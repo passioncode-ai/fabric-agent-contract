@@ -112,3 +112,20 @@ describe("unlinkable enrollments (DEC-0128 FAC-SEM-148, FAC-SEM-149)", () => {
     expect(nodeEnrollmentRules("another", {})).toBeUndefined();
   });
 });
+
+describe("moving the hub with its context keys (DEC-0128)", () => {
+  it("reports a context key added and removed beside the personal one", async () => {
+    const { hubMove } = await import("../src/hub-move.js");
+    const moved = (RECORD.machines as Json[]).map((machine) =>
+      machine.id === hubMachine.id ? { ...machine, contextHubKeys: [{ context: ORG, key: { ...CONTEXT_KEY, kid: "hub-ctx-a-2" } }] } : machine);
+    const next = { ...RECORD, machines: moved, revocations: [{ kind: "hub-key", ref: CONTEXT_KEY.kid }] };
+    expect(hubMove(RECORD, next)).toEqual({
+      moved: true,
+      added: [{ machine: hubMachine.id, kid: "hub-ctx-a-2", context: ORG }],
+      removed: [{ machine: hubMachine.id, kid: CONTEXT_KEY.kid, context: ORG, revoked: true }]
+    });
+    expect(hubMove(RECORD, RECORD)).toEqual({ moved: false, added: [], removed: [] });
+    const junk = { ...RECORD, machines: [{ id: 7, contextHubKeys: [{ context: ORG, key: CONTEXT_KEY }] }, { id: "m-x", contextHubKeys: [{ context: 1, key: CONTEXT_KEY }, { context: ORG, key: "k" }, { context: ORG, key: { kid: 1 } }] }] };
+    expect(hubMove(junk, junk)).toEqual({ moved: false, added: [], removed: [] });
+  });
+});

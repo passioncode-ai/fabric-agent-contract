@@ -53,8 +53,8 @@ Schema: [`device-enrollment.schema.json`](../../schemas/device-enrollment.schema
 This is an organization server's enrollment. A machine joins its owner's personal estate by the estate ceremonies
 instead — a comparison code nearby or through a relay rendezvous, or an `enroll-token/1` without a screen — and a
 passkey-signed estate revision, with no certificate ([ceremonies](ceremonies.md), DEC-0084). Each organization
-enrollment of a machine gets keys of its own (the operator's NET-2); the contract's per-context `kid` and `iss`
-(CX-CON-06) are not decided yet.
+enrollment of a machine gets keys of its own (the operator's NET-2), and nothing a check-in carries links two of them
+([unlinkable enrollments](#unlinkable-enrollments), DEC-0128).
 
 1. The device generates a key pair in a hardware or platform store that does not export it, or, without one, in a file
    (DEC-0094, below), and a PKCS#10 certificate signing request (RFC 2986) signed by that key. In a store, the key's
@@ -567,6 +567,30 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   unchanged, and a check-in response carries a heartbeat and a page (both typed by DEC-0054's schemas) and leases in
   `records` unchanged. A relay's `welcome.deltaHead` has the `revocationDelta` shape, so a node reports it as it came.
 
+<a id="unlinkable-enrollments"></a>
+
+**Unlinkable enrollments** (DEC-0128, CT-122, CX-CON-06). Two organizations one machine is enrolled in cannot link it:
+
+- **UE-1, its own identity.** Each enrollment has a fresh opaque `device.id` (never the machine's estate id), its own
+  `#sig` and `#kem` keys and kids, its own telemetry key ([activity](activity.md#event-id)), its own `collector.id` and
+  stream counters, and its own `sequence` in a node summary. A hardware attestation SHOULD NOT carry a hardware-unique
+  identifier in an organization enrollment (OQ-0010 decides formats). `FAC-SEM-148` checks the node's local registry
+  (kind `node-enrollments`): one enrollment per organization, and no device id, kid, public key, telemetry key or
+  collector id shared or equal to the estate id. The node keeps that registry and never sends it.
+- **UE-2, nothing of the estate's.** A check-in to an organization server carries none of the estate's records in
+  `records` (`estateRecord`, `heartbeat`, `revocationDelta`, `leases`), and its answer carries none of the estate's
+  documents, each of which names the estate. `FAC-SEM-149` is the sender's duty: a node checks what it is about to send
+  (kind `check-in-outbound`), an organization server what it is about to answer (`check-in-response-outbound`). A
+  receiver ignores the members and never refuses a check-in for them, so a node pinned before still checks in; the hub
+  reads them on the personal channel. The members stay in the schema for an organization's own records later.
+- **UE-3, independent schedules.** Each enrollment schedules its check-ins on its own, with jitter (SHOULD), so their
+  timing does not pair them.
+- **What stays linkable, named.** Low-entropy values (`agent.version`, `components`, `platform`, `protocols`);
+  coding-agent versions and the hook count in a mode `C` node summary (DEC-0118); an agent the person shares into two
+  organizations shows the same `agentRef` (the person's own choice); the relay operator reads `org:<orgId>` in the estate
+  record until per-context relay sessions (the operator's questions 1 to 4, taken at their defaults). A stolen machine:
+  Fabric offers the person to ask each organization to revoke, from the local registry, with no automatic message.
+
 **One enrollment per organization** (DEC-0082). A device enrolled in several organizations holds one enrollment,
 certificate and stream epoch in each. It sends each enrollment's check-ins to that enrollment's own server, on that
 enrollment's interval, reporting only that enrollment's streams; a check-in carries no context but its `node-summary/1`
@@ -577,8 +601,8 @@ it. A session's events go where `routeTarget` answers, and a grant's daily usage
 [`fixtures/vectors/context-route.json`](../../fixtures/vectors/context-route.json), [contexts](contexts.md#routing)).
 Share registrations go to each enrollment's own server, signed as its other requests are
 ([share registration](share-registration.md#transport), DEC-0086).
-Until a key per context exists (CX-CON-06), the device shows both organizations the same device key and reports the same
-`records` to each, so the two can link it ([contexts → linkability](contexts.md#linkability)).
+Each enrollment shows its organization its own keys and no estate records (UE-1, UE-2), so two organizations cannot link
+the machine by them ([contexts → linkability](contexts.md#linkability)).
 
 The server answers a `check-in-response` (OpAMP `ServerToAgent`): `nextCheckInSeconds`, `flags`, the
 device's [`collectionStart`](#collection-start) once it is known, the `noticeVersion` its person last acknowledged
@@ -686,6 +710,8 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | <a id="fac-sem-069"></a>`FAC-SEM-069` | `device-root-certification` | when the installer pinned offline root keys, the root key from enrollment is certified at enrollment time by a pinned key, or by a delegation key whose certificate of at most 30 days a pinned key signed and whose id the pinned key's revocation list does not name |
 | <a id="fac-sem-077"></a>`FAC-SEM-077` | `device-request-signature` | a receiver that requires the signature, or that sees a client certificate, answers a device request as the transport binding does: it accepts a `fabric-device` signature of the required shape whose digest, window, certificate, algorithm, key and signature all hold and whose (serial, nonce) it does not hold (naming the client certificate's serial when there is one) accepts an unsigned request only on a valid client certificate, and otherwise answers the code of the first step that fails: 401, or 410 `organization-closed` for a certificate whose record carries `organizationClosedAt` (DEC-0103) |
 | <a id="fac-sem-125"></a>`FAC-SEM-125` | `device-rotation` | a rotation request whose CSR key (`publicKeySha256`) and current certificate serial equal a rotation the server already answered gets that answer's certificate again, byte for byte, never a new one (DEC-0094) |
+| <a id="fac-sem-148"></a>`FAC-SEM-148` | `node-enrollments` | one enrollment per organization, and no two enrollments share a device id, a kid, a public key, a telemetry key or a collector id, none equal to the machine's estate id (DEC-0128 UE-1) |
+| <a id="fac-sem-149"></a>`FAC-SEM-149` | `check-in-outbound`, `check-in-response-outbound` | a check-in a node sends an organization carries no estate record in `records` (`estateRecord`, `heartbeat`, `revocationDelta`, `leases`), and an organization's answer no estate document there; the sender's duty, never a receiver's refusal (DEC-0128 UE-2) |
 
 Each kind checks one input:
 

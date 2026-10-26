@@ -80,7 +80,8 @@ no record.
 ## The envelope
 
 `fabric-credential-envelope/1` is `{header, ct, sig}`: the value sealed with HPKE (RFC 9180) base mode, suite
-`[16, 1, 1]` as the [secret envelope](relay.md#the-secret-envelope), to the target machine's `#kem`, `info` the ASCII
+`[16, 1, 1]` as the [secret envelope](relay.md#the-secret-envelope), to the target's `#kem` (in an organization's
+context the enrollment's own `#kem`, DEC-0128 UE-1), `info` the ASCII
 `fabric-credential-envelope/1`, the additional data the RFC 8785 bytes of the header; `sig` is over the RFC 8785 bytes of
 `{header, ct}`. The header names `alg`, `suite`, `recipient` (`#kem`), `signer`, `context`, `agentRef`, `slot`,
 `provider`, `sequence` (the sealer's for `(context, agentRef, slot)`), `iat`, `exp` (a life of at most 24 hours) and

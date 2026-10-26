@@ -200,17 +200,19 @@ when no call is metered under it.
 ## Linkability
 
 The operator decided K-1 on 2026-10-15 (NET-2, recorded by DEC-0084): each organization enrollment of a machine gets
-keys of its own, so organizations cannot link the machine (CX-22). The contract's part — a `kid` and an `iss` per context,
-with what `FAC-SEM-044`, `FAC-SEM-073` and the check-in carry for each (CX-CON-06) — is stage 2 and not yet decided. Until
-it lands, this slice still does **not** meet CX-22, and a machine shows both organizations:
+keys of its own, so organizations cannot link the machine (CX-22). DEC-0128 (CX-CON-06) decides the contract's part:
 
-- the same device key and hub key;
-- in every check-in, the same `records`: the estate record's `revision` and `digest`, the `heartbeat`, the
-  `revocationDelta` head and the `leases` (DEC-0053, DEC-0054, DEC-0056, DEC-0062).
+- each enrollment has its own `device.id`, keys, kids, telemetry key, collector ids and counters, never the estate id
+  ([devices → unlinkable enrollments](devices.md#unlinkable-enrollments) UE-1, `FAC-SEM-148`);
+- a check-in to an organization carries none of the estate's records, and its answer none of the estate's documents
+  (UE-2, `FAC-SEM-149`);
+- a token in an organization's context names that context's own issuer and per-context subject, signed by that
+  context's hub key ([delegation](delegation.md#keys-publication-and-rotation) DL-14a).
 
-So the two organization servers can tell that one person's machine is enrolled in both: the pilot's single key stays
-linkable until CX-CON-06. Project Observatory's plan for a device identity per organization is the direction NET-2
-confirms. A membership in an organization another person controls does not run on this slice.
+What stays linkable is named in UE's last item (low-entropy values, mode `C`'s harness lines, a shared `agentRef`, the
+relay operator's view of `org:<orgId>`). The slice meets CX-22 once the node (UE-1, UE-2), the first organization
+server (per-organization device and key lookups) and Fabric's hub (context keys and issuers) adopt it (CT-122); until
+then, enrolling in an organization the person does not own stays off (the K-1 condition).
 
 ## Compatibility
 

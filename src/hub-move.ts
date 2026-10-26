@@ -60,8 +60,8 @@ export function recoveryReady(record: unknown): { ready: boolean; authorities: n
   return { ready: ids.size >= 2, authorities: ids.size };
 }
 
-/** One machine's certified hub key, by machine id and kid. */
-export interface HubHolder { machine: string; kid: string }
+/** One machine's certified hub key, by machine id and kid; `context` for an organization context's key (DEC-0128). */
+export interface HubHolder { machine: string; kid: string; context?: string }
 
 /** A machine's hub key, its public `x` beside it so a key replaced under the same kid reads as a change. */
 interface Held extends HubHolder { x: unknown }
@@ -72,7 +72,12 @@ const holders = (record: JsonObject): Held[] => {
   return list(record.machines).flatMap((machine) => {
     if (seen.has(machine.id)) return [];
     seen.add(machine.id);
-    return isString(machine.id) && isObject(machine.hubKey) && isString(machine.hubKey.kid) ? [{ machine: machine.id, kid: machine.hubKey.kid, x: machine.hubKey.x }] : [];
+    const personal: Held[] = isString(machine.id) && isObject(machine.hubKey) && isString(machine.hubKey.kid) ? [{ machine: machine.id, kid: machine.hubKey.kid, x: machine.hubKey.x }] : [];
+    // DEC-0128: a context's hub keys move with the hub, each read as its own holder.
+    const contexts: Held[] = isString(machine.id)
+      ? list(machine.contextHubKeys).flatMap((entry) => (isString(entry.context) && isObject(entry.key) && isString(entry.key.kid) ? [{ machine: machine.id as string, kid: entry.key.kid, x: entry.key.x, context: entry.context }] : []))
+      : [];
+    return [...personal, ...contexts];
   });
 };
 
@@ -84,10 +89,11 @@ const holders = (record: JsonObject): Held[] => {
 export function hubMove(parent: unknown, next: unknown): { moved: boolean; added: HubHolder[]; removed: Array<HubHolder & { revoked: boolean }> } {
   const before = isObject(parent) ? holders(parent) : [];
   const after = isObject(next) ? holders(next) : [];
-  const same = (a: Held) => (b: Held) => a.machine === b.machine && a.kid === b.kid && a.x === b.x;
+  const same = (a: Held) => (b: Held) => a.machine === b.machine && a.kid === b.kid && a.x === b.x && a.context === b.context;
   const gone = isObject(next) ? revoked(next, "hub-key") : new Set<unknown>();
-  const added = after.filter((holder) => !before.some(same(holder))).map(({ machine, kid }) => ({ machine, kid }));
-  const removed = before.filter((holder) => !after.some(same(holder))).map(({ machine, kid }) => ({ machine, kid, revoked: gone.has(kid) }));
+  const holder = ({ machine, kid, context }: Held): HubHolder => (context === undefined ? { machine, kid } : { machine, kid, context });
+  const added = after.filter((entry) => !before.some(same(entry))).map(holder);
+  const removed = before.filter((entry) => !after.some(same(entry))).map((entry) => ({ ...holder(entry), revoked: gone.has(entry.kid) }));
   return { moved: added.length > 0 && removed.length > 0, added, removed };
 }
 // #endregion hub-move

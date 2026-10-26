@@ -319,7 +319,7 @@ A collector MUST drop content and person attributes at the source. Claude Code's
   the home directory into the name (`-Users-<name>-…`).
 - The HMAC key is the device's **telemetry key** ([`pathSourceKey`](../../src/activity-rules.ts),
   [`hashedBranch`](../../src/activity-rules.ts)): 32 random bytes the collector generates once per
-  device, keeps beside its stream state, and never sends. A re-read on the same device yields the
+  enrollment (DEC-0128 UE-1: two organizations never see one key's hashes), keeps beside its stream state, and never sends. A re-read on the same device yields the
   same key. The same telemetry key hashes `git.branch`. A collector that loses its telemetry key has
   lost its stream state too, and re-enrolls. Usage lines it reads again are still counted once by
   their `dedupeKey`.

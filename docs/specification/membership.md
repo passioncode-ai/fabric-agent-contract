@@ -190,11 +190,11 @@ for that organization's server, and nothing else ([contexts](contexts.md#routing
 | a membership refresh | the audience and the subject the issuer gave | this decision |
 
 Personal work, another organization's work, the estate record and its members, passkeys, secrets, the person's other
-memberships and anything a row does not name never leave for an organization. A new row needs a decision. One gap is
-recorded, not allowed: until CT-122 every check-in also carries the estate's own records (the estate record's revision
-and digest, the heartbeat, the revocation delta's head, the leases, DEC-0053, DEC-0054, DEC-0056, DEC-0062), which link
-one machine across organizations ([contexts](contexts.md#linkability)); CT-122 removes them from what goes to an
-organization.
+memberships and anything a row does not name never leave for an organization. A new row needs a decision. The estate's own
+records a check-in could carry (the estate record's revision and digest, the heartbeat, the revocation delta's head, the
+leases, DEC-0053, DEC-0054, DEC-0056, DEC-0062) and the estate documents an answer could carry are not on the list:
+DEC-0128 makes leaving them out the sender's duty ([devices](devices.md#unlinkable-enrollments) UE-2, `FAC-SEM-149`),
+and until a node adopts it they still link one machine across organizations ([contexts](contexts.md#linkability)).
 
 ## The issuer's duties
 
@@ -218,7 +218,7 @@ organization.
 |---|---|---|
 | <a id="fac-sem-145"></a>`FAC-SEM-145` | `org-membership` | the times are strict RFC 3339 with at most three fraction digits and `issuedAt` ≤ `notBefore` < `expiresAt`, the life is at most 24 hours, and `membershipEndsAt` is `null` or such a time |
 | <a id="fac-sem-146"></a>`FAC-SEM-146` | `org-key-set` | each kid once, the root's kid not among the keys, every key window strict and positive, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt` |
-| <a id="fac-sem-147"></a>`FAC-SEM-147` | `estate-record` | each organization pinned once by its context, and no pinned root of small order |
+| <a id="fac-sem-147"></a>`FAC-SEM-147` | `estate-record` | each organization pinned once by its context, and no pinned root of small order; each context issuer once and never containing the estate id (DEC-0128) |
 
 ## Who adopts it
 

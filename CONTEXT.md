@@ -663,6 +663,11 @@ expires ([entitlement](docs/specification/entitlement.md)).
 kids it revokes (`entitlement-key-set/1`, DEC-0085), signed by the issuer's root key, which a verifier pins at
 installation and which signs nothing else ([entitlement](docs/specification/entitlement.md#issuer-keys)).
 
+**Unlinkable enrollment**: An organization enrollment of a machine that shares nothing with the machine's other
+enrollments or its estate: its own `device.id`, keys, kids, telemetry key, collector ids and counters, no estate record
+in its check-ins and no estate document in their answers, and in its organization's context a hub key and token issuer
+of its own (DEC-0128, [devices](docs/specification/devices.md#unlinkable-enrollments)).
+
 **Membership attestation**: What an organization server states about one person's membership of one organization,
 for one reader, for at most a day: the organization, a subject pairwise to that reader, a role (`owner`, `admin`,
 `member`), `active` or `ended`, and a revision (`org-membership/1`, DEC-0127). Signed by a key of the organization's

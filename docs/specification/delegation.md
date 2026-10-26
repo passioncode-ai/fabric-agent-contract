@@ -57,8 +57,8 @@ in the shape of OAuth 2.0 Token Exchange (RFC 8693):
 
 | Claim | Required | Value |
 |---|---|---|
-| `iss` | yes | the estate hub, a URI stable across key rotation and port changes (`urn:fabric:estate:<estate id>`) |
-| `sub` | yes | the principal, a URI naming a person |
+| `iss` | yes | the estate hub, a URI stable across key rotation and port changes (`urn:fabric:estate:<estate id>`); in an organization's context that context's own issuer, `urn:fabric:context:<opaque>` from the estate record's pin, which names no estate (DEC-0128) |
+| `sub` | yes | the principal, a URI naming a person; in an organization's context one per context, so two organizations' tokens share no person id (DEC-0128) |
 | `act` | yes | the actor chain (RFC 8693 §4.1): `{sub: <agent id>, session?: <id>, act?: {…}}`, the agent calling now outermost, each earlier actor nested inside, and innermost only the partner actor `{partner: "org:<partnerOrgId>"}` under a partner grant (DEC-0090, [the partner channel](partner-channel.md#owner-to-partner-to-agents-fac-sem-124)); at most **four** deep, five in a token for the meter (DL-6) |
 | `aud` | yes | exactly **one** callee agent id, a string, never an array |
 | `scope` | yes | the callee's capability names, space-delimited (RFC 8693 §4.2) |
@@ -245,6 +245,15 @@ machine word for `error.data.detail`, never the token. A verifier in another lan
   [`fixtures/vectors/hub-key.json`](../../fixtures/vectors/hub-key.json) hold each row, the exact window boundaries, a
   rotation (revision 3 certifies a new hub key and revokes the old one, and verifies against revision 2), the rollback,
   and the verifiers' answers; `FAC-SEM-081` checks a verifier's answer on `{record, kid, x, at, applied?, answer}`.
+- **DL-14a, a key per context** (DEC-0128). Beside the personal hub key, a `full` machine may hold a hub key per
+  organization context the estate pins (`machines[].contextHubKeys`, `{context, key}`), under that context's issuer
+  (`organizations[].iss`). A token in an organization's context is signed by that context's key and names its issuer;
+  a callee that serves the context passes it to `hubKeyCertified` (`options.context`) and to `verifyDelegation`
+  (`estateContext`, `issuer` the context's issuer), which trust the kid only from that context's keys and only while the
+  record pins the organization. A context key never verifies a personal token, and the personal key never an
+  organization's. Heartbeats, delta entries and leases stay the personal key's alone. A dropped context key is revoked
+  as `hub-key` in the same revision (`FAC-SEM-114`), and it moves with the hub (`hubMove`).
+
 - **DL-15 — Rotation.** The issuer publishes a new key before it signs with it. It keeps the previous key
   published for at least one token lifetime plus the leeway after the last token it signed (660 s), and for 24
   hours plus the leeway when the key signed an approval, because an approval lives up to 24 hours. A callee
@@ -618,7 +627,7 @@ product that needs protection from a hostile local process adds an approval (DL-
 | <a id="fac-sem-049"></a>`FAC-SEM-049` | `delegation-claims` | a delegation token expires after it was issued and at most 600 seconds after; its scope names each capability once; its spend names each window once |
 | <a id="fac-sem-050"></a>`FAC-SEM-050` | `delegation-mint` | a token is minted under an active delegation grant that its `grant` claim names, and names no other (DEC-0045): its audience, its capabilities, its effect ceiling (itself within the grant's effects), its start and expiry, its project, a limited spend under a limited grant whose windows are the grant's and hold no more than its limits, a per-call maximum no larger than the grant's, and the actor and person the grant names; at most four actors, five only in a token for the meter; a token for the meter reads only its grant-check capability under the parent's one grant; an onward token keeps the parent's issuer, principal and project, adds one actor (the parent's audience) to the parent's chain, and carries no wider effect, no later expiry, no more remaining spend and no larger per-call maximum than its parent; it keeps the parent's `task` or none, and the meter's token keeps it (DEC-0041) |
 | <a id="fac-sem-051"></a>`FAC-SEM-051` | `approval-claims` | an approval expires after it was issued and at most 24 hours after |
-| <a id="fac-sem-081"></a>`FAC-SEM-081` | `delegation-hub-key` | a verifier that reads the estate record answers as DL-14 says (DEC-0060): `certified` when exactly one machine's `hubKey` carries the `kid` and the published `x`, inside the revision's window, neither revoked, and the revision not lower than (nor forked from) the applied one; otherwise `kid-not-certified`, `estate-unreadable`, `estate-outside-window`, `estate-rolled-back`, `estate-forked` or `no-clock` |
+| <a id="fac-sem-081"></a>`FAC-SEM-081` | `delegation-hub-key` | a verifier that reads the estate record answers as DL-14 says (DEC-0060): `certified` when exactly one machine's `hubKey` (in an organization's `context`, one of that context's pinned `contextHubKeys`, DEC-0128) carries the `kid` and the published `x`, inside the revision's window, neither revoked, and the revision not lower than (nor forked from) the applied one; otherwise `kid-not-certified`, `estate-unreadable`, `estate-outside-window`, `estate-rolled-back`, `estate-forked` or `no-clock` |
 | <a id="fac-sem-144"></a>`FAC-SEM-144` | `mandate` | a mandate is its schema's, stands at most 7 days after `at`, its chain goes forward in time from `at` and before `expiresAt`, names each agent once and at most four, and each narrower scope is within the one before, keeping every list and the per-call ceiling it narrows (DEC-0125 MD-1, MD-2) |
 | <a id="fac-sem-124"></a>`FAC-SEM-124` | `delegation-mint` | under a partner grant the principal is the partner organization and the context the company's own organization; the token is for the issuer and its chain ends in the partner, two deep at mint; a partner actor stands in no chain under another grant ([the partner channel](partner-channel.md), DEC-0090) |
 
