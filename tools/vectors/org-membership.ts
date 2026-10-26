@@ -245,6 +245,8 @@ function keySetCases(): Json[] {
     c("unknown algorithm: the set under ES256", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, K2_ENTRY], [K0.kid], { alg: "ES256" }), pin(), refused("unknown-algorithm")),
     c("malformed: a kid listed twice", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, { ...K2_ENTRY, kid: K1.kid }], [K0.kid]), pin(), refused("malformed")),
     c("malformed: an administrator's credential listed twice (DEC-0129)", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, K2_ENTRY], [K0.kid], { administrators: [ADMIN_CREDENTIAL, ADMIN_CREDENTIAL] }), pin(), refused("malformed")),
+    c("malformed: an administrator with no origin (DEC-0129)", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, K2_ENTRY], [K0.kid], { administrators: [{ ...ADMIN_CREDENTIAL, origins: [] }] }), pin(), refused("malformed")),
+    c("malformed: an administrator's origin listed twice (DEC-0129)", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, K2_ENTRY], [K0.kid], { administrators: [{ ...ADMIN_CREDENTIAL, origins: [ADMIN_CREDENTIAL.origins[0], ADMIN_CREDENTIAL.origins[0]] }] }), pin(), refused("malformed")),
     c("malformed: no organization", (({ org: _org, ...rest }) => rest)(r2), pin(), refused("malformed")),
     c("malformed: an attestation is not a key set", BASE, pin(), refused("malformed")),
     c("context: a pin without its organization", "r2", { root: { issuer: ISSUER, kid: ROOT.kid, x: ROOT.x } }, refused("context-invalid")),

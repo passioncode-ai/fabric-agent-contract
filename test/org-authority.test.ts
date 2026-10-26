@@ -20,6 +20,8 @@ const codes = (kind: string, value: unknown) => [...new Set(evaluateSemanticRule
 const BASE = read("fixtures/positive/org-authority.json");
 const KEY_SET = read("fixtures/positive/org-key-set.json");
 const ADMIN = KEY_SET.administrators[0];
+/** A P-256 public JWK in the schema's shape; only its shape is read here, not whether the point is on the curve. */
+const EC_KEY = { kty: "EC", crv: "P-256", x: "WKn-ZIGevcwGIyyrzFoZNBdaq9_TsqzGl96oc0CWuis", y: "y77t-RvAHRKTsSGdIYUfweuOvwrvDD-Q3Hv5J0fSKbE" };
 const AT = new Date("2026-10-27T00:00:00Z");
 const ORG = "org:org-a";
 const sha = (data: string | Buffer) => createHash("sha256").update(data).digest();
@@ -132,10 +134,11 @@ describe("org-key-set/1's administrators (DEC-0129, FAC-SEM-146)", () => {
     expect(orgKeySetWellFormed(without)).toBe(false);
     expect(orgKeySetWellFormed({ ...KEY_SET, administrators: [] })).toBe(true);
     expect(orgKeySetWellFormed({ ...KEY_SET, administrators: Array.from({ length: 17 }, (_v, i) => ({ ...ADMIN, credentialId: `c${i}` })) })).toBe(false);
-    for (const change of [{ credentialId: 1 }, { credentialId: "a".repeat(1367) }, { credentialId: "a+b" }, { alg: "RS256" }, { publicKey: "k" }, { rpId: 1 }, { origins: [1] }, { origins: "x" }, { extra: 1 }]) {
+    for (const change of [{ credentialId: 1 }, { credentialId: "a".repeat(1367) }, { credentialId: "a+b" }, { alg: "RS256" }, { publicKey: "k" }, { rpId: 1 }, { origins: [1] }, { origins: "x" }, { extra: 1 }, { origins: [] }, { origins: Array.from({ length: 9 }, (_v, i) => `https://h${i}.sign.orgs.example`) }, { origins: ["http://sign.orgs.example"] }, { origins: [ADMIN.origins[0], ADMIN.origins[0]] }, { publicKey: { ...ADMIN.publicKey, kid: "k" } }, { alg: "ES256" }, { publicKey: { ...EC_KEY, extra: 1 }, alg: "ES256" }, { publicKey: EC_KEY }]) {
       expect(orgKeySetWellFormed({ ...KEY_SET, administrators: [{ ...ADMIN, ...change }] }), JSON.stringify(change)).toBe(false);
     }
     expect(orgKeySetWellFormed({ ...KEY_SET, administrators: [ADMIN, ADMIN] })).toBe(false);
+    expect(orgKeySetWellFormed({ ...KEY_SET, administrators: [{ ...ADMIN, alg: "ES256", publicKey: EC_KEY }] })).toBe(true);
     expect(orgKeySetWellFormed({ ...KEY_SET, administrators: "none" })).toBe(false);
   });
 });

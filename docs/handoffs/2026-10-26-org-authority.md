@@ -30,14 +30,19 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
   product fail (OM-7 lacked the owner's and administrators' outflows; the owner's Fabric had no review duty; fixed).
 - Round 5: unit pass; seam pass (verifyOrgKeySet now refuses an unusable administrator, three vector cases); product
   fail (an administrator's credential could be an estate authority; fixed: one credential per organization).
+- Round 6: unit pass; seam fail (the register's "one field list for good" rule, qualified by DEC-0119); product fail (a
+  refused candidate in DEC-0129 item 4 and conformance; D8-b's estate passkeys as administrators; fixed). The
+  administrator's shape now matches the schema.
 
 ## Decisions
 
 - **No server signs the list.** ADR-0178 point 2 replaced the plan's signing keys with an administrator's passkey.
 - **Administrators live in the key set.** The root already signs it and the person already pins the root, so no new pin.
-- **The root stays Ed25519.** ADR-0178 D8-b's passkey root enters as the first set's administrators; a passkey root is
+- **The root stays Ed25519.** ADR-0178 D8-b's estate passkeys are not used: the owner registers a credential for the organization alone, the first set's administrator; a passkey root is
   a later pin form, named on the board.
-- **`administrators` is required** in `org-key-set/1`, a narrowing before its first tag (DEC-0127's annotation).
+- **`administrators` is required** in `org-key-set/1`, a narrowing before its first tag (DEC-0127's annotation). It
+  `$ref`s the estate record's `authority`, so a consumer vendoring by `schemaClosure` copies 18 schemas for
+  `org-key-set` instead of 9.
 
 ## Open
 

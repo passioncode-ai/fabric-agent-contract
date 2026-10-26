@@ -10,7 +10,8 @@ import { type AssertionVerdict, type PasskeyCredential, verifyAssertion } from "
  * (DEC-0043) of `{type, ...fields}`, with `type` one of the names below and the other members exactly that type's
  * fields. A passkey signs the SHA-256 of those bytes as its WebAuthn challenge; a key signs the bytes themselves. The
  * type inside keeps one signature from standing for another over the same digest. A changed field list is a new type
- * (`/2`), never a new reading of an old one.
+ * (`/2`), never a new reading of an old one, except DEC-0119's: a type no tag carried and no party adopted may change
+ * its list by a decision that names the narrowing (DEC-0129, `org-key-set/1`).
  */
 export type Signer = "passkey" | "key";
 

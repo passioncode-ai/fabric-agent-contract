@@ -7787,15 +7787,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3. **OL-3, the verifier** `verifyOrgAuthority` in `src/org-authority.ts`, in the order of membership.md's OL table.
   4. **OL-4, the relay's admission set.** `orgRelayAdmissionSet` in `src/org-authority.ts` (outside `src/relay.ts`, so the relay's import closure is unchanged): an organization's relay pins the
      organization's root at setup, applies key sets under it, and takes the listed `#sig` keys of a list that verifies;
-     on any refusal the set is empty (DEC-0047). Without a candidate the held list is verified again under the current
+     a refused candidate leaves the held list's set in force, and a refused held list, or none, admits nobody (DEC-0047). Without a candidate the held list is verified again under the current
      key set. The organization relay's handshake (what `auth` signs in `estate`, what `welcome` carries) waits on the
      organization's heartbeat and delta, so no organization relay runs on this release (CT-37 keeps it).
   4a. **The root's holder.** The membership root is held by the organization owner's Fabric, never by a server (A-3):
      the server generates signing keys and drafts each key set, the owner's Fabric shows its changes and signs it only
      once the owner confirms them, so no server can certify an administrator (DEC-0127 OM-8 annotated). OM-7 gains the
      owner's and an administrator's outflows (the root's public key and key-set signatures; a passkey's public part and
-     list signatures). The owner's passkeys (ADR-0178 D8-b) enter as the first set's
-     administrators; a passkey root and an administrator's device binding (ADR-0178 point 2) are later decisions. An
+     list signatures). ADR-0178 D8-b's root, the owner's two estate passkeys, is
+     not taken: the owner registers a signing credential for this organization alone, which enters as the first set's
+     administrator (a departure from D8-b, as the Ed25519 root is); a passkey root and an administrator's device binding (ADR-0178 point 2) are later decisions. An
      administrator's credential is registered for that organization alone, never an estate authority (OM-7) and never in
      another organization's set.
   5. **OL-5, the duties.** The server drafts a revision on every join, end and key change and before expiry; an ended

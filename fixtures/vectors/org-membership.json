@@ -1332,6 +1332,123 @@
       }
     },
     {
+      "name": "malformed: an administrator with no origin (DEC-0129)",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": []
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "gRdWVJFU3uyJxiwvQR1a4bwB1l-N1Rr3E6S1rlPxtRQxvjpHPLEmTFZ8DoSBNRvBZqpN39t5izGCXOmweyL5Dg"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an administrator's origin listed twice (DEC-0129)",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://sign.orgs.example",
+              "https://sign.orgs.example"
+            ]
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "595J5VNcM55M9cChaZD3waWoro0PSjOVuKIxnXXu1QKO-IS4OGttJ-P6p_YaJKvLMMU-QT1TRiOE-qTF8LSeAQ"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
       "name": "malformed: no organization",
       "keySet": {
         "type": "org-key-set/1",

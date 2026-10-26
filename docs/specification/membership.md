@@ -112,7 +112,8 @@ confirmation is a local gate in the owner's Fabric, which no one verifies later 
 decided): so no
 server can certify an administrator. A reader pinned at a main commit of DEC-0127 or DEC-0128 refuses a set carrying
 `administrators`, and a reader at or after DEC-0129 refuses one without it; no tag carried the type before (DEC-0119). ADR-0178 takes the owner's two passkeys as the organization's root in R1 (its D8-b); here the root that
-signs key sets stays DEC-0127's Ed25519 key, so the owner's passkeys enter as the first set's administrators. A passkey
+signs key sets stays DEC-0127's Ed25519 key, and D8-b's estate passkeys are not used: the owner registers a signing
+credential for this organization alone, which enters as the first set's administrator (both departures from D8-b). A passkey
 that signs key sets itself would be a new pin form, and an administrator's device binding (ADR-0178 point 2) is not
 checked: both later decisions.
 
@@ -219,7 +220,7 @@ for that organization's server, and nothing else ([contexts](contexts.md#routing
 | an adaptation plan's organization part (TP-03) | what the person chose to bring into that organization (projects, history, results, schedules), by reference, and the person's requests to its administrators; never the plan's draft, its inventory or anything the person did not choose | DEC-0129 |
 | a membership refresh | the audience and the subject the issuer gave | this decision |
 
-Personal work, another organization's work, the estate record and its members, passkeys, secrets, the person's other
+Personal work, another organization's work, the estate record and its members, the estate's passkeys, secrets, the person's other
 memberships and anything a row does not name never leave for an organization. The adaptation row carries no project's
 entry: a project enters by the estate revision its person's passkey signs (R1-D12, Fabric ADR-0178 point 7), which never
 leaves. A new row needs a decision. The estate's own

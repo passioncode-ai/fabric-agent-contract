@@ -119,17 +119,24 @@ function validAtIssue(set: JsonObject): boolean {
 }
 
 /**
- * The members of a passkey credential (the estate record's `authority`, DEC-0055), in shape. The key, the RP ID and the
- * origins are FAC-SEM-146's and the schema's, and a credential that fails them fails closed when it signs (`unusable-key`,
- * `wrong-rp`, `wrong-origin`).
+ * The members of a passkey credential (the estate record's `authority`, DEC-0055), in the schema's shape: a public JWK
+ * of the algorithm's key type, 1 to 8 distinct https origins. Whether the key is usable and of full order, and whether
+ * the RP ID is a signing RP with the origins within it, is `verifyOrgKeySet`'s at OK-6 and FAC-SEM-146's.
  */
 const AUTHORITY_FIELDS = ["credentialId", "alg", "publicKey", "rpId", "origins"];
 const B64URL = /^[A-Za-z0-9_-]+$/;
+/** `estate-record#/$defs/authority`'s origin: https, a lower-case host, no port or path. */
+const ORIGIN = /^https:\/\/[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?$/;
+/** The public JWK's members by its key type, as the schema's two branches give them. */
+const jwkOk = (key: unknown) =>
+  isObject(key) && ((key.kty === "EC" && exactly(key, ["kty", "crv", "x", "y"]) && key.crv === "P-256" && matches(X, key.x) && matches(X, key.y)) ||
+    (key.kty === "OKP" && exactly(key, ["kty", "crv", "x"]) && key.crv === "Ed25519" && matches(X, key.x)));
 function administratorOk(value: unknown): boolean {
   return (
     isObject(value) && exactly(value, AUTHORITY_FIELDS) && isString(value.credentialId) && value.credentialId.length <= 1366 && B64URL.test(value.credentialId) &&
-    ASSERTION_ALGORITHMS.includes(value.alg as string) && isObject(value.publicKey) && isString(value.rpId) &&
-    Array.isArray(value.origins) && value.origins.every(isString)
+    ASSERTION_ALGORITHMS.includes(value.alg as string) && jwkOk(value.publicKey) && (value.alg === "ES256") === (isObject(value.publicKey) && value.publicKey.kty === "EC") &&
+    isString(value.rpId) && Array.isArray(value.origins) && value.origins.length >= 1 && value.origins.length <= 8 &&
+    value.origins.every((origin) => isString(origin) && origin.length <= 256 && ORIGIN.test(origin)) && new Set(value.origins).size === value.origins.length
   );
 }
 
@@ -207,7 +214,8 @@ export function verifyOrgKeySet(value: unknown, trust: { root: OrgRoot; held?: H
   const set = value as JsonObject;
   const root = trust.root;
   if (set.issuer !== root.issuer || set.kid !== root.kid) return { ok: false, problem: "wrong-issuer" };
-  // One root signs for one organization: a server hosting many organizations holds a root per organization (MD-9 (a)).
+  // One root signs for one organization: a server hosting many organizations serves a root per organization, each held
+  // by that organization owner's Fabric (MD-9 (a), DEC-0129).
   if (set.org !== root.org) return { ok: false, problem: "wrong-org" };
   const keys = set.keys as JsonObject[];
   if (!ORG_MEMBERSHIP_ALGORITHMS.includes(set.alg as string) || !keys.every((key) => ORG_MEMBERSHIP_ALGORITHMS.includes(key.alg as string))) return { ok: false, problem: "unknown-algorithm" };
