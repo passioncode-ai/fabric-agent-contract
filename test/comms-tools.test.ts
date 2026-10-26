@@ -150,6 +150,8 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
     expect(finding.properties.consequence.maxLength).toBe(500);
     expect(limits.get("A finding's consequence")).toBe("500 characters (code points)");
     expect(common.$defs.dedupeKey.pattern).toBe("^[A-Za-z0-9._:-]{8,128}$");
+    expect(common.$defs.deliverTo.oneOf[1].maxItems).toBe(16);
+    expect(limits.get("Projects a reply's `deliverTo` names")).toBe("16 (DEC-0135)");
     expect(limits.get("A finding's `dedupeKey`")).toBe("8–128 characters `[A-Za-z0-9._:-]`");
   });
 

@@ -23,12 +23,14 @@ the message it answers, and the contract had no field to ask for the whole threa
 
 ## Checks actually run
 
-- `pnpm run check` after each round's fixes: exit 0 (106 files, 9 356 tests at the last round, UX lint, docs, markdownlint 0
+- `pnpm run check` after each round's fixes: exit 0 (106 files, 9 358 tests at the last round, UX lint, docs, markdownlint 0
   errors, privacy 0); `pnpm vectors:check`: 25 files match.
 - Blind readings: round 1 fail (the `unread` description; a list could answer a request without reaching its
   requester); round 2 fail (the message view's history; a responder's messages' kind); round 3 fail (the own-Project
   exception in two descriptions; the read-mark receipt; SCR-19's wording); round 4 fail (the read-mark receipt changed
-  an adopted answer: reverted to DEC-0073, and the narrowing of `unread` recorded as an exception). Fixed after each. Non-blocking findings:
+  an adopted answer: reverted to DEC-0073, and the narrowing of `unread` recorded as an exception); round 5 fail (the
+  compatibility policy named only DEC-0119's exception: the second exception is now in `conformance.md`). Fixed after
+  each. Non-blocking findings:
   CT-166.
 
 ## Open
@@ -39,4 +41,6 @@ the message it answers, and the contract had no field to ask for the whole threa
 
 ## Next task
 
-Finish the readings (two clean rounds), merge, release, tell Fabric (CO-437) and the adapter; then CT-157 and CT-161.
+Finish the readings (two clean rounds), merge, release (the release notes list the narrowing of `unread` and
+`com.status`'s count to deliveries as narrowing, DEC-0135 and the compatibility policy's second exception), tell
+Fabric (CO-437) and the adapter; then CT-157 and CT-161.

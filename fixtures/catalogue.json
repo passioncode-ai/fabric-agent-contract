@@ -886,6 +886,7 @@
   {"name": "comms-reply-deliver-sender", "schema": "comms-reply.schema.json", "path": "positive/comms-reply-deliver-sender.json", "valid": true},
   {"name": "comms-reply-deliver-thread", "schema": "comms-reply.schema.json", "path": "positive/comms-reply-deliver-thread.json", "valid": true},
   {"name": "comms-reply-deliver-list", "schema": "comms-reply.schema.json", "path": "positive/comms-reply-deliver-list.json", "valid": true},
+  {"name": "comms-reply-deliver-list-max", "schema": "comms-reply.schema.json", "path": "positive/comms-reply-deliver-list-max.json", "valid": true},
   {"name": "comms-reply-deliver-empty-list", "schema": "comms-reply.schema.json", "path": "negative/comms-reply-deliver-empty-list.json", "valid": false, "keyword": "minItems"},
   {"name": "comms-reply-deliver-too-many", "schema": "comms-reply.schema.json", "path": "negative/comms-reply-deliver-too-many.json", "valid": false, "keyword": "maxItems"},
   {"name": "comms-reply-deliver-duplicate", "schema": "comms-reply.schema.json", "path": "negative/comms-reply-deliver-duplicate.json", "valid": false, "keyword": "uniqueItems"},

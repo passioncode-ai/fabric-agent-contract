@@ -509,5 +509,8 @@ profiles; consumers MUST ignore preserved extensions but need not accept unknown
 normative profile versions. Removing or changing required semantics requires a
 new major version, or a new revision of the protocol (`name/2`), except for a revision no party has adopted
 yet: while the backlog records no party writing or reading it, a decision may change its required semantics under
-the same name, and the next release's notes list the change as narrowing (DEC-0119). Provider revisions declare a supported contract-version range,
+the same name, and the next release's notes list the change as narrowing (DEC-0119). A second exception: a decision may narrow an
+adopted revision's required semantics under the same name when the narrowed rule is what every party serving the
+revision already answers in its released versions, so no reader of a released server sees an answer change; the
+next release's notes list it as narrowing too (DEC-0135). Provider revisions declare a supported contract-version range,
 and a binding pins one exact negotiated version.

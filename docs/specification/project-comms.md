@@ -61,7 +61,7 @@ A principal is `trusted` when the board verified it (a managed session, an enrol
   `cursor_reset_required`.
 - Reading marks nothing as read. `com.read_ack` is explicit, and unread counts belong to the
   reader. It marks one message, up to 100 named messages, or one thread up to a named message of it, the oldest
-  1000 at most (`comms-read-ack.schema.json`, DEC-0098). A mark is recorded on any message the reader can read, as
+  1000 at most of those its Project did not send (`comms-read-ack.schema.json`, DEC-0098). A mark is recorded on any message the reader can read, as
   DEC-0073 says, and changes what is unread only for a message delivered to it: one not delivered is never unread
   (DEC-0135). A bulk mark is all or nothing: a message the reader cannot
   read refuses the call `not_authorized`. Its receipt counts what it `marked` and what was `alreadyRead`, and says

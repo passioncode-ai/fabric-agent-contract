@@ -4142,7 +4142,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-13):** amended by DEC-0079: `com.status` responders and directory capabilities gain an optional `held`, and the refusal codes gain `held`.
 - **Annotated (2026-10-13):** amended by DEC-0081: `com.reconcile` also answers the estate owner while no responder holds the slot (same arguments, the summary required for the owner); the receipt's and the message view's `request` gain an optional `settledBy: "owner"`, sent only on an owner settlement.
 - **Annotated (2026-10-13):** amended by DEC-0080: a finding's dedupe answers the standing finding's receipt with the existing `repeated: true`; `com.submit` and a message gain the optional `finding`.
-- **Annotated (2026-10-26):** unchanged by DEC-0135: item 3's `com.read_ack` answer holds for every message the reader can read, one not delivered to it included; such a message's `read` is `true` before and after the mark.
+- **Annotated (2026-10-26):** amended by DEC-0135: item 1's participant `com.reply`, `com.submit` of kind `reply` and a message gain the optional `deliverTo`. Unchanged by it: item 3's `com.read_ack` answer holds for every message the reader can read, one not delivered to it included; such a message's `read` is `true` before and after the mark.
 - **Amends:** DEC-0022 (adds the shapes its tools lacked and one tool, `com.directory`; changes no existing field).
   Implements Fabric's COM-02.3/03 Task 0 and the rollout design's project-directory finding.
 - **Decision:** in [project communication](specification/project-comms.md#tools-arguments-and-answers) —
@@ -6092,7 +6092,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of PR #141). Consumer adoption: board row CT-81.
   Annotated (2026-10-22): corrected by DEC-0102, items 9 (the answer transition, the pass over earlier requests, holds, `noResponder.message`).
   Annotated (2026-10-26): DEC-0135 narrows item 4: `unread` and `read` are over the messages delivered to the reader
-  (project-comms.md, Who a message is delivered to). Item 5's bulk marks and their counts are unchanged.
+  (project-comms.md, Who a message is delivered to). Item 5's bulk marks and their counts are unchanged; a thread's mark covers the messages the reader's
+  Project did not send, as before, and its schema text now says so rather than "delivered".
 - **Decision:** in [project communication](specification/project-comms.md):
   1. **`answered`**, a request state: a message from the request's target Project, not itself a request, whose
      `replyTo` is a `queued` request moves it to `answered` in the same transaction (`answer`, `queued` →
@@ -7139,7 +7140,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. The compatibility policy admits one exception: a revision no party has adopted (the backlog records no party
      writing or reading it) may change its required semantics under the same name by a decision, and the next
      release's notes list the change as narrowing. DEC-0113 is such a change: no party writes or reads
-     `credential-revocation/1` (CT-117).
+     `credential-revocation/1` (CT-117). Annotated (2026-10-26): DEC-0135 adds a second exception, a narrowing of an
+     adopted revision to what every party serving it already answers in its released versions.
   2. `FAC-SEM-069` reads the root certification's and the delegation key's windows and the revocation list's
      `issuedAt` with `strictTime`, and `FAC-SEM-041` and `repairDecision` read the verifier's clock so, as DEC-0115
      reads every key bound. The key set's rotation rule keeps a current key valid at the next set's `issuedAt` (both
@@ -8158,7 +8160,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `held`. `unread` and `com.status`'s count narrow to deliveries: a Project's own messages and replies delivered to
   others leave a reader's count on a board that counted them before, and `read` is `true` for them on a filtered
   page. `fabric-project-comms/0.1` is adopted, so `conformance.md`'s compatibility policy would put this narrowing in
-  a new revision; it is made under the same name as a recorded exception (as DEC-0026 was), because it records what
+  a new revision; it is made under the same name as a second exception, now named in that policy, because it records what
   the only board serving 0.1 already answers: its released versions (v0.3.10 to v0.3.12) count unread over their
   deliveries (`board_status`, migration 107) and keep `read` true for a reader's own messages, the only ones they do
   not deliver to it (`board_list_reader`, migration 120), and its migration 124 (CO-370, on its main) narrows a reply's
@@ -8168,9 +8170,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the narrowing. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/comms-common.schema.json` (`deliverTo`, the `answered` description),
   `comms-reply.schema.json`, `comms-submit.schema.json`, `comms-message.schema.json`, `comms-list.schema.json` and
-  `comms-status.schema.json` (`unread`); fixtures; `docs/specification/project-comms.md` (header, participants, reads,
-  delivery, messages, `com.status`, transport mirror), `conformance.md` (the board's row), `CONTEXT.md` (Delivery),
-  `docs/DOCMAP.md`, `docs/ux/screens.md` (SCR-19); DEC-0022, DEC-0073 and DEC-0098 annotated; backlog CT-154,
+  `comms-status.schema.json` (`unread`), `comms-read-ack.schema.json` (`upTo`'s wording); fixtures;
+  `docs/specification/project-comms.md` (header, participants, reads, delivery, messages, `com.status`, transport
+  mirror), `conformance.md` (the board's row, the compatibility policy's second exception), `CONTEXT.md` (Delivery),
+  `docs/DOCMAP.md`, `docs/ux/screens.md` (SCR-19); DEC-0022, DEC-0073, DEC-0098 and DEC-0119 annotated; backlog CT-154,
   CT-166.
 - **Source:** CT-154; Fabric CO-437, CO-370 (fabric `20261026000124_one_schema_step.sql`); fabric-workspace's relay of
   2026-10-26.
