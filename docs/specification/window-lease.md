@@ -112,7 +112,8 @@ organization server, DEC-0128 UE-2): `{leaseId, expiresAt, spent}` (DEC-0053's
 names; `spent` is this decision's, optional and additive). `spent` is an upper bound on what the meter spent in the
 lease's window instance: settled receipts plus open reservations, a decimal string.
 
-What a meter has not reported counts as spent. After a hub move the new hub holds none of the old hub's division, so it
+What a meter has not reported counts as spent, so a final report the relay refused (MR-2) delays the refund to the
+machine's next report, at most 24 hours later. After a hub move the new hub holds none of the old hub's division, so it
 issues no lease of a window instance the old hub divided until that instance ends or every machine holding one of the
 old hub's leases has reported it after the revocation (DEC-0107, [ceremonies](ceremonies.md#move-the-hub); a report
 whose `estateRecord.revision` is at or above the revoking revision, DEC-0132 MR-5). The hub

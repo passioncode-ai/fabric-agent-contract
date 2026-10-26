@@ -20,7 +20,7 @@
     },
     "at": {
       "$ref": "common.schema.json#/$defs/timestamp",
-      "description": "When the machine wrote the report. The hub keeps, per machine, the report with the latest at and refuses one not after it (stale)."
+      "description": "When the machine wrote the report. The hub keeps, per machine, the report with the latest at and refuses one not after it (stale), and one whose at strictTime cannot read, a leap second or a space for T (malformed, DEC-0139)."
     },
     "records": {
       "type": "object",

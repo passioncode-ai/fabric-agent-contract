@@ -60,7 +60,7 @@ an `id` that is otherwise well formed is a notification and is not answered; a m
    ([the machines' report](relay.md#the-machines-report), MR-2). The client's method (`CLIENT_METHODS`) is
    `consent.prompt`, called by the node; a client that sends it to the node gets `unknown-method`, and so does a method
    of `NODE_METHODS` that this node does not serve (DEC-0139). A node pinned before DEC-0132 was promised no answer to
-   `machine.report`: its hub reads any error, or none, as no report (relay.md MR-2). Other payload methods (`node.lifecycle.*`, `grant.check`, …)
+   `machine.report`: its hub reads any error, or none before a deadline of its own, as no report (relay.md MR-2). Other payload methods (`node.lifecycle.*`, `grant.check`, …)
    are added by their owners' decisions, in this envelope. `machine.report` answers any client of the channel: a
    process of the node's own user, inside the trust boundary ([who may connect](#transport-and-who-may-connect)), may read the machine's leases and what they spent,
    as it may read the node's files; a node keeps it from no such process (DEC-0139).

@@ -7974,7 +7974,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reports and Fabric's hub reads them; on the hub's machine the node serves the local channel's `machine.report` and
   Fabric's hub calls it (CT-152). A node pinned before DEC-0132 answers `machine.report` with `unknown-method`, and its
   leases then count at their whole amounts until it reports.
-- **Annotated (2026-10-26):** DEC-0139 settles the readings' text and test items: the hub's reading after opening (`acceptMachineReport`, a `FAC-SEM-152` finding and an `at` `strictTime` cannot read are `malformed`), refused sends, an unusable `#kem`, a pre-DEC-0132 hub and `machine.report`'s callers.
+- **Annotated (2026-10-26):** DEC-0139 settles the readings' text and test items: the hub's reading after opening (`acceptMachineReport`, a `FAC-SEM-152` finding and an `at` `strictTime` cannot read are `malformed`), refused sends, an unusable `#kem`, `machine.report`'s callers, and names a pre-DEC-0132 hub's handling as open (CT-172).
 - **Context:** DEC-0128 UE-2 keeps the estate's records (the applied revision, the heartbeat, the delta head, the
   leases with `spent`) off every check-in to an organization server, and left the message that carries them to the hub
   open (CT-152). Three readers wait on it: the hub's key rotation (DL-15), the hub move's step 6 and the window lease's
@@ -8272,10 +8272,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0139: the machines' report, its readings' loose ends settled
 
 - **Date:** 2026-10-26
-- **Status:** Accepted (2026-10-26). A narrowing of the hub's reading: a relayed report whose `at` RFC 3339 as
+- **Status:** Accepted (2026-10-26). A narrowing of the hub's reading: a relayed report, or its own node's
+  `machine.report`, whose `at` RFC 3339 as
   `strictTime` reads does not, or that carries a `FAC-SEM-152` finding, is now `malformed` (before, the first read
   `stale` when a report was held and was accepted otherwise, and the second was accepted with a finding). No machine
-  that follows MR-1 sends either (relay.md's times refuse a leap second and a lower-case or missing `T`). Additive: a
+  that follows MR-1 sends either (MR-1 names each lease once; relay.md's times refuse a leap second and a space for `T`). Additive: a
   reference function (`acceptMachineReport`), a constant (`MACHINE_REPORT_ACCEPT_REFUSALS`) and a vector group
   (`accept`) a port's runner adds, and three new `open` vectors; no earlier vector's answer changes. Node-side: a
   method of `NODE_METHODS` a node does not serve answers `unknown-method` (JSON-RPC -32601), and `machine.report`
@@ -8293,10 +8294,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      dropped; the next report, which carries the whole state, replaces it (after `rate-limited`, not before its
      `retryAfter`).
   3. **A hub that cannot read reports** (its own `#kem` not listed in the revision it applied, or its private half
-     unreadable) names it in its node's `health` `degraded`, so a key rotation, a move's step 6 and a division do not
+     unreadable) names it in the `degraded` of its own service's health (`fabric-service/0.1`), so a key rotation, a move's step 6 and a division do not
      wait in silence. What a hub not yet on DEC-0132 does with a report is not decided here (CT-172).
   4. **The local channel.** A method of `NODE_METHODS` a node does not serve answers `unknown-method`; a hub reads
-     any error answer to `machine.report`, or none, as no report, since a node pinned before DEC-0132 was promised no
+     any error answer to `machine.report`, or none before a deadline of its own, as no report, since a node pinned before DEC-0132 was promised no
      answer; `machine.report` answers any client of the channel, a process of the node's own user being inside its
      trust boundary.
 - **Why:** each item is a sentence a careful implementer could have read two ways; the two narrowings close a gap
