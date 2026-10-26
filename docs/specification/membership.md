@@ -80,8 +80,8 @@ gated theirs).
 a key of its own, never the same key as the organization's `policyRootKey` (DEC-0031), which signs device policy key
 sets only. One membership root signs for one organization, even on a server that hosts many: an issuer key belongs to
 the organization, so another server can take the organization over under the same `org:<orgId>` by the person's new
-pin (a new id is a new organization and context), and an organization deleted at one server leaves nothing that signs
-for it. A signing key is listed in one organization's set only; the verifier still checks the attestation's `org`, so
+pin (a new id is a new organization and context). An organization deleted at one server leaves its root in the owner's
+Fabric (DEC-0129), and a key set naming that server still needs each member's pin, which names the issuer. A signing key is listed in one organization's set only; the verifier still checks the attestation's `org`, so
 a server that lists one key for two organizations is refused `wrong-org` rather than trusted.
 
 | Field | Rule |
@@ -102,8 +102,11 @@ on a server (Fabric ADR-0178 point 2); a signing key of `keys` never signs it, a
 signs an attestation. Each credential is listed once, under a signing RP (`sign.<domain>`, DEC-0063) with every origin
 within it (`FAC-SEM-146`). A credential a later set drops signs nothing from that set on. Who holds the root (DEC-0129): the organization owner's Fabric, never a
 server (A-3: the platform never holds an organization root); the server generates the signing keys, drafts each key set
-and serves the sets and the attestations, and the owner's Fabric signs each set it drafted, so no server can certify an
-administrator. ADR-0178 takes the owner's two passkeys as the organization's root in R1 (its D8-b); here the root that
+and serves the sets and the attestations, and the owner's Fabric signs each set it drafted. It first shows the owner
+the draft's changes to `keys`, `revoked` and `administrators` against the set it signed last, and signs only once the
+owner confirms them in a ceremony their passkey authorises (user verification), never on the server's word: so no
+server can certify an administrator. A reader pinned at a main commit of DEC-0127 or DEC-0128 refuses a set carrying
+`administrators`, and a reader at or after DEC-0129 refuses one without it; no tag carried the type before (DEC-0119). ADR-0178 takes the owner's two passkeys as the organization's root in R1 (its D8-b); here the root that
 signs key sets stays DEC-0127's Ed25519 key, so the owner's passkeys enter as the first set's administrators. A passkey
 that signs key sets itself would be a new pin form, and an administrator's device binding (ADR-0178 point 2) is not
 checked: both later decisions.
@@ -205,6 +208,8 @@ for that organization's server, and nothing else ([contexts](contexts.md#routing
 | `grant.usage` and share registrations | grants whose context is that `org:<orgId>` | DEC-0086 |
 | `node-summary/1` | the enrollment's own record: what DEC-0118 lists for the machine's mode (under `C` this context only, under `A` the whole harness) | DEC-0102, DEC-0118 |
 | `credentialRequests`, `callRecords` | the enrollment's own | DEC-0111 |
+| for the organization's owner | the membership root's public key and the root's signatures over the key sets the server drafted (OM-3) | DEC-0129 |
+| for an administrator | the public part of their signing passkey (an `administrators` entry) and their signatures over member lists (OL-2) | DEC-0129 |
 | the member list's own entry | the context's `iss` (DEC-0128), so the server can draft `org-authority/1`; the enrollment's `#sig` key it already holds from the enrollment | DEC-0129 |
 | an adaptation plan's organization part (TP-03) | what the person chose to bring into that organization (projects, history, results, schedules), by reference, and the person's requests to its administrators; never the plan's draft, its inventory or anything the person did not choose | DEC-0129 |
 | a membership refresh | the audience and the subject the issuer gave | this decision |
@@ -319,8 +324,8 @@ the relay stops admitting their enrollments once that list is signed and applied
   adoption already do.
 - **Every organization server** also drafts the organization's member list (OL-5) and lists the administrators'
   passkeys in its key sets, which the root signs; it signs no list itself.
-- **The organization owner's Fabric** holds the membership root and signs each key set the server drafts (OM-3,
-  DEC-0129).
+- **The organization owner's Fabric** holds the membership root and signs each key set the server drafts, only after
+  the owner confirms its changes (OM-3, DEC-0129).
 - **An administrator's Fabric** (or a pinned page) signs the list with the administrator's passkey (OL-2).
 - **An organization's relay** admits only from a list `orgRelayAdmissionSet` accepts (OL-4).
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same

@@ -26,7 +26,8 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
   (the root's holder, the `iss` row, the passkey type list, DEC-0051 and DEC-0063, scenarios; fixed).
 - Round 2: unit pass, seam pass (risks fixed: the admission set moved beside its verifier), product fail (package.md,
   CT-04; fixed). Round 3: unit pass, seam pass (DOCMAP's type list, the shared credential check, the held list's
-  refusal; fixed), product fail (SCN-049 against OL-5; fixed with seven smaller lines).
+  refusal; fixed), product fail (SCN-049 against OL-5; fixed with seven smaller lines). Round 4: unit pass,
+  product fail (OM-7 lacked the owner's and administrators' outflows; the owner's Fabric had no review duty; fixed).
 
 ## Decisions
 

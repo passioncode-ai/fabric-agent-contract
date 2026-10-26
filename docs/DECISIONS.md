@@ -7791,12 +7791,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      key set. The organization relay's handshake (what `auth` signs in `estate`, what `welcome` carries) waits on the
      organization's heartbeat and delta, so no organization relay runs on this release (CT-37 keeps it).
   4a. **The root's holder.** The membership root is held by the organization owner's Fabric, never by a server (A-3):
-     the server generates signing keys and drafts each key set, the owner's Fabric signs it, so no server can certify an
-     administrator (DEC-0127 OM-8 annotated). The owner's passkeys (ADR-0178 D8-b) enter as the first set's
+     the server generates signing keys and drafts each key set, the owner's Fabric shows its changes and signs it only
+     once the owner confirms them, so no server can certify an administrator (DEC-0127 OM-8 annotated). OM-7 gains the
+     owner's and an administrator's outflows (the root's public key and key-set signatures; a passkey's public part and
+     list signatures). The owner's passkeys (ADR-0178 D8-b) enter as the first set's
      administrators; a passkey root and an administrator's device binding (ADR-0178 point 2) are later decisions.
   5. **OL-5, the duties.** The server drafts a revision on every join, end and key change and before expiry; an ended
      membership leaves the next list.
-  6. **OM-7 gains two rows:** the context's `iss` for the member list's own entry (the server already holds the
+  6. **OM-7 gains two more rows:** the context's `iss` for the member list's own entry (the server already holds the
      enrollment's `#sig` key); and an adaptation plan's organization part (TP-03): what the person chose to bring into that
      organization, by reference, and the person's requests to its administrators; never the plan's draft, its inventory
      or anything not chosen. A project's entry is the estate revision its person's passkey signs (R1-D12, ADR-0178
@@ -7823,7 +7825,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   member list OL-1 to OL-5, OM-2's fingerprint, OM-3's administrators and root holder, OM-7's rows, OM-8, the rules),
   `relay.md`, `signing.md` (the sixth passkey type), `package.md`, `revocation-delta.md`, `window-lease.md`,
   `estate-record.md`, `conformance.md` (module, rows, the two tables, the code, the next free code), `README.md`,
-  `docs/DOCMAP.md`, `CONTEXT.md` (Member list, Adaptation plan); DEC-0051, DEC-0063 and DEC-0127 annotated;
+  `docs/DOCMAP.md`, `CONTEXT.md` (Member list, Adaptation plan); DEC-0047, DEC-0051, DEC-0062, DEC-0063, DEC-0066 and DEC-0127 annotated;
   `docs/ux/` (SCN-047, SCN-049); `tools/vectors/org-membership.ts`,
   `fixtures/vectors/org-membership.json`, positive and negative fixtures; `test/org-authority.test.ts`,
   `test/signing-challenges.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`,
