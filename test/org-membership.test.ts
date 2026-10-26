@@ -112,7 +112,9 @@ describe("the documents", () => {
       { ...BASE, extensions: [] },
       { ...BASE, extensions: { "orgs.example/x": "a".repeat(257) } },
       { ...BASE, extensions: Object.fromEntries(Array.from({ length: 17 }, (_, index) => [`orgs.example/k${index}`, index])) },
-      { ...BASE, issuer: "https://Orgs.example" }
+      { ...BASE, issuer: "https://Orgs.example" },
+      { ...BASE, extensions: { "orgs.example/x": "\u{1F600}".repeat(200) } },
+      { ...BASE, extensions: { "orgs.example/x": "\u{1F600}".repeat(257) } }
     ];
     for (const doc of cases) expect(orgMembershipWellFormed(doc), JSON.stringify(doc).slice(0, 120)).toBe(valid(doc, "org-membership"));
   });

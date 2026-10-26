@@ -152,6 +152,11 @@ function verifyCases(): Json[] {
     c("wrong organization: A's attestation read for B", BASE, trust({ org: ORG_B, keySet: "orgB" }), refused("wrong-org")),
     c("wrong organization: orgs compare as written", BASE, trust({ org: "org:ORG-A" }), refused("context-invalid")),
     c("wrong audience: an attestation for another reader", BASE, trust({ audience: "product-client-9" }), refused("wrong-audience")),
+    c("wrong subject: a reader that knows its member gets another member's attestation", BASE, trust({ subject: "m-00c4e1aa" }), refused("wrong-subject")),
+    c("subject: a reader that knows its member gets that member's attestation", BASE, trust({ subject: "m-7f3a91c2" }), accepted(BASE, "active", false)),
+    c("extension: 256 astral characters, counted as code points as the schema counts them", attestation({ extensions: { "orgs.example/note": "\u{1F600}".repeat(256) } }), trust(), accepted(attestation({ extensions: { "orgs.example/note": "\u{1F600}".repeat(256) } }), "active", false)),
+    c("extension: 257 astral characters is malformed", attestation({ extensions: { "orgs.example/note": "\u{1F600}".repeat(257) } }), trust(), refused("malformed")),
+    c("too long: expiresAt at notBefore, an empty life", attestation({ expiresAt: "2026-10-25T11:00:00Z" }), trust(), refused("too-long-lived")),
     c("wrong key: K2's kid, signed by a key nobody lists", signed(attestation(), ROGUE), trust(), refused("bad-signature")),
     c("bad signature: the role raised after signing", { ...BASE, role: "owner" }, trust(), refused("bad-signature")),
     c("unknown kid: a kid the key set does not list", attestation({}, ROGUE), trust(), refused("unknown-key")),
@@ -191,6 +196,7 @@ function verifyCases(): Json[] {
     c("context: a key set that is not one", BASE, trust({ keySet: "rootAmongKeys" }), refused("context-invalid")),
     c("context: a key set under an algorithm the verifier does not know", BASE, trust({ keySet: "es256" }), refused("context-invalid")),
     c("context: an audience that is not an opaque id", BASE, trust({ audience: "" }), refused("context-invalid")),
+    c("context: a subject that is not an opaque id", BASE, trust({ subject: "" }), refused("context-invalid")),
     c("context: a held record without a subject", BASE, trust({ held: { revision: 4, digest: digest(BASE) } }), refused("context-invalid")),
     c("no clock: an unreadable now", BASE, trust({ now: "2026-10-25 11:30:00" }), refused("no-clock"))
   ];
@@ -222,6 +228,8 @@ function keySetCases(): Json[] {
     c("unknown algorithm: a listed key under ES256", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, keyEntry(K2, "2026-10-15T00:00:00Z", "2027-01-01T00:00:00Z", "ES256")], [K0.kid]), pin(), refused("unknown-algorithm")),
     c("unusable key: a pinned root that is not 32 canonical bytes", "r2", pin({ root: { ...ROOT_PIN, x: `${ROOT.x.slice(0, 42)}B` } }), refused("unusable-key")),
     c("small-order key: a pinned root of order 4", "r2", pin({ root: { ...ROOT_PIN, x: ZERO_X } }), refused("small-order-key")),
+    c("small-order key: a root-signed set listing a key of order 4", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, { kid: "mem-zero", alg: "EdDSA", x: ZERO_X, notBefore: "2026-10-01T00:00:00Z", notAfter: "2027-01-01T00:00:00Z" }], [K0.kid]), pin(), refused("small-order-key")),
+    c("unknown algorithm: the set under ES256", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, K2_ENTRY], [K0.kid], { alg: "ES256" }), pin(), refused("unknown-algorithm")),
     c("malformed: a kid listed twice", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, { ...K2_ENTRY, kid: K1.kid }], [K0.kid]), pin(), refused("malformed")),
     c("malformed: no organization", (({ org: _org, ...rest }) => rest)(r2), pin(), refused("malformed")),
     c("malformed: an attestation is not a key set", BASE, pin(), refused("malformed")),

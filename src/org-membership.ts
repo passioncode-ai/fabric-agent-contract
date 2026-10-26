@@ -86,7 +86,8 @@ function extensionsOk(value: unknown): boolean {
   const entries = Object.entries(value);
   return entries.length <= MAX_EXTENSIONS && entries.every(([name, item]) =>
     name.length <= 320 && EXTENSION.test(name) &&
-    ((isString(item) && item.length <= 256) || typeof item === "boolean" || Number.isSafeInteger(item)));
+    // The schema's maxLength counts code points, so a string of astral characters is measured the same way.
+    ((isString(item) && [...item].length <= 256) || typeof item === "boolean" || Number.isSafeInteger(item)));
 }
 
 /**
@@ -216,6 +217,7 @@ export type OrgMembershipProblem =
   | "bad-signature"
   | "wrong-org"
   | "wrong-audience"
+  | "wrong-subject"
   | "too-long-lived"
   | "not-yet-valid"
   | "expired"
@@ -233,6 +235,8 @@ export interface OrgMembershipTrust {
   org: string;
   /** Who this verifier is at the issuer: the audience the issuer names it by. */
   audience: string;
+  /** The member this verifier asks about, when it knows the subject: a reader whose audience many members share binds the presenter to it. */
+  subject?: string;
   /** The organization's key set this verifier applied (accepted by `verifyOrgKeySet` under the pinned root). */
   keySet: JsonObject;
   /** The attestation held for this organization, audience and subject, if any. */
@@ -244,7 +248,7 @@ const heldMembershipOk = (held: unknown) => held === undefined || (isObject(held
 /** Whether `trust` is a usable context, the clock aside. */
 function usableTrust(trust: OrgMembershipTrust): boolean {
   const keySetOk = isObject(trust.keySet) && orgKeySetWellFormed(trust.keySet) && ORG_MEMBERSHIP_ALGORITHMS.includes(trust.keySet.alg as string);
-  return matches(ORG, trust.org) && opaque(trust.audience) && keySetOk && trust.keySet.org === trust.org && heldMembershipOk(trust.held);
+  return matches(ORG, trust.org) && opaque(trust.audience) && (trust.subject === undefined || opaque(trust.subject)) && keySetOk && trust.keySet.org === trust.org && heldMembershipOk(trust.held);
 }
 
 /**
@@ -277,6 +281,7 @@ export function verifyOrgMembership(value: unknown, trust: OrgMembershipTrust): 
 
   if (attestation.org !== trust.org) return { ok: false, problem: "wrong-org" };
   if (attestation.audience !== trust.audience) return { ok: false, problem: "wrong-audience" };
+  if (trust.subject !== undefined && attestation.subject !== trust.subject) return { ok: false, problem: "wrong-subject" };
   const notBefore = time(attestation.notBefore);
   const expiresAt = time(attestation.expiresAt);
   if (issuedAt > notBefore || notBefore >= expiresAt || expiresAt - issuedAt > MAX_ATTESTATION_SECONDS * 1000) return { ok: false, problem: "too-long-lived" };

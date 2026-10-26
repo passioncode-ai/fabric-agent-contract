@@ -106,22 +106,23 @@ refuses at once what it signed, a lower revision is `stale-revision` and the sam
 | OK-7 | `bad-signature` | the root's signature does not verify over `orgKeySetSigningInput` |
 | OK-8 | `stale-revision`, `revision-conflict` | a revision below the held one; the held revision with another digest |
 
-`verifyOrgMembership(attestation, {now, org, audience, keySet, held})` checks an attestation with no network, in this
+`verifyOrgMembership(attestation, {now, org, audience, subject?, keySet, held})` checks an attestation with no network, in this
 order, and answers `{ok: true, status, role, refreshDue, unchanged, digest, held}` or one problem. `keySet` is the set
 the reader applied under the pin of `org`; `held` is `{subject, revision, digest}`, the record the reader keeps per
-(organization, audience, subject):
+(organization, audience, subject); `subject` is the member the reader asks about, which a reader whose audience many
+members share (a product's client) passes, so a member presenting another member's attestation is refused:
 
 | Row | Problem | When |
 |---|---|---|
-| OM-a | `no-clock`, `context-invalid` | the context is not an object (first), then `now` is not a readable time, then `org` is not an organization's context id, `audience` not an opaque id, `keySet` not a well-formed `EdDSA` key set of `org`, or `held` not `{subject, revision, digest}` |
-| OM-b | `malformed` | not an object, another `type`, a member missing or unlisted, a value outside its field's rule (an unknown role or status, an extension not named by a domain or holding an object, a time with more than three fraction digits) |
+| OM-a | `no-clock`, `context-invalid` | the context is not an object (first), then `now` is not a readable time, then `org` is not an organization's context id, `audience` or a given `subject` not an opaque id, `keySet` not a well-formed `EdDSA` key set of `org`, or `held` not `{subject, revision, digest}` |
+| OM-b | `malformed` | not an object, another `type`, a member missing or unlisted, a value outside its field's rule (an unknown role or status, an extension not named by a domain, holding an object or a string of more than 256 code points, a time with more than three fraction digits) |
 | OM-c | `wrong-issuer` | `issuer` is not the key set's |
 | OM-d | `unknown-algorithm` | `alg` is not `EdDSA` |
 | OM-e | `unknown-key`, `key-revoked` | `kid` is neither listed nor revoked; `kid` is revoked |
 | OM-f | `unusable-key`, `small-order-key` | the listed key names another `alg`; the listed key is of small order |
 | OM-g | `key-not-valid` | `issuedAt` is outside the key's window |
 | OM-h | `bad-signature` | the signature does not verify over `orgMembershipSigningInput` |
-| OM-i | `wrong-org`, `wrong-audience` | `org` is not the reader's; `audience` is not the reader's |
+| OM-i | `wrong-org`, `wrong-audience`, `wrong-subject` | `org` is not the reader's; `audience` is not the reader's; `subject` is not the one the reader passed |
 | OM-j | `too-long-lived` | the times are not `issuedAt` ≤ `notBefore` < `expiresAt`, or the life is above 24 hours |
 | OM-k | `not-yet-valid` | the clock is more than 60 s before `notBefore` |
 | OM-l | `expired` | the clock is at or after `expiresAt`: there is no grace, an expired attestation proves nothing about now |

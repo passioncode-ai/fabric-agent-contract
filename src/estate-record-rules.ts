@@ -550,10 +550,6 @@ function droppedFindings(parent: JsonObject, next: JsonObject): Finding[] {
 }
 
 /**
- * FAC-SEM-072…076 over one record, FAC-SEM-092 (DEC-0063) on each passkey it lists, FAC-SEM-110 on each share grant,
- * FAC-SEM-111 on each placement (DEC-0082) and FAC-SEM-134 on each machine's profile (DEC-0106).
- */
-/**
  * FAC-SEM-147: the organizations the person admitted (DEC-0127 OM-2), each once by its context, and no root of small
  * order (DEC-0045), since the root's key sets are what every attestation of that organization verifies under.
  */
@@ -571,6 +567,11 @@ function organizationPins(value: JsonObject, flag: (instancePath: string, messag
   }
 }
 
+/**
+ * FAC-SEM-072…076 over one record, FAC-SEM-092 (DEC-0063) on each passkey it lists, FAC-SEM-110 on each share grant,
+ * FAC-SEM-111 on each placement (DEC-0082), FAC-SEM-134 on each machine's profile (DEC-0106) and FAC-SEM-147 on the
+ * organizations it pins (DEC-0127).
+ */
 function recordFindings(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   revisionWhole(value, flagger(findings, "FAC-SEM-072"));
