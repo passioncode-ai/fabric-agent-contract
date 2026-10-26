@@ -73,7 +73,7 @@ An **entry** (`$defs/entry` of [`revocation-delta`](../../schemas/revocation-del
   It is the shape of a check-in's `records.revocationDelta` (DEC-0053) and of a relay's `welcome.deltaHead` (DEC-0047),
   so a node reports what it holds, and passes on what it was handed, unchanged.
 - **A page** is `{head, entries}` (the schema's root): consecutive entries, oldest first, at most 256, so a relay frame
-  stays under 1 MiB. A relay's `delta` frame and a check-in response's `records.revocationDelta` carry one unchanged. The
+  stays under 1 MiB. A relay's `delta` frame and a check-in response's `records.revocationDelta` (an organization server's answer only toward a node that has not adopted DEC-0128's UE-2; otherwise the relay, CT-152) carry one unchanged. The
   page's `head` is the carrier's hint and binds nothing; only a heartbeat's head binds.
 
 **The hub's duties.** One chain per estate: a hub issues the next sequence after the head it holds and never two entries

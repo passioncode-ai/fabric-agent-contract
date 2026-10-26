@@ -194,7 +194,7 @@ export type LeaseVerdict =
 export interface LeaseTrust {
   /** The meter's clock. */
   at: Date;
-  /** This machine's device id: a lease for any other machine is refused. */
+  /** This machine's estate id (estate-record machines[].id; never an organization enrollment's device.id, DEC-0128): a lease for any other machine is refused. */
   machine: string;
   /** The estate record this machine applies (verified by `verifyEstateRecord`): it certifies the hub's key. */
   estateRecord: JsonObject;

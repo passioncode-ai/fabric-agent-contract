@@ -355,7 +355,7 @@
             }
           },
           "additionalProperties": false,
-          "description": "What the device holds of the records the relay protocol carries (DEC-0053): the estate revision it applies, the latest heartbeat and the revocation delta's head (DEC-0054), and the leases its meter holds (window-lease/1, DEC-0062)."
+          "description": "What the device holds of the records the relay protocol carries (DEC-0053): the estate revision it applies, the latest heartbeat and the revocation delta's head (DEC-0054), and the leases its meter holds (window-lease/1, DEC-0062). Since DEC-0128 (UE-2, FAC-SEM-149) a node that has adopted it sends none of the estate's records (estateRecord, heartbeat, revocationDelta, leases) to an organization server; they go to its hub over the relay (CT-152)."
         },
         "fullState": {
           "type": "boolean"
@@ -493,7 +493,7 @@
             }
           },
           "additionalProperties": false,
-          "description": "Records the server hands the device at check-in (DEC-0053): a heartbeat and a page of the revocation delta (DEC-0054) and leases (window-lease/1, DEC-0062), each carried unchanged."
+          "description": "Records the server hands the device at check-in (DEC-0053): a heartbeat and a page of the revocation delta (DEC-0054) and leases (window-lease/1, DEC-0062), each carried unchanged. Since DEC-0128 (UE-2, FAC-SEM-149) an organization server's answer carries none of the estate's documents (a heartbeat, a delta page or a lease naming an estate) to a node that has adopted it; those members then hold only the organization's own records."
         },
         "certificate": {
           "type": "object",

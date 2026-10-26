@@ -22,7 +22,7 @@ const strings = (value: unknown): string[] => (Array.isArray(value) ? value.filt
  */
 function enrollmentFindings(value: JsonObject, flag: Flag): void {
   const estate = typeof value.estateMachineId === "string" ? value.estateMachineId : undefined;
-  // The estate's own identifiers: its machine id and its device kids (FAC-SEM-073's <id>#sig, <id>#kem).
+  // The estate's own identifiers: its machine id, its device kids (FAC-SEM-073's <id>#sig, <id>#kem) and its public keys.
   const estateKeys = Array.isArray(value.estatePublicKeys) ? value.estatePublicKeys.filter((key): key is string => typeof key === "string") : [];
   const estateIds = new Set([...(estate === undefined ? [] : [estate, `${estate}#sig`, `${estate}#kem`]), ...estateKeys]);
   // One set across every identifier field: a value one enrollment uses as a telemetry key and another as a collector
