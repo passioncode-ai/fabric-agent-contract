@@ -8078,8 +8078,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   client met the new `welcome`. `FRAME_TYPES` is unchanged; `welcome` has two schema variants.
 - **Consequences / affects:** `schemas/relay-frame.schema.json`; `src/relay.ts` (`SessionAdmission`);
   `docs/specification/relay.md` (The organization's relay, OR-1 to OR-5; the header and the member-list paragraph),
-  `membership.md` (OL-4, OL-6, OX-6, Not decided), `conformance.md`, `CONTEXT.md` (Admission set),
-  `docs/specification/README.md`, `docs/DOCMAP.md`, `devices.md` (What stays linkable), `docs/ux/scenarios.md`
-  (SCN-049); DEC-0047, DEC-0066, DEC-0129 and DEC-0133 annotated; `test/org-authority.test.ts`, `test/relay.test.ts`; backlog
-  CT-37, CT-162, CT-163.
+  `membership.md` (OL-4, OL-6, OX-6, Who adopts it, Not decided), `conformance.md`, `CONTEXT.md` (Admission set,
+  Revocation delta), `docs/specification/README.md`, `docs/DOCMAP.md`, `devices.md` and `contexts.md` (What stays
+  linkable: an operator running two of a machine's relays sees its two connections), `docs/ux/scenarios.md` (SCN-049);
+  DEC-0047, DEC-0066, DEC-0129 and DEC-0133 annotated; `test/org-authority.test.ts`, `test/relay.test.ts`; backlog
+  CT-36, CT-37, CT-162, CT-163, CT-164.
 - **Source:** CT-37; DEC-0047, DEC-0066, DEC-0084, DEC-0128, DEC-0129; Fabric ADR-0180 point 4.

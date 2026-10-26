@@ -438,7 +438,10 @@ an administrator's passkey makes a list that passes.
 - **An administrator's Fabric** (or a pinned page) registers a signing credential for that organization alone (never
   an estate authority, never another organization's), shows a drafted list's changes against the last signed list, and
   signs it with that passkey (OM-3, OL-2). The owner's Fabric registers such a credential for the first key set.
-- **An organization's relay** admits only from a list `orgRelayAdmissionSet` accepts (OL-4).
+- **An organization's relay** admits only from a list `orgRelayAdmissionSet` accepts (OL-4), with the handshake of
+  relay.md OR-1 to OR-5 (DEC-0134).
+- **A member's node** signs `auth` with an enrollment's `#sig` key and the organization's context id in `estate`, reads
+  the organization's `welcome` by its `list`, and expects no estate record from that relay (relay.md OR-1, OR-2).
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same
   pin, with its own audience.
 

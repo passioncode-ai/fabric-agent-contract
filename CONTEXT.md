@@ -670,7 +670,7 @@ under the organization's key set, and its handshake names the organization in `a
 
 **Revocation delta**: The estate record's fast path (`revocation-delta/1`, DEC-0054): an append-only chain of
 entries, one revocation each, signed by an **Estate key** and chained by RFC 8785 hash, so its head is
-`{sequence, sha256}`: what a machine reports to its hub and a **Relay**'s `welcome` carries. A revision issued after an entry
+`{sequence, sha256}`: what a machine reports to its hub and an estate's **Relay** carries in its `welcome` (an organization's relay does not, DEC-0134 OR-2). A revision issued after an entry
 lists it ([revocation delta](docs/specification/revocation-delta.md)).
 
 **Window lease**: A hub-signed share of one estate window instance for one machine (`window-lease/1`, DEC-0062):

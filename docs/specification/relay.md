@@ -459,8 +459,9 @@ revocation signed by an estate key (a hub key the estate record certifies) and c
 
 - **What the relay carries.** It carries them unchanged: a page of entries (`{head, entries}`, at most 256) in a `delta`
   frame, a heartbeat in a `heartbeat` frame (both typed by [`relay-frame.schema.json`](../../schemas/relay-frame.schema.json)
-  against DEC-0054's schemas). On `welcome` it sends its `deltaHead` and its latest heartbeat (or `null`), and it pushes
-  each new one to every connected machine of the estate the object names.
+  against DEC-0054's schemas). On an estate's relay `welcome` sends its `deltaHead` and its latest heartbeat (or
+  `null`), and the relay pushes each new one to every connected machine of the estate the object names; an
+  organization's relay sends neither (OR-2).
 - **Where the relay gets them** (DEC-0066). An admitted hub machine sends `delta` and `heartbeat` frames on its own
   session. The relay accepts one only when it verifies under the record it holds, by DEC-0054's own rules: an entry or
   heartbeat signed by an estate key — the `hubKey` the held revision certifies for exactly one machine, as DL-14's
