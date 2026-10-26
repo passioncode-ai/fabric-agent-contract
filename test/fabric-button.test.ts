@@ -85,9 +85,9 @@ describe("fabric:// links (DEC-0040, FL-1…FL-6)", () => {
 
 describe("Fabric's button (DEC-0040, FB-1…FB-8)", () => {
   it("states the absent-Fabric message, the accessible name and the placement once, in the specification", () => {
-    expect(spec).toContain("> Fabric is not installed — get it at passioncode.ai/fabric");
+    expect(spec).toContain("> Fabric is not installed. Get it at passioncode.ai/fabric");
     expect(spec).toContain("`https://passioncode.ai/fabric`");
-    expect(spec).toMatch(/accessible name is \*\*Open Fabric\*\*/);
+    expect(spec).toMatch(/accessible name is \*\*Open Fabric\*\* in the page's language/);
     expect(spec).toMatch(/bottom-right corner of the viewport/);
     for (const rule of ["FB-1", "FB-2", "FB-3", "FB-4", "FB-5", "FB-6", "FB-7", "FB-8", "FL-1", "FL-2", "FL-3", "FL-4", "FL-5", "FL-6", "FL-7"]) {
       expect(spec.match(new RegExp(`\\*\\*${rule} — `, "g")), rule).toHaveLength(1);

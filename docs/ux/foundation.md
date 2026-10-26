@@ -389,7 +389,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a dashboard that knows its project, when I press the button, then a menu offers a chat with Fabric about the service and a coding session in the project.
   - Given I choose the chat, then Fabric opens the manager conversation scoped to that service and project and sends nothing.
   - Given I choose the session, then Fabric shows the project's session view and starts the runner only when I press Start.
-  - Given Fabric is not installed, then the menu says "Fabric is not installed — get it at passioncode.ai/fabric".
+  - Given Fabric is not installed, then the menu says "Fabric is not installed. Get it at passioncode.ai/fabric", in the page's language.
   - Given a link with a token or a bad id, then Fabric refuses the whole link and says why.
 - **Priority:** should
 - **Status:** draft

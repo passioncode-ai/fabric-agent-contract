@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0124` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0125` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -1534,7 +1534,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0040 — Fabric's button in every product and `fabric://` links
 
 - **Date:** 2026-10-11
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric (the link
+- **Status:** Accepted source change (on merge of its pull request). FB-3's name, FB-4's items and FB-5's sentence amended by DEC-0124 (2026-10-26): in the page's language, the sentence without a dash. Consumer adoption: Fabric (the link
   handler), Fabric Dashboards (the first host, FD-45), the fabric-agent-adapter's dashboard kit (the component).
 - **Annotated (2026-10-12):** FB-6's cookie scope amended by DEC-0059 (per host in a shared cookie store, per service
   where the host gives each service its own store).
@@ -7406,3 +7406,36 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   set wider than the host's `safePath` (an empty path, a backslash or a control character inside it); and a third
   unit reading, which found a second `?` read as `path` and a link limit its own builder could exceed; and a fourth,
   which found a link with a control character or a tab inside its scheme passing the check unrecognised.
+
+### DEC-0124: Fabric's button speaks the page's language; *Fabric* stays in English
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). Amends DEC-0040's FB-3, FB-4 and FB-5; no wire change.
+- **Context:** FB-3 said the button's accessible name is *Open Fabric* "in every case", and FB-5 fixed one English
+  sentence (an English clause, a dash, then "get it at passioncode.ai/fabric") to be shown exactly. The adapter's dashboard
+  kit 1.1.4 (adapter 0.49.3, FAA-119, on the operator's decision of 2026-10-25) names the button in the page's
+  language, Russian on a `lang="ru"` page, after two services asked for it on the board (threads `288afbce`,
+  `a0929fba`); Fabric Dashboards already names its own button «Открыть Fabric» (`src/core/i18n.ts`). Both
+  implementations broke FB-3 as written, and the adapter asked for the amendment (request `7d8c704b`, thread
+  `4801da8d`). FB-5's sentence also carried a dash, which the operator's rule keeps out of text people read.
+- **Decision:**
+  1. FB-3: the accessible name is *Open Fabric* in the page's language, the document's `lang`, English when the page
+     names none. The product name *Fabric* stays in English in every language, as the visible word and inside the
+     name. A page MAY supply its own words for its language.
+  2. FB-4: the menu's items are in the page's language by the same rule; the service's and project's names are shown
+     as they are.
+  3. FB-5: the message is "Fabric is not installed. Get it at passioncode.ai/fabric" in the page's language, English
+     when the page names none, with *Fabric* and the address unchanged and the link as before.
+- **Why:** a person reads the page in its language, and a screen reader announces the name in that language; the
+  product name is a name and is not translated. One English sentence shown "exactly" on a Russian page was the defect
+  both implementations had already corrected.
+- **Alternatives considered:** keep *Open Fabric* in English everywhere (both implementations and two services' requests
+  say otherwise); translate *Fabric* too (a product name, and the visible word would no longer match the mark);
+  keep the old sentence with its dash (text for people carries none).
+- **Compatibility:** no schema changes; `contractVersion` stays `0.1.0`. A page that still shows the English name or
+  the old English sentence on an English page stays readable; a kit adopts the wording at its next pin. The adapter's
+  kit 1.1.4 already follows items 1 and 2.
+- **Consequences / affects:** `docs/specification/fabric-button.md` (FB-3, FB-4, FB-5), `test/fabric-button.test.ts`,
+  `docs/ux/flows.md` (FLW-09), `docs/ux/foundation.md` (ST-011), `docs/ux/scenarios.md` (SCN-015),
+  `docs/ux/screens.md` (SCR-12); DEC-0040's status; backlog CT-148 (closed by this decision).
+- **Source:** request `7d8c704b` (thread `4801da8d`), fabric-agent-adapter FAA-119; Fabric Dashboards `src/core/i18n.ts`.

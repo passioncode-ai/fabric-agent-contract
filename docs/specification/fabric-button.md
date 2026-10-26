@@ -36,8 +36,10 @@ the page leaves the button's height plus 16 CSS pixels free at the end of its sc
 clear of it. It holds at the page's floor (ED-1) and does not count as sticky chrome (ED-5).
 
 **FB-3 — Label and name.** The button shows the Fabric mark and the word **Fabric**; below a 480 CSS pixel
-viewport it MAY show the mark alone. Its accessible name is **Open Fabric** in every case, and its target is at
-least 44 × 44 CSS pixels. Its colours come from the page's theme tokens and follow the host's appearance
+viewport it MAY show the mark alone. Its accessible name is **Open Fabric** in the page's language: the document's
+`lang`, English when the page names none (DEC-0124). The product name *Fabric* stays in English in every language,
+both as the visible word and inside the name, and a page MAY supply its own words for its language; Fabric
+Dashboards' «Открыть Fabric» is the Russian name. Its target is at least 44 × 44 CSS pixels. Its colours come from the page's theme tokens and follow the host's appearance
 (ED-6, ED-8); its text meets 4.5:1 and its boundary 3:1 against the page (WCAG 2.2 AA), and its meaning is
 never carried by colour alone.
 
@@ -49,15 +51,16 @@ aria-expanded>`). Pressing it, or Enter or Space on it, opens a menu:
 | **Chat with Fabric about** *the service's name* | always | the chat link of the service, with the project when the page knows it |
 | **Open a coding session in** *the project's name* | the page knows its project | the session link of the project |
 
-The first item takes focus when the menu opens; arrow keys move between items; Escape closes the menu and
+The items are in the page's language as FB-3's name is, *Fabric* staying in English and the service's and project's
+names shown as they are (DEC-0124). The first item takes focus when the menu opens; arrow keys move between items; Escape closes the menu and
 returns focus to the button. With reduced motion requested, the menu appears without animation. A page with
 only the first item MAY open the chat link directly from the button (then without `aria-haspopup`).
 
 **FB-5 — When Fabric is not installed.** When the page knows Fabric is absent, or after following a link the
 page is still visible and focused 1 500 ms later, the button's menu shows, instead of the actions or under
-them, exactly:
+them, in the page's language (English when the page names none), with *Fabric* and the address unchanged:
 
-> Fabric is not installed — get it at passioncode.ai/fabric
+> Fabric is not installed. Get it at passioncode.ai/fabric
 
 where *passioncode.ai/fabric* links to `https://passioncode.ai/fabric`, opened in a new browsing context with
 `rel="noopener"`. The page never downloads anything by itself and never retries a link in a loop. A page knows

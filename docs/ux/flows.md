@@ -234,7 +234,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   B[Screen: Fabric's button and menu] --> C{Fabric installed?}
-  C -->|no, or no answer in 1.5 s| N[Fabric is not installed — get it at passioncode.ai/fabric]
+  C -->|no, or no answer in 1.5 s| N[Fabric is not installed. Get it at passioncode.ai/fabric]
   C -->|yes| L{Link valid: action, ids, no secret?}
   L -->|no| R[Fabric says the link was refused and why]
   L -->|chat| T[Manager conversation scoped to service and project]

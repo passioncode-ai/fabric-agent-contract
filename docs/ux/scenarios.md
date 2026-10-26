@@ -372,7 +372,7 @@ independent agent author and P-02 project operator.
 - **Alt paths:** the link names a runner that is not installed -> Fabric uses the project's default runner and says so. The page is embedded in Fabric Dashboards, which draws its own button -> the page's button is hidden.
 - **UI elements:** floating button, menu with two actions, the absent message.
 - **States covered:** success, empty, error
-- **Errors & recovery:** Fabric is not installed -> the menu says "Fabric is not installed — get it at passioncode.ai/fabric" with the link; a link carrying a token or a bad id -> Fabric refuses the whole link and says why.
+- **Errors & recovery:** Fabric is not installed -> the menu says "Fabric is not installed. Get it at passioncode.ai/fabric" (in the page's language) with the link; a link carrying a token or a bad id -> Fabric refuses the whole link and says why.
 - **Status:** draft
 - **Coverage:** DEC-0040 FB-1…FB-8, FL-1…FL-7, `fabric-link.schema.json`, `test/fabric-button.test.ts`
 - **Product:** unobserved
