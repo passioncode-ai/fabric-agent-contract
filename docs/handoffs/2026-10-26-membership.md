@@ -47,13 +47,26 @@ TP-00, row N-1), open to any organization server (MD-9 path (a)).
   - CT-128: after 2026-10-30;
   - CT-42: thread `c06f2991`.
 
+## Update: DEC-0128 merged
+
+- DEC-0128 (unlinkable memberships, CT-122) merged in PR #196 (`6f3abaa5`):
+  - [devices](../specification/devices.md#unlinkable-enrollments) UE-1 to UE-3, `FAC-SEM-148` and `FAC-SEM-149`;
+  - [delegation](../specification/delegation.md#keys-publication-and-rotation) DL-14a, context issuers and context hub
+    keys.
+- Checks: `pnpm run check` gave 9 146 tests. Six blind readings; rounds 5 and 6 found nothing blocking.
+- Board reply `41181c8d` on request `a90c37b2` (thread `305f39c3`).
+- Filed: CT-152, the machines' report to their hub over the relay. A node adopts UE-2 only after it.
+- DEC-0129 is reserved for `org-authority/1`.
+
 ## Next task
 
-CT-122: decide DEC-0128 from the brief, with the operator's question defaults:
-- a `kid` and an `iss` per context;
-- `contextIssuers[]` and `machines[].contextHubKeys[]` in the estate record, gated;
-- the kind `node-enrollments`;
-- no estate records to an organization server;
-- `org-authority/1`.
+DEC-0129, `org-authority/1`, the organization's member list only (CT-37), as
+[the plan](../evidence/plans/2026-10-26-ct122-org-authority.md) maps it:
 
-Then tag DEC-0127 and DEC-0128 together (DEC-0108).
+- one schema and one register type;
+- OM-3 widened so the membership key set's signing keys also sign the list;
+- `verifyOrgAuthority` in `src/org-authority.ts`;
+- an organization admission source in `relayAdmissionSet` that fails closed (DEC-0047).
+
+Then tag DEC-0127, DEC-0128 and DEC-0129 together (DEC-0108). The release notes list `organizationPin.iss` as a
+narrowing (DEC-0119).
