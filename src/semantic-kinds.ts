@@ -83,6 +83,7 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "lease-reservation": wrap("lease", "request", "decision"),
   "local-channel-session": wrap("requests"),
   "machine-call": wrap("caller", "target", "capability", "effect", "answer"),
+  "mandate": doc("mandate.schema.json"),
   manifest: doc("manifest.schema.json"),
   "model-catalogue": doc("registry-models.schema.json"),
   "model-profiles": doc("model-profile.schema.json"),

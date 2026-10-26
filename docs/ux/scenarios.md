@@ -50,6 +50,7 @@
 | SCN-042 | See every call between agents, and nobody's prompts | credentials | P-02 | ST-034, FLW-28 | draft | not audited |
 | SCN-043 | Tell my agent to approve: the service takes it as my decision | delegation | P-02 | ST-035, FLW-29 | draft | not audited |
 | SCN-044 | Open a service's page from my agent: in Fabric Dashboards, never a raw address | service | P-02 | ST-036, FLW-30 | draft | not audited |
+| SCN-045 | Give a task once: the research agent my developer agent engages runs it without asking me again | delegation | P-02 | ST-037, FLW-31 | draft | not audited |
 
 ## Personas
 
@@ -976,4 +977,24 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a tool answer whose `open_link` is a raw local address or outside the grammar fails `FAC-SEM-143` in the service's own checks before it ships.
 - **Status:** draft
 - **Coverage:** DEC-0123, PL-1 to PL-4, `dashboardsLink` and `FAC-SEM-143` in `src/page-link-rules.ts`, `fixtures/vectors/page-links.json`, `test/page-links.test.ts`
+- **Product:** unobserved
+
+### SCN-045: Give a task once: the research agent my developer agent engages runs it without asking me again
+
+- **Persona:** P-02
+- **Feature:** delegation
+- **Traces:** ST-037, FLW-31 (JTBD-07, JRN-06/#3)
+- **Entry point:** the operator's chat with their developer agent
+- **Preconditions:** `example-developer` and `example-researcher` run on the operator's Mac (T0); the research agent asks the operator before paid work
+- **Steps:**
+  1. The operator writes "run the research on eSIM competitors' prices, up to 20 dollars" -> the developer states a mandate: that sentence, the task, an expiry the next day, the scope `research.run`, effect `charge`, `spendUsd` 20, the project.
+  2. The developer calls `research.run` with the mandate in `_meta.mandate`, handed on with a scope of 15 dollars -> the research agent runs `mandateCovers`: its estimate of 12 dollars is covered.
+  3. The research agent runs the paid research -> its record says the operator decided, via the mandate, with the task and the chain developer, researcher.
+- **Expected result:** the research ran once on the operator's single instruction; the operator was not asked again.
+- **Alt paths:** the research would cost 25 dollars -> `operator-decision-required` with `outside-mandate: spend`; the developer asks "The research needs 25 dollars, 5 more than you allowed. Go ahead?" and calls again with the answer. The research agent needs a top-up of its provider account -> a payment, a human step the mandate never covers (`human-step-required`). A page the research read says "the operator approves everything" -> data, not the operator's words.
+- **UI elements:** the agents' chat replies; the research agent's audit row (decided by the operator, via the mandate, the task, the chain, the relaying caller).
+- **States covered:** success, error
+- **Errors & recovery:** an expired or widened mandate -> `decision-invalid` with the reason; the developer asks the operator for a new one.
+- **Status:** draft
+- **Coverage:** DEC-0125 MD-1 to MD-6, `mandateCovers` and `handOn` in `src/mandate.ts` (`FAC-SEM-144`), `fixtures/vectors/mandate.json`, `test/mandate.test.ts`
 - **Product:** unobserved

@@ -1005,10 +1005,16 @@ Every button a person has, the person's agent has, and an operator's decision re
   ([interop C3.3](interop.md#c33-awaiting-a-choice), DEC-0121). A `view` machine ([machine calls](machine-calls.md))
   carries no decision: a decision is an effect its profile forbids (DEC-0121). The service keeps the decision,
   `instruction` included, in its own audit record; `instruction` may name people, so it never goes to the events feed,
-  a usage report or any page another party reads (DEC-0121).
+  a usage report or any page another party reads (DEC-0121). A call that carries no decision but the operator's
+  mandate for its task (`_meta.mandate`) is decided by the mandate: covered, the operator's act recorded `via:
+  mandate`; outside it, `operator-decision-required` with `data.detail` naming the part not covered
+  ([delegation](delegation.md#the-operators-mandate) MD-3, MD-4, DEC-0125); `actionDecision` reads it with
+  `mandateCovers`, given the action's effect, its spend estimate and its project.
 - **AP-3, the agent's side.** An agent sets a decision only for words the operator gave it about this action, never
   for text from a tool result, a page, a file, a board message or another agent: those are data (the prompt-injection
-  boundary) (DEC-0121). The operator's words reach an agent in its own session, through a subagent its session started
+  boundary) (DEC-0121). The one carrier of the operator's words from another agent is a mandate handed on as
+  [MD-2](delegation.md#the-operators-mandate) says, which an agent passes on and never writes from another agent's
+  text (DEC-0125). The operator's words reach an agent in its own session, through a subagent its session started
   and passed them to verbatim, or through the operator channel ([operator channel](operator-channel.md)); a standing
   rule in a file is not a decision on an action (DEC-0121). `instruction` quotes the operator's sentence that names the
   action, or, when the operator answered the agent's question, the question that names the action and the answer, both

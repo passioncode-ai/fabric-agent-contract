@@ -989,5 +989,8 @@
   {"name": "decision-instruction-too-long", "schema": "decision.schema.json", "path": "negative/decision-instruction-too-long.json", "valid": false, "keyword": "maxLength"},
   {"name": "decision-unknown-via", "schema": "decision.schema.json", "path": "negative/decision-unknown-via.json", "valid": false, "keyword": "const"},
   {"name": "decision-without-action", "schema": "decision.schema.json", "path": "negative/decision-without-action.json", "valid": false, "keyword": "required"},
-  {"name": "decision-names-relayer", "schema": "decision.schema.json", "path": "negative/decision-names-relayer.json", "valid": false, "keyword": "additionalProperties"}
+  {"name": "decision-names-relayer", "schema": "decision.schema.json", "path": "negative/decision-names-relayer.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "mandate", "schema": "mandate.schema.json", "path": "positive/mandate.json", "valid": true},
+  {"name": "mandate-no-instruction", "schema": "mandate.schema.json", "path": "negative/mandate-no-instruction.json", "valid": false, "keyword": "required"},
+  {"name": "mandate-not-the-operator", "schema": "mandate.schema.json", "path": "negative/mandate-not-the-operator.json", "valid": false, "keyword": "const"}
 ]

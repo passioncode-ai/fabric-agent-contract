@@ -700,6 +700,18 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Status:** draft
 - **Product:** unobserved
 
+### ST-037: Operator gives a task once, and the agents it reaches do not ask again
+
+- **Story:** As P-02, I want a task I give one agent to carry my instruction to every agent it engages, so that I am not asked again for what I already decided and am asked only for what my words did not cover.
+- **Traces:** JTBD-07, JRN-06/#3
+- **Acceptance criteria:**
+  - Given I tell my developer agent "run the research on competitors' prices, up to 20 dollars", when it engages the research agent, then the research agent runs the paid research without asking me and records my words, the task and the chain (`mandateCovers`, DEC-0125).
+  - Given the research would cost more than my words allow, or reach a capability, an effect or a project they do not name, when the research agent is called, then it refuses with the part not covered and only that part is put to me.
+  - Given a sign-in, a consent, a payment, a typed secret or spend above a limit, then my mandate never covers it and the step comes to me.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
 ## Design tooling
 
 - **Figma:** disabled

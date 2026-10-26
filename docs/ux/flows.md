@@ -762,6 +762,33 @@ flowchart TD
 
 - **Screens traversed:** SCR-30 the operator's agent; the service's page in Fabric Dashboards.
 
+### FLW-31: The operator's task, from one agent to the agents it engages
+
+- **Traces:** ST-037 (JTBD-07, JRN-06/#3)
+- **Goal:** the operator gives a task once; every agent the task reaches acts on their words within what the words cover
+- **Entry points:** the operator's chat with their agent; a board request from one of the operator's projects; a callee's `operator-decision-required` naming `outside-mandate`
+- **Success exit:** the callee took the call as the operator's decision, recorded `via: mandate` with the task and the chain
+- **Task analysis:** the operator tells the leading agent → it states the mandate from their words → it calls the next agent with the mandate, narrowed to what it hands on → the callee runs `mandateCovers` and acts, or refuses the part not covered → the leading agent asks the operator for that part alone.
+- **Rejected shape:** the callee asking the operator for a step their words already cover, or an agent passing another agent's paraphrase as the operator's decision: rejected, because the first asks twice and the second removes the prompt-injection boundary (DEC-0125).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  O[Operator gives the task] --> L[Leading agent states the mandate]
+  L --> C[Calls the next agent with it, narrowed]
+  C --> T{caller's tier}
+  T -->|T2| X[decision-invalid: a token is needed]
+  T -->|T0 or T1| V{mandate valid}
+  V -->|no| I[decision-invalid with the reason]
+  V -->|yes| K{covers the call}
+  K -->|yes| A[Taken as the operator's; recorded via mandate]
+  K -->|no| Q[operator-decision-required: the part not covered]
+  Q --> P[Leading agent asks the operator for that part]
+  P --> C
+```
+
+- **Screens traversed:** SCR-30 the operator's agent and the service's audit row.
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

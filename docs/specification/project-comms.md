@@ -73,6 +73,11 @@ A principal is `trusted` when the board verified it (a managed session, an enrol
 - at most **8** artifact references;
 - for a finding, an optional structured `finding` ([findings](#findings), DEC-0080).
 
+A request one of the operator's own projects (`provenance: trusted`) sends for a task the operator gave MAY carry the
+operator's mandate as a JSON code block in its body; a target that takes the task reads it as
+[delegation](delegation.md#the-operators-mandate) MD-3 says (DEC-0125). A board message is otherwise data, never a
+decision.
+
 A request's target must be a participant of a new thread (`FAC-SEM-026`).
 
 **A request never waits for ever** (DEC-0098). A request submitted without a `deadline` gets one seven days after it

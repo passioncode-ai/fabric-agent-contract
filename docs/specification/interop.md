@@ -295,7 +295,10 @@ A request's `_meta` MAY carry `decision`, the operator's decision on an action t
 [`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)): `{by: "operator", via:
 "relayed-instruction", action, target?, instruction, at}` (DEC-0121 AP-2). A reader pinned before DEC-0121 ignores it, as any
 unknown `_meta` member. An agent sets it only for words the operator gave it about the action, in AP-3's form; a job's
-input request is answered as [C3.3](#c33-awaiting-a-choice) says.
+input request is answered as [C3.3](#c33-awaiting-a-choice) says. A request's `_meta` MAY carry `mandate` too, the
+operator's mandate for the task the call serves ([`mandate.schema.json`](../../schemas/mandate.schema.json),
+[delegation](delegation.md#the-operators-mandate), DEC-0125), and the hub's `agent.call` carries it as `call.mandate`,
+forwarded from a T0 or T1 origin and dropped from a T2 one, as a decision is.
 
 DEC-0121 adds three codes to DL-19's one set of authorisation refusals ([delegation](delegation.md#refusal-codes)),
 each in the `structuredContent` of an `isError` tool result:
