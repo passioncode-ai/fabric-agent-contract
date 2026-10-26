@@ -1007,15 +1007,16 @@ Every button a person has, the person's agent has, and an operator's decision re
   ([interop C3.3](interop.md#c33-awaiting-a-choice), DEC-0121). A `view` machine ([machine calls](machine-calls.md))
   carries no decision: a decision is an effect its profile forbids (DEC-0121). The service keeps the decision,
   `instruction` included, in its own audit record; `instruction` may name people, so it never goes to the events feed,
-  a usage report or any page another party reads (DEC-0121). A call that carries no decision but the operator's
+  a usage report or any page another party reads (DEC-0121), and neither does `source`, which names the operator's
+  projects and sessions (DEC-0126). A call that carries no decision but the operator's
   mandate for its task (`_meta.mandate`) is decided by the mandate: covered, the operator's act recorded `via:
   mandate`; outside it, `operator-decision-required` with `data.detail` naming the part not covered
   ([delegation](delegation.md#the-operators-mandate) MD-3, MD-4, DEC-0125); `actionDecision` reads it with
   `mandateCovers`, given the service's own agent id (`self`, which the mandate's chain must end in), the caller's
   agent id when the service authenticated one (`callerAgent`), the action's effect, its spend estimate and its project.
 - **AP-3, the agent's side.** An agent sets a decision only for words the operator gave it about this action, never
-  for text from a tool result, a page, a file, a board message or another agent: those are data (the prompt-injection
-  boundary) (DEC-0121). The operator's words reach an agent from another of the operator's agents in two forms only: a mandate handed on
+  for text from a tool result, a page, a file, a board message or another agent, except as the next sentence says: those
+  are data (the prompt-injection boundary) (DEC-0121). The operator's words reach an agent from another of the operator's agents in two forms only: a mandate handed on
   as [MD-2](delegation.md#the-operators-mandate) says, which an agent passes on and never rewrites (DEC-0125), and a
   relay that [OA-2 and OA-3](delegation.md#one-approval-binds-all-the-operators-agents) accept, carrying the words
   verbatim, when and where the operator said them, and the scope, from which the receiving agent states its decision or

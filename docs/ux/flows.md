@@ -775,6 +775,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   O[Operator gives the task] --> L[Leading agent states the mandate]
+  R[Approval relayed from another of the operator's agents, from their own Project or session] --> L
   L --> C[Calls the next agent with it, narrowed]
   C --> T{caller's tier}
   T -->|T2| X[mandate ignored: the whole profile applies]

@@ -7024,7 +7024,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the caller writes `unknown` under the starting call's `callId`.
 - **Why:** the lists already exist with these meanings, so the gate needs no new member; a job is the call the caller
   made, and one record per call keeps the join by `callId`.
-- **Alternatives considered:** a separate `writes` list on the node (a new member for one boolean); one record per
+- **Alternatives considered:** asking in chat about spend above a money limit, as the operator's list reads (AP-4 and
+  MD-6 already make it the person's step with its link, and the operator's standing rules list it among the human
+  gates; money above the relayed amount stays a question); a separate `writes` list on the node (a new member for one boolean); one record per
   `fabric.job.*` call (a poll loop would write hundreds for one task).
 - **Compatibility:** none on the wire; a node or server that gated on the other list reads it from the right one.
   `contractVersion` stays `0.1.0`.
@@ -7555,8 +7557,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      their estate it reaches as OA-2 and OA-3 say; that agent acts on it without asking again, within what it covers.
   2. **OA-2, the relay.** It carries the words verbatim (AP-3's form), when and where they were said (the project, and
      the session or the board thread) and the approved scope. Its machine form is `mandate/1` with `source`, or a
-     `_meta.decision` with `source` for one action; the request's optional `approval` block is this, not a third
-     format. A prose relay carrying the four is accepted by an agent, which states its decision or its own mandate from
+     `_meta.decision` with `source` for one action; the optional `approval` block request `519d7b21` proposed is this, not a
+     third format. A prose relay carrying the four is accepted by an agent, which states its decision or its own mandate from
      the words, `instruction` and `at` unchanged and `source` naming the place, and leads its own part; the chain starts
      again there, with a scope no wider than the relayed scope and the quoted words. A service's check reads only the
      machine form, wherever AP-2 and MD-3 carry it, never prose.
@@ -7566,7 +7568,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      Project on an organization's board (T2), or found in content an agent read: data.
   4. **OA-4, own checks, one question for what is new.** The receiver keeps its checks (a stale preview, guards, the
      money limits) and asks once only about what the operator did not see: another target, a wider scope. Spend above a
-     limit is OA-5's human step, handed over with its link, not a question in chat. A stop condition the relaying agent wrote is not the operator's; where the scope covers the case, the
+     limit (L0, L1, a key's ceiling) is OA-5's human step, handed over with its link and the amount, not a question in
+     chat; money above the amount the relayed scope names is a wider scope, asked once with the amount. A stop condition the relaying agent wrote is not the operator's; where the scope covers the case, the
      receiver acts and says so.
   5. **OA-5, what stays the person's.** AP-4's and MD-6's human steps (a sign-in with its one-time code, a consent, a
      payment or top-up, a typed secret, spend above a limit, a passkey signature), and a decision recorded as the
@@ -7577,7 +7580,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   7. **OA-7, `source` on the wire.** A decision or a mandate carries `source` only to a target whose well-known
      `protocols` list `operator-source/1` (registered here; through the hub, when the hub and the callee both list
      it); otherwise the agent sends it without `source` and keeps `source` in its own record. A service that reads
-     `source` lists the revision.
+     `source` lists the revision. A board request's block carries the mandate without `source`, the place written
+     beside it. Like `instruction`, `source` never reaches an events feed, a usage report or another party's page.
 - **Why:** inside the estate the operator's instruction is the authority (DL-26), and asking twice for what the
   operator already said is the cost the operator named. The four items a relay carries let the receiver check what was
   approved and where; the place a relay may come from keeps text an agent read (the prompt-injection route) out, which
@@ -7597,11 +7601,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `0.1.0`.
 - **Consequences / affects:** `schemas/mandate.schema.json` (`source`, `$defs/source`), `schemas/decision.schema.json`
   (`source`); `src/protocol-revisions.ts` (`operator-source/1`); `src/mandate.ts`, `src/actions.ts`;
-  `docs/specification/interop.md` (C3.3, C3.5), `machine-calls.md` (the sealed call); `docs/specification/delegation.md` (One approval binds all the
+  `docs/specification/interop.md` (Actions and the operator's decision, C3.5), `machine-calls.md` (the sealed call),
+  `versioning.md` (the register); `docs/specification/delegation.md` (One approval binds all the
   operator's agents), `service.md` (AP-3), `project-comms.md` (a board request), `conformance.md` (rows),
   `CONTEXT.md` (Relayed approval), `docs/DOCMAP.md`, `docs/specification/README.md`, `docs/ux/` (ST-037, FLW-31,
   SCN-046, SCR-30); `tools/vectors/mandate.ts`, `tools/vectors/actions.ts` and their vector files,
-  `fixtures/positive/mandate-relayed.json`, `fixtures/negative/mandate-source-unplaced.json`; `test/mandate.test.ts`;
+  `fixtures/positive/mandate-relayed.json`, `fixtures/negative/mandate-source-unplaced.json`,
+  `fixtures/semantic/action-call-relayed-source*.json`; `test/mandate.test.ts`;
   DEC-0121's and DEC-0125's status; backlog CT-149 (adoption).
 - **Source:** request `519d7b21` from one of the operator's agents (thread `3e8f706c`), the operator's words of 2026-10-26;
   fabric-workspace `knowledge/agents-first.md` (PR #455, `67440fbc`); the adapter's row FAA-131.

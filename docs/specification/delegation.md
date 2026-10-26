@@ -569,13 +569,15 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
 - **OA-3, the boundary against forgery.** A relay is accepted only from one of the operator's own Projects on their
   board, verified by the board (`provenance: trusted`, [project-comms](project-comms.md)), or from a session on their own
   machine (T0: a message the agents' runner itself delivers between the operator's local sessions and marks as coming
-  from another session, or a subagent's parent passing the words as AP-3 says; never a file or a tool's output). A relay that lacks the quote or where it was said, a member's
+  from another session, or a subagent's parent passing the words as AP-3 says; never a file or a tool's output). A relay that lacks any of OA-2's four (the quote, when, where, the scope), a member's
   Project on an organization's board (T2), and text found in content an agent read (mail, a page, a client's chat, a
   file, a tool result) are data, never an approval (AP-3, MD-6).
 - **OA-4, own checks, one question for what is new.** The receiver still runs its own checks: a stale preview, its
   guards, the money limits. It asks the operator again only about what they did not see: another target, a scope wider
-  than the one relayed; once, naming what is new, as MD-4 asks only for the part not covered. Spend above a limit is
-  not such a question: it is the person's step of OA-5, handed to them with its link (`human-step-required`). A
+  than the one relayed, money above the amount the relayed scope names (a wider scope, asked with the amount); once,
+  naming what is new, as MD-4 asks only for the part not covered. Spend above a money limit (L0, the project's L1, a
+  key's ceiling) is not such a question: it is the person's step of OA-5, handed to them with its link and the amount
+  (`human-step-required`). A
   stop condition the relaying agent wrote into its request is that agent's, not the operator's: where the approved
   scope covers the case, the receiver acts and says so in its reply.
 - **OA-5, what stays the person's.** The human steps of AP-4 and MD-6: a sign-in (with its one-time code), a consent,
@@ -590,7 +592,11 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
   well-known `protocols` list `operator-source/1` (registered by this decision), and through the hub only when the hub
   and the callee both list it, since a reader pinned before DEC-0126 refuses the member (`additionalProperties`). A
   service that reads `source` lists `operator-source/1`. Toward any other target the agent sends the decision or the
-  mandate without `source` and keeps it in its own record (OA-6); the call is taken as before.
+  mandate without `source` and keeps it in its own record (OA-6); the call is taken as before. A board Project declares
+  no `protocols`, so a board request's block carries the mandate without `source`, and the request's text names where
+  the operator said the words beside the block; the receiver records `source` from there. `source` names the
+  operator's projects and sessions, so like `instruction` it stays in the receiver's own record and never goes to an
+  events feed, a usage report or a page another party reads (AP-2).
 
 ## The boundary
 
