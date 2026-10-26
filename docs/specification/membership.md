@@ -100,11 +100,16 @@ record's `authority` shape `{credentialId, alg, publicKey, rpId, origins}`, whic
 Only they sign the organization's member list ([OL-2](#the-organizations-member-list)), in Fabric or a pinned page, never
 on a server (Fabric ADR-0178 point 2); a signing key of `keys` never signs it, and an administrator's passkey never
 signs an attestation. Each credential is listed once, under a signing RP (`sign.<domain>`, DEC-0063) with every origin
-within it (`FAC-SEM-146`). A credential a later set drops signs nothing from that set on. Who holds the root (DEC-0129): the organization owner's Fabric, never a
+within it (`FAC-SEM-146`). An administrator's credential is registered for that organization alone: never one of the
+administrator's estate record `authorities`, which OM-7 keeps from every organization, and never listed in another
+organization's set, so two organizations cannot link one administrator by it. The administrator's Fabric enforces this
+when it registers the credential; no server can check it. A credential a later set drops signs nothing from that set on. Who holds the root (DEC-0129): the organization owner's Fabric, never a
 server (A-3: the platform never holds an organization root); the server generates the signing keys, drafts each key set
 and serves the sets and the attestations, and the owner's Fabric signs each set it drafted. It first shows the owner
 the draft's changes to `keys`, `revoked` and `administrators` against the set it signed last, and signs only once the
-owner confirms them in a ceremony their passkey authorises (user verification), never on the server's word: so no
+owner confirms them in a ceremony their passkey authorises (user verification), never on the server's word; that
+confirmation is a local gate in the owner's Fabric, which no one verifies later (a register statement for it is not
+decided): so no
 server can certify an administrator. A reader pinned at a main commit of DEC-0127 or DEC-0128 refuses a set carrying
 `administrators`, and a reader at or after DEC-0129 refuses one without it; no tag carried the type before (DEC-0119). ADR-0178 takes the owner's two passkeys as the organization's root in R1 (its D8-b); here the root that
 signs key sets stays DEC-0127's Ed25519 key, so the owner's passkeys enter as the first set's administrators. A passkey
@@ -128,7 +133,7 @@ refuses at once what it signed, a lower revision is `stale-revision` and the sam
 | OK-3 | `wrong-issuer` | the set's `issuer` or `kid` is not the pinned root's |
 | OK-4 | `wrong-org` | the set's `org` is not the pinned root's |
 | OK-5 | `unknown-algorithm` | the set's `alg` or a key's `alg` is not `EdDSA` |
-| OK-6 | `unusable-key`, `small-order-key` | the pinned root's `x` is not the canonical base64url of 32 bytes; the root or a listed key is of small order |
+| OK-6 | `unusable-key`, `small-order-key` | the pinned root's `x` is not the canonical base64url of 32 bytes; the root or a listed key is of small order; an administrator's credential is not a signing credential (its RP ID or an origin) or its key is unusable or of small order (DEC-0129) |
 | OK-7 | `bad-signature` | the root's signature does not verify over `orgKeySetSigningInput` |
 | OK-8 | `stale-revision`, `revision-conflict` | a revision below the held one; the held revision with another digest |
 
@@ -263,7 +268,10 @@ at the relay, which admits every listed member alike.
 
 **OL-2, the signature.** An administrator's passkey that the applied key set lists in `administrators` signs the
 register's `org-authority/1` challenge, `{type, digest}` ([signing challenges](conformance.md#signing-challenges),
-DEC-0063), as a passkey signs an estate revision (DEC-0055). No server signs a list, the drafting server included.
+DEC-0063), as a passkey signs an estate revision (DEC-0055). No server signs a list, the drafting server included. The administrator's Fabric shows the draft's changes against
+the last signed list, whoever signed it: entries added and dropped, and their count. An entry is a pairwise subject, an
+opaque issuer and an enrollment key, so an administrator can check that the changes match the joins and ends they
+expect, not who each entry is; what OL-2 guarantees is that no server signs.
 
 **OL-3, the verifier.** `verifyOrgAuthority(list, {now, org, keySet, held})` answers `{ok: true, digest, revision,
 signedBy, unchanged, held, members}` or one problem, in this order. `keySet` is the organization's set the reader applied
@@ -284,12 +292,12 @@ checks the list against the schema first, as a relay does an estate record:
 **OL-4, the relay.** An organization's relay pins the organization's root when it is set up for the organization, as an
 estate's relay pins the estate's first passkeys, applies key sets under it, and admits from the list it holds:
 `orgRelayAdmissionSet({held, candidate, org, keySet, at, schemaValid})` answers the set of listed `#sig` keys, kid to
-SEC 1 octets, or a refusal, and then admits nobody (DEC-0047, fail closed). A candidate must be schema-valid and verify
-against the held list (a refused candidate answers `unverified` with its problem, its window included; `expired` and
-`not-yet-valid` name only the held list's own window), and a held list that cannot be read back (no positive revision, no RFC 8785 form) is refused
+SEC 1 octets, or a refusal. A refused candidate leaves the held list's set in force: a candidate that fails the schema
+answers `invalid`, one that fails verification `unverified` with its problem, its window included. A refused held
+list, or none, admits nobody (DEC-0047, fail closed): `expired` and `not-yet-valid` name only the held list's own
+window, and a held list that cannot be read back (no positive revision, no RFC 8785 form) is refused
 `invalid`, with or without a candidate; without one the held list is verified again under the key set applied now, so a list past its
-window, or one whose signer a later set dropped, admits nobody until a newer list verifies. A refused candidate changes
-nothing. Only the admission set is decided: what a member's `auth` signs in `estate` (never the member's estate id,
+window, or one whose signer a later set dropped, admits nobody until a newer list verifies. Only the admission set is decided: what a member's `auth` signs in `estate` (never the member's estate id,
 DEC-0128) and what an organization relay's `welcome` carries in place of the estate's revision, delta head and
 heartbeat wait on the organization's own heartbeat and delta ([revocation delta](revocation-delta.md#not-decided-here)),
 so no organization relay runs on this release (CT-37).
@@ -346,6 +354,8 @@ grants, until per-context relay sessions (CT-122's question 3).
   waits on that Fabric being reachable; a recovery of the root, as DEC-0107 recovers a passkey, is not decided.
 - How the person's Fabric sends the context's `iss` to the server for its entry (OM-7's row allows it; no message
   carries it yet), and how a relay is registered as an attestation audience for the subject OL-1 names (CT-37).
+- What a "reference" in the adaptation plan's OM-7 row is: its form must name nothing of the person's estate (DEC-0128);
+  TP-03 defines it with Fabric.
 - The organization relay's handshake (OL-4): `auth.estate` and the `welcome` frame on an organization's relay (CT-37).
 - Whether a reader checks an attestation's `role` or `status` against the latest signed member list; until then the
   list's role grants nothing anywhere but its own document.

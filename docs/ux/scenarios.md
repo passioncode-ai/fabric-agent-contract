@@ -54,7 +54,7 @@
 | SCN-046 | Approve once in one agent's chat: the agent that holds the key acts without asking me again | delegation | P-02 | ST-037, FLW-31 | draft | not audited |
 | SCN-047 | Join an organization by my own passkey: my Fabric trusts the membership only from what the organization signed | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-048 | Enrolled in two organizations, my machine looks like two strangers to them | membership | P-03 | ST-038, FLW-32 | draft | not audited |
-| SCN-049 | As an administrator, I sign who my organization's relay admits; no server can | membership | P-03 | ST-038, FLW-32 | draft | not audited |
+| SCN-049 | As an administrator, I sign who my organization's relay admits; no server signs it | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 
 ## Personas
 
@@ -1064,7 +1064,7 @@ independent agent author and P-02 project operator.
 - **Coverage:** DEC-0128 UE-1 to UE-3 and DL-14a, `src/node-enrollments.ts`, `hubKeyCertified` with a context, `test/context-keys.test.ts`, `fixtures/semantic/node-enrollments-*`, `check-in-*-outbound-*`
 - **Product:** unobserved
 
-### SCN-049: As an administrator, I sign who my organization's relay admits; no server can
+### SCN-049: As an administrator, I sign who my organization's relay admits; no server signs it
 
 - **Persona:** P-03
 - **Feature:** membership
@@ -1073,9 +1073,9 @@ independent agent author and P-02 project operator.
 - **Preconditions:** the organization's key set, signed by the root the owner's Fabric holds, lists the administrator's signing passkey in `administrators`; the relay serving the organization pinned the root at setup
 - **Steps:**
   1. A member joins, or an enrollment's key changes -> the server drafts the next `org-authority/1` revision: each member's pairwise subject, role, context issuer and enrollment `#sig` keys, valid at most 7 days.
-  2. The administrator's Fabric shows the change against the last signed list, whoever signed it -> the administrator confirms with their passkey over the register's `org-authority/1` challenge.
+  2. The administrator's Fabric shows the change against the last signed list, whoever signed it: entries added and dropped and their count, which the administrator matches against the joins and ends they expect -> the administrator confirms with their passkey over the register's `org-authority/1` challenge.
   3. The relay applies the signed list -> its admission set holds exactly the listed keys (`orgRelayAdmissionSet`).
-- **Expected result:** who the organization's relay admits is decided by an administrator's passkey, which the organization's root certified; the server only drafts.
+- **Expected result:** who the organization's relay admits is signed by an administrator's passkey, which the organization's root certified; the server only drafts and signs nothing.
 - **Alt paths:** nobody signs before `expiresAt` -> the relay's admission set is empty and nobody is admitted until a newer list verifies. A membership ends -> the next list drops the member. An administrator leaves -> before the root drops their passkey, the server has another administrator sign a fresh list, so admission never empties (OL-5). A passkey is lost and the set drops it first -> the list it signed stops verifying at once and the relay admits nobody until another administrator signs. The server drafts a key set that adds an administrator -> the owner's Fabric shows the change against the set it signed last and signs it only once the owner confirms with their passkey; a draft the owner did not expect is refused and nobody is added. A list signed by a passkey the set does not list, or under a sign-in RP -> refused (`unknown-administrator`, `wrong-rp`).
 - **UI elements:** SCR-31: the drafted list's changes, the passkey prompt, the list's expiry.
 - **States covered:** success, error

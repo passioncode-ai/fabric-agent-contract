@@ -7795,7 +7795,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      once the owner confirms them, so no server can certify an administrator (DEC-0127 OM-8 annotated). OM-7 gains the
      owner's and an administrator's outflows (the root's public key and key-set signatures; a passkey's public part and
      list signatures). The owner's passkeys (ADR-0178 D8-b) enter as the first set's
-     administrators; a passkey root and an administrator's device binding (ADR-0178 point 2) are later decisions.
+     administrators; a passkey root and an administrator's device binding (ADR-0178 point 2) are later decisions. An
+     administrator's credential is registered for that organization alone, never an estate authority (OM-7) and never in
+     another organization's set.
   5. **OL-5, the duties.** The server drafts a revision on every join, end and key change and before expiry; an ended
      membership leaves the next list.
   6. **OM-7 gains two more rows:** the context's `iss` for the member list's own entry (the server already holds the
@@ -7803,7 +7805,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      organization, by reference, and the person's requests to its administrators; never the plan's draft, its inventory
      or anything not chosen. A project's entry is the estate revision its person's passkey signs (R1-D12, ADR-0178
      point 7) and never leaves.
-- **Why:** an administrator's passkey keeps the organization's members out of any server's sole control, as A-3 and
+- **Why:** an administrator's passkey keeps the signature over the organization's members off every server, as A-3 and
   ADR-0178 require, while the relay still checks one signed document offline. Listing administrators in the key set
   the root already signs reuses the person's pin (OM-2) as the only trust anchor and needs no new pin form. A 7-day
   life bounds how long an ended member stays admitted if the server stops drafting, and re-verifying the held list

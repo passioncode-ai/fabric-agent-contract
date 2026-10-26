@@ -52,7 +52,8 @@ SHA-256 of the UTF-8 RFC 8785 form of `{type, ...fields}` (`signingChallenge`). 
   package version (`digest`, DEC-0050) for one listing — its `audience`, its grant (`<id>#<revision>`) and the
   organization record's `revision`. v4 §6 Path 4 lists the last four; `organization` is added because hosted
   organizations may share PassionCode's signing RP, and one administrator's credential may be certified by two
-  organizations: without it, a countersignature for one organization's listing would verify for another's with the same
+  organizations (DEC-0129 has an administrator register one credential per organization for `org-key-set/1`, but a
+  countersignature's verifier must not rely on it): without it, a countersignature for one organization's listing would verify for another's with the same
   grant and revision.
 - **`share-grant/1`** `{estate, grant, jkt, expiresAt}`: the owner's confirmation that an outside person's key may act
   under a share grant until `expiresAt` (v4 §6 Path 7 step 3). `jkt` is the base64url RFC 7638 SHA-256 thumbprint of

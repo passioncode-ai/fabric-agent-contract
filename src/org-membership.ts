@@ -214,6 +214,12 @@ export function verifyOrgKeySet(value: unknown, trust: { root: OrgRoot; held?: H
   if (!X.test(root.x)) return { ok: false, problem: "unusable-key" };
   // DEC-0045: a small-order key verifies forged signatures on Node 20 and 22; none is used, nor listed for later use.
   if (isSmallOrderKey(rawKey(root.x)) || keys.some((key) => isSmallOrderKey(rawKey(key.x as string)))) return { ok: false, problem: "small-order-key" };
+  // DEC-0129: an administrator the set certifies is a signing credential (FAC-SEM-092's rule) with a key of full order.
+  for (const admin of set.administrators as JsonObject[]) {
+    if (signingCredentialFindings(admin, "").length > 0) return { ok: false, problem: "unusable-key" };
+    const usable = credentialKey(admin.publicKey, admin.alg as string);
+    if ("problem" in usable) return { ok: false, problem: usable.problem };
+  }
   if (!signatureVerifies(root.x, input, set.sig as string)) return { ok: false, problem: "bad-signature" };
 
   const digest = digestOf(input);

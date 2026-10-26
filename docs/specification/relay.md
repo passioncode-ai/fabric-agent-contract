@@ -186,7 +186,8 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
   RLY-08).
 - **An organization's member list.** An organization's admission set comes from its member list
   (`orgRelayAdmissionSet`, [membership](membership.md#the-organizations-member-list) OL-4, DEC-0129), under the
-  organization's root the relay pins at setup and the key set it applied, and is empty on any refusal. The handshake
+  organization's root the relay pins at setup and the key set it applied. A refused candidate leaves the held list's set
+in force; a refused held list, or none, admits nobody. The handshake
   above is still the estate's: what a member signs in `estate` and what `welcome` carries on an organization's relay
   wait on the organization's heartbeat and delta (CT-37).
 
