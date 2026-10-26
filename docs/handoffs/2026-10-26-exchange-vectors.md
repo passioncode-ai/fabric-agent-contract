@@ -24,6 +24,8 @@ take in Fabric ADR-0180's answers to DEC-0129's open questions (thread `115ef7fb
   itself to roles and leaves the relay's status rule to CT-37 (now in its row and Not decided); each row names the
   adopter's own test beside the vectors.
 - Round 2 (head `8a727e40`): unit, seam and product pass. Their non-blocking findings are in CT-158 and CT-160.
+- Round 3 (head `a177597a`): unit, seam and product pass. Two clean rounds in a row; their non-blocking findings are
+  in CT-158.
 
 ## Decisions
 
