@@ -15,14 +15,15 @@ type Flag = (instancePath: string, message: string) => void;
 const strings = (value: unknown): string[] => (Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []);
 
 /**
- * FAC-SEM-148 on a node's local registry, `{estateMachineId?, enrollments: [{org, deviceId, kids, publicKeys,
+ * FAC-SEM-148 on a node's local registry, `{estateMachineId?, estatePublicKeys?, enrollments: [{org, deviceId, kids, publicKeys,
  * telemetryKeyId, collectorIds}]}`: one enrollment per organization, no identifier (device id, kid, public key,
  * telemetry key, collector id) shared by two enrollments in any field, and none the machine's estate id or its device kids.
  */
 function enrollmentFindings(value: JsonObject, flag: Flag): void {
   const estate = typeof value.estateMachineId === "string" ? value.estateMachineId : undefined;
   // The estate's own identifiers: its machine id and its device kids (FAC-SEM-073's <id>#sig, <id>#kem).
-  const estateIds = new Set(estate === undefined ? [] : [estate, `${estate}#sig`, `${estate}#kem`]);
+  const estateKeys = Array.isArray(value.estatePublicKeys) ? value.estatePublicKeys.filter((key): key is string => typeof key === "string") : [];
+  const estateIds = new Set([...(estate === undefined ? [] : [estate, `${estate}#sig`, `${estate}#kem`]), ...estateKeys]);
   // One set across every identifier field: a value one enrollment uses as a telemetry key and another as a collector
   // id links them as surely as a shared device id. The organization is its own field.
   const identifiers = new Map<string, number>();

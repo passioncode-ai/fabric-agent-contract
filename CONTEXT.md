@@ -646,12 +646,12 @@ organization's relay has none of its own until `org-authority/1` (decided with C
 
 **Revocation delta**: The estate record's fast path (`revocation-delta/1`, DEC-0054): an append-only chain of
 entries, one revocation each, signed by an **Estate key** and chained by RFC 8785 hash, so its head is
-`{sequence, sha256}` — what a check-in reports and a **Relay**'s `welcome` carries. A revision issued after an entry
+`{sequence, sha256}`: what a machine reports to its hub and a **Relay**'s `welcome` carries. A revision issued after an entry
 lists it ([revocation delta](docs/specification/revocation-delta.md)).
 
 **Window lease**: A hub-signed share of one estate window instance for one machine (`window-lease/1`, DEC-0062):
 the meter spends within the smaller of its own remainder and the lease's, fails closed at expiry, and reports `spent`
-in its check-in ([window lease](docs/specification/window-lease.md)).
+to its hub over the relay ([window lease](docs/specification/window-lease.md)).
 
 **Entitlement**: The issuer's signed record of what one order entitles one subject to (an organization,
 `org:<orgId>`, or one person's estate, `personal`) for at most 38 days: a member allowance, a hosting product, a

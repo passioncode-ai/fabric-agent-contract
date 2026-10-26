@@ -360,7 +360,7 @@
           "items": {
             "$ref": "#/$defs/contextHubKey"
           },
-          "description": "The hub keys of this machine per organization context (DEC-0128): each signs the delegation tokens of its context under that context's iss, and nothing of the estate's (heartbeats, delta entries, leases stay the personal hubKey's). Each context once, every kid and key unique across all hub keys of the record, the context pinned in organizations, only on a full machine (FAC-SEM-073, FAC-SEM-134). A reader pinned before DEC-0128 refuses the member, so Fabric writes it only once every reader of the record is pinned at or after."
+          "description": "The hub keys of this machine per organization context (DEC-0128): each signs the delegation tokens of its context under that context's iss, and nothing of the estate's (heartbeats, delta entries, leases stay the personal hubKey's). Each context once, every kid and key unique across all hub keys of the record, the context pinned in organizations, only on a full machine that holds the personal hubKey (FAC-SEM-073, FAC-SEM-134). A reader pinned before DEC-0128 refuses the member, so Fabric writes it only once every reader of the record is pinned at or after."
         },
         "packages": {
           "type": "array",

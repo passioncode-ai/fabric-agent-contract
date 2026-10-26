@@ -178,14 +178,14 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
   (DEC-0107, [Reporting](#reporting)). v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
   how the hub sizes it within the remainder is its own.
 - **Project Observatory's meter** (CT-20) verifies each lease with `verifyWindowLease` before it spends against it,
-  holds one per slot, reserves only as `mayReserve` answers — the smaller of its own remainder and the lease's, and
-  nothing after expiry — and reports `records.leases[]` with `spent` in its check-in.
+  holds one per slot, reserves only as `mayReserve` answers (the smaller of its own remainder and the lease's, and
+  nothing after expiry), and reports `records.leases[]` with `spent` (to its hub over the relay, CT-152; never in a check-in to an organization server, DEC-0128 UE-2).
 - **An organization server** hands leases of organization windows in the check-in response (v4 Path 5); the scope
   `estate` is the only one v4 uses, and organization windows wait on `org-authority/1`.
 
 ## Privacy
 
-A lease names an estate, a machine by its device id, a window and an amount. It carries no person and no caller
+A lease names an estate, a machine by its estate id, a window and an amount. It carries no person and no caller
 identity (J10; v4 Path 5 step 3: per-member period totals come from lease returns inside the organization's own
 server, and the public contract stays without a person dimension). `spent` is a sum over a window instance on one
 machine.

@@ -564,8 +564,10 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   entry's sequence and hash, `0` and the estate's genesis before any, or the delta anchor's sequence and hash when the
   machine holds no entry after it, as `deltaHead` answers, DEC-0107). The leases are the window lease's decision (not
   yet taken). The relay ([DEC-0047](relay.md#revocation-and-heartbeat)) carries heartbeats and pages of the delta
-  unchanged, and a check-in response carries a heartbeat and a page (both typed by DEC-0054's schemas) and leases in
+  unchanged, and a check-in response carried a heartbeat and a page (both typed by DEC-0054's schemas) and leases in
   `records` unchanged. A relay's `welcome.deltaHead` has the `revocationDelta` shape, so a node reports it as it came.
+  DEC-0128 (UE-2) ends both directions toward an organization: these members are what a node pinned before it sends,
+  and the estate's records travel to and from its hub over the relay (CT-152).
 
 <a id="unlinkable-enrollments"></a>
 
@@ -716,7 +718,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | <a id="fac-sem-069"></a>`FAC-SEM-069` | `device-root-certification` | when the installer pinned offline root keys, the root key from enrollment is certified at enrollment time by a pinned key, or by a delegation key whose certificate of at most 30 days a pinned key signed and whose id the pinned key's revocation list does not name |
 | <a id="fac-sem-077"></a>`FAC-SEM-077` | `device-request-signature` | a receiver that requires the signature, or that sees a client certificate, answers a device request as the transport binding does: it accepts a `fabric-device` signature of the required shape whose digest, window, certificate, algorithm, key and signature all hold and whose (serial, nonce) it does not hold (naming the client certificate's serial when there is one) accepts an unsigned request only on a valid client certificate, and otherwise answers the code of the first step that fails: 401, or 410 `organization-closed` for a certificate whose record carries `organizationClosedAt` (DEC-0103) |
 | <a id="fac-sem-125"></a>`FAC-SEM-125` | `device-rotation` | a rotation request whose CSR key (`publicKeySha256`) and current certificate serial equal a rotation the server already answered gets that answer's certificate again, byte for byte, never a new one (DEC-0094) |
-| <a id="fac-sem-148"></a>`FAC-SEM-148` | `node-enrollments` | one enrollment per organization, and no two enrollments share a device id, a kid, a public key, a telemetry key or a collector id, none equal to the machine's estate id (DEC-0128 UE-1) |
+| <a id="fac-sem-148"></a>`FAC-SEM-148` | `node-enrollments` | one enrollment per organization, no identifier (device id, kid, public key, telemetry key, collector id) shared by two enrollments in any field, and none equal to the machine's estate id, its device kids or its estate public keys (DEC-0128 UE-1) |
 | <a id="fac-sem-149"></a>`FAC-SEM-149` | `check-in-outbound`, `check-in-response-outbound` | a check-in a node sends an organization carries no estate record in `records` (`estateRecord`, `heartbeat`, `revocationDelta`, `leases`), and an organization's answer no estate document there; the sender's duty, never a receiver's refusal (DEC-0128 UE-2) |
 
 Each kind checks one input:

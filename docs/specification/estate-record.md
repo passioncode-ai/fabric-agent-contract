@@ -12,7 +12,7 @@ record** is its signed state, one revision at a time. It lists the passkeys that
 with their device keys and a certificate of each machine's hub key, the packages placed on each machine in each context
 (DEC-0082), where each secret slot is filled from, the share grants and every revocation. Fabric's hub drafts a revision; the person's passkey
 signs it; every machine of the estate applies the latest revision it can verify and reports its number, and optionally
-its digest, in its check-in (`records.estateRecord`, [devices](devices.md#check-in), DEC-0053, DEC-0056).
+its digest, to its hub over the relay (CT-152; never in a check-in to an organization server, DEC-0128 UE-2) (`records.estateRecord`, [devices](devices.md#check-in), DEC-0053, DEC-0056).
 
 Sources: the first organization server's target architecture v4 (commit `9c6a780`) — §2 rule 6 (three signed records)
 and rule 12 (algorithms by role), §3 (the nouns *Passkey*, *Estate*, *Machine*, *Device key*, *Signing key*, *Estate
@@ -149,8 +149,8 @@ DEC-0127, DEC-0128 · rule code `FAC-SEM-147` · [membership](membership.md#the-
 
 `organizations` lists the organizations the person admitted into their estate, 0 to 64 `{org, issuer, iss, root: {kid,
 x}, pinnedAt}`: each organization's context, its server's origin, the opaque issuer of that context's delegation tokens
-(DEC-0128, never containing the estate id), and the root key that signs its `org-key-set/1`. A `full` machine may
-certify a hub key per pinned context in `machines[].contextHubKeys` ([delegation](delegation.md#keys-publication-and-rotation)
+(DEC-0128, never containing the estate id), and the root key that signs its `org-key-set/1`. The machine that holds the
+personal hub key may certify a hub key per pinned context in `machines[].contextHubKeys` ([delegation](delegation.md#keys-publication-and-rotation)
 DL-14a). The passkey's signature over the revision is the person's admission (R1-D12); no administrator signs it. It is
 the estate's half of the organization-to-estate mapping: a membership attestation verifies only under a key set whose
 root a pin names (OM-2, OM-4), and unpinning an organization ends every membership of it (OM-5). Each organization once,
@@ -257,7 +257,7 @@ keys are DEC-0053's.
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-072"></a>`FAC-SEM-072` | `estate-record`, `estate-record-revision` | a revision is whole and follows its parent: its `digest` is its own, its window is positive and at most 30 days; across `{parent, next}`, the same estate, the next number, the parent's digest, not issued before the parent, every parent revocation kept |
-| <a id="fac-sem-073"></a>`FAC-SEM-073` | `estate-record` | every key is usable: exactly one `<id>#sig` and at most one `#kem` per machine, each named for its machine, its `publicKey` in canonical padded base64 (a key with no `deviceKeyFingerprint`, DEC-0084), valid for its algorithm and in one role; machine ids and hub kids once; no hub key of small order; each passkey's key valid and listed once; a context hub key (DEC-0128) is unique among every hub key of the record, of full order, once per context on its machine, and in a context the record pins |
+| <a id="fac-sem-073"></a>`FAC-SEM-073` | `estate-record` | every key is usable: exactly one `<id>#sig` and at most one `#kem` per machine, each named for its machine, its `publicKey` in canonical padded base64 (a key with no `deviceKeyFingerprint`, DEC-0084), valid for its algorithm and in one role; machine ids and hub kids once; no hub key of small order; each passkey's key valid and listed once; a context hub key (DEC-0128) is unique among every hub key of the record, of full order, once per context on its machine, and in a context the record pins, held only by a machine that holds the personal hub key |
 | <a id="fac-sem-074"></a>`FAC-SEM-074` | `estate-record`, `estate-placement` | an agent is placed once per machine and context (absent: `personal`, DEC-0082) under a publisher key the record pins, each pinned once; an installed package is the one placed in its context: its own digest, the placement's `agentRef` and digest, on a machine of the record |
 | <a id="fac-sem-075"></a>`FAC-SEM-075` | `estate-record`, `estate-placement` | a secret placement is a reference: nothing shaped like a credential, an agent placed on that machine in the secret's context, a source machine of the record (its own machine for an organization's instance), a slot once per (machine, agent, slot, context) (DEC-0082), and a slot the placed package declares |
 | <a id="fac-sem-076"></a>`FAC-SEM-076` | `estate-record` | share grants are to external principals, each listed once; each revocation once; nothing listed that the record revokes: a grant's id and a `grant` revocation's ref compared by normal form (DEC-0076), a `device-key` revocation's ref as a kid or a key reference `<kid>@sha256:<hex>`, and a ref that holds `@` refused unless it is a key reference (DEC-0084); a `hub-key` revocation also covers a context hub key's kid (DEC-0128) |
@@ -274,7 +274,7 @@ keys are DEC-0053's.
   reconciled with the revocation-delta entries the node holds (`reconcileRevision`, DEC-0054), then applies its delta anchor (`anchorDelta`, DEC-0107), refusing the revision and keeping its parent when either refuses it; installs a
   package only when `verifyPackage` accepts it under `placementTrust`'s key and the `estate-placement` rule finds it
   is the one placed (its digest and `agentRef`: `verifyPackage` alone accepts any version signed under that key), each
-  instance in its own context and an organization's under its grant (DEC-0082); fills only placed slots; and reports the applied revision in its check-in's
+  instance in its own context and an organization's under its grant (DEC-0082); fills only placed slots; and reports the applied revision to its hub over the relay (CT-152, DEC-0128 UE-2) as
   `records.estateRecord.revision` (DEC-0053) with its `digest` beside it (DEC-0056). As a delegation callee it reads the
   revision it applied, never an older one, and trusts a token's `kid` as DL-14 says (DEC-0060).
 - **The relay** serves the latest revision by digest ([DEC-0047](relay.md#blobs)); it never decides trust.
@@ -289,7 +289,7 @@ keys are DEC-0053's.
 ## Privacy
 
 The record describes an estate's keys, machines, placements and grants. It has no field that assesses a person (J10,
-the organization edition's open/private split): machines are named by device id, not by a human name (the schema
+the organization edition's open/private split): machines are named by their own opaque id, not by a human name (the schema
 refuses `name`); no WebAuthn user handle is recorded; a share grant names its principal because it authorizes them, and
 records no use. A credential's id is an opaque handle.
 

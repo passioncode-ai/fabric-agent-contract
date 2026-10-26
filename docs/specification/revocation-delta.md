@@ -10,7 +10,8 @@ signed by a passkey, and machines fetch it hourly. The **revocation delta** is i
 signed entries, one revocation each, that the relay pushes to every machine within seconds
 ([relay](relay.md#revocation-and-heartbeat), DEC-0047). The **timestamp heartbeat** is a signed commitment to the
 delta's head and to the estate revision, so a relay that withholds an entry is caught: it can delay revocation, never
-forge or hide it for long. A machine reports the head it applied and the heartbeat it holds in its check-in
+forge or hide it for long. A machine reports the head it applied and the heartbeat it holds to its hub over the relay (CT-152; never in a check-in
+to an organization server, DEC-0128 UE-2)
 (`records.revocationDelta`, `records.heartbeat`, [devices](devices.md#check-in), DEC-0053).
 
 Sources: the first organization server's target architecture v4 (commit `9c6a780`), §7 *Freshness* (records valid 7
@@ -224,7 +225,7 @@ over the relay (CT-152).
 - **Fabric's hub** issues entries and heartbeats under the estate key, keeps one chain, lists every entry in the next
   revision (every entry up to an anchor it sets, whatever its time, DEC-0107), and sends each page and heartbeat to the relay on its own admitted session (DEC-0066; backlog CT-19).
 - **Project Observatory's node** applies pages and heartbeats under the highest revision it applied, reports the head and
-  the heartbeat in its check-in, refuses what arrives from other machines unless `current`, refuses an unreconciled
+  the heartbeat (to its hub over the relay, CT-152; never in a check-in to an organization server, DEC-0128 UE-2), refuses what arrives from other machines unless `current`, refuses an unreconciled
   revision (CT-20, CT-34), and applies each revision's delta anchor with `anchorDelta` (DEC-0107, CT-113).
 - **The relay** takes pages and heartbeats from an admitted hub machine's session and applies them under the record it
   holds (`applyDelta`, `acceptHeartbeat`), answering a refused one with their own problem code; it carries them

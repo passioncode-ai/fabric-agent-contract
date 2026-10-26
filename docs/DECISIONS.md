@@ -7623,6 +7623,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   or after: every machine of the person and the relay that holds the record, and the node ends an enrollment on the
   unpinning revision as measured (CT-137). Adoption: every organization server,
   Fabric and the products that read membership (CT-137).
+- **Annotated (2026-10-26):** DEC-0128 makes `organizationPin.iss` required, a narrowing of this unadopted member
+  (DEC-0119); the release that carries both lists it as a narrowing.
 - **Context:** the organization train's packet TP-00 (row N-1, step 1.1 of fabric-workspace
   `docs/reports/2026-10-25-organization-r1/README.md` at `d438e3dc`): Fabric cannot trust an organization server's
   membership, and a product cannot be granted one, without a document Fabric verifies. MD-9 path (a)
@@ -7695,7 +7697,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-26
 - **Status:** Accepted (2026-10-26). `machines[].contextHubKeys` is additive; `iss`, required on DEC-0127's
   `organizationPin`, narrows a member no reader has adopted (DEC-0119: the release notes list it as a narrowing); which Fabric writes only once every reader of the record is pinned at or after (as
-  DEC-0106, DEC-0107 and DEC-0127); new rules a sender runs on itself. Adoption: CT-122.
+  DEC-0106, DEC-0107 and DEC-0127); new rules a sender runs on itself. Adoption: CT-122; a node adopts UE-2 only once the machines' report to the hub over
+  the relay exists (CT-152), since DL-15, the hub move and the window leases read those reports.
 - **Context:** the operator decided K-1 on 2026-10-15 (NET-2, DEC-0084): each organization enrollment of a machine gets
   keys of its own, so two organizations cannot link the machine (CX-22). The scope brief
   (`docs/evidence/specs/2026-10-24-ct122-unlinkable/brief.md`) listed twelve values two enrollments share today, and the

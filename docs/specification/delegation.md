@@ -244,7 +244,7 @@ machine word for `error.data.detail`, never the token. A verifier in another lan
   from its own and does not mint again for nothing. The vectors
   [`fixtures/vectors/hub-key.json`](../../fixtures/vectors/hub-key.json) hold each row, the exact window boundaries, a
   rotation (revision 3 certifies a new hub key and revokes the old one, and verifies against revision 2), the rollback,
-  and the verifiers' answers; `FAC-SEM-081` checks a verifier's answer on `{record, kid, x, at, applied?, answer}`.
+  and the verifiers' answers; `FAC-SEM-081` checks a verifier's answer on `{record, kid, x, at, applied?, extraRevocations?, context?, answer}`.
 - **DL-14a, a key per context** (DEC-0128). Beside the personal hub key, a `full` machine may hold a hub key per
   organization context the estate pins (`machines[].contextHubKeys`, `{context, key}`), under that context's issuer
   (`organizations[].iss`). A token in an organization's context is signed by that context's key and names its issuer;
@@ -252,9 +252,9 @@ machine word for `error.data.detail`, never the token. A verifier in another lan
   (`estateContext`, `issuer` the context's issuer), which trust the kid only from that context's keys and only while the
   record pins the organization. A context key never verifies a personal token, and the personal key never an
   organization's. Heartbeats, delta entries and leases stay the personal key's alone. A context key is held only by the
-  machine that holds the personal hub key (`FAC-SEM-073`), so a hub move re-keys every context with it: the new hub
-  certifies a new key per context and the old ones are revoked as `hub-key` in the same revision (`FAC-SEM-114`, which
-  also covers a context key dropped with its pin), and `hubMove` reports each. The hub publishes a key set per context
+  machine that holds the personal hub key (`FAC-SEM-073`), so a hub move re-keys every context with it, as DL-15 rotates: the first revision certifies the new hub's key per
+  context beside the old ones, the second drops the old ones and revokes them as `hub-key` (`FAC-SEM-114`, which also
+  covers a context key dropped with its pin), and `hubMove` reports each. The hub publishes a key set per context
   (never the personal key set, which would show every context's kid to every organization), and a service that serves
   an organization's context declares that context's `iss` and key set in `auth.delegation` (DL-16).
 
@@ -632,7 +632,7 @@ product that needs protection from a hostile local process adds an approval (DL-
 | <a id="fac-sem-049"></a>`FAC-SEM-049` | `delegation-claims` | a delegation token expires after it was issued and at most 600 seconds after; its scope names each capability once; its spend names each window once |
 | <a id="fac-sem-050"></a>`FAC-SEM-050` | `delegation-mint` | a token is minted under an active delegation grant that its `grant` claim names, and names no other (DEC-0045): its audience, its capabilities, its effect ceiling (itself within the grant's effects), its start and expiry, its project, a limited spend under a limited grant whose windows are the grant's and hold no more than its limits, a per-call maximum no larger than the grant's, and the actor and person the grant names; at most four actors, five only in a token for the meter; a token for the meter reads only its grant-check capability under the parent's one grant; an onward token keeps the parent's issuer, principal and project, adds one actor (the parent's audience) to the parent's chain, and carries no wider effect, no later expiry, no more remaining spend and no larger per-call maximum than its parent; it keeps the parent's `task` or none, and the meter's token keeps it (DEC-0041) |
 | <a id="fac-sem-051"></a>`FAC-SEM-051` | `approval-claims` | an approval expires after it was issued and at most 24 hours after |
-| <a id="fac-sem-081"></a>`FAC-SEM-081` | `delegation-hub-key` | a verifier that reads the estate record answers as DL-14 says (DEC-0060): `certified` when exactly one machine's `hubKey` (in an organization's `context`, one of that context's pinned `contextHubKeys`, DEC-0128) carries the `kid` and the published `x`, inside the revision's window, neither revoked, and the revision not lower than (nor forked from) the applied one; otherwise `kid-not-certified`, `estate-unreadable`, `estate-outside-window`, `estate-rolled-back`, `estate-forked` or `no-clock` |
+| <a id="fac-sem-081"></a>`FAC-SEM-081` | `delegation-hub-key` | a verifier that reads the estate record answers as DL-14 says (DEC-0060): `certified` when exactly one machine's `hubKey` (in an organization's `context`, one of that context's pinned `contextHubKeys`, DEC-0128) carries the `kid` and the published `x`, inside the revision's window, neither revoked, and the revision not lower than (nor forked from) the applied one; otherwise `kid-not-certified`, `estate-unreadable`, `estate-outside-window`, `estate-rolled-back`, `estate-forked` or `no-clock`; with a `context` that is neither `personal` nor an organization's context id, `kid-not-certified` |
 | <a id="fac-sem-144"></a>`FAC-SEM-144` | `mandate` | a mandate is its schema's, stands at most 7 days after `at`, its chain goes forward in time from `at` and before `expiresAt`, names each agent once and at most four, and each narrower scope is within the one before, keeping every list and the per-call ceiling it narrows (DEC-0125 MD-1, MD-2) |
 | <a id="fac-sem-124"></a>`FAC-SEM-124` | `delegation-mint` | under a partner grant the principal is the partner organization and the context the company's own organization; the token is for the issuer and its chain ends in the partner, two deep at mint; a partner actor stands in no chain under another grant ([the partner channel](partner-channel.md), DEC-0090) |
 

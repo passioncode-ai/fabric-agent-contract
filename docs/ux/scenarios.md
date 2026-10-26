@@ -1028,10 +1028,10 @@ independent agent author and P-02 project operator.
 - **Feature:** membership
 - **Traces:** ST-038, FLW-32 (JTBD-04, JRN-03/#1)
 - **Entry point:** the member's join in Fabric
-- **Preconditions:** the organization `org:org-a` is served by `https://orgs.example`, which holds a root per organization; the member's Fabric is pinned at or after DEC-0127
+- **Preconditions:** the organization `org:org-a` is served by `https://orgs.example`, which holds a root per organization; the member's Fabric and every reader of the estate record are pinned at or after DEC-0128
 - **Steps:**
   1. The member starts the join -> Fabric reads the organization's root from its server and shows the organization, the server and the root's fingerprint (what the member compares it with is pending Fabric's D8).
-  2. The member confirms with their passkey -> the estate revision that pins `{org, issuer, root, pinnedAt}` is signed; no administrator is asked.
+  2. The member confirms with their passkey -> the estate revision that pins `{org, issuer, iss, root, pinnedAt}` (`iss` the context's opaque issuer Fabric generates) is signed; no administrator is asked.
   3. The server sends the organization's key set and an attestation for the member's Fabric as audience -> Fabric applies the set under the pin and verifies the attestation: `active`, role `member`.
   4. Fifteen minutes before expiry -> Fabric fetches the next revision and holds it per subject.
 - **Expected result:** the membership is trusted from a document the organization's pinned root vouches for, and the member's personal work never leaves for the organization.

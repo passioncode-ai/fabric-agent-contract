@@ -86,7 +86,7 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "local-channel-session": wrap("requests"),
   "machine-call": wrap("caller", "target", "capability", "effect", "answer"),
   "mandate": doc("mandate.schema.json"),
-  "node-enrollments": wrap("estateMachineId", "enrollments"),
+  "node-enrollments": wrap("estateMachineId", "estatePublicKeys", "enrollments"),
   "check-in-outbound": wrap("checkIn"),
   "check-in-response-outbound": wrap("response"),
   manifest: doc("manifest.schema.json"),

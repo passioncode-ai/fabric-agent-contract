@@ -117,6 +117,8 @@ describe("unlinkable enrollments (DEC-0128 FAC-SEM-148, FAC-SEM-149)", () => {
     const two = { org: "org:org-b", deviceId: "d-2", kids: ["d-2#sig"], publicKeys: ["k-2"], telemetryKeyId: "t-2", collectorIds: ["c-2"] };
     expect(enrollmentsLinkable({ estateMachineId: "m-1", enrollments: [one, two] })).toBe(false);
     expect(enrollmentsLinkable("registry")).toBe(false);
+    // An enrollment that reuses the estate's own #sig key under a new kid is linkable too.
+    expect(enrollmentsLinkable({ estateMachineId: "m-1", estatePublicKeys: ["k-estate", 7], enrollments: [one, { ...two, publicKeys: ["k-estate"] }] })).toBe(true);
     for (const shared of [{ org: "org:org-a" }, { deviceId: "d-1" }, { kids: ["d-1#sig"] }, { publicKeys: ["k-1"] }, { telemetryKeyId: "t-1" }, { collectorIds: ["c-1"] }, { deviceId: "m-1" }, { kids: ["m-1#sig"] }, { publicKeys: ["m-1"] }, { telemetryKeyId: "m-1" }, { collectorIds: ["m-1"] }, { collectorIds: ["t-1"] }]) {
       expect(enrollmentsLinkable({ estateMachineId: "m-1", enrollments: [one, { ...two, ...shared }] }), JSON.stringify(shared)).toBe(true);
     }

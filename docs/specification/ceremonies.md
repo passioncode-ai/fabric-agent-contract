@@ -336,8 +336,8 @@ alert:
    one continues the one chain from the switch (its first entry is the next sequence after the head it holds); a second
    revision drops the old key, revokes it as `hub-key <old kid>` (`FAC-SEM-114`) and anchors the head as it then stands.
    `hubMove` reads that pair as an addition, then a removal (`moved` is `false` in each).
-   Every context hub key moves the same way (DEC-0128): the new hub machine certifies a new key per pinned context and
-   the old machine's context keys are revoked in that revision.
+   Every context hub key moves the same way (DEC-0128): the first revision certifies the new hub machine's key per pinned
+   context beside the old ones, and the second drops and revokes the old machine's.
 4. **A lost hub** is replaced in one revision: the new `hubKey`, the old key dropped and revoked, the lost machine removed
    and revoked as `machine <id>` ([Remove a machine](#remove-a-machine)), and the delta anchored at the head the new hub
    holds; the new hub's first entry is the anchor's sequence + 1. Fabric withdraws the lost key from the key set it
