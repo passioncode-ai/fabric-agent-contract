@@ -468,7 +468,7 @@ its relay (OX-6).
   carries it yet), and how a relay is registered as an attestation audience for the subject OL-1 names (CT-162).
 - What a "reference" in the adaptation plan's OM-7 row is: its form must name nothing of the person's estate (DEC-0128);
   TP-03 defines it with Fabric.
-- How a member's node learns its organization relay's origin: as for an estate's relay, its configuration.
+- How a member's node learns its organization relay's origin (an estate's relay's origin is configuration today too).
 - Whether an organization's relay checks a member's attestation status against the list, the stricter answer winning
   (Fabric ADR-0180 point 4; OL-6), which needs the relay registered as an attestation audience (CT-162).
 - Beyond the member list (DEC-0129): a quorum or a delay of administrators' signatures (Fabric ADR-0178 D8-c, R2); the

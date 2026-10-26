@@ -280,8 +280,12 @@
           }
         }
       },
-      "additionalProperties": false,
-      "description": "The welcome of an organization's relay (DEC-0134): the session and the member list it admits from, in place of an estate's revision, delta head and heartbeat."
+      "description": "The welcome of an organization's relay (DEC-0134): the session and the member list it admits from, in place of an estate's revision, delta head and heartbeat. It never carries estateRevision, which keeps it apart from an estate's welcome; other unknown members are ignored, as every frame's.",
+      "not": {
+        "required": [
+          "estateRevision"
+        ]
+      }
     },
     {
       "type": "object",

@@ -2535,6 +2535,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-12
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption:
+- **Annotated (2026-10-26):** DEC-0134 decides the organization relay's handshake (relay.md OR-1 to OR-5); the relay's
+  attestation status check is CT-162.
 - **Annotated (2026-10-26):** DEC-0129 gives an organization's relay its admission set (`orgRelayAdmissionSet`, the
   member list `org-authority/1`); the organization relay's handshake stays open (CT-37).
 - **Annotated (2026-10-15):** amended by DEC-0084: a relay opens a one-time pairing rendezvous that lives at most 600 s and carries `pairing-message/1` frames only, with one `abort` after both reveals (relay.md, *The pairing rendezvous*; its frame types are not decided); `relayAdmissionSet` subtracts a key revoked by its kid or its key reference `<kid>@sha256:<hex>` and reports a malformed reference (`unread`); F7: it admits a `#sig` key only under its own machine's kid `<id>#sig`, and a kid listed twice for neither (`bad-key`), as `FAC-SEM-073` says, even over a held record; an open session stands only while its kid maps to the key octets it was proven under (`sessionStands`, which amends DEC-0066's revalidation by kid), so a session proven under a replaced key ends; `estateEnvelopeContext` takes the applied delta entries' revocations (`extraRevocations`), so an envelope's sender key is refused once a delta revokes it. Shared vectors: `fixtures/vectors/relay.json` `admissionSet` (five new cases) and `session` (new).
@@ -7768,6 +7770,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`FAC-SEM-150`) and a relay admission source; `org-key-set/1` gains the required `administrators` before any tag
   carried the type (DEC-0127's annotation: the release lists it as a narrowing, DEC-0119). Adoption: CT-37 (every
   organization server drafts, an administrator's Fabric signs, an organization's relay admits).
+- **Annotated (2026-10-26):** DEC-0134 decides the organization relay's handshake (relay.md OR-1 to OR-5): a
+  member's `auth` names the organization, `welcome` carries the list, sessions stand under it; the attestation status
+  check is CT-162.
 - **Context:** DEC-0127 left the organization's list of admitted members for its relay to be decided with CT-122,
   because its entries are the members' keys per context; DEC-0128 gave each enrollment its own keys and each context its
   own issuer. Fabric ADR-0178 (D8, fabric `cf99c32f`, 2026-10-26) settled who signs: an administrator's device-bound
@@ -7999,6 +8004,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-26
 - **Status:** Accepted (2026-10-26). Additive, with one narrowing before any server serves the exchange: a root
   registration whose issuer is over 261 characters is refused as `malformed`, as its schema already refuses it.
+- **Annotated (2026-10-26):** DEC-0134 decides the organization relay's handshake (relay.md OR-1 to OR-5): a
+  member's `auth` names the organization, `welcome` carries the list, sessions stand under it; the attestation status
+  check is CT-162.
 - **Context:** DEC-0131's readings left the exchange with no vector file a server or Fabric can run, no schema for the
   root's answer, and a registration check without the issuer's length cap (CT-158). Fabric answered DEC-0129's open
   questions in ADR-0180 (thread `115ef7fb`, message `664b69ad`): it keeps the Ed25519 root per organization, and an
@@ -8053,20 +8061,23 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      a refused candidate leaves the held list.
   4. **OR-4, sources.** The relay pins the root at setup and reads the key set and list from the server at least hourly
      and when told of a new one, with a credential the server issues it; it applies only what the verifiers accept.
-  5. **OR-5, between members:** T2 unless the recipient's own estate places the sender in T1; no presence across
-     members; one relay origin per organization.
+  5. **OR-5, between members:** every member is T2 to every other, two enrollments of one owner included; no presence
+     across members; one relay origin per organization. What the relay carries between members, and where a recipient
+     gets a member's enrollment key, is CT-163.
 - **Why:** the list's 7-day window and OL-5's draft on every end already bound how long an ended member stays admitted,
   so an organization heartbeat and delta only shorten that bound; they stay additive (a member delta kind, membership's
   Not decided). Naming the organization in `estate` keeps one `admit` for both kinds of relay and never shows a member's
   estate id to an organization's relay (DEC-0128).
 - **Alternatives considered:** waiting for an organization heartbeat and delta (they shorten the bound; nothing in the
   handshake needs them); a new frame type for an organization's auth (the existing frame names its record already);
-  taking ADR-0180 point 4's status check now (the relay is not yet an attestation audience: CT-162).
+  taking ADR-0180 point 4's status check now (the relay is not yet an attestation audience: CT-162); placing two
+  enrollments of one owner in T1 to each other (it would link an enrollment to its estate, UE-1).
 - **Compatibility:** additive. `contractVersion` stays `0.1.0`. No organization relay ran before this decision, so no
   client met the new `welcome`. `FRAME_TYPES` is unchanged; `welcome` has two schema variants.
 - **Consequences / affects:** `schemas/relay-frame.schema.json`; `src/relay.ts` (`SessionAdmission`);
   `docs/specification/relay.md` (The organization's relay, OR-1 to OR-5; the header and the member-list paragraph),
   `membership.md` (OL-4, OL-6, OX-6, Not decided), `conformance.md`, `CONTEXT.md` (Admission set),
-  `docs/specification/README.md`, `docs/DOCMAP.md`; `test/org-authority.test.ts`, `test/relay.test.ts`; backlog CT-37,
-  CT-162.
+  `docs/specification/README.md`, `docs/DOCMAP.md`, `devices.md` (What stays linkable), `docs/ux/scenarios.md`
+  (SCN-049); DEC-0047, DEC-0129 and DEC-0133 annotated; `test/org-authority.test.ts`, `test/relay.test.ts`; backlog
+  CT-37, CT-162, CT-163.
 - **Source:** CT-37; DEC-0047, DEC-0066, DEC-0084, DEC-0128, DEC-0129; Fabric ADR-0180 point 4.

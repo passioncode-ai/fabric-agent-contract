@@ -291,6 +291,8 @@ describe("the organization relay's handshake (DEC-0134)", () => {
     const list = { org: ORG, revision: 4, digest: LIST.digest };
     expect(frameValid({ v: 1, type: "welcome", id: "w1", session: "s1", list })).toBe(true);
     expect(frameValid({ v: 1, type: "welcome", id: "w1", session: "s1", list, estateRevision: 3 })).toBe(false);
+    // Unknown members are ignored (relay.md), so an organization's heartbeat and delta can join later.
+    expect(frameValid({ v: 1, type: "welcome", id: "w1", session: "s1", list, later: 1 })).toBe(true);
     expect(frameValid({ v: 1, type: "welcome", id: "w1", session: "s1", list: { ...list, org: "personal" } })).toBe(false);
     expect(frameValid({ v: 1, type: "welcome", id: "w1", session: "s1", estateRevision: 3, deltaHead: { sequence: 0, sha256: "0".repeat(64) }, heartbeat: null })).toBe(true);
   });

@@ -597,7 +597,8 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   is its own (UE-1); a token's `project`, `task` and actor ids in an organization's context are that context's;
   coding-agent versions and the hook count in a mode `C` node summary (DEC-0118); an agent the person shares into two
   organizations shows the same `agentRef` (the person's own choice); the relay operator reads `org:<orgId>` in the estate
-  record until per-context relay sessions (the operator's questions 1 to 4, taken at their defaults). A stolen machine:
+  record until per-context relay sessions (the operator's questions 1 to 4, taken at their defaults); an operator that
+  runs both an estate's relay and an organization's (DEC-0134) sees one machine's two connections. A stolen machine:
   Fabric offers the person to ask each organization to revoke, from the local registry, with no automatic message.
 
 **One enrollment per organization** (DEC-0082). A device enrolled in several organizations holds one enrollment,
