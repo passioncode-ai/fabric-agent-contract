@@ -52,6 +52,16 @@ const ROGUE = testKey("rogue", "mem-rogue");
 /** The all-zero Ed25519 encoding, of order 4 (DEC-0045). */
 const ZERO_X = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
+/** An administrator's signing passkey (EdDSA, COSE -8), certified by the root in `administrators` (DEC-0129). */
+const ADMIN = testKey("administrator-passkey", "admin-passkey");
+const ADMIN_CREDENTIAL = {
+  credentialId: sha256(`${LABEL}administrator-passkey/credential`).subarray(0, 16).toString("base64url"),
+  alg: "EdDSA",
+  publicKey: { kty: "OKP", crv: "Ed25519", x: ADMIN.x },
+  rpId: "sign.orgs.example",
+  origins: ["https://sign.orgs.example"]
+};
+
 const ISSUER = "https://orgs.example";
 const ORG_A = "org:org-a";
 const ORG_B = "org:org-b";
@@ -70,7 +80,7 @@ const K1_ENTRY = keyEntry(K1, "2026-09-01T00:00:00Z", "2026-11-01T00:00:00Z");
 const K2_ENTRY = keyEntry(K2, "2026-10-15T00:00:00Z", "2027-01-01T00:00:00Z");
 
 function keySet(revision: number, issuedAt: string, keys: Json[], revoked: string[], change: Json = {}, signer: TestKey = ROOT): Json {
-  return signed({ type: "org-key-set/1", issuer: ISSUER, org: ORG_A, revision, issuedAt, keys, revoked, alg: "EdDSA", kid: ROOT.kid, ...change }, signer);
+  return signed({ type: "org-key-set/1", issuer: ISSUER, org: ORG_A, revision, issuedAt, keys, revoked, administrators: [ADMIN_CREDENTIAL], alg: "EdDSA", kid: ROOT.kid, ...change }, signer);
 }
 
 const KEY_SETS: Record<string, Json> = {
@@ -229,8 +239,14 @@ function keySetCases(): Json[] {
     c("unusable key: a pinned root that is not 32 canonical bytes", "r2", pin({ root: { ...ROOT_PIN, x: `${ROOT.x.slice(0, 42)}B` } }), refused("unusable-key")),
     c("small-order key: a pinned root of order 4", "r2", pin({ root: { ...ROOT_PIN, x: ZERO_X } }), refused("small-order-key")),
     c("small-order key: a root-signed set listing a key of order 4", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, { kid: "mem-zero", alg: "EdDSA", x: ZERO_X, notBefore: "2026-10-01T00:00:00Z", notAfter: "2027-01-01T00:00:00Z" }], [K0.kid]), pin(), refused("small-order-key")),
+    c("unusable key: an administrator under a sign-in RP (DEC-0129)", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, K2_ENTRY], [K0.kid], { administrators: [{ ...ADMIN_CREDENTIAL, rpId: "orgs.example", origins: ["https://orgs.example"] }] }), pin(), refused("unusable-key")),
+    c("unusable key: an administrator's origin outside its RP (DEC-0129)", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, K2_ENTRY], [K0.kid], { administrators: [{ ...ADMIN_CREDENTIAL, origins: ["https://evil.example"] }] }), pin(), refused("unusable-key")),
+    c("small-order key: an administrator's key of order 4 (DEC-0129)", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, K2_ENTRY], [K0.kid], { administrators: [{ ...ADMIN_CREDENTIAL, publicKey: { kty: "OKP", crv: "Ed25519", x: ZERO_X } }] }), pin(), refused("small-order-key")),
     c("unknown algorithm: the set under ES256", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, K2_ENTRY], [K0.kid], { alg: "ES256" }), pin(), refused("unknown-algorithm")),
     c("malformed: a kid listed twice", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, { ...K2_ENTRY, kid: K1.kid }], [K0.kid]), pin(), refused("malformed")),
+    c("malformed: an administrator's credential listed twice (DEC-0129)", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, K2_ENTRY], [K0.kid], { administrators: [ADMIN_CREDENTIAL, ADMIN_CREDENTIAL] }), pin(), refused("malformed")),
+    c("malformed: an administrator with no origin (DEC-0129)", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, K2_ENTRY], [K0.kid], { administrators: [{ ...ADMIN_CREDENTIAL, origins: [] }] }), pin(), refused("malformed")),
+    c("malformed: an administrator's origin listed twice (DEC-0129)", keySet(2, "2026-10-15T00:00:00Z", [K1_ENTRY, K2_ENTRY], [K0.kid], { administrators: [{ ...ADMIN_CREDENTIAL, origins: [ADMIN_CREDENTIAL.origins[0], ADMIN_CREDENTIAL.origins[0]] }] }), pin(), refused("malformed")),
     c("malformed: no organization", (({ org: _org, ...rest }) => rest)(r2), pin(), refused("malformed")),
     c("malformed: an attestation is not a key set", BASE, pin(), refused("malformed")),
     c("context: a pin without its organization", "r2", { root: { issuer: ISSUER, kid: ROOT.kid, x: ROOT.x } }, refused("context-invalid")),

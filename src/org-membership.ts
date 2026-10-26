@@ -2,7 +2,8 @@ import { createHash, createPublicKey, verify as verifySignature } from "node:cry
 import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, indexed, isObject, show } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
-import { ORG_KEY_SET_FIELDS, ORG_MEMBERSHIP_FIELDS, signingStatement } from "./signing-challenges.js";
+import { ORG_KEY_SET_FIELDS, ORG_MEMBERSHIP_FIELDS, signingCredentialFindings, signingStatement } from "./signing-challenges.js";
+import { ASSERTION_ALGORITHMS, credentialKey } from "./webauthn.js";
 
 // #region org-membership, docs: docs/specification/membership.md
 /**
@@ -11,7 +12,8 @@ import { ORG_KEY_SET_FIELDS, ORG_MEMBERSHIP_FIELDS, signingStatement } from "./s
  * `admin` and `member`, whether the membership is `active` or `ended`, and its revision, for at most 24 hours. Any
  * organization server issues it (MD-9 path (a)); the organization's root, which the person's estate pins (the estate
  * record's `organizations`), signs an `org-key-set/1` whose keys sign the attestations. No name, address or email of a
- * person appears anywhere.
+ * person appears anywhere. The set also certifies the administrators' signing passkeys, which sign the organization's
+ * member list (`org-authority/1`, DEC-0129, `src/org-authority.ts`).
  */
 export const ORG_MEMBERSHIP_TYPE = "org-membership/1";
 export const ORG_KEY_SET_TYPE = "org-key-set/1";
@@ -29,6 +31,8 @@ export const MAX_EXTENSIONS = 16;
 /** The most signing keys, and revoked kids, one key set lists. */
 export const MAX_KEYS = 32;
 export const MAX_REVOKED = 256;
+/** The most administrators' signing passkeys one key set certifies (DEC-0129). */
+export const MAX_ADMINISTRATORS = 16;
 export { CLOCK_SKEW_SECONDS };
 
 const isString = (value: unknown): value is string => typeof value === "string";
@@ -115,9 +119,37 @@ function validAtIssue(set: JsonObject): boolean {
 }
 
 /**
+ * The members of a passkey credential (the estate record's `authority`, DEC-0055), in the schema's shape: a public JWK
+ * of the algorithm's key type, 1 to 8 distinct https origins. Whether the key is usable and of full order, and whether
+ * the RP ID is a signing RP with the origins within it, is `verifyOrgKeySet`'s at OK-6 and FAC-SEM-146's.
+ */
+const AUTHORITY_FIELDS = ["credentialId", "alg", "publicKey", "rpId", "origins"];
+const B64URL = /^[A-Za-z0-9_-]+$/;
+/** `estate-record#/$defs/authority`'s origin: https, a lower-case host, no port or path. */
+const ORIGIN = /^https:\/\/[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?$/;
+/** The public JWK's members by its key type, as the schema's two branches give them. */
+const jwkOk = (key: unknown) =>
+  isObject(key) && ((key.kty === "EC" && exactly(key, ["kty", "crv", "x", "y"]) && key.crv === "P-256" && matches(X, key.x) && matches(X, key.y)) ||
+    (key.kty === "OKP" && exactly(key, ["kty", "crv", "x"]) && key.crv === "Ed25519" && matches(X, key.x)));
+function administratorOk(value: unknown): boolean {
+  return (
+    isObject(value) && exactly(value, AUTHORITY_FIELDS) && isString(value.credentialId) && value.credentialId.length <= 1366 && B64URL.test(value.credentialId) &&
+    ASSERTION_ALGORITHMS.includes(value.alg as string) && jwkOk(value.publicKey) && (value.alg === "ES256") === (isObject(value.publicKey) && value.publicKey.kty === "EC") &&
+    isString(value.rpId) && Array.isArray(value.origins) && value.origins.length >= 1 && value.origins.length <= 8 &&
+    value.origins.every((origin) => isString(origin) && origin.length <= 256 && ORIGIN.test(origin)) && new Set(value.origins).size === value.origins.length
+  );
+}
+
+/** Whether a key set's administrators are 0 to 16 credentials in shape, each credentialId once (DEC-0129). */
+function administratorsOk(value: unknown): boolean {
+  if (!Array.isArray(value) || value.length > MAX_ADMINISTRATORS || !value.every(administratorOk)) return false;
+  return new Set(value.map((entry: JsonObject) => entry.credentialId)).size === value.length;
+}
+
+/**
  * Whether a key set's members have the schema's shapes and FAC-SEM-146's structure (each kid once, the root's kid not
- * among the keys, every window positive, a key valid at its `issuedAt`, no revoked kid among the keys); algorithms and
- * small-order keys aside.
+ * among the keys, every window positive, a key valid at its `issuedAt`, no revoked kid among the keys, each
+ * administrator's credentialId once); algorithms, small-order keys and signing RP IDs aside.
  */
 export function orgKeySetWellFormed(set: JsonObject): boolean {
   const keys = set.keys;
@@ -127,7 +159,7 @@ export function orgKeySetWellFormed(set: JsonObject): boolean {
       issuerOk(set.issuer) && matches(ORG, set.org) && positive(set.revision) && readable(set.issuedAt) &&
       Array.isArray(keys) && keys.length >= 1 && keys.length <= MAX_KEYS &&
       Array.isArray(revoked) && revoked.length <= MAX_REVOKED && revoked.every(opaque) && new Set(revoked).size === revoked.length &&
-      isString(set.alg) && opaque(set.kid) && matches(SIG, set.sig))
+      administratorsOk(set.administrators) && isString(set.alg) && opaque(set.kid) && matches(SIG, set.sig))
   ) return false;
   const kids = new Set<unknown>();
   for (const key of keys) {
@@ -182,13 +214,20 @@ export function verifyOrgKeySet(value: unknown, trust: { root: OrgRoot; held?: H
   const set = value as JsonObject;
   const root = trust.root;
   if (set.issuer !== root.issuer || set.kid !== root.kid) return { ok: false, problem: "wrong-issuer" };
-  // One root signs for one organization: a server hosting many organizations holds a root per organization (MD-9 (a)).
+  // One root signs for one organization: a server hosting many organizations serves a root per organization, each held
+  // by that organization owner's Fabric (MD-9 (a), DEC-0129).
   if (set.org !== root.org) return { ok: false, problem: "wrong-org" };
   const keys = set.keys as JsonObject[];
   if (!ORG_MEMBERSHIP_ALGORITHMS.includes(set.alg as string) || !keys.every((key) => ORG_MEMBERSHIP_ALGORITHMS.includes(key.alg as string))) return { ok: false, problem: "unknown-algorithm" };
   if (!X.test(root.x)) return { ok: false, problem: "unusable-key" };
   // DEC-0045: a small-order key verifies forged signatures on Node 20 and 22; none is used, nor listed for later use.
   if (isSmallOrderKey(rawKey(root.x)) || keys.some((key) => isSmallOrderKey(rawKey(key.x as string)))) return { ok: false, problem: "small-order-key" };
+  // DEC-0129: an administrator the set certifies is a signing credential (FAC-SEM-092's rule) with a key of full order.
+  for (const admin of set.administrators as JsonObject[]) {
+    if (signingCredentialFindings(admin, "").length > 0) return { ok: false, problem: "unusable-key" };
+    const usable = credentialKey(admin.publicKey, admin.alg as string);
+    if ("problem" in usable) return { ok: false, problem: usable.problem };
+  }
   if (!signatureVerifies(root.x, input, set.sig as string)) return { ok: false, problem: "bad-signature" };
 
   const digest = digestOf(input);
@@ -329,7 +368,9 @@ function membershipDocument(value: JsonObject, flag: Flag): void {
 
 /**
  * FAC-SEM-146 on one key set: each kid once, never the root's kid, every window positive, a key valid at the set's
- * `issuedAt`, no revoked kid among the keys, and no key of small order.
+ * `issuedAt`, no revoked kid among the keys, no key of small order, and each administrator's credential once, with a
+ * usable key, under a signing RP with every origin within it (DEC-0129, as FAC-SEM-073 and FAC-SEM-092 say of an
+ * estate's authority).
  */
 function keySetDocument(value: JsonObject, flag: Flag): void {
   const revoked = list(value.revoked);
@@ -346,6 +387,17 @@ function keySetDocument(value: JsonObject, flag: Flag): void {
     if (matches(X, key.x) && isSmallOrderKey(rawKey(key.x as string))) flag(`${at}/x`, "a key of small order lets anyone forge a signature (DEC-0045)");
   }
   if (readable(value.issuedAt) && !validAtIssue(value)) flag("/keys", "a key set holds at least one key valid at its issuedAt");
+  const credentials = new Set<string>();
+  for (const [admin, index] of indexed(value.administrators)) {
+    const at = `/administrators/${index}`;
+    const id = show(admin.credentialId);
+    if (credentials.has(id)) flag(`${at}/credentialId`, `credential ${id} is listed twice`);
+    credentials.add(id);
+    // As FAC-SEM-073 flags an estate's authority: a key no verifier can use certifies an administrator who can never sign.
+    if (ASSERTION_ALGORITHMS.includes(admin.alg as string) && "problem" in credentialKey(admin.publicKey, admin.alg as string)) flag(`${at}/publicKey`, "an administrator's key is a usable key of its algorithm, never of small order");
+    // FAC-SEM-092's own check of a signing credential, reported under this rule's code.
+    for (const finding of signingCredentialFindings(admin, at)) flag(finding.instancePath, finding.message);
+  }
 }
 
 export function orgMembershipRules(kind: string, value: JsonObject): Finding[] | undefined {

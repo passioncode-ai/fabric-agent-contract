@@ -206,8 +206,8 @@ entries, so its sequence is the anchor's sequence (0 without one) plus the index
 ## The organization
 
 v4 §7 also gives an organization a heartbeat signed by its own timestamp key, and records valid 7 days; an
-organization's own heartbeat would travel in DEC-0053's check-in, which an organization server receives. Where an organization pins that key (`org-authority/1`,
-decided with CT-122 and CT-37; a role in DEC-0031's key set; or a role in `org-key-set/1`, which OM-3 would have to widen, DEC-0127) is not decided, so this version defines the estate's documents only: every
+organization's own heartbeat would travel in DEC-0053's check-in, which an organization server receives. Where an organization pins that key (a role in DEC-0031's key set, or
+one `org-key-set/1` would have to list, DEC-0127; the member list `org-authority/1`, DEC-0129, lists members and no such key) is not decided, so this version defines the estate's documents only: every
 document names its `estate`. An organization's documents join additively, with their own scope member and key, once
 that record exists. Under DEC-0128 UE-2 (adopted by a node once CT-152 exists), the estate's heartbeat never goes to an organization: a device reports it to its hub
 over the relay (CT-152).
@@ -242,8 +242,8 @@ counter, a time, a head and a revision. Neither names a person, a place or an ac
 
 ## Not decided here
 
-- The organization's documents and the key that signs them (`org-authority/1`, decided with CT-122, CT-37), the 7-day validity of the
-  organization's records, and the heartbeat extension of up to 7 days that v4 §7 lets the organization root or a quorum
+- The organization's documents beyond its member list (`org-authority/1`, DEC-0129, valid at most 7 days) and the key
+  that signs them, the 7-day validity of those records, and the heartbeat extension of up to 7 days that v4 §7 lets the organization root or a quorum
   of administrators sign while the organization server is down.
 - Recovery from a fork: a new chain anchored in a revision. Until it is decided, a `broken` machine stays broken and the
   person's own work continues.

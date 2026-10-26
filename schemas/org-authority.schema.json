@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/org-authority.schema.json",
+  "title": "Organization member list, org-authority/1 (DEC-0129)",
+  "description": "One organization's signed list of admitted members, the source of its relay's admission set (DEC-0047, CT-37): each member by the subject pairwise to the relay, a role, the issuer of its context's tokens and the #sig keys of its enrollments in the organization. An organization server drafts it (Fabric ADR-0178 point 3); an administrator's signing passkey, certified by the organization's root in org-key-set/1's administrators, signs it in Fabric or a pinned page, never a server (point 2). Valid for at most 7 days (FAC-SEM-150). The digest is SHA-256 over RFC 8785 of this document without digest and signature; the signature is a WebAuthn assertion over the register's org-authority/1 challenge. docs/specification/membership.md.",
+  "type": "object",
+  "required": [
+    "type",
+    "issuer",
+    "org",
+    "revision",
+    "issuedAt",
+    "expiresAt",
+    "members",
+    "digest",
+    "signature"
+  ],
+  "properties": {
+    "type": {
+      "const": "org-authority/1"
+    },
+    "issuer": {
+      "$ref": "entitlement.schema.json#/$defs/issuer",
+      "description": "The organization server that drafted the list, as the organization's key set names it."
+    },
+    "org": {
+      "$ref": "org-membership.schema.json#/$defs/org"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991,
+      "description": "Rises with every list an administrator signs; a reader refuses a lower revision than the one it applied, and the same revision with other bytes."
+    },
+    "issuedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "expiresAt": {
+      "$ref": "common.schema.json#/$defs/timestamp",
+      "description": "After issuedAt and at most 7 days after it (v4 §7, the organization's records; FAC-SEM-150). Past it the relay admits nobody from this list."
+    },
+    "members": {
+      "type": "array",
+      "maxItems": 1024,
+      "items": {
+        "$ref": "#/$defs/member"
+      },
+      "description": "The admitted members: each subject, each iss and each kid once across the list (FAC-SEM-150)."
+    },
+    "digest": {
+      "$ref": "common.schema.json#/$defs/sha256",
+      "description": "SHA-256 over the RFC 8785 form of this document without digest and signature (DEC-0043)."
+    },
+    "signature": {
+      "$ref": "estate-record.schema.json#/$defs/assertion",
+      "description": "An administrator's passkey assertion over the register's org-authority/1 challenge, derived from digest (DEC-0063)."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "member": {
+      "type": "object",
+      "required": [
+        "subject",
+        "role",
+        "iss",
+        "keys"
+      ],
+      "properties": {
+        "subject": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId",
+          "description": "The member, as org-membership/1 names it to the relay's audience: pairwise and opaque, never an email, a name, the estate id or a device id."
+        },
+        "role": {
+          "enum": [
+            "owner",
+            "admin",
+            "member"
+          ],
+          "description": "The role, as org-membership/1 maps it. The relay admits every role alike; a role grants nothing at the relay."
+        },
+        "iss": {
+          "$ref": "estate-record.schema.json#/$defs/organizationPin/properties/iss",
+          "description": "The issuer of the member's tokens in this organization's context, as the member's estate pins it (DEC-0128): opaque, never containing an estate id."
+        },
+        "keys": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/key"
+          },
+          "description": "The #sig keys of the member's enrollments in this organization (DEC-0128 UE-1: each enrollment its own id), the keys a relay session authenticates with."
+        }
+      },
+      "additionalProperties": false
+    },
+    "key": {
+      "type": "object",
+      "required": [
+        "kid",
+        "publicKey"
+      ],
+      "properties": {
+        "kid": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}#sig$",
+          "description": "<enrollment id>#sig (DEC-0053, DEC-0128)."
+        },
+        "publicKey": {
+          "$ref": "device-common.schema.json#/$defs/p256Key",
+          "description": "The enrollment's P-256 signing key, as its device enrollment carries it: the relay verifies ES256 only (DEC-0047)."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

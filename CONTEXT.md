@@ -344,6 +344,12 @@ operator's own machine, **T1** an enrolled machine of the same owner, **T2** eve
 A `relayed` action from a T0 or T1 caller carries the operator's decision (**Relayed decision**, DEC-0121).
 Over the relay a node places a sender in T1 from the estate record it applied (`relayCallerTier`, DEC-0106).
 
+**Adaptation plan**: What a person moves into an organization they join: projects, history, results and schedules.
+The plan's draft and the inventory it is chosen from stay in the person's Fabric; only its organization part, what the
+person chose and their requests to the organization's administrators, leaves for that organization (OM-7, DEC-0129,
+[membership](docs/specification/membership.md#what-leaves-a-persons-fabric)). A project's entry is the estate revision
+the person's passkey signs, never part of the plan that leaves.
+
 **Narrow credential**: A credential an agent instance asks its organization for (`credential-request/1`), issued
 by the organization's issuer from an account its door holds and delivered sealed into that organization's context on
 the agent's machine (`fabric-credential-envelope/1`), ending at most 30 days after it was issued (DEC-0111).
@@ -642,7 +648,8 @@ caller's signature is proven it tells it nothing it holds (DEC-0066).
 applied only after `verifyEstateRecord`, minus revoked machines and keys (and the revocations of verified delta
 entries), minus keys that could never verify; none once the record's window ends, when open sessions close too. It
 keeps strangers out of mailboxes and is not authorization: a recipient decides the tier from the signed sender. An
-organization's relay has none of its own until `org-authority/1` (decided with CT-122, CT-37).
+organization's relay takes its set from the organization's member list (`org-authority/1`, DEC-0129) instead, verified
+under the organization's key set; it runs once its handshake is decided (CT-37).
 
 **Revocation delta**: The estate record's fast path (`revocation-delta/1`, DEC-0054): an append-only chain of
 entries, one revocation each, signed by an **Estate key** and chained by RFC 8785 hash, so its head is
@@ -675,6 +682,12 @@ for one reader, for at most a day: the organization, a subject pairwise to that 
 administrator's acceptance. Any organization server issues it, so a reader works with any of them
 ([membership](docs/specification/membership.md)).
 
+**Member list**: An organization's signed list of admitted members, the source of its relay's admission set
+(`org-authority/1`, DEC-0129): each member by a subject pairwise to the relay, a role, its context's token issuer and
+its enrollments' `#sig` keys, for at most 7 days. An organization server drafts it; an administrator's signing passkey,
+listed by the organization's root in `org-key-set/1`'s `administrators`, signs it; no server does
+([membership](docs/specification/membership.md#the-organizations-member-list)).
+
 **Share grant id**: The `meta.id` of a share grant into an organization, `urn:fabric:share:` and 32 lower-case hex
 digits from a CSPRNG, which holds no person's name, address or estate id and is compared as written (`FAC-SEM-117`,
 DEC-0086, [share registration](docs/specification/share-registration.md#the-share-grant-id)).
@@ -685,8 +698,8 @@ withdrawn (`share-registration/1`, DEC-0086). The server keys it by the member t
 member's `grant.usage` to the agent by it ([share registration](docs/specification/share-registration.md)).
 
 **Signing credential**: A passkey registered under the dedicated signing RP `sign.<domain>` and used for nothing else;
-it signs the register's statements (`estate-revision/1`, `org-countersign/1`, `share-grant/1`, `limits/1`) in a
-top-level ceremony (DEC-0063, [signing](docs/specification/signing.md)).
+it signs the register's statements (`estate-revision/1`, `org-countersign/1`, `share-grant/1`, `limits/1`,
+`enroll-token/1`, `org-authority/1`) in a top-level ceremony (DEC-0063, [signing](docs/specification/signing.md)).
 
 **Event data**: An optional `{schema, value}` on a service feed event: machine-readable fields under a schema the service
 publishes, bounded, never a secret; `text` stays the event (DEC-0070, [service](docs/specification/service.md#event-data)).

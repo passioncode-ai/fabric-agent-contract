@@ -38,11 +38,12 @@ describe("the register (DEC-0063)", () => {
   it("names v4 §7's four challenge types, the enroll token, the package statement and every typed statement a key signs", () => {
     expect([...SIGNING_STATEMENTS.keys()]).toEqual([
       "estate-revision/1", "org-countersign/1", "share-grant/1", "limits/1", "enroll-token/1", "fabric-package-signature/1", "enroll-join/1", "window-lease/1", "relay-auth/1", "relay-blob/1",
-      "entitlement/1", "entitlement-key-set/1", "org-membership/1", "org-key-set/1"
+      "entitlement/1", "entitlement-key-set/1", "org-membership/1", "org-key-set/1", "org-authority/1"
     ]);
     const passkey = [...SIGNING_STATEMENTS].filter(([, spec]) => spec.signer === "passkey").map(([type]) => type);
     // DEC-0084 adds enroll-token/1 (DV-CON-01's amendment of DV-05): a passkey signs it too.
-    expect(passkey).toEqual(["estate-revision/1", "org-countersign/1", "share-grant/1", "limits/1", "enroll-token/1"]);
+    // DEC-0129 adds org-authority/1: an administrator's passkey signs an organization's member list.
+    expect(passkey).toEqual(["estate-revision/1", "org-countersign/1", "share-grant/1", "limits/1", "enroll-token/1", "org-authority/1"]);
   });
 
   it("is the table in conformance.md: each type, its fields, its signer and its decision", () => {

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/org-key-set.schema.json",
   "title": "Organization key set, org-key-set/1 (DEC-0127)",
-  "description": "One organization's signing keys for org-membership/1 attestations, under a monotonic revision, signed by the organization's root key over the RFC 8785 form of the set without sig (the register's org-key-set/1, DEC-0063). The person's estate pins the root (the estate record's organizations); the root signs nothing else. One root per organization, even on a server that hosts many (MD-9 path (a)).",
+  "description": "One organization's signing keys for org-membership/1 attestations, under a monotonic revision, signed by the organization's root key over the RFC 8785 form of the set without sig (the register's org-key-set/1, DEC-0063). The person's estate pins the root (the estate record's organizations); the root signs nothing else. The set also certifies the administrators' signing passkeys (DEC-0129). One root per organization, even on a server that hosts many (MD-9 path (a)).",
   "type": "object",
   "required": [
     "type",
@@ -12,6 +12,7 @@
     "issuedAt",
     "keys",
     "revoked",
+    "administrators",
     "alg",
     "kid",
     "sig"
@@ -82,6 +83,14 @@
         "$ref": "activity-common.schema.json#/$defs/opaqueId"
       },
       "description": "Kids revoked: absent from keys (FAC-SEM-146), and every attestation one of them signed is refused (key-revoked)."
+    },
+    "administrators": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "$ref": "estate-record.schema.json#/$defs/authority"
+      },
+      "description": "DEC-0129: the administrators' signing passkeys the root certifies, each a WebAuthn credential under a dedicated signing RP (sign.<domain>, DEC-0063); only one of them signs the organization's member list (org-authority/1, Fabric ADR-0178 point 2), never a key of keys. Each credentialId once, every RP ID a signing RP and every origin within it (FAC-SEM-146). Empty when the organization has no member list; a credential dropped from a later set signs nothing from that set on."
     },
     "alg": {
       "enum": [

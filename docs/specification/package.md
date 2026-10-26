@@ -188,9 +188,10 @@ not this document.
 Every signature covers the UTF-8 bytes of the RFC 8785 form of
 `{"type": "fabric-package-signature/1", "role": <role>, "digest": <digest>}` (`packageSigningInput`). The role is
 inside, so a publisher's signature replayed as a countersignature fails, even under the same key. The organization
-countersignature that v4 §7 defines — an administrator's passkey assertion over a typed challenge with the listing's
-audience, grant and revision (`org-countersign/1`) — is the signing-challenge decision's, with `org-authority/1`; this
-version's countersignature is a detached signature over the statement above.
+countersignature that v4 §7 defines, an administrator's passkey assertion over a typed challenge with the listing's
+audience, grant and revision (`org-countersign/1`), waits on the decision that defines its verifier: DEC-0129 decided
+`org-authority/1` as the member list only. This version's countersignature is a detached signature over the statement
+above.
 
 ### Algorithms
 
@@ -247,9 +248,10 @@ package records no use and no user (the organization edition's open/private spli
 
 ## Not decided here
 
-- `ES256` — when Fabric records D2; the passkey-assertion countersignature and its challenge type with
-  `org-authority/1` and the signing-challenge types (v4 §12, later waves).
-- How a countersignature chains to an organization's root: `org-authority/1`. Which keys a machine pins for a
+- `ES256`: when Fabric records D2; the passkey-assertion countersignature, whose challenge type
+  `org-countersign/1` DEC-0063 registered, waits on the decision that defines its verifier (v4 §12, later waves).
+- How a countersignature chains to an organization's root: an administrator's credential is listed by the root in
+  `org-key-set/1`'s `administrators` (DEC-0129); the `org-countersign/1` verifier that reads it is not decided. Which keys a machine pins for a
   publisher is decided by the [estate record](estate-record.md#machines) (DEC-0055: `publisherKeys` and
   `placementTrust`).
 - Where a package's bytes are fetched from (v4 §4: the relay's blob store, by digest), and how a machine reports a

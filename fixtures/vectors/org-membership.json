@@ -87,11 +87,26 @@
         "revoked": [
           "mem-2026-08"
         ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://sign.orgs.example"
+            ]
+          }
+        ],
         "alg": "EdDSA",
         "kid": "root-org-a-1",
-        "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+        "sig": "1m7WMmBNGbZD_GRMuJCyJ-_h7ZtA3plVjqDLZnAY53A6BHn3WqnI6CMNevDZzY_5Bj0fVn6g2W77p3otWOacAg"
       },
-      "input": "{\"alg\":\"EdDSA\",\"issuedAt\":\"2026-10-15T00:00:00Z\",\"issuer\":\"https://orgs.example\",\"keys\":[{\"alg\":\"EdDSA\",\"kid\":\"mem-2026-09\",\"notAfter\":\"2026-11-01T00:00:00Z\",\"notBefore\":\"2026-09-01T00:00:00Z\",\"x\":\"HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI\"},{\"alg\":\"EdDSA\",\"kid\":\"mem-2026-10\",\"notAfter\":\"2027-01-01T00:00:00Z\",\"notBefore\":\"2026-10-15T00:00:00Z\",\"x\":\"VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI\"}],\"kid\":\"root-org-a-1\",\"org\":\"org:org-a\",\"revision\":2,\"revoked\":[\"mem-2026-08\"],\"type\":\"org-key-set/1\"}"
+      "input": "{\"administrators\":[{\"alg\":\"EdDSA\",\"credentialId\":\"sBKYUAaR0nfK9JRIUcTocg\",\"origins\":[\"https://sign.orgs.example\"],\"publicKey\":{\"crv\":\"Ed25519\",\"kty\":\"OKP\",\"x\":\"NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg\"},\"rpId\":\"sign.orgs.example\"}],\"alg\":\"EdDSA\",\"issuedAt\":\"2026-10-15T00:00:00Z\",\"issuer\":\"https://orgs.example\",\"keys\":[{\"alg\":\"EdDSA\",\"kid\":\"mem-2026-09\",\"notAfter\":\"2026-11-01T00:00:00Z\",\"notBefore\":\"2026-09-01T00:00:00Z\",\"x\":\"HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI\"},{\"alg\":\"EdDSA\",\"kid\":\"mem-2026-10\",\"notAfter\":\"2027-01-01T00:00:00Z\",\"notBefore\":\"2026-10-15T00:00:00Z\",\"x\":\"VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI\"}],\"kid\":\"root-org-a-1\",\"org\":\"org:org-a\",\"revision\":2,\"revoked\":[\"mem-2026-08\"],\"type\":\"org-key-set/1\"}"
     }
   },
   "keySets": {
@@ -111,9 +126,24 @@
         }
       ],
       "revoked": [],
+      "administrators": [
+        {
+          "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+          },
+          "rpId": "sign.orgs.example",
+          "origins": [
+            "https://sign.orgs.example"
+          ]
+        }
+      ],
       "alg": "EdDSA",
       "kid": "root-org-a-1",
-      "sig": "dPkD8zS0m6zprcky3APC5Kxd3B_dKyb_o4eg5_QKT5SkNpH8ZyyLXF92MAxDadUQmNAVFGfWgZO0quhzUzblAQ"
+      "sig": "gS4zrSBhoEfMILhOaHVki4tbXw3JcL5eUEWy6pK9wXKjD8fWmwOys6eYDogvESJUu6-iuQszkZ63mqPqk1UcAQ"
     },
     "r2": {
       "type": "org-key-set/1",
@@ -140,9 +170,24 @@
       "revoked": [
         "mem-2026-08"
       ],
+      "administrators": [
+        {
+          "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+          },
+          "rpId": "sign.orgs.example",
+          "origins": [
+            "https://sign.orgs.example"
+          ]
+        }
+      ],
       "alg": "EdDSA",
       "kid": "root-org-a-1",
-      "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+      "sig": "1m7WMmBNGbZD_GRMuJCyJ-_h7ZtA3plVjqDLZnAY53A6BHn3WqnI6CMNevDZzY_5Bj0fVn6g2W77p3otWOacAg"
     },
     "r2Other": {
       "type": "org-key-set/1",
@@ -169,9 +214,24 @@
       "revoked": [
         "mem-2026-08"
       ],
+      "administrators": [
+        {
+          "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+          },
+          "rpId": "sign.orgs.example",
+          "origins": [
+            "https://sign.orgs.example"
+          ]
+        }
+      ],
       "alg": "EdDSA",
       "kid": "root-org-a-1",
-      "sig": "sw-YNHeJXmk7jT4p3Xtj8vdDBaAFYqRn_qiUtcAFd-moCG3R-ujwiYc9ivaDTsu4EnnF6cznXE3kva9Lp1hYBw"
+      "sig": "ZQRgpVtdw-pGfGIGltA5pL4EPWvAy-aTjZrrsM7sc8W0fo31_0QUkTnI0zwNxOPehEgbxWED9iGBHJey208oBw"
     },
     "r3": {
       "type": "org-key-set/1",
@@ -192,9 +252,24 @@
         "mem-2026-08",
         "mem-2026-09"
       ],
+      "administrators": [
+        {
+          "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+          },
+          "rpId": "sign.orgs.example",
+          "origins": [
+            "https://sign.orgs.example"
+          ]
+        }
+      ],
       "alg": "EdDSA",
       "kid": "root-org-a-1",
-      "sig": "-pPGKNwKtM9jeq_6sipmG5Cb_hC5iXU8bG7xsTGKhNQvgxE4mfcfV70lAp3NJQRTlakiW7ftAcvcWdhBUOLYDg"
+      "sig": "bIEFMLsK-gIoqqNgAT7Dl_MpEVkDE5yRR6GQ_GszR7pjv6Qgb38sNHb5h_o23lr6pi1UZ0tj7xwA6sTqA7wHBg"
     },
     "orgB": {
       "type": "org-key-set/1",
@@ -219,9 +294,24 @@
         }
       ],
       "revoked": [],
+      "administrators": [
+        {
+          "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+          },
+          "rpId": "sign.orgs.example",
+          "origins": [
+            "https://sign.orgs.example"
+          ]
+        }
+      ],
       "alg": "EdDSA",
       "kid": "root-org-b-1",
-      "sig": "s0zkwUbiPjVigA9qWQybIbo8OMJqEyvManpr3dMBNbX5--9jBUqy-evEQxulfTHQDRZCg7_rNILCQHhxsgSHAg"
+      "sig": "T3qdKgznmO-V4ZvmBlePa-VuPRevAr1Mey6P5KO4LlPM9e-DyahpE4Pyfibg6_X54sGDa7v_qCS5MFYevZsIDQ"
     }
   },
   "handedKeySets": {
@@ -250,9 +340,24 @@
       "revoked": [
         "mem-2026-08"
       ],
+      "administrators": [
+        {
+          "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+          },
+          "rpId": "sign.orgs.example",
+          "origins": [
+            "https://sign.orgs.example"
+          ]
+        }
+      ],
       "alg": "EdDSA",
       "kid": "root-org-a-1",
-      "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+      "sig": "1m7WMmBNGbZD_GRMuJCyJ-_h7ZtA3plVjqDLZnAY53A6BHn3WqnI6CMNevDZzY_5Bj0fVn6g2W77p3otWOacAg"
     },
     "smallOrder": {
       "type": "org-key-set/1",
@@ -286,9 +391,24 @@
       "revoked": [
         "mem-2026-08"
       ],
+      "administrators": [
+        {
+          "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+          },
+          "rpId": "sign.orgs.example",
+          "origins": [
+            "https://sign.orgs.example"
+          ]
+        }
+      ],
       "alg": "EdDSA",
       "kid": "root-org-a-1",
-      "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+      "sig": "1m7WMmBNGbZD_GRMuJCyJ-_h7ZtA3plVjqDLZnAY53A6BHn3WqnI6CMNevDZzY_5Bj0fVn6g2W77p3otWOacAg"
     },
     "es256": {
       "type": "org-key-set/1",
@@ -315,9 +435,24 @@
       "revoked": [
         "mem-2026-08"
       ],
+      "administrators": [
+        {
+          "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+          },
+          "rpId": "sign.orgs.example",
+          "origins": [
+            "https://sign.orgs.example"
+          ]
+        }
+      ],
       "alg": "ES256",
       "kid": "root-org-a-1",
-      "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+      "sig": "1m7WMmBNGbZD_GRMuJCyJ-_h7ZtA3plVjqDLZnAY53A6BHn3WqnI6CMNevDZzY_5Bj0fVn6g2W77p3otWOacAg"
     },
     "rootAmongKeys": {
       "type": "org-key-set/1",
@@ -351,9 +486,24 @@
       "revoked": [
         "mem-2026-08"
       ],
+      "administrators": [
+        {
+          "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+          },
+          "rpId": "sign.orgs.example",
+          "origins": [
+            "https://sign.orgs.example"
+          ]
+        }
+      ],
       "alg": "EdDSA",
       "kid": "root-org-a-1",
-      "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+      "sig": "1m7WMmBNGbZD_GRMuJCyJ-_h7ZtA3plVjqDLZnAY53A6BHn3WqnI6CMNevDZzY_5Bj0fVn6g2W77p3otWOacAg"
     }
   },
   "keySetCases": [
@@ -371,10 +521,10 @@
       "expected": {
         "ok": true,
         "unchanged": false,
-        "digest": "sha256:1f131de6ce4abc2a05e59ed17ee8b9217f6ed73d283415daf3f4458b1e511a52",
+        "digest": "sha256:ca8d0468d17208012387011f3709b08a3a1bfefd267c56eb321fd378424a216f",
         "held": {
           "revision": 1,
-          "digest": "sha256:1f131de6ce4abc2a05e59ed17ee8b9217f6ed73d283415daf3f4458b1e511a52"
+          "digest": "sha256:ca8d0468d17208012387011f3709b08a3a1bfefd267c56eb321fd378424a216f"
         }
       }
     },
@@ -390,16 +540,16 @@
         },
         "held": {
           "revision": 1,
-          "digest": "sha256:1f131de6ce4abc2a05e59ed17ee8b9217f6ed73d283415daf3f4458b1e511a52"
+          "digest": "sha256:ca8d0468d17208012387011f3709b08a3a1bfefd267c56eb321fd378424a216f"
         }
       },
       "expected": {
         "ok": true,
         "unchanged": false,
-        "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0",
+        "digest": "sha256:855d152249f183102803b4e9f5976cf756dddf02d954a56a6df1b5bb9156e162",
         "held": {
           "revision": 2,
-          "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0"
+          "digest": "sha256:855d152249f183102803b4e9f5976cf756dddf02d954a56a6df1b5bb9156e162"
         }
       }
     },
@@ -415,16 +565,16 @@
         },
         "held": {
           "revision": 2,
-          "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0"
+          "digest": "sha256:855d152249f183102803b4e9f5976cf756dddf02d954a56a6df1b5bb9156e162"
         }
       },
       "expected": {
         "ok": true,
         "unchanged": false,
-        "digest": "sha256:7477741a8a82005142122ea44e3fcb4d75eddfd50805741d4293c0cb02997da2",
+        "digest": "sha256:0dddbefb959427e40a458a468b0ffcc4106773cb5108505990cdfb32c5472639",
         "held": {
           "revision": 3,
-          "digest": "sha256:7477741a8a82005142122ea44e3fcb4d75eddfd50805741d4293c0cb02997da2"
+          "digest": "sha256:0dddbefb959427e40a458a468b0ffcc4106773cb5108505990cdfb32c5472639"
         }
       }
     },
@@ -440,16 +590,16 @@
         },
         "held": {
           "revision": 2,
-          "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0"
+          "digest": "sha256:855d152249f183102803b4e9f5976cf756dddf02d954a56a6df1b5bb9156e162"
         }
       },
       "expected": {
         "ok": true,
         "unchanged": true,
-        "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0",
+        "digest": "sha256:855d152249f183102803b4e9f5976cf756dddf02d954a56a6df1b5bb9156e162",
         "held": {
           "revision": 2,
-          "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0"
+          "digest": "sha256:855d152249f183102803b4e9f5976cf756dddf02d954a56a6df1b5bb9156e162"
         }
       }
     },
@@ -465,7 +615,7 @@
         },
         "held": {
           "revision": 2,
-          "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0"
+          "digest": "sha256:855d152249f183102803b4e9f5976cf756dddf02d954a56a6df1b5bb9156e162"
         }
       },
       "expected": {
@@ -485,7 +635,7 @@
         },
         "held": {
           "revision": 2,
-          "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0"
+          "digest": "sha256:855d152249f183102803b4e9f5976cf756dddf02d954a56a6df1b5bb9156e162"
         }
       },
       "expected": {
@@ -507,10 +657,10 @@
       "expected": {
         "ok": true,
         "unchanged": false,
-        "digest": "sha256:256fd3a0a27ebd2f7edc95501202dd1f63591eed79435001a9be096eb89e9b12",
+        "digest": "sha256:f58db6bf9a6a8bea64ea4c25f4525d9798548d77d064dfa0bb168e7bcc673fc5",
         "held": {
           "revision": 1,
-          "digest": "sha256:256fd3a0a27ebd2f7edc95501202dd1f63591eed79435001a9be096eb89e9b12"
+          "digest": "sha256:f58db6bf9a6a8bea64ea4c25f4525d9798548d77d064dfa0bb168e7bcc673fc5"
         }
       }
     },
@@ -557,9 +707,24 @@
         "revoked": [
           "mem-2026-08"
         ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://sign.orgs.example"
+            ]
+          }
+        ],
         "alg": "EdDSA",
         "kid": "root-org-a-1",
-        "sig": "NmvBUpfXgN_UiHfwM1GtUPA-5A4FYfWOlORhXCsr4mCkhcGQSmWH7gDPUMtfWBJ1tExoypVc-EO4sDaS6fMyAg"
+        "sig": "WAdpxc1IK7XNcxqVWfVXo8gy2AmtqkoQnrjRZt_eBYKpcf3ICscHPQNWM1XVALKyzh-DKn_IBRxEIkl6JEJoBg"
       },
       "trust": {
         "root": {
@@ -617,9 +782,24 @@
         "revoked": [
           "mem-2026-08"
         ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://sign.orgs.example"
+            ]
+          }
+        ],
         "alg": "EdDSA",
         "kid": "root-org-a-1",
-        "sig": "rWa_Hpf5-k2rVrPkqKVx1Oqws_5LP6YOHOqs3ph9VEsJi73PtaA1Sjggoxu8P7e1BKbAQUiLmVPMvluFTRznAg"
+        "sig": "VdYUfo9Bb5D4HBxjdzaiY5kXxeg8Y7mh79Q8m_YfbdHZ6Xk01AyYcI98Ae5iUSITatL1NTS2fP0il9amS939Cg"
       },
       "trust": {
         "root": {
@@ -661,9 +841,24 @@
         "revoked": [
           "mem-2026-08"
         ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://sign.orgs.example"
+            ]
+          }
+        ],
         "alg": "EdDSA",
         "kid": "root-org-a-1",
-        "sig": "KVCHAX_0zAlvjIuw57yq-AYNyW8BIcbD0lny-rJDvwH07bfxJYJVZQcSomle49zqGs6k7KWLy0e5dqUe1jj_CA"
+        "sig": "sxSgljgop3MtfiyVCaD7eD1vUx_MlhF-UUeRUfWg8-OrfG9ROpPeeNjMDQYYNQrcHKorp_vg3w_yVfpGOetvAQ"
       },
       "trust": {
         "root": {
@@ -737,9 +932,201 @@
         "revoked": [
           "mem-2026-08"
         ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://sign.orgs.example"
+            ]
+          }
+        ],
         "alg": "EdDSA",
         "kid": "root-org-a-1",
-        "sig": "7nbmuYxeBYa7HkIrtqIYyvsLJ7V0_GRJ_yBYClcD1WqjMJal0qcVE9gBSuxaQPkhRK6MdiM6sbuRs_OUFqamBw"
+        "sig": "nhpuKBjHPr6U8TRNdbXcaCAMEPdZXG4fJjlVHbAn0p5GlnrDewGhkiAeHIdl3Pmzi6q224I-CZ-5C97S1YtcBA"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "small-order-key"
+      }
+    },
+    {
+      "name": "unusable key: an administrator under a sign-in RP (DEC-0129)",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "orgs.example",
+            "origins": [
+              "https://orgs.example"
+            ]
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "5zMBRIZaq1acOFWNi-rOxGGn8m8Hmgpn5N4wRM67MsfI_r8Onwp7WmRa72xoOz_KlSjelzax_6mrGOHP8e1VDQ"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unusable-key"
+      }
+    },
+    {
+      "name": "unusable key: an administrator's origin outside its RP (DEC-0129)",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://evil.example"
+            ]
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "POKn0sd3__F1qJj_gQu3wuxKNyD_UKOKcfc3fWpARGQ7VXm2BMe7aFZ-2Gh8NM7AVQxfDlPnn_yHTe_hMb0KAQ"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unusable-key"
+      }
+    },
+    {
+      "name": "small-order key: an administrator's key of order 4 (DEC-0129)",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://sign.orgs.example"
+            ]
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "RSrJSdom2SWB3mjTycSLoTFKQ4nQfiV1UMuPqfuUmcr4HtdImecNe64pgAPw9EKZOuNc6rRQ3g8C9rGGho4_Bw"
       },
       "trust": {
         "root": {
@@ -781,9 +1168,24 @@
         "revoked": [
           "mem-2026-08"
         ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://sign.orgs.example"
+            ]
+          }
+        ],
         "alg": "ES256",
         "kid": "root-org-a-1",
-        "sig": "sXAar6lbrJu0nHT6qYAV34ts0gKSrVstYIh5B8v30KCUWtP9ljfbbWOHf-_j7C8xmbMLrs9831GGS9SeUyWIBw"
+        "sig": "WWMBO4ElWwnExB-XOM1yyYngwe9JkvTw5jUNmubvs4KOKYk0vo5WiknlmxyOfpfxYE_pc_yL81jnejP3JbC4AQ"
       },
       "trust": {
         "root": {
@@ -825,9 +1227,213 @@
         "revoked": [
           "mem-2026-08"
         ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://sign.orgs.example"
+            ]
+          }
+        ],
         "alg": "EdDSA",
         "kid": "root-org-a-1",
-        "sig": "iRrIggwgmNaRb6A2X5OUKO1ofi4KStrG4OfbtBeH42wLKYar67rBi0JqxQS1WQQ3DVkWU4k3JRP1fC6mRMA5CA"
+        "sig": "ffXW-hAPpDy4f0bIcEfquw4kgwcsBLpRKb2SjbMHIejb4ED6yNjr4xQ2ezOryHRNrU5B8cDIQz_-PRqzGOIsDg"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an administrator's credential listed twice (DEC-0129)",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://sign.orgs.example"
+            ]
+          },
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://sign.orgs.example"
+            ]
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "uo5ImX9AcAOXblrUixIzPJdnzzsktt8G4kyr_SoLU7dkeKDv7QORwAk96BpcOMEmUYqal4Oh8ZODzHih_Mp2Dw"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an administrator with no origin (DEC-0129)",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": []
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "gRdWVJFU3uyJxiwvQR1a4bwB1l-N1Rr3E6S1rlPxtRQxvjpHPLEmTFZ8DoSBNRvBZqpN39t5izGCXOmweyL5Dg"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an administrator's origin listed twice (DEC-0129)",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://sign.orgs.example",
+              "https://sign.orgs.example"
+            ]
+          }
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "595J5VNcM55M9cChaZD3waWoro0PSjOVuKIxnXXu1QKO-IS4OGttJ-P6p_YaJKvLMMU-QT1TRiOE-qTF8LSeAQ"
       },
       "trust": {
         "root": {
@@ -868,9 +1474,24 @@
         "revoked": [
           "mem-2026-08"
         ],
+        "administrators": [
+          {
+            "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+            "alg": "EdDSA",
+            "publicKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+            },
+            "rpId": "sign.orgs.example",
+            "origins": [
+              "https://sign.orgs.example"
+            ]
+          }
+        ],
         "alg": "EdDSA",
         "kid": "root-org-a-1",
-        "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+        "sig": "1m7WMmBNGbZD_GRMuJCyJ-_h7ZtA3plVjqDLZnAY53A6BHn3WqnI6CMNevDZzY_5Bj0fVn6g2W77p3otWOacAg"
       },
       "trust": {
         "root": {

@@ -36,8 +36,9 @@
     "revoked": [
       "mem-2026-08"
     ],
+    "administrators": [],
     "alg": "EdDSA",
     "kid": "root-org-a-1",
-    "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+    "sig": "HXZ3Z4J_HXFcykazle2breySQNW6Bw5AF4aMOynUD6EWtkV2tbWtToC_xW2u26pJH3Bjmtbsa8_v1IfXmiHrCQ"
   }
 }

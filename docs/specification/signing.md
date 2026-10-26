@@ -5,7 +5,8 @@ DEC-0063 · rule code `FAC-SEM-092` · the register of signed statements in
 vectors [`fixtures/vectors/signing-challenges.json`](../../fixtures/vectors/signing-challenges.json)
 
 A person's passkey signs the records that decide what runs on their machines and what money may be spent: an estate
-revision, a share grant, limits, and in an organization an administrator's countersignature. This page makes two things
+revision, a share grant, limits, and in an organization an administrator's countersignature and the organization's
+member list (DEC-0129). This page makes two things
 a contract: **what** a passkey signs — a challenge derived from a typed statement in one register — and **where** it
 signs — under a dedicated signing RP, `sign.<domain>`, with a credential that is never the one the person signs in with.
 
@@ -51,7 +52,8 @@ SHA-256 of the UTF-8 RFC 8785 form of `{type, ...fields}` (`signingChallenge`). 
   package version (`digest`, DEC-0050) for one listing — its `audience`, its grant (`<id>#<revision>`) and the
   organization record's `revision`. v4 §6 Path 4 lists the last four; `organization` is added because hosted
   organizations may share PassionCode's signing RP, and one administrator's credential may be certified by two
-  organizations: without it, a countersignature for one organization's listing would verify for another's with the same
+  organizations (DEC-0129 has an administrator register one credential per organization for `org-key-set/1`, but a
+  countersignature's verifier must not rely on it): without it, a countersignature for one organization's listing would verify for another's with the same
   grant and revision.
 - **`share-grant/1`** `{estate, grant, jkt, expiresAt}`: the owner's confirmation that an outside person's key may act
   under a share grant until `expiresAt` (v4 §6 Path 7 step 3). `jkt` is the base64url RFC 7638 SHA-256 thumbprint of
@@ -61,6 +63,9 @@ SHA-256 of the UTF-8 RFC 8785 form of `{type, ...fields}` (`signingChallenge`). 
   with which a machine without a screen joins an estate, for at most 900 s, purpose `agent-host`, one use (DEC-0084,
   [ceremonies](ceremonies.md#a-headless-machine)). `ceiling` is `null` for none, so the field list stays one list. The
   joining machine proves its `#sig` key with the key-signed `enroll-join/1` `{digest, nonce}` over that token.
+- **`org-authority/1`** `{digest}`: an administrator's signature of the organization's member list by its digest, as
+  `estate-revision/1` signs an estate revision; the administrator's credential is one the organization's root lists in
+  `org-key-set/1`'s `administrators` (DEC-0129, [membership](membership.md#the-organizations-member-list)).
 - **`limits/1`** `{scope, digest}`: approval of a limits document, the estate's (`estate:<id>`) or an organization's
   (`organization:<id>`), by its `sha256:` digest over RFC 8785. The document's shape — an estate's windows, an
   organization's levels and allowances — is not decided here; the approval binds whatever document the digest names.
@@ -97,19 +102,23 @@ another grant (`wrong-challenge`), one by a sign-in credential (`wrong-rp`) and 
   ([ceremonies](ceremonies.md), DEC-0084); it registers each person's signing credential under its signing RP ID, apart from the sign-in
   credential; runs every ceremony in the person's Fabric or the pinned static page; computes each challenge with the
   register's statement; and signs `share-grant/1` when an owner confirms an outside person, and `limits/1` when a person
-  sets their estate's limits.
+  sets their estate's limits; in an administrator's Fabric it registers one more signing credential per organization
+  (never an estate authority) and signs `org-authority/1`, the organization's member list, with it (DEC-0129).
 - **Project Observatory's node** (CT-20) verifies estate revisions under signing credentials only (`verifyEstateRecord`,
   which now refuses a sign-in credential); a node that later verifies a countersignature or a share-grant binding uses
   `verifySigningAssertion` with the register's type.
-- **The first organization server** pins its administrators' and finance approvers' signing credentials under its
-  `sign.` RP ID in `org-authority/1` and never serves a signing page.
+- **The first organization server** lists its administrators' signing credentials under its `sign.` RP ID in the
+  `administrators` of its `org-key-set/1`, which the organization's root signs (DEC-0129), and never serves a signing
+  page; where a finance approver's are pinned is not decided.
 
 ## Not decided here
 
-- Where an administrator's and a finance approver's signing credentials are pinned and certified, their quorum, delay
-  and device binding (`org-authority/1`). Until then `org-countersign/1` is registered but no verifier reads it, and the
-  package's organization countersignature stays DEC-0051's detached signature; replacing it with the passkey assertion is
-  a breaking change for organization countersignatures, stated by the decision that defines `org-authority/1`.
+- Where a finance approver's signing credentials are pinned and certified, and the contract's check of
+  administrators' quorum, delay and device binding (Fabric ADR-0178 requires device-bound credentials and, in R1, one
+  signature; DEC-0129 pins administrators' signing passkeys for the member list only). Until then
+  `org-countersign/1` is registered but no verifier reads it, and the package's organization countersignature stays
+  DEC-0051's detached signature; replacing it with the passkey assertion is a breaking change for organization
+  countersignatures, stated by the decision that defines its verifier.
 - The shape of a limits document and where approved limits are stored.
 - How the outside person's key is first registered and shown to the owner (the relay's OAuth page and its 6-digit
   code, v4 Path 7), beyond the binding `share-grant/1` signs.

@@ -181,7 +181,7 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
   holds one per slot, reserves only as `mayReserve` answers (the smaller of its own remainder and the lease's, and
   nothing after expiry), and reports `records.leases[]` with `spent` (to its hub over the relay, CT-152; never in a check-in to an organization server, DEC-0128 UE-2).
 - **An organization server** hands leases of organization windows in the check-in response (v4 Path 5); the scope
-  `estate` is the only one v4 uses, and organization windows wait on `org-authority/1`.
+  `estate` is the only one v4 uses, and organization windows wait on a decision beyond the member list `org-authority/1` (DEC-0129).
 
 ## Privacy
 
@@ -199,4 +199,4 @@ machine.
   fields and the relay's message carriage (DEC-0047).
 - Where an estate's window limits are signed (`limits/1`, [signing challenges](conformance.md#signing-challenges)):
   until a document carries them, a meter's `remainderUsd` is its configured limit.
-- Organization windows, member allowances and their leases (`org-authority/1`); `ES256` hub keys (Fabric's D2).
+- Organization windows, member allowances and their leases (beyond DEC-0129's member list); `ES256` hub keys (Fabric's D2).

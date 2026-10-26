@@ -327,8 +327,8 @@ export type AdmissionResult =
  * machines and keys, and minus every key that could never verify a relay signature (an Ed25519 key, or one SEC 1
  * refuses), which `excluded` names for the relay's log; or why there is none. A refused candidate changes nothing: the caller keeps `held`. When the held
  * revision's window has ended the relay fails closed (`expired`): no new `auth` is admitted until a newer verified
- * revision arrives. The organization record has no reference yet (`org-authority/1`, decided with CT-122, CT-37), so an organization's
- * relay has no admission source of its own. A held record whose `revision` is no positive integer is refused `invalid`,
+ * revision arrives. An organization's admission set comes from its member list instead (`orgRelayAdmissionSet` in
+ * `src/org-authority.ts`, DEC-0129). A held record whose `revision` is no positive integer is refused `invalid`,
  * and a machine whose `id` is no string admits no key (CT-111): the function never throws on a JSON value.
  */
 export function relayAdmissionSet(input: AdmissionInput): AdmissionResult {

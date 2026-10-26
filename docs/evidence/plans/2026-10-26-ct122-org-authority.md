@@ -83,6 +83,10 @@ The scope brief is [`2026-10-24-ct122-unlinkable/brief.md`](../specs/2026-10-24-
 
 ## DEC-0129: `org-authority/1`, the member list only (CT-37)
 
+Superseded as decided: Fabric ADR-0178 point 2 has an administrator's passkey, not the key set's signing keys, sign the
+list, and the admission set lives in `src/org-authority.ts`; see [membership](../../specification/membership.md#the-organizations-member-list)
+OL-1 to OL-5 and DEC-0129. The plan below is kept as written.
+
 - **The document.** One new schema, `org-authority/1`: an organization's signed list of admitted members. Each entry is
   a `subject` (DEC-0127's pairwise id for the relay's audience), the context `iss` and the context `#sig` keys, under a
   revision and an expiry.

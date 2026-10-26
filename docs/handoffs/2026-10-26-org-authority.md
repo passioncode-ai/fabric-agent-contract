@@ -1,0 +1,72 @@
+# 2026-10-26: the organization's member list (DEC-0129), the next task the release of DEC-0127 to DEC-0129
+
+## Objective
+
+Give an organization's relay a signed admission source (CT-37, the last open part of TP-00) that no server signs, as
+Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request `d5cbabfd` (TP-03's organization part).
+
+## Done
+
+- DEC-0129: [membership](../specification/membership.md#the-organizations-member-list), OL-1 to OL-5.
+  - **Document.** `org-authority/1`: members by pairwise subject, role, context issuer and enrollment `#sig` keys, at
+    most 7 days, `FAC-SEM-150`.
+  - **Signer.** An administrator's signing passkey that the root lists in `org-key-set/1`'s new `administrators`
+    (`FAC-SEM-146` widened); the register's `org-authority/1` challenge.
+  - **Code.** `verifyOrgAuthority` (`src/org-authority.ts`), `orgRelayAdmissionSet` (also `src/org-authority.ts`, outside the relay's import closure), the admission
+    set only: an organization relay's handshake waits on the organization's heartbeat and delta (CT-37 keeps it).
+  - **The root's holder.** The organization owner's Fabric, never a server (A-3); OM-8 annotated.
+  - **OM-7.** Four rows: the owner's (the root's key and key-set signatures) and an administrator's (a passkey's public
+    part and list signatures), also for an organization being created; the member list's `iss`; an adaptation plan's
+    organization part (TP-03).
+  - **UX.** SCN-047 takes ADR-0178's fingerprint check; SCN-049, the administrator signs the list.
+- CT-37 stays open for the relay's handshake. CT-153 filed (member-list vectors, the D8 sweep); CT-155 (the readings' small follow-ups).
+
+## Checks actually run
+
+- `pnpm run check`: 104 files, 9 189 tests, UX lint, docs, privacy 0. `pnpm vectors:check`: 23 files match.
+- Blind readings, round 1: unit pass (five risks, fixed); seam fail (the relay's handshake, narrowed); product fail
+  (the root's holder, the `iss` row, the passkey type list, DEC-0051 and DEC-0063, scenarios; fixed).
+- Round 2: unit pass, seam pass (risks fixed: the admission set moved beside its verifier), product fail (package.md,
+  CT-04; fixed). Round 3: unit pass, seam pass (DOCMAP's type list, the shared credential check, the held list's
+  refusal; fixed), product fail (SCN-049 against OL-5; fixed with seven smaller lines). Round 4: unit pass,
+  product fail (OM-7 lacked the owner's and administrators' outflows; the owner's Fabric had no review duty; fixed).
+- Round 5: unit pass; seam pass (verifyOrgKeySet now refuses an unusable administrator, three vector cases); product
+  fail (an administrator's credential could be an estate authority; fixed: one credential per organization).
+- Round 6: unit pass; seam fail (the register's "one field list for good" rule, qualified by DEC-0119); product fail (a
+  refused candidate in DEC-0129 item 4 and conformance; D8-b's estate passkeys as administrators; fixed). The
+  administrator's shape now matches the schema.
+- Round 7: unit pass (a held list that cannot be read back is now `held-invalid`); seam pass; product fail (OM-7
+  now covers an organization being created; the administrator's duties in the party rows; fixed).
+- Round 8: unit fail (`held-invalid` hidden behind a schema-invalid candidate; fixed: the held list is read first);
+  product fail (SCN-047's precondition; the person's admission against the relay's, in OL-2 and FLW-32; fixed).
+- Round 9: unit pass, seam pass; product fail (DEC-0129's Alternatives on the owner's passkeys; DEC-0119 restated in the
+  register rule; fixed). Non-blocking findings of rounds 8 and 9 are CT-155.
+- Rounds 10 and 11: unit, seam and product pass, nothing blocking; their non-blocking findings joined CT-155.
+
+## Decisions
+
+- **No server signs the list.** ADR-0178 point 2 replaced the plan's signing keys with an administrator's passkey.
+- **Administrators live in the key set.** The root already signs it and the person already pins the root, so no new pin.
+- **The root stays Ed25519.** ADR-0178 D8-b's estate passkeys are not used: the owner registers a credential for the organization alone, the first set's administrator; a passkey root is
+  a later pin form, named on the board.
+- **`administrators` is required** in `org-key-set/1`, a narrowing before its first tag (DEC-0127's annotation). It
+  `$ref`s the estate record's `authority`, so a consumer vendoring by `schemaClosure` copies 18 schemas for
+  `org-key-set` instead of 9.
+
+## Open
+
+- **The release.** Tag DEC-0127 to DEC-0129 together; the notes list three narrowings (DEC-0119):
+  `organizationPin.iss`, `org-key-set/1.administrators`, and the membership root moving from the server to the owner's
+  Fabric.
+- **For the first organization server.** Its design describes a server-signed `org-authority/1` carrying levels,
+  allowances, presets, approvers and listings; DEC-0129 makes it a member list only, signed by an administrator's
+  passkey, with the root in the owner's Fabric. Told on the board, thread `bd508780` (message `03c84356`), before the merge.
+- **For Fabric (board thread `8d115bed`).** A passkey root; how a member's estate verifies an administrator's passkey
+  over a project's leaving (MC-13, ADR-0178 point 7), since the estate record admits its own passkeys only.
+- **CT-143** (the family, T0 over the operator's estate), due 2026-11-07. CT-150, CT-151, CT-152.
+
+## Next task
+
+Merge, update fabric-workspace `knowledge/integration.md` row X-6 (it says `org-authority/1` follows as DEC-0128; it is
+DEC-0129) and publish, then tag `v0.1.0+2026-10-26.4` (or the next free suffix) carrying DEC-0127 to DEC-0129 (DEC-0108), answer `d5cbabfd` in
+thread `8d115bed`, then CT-143.

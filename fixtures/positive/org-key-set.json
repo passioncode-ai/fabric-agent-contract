@@ -23,7 +23,22 @@
   "revoked": [
     "mem-2026-08"
   ],
+  "administrators": [
+    {
+      "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+      "alg": "EdDSA",
+      "publicKey": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+      },
+      "rpId": "sign.orgs.example",
+      "origins": [
+        "https://sign.orgs.example"
+      ]
+    }
+  ],
   "alg": "EdDSA",
   "kid": "root-org-a-1",
-  "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+  "sig": "1m7WMmBNGbZD_GRMuJCyJ-_h7ZtA3plVjqDLZnAY53A6BHn3WqnI6CMNevDZzY_5Bj0fVn6g2W77p3otWOacAg"
 }
