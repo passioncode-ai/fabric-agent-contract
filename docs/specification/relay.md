@@ -151,7 +151,8 @@ enrollment's kid, which the node shows (a list entry names a pairwise subject, n
 clock and update the client. It retries no more often than its backoff, and never asks the person to re-enter a secret for
 it.
 
-**The admission set** is the set of `#sig` keys of the machines in the estate record the relay holds, minus revoked
+**The admission set** of an estate's relay (an organization's is its member list's, below and OR-3) is the set of
+`#sig` keys of the machines in the estate record the relay holds, minus revoked
 machines and keys — a `device-key` revocation names a kid or a key reference `<kid>@sha256:<hex>` (DEC-0084); the set
 subtracts a key either names, and reports in `unread` a delta revocation whose ref holds `@` but is no key reference —
 minus a `#sig` key listed under a kid other than its own machine's `<id>#sig`, and every key of a kid listed twice (F7,
@@ -241,7 +242,9 @@ signed (OL-5) and the admission set does not empty between the two. A key set th
 the list read with it is refused: the relay then re-reads the held list under the new set (OR-3), so when the root
 removed the held list's signer and no other administrator's list verifies yet, it admits nobody until one does (OL-5)
 and fails closed rather than keep a removed administrator's list. It never checks a list under a key set older than the
-newest it verified, and it reads the key set with every list it reads.
+newest it verified, and it reads the key set with every list it reads: it passes the key set it holds (its
+`{revision, digest}`) to `verifyOrgKeySet` as `held`, and keeps it across a restart, so an older set the root signed is
+`stale-revision`.
 
 **OR-5, between members.** On an organization's relay every member is T2 to every other, two enrollments of one owner
 included: an enrollment's kid is never in an estate record (UE-1), so no recipient can place it in T1, and no text may

@@ -7777,7 +7777,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   organization server drafts, an administrator's Fabric signs, an organization's relay admits).
 - **Annotated (2026-10-26):** DEC-0134 decides the organization relay's handshake (relay.md OR-1 to OR-5): a
   member's `auth` names the organization, `welcome` carries the list, sessions stand under it; the attestation status
-  check is CT-162.
+  check is CT-162. OR-3 and OR-4 narrow item 4: a refused candidate leaves the held list, re-read under the
+  newest key set the relay verified, which it applies even when the list read with it is refused, so a held list whose
+  signer that set dropped admits nobody (fail closed).
 - **Context:** DEC-0127 left the organization's list of admitted members for its relay to be decided with CT-122,
   because its entries are the members' keys per context; DEC-0128 gave each enrollment its own keys and each context its
   own issuer. Fabric ADR-0178 (D8, fabric `cf99c32f`, 2026-10-26) settled who signs: an administrator's device-bound
@@ -8080,15 +8082,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   handshake needs them); a new frame type for an organization's auth (the existing frame names its record already);
   taking ADR-0180 point 4's status check now (the relay is not yet an attestation audience: CT-162); placing two
   enrollments of one owner in T1 to each other (it would link an enrollment to its estate, UE-1).
-- **Compatibility:** additive. `contractVersion` stays `0.1.0`. No organization relay ran before this decision, so no
-  client met the new `welcome`. `FRAME_TYPES` is unchanged; `welcome` has two schema variants.
+- **Compatibility:** additive, with one narrowing of DEC-0129 item 4 (a refused candidate no longer keeps the held
+  list's set in force under a key set that dropped its signer) before any organization relay ran. `contractVersion`
+  stays `0.1.0`. No organization relay ran before this decision, so no client met the new `welcome`. `FRAME_TYPES` is
+  unchanged; `welcome` has two schema variants.
 - **Consequences / affects:** `schemas/relay-frame.schema.json`; `src/relay.ts` (`SessionAdmission`);
   `docs/specification/relay.md` (The organization's relay, OR-1 to OR-5; the header and the member-list paragraph),
   `membership.md` (OL-4, OL-6, OX-6, Who adopts it, Not decided), `conformance.md`, `CONTEXT.md` (Admission set,
   Revocation delta), `revocation-delta.md`, `ceremonies.md` and `devices.md` (an estate relay's `welcome`), `docs/specification/README.md`, `docs/DOCMAP.md`, `devices.md` and `contexts.md` (What stays
   linkable: an operator running two of a machine's relays sees its two connections), `docs/ux/scenarios.md` (SCN-049);
   DEC-0047, DEC-0066, DEC-0129 and DEC-0133 annotated; `test/org-authority.test.ts`, `test/relay.test.ts`; backlog
-  CT-36, CT-37, CT-162, CT-163, CT-164; `machine-calls.md` (the adopters' table), `docs/ux/scenarios.md`, `docs/ux/flows.md` and `docs/ux/foundation.md` (the hub move's relay),
+  DEC-0129 annotated (item 4 narrowed); CT-36, CT-37, CT-162, CT-163, CT-164; `machine-calls.md` (the adopters' table), `docs/ux/scenarios.md`, `docs/ux/flows.md` and `docs/ux/foundation.md` (the hub move's relay),
   `schemas/revocation-delta.schema.json` and `src/revocation-delta.ts` (descriptions), `test/relay-rules.test.ts`;
   the handoff.
 - **Source:** CT-37; DEC-0047, DEC-0066, DEC-0084, DEC-0128, DEC-0129; Fabric ADR-0180 point 4.
