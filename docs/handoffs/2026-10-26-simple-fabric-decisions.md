@@ -36,7 +36,7 @@ session; an optional session `role` and `branch` with a privacy rule.
   twin.
 - A host or kit that starts recording a session's branch (PR-3) changes its own "no branch" promise in the same
   change: Fabric's `fabric_session_observe` description and the adapter's working-with-fabric `session-hooks.md`.
-- Fabric's design marks the oldest live slot's holder as main until `project.work` is held; PR-1 shows none, so the
+- Fabric's design marks the oldest live slot's holder as main until a session occupies `project.work`; PR-1 shows none, so the
   fallback goes when Fabric adopts (raised on thread `6a8d2f9c`).
 
 ## Checks actually run

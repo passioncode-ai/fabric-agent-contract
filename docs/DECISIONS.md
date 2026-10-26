@@ -375,7 +375,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the thread or a list of participants.
 - **Annotated (2026-10-26):** amended by DEC-0140: `project.work` is the reserved capability of a Project's primary
   responder; the operator who owns a Project may move an occupied slot to another authorized session as one fenced
-  transition, after which the ordinary rules hold it; a session role is a claim, and a reported branch stays in its
+  transition, after which the ordinary rules govern it; a session role is a claim, and a reported branch stays in its
   Project but for an activity event's `git.branch` under `telemetry.git_branch`.
 - **Decision:** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
   board on which messages are addressed to a Project, and through a request to a capability of
@@ -8293,14 +8293,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Decision:** [project communication](specification/project-comms.md) PR-1 to PR-3.
   1. **PR-1.** `project.work` (`PRIMARY_CAPABILITY`) is the reserved capability a requester names to reach a Project's
      primary responder; the board never re-routes another capability to it; otherwise a capability like any other. A
-     host shows its holder as the main session, none while nobody holds it. No service serves or declares it.
+     host shows its holder as the main session (a `stale` one as not answering), none while the slot is `absent`. No
+     service serves or declares it.
   2. **PR-2.** The operator who owns the Project (in an organization, that member only) moves an occupied (Project,
      capability) slot to another live, authorized session of that Project than its holder, in
      the host's controls or by a relayed decision (`gate: relayed`), never an agent on its own account; from the
      generation the operator saw (`revision_conflict` otherwise); one transition as `com.responder_replace` would
      make it for the receiving session, transferring nothing; refused `held` under a slot or Project hold. After it
-     the board's ordinary rules hold the slot: a move bars nobody, and a host keeps the operator's choice as its own
-     state, showing when the holder is no longer the chosen session and offering the move again. The receiving
+     the board's ordinary rules govern the slot: a move bars nobody, and a host keeps the operator's choice as its own
+     state, showing when the holder is no longer the chosen session and offering the move again while the chosen
+     session is live. The receiving
      session continues accepted work by its own replacement with a transfer, or the requester cancels it.
   3. **PR-3.** A session role is a claim, display and routing only, never authority, and not a role assignment; the
      host never copies a session's reported branch into the board, the directory, `com.status`, a relay, an
@@ -8315,7 +8317,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   would change, and an agent could move slots by itself); transferring accepted work as part of the move (a transfer's
   checkpoint is written by its caller, and the operator writes none; the receiving session writes its own by
   replacing itself); a host bar on the moved-off session (a reconnect gets a new session id, and barring the binding
-  would bar the same agent's other terminals); a client rule to recover only at the generation its checkpoint held
+  would bar the same agent's other terminals); a client rule to recover only at the generation its checkpoint recorded
   (released clients replace at the generation `com.status` shows, which the replace schema tells them to, so it would
   be a second narrowing no released client meets; it is the clients' own improvement, CT-175); a session role that grants a slot (a claim would become authority).
 - **Compatibility:** additive, with the one narrowing named in Status. `contractVersion` stays `0.1.0`.
