@@ -2,7 +2,7 @@ import { createHash, createPublicKey, verify as verifySignature } from "node:cry
 import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, indexed, isObject, show } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
-import { ORG_KEY_SET_FIELDS, ORG_MEMBERSHIP_FIELDS, isSigningRpId, originWithin, signingStatement } from "./signing-challenges.js";
+import { ORG_KEY_SET_FIELDS, ORG_MEMBERSHIP_FIELDS, signingCredentialFindings, signingStatement } from "./signing-challenges.js";
 import { ASSERTION_ALGORITHMS, credentialKey } from "./webauthn.js";
 
 // #region org-membership, docs: docs/specification/membership.md
@@ -381,10 +381,8 @@ function keySetDocument(value: JsonObject, flag: Flag): void {
     credentials.add(id);
     // As FAC-SEM-073 flags an estate's authority: a key no verifier can use certifies an administrator who can never sign.
     if (ASSERTION_ALGORITHMS.includes(admin.alg as string) && "problem" in credentialKey(admin.publicKey, admin.alg as string)) flag(`${at}/publicKey`, "an administrator's key is a usable key of its algorithm, never of small order");
-    if (!isSigningRpId(admin.rpId)) flag(`${at}/rpId`, "an administrator signs only under a dedicated signing RP, sign.<domain> (DEC-0063)");
-    else list(admin.origins).forEach((origin, n) => {
-      if (!originWithin(origin, admin.rpId as string)) flag(`${at}/origins/${n}`, `a signing ceremony runs only on ${show(admin.rpId)} or a host under it, over https without a port`);
-    });
+    // FAC-SEM-092's own check of a signing credential, reported under this rule's code.
+    for (const finding of signingCredentialFindings(admin, at)) flag(finding.instancePath, finding.message);
   }
 }
 

@@ -112,8 +112,9 @@ another grant (`wrong-challenge`), one by a sign-in credential (`wrong-rp`) and 
 
 ## Not decided here
 
-- Where a finance approver's signing credentials are pinned and certified, and administrators' quorum, delay and
-  device binding (DEC-0129 pins administrators' signing passkeys for the member list only). Until then
+- Where a finance approver's signing credentials are pinned and certified, and the contract's check of
+  administrators' quorum, delay and device binding (Fabric ADR-0178 requires device-bound credentials and, in R1, one
+  signature; DEC-0129 pins administrators' signing passkeys for the member list only). Until then
   `org-countersign/1` is registered but no verifier reads it, and the package's organization countersignature stays
   DEC-0051's detached signature; replacing it with the passkey assertion is a breaking change for organization
   countersignatures, stated by the decision that defines its verifier.

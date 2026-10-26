@@ -24,6 +24,9 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
 - `pnpm run check`: 104 files, 9 184 tests, UX lint, docs, privacy 0. `pnpm vectors:check`: 23 files match.
 - Blind readings, round 1: unit pass (five risks, fixed); seam fail (the relay's handshake, narrowed); product fail
   (the root's holder, the `iss` row, the passkey type list, DEC-0051 and DEC-0063, scenarios; fixed).
+- Round 2: unit pass, seam pass (risks fixed: the admission set moved beside its verifier), product fail (package.md,
+  CT-04; fixed). Round 3: unit pass, seam pass (DOCMAP's type list, the shared credential check, the held list's
+  refusal; fixed), product fail (SCN-049 against OL-5; fixed with seven smaller lines).
 
 ## Decisions
 
@@ -37,6 +40,9 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
 
 - **The release.** Tag DEC-0127 to DEC-0129 together; the notes list `organizationPin.iss` and
   `org-key-set/1.administrators` as narrowings (DEC-0119).
+- **For the first organization server.** Its design describes a server-signed `org-authority/1` carrying levels,
+  allowances, presets, approvers and listings; DEC-0129 makes it a member list only, signed by an administrator's
+  passkey, with the root in the owner's Fabric. Told in the reply on thread `8d115bed`.
 - **For Fabric (board thread `8d115bed`).** A passkey root; how a member's estate verifies an administrator's passkey
   over a project's leaving (MC-13, ADR-0178 point 7), since the estate record admits its own passkeys only.
 - **CT-143** (the family, T0 over the operator's estate), due 2026-11-07. CT-150, CT-151, CT-152.

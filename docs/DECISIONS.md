@@ -2535,6 +2535,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-12
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption:
+- **Annotated (2026-10-26):** DEC-0129 gives an organization's relay its admission set (`orgRelayAdmissionSet`, the
+  member list `org-authority/1`); the organization relay's handshake stays open (CT-37).
 - **Annotated (2026-10-15):** amended by DEC-0084: a relay opens a one-time pairing rendezvous that lives at most 600 s and carries `pairing-message/1` frames only, with one `abort` after both reveals (relay.md, *The pairing rendezvous*; its frame types are not decided); `relayAdmissionSet` subtracts a key revoked by its kid or its key reference `<kid>@sha256:<hex>` and reports a malformed reference (`unread`); F7: it admits a `#sig` key only under its own machine's kid `<id>#sig`, and a kid listed twice for neither (`bad-key`), as `FAC-SEM-073` says, even over a held record; an open session stands only while its kid maps to the key octets it was proven under (`sessionStands`, which amends DEC-0066's revalidation by kid), so a session proven under a replaced key ends; `estateEnvelopeContext` takes the applied delta entries' revocations (`extraRevocations`), so an envelope's sender key is refused once a delta revokes it. Shared vectors: `fixtures/vectors/relay.json` `admissionSet` (five new cases) and `session` (new).
 - **Annotated (2026-10-13):** amended by DEC-0082: an envelope names no context, so a target's open context (`estateEnvelopeContext`) reads only personal secret placements, and an organization's instance fills its slot on its own machine (`FAC-SEM-075`), never by an envelope (`docs/specification/contexts.md`).
 - **Annotated (2026-10-12):** the `Fabric-Relay-Request` wire form, which DEC-0047 left unspecified: base64url (no padding, canonical) of the RFC 8785 bytes of `{alg, kid, recipients, iat, sig}`, at most 8192 bytes (431 `too-large`), parsed strictly (400 `malformed`); 1–64 `#sig` recipients of at most 256 characters; a GET's signer must be a stored recipient, sign the stored list letter for letter and be in the current admission set; a PUT of a held blob with another list is 409 `recipients-mismatch` (a new code); the reference is `parseRelayRequest`/`verifyBlobRequest`, the vectors `fixtures/vectors/relay.json` `blobRequest` ([relay](specification/relay.md#blobs)).
@@ -3695,6 +3697,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   every shared case, signs its test traffic with `signEs256`, and builds the admission, frames, blob and delta parts
   (its RP, A-3…A-7, B-1, C-1, D-1, D-2, H-1, H-2; CT-33); Project Observatory's node seals with a sequence, keeps the
   mark with its vault and checks replays (CT-34); every relay client signs low-S.
+- **Annotated (2026-10-26):** DEC-0129 decides `org-authority/1` and an organization relay's admission set (CON-023's
+  source); the organization relay's handshake and how one relay serves several contexts stay open (CT-37, RLY-08).
 - **Amends:** DEC-0047 items 2, 3, 4, 5, 7, 8 and 9, in place: nothing is deployed (the hosted relay's RLY-05 is
   open, and no envelope exists outside tests). Folds in DEC-0047's 2026-10-12 annotation of the blob request. Also
   amends the window of DEC-0055 (ER-10) and DEC-0060 (DL-14), each annotated. Closes the relay audit's CON-001…CON-017,

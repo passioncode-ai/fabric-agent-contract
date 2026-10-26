@@ -798,14 +798,16 @@ flowchart TD
 - **Goal:** the member joins by their own act; their Fabric trusts the membership only from what the organization's pinned root vouches for
 - **Entry points:** the member's join in Fabric; an organization server's attestation; a refresh due 15 minutes before expiry; an `ended` attestation or `organization-closed`
 - **Success exit:** the organization pinned in the estate record, a verified attestation held per subject, the role read from it
-- **Task analysis:** the member starts a join → Fabric reads the organization's root from its server and shows it → the member's passkey signs the estate revision that pins it → Fabric applies the organization's key set under the pin → it verifies each attestation for its own organization and audience → it refreshes before expiry; an end revokes the context's share grants and stops what leaves; an expiry only suspends.
+- **Task analysis:** the member starts a join → Fabric reads the organization's root from its server and shows it → the member compares its fingerprint with the administrator's invitation (a mismatch pins nothing) → the member's passkey signs the estate revision that pins it → Fabric applies the organization's key set under the pin → it verifies each attestation for its own organization and audience → it refreshes before expiry; an end revokes the context's share grants and stops what leaves; an expiry only suspends.
 - **Rejected shape:** an administrator admitting the member, or a reader trusting a server's key fetched on each request: rejected, because R1-D12 keeps the admission the person's, and a pin makes a new root the person's act rather than a silent re-key (DEC-0127).
 - **Flow:**
 
 ```mermaid
 flowchart TD
   J[Member joins] --> P[Fabric shows the server and its root]
-  P --> S[Passkey signs the revision that pins it]
+  P --> C{fingerprint matches the invitation}
+  C -->|no| N[Nothing pinned, reason shown]
+  C -->|yes| S[Passkey signs the revision that pins it]
   S --> K[Key set applied under the pin]
   K --> A{attestation verifies for this org and audience}
   A -->|no| R[Refused with the reason]

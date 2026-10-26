@@ -234,11 +234,12 @@ export function orgRelayAdmissionSet(input: OrgAdmissionInput): OrgAdmissionResu
   // A held list that cannot be read back (no positive revision, no RFC 8785 form) is refused, never treated as none:
   // dropping it would drop the rollback guard (as `relayAdmissionSet` in `src/relay.ts` refuses such a record, CT-111).
   let held: { revision: number; digest: string } | undefined;
-  if (offered && input.held !== undefined) {
+  if (input.held !== undefined) {
     const revision = isObject(input.held) ? input.held.revision : undefined;
     if (typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 1) return { ok: false, refusal: "invalid" };
     try {
-      held = { revision, digest: orgAuthorityDigest(input.held as JsonObject) };
+      const digest = orgAuthorityDigest(input.held as JsonObject);
+      if (offered) held = { revision, digest };
     } catch {
       return { ok: false, refusal: "invalid" };
     }

@@ -232,6 +232,7 @@ describe("orgRelayAdmissionSet: an organization's relay admits from its member l
     // A held list it cannot read back keeps its rollback guard: the candidate is refused, never applied as if none were held.
     for (const held of [{ ...BASE, revision: Number.NaN }, { ...BASE, revision: "9" }, "x", { ...BASE, revision: 9, members: [{ subject: "\ud800" }] }]) {
       expect(admit({ held, candidate: BASE }), JSON.stringify(held).slice(0, 40)).toEqual({ ok: false, refusal: "invalid" });
+      expect(admit({ held }), JSON.stringify(held).slice(0, 40)).toEqual({ ok: false, refusal: "invalid" });
     }
     // A held list is verified again, and FAC-SEM-150 refuses what is not a member's key; were it ever admitted, only #sig kids with a P-256 key count.
     expect(admit({ held: resign({ ...BASE, members: [{ ...BASE.members[0], keys: [{ kid: "en-x#enc", publicKey: BASE.members[0].keys[0].publicKey }] }] }) })).toEqual({ ok: false, refusal: "unverified", problem: "rule-violation" });

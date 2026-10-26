@@ -228,9 +228,9 @@ and until a node adopts it they still link one machine across organizations ([co
   it, never silence alone, and it revokes every device certificate of the person's enrollments in that organization (DEC-0031).
 - It keeps the subject pairwise and opaque, and puts no person's name, address or email in any member.
 - It maps its own roles onto `owner`, `admin` and `member`; a finer role goes in `extensions`, which grant nothing.
-- It uses one membership root per organization, distinct from the `policyRootKey`, which signs only `org-key-set/1`;
-  since DEC-0129 the root is held by the organization owner's Fabric, never by the server, which drafts each set for
-  it to sign. It lists each signing key in one organization's set, rotates signing keys with overlapping windows, and
+- It uses one membership root per organization, which signs only `org-key-set/1` and is never the `policyRootKey`;
+  since DEC-0129 the membership root is held by the organization owner's Fabric, never by the server, which drafts
+  each set for it to sign. It lists each signing key in one organization's set, rotates signing keys with overlapping windows, and
   re-issues under a listed key before it revokes one.
 - It issues attestations with a life of at most 24 hours; a short life (an hour) bounds how long an end it could not
   deliver still reads active.
@@ -281,8 +281,8 @@ estate's relay pins the estate's first passkeys, applies key sets under it, and 
 `orgRelayAdmissionSet({held, candidate, org, keySet, at, schemaValid})` answers the set of listed `#sig` keys, kid to
 SEC 1 octets, or a refusal, and then admits nobody (DEC-0047, fail closed). A candidate must be schema-valid and verify
 against the held list (a refused candidate answers `unverified` with its problem, its window included; `expired` and
-`not-yet-valid` name only the held list's own window), and a held list that cannot be read back (no positive revision, no RFC 8785 form) refuses it
-`invalid`; without one the held list is verified again under the key set applied now, so a list past its
+`not-yet-valid` name only the held list's own window), and a held list that cannot be read back (no positive revision, no RFC 8785 form) is refused
+`invalid`, with or without a candidate; without one the held list is verified again under the key set applied now, so a list past its
 window, or one whose signer a later set dropped, admits nobody until a newer list verifies. A refused candidate changes
 nothing. Only the admission set is decided: what a member's `auth` signs in `estate` (never the member's estate id,
 DEC-0128) and what an organization relay's `welcome` carries in place of the estate's revision, delta head and
@@ -339,6 +339,8 @@ grants, until per-context relay sessions (CT-122's question 3).
 
 - Losing the root: the owner's Fabric holds it, so its loss means a new pin by every member (OM-3), and every key set
   waits on that Fabric being reachable; a recovery of the root, as DEC-0107 recovers a passkey, is not decided.
+- How the person's Fabric sends the context's `iss` to the server for its entry (OM-7's row allows it; no message
+  carries it yet), and how a relay is registered as an attestation audience for the subject OL-1 names (CT-37).
 - The organization relay's handshake (OL-4): `auth.estate` and the `welcome` frame on an organization's relay (CT-37).
 - Whether a reader checks an attestation's `role` or `status` against the latest signed member list; until then the
   list's role grants nothing anywhere but its own document.

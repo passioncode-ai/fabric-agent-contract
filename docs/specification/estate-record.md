@@ -214,8 +214,9 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
 
 - **Attestation:** an assertion carries none; how the passkey was created is not checked.
 - **The authenticator's provenance:** no AAGUID allow-list and no device binding. A personal estate may use a synced
-  passkey (v4 §7), so BE and BS are read only for consistency. An administrator's device binding is not
-  decided: DEC-0129 lists administrators' signing passkeys in `org-key-set/1`, not how they were created.
+  passkey (v4 §7), so BE and BS are read only for consistency. An administrator's credential is device-bound
+  by Fabric ADR-0178 point 2, but the contract does not check it: DEC-0129 lists administrators' signing passkeys in
+  `org-key-set/1`, not how they were created.
 - **The signature counter:** `verifyEstateRecord` returns `signCount` but checks no monotonicity, since a synced
   passkey's counter is often 0 and machines share no counter.
 - **Extension outputs** are ignored.
