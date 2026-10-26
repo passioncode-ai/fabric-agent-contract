@@ -209,7 +209,7 @@ SYSTEM or Administrators — the trust of root reading a 0600 file (DEC-0032, DE
 `fabric-project-comms/0.1` ([project communication](docs/specification/project-comms.md), DEC-0022).
 
 **Primary responder**: The holder of a Project's `project.work` slot, the capability a request names when it names no
-narrower one, shown by a host as the Project's main session; the operator may move it, or any slot, to another live,
+narrower one, shown by a host as the Project's main session; the operator may move it, or any occupied slot, to another live,
 authorized session of the Project, after which the board's ordinary rules govern it ([project communication](docs/specification/project-comms.md#the-primary-responder), DEC-0140).
 
 **Session role**: What a session says it does, in an open vocabulary of its host's (for example `coder`,
@@ -241,7 +241,7 @@ sequence number (DEC-0073).
 **Board hold**: The operator's hold, set in the host or relayed by their agent to the host's action (DEC-0121), on a thread, a Project or a (Project, capability) responder slot.
 While it lasts the board refuses new work in its scope `held` (retryable), the operator's move of a slot included (DEC-0140), never refuses a cancel or a read, and
 never refuses the current responder's calls on started work; if that responder's session ends under a slot or
-Project hold, enrollment and replacement wait for the lift, and its accepted work stays held as C4 says. It is not an
+Project hold, enrollment and replacement wait for the lift, and its accepted work is kept as C4 says. It is not an
 authority change and bumps no generation
 ([project communication](docs/specification/project-comms.md#holds), DEC-0079). Not the C4 sense in which accepted
 work is *held* past its deadline.

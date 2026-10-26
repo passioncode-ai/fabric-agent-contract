@@ -336,7 +336,8 @@ A request reaches `outcome_unknown` by three paths only, and the owner settles i
 
 - the sender's `com.cancel` after the effect began;
 - a [restore](#restore), after which a started effect is `unknown`;
-- the lost-result operation, when a holder took the slot and then left, or the operator moved it ([PR-2](#the-operator-moves-a-slot)).
+- the lost-result operation, when the next holder takes the slot: after a holder left, by a replacement, or by the
+  operator's move ([PR-2](#the-operator-moves-a-slot)).
 
 The lost-result operation runs only when the next holder takes the slot ([slots end with the
 session](#slots-end-with-the-session)). An `in_progress` request whose responder retired with no successor therefore
@@ -710,16 +711,20 @@ session of that Project: in the host's operator controls, or through their agent
 - **One transition, from the generation the operator saw.** The move names the slot's generation the operator's view
   showed, and the host refuses it `revision_conflict` when the slot has moved on since, as `expectedGeneration` refuses
   a replacement. A relayed move is one call: the decision's `target` names the slot, that generation and the receiving
-  session, in the form the host's move tool publishes (at most 200 characters, `decision.schema.json`), so a new call
+  session, in the form the host's move tool publishes (at most 200 characters, `decision.schema.json`; a host whose plain form
+  would be longer publishes a compact reference to the slot instead), so a new call
   under the same decision (AP-2's coverage) is refused `revision_conflict` once the slot has moved on. A retry of the
-  same call with its idempotency key answers the stored result ([service](service.md#actions) AP-1), so a lost answer
-  never reads as a failed move. Otherwise the host applies it atomically, as `com.responder_replace` would for the receiving session:
+  same call with its idempotency key answers the stored result (a rule of the move, DEC-0140, as for every board
+  write), so a lost answer never reads as a failed move. Otherwise the host applies it atomically, as `com.responder_replace` would for the receiving session:
   the generation goes up by one; a `claimed` request returns to `queued`; an `in_progress` one becomes
   `outcome_unknown` (`lost_result`); an `accepted` one is kept (C4). The move transfers no request, since a transfer
   carries a checkpoint its caller writes, and the operator writes none.
 - **Who may receive it.** A live session of that Project already authorized to respond for that capability, as for
   `com.enroll`, other than the slot's holder; the host refuses any other `not_authorized`, and a move grants nothing.
-  An `absent` slot is not moved: an authorized session takes it by its own `com.enroll`.
+  The host refuses a mover that is not the owning operator `not_authorized`, and a move of an `absent` slot
+  `revision_conflict` (there is no session's generation to move from). The move tool answers the board's refusals
+  in `comms-refusal.schema.json`'s shape, `held` included at every pin, and on the relayed path DL-19's codes as
+  `structuredContent` (AP-2). An `absent` slot is not moved: an authorized session takes it by its own `com.enroll`.
 - **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
 - **After the move.** The board's ordinary rules then govern the slot, and a move bars nobody and adds no
   refusal: another authorized session may replace it, a client's recovery may replace it (the moved-off session's
@@ -730,11 +735,12 @@ session of that Project: in the host's operator controls, or through their agent
   it is the client's (CT-175).
 - **What was in flight.** The receiving session continues the kept accepted work only by its own `com.responder_replace`
   with a transfer, whose checkpoint it writes as the replacement (a holder may replace itself at its current
-  generation, before it claims or begins any effect, since its own replacement fences its own claims and attempts; at
-  most 64 requests per replacement, as for any transfer), or the requester cancels it. An `outcome_unknown` request is settled as before: by the slot's holder
+  generation, which is safe before it claims or begins any effect, since its own replacement fences its own claims and
+  attempts; at most 64 requests per replacement, as for any transfer), or the requester cancels it. An `outcome_unknown` request is settled as before: by the slot's holder
   with an observed outcome, or by the estate owner under [owner settlement](#owner-settlement)'s own test (the slot
   `absent`, or `stale` with no current enrollment). The host shows the slot's `accepted` and `in_progress` counts before the operator
-  confirms a move, and that in-progress work will wait for the new holder's observation.
+  confirms a move, and that in-progress work stays `outcome_unknown` until the new holder observes it or, once the
+  slot is free under owner settlement's test, the owner settles it.
 - **Learning the slot is its own.** The host tells the receiving session through its own session surface; a client
   that cannot hear it learns the slot is its own when its `com.claim` succeeds, and keeps it as any holder does; one that
   does neither within its lease goes `stale`, as any holder does (After the move). A stale slot is occupied and may be
@@ -747,12 +753,13 @@ session of that Project: in the host's operator controls, or through their agent
 
 ## A session's role and branch
 
-**PR-3 (DEC-0140).** A host may let a session name its **session role** when the host enrolls the session (an open
-vocabulary of the host's, for example `coder`, `observer`, `monitor`; not `com.enroll`, whose closed arguments carry none) and the Git `branch` it works on
+**PR-3 (DEC-0140).** A host may let a session name its **session role** when the host registers the session in its own
+session surface (an open vocabulary of the host's, for example `coder`, `observer`, `monitor`; not `com.enroll`, whose closed arguments carry none) and the Git `branch` it works on
 when it reports its activity to the host. Both belong to the host's own session surface, not the board's, and no board
 tool carries either.
 
-- **A session role is a claim.** It is display and routing only, never authority, and it is not a role assignment
+- **A session role is a claim.** It is display and routing only (routing: the host's own choice of which session it
+  shows or hands work to, never the board's), never authority, and it is not a role assignment
   (`roles.schema.json`, which can carry authority): a `responder` role takes no slot (only `com.enroll` or
   `com.responder_replace` under the session's grant, or the operator's move, does), and no session role widens what a
   session may read or do.

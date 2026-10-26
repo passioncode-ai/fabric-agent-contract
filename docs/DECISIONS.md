@@ -8285,7 +8285,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `v0.42.0`, the first organization server `v0.4.0`, and every other repository on the operator's machine at its
   latest tag, else its head (165 in all, the estate's provider agents among them), none of which serves or declares
   it (the only matches are i18n keys and longer identifiers such as `project.workspace_ids`); fabric-workspace has no
-  tag and none at its head. The release notes will list it as a narrowing. No tool, argument or field of any tool's schema changes. Adoption: Fabric in 0.3.15
+  tag and none at its head (a head was read only where a repository has no tag). The release notes will list it as a narrowing. No tool, argument or field of any tool's schema changes. Adoption: Fabric in 0.3.15
   (CT-174); whether a client leaves a slot moved off it is the clients' own (CT-175).
 - **Context:** Fabric's simple Fabric shows each Project's main session and lets the operator hand a Project's work to
   another session; its request `23ba0e97` asked for one rule for "the main one", for the operator's move of a slot, and
@@ -8324,6 +8324,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `docs/specification/project-comms.md` (header, C4's wording, PR-1 to PR-3, the hold
   table), `conformance.md` (a row), `interop.md` (the reserved name), `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder,
   Session role), `src/comms-hold.ts` (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`, `docs/ux/scenarios.md`
-  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020 and DEC-0022 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175 and CT-176 (filed); the handoff
+  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020 and DEC-0022 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176 and CT-179 (filed); the handoff
   `docs/handoffs/2026-10-26-simple-fabric-decisions.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-174; Fabric's request `23ba0e97` (thread `6a8d2f9c`).
