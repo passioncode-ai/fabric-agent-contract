@@ -7851,11 +7851,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      sessions; a callee recognises it only by placing the caller in T0 or T1 (DL-25). It is not a context (`personal`
      and `org:<orgId>` stay the only ones) and not a tier. It is open to what DL-26 opens: everything open to the
      operator in the call's context, no token, approval or grant; one approval travels as a mandate (DEC-0125); money
-     limits, human gates and the contexts' routing (DEC-0082) still bind.
-  2. **DL-28.** No claim of a caller places it in the family; a call relayed onto loopback, or a caller under another
-     OS account, stays T2. The limits and gates inside the family are what holds when a family agent is turned against
+     limits, human gates, the contexts' routing (DEC-0082), the machine profiles (DEC-0106) and a relayed action's
+     decision or mandate (DEC-0121, DEC-0125) still bind.
+  2. **DL-28.** No claim of a caller places it in the family; a call relayed onto loopback stays T2 unless the relay
+     proves the origin's tier (DL-25, `relayCallerTier`, DEC-0106), and a caller under another OS account stays T2. The limits and gates inside the family are what holds when a family agent is turned against
      the operator.
-  3. **DL-29.** The agent network beyond the family is T2: open to what its context was granted, with a token per call.
+  3. **DL-29.** The agent network (not NET-1's network, a context's machines) beyond the family is T2: open to what its context was granted, with a token per call.
      A service off the estate's machines has no family caller; it may map a verified token of the operator's estate,
      issued in `personal`, onto a class of its own for the operator's account, never a caller's claim.
 - **Why:** the line the operator draws is the machine boundary DEC-0045 already draws, so naming it from the agents'
@@ -7868,5 +7869,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** text and callee rules only; nothing a reader validates changes. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/delegation.md` (The family and the agent network, DL-27 to DL-29; Not
   decided here), `conformance.md` (a row), `CONTEXT.md` (Family); backlog CT-143 (closed).
-- **Source:** CT-143; board request `9db9e09e` item 1 and reply `550ebf96`; DEC-0045, DEC-0055, DEC-0082, DEC-0090,
-  DEC-0104, DEC-0125.
+- **Source:** CT-143; board request `9db9e09e` item 1 and reply `550ebf96`; DEC-0045, DEC-0055, DEC-0082, DEC-0084
+  (NET-1), DEC-0090, DEC-0104, DEC-0106, DEC-0121, DEC-0125.
