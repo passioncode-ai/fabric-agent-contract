@@ -454,9 +454,11 @@ server issued it for the person, the same way it reads the person's attestations
 issuer is the issuer's and the reader's (*Not decided here*), and the server attributes the plan to that credential's
 person. The route is `PUT /fabric/adaptation/v1/{org}/plan` under the issuer's origin, `{org}` being the part of
 `org:<orgId>` after `org:`; `GET` on it answers the person's receipt, or `404` with the code `no-plan` before the
-first. Fabric sends a plan only after a `GET` answered a receipt or `no-plan`. Any other answer (another `404`, or a
-`401` or `403` from the server's credential layer that is not `not-a-member`) means the server takes no plans from this
-credential: Fabric sends nothing, tells the person so, and asks again only after the person connects the server again.
+first. Fabric sends a plan only after a `GET` answered a receipt or `no-plan`. It retries a `GET` that got no answer or
+a `5xx` with backoff, as AD-4 retries a `PUT`, and treats `not-a-member` as AD-4 does. Another `404`, or a `401` or
+`403` from the server's credential layer that persists after Fabric refreshed the credential, means the server takes no
+plans from this credential: Fabric sends nothing, tells the person so, and asks again only after the person connects
+the server again. A server accepts a plan body of at least 512 KiB, which holds the largest plan this schema allows.
 A server may ask the person to consent to plans when they connect Fabric to it.
 
 **AD-4, the server keeps the newest revision** (`decideAdaptation`). After it authenticates the credential, in order:
@@ -474,7 +476,8 @@ A server may ask the person to consent to plans when they connect Fabric to it.
 `schema-unsupported` answers versioning's document (`{error: {code, message, data: {protocol, accepted}}}`); every other
 refusal's body is `{error: {code, message}}`, the message at most 200 characters. Fabric sends again with backoff after
 no answer or a `5xx`, sends the next revision after `stale-revision` or `revision-conflict` once it has read the
-receipt, and sends nothing more for that membership after `not-a-member` (a later membership, pinned again, may send),
+receipt, shows any other `4xx` to the person and holds the plan until they act (backing off on `429`), and sends
+nothing more for that membership after `not-a-member` (a later membership, pinned again, may send),
 refreshing the person's attestation at once (OM-6). A server may also take a withdrawal the person makes on its own
 page: it records it as the next revision, with no items and no requests, so a plan Fabric sends at that revision meets
 `revision-conflict`; Fabric, reading a receipt at a revision it did not send, takes the plan as withdrawn and sends
@@ -500,7 +503,8 @@ administrator's credential reaches the owner's draft is CT-158.
 **AD-6, privacy and the end.** The plan is read by the organization's administrators and the person it came from,
 never by another member. When the person ends the membership by unpinning, their Fabric first sends the empty
 revision that withdraws the plan (OM-5); when the server ends it, or the organization closes, the server ends the plan
-and its decisions. Either way the person's Fabric sends no further plan to that organization. A withdrawn plan's earlier revisions are the server's record, kept as its
+and its decisions. Either way the person's Fabric sends no further plan under that membership; a later membership,
+pinned again, may send. A withdrawn plan's earlier revisions are the server's record, kept as its
 retention says.
 
 ## Semantic rules
@@ -547,7 +551,8 @@ retention says.
   `fixtures/vectors/org-adaptation.json` (DEC-0138). **The person's Fabric** draws each `ref` and request `id` at random
   per organization and keeps them (AD-2), fills no text from the estate, takes only the person's choices, keeps one
   revision counter per organization, sends the plan with the credential the server issued it (AD-3), and withdraws it
-  by an empty revision before it asks the passkey to sign an unpinning (OM-5).
+  by an empty revision before it asks the passkey to sign an unpinning (OM-5). The server serves a plan and its
+  receipt only to the organization's administrators and the person it came from (AD-6).
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same
   pin, with its own audience.
 
@@ -586,6 +591,9 @@ its relay (OX-6).
 - A push of a pending draft to the owner's or an administrator's Fabric (beside OX-5's reading of the route).
 - What the hub answers a caller it refuses to mint for in a suspended or ended organization's context (OM-5, OM-6):
   the hub's refusal code, Fabric's to state beside DL-4.
+- Where the person's Fabric keeps an adaptation plan's references, request ids and revision counter when the person
+  runs it on more than one machine or moves their hub (AD-2, AD-4): Fabric's (TP-04), so long as they stay one set per
+  organization.
 - How attestations reach a reader (a push, a fetch) and how a reader authenticates to the issuer to fetch one: the
   issuer's and the reader's, beside OM-7's refresh row, which bounds what that exchange carries about the person.
 - A faster end than expiry (an organization's revocation delta with a `member` kind): additive, when a reader needs it.

@@ -37,6 +37,9 @@ requests to the administrators. The first organization server needs it by 2026-1
   withdrawal on the server's page had no rule). Fixed: `expired` everywhere, a server-page withdrawal is held as the next
   empty revision, the withdrawal before unpinning waits no longer than the person agrees to, `not-a-member` refreshes the
   attestation, combined-refusal vectors.
+- Round 4: unit pass, seam and product fail (AD-6 forbade a later membership; DEC-0128 and devices.md lacked the new
+  links; the first server's record still planned the withdrawn device transport). Fixed, and the server told in
+  `0fee99ae` (`6d41733c`, `24327dbf`) and its session.
 
 ## Open
 
@@ -45,4 +48,5 @@ requests to the administrators. The first organization server needs it by 2026-1
 ## Next task
 
 Read the objections in thread `5d2ea917` (by 2026-10-27 18:00 UTC), finish the readings, merge, release by 2026-10-29,
-and post the tag in threads `5d2ea917` and `0fee99ae`; then CT-161, CT-164, CT-165, CT-167, CT-170.
+and post the tag in threads `5d2ea917` and `0fee99ae`, naming Fabric's TP-04 duties (GET-first, withdraw before
+unpinning) for its CO-421 and ADR-0178 end flow; add a row to fabric-workspace `knowledge/integration.md`; then CT-161, CT-164, CT-165, CT-167, CT-170.

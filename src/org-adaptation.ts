@@ -130,7 +130,7 @@ export function decideAdaptation(
 ): { outcome: "accepted" | "repeated"; held: HeldAdaptation } | { outcome: "refused"; refusal: OrgAdaptationRefusal } {
   if (!isObject(ctx) || ctx.member !== true) return { outcome: "refused", refusal: "not-a-member" };
   if (isObject(plan) && typeof plan.type === "string" && plan.type !== ORG_ADAPTATION_TYPE) return { outcome: "refused", refusal: "schema-unsupported" };
-  if (!ctx.valid || !isObject(plan) || !Number.isSafeInteger(plan.revision)) return { outcome: "refused", refusal: "malformed" };
+  if (!ctx.valid || !isObject(plan) || !Number.isSafeInteger(plan.revision) || (plan.revision as number) < 1) return { outcome: "refused", refusal: "malformed" };
   const digest = adaptationDigest(plan);
   if (digest === undefined) return { outcome: "refused", refusal: "malformed" };
   if (plan.org !== ctx.org) return { outcome: "refused", refusal: "wrong-organization" };

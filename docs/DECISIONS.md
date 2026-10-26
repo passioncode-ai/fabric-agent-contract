@@ -7732,6 +7732,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0128: unlinkable memberships, an identity per enrollment and a key and issuer per context
 
 - **Date:** 2026-10-26
+- **Annotated (2026-10-26):** DEC-0138 adds to item 5's residual linkability the text a person types into two organizations' adaptation plans, and a server serving both linking the person's plans by whatever identifies the person to it.
 - **Status:** Accepted (2026-10-26). `machines[].contextHubKeys` is additive; `iss`, required on DEC-0127's
   `organizationPin`, narrows a member no reader has adopted (DEC-0119: the release notes list it as a narrowing); which Fabric writes only once every reader of the record is pinned at or after (as
   DEC-0106, DEC-0107 and DEC-0127); new rules a sender runs on itself. Adoption: CT-122; a node adopts UE-2 only once the machines' report to the hub over
@@ -8292,8 +8293,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      stands; `label`, `resource`, `note` and `purpose` are typed by the person.
   3. **AD-3.** The person's Fabric sends the whole plan with the credential the server issued it for the person;
      the route is `PUT /fabric/adaptation/v1/{org}/plan`, with `GET` for the receipt (`404 no-plan` before the first).
-     Fabric sends only after a `GET` answered a receipt or `no-plan`; any other answer means the server takes no plans
-     from this credential.
+     Fabric sends only after a `GET` answered a receipt or `no-plan`, retrying no answer or a `5xx`; another `404`, or
+     a `401` or `403` that persists after a credential refresh, means the server takes no plans from this credential.
   4. **AD-4.** The server keeps the newest revision (`decideAdaptation`): `not-a-member`, `schema-unsupported`,
      `malformed`, `wrong-organization`, `stale-revision`, `revision-conflict`, a repeat answering the same receipt; an
      empty revision withdraws, and a withdrawal on the server's own page is held as the next, empty revision.
@@ -8322,9 +8323,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/org-adaptation.test.ts`, `test/positive-sweep.test.ts`, `test/rule-tolerance.test.ts`, `vitest.config.ts`,
   `test/protocol-revisions.test.ts`, `test/schema-compilation.test.ts`, `tools/vectors/run.ts`, `fixtures/catalogue.json`;
   `docs/specification/membership.md` (header, OM-5, OM-7's row, The adaptation plan, `FAC-SEM-153`, Who adopts it,
-  Privacy, Not decided here), `contexts.md` (Linkability), `devices.md` (what stays linkable), `README.md` (the
-  membership row), `conformance.md` (rule table, code table, a row), `CONTEXT.md` (Adaptation plan), `docs/DOCMAP.md`,
-  `docs/ux/flows.md` (FLW-32), `docs/ux/scenarios.md` (SCN-047), `docs/ux/scenarios.md` (SCN-050, draft), `docs/ux/screens.md` (SCR-31); backlog CT-159, CT-169; the
+  Privacy, Not decided here), `contexts.md` (Linkability), `devices.md` (what stays linkable),
+  `docs/specification/README.md` (the membership row), `conformance.md` (rule table, code table, a row), `CONTEXT.md` (Adaptation plan), `docs/DOCMAP.md`,
+  `docs/ux/flows.md` (FLW-32), `docs/ux/foundation.md` (ST-038), `docs/ux/scenarios.md` (SCN-047), `docs/ux/scenarios.md` (SCN-050, draft), `docs/ux/screens.md` (SCR-31); backlog CT-159, CT-169; the
   handoff `docs/handoffs/2026-10-26-adaptation-plan.md`.
 - **Source:** CT-169; the first organization server's request N-4 (board message `38f108ba`, thread `0fee99ae`); the
-  shape posted in thread `5d2ea917`; DEC-0029 (rule codes), DEC-0056, DEC-0067, DEC-0128, DEC-0129.
+  shape posted in thread `5d2ea917` and, for the server, in `0fee99ae` (`6d41733c`, `24327dbf`, superseding the device
+  transport of `28b7a5b3`); DEC-0029 (rule codes), DEC-0056, DEC-0067, DEC-0128, DEC-0129.

@@ -816,6 +816,10 @@ flowchart TD
   T --> F{refresh due or expired}
   F -->|refreshed| A
   F -->|expired| U[Suspended: nothing new authorised]
+  T --> D[Adaptation plan sent: references, typed text, requests]
+  T --> L{member leaves}
+  L --> W[Plan withdrawn by an empty revision, bounded wait]
+  W --> E
 ```
 
 - **Screens traversed:** SCR-31 joining an organization.

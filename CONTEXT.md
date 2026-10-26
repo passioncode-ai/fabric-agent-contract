@@ -723,7 +723,7 @@ and its own administrator credential with a one-time claim
 
 **Adaptation plan (organization part)**: What a person's Fabric sends an organization when the person brings work into
 it (DEC-0138, OM-7): `org-adaptation/1`, the items the person chose, each by a random per-organization reference that
-names nothing of the estate, and the person's requests (access, spend, role `admin`) to the administrators. The
+names nothing of the estate with the label the person typed for it, and the person's requests (access, spend, role `admin`) to the administrators. The
 person's Fabric sends it whole with the credential the server issued it; the server keeps the newest revision and binds
 each decision to its request's digest. Never the plan's draft or inventory. ([membership](docs/specification/membership.md#the-adaptation-plan))
 

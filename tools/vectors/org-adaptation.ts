@@ -52,6 +52,7 @@ export function orgAdaptationVectors(): Json {
       { name: "a plan that failed its schema or FAC-SEM-153", plan, context: { member: true, valid: false, org }, expected: { outcome: "refused", refusal: "malformed" } },
       { name: "a person who is not a member", plan, context: { member: false, valid: true, org }, expected: { outcome: "refused", refusal: "not-a-member" } },
       { name: "another revision of the type", plan: { ...plan, type: "org-adaptation/2" }, context: { member: true, valid: false, org }, expected: { outcome: "refused", refusal: "schema-unsupported" } },
+      { name: "a revision below 1", plan: { ...plan, revision: 0 }, context: { member: true, valid: true, org }, expected: { outcome: "refused", refusal: "malformed" } },
       { name: "not a member, and another type", plan: { ...plan, type: "org-adaptation/2" }, context: { member: false, valid: false, org }, expected: { outcome: "refused", refusal: "not-a-member" } },
       { name: "malformed, and another organization", plan: { ...plan, org: "org:org-b" }, context: { member: true, valid: false, org }, expected: { outcome: "refused", refusal: "malformed" } },
       { name: "another organization, at a lower revision", plan: { ...plan, org: "org:org-b", revision: 1 }, context: { member: true, valid: true, org, held }, expected: { outcome: "refused", refusal: "wrong-organization" } },
@@ -91,6 +92,19 @@ export function orgAdaptationVectors(): Json {
             { id: access.id, digest: digest(access), state: "granted", at: "2026-10-27T10:00:00Z" },
             { id: spend.id, digest: digest(spend), state: "expired", at: "2026-11-26T10:00:00Z" },
             { id: role.id, digest: digest(role), state: "pending" }
+          ]
+        }
+      },
+      {
+        name: "an unchanged request stays expired under a new revision",
+        plan: next,
+        decisions: [{ id: role.id, digest: digest(role), state: "expired", at: "2026-11-26T10:00:00Z" }],
+        expected: {
+          type: "org-adaptation-receipt/1", org, revision: 3, digest: digest(next),
+          requests: [
+            { id: access.id, digest: digest(access), state: "pending" },
+            { id: spend.id, digest: digest(changedSpend), state: "pending" },
+            { id: role.id, digest: digest(role), state: "expired", at: "2026-11-26T10:00:00Z" }
           ]
         }
       },

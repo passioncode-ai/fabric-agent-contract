@@ -600,8 +600,8 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   record until per-context relay sessions (the operator's questions 1 to 4, taken at their defaults); an operator that
   runs two of a machine's relays (an estate's and an organization's, or two organizations', DEC-0134) sees that
   machine's two connections. Text a person types into two organizations' adaptation plans is theirs to repeat and
-  links them; the plans' references and request ids do not ([membership](membership.md#the-adaptation-plan) AD-2,
-  DEC-0138). A stolen machine:
+  links them, and a server serving both links the person's plans by whatever identifies the person to it; the plans'
+  references and request ids do not ([membership](membership.md#the-adaptation-plan) AD-2, DEC-0138). A stolen machine:
   Fabric offers the person to ask each organization to revoke, from the local registry, with no automatic message.
 
 **One enrollment per organization** (DEC-0082). A device enrolled in several organizations holds one enrollment,

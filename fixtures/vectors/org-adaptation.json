@@ -543,6 +543,55 @@
       }
     },
     {
+      "name": "a revision below 1",
+      "plan": {
+        "type": "org-adaptation/1",
+        "org": "org:org-7f3a",
+        "revision": 0,
+        "items": [
+          {
+            "ref": "q7Xk2mP9vLr4Tn8w",
+            "kind": "project",
+            "label": "Billing migration"
+          },
+          {
+            "ref": "Hb3Zt6Yc1Nq5Ws0e",
+            "kind": "schedule"
+          }
+        ],
+        "requests": [
+          {
+            "id": "req-access-01",
+            "kind": "access",
+            "itemRef": "q7Xk2mP9vLr4Tn8w",
+            "resource": "staging database",
+            "note": "read-only, to finish the migration"
+          },
+          {
+            "id": "req-spend-01",
+            "kind": "spend",
+            "amountUsd": 200,
+            "period": "month",
+            "purpose": "model calls for the migration agent"
+          },
+          {
+            "id": "req-role-01",
+            "kind": "role",
+            "role": "admin"
+          }
+        ]
+      },
+      "context": {
+        "member": true,
+        "valid": true,
+        "org": "org:org-7f3a"
+      },
+      "expected": {
+        "outcome": "refused",
+        "refusal": "malformed"
+      }
+    },
+    {
       "name": "not a member, and another type",
       "plan": {
         "type": "org-adaptation/2",
@@ -1020,6 +1069,78 @@
             "id": "req-role-01",
             "digest": "sha256:b35ce875a649c8075bc60c114649124ef20b1c66468cc425af1ec87bd3925560",
             "state": "pending"
+          }
+        ]
+      }
+    },
+    {
+      "name": "an unchanged request stays expired under a new revision",
+      "plan": {
+        "type": "org-adaptation/1",
+        "org": "org:org-7f3a",
+        "revision": 3,
+        "items": [
+          {
+            "ref": "q7Xk2mP9vLr4Tn8w",
+            "kind": "project",
+            "label": "Billing migration"
+          },
+          {
+            "ref": "Hb3Zt6Yc1Nq5Ws0e",
+            "kind": "schedule"
+          }
+        ],
+        "requests": [
+          {
+            "id": "req-access-01",
+            "kind": "access",
+            "itemRef": "q7Xk2mP9vLr4Tn8w",
+            "resource": "staging database",
+            "note": "read-only, to finish the migration"
+          },
+          {
+            "id": "req-spend-01",
+            "kind": "spend",
+            "amountUsd": 300,
+            "period": "month",
+            "purpose": "model calls for the migration agent"
+          },
+          {
+            "id": "req-role-01",
+            "kind": "role",
+            "role": "admin"
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "id": "req-role-01",
+          "digest": "sha256:b35ce875a649c8075bc60c114649124ef20b1c66468cc425af1ec87bd3925560",
+          "state": "expired",
+          "at": "2026-11-26T10:00:00Z"
+        }
+      ],
+      "expected": {
+        "type": "org-adaptation-receipt/1",
+        "org": "org:org-7f3a",
+        "revision": 3,
+        "digest": "sha256:60c8f2fe61c0bd1691247138892c0a0b1f91941767432baea0c20b5042235eca",
+        "requests": [
+          {
+            "id": "req-access-01",
+            "digest": "sha256:4f4cd5b3808ba803ffbea96df6ececeec849a36c9ddca89a70bbbc0cb154c065",
+            "state": "pending"
+          },
+          {
+            "id": "req-spend-01",
+            "digest": "sha256:e43649cc7a198fbfd711f20971e471a214d8ee7a39c065c18c1ab3c04604b7f6",
+            "state": "pending"
+          },
+          {
+            "id": "req-role-01",
+            "digest": "sha256:b35ce875a649c8075bc60c114649124ef20b1c66468cc425af1ec87bd3925560",
+            "state": "expired",
+            "at": "2026-11-26T10:00:00Z"
           }
         ]
       }
