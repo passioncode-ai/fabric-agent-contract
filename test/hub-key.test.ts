@@ -61,6 +61,8 @@ describe("the revocation delta on top of the revision (DEC-0054, extraRevocation
   it("reaches the verifiers through estateRevocations, a list or a function", () => {
     const revoked = [{ kind: "hub-key", ref: K1, revokedAt: "2026-10-21T09:00:00Z" }];
     expect(delegation(token, { estate: second })).toBe("ok");
+    // DEC-0128: a callee serving an organization's context reads only that context's keys, which this record does not pin.
+    expect(delegation(token, { estate: second, estateContext: "org:org-a" })).toBe("unauthenticated/kid-not-certified");
     expect(delegation(token, { estate: second, estateRevocations: revoked })).toBe("unauthenticated/kid-not-certified");
     expect(delegation(token, { estate: second, estateRevocations: () => revoked })).toBe("unauthenticated/kid-not-certified");
     expect(delegation(token, { estate: second, estateRevocations: () => { throw new Error("unreadable"); } })).toBe("issuer-unavailable/estate-unreadable");

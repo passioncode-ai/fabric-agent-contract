@@ -79,6 +79,6 @@ export function nodeEnrollmentRules(kind: string, value: JsonObject): Finding[] 
 
 /** A node's own registry mapping its machine to its enrollments, as FAC-SEM-148 reads it. */
 export function enrollmentsLinkable(registry: unknown): boolean {
-  return isObject(registry) && (nodeEnrollmentRules("node-enrollments", registry) ?? []).length > 0;
+  return isObject(registry) && (nodeEnrollmentRules("node-enrollments", registry) as Finding[]).length > 0;
 }
 // #endregion node-enrollments

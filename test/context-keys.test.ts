@@ -17,7 +17,7 @@ const hubMachine = (RECORD.machines as Json[]).find((machine) => machine.hubKey)
 const CONTEXT_KEY = (hubMachine.contextHubKeys as Json[])[0]?.key as Json;
 const PERSONAL_KEY = hubMachine.hubKey as Json;
 const codes = (kind: string, value: unknown) => [...new Set(evaluateSemanticRules(kind, value).map((finding) => finding.code))];
-const redigest = (record: Json) => ({ ...record, digest: estateRecordDigest(record) });
+const redigest = (record: Json): Json => ({ ...record, digest: estateRecordDigest(record) });
 
 describe("context hub keys in DL-14 (DEC-0128)", () => {
   it("certifies a context key for its own context only", () => {
@@ -92,6 +92,8 @@ describe("context hub keys in the record's rules (DEC-0128)", () => {
     });
     const removedCodes = (estateRecordRules("estate-record-revision", { parent, next: removed }) ?? []).map((finding) => finding.message);
     expect(removedCodes.some((message) => message.includes("context hub key"))).toBe(true);
+    const removedRevoked = redigest({ ...removed, revocations: [...(removed.revocations as Json[]), { kind: "hub-key", ref: CONTEXT_KEY.kid, revokedAt: parent.issuedAt }] });
+    expect((estateRecordRules("estate-record-revision", { parent, next: removedRevoked }) ?? []).some((finding) => finding.message.includes("context hub key"))).toBe(false);
   });
 });
 
