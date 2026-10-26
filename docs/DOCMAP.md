@@ -50,7 +50,7 @@ and recorded as DEC-0001.
 | P-256 keys refused before verifying or sealing: SEC 1 §3.2.2 validation of every P-256 key on record (device `#sig` and `#kem` keys, passkeys, organization roots) | `src/p256.ts`, `test/p256.test.ts`, `fixtures/vectors/p256.json`, `docs/specification/devices.md#device-keys`, `docs/specification/relay.md#keys` (DEC-0053, DEC-0047) |
 | The operator's dashboard session lifetime | `docs/specification/service.md#operator-session-lifetime`, `src/operator-session.ts` (DEC-0039) |
 | Session handoff (`session-handoff/1`), SH-1…SH-13: the folder, its modes and files, lifetime, the first call and the preamble, the brief, `mcp.json`, the per-runtime launch table, integrity, secrets | `docs/specification/session-handoff.md`, `schemas/session-handoff.schema.json`, `src/session-handoff.ts` (DEC-0042); handoff `docs/handoffs/2026-10-11-session-handoff.md` |
-| Fabric's button and `fabric://` links, FB-1…FB-8, FL-1…FL-7 | `docs/specification/fabric-button.md`, `schemas/fabric-link.schema.json`, `src/fabric-links.ts` (DEC-0040) |
+| Fabric's button and `fabric://` links, FB-1…FB-8, FL-1…FL-7 | `docs/specification/fabric-button.md`, `schemas/fabric-link.schema.json`, `src/fabric-links.ts` (DEC-0040; the page's language DEC-0124) |
 | Operator channel handoffs | `docs/handoffs/2026-10-10-operator-channel.md`, `docs/handoffs/2026-10-10-operator-channel-group-chat.md` |
 | Shared capability-name acceptance and underscore compatibility | `docs/specification/interop.md#capability-names`, `schemas/common.schema.json` (DEC-0020) |
 | Provider entries (`fabric-provider/0.1`) | `docs/specification/provider.md` |

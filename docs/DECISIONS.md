@@ -7419,13 +7419,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   implementations broke FB-3 as written, and the adapter asked for the amendment (request `7d8c704b`, thread
   `4801da8d`). FB-5's sentence also carried a dash, which the operator's rule keeps out of text people read.
 - **Decision:**
-  1. FB-3: the accessible name is *Open Fabric* in the page's language, the document's `lang`, English when the page
-     names none. The product name *Fabric* stays in English in every language, as the visible word and inside the
-     name. A page MAY supply its own words for its language.
+  1. FB-3: the accessible name is *Open Fabric* in the page's language: the `lang` of the document the button is drawn
+     in, matched on its primary subtag, English when the page names none or one the button has no words for; a host's
+     own button follows the host's language. The product name *Fabric* stays in English in every language, as the
+     visible word and inside the name. A page MAY supply its own words, which keep *Fabric* inside the name (WCAG 2.2
+     SC 2.5.3).
   2. FB-4: the menu's items are in the page's language by the same rule; the service's and project's names are shown
      as they are.
-  3. FB-5: the message is "Fabric is not installed. Get it at passioncode.ai/fabric" in the page's language, English
-     when the page names none, with *Fabric* and the address unchanged and the link as before.
+  3. FB-5: the message is in the page's language as item 1 chooses it, with *Fabric* and the address unchanged and the
+     link as before; in English it is "Fabric is not installed. Get it at passioncode.ai/fabric", its final full stop
+     optional.
 - **Why:** a person reads the page in its language, and a screen reader announces the name in that language; the
   product name is a name and is not translated. One English sentence shown "exactly" on a Russian page was the defect
   both implementations had already corrected.
@@ -7434,8 +7437,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   keep the old sentence with its dash (text for people carries none).
 - **Compatibility:** no schema changes; `contractVersion` stays `0.1.0`. A page that still shows the English name or
   the old English sentence on an English page stays readable; a kit adopts the wording at its next pin. The adapter's
-  kit 1.1.4 already follows items 1 and 2.
+  kit 1.1.4 (adapter 0.49.3) already follows items 1 to 3, in English and Russian; Fabric Dashboards follows them too
+  (`src/core/i18n.ts` at `4679ea0`, its English sentence ending in a full stop).
 - **Consequences / affects:** `docs/specification/fabric-button.md` (FB-3, FB-4, FB-5), `test/fabric-button.test.ts`,
   `docs/ux/flows.md` (FLW-09), `docs/ux/foundation.md` (ST-011), `docs/ux/scenarios.md` (SCN-015),
-  `docs/ux/screens.md` (SCR-12); DEC-0040's status; backlog CT-148 (closed by this decision).
-- **Source:** request `7d8c704b` (thread `4801da8d`), fabric-agent-adapter FAA-119; Fabric Dashboards `src/core/i18n.ts`.
+  `docs/ux/screens.md` (SCR-12), `docs/DOCMAP.md`; DEC-0040's status; backlog CT-148 (closed by this decision).
+- **Source:** request `7d8c704b` (thread `4801da8d`), fabric-agent-adapter FAA-119 (kit 1.1.4, `fabric-button.js`);
+  Fabric Dashboards `src/core/i18n.ts` at `4679ea0`; a product reading of the first draft (2026-10-26), which found no
+  rule for a language the button has no words for.

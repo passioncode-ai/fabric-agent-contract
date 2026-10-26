@@ -1,6 +1,6 @@
 # Fabric's button and `fabric://` links
 
-DEC-0040, the cookie's scope DEC-0059 · Fabric 0.4.0 REQ-42 · schema [`fabric-link.schema.json`](../../schemas/fabric-link.schema.json) · rule code
+DEC-0040, the cookie's scope DEC-0059, the page's language DEC-0124 · Fabric 0.4.0 REQ-42 · schema [`fabric-link.schema.json`](../../schemas/fabric-link.schema.json) · rule code
 `FAC-SEM-052` · parser and builder [`src/fabric-links.ts`](../../src/fabric-links.ts) · builds on
 [`fabric-dashboard/0.1`](embedded-dashboard.md) and [`fabric-service/0.1`](service.md)
 
@@ -36,10 +36,13 @@ the page leaves the button's height plus 16 CSS pixels free at the end of its sc
 clear of it. It holds at the page's floor (ED-1) and does not count as sticky chrome (ED-5).
 
 **FB-3 — Label and name.** The button shows the Fabric mark and the word **Fabric**; below a 480 CSS pixel
-viewport it MAY show the mark alone. Its accessible name is **Open Fabric** in the page's language: the document's
-`lang`, English when the page names none (DEC-0124). The product name *Fabric* stays in English in every language,
-both as the visible word and inside the name, and a page MAY supply its own words for its language; Fabric
-Dashboards' «Открыть Fabric» is the Russian name. Its target is at least 44 × 44 CSS pixels. Its colours come from the page's theme tokens and follow the host's appearance
+viewport it MAY show the mark alone. Its accessible name is **Open Fabric** in the page's language (DEC-0124): the
+`lang` of the document the button is drawn in, matched on its primary language subtag (`ru-RU` is `ru`), and English
+when the page names no language or one the button has no words for; a host's own button (FB-1, FB-6) follows the
+host's language. The product name *Fabric* stays in English in every language, as the visible word and inside the
+name. A page MAY supply its own words for its language, and they keep *Fabric*, the visible label, inside the name
+(WCAG 2.2 SC 2.5.3, Label in Name): for example Fabric Dashboards' «Открыть Fabric» (`src/core/i18n.ts` at
+`4679ea0`). Its target is at least 44 × 44 CSS pixels. Its colours come from the page's theme tokens and follow the host's appearance
 (ED-6, ED-8); its text meets 4.5:1 and its boundary 3:1 against the page (WCAG 2.2 AA), and its meaning is
 never carried by colour alone.
 
@@ -58,9 +61,12 @@ only the first item MAY open the chat link directly from the button (then withou
 
 **FB-5 — When Fabric is not installed.** When the page knows Fabric is absent, or after following a link the
 page is still visible and focused 1 500 ms later, the button's menu shows, instead of the actions or under
-them, in the page's language (English when the page names none), with *Fabric* and the address unchanged:
+them, in the page's language as FB-3 chooses it, with *Fabric* and the address unchanged. In English it reads, its
+final full stop optional:
 
 > Fabric is not installed. Get it at passioncode.ai/fabric
+
+and in another language it says the same, in that language's own words.
 
 where *passioncode.ai/fabric* links to `https://passioncode.ai/fabric`, opened in a new browsing context with
 `rel="noopener"`. The page never downloads anything by itself and never retries a link in a loop. A page knows
