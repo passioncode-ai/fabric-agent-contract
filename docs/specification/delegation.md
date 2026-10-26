@@ -2,7 +2,7 @@
 
 DEC-0039, DEC-0041, DEC-0043, DEC-0045, DEC-0055, DEC-0060, DEC-0066, DEC-0082, DEC-0090 ([the partner
 channel](partner-channel.md)), DEC-0106, DEC-0107, DEC-0111, DEC-0121, DEC-0125, DEC-0126, DEC-0128, DEC-0130,
-DEC-0132, DEC-0136, DEC-0137 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
+DEC-0132, DEC-0136, DEC-0137, DEC-0141 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
 · schemas [`delegation-token`](../../schemas/delegation-token.schema.json),
 [`delegation-jwks`](../../schemas/delegation-jwks.schema.json), [`approval`](../../schemas/approval.schema.json),
 [`delegation-refusal`](../../schemas/delegation-refusal.schema.json),
@@ -543,7 +543,7 @@ caller's claim.
 
 ## The operator's mandate
 
-DEC-0125 · rule code `FAC-SEM-144` · schema [`mandate.schema.json`](../../schemas/mandate.schema.json) · reference
+DEC-0125, DEC-0141 (MJ-1) · rule code `FAC-SEM-144` · schema [`mandate.schema.json`](../../schemas/mandate.schema.json) · reference
 [`src/mandate.ts`](../../src/mandate.ts) (`mandateCovers`, `handOn`) · vectors
 [`mandate.json`](../../fixtures/vectors/mandate.json)
 
@@ -559,7 +559,7 @@ it reaches acts on them without asking, within what they cover.
   the operator's words, and `chain` with itself first. The scope lists `capabilities`, relayed `actions` and
   `projects` (a `projects` list left out means any project; a `capabilities` list left out means any capability for a
   read or a draft but names none for an external effect; an `actions` list left out covers a relayed action only through
-  a listed capability that is its tool, MD-3), an effect ceiling `effects`, and `perCallMaxUsd` only where the words name an
+  a listed capability that is its tool, for a job's step the job's capability, MJ-1, MD-3), an effect ceiling `effects`, and `perCallMaxUsd` only where the words name an
   amount. It never states a scope wider than the words; where they are unclear, it asks the operator (AP-3). An agent
   names itself in the chain by its registry id, or, a coding session with none, by its runner kind (`claude-code`,
   `codex`), without DEC-0121's `agent:` prefix. A task still open when the mandate expires asks the operator once, in one
@@ -572,7 +572,7 @@ it reaches acts on them without asking, within what they cover.
   document that breaks this.
 - **MD-2a, a naming list is never added** (DEC-0136). A `capabilities` list left out is "any" for a read or a draft
   but names no call for an external effect, and an `actions` list left out covers a relayed action only through a
-  listed capability (MD-3, **Covered**). So a hand-over never
+  listed capability (its tool, for a job's step the job's capability; MD-3, **Covered**, MJ-1). So a hand-over never
   adds a `capabilities` or `actions` list the scope in force leaves out, except `actions` where the scope in force lists
   `capabilities` (it then narrows the relayed actions those name); it may add a `projects` list. Added anywhere else,
   the list could cover calls the operator's words did not, and the mandate is `mandate-widened`. The line is drawn at
@@ -587,13 +587,14 @@ it reaches acts on them without asking, within what they cover.
   product itself asks of the operator before a step, such as a paid run. For a job, the step reads the mandate its
   start call carried: a covered step raises no input request ([interop C3.3](interop.md#c33-awaiting-a-choice)).
   **MJ-1 (DEC-0141).** A step is read as its start was: under the job's own capability, the tool its start call named,
-  never under `fabric.job.get`, its action the step's request key and its effect the job's; a mandate whose
+  never under `fabric.job.get`, its action the step's request key and its effect the class the service declares for
+  what the step does (DL-3); a mandate whose
   `capabilities` name `fabric.job.get` covers no step of another capability. The
   mandate travels in `_meta.mandate` (an MCP call, the `fabric.job.get` that answers an input request), in
   `call.mandate` (the hub's `agent.call`, which forwards it as `_meta.mandate`; a sealed call, sent only to a target
   that lists `mandate/1`), or in a project-board request ([project-comms](project-comms.md)) whose sender the target
   places by the rule there. **Covered** means: a relayed action is in `actions`, or, with no actions listed, its tool
-  is in `capabilities`; the capability is in `capabilities` (or none is listed); the effect is within the closure of
+  (for a job's step, the job's capability, MJ-1) is in `capabilities`; the capability is in `capabilities` (or none is listed); the effect is within the closure of
   `effects` (as a grant's ceiling), never `change-policy` (AP-5), and an effect beyond `draft` needs the call named, a
   relayed action in `actions` or `capabilities`, any other call in `capabilities`; with `perCallMaxUsd`, the callee's
   own estimate for the call exists and is at most that; the project is in `projects` (or none is listed; a call that

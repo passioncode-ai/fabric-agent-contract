@@ -58,7 +58,8 @@ export interface ActionDecisionInput {
   /** The action's effect class, the service's own knowledge, required to read a mandate. */
   effect?: unknown;
   /** For a job's input request (an action whose `tool` is `fabric.job.get`), the capability of the job it belongs to:
-   * the tool its start call named. A mandate reads the step under it, as at the start (DEC-0141 MJ-1); required then. */
+   * the tool its start call named, never `fabric.job.get`. A mandate reads the step under it, as at the start
+   * (DEC-0141 MJ-1); required when the step's call carries a mandate and no decision. */
   mandateCapability?: unknown;
   /** The service's own estimate of what this call spends, USD, to read a mandate's spend. */
   spendUsd?: unknown;
@@ -149,15 +150,17 @@ export const JOB_STEP_TOOL = "fabric.job.get" as const;
 
 /**
  * A relayed action's call that carries a mandate and no decision (DEC-0125 MD-3): the mandate decides. A job's input
- * request is read under the job's own capability, never under `fabric.job.get`, so a mandate that covers a job's start
- * covers its steps alike (DEC-0141 MJ-1); its action stays the request key.
+ * request is read under the job's own capability, never under `fabric.job.get` (DEC-0141 MJ-1), its action the request
+ * key: a mandate listing capabilities covers a job's start and its steps alike, and one that also lists actions covers
+ * a step only when it names the step's key.
  */
 function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: string): ActionDecisionAnswer {
   const { effect, spendUsd, project } = input;
   if (typeof effect !== "string") return { fault: "effect-missing" };
   if (typeof input.self !== "string") return { fault: "self-missing" };
   const capability = action.tool === JOB_STEP_TOOL ? input.mandateCapability : action.tool;
-  if (typeof capability !== "string" || capability.length === 0) return { fault: "mandate-capability-missing" };
+  // MJ-1: never the transport itself, so a lazily passed `fabric.job.get` cannot bring the old reading back.
+  if (typeof capability !== "string" || capability.length === 0 || capability === JOB_STEP_TOOL) return { fault: "mandate-capability-missing" };
   const answer = mandateCovers({
     mandate: input.mandate, tier: input.tier, now: input.now, self: input.self,
     ...(input.callerAgent === undefined ? {} : { callerAgent: input.callerAgent }),

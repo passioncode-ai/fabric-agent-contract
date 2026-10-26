@@ -7192,6 +7192,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-24
 - **Status:** Accepted (2026-10-24). AP-3 extended by DEC-0125 (2026-10-26): a mandate handed on carries the operator's words from another agent. Extended by DEC-0126 (2026-10-26): a relay OA-2 and OA-3 accept carries them too. Additive on the wire (a new extension key, an optional `_meta` member and the
   sealed call's `decision`); a behaviour rule a service adopts at its next pin. Consumer adoption: CT-124 to CT-127.
+- **Annotated (2026-10-26):** clarified by DEC-0141: a job's input request answered under a mandate is read under the
+  job's capability (MJ-1); a decision still names the request key on `fabric.job.get`.
 - **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
   does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
   DL-26 already says that inside the machine boundary the operator's instruction is the authority and that a callee
@@ -8274,9 +8276,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-26
 - **Status:** Accepted (on merge of its pull request). A clarification of DEC-0125 and DEC-0121 where they read two
-  ways; `actionDecision` gains one input. Consumer adoption: the adapter's kits already read it this way (0.52.0, its
-  kit-only `mandateCapability`, brief D10) and adopt the contract's input at their repin; any service with a job that
-  waits `input_required` (CT-177).
+  ways; `actionDecision` gains one input. Consumer adoption: the adapter's kits read a step under the job's capability
+  since 0.52.0 (brief D10) but differ from the reference in two cases of `jobSteps`: without `mandateCapability` they
+  answer `operator-decision-required` where the reference answers its fault, and they read `mandateCapability` on an
+  ordinary action where the reference reads its tool; at their repin they adopt both and vendor the `jobSteps` group
+  (their vendoring reads `cases` and `declarations` only). Any other service with a job that waits `input_required`
+  (CT-177).
 - **Context:** the adapter asked (board thread `aa86a675`) under which capability a mandate is read when it answers a
   job's input request. AP-2 makes the input request an action whose tool is `fabric.job.get`, and `actionDecision`
   read a mandate with `capability = action.tool`; C3.3 and MD-3 read the step as the start, under the job's
@@ -8284,7 +8289,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reading, so C3.3's promise that a covered step raises no input request did not hold.
 - **Decision:** [delegation](specification/delegation.md#the-operators-mandate) MJ-1: a job's step is read as its
   start was, under the job's own capability (the tool its start call named), its action the step's request key, its
-  effect the job's; a mandate whose `capabilities` name `fabric.job.get` covers no step of another capability.
+  effect the class the service declares for what the step does (DL-3); a mandate whose `capabilities` name `fabric.job.get` covers no step of another capability.
   `actionDecision` takes the job's capability as `mandateCapability` for an action whose tool is `fabric.job.get` and
   answers the service's fault `mandate-capability-missing` without it; every other action reads its own tool. AP-2's
   decision path is unchanged: a decision still names the request key, one `fabric.job.get` call per key.
@@ -8294,12 +8299,19 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Alternatives considered:** keeping `fabric.job.get` and asking mandates to list it (it would cover the steps of
   every job, a widening no operator wrote); a new field on the input request naming the capability (the service
   already knows its own job; nothing needs to travel).
-- **Compatibility:** additive for a caller. A service pinned before it that reads a step's mandate under
-  `fabric.job.get` asks the operator where the mandate covers the step (an extra question, never an extra act).
-  `fixtures/vectors/actions.json` gains a `jobSteps` group (8 cases); `cases` is unchanged. `contractVersion` stays
+- **Compatibility:** a narrowing in one place and a widening in another, both only for a mandate on a job's step. A
+  service pinned before it reads the step under `fabric.job.get`: it asks the operator where a mandate names the job's
+  capability (an extra question), and it acts where a mandate names `fabric.job.get` itself, which now covers no step
+  (an act the operator's words did not name, so such a mandate was already outside AP-3's intent). No released
+  service is known to read a step's mandate under `fabric.job.get`; the adapter already reads it under the job's.
+  `actionDecision` refuses `fabric.job.get` as `mandateCapability`. A service that repins passes `mandateCapability`
+  for every job step its mandate path reads, or such a step answers the service's own fault. `fixtures/vectors/actions.json` gains a `jobSteps`
+  group (12 cases); `cases` is unchanged; kind `action-call` gains member `mandateCapability`, with two fixtures. `contractVersion` stays
   `0.1.0`.
-- **Consequences / affects:** `src/actions.ts` (`mandateCapability`, `JOB_STEP_TOOL`, the fault), `tools/vectors/actions.ts`,
-  `fixtures/vectors/actions.json`, `test/actions.test.ts`; `docs/specification/delegation.md` (MJ-1), `service.md`
-  (AP-2), `interop.md` (C3.3), `conformance.md` (the callee row); DEC-0125 annotated; backlog CT-177 (closed on merge)
+- **Consequences / affects:** `src/actions.ts` (`mandateCapability`, `JOB_STEP_TOOL`, the fault), `src/semantic-kinds.ts` (`action-call`'s member),
+  `fixtures/semantic/action-call-mandate-job-step*.json`, `tools/vectors/actions.ts`,
+  `fixtures/vectors/actions.json`, `test/actions.test.ts`; `docs/specification/delegation.md` (MJ-1, MD-1, MD-2a,
+  Covered), `schemas/mandate.schema.json` (the `actions` description), `service.md` (AP-2, the reference's inputs and
+  faults), `interop.md` (C3.3), `conformance.md` (the callee row), `DOCMAP.md`; DEC-0121 and DEC-0125 annotated; backlog CT-177 (closed on merge)
   and CT-178 (filed); the handoff `docs/handoffs/2026-10-26-mandate-job-step.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-177; the adapter's question `46433e3a` (thread `aa86a675`).

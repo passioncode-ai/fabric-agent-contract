@@ -11,15 +11,16 @@ answers a job's input request, and add a vector for it.
   request key as the action, the job's effect; `fabric.job.get` in a mandate covers no other job's step.
 - `actionDecision` takes `mandateCapability` for a job's input request; without it the service's fault
   `mandate-capability-missing` (`src/actions.ts`).
-- `fixtures/vectors/actions.json` gains `jobSteps` (8 cases, written by `tools/vectors/actions.ts`), run by
+- `fixtures/vectors/actions.json` gains `jobSteps` (12 cases, written by `tools/vectors/actions.ts`), run by
   `test/actions.test.ts`.
 - AP-2 (`service.md`), C3.3 (`interop.md`) and the callee row in `conformance.md` name it; DEC-0125 annotated.
 - CT-178 filed for Project Observatory's three asks (request `c50f590b`), acknowledged on the board.
 
 ## Open
 
-- Reply on thread `aa86a675` with the DEC id and the release tag once merged; the adapter drops its kit-only input at
-  its repin.
+- Reply on thread `aa86a675` with the DEC id and the release tag once merged. At its repin the adapter adopts two
+  deltas the readings measured on kit 0.52.0 (the fault without `mandateCapability`; an ordinary action reads its own
+  tool) and vendors the `jobSteps` group.
 - CT-178: answer Observatory by 2026-11-04.
 
 ## Checks actually run

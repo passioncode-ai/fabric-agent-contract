@@ -1052,7 +1052,7 @@ declared `action`, the caller's `tier`, the service's authenticated `caller`, th
 `elicited` record, the `approval` outcome, the `actionDigest` (DL-18), the `humanStepUrl` and the service's clock
 `now`; for a call under the operator's mandate (DEC-0125) also the call's `mandate`, the service's own agent id `self`,
 the caller's agent id `callerAgent` when the service authenticated one, the action's `effect`, the service's `spendUsd`
-estimate and the `project`:
+estimate and the `project`, and for a job's input request the job's capability `mandateCapability` (MJ-1, DEC-0141):
 
 | Action's `gate` | Caller | Answer |
 |---|---|---|
@@ -1067,7 +1067,7 @@ estimate and the `project`:
 | `relayed` | T0 or T1, a valid decision | `{ok: true, recordAs: {by: "operator", via: "relayed-instruction", caller, source?}}`: the operator's act, `source` when the decision carries it (DEC-0126) |
 
 An input the service owes and does not have (a declaration that is not valid, no authenticated caller, no readable
-clock, no digest for a T2 refusal, no link for a human step, and under a mandate no `effect` or no `self`) is its own fault (`{fault}`), never an answer to the
+clock, no digest for a T2 refusal, no link for a human step, and under a mandate no `effect` or no `self`, or for a job's input request no `mandateCapability` or `fabric.job.get` itself, MJ-1) is its own fault (`{fault}`), never an answer to the
 caller. Kind `action-call` (the reference's inputs and the service's `answer`) holds a service's answer to the
 reference's under `FAC-SEM-142`. A refusal is DL-19's ([delegation](delegation.md#refusal-codes)): the three codes
 `operator-decision-required`, `decision-invalid` and `human-step-required` are in its one set and travel as its
