@@ -1,0 +1,23 @@
+{
+  "type": "org-root-registration/1",
+  "org": "org:org-a",
+  "issuer": "https://orgs.example",
+  "root": {
+    "kid": "root-org-a-1",
+    "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+  },
+  "administrator": {
+    "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+    "alg": "EdDSA",
+    "publicKey": {
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+    },
+    "rpId": "sign.orgs.example",
+    "origins": [
+      "https://sign.orgs.example"
+    ]
+  },
+  "claim": "short"
+}

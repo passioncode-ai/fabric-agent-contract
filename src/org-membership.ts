@@ -131,7 +131,12 @@ const ORIGIN = /^https:\/\/[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?$/;
 const jwkOk = (key: unknown) =>
   isObject(key) && ((key.kty === "EC" && exactly(key, ["kty", "crv", "x", "y"]) && key.crv === "P-256" && matches(X, key.x) && matches(X, key.y)) ||
     (key.kty === "OKP" && exactly(key, ["kty", "crv", "x"]) && key.crv === "Ed25519" && matches(X, key.x)));
-function administratorOk(value: unknown): boolean {
+/**
+ * Whether one administrator credential has `org-key-set/1`'s shape for its `administrators` items (DEC-0129): exactly the
+ * authority's members, a base64url credentialId, an algorithm with its public JWK, 1 to 8 distinct origins. The root's
+ * registration checks the owner's credential with it (DEC-0131 OX-2), so a credential it admits fits the first set.
+ */
+export function administratorOk(value: unknown): boolean {
   return (
     isObject(value) && exactly(value, AUTHORITY_FIELDS) && isString(value.credentialId) && value.credentialId.length <= 1366 && B64URL.test(value.credentialId) &&
     ASSERTION_ALGORITHMS.includes(value.alg as string) && jwkOk(value.publicKey) && (value.alg === "ES256") === (isObject(value.publicKey) && value.publicKey.kty === "EC") &&

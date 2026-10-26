@@ -64,6 +64,8 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "org-membership": doc("org-membership.schema.json"),
   "org-key-set": doc("org-key-set.schema.json"),
   "org-authority": doc("org-authority.schema.json"),
+  "org-key-set-draft": doc("org-key-set-draft.schema.json"),
+  "org-authority-draft": doc("org-authority-draft.schema.json"),
   "estate-placement": wrap("record", "machine", "package", "context"),
   "estate-record": doc("estate-record.schema.json"),
   "estate-record-revision": wrap("parent", "next"),

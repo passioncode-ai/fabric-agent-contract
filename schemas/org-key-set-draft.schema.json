@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/org-key-set-draft.schema.json",
+  "title": "Organization key-set draft, org-key-set-draft/1 (DEC-0131)",
+  "description": "What an organization server serves at GET {issuer}/fabric/membership/v1/{org}/key-set/draft (DEC-0131 OX-1): the next org-key-set/1 it drafted, unsigned, for the root the owner's Fabric holds to sign. Public material only, served without a credential; its authenticity is the root's signature over it. docs/specification/membership.md.",
+  "type": "object",
+  "required": [
+    "type",
+    "org",
+    "base",
+    "draft",
+    "digest"
+  ],
+  "properties": {
+    "type": {
+      "const": "org-key-set-draft/1"
+    },
+    "org": {
+      "$ref": "org-membership.schema.json#/$defs/org",
+      "description": "The organization the draft is for; the draft names the same (FAC-SEM-151)."
+    },
+    "base": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "revision",
+            "digest"
+          ],
+          "properties": {
+            "revision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "digest": {
+              "$ref": "common.schema.json#/$defs/sha256"
+            }
+          },
+          "additionalProperties": false
+        }
+      ],
+      "description": "The last signed document the draft was made from, by revision and digest, or null for the first. The draft's revision is one above it (FAC-SEM-151)."
+    },
+    "draft": {
+      "type": "object",
+      "description": "An org-key-set/1 without sig: every member the root signs, exactly (orgKeySetSigningInput has bytes for it)."
+    },
+    "digest": {
+      "$ref": "common.schema.json#/$defs/sha256",
+      "description": "The draft's digest: SHA-256 of what its signer signs over it (FAC-SEM-151). The server accepts a signed document only when its signed bytes have this digest."
+    }
+  },
+  "additionalProperties": false
+}
