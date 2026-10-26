@@ -107,9 +107,7 @@ The manifest capability `name`, hub `agent.call.capability`, service
 definition. C3.1's equality between the manifest capability name and served MCP
 tool name still applies; this amendment does not rename a product's tool or add
 an alternative `toolName` field. Binding capability identity remains a URI, and
-an allowed name still grants no admission, binding or access authority. One name is reserved: `project.work`, the
-capability of a Project's primary responder on the board ([project communication](project-comms.md#the-primary-responder)
-PR-1, DEC-0140), which no service serves or declares as its own.
+an allowed name still grants no admission, binding or access authority.
 
 This is an additive acceptance change under DEC-0016: `contractVersion` remains
 `0.1.0`, with the source revision selected by the consumer's
@@ -119,6 +117,11 @@ review and repin before relying on them; an unmerged source branch is not a
 published or adopted revision. The shared-ref and compiled-document regressions
 are [`capability-names.test.ts`](../../test/capability-names.test.ts); positive
 and negative conformance fixtures are in the [catalogue](../../fixtures/catalogue.json).
+
+**Amendment (DEC-0140).** The board reserves `project.work`, the capability of a Project's primary responder
+([project communication](project-comms.md#the-primary-responder) PR-1): no service serves or declares it as a
+capability of its own. This narrows the names a service may declare, under the compatibility policy's second exception
+([conformance](conformance.md)); memory/0.1 reserves its own names ([memory and learning](memory-and-learning.md)).
 
 ## C3.2 Jobs
 

@@ -25,7 +25,8 @@ read, that leaves out its own messages, a narrowing made under the compatibility
 **Amended by DEC-0140 (2026-10-26):** the reserved capability `project.work`, a Project's
 [primary responder](#the-primary-responder); the operator's [move of a slot](#the-operator-moves-a-slot) to another
 session; and what a [session's role and branch](#a-sessions-role-and-branch) may and may not carry. It adds no tool, no
-argument and no field to any tool's schema.
+argument and no field to any tool's schema, and reserves one capability name no service may serve or declare, a
+narrowing under the compatibility policy's second exception.
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`
@@ -536,7 +537,8 @@ per Project (C4), fenced, listed in the [project directory](#project-directory) 
 (with an `absent` responder until one enrolls), and held by the operator like any slot. A host that shows a Project's
 main session shows the holder of that slot, and shows none while nobody holds it. No service serves `project.work` as
 a tool or declares it as a capability of its own (`surfaces.mcp.capabilities`, an action's `tool`); the checker does
-not test this today, and no other capability name is reserved.
+not test this today, and the board reserves no other capability name (memory/0.1 reserves its own, [memory and
+learning](memory-and-learning.md)).
 
 ### Slots end with the session
 
@@ -709,11 +711,12 @@ Project: in the host's operator controls, or through their agent, which relays t
 - **Who may receive it.** A live session of that Project already authorized to respond for that capability, as for
   `com.enroll`; the host refuses any other `not_authorized`, and a move grants nothing.
 - **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
-- **The holder moved off.** A client recovering its slots calls `com.responder_replace` only at the generation its own
-  checkpoint recorded as held. A slot whose generation `com.status` shows above that one was moved or taken over: the
-  client leaves it, ends its claims there, leaves its accepted work held and does not replace it, whatever session id
-  it rejoins under, so its recovery never undoes the operator's move. Another authorized session may still replace a
-  slot as before; a move bars nobody, and adds no refusal.
+- **After the move.** The slot is then held under the board's ordinary rules, and a move bars nobody and adds no
+  refusal: another authorized session may replace it, a client's recovery may replace it (the moved-off session's
+  included, when its checkpoint holds accepted work), and a receiving session that lets its lease lapse loses it to
+  the next `com.enroll`. A host keeps the operator's choice as its own state: when the slot's holder is no longer the
+  session the operator chose, it shows so and offers the move again. Whether a client should leave a slot moved off
+  it is the client's (CT-175).
 - **What was in flight.** The receiving session continues held accepted work only by its own `com.responder_replace`
   with a transfer, whose checkpoint it writes as the replacement (a holder may replace itself at its current
   generation, before it claims or begins any effect, since its own replacement fences its own claims and attempts), or
@@ -722,7 +725,8 @@ Project: in the host's operator controls, or through their agent, which relays t
   settlement](#owner-settlement)). The host shows the slot's `accepted` and `in_progress` counts before the operator
   confirms a move, and that in-progress work will wait for the new holder's observation.
 - **Learning it holds the slot.** The host tells the receiving session through its own session surface; a client
-  that cannot hear it learns it holds the slot when its `com.claim` succeeds, and renews from there.
+  that cannot hear it learns it holds the slot when its `com.enroll` renews it or its `com.claim` succeeds, and renews
+  from there.
 - **The record.** The host's own slot record of the move names the operator as the actor and the receiving session as
   the holder; each request the move changes is journaled as op `replace` (`claimed` to `queued`) or `lost_result`
   (`in_progress` to `outcome_unknown`), carrying the operator principal (`FAC-SEM-027`). `com.status` shows the slot as
