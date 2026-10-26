@@ -203,7 +203,8 @@ export function verifyOrgAuthority(value: unknown, trust: OrgAuthorityTrust): Or
 /**
  * What an organization's relay admits from (DEC-0129, CT-37): the organization's member list (`org-authority/1`) it
  * holds, under the organization's key set it applied (`verifyOrgKeySet` under the root it pinned when it was set up for
- * the organization, as an estate's relay pins the estate's first passkeys).
+ * the organization, as an estate's relay pins the estate's first passkeys). `keySet` MUST be the newest set
+ * `verifyOrgKeySet` accepted: under an older one a removed administrator's list would still verify (relay.md OR-4).
  */
 export interface OrgAdmissionInput {
   held?: JsonObject; // the list the relay verified and applied last, if any

@@ -307,7 +307,8 @@ checks the list against the schema first, as a relay does an estate record:
 **OL-4, the relay.** An organization's relay pins the organization's root when it is set up for the organization, as an
 estate's relay pins the estate's first passkeys, applies key sets under it, and admits from the list it holds:
 `orgRelayAdmissionSet({held, candidate, org, keySet, at, schemaValid})` answers the set of listed `#sig` keys, kid to
-SEC 1 octets, or a refusal. A refused candidate leaves the held list's set in force: a candidate that fails the schema
+SEC 1 octets, or a refusal. A refused candidate leaves the held list, which the relay re-reads under the key set it applied now (relay.md OR-3,
+OR-4): a candidate that fails the schema
 answers `invalid`, one that fails verification `unverified` with its problem, its window included. A refused held
 list, or none, admits nobody (DEC-0047, fail closed): `expired` and `not-yet-valid` name only the held list's own
 window, and a held list that cannot be read back (no positive revision, no RFC 8785 form) is refused

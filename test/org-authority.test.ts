@@ -290,7 +290,8 @@ describe("the organization relay's handshake (DEC-0134)", () => {
     const session = { kid: KID, key: new Uint8Array(octets) };
     const dropped = { ...KEY_SET, administrators: [] };
     // The key set is applied even though the list read with it is refused; the held list, re-read under it, admits nobody.
-    expect(admission({ keySet: dropped, held: LIST, candidate: resign({ ...LIST, revision: 5 }) }).ok).toBe(false);
+    expect(admission({ keySet: dropped, held: LIST, candidate: resign({ ...LIST, revision: 5 }) })).toEqual({ ok: false, refusal: "unverified", problem: "unknown-administrator" });
+    expect(admission({ keySet: dropped, held: LIST })).toEqual({ ok: false, refusal: "unverified", problem: "unknown-administrator" });
     expect(sessionStands(session, admission({ keySet: dropped, held: LIST }))).toEqual({ ok: false, code: "not-admitted" });
   });
 
