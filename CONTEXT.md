@@ -351,9 +351,9 @@ person chose and their requests to the organization's administrators, leaves for
 the person's passkey signs, never part of the plan that leaves.
 
 **Family**: The operator's agents: every agent placed on a machine of the operator's estate and the operator's own
-local sessions, which a callee recognises only by placing them in **T0** or **T1**; never a caller's own claim. Open to
-everything open to the operator in the context the call runs in, within the money limits, the human gates, the
-contexts' routing, the machine profiles and, for a relayed action, the operator's decision or a mandate. Not a context and not a tier of its own (DEC-0130, [delegation](docs/specification/delegation.md#the-family-and-the-agent-network)).
+local sessions, which a callee recognises only by placing them in **T0** or **T1** (any process of the owner's OS account,
+one the owner did not install included); never a caller's own claim. Open to everything open to the operator in the
+context the call runs in, within the money limits, the human gates, the credential source, the contexts' routing, the machine profiles and, for a relayed action, the operator's decision or a mandate. Not a context and not a tier of its own (DEC-0130, [delegation](docs/specification/delegation.md#the-family-and-the-agent-network)).
 Every other reachable agent is in the agent network beyond the family: **T2**, open to what its context was granted.
 The agent network is not **Network** (NET-1, a context's machines). Unrelated to the relay family (the relay's
 documents), a runner's provider family or a capability family (`memory/0.1`), where family names a set of documents or

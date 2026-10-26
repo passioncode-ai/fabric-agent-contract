@@ -1,7 +1,8 @@
 # Delegation `fabric-delegation/0.1`
 
-DEC-0039, DEC-0041, DEC-0045, DEC-0060, DEC-0090 ([the partner channel](partner-channel.md)), DEC-0121, DEC-0125,
-DEC-0126, DEC-0130, DEC-0136, DEC-0137 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
+DEC-0039, DEC-0041, DEC-0043, DEC-0045, DEC-0055, DEC-0060, DEC-0066, DEC-0082, DEC-0090 ([the partner
+channel](partner-channel.md)), DEC-0106, DEC-0107, DEC-0111, DEC-0121, DEC-0125, DEC-0126, DEC-0128, DEC-0130,
+DEC-0132, DEC-0136, DEC-0137 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
 · schemas [`delegation-token`](../../schemas/delegation-token.schema.json),
 [`delegation-jwks`](../../schemas/delegation-jwks.schema.json), [`approval`](../../schemas/approval.schema.json),
 [`delegation-refusal`](../../schemas/delegation-refusal.schema.json),
@@ -466,7 +467,7 @@ Proof starts at the machine boundary (DEC-0045; Fabric ADR-0144
 |---|---|---|
 | **T0** | the operator's own machine: a caller on loopback, running under the owner's OS account | the local placement's floor ([service](service.md#authentication-and-network)), which this profile does not change |
 | **T1** | an enrolled machine of the same owner | its enrolment in the owner's estate (the estate record, DEC-0084); over the relay, `relayCallerTier` from the estate record the callee's node applied ([machine calls](machine-calls.md#the-t1-binding-over-the-relay), DEC-0106) |
-| **T2** | everything else: another person's machine (a share grant, `principalKind: external`), and any caller the callee cannot place in T0 or T1 | — |
+| **T2** | everything else: another person's machine (a share grant, `principalKind: external`), and any caller the callee cannot place in T0 or T1 (over the estate's relay an unplaced sender is refused instead, DL-28) | the default: no placement |
 
 A caller's tier is its origin's, not its connection's. A call relayed onto loopback from off the machine — through
 a tunnel, a reverse proxy, or the hub forwarding (DL-10) a T2 caller's call — is T2 unless the relay proves the
@@ -507,20 +508,21 @@ DEC-0045), and `personal` and `org:<orgId>` stay the only contexts. What DL-26 o
 open to the family: everything open to the operator, in the context the call runs in (a call without a token runs in
 the context of the callee instance it reaches), with no token, approval or grant record; one approval of the operator
 travels along the family's chain as a mandate (DEC-0125). What still binds the family: the money limits, the human
-gates, the credential source (never another agent's key or vault slot, DL-26), the contexts, the machine profiles
-between the estate's machines (a `view` machine neither takes nor makes a call with an effect, `machineCallVerdict`,
-DEC-0106), and for a `relayed` action the operator's decision or a mandate that covers it (DEC-0121, DEC-0125). A family agent placed in an organization's context works under that context's routing and grants
+gates, the credential source (never another agent's key or vault slot, DL-26), the contexts, the machine profiles on
+calls between the estate's machines over the relay (a `view` machine neither takes nor makes a call with an effect,
+job tools excepted, `machineCallVerdict`; a profile does not reach another path, [machine
+profiles](machine-calls.md#machine-profiles), DEC-0106), and for a `relayed` action the operator's decision or a mandate that covers it (DEC-0121, DEC-0125). A family agent placed in an organization's context works under that context's routing and grants
 (DEC-0082): the family carries nothing of `personal` into an organization's context, nor back.
 
 **DL-28, nothing declares a family.** A caller's own claim never places it in the family: a header, a session label, a
 token class it names itself, an agent id it states. A call relayed onto loopback from off the machine (a tunnel, a
 reverse proxy, the hub forwarding) stays T2 unless the relay proves the origin's tier (DL-25). Over the estate's
-relay, `relayCallerTier` decides, and a sender it cannot place is refused, never taken as T2: `unknown-state` is a
-denial and a sender that is not T1 is refused `unauthenticated` ([machine calls](machine-calls.md#the-t1-binding-over-the-relay),
-DEC-0106). A loopback caller under another OS account stays T2. Only the placement of DL-25 counts, so an agent that a
+relay, `relayCallerTier` decides: `unknown-state` is a denial that never falls back to T2, and a sender that is not T1
+is refused `unauthenticated`; a call over the relay from outside the estate is not decided there ([machine
+calls](machine-calls.md#the-t1-binding-over-the-relay), DEC-0106). A loopback caller under another OS account stays T2. Only the placement of DL-25 counts, so an agent that a
 prompt injection turns against the operator is still a family agent, which is why the money limits and the human
 gates hold inside the family too, and why a product that needs protection from a hostile local process still adds an
-approval ([the boundary](#the-boundary)) that no mandate covers for it (MD-6); a watcher for that case is a running
+approval ([the boundary](#the-boundary)); a watcher for that case is a running
 service, not a contract format (proposed to Fabric, board message `35b8301c`).
 
 **DL-29, the agent network.** The agent network is every agent a caller can reach: the family, organizations' agents,
@@ -530,7 +532,7 @@ that context's routing and grants (DL-27). Outside the family a caller is T2 and
 open to what its context was granted, a share grant, a partner grant or an organization's grant, with a delegation
 token per call (DL-8, DL-13). A service off the estate's machines (a platform the operator uses) has no caller of
 this operator's family: the operator's agents reach it as T2 (its own owner's processes on its own machines are that
-owner's T0, and an organization's cloud machine binds no person, DEC-0099). The operator's agents reach it, once
+owner's T0; an organization's cloud machine binds no person, DEC-0099, so the operator's agents are T2 there too). The operator's agents reach it, once
 Fabric's issuer serves (MD-5), with a token the operator's hub issues for `personal`: its issuer is the estate's,
 `urn:fabric:estate:<id>` (DL-2, DL-14a), since a token names no context of its own, and its scope is all they carry. A
 service that keeps its own token classes may map such a token onto a class of its own for the operator's account (the

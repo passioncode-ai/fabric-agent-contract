@@ -10,9 +10,11 @@ rules they rest on (DEC-0045, DEC-0099, DEC-0106, DEC-0125, DL-26, MD-6).
 - DEC-0137, text only, in [delegation](../specification/delegation.md#the-family-and-the-agent-network):
   - a call without a token runs in the context of the callee instance it reaches;
   - T0 is every process of the owner's account, one the owner did not install included; the money limits, the human
-    gates and a product's own approval against a hostile local process (The boundary, MD-6) hold against it;
-  - over the estate's relay an unplaced sender is refused (`unknown-state`, `unauthenticated`), never taken as T2;
-  - what binds the family adds the credential source and reads the machine profiles as `machineCallVerdict` does;
+    gates and a product's own approval against a hostile local process (The boundary) hold against it;
+  - over the estate's relay `relayCallerTier` decides: `unknown-state` never falls back to T2, a sender that is not T1
+    is `unauthenticated`, a call from outside the estate is not decided there;
+  - what binds the family adds the credential source and reads the machine profiles as `machineCallVerdict` judges a
+    call over the relay;
   - the agent network links its directory (DEC-0104) and includes the family; DL-25's T1 row says "enrolment in the
     owner's estate";
   - a service off the estate: the operator's agents are T2 there, its own owner's processes its own T0; the token is
@@ -21,7 +23,9 @@ rules they rest on (DEC-0045, DEC-0099, DEC-0106, DEC-0125, DL-26, MD-6).
   DL-27 to DL-29 guarded in `test/delegation-sealed.test.ts`; DEC-0130 annotated; CT-143's earlier status kept.
 - Board: the operator's request thread (`198866e6`, reply `a29ffd5e`) told that DEC-0130 answers item 1, the
   platform's reply `550ebf96` included.
-- CT-157 closed; CT-167 filed (`docs:check` does not check a link's `#fragment`).
+- CT-157 closed; CT-167 filed (`docs:check` does not check a link's `#fragment`), CT-168 filed (a mandate against a
+  product's protective approval); CT-149 carries the family's scenario and "issued for `personal`".
+- Readings: round 1 fail (DL-27's profiles read wider than DEC-0106; CT-167's link count); fixed with the round's risks.
 
 ## Checks actually run
 
