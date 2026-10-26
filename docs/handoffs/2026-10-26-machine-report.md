@@ -36,6 +36,9 @@ move's step 6 and the window lease's reporting.
 - Round 3 (head `7f0a4661`): unit and seam pass; product fail ("a machine that refused it never qualifies" against
   step 6's catch-up revision; FAC-SEM-090's row still said "received"; the spec index called the report adopted).
   Fixed: such a machine qualifies once it applies a later revision; the row says written; the index says owed.
+- Round 4 (head `956ce65a`): unit and seam pass; product fail (the hub machine's own leases had no way to reach its
+  hub, so step 7 could not finish). Fixed: the hub's own node gives the same report locally. Non-blocking findings of
+  every round are CT-161.
 
 ## Decisions
 

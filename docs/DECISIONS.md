@@ -7953,7 +7953,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      on its parent reaches the new hub, the hub move's step 6), after it applies a revision, a heartbeat or a delta
      page (at most once a minute), at or after each lease's expiry, and at least every 24 hours
      while it holds a lease or applies the estate's records. A report carries the whole state, is never answered, and
-     a lost one is replaced by the next.
+     a lost one is replaced by the next. The hub machine's own node gives its hub the same report on the machine
+     (the local channel), so the hub's own leases and revision count like any machine's.
   3. **MR-3, how.** Sealed to the hub machine's `#kem` as `fabric-machine-report/1` `{type, kem, enc, ct}` inside a
      `fabric-relay-message/1` body: HPKE base mode, suite `[16, 1, 1]`, `info` the protocol name, the additional data
      the RFC 8785 bytes of `{type, from, to, msgId, kem}`, the plaintext at most 65 536 bytes.
