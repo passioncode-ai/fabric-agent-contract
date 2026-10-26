@@ -7285,13 +7285,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      Host and Origin checks, and its interface URLs are on the loopback origin (`http://127.0.0.1:<port>`) for peers
      on the same computer. A2A asks for HTTPS in production (A2A 1.0 §4.4.6, §7.1); a loopback origin is unreachable
      from outside the computer, so the contract admits it there and nowhere else. A service offered to others serves
-     the card its outside peers read at its `https` `peer.endpoint` (DEC-0061); a remote placement serves it on its
-     `https` origin and MAY answer there without the token. On every placement the public card carries no secret and
+     the card its outside peers read at the well-known path on its `https` `peer.endpoint`'s origin (DEC-0061); a
+     remote placement serves it on its `https` origin and MAY answer there without the token, a card that is not open
+     being gated by the service's own credentials or an identity proxy, never the descriptor's token. On every placement the public card carries no secret and
      no member of the well-known document about the running process (build, pid, status, tiles, the degraded list);
      it discloses the service's name and skills, which on a remote placement is the one exception, by the service's
      choice, to what DEC-0109 keeps behind the token.
-  3. A peer never holds the descriptor's token (DL-12, DEC-0024, DEC-0061): an A2A interface MUST NOT accept it and the
-     card's `securitySchemes` MUST NOT name it. A service authenticates A2A callers with credentials of its own or with
+  3. An A2A peer is never given the descriptor's token (DL-12, DEC-0061; for a peer on the same computer, where MCP may
+     still take it by default under DEC-0024, this is the stricter choice, so one card serves every peer alike): an
+     A2A interface MUST NOT accept it and the card's `securitySchemes` MUST NOT name it. A service authenticates A2A callers with credentials of its own or with
      the estate's delegation tokens (`auth.delegation`, DEC-0039), with or without an MCP surface, and the
      authenticated extended card (`capabilities.extendedAgentCard`, `GetExtendedAgentCard`, A2A 1.0 §4.4.3, §5.3)
      requires one of them on every placement. A host and a probe never call an A2A interface with the descriptor's

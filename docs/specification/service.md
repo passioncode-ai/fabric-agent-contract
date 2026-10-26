@@ -811,7 +811,7 @@ supervisor, rather than as a stdio server each session starts (LC-19, [profiles]
 
 | Caller | Surface |
 |---|---|
-| Another agent on the same machine | MCP `2026-07-28`, `streamable-http`, at `surfaces.mcp.path` on the service origin, token in the declared header — unless `surfaces.mcp.auth` is `own` or `delegation` ([below](#mcp-credentials)); an agent of the estate presents a delegation token ([delegation](delegation.md), DEC-0039) |
+| Another agent on the same machine | MCP `2026-07-28`, `streamable-http`, at `surfaces.mcp.path` on the service origin, token in the declared header, unless `surfaces.mcp.auth` is `own` or `delegation` ([below](#mcp-credentials)); an agent of the estate presents a delegation token ([delegation](delegation.md), DEC-0039); or A2A `1.0` on the loopback origin, never with the descriptor's token ([A2A Agent Card](#a2a-agent-card)) |
 | The operator, a script | the service's CLI, delegating start, stop and restart to the supervisor |
 | A remote agent | A2A `1.0` over HTTPS, found through its [Agent Card](#a2a-agent-card), or MCP behind an authenticated gateway |
 | The dashboard page | same-origin requests with the session cookie and the custom request header; its layout and appearance inside a host follow [`fabric-dashboard/0.1`](embedded-dashboard.md) (DEC-0036) |
@@ -868,17 +868,20 @@ surfaces; a peer finds it at A2A's own well-known path (A2A 1.0 §8.2):
   URLs are on that origin (`http://127.0.0.1:<port>`): a peer on the same computer reaches them, and loopback is the
   trust anchor ([Remote placement](#remote-placement)). A2A asks for HTTPS in production (A2A 1.0 §4.4.6, §7.1); a
   loopback origin is not reachable from outside the computer, so this contract admits it there and nowhere else. A
-  service [offered to others](#offered-to-others) serves the card its outside peers read at its `peer.endpoint`, whose
-  interface URLs are on that `https` endpoint; a remote placement serves it on its `https` origin, and it MAY answer
-  there without the token, since a peer that holds no credential yet discovers the service through it.
+  service [offered to others](#offered-to-others) serves the card its outside peers read at the well-known path on its
+  `peer.endpoint`'s origin (A2A 1.0 §8.2 is rooted at the domain), whose interface URLs are on that `https` endpoint; a
+  remote placement serves it on its `https` origin. There it MAY answer without the token, since a peer that holds no
+  credential yet discovers the service through it; a card that is not open is gated by the service's own credentials
+  or an identity proxy in front of it, never by the descriptor's token.
 - **What the public card discloses.** It carries no secret and none of the well-known document's members about the
   running process (build, pid, status, tiles, the degraded list). It does disclose the service's name and skills: on a
   remote placement this is the service's choice by serving it, and it is the one exception to what DEC-0109 keeps
   behind the token there.
-- **Who may call its interfaces.** A peer never holds the descriptor's token: it is the host's credential, retired as a
-  capability credential across the machine boundary ([delegation](delegation.md) DL-12) and never given to others
-  ([Offered to others](#offered-to-others), DEC-0024, DEC-0061). An A2A interface therefore MUST NOT accept the
-  descriptor's token, and the card's `securitySchemes` MUST NOT name it. A service authenticates A2A callers with
+- **Who may call its interfaces.** An A2A peer is never given the descriptor's token. It is the host's credential,
+  retired as a capability credential across the machine boundary ([delegation](delegation.md) DL-12) and never given
+  to others ([Offered to others](#offered-to-others), DEC-0061); for a peer on the same computer, where MCP may still
+  take it by default (DEC-0024), this decision chooses the stricter rule, so one card serves every peer alike. An A2A
+  interface MUST NOT accept the descriptor's token, and the card's `securitySchemes` MUST NOT name it. A service authenticates A2A callers with
   credentials of its own (as `surfaces.mcp.auth: "own"` describes) or with the estate's delegation tokens when it
   declares `auth.delegation` ([MCP credentials](#mcp-credentials), DEC-0039), whether or not it has an MCP surface. A
   host and a probe MUST NOT call an A2A interface with the descriptor's token and MUST NOT report its refusal
