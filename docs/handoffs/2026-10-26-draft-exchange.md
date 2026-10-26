@@ -16,8 +16,6 @@ who signs it and come back signed (CT-156; request `1822d650`, thread `bd508780`
 
 ## Checks actually run
 
-- `pnpm run check` on the rebased branch: 105 files, 9 217 tests, UX lint, docs, markdownlint 0 errors, privacy 0;
-  `pnpm vectors:check`: 23 files match.
 - Blind readings, round 1 (head `f4c1806f`): unit fail (the registration schema did not pin revision 1), seam pass,
   product fail (the claim by an open link carries a secret DEC-0123 links never carry; the root and the owner's
   credential arrived after the draft that names them; OM-2 still left the root's serving to Fabric). Fixed: the root
@@ -29,6 +27,10 @@ who signs it and come back signed (CT-156; request `1822d650`, thread `bd508780`
   The unit tier of round 2 found the same registration gap.
 - Round 3 (head `24052d56`): unit, seam and product pass. Their cheap non-blocking items were applied before round 4:
   the issuer's shape at registration, the claim-not-spent tests, the decision's wording on key-set drafts and OM-7.
+- Round 4 (head `2c242407`): unit, seam and product pass. Two clean rounds in a row; their non-blocking findings are
+  in CT-158.
+- `pnpm run check` on the merge head: 105 files, 9 217 tests, UX lint, docs, markdownlint 0 errors, privacy 0;
+  `pnpm vectors:check`: 23 files match.
 
 ## Decisions
 
