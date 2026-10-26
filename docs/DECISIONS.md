@@ -7643,8 +7643,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `refreshDue` 15 minutes before expiry; one held record per (organization, audience, subject).
   5. **OM-5, what ends with a membership.** An `ended` attestation, `organization-closed` (DEC-0103) or an unpin ends
      it, and with it the context's share grants (revoked in the next revision), delegation tokens in the context, the
-     device enrollment (ended as on `organization-closed`: the `server` layer and its locks, key set, streams and the
-     context's credentials; devices.md amended) and anything leaving for the organization.
+     device enrollment (ended as on `organization-closed` once the node applies the revision that unpins the
+     organization, which Fabric writes on every end: the `server` layer and its locks, key set, streams and the
+     context's credentials; devices.md amended; a revoked certificate alone keeps DEC-0103's meaning) and anything leaving for the organization.
   6. **OM-6, suspended is not ended.** An expired or unverifiable attestation authorises nothing new; what runs keeps
      its expiry. A refresh the issuer refuses for the membership is an end.
   7. **OM-7, the allowlist.** Only the enrollment's own requests (enrollment, rotation, renewal) and its sessionless

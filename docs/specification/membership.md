@@ -145,13 +145,15 @@ Everything the membership carried ends with it, as one rule:
 
 - Fabric revokes every share grant whose context is that `org:<orgId>`: the next estate revision lists a `grant`
   revocation for each, and in the same revision removes the grant from `shareGrants` and every placement and secret
-  placement in that context, so the revision passes `FAC-SEM-075`, `FAC-SEM-076` and `FAC-SEM-111` (and drops the
-  organization's pin when the person unpinned it); the revocation delta carries the revocation fast (DEC-0054), so the
+  placement in that context, and drops the organization's pin, so the revision passes `FAC-SEM-075`, `FAC-SEM-076` and
+  `FAC-SEM-111` and every machine of the person reads the end from it; the revocation delta carries the revocation fast (DEC-0054), so the
   agents the person shared stop running for it;
 - the hub mints no delegation token in that context, and no relayed decision or mandate of the organization's context
   is taken;
-- the device enrollment ends: the organization server revokes the device certificate (DEC-0031), and the node ends
-  that enrollment as on `organization-closed` ([devices](devices.md#a-closed-organization), DEC-0103): it stops every
+- the device enrollment ends: the organization server revokes the device certificate (DEC-0031), and the node, when it
+  applies an estate revision that no longer pins the organization or meets `organization-closed`, ends that enrollment
+  as on `organization-closed` ([devices](devices.md#organization-closed), DEC-0103); a revoked certificate alone keeps
+  DEC-0103's meaning and is not read as a membership's end. Ending it, the node stops every
   request to that organization, drops what it buffered for it, discards that organization's `server` policy layer and
   its locks, key set, collection start and streams, deletes every credential of the context (DEC-0111) and drops the
   enrollment's keys (CT-122 adds the context's own `iss` and hub key, dropped the same way); an `mdm` layer stays the
@@ -224,8 +226,8 @@ organization.
   `verifyOrgKeySet`, verifies attestations with `verifyOrgMembership` before it trusts a membership, keeps the held
   record per subject, and acts on OM-5, OM-6 and OM-7.
 - **Project Observatory's node** ends an enrollment on a membership's end as on `organization-closed` (OM-5): it learns
-  of the end from the organization server's answers (a revoked certificate, `organization-closed`) and from an estate
-  revision that no longer pins the organization, which it applies anyway.
+  of the end from an estate revision that no longer pins the organization, which Fabric writes on every end (OM-5),
+  and from `organization-closed`; a revoked certificate alone keeps its DEC-0103 meaning.
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same
   pin, with its own audience.
 
@@ -244,6 +246,8 @@ grants, until per-context relay sessions (CT-122's question 3).
   are the members' per-context keys, decided with CT-122.
 - How an issuer serves its root and key sets (a URL, a push), and how Fabric shows the root before the passkey signs:
   the issuer's and Fabric's (D8).
+- What the hub answers a caller it refuses to mint for in a suspended or ended organization's context (OM-5, OM-6):
+  the hub's refusal code, Fabric's to state beside DL-4.
 - How attestations reach a reader (a push, a fetch) and how a reader authenticates to the issuer to fetch one: the
   issuer's and the reader's, beside OM-7's refresh row, which bounds what that exchange carries about the person.
 - A faster end than expiry (an organization's revocation delta with a `member` kind): additive, when a reader needs it.
