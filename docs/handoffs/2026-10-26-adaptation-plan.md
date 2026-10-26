@@ -46,6 +46,10 @@ requests to the administrators. The first organization server needs it by 2026-1
 - Round 6: unit and seam pass, product fail (the white-space rule unstated, a server page promised that is optional,
   DEC-0138 item 3 behind AD-3 on a `403`). Fixed, with Fabric's trim, the Unicode-mode note, the receipt-reading
   question in *Not decided here*, and the adoption order and closure in CT-169.
+- Round 7: unit, seam and product pass (the first clean round). Polish taken: the white-space set named (ECMA-262
+  `\s`), the leave notice on any withdrawal no receipt confirmed, a suspended membership sends no plan, the body size
+  stated for compact UTF-8, edge tests for white space. The first server's objection (a `401` with `idp-sign-in-required` while its sign-in is stale) taken: AD-3 reads a
+  `401` or `403` by its code. At merge, write the merge date into DEC-0138's Status.
 
 ## Open
 

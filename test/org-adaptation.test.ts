@@ -99,6 +99,9 @@ describe("org-adaptation/1 (DEC-0138)", () => {
         expect(valid(withText(`read${c}only`), "org-adaptation"), `${field} ${JSON.stringify(c)}`).toBe(false);
       }
       expect(valid(withText("read \u{1F600} only"), "org-adaptation"), `${field} a surrogate pair`).toBe(true);
+      for (const text of [" a", "a ", "\ta", "a\n", "a\u00a0", "\ufeffa", "a\u3000", " ", "\u2028"]) {
+        expect(valid(withText(text), "org-adaptation"), `${field} ${JSON.stringify(text)}`).toBe(false);
+      }
     }
   });
 

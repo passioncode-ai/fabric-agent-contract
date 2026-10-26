@@ -182,8 +182,9 @@ Everything the membership carried ends with it, as one rule:
 
 - when the person ends it by unpinning, their Fabric first sends the organization the empty revision that withdraws an
   adaptation plan it sent there ([AD-6](#the-adaptation-plan)), waiting for an answer no longer than the person agrees
-  to, then asks the passkey to sign the revision that unpins it whatever the answer; a withdrawal left unanswered is
-  the server's to end with the membership, and Fabric tells the person the plan may remain with the server and, where
+  to, then asks the passkey to sign the revision that unpins it whatever the answer; a withdrawal no receipt confirmed
+  within that wait (no answer, or a refusal) is the server's to end with the membership, and Fabric tells the person
+  the plan may remain with the server and, where
   the server offers a page to withdraw it (AD-4), that they can withdraw it there;
 
 - Fabric revokes every share grant whose context is that `org:<orgId>`: the next estate revision lists a `grant`
@@ -449,7 +450,8 @@ stands; a later membership of that organization gets new request ids, so no deci
 binds a request of the next (AD-6). `label`, `resource`, `note` and `purpose` are what the person typed for the organization; Fabric never fills
 them from the estate. They hold no control character but tab and line feed (no U+0000 to U+0008, U+000B to U+001F or
 U+007F to U+009F) and no lone surrogate, so a server can keep them where U+0000 cannot go and digest them under RFC 8785,
-and none is blank or begins or ends with white space. Fabric turns a CRLF or a CR the person typed into a line feed and
+and none is blank or begins or ends with white space, white space being what ECMA-262's `\s` matches (its WhiteSpace
+and LineTerminator, U+FEFF included, which `String.prototype.trim` removes). Fabric turns a CRLF or a CR the person typed into a line feed and
 trims white space from both ends before it sends, and leaves out an optional text the person left blank; a plan
 breaking any of these is `malformed` (AD-4). The schema's patterns are ECMA-262 patterns read in Unicode mode (the `u`
 flag): without it a surrogate pair, an emoji, is refused, so a validator without that mode checks lone surrogates
@@ -463,10 +465,15 @@ issuer is the issuer's and the reader's (*Not decided here*), and the server att
 person. The route is `PUT /fabric/adaptation/v1/{org}/plan` under the issuer's origin, `{org}` being the part of
 `org:<orgId>` after `org:`; `GET` on it answers the person's receipt, or `404` with the code `no-plan` before the
 first. Fabric sends a plan only after a `GET` answered a receipt or `no-plan`. It retries a `GET` that got no answer or
-a `5xx` with backoff, as AD-4 retries a `PUT`, backs off on `429`, and treats `not-a-member` as AD-4 does. A `403`
-that carries an AD-4 code is that refusal, not the credential layer. Another `404`, or a `401` or a `403` without an
-AD-4 code that persists after Fabric refreshed the credential, means the server takes no plans from this credential: Fabric sends nothing, tells the person so, and asks again only after the person connects
-the server again. A server accepts a plan body of at least 512 KiB, which holds the largest plan this schema allows.
+a `5xx` with backoff, as AD-4 retries a `PUT`, backs off on `429`, and reads a `401` or a `403` by the code its body
+carries: an AD-4 code is that refusal (`not-a-member` as AD-4 says); any other code (a sign-in the server asks for
+again, say) is shown to the person, and Fabric holds the plan and asks again after the person acts. Another `404`, or
+a `401` or a `403` with no code in its body (or OAuth's `invalid_token`) that persists after Fabric refreshed the
+credential, means the server takes no plans from this credential: Fabric sends nothing, tells the person so, and asks again only after the person connects
+the server again. A server accepts a plan body of at least 512 KiB, which holds the largest plan this schema allows
+written as compact JSON in UTF-8, the form Fabric sends. A suspended membership (OM-6) authorises nothing new, so Fabric
+refreshes the attestation before a `PUT` and sends only once the membership is active again; a withdrawal on leaving
+is sent whatever the membership's state.
 Any other `4xx` to a `GET` Fabric shows to the person, as AD-4 shows one to a `PUT`. Where Fabric keeps the
 credential is Fabric's; nothing here asks the app to hold it. A server may ask the person to consent to plans when they
 connect Fabric to it.
