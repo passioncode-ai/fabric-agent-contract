@@ -1,0 +1,45 @@
+{
+  "type": "org-authority-draft/1",
+  "org": "org:org-a",
+  "base": {
+    "revision": 2,
+    "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+  },
+  "draft": {
+    "type": "org-authority/1",
+    "issuer": "https://orgs.example",
+    "org": "org:org-a",
+    "revision": 3,
+    "issuedAt": "2026-10-26T00:00:00Z",
+    "expiresAt": "2026-11-02T00:00:00Z",
+    "members": [
+      {
+        "subject": "r-5c1e0b7d",
+        "role": "owner",
+        "iss": "urn:fabric:context:q8v2m4k7x1c9z3b6",
+        "keys": [
+          {
+            "kid": "en-71c4e2a9#sig",
+            "publicKey": "BB85SlPackFDdXhEpEl0dQDD5dwL0vq5x0SPtSjipo0hdWJyB+GuO3OcWXahJ2nIZxwsb1BoZIxqXHx3R/oTF28="
+          },
+          {
+            "kid": "en-0d93fb16#sig",
+            "publicKey": "BJmqBYUDADg+z7yU0yCaXevxNz6zHXak0uhnk/2qt+FUjkeWM+4S1y81woWsMio9CgNfb0OkkTT3be032LD0kzs="
+          }
+        ]
+      },
+      {
+        "subject": "r-a2f6d830",
+        "role": "member",
+        "iss": "urn:fabric:context:t5n8w1y4e7r0u2i9",
+        "keys": [
+          {
+            "kid": "en-3b8e5c21#sig",
+            "publicKey": "BKf7zbEwll1DBmIwSZMFyJbTgKRd0NLueW3ndQHsfwj/lMM6DbHSq73T2UyL/+fgVttipCAelZUir4xRA+zvT1E="
+          }
+        ]
+      }
+    ]
+  },
+  "digest": "sha256:61b515e495d1bd83b910ba4c4b04904d7c1d084274d55773569884b76388cce9"
+}

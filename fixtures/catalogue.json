@@ -1002,5 +1002,10 @@
   {"name": "org-key-set", "schema": "org-key-set.schema.json", "path": "positive/org-key-set.json", "valid": true},
   {"name": "org-key-set-no-org", "schema": "org-key-set.schema.json", "path": "negative/org-key-set-no-org.json", "valid": false, "keyword": "required"},
   {"name": "org-authority", "schema": "org-authority.schema.json", "path": "positive/org-authority.json", "valid": true},
-  {"name": "org-authority-no-members", "schema": "org-authority.schema.json", "path": "negative/org-authority-no-members.json", "valid": false, "keyword": "required"}
+  {"name": "org-authority-no-members", "schema": "org-authority.schema.json", "path": "negative/org-authority-no-members.json", "valid": false, "keyword": "required"},
+  {"name": "org-key-set-draft", "schema": "org-key-set-draft.schema.json", "path": "positive/org-key-set-draft.json", "valid": true},
+  {"name": "org-key-set-draft-no-digest", "schema": "org-key-set-draft.schema.json", "path": "negative/org-key-set-draft-no-digest.json", "valid": false, "keyword": "required"},
+  {"name": "org-authority-draft", "schema": "org-authority-draft.schema.json", "path": "positive/org-authority-draft.json", "valid": true},
+  {"name": "org-root-registration", "schema": "org-root-registration.schema.json", "path": "positive/org-root-registration.json", "valid": true},
+  {"name": "org-root-registration-short-claim", "schema": "org-root-registration.schema.json", "path": "negative/org-root-registration-short-claim.json", "valid": false, "keyword": "pattern"}
 ]

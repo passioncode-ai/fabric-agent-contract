@@ -689,6 +689,12 @@ for one reader, for at most a day: the organization, a subject pairwise to that 
 administrator's acceptance. Any organization server issues it, so a reader works with any of them
 ([membership](docs/specification/membership.md)).
 
+**Draft exchange**: How an organization server's unsigned draft of a key set or a member list reaches the person who
+signs it and comes back signed (DEC-0131): the server serves the draft at a public route, the owner's Fabric (a key set,
+with the root) or an administrator's (a list, with their passkey) shows its changes, signs it on the person's
+confirmation and POSTs it, and the server accepts only the pending draft, signed. The first key set registers the root
+with a one-time claim ([membership](docs/specification/membership.md#the-draft-exchange)).
+
 **Member list**: An organization's signed list of admitted members, the source of its relay's admission set
 (`org-authority/1`, DEC-0129): each member by a subject pairwise to the relay, a role, its context's token issuer and
 its enrollments' `#sig` keys, for at most 7 days. An organization server drafts it; an administrator's signing passkey,

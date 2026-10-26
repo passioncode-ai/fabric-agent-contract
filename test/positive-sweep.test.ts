@@ -20,13 +20,24 @@ const catalogue = JSON.parse(readFileSync(path.join(root, "fixtures/catalogue.js
  * and are exercised by their semantic fixtures. A schema with positive fixtures is on one list or the other.
  */
 export const NOT_SWEPT: readonly string[] = [
+  "// A credential decision, envelope and revocation are read against their request, context and keys (DEC-0111).",
+  "// A pairing message is read by the pairing functions (src/pairing.ts, DEC-0084), against its commitment or the other",
+  "// A refusal that started nothing (DEC-0104): a shape only.",
+  "// Action parity (DEC-0121): the actions extension is checked inside a well-known document (FAC-SEM-142, kind",
+  "// The agent network (DEC-0104): a directory is checked against what it derives from (kind `agent-directory-view`), the",
+  "// The coding-agent catalogue (DEC-0093) has no rule kind; test/coding-agents.test.ts reads the real catalogue.",
+  "// `service-well-known`), and a call's decision against the action and the tier (kind `action-call`).",
+  "// load extension and fabric.job.list are shapes only.",
+  "// side's reveal, never whole by a rule kind.",
   "access-log.schema.json",
   "activity-batch-ack.schema.json",
   "activity-notice.schema.json",
   "admission.schema.json",
   "agent-call-message.schema.json",
   "agent-call-sealed.schema.json",
+  "agent-directory.schema.json",
   "binding.schema.json",
+  "coding-agents.schema.json",
   "comms-cancel.schema.json",
   "comms-claim.schema.json",
   "comms-complete.schema.json",
@@ -48,22 +59,20 @@ export const NOT_SWEPT: readonly string[] = [
   "comms-responder-replace.schema.json",
   "comms-status-args.schema.json",
   "comms-status.schema.json",
-  // The coding-agent catalogue (DEC-0093) has no rule kind; test/coding-agents.test.ts reads the real catalogue.
-  "coding-agents.schema.json",
   "conformance-report.schema.json",
   "contract-pin.schema.json",
-  // A credential decision, envelope and revocation are read against their request, context and keys (DEC-0111).
   "credential-decision.schema.json",
   "credential-envelope.schema.json",
   "credential-revocation.schema.json",
+  "decision.schema.json",
   "delegation-jwks.schema.json",
   "delegation-refusal.schema.json",
-  "device-root-certification.schema.json",
   "device-enrollment.schema.json",
   "device-health.schema.json",
   "device-key-set.schema.json",
   "device-organization-closed.schema.json",
   "device-policy.schema.json",
+  "device-root-certification.schema.json",
   "execution-context.schema.json",
   "fabric-link.schema.json",
   "folder-attribution.schema.json",
@@ -72,40 +81,32 @@ export const NOT_SWEPT: readonly string[] = [
   "interop-agent-call.schema.json",
   "interop-capability.schema.json",
   "interop-job-handle.schema.json",
+  "interop-job-list-request.schema.json",
+  "interop-job-list.schema.json",
   "interop-job-request.schema.json",
   "interop-job-tool-output.schema.json",
   "interop-request-meta.schema.json",
   "interop-result.schema.json",
+  "interop-tool-error.schema.json",
+  "learning-note-answer.schema.json",
+  "learning-note.schema.json",
+  "local-channel.schema.json",
   "memory-capability.schema.json",
   "memory.schema.json",
   "operator-channel-status.schema.json",
+  "org-root-registration.schema.json",
+  "pairing-message.schema.json",
   "pipeline.schema.json",
   "repair-request.schema.json",
   "repair-result.schema.json",
   "runner-route-event.schema.json",
-  "service-dashboard-extension.schema.json",
-  "service-connections-extension.schema.json",
   "schema-unsupported.schema.json",
-  "service-login-code.schema.json",
-  "work.schema.json",
-  "local-channel.schema.json",
-  "learning-note.schema.json",
-  "learning-note-answer.schema.json",
-  // A pairing message is read by the pairing functions (src/pairing.ts, DEC-0084), against its commitment or the other
-  // side's reveal, never whole by a rule kind.
-  "pairing-message.schema.json",
-  // The agent network (DEC-0104): a directory is checked against what it derives from (kind `agent-directory-view`), the
-  // load extension and fabric.job.list are shapes only.
-  "agent-directory.schema.json",
-  "interop-job-list.schema.json",
-  "interop-job-list-request.schema.json",
-  "service-load-extension.schema.json",
-  // A refusal that started nothing (DEC-0104): a shape only.
-  "interop-tool-error.schema.json",
-  // Action parity (DEC-0121): the actions extension is checked inside a well-known document (FAC-SEM-142, kind
-  // `service-well-known`), and a call's decision against the action and the tier (kind `action-call`).
   "service-actions-extension.schema.json",
-  "decision.schema.json"
+  "service-connections-extension.schema.json",
+  "service-dashboard-extension.schema.json",
+  "service-load-extension.schema.json",
+  "service-login-code.schema.json",
+  "work.schema.json"
 ];
 
 describe("every positive fixture passes the semantic rules", () => {
@@ -117,7 +118,7 @@ describe("every positive fixture passes the semantic rules", () => {
   });
 
   it("names only kinds a rule reads and schemas that exist, and sweeps a fixture of each", () => {
-    const sources = ["semantic-rules", "job-limits", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules", "node-summary", "agent-network", "credentials", "mandate", "org-membership", "org-authority"]
+    const sources = ["semantic-rules", "job-limits", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules", "node-summary", "agent-network", "credentials", "mandate", "org-membership", "org-authority", "org-exchange"]
       .map((name) => readFileSync(path.join(root, "src", `${name}.ts`), "utf8"))
       .join("\n");
     for (const [schema, kind] of Object.entries(KIND_OF_SCHEMA)) {

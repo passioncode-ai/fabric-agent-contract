@@ -92,6 +92,7 @@ detector; connections use a variant of it in `src/connections.ts`, and whether t
 | [`src/node-enrollments.ts`](../../src/node-enrollments.ts) | a node's enrollments that link nothing (`FAC-SEM-148`) and what a check-in and its answer may carry to an organization (`FAC-SEM-149`) | semantic fixtures `fixtures/semantic/node-enrollments-*`, `check-in-*-outbound-*` | DEC-0128 |
 | [`src/org-membership.ts`](../../src/org-membership.ts) | membership attestations and organizations' key sets (`verifyOrgMembership`, `verifyOrgKeySet`, `FAC-SEM-145`, `FAC-SEM-146`) | [`org-membership.json`](../../fixtures/vectors/org-membership.json) | DEC-0127 |
 | [`src/org-authority.ts`](../../src/org-authority.ts) | an organization's member list (`verifyOrgAuthority`, `FAC-SEM-150`) and the admission set it gives an organization's relay (`orgRelayAdmissionSet`) | none (CT-153); `test/org-authority.test.ts` | DEC-0129 |
+| [`src/org-exchange.ts`](../../src/org-exchange.ts) | the draft exchange: a draft's digest, `FAC-SEM-151`, accepting a signed key set or member list only as the pending draft (`acceptSignedKeySet`, `acceptSignedAuthority`) and the root's registration (`verifyRootRegistration`) | none (CT-153); `test/org-exchange.test.ts` | DEC-0131 |
 | [`src/share-registration.ts`](../../src/share-registration.ts) | share registrations and the join of `grant.usage` to an agent | [`share-registration.json`](../../fixtures/vectors/share-registration.json) | DEC-0086 |
 | [`src/context-route.ts`](../../src/context-route.ts) | routing by context | [`context-route.json`](../../fixtures/vectors/context-route.json) | DEC-0082 |
 | [`src/job-limits.ts`](../../src/job-limits.ts) | jobs under limits and uncertain effects | [`job-limits.json`](../../fixtures/vectors/job-limits.json) | DEC-0087 |
@@ -152,6 +153,8 @@ on what a client sends or a reader accepts, not on a provider's own documents:
 | an organization server answering check-ins (the first organization server) | answers with none of the estate's documents (`FAC-SEM-149`, kind `check-in-response-outbound`), never refuses a check-in for carrying them, and keys device and key lookups per organization | DEC-0128 (UE-2) | `fixtures/semantic/check-in-response-outbound-*` ([devices](devices.md#unlinkable-enrollments)) |
 | an organization server drafting its member list (every organization server) | lists its administrators' signing passkeys in `administrators` of the key sets it drafts for the root the owner's Fabric holds; drafts `org-authority/1` on every join, end and key change and before `expiresAt`, with a life of at most 7 days, each subject, `iss` and kid once; signs no list itself | DEC-0129 (OL-1, OL-5); `FAC-SEM-146`, `FAC-SEM-150` | [`org-authority.json`](../../fixtures/positive/org-authority.json) ([membership](membership.md#the-organizations-member-list)) |
 | the organization owner's Fabric | holds the membership root, never on a server; shows each key set the server drafts as its changes to `keys`, `revoked` and `administrators` against the set it signed last, and signs it only once the owner confirms in a ceremony their passkey authorises | DEC-0129 (OM-3) | none; [membership](membership.md#the-organizations-keys) |
+| an organization server in the draft exchange (every organization server) | serves the root, the last signed key set and the pending draft at the exchange's routes, never a draft as a signed set; issues the first set's claim to the owner's signed-in account (one use, 15 minutes); registers the root and accepts a signed set or list only as `verifyRootRegistration`, `acceptSignedKeySet` and `acceptSignedAuthority` do; drafts the next key set at least 7 days before the newest signing key's `notAfter`; signs no attestation with a key no signed set lists | DEC-0131 (OX-1 to OX-6); `FAC-SEM-151` | `test/org-exchange.test.ts` ([membership](membership.md#the-draft-exchange)) |
+| the owner's or an administrator's Fabric in the draft exchange | reads the pending draft when it starts and at least daily, shows its changes against the last signed document, signs it only on the person's confirmation, and POSTs it; registers the root once with the server's claim | DEC-0131 (OX-2, OX-3, OX-5, OX-6) | `test/org-exchange.test.ts` |
 | an administrator's Fabric (or a pinned page) | registers a signing credential for that organization alone, never an estate authority or another organization's (the owner's Fabric registers one for the first key set); shows a drafted list's changes against the last signed list; signs the member list with that passkey over the register's `org-authority/1` challenge, under a signing RP | DEC-0129 (OM-3, OL-2) | `test/org-authority.test.ts` |
 | an organization's relay (once its handshake is decided, CT-37) | pins the organization's root at setup, applies key sets with `verifyOrgKeySet`, takes its admission set only from a list `orgRelayAdmissionSet` accepts, keeps the held list's set when a candidate is refused, and admits nobody when the held list is refused or there is none | DEC-0129 (OL-4), DEC-0047 | `test/org-authority.test.ts` ([membership](membership.md#the-organizations-member-list)) |
 | a hub that mints in an organization's context (Fabric) | signs an organization-context token with that context's hub key under the pin's `iss` and a per-context `sub`; certifies context hub keys only on a `full` machine for a pinned context, revokes a dropped one in the same revision, moves them with the hub; a callee serving the context passes `estateContext` (DL-14a) | DEC-0128 | `test/context-keys.test.ts` ([delegation](delegation.md#keys-publication-and-rotation)) |
@@ -341,7 +344,7 @@ reserved (receipt SEM-0095, DEC-0064) and is not used: the rule it was
 for became a fix of `FAC-SEM-006`. `FAC-SEM-141` was reserved (receipt SEM-0141) by DEC-0121's run and is not used: the
 decision names `FAC-SEM-142`, reserved after it.
 
-**Next free rule code:** `FAC-SEM-151` (the CAS counter's next value when this line was last written; read
+**Next free rule code:** `FAC-SEM-152` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/SEM` on origin for the current one)
 
 | Code | Kind | Defined in | Receipt |
@@ -492,6 +495,7 @@ decision names `FAC-SEM-142`, reserved after it.
 | `FAC-SEM-148` | `node-enrollments` | [devices](devices.md#semantic-rules) | SEM-0148 |
 | `FAC-SEM-149` | `check-in-outbound`, `check-in-response-outbound` | [devices](devices.md#semantic-rules) | SEM-0149 |
 | `FAC-SEM-150` | `org-authority` | [membership](membership.md#semantic-rules) | SEM-0150 |
+| `FAC-SEM-151` | `org-key-set-draft`, `org-authority-draft` | [membership](membership.md#semantic-rules) | SEM-0151 |
 
 ## Compatibility policy
 

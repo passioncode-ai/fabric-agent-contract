@@ -3,10 +3,10 @@ import { CONTRACT_VERSION, SCHEMA_PREFIX, loadSchemas } from "../src/contract.js
 import { createValidator } from "../src/validator.js";
 
 describe("schema catalogue", () => {
-  it("loads 134 unique Draft 2020-12 schemas under the contract prefix", async () => {
+  it("loads 137 unique Draft 2020-12 schemas under the contract prefix", async () => {
     const schemas = await loadSchemas();
-    expect(schemas).toHaveLength(134);
-    expect(new Set(schemas.map((schema) => schema.$id)).size).toBe(134);
+    expect(schemas).toHaveLength(137);
+    expect(new Set(schemas.map((schema) => schema.$id)).size).toBe(137);
     expect(schemas.every((schema) => schema.$schema === "https://json-schema.org/draft/2020-12/schema")).toBe(true);
     expect(schemas.every((schema) => schema.$id.startsWith(SCHEMA_PREFIX))).toBe(true);
     expect(CONTRACT_VERSION).toBe("0.1.0");

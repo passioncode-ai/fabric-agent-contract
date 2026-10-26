@@ -1,0 +1,45 @@
+{
+  "type": "org-root-registration/1",
+  "org": "org:org-a",
+  "issuer": "https://orgs.example",
+  "root": {
+    "kid": "root-org-a-1",
+    "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+  },
+  "claim": "short",
+  "keySet": {
+    "type": "org-key-set/1",
+    "issuer": "https://orgs.example",
+    "org": "org:org-a",
+    "revision": 1,
+    "issuedAt": "2026-09-01T00:00:00Z",
+    "keys": [
+      {
+        "kid": "mem-2026-09",
+        "alg": "EdDSA",
+        "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+        "notBefore": "2026-09-01T00:00:00Z",
+        "notAfter": "2026-11-01T00:00:00Z"
+      }
+    ],
+    "revoked": [],
+    "administrators": [
+      {
+        "credentialId": "sBKYUAaR0nfK9JRIUcTocg",
+        "alg": "EdDSA",
+        "publicKey": {
+          "kty": "OKP",
+          "crv": "Ed25519",
+          "x": "NWFggT55tZfw4AvZ77qKnNtoXrN-ebqqBEihTdI4Wfg"
+        },
+        "rpId": "sign.orgs.example",
+        "origins": [
+          "https://sign.orgs.example"
+        ]
+      }
+    ],
+    "alg": "EdDSA",
+    "kid": "root-org-a-1",
+    "sig": "gS4zrSBhoEfMILhOaHVki4tbXw3JcL5eUEWy6pK9wXKjD8fWmwOys6eYDogvESJUu6-iuQszkZ63mqPqk1UcAQ"
+  }
+}
