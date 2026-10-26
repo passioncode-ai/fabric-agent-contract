@@ -374,9 +374,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   mirror sends) is decided apart from who reads it; a reply goes to the sender it answers unless its `deliverTo` names
   the thread or a list of participants.
 - **Annotated (2026-10-26):** amended by DEC-0140: `project.work` is the reserved capability of a Project's primary
-  responder; the operator who owns a Project may move a held slot to another authorized session as one fenced
-  transition, after which the ordinary rules hold it; a session role is a claim and a reported branch stays in its
-  Project.
+  responder; the operator who owns a Project may move an occupied slot to another authorized session as one fenced
+  transition, after which the ordinary rules hold it; a session role is a claim, and a reported branch stays in its
+  Project but for an activity event's `git.branch` under `telemetry.git_branch`.
 - **Decision:** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
   board on which messages are addressed to a Project, and through a request to a capability of
   that Project. Identity comes from the authenticated endpoint and never from the payload. A
@@ -8294,7 +8294,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. **PR-1.** `project.work` (`PRIMARY_CAPABILITY`) is the reserved capability a requester names to reach a Project's
      primary responder; the board never re-routes another capability to it; otherwise a capability like any other. A
      host shows its holder as the main session, none while nobody holds it. No service serves or declares it.
-  2. **PR-2.** The operator who owns the Project (in an organization, that member only) moves a held (Project,
+  2. **PR-2.** The operator who owns the Project (in an organization, that member only) moves an occupied (Project,
      capability) slot to another live, authorized session of that Project than its holder, in
      the host's controls or by a relayed decision (`gate: relayed`), never an agent on its own account; from the
      generation the operator saw (`revision_conflict` otherwise); one transition as `com.responder_replace` would

@@ -386,7 +386,7 @@ flowchart TD
 
 ### FLW-16: Operator follows a request on the Project board
 
-- **Traces:** ST-020 (JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3)
+- **Traces:** ST-020 (JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3, JRN-08/#5)
 - **Goal:** the operator reads each request between Projects with its request state and its effect state, and a lost result stays visible
 - **Entry points:** a request submitted to a Project's capability on the board
 - **Success exit:** the request terminal with an observed result, or `outcome_unknown` until reconciled by the responder or, when none holds the slot, by the estate owner, or `answered` when the target's participant replied to it while it was queued, or while it was claimed and it returned to queued (DEC-0098, DEC-0102)
@@ -403,6 +403,8 @@ flowchart TD
   E -->|result lost| U[outcome_unknown]
   U -->|observed reconciliation| D
   U -->|no responder holds the slot: owner's observed settlement with a summary| O[Completed or failed_known, settled by the owner]
+  C -->|the operator moves the slot| Q
+  E -->|the operator moves the slot| U
   Q -->|deadline before accept| X[Expired]
   Q -->|the target's participant replies to it| N[Answered]
   C -->|responder replaced| Q

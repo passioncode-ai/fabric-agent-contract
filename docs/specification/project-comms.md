@@ -336,7 +336,7 @@ A request reaches `outcome_unknown` by three paths only, and the owner settles i
 
 - the sender's `com.cancel` after the effect began;
 - a [restore](#restore), after which a started effect is `unknown`;
-- the lost-result operation, when a holder took the slot and then left.
+- the lost-result operation, when a holder took the slot and then left, or the operator moved it ([PR-2](#the-operator-moves-a-slot)).
 
 The lost-result operation runs only when the next holder takes the slot ([slots end with the
 session](#slots-end-with-the-session)). An `in_progress` request whose responder retired with no successor therefore
@@ -535,7 +535,9 @@ responder**. A requester that knows no narrower capability of the target names `
 board never re-routes a request that names another capability. Beyond that it is a capability like any other: one slot
 per Project (C4), fenced, listed in the [project directory](#project-directory) only for a Project whose host takes requests for
 it (with an `absent` responder until one enrolls), and held by the operator like any slot. A host that shows a Project's
-main session, for the operator's own Projects only (another member's responder state is never shown, OD-1), shows the holder of that slot, and shows none while nobody holds it. No service serves `project.work` as
+main session, for the operator's own Projects only (another member's responder state is never shown, OD-1), shows the holder of that slot, and shows none while nobody holds it. Here and in PR-2 a session holds a slot while
+`com.status` reports its responder `active` or `stale` (a stale holder is shown as the main session not answering), and
+nobody holds it while it is `absent`; owner settlement keeps its own test, a lapsed lease with no current enrollment. No service serves `project.work` as
 a tool or declares it as a capability of its own (`surfaces.mcp.capabilities`, an action's `tool`); the checker does
 not test this today, and the board reserves no other capability name (memory/0.1 reserves its own, [memory and
 learning](memory-and-learning.md)).
@@ -698,20 +700,21 @@ constraint (`comms-refusal.schema.json`).
 ### The operator moves a slot
 
 **PR-2 (DEC-0140).** The operator who owns the Project (in an organization, that member only, as in [owner
-settlement](#owner-settlement)) may move a held (Project, capability) responder slot from its holder to another live
+settlement](#owner-settlement)) may move an occupied (Project, capability) responder slot (one a session holds) from its holder to another live
 session of that Project: in the host's operator controls, or through their agent, which relays the decision to the host's move action
 (`gate: relayed`, [service](service.md#actions) AP-2, DEC-0121). An agent never moves a slot on its own account, and
 `com.responder_replace` still takes a slot for its own caller only: its closed arguments name no session.
 
 - **One transition, from the generation the operator saw.** The move names the slot's generation the operator's view
   showed, and the host refuses it `revision_conflict` when the slot has moved on since, as `expectedGeneration` refuses
-  a replacement. Otherwise the host applies it atomically, as `com.responder_replace` would for the receiving session:
+  a replacement. A relayed move is one call: the decision's `target` names the slot and that generation, so a repeat
+  under the same decision (AP-2's coverage) is refused `revision_conflict` once the slot has moved on. Otherwise the host applies it atomically, as `com.responder_replace` would for the receiving session:
   the generation goes up by one; a `claimed` request returns to `queued`; an `in_progress` one becomes
   `outcome_unknown` (`lost_result`); an `accepted` one is held (C4). The move transfers no request, since a transfer
   carries a checkpoint its caller writes, and the operator writes none.
 - **Who may receive it.** A live session of that Project already authorized to respond for that capability, as for
   `com.enroll`, other than the slot's holder; the host refuses any other `not_authorized`, and a move grants nothing.
-  A slot nobody holds is not moved: an authorized session takes it by its own `com.enroll`.
+  A slot nobody holds (`absent`) is not moved: an authorized session takes it by its own `com.enroll`.
 - **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
 - **After the move.** The slot is then held under the board's ordinary rules, and a move bars nobody and adds no
   refusal: another authorized session may replace it, a client's recovery may replace it (the moved-off session's
@@ -727,10 +730,9 @@ session of that Project: in the host's operator controls, or through their agent
   settlement](#owner-settlement)). The host shows the slot's `accepted` and `in_progress` counts before the operator
   confirms a move, and that in-progress work will wait for the new holder's observation.
 - **Learning it holds the slot.** The host tells the receiving session through its own session surface; a client
-  that cannot hear it learns it holds the slot from a call on it that succeeds (`com.claim`, or `com.enroll` where its host renews a
-  holder's lease, as Fabric's board does), and keeps it as any holder does; one that
-  does neither within its lease loses the slot as any holder does (After the move). A host shows a holder whose lease
-  has gone stale (`com.status`) as the main session not answering, not as none.
+  that cannot hear it learns it holds the slot when its `com.claim` succeeds, and keeps it as any holder does; one that
+  does neither within its lease goes `stale`, as any holder does (After the move). A stale slot is occupied and may be
+  moved, which is how the operator replaces a main session that stopped answering.
 - **The record.** The host's own slot record of the move names the operator as the actor and the receiving session as
   the holder; each request the move changes is journaled as op `replace` (`claimed` to `queued`) or `lost_result`
   (`in_progress` to `outcome_unknown`), (`FAC-SEM-027`), carrying the operator principal, which no rule checks. `com.status` shows the slot as
