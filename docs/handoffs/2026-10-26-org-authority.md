@@ -19,7 +19,7 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
     part and list signatures), also for an organization being created; the member list's `iss`; an adaptation plan's
     organization part (TP-03).
   - **UX.** SCN-047 takes ADR-0178's fingerprint check; SCN-049, the administrator signs the list.
-- CT-37 stays open for the relay's handshake. CT-153 filed (member-list vectors, the D8 sweep).
+- CT-37 stays open for the relay's handshake. CT-153 filed (member-list vectors, the D8 sweep); CT-155 (the readings' small follow-ups).
 
 ## Checks actually run
 
@@ -39,6 +39,8 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
   now covers an organization being created; the administrator's duties in the party rows; fixed).
 - Round 8: unit fail (`held-invalid` hidden behind a schema-invalid candidate; fixed: the held list is read first);
   product fail (SCN-047's precondition; the person's admission against the relay's, in OL-2 and FLW-32; fixed).
+- Round 9: unit pass, seam pass; product fail (DEC-0129's Alternatives on the owner's passkeys; DEC-0119 restated in the
+  register rule; fixed). Non-blocking findings of rounds 8 and 9 are CT-155.
 
 ## Decisions
 

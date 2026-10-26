@@ -7814,7 +7814,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Alternatives considered:** the key set's signing keys signing the list (the plan's; ADR-0178 point 2 refuses any
   server signature over the organization's record); a separate `org-admin-set/1` document for administrators (a second
   root-signed document beside the key set for no gain); the owner's passkeys as the root itself (ADR-0178 D8-b; the pin
-  of DEC-0127 is an Ed25519 key, so the owner's passkeys enter as the first set's administrators and a passkey root is a
+  of DEC-0127 is an Ed25519 key, so the owner registers a signing credential for this organization alone, which enters as the first set's administrator and a passkey root is a
   later pin form); a member's estate record carrying its organization keys for the relay (the relay of an organization
   would read every member's estate, which DEC-0128 keeps from it); roles that grant at the relay (the relay admits, it
   does not authorise).

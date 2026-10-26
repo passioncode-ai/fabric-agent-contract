@@ -294,8 +294,8 @@ below and the other members exactly that type's fields (`signingStatement`, DEC-
 those bytes as its WebAuthn challenge (`signingChallenge`), under the dedicated signing RP ([signing](signing.md)); a key
 signs the bytes themselves. The type inside keeps one signature from standing for another over the same digest. A type
 names one field list for good: a changed list is a new type (`/2`), registered here first, never a new reading of an
-old one. The one exception is DEC-0119's: a type no tag has carried and no party has adopted may change its list by a
-decision that lists the change as a narrowing, as DEC-0129 did for `org-key-set/1`. The register is `SIGNING_STATEMENTS` in [`src/signing-challenges.ts`](../../src/signing-challenges.ts), and
+old one. The one exception is DEC-0119's: a type no party has adopted, as the backlog records, may change its list by a
+decision that lists the change as a narrowing, as DEC-0129 did for `org-key-set/1` before any tag carried it. The register is `SIGNING_STATEMENTS` in [`src/signing-challenges.ts`](../../src/signing-challenges.ts), and
 `test/signing-challenges.test.ts` holds this table to it.
 
 | Type | Fields beside `type` | Signed by | What is signed | Computed by | Decision |
