@@ -20,7 +20,7 @@ move's step 6 and the window lease's reporting.
 
 ## Checks actually run
 
-- `pnpm run check` on the head after each round's fixes: 106 files, 9 245 tests, UX lint, docs, markdownlint 0 errors, privacy 0; `pnpm vectors:check`: 24
+- `pnpm run check` on the head after each round's fixes: 106 files, 9 282 tests (9 245 before DEC-0133's merge), UX lint, docs, markdownlint 0 errors, privacy 0; `pnpm vectors:check`: 24
   files match before DEC-0133's merge, 25 after.
 - Blind readings, round 1 (head `14d59122`): unit pass; seam and product fail on two shared blockers: MR-2 sent a
   machine left on its parent after a hub move to the old hub only, so the new hub never saw the report step 6 waits
@@ -45,6 +45,8 @@ move's step 6 and the window lease's reporting.
   window-lease bullet narrowed.
 - Round 6 (head `26119b4e`): unit and seam pass; product fail (`machine.report` named as owed nowhere). Fixed: the
   spec index, CT-152 and DEC-0132's adoption line name it and its two adopters.
+- Round 7 (head `c6573bec`): unit and seam fail (the owed note landed on the Fabric's button row of the spec index,
+  not the local channel's). Fixed: only the local channel row carries it.
 
 ## Decisions
 

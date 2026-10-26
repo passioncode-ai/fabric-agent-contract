@@ -38,7 +38,7 @@ defined in [CONTEXT.md](../../CONTEXT.md).
 | [machine calls](machine-calls.md) | a machine's `profile` (`full`, `member`, `view`), the T1 binding over the relay, the call rule and the sealed `fabric-agent-call/1` (DEC-0106) | the Fabric Agent Adapter's kits read `profile` (0.47.0) and the first organization server's vendored schema is re-pinned (`588748ab`); owed: Fabric and its nodes (CO-402), the relay, Project Observatory's node (OBS-217), Fabric Dashboards (CT-110) |
 | [credentials](credentials.md) | narrow credentials on request (`credential-request/1`, `credential-decision/1`, `fabric-credential-envelope/1`, `credential-revocation/1`), the estate's keyed digests and `call-record/1` (DEC-0111) | not adopted yet: Project Observatory, its node, the first organization server, Fabric, Fabric Switchboard (CT-117) |
 | [agent network](agent-network.md) | `agent-directory/1`, the call queue on `fabric.job.*`, `fabric-load/0.1` and `service-load/1` (DEC-0104) | not adopted yet: Fabric (CO-376), the first organization server, hosting nodes and Fabric Dashboards (CT-84) |
-| [Fabric's button and links](fabric-button.md) | Fabric's button in a product and `fabric://` links | adopted by Fabric Dashboards, Fabric and the Fabric Agent Adapter; owed: `machine.report` (DEC-0132), served by Project Observatory's node and called by Fabric's hub (CT-152) |
+| [Fabric's button and links](fabric-button.md) | Fabric's button in a product and `fabric://` links | adopted by Fabric Dashboards, Fabric and the Fabric Agent Adapter |
 | [session handoff](session-handoff.md) | `session-handoff/1`: the folder a host hands a coding-agent session | adopted by Fabric Dashboards, Fabric and the Fabric Agent Adapter |
 | [folder attribution](folder-attribution.md) | which Project a coding agent's folder belongs to | adopted by Fabric and Project Observatory |
 
@@ -73,7 +73,7 @@ defined in [CONTEXT.md](../../CONTEXT.md).
 |---|---|---|
 | [project communication](project-comms.md) | `fabric-project-comms/0.1`: the Project board | adopted by Fabric (server) and the Fabric Agent Adapter (client) |
 | [operator channel](operator-channel.md) | `fabric-operator-channel/0.1` and its status document | the status document (DEC-0058): specified, no consumer yet; the channel itself not measured |
-| [local channel](local-channel.md) | `fabric-local-channel/0.1`: the local channel to the node | adopted by Fabric Dashboards, Fabric and the Fabric Agent Adapter |
+| [local channel](local-channel.md) | `fabric-local-channel/0.1`: the local channel to the node | adopted by Fabric Dashboards, Fabric and the Fabric Agent Adapter; owed: `machine.report` (DEC-0132), served by Project Observatory's node and called by Fabric's hub (CT-152) |
 | [coordination](coordination.md) | multi-agent coordination and Git integration | not measured |
 
 ## Telemetry and usage
