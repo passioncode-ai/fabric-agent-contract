@@ -372,7 +372,8 @@ it calls, and the callee compares the origin the hub's delegation token names, w
 before it; the hub's own id is never the caller's agent id for this check, and without a token the chain's end alone
 binds the mandate. An origin sends `mandate` only to a hub whose `protocols` list `mandate/1`, since a hub pinned before
 DEC-0125 refuses the member, and a decision or mandate carrying `source` only when the hub and the callee both list
-`operator-source/1` (DEC-0126 OA-7).
+`operator-source/1`, which the origin cannot read of a callee today (the directory carries no `protocols`), so until
+then it keeps `source` in its own record (DEC-0126 OA-7).
 
 **Amendment (DEC-0039).** The hub is the only **issuer** between agents, not the only
 **route**. It signs a [delegation token](delegation.md) naming the person the work is for,

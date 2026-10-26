@@ -518,7 +518,8 @@ it reaches acts on them without asking, within what they cover.
   own estimate for the call exists and is at most that; the project is in `projects` (or none is listed; a call that
   acts in no project is not limited by `projects`); the scope read being the last narrower one in `chain`. Without
   `perCallMaxUsd` the money limits decide the spend, as the operator's rule reserves only spend above a limit (MD-6).
-  The callee records `{by: "operator", via: "mandate", task, chain}` with the caller it authenticated and the
+  The callee records `{by: "operator", via: "mandate", task, chain, source?}` (`source` when the mandate carries it,
+  DEC-0126 OA-6) with the caller it authenticated and the
   operator's words, as AP-2 records a decision. A decision in the same call is read first.
 - **MD-4, asking only for the rest.** A call the mandate does not cover is refused `operator-decision-required` with
   `data.detail` `outside-mandate: <action|capability|effect|spend|project>`, naming the first part not covered, and for
@@ -593,8 +594,11 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
   and the callee both list it, since a reader pinned before DEC-0126 refuses the member (`additionalProperties`). A
   service that reads `source` lists `operator-source/1`. Toward any other target the agent sends the decision or the
   mandate without `source` and keeps it in its own record (OA-6); the call is taken as before. A board Project declares
-  no `protocols`, so a board request's block carries the mandate without `source`, and the request's text names where
-  the operator said the words beside the block; the receiver records `source` from there. `source` names the
+  no `protocols`, and neither does a session reached by the runner's own delivery (OA-3), so toward a target that
+  declares none the block or the message carries the mandate or the decision without `source`, and its text names
+  where the operator said the words beside it; the receiver records `source` from there. Through the hub an origin
+  sends `source` only once it can read the callee's `protocols` (the directory lists none today), and until then keeps
+  it in its own record. `source` names the
   operator's projects and sessions, so like `instruction` it stays in the receiver's own record and never goes to an
   events feed, a usage report or a page another party reads (AP-2).
 

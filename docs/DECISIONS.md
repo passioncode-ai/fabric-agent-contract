@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0126` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0127` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -7024,9 +7024,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the caller writes `unknown` under the starting call's `callId`.
 - **Why:** the lists already exist with these meanings, so the gate needs no new member; a job is the call the caller
   made, and one record per call keeps the join by `callId`.
-- **Alternatives considered:** asking in chat about spend above a money limit, as the operator's list reads (AP-4 and
-  MD-6 already make it the person's step with its link, and the operator's standing rules list it among the human
-  gates; money above the relayed amount stays a question); a separate `writes` list on the node (a new member for one boolean); one record per
+- **Alternatives considered:** a separate `writes` list on the node (a new member for one boolean); one record per
   `fabric.job.*` call (a poll loop would write hundreds for one task).
 - **Compatibility:** none on the wire; a node or server that gated on the other list reads it from the right one.
   `contractVersion` stays `0.1.0`.
@@ -7586,7 +7584,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   operator already said is the cost the operator named. The four items a relay carries let the receiver check what was
   approved and where; the place a relay may come from keeps text an agent read (the prompt-injection route) out, which
   is the boundary AP-3 drew. Reusing `mandate/1` and the decision keeps one machine form a service checks.
-- **Alternatives considered:** a separate `approval` block `{quote, by, at, source, scope}` (a third format for what
+- **Alternatives considered:** asking in chat about spend above a money limit, as the operator's list reads (AP-4 and
+  MD-6 already make it the person's step with its link, and the operator's standing rules list it among the human
+  gates; money above the relayed amount stays a question); a separate `approval` block `{quote, by, at, source, scope}` (a third format for what
   a mandate and a decision already say; `source` added to both instead); keeping a prose relay as data, as DEC-0125 decided
   (its reasons were that a callee could not tell what prose covers or check a narrowing, and that letting any agent
   relay another agent's quoted words removes AP-3's injection boundary; the operator's rule decides otherwise, and this
@@ -7607,7 +7607,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `CONTEXT.md` (Relayed approval), `docs/DOCMAP.md`, `docs/specification/README.md`, `docs/ux/` (ST-037, FLW-31,
   SCN-046, SCR-30); `tools/vectors/mandate.ts`, `tools/vectors/actions.ts` and their vector files,
   `fixtures/positive/mandate-relayed.json`, `fixtures/negative/mandate-source-unplaced.json`,
-  `fixtures/semantic/action-call-relayed-source*.json`; `test/mandate.test.ts`;
+  `fixtures/semantic/action-call-relayed-source*.json`, `fixtures/semantic/action-call-mandate-source*.json`; `test/mandate.test.ts`;
   DEC-0121's and DEC-0125's status; backlog CT-149 (adoption).
 - **Source:** request `519d7b21` from one of the operator's agents (thread `3e8f706c`), the operator's words of 2026-10-26;
   fabric-workspace `knowledge/agents-first.md` (PR #455, `67440fbc`); the adapter's row FAA-131.
