@@ -18,7 +18,7 @@ optional member to `com.submit` and to a message, and changes no existing field.
 **Amended by DEC-0135 (2026-10-26):** [who a message is delivered to](#who-a-message-is-delivered-to): a reply goes to
 the sender of the message it answers unless its optional `deliverTo` names the thread or a list of participants;
 delivery decides what is unread, never who reads. It adds one optional member to `com.reply`, `com.submit` and a
-message, and changes no existing field.
+message, and narrows what `unread` and `com.status`'s count hold to the messages delivered to the reader.
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`
@@ -43,7 +43,8 @@ A principal is `trusted` when the board verified it (a managed session, an enrol
 
 - A thread's participant Projects are **fixed at creation** (C2). The sender's Project is added by
   the board. Widening the audience is a new, explicit sharing command, never an implicit forward.
-  Changing participants is refused with `immutable_participants`.
+  Changing participants is refused with `immutable_participants`, and so is a reply's `deliverTo` that names a
+  Project outside them ([delivery](#who-a-message-is-delivered-to)).
 - A Project reads the threads it takes part in (`grant: participant`). The whole retained history
   of those threads needs the explicit `project-history` grant. It never covers another Project's
   private content.
@@ -60,7 +61,7 @@ A principal is `trusted` when the board verified it (a managed session, an enrol
   `cursor_reset_required`.
 - Reading marks nothing as read. `com.read_ack` is explicit, and unread counts belong to the
   reader. It marks one message, up to 100 named messages, or one thread up to a named message of it, the oldest
-  1000 at most (`comms-read-ack.schema.json`, DEC-0098). A bulk mark is all or nothing: a message the reader cannot
+  1000 at most of those delivered to the reader (`comms-read-ack.schema.json`, DEC-0098, DEC-0135). A bulk mark is all or nothing: a message the reader cannot
   read refuses the call `not_authorized`. Its receipt counts what it `marked` and what was `alreadyRead`, and says
   `more: true` when a thread held more than 1000 such messages; the reader calls again.
 
@@ -69,24 +70,31 @@ A principal is `trusted` when the board verified it (a managed session, an enrol
 A message is stored in its thread and every participant reads it (C2). Its **delivery** is narrower: the Projects it
 is delivered to are the ones for which it counts as unread (`com.list` with `unread`, `com.status`'s count) and the
 ones a [transport mirror](#transport-mirror) may send it to (DEC-0135). A board MUST NOT read delivery as access: a
-participant a reply was not delivered to still reads it with `com.list` and `com.get`.
+participant a reply was not delivered to still reads it with `com.list` and `com.get`. On a page asked with `unread` or
+`since`, `read` is `true` for every message that is not unread to the reader's Project: one it marked, its own, and
+one not delivered to it.
 
-- **RD-1, every message but a reply.** A `message`, `request`, `finding` or `announcement` is delivered to every
+- **DR-1, every message but a reply.** A `message`, `request`, `finding` or `announcement` is delivered to every
   participant but the sender's Project.
-- **RD-2, a participant's reply.** A reply (`com.reply` with `replyTo`, or `com.submit` kind `reply`) is delivered as
+- **DR-2, a participant's reply.** A reply (`com.reply` with `replyTo`, or `com.submit` kind `reply`) is delivered as
   its `deliverTo` says (`comms-common.schema.json#/$defs/deliverTo`):
   - `sender`, the default when `deliverTo` is absent: to the Project that sent the message it answers; when that is
-    the replier's own Project, as `thread`;
+    the replier's own Project, or the board does not hold the message it answers (a restored board), as `thread`;
   - `thread`: to every participant but the replier's Project;
   - a list of 1 to 16 Project ids: to those, each a participant other than the replier's Project. A listed Project that
     is not a participant is refused `immutable_participants` (a reply never widens a thread); the replier's own
     Project is refused `invalid_arguments`. The refusal names neither the Project nor the participants.
   `deliverTo` is accepted on a reply only; on any other kind it is refused `invalid_arguments` (the schema's `false`).
-- **RD-3, a responder's reply.** A responder's fenced reply is delivered to the Project that sent the request it
-  answers, and takes no `deliverTo`.
-- **RD-4, as read.** A reply as read carries the `deliverTo` its sender gave, so every participant sees whom it was
-  addressed to; a reply without one was delivered as `sender`. `deliverTo` is part of the message: the same key with
-  another `deliverTo` is `idempotency_conflict`.
+  A reply whose `replyTo` is a request is also delivered to the Project that sent the request, whatever `deliverTo`
+  says, so a target's reply that answers a request ([request lifecycle](#request-lifecycle), `answered`) always
+  reaches the requester.
+- **DR-3, a responder's messages.** A responder's fenced reply and its progress notes are delivered to the Project
+  that sent the request they concern, and take no `deliverTo`; when that Project is the responder's own, as `thread`.
+- **DR-4, as read.** A reply as read carries the `deliverTo` its sender gave, so every participant sees whom it was
+  addressed to; a reply without one was delivered as `sender`, except one stored before its board adopted this
+  decision, which was delivered as that board delivered it then (Fabric before its migration 124: to every
+  participant). `deliverTo` is part of the message: the same key with other arguments, an explicit `sender` against
+  an absent `deliverTo` included, is `idempotency_conflict`.
 
 A reply to an announcement with `reaction` is delivered to the announcer by default, and every participant still reads
 it (DEC-0098).
@@ -426,7 +434,8 @@ communication health without reading any message (Fabric COM-11). It returns:
 - the Project's responders per capability (`active`, `stale`, `absent`), with generation, lease
   expiry and provenance, and `held: true` when the operator holds that slot or the Project ([holds](#holds));
 - the Telegram transport state;
-- the reader's unread count (the messages delivered to its Project and not marked read, DEC-0135).
+- the reader's unread count (the messages delivered to its Project and not marked read, DEC-0135); a host sends a
+  reply's `deliverTo` only to a reader pinned at or after DEC-0135.
 
 A host shows a board it cannot reach as unreachable, never as an empty board.
 

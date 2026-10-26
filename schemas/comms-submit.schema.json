@@ -77,7 +77,7 @@
       "$ref": "comms-common.schema.json#/$defs/reaction"
     },
     "deliverTo": {
-      "description": "With kind reply only (DEC-0135 RD-2).",
+      "description": "With kind reply only (DEC-0135 DR-2).",
       "$ref": "comms-common.schema.json#/$defs/deliverTo"
     },
     "request": {

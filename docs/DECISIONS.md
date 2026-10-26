@@ -8116,19 +8116,23 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   message it answers, not to every participant, and an unread count holds the reader's deliveries only. The contract
   fixed a thread's participants at creation and said nothing of a reply's audience, so no reply to everyone could be
   asked for (Fabric CO-437, relayed by fabric-workspace on 2026-10-26).
-- **Decision:** [project comms](specification/project-comms.md#who-a-message-is-delivered-to) RD-1 to RD-4.
+- **Decision:** [project comms](specification/project-comms.md#who-a-message-is-delivered-to) DR-1 to DR-4.
   1. **Delivery is not reading.** Every participant reads every message of a thread (C2). A message's delivery decides
      only what counts as unread for a Project (`com.list` with `unread`, `com.status`'s count) and what a transport
      mirror may send to it.
-  2. **RD-1.** A message, request, finding or announcement is delivered to every participant but the sender.
-  3. **RD-2.** A participant's reply is delivered as its optional `deliverTo` says: `sender` (the default, Fabric's
-     behaviour since migration 124; as `thread` when the replier answers its own Project's message), `thread` (every
+  2. **DR-1.** A message, request, finding or announcement is delivered to every participant but the sender.
+  3. **DR-2.** A participant's reply is delivered as its optional `deliverTo` says: `sender` (the default, Fabric's
+     behaviour since migration 124; as `thread` when the replier answers its own Project's message or the board does
+     not hold the message it answers), `thread` (every
      participant but the replier), or a list of 1 to 16 participants other than the replier. A listed non-participant
      is refused `immutable_participants`, the replier's own Project `invalid_arguments`; `deliverTo` on another kind is
-     refused `invalid_arguments`.
-  4. **RD-3.** A responder's fenced reply is delivered to the requester and takes no `deliverTo`.
-  5. **RD-4.** A reply as read carries the `deliverTo` its sender gave; the same idempotency key with another
-     `deliverTo` is `idempotency_conflict`.
+     refused `invalid_arguments`. A reply to a request is also delivered to the requester whatever `deliverTo` says,
+     so a target's reply that answers a request (`answered`, DEC-0098) always reaches it.
+  4. **DR-3.** A responder's fenced reply and its progress notes are delivered to the requester (as `thread` when the
+     requester is the responder's own Project), and take no `deliverTo`.
+  5. **DR-4.** A reply as read carries the `deliverTo` its sender gave (one stored before its board adopted this was
+     delivered as that board delivered it then); the same idempotency key with other arguments, an explicit `sender`
+     against an absent `deliverTo` included, is `idempotency_conflict`.
 - **Why:** replies to a broadcast were most of a board's deliveries (Fabric BD-4: 69 %), so the sender default stays;
   a person still needs to answer a whole thread, or the two Projects that asked the same thing, without opening a new
   thread, which would lose the context. Keeping delivery apart from reading keeps C2: a reply never widens or narrows
@@ -8139,11 +8143,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** additive for a writer: a reply without `deliverTo` is unchanged and is delivered as Fabric
   delivers it now. A board pinned before this refuses `deliverTo` as an unknown member (`invalid_arguments`); a writer
   that gets that refusal and still means the thread says so in a new message rather than dropping the member. A
-  reader pinned before this meets `deliverTo` on a reply it reads and takes this pin to read it. `contractVersion`
-  stays `0.1.0`.
-- **Consequences / affects:** `schemas/comms-common.schema.json` (`deliverTo`), `comms-reply.schema.json`,
-  `comms-submit.schema.json`, `comms-message.schema.json`; fixtures; `docs/specification/project-comms.md` (header,
-  delivery, messages, `com.status`, transport mirror); backlog CT-154.
+  reader pinned before this would refuse a message that carries `deliverTo` (`comms-message` is closed), so a host
+  sends the member only to a reader pinned at or after DEC-0135 and omits it for an older one, as DEC-0079 staged
+  `held`. `unread` and `com.status`'s count narrow to deliveries: a Project's own messages and replies delivered to
+  others leave a reader's count on a board that counted them before. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/comms-common.schema.json` (`deliverTo`, the `answered` description),
+  `comms-reply.schema.json`, `comms-submit.schema.json`, `comms-message.schema.json`, `comms-list.schema.json` and
+  `comms-status.schema.json` (`unread`); fixtures; `docs/specification/project-comms.md` (header, participants, reads,
+  delivery, messages, `com.status`, transport mirror), `conformance.md` (the board's row), `CONTEXT.md` (Delivery),
+  `docs/DOCMAP.md`; backlog CT-154.
 - **Source:** CT-154; Fabric CO-437, CO-370 (fabric `20261026000124_one_schema_step.sql`); fabric-workspace's relay of
   2026-10-26.
 
