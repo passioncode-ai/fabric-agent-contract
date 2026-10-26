@@ -146,7 +146,9 @@ Everything the membership carried ends with it, as one rule:
 - Fabric revokes every share grant whose context is that `org:<orgId>`: the next estate revision lists a `grant`
   revocation for each, and in the same revision removes the grant from `shareGrants` and every placement and secret
   placement in that context, and drops the organization's pin, so the revision passes `FAC-SEM-075`, `FAC-SEM-076` and
-  `FAC-SEM-111` and every machine of the person reads the end from it; the revocation delta carries the revocation fast (DEC-0054), so the
+  `FAC-SEM-111` and every machine of the person reads the end from it once the person's passkey signs it (Fabric
+  drafts it at the end and asks for the signature; until then the server already refuses the revoked certificate, and
+  the hub mints nothing in the context); the revocation delta carries the revocation fast (DEC-0054), so the
   agents the person shared stop running for it;
 - the hub mints no delegation token in that context, and no relayed decision or mandate of the organization's context
   is taken;
@@ -227,7 +229,9 @@ organization.
   record per subject, and acts on OM-5, OM-6 and OM-7.
 - **Project Observatory's node** ends an enrollment on a membership's end as on `organization-closed` (OM-5): it learns
   of the end from an estate revision that no longer pins the organization, which Fabric writes on every end (OM-5),
-  and from `organization-closed`; a revoked certificate alone keeps its DEC-0103 meaning.
+  and from `organization-closed`; a revoked certificate alone keeps its DEC-0103 meaning. Until every reader is pinned
+  at or after DEC-0127 no revision carries `organizations`, so a node ends an enrollment as DEC-0103 and its own
+  adoption already do.
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same
   pin, with its own audience.
 

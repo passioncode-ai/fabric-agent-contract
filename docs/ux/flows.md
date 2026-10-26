@@ -810,7 +810,7 @@ flowchart TD
   K --> A{attestation verifies for this org and audience}
   A -->|no| R[Refused with the reason]
   A -->|yes, active| T[Membership trusted, role read]
-  A -->|yes, ended| E[Context's share grants revoked, nothing more leaves]
+  A -->|yes, ended| E[Revision for the passkey: grants revoked, pin dropped; enrollment ends, nothing more leaves]
   T --> F{refresh due or expired}
   F -->|refreshed| A
   F -->|expired| U[Suspended: nothing new authorised]

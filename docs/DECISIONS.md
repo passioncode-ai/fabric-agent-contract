@@ -6355,7 +6355,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 ### DEC-0103: `organization-closed`, a final transport refusal for an organization that ended (CT-105)
 
-- **Status:** Accepted source change (2026-10-22). Consumer adoption: CT-105.
+- **Status:** Accepted source change (2026-10-22). Consumer adoption: CT-105. Annotated (2026-10-26): item 4's "one
+  event" amended by DEC-0127, whose OM-5 makes a membership's end, read from the revision that unpins the organization,
+  a second event that ends a `server` layer's locks; `certificate-revoked` keeps its meaning.
 - **Context:** the first organization server closes organizations (its organization export and termination, live on
   2026-10-22): at the end of the notice period it revokes every machine certificate, then deletes the organization. Its
   machines then meet `401 certificate-revoked` and, after the deletion, `401 certificate-unknown`. Project Observatory's
@@ -7645,7 +7647,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      it, and with it the context's share grants (revoked in the next revision), delegation tokens in the context, the
      device enrollment (ended as on `organization-closed` once the node applies the revision that unpins the
      organization, which Fabric writes on every end: the `server` layer and its locks, key set, streams and the
-     context's credentials; devices.md amended; a revoked certificate alone keeps DEC-0103's meaning) and anything leaving for the organization.
+     context's credentials; devices.md amended, and DEC-0103 item 4's "one event" amended; a revoked certificate alone
+     keeps DEC-0103's meaning) and anything leaving for the organization.
   6. **OM-6, suspended is not ended.** An expired or unverifiable attestation authorises nothing new; what runs keeps
      its expiry. A refresh the issuer refuses for the membership is an end.
   7. **OM-7, the allowlist.** Only the enrollment's own requests (enrollment, rotation, renewal) and its sessionless
