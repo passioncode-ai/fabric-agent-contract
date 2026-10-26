@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { actionDecision } from "../src/actions.js";
 import { projectRoot } from "../src/contract.js";
 import { MAX_CHAIN_DEPTH } from "../src/delegation.js";
-import { handOn, type Mandate, mandateCovers, mandateProblem } from "../src/mandate.js";
+import { handOn, type Mandate, type MandateCall, type MandateScope, mandateCovers, mandateProblem, scopeWithin } from "../src/mandate.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { buildMandateVectors } from "../tools/vectors/mandate.js";
 
@@ -12,7 +12,7 @@ import { buildMandateVectors } from "../tools/vectors/mandate.js";
 type Json = Record<string, any>;
 const root = projectRoot();
 const read = (relative: string) => readFileSync(path.join(root, relative), "utf8");
-const vectors = JSON.parse(read("fixtures/vectors/mandate.json")) as { cases: Array<{ name: string; input: Json; expected: Json }> };
+const vectors = JSON.parse(read("fixtures/vectors/mandate.json")) as { cases: Array<{ name: string; input: Json; expected: Json }>; handOn: Array<{ name: string; input: Json; expected: Json }> };
 const base = vectors.cases[0]?.input.mandate as Mandate;
 const leading: Mandate = { ...base, chain: [base.chain[0] as Mandate["chain"][number]] };
 
@@ -23,6 +23,18 @@ describe("the mandate vectors (DEC-0125)", () => {
 
   it.each(vectors.cases.map((vector) => [vector.name, vector] as const))("mandateCovers: %s", (_name, vector) => {
     expect(mandateCovers(vector.input as Parameters<typeof mandateCovers>[0])).toEqual(vector.expected);
+  });
+
+  it.each(vectors.handOn.map((vector) => [vector.name, vector] as const))("handOn: %s", (_name, vector) => {
+    const { mandate, callee, at, narrower } = vector.input;
+    let answer: Json;
+    try {
+      answer = { mandate: handOn(mandate as Mandate, callee, at, narrower) };
+    } catch (error) {
+      answer = { refused: /: (mandate-[a-z]+)$/.exec((error as Error).message)?.[1] };
+    }
+    expect(answer).toEqual(vector.expected);
+    if ("mandate" in answer) expect(mandateProblem(answer.mandate)).toBeUndefined();
   });
 });
 
@@ -93,5 +105,39 @@ describe("a relayed action under a mandate (MD-3, DEC-0121 AP-2)", () => {
     const decision = { by: "operator", via: "relayed-instruction", action: "approve-draft", instruction: "approve the draft", at: "2026-10-26T11:59:00Z" };
     expect(actionDecision({ ...call, decision })).toEqual({ ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller: "agent:claude-code" } });
     expect(actionDecision({ ...call, tier: "T2", actionDigest: `sha256:${"a".repeat(64)}` })).toEqual({ ok: false, code: "approval-required", data: { actionDigest: `sha256:${"a".repeat(64)}` } });
+  });
+});
+
+describe("MD-2a, no hand-over covers a call the scope in force does not (DEC-0136)", () => {
+  // Every shape of the two naming lists, a projects list or none, and three effect ceilings, against every call shape.
+  // Capability names follow the schema's capabilityName (two characters at least); a name it refuses would make every
+  // scope with a capabilities list malformed, and the property would never see that half of the rule.
+  const capabilityLists = [undefined, ["x.a"], ["x.a", "x.b"]];
+  const actionLists = [undefined, ["a"], ["a", "b"]];
+  const effects = [["draft"], ["charge"], ["charge", "publish"]];
+  const scopes: MandateScope[] = [];
+  for (const capabilities of capabilityLists) for (const actions of actionLists) for (const projects of [undefined, ["p"]]) for (const fx of effects) {
+    scopes.push({ ...(capabilities ? { capabilities } : {}), ...(actions ? { actions } : {}), ...(projects ? { projects } : {}), effects: fx });
+  }
+  const calls: MandateCall[] = [];
+  for (const capability of ["x.a", "x.b", "x.c"]) for (const action of [undefined, "a", "b", "c"]) for (const effect of ["none", "draft", "charge", "publish"]) for (const project of [undefined, "p", "q"]) {
+    calls.push({ capability, ...(action ? { action } : {}), effect, ...(project ? { project } : {}) });
+  }
+  const covered = (scope: MandateScope, call: MandateCall) => {
+    const mandate = { ...base, scope, chain: [base.chain[0], { agent: "example-researcher", at: "2026-10-26T10:05:00Z" }] };
+    const answer = mandateCovers({ mandate, tier: "T0", now: "2026-10-26T12:00:00Z", self: "example-researcher", call });
+    return "ok" in answer && answer.ok;
+  };
+
+  it("a scope scopeWithin accepts covers no call its parent does not", () => {
+    const leaks: string[] = [];
+    for (const parent of scopes) for (const child of scopes) {
+      if (!scopeWithin(child, parent)) continue;
+      for (const call of calls) if (covered(child, call) && !covered(parent, call)) leaks.push(JSON.stringify({ parent, child, call }));
+    }
+    expect(leaks.slice(0, 3)).toEqual([]);
+    // The property is not vacuous: a scope that names capabilities covers some call, and so does one that names actions.
+    expect(calls.some((call) => covered({ capabilities: ["x.a"], effects: ["charge"] }, call))).toBe(true);
+    expect(calls.some((call) => covered({ capabilities: ["x.a"], actions: ["a"], effects: ["charge"] }, call))).toBe(true);
   });
 });

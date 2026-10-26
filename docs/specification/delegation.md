@@ -542,7 +542,9 @@ it reaches acts on them without asking, within what they cover.
   through one of AP-3's sources) states a `mandate/1`: `task`, the operator's `instruction` verbatim in AP-3's form,
   `at`, `expiresAt` (after `at` and at most 7 days after it; the shortest that covers the task), a `scope` stated from
   the operator's words, and `chain` with itself first. The scope lists `capabilities`, relayed `actions` and
-  `projects` (a list left out means any), an effect ceiling `effects`, and `perCallMaxUsd` only where the words name an
+  `projects` (a `projects` list left out means any project; a `capabilities` list left out means any capability for a
+  read or a draft but names none for an external effect; an `actions` list left out covers a relayed action only through
+  a listed capability that is its tool, MD-3), an effect ceiling `effects`, and `perCallMaxUsd` only where the words name an
   amount. It never states a scope wider than the words; where they are unclear, it asks the operator (AP-3). An agent
   names itself in the chain by its registry id, or, a coding session with none, by its runner kind (`claude-code`,
   `codex`), without DEC-0121's `agent:` prefix. A task still open when the mandate expires asks the operator once, in one
@@ -553,6 +555,14 @@ it reaches acts on them without asking, within what they cover.
   the ceiling, never drops a list or the ceiling, never changes `task`, `instruction`, `at`, `expiresAt` or `source` (DEC-0126), and never
   names an agent twice; the chain holds at most four agents, as a delegation chain (DL-6). `FAC-SEM-144` refuses a
   document that breaks this.
+- **MD-2a, a naming list is never added** (DEC-0136). A `capabilities` list left out is "any" for a read or a draft
+  but names no call for an external effect, and an `actions` list left out covers a relayed action only through a
+  listed capability (MD-3, **Covered**). So a hand-over never
+  adds a `capabilities` or `actions` list the scope in force leaves out, except `actions` where the scope in force lists
+  `capabilities` (it then narrows the relayed actions those name); it may add a `projects` list. Added anywhere else,
+  the list could cover calls the operator's words did not, and the mandate is `mandate-widened`. The line is drawn at
+  the list, not at the call: `capabilities` added where only `actions` is listed is refused even for a hand-over whose
+  effects stay within `draft`, where it would cover nothing new (DEC-0136, Alternatives).
 - **MD-3, taking a call.** A callee takes the mandate only from a T0 or T1 caller (DL-25) and only when the chain ends
   in itself; when it authenticated its caller's agent id (a per-agent credential, `surfaces.mcp.auth: own`; a
   delegation token's outermost actor; for a call the hub forwards, the origin its delegation token names, never the
@@ -672,7 +682,7 @@ product that needs protection from a hostile local process adds an approval (DL-
 | <a id="fac-sem-050"></a>`FAC-SEM-050` | `delegation-mint` | a token is minted under an active delegation grant that its `grant` claim names, and names no other (DEC-0045): its audience, its capabilities, its effect ceiling (itself within the grant's effects), its start and expiry, its project, a limited spend under a limited grant whose windows are the grant's and hold no more than its limits, a per-call maximum no larger than the grant's, and the actor and person the grant names; at most four actors, five only in a token for the meter; a token for the meter reads only its grant-check capability under the parent's one grant; an onward token keeps the parent's issuer, principal and project, adds one actor (the parent's audience) to the parent's chain, and carries no wider effect, no later expiry, no more remaining spend and no larger per-call maximum than its parent; it keeps the parent's `task` or none, and the meter's token keeps it (DEC-0041) |
 | <a id="fac-sem-051"></a>`FAC-SEM-051` | `approval-claims` | an approval expires after it was issued and at most 24 hours after |
 | <a id="fac-sem-081"></a>`FAC-SEM-081` | `delegation-hub-key` | a verifier that reads the estate record answers as DL-14 says (DEC-0060): `certified` when exactly one machine's `hubKey` (in an organization's `context`, one of that context's pinned `contextHubKeys`, DEC-0128) carries the `kid` and the published `x`, inside the revision's window, neither revoked, and the revision not lower than (nor forked from) the applied one; otherwise `kid-not-certified`, `estate-unreadable`, `estate-outside-window`, `estate-rolled-back`, `estate-forked` or `no-clock`; with a `context` that is neither `personal` nor an organization's context id, `kid-not-certified` |
-| <a id="fac-sem-144"></a>`FAC-SEM-144` | `mandate` | a mandate is its schema's, stands at most 7 days after `at`, its chain goes forward in time from `at` and before `expiresAt`, names each agent once and at most four, and each narrower scope is within the one before, keeping every list and the per-call ceiling it narrows (DEC-0125 MD-1, MD-2) |
+| <a id="fac-sem-144"></a>`FAC-SEM-144` | `mandate` | a mandate is its schema's, stands at most 7 days after `at`, each step of its chain never goes back in time from the one before (the first from `at`; an equal time is in order) and stays before `expiresAt`, names each agent once and at most four, and each narrower scope is within the one before, keeping every list and the per-call ceiling it narrows and adding no `capabilities` or `actions` list the one before leaves out, except `actions` under listed `capabilities`; its problems are read as the schema, the span, then each step in turn (its time before its scope), then a repeated agent, and the first one found is the answer (DEC-0125 MD-1, MD-2; DEC-0136 MD-2a) |
 | <a id="fac-sem-124"></a>`FAC-SEM-124` | `delegation-mint` | under a partner grant the principal is the partner organization and the context the company's own organization; the token is for the issuer and its chain ends in the partner, two deep at mint; a partner actor stands in no chain under another grant ([the partner channel](partner-channel.md), DEC-0090) |
 
 Fixtures: the `delegation-*`, `approval-*` and `governance-grant-delegation*` entries of
