@@ -7348,25 +7348,31 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   agents kept opening pages in a browser. FL-7 said Fabric opens the service's own address in the browser "otherwise",
   which did not separate a missing host from one that failed.
 - **Decision:**
-  1. **PL-1.** Wherever a service, its CLI, its tools, its notifications or a completion message hand a person one of
-     the service's own pages, the action is Fabric Dashboards' `open_link`,
-     `fabric-dashboards://service/<id>.<instance>?path=<percent-encoded path>`, with the service's own `id` and
-     `instance` and the page's path on its origin; it carries no token or login code and never names the login-code
-     route. `dashboardsLink` and `parseDashboardsLink` (`src/page-link-rules.ts`) are the reference; the grammar stays
-     Fabric Dashboards'.
-  2. **PL-2.** A service and an agent never open a browser on a service's page themselves; an agent opens the
-     open_link through the host with no browser fallback.
-  3. **PL-3.** The raw address MAY accompany the open_link as a labelled diagnostic and is the action only when Fabric
-     Dashboards is confirmed absent on that computer (`not_installed`); an installed host that did not open the page is
-     reported, not replaced. FL-7 says the same of Fabric.
-  4. **PL-4.** A tool answer carries the page in `open_link`, with any raw address (`http_url`, or an existing
+  1. **PL-1.** Wherever a service, its CLI, its tools or a completion message hand a person one of the service's own
+     pages, the action MUST be Fabric Dashboards' `open_link`, `fabric-dashboards://service/<id>.<instance>` for the
+     dashboard itself with `?path=<path>` for one page, as Fabric Dashboards' ADR-0005 defines it (one trailing slash
+     the same link, no other parameter), with the service's own `id` and `instance`; it carries no token or login code
+     and never names the login-code route. `dashboardsLink` (encoding as the host's `serviceLink` does) and
+     `parseDashboardsLink` (`src/page-link-rules.ts`) are the reference.
+  2. **PL-2.** A service and an agent never open a browser on a service's page themselves, except as PL-3 allows; an
+     agent opens the open_link through the host with no browser fallback.
+  3. **PL-3.** The raw address MAY accompany the open_link as a labelled diagnostic and is the action only where Fabric
+     Dashboards cannot show the page on that computer: `not_installed`, or `unsupported` on a system it does not ship
+     for (macOS only today). There the agent or the host opens the page's own address from the service's descriptor
+     (`origin` plus the path). An installed host that did not open the page is reported, not replaced. FL-7 says the
+     same of Fabric.
+  4. **PL-4.** A tool answer MUST carry the page in `open_link`, with any raw address (`http_url`, or an existing
      `dashboard_url`) as the diagnostic; an event's `link` stays a path the host turns into the open_link;
      `human-step-required`'s `data.url` stays a path on the service origin or another party's `https` page, as its
-     schema already requires; a URL-mode input request on the service's own page carries the open_link as `url`.
-  5. **`FAC-SEM-143`** refuses a raw `http` or `https` address on a loopback host, and a `fabric-dashboards:` link
-     outside the grammar, in a URL-mode input request (kind `interop-input-requests`) and in any link a checker is given
+     schema already requires; a URL-mode input request on the service's own page MUST carry the open_link as `url`;
+     an operator-channel message, read on a phone, names the page and says it opens in Fabric Dashboards on the
+     computer (OC-10).
+  5. **`FAC-SEM-143`** refuses a raw `http` or `https` address on a local host (`127.0.0.0/8`, `[::1]`,
+     `[::ffff:127.x.y.z]`, `localhost` and names under it, the unspecified `0.0.0.0` and `[::]`), and a
+     `fabric-dashboards:` link outside the grammar (a second parameter, a path that leaves the origin, a credential), in a URL-mode input request (kind `interop-input-requests`) and in any link a checker is given
      (new kind `page-link`, `{url}`). Whether the host is installed is known only at run time, so the checker refuses
-     the raw address wherever a person receives it; PL-3's fallback is the runtime's.
+     the raw address wherever a person receives it; PL-3's fallback is the runtime's. A remote placement's own `https`
+     page cannot be told from another party's by its form and stays the service's own test.
 - **Why:** the host signs the person in and shows the page with its controls; a browser has no session, so the person
   meets a login wall or a page outside the estate. One rule in the contract lets the adapter's kits, Fabric Dashboards
   and every agent cite one place instead of a skill's reference. A checker rule catches the raw address before it
@@ -7381,10 +7387,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   at its next pin, as DEC-0121's behaviour rules did. The new kind `page-link` is refused by a checker pinned before
   this decision, which does not know it.
 - **Consequences / affects:** `docs/specification/service.md` (Links to a service's pages, PL-1 to PL-4; the
-  semantic-rules row), `docs/specification/fabric-button.md` (FL-7), `docs/specification/interop.md` (C3.3),
+  semantic-rules row; the Events feed's `link`; AP-4), `docs/specification/fabric-button.md` (the intro, the diagram,
+  FL-7), `docs/specification/interop.md` (C3.3, the rule's pointer), `docs/specification/README.md` (not adopted yet),
+  `CONTEXT.md` (open_link), `docs/evidence/sources.md` (Fabric Dashboards' ADR-0005 at `a98d1ae`), `docs/ux/`
+  (ST-036, FLW-30, SCN-044, SCR-30),
   `docs/specification/conformance.md` (the rule's row, the reference's row, two behaviour rows, the next free code),
   `docs/DOCMAP.md`; `src/page-link-rules.ts`, `src/semantic-rules.ts`, `src/interop-rules.ts`,
   `src/semantic-kinds.ts`; `tools/vectors/page-links.ts`, `tools/vectors/run.ts`, `fixtures/vectors/page-links.json`;
-  `test/page-links.test.ts`; backlog CT-130 (closed by this decision). Consumers: the adapter (its kits and
+  `test/page-links.test.ts`, `vitest.config.ts` (its branch floor); backlog CT-130 (closed by this decision), CT-147
+  (adoption). Consumers: the adapter (its kits and
   `dashboard-links.md`, `check_dashboard_link.py`), Fabric Dashboards, Fabric, every service that answers with a page.
-- **Source:** the operator's rule of 2026-10-24; request `886c9b4d` (thread `67961610`); CT-130.
+- **Source:** the operator's rule of 2026-10-24; request `886c9b4d` (thread `67961610`); CT-130; the unit reading of
+  the first draft (2026-10-26), which found a second parameter, a backslash path and the IPv4-mapped and trailing-dot
+  loopback forms passing; its product reading, which found the host's own path-less link refused, PL-2 against PL-3,
+  no route on a system the host does not ship for, and no scenario.

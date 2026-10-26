@@ -49,6 +49,7 @@
 | SCN-041 | A member leaves and the credentials of their agents end | credentials | P-02 | ST-033, FLW-28 | draft | not audited |
 | SCN-042 | See every call between agents, and nobody's prompts | credentials | P-02 | ST-034, FLW-28 | draft | not audited |
 | SCN-043 | Tell my agent to approve: the service takes it as my decision | delegation | P-02 | ST-035, FLW-29 | draft | not audited |
+| SCN-044 | Open a service's page from my agent: in Fabric Dashboards, never a raw address | service | P-02 | ST-036, FLW-30 | draft | not audited |
 
 ## Personas
 
@@ -956,4 +957,23 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a decision for another action or object, more than 24 hours old or more than 60 seconds ahead of the service's clock -> `decision-invalid`; the agent asks the operator again.
 - **Status:** draft
 - **Coverage:** DEC-0121, `actionDecision` in `src/actions.ts` (`FAC-SEM-142`), `fixtures/vectors/actions.json`, `fixtures/semantic/action-call-*`, `test/actions.test.ts`
+- **Product:** unobserved
+
+### SCN-044: Open a service's page from my agent: in Fabric Dashboards, never a raw address
+
+- **Persona:** P-02
+- **Feature:** service
+- **Traces:** ST-036, FLW-30 (JTBD-06, JRN-05/#3)
+- **Entry point:** the operator's chat with their own coding agent
+- **Preconditions:** `example-publisher` (`example-publisher.default`) runs on the operator's Mac with a dashboard at `/dashboard`; Fabric Dashboards is installed
+- **Steps:**
+  1. The operator asks "show me the drafts waiting for me" -> the agent calls the service's tool, whose answer carries `open_link` `fabric-dashboards://service/example-publisher.default?path=%2Fdashboard%2Fdrafts` beside the diagnostic `http_url`.
+  2. The agent presents the `open_link` and opens it through Fabric Dashboards with no browser fallback -> the host shows the drafts page, signed in.
+- **Expected result:** the page is open in Fabric Dashboards; the operator never saw a sign-in wall or a `127.0.0.1` address as the action.
+- **Alt paths:** Fabric Dashboards is installed but does not open the page -> the agent says it failed and opens no browser. Fabric Dashboards is not installed, or the computer runs a system it does not ship for (`unsupported`) -> the agent opens the service's own address, read from its descriptor's `origin` and the path. The service asks for a typed secret in URL mode -> the request's `url` is the `open_link` of its own page. The service posts a stop to the operator channel -> the message names the page and says it opens in Fabric Dashboards on the computer.
+- **UI elements:** the agent's answer with one link; the page in Fabric Dashboards.
+- **States covered:** success, error
+- **Errors & recovery:** a tool answer whose `open_link` is a raw local address or outside the grammar fails `FAC-SEM-143` in the service's own checks before it ships.
+- **Status:** draft
+- **Coverage:** DEC-0123, PL-1 to PL-4, `dashboardsLink` and `FAC-SEM-143` in `src/page-link-rules.ts`, `fixtures/vectors/page-links.json`, `test/page-links.test.ts`
 - **Product:** unobserved

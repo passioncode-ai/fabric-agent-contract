@@ -1,6 +1,15 @@
 {
-  "about": "Vectors for links that hand a person a service's page (DEC-0123, PL-1 to PL-4), written by tools/vectors/page-links.ts, never by hand. `builds`: dashboardsLink(service, instance, path) answers the open_link fabric-dashboards://service/<id>.<instance>?path=<percent-encoded path>, or null where it refuses the input (an id or instance outside its grammar, a value that is not a path on the service origin, the login-code route, a query that could carry a credential). `links`: the kind page-link ({url}) answers FAC-SEM-143 at /url for a raw http or https address on a loopback host (127.0.0.0/8, [::1], localhost, *.localhost) and for a fabric-dashboards: link outside that grammar; any other https address passes. `requests`: the kind interop-input-requests answers FAC-SEM-143 at a URL-mode request's url by the same rule.",
+  "about": "Vectors for links that hand a person a service's page (DEC-0123, PL-1 to PL-4), written by tools/vectors/page-links.ts, never by hand. The grammar is Fabric Dashboards' (its ADR-0005): `builds`: dashboardsLink(service, instance, path) answers the open_link fabric-dashboards://service/<id>.<instance>, with ?path=<path> encoded as URLSearchParams encodes it when a page is named (a null path names none: the dashboard itself), or null where it refuses the input (an id or instance outside its grammar, a value that is not a path on the service origin, a backslash a resolver reads as another host included, the login-code route however its dot segments or letter case hide it, a query or fragment, a hash route's own query included, that could carry a credential). `links`: the kind page-link ({url}) answers FAC-SEM-143 at /url for a raw http or https address on a local host as WHATWG URL writes it (127.0.0.0/8, [::1], [::ffff:127.x.y.z], localhost and names under it, a trailing dot ignored, and the unspecified 0.0.0.0 and [::] of a wildcard bind) and for a fabric-dashboards: link outside that grammar, which carries no parameter but one path, nothing after the key but one slash; any other https address passes. `requests`: the kind interop-input-requests answers FAC-SEM-143 at a URL-mode request's url by the same rule.",
   "builds": [
+    {
+      "name": "the dashboard itself, no path",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": null
+      },
+      "expected": "fabric-dashboards://service/example-agent.default"
+    },
     {
       "name": "the dashboard's root",
       "input": {
@@ -81,6 +90,51 @@
         "path": "/dashboard?token=sk-A1A1A1A1A1A1A1A1A1A1A1A1"
       },
       "expected": null
+    },
+    {
+      "name": "a backslash that a resolver reads as another host",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "/\\evil.example/x"
+      },
+      "expected": null
+    },
+    {
+      "name": "the login-code route behind a dot segment",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "/x/../fabric/v1/login"
+      },
+      "expected": null
+    },
+    {
+      "name": "the login-code route in other letter case",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "/Fabric/v1/login"
+      },
+      "expected": null
+    },
+    {
+      "name": "a token in a hash route's own query",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "/dashboard#/jobs?token=abc"
+      },
+      "expected": null
+    },
+    {
+      "name": "a hash route without a credential",
+      "input": {
+        "service": "example-agent",
+        "instance": "default",
+        "path": "/dashboard#/jobs?tab=log"
+      },
+      "expected": "fabric-dashboards://service/example-agent.default?path=%2Fdashboard%23%2Fjobs%3Ftab%3Dlog"
     }
   ],
   "links": [
@@ -90,6 +144,29 @@
         "url": "fabric-dashboards://service/example-agent.default?path=%2Fdashboard"
       },
       "expected": []
+    },
+    {
+      "name": "the dashboard itself, no path (Fabric Dashboards' link tool)",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default"
+      },
+      "expected": []
+    },
+    {
+      "name": "one trailing slash is the same link",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default/"
+      },
+      "expected": []
+    },
+    {
+      "name": "a page after the key instead of in path",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default/dashboard"
+      },
+      "expected": [
+        "/url"
+      ]
     },
     {
       "name": "the scheme in upper case",
@@ -167,6 +244,51 @@
       ]
     },
     {
+      "name": "the IPv4-mapped loopback",
+      "input": {
+        "url": "http://[::ffff:127.0.0.1]:4100/"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "localhost with a trailing dot",
+      "input": {
+        "url": "http://localhost.:4100/dashboard"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "the unspecified IPv4 address of a wildcard bind",
+      "input": {
+        "url": "http://0.0.0.0:4100/"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "the unspecified IPv6 address of a wildcard bind",
+      "input": {
+        "url": "http://[::]:4100/"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "a raw loopback address with leading space",
+      "input": {
+        "url": " http://127.0.0.1:4100/"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
       "name": "an open_link without its instance",
       "input": {
         "url": "fabric-dashboards://service/example-agent?path=%2Fdashboard"
@@ -206,6 +328,42 @@
       "name": "an open_link of another form",
       "input": {
         "url": "fabric-dashboards://open?service=example-agent.default"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "an open_link with a second parameter",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default?path=%2Fdashboard&code=abcdefghijklmnop"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "an open_link with an unknown parameter",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default?path=%2F&x=1"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "an open_link whose path leaves the origin by a backslash",
+      "input": {
+        "url": "fabric-dashboards://service/example-agent.default?path=%2F%5Cevil.example"
+      },
+      "expected": [
+        "/url"
+      ]
+    },
+    {
+      "name": "a malformed open_link with leading space",
+      "input": {
+        "url": " fabric-dashboards://service/Bad?path=x"
       },
       "expected": [
         "/url"

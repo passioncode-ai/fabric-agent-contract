@@ -688,6 +688,18 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Status:** draft
 - **Product:** unobserved
 
+### ST-036: Operator opens a service's page from an agent, a notification or Fabric
+
+- **Story:** As P-02, I want every link to one of my services' pages to open inside Fabric Dashboards, signed in, so that I never land on a browser page that asks me to sign in or shows the service outside my host.
+- **Traces:** JTBD-06, JRN-05/#3
+- **Acceptance criteria:**
+  - Given Fabric Dashboards is installed, when an agent, a tool answer or a completion message hands me a service's page, then it hands me the `open_link` and the page opens in Fabric Dashboards (PL-1, DEC-0123).
+  - Given Fabric Dashboards is installed but did not open the page, then I am told it failed and no browser opens in its place (PL-3).
+  - Given Fabric Dashboards is not installed, or cannot run on my system, then the page opens at the service's own address, read from its descriptor (PL-3).
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
 ## Design tooling
 
 - **Figma:** disabled

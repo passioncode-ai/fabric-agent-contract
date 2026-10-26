@@ -33,6 +33,7 @@ export default defineConfig({
         "src/dashboard-declaration.ts": { branches: 100 },
         "src/connections.ts": { branches: 100 },
         "src/actions.ts": { branches: 100 },
+        "src/page-link-rules.ts": { branches: 100 },
         "src/agent-network.ts": { branches: 100 },
         "src/machine-call.ts": { branches: 100 },
         "src/hub-move.ts": { branches: 100 },

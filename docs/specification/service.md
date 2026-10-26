@@ -271,8 +271,8 @@ Schema: [`service-events-page.schema.json`](../../schemas/service-events-page.sc
   shape, a URL with a credential included (`FAC-SEM-101`, the shared detector); personal data is the service's
   duty, since no check can tell a name from another string.
 - `notify: true` asks a host to raise an operator notification; `link` is a path under
-  the service origin that the notification opens. The host MAY suppress it by the
-  operator's settings.
+  the service origin that the notification opens, as the service's open_link ([PL-4](#page-links)). The host MAY
+  suppress it by the operator's settings.
 - A service SHOULD implement the feed as a view over the log it already keeps rather
   than a second store.
 - A service MAY offer `GET /fabric/v1/events/stream` (Server-Sent Events carrying the
@@ -465,32 +465,41 @@ DEC-0123 · rule code `FAC-SEM-143` · reference [`src/page-link-rules.ts`](../.
 A person opens a service's page inside Fabric Dashboards, which signs them in (ED-1 to ED-9, [Operator
 login](#operator-login)); a raw address opens a browser that has no session and shows the page outside the host.
 
-- **PL-1, the open_link.** Wherever a service, its CLI, its tools, its notifications or a completion message hand a
-  person one of the service's own pages, the action they present is Fabric Dashboards' `open_link`:
-  `fabric-dashboards://service/<id>.<instance>?path=<percent-encoded path>`, with the service's own descriptor `id`
-  and `instance` (never guessed from a project name or a port) and the page's path on its origin ([FL-7](fabric-button.md#the-link-back)).
-  The link carries no token and no login code, and never names the login-code route. `dashboardsLink` builds it and
-  `parseDashboardsLink` reads it; the `fabric-dashboards://` grammar is Fabric Dashboards', and these follow it.
-- **PL-2, no browser of its own.** A service and an agent MUST NOT open a browser on a service's page themselves. An
-  agent opens the open_link through the host (Fabric Dashboards' `open`, with no browser fallback).
+- **PL-1, the open_link.** Wherever a service, its CLI, its tools or a completion message hand a person one of the
+  service's own pages, the action they present MUST be Fabric Dashboards' `open_link`:
+  `fabric-dashboards://service/<id>.<instance>` for the dashboard itself, with `?path=<path>` naming one page on the
+  service origin. `<id>` and `<instance>` are the service's own descriptor's (never guessed from a project name or a
+  port). The grammar is Fabric Dashboards' (its ADR-0005, [sources](../evidence/sources.md)): one trailing slash is the
+  same link, and the link carries no parameter but `path`, nothing after the key, no token, no login code and never
+  the login-code route ([FL-7](fabric-button.md#the-link-back)). `dashboardsLink` builds it as the host's own
+  `serviceLink` does and `parseDashboardsLink` reads it.
+- **PL-2, no browser of its own.** A service and an agent MUST NOT open a browser on a service's page themselves,
+  except as PL-3 allows. An agent opens the open_link through the host (Fabric Dashboards' `open`, with no browser
+  fallback).
 - **PL-3, the raw address is a diagnostic.** The page's own address (`http://127.0.0.1:<port>/…`, or a remote
   placement's `https` origin with the path) MAY accompany the open_link, labelled as a diagnostic, and is never the
-  primary action. It becomes the action only when Fabric Dashboards is confirmed absent on that computer (its
-  `host_status` answers `not_installed`). An installed host that did not open the page is not absent: the failure is
-  reported, and the browser does not replace it.
-- **PL-4, where the link travels.** A tool answer that names a page for a person carries the open_link in a member
+  primary action. It becomes the action only where Fabric Dashboards cannot show the page on that computer: its
+  `host_status` answers `not_installed`, or `unsupported` on a system it does not ship for (it ships for macOS today).
+  There the agent or the host opens the page's own address, which it reads from the service's descriptor on that
+  computer (`origin` plus the path). An installed host that did not open the page is not absent: the failure is
+  reported to the person, and the browser does not replace it.
+- **PL-4, where the link travels.** A tool answer that names a page for a person MUST carry the open_link in a member
   named `open_link`; a raw address beside it (`http_url`, or an existing `dashboard_url`) is the diagnostic of PL-3,
   and an agent presents `open_link`. An event's `link` stays a path on the service origin, from which the host builds
   the open_link ([Events feed](#events-feed)). `human-step-required`'s `data.url` is a path on the service origin for
   a step on its own page, which the agent hands over as the open_link, or the `https` address of another party's page
-  (a payment provider, a sign-in) (DEC-0121 AP-4). An input request in URL mode on the service's own page carries the
-  open_link as its `url` ([interop C3.3](interop.md#c33-awaiting-a-choice)).
-- **The check.** `FAC-SEM-143` refuses a link handed to a person that is a raw `http` or `https` address on a
-  loopback host (`127.0.0.0/8`, `[::1]`, `localhost`, a name under `localhost`) or a `fabric-dashboards:` link
-  outside that grammar: in an input request in URL mode (kind `interop-input-requests`) and in any link a checker is
-  given (kind `page-link`, `{url}`, such as a tool answer's `open_link`). Whether the host is installed is known only
-  at run time, so the checker refuses the raw address wherever a person receives it, and PL-3's fallback stays the
-  runtime's.
+  (a payment provider, a sign-in) (DEC-0121 AP-4). An input request in URL mode on the service's own page MUST carry
+  the open_link as its `url` ([interop C3.3](interop.md#c33-awaiting-a-choice)). A message on the
+  [operator channel](operator-channel.md) is read on a phone, where neither form opens: it names the page and says it
+  opens in Fabric Dashboards on the computer, as OC-10 says of files.
+- **The check.** `FAC-SEM-143` refuses a link handed to a person that is a raw `http` or `https` address on a local
+  host as a URL parser writes it (`127.0.0.0/8`, `[::1]`, the IPv4-mapped `[::ffff:127.x.y.z]`, `localhost` and names
+  under it, and the unspecified `0.0.0.0` and `[::]` a wildcard bind reports), or a `fabric-dashboards:` link outside
+  that grammar: in an input request in URL mode (kind `interop-input-requests`) and in any link a checker is given
+  (kind `page-link`, `{url}`, such as a tool answer's `open_link`). Whether the host can show the page is known only
+  at run time, so the checker refuses the raw local address wherever a person receives it, and PL-3's fallback stays
+  the runtime's. A remote placement's own `https` address cannot be told from another party's page by its form, so
+  handing it over as the action stays the service's own test.
 
 ## Authentication and network
 
@@ -1009,7 +1018,8 @@ Every button a person has, the person's agent has, and an operator's decision re
   `humanStep` (`sign-in`, `consent`, `payment`, `secret`, `spend-above-limit`, `passkey`); the tool refuses
   `human-step-required` with `data.humanStep` and `data.url`, the direct link to that step (an https URL or a path on
   the service's origin; a URL-mode elicitation where the client supports it), so the agent hands the person the exact
-  button (DEC-0121).
+  button (DEC-0121). An https URL is another party's page; a step on the service's own page is a path, which the agent
+  hands over as the service's open_link ([PL-4](#page-links), DEC-0123).
 - **AP-5, approval separation.** A relayed decision is the operator's, not the agent's: an agent still MUST NOT approve
   its own promotion, grant, checker rule or policy change on its own account, and MAY relay the operator's approval of
   it, which the service's audit records with the relaying caller ([governance](governance-and-roles.md#approval-separation),
@@ -1063,5 +1073,5 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | <a id="fac-sem-087"></a>`FAC-SEM-087` | `service-runner` | the runner's kind is in the node's catalogue; a subscription names its vendor's runner; the declared credential kind is one of the four and equals the one the node derived; a service offered to others runs on no subscription, declared, derived or in its usage report |
 | <a id="fac-sem-088"></a>`FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
 | <a id="fac-sem-101"></a>`FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
-| <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address on a loopback host, and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>?path=<path>` with no credential (DEC-0123 PL-1) |
+| <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address on a local host, and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
 | <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121) |

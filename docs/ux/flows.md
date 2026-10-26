@@ -740,6 +740,28 @@ flowchart TD
 
 - **Screens traversed:** SCR-30 the operator's agent and the service's audit row.
 
+### FLW-30: A service's page, from the link to the host
+
+- **Traces:** ST-036 (JTBD-06, JRN-05/#3)
+- **Goal:** the operator opens a service's page inside Fabric Dashboards, signed in by it
+- **Entry points:** an agent's answer, a tool answer's `open_link`, a completion message, an event's notification, Fabric's link back (FL-7)
+- **Success exit:** the page shows in Fabric Dashboards; where the host cannot run, at the service's own address
+- **Task analysis:** the service or agent builds the `open_link` from the service's own `id.instance` and the page's path → the agent opens it through Fabric Dashboards with no browser fallback → the host shows the page and signs in.
+- **Rejected shape:** handing the operator `http://127.0.0.1:<port>/…` as the action, or an agent opening a browser because the host did not open the page: rejected, because a browser has no session and shows the page outside the host (DEC-0123).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  L[Service or agent builds the open_link] --> S{Fabric Dashboards on this computer}
+  S -->|available| O[Opened through the host]
+  O --> P{page shown}
+  P -->|yes| D[Page in Fabric Dashboards, signed in]
+  P -->|no| F[Failure reported; no browser]
+  S -->|not_installed or unsupported| B[Service's own address from its descriptor, in the browser]
+```
+
+- **Screens traversed:** SCR-30 the operator's agent; the service's page in Fabric Dashboards.
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

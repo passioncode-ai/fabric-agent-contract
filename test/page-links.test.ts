@@ -13,9 +13,9 @@ const read = (relative: string) => readFileSync(path.join(root, relative), "utf8
 const vectors = JSON.parse(read("fixtures/vectors/page-links.json")) as { builds: Json[]; links: Json[]; requests: Json[] };
 const paths = (kind: string, value: Json) =>
   evaluateSemanticRules(kind, value).filter((finding) => finding.code === "FAC-SEM-143").map((finding) => finding.instancePath);
-const built = (service: string, instance: string, page: string) => {
+const built = (service: string, instance: string, page?: string | null) => {
   try {
-    return dashboardsLink(service, instance, page);
+    return dashboardsLink(service, instance, page ?? undefined);
   } catch {
     return null;
   }
@@ -42,7 +42,8 @@ describe("the page-link vectors (DEC-0123)", () => {
 describe("open_link round trip and edges (DEC-0123 PL-1)", () => {
   it("reads back what it builds, path included", () => {
     for (const vector of vectors.builds.filter((item) => item.expected !== null)) {
-      expect(parseDashboardsLink(vector.expected)).toEqual({ ok: true, ...vector.input });
+      const { path: page, ...key } = vector.input;
+      expect(parseDashboardsLink(vector.expected)).toEqual({ ok: true, ...key, ...(page === null ? {} : { path: page }) });
     }
   });
 
@@ -72,6 +73,8 @@ describe("open_link round trip and edges (DEC-0123 PL-1)", () => {
     expect(isLoopbackPageUrl("ftp://127.0.0.1/x")).toBe(false);
     expect(isLoopbackPageUrl("http://127.0.0.1.example/x")).toBe(false);
     expect(isLoopbackPageUrl("http://LOCALHOST/x")).toBe(true);
+    expect(dashboardsLink("example-agent", "default", "")).toBe("fabric-dashboards://service/example-agent.default");
+    expect(parseDashboardsLink("fabric-dashboards://service/Bad")).toEqual({ ok: false, problems: ["the service is not a service id", "the instance is not an instance name"] });
   });
 
   it("answers only its own kind and ignores a url that is not a string", () => {

@@ -6,7 +6,8 @@ DEC-0040, the cookie's scope DEC-0059 · Fabric 0.4.0 REQ-42 · schema [`fabric-
 
 A product's dashboard MAY show **Fabric's button**: one floating button that opens Fabric, the CEO agent, on
 that product. It opens a conversation with Fabric about the service and its project, or a coding-agent session
-in the project. Fabric opens the product back through Fabric Dashboards or the product's own address. This
+in the project. Fabric opens the product back through Fabric Dashboards, and through the product's own address only
+where Fabric Dashboards cannot show it on that computer ([FL-7](#the-link-back)). This
 profile says what the button is, what its links look like, what opening one may do, and what happens when
 Fabric is not installed. The button and its links carry ids only; following a link opens a view and starts
 nothing by itself.
@@ -19,7 +20,7 @@ flowchart LR
   B[Fabric's button on a dashboard] -- fabric://chat?service=…&project=… --> C[Fabric: conversation with the manager]
   B -- fabric://session/new?project=…&runner=… --> S[Fabric: session view of the project]
   C -- fabric-dashboards://service/id.instance?path=… --> D[Fabric Dashboards shows the page]
-  C -- the service's own URL --> W[Browser]
+  C -- the service's own URL, only where the host is absent or unsupported --> W[Browser]
 ```
 
 ## The button
@@ -175,9 +176,10 @@ when the action does not define the parameter (`FAC-SEM-052`), when:
 ## The link back
 
 **FL-7 — Fabric opens a product's page** through Fabric Dashboards when it is installed:
-`fabric-dashboards://service/<id>.<instance>?path=<percent-encoded path>`, the `open_link` that Fabric
-Dashboards' `link` tool returns, which shows the page inside Fabric Dashboards, signed in by the host. Only when
-Fabric Dashboards is confirmed absent on that computer (`not_installed`) does Fabric open the service's own address
+`fabric-dashboards://service/<id>.<instance>` with `?path=<percent-encoded path>` for one page, the `open_link` that Fabric
+Dashboards' `link` tool returns, which shows the page inside Fabric Dashboards, signed in by the host. Only where
+Fabric Dashboards cannot show it on that computer (`not_installed`, or `unsupported` on a system it does not ship for)
+does Fabric open the service's own address
 (its `https` origin, or `http://127.0.0.1:<port>`, with the path) in the browser; an installed host that did not open
 the page is reported, not replaced ([service](service.md#page-links) PL-3, DEC-0123). Neither carries a token or a login code: signing in is the host's
 ([Operator login](service.md#operator-login)). The `fabric-dashboards://` grammar is Fabric Dashboards'; this
