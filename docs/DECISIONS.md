@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0130` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0131` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -7835,3 +7835,38 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `vitest.config.ts`; backlog CT-04, CT-37 (open for the relay's handshake), CT-122, CT-137, CT-153 and CT-155 (filed).
 - **Source:** CT-37; Fabric ADR-0178 (fabric `cf99c32f`); board request `d5cbabfd` (thread `8d115bed`, TP-03's
   organization part); DEC-0047, DEC-0055, DEC-0063, DEC-0127, DEC-0128; v4 §7.
+
+### DEC-0130: the family is T0 and T1 named from the agents' side; beyond it, the agent network
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). Definitions and callee rules; no schema, no wire change. Adoption: the adapter's
+  kits with CT-149; the first consumer that keeps token classes maps them as DL-29 says.
+- **Context:** the operator's task of 2026-10-25 (board request `9db9e09e`, item 1): the family is the agents the
+  operator runs, trusted most and open to everything open to the operator; the network is every reachable agent, each
+  open to what its context was granted; decide whether the family is a tier, a context or a notion of its own, and how a
+  responding agent sees it. A consumer that keeps its own token classes waits for the answer (board reply `550ebf96`).
+  Item 2 became DEC-0125 (the mandate); item 3, a watcher, is a service proposed to Fabric (`35b8301c`).
+- **Decision:**
+  1. **DL-27.** The family is every agent placed on a machine of the operator's estate and the operator's own local
+     sessions; a callee recognises it only by placing the caller in T0 or T1 (DL-25). It is not a context (`personal`
+     and `org:<orgId>` stay the only ones) and not a tier. It is open to what DL-26 opens: everything open to the
+     operator in the call's context, no token, approval or grant; one approval travels as a mandate (DEC-0125); money
+     limits, human gates and the contexts' routing (DEC-0082) still bind.
+  2. **DL-28.** No claim of a caller places it in the family; a call relayed onto loopback, or a caller under another
+     OS account, stays T2. The limits and gates inside the family are what holds when a family agent is turned against
+     the operator.
+  3. **DL-29.** The agent network beyond the family is T2: open to what its context was granted, with a token per call.
+     A service off the estate's machines has no family caller; it may map a verified token of the operator's estate,
+     issued in `personal`, onto a class of its own for the operator's account, never a caller's claim.
+- **Why:** the line the operator draws is the machine boundary DEC-0045 already draws, so naming it from the agents'
+  side gives every callee one test it already runs; a family context would split one estate's data in two, and a tier
+  of its own would let a claim, not a placement, open the operator's whole estate.
+- **Alternatives considered:** a `family` context beside `personal` (two contexts for one owner's data, and the
+  routing rules of DEC-0082 would have to choose between them); a fourth tier between T1 and T2 for the operator's
+  agents off the estate (it would need a proof the token already gives); a family flag in the agent directory (a
+  derived view, never authority, DEC-0104).
+- **Compatibility:** text and callee rules only; nothing a reader validates changes. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/delegation.md` (The family and the agent network, DL-27 to DL-29; Not
+  decided here), `conformance.md` (a row), `CONTEXT.md` (Family); backlog CT-143 (closed).
+- **Source:** CT-143; board request `9db9e09e` item 1 and reply `550ebf96`; DEC-0045, DEC-0055, DEC-0082, DEC-0090,
+  DEC-0104, DEC-0125.
