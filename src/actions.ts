@@ -138,7 +138,7 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
     return { ok: false, code: DECISION_INVALID };
   }
   // A decision relayed from another of the operator's agents keeps where he said it (DEC-0126 OA-6).
-  return { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller, ...(read.source ? { source: read.source } : {}) } };
+  return { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller, ...(read.source ? { source: { ...read.source } } : {}) } };
 }
 
 /** A relayed action's call that carries a mandate and no decision (DEC-0125 MD-3): the mandate decides. */

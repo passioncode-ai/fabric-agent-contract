@@ -660,7 +660,7 @@
           "instruction": "approve the reply to the review from Anna",
           "at": "2026-10-24T09:30:00Z",
           "source": {
-            "project": "example-dataroom",
+            "project": "example-analyst",
             "session": "example-session-7"
           }
         }
@@ -672,7 +672,7 @@
           "via": "relayed-instruction",
           "caller": "agent:claude-code",
           "source": {
-            "project": "example-dataroom",
+            "project": "example-analyst",
             "session": "example-session-7"
           }
         }
@@ -697,7 +697,7 @@
           "instruction": "approve the reply to the review from Anna",
           "at": "2026-10-24T09:30:00Z",
           "source": {
-            "project": "example-dataroom"
+            "project": "example-analyst"
           }
         }
       },

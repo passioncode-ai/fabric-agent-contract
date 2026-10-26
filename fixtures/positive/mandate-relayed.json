@@ -5,7 +5,7 @@
   "instruction": "run the research on eSIM competitors' prices",
   "at": "2026-10-26T10:00:00Z",
   "source": {
-    "project": "example-dataroom",
+    "project": "example-analyst",
     "thread": "example-thread-3"
   },
   "expiresAt": "2026-10-27T10:00:00Z",

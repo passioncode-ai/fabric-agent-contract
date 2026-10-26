@@ -48,8 +48,8 @@ function cases(): Array<[string, Json, Json]> {
     ["handed on narrowed, used within the narrower scope", call({ mandate: lastScope(narrowed) }), OK()],
     ["a third agent the researcher called", call({ mandate: third, self: "example-crawler", callerAgent: "example-researcher" }), OK(["example-developer", "example-researcher", "example-crawler"])],
     // DEC-0126 OA-2, OA-6: the operator said it in another of his agents' sessions; where travels into the record.
-    ["words relayed from another of the operator's agents: where he said them travels into the record", call({ mandate: { ...base, source: { project: "example-dataroom", thread: "example-thread-3" } } }), { ...OK(), recordAs: { ...OK().recordAs, source: { project: "example-dataroom", thread: "example-thread-3" } } }],
-    ["a source naming neither the session nor the thread", call({ mandate: { ...base, source: { project: "example-dataroom" } } }), BAD("mandate-malformed")],
+    ["words relayed from another of the operator's agents: where he said them travels into the record", call({ mandate: { ...base, source: { project: "example-analyst", thread: "example-thread-3" } } }), { ...OK(), recordAs: { ...OK().recordAs, source: { project: "example-analyst", thread: "example-thread-3" } } }],
+    ["a source naming neither the session nor the thread", call({ mandate: { ...base, source: { project: "example-analyst" } } }), BAD("mandate-malformed")],
     ["a T2 caller: its mandate changes nothing, the profile applies", call({ tier: "T2" }), { ignored: "mandate-at-t2" }],
     ["the callee is not the chain's last agent", call({ self: "example-other" }), BAD("mandate-not-for-this-call")],
     ["the authenticated caller is not the agent before the callee", call({ callerAgent: "example-other" }), BAD("mandate-not-for-this-call")],

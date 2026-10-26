@@ -159,7 +159,7 @@ export function mandateCovers(input: { mandate: unknown; tier: unknown; now: unk
   }
   if (call.project !== undefined && scope.projects !== undefined && !scope.projects.includes(call.project)) return outside("outside-mandate: project");
   // Where the operator said it travels into the record, as the reason the callee acted (DEC-0126 OA-6).
-  return { ok: true, recordAs: { by: "operator", via: "mandate", task: read.task, chain: holders, ...(read.source ? { source: read.source } : {}) } };
+  return { ok: true, recordAs: { by: "operator", via: "mandate", task: read.task, chain: holders, ...(read.source ? { source: { ...read.source } } : {}) } };
 }
 
 /**

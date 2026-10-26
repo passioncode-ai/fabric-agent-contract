@@ -406,7 +406,7 @@
             }
           ],
           "source": {
-            "project": "example-dataroom",
+            "project": "example-analyst",
             "thread": "example-thread-3"
           }
         },
@@ -432,7 +432,7 @@
             "example-researcher"
           ],
           "source": {
-            "project": "example-dataroom",
+            "project": "example-analyst",
             "thread": "example-thread-3"
           }
         }
@@ -473,7 +473,7 @@
             }
           ],
           "source": {
-            "project": "example-dataroom"
+            "project": "example-analyst"
           }
         },
         "tier": "T0",
