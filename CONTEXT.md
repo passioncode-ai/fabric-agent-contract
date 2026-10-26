@@ -355,7 +355,9 @@ local sessions, which a callee recognises only by placing them in **T0** or **T1
 everything open to the operator in the context the call runs in, within the money limits, the human gates, the
 contexts' routing, the machine profiles and, for a relayed action, the operator's decision or a mandate. Not a context and not a tier of its own (DEC-0130, [delegation](docs/specification/delegation.md#the-family-and-the-agent-network)).
 Every other reachable agent is in the agent network beyond the family: **T2**, open to what its context was granted.
-The agent network is not **Network** (NET-1, a context's machines).
+The agent network is not **Network** (NET-1, a context's machines). Unrelated to the relay family (the relay's
+documents), a runner's provider family or a capability family (`memory/0.1`), where family names a set of documents or
+capabilities.
 
 **Narrow credential**: A credential an agent instance asks its organization for (`credential-request/1`), issued
 by the organization's issuer from an account its door holds and delivered sealed into that organization's context on

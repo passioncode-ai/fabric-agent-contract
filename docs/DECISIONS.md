@@ -7887,6 +7887,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   agents off the estate (it would need a proof the token already gives); a family flag in the agent directory (a
   derived view, never authority, DEC-0104).
 - **Compatibility:** text and callee rules only; nothing a reader validates changes. `contractVersion` stays `0.1.0`.
+- **Annotated (2026-10-26):** wording settled by DEC-0137 (CT-157): item 2's relay case and OS account read as DL-28
+  now says; item 3 carries "once Fabric's issuer serves (MD-5)" and "whose scope is all they carry".
 - **Consequences / affects:** `docs/specification/delegation.md` (The family and the agent network, DL-27 to DL-29; Not
   decided here), `conformance.md` (a row), `README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (Family); backlog CT-143 (closed),
   CT-149 (adoption), CT-157 (filed).
@@ -8140,3 +8142,40 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   capability names the schema accepts; it fails under the old rule and under each of three weaker forms of MD-2a);
   `docs/specification/delegation.md` (MD-1, MD-2a, `FAC-SEM-144`); DEC-0125 annotated; backlog CT-149.
 - **Source:** CT-149's readings (round 2 of the hand-over vectors, 2026-10-26).
+
+### DEC-0137: the family's wording settled (DEC-0130's readings)
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). Text only; no schema, no wire change, no new rule a reader validates.
+- **Context:** DEC-0130's blind readings filed CT-157: places where DL-25 to DL-29 read wider or narrower than the
+  rules they rest on (DEC-0045, DEC-0099, DEC-0106, DEC-0125, DL-26, MD-6).
+- **Decision:** in [delegation](specification/delegation.md#the-family-and-the-agent-network):
+  1. **Context of a tokenless call.** A call without a token runs in the context of the callee instance it reaches.
+  2. **T0 is every process of the owner's account.** One the owner did not install is T0 too (DEC-0045); the money
+     limits, the human gates and a product's own approval against a hostile local process ([the
+     boundary](specification/delegation.md#the-boundary), MD-6) are what hold against it.
+  3. **Over the estate's relay an unplaced sender is refused, never T2.** DL-28 names `relayCallerTier`'s refusals
+     (`unknown-state` a denial, a sender that is not T1 `unauthenticated`, DEC-0106); "another OS account" means a
+     loopback caller.
+  4. **What binds the family** adds DL-26's credential source (never another agent's key or vault slot), and the
+     machine profiles read as `machineCallVerdict` does: between the estate's machines a `view` machine neither takes
+     nor makes a call with an effect (DEC-0106).
+  5. **The agent network** links its directory (DEC-0104) and includes the family; NET-1's network of the operator is
+     `personal`, while the family also counts agents placed on the estate's machines in an organization's context;
+     DL-25's T1 row says "enrolment in the owner's estate" rather than "in the agent network".
+  6. **A service off the estate.** The operator's agents reach it as T2; its own owner's processes are that owner's T0
+     (and an organization's cloud machine binds no person, DEC-0099). The token they carry is issued for `personal`
+     by the estate's issuer `urn:fabric:estate:<id>` (a token names no context, DL-2, DL-14a), once Fabric's issuer
+     serves (MD-5), and its scope is all they carry. The first consumer's token class `internal` is not service.md's
+     data class of that name.
+- **Why:** each reading found a sentence a careful callee could follow into a wrong answer; none changed what DEC-0130
+  decided.
+- **Alternatives considered:** renaming the section to put the family inside the agent network (four inbound links,
+  and `docs:check` does not check fragments, CT-167); leaving the items as backlog (they are cheap and each is a sentence
+  a port reads).
+- **Compatibility:** text only. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/delegation.md` (header, DL-25's T1 row, the family section's intro,
+  DL-27 to DL-29), `conformance.md` (the family's row), `README.md` (the delegation row), `CONTEXT.md` (Family),
+  `test/delegation-sealed.test.ts` (DL-27 to DL-29's heading form); DEC-0130 annotated; backlog CT-143, CT-157 (closed),
+  CT-167 (filed).
+- **Source:** CT-157; DEC-0130's readings, rounds 1 to 5.
