@@ -229,9 +229,6 @@ export type OrgAdmissionResult =
  */
 export function orgRelayAdmissionSet(input: OrgAdmissionInput): OrgAdmissionResult {
   const offered = input.candidate !== undefined;
-  if (offered && !input.schemaValid(input.candidate)) return { ok: false, refusal: "invalid" };
-  const doc = offered ? input.candidate : input.held;
-  if (doc === undefined) return { ok: false, refusal: "no-record" };
   // A held list that cannot be read back (no positive revision, no RFC 8785 form) is refused `held-invalid`, never as none:
   // dropping it would drop the rollback guard (as `relayAdmissionSet` in `src/relay.ts` refuses such a record, CT-111).
   let held: { revision: number; digest: string } | undefined;
@@ -245,6 +242,9 @@ export function orgRelayAdmissionSet(input: OrgAdmissionInput): OrgAdmissionResu
       return { ok: false, refusal: "held-invalid" };
     }
   }
+  if (offered && !input.schemaValid(input.candidate)) return { ok: false, refusal: "invalid" };
+  const doc = offered ? input.candidate : input.held;
+  if (doc === undefined) return { ok: false, refusal: "no-record" };
   const verdict = verifyOrgAuthority(doc, { now: input.at, org: input.org, keySet: input.keySet, ...(held ? { held } : {}) });
   if (!verdict.ok) {
     // `expired` and `not-yet-valid` name the held list's own window, on which the relay ends its sessions; a refused
