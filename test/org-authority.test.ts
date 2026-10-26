@@ -286,6 +286,14 @@ describe("the organization relay's handshake (DEC-0134)", () => {
     expect(sessionStands(session, admission({ held: LIST }))).toEqual({ ok: true });
   });
 
+  it("fails closed when a key set drops the held list's signer and no other administrator's list verifies (OR-4, OL-5)", () => {
+    const session = { kid: KID, key: new Uint8Array(octets) };
+    const dropped = { ...KEY_SET, administrators: [] };
+    // The key set is applied even though the list read with it is refused; the held list, re-read under it, admits nobody.
+    expect(admission({ keySet: dropped, held: LIST, candidate: resign({ ...LIST, revision: 5 }) }).ok).toBe(false);
+    expect(sessionStands(session, admission({ keySet: dropped, held: LIST }))).toEqual({ ok: false, code: "not-admitted" });
+  });
+
   it("welcomes with the member list it admits from, in place of an estate's revision, delta head and heartbeat", () => {
     const frameValid = (value: unknown) => valid(value, "relay-frame");
     const list = { org: ORG, revision: 4, digest: LIST.digest };

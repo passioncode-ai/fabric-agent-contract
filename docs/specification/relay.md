@@ -236,10 +236,11 @@ one; it authenticates to the server with a credential the server issues when it 
 Every document it applies is one `verifyOrgKeySet` and `orgRelayAdmissionSet` accept: the server's word adds nothing.
 A key set and a list it reads together it applies in one step: `orgRelayAdmissionSet` with the new key set, the held list
 and the new list as the candidate, so a set that drops the held list's signer meets the list another administrator
-signed (OL-5) and the admission set does not empty between the two. When that call refuses the new list, the relay
-applies neither document: it keeps the key set and the list it held, its sessions stand under them (OR-3), and it reads
-both again at its next read; a key set that drops the held list's signer counts only with a list that verifies under
-it.
+signed (OL-5) and the admission set does not empty between the two. A key set the root signed is applied even when
+the list read with it is refused: the relay then re-reads the held list under the new set (OR-3), so when the root
+removed the held list's signer and no other administrator's list verifies yet, it admits nobody until one does (OL-5)
+and fails closed rather than keep a removed administrator's list. It never checks a list under a key set older than the
+newest it verified, and it reads the key set with every list it reads.
 
 **OR-5, between members.** On an organization's relay every member is T2 to every other, two enrollments of one owner
 included: an enrollment's kid is never in an estate record (UE-1), so no recipient can place it in T1, and no text may
