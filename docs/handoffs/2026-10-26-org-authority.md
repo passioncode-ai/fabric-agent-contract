@@ -37,7 +37,8 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
   administrator's shape now matches the schema.
 - Round 7: unit pass (a held list that cannot be read back is now `held-invalid`); seam pass; product fail (OM-7
   now covers an organization being created; the administrator's duties in the party rows; fixed).
-- Round 8: unit fail (`held-invalid` hidden behind a schema-invalid candidate; fixed: the held list is read first).
+- Round 8: unit fail (`held-invalid` hidden behind a schema-invalid candidate; fixed: the held list is read first);
+  product fail (SCN-047's precondition; the person's admission against the relay's, in OL-2 and FLW-32; fixed).
 
 ## Decisions
 

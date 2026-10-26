@@ -275,7 +275,11 @@ register's `org-authority/1` challenge, `{type, digest}` ([signing challenges](c
 DEC-0063), as a passkey signs an estate revision (DEC-0055). No server signs a list, the drafting server included. The administrator's Fabric shows the draft's changes against
 the last signed list, whoever signed it: entries added and dropped, and their count. An entry is a pairwise subject, an
 opaque issuer and an enrollment key, so an administrator can check that the changes match the joins and ends they
-expect, not who each entry is; what OL-2 guarantees is that no server signs.
+expect, not who each entry is; what OL-2 guarantees is that no server signs. Two admissions stay apart. The person's admission is the pin
+their passkey signs (OM-2, R1-D12); no administrator takes part in it, and it decides the membership. The relay's
+admission is this list: an administrator signs who the organization's relay delivers to (ADR-0178 point 2). A join an
+administrator has not yet signed, or declines, leaves the membership as the attestation states it and only keeps the
+member's enrollments off the organization's relay until a list names them.
 
 **OL-3, the verifier.** `verifyOrgAuthority(list, {now, org, keySet, held})` answers `{ok: true, digest, revision,
 signedBy, unchanged, held, members}` or one problem, in this order. `keySet` is the organization's set the reader applied
