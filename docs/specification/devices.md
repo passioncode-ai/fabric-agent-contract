@@ -566,7 +566,8 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   yet taken). The relay ([DEC-0047](relay.md#revocation-and-heartbeat)) carries heartbeats and pages of the delta
   unchanged, and a check-in response carried a heartbeat and a page (both typed by DEC-0054's schemas) and leases in
   `records` unchanged. A relay's `welcome.deltaHead` has the `revocationDelta` shape, so a node reports it as it came.
-  DEC-0128 (UE-2) ends both directions toward an organization: these members are what a node pinned before it sends,
+  DEC-0128 (UE-2) ends both directions toward an organization: these members are what a node that has not adopted UE-2 sends (one pinned before DEC-0128, or before CT-152's report
+  over the relay exists),
   and the estate's records travel to and from its hub over the relay (CT-152).
 
 <a id="unlinkable-enrollments"></a>
@@ -578,7 +579,7 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   stream counters, and its own `sequence` in a node summary. A hardware attestation SHOULD NOT carry a hardware-unique
   identifier in an organization enrollment (OQ-0010 decides formats). `FAC-SEM-148` checks the node's local registry
   (kind `node-enrollments`): one enrollment per organization, and no identifier (device id, kid, public key, telemetry
-  key, collector id) shared by two enrollments in any field, nor equal to the machine's estate id or its device kids. The node keeps that registry and never sends it.
+  key, collector id) shared by two enrollments in any field, nor equal to the machine's estate id, its device kids or its estate public keys. The node keeps that registry and never sends it.
 - **UE-2, nothing of the estate's.** A check-in to an organization server carries none of the estate's records in
   `records` (`estateRecord`, `heartbeat`, `revocationDelta`, `leases`), and its answer carries none of the estate's
   documents, each of which names the estate. `FAC-SEM-149` is the sender's duty: a node checks what it is about to send

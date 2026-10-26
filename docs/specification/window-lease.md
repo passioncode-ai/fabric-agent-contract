@@ -26,7 +26,7 @@ meter's owner, on 2026-10-12 (its `docs/design/METER.md`, sections M3 and M4). T
 | Field | Rule |
 |---|---|
 | `type` | `window-lease/1` |
-| `leaseId` | the lease's opaque id; the check-in reports it |
+| `leaseId` | the lease's opaque id; the machine reports it to its hub over the relay (CT-152; never in a check-in to an organization server, DEC-0128 UE-2) |
 | `sequence` | rises with every lease the hub issues one machine for one scope, window and period ([one lease per slot](#one-lease-per-slot)) |
 | `estate` | the estate whose record certifies the signing hub key |
 | `estateRevision` | the estate-record revision the hub followed; a machine that applies an earlier one refuses the lease until it has caught up |

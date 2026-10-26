@@ -86,8 +86,8 @@ hubs of one estate agree on the next sequence is Fabric's.
 A **heartbeat** ([`heartbeat`](../../schemas/heartbeat.schema.json)) is `{type: "heartbeat/1", alg: "EdDSA", estate,
 sequence, at, deltaHead, estateRecord: {revision, digest}, kid, sig}`, signed like an entry. `sequence` is the estate's
 heartbeat counter; `deltaHead` is the head of the delta when it was signed; `estateRecord` is the latest revision with
-its `digest` (required here, so two revisions with one number are told apart, DEC-0056). A check-in reports the held
-heartbeat's `sequence` and `at` (`records.heartbeat`, DEC-0053).
+its `digest` (required here, so two revisions with one number are told apart, DEC-0056). A machine reports the held
+heartbeat's `sequence` and `at` (`records.heartbeat`, DEC-0053) to its hub over the relay (CT-152; never in a check-in to an organization server, DEC-0128 UE-2).
 
 A running hub signs a heartbeat right after every entry and every revision, SHOULD sign one every 60 minutes
 (`HEARTBEAT_INTERVAL_SECONDS`), and lets no more than 24 hours pass between two (v4 §7 "daily",

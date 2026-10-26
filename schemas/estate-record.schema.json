@@ -27,7 +27,7 @@
       "type": "integer",
       "minimum": 1,
       "maximum": 9007199254740991,
-      "description": "1 for the first revision; each later one is its parent's plus one (FAC-SEM-072). The device check-in's records.estateRecord.revision names it (DEC-0053)."
+      "description": "1 for the first revision; each later one is its parent's plus one (FAC-SEM-072). A machine's report to its hub names it in records.estateRecord.revision (DEC-0053, DEC-0128)."
     },
     "parent": {
       "$ref": "common.schema.json#/$defs/sha256",
@@ -123,7 +123,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "DEC-0107: the revocation delta's head this revision vouches for, as a check-in reports it. Every revocation of the entries up to it is in this record (reconciliation, DEC-0054), so a machine that does not hold those entries starts its chain here (anchorDelta) instead of verifying entries an estate key the record no longer certifies signed. Never moves back (FAC-SEM-137)."
+      "description": "DEC-0107: the revocation delta's head this revision vouches for, in the shape a machine reports it (records.revocationDelta). Every revocation of the entries up to it is in this record (reconciliation, DEC-0054), so a machine that does not hold those entries starts its chain here (anchorDelta) instead of verifying entries an estate key the record no longer certifies signed. Never moves back (FAC-SEM-137)."
     },
     "revocations": {
       "type": "array",

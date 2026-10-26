@@ -339,7 +339,9 @@ alert:
    Every context hub key moves the same way (DEC-0128): the first revision certifies the new hub machine's key per pinned
    context beside the old ones, and the second drops and revokes the old machine's.
 4. **A lost hub** is replaced in one revision: the new `hubKey`, the old key dropped and revoked, the lost machine removed
-   and revoked as `machine <id>` ([Remove a machine](#remove-a-machine)), and the delta anchored at the head the new hub
+   and revoked as `machine <id>` ([Remove a machine](#remove-a-machine)) with every context hub key it held, the new hub's
+   key per pinned context certified in the same revision and each context's published key set withdrawing the lost keys
+   at once (DEC-0128), and the delta anchored at the head the new hub
    holds; the new hub's first entry is the anchor's sequence + 1. Fabric withdraws the lost key from the key set it
    publishes online (DL-14) at once, with no DL-15 grace. A service whose `auth.delegation.jwks` (DL-16) names that
    published copy stops accepting the lost key within its cache time (at most 10 minutes, DL-15); one that names the old hub's own `/.well-known/jwks.json`, which

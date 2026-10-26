@@ -321,7 +321,7 @@ export function mayReserve(lease: unknown, request: ReserveRequest): ReserveVerd
 
 // ---- The hub -----------------------------------------------------------------------------------------------------
 
-/** A meter's report of one lease, as the hub received it: the check-in's `records.leases[]` entry and its time. */
+/** A meter's report of one lease, as the hub received it: the `records.leases[]` entry it reported and its time. */
 export interface LeaseReport {
   leaseId: string;
   /** Settled receipts plus open reservations in the window instance, an upper bound; absent, the lease is unreported. */

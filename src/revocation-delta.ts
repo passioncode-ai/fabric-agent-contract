@@ -10,7 +10,7 @@ import { sameIdentifier } from "./identifiers.js";
 /**
  * The revocation delta and the timestamp heartbeat (DEC-0054). The delta is an append-only chain of signed entries,
  * one revocation each; entry n names the hash of the head before it, so the head is `{sequence, sha256}` — the shape a
- * device check-in reports (`records.revocationDelta`, DEC-0053) and a relay's `welcome.deltaHead` carries (DEC-0047).
+ * machine reports to its hub (`records.revocationDelta`, DEC-0053; over the relay, DEC-0128) and a relay's `welcome.deltaHead` carries (DEC-0047).
  * The heartbeat is a signed timestamp that commits to the delta's head and to the estate revision. Both are signed by
  * an estate key: a hub key the highest estate-record revision the machine verified and applied certifies (DEC-0055
  * `hubKey`), not revoked there or by an entry applied before. A machine whose heartbeat is more than 72 hours old, or
@@ -103,7 +103,7 @@ const baseOf = (state: DeltaState): number => (Number.isSafeInteger(state.anchor
 const usable = (state: unknown): state is DeltaState =>
   isObject(state) && isString(state.estate) && Array.isArray(state.entries) && (state.anchor === undefined || deltaAnchorOf({ deltaAnchor: state.anchor }) !== undefined);
 
-/** The head a machine has applied, in the check-in's `records.revocationDelta` shape. */
+/** The head a machine has applied, in the `records.revocationDelta` shape it reports to its hub. */
 export function deltaHead(state: DeltaState): { sequence: number; sha256: string } {
   const sequence = baseOf(state) + state.entries.length;
   return { sequence, sha256: headAt(state, sequence) };

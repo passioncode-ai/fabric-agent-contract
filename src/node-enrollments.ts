@@ -17,7 +17,8 @@ const strings = (value: unknown): string[] => (Array.isArray(value) ? value.filt
 /**
  * FAC-SEM-148 on a node's local registry, `{estateMachineId?, estatePublicKeys?, enrollments: [{org, deviceId, kids, publicKeys,
  * telemetryKeyId, collectorIds}]}`: one enrollment per organization, no identifier (device id, kid, public key,
- * telemetry key, collector id) shared by two enrollments in any field, and none the machine's estate id or its device kids.
+ * telemetry key, collector id) shared by two enrollments in any field, and none the machine's estate id, its device kids
+ * or its estate public keys.
  */
 function enrollmentFindings(value: JsonObject, flag: Flag): void {
   const estate = typeof value.estateMachineId === "string" ? value.estateMachineId : undefined;
