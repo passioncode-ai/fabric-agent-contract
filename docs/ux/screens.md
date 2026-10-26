@@ -400,7 +400,7 @@
 - **Used by:** FLW-16
 - **Purpose:** the operator sees which session of a Project is its main one (the holder of `project.work`) and moves that slot, or another, to another live session.
 - **Elements:** the Project's live sessions, each with its session role and, for this Project only, its reported branch; the main one marked; per occupied slot, the capability and its holder; "Make main" (or "Move") on an authorized session; the confirmation with the slot's `accepted` and `in_progress` counts, saying in-progress work will wait for the new holder's observation.
-- **States:** success, the slot moved; refused, `revision_conflict` (the slot moved on since the view was drawn), `held` (the slot or the Project is held) or `not_authorized` (the session has no grant for the capability); no main session, nobody holds `project.work`; changed hands, the slot's holder is no longer the session the operator chose, with the move offered again.
+- **States:** success, the slot moved; refused, `revision_conflict` (the slot moved on since the view was drawn), `held` (the slot or the Project is held) or `not_authorized` (the session has no grant for the capability); no main session, nobody holds `project.work`; changed hands, the slot's holder is no longer the session the operator chose, with the move offered again; not answering, the main session's lease is stale.
 - **Coverage:** project-comms PR-1, PR-2, PR-3 (DEC-0140); `src/comms-hold.ts` (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`
 - **Scenarios:** SCN-051
 - **Resources:** project-comms specification, The primary responder, The operator moves a slot, A session's role and branch

@@ -32,7 +32,12 @@ session; an optional session `role` and `branch` with a privacy rule.
   `project.work`) and the adapter's working-with-fabric skill, which enrolls a coding agent's session for
   `project.work` under the grant the operator gives in Fabric; until a session enrolls, Fabric shows no main session.
 - CT-175 (the adapter's kits): whether a client leaves a slot moved off it, and an `outcome_unknown` a move produces
-  when only the moved-off session observed the effect. CT-125: the move's agent twin.
+  when only the moved-off session observed the effect, and the receiving client's part. CT-125: the move's agent
+  twin.
+- A host or kit that starts recording a session's branch (PR-3) changes its own "no branch" promise in the same
+  change: Fabric's `fabric_session_observe` description and the adapter's working-with-fabric `session-hooks.md`.
+- Fabric's design marks the oldest live slot's holder as main until `project.work` is held; PR-1 shows none, so the
+  fallback goes when Fabric adopts (raised on thread `6a8d2f9c`).
 
 ## Checks actually run
 

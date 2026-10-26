@@ -295,6 +295,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-04
 - **Status:** Accepted source change; consumer adoption pending
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
+- **Annotated (2026-10-26):** amended by DEC-0140: the board reserves `project.work`; no service serves or declares
+  it as a capability of its own (a narrowing; [interop](specification/interop.md)).
 - **Amends:** DEC-0016; C3.1/C3.6 naming in the interop specification
 - **Decision:** `common.schema.json#/$defs/capabilityName` admits
   `^[a-z][a-z0-9._-]{1,127}$`. The manifest capability name, hub argument,
@@ -371,6 +373,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-26):** amended by DEC-0135: who a message is delivered to (what counts as unread and what a
   mirror sends) is decided apart from who reads it; a reply goes to the sender it answers unless its `deliverTo` names
   the thread or a list of participants.
+- **Annotated (2026-10-26):** amended by DEC-0140: `project.work` is the reserved capability of a Project's primary
+  responder; the operator who owns a Project may move a held slot to another authorized session as one fenced
+  transition, after which the ordinary rules hold it; a session role is a claim and a reported branch stays in its
+  Project.
 - **Decision:** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
   board on which messages are addressed to a Project, and through a request to a capability of
   that Project. Identity comes from the authenticated endpoint and never from the payload. A
@@ -8276,7 +8282,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   policy's second exception: no service may serve or declare `project.work` (PR-1). The serving parties were checked
   on 2026-10-26 by `git grep project.work` at their released tags: Fabric `v0.3.13` (only i18n keys), the adapter
   `v0.52.0`, Fabric Dashboards `v0.8.7`, Fabric Switchboard `v0.6.83`, Project Observatory `v0.1.0`, Fabric Inbox
-  `v0.40.0`, the first organization server `v0.4.0`, and every other repository on the operator's machine at its
+  `v0.42.0`, the first organization server `v0.4.0`, and every other repository on the operator's machine at its
   latest tag, else its head (165 in all, the estate's provider agents among them), none of which serves or declares
   it (the only matches are i18n keys and longer identifiers such as `project.workspace_ids`); fabric-workspace has no
   tag and none at its head. The release notes will list it as a narrowing. No tool, argument or field of any tool's schema changes. Adoption: Fabric in 0.3.15
@@ -8288,7 +8294,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. **PR-1.** `project.work` (`PRIMARY_CAPABILITY`) is the reserved capability a requester names to reach a Project's
      primary responder; the board never re-routes another capability to it; otherwise a capability like any other. A
      host shows its holder as the main session, none while nobody holds it. No service serves or declares it.
-  2. **PR-2.** The operator moves a (Project, capability) slot to another live, authorized session of that Project, in
+  2. **PR-2.** The operator who owns the Project (in an organization, that member only) moves a held (Project,
+     capability) slot to another live, authorized session of that Project than its holder, in
      the host's controls or by a relayed decision (`gate: relayed`), never an agent on its own account; from the
      generation the operator saw (`revision_conflict` otherwise); one transition as `com.responder_replace` would
      make it for the receiving session, transferring nothing; refused `held` under a slot or Project hold. After it
@@ -8315,6 +8322,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `docs/specification/project-comms.md` (header, C4's wording, PR-1 to PR-3, the hold
   table), `conformance.md` (a row), `interop.md` (the reserved name), `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder,
   Session role), `src/comms-hold.ts` (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`, `docs/ux/scenarios.md`
-  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16); backlog CT-125 (the move's agent twin), CT-174 and CT-175 (filed); the handoff
+  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020 and DEC-0022 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175 and CT-176 (filed); the handoff
   `docs/handoffs/2026-10-26-simple-fabric-decisions.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-174; Fabric's request `23ba0e97` (thread `6a8d2f9c`).

@@ -742,21 +742,21 @@ independent agent author and P-02 project operator.
 
 - **Persona:** P-02
 - **Feature:** project-board
-- **Traces:** ST-020, FLW-16 (JTBD-09, JRN-08/#1)
+- **Traces:** ST-020, FLW-16 (JTBD-09, JRN-08/#5)
 - **Entry point:** the host's view of `project-b`'s sessions, where session `s-1` holds `project.work` (the main one) and `s-2` is live
-- **Preconditions:** `s-2` is authorized to respond for `project.work`; the slot holds one `accepted` request and one `in_progress` request of `s-1`
+- **Preconditions:** `s-2` is authorized to respond for `project.work` and runs a client that hears the move or claims; the operator owns `project-b`; the slot holds one `accepted` request and one `in_progress` request of `s-1`
 - **Steps:**
   1. The operator chooses to make `s-2` the main session -> the host shows the slot's work first: one accepted, one in progress, and that the accepted one waits for `s-2` and the in-progress one becomes unknown.
   2. The operator confirms -> the host moves the slot from the generation the operator saw: `s-2` holds `project.work`, the in-progress request reads `outcome_unknown`, the accepted one is held, and `s-1`'s next fenced call is `fenced`.
   3. `s-2` replaces itself with a transfer of the accepted request and its own checkpoint, before it claims anything -> it continues that request under a new attempt.
   4. The in-progress request stays `outcome_unknown` until `s-2` observes its outcome and reconciles it; if only `s-1` could observe it, the owner settles it once nobody holds the slot (CT-175).
 - **Expected result:** the main session is the one the operator chose at the moment of the move, the host always shows who holds the slot now, and no request the board fences is lost or continued by two holders (an effect outside the board is not covered: exactly-once is not claimed). Under the board's ordinary rules the slot can leave `s-2` by another move, by `s-2`'s session ending or its lease lapsing to another enrollment, or by another authorized session replacing it; the host then shows the change and offers the move again.
-- **Alt paths:** someone else moved or re-enrolled the slot after the operator's view was drawn -> the host refuses `revision_conflict` and shows the slot as it is now. The slot or `project-b` is held -> the move is refused `held` until the hold is lifted. An agent relays the operator's decision -> the same move, recorded as the operator's act. `s-2`'s session ends -> the slot is released and the host shows no main session until someone holds `project.work`. `s-1`'s client restarts and its recovery replaces the slot -> the host shows that `s-1` holds the main slot again, not the session the operator chose, and offers "Make main" for `s-2` again.
+- **Alt paths:** someone else moved or re-enrolled the slot after the operator's view was drawn -> the host refuses `revision_conflict` and shows the slot as it is now. The slot or `project-b` is held -> the move is refused `held` until the hold is lifted. An agent relays the operator's decision -> the same move, recorded as the operator's act. `s-2`'s session ends -> the slot is released and the host shows no main session until someone holds `project.work`. `s-1`'s client restarts as a new session `s-3` and its recovery replaces the slot -> the host shows that `s-3` holds the main slot, not the session the operator chose, and offers "Make main" for `s-2` again. `s-2` goes quiet past its lease -> the host shows it as the main session not answering, and once the slot lapses, no main session.
 - **UI elements:** the sessions list with the main one marked; "Make main"; the confirmation with the slot's accepted and in-progress counts.
 - **States covered:** success, error, the slot changed hands after the move
 - **Errors & recovery:** `s-2` is not authorized for the capability -> the host refuses `not_authorized` and says the session needs the grant first; nothing moves. The operator cannot settle the unknown request while `s-2` holds the slot (owner settlement needs no holder) -> the host says it waits for `s-2`'s observation.
 - **Status:** draft
-- **Coverage:** project-comms PR-1, PR-2 (DEC-0140); `test/comms-hold.test.ts` (`PRIMARY_CAPABILITY`)
+- **Coverage:** project-comms PR-1, PR-2 (DEC-0140); PR-2: the host's own test; `test/comms-hold.test.ts` covers `PRIMARY_CAPABILITY` only
 - **Product:** unobserved
 
 ## Services

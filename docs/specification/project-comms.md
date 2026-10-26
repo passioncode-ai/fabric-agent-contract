@@ -535,7 +535,7 @@ responder**. A requester that knows no narrower capability of the target names `
 board never re-routes a request that names another capability. Beyond that it is a capability like any other: one slot
 per Project (C4), fenced, listed in the [project directory](#project-directory) only for a Project whose host takes requests for
 it (with an `absent` responder until one enrolls), and held by the operator like any slot. A host that shows a Project's
-main session shows the holder of that slot, and shows none while nobody holds it. No service serves `project.work` as
+main session, for the operator's own Projects only (another member's responder state is never shown, OD-1), shows the holder of that slot, and shows none while nobody holds it. No service serves `project.work` as
 a tool or declares it as a capability of its own (`surfaces.mcp.capabilities`, an action's `tool`); the checker does
 not test this today, and the board reserves no other capability name (memory/0.1 reserves its own, [memory and
 learning](memory-and-learning.md)).
@@ -697,8 +697,9 @@ constraint (`comms-refusal.schema.json`).
 
 ### The operator moves a slot
 
-**PR-2 (DEC-0140).** The operator may move a (Project, capability) responder slot to another live session of that
-Project: in the host's operator controls, or through their agent, which relays the decision to the host's move action
+**PR-2 (DEC-0140).** The operator who owns the Project (in an organization, that member only, as in [owner
+settlement](#owner-settlement)) may move a held (Project, capability) responder slot from its holder to another live
+session of that Project: in the host's operator controls, or through their agent, which relays the decision to the host's move action
 (`gate: relayed`, [service](service.md#actions) AP-2, DEC-0121). An agent never moves a slot on its own account, and
 `com.responder_replace` still takes a slot for its own caller only: its closed arguments name no session.
 
@@ -709,24 +710,27 @@ Project: in the host's operator controls, or through their agent, which relays t
   `outcome_unknown` (`lost_result`); an `accepted` one is held (C4). The move transfers no request, since a transfer
   carries a checkpoint its caller writes, and the operator writes none.
 - **Who may receive it.** A live session of that Project already authorized to respond for that capability, as for
-  `com.enroll`; the host refuses any other `not_authorized`, and a move grants nothing.
+  `com.enroll`, other than the slot's holder; the host refuses any other `not_authorized`, and a move grants nothing.
+  A slot nobody holds is not moved: an authorized session takes it by its own `com.enroll`.
 - **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
 - **After the move.** The slot is then held under the board's ordinary rules, and a move bars nobody and adds no
   refusal: another authorized session may replace it, a client's recovery may replace it (the moved-off session's
-  included, when its checkpoint holds accepted work), and a receiving session that lets its lease lapse loses it as any
+  client included, under a new session id after a restart, when its checkpoint holds accepted work), and a receiving session that lets its lease lapse loses it as any
   lapsed holder does. A host keeps the operator's choice as its own state: when the slot's holder is no longer the
   session the operator chose, it shows so and offers the move again. Whether a client should leave a slot moved off
   it is the client's (CT-175).
 - **What was in flight.** The receiving session continues held accepted work only by its own `com.responder_replace`
   with a transfer, whose checkpoint it writes as the replacement (a holder may replace itself at its current
-  generation, before it claims or begins any effect, since its own replacement fences its own claims and attempts), or
-  the requester cancels it. An `outcome_unknown` request is settled as before: by the slot's holder
+  generation, before it claims or begins any effect, since its own replacement fences its own claims and attempts; at
+  most 64 requests per replacement, as for any transfer), or the requester cancels it. An `outcome_unknown` request is settled as before: by the slot's holder
   with an observed outcome, or by the estate owner once no responder holds the slot ([owner
   settlement](#owner-settlement)). The host shows the slot's `accepted` and `in_progress` counts before the operator
   confirms a move, and that in-progress work will wait for the new holder's observation.
 - **Learning it holds the slot.** The host tells the receiving session through its own session surface; a client
-  that cannot hear it learns it holds the slot when its `com.claim` succeeds, and renews from there; one that does
-  neither within its lease loses the slot as any holder does (After the move).
+  that cannot hear it learns it holds the slot from a call on it that succeeds (`com.claim`, or `com.enroll` where its host renews a
+  holder's lease, as Fabric's board does), and keeps it as any holder does; one that
+  does neither within its lease loses the slot as any holder does (After the move). A host shows a holder whose lease
+  has gone stale (`com.status`) as the main session not answering, not as none.
 - **The record.** The host's own slot record of the move names the operator as the actor and the receiving session as
   the holder; each request the move changes is journaled as op `replace` (`claimed` to `queued`) or `lost_result`
   (`in_progress` to `outcome_unknown`), (`FAC-SEM-027`), carrying the operator principal, which no rule checks. `com.status` shows the slot as
