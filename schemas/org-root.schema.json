@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/org-root.schema.json",
+  "title": "An organization's membership root as its issuer serves it (DEC-0131, DEC-0133)",
+  "description": "What an organization server answers at GET {issuer}/fabric/membership/v1/{org}/root once the root's first key set is accepted (DEC-0131 OX-2; 404 no-root before): the root members pin in the estate record's organizations (OM-2). The same organization, issuer and root {kid, x} an organizationPin carries; Fabric shows the root's kid and a fingerprint of its x to the person before their passkey signs the pin. docs/specification/membership.md#the-draft-exchange.",
+  "type": "object",
+  "required": [
+    "org",
+    "issuer",
+    "root"
+  ],
+  "properties": {
+    "org": {
+      "$ref": "org-membership.schema.json#/$defs/org"
+    },
+    "issuer": {
+      "$ref": "entitlement.schema.json#/$defs/issuer"
+    },
+    "root": {
+      "type": "object",
+      "required": [
+        "kid",
+        "x"
+      ],
+      "properties": {
+        "kid": {
+          "$ref": "activity-common.schema.json#/$defs/opaqueId"
+        },
+        "x": {
+          "$ref": "org-key-set.schema.json#/$defs/ed25519X"
+        }
+      },
+      "additionalProperties": false,
+      "description": "The root's key id and its Ed25519 public key, base64url (32 bytes)."
+    }
+  },
+  "additionalProperties": false
+}

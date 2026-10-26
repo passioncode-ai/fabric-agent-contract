@@ -1,0 +1,8 @@
+{
+  "org": "org:org-a",
+  "issuer": "https://orgs.example",
+  "root": {
+    "kid": "root-org-a-1",
+    "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+  }
+}

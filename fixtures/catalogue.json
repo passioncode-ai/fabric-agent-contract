@@ -1010,5 +1010,7 @@
   {"name": "org-root-registration-short-claim", "schema": "org-root-registration.schema.json", "path": "negative/org-root-registration-short-claim.json", "valid": false, "keyword": "pattern"},
   {"name": "machine-report", "schema": "machine-report.schema.json", "path": "positive/machine-report.json", "valid": true},
   {"name": "machine-report-no-estate-record", "schema": "machine-report.schema.json", "path": "negative/machine-report-no-estate-record.json", "valid": false, "keyword": "required"},
-  {"name": "machine-report-sealed", "schema": "machine-report-sealed.schema.json", "path": "positive/machine-report-sealed.json", "valid": true}
+  {"name": "machine-report-sealed", "schema": "machine-report-sealed.schema.json", "path": "positive/machine-report-sealed.json", "valid": true},
+  {"name": "org-root", "schema": "org-root.schema.json", "path": "positive/org-root.json", "valid": true},
+  {"name": "org-root-flat", "schema": "org-root.schema.json", "path": "negative/org-root-flat.json", "valid": false, "keyword": "required"}
 ]
