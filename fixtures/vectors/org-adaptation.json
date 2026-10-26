@@ -1,5 +1,5 @@
 {
-  "description": "DEC-0138: the organization part of an adaptation plan. `digests` are adaptationDigest and requestDigest (SHA-256 over RFC 8785). `decide` is the server's decision on a PUT plan that passed the device transport: `member` says the credential's person holds an active or suspended membership, `valid` that the plan passed its schema and FAC-SEM-153, `org` is the route's organization in its full `org:<orgId>` form, `held` the revision held. `receipts` binds each request's decision by its id and digest.",
+  "description": "DEC-0138: the organization part of an adaptation plan. `digests` are adaptationDigest and requestDigest (SHA-256 over RFC 8785). `decide` is the server's decision on a PUT plan whose credential (the one it issued the person's Fabric for the person) it authenticated: `member` says the credential's person holds an active or suspended membership, `valid` that the plan passed its schema and FAC-SEM-153, `org` is the route's organization in its full `org:<orgId>` form, `held` the revision held. `receipts` binds each request's decision by its id and digest.",
   "digests": [
     {
       "name": "the plan",
@@ -737,6 +737,85 @@
             "digest": "sha256:b35ce875a649c8075bc60c114649124ef20b1c66468cc425af1ec87bd3925560",
             "state": "refused",
             "at": "2026-10-27T10:05:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "name": "a request the server closed without a decision",
+      "plan": {
+        "type": "org-adaptation/1",
+        "org": "org:org-7f3a",
+        "revision": 2,
+        "items": [
+          {
+            "ref": "q7Xk2mP9vLr4Tn8w",
+            "kind": "project",
+            "label": "Billing migration"
+          },
+          {
+            "ref": "Hb3Zt6Yc1Nq5Ws0e",
+            "kind": "schedule"
+          }
+        ],
+        "requests": [
+          {
+            "id": "req-access-01",
+            "kind": "access",
+            "itemRef": "q7Xk2mP9vLr4Tn8w",
+            "resource": "staging database",
+            "note": "read-only, to finish the migration"
+          },
+          {
+            "id": "req-spend-01",
+            "kind": "spend",
+            "amountUsd": 200,
+            "period": "month",
+            "purpose": "model calls for the migration agent"
+          },
+          {
+            "id": "req-role-01",
+            "kind": "role",
+            "role": "admin"
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "id": "req-access-01",
+          "digest": "sha256:4f4cd5b3808ba803ffbea96df6ececeec849a36c9ddca89a70bbbc0cb154c065",
+          "state": "granted",
+          "at": "2026-10-27T10:00:00Z"
+        },
+        {
+          "id": "req-spend-01",
+          "digest": "sha256:59e8f009bcdf66fe65a668ef25fb147457d60bf62d0cd01742d7a914576c5387",
+          "state": "expired",
+          "at": "2026-11-26T10:00:00Z"
+        }
+      ],
+      "expected": {
+        "type": "org-adaptation-receipt/1",
+        "org": "org:org-7f3a",
+        "revision": 2,
+        "digest": "sha256:67e1393704cb2bfc0d9df58e9952d3cba075f7dc892e2cd873321826afa94c41",
+        "requests": [
+          {
+            "id": "req-access-01",
+            "digest": "sha256:4f4cd5b3808ba803ffbea96df6ececeec849a36c9ddca89a70bbbc0cb154c065",
+            "state": "granted",
+            "at": "2026-10-27T10:00:00Z"
+          },
+          {
+            "id": "req-spend-01",
+            "digest": "sha256:59e8f009bcdf66fe65a668ef25fb147457d60bf62d0cd01742d7a914576c5387",
+            "state": "expired",
+            "at": "2026-11-26T10:00:00Z"
+          },
+          {
+            "id": "req-role-01",
+            "digest": "sha256:b35ce875a649c8075bc60c114649124ef20b1c66468cc425af1ec87bd3925560",
+            "state": "pending"
           }
         ]
       }

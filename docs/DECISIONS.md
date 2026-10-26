@@ -7787,6 +7787,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0129: the organization's member list, `org-authority/1`, signed by an administrator's passkey
 
 - **Date:** 2026-10-26
+- **Annotated (2026-10-26):** DEC-0138 decides OM-7's adaptation row: the organization part of an adaptation plan, `org-adaptation/1`, and what a reference is.
 - **Status:** Accepted (2026-10-26). A new schema (`org-authority/1`), a new register statement, a new rule
   (`FAC-SEM-150`) and a relay admission source; `org-key-set/1` gains the required `administrators` before any tag
   carried the type (DEC-0127's annotation: the release lists it as a narrowing, DEC-0119). Adoption: CT-37 (every
@@ -8290,13 +8291,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      kept while their item or request stands; `label`, `resource`, `note` and `purpose` are typed by the person.
   3. **AD-3.** The person's Fabric sends the whole plan with the credential the server issued it for the person;
      the route is `PUT /fabric/adaptation/v1/{org}/plan`, with `GET` for the receipt (`404 no-plan` before the first).
+     Fabric sends only after a `GET` answered a receipt or `no-plan`; any other answer means the server takes no plans
+     from this credential.
   4. **AD-4.** The server keeps the newest revision (`decideAdaptation`): `not-a-member`, `schema-unsupported`,
      `malformed`, `wrong-organization`, `stale-revision`, `revision-conflict`, a repeat answering the same receipt; an
      empty revision withdraws.
   5. **AD-5.** Each decision is bound to its request's id and digest (`requestDigest`, `adaptationReceipt`), so a
-     changed request waits for a new decision; a lapsed one reads `pending`; a decision grants nothing by itself, and
-     a granted `admin` role is display and routing, never authority (OL-6, OM-3).
-  6. **AD-6.** Read by the organization's administrators and the person only; ended with the membership (OM-5).
+     changed request waits for a new decision; a request the server closes without one reads `expired` (the first
+     server's objection); a decision grants nothing by itself, and a granted `admin` role is display and routing,
+     never authority (OL-6, OM-3).
+  6. **AD-6.** Read by the organization's administrators and the person only. A person who leaves by unpinning
+     withdraws the plan first (OM-5); an end the server issues ends the plan.
 - **Why:** the plan is the person's, authored in their Fabric, which reads the person's attestations with the
   credential the server issued it; sending the plan the same way adds no identity and no enrollment Fabric lacks. A
   random per-organization reference keeps two organizations
@@ -8312,10 +8317,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `schemas/org-adaptation.schema.json`, `schemas/org-adaptation-receipt.schema.json` (new);
   `src/org-adaptation.ts`, `src/semantic-rules.ts`, `src/semantic-kinds.ts`, `src/protocol-revisions.ts`;
   `fixtures/vectors/org-adaptation.json` written by `tools/vectors/org-adaptation.ts`; fixtures `org-adaptation*`;
-  `test/org-adaptation.test.ts`, `test/positive-sweep.test.ts`, `test/rule-tolerance.test.ts`, `vitest.config.ts`;
-  `test/protocol-revisions.test.ts`; `docs/specification/membership.md` (header, OM-7's row, The adaptation plan,
-  `FAC-SEM-153`, Who adopts it, Not decided here), `contexts.md` (Linkability), `conformance.md` (rule table, code table,
-  a row), `CONTEXT.md` (Adaptation plan), `docs/DOCMAP.md`, `docs/ux/scenarios.md` (SCN-050, draft), `docs/ux/screens.md` (SCR-31); backlog CT-159, CT-169; the
+  `test/org-adaptation.test.ts`, `test/positive-sweep.test.ts`, `test/rule-tolerance.test.ts`, `vitest.config.ts`,
+  `test/protocol-revisions.test.ts`, `test/schema-compilation.test.ts`, `tools/vectors/run.ts`, `fixtures/catalogue.json`;
+  `docs/specification/membership.md` (header, OM-5, OM-7's row, The adaptation plan, `FAC-SEM-153`, Who adopts it,
+  Privacy, Not decided here), `contexts.md` (Linkability), `devices.md` (what stays linkable), `README.md` (the
+  membership row), `conformance.md` (rule table, code table, a row), `CONTEXT.md` (Adaptation plan), `docs/DOCMAP.md`,
+  `docs/ux/flows.md` (FLW-32), `docs/ux/scenarios.md` (SCN-047), `docs/ux/scenarios.md` (SCN-050, draft), `docs/ux/screens.md` (SCR-31); backlog CT-159, CT-169; the
   handoff `docs/handoffs/2026-10-26-adaptation-plan.md`.
 - **Source:** CT-169; the first organization server's request N-4 (board message `38f108ba`, thread `0fee99ae`); the
   shape posted in thread `5d2ea917`; DEC-0029 (rule codes), DEC-0056, DEC-0067, DEC-0128, DEC-0129.

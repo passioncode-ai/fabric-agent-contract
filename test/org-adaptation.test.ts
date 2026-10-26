@@ -18,7 +18,7 @@ import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { VECTOR_FILE, buildOrgAdaptationVectors } from "../tools/vectors/org-adaptation.js";
 
-// DEC-0138: the organization part of an adaptation plan, sent whole by the person's node and kept by revision.
+// DEC-0138: the organization part of an adaptation plan, sent whole by the person's Fabric and kept by revision.
 const root = projectRoot();
 type Json = Record<string, any>;
 const read = (relative: string) => JSON.parse(readFileSync(path.join(root, relative), "utf8")) as Json;
@@ -47,6 +47,8 @@ describe("org-adaptation/1 (DEC-0138)", () => {
     expect(decideAdaptation("x", { member: true, valid: true, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
     expect(decideAdaptation({ ...plan, revision: 1.5 }, { member: true, valid: true, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
     expect(decideAdaptation({ ...plan, extra: Number.POSITIVE_INFINITY }, { member: true, valid: true, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
+    expect(decideAdaptation(plan, { member: true, valid: true, org: plan.org, held: null as never })).toEqual({ outcome: "accepted", held: { revision: 2, digest: adaptationDigest(plan) } });
+    expect(decideAdaptation(plan, { member: true, valid: true, org: plan.org, held: "x" as never }).outcome).toBe("accepted");
     expect(decideAdaptation(plan, undefined as never)).toEqual({ outcome: "refused", refusal: "not-a-member" });
     expect(decideAdaptation({ ...plan, type: 7 }, { member: true, valid: false, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
     expect([...new Set(vectors.decide.filter((v: Json) => v.expected.refusal).map((v: Json) => v.expected.refusal))].sort()).toEqual([...ORG_ADAPTATION_REFUSALS].sort());
@@ -65,6 +67,11 @@ describe("org-adaptation/1 (DEC-0138)", () => {
     expect(adaptationReceipt({ ...plan, requests: [5] }, [])).toBeUndefined();
     expect(adaptationReceipt({ ...plan, x: Number.NaN }, [])).toBeUndefined();
     expect(adaptationReceipt(plan, null as never)).toBeUndefined();
+    expect(adaptationReceipt({ ...plan, revision: 0 }, [])).toBeUndefined();
+    const unbound = [{ id: plan.requests[0].id, digest: requestDigest(plan.requests[0]), state: "maybe", at: "2026-10-27T10:00:00Z" }, { id: plan.requests[1].id, digest: requestDigest(plan.requests[1]), state: "granted" }];
+    const loose = adaptationReceipt(plan, unbound as never);
+    expect(loose?.requests.map((r) => r.state)).toEqual(["pending", "pending", "pending"]);
+    expect(valid(loose, "org-adaptation-receipt")).toBe(true);
     expect(adaptationReceipt(plan, [null] as never)?.requests.map((r) => r.state)).toEqual(["pending", "pending", "pending"]);
   });
 
@@ -75,6 +82,7 @@ describe("org-adaptation/1 (DEC-0138)", () => {
     expect(evaluateSemanticRules("org-adaptation", twice).map((f) => f.instancePath)).toEqual(["/items/2/ref", "/requests/3/id"]);
     expect(adaptationFindings({ ...plan, items: [7], requests: [{ id: "r-unknown-1", kind: "access", resource: "x", itemRef: "Zz9Yy8Xx7Ww6Vv5U" }] }).map((f) => f.instancePath)).toEqual(["/requests/0/itemRef"]);
     expect(adaptationFindings({ type: "org-adaptation/1" })).toEqual([]);
+    expect(adaptationFindings(null as never)).toEqual([]);
   });
 
   it("states its limits and route as the schema and the spec do", () => {

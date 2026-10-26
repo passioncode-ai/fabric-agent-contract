@@ -20,7 +20,8 @@ export const MAX_REQUESTS = 50;
 /** The server's refusals of a plan, in the order `decideAdaptation` reads them. */
 export const ORG_ADAPTATION_REFUSALS = ["not-a-member", "schema-unsupported", "malformed", "wrong-organization", "stale-revision", "revision-conflict"] as const;
 export type OrgAdaptationRefusal = (typeof ORG_ADAPTATION_REFUSALS)[number];
-export type RequestState = "pending" | "granted" | "refused";
+export type RequestState = "pending" | "granted" | "refused" | "expired";
+const DECIDED: readonly string[] = ["granted", "refused", "expired"];
 
 const digestOf = (value: unknown): string | undefined => {
   try {
@@ -48,6 +49,7 @@ const list = (value: unknown): unknown[] => (Array.isArray(value) ? value : []);
  */
 export function adaptationFindings(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
+  if (!isObject(value)) return findings;
   const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-153", instancePath, message });
   const refs = new Set<unknown>();
   list(value.items).forEach((item, index) => {
@@ -75,11 +77,11 @@ export interface HeldAdaptation {
   digest: string;
 }
 
-/** An administrator's decision, bound to the request it decided by id and digest. */
+/** An administrator's decision, or the server's closing of a request without one (`expired`), bound to the request by id and digest. */
 export interface RequestDecision {
   id: string;
   digest: string;
-  state: "granted" | "refused";
+  state: "granted" | "refused" | "expired";
   at: string;
 }
 
@@ -92,18 +94,19 @@ export interface AdaptationReceipt {
 }
 
 /**
- * The receipt for a plan the server holds: each request with its digest and the decision bound to that id and digest,
- * or `pending` when none is (a request whose digest changed keeps no earlier decision).
+ * The receipt for a plan the server holds: each request with its digest and the decision bound to that id and digest
+ * (`granted`, `refused`, or `expired` when the server closed it without one), or `pending` when none is (a request
+ * whose digest changed keeps no earlier decision). A decision that is not one of those, or has no `at`, is not bound.
  */
 export function adaptationReceipt(plan: JsonObject, decisions: readonly RequestDecision[]): AdaptationReceipt | undefined {
   const digest = adaptationDigest(plan);
-  if (digest === undefined || typeof plan.org !== "string" || !Number.isSafeInteger(plan.revision) || !Array.isArray(decisions)) return undefined;
+  if (digest === undefined || typeof plan.org !== "string" || !Number.isSafeInteger(plan.revision) || (plan.revision as number) < 1 || !Array.isArray(decisions)) return undefined;
   const requests: AdaptationReceipt["requests"] = [];
   for (const request of list(plan.requests)) {
     const requestId = isObject(request) ? request.id : undefined;
     const bound = requestDigest(request);
     if (typeof requestId !== "string" || bound === undefined) return undefined;
-    const decision = decisions.find((entry) => isObject(entry) && entry.id === requestId && entry.digest === bound);
+    const decision = decisions.find((entry) => isObject(entry) && entry.id === requestId && entry.digest === bound && typeof entry.state === "string" && DECIDED.includes(entry.state) && typeof entry.at === "string");
     requests.push(decision ? { id: requestId, digest: bound, state: decision.state, at: decision.at } : { id: requestId, digest: bound, state: "pending" });
   }
   return { type: ORG_ADAPTATION_RECEIPT_TYPE, org: plan.org, revision: plan.revision as number, digest, requests };
@@ -117,7 +120,8 @@ export function adaptationReceipt(plan: JsonObject, decisions: readonly RequestD
  * route's in its full `org:<orgId>` form); then against the held revision: a lower revision is `stale-revision`; the
  * same revision with another digest is `revision-conflict`; the same revision and digest is `repeated` (answered with
  * the same receipt, nothing stored); a higher revision is `accepted` and replaces the held one. A plan with no items
- * and no requests is accepted the same way, and withdraws what the member brought.
+ * and no requests is accepted the same way, and withdraws what the member brought. A `held` that is not a revision
+ * (`null` for no plan yet) holds none.
  */
 export function decideAdaptation(
   plan: unknown,
@@ -130,9 +134,10 @@ export function decideAdaptation(
   if (digest === undefined) return { outcome: "refused", refusal: "malformed" };
   if (plan.org !== ctx.org) return { outcome: "refused", refusal: "wrong-organization" };
   const revision = plan.revision as number;
-  if (ctx.held !== undefined) {
-    if (revision < ctx.held.revision) return { outcome: "refused", refusal: "stale-revision" };
-    if (revision === ctx.held.revision) return digest === ctx.held.digest ? { outcome: "repeated", held: ctx.held } : { outcome: "refused", refusal: "revision-conflict" };
+  const held = ctx.held;
+  if (isObject(held) && Number.isSafeInteger(held.revision)) {
+    if (revision < held.revision) return { outcome: "refused", refusal: "stale-revision" };
+    if (revision === held.revision) return digest === held.digest ? { outcome: "repeated", held } : { outcome: "refused", refusal: "revision-conflict" };
   }
   return { outcome: "accepted", held: { revision, digest } };
 }

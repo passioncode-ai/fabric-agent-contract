@@ -29,6 +29,10 @@ requests to the administrators. The first organization server needs it by 2026-1
 - Readings: round 1 fail (a home path in a fixture tripped the privacy check; the device-request transport, which the
   plan's author does not hold; the role wording; `schema-unsupported`); the transport is now the person's Fabric's
   credential, as the first organization server proposed.
+- Round 2 fail (an own leave left the plan with the server; the route's discovery against the first server's `401`;
+  `decideAdaptation` on `held: null`; the vector text). Fixed: Fabric withdraws before unpinning (OM-5, AD-6), sends only
+  after a `GET` answered a receipt or `no-plan`, the receipt gains `expired` (the first server's objection), typed text
+  is named in OM-7, Privacy and the linkable lists.
 
 ## Open
 

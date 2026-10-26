@@ -357,7 +357,8 @@ Over the relay a node places a sender in T1 from the estate record it applied (`
 The plan's draft and the inventory it is chosen from stay in the person's Fabric; only its organization part, what the
 person chose and their requests to the organization's administrators, leaves for that organization (OM-7, DEC-0129,
 [membership](docs/specification/membership.md#what-leaves-a-persons-fabric)). A project's entry is the estate revision
-the person's passkey signs, never part of the plan that leaves.
+the person's passkey signs, never part of the plan that leaves. The part that leaves is the **Adaptation plan
+(organization part)** below (DEC-0138).
 
 **Family**: The operator's agents: every agent placed on a machine of the operator's estate and the operator's own
 local sessions, which a callee recognises only by placing them in **T0** or **T1** (any process of the owner's OS account,
