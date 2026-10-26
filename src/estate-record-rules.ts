@@ -607,7 +607,8 @@ function organizationPins(value: JsonObject, flag: (instancePath: string, messag
     }
     // Only the opaque part is the pin's own: the fixed prefix would match a short estate id by chance.
     const opaquePart = typeof pin.iss === "string" ? pin.iss.replace(/^urn:fabric:context:/, "").toLowerCase() : "";
-    if (typeof value.estate === "string" && value.estate.length > 0 && opaquePart.includes(value.estate.toLowerCase())) {
+    // An estate id shorter than eight characters appears inside any random id by chance; the issuer's duty covers it.
+    if (typeof value.estate === "string" && value.estate.length >= 8 && opaquePart.includes(value.estate.toLowerCase())) {
       flag(`${at}/iss`, "a context issuer never contains the estate id (DEC-0128)");
     }
     const x = isObject(pin.root) ? pin.root.x : undefined;
