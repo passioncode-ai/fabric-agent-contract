@@ -132,7 +132,7 @@ describe("verifyRootRegistration (OX-2)", () => {
   });
 
   it("refuses a malformed body before anything else", () => {
-    for (const body of [null, { ...REG, type: "x" }, { ...REG, org: 1 }, { ...REG, org: "org-a" }, { ...REG, issuer: 1 }, { ...REG, root: "r" }, { ...REG, root: { ...REG.root, kid: 1 } }, { ...REG, root: { ...REG.root, x: 1 } }, { ...REG, root: { ...REG.root, x: "short" } }, { ...REG, root: { ...REG.root, kid: "bad kid!" } }, { ...REG, administrator: "a" },
+    for (const body of [null, { ...REG, type: "x" }, { ...REG, org: 1 }, { ...REG, org: "org-a" }, { ...REG, issuer: 1 }, { ...REG, root: "r" }, { ...REG, root: { ...REG.root, kid: 1 } }, { ...REG, root: { ...REG.root, x: 1 } }, { ...REG, root: { ...REG.root, x: "short" } }, { ...REG, root: { ...REG.root, kid: "bad kid!" } }, { ...REG, extra: 1 }, { ...REG, root: { ...REG.root, extra: 1 } }, { ...REG, root: { ...REG.root, kid: "" } }, { ...REG, administrator: "a" },
       // The administrator exactly as the first set's administrators must carry it, or the claim would buy a set that never verifies.
       strip(REG, "administrator"), { ...REG, administrator: strip(REG.administrator, "credentialId") }, { ...REG, administrator: { ...REG.administrator, origins: [] } },
       { ...REG, administrator: { ...REG.administrator, extra: 1 } }, { ...REG, administrator: { ...REG.administrator, publicKey: { ...REG.administrator.publicKey, d: "x" } } },

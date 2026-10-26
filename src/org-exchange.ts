@@ -138,9 +138,10 @@ export type RootRegistrationProblem = "malformed" | "wrong-org" | "root-register
  */
 export function verifyRootRegistration(
   body: unknown,
+  /** `registered`: a first key set under a root of this organization was accepted (OX-3), not merely a registration recorded. */
   ctx: { org: string; issuer: string; registered: boolean; claimValid: (claim: string) => boolean }
 ): { ok: true; root: OrgRoot; administrator: JsonObject } | { ok: false; problem: RootRegistrationProblem } {
-  if (!isObject(body) || body.type !== ROOT_REGISTRATION_TYPE || !isString(body.org) || !ORG.test(body.org) || !isString(body.issuer) || !isObject(body.root) ||
+  if (!isObject(body) || Object.keys(body).sort().join(",") !== "administrator,claim,issuer,org,root,type" || body.type !== ROOT_REGISTRATION_TYPE || !isString(body.org) || !ORG.test(body.org) || !isString(body.issuer) || !isObject(body.root) || Object.keys(body.root).sort().join(",") !== "kid,x" ||
     !isString(body.root.kid) || !OPAQUE.test(body.root.kid) || !isString(body.root.x) || !X.test(body.root.x) || !administratorOk(body.administrator) || !isString(body.claim) || !NONCE.test(body.claim)) {
     return { ok: false, problem: "malformed" };
   }

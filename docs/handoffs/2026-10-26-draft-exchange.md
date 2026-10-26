@@ -25,7 +25,8 @@ who signs it and come back signed (CT-156; request `1822d650`, thread `bd508780`
 - Round 2 (head `d2165354`): seam fail (the registration admitted an administrator credential and a root kid the first
   set can never carry, after which the claim is spent), product fail (the glossary and the module header still called
   every draft public). Fixed: the registration checks the credential with `administratorOk` and the kid as an opaque
-  id; both texts scope public reads to key sets.
+  id, and refuses a body or root with an extra member, as the schema does; both texts scope public reads to key sets.
+  The unit tier of round 2 found the same registration gap.
 
 ## Decisions
 
