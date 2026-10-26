@@ -48,6 +48,7 @@ move's step 6 and the window lease's reporting.
 - Round 7 (head `c6573bec`): unit and seam fail (the owed note landed on the Fabric's button row of the spec index,
   not the local channel's). Fixed: only the local channel row carries it. Product also failed on the same row; its non-blocking items
   (the glossary, DL-15's local path, `unknown-method`) were applied before round 8.
+- Round 8 (head `473668ee`): unit, seam and product pass. Their non-blocking findings are in CT-161.
 
 ## Decisions
 
