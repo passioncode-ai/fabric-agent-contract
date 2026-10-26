@@ -80,6 +80,7 @@ export const NOT_SWEPT: readonly string[] = [
   "memory.schema.json",
   "operator-channel-status.schema.json",
   "org-root-registration.schema.json",
+  "org-root.schema.json",
   "pipeline.schema.json",
   "repair-request.schema.json",
   "repair-result.schema.json",

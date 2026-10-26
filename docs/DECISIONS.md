@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0132` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0134` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -7932,3 +7932,38 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`, `vitest.config.ts`; backlog CT-156.
 - **Source:** CT-156; request `1822d650` (thread `bd508780`); fabric-workspace MD-14; DEC-0123 (open links), DEC-0127,
   DEC-0129; the vector root of `fixtures/vectors/org-membership.json`.
+
+### DEC-0133: the draft exchange's shared vectors, the root's answer, and a role is no authority
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). Additive, with one narrowing before any server serves the exchange: a root
+  registration whose issuer is over 261 characters is refused as `malformed`, as its schema already refuses it.
+- **Context:** DEC-0131's readings left the exchange with no vector file a server or Fabric can run, no schema for the
+  root's answer, and a registration check without the issuer's length cap (CT-158). Fabric answered DEC-0129's open
+  questions in ADR-0180 (thread `115ef7fb`, message `664b69ad`): it keeps the Ed25519 root per organization, and an
+  attestation's role never proves an administrator.
+- **Decision:**
+  1. **Vectors.** `fixtures/vectors/org-exchange.json`, written by `tools/vectors/org-exchange.ts`: draft digests,
+     `FAC-SEM-151`, accepting a signed key set and member list, and the root's registration, with whether the claim may
+     be checked at all. Every server of the exchange and every Fabric that registers a root runs it.
+  2. **The root's answer** `GET .../root` is `org-root.schema.json`: `{org, issuer, root: {kid, x}}`.
+  3. **The issuer's cap.** `verifyRootRegistration` refuses an issuer over 261 characters as `malformed`, as
+     `verifyOrgKeySet` and the schema read an issuer.
+  4. **OX-1's public material** names the administrators' public credentials, the owner's among them, never the claim.
+  5. **OL-6, a role is no authority.** An attestation's role never proves an administrator; the applied key set's
+     `administrators` does. No reader checks an attestation's role or status against the member list; only the relay
+     could match its subjects (CT-37).
+- **Why:** a port of the exchange is checked by bytes, not by reading TypeScript; the root's answer is what a member
+  pins, so it gets a schema; and a role that proved authority would let an issuer's online keys certify an
+  administrator, which DEC-0129 keeps with the root.
+- **Alternatives considered:** a `type` member on the root's answer (DEC-0131 fixed its shape without one, and a server
+  already answers it); reading a role against the list in Fabric (subjects are pairwise, CX-22).
+- **Compatibility:** additive but for item 3, which narrows a check no server runs yet (the first organization server's
+  N-3 is unmerged). `contractVersion` stays `0.1.0`. Fabric ADR-0180's release statement and root succession are
+  CT-159 and CT-160.
+- **Consequences / affects:** `schemas/org-root.schema.json` (new); `src/org-exchange.ts`; `tools/vectors/org-exchange.ts`,
+  `tools/vectors/run.ts`, `fixtures/vectors/org-exchange.json`; `docs/specification/membership.md` (header, the
+  exchange's header and routes, OX-1, OL-6, Not decided), `conformance.md`, `docs/DOCMAP.md`; fixtures;
+  `test/org-exchange.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`; backlog CT-158, CT-159,
+  CT-160.
+- **Source:** CT-158; Fabric ADR-0180 (fabric `1d49ed3b`; thread `115ef7fb`); DEC-0129, DEC-0131.

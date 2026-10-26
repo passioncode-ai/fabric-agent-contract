@@ -5,12 +5,15 @@ DEC-0127, DEC-0129, DEC-0131 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SE
 [`org-authority`](../../schemas/org-authority.schema.json), the exchange's
 [`org-key-set-draft`](../../schemas/org-key-set-draft.schema.json),
 [`org-authority-draft`](../../schemas/org-authority-draft.schema.json) and
-[`org-root-registration`](../../schemas/org-root-registration.schema.json), and the estate record's `organizations`
+[`org-root-registration`](../../schemas/org-root-registration.schema.json) and the root's answer
+[`org-root`](../../schemas/org-root.schema.json), and the estate record's `organizations`
 ([`estate-record`](../../schemas/estate-record.schema.json)) · code [`src/org-membership.ts`](../../src/org-membership.ts),
 [`src/org-authority.ts`](../../src/org-authority.ts) (with `orgRelayAdmissionSet`),
 [`src/org-exchange.ts`](../../src/org-exchange.ts) · vectors
 [`fixtures/vectors/org-membership.json`](../../fixtures/vectors/org-membership.json), written by
-[`tools/vectors/org-membership.ts`](../../tools/vectors/org-membership.ts)
+[`tools/vectors/org-membership.ts`](../../tools/vectors/org-membership.ts), and the exchange's
+[`fixtures/vectors/org-exchange.json`](../../fixtures/vectors/org-exchange.json), written by
+[`tools/vectors/org-exchange.ts`](../../tools/vectors/org-exchange.ts)
 
 A **membership attestation** says, for one reader, that one person is a member of one organization: the
 organization, a subject pairwise to that reader, a role, whether the membership is `active` or `ended`, and its
@@ -319,13 +322,20 @@ key, and well before `expiresAt`; an administrator signs it. Before it asks the 
 administrator, it has another administrator sign a fresh list, so the relay's admission set does not empty. Ending a membership drops the member from the next list, so
 the relay stops admitting their enrollments once that list is signed and applied, and within 7 days at the latest.
 
+**OL-6, a role is no authority** (DEC-0133, Fabric ADR-0180). An attestation's role never proves an administrator; the
+applied key set's `administrators` does. A reader reads an attestation's `owner` or `admin` as the issuer's statement,
+for display and routing, never as authority to sign or release anything. No reader checks an attestation's `role` or
+`status` against the member list: the list's subjects are pairwise to the relay's audience (OL-1) and an attestation's
+to its own reader (CX-22), so only the relay could match them, and how it does is the relay's handshake (CT-37).
+
 ## The draft exchange
 
 DEC-0131 (CT-156; the first organization server's request `1822d650`, thread `bd508780`) · schemas
 [`org-key-set-draft`](../../schemas/org-key-set-draft.schema.json),
 [`org-authority-draft`](../../schemas/org-authority-draft.schema.json),
-[`org-root-registration`](../../schemas/org-root-registration.schema.json) · code
-[`src/org-exchange.ts`](../../src/org-exchange.ts) · rule `FAC-SEM-151`
+[`org-root-registration`](../../schemas/org-root-registration.schema.json),
+[`org-root`](../../schemas/org-root.schema.json) · code [`src/org-exchange.ts`](../../src/org-exchange.ts) · vectors
+[`fixtures/vectors/org-exchange.json`](../../fixtures/vectors/org-exchange.json) (DEC-0133) · rule `FAC-SEM-151`
 
 A server drafts each key set and each member list; the owner's Fabric signs a key set with the root (OM-3), an
 administrator's Fabric signs a list with their passkey (OL-2). This is how a draft reaches the signer and the signature
@@ -334,7 +344,7 @@ comes back. Every route is under the issuer's origin, `{org}` being the organiza
 
 | Route | Answers |
 |---|---|
-| `GET /fabric/membership/v1/{org}/root` | `{org, issuer, root: {kid, x}}`, the root members pin (OM-2), once its first key set is accepted; `404 no-root` before |
+| `GET /fabric/membership/v1/{org}/root` | `{org, issuer, root: {kid, x}}` ([`org-root`](../../schemas/org-root.schema.json), DEC-0133), the root members pin (OM-2), once its first key set is accepted; `404 no-root` before |
 | `POST /fabric/membership/v1/{org}/root` | registers the root and the owner's administrator credential before the first key set (OX-2) |
 | `GET /fabric/membership/v1/{org}/key-set` | the last signed `org-key-set/1`; `404 no-signed-key-set` before the first |
 | `GET /fabric/membership/v1/{org}/key-set/draft` | the pending `org-key-set-draft/1`; `404 no-draft` when none waits |
@@ -345,7 +355,7 @@ comes back. Every route is under the issuer's origin, `{org}` being the organiza
 without `sig`, every member the root signs, exactly; `base` is the last signed set's `{revision, digest}`, or `null`
 before the first; `draft.revision` is one above `base` (1 with none); `digest` is SHA-256 of the root's signing input
 over `draft` (`keySetDraftDigest`). `FAC-SEM-151` holds the envelope to that. A key-set draft holds public material only (the
-signing keys' public halves, the administrators' public credentials, OM-7's owner and administrator rows), so the
+signing keys' public halves and the administrators' public credentials, the owner's among them; never the claim), so the
 key-set and root routes are read without a credential, and a draft is never served as a signed set. One draft waits at a time; a newer
 draft replaces it before it is signed.
 
@@ -447,14 +457,14 @@ its relay (OX-6).
 ## Not decided here
 
 - Losing the root: the owner's Fabric holds it, so its loss means a new pin by every member (OM-3), and every key set
-  waits on that Fabric being reachable; a recovery of the root, as DEC-0107 recovers a passkey, is not decided.
+  waits on that Fabric being reachable. Fabric ADR-0180 proposes a planned successor named in a key set the old root
+  signs and an optional second `recovery` key in the pin that signs only a successor statement; the contract decides
+  their shapes (CT-160).
 - How the person's Fabric sends the context's `iss` to the server for its entry (OM-7's row allows it; no message
   carries it yet), and how a relay is registered as an attestation audience for the subject OL-1 names (CT-37).
 - What a "reference" in the adaptation plan's OM-7 row is: its form must name nothing of the person's estate (DEC-0128);
   TP-03 defines it with Fabric.
 - The organization relay's handshake (OL-4): `auth.estate` and the `welcome` frame on an organization's relay (CT-37).
-- Whether a reader checks an attestation's `role` or `status` against the latest signed member list; until then the
-  list's role grants nothing anywhere but its own document.
 - Beyond the member list (DEC-0129): a quorum or a delay of administrators' signatures (Fabric ADR-0178 D8-c, R2); the
   `org-countersign/1` verifier; the organization's heartbeat and revocation delta; organization windows; members'
   allowances; a passkey root that signs key sets itself.
@@ -465,6 +475,9 @@ its relay (OX-6).
   issuer's and the reader's, beside OM-7's refresh row, which bounds what that exchange carries about the person.
 - A faster end than expiry (an organization's revocation delta with a `member` kind): additive, when a reader needs it.
 - What each role may do in a reader: the reader's. An administrator's signature to release a project from an
-  organization (MC-13) is not an attestation: Fabric ADR-0178 point 7 places it in Fabric, and how a member's estate
-  verifies an administrator's passkey over its revision, which today admits its own passkeys only, is not decided here.
+  organization (MC-13) is not an attestation, and never a signature inside the member's estate. Fabric ADR-0180
+  proposes a release statement an administrator's listed credential signs over a register challenge (as OL-2 signs a
+  list), naming the organization, the project by the reference it came in with and a rising revision; the member's
+  Fabric stops the project's OM-7 outflows on receipt and its person's passkey signs the revision that removes it. The
+  contract decides its shape (CT-159).
 - Attestation formats that carry a hardware identifier (OQ-0010).
