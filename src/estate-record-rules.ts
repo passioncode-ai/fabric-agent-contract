@@ -321,7 +321,9 @@ function keys(value: JsonObject, flag: Flag): void {
       if (contexts.has(entry.context)) flag(`${keyAt}/context`, `context ${show(entry.context)} has two hub keys on one machine`);
       contexts.add(entry.context);
       if (!pinned.has(entry.context)) flag(`${keyAt}/context`, `context ${show(entry.context)} is not an organization the record pins (DEC-0127)`);
-      const key = isObject(entry.key) ? entry.key : {};
+      // A key that is not an object is the schema's to refuse; nothing here reads it.
+      if (!isObject(entry.key)) return;
+      const key = entry.key;
       if (hubKids.has(key.kid)) flag(`${keyAt}/key/kid`, `hub key ${show(key.kid)} is certified twice: one kid per hub key, personal or per context`);
       hubKids.add(key.kid);
       if (hubKeys.has(key.x)) flag(`${keyAt}/key/x`, "one public key is certified as two hub keys: a context key is its own key");

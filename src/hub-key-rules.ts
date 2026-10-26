@@ -20,7 +20,15 @@ export interface AppliedRevision { revision: number; digest?: string }
  * delta's entries a node applied since the revision (DEC-0054, `deltaRevocations`). They revoke exactly as
  * `record.revocations` do.
  */
-export interface HubKeyOptions { extraRevocations?: readonly unknown[] }
+export interface HubKeyOptions {
+  extraRevocations?: readonly unknown[];
+  /**
+   * The context the token is in (DEC-0128): absent or `personal` reads each machine's personal `hubKey`; `org:<orgId>`
+   * reads only that context's hub keys (`machines[].contextHubKeys`) and only while the record pins the organization,
+   * so a context key never verifies a personal token and the personal key never an organization's.
+   */
+  context?: string;
+}
 
 /**
  * Why a `kid` is not trusted, as `error.data.detail`:
@@ -38,6 +46,8 @@ export type HubKeyVerdict =
   | { certified: false; fault: HubKeyFault; detail: HubKeyDetail };
 
 const isString = (value: unknown): value is string => typeof value === "string";
+/** An organization's context id (DEC-0082). */
+const ORG_CONTEXT = /^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 const isRevision = (value: unknown): value is number => Number.isSafeInteger(value) && (value as number) >= 1;
 const refused = (fault: HubKeyFault, detail: HubKeyDetail): HubKeyVerdict => ({ certified: false, fault, detail });
 
@@ -60,6 +70,10 @@ const clock = (at: unknown): number => (at instanceof Date ? at.getTime() : type
  * 5. the revision, or `options.extraRevocations`, revokes `hub-key <kid>`; no machine's `hubKey.kid` is `kid`, or two are; that machine's `hubKey.x` is
  *    not the string `x`; or the revision or `options.extraRevocations` revokes `machine <id>` of that machine →
  *    `kid-not-certified`. A revocation's `ref` is compared exactly, never as a string conversion.
+ *
+ * With `options.context` an organization's context (DEC-0128), step 5 reads that context's hub keys instead: a kid is
+ * certified only when exactly one machine lists it in `contextHubKeys` for that context, with that key, and the revision
+ * pins the organization. A context that is not a context id, or `personal` given as written, reads the personal keys.
  *
  * Otherwise the key is certified, for that machine, by that revision. Never throws.
  */
@@ -86,12 +100,22 @@ export function hubKeyCertified(record: unknown, kid: unknown, x: unknown, at: D
   const revocations = [...((record.revocations ?? []) as unknown[]), ...((extra ?? []) as unknown[])];
   const revokes = (kind: string, ref: unknown) => revocations.some((entry) => isObject(entry) && entry.kind === kind && entry.ref === ref);
   if (!isString(kid) || revokes("hub-key", kid)) return refused("token", "kid-not-certified");
-  const holders = (record.machines as unknown[]).filter((machine): machine is JsonObject => isObject(machine) && isObject(machine.hubKey) && machine.hubKey.kid === kid);
+  const context = options?.context;
+  const inOrg = isString(context) && ORG_CONTEXT.test(context);
+  // DEC-0128: an organization's token verifies only under that context's key, and only while the record pins it.
+  if (inOrg && !(record.organizations === undefined ? [] : Array.isArray(record.organizations) ? record.organizations : []).some((pin) => isObject(pin) && pin.org === context)) return refused("token", "kid-not-certified");
+  const keyOf = (machine: JsonObject): JsonObject | undefined => {
+    if (!inOrg) return isObject(machine.hubKey) ? machine.hubKey : undefined;
+    const entries = Array.isArray(machine.contextHubKeys) ? machine.contextHubKeys : [];
+    const entry = entries.find((item) => isObject(item) && item.context === context && isObject(item.key) && item.key.kid === kid);
+    return isObject(entry) ? (entry.key as JsonObject) : undefined;
+  };
+  const holders = (record.machines as unknown[]).filter((machine): machine is JsonObject => isObject(machine) && keyOf(machine)?.kid === kid);
   // Two machines under one kid break FAC-SEM-073; such a revision certifies neither.
   if (holders.length !== 1) return refused("token", "kid-not-certified");
   const machine = holders[0] as JsonObject;
   // A missing x never equals a missing x: the published key must be the certified one.
-  if (!isString(x) || (machine.hubKey as JsonObject).x !== x) return refused("token", "kid-not-certified");
+  if (!isString(x) || (keyOf(machine) as JsonObject).x !== x) return refused("token", "kid-not-certified");
   if (revokes("machine", machine.id)) return refused("token", "kid-not-certified");
   return { certified: true, machine: show(machine.id), revision: record.revision };
 }
@@ -102,8 +126,11 @@ export function hubKeyCertified(record: unknown, kid: unknown, x: unknown, at: D
  * read strictly (an unreadable one answers `no-clock`).
  */
 function hubKeyAnswer(value: JsonObject): Finding[] {
-  const extra = value.extraRevocations === undefined ? undefined : { extraRevocations: value.extraRevocations as unknown[] };
-  const verdict = hubKeyCertified(value.record, value.kid, value.x, new Date(strictTime(value.at)), value.applied as AppliedRevision | undefined, extra);
+  const options: HubKeyOptions = {
+    ...(value.extraRevocations === undefined ? {} : { extraRevocations: value.extraRevocations as unknown[] }),
+    ...(typeof value.context === "string" ? { context: value.context } : {})
+  };
+  const verdict = hubKeyCertified(value.record, value.kid, value.x, new Date(strictTime(value.at)), value.applied as AppliedRevision | undefined, options);
   const want = verdict.certified ? "certified" : verdict.detail;
   if (value.answer === want) return [];
   return [{

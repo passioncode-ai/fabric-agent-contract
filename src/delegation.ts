@@ -141,6 +141,9 @@ export interface VerifyDelegationOptions {
   /** Revocations in force beyond the revision's own: the revocation delta's entries applied since it (DEC-0054), or a
    * function returning them. */
   estateRevocations?: unknown;
+  /** The context this callee serves (DEC-0128): an organization's `org:<orgId>` makes DL-14 read that context's hub keys
+   * and pin, and `issuer` is then that pin's context issuer; absent or `personal`, the personal hub keys. */
+  estateContext?: string;
 }
 
 /** Where a callee records consumed approval ids. It MUST survive a restart for the approval's lifetime. */
@@ -273,7 +276,7 @@ const readableClock = (now: unknown): now is number => typeof now === "number" &
  * key must be certified by that revision. `undefined` when the check passes or does not run; else the refusal's fault
  * (the token's, or the trust source's: `issuer-unavailable`) and detail. A source that throws is unreadable, never a pass.
  */
-function estateRefusal(options: { estate?: unknown; estateApplied?: AppliedRevision; estateRevocations?: unknown }, kid: string, x: string, now: number): { issuer: boolean; detail: string } | undefined {
+function estateRefusal(options: { estate?: unknown; estateApplied?: AppliedRevision; estateRevocations?: unknown; estateContext?: string }, kid: string, x: string, now: number): { issuer: boolean; detail: string } | undefined {
   if (options.estate === undefined) return undefined;
   let record: unknown;
   let extra: unknown;
@@ -283,7 +286,10 @@ function estateRefusal(options: { estate?: unknown; estateApplied?: AppliedRevis
   } catch {
     return { issuer: true, detail: "estate-unreadable" };
   }
-  const verdict = hubKeyCertified(record, kid, x, now, options.estateApplied, extra === undefined ? undefined : { extraRevocations: extra as unknown[] });
+  const verdict = hubKeyCertified(record, kid, x, now, options.estateApplied, {
+    ...(extra === undefined ? {} : { extraRevocations: extra as unknown[] }),
+    ...(options.estateContext === undefined ? {} : { context: options.estateContext })
+  });
   // The clock was refused before row 1, so a verdict here is the token's or the trust source's.
   return verdict.certified ? undefined : { issuer: verdict.fault !== "token", detail: verdict.detail };
 }
