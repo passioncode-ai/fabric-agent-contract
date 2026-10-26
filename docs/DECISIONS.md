@@ -7723,6 +7723,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `organizationPin`, narrows a member no reader has adopted (DEC-0119: the release notes list it as a narrowing); which Fabric writes only once every reader of the record is pinned at or after (as
   DEC-0106, DEC-0107 and DEC-0127); new rules a sender runs on itself. Adoption: CT-122; a node adopts UE-2 only once the machines' report to the hub over
   the relay exists (CT-152), since DL-15, the hub move and the window leases read those reports.
+- **Annotated (2026-10-26, DEC-0134):** item 5's residual linkability gains one link: an operator that runs two of a
+  machine's relays (an estate's and an organization's, or two organizations') sees that machine's two connections
+  (devices.md What stays linkable; relay.md OR-5).
 - **Context:** the operator decided K-1 on 2026-10-15 (NET-2, DEC-0084): each organization enrollment of a machine gets
   keys of its own, so two organizations cannot link the machine (CX-22). The scope brief
   (`docs/evidence/specs/2026-10-24-ct122-unlinkable/brief.md`) listed twelve values two enrollments share today, and the
@@ -8088,11 +8091,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   unchanged; `welcome` has two schema variants.
 - **Consequences / affects:** `schemas/relay-frame.schema.json`; `src/relay.ts` (`SessionAdmission`);
   `docs/specification/relay.md` (The organization's relay, OR-1 to OR-5; the header and the member-list paragraph),
-  `membership.md` (OL-4, OL-6, OX-6, Who adopts it, Not decided), `conformance.md`, `CONTEXT.md` (Admission set,
-  Revocation delta), `revocation-delta.md`, `ceremonies.md` and `devices.md` (an estate relay's `welcome`), `docs/specification/README.md`, `docs/DOCMAP.md`, `devices.md` and `contexts.md` (What stays
-  linkable: an operator running two of a machine's relays sees its two connections), `docs/ux/scenarios.md` (SCN-049);
-  DEC-0047, DEC-0066, DEC-0129 and DEC-0133 annotated; `test/org-authority.test.ts`, `test/relay.test.ts`; backlog
-  DEC-0129 annotated (item 4 narrowed); CT-36, CT-37, CT-162, CT-163, CT-164; `machine-calls.md` (the adopters' table), `docs/ux/scenarios.md`, `docs/ux/flows.md` and `docs/ux/foundation.md` (the hub move's relay),
-  `schemas/revocation-delta.schema.json` and `src/revocation-delta.ts` (descriptions), `test/relay-rules.test.ts`;
-  the handoff.
+  `membership.md` (OL-4, OL-6, OX-6, Who adopts it, Not decided), `conformance.md`, `CONTEXT.md` (Relay, Admission
+  set, Revocation delta), `revocation-delta.md` and `ceremonies.md` (an estate relay's `welcome`), `devices.md` (an
+  estate relay's `welcome`; What stays linkable: an operator running two of a machine's relays sees its two
+  connections), `contexts.md` (the same), `machine-calls.md` (the adopters' table), `docs/specification/README.md`,
+  `docs/DOCMAP.md`, `docs/ux/scenarios.md` (SCN-049, the hub move), `docs/ux/flows.md` and `docs/ux/foundation.md`
+  (the hub move's relay); `schemas/revocation-delta.schema.json`, `src/revocation-delta.ts` and `src/org-authority.ts`
+  (descriptions); DEC-0047, DEC-0066, DEC-0128, DEC-0129 (item 4 narrowed) and DEC-0133 annotated;
+  `test/org-authority.test.ts`, `test/relay.test.ts`, `test/relay-rules.test.ts`; backlog CT-36, CT-37, CT-162,
+  CT-163, CT-164; the handoff.
 - **Source:** CT-37; DEC-0047, DEC-0066, DEC-0084, DEC-0128, DEC-0129; Fabric ADR-0180 point 4.

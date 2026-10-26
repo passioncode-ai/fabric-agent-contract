@@ -7,12 +7,14 @@ A compromised relay can delay, drop or count traffic. It cannot read a secret, f
 the recipient's checks. Decided in DEC-0047 and amended in place by DEC-0066 (nothing was deployed); the reference
 server is [passioncode-ai/relay](https://github.com/passioncode-ai/relay).
 
-The reference code is in five files:
+The reference code is in six files:
 - [`src/relay.ts`](../../src/relay.ts): admission, blob requests, message bodies and the close codes;
 - [`src/secret-envelope.ts`](../../src/secret-envelope.ts): the envelope;
 - [`src/p256.ts`](../../src/p256.ts): key validation and the low-S rule;
 - [`src/relay-vectors.ts`](../../src/relay-vectors.ts): the runner of the shared vectors (see [Shared vectors](#shared-vectors));
-- [`src/machine-report.ts`](../../src/machine-report.ts): the machines' report to their hub (DEC-0132).
+- [`src/machine-report.ts`](../../src/machine-report.ts): the machines' report to their hub (DEC-0132);
+- [`src/org-authority.ts`](../../src/org-authority.ts): an organization's relay's admission set from its member list
+  (`orgRelayAdmissionSet`, DEC-0129, DEC-0134).
 
 Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`, `p256.json`, `machine-report.json`).
 

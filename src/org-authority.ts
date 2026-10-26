@@ -224,7 +224,8 @@ export type OrgAdmissionResult =
  * and then the relay admits nobody (DEC-0047, fail closed). A candidate must be schema-valid and verify against the held
  * list's revision; without one, the held list is verified again under the key set applied now, so a list whose window
  * ended, or whose signer the root no longer certifies, admits nobody until a newer list verifies. A refused candidate
- * (`invalid`, or `unverified` with its problem) changes nothing: the caller keeps `held`. A held list that cannot be
+ * (`invalid`, or `unverified` with its problem) leaves the caller's `held` list, which it reads again under the newest
+ * key set it applied (relay.md OR-4 applies that set even when the list read with it is refused). A held list that cannot be
  * read back is `held-invalid`, and then the relay admits nobody. FAC-SEM-150 holds for every verified list, so every listed key is a P-256
  * point, each kid once.
  */
