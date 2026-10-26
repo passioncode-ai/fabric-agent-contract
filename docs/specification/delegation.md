@@ -251,8 +251,12 @@ machine word for `error.data.detail`, never the token. A verifier in another lan
   a callee that serves the context passes it to `hubKeyCertified` (`options.context`) and to `verifyDelegation`
   (`estateContext`, `issuer` the context's issuer), which trust the kid only from that context's keys and only while the
   record pins the organization. A context key never verifies a personal token, and the personal key never an
-  organization's. Heartbeats, delta entries and leases stay the personal key's alone. A dropped context key is revoked
-  as `hub-key` in the same revision (`FAC-SEM-114`), and it moves with the hub (`hubMove`).
+  organization's. Heartbeats, delta entries and leases stay the personal key's alone. A context key is held only by the
+  machine that holds the personal hub key (`FAC-SEM-073`), so a hub move re-keys every context with it: the new hub
+  certifies a new key per context and the old ones are revoked as `hub-key` in the same revision (`FAC-SEM-114`, which
+  also covers a context key dropped with its pin), and `hubMove` reports each. The hub publishes a key set per context
+  (never the personal key set, which would show every context's kid to every organization), and a service that serves
+  an organization's context declares that context's `iss` and key set in `auth.delegation` (DL-16).
 
 - **DL-15 — Rotation.** The issuer publishes a new key before it signs with it. It keeps the previous key
   published for at least one token lifetime plus the leeway after the last token it signed (660 s), and for 24
@@ -262,7 +266,8 @@ machine word for `error.data.detail`, never the token. A verifier in another lan
   [ceremonies](ceremonies.md#move-the-hub)), since a copy on a lost disk must not keep signing. Where callees read the estate record, a new key is also certified by a revision before the issuer signs
   with it: a callee whose applied revision does not certify the key refuses its tokens `kid-not-certified` (DL-14).
   To keep every callee answering, the hub certifies the new key while the old one stays certified, signs with the new
-  key once the check-ins it reads (`records.estateRecord.revision`, DEC-0053) show the certifying revision applied, and
+  key once its machines' reports (`records.estateRecord.revision`, DEC-0053, over the relay and never through an
+organization server, DEC-0128; CT-152) show the certifying revision applied, and
   revokes the old key in a later revision. A revision that certifies the new key and revokes the old one at once (as
   the rotation vector does) is valid, but callees on the older revision refuse the new key until they apply it.
 

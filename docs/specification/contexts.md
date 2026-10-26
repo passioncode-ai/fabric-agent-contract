@@ -286,8 +286,7 @@ The board rows are CT-51 and, for share registrations, CT-56.
 ## Not decided here
 
 - The rest of N20 (CT-38): CX-CON-04 (`person` and `organization` in place of `external`), CX-CON-03, CX-CON-05 and
-  CX-CON-07…10; CX-CON-06 (a `kid` and an `iss` per context), unblocked by the operator's NET-2 (DEC-0084) and stage 2
-  of RM-21.
+  CX-CON-07…10 (CX-CON-06 is DEC-0128's).
 - A context on a project, a session or an event (the rest of CX-CON-01). Who fixes a session to a context is the host's
   (Fabric's CX-FAB-08).
 - Whether a share grant's `audience` names the placed agent: `audience` is an agent id and a placement names an

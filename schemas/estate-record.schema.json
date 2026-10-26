@@ -339,7 +339,7 @@
       "properties": {
         "id": {
           "$ref": "activity-common.schema.json#/$defs/opaqueId",
-          "description": "The device id it enrolled with (DEC-0031); no human name."
+          "description": "The machine's own opaque id in the estate, never an organization enrollment's device.id (DEC-0128 UE-1); no human name."
         },
         "deviceKeys": {
           "type": "array",

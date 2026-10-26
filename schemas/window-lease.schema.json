@@ -48,7 +48,7 @@
     },
     "machine": {
       "$ref": "activity-common.schema.json#/$defs/opaqueId",
-      "description": "The device id of the one machine whose meter holds this lease (DEC-0031, estate-record machines[].id)."
+      "description": "The estate id of the one machine whose meter holds this lease (estate-record machines[].id; never an organization enrollment's device.id, DEC-0128)."
     },
     "scope": {
       "type": "string",

@@ -53,11 +53,18 @@ function outboundCheckIn(value: JsonObject, flag: Flag): void {
   }
 }
 
-/** FAC-SEM-149 on an answer an organization server is about to send: no estate document (each names the estate). */
+/** Whether a record member holds a document that names an estate (an estate's heartbeat, delta page or lease). */
+const namesEstate = (item: unknown): boolean =>
+  Array.isArray(item) ? item.some(namesEstate) : isObject(item) && (Object.hasOwn(item, "estate") || Object.values(item).some((inner) => Array.isArray(inner) && inner.some(namesEstate)));
+
+/**
+ * FAC-SEM-149 on an answer an organization server is about to send: no estate document. Only a document that names an
+ * estate is refused, so an organization's own records (its leases once organization windows exist) stay allowed.
+ */
 function outboundResponse(value: JsonObject, flag: Flag): void {
   const records = isObject(value.response) && isObject(value.response.records) ? value.response.records : {};
   for (const name of ESTATE_RECORDS) {
-    if (Object.hasOwn(records, name)) flag(`/response/records/${name}`, `an organization's answer carries none of the estate's documents: ${name} names the person's estate (DEC-0128)`);
+    if (Object.hasOwn(records, name) && namesEstate(records[name])) flag(`/response/records/${name}`, `an organization's answer carries none of the estate's documents: this ${name} names the person's estate (DEC-0128)`);
   }
 }
 

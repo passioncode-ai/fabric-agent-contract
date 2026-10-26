@@ -203,11 +203,12 @@ entries, so its sequence is the anchor's sequence (0 without one) plus the index
 
 ## The organization
 
-v4 §7 also gives an organization a heartbeat signed by its own timestamp key, and records valid 7 days; DEC-0053's
-check-in, which an organization server receives, carries it. Where an organization pins that key (`org-authority/1`,
+v4 §7 also gives an organization a heartbeat signed by its own timestamp key, and records valid 7 days; an
+organization's own heartbeat would travel in DEC-0053's check-in, which an organization server receives. Where an organization pins that key (`org-authority/1`,
 decided with CT-122 and CT-37; a role in DEC-0031's key set; or a role in `org-key-set/1`, which OM-3 would have to widen, DEC-0127) is not decided, so this version defines the estate's documents only: every
 document names its `estate`. An organization's documents join additively, with their own scope member and key, once
-that record exists; until then a device's `records.heartbeat` reports its estate's heartbeat.
+that record exists. The estate's heartbeat never goes to an organization (DEC-0128 UE-2): a device reports it to its hub
+over the relay (CT-152).
 
 ## Semantic rules
 

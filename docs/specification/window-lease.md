@@ -30,7 +30,7 @@ meter's owner, on 2026-10-12 (its `docs/design/METER.md`, sections M3 and M4). T
 | `sequence` | rises with every lease the hub issues one machine for one scope, window and period ([one lease per slot](#one-lease-per-slot)) |
 | `estate` | the estate whose record certifies the signing hub key |
 | `estateRevision` | the estate-record revision the hub followed; a machine that applies an earlier one refuses the lease until it has caught up |
-| `machine` | the device id of the one machine whose meter holds the lease (DEC-0031; `machines[].id` in the estate record) |
+| `machine` | the estate id of the one machine whose meter holds the lease (`machines[].id` in the estate record; never an organization enrollment's `device.id`, DEC-0128) |
 | `scope` | whose window: `estate` (L0), `project:<id>` (L1) or `grant:<id>#<revision>`; v4 leases only `estate`, and the field is kept so a later version needs no new type |
 | `window` | `day`, `week` or `month`: the spend policy's calendar windows in UTC, a week starting on Monday (DEC-0038) |
 | `period` | the window instance ([the window instance](#the-window-instance)) |
@@ -104,7 +104,8 @@ overrun is at most one call's error per meter (v4 Path 5 step 1).
 
 ## Reporting
 
-A meter reports each lease it holds in its check-in, `records.leases[]`: `{leaseId, expiresAt, spent}` (DEC-0053's
+A meter reports each lease it holds to its hub, `records.leases[]` (in a report over the relay, never in a check-in to an
+organization server, DEC-0128 UE-2; the report message is CT-152): `{leaseId, expiresAt, spent}` (DEC-0053's
 names; `spent` is this decision's, optional and additive). `spent` is an upper bound on what the meter spent in the
 lease's window instance: settled receipts plus open reservations, a decimal string.
 
@@ -122,8 +123,9 @@ counts what was spent. A machine's own earlier leases are what its new lease rep
 lease a machine is the window's limit less what every **other** machine holds; a shrunk share frees its difference only
 once the larger lease expires or is reported.
 
-A lease reaches its machine unchanged: an organization server hands it in the check-in response's `records.leases`,
-whose items are this schema; the relay carries one from the hub's machine as a message (DEC-0047). The transport adds
+A lease reaches its machine unchanged: the relay carries it from the hub's machine as a message (DEC-0047). An estate's
+lease never travels through an organization server (DEC-0128 UE-2); a check-in response's `records.leases`, whose items
+are this schema, carries an organization's own leases once organization windows exist. The transport adds
 nothing and decides nothing.
 
 ## The verifier

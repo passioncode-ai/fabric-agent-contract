@@ -280,7 +280,8 @@ export const validDeviceKey = (key: JsonObject): boolean => {
  * FAC-SEM-073: every key is usable — a machine has exactly one `<id>#sig` key and at most one `#kem` (DEC-0053), each
  * named by the machine and its role, valid for its algorithm and used in one role only; machine ids and hub kids are
  * unique, and a hub key is of full order; every passkey's public key is valid and named once. A context hub key (DEC-0128)
- * is unique among every hub key of the record, of full order, once per context on its machine, and in a pinned context.
+ * is unique among every hub key of the record, of full order, once per context on its machine, in a pinned context, and
+ * held only by a machine that holds the personal hub key.
  */
 function keys(value: JsonObject, flag: Flag): void {
   const pinned = new Set<unknown>(list(value.organizations).map((pin) => pin.org));
@@ -316,6 +317,8 @@ function keys(value: JsonObject, flag: Flag): void {
     // DEC-0128: a context's hub key is as unique as the personal one, across every hub key of the record, and belongs to a
     // pinned organization, so a token in that context verifies only under its own context's key.
     const contexts = new Set<unknown>();
+    // A context's key lives with the personal hub key, so a hub move carries every context's key with it (DL-15).
+    if (list(machine.contextHubKeys).length > 0 && !isObject(machine.hubKey)) flag(`${at}/contextHubKeys`, "a context's hub key is held only by the machine that holds the personal hub key (DEC-0128)");
     indexed(machine.contextHubKeys).forEach(([entry, c]) => {
       const keyAt = `${at}/contextHubKeys/${c}`;
       if (contexts.has(entry.context)) flag(`${keyAt}/context`, `context ${show(entry.context)} has two hub keys on one machine`);

@@ -73,6 +73,10 @@ describe("context hub keys in the record's rules (DEC-0128)", () => {
     expect(codes("estate-record", twice([{ context: ORG, key: { ...CONTEXT_KEY, x: PERSONAL_KEY.x } }]))).toEqual(["FAC-SEM-073"]);
     expect(evaluateSemanticRules("estate-record", twice([{ context: ORG, key: { ...CONTEXT_KEY, x: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" } }])).map((finding) => finding.message).join(" ")).toContain("small order");
     expect(codes("estate-record", twice([{ context: ORG, key: "none" }]))).toEqual([]);
+    // A context key lives with the personal hub key, so the hub move carries it.
+    const { hubKey: _hub, ...withoutHub } = hubMachine;
+    const elsewhere = redigest({ ...RECORD, machines: (RECORD.machines as Json[]).map((machine) => (machine.id === hubMachine.id ? withoutHub : machine)) });
+    expect(evaluateSemanticRules("estate-record", elsewhere).map((finding) => finding.message).join(" ")).toContain("only by the machine that holds the personal hub key");
   });
 
   it("revokes a dropped or replaced context key in the same revision (FAC-SEM-114)", () => {
@@ -120,6 +124,10 @@ describe("unlinkable enrollments (DEC-0128 FAC-SEM-148, FAC-SEM-149)", () => {
     expect(nodeEnrollmentRules("node-enrollments", { enrollments: [{ ...one, kids: "d-1#sig", deviceId: 7 }, { ...two, kids: [3] }] })).toEqual([]);
     expect(nodeEnrollmentRules("check-in-outbound", { checkIn: "x" })).toEqual([]);
     expect(nodeEnrollmentRules("check-in-response-outbound", {})).toEqual([]);
+    // An organization's own records name no estate and pass; one nested under a page still names it.
+    expect(nodeEnrollmentRules("check-in-response-outbound", { response: { records: { leases: [{ leaseId: "l-1", scope: "org:org-a" }] } } })).toEqual([]);
+    expect(nodeEnrollmentRules("check-in-response-outbound", { response: { records: { revocationDelta: { entries: [{ estate: "e-1" }] } } } })?.map((finding) => finding.code)).toEqual(["FAC-SEM-149"]);
+    expect(nodeEnrollmentRules("check-in-response-outbound", { response: { records: { heartbeat: "x" } } })).toEqual([]);
     expect(nodeEnrollmentRules("another", {})).toBeUndefined();
   });
 });

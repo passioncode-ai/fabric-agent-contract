@@ -83,7 +83,8 @@ DEC-0063). No user handle is recorded.
 
 ## Machines
 
-A machine is a device enrolled in the estate, by its device `id` (DEC-0031) and never by a human name. This departs from
+A machine is a device enrolled in the estate, by its own opaque `id` in the estate (never an organization enrollment's
+`device.id`, DEC-0128 UE-1) and never by a human name. This departs from
 v4 §3, whose *Machine* has a human name ("GPU box"): the name a person sees is the node's and Project Observatory's,
 kept outside the signed record, so the record carries no label a person chose:
 
@@ -94,7 +95,8 @@ kept outside the signed record, so the record carries no label a person chose:
 - **`hubKey`** — the certificate of the hub's `kid` on this machine: the passkey-signed record binds this `kid` and
   public key to this machine. In a personal estate the hub runs on the always-on machine under an Ed25519 key of its
   own, never the machine's `#sig` key (the operator's NET-3, DEC-0084, [ceremonies](ceremonies.md#who-holds-which-key)). It has the shape of a key in the estate's key set (`delegation-jwks`, DEC-0039) and names
-  its `alg`; one `kid` per machine (v4 §3), never certified for two machines, never of small order (`FAC-SEM-073`). A
+  its `alg`; one personal `kid` per machine (v4 §3), plus one per organization context it holds (DEC-0128), never certified
+for two machines, never of small order (`FAC-SEM-073`). A
   delegation verifier that reads the estate record trusts a token's `kid` only while the revision it reads certifies
   it — a revision `verifyEstateRecord` accepted, not lower than the highest its machine applied (DL-14) — and refuses otherwise with the codes of
   [DL-14](delegation.md#keys-publication-and-rotation) (`hubKeyCertified`, `FAC-SEM-081`, DEC-0060).
@@ -280,7 +282,8 @@ keys are DEC-0053's.
   reads a revision that carries a machine's `profile` only once pinned at or after DEC-0106, and one that carries
   `deltaAnchor` only once pinned at or after DEC-0107, and one that carries `organizations` only once pinned at or after
   DEC-0127, which also adds `org-membership.schema.json` and `entitlement.schema.json` to the record schema's closure, so
-  a reader that vendors the schema vendors those two with it; Fabric writes none of them before ([machine calls](machine-calls.md#compatibility),
+  a reader that vendors the schema vendors those two with it, and one that carries `iss` or `contextHubKeys` only once
+  pinned at or after DEC-0128; Fabric writes none of them before ([machine calls](machine-calls.md#compatibility),
   [ceremonies](ceremonies.md#move-the-hub)).
 
 ## Privacy
@@ -295,8 +298,8 @@ records no use. A credential's id is an opaque handle.
 - Fabric's decision D3 is settled for the personal estate by the operator's NET-3 (2026-10-15, DEC-0084): the passkey
   signs every revision, the hub holds a private key of its own — an Ed25519 hub key certified as `hubKey`, not the
   machine's `#sig` key — and every machine keeps its own device keys. The hub key stays Ed25519 until Fabric's D2. The
-  estate's fingerprint and the enrollment ceremonies are [ceremonies](ceremonies.md)'s. An organization's keys (Fabric
-  D8, CX-CON-06) stay open.
+  estate's fingerprint and the enrollment ceremonies are [ceremonies](ceremonies.md)'s. An organization's own keys beyond its membership root
+  (DEC-0127) and a context's hub keys (DEC-0128) stay open (Fabric D8, `org-authority/1`).
 - A fork: two revisions with one number from one parent, signed by two listed passkeys. A machine accepts only the one
   whose `parent` is the digest it holds, and its check-in may report that revision's `digest` beside the number
   (`records.estateRecord.digest`, DEC-0056), so a receiver tells the two apart; what a receiver does on seeing a fork is

@@ -581,11 +581,17 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   `records` (`estateRecord`, `heartbeat`, `revocationDelta`, `leases`), and its answer carries none of the estate's
   documents, each of which names the estate. `FAC-SEM-149` is the sender's duty: a node checks what it is about to send
   (kind `check-in-outbound`), an organization server what it is about to answer (`check-in-response-outbound`). A
-  receiver ignores the members and never refuses a check-in for them, so a node pinned before still checks in; the hub
-  reads them on the personal channel. The members stay in the schema for an organization's own records later.
+  receiver ignores the members and never refuses a check-in for them, so a node pinned before still checks in. They
+  travel on the estate's own channel instead: the relay (DEC-0047), which carries the hub's heartbeats, delta pages and
+  leases unchanged and the machines' reports back to the hub, and the local channel on one machine. How a machine
+  reports `records` to its hub over the relay (a report message) is CT-152. The members stay in the schema for an
+  organization's own records later; the response rule refuses only documents that name an estate.
 - **UE-3, independent schedules.** Each enrollment schedules its check-ins on its own, with jitter (SHOULD), so their
   timing does not pair them.
 - **What stays linkable, named.** Low-entropy values (`agent.version`, `components`, `platform`, `protocols`);
+  an organization server keeps its device and key lookups per organization (`FAC-SEM-044`'s "device on record" is its
+  own record, so one server hosting two organizations scopes it per organization), and each enrollment's `sequenceNum`
+  is its own (UE-1); a token's `project`, `task` and actor ids in an organization's context are that context's;
   coding-agent versions and the hook count in a mode `C` node summary (DEC-0118); an agent the person shares into two
   organizations shows the same `agentRef` (the person's own choice); the relay operator reads `org:<orgId>` in the estate
   record until per-context relay sessions (the operator's questions 1 to 4, taken at their defaults). A stolen machine:
