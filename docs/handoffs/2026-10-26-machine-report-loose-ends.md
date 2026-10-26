@@ -37,6 +37,9 @@ question to CT-172.
 
 ## Open
 
+- Rounds 1 to 4 each failed on one tier; round 5 passed on all three (unit, seam, product), its non-blocking findings
+  filed in CT-172. A sixth clean round is the finish line.
+
 - Readings: rounds 1 to 2 or more until two clean rounds in a row.
 - Merge after DEC-0138 (PR #212). Merging `origin/main` in once #212 lands conflicts in `docs/DECISIONS.md` (DEC-0138
   before DEC-0139), `docs/backlog.md` (CT-169, CT-171, CT-172 in id order) and `docs/handoffs/README.md` (DEC-0139's row
