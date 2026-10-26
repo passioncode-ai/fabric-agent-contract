@@ -7469,7 +7469,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `call.mandate`); a behaviour rule a callee adopts at its next pin. Adoption: CT-149. Amended by DEC-0126 (2026-10-26):
   a relay of the operator's approval from one of their own Projects or sessions is accepted, and `source` names where
   the words were said.
-- **Annotated (2026-10-26, CT-149):** `fixtures/vectors/mandate.json` gains a `handOn` group (15 cases): the mandate an
+- **Annotated (2026-10-26, CT-149):** `fixtures/vectors/mandate.json` gains a `handOn` group (19 cases): the mandate an
   agent sends when it calls the next one, or the problem that stops it, so a leading agent's port (the adapter's kits,
   FAA-131) checks MD-2 as a callee checks MD-3 to MD-5. No rule changes; the existing `cases` are unchanged.
 - **Context:** the operator decided on 2026-10-25 that their mandate goes with the task: an agent leading the

@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for the operator's mandate, mandate/1 (DEC-0125, MD-1 to MD-6), written by tools/vectors/mandate.ts, never by hand. mandateCovers({mandate, tier, now, self, callerAgent?, call: {capability, action?, effect, spendUsd?, project?}}) answers {ignored: mandate-at-t2} for a T2 caller (its mandate changes nothing); {ok: false, code: decision-invalid, data: {detail}} for a document that is not the schema's, stands more than 7 days, or whose chain goes back in time, repeats an agent or exceeds four (mandate-malformed), a hand-over that widens a list, the effects or the per-call ceiling or drops one (mandate-widened), a chain that does not end in self, or, when the callee authenticated its caller's agent id (callerAgent), does not name it before self (mandate-not-for-this-call), one given more than 60 s after the clock (mandate-early) or past its expiry (mandate-expired); {ok: false, code: operator-decision-required, data: {detail: outside-mandate: <action|capability|effect|spend|project>, estimateUsd?, perCallMaxUsd?}} for a valid one that does not cover the call, naming the first part not covered in that order; otherwise {ok: true, recordAs: {by: operator, via: mandate, task, chain, source?}}, source being where the operator said the words when the mandate carries it (DEC-0126 OA-6). The scope in force is the last chain entry's that names one, else the mandate's. A relayed action is covered when the scope's actions list it, or, with no actions listed, its capabilities include its tool; change-policy is never covered (AP-5); an effect beyond draft needs the call named, a relayed action by actions or capabilities and any other call by capabilities; with perCallMaxUsd the call's own estimate must exist and be within it, without it the money limits decide. {fault} is the callee's own and never sent. `handOn`: handOn({mandate, callee, at, narrower?}) answers {mandate} the agent sends with its call, the chain gaining {agent: callee, at, scope: narrower?} (MD-2), or {refused: mandate-widened} for a narrower scope that asks for more than the scope in force (a list the holder was not given or dropped, an effect above its ceiling read as a grant's, a higher or dropped per-call ceiling), or {refused: mandate-malformed} for a step back in time or at or after expiresAt, an agent already in the chain or a fifth; source travels unchanged.",
+  "about": "Vectors for the operator's mandate, mandate/1 (DEC-0125, MD-1 to MD-6), written by tools/vectors/mandate.ts, never by hand. mandateCovers({mandate, tier, now, self, callerAgent?, call: {capability, action?, effect, spendUsd?, project?}}) answers {ignored: mandate-at-t2} for a T2 caller (its mandate changes nothing); {ok: false, code: decision-invalid, data: {detail}} for a document that is not the schema's, stands more than 7 days, or whose chain goes back in time, repeats an agent or exceeds four (mandate-malformed), a hand-over that widens a list, the effects or the per-call ceiling or drops one (mandate-widened), a chain that does not end in self, or, when the callee authenticated its caller's agent id (callerAgent), does not name it before self (mandate-not-for-this-call), one given more than 60 s after the clock (mandate-early) or past its expiry (mandate-expired); {ok: false, code: operator-decision-required, data: {detail: outside-mandate: <action|capability|effect|spend|project>, estimateUsd?, perCallMaxUsd?}} for a valid one that does not cover the call, naming the first part not covered in that order; otherwise {ok: true, recordAs: {by: operator, via: mandate, task, chain, source?}}, source being where the operator said the words when the mandate carries it (DEC-0126 OA-6). The scope in force is the last chain entry's that names one, else the mandate's. A relayed action is covered when the scope's actions list it, or, with no actions listed, its capabilities include its tool; change-policy is never covered (AP-5); an effect beyond draft needs the call named, a relayed action by actions or capabilities and any other call by capabilities; with perCallMaxUsd the call's own estimate must exist and be within it, without it the money limits decide. {fault} is the callee's own and never sent. `handOn`: handOn({mandate, callee, at, narrower?}) answers {mandate} the agent sends with its call, the chain gaining {agent: callee, at, scope: narrower?} (MD-2), or the problem FAC-SEM-144 finds in the resulting document: {refused: mandate-widened} for a narrower scope that asks for more than the scope in force (an entry of a list the scope in force does not hold, a list it holds that is dropped, an effect outside its ceiling's closure as a grant's, a higher or dropped per-call ceiling; adding a list the scope in force has none of narrows it), or {refused: mandate-malformed} for a result that is not the schema's, a step back in time (an equal time is in order) or at or after expiresAt, an agent already in the chain or a fifth; source travels unchanged.",
   "cases": [
     {
       "name": "the operator's words with no amount: the paid research is covered, the money limits decide its spend",
@@ -2606,6 +2606,262 @@
       }
     },
     {
+      "name": "the same scope again: equal is within",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z",
+              "scope": {
+                "capabilities": [
+                  "research.run"
+                ],
+                "effects": [
+                  "charge"
+                ],
+                "perCallMaxUsd": 5,
+                "projects": [
+                  "example-site"
+                ]
+              }
+            }
+          ]
+        },
+        "callee": "example-crawler",
+        "at": "2026-10-26T10:06:00Z",
+        "narrower": {
+          "capabilities": [
+            "research.run"
+          ],
+          "effects": [
+            "charge"
+          ],
+          "perCallMaxUsd": 5,
+          "projects": [
+            "example-site"
+          ]
+        }
+      },
+      "expected": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z",
+              "scope": {
+                "capabilities": [
+                  "research.run"
+                ],
+                "effects": [
+                  "charge"
+                ],
+                "perCallMaxUsd": 5,
+                "projects": [
+                  "example-site"
+                ]
+              }
+            },
+            {
+              "agent": "example-crawler",
+              "at": "2026-10-26T10:06:00Z",
+              "scope": {
+                "capabilities": [
+                  "research.run"
+                ],
+                "effects": [
+                  "charge"
+                ],
+                "perCallMaxUsd": 5,
+                "projects": [
+                  "example-site"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "adding a list the holder has none of narrows it (a list left out means any)",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z",
+              "scope": {
+                "capabilities": [
+                  "research.run"
+                ],
+                "effects": [
+                  "charge"
+                ],
+                "perCallMaxUsd": 5,
+                "projects": [
+                  "example-site"
+                ]
+              }
+            }
+          ]
+        },
+        "callee": "example-crawler",
+        "at": "2026-10-26T10:06:00Z",
+        "narrower": {
+          "capabilities": [
+            "research.run"
+          ],
+          "effects": [
+            "charge"
+          ],
+          "perCallMaxUsd": 5,
+          "projects": [
+            "example-site"
+          ],
+          "actions": [
+            "approve-draft"
+          ]
+        }
+      },
+      "expected": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z",
+              "scope": {
+                "capabilities": [
+                  "research.run"
+                ],
+                "effects": [
+                  "charge"
+                ],
+                "perCallMaxUsd": 5,
+                "projects": [
+                  "example-site"
+                ]
+              }
+            },
+            {
+              "agent": "example-crawler",
+              "at": "2026-10-26T10:06:00Z",
+              "scope": {
+                "capabilities": [
+                  "research.run"
+                ],
+                "effects": [
+                  "charge"
+                ],
+                "perCallMaxUsd": 5,
+                "projects": [
+                  "example-site"
+                ],
+                "actions": [
+                  "approve-draft"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
       "name": "at the same second as the step before",
       "input": {
         "mandate": {
@@ -2950,7 +3206,7 @@
       }
     },
     {
-      "name": "an effect above the holder's ceiling widens",
+      "name": "an effect outside the holder's ceiling (its closure, as a grant's) widens",
       "input": {
         "mandate": {
           "kind": "mandate/1",
@@ -3005,6 +3261,69 @@
           "effects": [
             "charge",
             "publish"
+          ],
+          "perCallMaxUsd": 5,
+          "projects": [
+            "example-site"
+          ]
+        }
+      },
+      "expected": {
+        "refused": "mandate-widened"
+      }
+    },
+    {
+      "name": "dropping the capabilities list widens (no list means every capability)",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z",
+              "scope": {
+                "capabilities": [
+                  "research.run"
+                ],
+                "effects": [
+                  "charge"
+                ],
+                "perCallMaxUsd": 5,
+                "projects": [
+                  "example-site"
+                ]
+              }
+            }
+          ]
+        },
+        "callee": "example-crawler",
+        "at": "2026-10-26T10:06:00Z",
+        "narrower": {
+          "effects": [
+            "charge"
           ],
           "perCallMaxUsd": 5,
           "projects": [
@@ -3134,7 +3453,71 @@
       }
     },
     {
-      "name": "at or after the mandate's expiry",
+      "name": "a narrower scope that is not the schema's (no effects)",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z",
+              "scope": {
+                "capabilities": [
+                  "research.run"
+                ],
+                "effects": [
+                  "charge"
+                ],
+                "perCallMaxUsd": 5,
+                "projects": [
+                  "example-site"
+                ]
+              }
+            }
+          ]
+        },
+        "callee": "example-crawler",
+        "at": "2026-10-26T10:06:00Z",
+        "narrower": {
+          "capabilities": [
+            "research.run"
+          ],
+          "effects": [],
+          "perCallMaxUsd": 5,
+          "projects": [
+            "example-site"
+          ]
+        }
+      },
+      "expected": {
+        "refused": "mandate-malformed"
+      }
+    },
+    {
+      "name": "at the mandate's expiry (expiresAt itself is already past)",
       "input": {
         "mandate": {
           "kind": "mandate/1",
