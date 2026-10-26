@@ -53,8 +53,9 @@ configurations are not contract documents; the adapter checks them.
 The profile MUST declare:
 
 - A2A version `1.0` for contract 0.1.0, in the member `protocolVersion`;
-- an HTTPS Agent Card URL, normally `/.well-known/agent-card.json`; a [service](service.md#a2a-agent-card) names its
-  card in its well-known document's `surfaces.a2a` (DEC-0122);
+- an HTTPS Agent Card URL, normally `/.well-known/agent-card.json`, the card a peer outside the computer reads; a
+  [service](service.md#a2a-agent-card) also names its card in its well-known document's `surfaces.a2a`, and a local
+  service's card for peers on the same computer is on its loopback origin (DEC-0122);
 - the exact Agent Card skill IDs used to satisfy Fabric capabilities;
 - supported binding (`REST`, `JSON-RPC` or `gRPC`) and optional streaming/push;
 - task-state mapping and cancellation behavior — a host-side expectation of the A2A peer, not a manifest field (DEC-0064);

@@ -7276,26 +7276,35 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the card takes the token, how its callers are authenticated, or how a Fabric fact rides in it. The same gap was
   recorded on 2026-10-11 as CON-OE-06 (`docs/evidence/specs/2026-10-11-board-waves/findings/owed-decisions.json`).
 - **Decision:**
-  1. `surfaces.a2a` `{path, protocolVersion}` is an optional member of the well-known document's `surfaces`: `path` the
+  1. `surfaces.a2a` `{path, protocolVersion}` is an optional member of the well-known document's `surfaces`, which a
+     service that serves an Agent Card SHOULD carry: `path` the
      public card's path on the service origin (normally `/.well-known/agent-card.json`, A2A 1.0 §8.2),
      `protocolVersion` `1.0`, the version the card's interfaces expose (A2A 1.0 §4.4.6). The card names its interfaces,
      bindings and security schemes; the member only says where it is.
   2. On a local placement the public card answers without authentication, as the well-known document does, with the
-     Host and Origin checks. On a remote placement it MAY answer without the token. On either it carries no secret and
-     no member of the well-known document about the running process (build, pid, status, tiles, the degraded list),
-     which are what DEC-0109 keeps behind the token.
-  3. A call on the card's interfaces is authenticated as a call on the MCP surface is (`surfaces.mcp.auth`,
-     `auth.delegation`, DEC-0024, DEC-0039); an A2A interface never accepts a credential the MCP surface refuses. The
+     Host and Origin checks, and its interface URLs are on the loopback origin (`http://127.0.0.1:<port>`) for peers
+     on the same computer. A2A asks for HTTPS in production (A2A 1.0 §4.4.6, §7.1); a loopback origin is unreachable
+     from outside the computer, so the contract admits it there and nowhere else. A service offered to others serves
+     the card its outside peers read at its `https` `peer.endpoint` (DEC-0061); a remote placement serves it on its
+     `https` origin and MAY answer there without the token. On every placement the public card carries no secret and
+     no member of the well-known document about the running process (build, pid, status, tiles, the degraded list);
+     it discloses the service's name and skills, which on a remote placement is the one exception, by the service's
+     choice, to what DEC-0109 keeps behind the token.
+  3. A peer never holds the descriptor's token (DL-12, DEC-0024, DEC-0061): an A2A interface MUST NOT accept it and the
+     card's `securitySchemes` MUST NOT name it. A service authenticates A2A callers with credentials of its own or with
+     the estate's delegation tokens (`auth.delegation`, DEC-0039), with or without an MCP surface, and the
      authenticated extended card (`capabilities.extendedAgentCard`, `GetExtendedAgentCard`, A2A 1.0 §4.4.3, §5.3)
-     requires that credential on every placement.
+     requires one of them on every placement. A host and a probe never call an A2A interface with the descriptor's
+     token and never report its refusal as nonconformance.
   4. An extension the card declares for a Fabric fact (limits, load) carries `required: false` (A2A 1.0 §4.4.4), so a
      peer that does not know it still calls, and names no person, caller or prompt. The load report (DEC-0104) stays
      what a host reads; this decision fixes no extension URI.
   5. An `ai-catalog.json` entry (MCP's SEP-2127) is not part of `fabric-service/0.1`: it is MCP-side discovery, and the
      contract takes it when an MCP revision it pins carries it. The pinned revision is `2026-07-28`.
 - **Why:** A2A already defines the card and its discovery, and the contract profiles A2A rather than inventing a wire
-  (DEC-0002); the missing piece was a pointer a host reads beside the other surfaces. Authenticating the A2A interfaces
-  as the MCP surface keeps a second route from weakening the first. An optional extension keeps a Fabric fact from
+  (DEC-0002); the missing piece was a pointer a host reads beside the other surfaces. The descriptor's token mints
+  operator login codes and unlocks a remote well-known document, so a peer route that took it would hand a stranger
+  the host's credential. An optional extension keeps a Fabric fact from
   breaking a peer that only speaks A2A. Taking an MCP discovery file before an MCP revision carries it would pin the
   contract to a proposal.
 - **Alternatives considered:** `surfaces.a2a` with the binding, streaming and push flags and the security scheme
@@ -7304,14 +7313,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   on the service origin); requiring the token for the public card on every placement (a peer without a credential
   could not discover the service, and A2A 1.0 §6.9 fetches the public card without an `Authorization` header); making
   an `ai-catalog.json` entry normative now.
-- **Compatibility:** a widening. A reader pinned before this decision refuses a document that carries `surfaces.a2a`
-  (the member is closed there), so a service adds it at or after this pin, as with `surfaces.operatorChannel`
-  (DEC-0034). Without the member nothing changes. `contractVersion` stays `0.1.0`.
+- **Compatibility:** a widening. A reader that validates the well-known document against a schema pinned before this
+  decision refuses one that carries `surfaces.a2a` (the member is closed there), so a service carries it only where
+  its readers are pinned at or after this decision or read members by hand, as with `surfaces.operatorChannel`
+  (DEC-0034). Measured 2026-10-26: Fabric Dashboards (`packages/service-host/src/health.ts`) and the adapter's
+  `check_service.py` read members by hand and tolerate it. Without the member nothing changes. `contractVersion` stays
+  `0.1.0`.
 - **Consequences / affects:** `schemas/service-well-known.schema.json` (`surfaces.a2a`),
-  `docs/specification/service.md` (the well-known document's members, Surfaces, A2A Agent Card),
-  `docs/specification/profiles.md` (the A2A peer profile), `docs/specification/conformance.md` (a row),
-  `docs/evidence/sources.md` (the A2A 1.0 members), `docs/DOCMAP.md`; fixtures
+  `docs/specification/service.md` (the well-known document's members, Surfaces, A2A Agent Card,
+  Remote placement), `docs/specification/profiles.md` (the A2A peer profile), `docs/specification/conformance.md`
+  (two rows), `docs/specification/README.md` (not adopted yet), `docs/evidence/sources.md` (the A2A 1.0 members,
+  SEP-2127), `docs/DOCMAP.md`; `fixtures/catalogue.json`; fixtures
   `fixtures/positive/service-well-known-a2a.json`, `fixtures/negative/service-well-known-a2a-old-version.json`,
-  `fixtures/negative/service-well-known-a2a-url.json`; backlog CT-131 (closed by this decision). Consumers: the
-  adapter's FAA-10 (it serves the card) and Fabric Dashboards (it may show and link it).
-- **Source:** CT-131; board thread `2587bdd2` (2026-10-25); A2A 1.0.0 specification, checked 2026-10-26.
+  `fixtures/negative/service-well-known-a2a-url.json`; backlog CT-131 (closed by this decision), CT-145 (adoption),
+  CT-146 (a pair rule). Consumers: the adapter's FAA-10 and FAA-123 (it serves the card) and Fabric Dashboards (it may
+  show and link it).
+- **Source:** CT-131; board thread `2587bdd2` (2026-10-25); A2A 1.0.0 specification, checked 2026-10-26; seam and
+  product readings of the first draft (2026-10-26), which found the descriptor token offered to peers and the
+  unchecked fixtures.

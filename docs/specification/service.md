@@ -241,7 +241,7 @@ placement requires the token here too ([Remote placement](#remote-placement)).
 - `surfaces.operatorChannel` MAY name the path of the service's operator-channel status, which
   requires the service token ([operator channel](operator-channel.md) OC-9, DEC-0034). The
   channel's state never changes the service's `status` or `degraded` list.
-- `surfaces.a2a` MAY name where a service that answers A2A peers serves its Agent Card: the card's `path` on the
+- `surfaces.a2a` SHOULD name, for a service that serves an A2A Agent Card, where it is: the card's `path` on the
   service origin and the A2A `protocolVersion`, `1.0` ([A2A Agent Card](#a2a-agent-card), DEC-0122).
 - `configuration` MAY name what the operator can configure for this agent (`slots`: `runner`, `model`) and the
   profiles that apply now (`resolved`), read-only: a change is made in Fabric and reaches the agent through its
@@ -513,6 +513,8 @@ mode `0600`, and the same value lives on the hosting platform as a secret.
   the status of that `401` and never its body; a conformance checker admits a body that
   neither parses as the well-known document nor carries the service's own identity values (`service.id`, its instance, build or `process.pid`). With the token, the document is the one this
   extension defines.
+- Its public A2A Agent Card, when it serves one, MAY answer without the token: it discloses the service's name and
+  skills and nothing about the running process ([A2A Agent Card](#a2a-agent-card), DEC-0122).
 - The events feed, the login code and the login redirect are as for a local placement. The
   session cookie's name MUST start with `__Host-`, and it MUST carry `Secure`, `HttpOnly`,
   `SameSite=Strict` and `Path=/` and no `Domain`.
@@ -847,7 +849,8 @@ token, it never presents a service's own descriptor token to call that service's
 ### A2A Agent Card (DEC-0122)
 
 A service that answers A2A peers ([A2A peer profile](profiles.md#a2a-peer-profile), DEC-0002) serves an Agent Card
-as A2A `1.0` defines it and names it in its well-known document, so a host and a peer find it without probing:
+as A2A `1.0` defines it. It SHOULD name the card in its well-known document, so a host finds it beside the other
+surfaces; a peer finds it at A2A's own well-known path (A2A 1.0 §8.2):
 
 ```json
 "surfaces": {
@@ -860,27 +863,40 @@ as A2A `1.0` defines it and names it in its well-known document, so a host and a
   (A2A 1.0 §8.2). `protocolVersion` is `1.0`, the version every entry of the card's `supportedInterfaces` exposes
   (A2A 1.0 §4.4.6). The card, not this document, names its interfaces, bindings and security schemes;
   `surfaces.a2a` only says where it is.
-- On a local placement the public card MUST answer without authentication, as the well-known document does, and the
-  Host and Origin checks still apply; its interface URLs are on the service origin (`http://127.0.0.1:<port>`), whose
-  trust anchor is loopback ([Remote placement](#remote-placement)). On a remote placement it MAY answer without the
-  token, since a peer that holds no credential yet discovers the service through it. On either placement the public
-  card carries no secret and none of the well-known document's members about the running process (build, pid,
-  status, tiles, the degraded list), which are why the remote well-known route takes the token (DEC-0109). A
-  manifest's `a2a` profile, which admits a peer from outside the machine, keeps its `https://` `agentCardUrl`.
-- A call on the card's interfaces is authenticated as a call on the MCP surface is: the descriptor's token unless
-  `surfaces.mcp.auth` names `own` or `delegation`, and the estate's delegation tokens when the service declares
-  `auth.delegation` ([MCP credentials](#mcp-credentials), DEC-0039). The card's `securitySchemes` name that
-  credential. An A2A interface MUST NOT accept a credential the MCP surface refuses, so it is never a way around it.
-- An authenticated extended card (`capabilities.extendedAgentCard: true`, fetched with `GetExtendedAgentCard` or REST
-  `GET /extendedAgentCard`, A2A 1.0 §4.4.3, §5.3) MUST require that same credential on every placement.
-- An extension the card declares for a Fabric fact, such as the service's limits or its load (DEC-0104), MUST carry
-  `required: false` (A2A 1.0 §4.4.4), so a peer that does not know it still calls; a required extension the peer did
-  not declare fails its call with `ExtensionSupportRequiredError` (A2A 1.0 §3.3.4). Such an extension names no person,
-  caller or prompt, as the load report does not, and the load report stays what a host reads.
-- The skill ids the service's manifest names in its `a2a` profile (`skillIds`) are skills of this card; the manifest
-  remains the authority on capabilities, as it is for `surfaces.mcp.capabilities`.
-- An `ai-catalog.json` entry (MCP's SEP-2127) is not part of `fabric-service/0.1`: it is MCP-side discovery, and the
-  contract takes it when an MCP revision it pins (`2026-07-28` today, [sources](../evidence/sources.md)) carries it.
+- **Where the card and its interfaces are.** On a local placement the public card answers on the service origin
+  without authentication, as the well-known document does, and the Host and Origin checks still apply. Its interface
+  URLs are on that origin (`http://127.0.0.1:<port>`): a peer on the same computer reaches them, and loopback is the
+  trust anchor ([Remote placement](#remote-placement)). A2A asks for HTTPS in production (A2A 1.0 §4.4.6, §7.1); a
+  loopback origin is not reachable from outside the computer, so this contract admits it there and nowhere else. A
+  service [offered to others](#offered-to-others) serves the card its outside peers read at its `peer.endpoint`, whose
+  interface URLs are on that `https` endpoint; a remote placement serves it on its `https` origin, and it MAY answer
+  there without the token, since a peer that holds no credential yet discovers the service through it.
+- **What the public card discloses.** It carries no secret and none of the well-known document's members about the
+  running process (build, pid, status, tiles, the degraded list). It does disclose the service's name and skills: on a
+  remote placement this is the service's choice by serving it, and it is the one exception to what DEC-0109 keeps
+  behind the token there.
+- **Who may call its interfaces.** A peer never holds the descriptor's token: it is the host's credential, retired as a
+  capability credential across the machine boundary ([delegation](delegation.md) DL-12) and never given to others
+  ([Offered to others](#offered-to-others), DEC-0024, DEC-0061). An A2A interface therefore MUST NOT accept the
+  descriptor's token, and the card's `securitySchemes` MUST NOT name it. A service authenticates A2A callers with
+  credentials of its own (as `surfaces.mcp.auth: "own"` describes) or with the estate's delegation tokens when it
+  declares `auth.delegation` ([MCP credentials](#mcp-credentials), DEC-0039), whether or not it has an MCP surface. A
+  host and a probe MUST NOT call an A2A interface with the descriptor's token and MUST NOT report its refusal
+  (`401`/`403`) as nonconformance.
+- **The extended card.** An authenticated extended card (`capabilities.extendedAgentCard: true`, fetched with
+  `GetExtendedAgentCard` or REST `GET /extendedAgentCard`, A2A 1.0 §4.4.3, §5.3) MUST require one of those same
+  credentials on every placement.
+- **Fabric facts in the card.** An extension the card declares for a Fabric fact, such as the service's limits or its
+  load (DEC-0104), MUST carry `required: false` (A2A 1.0 §4.4.4), so a peer that does not know it still calls; a
+  required extension the peer did not declare fails its call with `ExtensionSupportRequiredError` (A2A 1.0 §3.3.4).
+  Such an extension names no person, caller or prompt, as the load report does not, and the load report stays what a
+  host reads.
+- **Skills.** The skill ids a manifest names in its `a2a` profile (`skillIds`) are skills of the card at that
+  profile's `agentCardUrl`, which is `https` (the card a peer outside the computer reads); the manifest remains the
+  authority on capabilities, as it is for `surfaces.mcp.capabilities`.
+- **Not here.** An `ai-catalog.json` entry (MCP's SEP-2127, [sources](../evidence/sources.md)) is not part of
+  `fabric-service/0.1`: it is MCP-side discovery, and the contract takes it when an MCP revision it pins (`2026-07-28`
+  today) carries it.
 
 ## Actions
 
