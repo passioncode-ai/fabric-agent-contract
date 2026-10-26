@@ -550,8 +550,27 @@ function droppedFindings(parent: JsonObject, next: JsonObject): Finding[] {
 }
 
 /**
+ * FAC-SEM-147: the organizations the person admitted (DEC-0127 OM-2), each once by its context, and no root of small
+ * order (DEC-0045), since the root's key sets are what every attestation of that organization verifies under.
+ */
+function organizationPins(value: JsonObject, flag: (instancePath: string, message: string) => void): void {
+  const seen = new Set<string>();
+  for (const [pin, index] of indexed(value.organizations)) {
+    const at = `/organizations/${index}`;
+    const org = show(pin.org);
+    if (seen.has(org)) flag(`${at}/org`, `organization ${org} is pinned twice`);
+    seen.add(org);
+    const x = isObject(pin.root) ? pin.root.x : undefined;
+    if (typeof x === "string" && /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/.test(x) && isSmallOrderKey(Buffer.from(x, "base64url"))) {
+      flag(`${at}/root/x`, "a root of small order lets anyone forge the organization's key sets (DEC-0045)");
+    }
+  }
+}
+
+/**
  * FAC-SEM-072…076 over one record, FAC-SEM-092 (DEC-0063) on each passkey it lists, FAC-SEM-110 on each share grant,
- * FAC-SEM-111 on each placement (DEC-0082) and FAC-SEM-134 on each machine's profile (DEC-0106).
+ * FAC-SEM-111 on each placement (DEC-0082), FAC-SEM-134 on each machine's profile (DEC-0106) and FAC-SEM-147 on the
+ * organizations it pins (DEC-0127).
  */
 function recordFindings(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
@@ -564,6 +583,7 @@ function recordFindings(value: JsonObject): Finding[] {
   indexed(value.shareGrants).forEach(([grant, index]) => findings.push(...grantContextFindings(grant, `/shareGrants/${index}`)));
   placementGrants(value, flagger(findings, "FAC-SEM-111"));
   machineProfiles(value, flagger(findings, "FAC-SEM-134"));
+  organizationPins(value, flagger(findings, "FAC-SEM-147"));
   indexed(value.authorities).forEach(([authority, index]) => findings.push(...signingCredentialFindings(authority, `/authorities/${index}`)));
   return findings;
 }

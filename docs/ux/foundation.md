@@ -713,6 +713,20 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Status:** draft
 - **Product:** unobserved
 
+
+### ST-038: Member joins an organization by their own act, and their Fabric trusts only what the organization signed
+
+- **Story:** As P-03, I want to join an organization by my own passkey and have my Fabric trust my membership only from what the organization signed, so that no administrator admits me behind my back, any organization server works, and nothing of mine leaves for the organization beyond what is listed.
+- **Traces:** JTBD-04, JRN-03/#1
+- **Acceptance criteria:**
+  - Given I join an organization, when my Fabric shows me its server and root key and I confirm with my passkey, then the organization is pinned in my estate record and no administrator's acceptance is asked (`FAC-SEM-147`, DEC-0127 OM-2).
+  - Given the organization's server sends my Fabric a membership attestation, when it verifies under the pinned root's key set, for my organization and my audience, then my Fabric trusts the role it states; a forged, revoked-key, other-organization or expired one is refused with the reason (`verifyOrgMembership`, OM-4).
+  - Given my membership ends, then my Fabric drafts the revision that revokes the share grants of that organization's context and drops its pin, and once my passkey signs it my device's enrollment ends, the organization's locks lift and nothing more is sent; given only the attestation expired, it authorises nothing new until a fresh one arrives (OM-5, OM-6).
+  - Given any of my work, then only what OM-7 lists ever leaves my Fabric for the organization.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
 ## Design tooling
 
 - **Figma:** disabled

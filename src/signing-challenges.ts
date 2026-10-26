@@ -58,6 +58,14 @@ export const ENTITLEMENT_FIELDS = [
 /** The entitlement key set's members beside `type`: the set without `sig` (DEC-0085). */
 export const ENTITLEMENT_KEY_SET_FIELDS = ["issuer", "revision", "issuedAt", "keys", "revoked", "alg", "kid"] as const;
 
+/** The membership attestation's members beside `type`: the document without `sig` (DEC-0127). */
+export const ORG_MEMBERSHIP_FIELDS = [
+  "issuer", "org", "audience", "subject", "role", "external", "status", "revision", "membershipEndsAt", "issuedAt", "notBefore", "expiresAt", "extensions", "alg", "kid"
+] as const;
+
+/** An organization key set's members beside `type`: the set without `sig` (DEC-0127). */
+export const ORG_KEY_SET_FIELDS = ["issuer", "org", "revision", "issuedAt", "keys", "revoked", "alg", "kid"] as const;
+
 /** A Map, so a type named like an Object.prototype member reads nothing. */
 export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<string, StatementSpec>([
   ["estate-revision/1", { signer: "passkey", fields: ["digest"], decision: "DEC-0055", check: (f) => matches(SHA256, f.digest) }],
@@ -101,7 +109,9 @@ export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<st
   ["relay-auth/1", { signer: "key", fields: ["alg", "relay", "nonce", "estate", "kid", "iat"], decision: "DEC-0047" }],
   ["relay-blob/1", { signer: "key", fields: ["alg", "relay", "method", "digest", "recipients", "iat"], decision: "DEC-0047" }],
   ["entitlement/1", { signer: "key", fields: ENTITLEMENT_FIELDS, decision: "DEC-0085" }],
-  ["entitlement-key-set/1", { signer: "key", fields: ENTITLEMENT_KEY_SET_FIELDS, decision: "DEC-0085" }]
+  ["entitlement-key-set/1", { signer: "key", fields: ENTITLEMENT_KEY_SET_FIELDS, decision: "DEC-0085" }],
+  ["org-membership/1", { signer: "key", fields: ORG_MEMBERSHIP_FIELDS, decision: "DEC-0127" }],
+  ["org-key-set/1", { signer: "key", fields: ORG_KEY_SET_FIELDS, decision: "DEC-0127" }]
 ]);
 
 /**

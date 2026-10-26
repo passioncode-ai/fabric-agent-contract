@@ -97,6 +97,14 @@
       },
       "description": "Share grants (DEC-0037, DEC-0039): standing grants to a person or organization outside the estate, each a delegation grant with an audience. A share grant into an organization carries its context, org:<orgId>, never personal (DEC-0082, FAC-SEM-110); an instance placed in that context names it (FAC-SEM-111)."
     },
+    "organizations": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/organizationPin"
+      },
+      "description": "The organizations the person admitted into their estate (DEC-0127 OM-2), each by its context, its server and the root key that signs its org-key-set/1: the estate's half of the organization-to-estate mapping. The passkey's signature over the revision is the person's admission (R1-D12); no administrator signs it. Each org once (FAC-SEM-147). A reader pinned before DEC-0127 refuses the member, so Fabric writes it only once every reader of the record is pinned at or after."
+    },
     "deltaAnchor": {
       "type": "object",
       "required": [
@@ -532,6 +540,46 @@
         }
       },
       "additionalProperties": false
+    },
+    "organizationPin": {
+      "type": "object",
+      "required": [
+        "org",
+        "issuer",
+        "root",
+        "pinnedAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "org": {
+          "$ref": "org-membership.schema.json#/$defs/org"
+        },
+        "issuer": {
+          "$ref": "entitlement.schema.json#/$defs/issuer",
+          "description": "The organization server's origin, as its attestations name it."
+        },
+        "root": {
+          "type": "object",
+          "required": [
+            "kid",
+            "x"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kid": {
+              "$ref": "activity-common.schema.json#/$defs/opaqueId"
+            },
+            "x": {
+              "$ref": "common.schema.json#/$defs/ed25519PublicKeyBase64url"
+            }
+          },
+          "description": "The organization's root (Ed25519): it signs org-key-set/1 documents only. Never of small order (FAC-SEM-147, DEC-0045)."
+        },
+        "pinnedAt": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "When the person admitted the organization."
+        }
+      }
     }
   }
 }

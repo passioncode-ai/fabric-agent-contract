@@ -52,6 +52,7 @@
 | SCN-044 | Open a service's page from my agent: in Fabric Dashboards, never a raw address | service | P-02 | ST-036, FLW-30 | draft | not audited |
 | SCN-045 | Give a task once: the research agent my developer agent engages runs it without asking me again | delegation | P-02 | ST-037, FLW-31 | draft | not audited |
 | SCN-046 | Approve once in one agent's chat: the agent that holds the key acts without asking me again | delegation | P-02 | ST-037, FLW-31 | draft | not audited |
+| SCN-047 | Join an organization by my own passkey: my Fabric trusts the membership only from what the organization signed | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 
 ## Personas
 
@@ -1018,4 +1019,25 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a relay from a member's Project on an organization's board (T2) -> not an approval; the config agent asks the operator through its own route.
 - **Status:** draft
 - **Coverage:** DEC-0126 OA-1 to OA-7, `source` in `mandate.schema.json` and `decision.schema.json`, `mandateCovers` and `actionDecision` returning it, `fixtures/vectors/mandate.json`, `fixtures/vectors/actions.json`, `fixtures/positive/mandate-relayed.json`, `test/mandate.test.ts`
+- **Product:** unobserved
+
+### SCN-047: Join an organization by my own passkey: my Fabric trusts the membership only from what the organization signed
+
+- **Persona:** P-03
+- **Feature:** membership
+- **Traces:** ST-038, FLW-32 (JTBD-04, JRN-03/#1)
+- **Entry point:** the member's join in Fabric
+- **Preconditions:** the organization `org:org-a` is served by `https://orgs.example`, which holds a root per organization; the member's Fabric is pinned at or after DEC-0127
+- **Steps:**
+  1. The member starts the join -> Fabric reads the organization's root from its server and shows the organization, the server and the root's fingerprint (what the member compares it with is pending Fabric's D8).
+  2. The member confirms with their passkey -> the estate revision that pins `{org, issuer, root, pinnedAt}` is signed; no administrator is asked.
+  3. The server sends the organization's key set and an attestation for the member's Fabric as audience -> Fabric applies the set under the pin and verifies the attestation: `active`, role `member`.
+  4. Fifteen minutes before expiry -> Fabric fetches the next revision and holds it per subject.
+- **Expected result:** the membership is trusted from a document the organization's pinned root vouches for, and the member's personal work never leaves for the organization.
+- **Alt paths:** the server goes offline for a day -> the attestation expires and the membership is suspended: nothing new is authorised, nothing is revoked, and the shared agents stop answering the organization within ten minutes, as running tokens expire. The administrator removes the member -> the server issues an `ended` attestation; Fabric drafts the next revision, which revokes the context's share grants and drops the organization's pin, and the member's passkey signs it; the device's enrollment then ends and the organization's locks lift, nothing more is sent, and rejoining takes a new pin. The member has not signed that revision yet -> the server already refuses the device's revoked certificate and the hub mints nothing in the context, while the contract lifts the organization's locks only on the signed revision (a node's own end on `certificate-revoked` is not decided); Fabric shows the signature as pending. An attestation signed for another organization on the same server -> refused (`unknown-key` under that organization's own keys, or `wrong-org` where a server lists one key for both). A server that changes its root silently -> attestations under the new key set do not verify until the member pins the new root.
+- **UI elements:** SCR-31: the organization, the server, the root's fingerprint, the passkey prompt; each membership's role and state.
+- **States covered:** success, error
+- **Errors & recovery:** a refused attestation -> its reason is shown; the member can retry or leave the organization.
+- **Status:** draft
+- **Coverage:** DEC-0127 OM-1 to OM-8, `verifyOrgMembership` and `verifyOrgKeySet` in `src/org-membership.ts`, `FAC-SEM-145` to `FAC-SEM-147`, `fixtures/vectors/org-membership.json`, `test/org-membership.test.ts`
 - **Product:** unobserved

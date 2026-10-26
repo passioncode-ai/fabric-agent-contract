@@ -697,6 +697,7 @@
   {"name": "estate-record-first", "schema": "estate-record.schema.json", "path": "positive/estate-record-first.json", "valid": true},
   {"name": "estate-record-second", "schema": "estate-record.schema.json", "path": "positive/estate-record-second.json", "valid": true},
   {"name": "estate-record-key-replaced", "schema": "estate-record.schema.json", "path": "positive/estate-record-key-replaced.json", "valid": true},
+  {"name": "estate-record-organizations", "schema": "estate-record.schema.json", "path": "positive/estate-record-organizations.json", "valid": true},
   {"name": "enroll-token", "schema": "enroll-token.schema.json", "path": "positive/enroll-token.json", "valid": true},
   {"name": "enroll-token-ceiling", "schema": "enroll-token.schema.json", "path": "positive/enroll-token-ceiling.json", "valid": true},
   {"name": "enroll-token-two-uses", "schema": "enroll-token.schema.json", "path": "negative/enroll-token-two-uses.json", "valid": false, "keyword": "const"},
@@ -994,5 +995,10 @@
   {"name": "mandate-no-instruction", "schema": "mandate.schema.json", "path": "negative/mandate-no-instruction.json", "valid": false, "keyword": "required"},
   {"name": "mandate-not-the-operator", "schema": "mandate.schema.json", "path": "negative/mandate-not-the-operator.json", "valid": false, "keyword": "const"},
   {"name": "mandate-relayed", "schema": "mandate.schema.json", "path": "positive/mandate-relayed.json", "valid": true},
-  {"name": "mandate-source-unplaced", "schema": "mandate.schema.json", "path": "negative/mandate-source-unplaced.json", "valid": false, "keyword": "anyOf"}
+  {"name": "mandate-source-unplaced", "schema": "mandate.schema.json", "path": "negative/mandate-source-unplaced.json", "valid": false, "keyword": "anyOf"},
+  {"name": "org-membership", "schema": "org-membership.schema.json", "path": "positive/org-membership.json", "valid": true},
+  {"name": "org-membership-unknown-role", "schema": "org-membership.schema.json", "path": "negative/org-membership-unknown-role.json", "valid": false, "keyword": "enum"},
+  {"name": "org-membership-email", "schema": "org-membership.schema.json", "path": "negative/org-membership-email.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "org-key-set", "schema": "org-key-set.schema.json", "path": "positive/org-key-set.json", "valid": true},
+  {"name": "org-key-set-no-org", "schema": "org-key-set.schema.json", "path": "negative/org-key-set-no-org.json", "valid": false, "keyword": "required"}
 ]

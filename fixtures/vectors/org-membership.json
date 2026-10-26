@@ -1,0 +1,2962 @@
+{
+  "about": "Vectors for org-membership/1 and org-key-set/1 (DEC-0127), written by tools/vectors/org-membership.ts, never by hand. keys: Ed25519 test keys, each seed the SHA-256 of a published label (anyone can derive them; nothing trusts them). root: organization A's root as the person's estate pins it ({issuer, org, kid, x}). keySets: documents a root signed; handedKeySets: key sets built by hand to reach the attestation verifier's key checks, never root-signed. keySet cases: verifyOrgKeySet(keySet, trust), keySet a document or the name of one in keySets. verify cases: verifyOrgMembership(attestation, trust), trust.now an RFC 3339 string a port parses strictly, trust.keySet the name of a key set in keySets or handedKeySets, trust.held the record held for the subject. expected is exactly what the reference returns; digest is sha256: of the signed bytes.",
+  "keys": {
+    "root": {
+      "seed": "138ae001690d466f152ac9c3074d86bc9196d3df9f1d29a065fe636dfbdda41f",
+      "kid": "root-org-a-1",
+      "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+    },
+    "rootB": {
+      "seed": "3d440dbecab80625b28c522c003d8c3575cceb2e49ae7b3b7576b5f23ac32493",
+      "kid": "root-org-b-1",
+      "x": "CFn01c2fmBAFHuF99_902jC141_T2rt7ORxIljXv8rk"
+    },
+    "k0": {
+      "seed": "c03c9c62a5970e729918e27d461dca13c7d1a53cdf38b9dfab7f0a4267c615e1",
+      "kid": "mem-2026-08",
+      "x": "EoS7IQuzxo_0TEWI-bK-HSYWYbRvVevm1JhHVOqMitk"
+    },
+    "k1": {
+      "seed": "df181174caad78a20661e7661cf16dec1af2e6ac4005a4aa064b77dc14178973",
+      "kid": "mem-2026-09",
+      "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI"
+    },
+    "k2": {
+      "seed": "ef71509d99bdd24a3c436996d4ddfd7c85844a6f1943b9f0ee683d75cf667eec",
+      "kid": "mem-2026-10",
+      "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI"
+    },
+    "rogue": {
+      "seed": "9dbee63fe0a6e2c55d8218d4fa505810d4bb3ae50507e28d0e69cfaa7835ea42",
+      "kid": "mem-rogue",
+      "x": "tt-kVq_FMrV9FMPbZuBtp-wDASwYM6_AAae5jTTNBPU"
+    }
+  },
+  "root": {
+    "issuer": "https://orgs.example",
+    "org": "org:org-a",
+    "kid": "root-org-a-1",
+    "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+  },
+  "signingInput": {
+    "attestation": {
+      "document": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "input": "{\"alg\":\"EdDSA\",\"audience\":\"fabric-estate-5d0f1a\",\"expiresAt\":\"2026-10-25T12:00:00Z\",\"extensions\":{},\"external\":false,\"issuedAt\":\"2026-10-25T11:00:00Z\",\"issuer\":\"https://orgs.example\",\"kid\":\"mem-2026-10\",\"membershipEndsAt\":null,\"notBefore\":\"2026-10-25T11:00:00Z\",\"org\":\"org:org-a\",\"revision\":4,\"role\":\"member\",\"status\":\"active\",\"subject\":\"m-7f3a91c2\",\"type\":\"org-membership/1\"}"
+    },
+    "keySet": {
+      "document": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+      },
+      "input": "{\"alg\":\"EdDSA\",\"issuedAt\":\"2026-10-15T00:00:00Z\",\"issuer\":\"https://orgs.example\",\"keys\":[{\"alg\":\"EdDSA\",\"kid\":\"mem-2026-09\",\"notAfter\":\"2026-11-01T00:00:00Z\",\"notBefore\":\"2026-09-01T00:00:00Z\",\"x\":\"HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI\"},{\"alg\":\"EdDSA\",\"kid\":\"mem-2026-10\",\"notAfter\":\"2027-01-01T00:00:00Z\",\"notBefore\":\"2026-10-15T00:00:00Z\",\"x\":\"VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI\"}],\"kid\":\"root-org-a-1\",\"org\":\"org:org-a\",\"revision\":2,\"revoked\":[\"mem-2026-08\"],\"type\":\"org-key-set/1\"}"
+    }
+  },
+  "keySets": {
+    "r1": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "revision": 1,
+      "issuedAt": "2026-09-01T00:00:00Z",
+      "keys": [
+        {
+          "kid": "mem-2026-09",
+          "alg": "EdDSA",
+          "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        }
+      ],
+      "revoked": [],
+      "alg": "EdDSA",
+      "kid": "root-org-a-1",
+      "sig": "dPkD8zS0m6zprcky3APC5Kxd3B_dKyb_o4eg5_QKT5SkNpH8ZyyLXF92MAxDadUQmNAVFGfWgZO0quhzUzblAQ"
+    },
+    "r2": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "mem-2026-09",
+          "alg": "EdDSA",
+          "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "mem-2026-10",
+          "alg": "EdDSA",
+          "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "mem-2026-08"
+      ],
+      "alg": "EdDSA",
+      "kid": "root-org-a-1",
+      "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+    },
+    "r2Other": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:01Z",
+      "keys": [
+        {
+          "kid": "mem-2026-09",
+          "alg": "EdDSA",
+          "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "mem-2026-10",
+          "alg": "EdDSA",
+          "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "mem-2026-08"
+      ],
+      "alg": "EdDSA",
+      "kid": "root-org-a-1",
+      "sig": "sw-YNHeJXmk7jT4p3Xtj8vdDBaAFYqRn_qiUtcAFd-moCG3R-ujwiYc9ivaDTsu4EnnF6cznXE3kva9Lp1hYBw"
+    },
+    "r3": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "revision": 3,
+      "issuedAt": "2026-10-28T00:00:00Z",
+      "keys": [
+        {
+          "kid": "mem-2026-10",
+          "alg": "EdDSA",
+          "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "mem-2026-08",
+        "mem-2026-09"
+      ],
+      "alg": "EdDSA",
+      "kid": "root-org-a-1",
+      "sig": "-pPGKNwKtM9jeq_6sipmG5Cb_hC5iXU8bG7xsTGKhNQvgxE4mfcfV70lAp3NJQRTlakiW7ftAcvcWdhBUOLYDg"
+    },
+    "orgB": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-b",
+      "revision": 1,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "mem-2026-09",
+          "alg": "EdDSA",
+          "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "mem-2026-10",
+          "alg": "EdDSA",
+          "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [],
+      "alg": "EdDSA",
+      "kid": "root-org-b-1",
+      "sig": "s0zkwUbiPjVigA9qWQybIbo8OMJqEyvManpr3dMBNbX5--9jBUqy-evEQxulfTHQDRZCg7_rNILCQHhxsgSHAg"
+    }
+  },
+  "handedKeySets": {
+    "algMismatch": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "mem-2026-09",
+          "alg": "EdDSA",
+          "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "mem-2026-10",
+          "alg": "ES256",
+          "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "mem-2026-08"
+      ],
+      "alg": "EdDSA",
+      "kid": "root-org-a-1",
+      "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+    },
+    "smallOrder": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "mem-2026-09",
+          "alg": "EdDSA",
+          "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "mem-2026-10",
+          "alg": "EdDSA",
+          "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        },
+        {
+          "kid": "mem-zero",
+          "alg": "EdDSA",
+          "x": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "notBefore": "2026-10-01T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "mem-2026-08"
+      ],
+      "alg": "EdDSA",
+      "kid": "root-org-a-1",
+      "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+    },
+    "es256": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "mem-2026-09",
+          "alg": "EdDSA",
+          "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "mem-2026-10",
+          "alg": "EdDSA",
+          "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "mem-2026-08"
+      ],
+      "alg": "ES256",
+      "kid": "root-org-a-1",
+      "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+    },
+    "rootAmongKeys": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "mem-2026-09",
+          "alg": "EdDSA",
+          "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "mem-2026-10",
+          "alg": "EdDSA",
+          "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        },
+        {
+          "kid": "root-org-a-1",
+          "alg": "EdDSA",
+          "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "mem-2026-08"
+      ],
+      "alg": "EdDSA",
+      "kid": "root-org-a-1",
+      "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+    }
+  },
+  "keySetCases": [
+    {
+      "name": "first: revision 1 with nothing held",
+      "keySet": "r1",
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "unchanged": false,
+        "digest": "sha256:1f131de6ce4abc2a05e59ed17ee8b9217f6ed73d283415daf3f4458b1e511a52",
+        "held": {
+          "revision": 1,
+          "digest": "sha256:1f131de6ce4abc2a05e59ed17ee8b9217f6ed73d283415daf3f4458b1e511a52"
+        }
+      }
+    },
+    {
+      "name": "rotation: revision 2 over revision 1",
+      "keySet": "r2",
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        },
+        "held": {
+          "revision": 1,
+          "digest": "sha256:1f131de6ce4abc2a05e59ed17ee8b9217f6ed73d283415daf3f4458b1e511a52"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "unchanged": false,
+        "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0",
+        "held": {
+          "revision": 2,
+          "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0"
+        }
+      }
+    },
+    {
+      "name": "revocation: revision 3 over revision 2",
+      "keySet": "r3",
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        },
+        "held": {
+          "revision": 2,
+          "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "unchanged": false,
+        "digest": "sha256:7477741a8a82005142122ea44e3fcb4d75eddfd50805741d4293c0cb02997da2",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:7477741a8a82005142122ea44e3fcb4d75eddfd50805741d4293c0cb02997da2"
+        }
+      }
+    },
+    {
+      "name": "redelivery: revision 2 again, the same bytes",
+      "keySet": "r2",
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        },
+        "held": {
+          "revision": 2,
+          "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "unchanged": true,
+        "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0",
+        "held": {
+          "revision": 2,
+          "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0"
+        }
+      }
+    },
+    {
+      "name": "stale: revision 1 after revision 2",
+      "keySet": "r1",
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        },
+        "held": {
+          "revision": 2,
+          "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "stale-revision"
+      }
+    },
+    {
+      "name": "conflict: revision 2 with other bytes",
+      "keySet": "r2Other",
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        },
+        "held": {
+          "revision": 2,
+          "digest": "sha256:7f1cbe89a103d96b77b08f8ccb6b4ca568485ba866c417550c4a27afbaf8d5f0"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "revision-conflict"
+      }
+    },
+    {
+      "name": "organization B's set under B's pinned root",
+      "keySet": "orgB",
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-b",
+          "kid": "root-org-b-1",
+          "x": "CFn01c2fmBAFHuF99_902jC141_T2rt7ORxIljXv8rk"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "unchanged": false,
+        "digest": "sha256:256fd3a0a27ebd2f7edc95501202dd1f63591eed79435001a9be096eb89e9b12",
+        "held": {
+          "revision": 1,
+          "digest": "sha256:256fd3a0a27ebd2f7edc95501202dd1f63591eed79435001a9be096eb89e9b12"
+        }
+      }
+    },
+    {
+      "name": "wrong issuer: B's set read under A's pin",
+      "keySet": "orgB",
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-issuer"
+      }
+    },
+    {
+      "name": "wrong organization: A's root signing a set that names B",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-b",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "NmvBUpfXgN_UiHfwM1GtUPA-5A4FYfWOlORhXCsr4mCkhcGQSmWH7gDPUMtfWBJ1tExoypVc-EO4sDaS6fMyAg"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-org"
+      }
+    },
+    {
+      "name": "wrong issuer: a root pinned for another origin",
+      "keySet": "r2",
+      "trust": {
+        "root": {
+          "issuer": "https://other.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-issuer"
+      }
+    },
+    {
+      "name": "bad signature: the root's kid, signed by another key",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "rWa_Hpf5-k2rVrPkqKVx1Oqws_5LP6YOHOqs3ph9VEsJi73PtaA1Sjggoxu8P7e1BKbAQUiLmVPMvluFTRznAg"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "bad-signature"
+      }
+    },
+    {
+      "name": "unknown algorithm: a listed key under ES256",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "ES256",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "KVCHAX_0zAlvjIuw57yq-AYNyW8BIcbD0lny-rJDvwH07bfxJYJVZQcSomle49zqGs6k7KWLy0e5dqUe1jj_CA"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unknown-algorithm"
+      }
+    },
+    {
+      "name": "unusable key: a pinned root that is not 32 canonical bytes",
+      "keySet": "r2",
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmB"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unusable-key"
+      }
+    },
+    {
+      "name": "small-order key: a pinned root of order 4",
+      "keySet": "r2",
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "small-order-key"
+      }
+    },
+    {
+      "name": "small-order key: a root-signed set listing a key of order 4",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-zero",
+            "alg": "EdDSA",
+            "x": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+            "notBefore": "2026-10-01T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "7nbmuYxeBYa7HkIrtqIYyvsLJ7V0_GRJ_yBYClcD1WqjMJal0qcVE9gBSuxaQPkhRK6MdiM6sbuRs_OUFqamBw"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "small-order-key"
+      }
+    },
+    {
+      "name": "unknown algorithm: the set under ES256",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "alg": "ES256",
+        "kid": "root-org-a-1",
+        "sig": "sXAar6lbrJu0nHT6qYAV34ts0gKSrVstYIh5B8v30KCUWtP9ljfbbWOHf-_j7C8xmbMLrs9831GGS9SeUyWIBw"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unknown-algorithm"
+      }
+    },
+    {
+      "name": "malformed: a kid listed twice",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "iRrIggwgmNaRb6A2X5OUKO1ofi4KStrG4OfbtBeH42wLKYar67rBi0JqxQS1WQQ3DVkWU4k3JRP1fC6mRMA5CA"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: no organization",
+      "keySet": {
+        "type": "org-key-set/1",
+        "issuer": "https://orgs.example",
+        "revision": 2,
+        "issuedAt": "2026-10-15T00:00:00Z",
+        "keys": [
+          {
+            "kid": "mem-2026-09",
+            "alg": "EdDSA",
+            "x": "HNJU1aJ1kxec03AVg-mzBX8FaUh_fg2iXbY5vbGnVEI",
+            "notBefore": "2026-09-01T00:00:00Z",
+            "notAfter": "2026-11-01T00:00:00Z"
+          },
+          {
+            "kid": "mem-2026-10",
+            "alg": "EdDSA",
+            "x": "VOKHzJVS_8A7K2GPQigfnGWQNAZFqviIoiO8I7esoEI",
+            "notBefore": "2026-10-15T00:00:00Z",
+            "notAfter": "2027-01-01T00:00:00Z"
+          }
+        ],
+        "revoked": [
+          "mem-2026-08"
+        ],
+        "alg": "EdDSA",
+        "kid": "root-org-a-1",
+        "sig": "QG_B3Mfo7j7XzAkp1znHZmb_Lu9q5H3T64lc25HRGAQRM-_VRyCY0CKEDhw5aLTryuR8qEvqQ-MK3n3oxOiwBg"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an attestation is not a key set",
+      "keySet": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "org": "org:org-a",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "context: a pin without its organization",
+      "keySet": "r2",
+      "trust": {
+        "root": {
+          "issuer": "https://orgs.example",
+          "kid": "root-org-a-1",
+          "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: no trust",
+      "keySet": "r2",
+      "trust": null,
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    }
+  ],
+  "verify": [
+    {
+      "name": "valid: an active member",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e"
+        }
+      }
+    },
+    {
+      "name": "valid: an administrator",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "admin",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "g61d2OGg4ogO_v8ugtQSZLu235qVVtYCd9_-c8MT-r6jczrbYCyI7B9KnifFDbQAyk6ODA2yvhllfp5Qe_osBQ"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "admin",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:9be023178f781ffd15ee2c23b8bf237cd523bdf16b74c14ea9de95bc82238262",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:9be023178f781ffd15ee2c23b8bf237cd523bdf16b74c14ea9de95bc82238262"
+        }
+      }
+    },
+    {
+      "name": "valid: a guest with a fixed term",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": true,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": "2026-12-31T00:00:00Z",
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "k2X2UiFb62bEyrtt5NPRHFIWs58c_6YTfeG3u4yHhnXxxzl2f2MebnVZAitcD7InqA5kS6zeuGxfmMbcx5f2Ag"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:72273109b9c3d2b08fcc58ceb3d18f32cc4429698d52a225baf03bb1a88e5ed2",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:72273109b9c3d2b08fcc58ceb3d18f32cc4429698d52a225baf03bb1a88e5ed2"
+        }
+      }
+    },
+    {
+      "name": "valid: an issuer's extension rides along and grants nothing",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {
+          "orgs.example/role": "finance",
+          "orgs.example/seat": true
+        },
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "fbZsf69M11iA3pFbe6Q4K0quMRVpXi4u9V-2aFtcGb-CQ7pM3rL840ZWKv3zhW6osZLOCij1ZXrmVmLPpftuBA"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:72dd4ebed51094a59816b0e5dff8037bb06feadd3c045d4a821c249538b500c2",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:72dd4ebed51094a59816b0e5dff8037bb06feadd3c045d4a821c249538b500c2"
+        }
+      }
+    },
+    {
+      "name": "ended: the issuer states the end with a higher revision",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "ended",
+        "revision": 5,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "TlZjdGc62Vi9mzYKwc89WMLf8aYKeYeuWc0iSwvLxU4jTiB3qPm9wXHn8KuvOR-YX44waFr6nnh-J9laisUVAA"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "status": "ended",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:594cad7a9bc8417c92caabcd8d0bb480e4c549c66608f83378d04298f83ac5f6",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 5,
+          "digest": "sha256:594cad7a9bc8417c92caabcd8d0bb480e4c549c66608f83378d04298f83ac5f6"
+        }
+      }
+    },
+    {
+      "name": "ended: past membershipEndsAt the attestation reads ended",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": "2026-10-25T11:15:00Z",
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "9tWB6U5EcdkBespmT4UENxIl4FwmXqZf0T9GVm6neyQdDWz3iqmx2tPJ7l-OegLj8hs3wFZbgv3CSC9Ig0idBw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "ended",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:b4a49aa2ede0a107b567326069de20d70a0531f0c43e98702f29454bbf0908d3",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:b4a49aa2ede0a107b567326069de20d70a0531f0c43e98702f29454bbf0908d3"
+        }
+      }
+    },
+    {
+      "name": "ended: a millisecond before membershipEndsAt it is still active",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": "2026-10-25T11:15:00Z",
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "9tWB6U5EcdkBespmT4UENxIl4FwmXqZf0T9GVm6neyQdDWz3iqmx2tPJ7l-OegLj8hs3wFZbgv3CSC9Ig0idBw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:14:59.999Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:b4a49aa2ede0a107b567326069de20d70a0531f0c43e98702f29454bbf0908d3",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:b4a49aa2ede0a107b567326069de20d70a0531f0c43e98702f29454bbf0908d3"
+        }
+      }
+    },
+    {
+      "name": "wrong organization: a server listing one key in two organizations' sets (against OM-3), A's attestation read for B",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-b",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "orgB"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-org"
+      }
+    },
+    {
+      "name": "wrong organization: orgs compare as written",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:ORG-A",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "wrong audience: an attestation for another reader",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "product-client-9",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-audience"
+      }
+    },
+    {
+      "name": "wrong subject: a reader that knows its member gets another member's attestation",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2",
+        "subject": "m-00c4e1aa"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-subject"
+      }
+    },
+    {
+      "name": "subject: a reader that knows its member gets that member's attestation",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2",
+        "subject": "m-7f3a91c2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e"
+        }
+      }
+    },
+    {
+      "name": "extension: 256 astral characters, counted as code points as the schema counts them",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {
+          "orgs.example/note": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+        },
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "L6mubRPvNqKaV3FuRzSdYE7gdcnwJzPcHy5oSvrRFDYOzfYbF8pDj2_KXgtYng9c4jaP5OwhQ9TuVpzLXgIABA"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:2c7578ea9fbca8ebe4dfdb1037426c628fee26e2264e1c1af5e79ba1a119d9df",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:2c7578ea9fbca8ebe4dfdb1037426c628fee26e2264e1c1af5e79ba1a119d9df"
+        }
+      }
+    },
+    {
+      "name": "extension: 257 astral characters is malformed",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {
+          "orgs.example/note": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+        },
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "vCHTeWUtt15hc3Qfi5NhkqMmSMlnJnG0Eg2q7vYor54O3XmL8GbvkCx4Qqx2jTYWYQVG-HOEp3CA1hMYAe-RCQ"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "too long: expiresAt at notBefore, an empty life",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T11:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "0baZR8v8nXyNg0DmH-yDKZBS7qtQrcbJm3PWW-PjMdb11hwAZi-zdJYHqM1tbPWLv4Ug9P3rpfyhviNyqdXvCg"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "too-long-lived"
+      }
+    },
+    {
+      "name": "wrong key: K2's kid, signed by a key nobody lists",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "EthX2VeVKJr_OZuPORzrTz6tHkL92tF6spwaE_NaU5T5CWGR1GbIKSUe8SH8JPbH_WCNTqkwLNgpxLPss1_ACA"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "bad-signature"
+      }
+    },
+    {
+      "name": "bad signature: the role raised after signing",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "owner",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "bad-signature"
+      }
+    },
+    {
+      "name": "unknown kid: a kid the key set does not list",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-rogue",
+        "sig": "d85RWuLFJbxNeBzBbBputqmFmO-wraoM3zalehkIdX8sShgUd61BnAl6ErU9wk9waHjDHZZbxqCCx3TMy94QBw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unknown-key"
+      }
+    },
+    {
+      "name": "revoked key: signed by K0, which the key set revokes",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-08",
+        "sig": "Ch4SkhSXGO_v66OkuZ7SnQsarVMz-gq_kaLXEkGEa6I4BroYPjmqQjOmGpBJPaBluQdmbXJoWFkctXWtikPnCQ"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "key-revoked"
+      }
+    },
+    {
+      "name": "revoked key: K1 revoked by revision 3, inside its window",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-09",
+        "sig": "yMmO2qyzMZTLStGcz48nBKjTUPJJgXbeyeMnJE5zfP9TacHD5RD5XMtW7SgUCLh0w0cmC_Ipde-wCNa_6Q-GCQ"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r3"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "key-revoked"
+      }
+    },
+    {
+      "name": "rotated key: K1, rotated out, issuedAt inside its window",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-09",
+        "sig": "yMmO2qyzMZTLStGcz48nBKjTUPJJgXbeyeMnJE5zfP9TacHD5RD5XMtW7SgUCLh0w0cmC_Ipde-wCNa_6Q-GCQ"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:7570722033f972b7a3e0de9c6554e7938867dfef702e50493d249df09ab91a35",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:7570722033f972b7a3e0de9c6554e7938867dfef702e50493d249df09ab91a35"
+        }
+      }
+    },
+    {
+      "name": "key window: K1 after its window, issuedAt at its notAfter",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-11-01T00:00:00Z",
+        "notBefore": "2026-11-01T00:00:00Z",
+        "expiresAt": "2026-11-01T01:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-09",
+        "sig": "wxk5ChvXzFZPZPK2qnF452vYtO4A-yJNBEbvqMdxXPrLcWwI_dWDRhOhOnTjlRVuxEN-saMooWiCvh9Zx0wHBQ"
+      },
+      "trust": {
+        "now": "2026-11-01T00:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "key-not-valid"
+      }
+    },
+    {
+      "name": "key window: K2 a millisecond before its window",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-14T23:59:59.999Z",
+        "notBefore": "2026-10-15T00:00:00Z",
+        "expiresAt": "2026-10-15T01:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "VPlzZ9iVa2DvPTZcCKWGcWGnaS9MGslsxXjjUO7f-BA6FZ89IVGwEdXsm87lomMX2hKozMurC3_7AtzJ3gMoBQ"
+      },
+      "trust": {
+        "now": "2026-10-15T00:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "key-not-valid"
+      }
+    },
+    {
+      "name": "small-order key: a listed key of order 4, refused before the signature is read",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-zero",
+        "sig": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "smallOrder"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "small-order-key"
+      }
+    },
+    {
+      "name": "unusable key: the listed key names another algorithm",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "algMismatch"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unusable-key"
+      }
+    },
+    {
+      "name": "wrong issuer: another server's attestation",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://other.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "7eNFVe49hUMPgWR3dRKe-K_RAyobTy3wpc1fQZ76gTl08uherGoo3g8Fb28stqWqihzen_ktS--6FvRWchOMBg"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-issuer"
+      }
+    },
+    {
+      "name": "unknown algorithm: ES256",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "ES256",
+        "kid": "mem-2026-10",
+        "sig": "7tZmLZ4A-vsHoMD_B9YzBMFjp7cbv7R2eOaoHF_iiGGO90nJNJ07oJWRNuatsj_DG7kizY9ZFQU7jRYIWPhiCg"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unknown-algorithm"
+      }
+    },
+    {
+      "name": "expired: at expiresAt, no grace",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T12:00:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "expired"
+      }
+    },
+    {
+      "name": "expired: a millisecond before expiresAt it still verifies, refresh due",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:59:59.999Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": true,
+        "unchanged": false,
+        "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e"
+        }
+      }
+    },
+    {
+      "name": "refresh due: 15 minutes before expiresAt",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:45:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": true,
+        "unchanged": false,
+        "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e"
+        }
+      }
+    },
+    {
+      "name": "refresh not due: a millisecond earlier",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:44:59.999Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e"
+        }
+      }
+    },
+    {
+      "name": "not yet valid: before notBefore",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:45:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "yrfotXmM-oCCGKWoadgZLkwrZ56TBr6ma5LbLQ6ktqzX7rgWdtsywug4YNyGVS7IstfuhvPAGWxa-LrIVJIqAw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "not-yet-valid"
+      }
+    },
+    {
+      "name": "not yet valid: 60 s before notBefore is within the clock skew",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:45:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "yrfotXmM-oCCGKWoadgZLkwrZ56TBr6ma5LbLQ6ktqzX7rgWdtsywug4YNyGVS7IstfuhvPAGWxa-LrIVJIqAw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:44:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:0076ca10ed9d9013696cb791dc32f26e5566464161d50e2b9ae5614336ec24c8",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:0076ca10ed9d9013696cb791dc32f26e5566464161d50e2b9ae5614336ec24c8"
+        }
+      }
+    },
+    {
+      "name": "too long: exactly 24 hours",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-26T11:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "QmBTgWM1Og5MreqXebg9c2zu3HqYI9uqZnYQGF2ICCcFEa87cumBO0v7acSBh_hQMMVshAcWYZ4baImGD3AEAw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:391416e99ad953bbf9b66814ef2ca451b6a25e5cd235a9d9fae1eb6bcb637825",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:391416e99ad953bbf9b66814ef2ca451b6a25e5cd235a9d9fae1eb6bcb637825"
+        }
+      }
+    },
+    {
+      "name": "too long: 24 hours and a millisecond",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-26T11:00:00.001Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "BN4FoL0b9QThaTkVgSU5hpA1p9FByRbdRZSPIBiKASaglT8KTqZFCJWrYBqkRMdSgTOlPkob-slULlGFNjDMAQ"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "too-long-lived"
+      }
+    },
+    {
+      "name": "too long: notBefore before issuedAt",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T10:59:59Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "g_O2QShNsDYV9JNmFPLlExRZrqbHPPBNAgOMswNcTEZTVfC3Ti33dtG0NmFK1H5ipjXgLbOKueCG28WKHwrlBg"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "too-long-lived"
+      }
+    },
+    {
+      "name": "replay: a lower revision for the held subject",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 3,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "7Tk-cV072zkkdj-lXCFXP851CN7KsTFJmSe-aVqqv_xaxO57BI2UorPCJws6SrYFQKYioqp_7AW2XEeCme-NBg"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "stale-revision"
+      }
+    },
+    {
+      "name": "replay: the held revision with other bytes",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "owner",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "C0xZWyAw99fdeqjoRF8Ylwv2iAmPHdLzb4s2lv0OuQyujfrSjdYj_c-IkfhBMaQxjBg2KZhvJFnqOPMhYt1oCA"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "revision-conflict"
+      }
+    },
+    {
+      "name": "redelivery: the held attestation again",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": true,
+        "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e"
+        }
+      }
+    },
+    {
+      "name": "renewal: a higher revision, the role changed",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "admin",
+        "external": false,
+        "status": "active",
+        "revision": 5,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "GMhipGVQnCJ_ovtlOg3mSaAGVKNyXGliN8P1oHJ4IJy3_yL9Ui32TWRtSqc87bXMJpku3bVNanMdFINsztZVCQ"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "admin",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:0a115f117c475b916964c293b12a02ec380e14978821085b372e853e50e2b0af",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 5,
+          "digest": "sha256:0a115f117c475b916964c293b12a02ec380e14978821085b372e853e50e2b0af"
+        }
+      }
+    },
+    {
+      "name": "another subject: held records are per subject",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-00c4e1aa",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 1,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "z74IF3JAWE9rhE5IKB3dsGzhfcoyfnuDdMOlYkNuGZad0ku3fTfm3fw66LlyIjDrKx6JW3aS3W2yF82344NcBw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2",
+        "held": {
+          "subject": "m-7f3a91c2",
+          "revision": 4,
+          "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:f960af5235e147e6b8c51cc5a502d4f4b1a15750cea97ee79a2c64ec98a9c178",
+        "held": {
+          "subject": "m-00c4e1aa",
+          "revision": 1,
+          "digest": "sha256:f960af5235e147e6b8c51cc5a502d4f4b1a15750cea97ee79a2c64ec98a9c178"
+        }
+      }
+    },
+    {
+      "name": "malformed: an unknown role",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "finance",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "KCrbHhPt_BcXDvKExS88diSyLwP5XB40hVL-qUYCXw84MAT9Fl4LIjTttxqL4HPQ4VqlNYGe4BhmtjHgG7idCw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an email as a member",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw",
+        "email": "a@b.example"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an extension not named by a domain",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {
+          "role": "finance"
+        },
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "BZMEAGJt6rujftZbjFVq5gToURsJVdmsqqS4qjxpGflwyUpoF7lBsfadJCvQBCxr2ndRTsIByIxxX9BUBzB3Bw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an extension holding an object",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {
+          "orgs.example/x": {
+            "a": 1
+          }
+        },
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "8driiHpwFwvgkkPNNKtFZ23pIUX4Bp7EyZXtW4dzWIJKJ2VwLsjO560PPTlm6iHp4FM7-eOXkhd7AZsLoAjiDw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: a personal context as the organization",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "personal",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "Gyp3Bmlb5_j_Yjcpc3Hf4V_F3p8OYUqo03Ub_ALkSz1lYLQmL2kMO2ejjQ-Th8rdI3u5mcCjlOihrdE06-hyAg"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: a time with four fraction digits",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00.0001Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "GHL40qb4BMsNqrP3iCdBGOtr2nYt-KXEbTXflnwdg9LYnhGpPNQb051tzik4BQLUlCCuzQY7DNEWoG7ILL9tBA"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: no signature",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: not an object",
+      "attestation": "org-membership",
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "context: no trust",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": null,
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: a key set of another organization",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "orgB"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: a key set that is not one",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "rootAmongKeys"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: a key set under an algorithm the verifier does not know",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "es256"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: an audience that is not an opaque id",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: a subject that is not an opaque id",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2",
+        "subject": ""
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: a held record without a subject",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2",
+        "held": {
+          "revision": 4,
+          "digest": "sha256:4c981ef45b494a7e1d8bd3d3620c7be7feb235b0be53a78a560fea59af21bf0e"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "no clock: an unreadable now",
+      "attestation": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "subject": "m-7f3a91c2",
+        "role": "member",
+        "external": false,
+        "status": "active",
+        "revision": 4,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "cUFA7MgmWo2D9kWJobOYGsPCsUSidyHC5Akpn5g13r1abAGjAPFZZBxAyqG4Wz_pgARJvoq8gOr6eTCi1Ky5Dw"
+      },
+      "trust": {
+        "now": "2026-10-25 11:30:00",
+        "org": "org:org-a",
+        "audience": "fabric-estate-5d0f1a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "no-clock"
+      }
+    }
+  ]
+}

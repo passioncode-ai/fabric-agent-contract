@@ -642,7 +642,7 @@ caller's signature is proven it tells it nothing it holds (DEC-0066).
 applied only after `verifyEstateRecord`, minus revoked machines and keys (and the revocations of verified delta
 entries), minus keys that could never verify; none once the record's window ends, when open sessions close too. It
 keeps strangers out of mailboxes and is not authorization: a recipient decides the tier from the signed sender. An
-organization's relay has none of its own until `org-authority/1` (Fabric D8).
+organization's relay has none of its own until `org-authority/1` (decided with CT-122, CT-37).
 
 **Revocation delta**: The estate record's fast path (`revocation-delta/1`, DEC-0054): an append-only chain of
 entries, one revocation each, signed by an **Estate key** and chained by RFC 8785 hash, so its head is
@@ -662,6 +662,13 @@ expires ([entitlement](docs/specification/entitlement.md)).
 **Entitlement key set**: The issuer's signing keys for entitlements under a rising revision, each with a window, and the
 kids it revokes (`entitlement-key-set/1`, DEC-0085), signed by the issuer's root key, which a verifier pins at
 installation and which signs nothing else ([entitlement](docs/specification/entitlement.md#issuer-keys)).
+
+**Membership attestation**: What an organization server states about one person's membership of one organization,
+for one reader, for at most a day: the organization, a subject pairwise to that reader, a role (`owner`, `admin`,
+`member`), `active` or `ended`, and a revision (`org-membership/1`, DEC-0127). Signed by a key of the organization's
+`org-key-set/1`, whose root the person pins in their estate record (`organizations`) when they join, with no
+administrator's acceptance. Any organization server issues it, so a reader works with any of them
+([membership](docs/specification/membership.md)).
 
 **Share grant id**: The `meta.id` of a share grant into an organization, `urn:fabric:share:` and 32 lower-case hex
 digits from a CSPRNG, which holds no person's name, address or estate id and is compared as written (`FAC-SEM-117`,

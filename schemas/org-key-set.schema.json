@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/org-key-set.schema.json",
+  "title": "Organization key set, org-key-set/1 (DEC-0127)",
+  "description": "One organization's signing keys for org-membership/1 attestations, under a monotonic revision, signed by the organization's root key over the RFC 8785 form of the set without sig (the register's org-key-set/1, DEC-0063). The person's estate pins the root (the estate record's organizations); the root signs nothing else. One root per organization, even on a server that hosts many (MD-9 path (a)).",
+  "type": "object",
+  "required": [
+    "type",
+    "issuer",
+    "org",
+    "revision",
+    "issuedAt",
+    "keys",
+    "revoked",
+    "alg",
+    "kid",
+    "sig"
+  ],
+  "properties": {
+    "type": {
+      "const": "org-key-set/1"
+    },
+    "issuer": {
+      "$ref": "entitlement.schema.json#/$defs/issuer"
+    },
+    "org": {
+      "$ref": "org-membership.schema.json#/$defs/org",
+      "description": "The organization whose root signs this set; the pin names the same."
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991,
+      "description": "Rises with every set the root signs; a verifier refuses a lower revision than the one it applied, and the same revision with other bytes."
+    },
+    "issuedAt": {
+      "$ref": "entitlement.schema.json#/$defs/instant",
+      "description": "At least one key's window holds it (FAC-SEM-146)."
+    },
+    "keys": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "required": [
+          "kid",
+          "alg",
+          "x",
+          "notBefore",
+          "notAfter"
+        ],
+        "properties": {
+          "kid": {
+            "$ref": "activity-common.schema.json#/$defs/opaqueId"
+          },
+          "alg": {
+            "enum": [
+              "EdDSA"
+            ]
+          },
+          "x": {
+            "$ref": "#/$defs/ed25519X"
+          },
+          "notBefore": {
+            "$ref": "entitlement.schema.json#/$defs/instant"
+          },
+          "notAfter": {
+            "$ref": "entitlement.schema.json#/$defs/instant",
+            "description": "After notBefore (FAC-SEM-146). An attestation verifies under this key only when its issuedAt is at or after notBefore and before notAfter."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "The signing keys: each kid once, never the root's kid, at least one valid at issuedAt (FAC-SEM-146)."
+    },
+    "revoked": {
+      "type": "array",
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "activity-common.schema.json#/$defs/opaqueId"
+      },
+      "description": "Kids revoked: absent from keys (FAC-SEM-146), and every attestation one of them signed is refused (key-revoked)."
+    },
+    "alg": {
+      "enum": [
+        "EdDSA"
+      ],
+      "description": "The root key's algorithm."
+    },
+    "kid": {
+      "$ref": "activity-common.schema.json#/$defs/opaqueId",
+      "description": "The root key's kid, as the estate pinned it."
+    },
+    "sig": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{85}[AQgw]$",
+      "description": "The root key's Ed25519 signature (64 bytes, base64url without padding) over the UTF-8 RFC 8785 form of the set without sig."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "ed25519X": {
+      "$ref": "common.schema.json#/$defs/ed25519PublicKeyBase64url",
+      "description": "A 32-byte Ed25519 public key, base64url without padding, canonical (the last character's two spare bits zero). Never a key of small order (DEC-0045, CT-29): the enum lists libsodium's seven encodings with the sign bit clear and set."
+    }
+  }
+}

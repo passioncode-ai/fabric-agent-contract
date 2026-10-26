@@ -332,8 +332,8 @@ it stops every request to that organization, drops what it buffered for it (even
 enrollment, discarding that organization's `server` policy layer, key set, collection start and streams, and deleting every
 credential of its context ([credentials](credentials.md#revocation), DEC-0111) (an `mdm` layer stays the operating
 system's); its other enrollments are untouched. `certificate-revoked`, `certificate-unknown` and a
-server's own enrollment refusals keep their meaning. The enrollment's end on `organization-closed` is the one event this
-contract decides, besides a newer signed policy, that ends a `server` layer's locks (an `mdm` lock survives it); an
+server's own enrollment refusals keep their meaning. The enrollment's end on `organization-closed`, and on a membership's end ([membership](membership.md#ending) OM-5,
+DEC-0127), are the events this contract decides, besides a newer signed policy, that end a `server` layer's locks (an `mdm` lock survives it); an
 enrollment a node ends on `certificate-revoked` is not decided here ([precedence and locks](#policy)), except that the node
 deletes every credential of that organization's context and its marks at once, for an answer to a request signed under its
 current certificate ([credentials](credentials.md#revocation),
@@ -433,8 +433,9 @@ It reports the revision it holds for each delivered layer in every check-in.
 **Expiry** (DEC-0053). A delivered layer MAY carry `expiresAt`. After the earliest one passes, and until
 a newer policy arrives, the device keeps every lock in force but stops honouring grants, stops remote
 execution, and lets no person's key serve someone else ([`expectedDecision`](../../src/device-rules.ts),
-`FAC-SEM-068`). Expiry never loosens a device: what was locked stays locked. The one exception is the enrollment's end
-on `organization-closed`, which discards that organization's `server` layer with its locks (DEC-0103).
+`FAC-SEM-068`). Expiry never loosens a device: what was locked stays locked. The exceptions are the enrollment's end
+on `organization-closed`, which discards that organization's `server` layer with its locks (DEC-0103), and its end with
+a membership ([membership](membership.md#ending) OM-5, DEC-0127), which does the same.
 
 <a id="collection-start"></a>
 
@@ -458,7 +459,8 @@ never overridden by a lower layer. A device MUST refuse a local change to a lock
 key as locked. The `user` layer cannot lock (schema, `FAC-SEM-042`). A `user` layer's `harness.baseline` and
 `repair.packages` count for nothing (DEC-0102): the resolution skips them, so a local change to either changes nothing
 (which answer a device gives such a change, and a schema that refuses them in a user layer, is CT-99). A `server`
-layer's locks also end with its enrollment when the organization closed ([a closed organization](#organization-closed), DEC-0103).
+layer's locks also end with its enrollment when the organization closed ([a closed organization](#organization-closed), DEC-0103)
+or when the membership ended ([membership](membership.md#ending) OM-5, DEC-0127).
 
 <a id="key-sets"></a>
 
