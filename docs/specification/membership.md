@@ -183,7 +183,9 @@ Everything the membership carried ends with it, as one rule:
 - when the person ends it by unpinning, their Fabric first sends the organization the empty revision that withdraws an
   adaptation plan it sent there ([AD-6](#the-adaptation-plan)), waiting for an answer no longer than the person agrees
   to, then asks the passkey to sign the revision that unpins it whatever the answer; a withdrawal no receipt confirmed
-  within that wait (no answer, or a refusal) is the server's to end with the membership, and Fabric tells the person
+  within that wait is the server's to end with the membership (inside the wait a `stale-revision` or
+  `revision-conflict` is met as AD-4 says: a receipt that already holds an empty plan confirms the withdrawal, and
+  otherwise Fabric sends the empty plan at the next revision; no answer or any other refusal leaves it unconfirmed), and Fabric tells the person
   the plan may remain with the server and, where
   the server offers a page to withdraw it (AD-4), that they can withdraw it there;
 
@@ -434,10 +436,12 @@ administrators. It is OM-7's adaptation row made a document; nothing else of the
 **AD-1, the document.** `org-adaptation/1` is `{type, org, revision, items, requests}`, closed.
 - `revision` counts up from 1. The person's Fabric keeps one counter per organization, so every plan it sends there
   is the next revision.
-- `items` (at most 200) are `{ref, kind, label?}`. `kind` is `project`, `history`, `result` or `schedule`.
+- `items` (at most 200) are `{ref, kind, label?}`. `kind` is `project`, `history`, `result` or `schedule`; `label` is at
+  most 80 characters (code points).
 - `requests` (at most 50) are `{id, kind, itemRef?, ...}`, `id` being 8 to 64 of `A-Za-z0-9_-`:
-  - `access`: `resource` (the organization's own name of an account, environment or credential), `note?`;
-  - `spend`: `amountUsd` (1 to 100 000), `period` (`once` or `month`), `purpose`;
+  - `access`: `resource` (the organization's own name of an account, environment or credential, at most 120
+    characters), `note?` (at most 200);
+  - `spend`: `amountUsd` (1 to 100 000), `period` (`once` or `month`), `purpose` (at most 200 characters);
   - `role`: `role`, which is `admin`. `owner` is never asked for and `member` is the role the person already holds,
     so `admin` is the only role of `org-authority/1` a request can name.
 - `FAC-SEM-153`: each `ref` is named once, each request `id` once, and an `itemRef` names one of the plan's items.
@@ -468,10 +472,11 @@ person. The route is `PUT /fabric/adaptation/v1/{org}/plan` under the issuer's o
 "no-plan", message}}`; a server that answers a `404` without that code there leaves every person's Fabric reading
 that it takes no plans. Fabric sends a plan only after a `GET` answered a receipt or `no-plan`. It retries a `GET` that got no answer or
 a `5xx` with backoff, as AD-4 retries a `PUT`, backs off on `429`, and reads a `401` or a `403` by the code its body
-carries: an AD-4 code is that refusal (`not-a-member` as AD-4 says); any other code (a sign-in the server asks for
-again, say) is shown to the person, and Fabric holds the plan and asks again after the person acts. Another `404`, or
-a `401` or a `403` with no code in its body (or OAuth's `invalid_token`, read from `WWW-Authenticate` (RFC 6750 section 3) or as the body's code,) that persists after Fabric refreshed the
-credential, means the server takes no plans from this credential: Fabric sends nothing, tells the person so, and asks again only after the person connects
+carries, which wins over a `WWW-Authenticate` header: an AD-4 code is that refusal (`not-a-member` as AD-4 says);
+any other code but `invalid_token` (a sign-in the server asks for again, say) is shown to the person, and Fabric holds
+the plan and asks again after the person acts. Another `404`, or a `401` or a `403` whose body carries no code or
+`invalid_token` (OAuth's, which a codeless body may carry in `WWW-Authenticate` instead, RFC 6750 section 3) that
+persists after Fabric refreshed the credential, means the server takes no plans from this credential: Fabric sends nothing, tells the person so, and asks again only after the person connects
 the server again. A server accepts a plan body of at least 512 KiB, which holds the largest plan this schema allows
 written as compact JSON in UTF-8, the form Fabric sends. A suspended membership (OM-6) authorises nothing new, so Fabric
 refreshes the attestation before a `PUT` and sends only once the membership is active again; a withdrawal on leaving
@@ -524,8 +529,8 @@ administrator's credential reaches the owner's draft is CT-158.
 **AD-6, privacy and the end.** The plan is read by the organization's administrators and the person it came from,
 never by another member. When the person ends the membership by unpinning, their Fabric first sends the empty
 revision that withdraws the plan (OM-5); when the server ends it, or the organization closes, the server ends the plan
-and its decisions, and serves none of them under a later membership: its `GET` answers `no-plan` until that
-membership's first plan. Either way the person's Fabric sends no further plan under that membership; a later
+and its decisions, and serves none of them under a later membership: that membership starts with no plan held, so its
+`GET` answers `no-plan` and its first plan is accepted at any revision. Either way the person's Fabric sends no further plan under that membership; a later
 membership, pinned again, may send, with new request ids (AD-2). A withdrawn plan's earlier revisions are the server's record, kept as its
 retention says.
 

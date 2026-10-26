@@ -124,7 +124,8 @@ export function adaptationReceipt(plan: JsonObject, decisions: readonly RequestD
  * same revision with another digest is `revision-conflict`; the same revision and digest is `repeated` (answered with
  * the same receipt, nothing stored); a higher revision is `accepted` and replaces the held one. A plan with no items
  * and no requests is accepted the same way, and withdraws what the member brought. A `held` that is not a revision
- * (`null` for no plan yet) holds none.
+ * (`null` for no plan yet) holds none. With `valid` true, only the revision (at least 1) and the RFC 8785 form are
+ * checked again here; every other schema fact is the caller's `valid`.
  */
 export function decideAdaptation(
   plan: unknown,

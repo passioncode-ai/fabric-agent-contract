@@ -14,6 +14,7 @@ import {
   orgAdaptationRules,
   requestDigest
 } from "../src/org-adaptation.js";
+import { schemaClosure } from "../src/schema-closure.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { VECTOR_FILE, buildOrgAdaptationVectors } from "../tools/vectors/org-adaptation.js";
@@ -55,11 +56,25 @@ describe("org-adaptation/1 (DEC-0138)", () => {
   });
 
   it("states in every decide vector the valid the schema and FAC-SEM-153 give, unless it names why not", () => {
+    const skipped: string[] = [];
     for (const vector of vectors.decide as Json[]) {
-      if (String(vector.name).includes("whatever the schema check said")) continue;
       const real = valid(vector.plan, "org-adaptation") && evaluateSemanticRules("org-adaptation", vector.plan).length === 0;
+      if (String(vector.name).includes("whatever the schema check said")) {
+        skipped.push(vector.name);
+        expect([real, vector.context.valid], vector.name).toEqual([false, true]);
+        continue;
+      }
       expect(vector.context.valid, vector.name).toBe(real);
     }
+    expect(skipped).toEqual([
+      "a plan with no RFC 8785 form (a lone surrogate), whatever the schema check said",
+      "a revision below 1, whatever the schema check said"
+    ]);
+    expect(schemaClosure(path.join(root, "schemas"), "org-adaptation-receipt.schema.json")).toEqual([
+      "activity-common.schema.json", "common.schema.json", "entitlement.schema.json", "fabric-package.schema.json",
+      "interop-capability.schema.json", "manifest.schema.json", "org-adaptation-receipt.schema.json",
+      "org-adaptation.schema.json", "org-membership.schema.json", "service-common.schema.json"
+    ]);
   });
 
   it("binds each decision to its request's digest", () => {

@@ -7663,7 +7663,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   carried it; a reader pinned at a main commit of DEC-0127 or DEC-0128 refuses a set that lists it, and the release
   that carries DEC-0127 to DEC-0129 lists it as a narrowing (DEC-0119).
 - **Annotated (2026-10-26):** DEC-0138 adds to OM-5 that, when the person leaves by unpinning, Fabric first withdraws
-  an adaptation plan it sent by an empty revision, waiting no longer than the person agrees to.
+  an adaptation plan it sent by an empty revision, waiting no longer than the person agrees to, and to OM-6 that a
+  suspension holds an adaptation plan's `PUT` but not that withdrawal.
 - **Context:** the organization train's packet TP-00 (row N-1, step 1.1 of fabric-workspace
   `docs/reports/2026-10-25-organization-r1/README.md` at `d438e3dc`): Fabric cannot trust an organization server's
   membership, and a product cannot be granted one, without a document Fabric verifies. MD-9 path (a)
@@ -8300,10 +8301,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3. **AD-3.** The person's Fabric sends the whole plan with the credential the server issued it for the person;
      the route is `PUT /fabric/adaptation/v1/{org}/plan`, with `GET` for the receipt (`404 no-plan` before the first).
      Fabric sends only after a `GET` answered a receipt or `no-plan`, retrying no answer or a `5xx` and backing off on
-     `429`; a `401` or `403` is read by its body's code (an AD-4 code is that refusal; another is shown and the plan
-     held until the person acts, the first server's `idp-sign-in-required` objection), and only another `404`, or a
-     `401` or `403` with no code (or `invalid_token`, in `WWW-Authenticate` or as the code) that persists after a credential refresh, means the server takes
-     no plans from this credential.
+     `429`; a `401` or `403` is read by its body's code, which wins over `WWW-Authenticate` (an AD-4 code is that
+     refusal; another but `invalid_token` is shown and the plan held until the person acts, the first server's
+     `idp-sign-in-required` objection), and only another `404`, or a `401` or `403` whose body carries no code or
+     `invalid_token`, persisting after a credential refresh, means the server takes no plans from this credential.
   4. **AD-4.** The server keeps the newest revision (`decideAdaptation`): `not-a-member`, `schema-unsupported`,
      `malformed`, `wrong-organization`, `stale-revision`, `revision-conflict`, a repeat answering the same receipt; an
      empty revision withdraws, and a withdrawal on the server's own page is held as the next, empty revision.
@@ -8331,7 +8332,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/vectors/org-adaptation.json` written by `tools/vectors/org-adaptation.ts`; fixtures `org-adaptation*`;
   `test/org-adaptation.test.ts`, `test/positive-sweep.test.ts`, `test/rule-tolerance.test.ts`, `vitest.config.ts`,
   `test/protocol-revisions.test.ts`, `test/schema-compilation.test.ts`, `tools/vectors/run.ts`, `fixtures/catalogue.json`;
-  `docs/specification/membership.md` (header, OM-5, OM-7's row, The adaptation plan, `FAC-SEM-153`, Who adopts it,
+  `docs/specification/membership.md` (header, OM-5, OM-6, OM-7's row, The adaptation plan, `FAC-SEM-153`, Who adopts it,
   Privacy, Not decided here), `contexts.md` (Linkability), `devices.md` (what stays linkable),
   `docs/specification/README.md` (the membership row), `conformance.md` (rule table, code table, the module row, the membership reader's row, the adopter row), `CONTEXT.md` (Adaptation plan), `docs/DOCMAP.md`,
   `docs/ux/flows.md` (FLW-32), `docs/ux/foundation.md` (ST-038), `docs/ux/scenarios.md` (SCN-047; SCN-050, draft), `docs/ux/screens.md` (SCR-31); backlog CT-159, CT-169, CT-171 (the readings' non-blocking findings); the

@@ -58,6 +58,9 @@ requests to the administrators. The first organization server needs it by 2026-1
   defined narrowly in DEC-0138 item 5 and the receipt schema). Fixed, with a test holding each vector's `valid` to the
   real check, the held plan in FLW-32, OM-6's pointer to AD-3, `no-plan` under a later membership (AD-6) and where
   `invalid_token` is read.
+- Round 10: unit, seam and product pass (the first clean round). Polish taken: a body code wins over
+  `WWW-Authenticate`, a crossing within the leave wait is met as AD-4 says, a later membership starts with no plan
+  held, the text limits in AD-1 and SCR-31, OM-6 annotated on DEC-0127, the schema closure pinned.
 
 ## Open
 
