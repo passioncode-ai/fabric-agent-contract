@@ -1,0 +1,55 @@
+# 2026-10-26: the machines' report, its readings' loose ends settled
+
+## Objective
+
+Close CT-161, DEC-0132's non-blocking findings. Settle what text, code or a vector can settle. Move each design
+question to CT-172.
+
+## Done
+
+- **DEC-0139** (this branch, `agent/ct161-dec0132-findings-20261026`).
+  - `acceptMachineReport` is now the hub's reading in two cases: after `openMachineReport`, and of its own node's
+    `machine.report`.
+    - It answers `malformed` for a `FAC-SEM-152` finding or for an `at` that `strictTime` cannot read.
+    - Otherwise it answers `wrong-machine` or `stale`.
+    - `openMachineReport` refuses that unreadable `at` too.
+  - Vectors: an off-curve `enc`, a leap second, a space for `T`, and the `accept` group. No earlier vector's answer
+    changes.
+  - MR-2 to MR-4 and local-channel.md:
+    - a send refused `unknown-recipient`, `mailbox-full` or `rate-limited` is dropped, and the next report replaces it;
+    - a hub whose own `#kem` is unusable says so in its node's `health` `degraded`;
+    - any error answer to `machine.report`, or none, means no report;
+    - an unserved node method answers `unknown-method`;
+    - `machine.report` stays inside the same-user trust boundary.
+  - Smaller fixes:
+    - the conformance rows;
+    - CONTEXT;
+    - three schema descriptions;
+    - FLW-27 and SCN-038's wait for every machine's report;
+    - devices.md;
+    - the window-lease case names now say "written";
+    - CT-122's stale name;
+    - CT-152's adoption text.
+  - CT-154 records the board answers: Fabric v0.3.13 (`7ef21793`) and the adapter's FAA-138 (`aa86a675`).
+- **CT-161** is closed. **CT-172** holds the design questions, among them what a hub not yet on DEC-0132 does with a
+  report (Fabric's answer is needed).
+
+## Open
+
+- Readings: rounds 1 to 2 or more until two clean rounds in a row.
+- Merge after DEC-0138 (PR #212). Both append to `docs/DECISIONS.md`, so merge `origin/main` in once #212 lands, with
+  DEC-0138 before DEC-0139, then run the gate again.
+- Ask Fabric on the board how its hub treats a verified relay body of an unknown payload type (CT-172).
+
+## Checks actually run
+
+- `pnpm typecheck`.
+- vitest with coverage written to the session scratchpad.
+- `pnpm ux:lint`, `pnpm docs:check`, `pnpm privacy:check`, `pnpm vectors:check`.
+- No U+2014 in the added lines.
+
+## Next task
+
+Finish the readings, merge after #212, and release. Then tell CT-152's adopters on board thread `41a9b0cb`:
+- Fabric's CO-452 and Project Observatory's OBS-253 now read with `acceptMachineReport`;
+- an unusable `#kem` goes in `degraded`.

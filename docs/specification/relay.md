@@ -561,7 +561,8 @@ opened report (`acceptMachineReport`, DEC-0139): the schema, `FAC-SEM-152` and a
 holds (`stale` otherwise); it holds it as that machine's newest report, so the hub machine's own
 leases and revision count under MR-5 like any machine's. A node that answers `unknown-method` (pinned before
 DEC-0132) has reported nothing: its leases count at their whole amounts, and it has applied no revision the hub can
-count, so the hub waits for it as for any machine that has not reported.
+count, so the hub waits for it as for any machine that has not reported. Any other error answer, or none within the
+channel's own timeouts, reads the same (DEC-0139).
 
 **MR-3, how it travels.** The report is the inner `payload` of a relay message body (`fabric-relay-message/1`), sealed
 to the hub machine's `#kem`, as the revision that certifies that hub machine lists it, as `fabric-machine-report/1` `{type, kem, enc, ct}`: HPKE base mode, suite `[16, 1, 1]`
@@ -572,9 +573,9 @@ into another body does not open), the plaintext the report's RFC 8785 form, at m
 machine `send`s it to the hub machine's `#sig` with a new `msgId`; a body whose signed `exp` is up to 7 days later
 reaches a hub that was asleep. A hub machine with no usable `#kem` gets no report; a hub whose own `#kem` the revision
 it applied does not list, or whose private half it cannot read, names that in its node's `health` `degraded` (local
-channel), so DL-15's switch, a move's step 6 and its division do not wait on reports in silence (DEC-0139). A hub not
-yet on DEC-0132 does not know `fabric-machine-report/1`: it acknowledges the delivery and acts on nothing, the sender
-hears nothing back (a report is never answered), and the machine's reports count once the hub adopts DEC-0132.
+channel), so DL-15's switch, a move's step 6 and its division do not wait on reports in silence (DEC-0139). What a hub
+not yet on DEC-0132 does with a body whose payload it does not know is not decided here (CT-172); the machine hears
+nothing back either way, since a report is never answered.
 
 **MR-4, the hub's reading.** After the body is verified (`verifyMessageBody`) and is not a replay (`checkReplay`), the
 hub places the sender with `relayCallerTier`; a sender that is not T1 is ignored, its delivery acknowledged. Then

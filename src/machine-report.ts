@@ -79,8 +79,10 @@ export function sealMachineReport(report: unknown, ctx: { from: unknown; to: unk
  * its sender in T1 as `sender` (the machine it named). In order: `malformed` for a sealed shape that is not the
  * schema's; `wrong-recipient` for another `kem`; `cannot-open` when HPKE fails (another body's `from`, `to` or `msgId`
  * among them); `malformed` for a plaintext that is not UTF-8 JSON in its own RFC 8785 form, not of the report's type, or
- * that `schemaValid` refuses; `wrong-machine` when the report names another machine than the sender; `stale` when its
- * `at` is not after the report the hub holds for that machine. It never throws.
+ * that `schemaValid` refuses, or whose `at` RFC 3339 as `strictTime` reads does not (a leap second, a space for `T`;
+ * DEC-0139); `wrong-machine` when the report names another machine than the sender; `stale` when its `at` is not after
+ * the report the hub holds for that machine. The hub then reads the report as `acceptMachineReport` does. It never
+ * throws.
  */
 export function openMachineReport(sealed: unknown, ctx: { from: unknown; to: unknown; msgId: unknown; own: { kid: unknown; privateKey: unknown }; sender: unknown; held?: { at: unknown }; schemaValid: (report: unknown) => boolean }): { ok: true; report: Json } | { ok: false; refusal: MachineReportRefusal } {
   if (!isObject(sealed)) return { ok: false, refusal: "malformed" };
@@ -114,16 +116,24 @@ export function openMachineReport(sealed: unknown, ctx: { from: unknown; to: unk
     valid = false;
   }
   if (!valid) return { ok: false, refusal: "malformed" };
-  // An `at` the schema's date-time takes but RFC 3339 as `strictTime` reads does not (a leap second, a space) cannot be
-  // ordered against the report the hub holds: it is malformed, held or not.
-  if (!Number.isFinite(strictTime(report.at))) return { ok: false, refusal: "malformed" };
-  if (report.machine !== ctx.sender) return { ok: false, refusal: "wrong-machine" };
-  if (isObject(ctx.held)) {
-    const held = isString(ctx.held.at) ? strictTime(ctx.held.at) : Number.NaN;
-    // A held time the hub cannot read keeps nothing back: the report replaces it.
-    if (Number.isFinite(held) && !(strictTime(report.at) > held)) return { ok: false, refusal: "stale" };
+  const order = orderReport(report, ctx.sender, ctx.held);
+  return order === undefined ? { ok: true, report } : { ok: false, refusal: order };
+}
+
+/**
+ * The checks the hub's two readings share, after the schema: an `at` the schema's date-time takes but RFC 3339 as
+ * `strictTime` reads does not (a leap second, a space) cannot be ordered against the report held, so it is `malformed`
+ * held or not; then `wrong-machine`; then `stale`. A held time the hub cannot read keeps nothing back.
+ */
+function orderReport(report: Json, machine: unknown, held: unknown): "malformed" | "wrong-machine" | "stale" | undefined {
+  const at = strictTime(report.at);
+  if (!Number.isFinite(at)) return "malformed";
+  if (report.machine !== machine) return "wrong-machine";
+  if (isObject(held)) {
+    const heldAt = isString(held.at) ? strictTime(held.at) : Number.NaN;
+    if (Number.isFinite(heldAt) && !(at > heldAt)) return "stale";
   }
-  return { ok: true, report };
+  return undefined;
 }
 
 /**
@@ -131,8 +141,9 @@ export function openMachineReport(sealed: unknown, ctx: { from: unknown; to: unk
  * `report` its own node's `machine.report` answered over the local channel. In order: `malformed` (not an object, the
  * schema refuses it, a `FAC-SEM-152` finding, or an `at` `strictTime` cannot read), `wrong-machine` (another machine
  * than `machine`, the sender `relayCallerTier` named or the hub's own machine id) and `stale` (an `at` not after the
- * report held for that machine). A `null` answer is no report: the node applies no estate records, and the hub holds
- * nothing for it. Never throws.
+ * report held for that machine). The caller handles a `null` answer before it calls: that is no report (the node
+ * applies no estate records, and the hub holds nothing for it), while `acceptMachineReport(null)` is `malformed`, as is
+ * anything else that is no report. Never throws.
  */
 export function acceptMachineReport(report: unknown, ctx: { machine: unknown; held?: { at: unknown }; schemaValid: (report: unknown) => boolean }): { ok: true; report: Json } | { ok: false; refusal: MachineReportAcceptRefusal } {
   if (!isObject(report) || report.type !== MACHINE_REPORT_MESSAGE_TYPE) return { ok: false, refusal: "malformed" };
@@ -143,14 +154,8 @@ export function acceptMachineReport(report: unknown, ctx: { machine: unknown; he
     valid = false;
   }
   if (!valid || leaseFindings(report).length > 0) return { ok: false, refusal: "malformed" };
-  const at = strictTime(report.at);
-  if (!Number.isFinite(at)) return { ok: false, refusal: "malformed" };
-  if (report.machine !== ctx.machine) return { ok: false, refusal: "wrong-machine" };
-  if (isObject(ctx.held)) {
-    const held = isString(ctx.held.at) ? strictTime(ctx.held.at) : Number.NaN;
-    if (Number.isFinite(held) && !(at > held)) return { ok: false, refusal: "stale" };
-  }
-  return { ok: true, report };
+  const order = orderReport(report, ctx.machine, ctx.held);
+  return order === undefined ? { ok: true, report } : { ok: false, refusal: order };
 }
 
 /** FAC-SEM-152 on `machine-report`: each lease once, by its `leaseId`. */

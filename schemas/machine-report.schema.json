@@ -16,7 +16,7 @@
     },
     "machine": {
       "$ref": "activity-common.schema.json#/$defs/opaqueId",
-      "description": "The reporting machine's id in the estate record; the hub refuses a report whose machine is not the one relayCallerTier named for the body's sender (wrong-machine)."
+      "description": "The reporting machine's id in the estate record; the hub refuses a report whose machine is not the one relayCallerTier named for the body's sender, or, for its own node's machine.report on the local channel, not its own machine id (wrong-machine)."
     },
     "at": {
       "$ref": "common.schema.json#/$defs/timestamp",

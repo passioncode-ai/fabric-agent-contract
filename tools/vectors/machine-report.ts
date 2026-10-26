@@ -6,7 +6,8 @@
  *   tsx tools/vectors/machine-report.ts --write   write it
  *
  * Every vector change is made here and written by `--write`, never by hand; `test/machine-report.test.ts` runs the
- * check. Each expected answer is written below by hand from DEC-0132's items. The sealed reports are computed: HPKE base
+ * check. Each expected answer is written below by hand from DEC-0132's items and DEC-0139's (the strict `at`, the
+ * off-curve `enc`, the `accept` group). The sealed reports are computed: HPKE base
  * mode (`hpkeSealBase`, itself checked against RFC 9180 §A.3.1 by `secret-envelope.json`) with an ephemeral scalar
  * derived from a published label, and the additional data written out here from the decision, so a port reproduces
  * each byte. Nothing here imports `src/machine-report.ts`, so the gate checks that the reference returns what this file
@@ -90,6 +91,7 @@ function machineReportVectors(): Json {
       { name: "the hub's own node answers its report", report: { ...REPORT, machine: "m-hub" }, context: { machine: "m-hub" }, expect: { ok: true } },
       { name: "an opened report whose lease is named twice is dropped", report: TWICE, context: { machine: "m-a" }, expect: { ok: false, refusal: "malformed" } },
       { name: "a report the schema refuses", report: { type: "machine-report/1", machine: "m-hub" }, context: { machine: "m-hub" }, expect: { ok: false, refusal: "malformed" } },
+      { name: "an at with a space for T", report: { ...REPORT, machine: "m-hub", at: "2026-10-27 08:00:00Z" }, context: { machine: "m-hub" }, expect: { ok: false, refusal: "malformed" } },
       { name: "an at strictTime cannot read", report: { ...REPORT, machine: "m-hub", at: "2026-12-31T23:59:60Z" }, context: { machine: "m-hub" }, expect: { ok: false, refusal: "malformed" } },
       { name: "a node that answers another machine's report", report: REPORT, context: { machine: "m-hub" }, expect: { ok: false, refusal: "wrong-machine" } },
       { name: "a report not after the one held", report: { ...REPORT, machine: "m-hub" }, context: { machine: "m-hub", held: { at: "2026-10-27T08:00:00Z" } }, expect: { ok: false, refusal: "stale" } },

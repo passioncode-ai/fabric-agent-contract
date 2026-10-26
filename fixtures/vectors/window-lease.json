@@ -2810,7 +2810,7 @@
       }
     },
     {
-      "name": "a report received after expiry: the late report is the refund",
+      "name": "a report written after expiry: the late report is the refund",
       "ledger": {
         "limitUsd": "1000",
         "at": "2026-10-12T09:00:00Z",
@@ -2868,7 +2868,7 @@
       }
     },
     {
-      "name": "two reports after expiry: the latest received counts",
+      "name": "two reports after expiry: the latest written counts",
       "ledger": {
         "limitUsd": "1000",
         "at": "2026-10-12T09:00:00Z",
@@ -2931,7 +2931,7 @@
       }
     },
     {
-      "name": "a report received before expiry does not end the lease's claim",
+      "name": "a report written before expiry does not end the lease's claim",
       "ledger": {
         "limitUsd": "1000",
         "at": "2026-10-12T09:00:00Z",
@@ -3208,7 +3208,7 @@
       }
     },
     {
-      "name": "a report received after the hub's clock is not counted yet",
+      "name": "a report written after the hub's clock is not counted yet",
       "ledger": {
         "limitUsd": "1000",
         "at": "2026-10-12T09:00:00Z",
