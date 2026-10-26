@@ -148,7 +148,7 @@ authenticated as the relayer, refuses one without it `operator-decision-required
 (`mandate/1`): the task, the operator's words verbatim, when they were given, an expiry within 7 days, a scope
 (capabilities, relayed actions, an effect ceiling, a per-call spend ceiling, projects) and the chain of agents that
 held it, each call appending its callee and never widening the scope. A callee that is the chain's last agent, called
-by the one before it from T0 or T1, takes a call it covers as the operator's decision and refuses only the part it does
+from T0 or T1 (by the agent before it, where it authenticated its caller's agent id), takes a call it covers as the operator's decision and refuses only the part it does
 not cover, so the operator is asked again for that alone; a T2 caller's mandate changes nothing, beyond the estate a
 delegation token carries the authority (`mandateCovers`,
 [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).

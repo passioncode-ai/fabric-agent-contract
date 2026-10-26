@@ -8,7 +8,8 @@ import { createValidatorSync } from "./validator.js";
 // #region mandate (docs: docs/specification/delegation.md#the-operators-mandate)
 // DEC-0125: the operator's instruction for one task travels with the task. The agent leading it states a mandate from
 // the operator's own words (MD-1); every call under it appends the agent it calls, with a scope never wider (MD-2); a
-// callee that is the chain's last agent, called by the one before it from T0 or T1, takes a call the mandate covers as
+// callee that is the chain's last agent, called from T0 or T1 (by the agent before it, where it authenticated the
+// caller's agent id), takes a call the mandate covers as
 // the operator's decision (MD-3), and refuses only what it does not cover, so the operator is asked for that part alone
 // (MD-4). A T2 caller's mandate changes nothing (MD-5); human steps and the money limits never travel (MD-6).
 

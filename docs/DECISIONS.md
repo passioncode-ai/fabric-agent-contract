@@ -7472,8 +7472,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      document.
   3. **MD-3, taking a call.** A callee takes the mandate only from T0 or T1 and only when the chain ends in itself, and,
      when it authenticated its caller's agent id (a per-agent credential, a delegation token's actor, the hub's token
-     naming the origin), only when that id is the agent before it; with the shared descriptor token on loopback the
-     chain's end alone binds it; then a call the mandate covers is the operator's decision: a
+     naming the origin, never the hub's own id), only when that id is the agent before it; without one the chain's end
+     alone binds it; then a call the mandate covers is the operator's decision: a
      `relayed` action without a decision (AP-2), any approval the product asks of the operator before a step, and a
      job's approval step (no input request raised). Covered: the action or the capability listed (an effect beyond
      `draft` needs the call named: a relayed action in either list, any other call in `capabilities`), the effect within the ceiling and never `change-policy` (AP-5), the callee's own
@@ -7498,8 +7498,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   carrying the words with the task, bound to a scope, an expiry and the chain that held it, lets every agent act without
   turning a quoted sentence into a general key. Binding the chain's end to the callee, and the agent before it to the
   caller wherever the callee authenticated the caller's agent id, keeps a copied mandate from serving another callee
-  (on loopback with the shared descriptor token, a local process could reuse it at the same callee within its scope
-  and expiry, as it could a decision: DL-26's boundary); narrowing at each call mirrors a delegation token's
+  (without such an id (the shared descriptor token on loopback, a T1 call over the relay, a call the hub forwards without a delegation token), it could be reused at the same callee within its scope and expiry, as a
+  decision could: DL-26's boundary); narrowing at each call mirrors a delegation token's
   attenuation (DL-5), so the same chain later becomes a signed one without changing what it means. An absent amount
   reads as "within the money limits" because the operator's rule reserves only spend above a limit; an explicit amount
   is a per-call ceiling because a callee can check its own estimate but not what other agents spent. Refusing only the

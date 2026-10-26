@@ -368,7 +368,8 @@ forwards a T0 or T1 origin's to the callee as `_meta.mandate` (on `agent.call` a
 a T2 origin's, passes the callee's refusals back unchanged and never answers a resend that carries a mandate from what
 it remembered of the same call without one. The hub is not an agent of the chain: the origin appends the callee before
 it calls, and the callee compares the origin the hub's delegation token names, when one is present, with the agent
-before it. An origin sends `mandate` only to a hub whose `protocols` list `mandate/1`, since a hub pinned before
+before it; the hub's own id is never the caller's agent id for this check, and without a token the chain's end alone
+binds the mandate. An origin sends `mandate` only to a hub whose `protocols` list `mandate/1`, since a hub pinned before
 DEC-0125 refuses the member.
 
 **Amendment (DEC-0039).** The hub is the only **issuer** between agents, not the only

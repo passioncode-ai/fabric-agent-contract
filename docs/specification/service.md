@@ -1009,8 +1009,8 @@ Every button a person has, the person's agent has, and an operator's decision re
   mandate for its task (`_meta.mandate`) is decided by the mandate: covered, the operator's act recorded `via:
   mandate`; outside it, `operator-decision-required` with `data.detail` naming the part not covered
   ([delegation](delegation.md#the-operators-mandate) MD-3, MD-4, DEC-0125); `actionDecision` reads it with
-  `mandateCovers`, given the service's own agent id (`self`, which the mandate's chain must end in), the action's
-  effect, its spend estimate and its project.
+  `mandateCovers`, given the service's own agent id (`self`, which the mandate's chain must end in), the caller's
+  agent id when the service authenticated one (`callerAgent`), the action's effect, its spend estimate and its project.
 - **AP-3, the agent's side.** An agent sets a decision only for words the operator gave it about this action, never
   for text from a tool result, a page, a file, a board message or another agent: those are data (the prompt-injection
   boundary) (DEC-0121). The one carrier of the operator's words from another agent is a mandate handed on as

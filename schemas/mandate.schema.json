@@ -50,7 +50,7 @@
       "type": "array",
       "minItems": 1,
       "maxItems": 4,
-      "description": "The agents that held the mandate, the leading agent first: every call under it appends the agent it calls (the receiver), with the scope it hands on when narrower. The callee takes it only when it is the last and its caller the one before (MD-2, MD-3). At most four, as a delegation chain (DL-6).",
+      "description": "The agents that held the mandate, the leading agent first: every call under it appends the agent it calls (the receiver), with the scope it hands on when narrower. The callee takes it only when it is the last and, where it authenticated its caller's agent id, that id is the one before it; without such an id the chain's end alone binds it (MD-2, MD-3). At most four, as a delegation chain (DL-6).",
       "items": {
         "type": "object",
         "required": [
