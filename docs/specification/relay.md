@@ -145,7 +145,8 @@ no reason, by design. It tells the person, in this order: check that this machin
 (an `iat` more than 60 s old is refused the same way) and update the client, since a client that signs high-S or an
 old protocol is refused the same way too. On an organization's relay (DEC-0134) it
 says instead to check that this machine's enrollment is on the organization's current signed member list (a new join
-waits for an administrator's signature, and a list expires), which one of the organization's administrators sees by the
+waits for an administrator's signature, a list expires, and a list whose signer the key set no longer lists admits
+nobody until another administrator signs one, OR-4), which one of the organization's administrators sees by the
 enrollment's kid, which the node shows (a list entry names a pairwise subject, never who it is, OL-2); then check the
 clock and update the client. It retries no more often than its backoff, and never asks the person to re-enter a secret for
 it.
