@@ -767,8 +767,8 @@ flowchart TD
 - **Traces:** ST-037 (JTBD-07, JRN-06/#3)
 - **Goal:** the operator gives a task once; every agent the task reaches acts on their words within what the words cover
 - **Entry points:** the operator's chat with their agent; a board request from one of the operator's projects; a callee's `operator-decision-required` naming `outside-mandate`; a relay of the operator's approval from another of their agents (DEC-0126 OA-2)
-- **Success exit:** the callee took the call as the operator's decision, recorded `via: mandate` with the task and the chain
-- **Task analysis:** the operator tells the leading agent → it states the mandate from their words → it calls the next agent with the mandate, narrowed to what it hands on → the callee runs `mandateCovers` and acts, or refuses the part not covered → the leading agent asks the operator for that part alone.
+- **Success exit:** the callee took the call as the operator's decision, recorded `via: mandate` with the task and the chain, or, for an approval relayed for one action, `via: relayed-instruction`; a relayed approval also records `source`, where the operator said it (DEC-0126)
+- **Task analysis:** the operator tells the leading agent → it states the mandate from their words → it calls the next agent with the mandate, narrowed to what it hands on → the callee runs `mandateCovers` and acts, or refuses the part not covered → the leading agent asks the operator for that part alone. An approval the operator gave another of their agents reaches the agent that acts by a relay from one of their own Projects or sessions → that agent states the decision or its own mandate from the relayed words with `source` and acts (DEC-0126 OA-2).
 - **Rejected shape:** the callee asking the operator for a step their words already cover, or an agent passing another agent's paraphrase as the operator's decision: rejected, because the first asks twice and the second removes the prompt-injection boundary (DEC-0125).
 - **Flow:**
 

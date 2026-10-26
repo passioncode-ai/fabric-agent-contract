@@ -981,9 +981,11 @@ Every button a person has, the person's agent has, and an operator's decision re
   ([`decision.schema.json`](../../schemas/decision.schema.json), a member of
   [`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)), and a sealed call over the
   relay or the hub's `agent.call` in `call.decision` ([machine calls](machine-calls.md), [interop](interop.md#c35-the-hub)):
-  `{by: "operator", via: "relayed-instruction", action, target?, instruction, at}`, `action` being the declared
+  `{by: "operator", via: "relayed-instruction", action, target?, instruction, at, source?}`, `action` being the declared
   action's id, `target` the one object the operator named when they named one, and `instruction` the operator's words
-  in AP-3's form, at most 500 characters (DEC-0121). A service MUST take
+  in AP-3's form, at most 500 characters (DEC-0121), and `source` where the operator said them when the words were
+  relayed from another of their agents, sent only to a service that lists `operator-source/1`
+  ([delegation](delegation.md#one-approval-binds-all-the-operators-agents) OA-7, DEC-0126). A service MUST take
   a `relayed` action from a T0 or T1 caller ([delegation](delegation.md#trust-tiers) DL-25) that carries a valid
   decision as the operator's decision: it performs it as the dashboard would, records it as the operator's with `via`
   and the caller's identity as the service authenticated it, never one the call names, and MUST NOT refuse it as
@@ -1057,9 +1059,9 @@ estimate and the `project`:
 | `relayed` | T2, or a caller placed in no tier (DL-25), without one | `{ok: false, code: "approval-required", data: {actionDigest}}` (DL-17, DL-18), the call's decision ignored |
 | `relayed` | T0 or T1, the service's own accepted elicitation | `{ok: true, recordAs: {by: "operator", via: "elicitation", caller}}` |
 | `relayed` | T0 or T1, no decision and no mandate | `{ok: false, code: "operator-decision-required"}` |
-| `relayed` | T0 or T1, no decision, a mandate | what `mandateCovers` answers: `{ok: true, recordAs: {by: "operator", via: "mandate", task, chain, caller}}` for a call it covers, `operator-decision-required` or `decision-invalid` with `data.detail` otherwise ([delegation](delegation.md#the-operators-mandate) MD-3, MD-4) |
+| `relayed` | T0 or T1, no decision, a mandate | what `mandateCovers` answers: `{ok: true, recordAs: {by: "operator", via: "mandate", task, chain, source?, caller}}` for a call it covers, `operator-decision-required` or `decision-invalid` with `data.detail` otherwise ([delegation](delegation.md#the-operators-mandate) MD-3, MD-4) |
 | `relayed` | T0 or T1, a decision invalid against the schema, for another action, naming a `target` the call does not act on, whose `at` is not read by `strictTime` (RFC 3339 with `T` and an offset, a day that exists, no leap second), lies more than 60 s (`CLOCK_SKEW_SECONDS`) after the service's clock or more than 24 h (`DECISION_LIFETIME_SECONDS`) before it | `{ok: false, code: "decision-invalid"}` |
-| `relayed` | T0 or T1, a valid decision | `{ok: true, recordAs: {by: "operator", via: "relayed-instruction", caller}}`: the operator's act |
+| `relayed` | T0 or T1, a valid decision | `{ok: true, recordAs: {by: "operator", via: "relayed-instruction", caller, source?}}`: the operator's act, `source` when the decision carries it (DEC-0126) |
 
 An input the service owes and does not have (a declaration that is not valid, no authenticated caller, no readable
 clock, no digest for a T2 refusal, no link for a human step, and under a mandate no `effect` or no `self`) is its own fault (`{fault}`), never an answer to the

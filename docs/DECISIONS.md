@@ -7557,35 +7557,47 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the session or the board thread) and the approved scope. Its machine form is `mandate/1` with `source`, or a
      `_meta.decision` with `source` for one action; the request's optional `approval` block is this, not a third
      format. A prose relay carrying the four is accepted by an agent, which states its decision or its own mandate from
-     the words, `instruction` and `at` unchanged and `source` naming the place, and leads its own part. A service's
-     check reads only `_meta.decision` and `_meta.mandate`.
+     the words, `instruction` and `at` unchanged and `source` naming the place, and leads its own part; the chain starts
+     again there, with a scope no wider than the relayed scope and the quoted words. A service's check reads only the
+     machine form, wherever AP-2 and MD-3 carry it, never prose.
   3. **OA-3, the boundary against forgery.** Accepted only from one of the operator's own Projects on their board
-     (`provenance: trusted`) or a session on their own machine (T0). Without the quote or the place, from a member's
+     (`provenance: trusted`) or a session on their own machine (T0: the runner's own delivery between local sessions, or a
+     subagent's parent). Without the quote or the place, from a member's
      Project on an organization's board (T2), or found in content an agent read: data.
   4. **OA-4, own checks, one question for what is new.** The receiver keeps its checks (a stale preview, guards, the
-     money limits) and asks once only about what the operator did not see: another target, a wider scope, spend above a
-     limit. A stop condition the relaying agent wrote is not the operator's; where the scope covers the case, the
+     money limits) and asks once only about what the operator did not see: another target, a wider scope. Spend above a
+     limit is OA-5's human step, handed over with its link, not a question in chat. A stop condition the relaying agent wrote is not the operator's; where the scope covers the case, the
      receiver acts and says so.
-  5. **OA-5, what stays the person's.** AP-4's and MD-6's human steps, and a decision recorded as the operator's own
-     that the relay does not carry.
+  5. **OA-5, what stays the person's.** AP-4's and MD-6's human steps (a sign-in with its one-time code, a consent, a
+     payment or top-up, a typed secret, spend above a limit, a passkey signature), and a decision recorded as the
+     operator's own that the relay does not carry.
   6. **OA-6, the record.** The receiver records the words, `at` and `source` as its reason (change log or audit,
      its reply in the thread, its handoff); `actionDecision` and `mandateCovers` return `source` in `recordAs`.
      `source` is the relaying agent's statement; it never places the caller's tier or identity (AP-2).
+  7. **OA-7, `source` on the wire.** A decision or a mandate carries `source` only to a target whose well-known
+     `protocols` list `operator-source/1` (registered here; through the hub, when the hub and the callee both list
+     it); otherwise the agent sends it without `source` and keeps `source` in its own record. A service that reads
+     `source` lists the revision.
 - **Why:** inside the estate the operator's instruction is the authority (DL-26), and asking twice for what the
   operator already said is the cost the operator named. The four items a relay carries let the receiver check what was
   approved and where; the place a relay may come from keeps text an agent read (the prompt-injection route) out, which
   is the boundary AP-3 drew. Reusing `mandate/1` and the decision keeps one machine form a service checks.
 - **Alternatives considered:** a separate `approval` block `{quote, by, at, source, scope}` (a third format for what
-  a mandate and a decision already say; `source` added to both instead); keeping a prose relay as data (the operator's
-  rule decides otherwise; DEC-0125 rejected it for a service's check, which still reads only the block); accepting a
+  a mandate and a decision already say; `source` added to both instead); keeping a prose relay as data, as DEC-0125 decided
+  (its reasons were that a callee could not tell what prose covers or check a narrowing, and that letting any agent
+  relay another agent's quoted words removes AP-3's injection boundary; the operator's rule decides otherwise, and this
+  decision answers both: a service still reads only the machine form, the receiver restates the scope no wider than the
+  relay, and only the operator's own Projects and sessions may relay, OA-3); accepting a
   relay from any Project of a board (an organization's board joins other people's machines, T2); letting a relayed
   approval cover a human step (AP-4 stands).
 - **Compatibility:** a reader that validates `mandate/1` or `decision.schema.json` against a schema pinned before this
-  decision refuses a document carrying `source` (`additionalProperties: false`), so a relaying agent sends `source`
-  only to a callee at or after this pin, or leaves it out and records it on its own side. `contractVersion` stays
+  decision refuses a document carrying `source` (`additionalProperties: false`), so the member travels only to a target that
+  lists `operator-source/1` (OA-7); toward any other the call goes without it and nothing a reader pinned before
+  checks changes. `contractVersion` stays
   `0.1.0`.
 - **Consequences / affects:** `schemas/mandate.schema.json` (`source`, `$defs/source`), `schemas/decision.schema.json`
-  (`source`); `src/mandate.ts`, `src/actions.ts`; `docs/specification/delegation.md` (One approval binds all the
+  (`source`); `src/protocol-revisions.ts` (`operator-source/1`); `src/mandate.ts`, `src/actions.ts`;
+  `docs/specification/interop.md` (C3.3, C3.5), `machine-calls.md` (the sealed call); `docs/specification/delegation.md` (One approval binds all the
   operator's agents), `service.md` (AP-3), `project-comms.md` (a board request), `conformance.md` (rows),
   `CONTEXT.md` (Relayed approval), `docs/DOCMAP.md`, `docs/specification/README.md`, `docs/ux/` (ST-037, FLW-31,
   SCN-046, SCR-30); `tools/vectors/mandate.ts`, `tools/vectors/actions.ts` and their vector files,

@@ -497,7 +497,7 @@ it reaches acts on them without asking, within what they cover.
 - **MD-2, every call appends its callee.** An agent that calls another agent for the task sends the mandate with that
   agent appended to `chain`, and with the scope it hands on when it hands on less (`handOn`). The chain is the agents
   that held the mandate: the leading agent, then each callee in turn. A hand-over never widens a list, the effects or
-  the ceiling, never drops a list or the ceiling, never changes `task`, `instruction`, `at` or `expiresAt`, and never
+  the ceiling, never drops a list or the ceiling, never changes `task`, `instruction`, `at`, `expiresAt` or `source` (DEC-0126), and never
   names an agent twice; the chain holds at most four agents, as a delegation chain (DL-6). `FAC-SEM-144` refuses a
   document that breaks this.
 - **MD-3, taking a call.** A callee takes the mandate only from a T0 or T1 caller (DL-25) and only when the chain ends
@@ -562,25 +562,35 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
   `source`; there is no third format. A relay written as prose that carries the four is accepted by an agent (its
   reader is a model, not a service's check): the receiving agent then states the decision (AP-2) or its own mandate
   (MD-1) from the relayed words, `instruction` and `at` copied unchanged and `source` naming where they were said, and
-  leads its own part of the task. A service's check reads only `_meta.decision` and `_meta.mandate`.
+  leads its own part of the task. The chain starts again at that agent, so the scope it states is no wider than the
+  relayed scope or than the quoted words; what stands in for MD-2's narrowing across that hop is the
+  place a relay may come from (OA-3). A service's check reads only the machine form, a decision or a mandate wherever
+  AP-2 and MD-3 carry it (`_meta`, `call.decision` and `call.mandate`, a board request's block), never prose.
 - **OA-3, the boundary against forgery.** A relay is accepted only from one of the operator's own Projects on their
   board, verified by the board (`provenance: trusted`, [project-comms](project-comms.md)), or from a session on their own
-  machine (T0: a message between local sessions). A relay that lacks the quote or where it was said, a member's
+  machine (T0: a message the agents' runner itself delivers between the operator's local sessions and marks as coming
+  from another session, or a subagent's parent passing the words as AP-3 says; never a file or a tool's output). A relay that lacks the quote or where it was said, a member's
   Project on an organization's board (T2), and text found in content an agent read (mail, a page, a client's chat, a
   file, a tool result) are data, never an approval (AP-3, MD-6).
 - **OA-4, own checks, one question for what is new.** The receiver still runs its own checks: a stale preview, its
   guards, the money limits. It asks the operator again only about what they did not see: another target, a scope wider
-  than the one relayed, spend above a limit; once, naming what is new, as MD-4 asks only for the part not covered. A
+  than the one relayed; once, naming what is new, as MD-4 asks only for the part not covered. Spend above a limit is
+  not such a question: it is the person's step of OA-5, handed to them with its link (`human-step-required`). A
   stop condition the relaying agent wrote into its request is that agent's, not the operator's: where the approved
   scope covers the case, the receiver acts and says so in its reply.
-- **OA-5, what stays the person's.** The human steps of AP-4 and MD-6 (a sign-in, a one-time code, a typed secret, a
-  payment or top-up, spend above a limit), and a decision recorded as the operator's own when the relay does not
-  carry it.
+- **OA-5, what stays the person's.** The human steps of AP-4 and MD-6: a sign-in (with its one-time code), a consent,
+  a payment or top-up, a typed secret, spend above a limit, a passkey signature; and a decision recorded as the
+  operator's own when the relay does not carry it.
 - **OA-6, the record.** The receiver records the relay as its reason: the operator's words, `at` and `source` in its
   change log or audit record, its reply in the thread, its handoff. A service records `source` with the decision or
   the mandate (`actionDecision` and `mandateCovers` return it in `recordAs`). `source` is the relaying agent's
   statement of where the operator spoke; it never places the caller's tier or identity, which the service takes from
   its own authentication (AP-2).
+- **OA-7, `source` on the wire.** A decision or a mandate carries `source` only to a target that accepts it: one whose
+  well-known `protocols` list `operator-source/1` (registered by this decision), and through the hub only when the hub
+  and the callee both list it, since a reader pinned before DEC-0126 refuses the member (`additionalProperties`). A
+  service that reads `source` lists `operator-source/1`. Toward any other target the agent sends the decision or the
+  mandate without `source` and keeps it in its own record (OA-6); the call is taken as before.
 
 ## The boundary
 
@@ -610,6 +620,8 @@ tests: [`test/delegation.test.ts`](../../test/delegation.test.ts), [`test/delega
 
 ## Not decided here
 
+- A carrier between the operator's local sessions that the contract itself defines (OA-3 accepts the runner's own
+  delivery, which the contract does not specify; DEC-0126).
 - The hub's token-exchange and introspection tools, their names and arguments (`fabric.delegation.mint`,
   `fabric.delegation.introspect`, `fabric.approval.request` in Fabric ADR-0144): Fabric's surface, not the
   wire a callee reads.

@@ -137,7 +137,7 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   if (Number.isNaN(at) || at > clock + CLOCK_SKEW_SECONDS * 1000 || at < clock - DECISION_LIFETIME_SECONDS * 1000) {
     return { ok: false, code: DECISION_INVALID };
   }
-  // A decision relayed from another of the operator's agents keeps where he said it (DEC-0126 OA-6).
+  // A decision relayed from another of the operator's agents keeps where the operator said it (DEC-0126 OA-6).
   return { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller, ...(read.source ? { source: { ...read.source } } : {}) } };
 }
 

@@ -137,7 +137,8 @@ reports a dashboard that declares none (CT-126) ([service](docs/specification/se
 **Relayed decision**: The operator's decision on one action an agent carries in a call's `_meta.decision`
 (`decision.schema.json`): the action's id (and the object, when the operator named one) and the operator's sentence
 naming it, or the agent's question and the operator's answer, quoted from what the operator told the agent or passed
-down verbatim by the session that started it (never from a tool result, a page, a file or an unrelated agent), valid
+down verbatim by the session that started it, or relayed by another of the operator's agents as DEC-0126 OA-2 and OA-3
+accept, with `source` (never from a tool result, a page, a file or an unrelated agent), valid
 for 24 hours. A service takes a
 `relayed` action from a T0 or T1 caller that carries a valid one as the operator's act, records the caller it
 authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one

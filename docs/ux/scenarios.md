@@ -1017,5 +1017,5 @@ independent agent author and P-02 project operator.
 - **States covered:** success, error
 - **Errors & recovery:** a relay from a member's Project on an organization's board (T2) -> not an approval; the config agent asks the operator through its own route.
 - **Status:** draft
-- **Coverage:** DEC-0126 OA-1 to OA-6, `source` in `mandate.schema.json` and `decision.schema.json`, `mandateCovers` and `actionDecision` returning it, `fixtures/vectors/mandate.json`, `fixtures/vectors/actions.json`, `fixtures/positive/mandate-relayed.json`, `test/mandate.test.ts`
+- **Coverage:** DEC-0126 OA-1 to OA-7, `source` in `mandate.schema.json` and `decision.schema.json`, `mandateCovers` and `actionDecision` returning it, `fixtures/vectors/mandate.json`, `fixtures/vectors/actions.json`, `fixtures/positive/mandate-relayed.json`, `test/mandate.test.ts`
 - **Product:** unobserved

@@ -67,7 +67,7 @@ function cases(): Json[] {
     ["an elicitation the caller claims is not the service's record", { ...base, tier: "T0", elicited: "true" }, refuse("operator-decision-required")],
     ["an instruction of 500 characters", { ...base, tier: "T0", decision: decided(NOW, { instruction: "a".repeat(500) }) }, operator("relayed-instruction")],
     ["an at with an offset", { ...base, tier: "T0", decision: decided("2026-10-24T11:30:00+02:00") }, operator("relayed-instruction")],
-    // DEC-0126 OA-2, OA-6: words another of the operator's agents relayed keep where he said them, into the record.
+    // DEC-0126 OA-2, OA-6: words another of the operator's agents relayed keep where the operator said them, into the record.
     ["relayed words with where the operator said them", { ...base, tier: "T0", decision: decided(NOW, { source: { project: "example-analyst", session: "example-session-7" } }) }, { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller: CALLER, source: { project: "example-analyst", session: "example-session-7" } } }],
     ["a source naming neither the session nor the thread", { ...base, tier: "T0", decision: decided(NOW, { source: { project: "example-analyst" } }) }, refuse("decision-invalid")],
     ["a decision 60 s ahead of the service's clock", { ...base, tier: "T0", decision: decided("2026-10-24T09:31:00Z") }, operator("relayed-instruction")],

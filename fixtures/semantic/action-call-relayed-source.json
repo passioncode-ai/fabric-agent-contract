@@ -1,0 +1,39 @@
+{
+  "description": "A decision relayed from another of the operator's agents carries where they said it; the service records source with the caller it authenticated, never one source names (DEC-0126 OA-6, OA-7).",
+  "kind": "action-call",
+  "expect": [],
+  "input": {
+    "action": {
+      "id": "approve-reply",
+      "title": "Approve the reply",
+      "tool": "reviews.approve",
+      "gate": "relayed"
+    },
+    "tier": "T1",
+    "caller": "agent:example-config-agent",
+    "decision": {
+      "by": "operator",
+      "via": "relayed-instruction",
+      "action": "approve-reply",
+      "instruction": "approve the reply to the review from Anna",
+      "at": "2026-10-24T09:30:00Z",
+      "source": {
+        "project": "example-analyst",
+        "session": "example-session-7"
+      }
+    },
+    "now": "2026-10-24T09:30:30Z",
+    "answer": {
+      "ok": true,
+      "recordAs": {
+        "by": "operator",
+        "via": "relayed-instruction",
+        "caller": "agent:example-config-agent",
+        "source": {
+          "project": "example-analyst",
+          "session": "example-session-7"
+        }
+      }
+    }
+  }
+}

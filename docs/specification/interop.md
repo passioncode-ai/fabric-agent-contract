@@ -298,7 +298,8 @@ DEC-0121 (`fabric-actions/0.1`) · rule code `FAC-SEM-142` · [service](service.
 A request's `_meta` MAY carry `decision`, the operator's decision on an action the service declares `relayed`
 ([`decision.schema.json`](../../schemas/decision.schema.json), a member of
 [`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)): `{by: "operator", via:
-"relayed-instruction", action, target?, instruction, at}` (DEC-0121 AP-2). A reader pinned before DEC-0121 ignores it, as any
+"relayed-instruction", action, target?, instruction, at, source?}` (DEC-0121 AP-2; `source`, DEC-0126 OA-7, only to a
+service that lists `operator-source/1`). A reader pinned before DEC-0121 ignores it, as any
 unknown `_meta` member. An agent sets it only for words the operator gave it about the action, in AP-3's form; a job's
 input request is answered as [C3.3](#c33-awaiting-a-choice) says. A request's `_meta` MAY carry `mandate` too, the
 operator's mandate for the task the call serves ([`mandate.schema.json`](../../schemas/mandate.schema.json),
@@ -370,7 +371,8 @@ it remembered of the same call without one. The hub is not an agent of the chain
 it calls, and the callee compares the origin the hub's delegation token names, when one is present, with the agent
 before it; the hub's own id is never the caller's agent id for this check, and without a token the chain's end alone
 binds the mandate. An origin sends `mandate` only to a hub whose `protocols` list `mandate/1`, since a hub pinned before
-DEC-0125 refuses the member.
+DEC-0125 refuses the member, and a decision or mandate carrying `source` only when the hub and the callee both list
+`operator-source/1` (DEC-0126 OA-7).
 
 **Amendment (DEC-0039).** The hub is the only **issuer** between agents, not the only
 **route**. It signs a [delegation token](delegation.md) naming the person the work is for,

@@ -372,7 +372,7 @@
       }
     },
     {
-      "name": "words relayed from another of the operator's agents: where he said them travels into the record",
+      "name": "words relayed from another of the operator's agents: where they said them travels into the record",
       "input": {
         "mandate": {
           "kind": "mandate/1",
