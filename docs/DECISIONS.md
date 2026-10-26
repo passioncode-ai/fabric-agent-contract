@@ -8065,6 +8065,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   now. No agent hands one on yet (CT-149 open, FAA-131 unreleased). `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/mandate.ts` (`scopeWithin`, the finding's text); `schemas/mandate.schema.json`
   (descriptions); `docs/specification/conformance.md` (the leading agent's row); `tools/vectors/mandate.ts`,
-  `fixtures/vectors/mandate.json` (`handOn`, one more `cases` vector); `test/mandate.test.ts`;
+  `fixtures/vectors/mandate.json` (`handOn`, one more `cases` vector); `test/mandate.test.ts` (with a property test:
+  no hand-over `scopeWithin` accepts covers a call the scope in force does not, over every list shape);
   `docs/specification/delegation.md` (MD-1, MD-2a, `FAC-SEM-144`); DEC-0125 annotated; backlog CT-149.
 - **Source:** CT-149's readings (round 2 of the hand-over vectors, 2026-10-26).

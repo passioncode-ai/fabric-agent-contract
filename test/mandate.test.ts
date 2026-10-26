@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { actionDecision } from "../src/actions.js";
 import { projectRoot } from "../src/contract.js";
 import { MAX_CHAIN_DEPTH } from "../src/delegation.js";
-import { handOn, type Mandate, mandateCovers, mandateProblem } from "../src/mandate.js";
+import { handOn, type Mandate, type MandateCall, type MandateScope, mandateCovers, mandateProblem, scopeWithin } from "../src/mandate.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { buildMandateVectors } from "../tools/vectors/mandate.js";
 
@@ -105,5 +105,33 @@ describe("a relayed action under a mandate (MD-3, DEC-0121 AP-2)", () => {
     const decision = { by: "operator", via: "relayed-instruction", action: "approve-draft", instruction: "approve the draft", at: "2026-10-26T11:59:00Z" };
     expect(actionDecision({ ...call, decision })).toEqual({ ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller: "agent:claude-code" } });
     expect(actionDecision({ ...call, tier: "T2", actionDigest: `sha256:${"a".repeat(64)}` })).toEqual({ ok: false, code: "approval-required", data: { actionDigest: `sha256:${"a".repeat(64)}` } });
+  });
+});
+
+describe("MD-2a, no hand-over covers a call the scope in force does not (DEC-0136)", () => {
+  // Every shape of the two naming lists, a projects list or none, and three effect ceilings, against every call shape.
+  const lists = [undefined, ["a"], ["a", "b"]];
+  const effects = [["draft"], ["charge"], ["charge", "publish"]];
+  const scopes: MandateScope[] = [];
+  for (const capabilities of lists) for (const actions of lists) for (const projects of [undefined, ["p"]]) for (const fx of effects) {
+    scopes.push({ ...(capabilities ? { capabilities } : {}), ...(actions ? { actions } : {}), ...(projects ? { projects } : {}), effects: fx });
+  }
+  const calls: MandateCall[] = [];
+  for (const capability of ["a", "b", "c"]) for (const action of [undefined, "a", "b", "c"]) for (const effect of ["none", "draft", "charge", "publish"]) for (const project of [undefined, "p", "q"]) {
+    calls.push({ capability, ...(action ? { action } : {}), effect, ...(project ? { project } : {}) });
+  }
+  const covered = (scope: MandateScope, call: MandateCall) => {
+    const mandate = { ...base, scope, chain: [base.chain[0], { agent: "example-researcher", at: "2026-10-26T10:05:00Z" }] };
+    const answer = mandateCovers({ mandate, tier: "T0", now: "2026-10-26T12:00:00Z", self: "example-researcher", call });
+    return "ok" in answer && answer.ok;
+  };
+
+  it("a scope scopeWithin accepts covers no call its parent does not", () => {
+    const leaks: string[] = [];
+    for (const parent of scopes) for (const child of scopes) {
+      if (!scopeWithin(child, parent)) continue;
+      for (const call of calls) if (covered(child, call) && !covered(parent, call)) leaks.push(JSON.stringify({ parent, child, call }));
+    }
+    expect(leaks.slice(0, 3)).toEqual([]);
   });
 });
