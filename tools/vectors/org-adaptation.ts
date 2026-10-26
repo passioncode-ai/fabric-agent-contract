@@ -40,7 +40,10 @@ export function orgAdaptationVectors(): Json {
     digests: [
       { name: "the plan", value: plan, digest: digest(plan) },
       ...(plan.requests as Json[]).map((request) => ({ name: `request ${request.id}`, value: request, digest: digest(request) })),
-      { name: "a withdrawn plan", value: withdrawn, digest: digest(withdrawn) }
+      { name: "a withdrawn plan", value: withdrawn, digest: digest(withdrawn) },
+      { name: "a spend of 12.5", value: { ...spend, amountUsd: 12.5 }, digest: digest({ ...spend, amountUsd: 12.5 }) },
+      { name: "a spend of 1234.07", value: { ...spend, amountUsd: 1234.07 }, digest: digest({ ...spend, amountUsd: 1234.07 }) },
+      { name: "a spend of 99999.99", value: { ...spend, amountUsd: 99999.99 }, digest: digest({ ...spend, amountUsd: 99999.99 }) }
     ],
     decide: [
       { name: "the first plan", plan, context: { member: true, valid: true, org }, expected: { outcome: "accepted", held } },
@@ -52,6 +55,7 @@ export function orgAdaptationVectors(): Json {
       { name: "a plan that failed its schema or FAC-SEM-153", plan, context: { member: true, valid: false, org }, expected: { outcome: "refused", refusal: "malformed" } },
       { name: "a person who is not a member", plan, context: { member: false, valid: true, org }, expected: { outcome: "refused", refusal: "not-a-member" } },
       { name: "another revision of the type", plan: { ...plan, type: "org-adaptation/2" }, context: { member: true, valid: false, org }, expected: { outcome: "refused", refusal: "schema-unsupported" } },
+      { name: "a plan with no RFC 8785 form (a lone surrogate), whatever the schema check said", plan: { ...plan, items: [{ ...(plan.items as Json[])[0], label: "Billing \ud800 migration" }] }, context: { member: true, valid: true, org }, expected: { outcome: "refused", refusal: "malformed" } },
       { name: "a revision below 1", plan: { ...plan, revision: 0 }, context: { member: true, valid: true, org }, expected: { outcome: "refused", refusal: "malformed" } },
       { name: "not a member, and another type", plan: { ...plan, type: "org-adaptation/2" }, context: { member: false, valid: false, org }, expected: { outcome: "refused", refusal: "not-a-member" } },
       { name: "malformed, and another organization", plan: { ...plan, org: "org:org-b" }, context: { member: true, valid: false, org }, expected: { outcome: "refused", refusal: "malformed" } },

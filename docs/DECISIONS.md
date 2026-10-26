@@ -7662,6 +7662,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-26):** DEC-0129 adds the required member `administrators` to `org-key-set/1` before any tag
   carried it; a reader pinned at a main commit of DEC-0127 or DEC-0128 refuses a set that lists it, and the release
   that carries DEC-0127 to DEC-0129 lists it as a narrowing (DEC-0119).
+- **Annotated (2026-10-26):** DEC-0138 adds to OM-5 that, when the person leaves by unpinning, Fabric first withdraws
+  an adaptation plan it sent by an empty revision, waiting no longer than the person agrees to.
 - **Context:** the organization train's packet TP-00 (row N-1, step 1.1 of fabric-workspace
   `docs/reports/2026-10-25-organization-r1/README.md` at `d438e3dc`): Fabric cannot trust an organization server's
   membership, and a product cannot be granted one, without a document Fabric verifies. MD-9 path (a)
@@ -7788,7 +7790,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0129: the organization's member list, `org-authority/1`, signed by an administrator's passkey
 
 - **Date:** 2026-10-26
-- **Annotated (2026-10-26):** DEC-0138 decides OM-7's adaptation row: the organization part of an adaptation plan, `org-adaptation/1`, and what a reference is.
+- **Annotated (2026-10-26):** DEC-0138 decides OM-7's adaptation row: the organization part of an adaptation plan, `org-adaptation/1`, and what a reference is, and widens it with the text the person types (labels, resources, notes, purposes).
 - **Status:** Accepted (2026-10-26). A new schema (`org-authority/1`), a new register statement, a new rule
   (`FAC-SEM-150`) and a relay admission source; `org-key-set/1` gains the required `administrators` before any tag
   carried the type (DEC-0127's annotation: the release lists it as a narrowing, DEC-0119). Adoption: CT-37 (every
@@ -8290,8 +8292,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `FAC-SEM-153`: refs and request ids once each, an `itemRef` names an item.
   2. **AD-2.** A `ref` and a request `id` are random, per organization, never derived from the estate (DEC-0128); a
      `ref` is kept for its item across revisions and withdrawals to that organization, an `id` while its request
-     stands; `label`, `resource`, `note` and `purpose` are typed by the person and hold no control character but tab
-     and line feed (the first server stores them where U+0000 cannot go, its objection in `0fee99ae`).
+     stands, and a later membership gets new request ids; `label`, `resource`, `note` and `purpose` are typed by the
+     person and hold no control character but tab and line feed (U+0000 to U+0008, U+000B to U+001F, U+007F to
+     U+009F) and no lone surrogate, Fabric turning CRLF into LF (the first server stores them where U+0000 cannot go,
+     its objection in `0fee99ae`).
   3. **AD-3.** The person's Fabric sends the whole plan with the credential the server issued it for the person;
      the route is `PUT /fabric/adaptation/v1/{org}/plan`, with `GET` for the receipt (`404 no-plan` before the first).
      Fabric sends only after a `GET` answered a receipt or `no-plan`, retrying no answer or a `5xx`; another `404`, or

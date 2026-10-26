@@ -40,6 +40,9 @@ requests to the administrators. The first organization server needs it by 2026-1
 - Round 4: unit pass, seam and product fail (AD-6 forbade a later membership; DEC-0128 and devices.md lacked the new
   links; the first server's record still planned the withdrawn device transport). Fixed, and the server told in
   `0fee99ae` (`6d41733c`, `24327dbf`) and its session.
+- Round 5: unit and seam pass, product fail (the text said no control character while C1 passed; SCN-050 gave up on a
+  transient `GET`). Fixed with the first server's U+0000 objection (`fcf8ee88`), Fabric's two points (`d71d8534`: no
+  reopening without the person, the credential's place is Fabric's) and the readings' risks; the rest is CT-171.
 
 ## Open
 

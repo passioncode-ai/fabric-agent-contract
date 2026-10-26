@@ -83,6 +83,39 @@
         "requests": []
       },
       "digest": "sha256:109be25bd971ed3782012c44b2f56eacde7aef995f0718a42e41b84c868053f0"
+    },
+    {
+      "name": "a spend of 12.5",
+      "value": {
+        "id": "req-spend-01",
+        "kind": "spend",
+        "amountUsd": 12.5,
+        "period": "month",
+        "purpose": "model calls for the migration agent"
+      },
+      "digest": "sha256:33e1224556fcdf2a8530d56b8a1faba79b231f39ccab4722c8ccd3132fbcde4f"
+    },
+    {
+      "name": "a spend of 1234.07",
+      "value": {
+        "id": "req-spend-01",
+        "kind": "spend",
+        "amountUsd": 1234.07,
+        "period": "month",
+        "purpose": "model calls for the migration agent"
+      },
+      "digest": "sha256:6d8cac41157e8242c29b78e3157ae3c8c756dff5fd43981cc001f2c0da653db2"
+    },
+    {
+      "name": "a spend of 99999.99",
+      "value": {
+        "id": "req-spend-01",
+        "kind": "spend",
+        "amountUsd": 99999.99,
+        "period": "month",
+        "purpose": "model calls for the migration agent"
+      },
+      "digest": "sha256:50a52ef96398dafd4b452279e704bd2c0414122d8c2a59cf746b09cb0ed020e8"
     }
   ],
   "decide": [
@@ -540,6 +573,51 @@
       "expected": {
         "outcome": "refused",
         "refusal": "schema-unsupported"
+      }
+    },
+    {
+      "name": "a plan with no RFC 8785 form (a lone surrogate), whatever the schema check said",
+      "plan": {
+        "type": "org-adaptation/1",
+        "org": "org:org-7f3a",
+        "revision": 2,
+        "items": [
+          {
+            "ref": "q7Xk2mP9vLr4Tn8w",
+            "kind": "project",
+            "label": "Billing \ud800 migration"
+          }
+        ],
+        "requests": [
+          {
+            "id": "req-access-01",
+            "kind": "access",
+            "itemRef": "q7Xk2mP9vLr4Tn8w",
+            "resource": "staging database",
+            "note": "read-only, to finish the migration"
+          },
+          {
+            "id": "req-spend-01",
+            "kind": "spend",
+            "amountUsd": 200,
+            "period": "month",
+            "purpose": "model calls for the migration agent"
+          },
+          {
+            "id": "req-role-01",
+            "kind": "role",
+            "role": "admin"
+          }
+        ]
+      },
+      "context": {
+        "member": true,
+        "valid": true,
+        "org": "org:org-7f3a"
+      },
+      "expected": {
+        "outcome": "refused",
+        "refusal": "malformed"
       }
     },
     {

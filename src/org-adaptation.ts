@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { strictTime } from "./rfc3339.js";
 
 // #region org-adaptation, docs: docs/specification/membership.md#the-adaptation-plan
 /**
@@ -96,8 +97,8 @@ export interface AdaptationReceipt {
 /**
  * The receipt for a plan the server holds: each request with its digest and the decision bound to that id and digest
  * (`granted`, `refused`, or `expired` when the server closed it without one), or `pending` when none is (a request
- * whose digest changed keeps no earlier decision). A decision that is not one of those, or has no `at`, is not bound.
- * `decisions` holds one entry per id and digest, its `at` an RFC 3339 time; the first that matches is the one shown.
+ * whose digest changed keeps no earlier decision). A decision that is not one of those, or whose `at` is not an RFC 3339
+ * time (`strictTime`), is not bound. `decisions` holds one entry per id and digest; the first that matches is shown.
  */
 export function adaptationReceipt(plan: JsonObject, decisions: readonly RequestDecision[]): AdaptationReceipt | undefined {
   const digest = adaptationDigest(plan);
@@ -107,8 +108,8 @@ export function adaptationReceipt(plan: JsonObject, decisions: readonly RequestD
     const requestId = isObject(request) ? request.id : undefined;
     const bound = requestDigest(request);
     if (typeof requestId !== "string" || bound === undefined) return undefined;
-    const decision = decisions.find((entry) => isObject(entry) && entry.id === requestId && entry.digest === bound && typeof entry.state === "string" && DECIDED.includes(entry.state) && typeof entry.at === "string");
-    requests.push(decision ? { id: requestId, digest: bound, state: decision.state, at: decision.at } : { id: requestId, digest: bound, state: "pending" });
+    const decision = decisions.find((entry) => isObject(entry) && entry.id === requestId && entry.digest === bound && typeof entry.state === "string" && DECIDED.includes(entry.state) && !Number.isNaN(strictTime(entry.at)));
+    requests.push(decision ? { id: requestId, digest: bound, state: decision.state, at: decision.at as string } : { id: requestId, digest: bound, state: "pending" });
   }
   return { type: ORG_ADAPTATION_RECEIPT_TYPE, org: plan.org, revision: plan.revision as number, digest, requests };
 }
@@ -117,7 +118,7 @@ export function adaptationReceipt(plan: JsonObject, decisions: readonly RequestD
  * The server's decision on a PUT plan, after it authenticated the person's credential, in this order: `not-a-member`
  * (the credential's person holds no active or suspended membership of the route's organization, `member` false);
  * `schema-unsupported` (the body names another `type` than `org-adaptation/1`, DEC-0067); `malformed` (the plan failed
- * its schema or FAC-SEM-153, `valid` false); `wrong-organization` (the plan names another organization than `org`, the
+ * its schema or FAC-SEM-153, `valid` not true, or has no RFC 8785 form); `wrong-organization` (the plan names another organization than `org`, the
  * route's in its full `org:<orgId>` form); then against the held revision: a lower revision is `stale-revision`; the
  * same revision with another digest is `revision-conflict`; the same revision and digest is `repeated` (answered with
  * the same receipt, nothing stored); a higher revision is `accepted` and replaces the held one. A plan with no items
@@ -130,7 +131,7 @@ export function decideAdaptation(
 ): { outcome: "accepted" | "repeated"; held: HeldAdaptation } | { outcome: "refused"; refusal: OrgAdaptationRefusal } {
   if (!isObject(ctx) || ctx.member !== true) return { outcome: "refused", refusal: "not-a-member" };
   if (isObject(plan) && typeof plan.type === "string" && plan.type !== ORG_ADAPTATION_TYPE) return { outcome: "refused", refusal: "schema-unsupported" };
-  if (!ctx.valid || !isObject(plan) || !Number.isSafeInteger(plan.revision) || (plan.revision as number) < 1) return { outcome: "refused", refusal: "malformed" };
+  if (ctx.valid !== true || !isObject(plan) || !Number.isSafeInteger(plan.revision) || (plan.revision as number) < 1) return { outcome: "refused", refusal: "malformed" };
   const digest = adaptationDigest(plan);
   if (digest === undefined) return { outcome: "refused", refusal: "malformed" };
   if (plan.org !== ctx.org) return { outcome: "refused", refusal: "wrong-organization" };

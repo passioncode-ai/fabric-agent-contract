@@ -85,16 +85,29 @@ describe("org-adaptation/1 (DEC-0138)", () => {
     expect(adaptationFindings(null as never)).toEqual([]);
   });
 
-  it("takes tab and line feed in typed text and refuses every other control character", () => {
-    const plan = read("fixtures/positive/org-adaptation.json");
-    const withText = (text: string) => ({
-      ...plan,
-      requests: plan.requests.map((r: { kind: string }) => (r.kind === "access" ? { ...r, note: text } : r)),
-    });
-    expect(valid(withText("read-only,\tthen\nwrite"), "org-adaptation")).toBe(true);
-    for (const c of ["\u0000", "\u0008", "\u000b", "\r", "\u001f", "\u007f"]) {
-      expect(valid(withText(`read${c}only`), "org-adaptation"), JSON.stringify(c)).toBe(false);
+  it("takes tab and line feed in typed text and refuses every other control character and a lone surrogate", () => {
+    const plan = read("fixtures/positive/org-adaptation.json") as { items: Json[]; requests: Json[] };
+    const fields: Array<[string, (text: string) => unknown]> = [
+      ["label", (text) => ({ ...plan, items: plan.items.map((item, i) => (i === 0 ? { ...item, label: text } : item)) })],
+      ["resource", (text) => ({ ...plan, requests: plan.requests.map((r) => (r.kind === "access" ? { ...r, resource: text } : r)) })],
+      ["note", (text) => ({ ...plan, requests: plan.requests.map((r) => (r.kind === "access" ? { ...r, note: text } : r)) })],
+      ["purpose", (text) => ({ ...plan, requests: plan.requests.map((r) => (r.kind === "spend" ? { ...r, purpose: text } : r)) })],
+    ];
+    for (const [field, withText] of fields) {
+      expect(valid(withText("read-only,\tthen\nwrite"), "org-adaptation"), field).toBe(true);
+      for (const c of ["\u0000", "\u0008", "\u000b", "\r", "\u001f", "\u007f", "\u0085", "\u009f", "\ud800", "\udfff"]) {
+        expect(valid(withText(`read${c}only`), "org-adaptation"), `${field} ${JSON.stringify(c)}`).toBe(false);
+      }
+      expect(valid(withText("read \u{1F600} only"), "org-adaptation"), `${field} a surrogate pair`).toBe(true);
     }
+  });
+
+  it("binds no decision whose time is not RFC 3339, and takes only valid === true", () => {
+    const plan = read("fixtures/positive/org-adaptation.json") as Json;
+    const [access] = plan.requests as [Json];
+    const receipt = adaptationReceipt(plan, [{ id: access.id as string, digest: requestDigest(access) as string, state: "granted", at: "yesterday" }]);
+    expect(receipt?.requests[0]).toEqual({ id: access.id, digest: requestDigest(access), state: "pending" });
+    expect(decideAdaptation(plan, { member: true, valid: "false" as unknown as boolean, org: plan.org as string })).toEqual({ outcome: "refused", refusal: "malformed" });
   });
 
   it("states its limits and route as the schema and the spec do", () => {
