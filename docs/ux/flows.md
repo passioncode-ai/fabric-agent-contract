@@ -816,6 +816,7 @@ flowchart TD
   T --> F{refresh due or expired}
   F -->|refreshed| A
   F -->|expired| U[Suspended: nothing new authorised]
+  U --> H[Plan held: no PUT until a fresh attestation shows it active]
   U --> L
   T --> D[Adaptation plan sent: references, typed text, requests]
   T --> L{member leaves, a plan was sent}

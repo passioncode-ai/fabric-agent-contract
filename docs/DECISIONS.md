@@ -8302,13 +8302,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      Fabric sends only after a `GET` answered a receipt or `no-plan`, retrying no answer or a `5xx` and backing off on
      `429`; a `401` or `403` is read by its body's code (an AD-4 code is that refusal; another is shown and the plan
      held until the person acts, the first server's `idp-sign-in-required` objection), and only another `404`, or a
-     `401` or `403` with no code (or `invalid_token`) that persists after a credential refresh, means the server takes
+     `401` or `403` with no code (or `invalid_token`, in `WWW-Authenticate` or as the code) that persists after a credential refresh, means the server takes
      no plans from this credential.
   4. **AD-4.** The server keeps the newest revision (`decideAdaptation`): `not-a-member`, `schema-unsupported`,
      `malformed`, `wrong-organization`, `stale-revision`, `revision-conflict`, a repeat answering the same receipt; an
      empty revision withdraws, and a withdrawal on the server's own page is held as the next, empty revision.
   5. **AD-5.** Each decision is bound to its request's id and digest (`requestDigest`, `adaptationReceipt`), so a
-     changed request waits for a new decision; a request the server closes without one reads `expired` (the first
+     changed request waits for a new decision; a request the server closes, undecided after a time it sets or a decision that lapsed, reads `expired` (the first
      server's objection); a decision grants nothing by itself, and a granted `admin` role is display and routing,
      never authority (OL-6, OM-3).
   6. **AD-6.** Read by the organization's administrators and the person only. A person who leaves by unpinning

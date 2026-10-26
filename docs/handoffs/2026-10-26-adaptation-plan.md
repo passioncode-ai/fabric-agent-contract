@@ -23,7 +23,7 @@ requests to the administrators. The first organization server needs it by 2026-1
 
 ## Checks actually run
 
-- `pnpm typecheck`, vitest with coverage (107 files, 9 410 tests, `src/org-adaptation.ts` at 100 % branches), `pnpm ux:lint`,
+- `pnpm typecheck`, vitest with coverage (107 files, 9 411 tests, `src/org-adaptation.ts` at 100 % branches), `pnpm ux:lint`,
   `pnpm docs:check` (0 errors), `pnpm privacy:check` (0 findings), `pnpm vectors:check` (26 files): exit 0.
 
 - Readings: round 1 fail (a home path in a fixture tripped the privacy check; the device-request transport, which the
@@ -51,8 +51,13 @@ requests to the administrators. The first organization server needs it by 2026-1
   stated for compact UTF-8, edge tests for white space. The first server's objection (a `401` with `idp-sign-in-required` while its sign-in is stale) taken: AD-3 reads a
   `401` or `403` by its code. At merge, write the merge date into DEC-0138's Status.
 - Round 8: unit and seam pass, product fail (SCN-050 put `invalid_token` with the other codes). Fixed, with the
-  `no-plan` body, the suspended hold in SCN-050, SCR-31 and FLW-32, the full duty lists in row 160 and Who adopts it, a
+  `no-plan` body, the suspended hold in SCN-050 and SCR-31 (FLW-32 got only the leave edge), the full duty lists in row 160 and Who adopts it, a
   valid plan in the revision-conflict vector, and `held` typed nullable.
+- Round 9: seam pass, unit and product fail (three decide vectors stated a `valid` the plan did not earn; SCN-050's
+  suspended path sat inside the no-plans path; the duty lists forbade the leave withdrawal while suspended; `expired`
+  defined narrowly in DEC-0138 item 5 and the receipt schema). Fixed, with a test holding each vector's `valid` to the
+  real check, the held plan in FLW-32, OM-6's pointer to AD-3, `no-plan` under a later membership (AD-6) and where
+  `invalid_token` is read.
 
 ## Open
 

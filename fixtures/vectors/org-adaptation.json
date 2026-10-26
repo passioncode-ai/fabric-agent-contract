@@ -439,7 +439,7 @@
       }
     },
     {
-      "name": "a plan that failed its schema or FAC-SEM-153",
+      "name": "a plan that failed its schema or FAC-SEM-153 (an item named twice)",
       "plan": {
         "type": "org-adaptation/1",
         "org": "org:org-7f3a",
@@ -453,6 +453,11 @@
           {
             "ref": "Hb3Zt6Yc1Nq5Ws0e",
             "kind": "schedule"
+          },
+          {
+            "ref": "q7Xk2mP9vLr4Tn8w",
+            "kind": "project",
+            "label": "Billing migration"
           }
         ],
         "requests": [
@@ -631,7 +636,7 @@
       }
     },
     {
-      "name": "a revision below 1",
+      "name": "a revision below 1, whatever the schema check said",
       "plan": {
         "type": "org-adaptation/1",
         "org": "org:org-7f3a",
@@ -733,7 +738,7 @@
       "plan": {
         "type": "org-adaptation/1",
         "org": "org:org-b",
-        "revision": 2,
+        "revision": 0,
         "items": [
           {
             "ref": "q7Xk2mP9vLr4Tn8w",

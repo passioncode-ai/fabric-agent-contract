@@ -54,6 +54,14 @@ describe("org-adaptation/1 (DEC-0138)", () => {
     expect([...new Set(vectors.decide.filter((v: Json) => v.expected.refusal).map((v: Json) => v.expected.refusal))].sort()).toEqual([...ORG_ADAPTATION_REFUSALS].sort());
   });
 
+  it("states in every decide vector the valid the schema and FAC-SEM-153 give, unless it names why not", () => {
+    for (const vector of vectors.decide as Json[]) {
+      if (String(vector.name).includes("whatever the schema check said")) continue;
+      const real = valid(vector.plan, "org-adaptation") && evaluateSemanticRules("org-adaptation", vector.plan).length === 0;
+      expect(vector.context.valid, vector.name).toBe(real);
+    }
+  });
+
   it("binds each decision to its request's digest", () => {
     for (const vector of vectors.receipts) {
       const receipt = adaptationReceipt(vector.plan, vector.decisions);

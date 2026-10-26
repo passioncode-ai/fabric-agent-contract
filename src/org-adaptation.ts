@@ -78,7 +78,7 @@ export interface HeldAdaptation {
   digest: string;
 }
 
-/** An administrator's decision, or the server's closing of a request without one (`expired`), bound to the request by id and digest. */
+/** An administrator's decision, or the server's closing of a request (`expired`: undecided after its own time, or a decision that lapsed), bound to the request by id and digest. */
 export interface RequestDecision {
   id: string;
   digest: string;
@@ -96,7 +96,7 @@ export interface AdaptationReceipt {
 
 /**
  * The receipt for a plan the server holds: each request with its digest and the decision bound to that id and digest
- * (`granted`, `refused`, or `expired` when the server closed it without one), or `pending` when none is (a request
+ * (`granted`, `refused`, or `expired` when the server closed it or its decision lapsed), or `pending` when none is (a request
  * whose digest changed keeps no earlier decision). A decision that is not one of those, or whose `at` is not an RFC 3339
  * time (`strictTime`), is not bound. `decisions` holds one entry per id and digest; the first that matches is shown.
  * `plan` is one `decideAdaptation` accepted: a plan that fails its schema may give a receipt that fails its own.
@@ -140,7 +140,7 @@ export function decideAdaptation(
   const held = ctx.held;
   if (isObject(held) && Number.isSafeInteger(held.revision)) {
     if (revision < held.revision) return { outcome: "refused", refusal: "stale-revision" };
-    if (revision === held.revision) return digest === held.digest ? { outcome: "repeated", held } : { outcome: "refused", refusal: "revision-conflict" };
+    if (revision === held.revision) return digest === held.digest ? { outcome: "repeated", held: { revision, digest } } : { outcome: "refused", refusal: "revision-conflict" };
   }
   return { outcome: "accepted", held: { revision, digest } };
 }

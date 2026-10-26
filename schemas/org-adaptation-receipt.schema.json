@@ -52,11 +52,11 @@
               "refused",
               "expired"
             ],
-            "description": "pending: waiting for a decision; granted or refused: an administrator's decision; expired: the server closed the request without one. Bound to the request's digest: a changed request is pending again."
+            "description": "pending: waiting for a decision; granted or refused: an administrator's decision; expired: the server closed the request, undecided after a time it sets or a decision that lapsed. Bound to the request's digest: a changed request is pending again."
           },
           "at": {
             "$ref": "common.schema.json#/$defs/timestamp",
-            "description": "When an administrator decided, or when the server closed the request (expired); absent while pending."
+            "description": "When an administrator decided, or when the server closed the request or the decision lapsed (expired); absent while pending."
           }
         },
         "additionalProperties": false,

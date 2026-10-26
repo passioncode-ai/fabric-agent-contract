@@ -214,7 +214,8 @@ token lives at most 600 s (`FAC-SEM-049`), calls in the organization's context s
 so an issuer sizes the attestation's life against its own outage budget. A refresh the issuer
 refuses for the membership (it answers that the person is not a member) is an end, as an `ended` attestation is. The
 reader asks for the next revision once `refreshDue` is true, and at least whenever it would act in the organization's
-context.
+context. A suspension also holds an adaptation plan's `PUT`, but not the withdrawal sent on leaving
+([AD-3](#the-adaptation-plan)).
 
 ## What leaves a person's Fabric
 
@@ -469,7 +470,7 @@ that it takes no plans. Fabric sends a plan only after a `GET` answered a receip
 a `5xx` with backoff, as AD-4 retries a `PUT`, backs off on `429`, and reads a `401` or a `403` by the code its body
 carries: an AD-4 code is that refusal (`not-a-member` as AD-4 says); any other code (a sign-in the server asks for
 again, say) is shown to the person, and Fabric holds the plan and asks again after the person acts. Another `404`, or
-a `401` or a `403` with no code in its body (or OAuth's `invalid_token`) that persists after Fabric refreshed the
+a `401` or a `403` with no code in its body (or OAuth's `invalid_token`, read from `WWW-Authenticate` (RFC 6750 section 3) or as the body's code,) that persists after Fabric refreshed the
 credential, means the server takes no plans from this credential: Fabric sends nothing, tells the person so, and asks again only after the person connects
 the server again. A server accepts a plan body of at least 512 KiB, which holds the largest plan this schema allows
 written as compact JSON in UTF-8, the form Fabric sends. A suspended membership (OM-6) authorises nothing new, so Fabric
@@ -523,8 +524,9 @@ administrator's credential reaches the owner's draft is CT-158.
 **AD-6, privacy and the end.** The plan is read by the organization's administrators and the person it came from,
 never by another member. When the person ends the membership by unpinning, their Fabric first sends the empty
 revision that withdraws the plan (OM-5); when the server ends it, or the organization closes, the server ends the plan
-and its decisions. Either way the person's Fabric sends no further plan under that membership; a later membership,
-pinned again, may send, with new request ids (AD-2). A withdrawn plan's earlier revisions are the server's record, kept as its
+and its decisions, and serves none of them under a later membership: its `GET` answers `no-plan` until that
+membership's first plan. Either way the person's Fabric sends no further plan under that membership; a later
+membership, pinned again, may send, with new request ids (AD-2). A withdrawn plan's earlier revisions are the server's record, kept as its
 retention says.
 
 ## Semantic rules
@@ -571,7 +573,7 @@ retention says.
   `fixtures/vectors/org-adaptation.json` (DEC-0138). **The person's Fabric** draws each `ref` and request `id` at random
   per organization and keeps them (AD-2), fills no text from the estate, takes only the person's choices, keeps one
   revision counter per organization, sends the plan with the credential the server issued it after a `GET`, reads a
-  `401` or `403` by its code and sends no `PUT` while the membership is suspended (AD-3), and withdraws it by an empty
+  `401` or `403` by its code and sends no `PUT` but the withdrawal on leaving while the membership is suspended (AD-3), and withdraws it by an empty
   revision when the person leaves, before it asks the passkey to sign the unpinning, telling the person the plan may
   remain when no receipt confirmed the withdrawal (OM-5); it turns a CRLF or a CR into LF and trims the text (AD-2), never reopens a plan withdrawn on the server's page without the person (AD-4), and
 waits for the answer to a withdrawal on leaving no longer than the person agrees to (OM-5). The server serves a plan and its
