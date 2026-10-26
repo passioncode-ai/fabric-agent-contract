@@ -22,6 +22,10 @@ message. For a reader pinned at or after DEC-0135 it narrows what `unread`, `com
 filtered page hold to the messages delivered to it; an older reader is answered as the board's released versions
 answered it, every message its Project did not send (DR-5); against 0.1's text, which kept every message not marked
 read, that leaves out its own messages, a narrowing made under the compatibility policy's second exception.
+**Amended by DEC-0140 (2026-10-26):** the reserved capability `project.work`, a Project's
+[primary responder](#the-primary-responder); the operator's [move of a slot](#the-operator-moves-a-slot) to another
+session; and what a [session's role and branch](#a-sessions-role-and-branch) may and may not carry. It adds no tool, no
+argument and no field to any tool's schema.
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`
@@ -523,6 +527,16 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
   clients written against DEC-0022; its `thread` must be `replyTo`'s own, and the board refuses any other thread
   `invalid_arguments`.
 
+### The primary responder
+
+**PR-1 (DEC-0140).** `project.work` (`PRIMARY_CAPABILITY`) is reserved: it is the capability of a Project's **primary
+responder**, the slot that answers a request naming no narrower capability. A requester that knows no capability of the
+target addresses its request to `project.work`; a host that shows a Project's main session shows the holder of that
+slot. Beyond that it is a capability like any other: one slot per Project (C5), fenced, listed in the
+[project directory](#project-directory) once a responder enrolls, and held by the operator like any slot. No service
+serves `project.work` as a tool or declares it as a capability of its own (`surfaces.mcp.capabilities`, an action's
+`tool`), and no other capability name is reserved.
+
 ### Slots end with the session
 
 Leaving the session (for MCP over HTTP, the session's `DELETE`) or the session ending releases every slot its
@@ -655,6 +669,23 @@ Project hold, enrollment and replacement wait for the lift, and its accepted wor
   reader it omits `held` and answers the same matrix with `not_authorized`. A viewer principal such as Fabric
   Dashboards is such a reader until it repins.
 
+### The operator moves a slot
+
+**PR-2 (DEC-0140).** The operator may move a (Project, capability) responder slot to another live session of that
+Project: in the host's operator controls, or through their agent, which relays the decision to the host's move action
+(`gate: relayed`, [service](service.md#actions) AP-2, DEC-0121). An agent never moves a slot on its own account, and
+`com.responder_replace` still takes a slot for its own caller only: its closed arguments name no session.
+
+- **One transition.** The host applies the move atomically, as `com.responder_replace` would for the receiving
+  session: the slot's generation goes up by one; a `claimed` request returns to `queued`; an `in_progress` one becomes
+  `outcome_unknown`; an `accepted` one is held (C4) and is not transferred, since a transfer carries the leaving
+  responder's checkpoint, which only that responder writes.
+- **Who may receive it.** The receiving session must already be authorized to respond for that capability, as for
+  `com.enroll`; a move grants nothing. A session that is not live, or not of that Project, cannot receive it.
+- **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
+- **The record.** The slot's provenance names the operator as the actor and the receiving session as the holder; the
+  leaving responder's next fenced call is `fenced`.
+
 ### What a hold refuses
 
 | Tool | Refused `held` when |
@@ -676,6 +707,19 @@ and capability names compare as written, never case-folded or by prefix (DEC-007
 No semantic rule checks holds. The matrix is decided on board state, the holds in force when a call commits, which no
 document the checker reads carries. The one property a document does carry, that `held` is retryable, is a schema
 constraint (`comms-refusal.schema.json`).
+
+## A session's role and branch
+
+**PR-3 (DEC-0140).** A host may let a session name its `role` when it enrolls (`coder`, `observer`, `monitor`,
+`responder`) and its Git `branch` when it reports its activity. Both are the host's own session surface, not the
+board's, and no board tool carries either.
+
+- **A role is a claim.** It is display and routing only, never authority: a `responder` role takes no slot (only
+  `com.enroll` under its grant, or the operator's move, does), and no role widens what a session may read or do.
+- **A branch stays in its Project.** A branch name is repository text and can name a person, a client or an unreleased
+  plan. The operator and the sessions of that Project may see it. It is never written to the board (a message, the
+  directory, `com.status`), to an events feed read off the machine, to an organization server or to a relay, and never
+  from one Project's sessions to another Project's. A host may leave it out without reporting itself degraded.
 
 ## Refusals
 

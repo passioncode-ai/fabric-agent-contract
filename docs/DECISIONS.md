@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0139` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0141` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -8267,3 +8267,38 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/delegation-sealed.test.ts` (DL-27 to DL-29's heading form), `relay.md` (Trust tiers' T2); DEC-0130 annotated; backlog CT-143, CT-149, CT-157
   (closed), CT-167 and CT-168 (filed).
 - **Source:** CT-157; DEC-0130's readings, rounds 1 to 5.
+
+### DEC-0140: the primary responder, the operator's move of a slot, a session's role and branch
+
+- **Date:** 2026-10-26
+- **Status:** Proposed (2026-10-26), its shape posted to Fabric for objections until 2026-10-28 18:00 UTC (board
+  thread `6a8d2f9c`). Additive: a reserved capability name and two host rules; no tool, argument or field of any tool's
+  schema changes. Adoption: Fabric, in 0.3.15 (CT-174).
+- **Context:** Fabric's simple Fabric shows each Project's main session and lets the operator hand a Project's work to
+  another session; its request `23ba0e97` asked for one rule for "the main one", for the operator's move of a slot, and
+  for an optional session `role` and `branch` with a privacy rule. No Project declared a capability when it asked.
+- **Decision:** [project communication](specification/project-comms.md) PR-1 to PR-3.
+  1. **PR-1.** `project.work` (`PRIMARY_CAPABILITY`) is the reserved capability of a Project's primary responder,
+     the slot that answers a request naming no narrower capability; otherwise a capability like any other. No service
+     serves or declares it as its own, and no other name is reserved.
+  2. **PR-2.** The operator moves a (Project, capability) slot to another live session of that Project, in the host's
+     controls or by a relayed decision (`gate: relayed`), never an agent on its own account. One transition, as
+     `com.responder_replace` would make it for the receiving session: generation up, `claimed` to `queued`,
+     `in_progress` to `outcome_unknown`, `accepted` held and not transferred; only to a session already authorized
+     for that capability; refused `held` under a slot or Project hold. `com.responder_replace` still takes a slot for
+     its caller only.
+  3. **PR-3.** A session's `role` is a claim, display and routing only, never authority; its `branch` stays in its
+     Project, off the board, any events feed read off the machine, an organization server and a relay.
+- **Why:** one name lets a requester reach a Project without knowing its capabilities, and lets every host show the
+  same main session; a move by the operator's act keeps the fences' guarantees while the person decides who works; a
+  branch name can carry what the board must not.
+- **Alternatives considered:** an argument on `com.responder_replace` naming the receiving session (a closed schema
+  would change, and an agent could move slots by itself); transferring accepted work on a move with a checkpoint the
+  operator writes (the checkpoint is the leaving responder's; Fabric asked); a role that grants a slot (a claim would
+  become authority).
+- **Compatibility:** additive. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/project-comms.md` (header, PR-1 to PR-3), `conformance.md` (a row),
+  `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder), `src/comms-hold.ts`
+  (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`; backlog CT-174; the handoff
+  `docs/handoffs/2026-10-26-simple-fabric-decisions.md`.
+- **Source:** CT-174; Fabric's request `23ba0e97` (thread `6a8d2f9c`).

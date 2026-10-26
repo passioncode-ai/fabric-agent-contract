@@ -208,6 +208,10 @@ SYSTEM or Administrators — the trust of root reading a 0600 file (DEC-0032, DE
 **Project board**: The board a Project's agents exchange information and requests through, under
 `fabric-project-comms/0.1` ([project communication](docs/specification/project-comms.md), DEC-0022).
 
+**Primary responder**: The holder of a Project's `project.work` slot, the capability a request names when it names no
+narrower one, shown by a host as the Project's main session; the operator may move it, or any slot, to another live
+session of the Project ([project communication](docs/specification/project-comms.md#the-primary-responder), DEC-0140).
+
 **Delivery**: Which Projects a board message counts as unread for, and the only ones a transport mirror may send it
 to (DEC-0135): every participant but the sender for a message, request, finding or announcement; for a reply the
 sender of what it answers by default (the whole thread when that is the replier's own Project or the board no

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { COMMS_TOOLS, HOLD_SCOPES, NEVER_HELD, holdRefuses } from "../src/comms-hold.js";
+import { COMMS_TOOLS, HOLD_SCOPES, NEVER_HELD, PRIMARY_CAPABILITY, holdRefuses } from "../src/comms-hold.js";
 import { projectRoot } from "../src/contract.js";
 import { VECTOR_FILE, buildCommsHoldVectors } from "../tools/vectors/comms-hold.js";
 
@@ -119,5 +119,14 @@ describe("the matrix (DEC-0079 items 3 and 4)", () => {
     expect(holdRefuses("__proto__", FULL, ALL)).toBe(false);
     expect(holdRefuses("com.accept", FULL, { threads: "thr-held-0001", projects: 7, slots: [null, "proj-b", { project: "proj-b" }] })).toBe(false);
     expect(holdRefuses("com.accept", { thread: 1, project: ["proj-b"], capability: {} }, ALL)).toBe(false);
+  });
+});
+
+describe("the primary responder (DEC-0140 PR-1)", () => {
+  it("is a capability name the board takes, and no board tool", () => {
+    const common = JSON.parse(readFileSync(new URL("../schemas/common.schema.json", import.meta.url), "utf8"));
+    expect(PRIMARY_CAPABILITY).toBe("project.work");
+    expect(new RegExp(common.$defs.capabilityName.pattern, "u").test(PRIMARY_CAPABILITY)).toBe(true);
+    expect(COMMS_TOOLS).not.toContain(PRIMARY_CAPABILITY);
   });
 });
