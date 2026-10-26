@@ -15,7 +15,9 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
   - **Code.** `verifyOrgAuthority` (`src/org-authority.ts`), `orgRelayAdmissionSet` (also `src/org-authority.ts`, outside the relay's import closure), the admission
     set only: an organization relay's handshake waits on the organization's heartbeat and delta (CT-37 keeps it).
   - **The root's holder.** The organization owner's Fabric, never a server (A-3); OM-8 annotated.
-  - **OM-7.** Rows for the member list's `iss` and for an adaptation plan's organization part (TP-03).
+  - **OM-7.** Four rows: the owner's (the root's key and key-set signatures) and an administrator's (a passkey's public
+    part and list signatures), also for an organization being created; the member list's `iss`; an adaptation plan's
+    organization part (TP-03).
   - **UX.** SCN-047 takes ADR-0178's fingerprint check; SCN-049, the administrator signs the list.
 - CT-37 stays open for the relay's handshake. CT-153 filed (member-list vectors, the D8 sweep).
 
@@ -33,6 +35,8 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
 - Round 6: unit pass; seam fail (the register's "one field list for good" rule, qualified by DEC-0119); product fail (a
   refused candidate in DEC-0129 item 4 and conformance; D8-b's estate passkeys as administrators; fixed). The
   administrator's shape now matches the schema.
+- Round 7: unit pass (a held list that cannot be read back is now `held-invalid`); seam pass; product fail (OM-7
+  now covers an organization being created; the administrator's duties in the party rows; fixed).
 
 ## Decisions
 
@@ -46,8 +50,9 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
 
 ## Open
 
-- **The release.** Tag DEC-0127 to DEC-0129 together; the notes list `organizationPin.iss` and
-  `org-key-set/1.administrators` as narrowings (DEC-0119).
+- **The release.** Tag DEC-0127 to DEC-0129 together; the notes list three narrowings (DEC-0119):
+  `organizationPin.iss`, `org-key-set/1.administrators`, and the membership root moving from the server to the owner's
+  Fabric.
 - **For the first organization server.** Its design describes a server-signed `org-authority/1` carrying levels,
   allowances, presets, approvers and listings; DEC-0129 makes it a member list only, signed by an administrator's
   passkey, with the root in the owner's Fabric. Told in the reply on thread `8d115bed`.

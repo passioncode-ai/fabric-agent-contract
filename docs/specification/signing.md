@@ -102,8 +102,8 @@ another grant (`wrong-challenge`), one by a sign-in credential (`wrong-rp`) and 
   ([ceremonies](ceremonies.md), DEC-0084); it registers each person's signing credential under its signing RP ID, apart from the sign-in
   credential; runs every ceremony in the person's Fabric or the pinned static page; computes each challenge with the
   register's statement; and signs `share-grant/1` when an owner confirms an outside person, and `limits/1` when a person
-  sets their estate's limits; in an administrator's Fabric it signs `org-authority/1`, the organization's member list
-  (DEC-0129).
+  sets their estate's limits; in an administrator's Fabric it registers one more signing credential per organization
+  (never an estate authority) and signs `org-authority/1`, the organization's member list, with it (DEC-0129).
 - **Project Observatory's node** (CT-20) verifies estate revisions under signing credentials only (`verifyEstateRecord`,
   which now refuses a sign-in credential); a node that later verifies a countersignature or a share-grant binding uses
   `verifySigningAssertion` with the register's type.

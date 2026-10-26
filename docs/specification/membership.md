@@ -202,7 +202,9 @@ context.
 ## What leaves a person's Fabric
 
 **OM-7, the allowlist.** For an organization whose membership is active or suspended, these leave the person's Fabric
-for that organization's server, and nothing else ([contexts](contexts.md#routing)):
+for that organization's server, and nothing else ([contexts](contexts.md#routing)). The owner's and an administrator's
+rows also hold for an organization being created, before any membership is active, since its first key set and first
+list come from them (DEC-0129):
 
 | What | Which | Rule |
 |---|---|---|
@@ -218,9 +220,10 @@ for that organization's server, and nothing else ([contexts](contexts.md#routing
 | for an administrator | the public part of their signing passkey (an `administrators` entry) and their signatures over member lists (OL-2) | DEC-0129 |
 | the member list's own entry | the context's `iss` (DEC-0128), so the server can draft `org-authority/1`; the enrollment's `#sig` key it already holds from the enrollment | DEC-0129 |
 | an adaptation plan's organization part (TP-03) | what the person chose to bring into that organization (projects, history, results, schedules), by reference, and the person's requests to its administrators; never the plan's draft, its inventory or anything the person did not choose | DEC-0129 |
-| a membership refresh | the audience and the subject the issuer gave | this decision |
+| a membership refresh | the audience and the subject the issuer gave | DEC-0127 |
 
-Personal work, another organization's work, the estate record and its members, the estate's passkeys, secrets, the person's other
+Personal work beyond the references the person chose in an adaptation plan (never their content), another
+organization's work, the estate record and its members, the estate's passkeys, secrets, the person's other
 memberships and anything a row does not name never leave for an organization. The adaptation row carries no project's
 entry: a project enters by the estate revision its person's passkey signs (R1-D12, Fabric ADR-0178 point 7), which never
 leaves. A new row needs a decision. The estate's own
@@ -297,7 +300,7 @@ SEC 1 octets, or a refusal. A refused candidate leaves the held list's set in fo
 answers `invalid`, one that fails verification `unverified` with its problem, its window included. A refused held
 list, or none, admits nobody (DEC-0047, fail closed): `expired` and `not-yet-valid` name only the held list's own
 window, and a held list that cannot be read back (no positive revision, no RFC 8785 form) is refused
-`invalid`, with or without a candidate; without one the held list is verified again under the key set applied now, so a list past its
+`held-invalid`, with or without a candidate, so a caller tells it from a refused candidate; without one the held list is verified again under the key set applied now, so a list past its
 window, or one whose signer a later set dropped, admits nobody until a newer list verifies. Only the admission set is decided: what a member's `auth` signs in `estate` (never the member's estate id,
 DEC-0128) and what an organization relay's `welcome` carries in place of the estate's revision, delta head and
 heartbeat wait on the organization's own heartbeat and delta ([revocation delta](revocation-delta.md#not-decided-here)),
@@ -335,7 +338,9 @@ the relay stops admitting their enrollments once that list is signed and applied
   passkeys in its key sets, which the root signs; it signs no list itself.
 - **The organization owner's Fabric** holds the membership root and signs each key set the server drafts, only after
   the owner confirms its changes (OM-3, DEC-0129).
-- **An administrator's Fabric** (or a pinned page) signs the list with the administrator's passkey (OL-2).
+- **An administrator's Fabric** (or a pinned page) registers a signing credential for that organization alone (never
+  an estate authority, never another organization's), shows a drafted list's changes against the last signed list, and
+  signs it with that passkey (OM-3, OL-2). The owner's Fabric registers such a credential for the first key set.
 - **An organization's relay** admits only from a list `orgRelayAdmissionSet` accepts (OL-4).
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same
   pin, with its own audience.

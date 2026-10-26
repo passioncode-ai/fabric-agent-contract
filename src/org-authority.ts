@@ -216,14 +216,15 @@ export interface OrgAdmissionInput {
 
 export type OrgAdmissionResult =
   | { ok: true; held: JsonObject; revision: number; set: Map<string, Uint8Array> }
-  | { ok: false; refusal: "no-record" | "invalid" | "unverified" | "not-yet-valid" | "expired"; problem?: OrgAuthorityProblem };
+  | { ok: false; refusal: "no-record" | "invalid" | "held-invalid" | "unverified" | "not-yet-valid" | "expired"; problem?: OrgAuthorityProblem };
 
 /**
  * An organization relay's admission set, kid → `#sig` key as SEC 1 octets, from its member list; or why there is none,
  * and then the relay admits nobody (DEC-0047, fail closed). A candidate must be schema-valid and verify against the held
  * list's revision; without one, the held list is verified again under the key set applied now, so a list whose window
  * ended, or whose signer the root no longer certifies, admits nobody until a newer list verifies. A refused candidate
- * changes nothing: the caller keeps `held`. FAC-SEM-150 holds for every verified list, so every listed key is a P-256
+ * (`invalid`, or `unverified` with its problem) changes nothing: the caller keeps `held`. A held list that cannot be
+ * read back is `held-invalid`, and then the relay admits nobody. FAC-SEM-150 holds for every verified list, so every listed key is a P-256
  * point, each kid once.
  */
 export function orgRelayAdmissionSet(input: OrgAdmissionInput): OrgAdmissionResult {
@@ -231,17 +232,17 @@ export function orgRelayAdmissionSet(input: OrgAdmissionInput): OrgAdmissionResu
   if (offered && !input.schemaValid(input.candidate)) return { ok: false, refusal: "invalid" };
   const doc = offered ? input.candidate : input.held;
   if (doc === undefined) return { ok: false, refusal: "no-record" };
-  // A held list that cannot be read back (no positive revision, no RFC 8785 form) is refused, never treated as none:
+  // A held list that cannot be read back (no positive revision, no RFC 8785 form) is refused `held-invalid`, never as none:
   // dropping it would drop the rollback guard (as `relayAdmissionSet` in `src/relay.ts` refuses such a record, CT-111).
   let held: { revision: number; digest: string } | undefined;
   if (input.held !== undefined) {
     const revision = isObject(input.held) ? input.held.revision : undefined;
-    if (typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 1) return { ok: false, refusal: "invalid" };
+    if (typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 1) return { ok: false, refusal: "held-invalid" };
     try {
       const digest = orgAuthorityDigest(input.held as JsonObject);
       if (offered) held = { revision, digest };
     } catch {
-      return { ok: false, refusal: "invalid" };
+      return { ok: false, refusal: "held-invalid" };
     }
   }
   const verdict = verifyOrgAuthority(doc, { now: input.at, org: input.org, keySet: input.keySet, ...(held ? { held } : {}) });

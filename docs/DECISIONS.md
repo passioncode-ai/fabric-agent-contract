@@ -7826,12 +7826,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `src/relay.ts` (a comment), `src/signing-challenges.ts` (`org-authority/1`, `ORG_KEY_SET_FIELDS`),
   `src/semantic-rules.ts`, `src/semantic-kinds.ts`, `src/protocol-revisions.ts`; `docs/specification/membership.md` (the
   member list OL-1 to OL-5, OM-2's fingerprint, OM-3's administrators and root holder, OM-7's rows, OM-8, the rules),
-  `relay.md`, `signing.md` (the sixth passkey type), `package.md`, `revocation-delta.md`, `window-lease.md`,
+  `relay.md`, `signing.md` (the sixth passkey type), `package.md`, `contexts.md` (Linkability), `revocation-delta.md`, `window-lease.md`,
   `estate-record.md`, `conformance.md` (module, rows, the two tables, the code, the next free code), `README.md`,
   `docs/DOCMAP.md`, `CONTEXT.md` (Member list, Adaptation plan); DEC-0047, DEC-0051, DEC-0062, DEC-0063, DEC-0066 and DEC-0127 annotated;
   `docs/ux/` (SCN-047, SCN-049); `tools/vectors/org-membership.ts`,
   `fixtures/vectors/org-membership.json`, positive and negative fixtures; `test/org-authority.test.ts`,
   `test/signing-challenges.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`,
-  `vitest.config.ts`; backlog CT-37 (open for the relay's handshake), CT-122, CT-153 (filed).
+  `vitest.config.ts`; backlog CT-04, CT-37 (open for the relay's handshake), CT-122, CT-137, CT-153 (filed).
 - **Source:** CT-37; Fabric ADR-0178 (fabric `cf99c32f`); board request `d5cbabfd` (thread `8d115bed`, TP-03's
   organization part); DEC-0047, DEC-0055, DEC-0063, DEC-0127, DEC-0128; v4 §7.
