@@ -853,7 +853,7 @@ independent agent author and P-02 project operator.
 - **Entry point:** a machine's alert in My network's machines
 - **Preconditions:** a network of `m-a` (the hub's machine, `full`) and `m-b` (`full`); `m-a` is lost (dead or stolen) and its last heartbeat is 30 hours old
 - **Steps:**
-  1. The person opens Fabric on `m-b` -> it reconnects to the relay, the latest heartbeat it then holds is still 30 hours old, and it says "This machine has not heard from the hub for 30 hours", with "Move the hub".
+  1. The person opens Fabric on `m-b` -> it reconnects to the estate's relay, the latest heartbeat it then holds is still 30 hours old, and it says "This machine has not heard from the hub for 30 hours", with "Move the hub".
   2. They pick `m-b`, which is always on -> its node makes a new hub key; Fabric fetches the delta from the relay and drafts one revision: `m-b`'s `hubKey`, `m-a`'s old key revoked as `hub-key`, `m-a` removed and revoked as `machine m-a`, the delta anchored at the head (once every reader of the record is pinned at or after DEC-0107).
   3. They sign with a passkey -> `m-b`'s hub signs a heartbeat; the alert clears on each machine once it holds that heartbeat.
 - **Expected result:** the network has a hub again before calls between machines stop at 72 hours, under a key that never left `m-b`.

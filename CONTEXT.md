@@ -656,7 +656,9 @@ effect; every effectful stage has one on every path from the start.
 version and commit a consuming repository builds against.
 
 **Relay**: A server that admits machines on their device keys and carries their messages,
-sealed **Secret envelopes** and blobs between them (`fabric-relay/0.1`, DEC-0047). It holds no
+sealed **Secret envelopes** and blobs between them (`fabric-relay/0.1`, DEC-0047): an estate's relay, one estate's
+machines; an organization's relay admits its members from the signed member list (DEC-0134), and what it carries
+between them is not decided (CT-163). It holds no
 authority: it reads nothing it carries, decides no trust tier and never reports a queued command done, and until a
 caller's signature is proven it tells it nothing it holds (DEC-0066).
 

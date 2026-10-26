@@ -169,7 +169,7 @@ Each party moves at its next pin (CT-110).
 |---|---|---|
 | Fabric (the hub and the operator's ceremonies) | writes `profile` in a record revision once its readers are pinned; seals and opens `fabric-agent-call/1` on its nodes; places relay senders with `relayCallerTier` and judges calls with `machineCallVerdict` | its next pin |
 | A node that takes relay calls | the same four functions; keys a tokenless call by `relay:<from>` when it queues | its next pin |
-| The first organization server's relay, and the relay | nothing on the wire: the payload is opaque to a relay; a vendored estate-record schema moves at its next pin | its next pin |
+| An organization's relay, and an estate's relay | nothing on the wire: the payload is opaque to a relay; a vendored estate-record schema moves at its next pin | its next pin |
 | Project Observatory's node, the Fabric Agent Adapter's kits | read a record that carries `profile`; a node that takes relay calls also does what the row above says | their next pin |
 | Fabric Dashboards | shows a machine's profile where it shows the machine | its next pin |
 

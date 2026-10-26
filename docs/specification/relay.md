@@ -203,8 +203,8 @@ in force; a refused held list, or none, admits nobody. Its handshake is
 
 ## The organization's relay
 
-DEC-0134 (CT-37) · code [`src/org-authority.ts`](../../src/org-authority.ts) (`orgRelayAdmissionSet`) and the relay's
-own `admit` and `sessionStands` · schema [`relay-frame`](../../schemas/relay-frame.schema.json) (the organization's
+DEC-0134 (CT-37) · code [`src/org-authority.ts`](../../src/org-authority.ts) (`orgRelayAdmissionSet`) and the reference
+[`src/relay.ts`](../../src/relay.ts) (`admit`, `sessionStands`) · schema [`relay-frame`](../../schemas/relay-frame.schema.json) (the organization's
 `welcome`)
 
 An organization's relay admits the enrollments its signed member list names (OL-4) by the same handshake as an
@@ -236,7 +236,10 @@ one; it authenticates to the server with a credential the server issues when it 
 Every document it applies is one `verifyOrgKeySet` and `orgRelayAdmissionSet` accept: the server's word adds nothing.
 A key set and a list it reads together it applies in one step: `orgRelayAdmissionSet` with the new key set, the held list
 and the new list as the candidate, so a set that drops the held list's signer meets the list another administrator
-signed (OL-5) and the admission set does not empty between the two.
+signed (OL-5) and the admission set does not empty between the two. When that call refuses the new list, the relay
+applies neither document: it keeps the key set and the list it held, its sessions stand under them (OR-3), and it reads
+both again at its next read; a key set that drops the held list's signer counts only with a list that verifies under
+it.
 
 **OR-5, between members.** On an organization's relay every member is T2 to every other, two enrollments of one owner
 included: an enrollment's kid is never in an estate record (UE-1), so no recipient can place it in T1, and no text may

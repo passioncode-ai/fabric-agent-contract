@@ -2536,7 +2536,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-12
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption:
 - **Annotated (2026-10-26):** DEC-0134 decides the organization relay's handshake (relay.md OR-1 to OR-5); the relay's
-  attestation status check is CT-162.
+  attestation status check is CT-162. OR-5 narrows item 6's T2 sentence: every member of an organization is T2 to every
+  other on its relay, two enrollments of one owner included, not only "to a recipient of another owner".
 - **Annotated (2026-10-26):** DEC-0129 gives an organization's relay its admission set (`orgRelayAdmissionSet`, the
   member list `org-authority/1`); the organization relay's handshake stays open (CT-37).
 - **Annotated (2026-10-15):** amended by DEC-0084: a relay opens a one-time pairing rendezvous that lives at most 600 s and carries `pairing-message/1` frames only, with one `abort` after both reveals (relay.md, *The pairing rendezvous*; its frame types are not decided); `relayAdmissionSet` subtracts a key revoked by its kid or its key reference `<kid>@sha256:<hex>` and reports a malformed reference (`unread`); F7: it admits a `#sig` key only under its own machine's kid `<id>#sig`, and a kid listed twice for neither (`bad-key`), as `FAC-SEM-073` says, even over a held record; an open session stands only while its kid maps to the key octets it was proven under (`sessionStands`, which amends DEC-0066's revalidation by kid), so a session proven under a replaced key ends; `estateEnvelopeContext` takes the applied delta entries' revocations (`extraRevocations`), so an envelope's sender key is refused once a delta revokes it. Shared vectors: `fixtures/vectors/relay.json` `admissionSet` (five new cases) and `session` (new).
@@ -8082,5 +8083,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Revocation delta), `revocation-delta.md`, `ceremonies.md` and `devices.md` (an estate relay's `welcome`), `docs/specification/README.md`, `docs/DOCMAP.md`, `devices.md` and `contexts.md` (What stays
   linkable: an operator running two of a machine's relays sees its two connections), `docs/ux/scenarios.md` (SCN-049);
   DEC-0047, DEC-0066, DEC-0129 and DEC-0133 annotated; `test/org-authority.test.ts`, `test/relay.test.ts`; backlog
-  CT-36, CT-37, CT-162, CT-163, CT-164.
+  CT-36, CT-37, CT-162, CT-163, CT-164; `machine-calls.md` (the adopters' table), `docs/ux/scenarios.md`, `docs/ux/flows.md` and `docs/ux/foundation.md` (the hub move's relay),
+  `schemas/revocation-delta.schema.json` and `src/revocation-delta.ts` (descriptions), `test/relay-rules.test.ts`;
+  the handoff.
 - **Source:** CT-37; DEC-0047, DEC-0066, DEC-0084, DEC-0128, DEC-0129; Fabric ADR-0180 point 4.
