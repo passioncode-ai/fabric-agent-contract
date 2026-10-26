@@ -3213,6 +3213,55 @@
       }
     },
     {
+      "name": "adding a capabilities list where only actions are listed widens even within draft (the line is at the list, not the call)",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "actions": [
+              "publish-page"
+            ],
+            "effects": [
+              "publish"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            }
+          ]
+        },
+        "callee": "example-researcher",
+        "at": "2026-10-26T10:05:00Z",
+        "narrower": {
+          "capabilities": [
+            "page.update"
+          ],
+          "actions": [
+            "publish-page"
+          ],
+          "effects": [
+            "draft"
+          ],
+          "projects": [
+            "example-site"
+          ]
+        }
+      },
+      "expected": {
+        "refused": "mandate-widened"
+      }
+    },
+    {
       "name": "adding a capabilities list where only actions are listed widens (MD-2a draws the line at the list)",
       "input": {
         "mandate": {

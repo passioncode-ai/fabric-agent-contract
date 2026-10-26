@@ -542,8 +542,9 @@ it reaches acts on them without asking, within what they cover.
   through one of AP-3's sources) states a `mandate/1`: `task`, the operator's `instruction` verbatim in AP-3's form,
   `at`, `expiresAt` (after `at` and at most 7 days after it; the shortest that covers the task), a `scope` stated from
   the operator's words, and `chain` with itself first. The scope lists `capabilities`, relayed `actions` and
-  `projects` (a `projects` list left out means any project; a `capabilities` or `actions` list left out means any for
-  a read or a draft but names no call for an external effect or a relayed action, MD-3), an effect ceiling `effects`, and `perCallMaxUsd` only where the words name an
+  `projects` (a `projects` list left out means any project; a `capabilities` list left out means any capability for a
+  read or a draft but names none for an external effect; an `actions` list left out covers a relayed action only through
+  a listed capability that is its tool, MD-3), an effect ceiling `effects`, and `perCallMaxUsd` only where the words name an
   amount. It never states a scope wider than the words; where they are unclear, it asks the operator (AP-3). An agent
   names itself in the chain by its registry id, or, a coding session with none, by its runner kind (`claude-code`,
   `codex`), without DEC-0121's `agent:` prefix. A task still open when the mandate expires asks the operator once, in one
@@ -554,8 +555,9 @@ it reaches acts on them without asking, within what they cover.
   the ceiling, never drops a list or the ceiling, never changes `task`, `instruction`, `at`, `expiresAt` or `source` (DEC-0126), and never
   names an agent twice; the chain holds at most four agents, as a delegation chain (DL-6). `FAC-SEM-144` refuses a
   document that breaks this.
-- **MD-2a, a naming list is never added** (DEC-0136). A `capabilities` or `actions` list left out is "any" for a read
-  or a draft, but names no call for an external effect or a relayed action (MD-3, **Covered**). So a hand-over never
+- **MD-2a, a naming list is never added** (DEC-0136). A `capabilities` list left out is "any" for a read or a draft
+  but names no call for an external effect, and an `actions` list left out covers a relayed action only through a
+  listed capability (MD-3, **Covered**). So a hand-over never
   adds a `capabilities` or `actions` list the scope in force leaves out, except `actions` where the scope in force lists
   `capabilities` (it then narrows the relayed actions those name); it may add a `projects` list. Added anywhere else,
   the list could cover calls the operator's words did not, and the mandate is `mandate-widened`. The line is drawn at
