@@ -384,7 +384,7 @@ decision adds no transition.
 
 ## Responders and fences
 
-One responder slot exists per Project and capability (C4, DEC-0022). It has a generation that only
+One responder slot exists per Project and capability (DEC-0022), fenced as C4 says. It has a generation that only
 grows and survives deletion and restore. Every responder mutation carries a fence
 (`comms-fence.schema.json`):
 
@@ -534,7 +534,7 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 **PR-1 (DEC-0140).** `project.work` (`PRIMARY_CAPABILITY`) is reserved: it is the capability of a Project's **primary
 responder**. A requester that knows no narrower capability of the target names `project.work` in its request; the
 board never re-routes a request that names another capability. Beyond that it is a capability like any other: one slot
-per Project (C4), fenced, listed in the [project directory](#project-directory) only for a Project whose host takes requests for
+per Project (DEC-0022), fenced (C4), listed in the [project directory](#project-directory) only for a Project whose host takes requests for
 it (with an `absent` responder until one enrolls), and subject to the operator's holds like any slot. A host that
 shows a Project's main session, for the operator's own Projects only (another member's responder state is never shown,
 OD-1), shows the slot's holder: an `active` one as the main session, a `stale` one as the main session not answering,
@@ -647,7 +647,7 @@ The operator can **hold** a thread, a Project or a (Project, capability) respond
 controls (Fabric's board operator controls, its decision D9). While a hold lasts, the board refuses new work in its
 scope with `held` and never refuses a call that settles, reports on or keeps alive work already started (DEC-0079).
 A hold never refuses the current responder's calls on started work; if that responder's session ends under a slot or
-Project hold, enrollment and replacement wait for the lift, and its accepted work stays held as C4 says.
+Project hold, enrollment and replacement wait for the lift, and its accepted work is kept as C4 says.
 
 - **Who sets it.** Only the operator decides a hold: in the host, or through their agent, which relays the decision to
   the host's set, lift and list actions (`gate: relayed`, [service](service.md#actions) AP-1 and AP-2, DEC-0121; the
@@ -712,10 +712,11 @@ session of that Project: in the host's operator controls, or through their agent
   showed, and the host refuses it `revision_conflict` when the slot has moved on since, as `expectedGeneration` refuses
   a replacement. A relayed move is one call: the decision's `target` names the slot, that generation and the receiving
   session, in the form the host's move tool publishes (at most 200 characters, `decision.schema.json`; a host whose plain form
-  would be longer publishes a compact reference to the slot instead), so a new call
+  would be longer publishes a compact reference that binds the slot, that generation and the receiving session, such
+  as a digest of the three, never the slot alone), so a new call
   under the same decision (AP-2's coverage) is refused `revision_conflict` once the slot has moved on. A retry of the
   same call with its idempotency key answers the stored result (a rule of the move, DEC-0140, as for every board
-  write), so a lost answer never reads as a failed move. Otherwise the host applies it atomically, as `com.responder_replace` would for the receiving session:
+  write that stores a receipt; the move keeps its keys in the Project's own namespace, a family of its own), so a lost answer never reads as a failed move. Otherwise the host applies it atomically, as `com.responder_replace` would for the receiving session:
   the generation goes up by one; a `claimed` request returns to `queued`; an `in_progress` one becomes
   `outcome_unknown` (`lost_result`); an `accepted` one is kept (C4). The move transfers no request, since a transfer
   carries a checkpoint its caller writes, and the operator writes none.
@@ -723,7 +724,7 @@ session of that Project: in the host's operator controls, or through their agent
   `com.enroll`, other than the slot's holder; the host refuses any other `not_authorized`, and a move grants nothing.
   The host refuses a mover that is not the owning operator `not_authorized`, and a move of an `absent` slot
   `revision_conflict` (there is no session's generation to move from). The move tool answers the board's refusals
-  in `comms-refusal.schema.json`'s shape, `held` included at every pin, and on the relayed path DL-19's codes as
+  in `comms-refusal.schema.json`'s shape, `held` staged by the reader's pin as the [holds](#holds) Compatibility says, and on the relayed path DL-19's codes as
   `structuredContent` (AP-2). An `absent` slot is not moved: an authorized session takes it by its own `com.enroll`.
 - **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
 - **After the move.** The board's ordinary rules then govern the slot, and a move bars nobody and adds no
@@ -740,7 +741,7 @@ session of that Project: in the host's operator controls, or through their agent
   with an observed outcome, or by the estate owner under [owner settlement](#owner-settlement)'s own test (the slot
   `absent`, or `stale` with no current enrollment). The host shows the slot's `accepted` and `in_progress` counts before the operator
   confirms a move, and that in-progress work stays `outcome_unknown` until the new holder observes it or, once the
-  slot is free under owner settlement's test, the owner settles it.
+  slot is `absent`, or `stale` with no current enrollment (owner settlement's test), the owner settles it.
 - **Learning the slot is its own.** The host tells the receiving session through its own session surface; a client
   that cannot hear it learns the slot is its own when its `com.claim` succeeds, and keeps it as any holder does; one that
   does neither within its lease goes `stale`, as any holder does (After the move). A stale slot is occupied and may be
@@ -769,7 +770,8 @@ tool carries either.
   directory, `com.status`, a relay, an organization server, an events feed read off the machine, or another Project's
   sessions. A host may leave it out without reporting itself degraded. An agent's own message text stays under its own
   rules, and the `git.branch` of an activity event follows the organization's `telemetry.git_branch` policy
-  ([activity](activity.md), [devices](devices.md), DEC-0031), not this rule.
+  ([activity](activity.md), [devices](devices.md), DEC-0031), not this rule; whether a branch a session reported may
+  feed it is CT-176's, and until that is decided a host does not feed it.
 
 ## Refusals
 
