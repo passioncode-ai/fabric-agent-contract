@@ -585,7 +585,10 @@ it reaches acts on them without asking, within what they cover.
   chain's end alone binds the mandate to the call. Then it takes a call the mandate covers as the
   operator's decision: a `relayed` action without a decision ([service](service.md#actions) AP-2), and any approval the
   product itself asks of the operator before a step, such as a paid run. For a job, the step reads the mandate its
-  start call carried: a covered step raises no input request ([interop C3.3](interop.md#c33-awaiting-a-choice)). The
+  start call carried: a covered step raises no input request ([interop C3.3](interop.md#c33-awaiting-a-choice)).
+  **MJ-1 (DEC-0141).** A step is read as its start was: under the job's own capability, the tool its start call named,
+  never under `fabric.job.get`, its action the step's request key and its effect the job's; a mandate whose
+  `capabilities` name `fabric.job.get` covers no step of another capability. The
   mandate travels in `_meta.mandate` (an MCP call, the `fabric.job.get` that answers an input request), in
   `call.mandate` (the hub's `agent.call`, which forwards it as `_meta.mandate`; a sealed call, sent only to a target
   that lists `mandate/1`), or in a project-board request ([project-comms](project-comms.md)) whose sender the target

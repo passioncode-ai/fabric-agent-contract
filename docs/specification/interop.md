@@ -269,7 +269,8 @@ mode never requests a secret (MCP rule); secrets use URL mode. A job whose start
 for its task reads it at its own approval step: a step the mandate covers raises no input request and goes on as the
 operator's decision; a step it does not cover waits `input_required` as here, its message naming the part not covered,
 and its answer may carry a mandate that covers it in the `_meta.mandate` of the `fabric.job.get` call
-([delegation](delegation.md#the-operators-mandate) MD-3, MD-4, DEC-0125). A mandate that expired before the step waits
+([delegation](delegation.md#the-operators-mandate) MD-3, MD-4, DEC-0125), read under the job's capability with the
+request key as its action, as at the start (MJ-1, DEC-0141). A mandate that expired before the step waits
 there too, its message saying the operator's mandate expired. A URL-mode request on the service's own page MUST carry
 its open_link as `url`, never a raw local address (**FAC-SEM-143**, [service](service.md#page-links) PL-4,
 DEC-0123), and a tool answer that names a page for a person MUST carry it in `open_link`.

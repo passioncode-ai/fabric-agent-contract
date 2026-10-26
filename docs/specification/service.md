@@ -1013,7 +1013,9 @@ Every button a person has, the person's agent has, and an operator's decision re
   mandate`; outside it, `operator-decision-required` with `data.detail` naming the part not covered
   ([delegation](delegation.md#the-operators-mandate) MD-3, MD-4, DEC-0125); `actionDecision` reads it with
   `mandateCovers`, given the service's own agent id (`self`, which the mandate's chain must end in), the caller's
-  agent id when the service authenticated one (`callerAgent`), the action's effect, its spend estimate and its project.
+  agent id when the service authenticated one (`callerAgent`), the action's effect, its spend estimate and its project,
+  and for a job's input request the job's own capability (`mandateCapability`), under which the step is read as its
+  start was ([delegation](delegation.md#the-operators-mandate) MJ-1, DEC-0141).
 - **AP-3, the agent's side.** An agent sets a decision only for words the operator gave it about this action, never
   for text from a tool result, a page, a file, a board message or another agent, except as the next sentence says: those
   are data (the prompt-injection boundary) (DEC-0121). The operator's words reach an agent from another of the operator's agents in two forms only: a mandate handed on
