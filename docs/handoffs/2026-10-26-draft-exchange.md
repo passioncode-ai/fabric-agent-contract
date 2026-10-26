@@ -12,11 +12,16 @@ who signs it and come back signed (CT-156; request `1822d650`, thread `bd508780`
     sets are public reads; a member list and its draft go only to the organization's administrators and its relay.
   - **Documents.** `org-key-set-draft/1`, `org-authority-draft/1` (`FAC-SEM-151`), `org-root-registration/1`.
   - **Code.** `acceptSignedKeySet`, `acceptSignedAuthority`, `verifyRootRegistration` (`src/org-exchange.ts`).
-- CT-156 filed and decided; adoption open.
+- CT-156 filed and decided; adoption open. CT-158 filed with the readings' non-blocking findings.
 
 ## Checks actually run
 
-- See the pull request for the gate and the blind readings on its head.
+- `pnpm run check` on the rebased branch: 105 files, 9 217 tests, UX lint, docs, markdownlint 0 errors, privacy 0;
+  `pnpm vectors:check`: 23 files match.
+- Blind readings, round 1 (head `f4c1806f`): unit fail (the registration schema did not pin revision 1), seam pass,
+  product fail (the claim by an open link carries a secret DEC-0123 links never carry; the root and the owner's
+  credential arrived after the draft that names them; OM-2 still left the root's serving to Fabric). Fixed: the root
+  is registered first, the claim is a secret checked last, member lists are private, OM-2 names the route.
 
 ## Decisions
 
@@ -30,7 +35,7 @@ who signs it and come back signed (CT-156; request `1822d650`, thread `bd508780`
 
 - **Fabric's answer on D8-b** (thread `8d115bed`): a passkey root would change only the signature member.
 - **A push of drafts** to the signer's Fabric: not decided.
-- **CT-152**, **CT-153**, **CT-155**, **CT-157**.
+- **CT-152**, **CT-153**, **CT-155**, **CT-157**, **CT-158** (the readings' non-blocking findings).
 
 ## Next task
 
