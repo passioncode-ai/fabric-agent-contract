@@ -90,11 +90,23 @@ const listWithin = (child: string[] | undefined, parent: string[] | undefined) =
 /** A per-call ceiling no higher: none in the child only when the parent names none. */
 const ceilingWithin = (child: number | undefined, parent: number | undefined) => parent === undefined || (child !== undefined && child <= parent);
 
-/** True when `child` asks for nothing `parent` does not give (MD-2): each list a subset, the effects within, the ceiling no higher. */
+/**
+ * A naming list (`capabilities`, `actions`) left out is "any" for a read or a draft but names no call for an external
+ * effect or a relayed action (MD-3), so adding one where the scope in force has none would cover calls it did not
+ * (DEC-0136 MD-2a). `actions` may be added where `capabilities` is listed: it then narrows the relayed actions those
+ * name.
+ */
+const namingWithin = (child: MandateScope, parent: MandateScope) =>
+  (parent.capabilities === undefined ? child.capabilities === undefined : listWithin(child.capabilities, parent.capabilities))
+  && (parent.actions === undefined ? child.actions === undefined || parent.capabilities !== undefined : listWithin(child.actions, parent.actions));
+
+/**
+ * True when `child` asks for nothing `parent` does not give (MD-2): each list a subset, no naming list added where the
+ * scope in force has none (MD-2a), the effects within, the ceiling no higher.
+ */
 export function scopeWithin(child: MandateScope, parent: MandateScope): boolean {
   const ceiling = effectClosure(parent.effects);
-  return listWithin(child.capabilities, parent.capabilities)
-    && listWithin(child.actions, parent.actions)
+  return namingWithin(child, parent)
     && listWithin(child.projects, parent.projects)
     && child.effects.every((effect) => ceiling.has(effect))
     && ceilingWithin(child.perCallMaxUsd, parent.perCallMaxUsd);
