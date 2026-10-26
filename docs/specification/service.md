@@ -196,7 +196,7 @@ The smallest answer to `GET /.well-known/fabric-service`, for the descriptor abo
 | `process` | yes | the live process: `pid` and `startedAt` |
 | `status` | yes | `starting`, `ready`, `degraded` or `stopping` |
 | `degraded` | yes | the sources that do not work now; an empty list asserts full health |
-| `surfaces` | yes | at least `events`; `dashboard`, `mcp` and `usage` when the service has them |
+| `surfaces` | yes | at least `events`; `dashboard`, `mcp`, `usage` and `a2a` when the service has them |
 
 `GET /.well-known/fabric-service` MUST answer without authentication, from memory, in
 under 100 ms, for a local placement. Host and Origin checks (below) still apply. A remote
@@ -241,6 +241,8 @@ placement requires the token here too ([Remote placement](#remote-placement)).
 - `surfaces.operatorChannel` MAY name the path of the service's operator-channel status, which
   requires the service token ([operator channel](operator-channel.md) OC-9, DEC-0034). The
   channel's state never changes the service's `status` or `degraded` list.
+- `surfaces.a2a` SHOULD name, for a service that serves an A2A Agent Card, where it is: the card's `path` on the
+  service origin and the A2A `protocolVersion`, `1.0` ([A2A Agent Card](#a2a-agent-card), DEC-0122).
 - `configuration` MAY name what the operator can configure for this agent (`slots`: `runner`, `model`) and the
   profiles that apply now (`resolved`), read-only: a change is made in Fabric and reaches the agent through its
   binding ([runners](runners.md#what-an-agent-declares), DEC-0046).
@@ -511,6 +513,8 @@ mode `0600`, and the same value lives on the hosting platform as a secret.
   the status of that `401` and never its body; a conformance checker admits a body that
   neither parses as the well-known document nor carries the service's own identity values (`service.id`, its instance, build or `process.pid`). With the token, the document is the one this
   extension defines.
+- Its public A2A Agent Card, when it serves one, MAY answer without the token: it discloses the service's name and
+  skills and nothing about the running process ([A2A Agent Card](#a2a-agent-card), DEC-0122).
 - The events feed, the login code and the login redirect are as for a local placement. The
   session cookie's name MUST start with `__Host-`, and it MUST carry `Secure`, `HttpOnly`,
   `SameSite=Strict` and `Path=/` and no `Domain`.
@@ -807,9 +811,9 @@ supervisor, rather than as a stdio server each session starts (LC-19, [profiles]
 
 | Caller | Surface |
 |---|---|
-| Another agent on the same machine | MCP `2026-07-28`, `streamable-http`, at `surfaces.mcp.path` on the service origin, token in the declared header — unless `surfaces.mcp.auth` is `own` or `delegation` ([below](#mcp-credentials)); an agent of the estate presents a delegation token ([delegation](delegation.md), DEC-0039) |
+| Another agent on the same machine | MCP `2026-07-28`, `streamable-http`, at `surfaces.mcp.path` on the service origin, token in the declared header, unless `surfaces.mcp.auth` is `own` or `delegation` ([below](#mcp-credentials)); an agent of the estate presents a delegation token ([delegation](delegation.md), DEC-0039); or A2A `1.0` on the loopback origin, never with the descriptor's token ([A2A Agent Card](#a2a-agent-card)) |
 | The operator, a script | the service's CLI, delegating start, stop and restart to the supervisor |
-| A remote agent | A2A `1.0` over HTTPS, or MCP behind an authenticated gateway |
+| A remote agent | A2A `1.0` over HTTPS, found through its [Agent Card](#a2a-agent-card), or MCP behind an authenticated gateway |
 | The dashboard page | same-origin requests with the session cookie and the custom request header; its layout and appearance inside a host follow [`fabric-dashboard/0.1`](embedded-dashboard.md) (DEC-0036) |
 
 <a id="mcp-credentials"></a>
@@ -839,6 +843,63 @@ descriptor's token. The descriptor's token stays the host's: once a caller can m
 token, it never presents a service's own descriptor token to call that service's capabilities
 ([delegation](delegation.md) DL-12). A host creating a sign-in for the dashboard it shows
 (`POST /fabric/v1/login-code`) is the host's operation and keeps using the descriptor's token.
+
+<a id="a2a-agent-card"></a>
+
+### A2A Agent Card (DEC-0122)
+
+A service that answers A2A peers ([A2A peer profile](profiles.md#a2a-peer-profile), DEC-0002) serves an Agent Card
+as A2A `1.0` defines it. It SHOULD name the card in its well-known document, so a host finds it beside the other
+surfaces; a peer finds it at A2A's own well-known path (A2A 1.0 §8.2):
+
+```json
+"surfaces": {
+  "events": { "path": "/fabric/v1/events" },
+  "a2a": { "path": "/.well-known/agent-card.json", "protocolVersion": "1.0" }
+}
+```
+
+- `surfaces.a2a.path` is the public card's path on the service origin, normally `/.well-known/agent-card.json`
+  (A2A 1.0 §8.2). `protocolVersion` is `1.0`, the version every entry of the card's `supportedInterfaces` exposes
+  (A2A 1.0 §4.4.6). The card, not this document, names its interfaces, bindings and security schemes;
+  `surfaces.a2a` only says where it is.
+- **Where the card and its interfaces are.** On a local placement the public card answers on the service origin
+  without authentication, as the well-known document does, and the Host and Origin checks still apply. Its interface
+  URLs are on that origin (`http://127.0.0.1:<port>`): a peer on the same computer reaches them, and loopback is the
+  trust anchor ([Remote placement](#remote-placement)). A2A asks for HTTPS in production (A2A 1.0 §4.4.6, §7.1); a
+  loopback origin is not reachable from outside the computer, so this contract admits it there and nowhere else. A
+  service [offered to others](#offered-to-others) serves the card its outside peers read at the well-known path on its
+  `peer.endpoint`'s origin (A2A 1.0 §8.2 is rooted at the domain), whose interface URLs are on that `https` endpoint; a
+  remote placement serves it on its `https` origin. There it MAY answer without the token, since a peer that holds no
+  credential yet discovers the service through it; a card that is not open is gated by the service's own credentials
+  or an identity proxy in front of it, never by the descriptor's token.
+- **What the public card discloses.** It carries no secret and none of the well-known document's members about the
+  running process (build, pid, status, tiles, the degraded list). It does disclose the service's name and skills: on a
+  remote placement this is the service's choice by serving it, and it is the one exception to what DEC-0109 keeps
+  behind the token there.
+- **Who may call its interfaces.** An A2A peer is never given the descriptor's token. It is the host's credential,
+  retired as a capability credential across the machine boundary ([delegation](delegation.md) DL-12) and never given
+  to others ([Offered to others](#offered-to-others), DEC-0061); for a peer on the same computer, where MCP may still
+  take it by default (DEC-0024), this decision chooses the stricter rule, so one card serves every peer alike. An A2A
+  interface MUST NOT accept the descriptor's token, and the card's `securitySchemes` MUST NOT name it. A service authenticates A2A callers with
+  credentials of its own (as `surfaces.mcp.auth: "own"` describes) or with the estate's delegation tokens when it
+  declares `auth.delegation` ([MCP credentials](#mcp-credentials), DEC-0039), whether or not it has an MCP surface. A
+  host and a probe MUST NOT call an A2A interface with the descriptor's token and MUST NOT report its refusal
+  (`401`/`403`) as nonconformance.
+- **The extended card.** An authenticated extended card (`capabilities.extendedAgentCard: true`, fetched with
+  `GetExtendedAgentCard` or REST `GET /extendedAgentCard`, A2A 1.0 §4.4.3, §5.3) MUST require one of those same
+  credentials on every placement.
+- **Fabric facts in the card.** An extension the card declares for a Fabric fact, such as the service's limits or its
+  load (DEC-0104), MUST carry `required: false` (A2A 1.0 §4.4.4), so a peer that does not know it still calls; a
+  required extension the peer did not declare fails its call with `ExtensionSupportRequiredError` (A2A 1.0 §3.3.4).
+  Such an extension names no person, caller or prompt, as the load report does not, and the load report stays what a
+  host reads.
+- **Skills.** The skill ids a manifest names in its `a2a` profile (`skillIds`) are skills of the card at that
+  profile's `agentCardUrl`, which is `https` (the card a peer outside the computer reads); the manifest remains the
+  authority on capabilities, as it is for `surfaces.mcp.capabilities`.
+- **Not here.** An `ai-catalog.json` entry (MCP's SEP-2127, [sources](../evidence/sources.md)) is not part of
+  `fabric-service/0.1`: it is MCP-side discovery, and the contract takes it when an MCP revision it pins (`2026-07-28`
+  today) carries it.
 
 ## Actions
 
