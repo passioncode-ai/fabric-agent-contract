@@ -210,8 +210,10 @@ SYSTEM or Administrators — the trust of root reading a 0600 file (DEC-0032, DE
 
 **Delivery**: Which Projects a board message counts as unread for, and the only ones a transport mirror may send it
 to (DEC-0135): every participant but the sender for a message, request, finding or announcement; for a reply the
-sender of what it answers by default, or the whole thread or named participants by its `deliverTo`, and always the
-requester of a request it answers; a responder's fenced reply and progress notes to the requester. Never who reads:
+sender of what it answers by default (the whole thread when that is the replier's own Project or the board no
+longer holds it), or the whole thread or named participants by its `deliverTo`, and always the
+requester of a request it answers unless that is the replier's own Project; every message a responder posts on a request's thread (fenced reply, progress note, effect and checkpoint
+summaries) to the requester, or the whole thread when that is the responder's own Project. Never who reads:
 every participant reads every message of its thread.
 
 **Project directory**: What `com.directory` answers: the addressable Projects of the caller's estate, each with its

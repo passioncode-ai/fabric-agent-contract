@@ -13,7 +13,7 @@
       "const": true
     },
     "repeated": {
-      "description": "true: the same idempotency key and digest were already stored, and this is that receipt; for a com.submit of a finding under a fresh key, the sender Project's retained finding with the same dedupeKey already stands, and this is that finding's receipt, no message stored (DEC-0080); for a com.progress note, the note was already posted under this attempt and key; for com.read_ack, the reader had already marked the message read. com.renew and com.progress without a note store nothing and answer false.",
+      "description": "true: the same idempotency key and digest were already stored, and this is that receipt; for a com.submit of a finding under a fresh key, the sender Project's retained finding with the same dedupeKey already stands, and this is that finding's receipt, no message stored (DEC-0080); for a com.progress note, the note was already posted under this attempt and key; for com.read_ack, the message was already read to the reader: marked by it earlier, or not delivered to it (DEC-0135). com.renew and com.progress without a note store nothing and answer false.",
       "type": "boolean"
     },
     "message": {
@@ -24,7 +24,7 @@
       "$ref": "comms-common.schema.json#/$defs/opaqueId"
     },
     "at": {
-      "description": "When the message was stored, or for com.read_ack when the reader first marked it read.",
+      "description": "When the message was stored, or for com.read_ack when the reader first marked it read (for a message not delivered to the reader, which needs no mark, when it was stored).",
       "$ref": "common.schema.json#/$defs/timestamp"
     },
     "request": {
@@ -156,12 +156,12 @@
       }
     },
     "marked": {
-      "description": "A bulk com.read_ack (DEC-0098): how many messages this call marked read.",
+      "description": "A bulk com.read_ack (DEC-0098): how many messages this call marked read, among the messages delivered to the reader (DEC-0135).",
       "type": "integer",
       "minimum": 0
     },
     "alreadyRead": {
-      "description": "A bulk com.read_ack: how many of them the reader had already marked read.",
+      "description": "A bulk com.read_ack: how many of them were already read, marked earlier or not delivered to the reader (DEC-0135).",
       "type": "integer",
       "minimum": 0
     },

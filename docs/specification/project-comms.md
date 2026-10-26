@@ -84,8 +84,9 @@ one not delivered to it.
   - `thread`: to every participant but the replier's Project;
   - a list of 1 to 16 Project ids: to those, each a participant other than the replier's Project. A listed Project that
     is not a participant is refused `immutable_participants` (a reply never widens a thread); the replier's own
-    Project is refused `invalid_arguments`, and is checked first. The refusal names neither the Project nor the
-    participants.
+    Project is refused `invalid_arguments`, and is checked first; a [hold](#holds) on the thread refuses before either,
+    and a repeat of a stored key answers its receipt before them ([idempotency](#idempotency)).
+    The refusal names neither the Project nor the participants.
   `deliverTo` is accepted on a reply only; on any other kind it is refused `invalid_arguments` (the schema's `false`).
   A reply whose `replyTo` is a request is also delivered to the Project that sent the request, whatever `deliverTo`
   says, unless that is the replier's own Project, so a target's reply that answers a request
@@ -492,7 +493,8 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 - **`com.read_ack` takes no idempotency key and stores no receipt**, because marking read twice is one mark. The
   reader's read mark is its own record. The first mark answers `repeated: false` and `at`, the time of the mark. A
   second mark of the same message by the same reader changes nothing and answers `repeated: true` with the first
-  mark's `at`.
+  mark's `at`. A mark of a message not delivered to the reader, already read to it (DEC-0135), changes nothing and
+  answers `repeated: true` with the time the message was stored.
 - **`com.claim` with nothing claimable** answers `{ok: true, repeated: false}` with no `request`. It stores no
   receipt, so the responder may poll again with the same key.
 - **`com.renew` and `com.progress` are naturally idempotent.** The board checks their key's shape and epoch, and a
@@ -694,6 +696,7 @@ operator resumes the work, and it never names a hidden Project or who set the ho
 | A finding's `dedupeKey` | 8–128 characters `[A-Za-z0-9._:-]` |
 | A finding's idempotency key | at least 128 random bits; the schema checks at least 22 characters |
 | Participants of a new thread | 16 |
+| Projects a reply's `deliverTo` names | 16 (DEC-0135) |
 | Page | 100 messages |
 | Directory page | 100 Projects |
 | Capabilities per directory entry | 64 |

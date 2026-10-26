@@ -368,6 +368,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-13):** amended by DEC-0079: an operator's hold on a thread, a Project or a responder slot refuses new work `held` (retryable) and never refuses started work, a cancel or a read.
 - **Annotated (2026-10-13):** amended by DEC-0081: `outcome_unknown` is still left only by `com.reconcile`, and its caller widens to the estate owner while no responder holds the slot, observed only and with a required summary; a request the owner settled says so (`settledBy: "owner"`, sent only then).
 - **Annotated (2026-10-13):** amended by DEC-0080: a message of kind `finding` may carry a structured `finding` (severity, consequence, affects, `dedupeKey`), deduped by the sender's Project and `dedupeKey`, its `affects` items redacted outside a reader's grants (`FAC-SEM-108`).
+- **Annotated (2026-10-26):** amended by DEC-0135: who a message is delivered to (what counts as unread and what a
+  mirror sends) is decided apart from who reads it; a reply goes to the sender it answers unless its `deliverTo` names
+  the thread or a list of participants.
 - **Decision:** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
   board on which messages are addressed to a Project, and through a request to a capability of
   that Project. Identity comes from the authenticated endpoint and never from the payload. A
@@ -8129,7 +8132,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      participant but the replier), or a list of 1 to 16 participants other than the replier. A listed non-participant
      is refused `immutable_participants`, the replier's own Project `invalid_arguments`; `deliverTo` on another kind is
      refused `invalid_arguments`. A reply to a request is also delivered to the requester whatever `deliverTo` says,
-     so a target's reply that answers a request (`answered`, DEC-0098) always reaches it.
+     unless the requester is the replier's own Project, so a target's reply that answers a request (`answered`,
+     DEC-0098) always reaches it.
   4. **DR-3.** Every message a responder posts on a request's thread (fenced reply, progress note, effect or
      checkpoint summary) is read as a reply to the request and delivered to the requester (as `thread` when the
      requester is the responder's own Project), and takes no `deliverTo`.
@@ -8149,12 +8153,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reader pinned before this would refuse a message that carries `deliverTo` (`comms-message` is closed), so a host
   sends the member only to a reader pinned at or after DEC-0135 and omits it for an older one, as DEC-0079 staged
   `held`. `unread` and `com.status`'s count narrow to deliveries: a Project's own messages and replies delivered to
-  others leave a reader's count on a board that counted them before. `contractVersion` stays `0.1.0`.
+  others leave a reader's count on a board that counted them before, and `read` is `true` for them on a filtered
+  page. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/comms-common.schema.json` (`deliverTo`, the `answered` description),
   `comms-reply.schema.json`, `comms-submit.schema.json`, `comms-message.schema.json`, `comms-list.schema.json` and
   `comms-status.schema.json` (`unread`); fixtures; `docs/specification/project-comms.md` (header, participants, reads,
   delivery, messages, `com.status`, transport mirror), `conformance.md` (the board's row), `CONTEXT.md` (Delivery),
-  `docs/DOCMAP.md`; DEC-0098 annotated; backlog CT-154.
+  `docs/DOCMAP.md`, `docs/ux/screens.md` (SCR-19), `comms-receipt.schema.json` (`repeated`, `at`, `marked`,
+  `alreadyRead`); DEC-0022 and DEC-0098 annotated; backlog CT-154, CT-166.
 - **Source:** CT-154; Fabric CO-437, CO-370 (fabric `20261026000124_one_schema_step.sql`); fabric-workspace's relay of
   2026-10-26.
 
