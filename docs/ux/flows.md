@@ -777,7 +777,7 @@ flowchart TD
   O[Operator gives the task] --> L[Leading agent states the mandate]
   R[Approval relayed from another of the operator's agents, from their own Project or session] --> L
   R --> D[For one action: the receiver states a decision with source]
-  D --> S[Service takes it; recorded via relayed-instruction with source]
+  D --> S[Service takes it; recorded via relayed-instruction, with source where it lists operator-source/1, else in the receiver's own record]
   L --> C[Calls the next agent with it, narrowed]
   C --> T{caller's tier}
   T -->|T2| X[mandate ignored: the whole profile applies]
