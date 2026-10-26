@@ -128,7 +128,7 @@ export function adaptationReceipt(plan: JsonObject, decisions: readonly RequestD
  */
 export function decideAdaptation(
   plan: unknown,
-  ctx: { member: boolean; valid: boolean; org: string; held?: HeldAdaptation }
+  ctx: { member: boolean; valid: boolean; org: string; held?: HeldAdaptation | null }
 ): { outcome: "accepted" | "repeated"; held: HeldAdaptation } | { outcome: "refused"; refusal: OrgAdaptationRefusal } {
   if (!isObject(ctx) || ctx.member !== true) return { outcome: "refused", refusal: "not-a-member" };
   if (isObject(plan) && typeof plan.type === "string" && plan.type !== ORG_ADAPTATION_TYPE) return { outcome: "refused", refusal: "schema-unsupported" };

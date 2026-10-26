@@ -47,7 +47,7 @@ describe("org-adaptation/1 (DEC-0138)", () => {
     expect(decideAdaptation("x", { member: true, valid: true, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
     expect(decideAdaptation({ ...plan, revision: 1.5 }, { member: true, valid: true, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
     expect(decideAdaptation({ ...plan, extra: Number.POSITIVE_INFINITY }, { member: true, valid: true, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
-    expect(decideAdaptation(plan, { member: true, valid: true, org: plan.org, held: null as never })).toEqual({ outcome: "accepted", held: { revision: 2, digest: adaptationDigest(plan) } });
+    expect(decideAdaptation(plan, { member: true, valid: true, org: plan.org, held: null })).toEqual({ outcome: "accepted", held: { revision: 2, digest: adaptationDigest(plan) } });
     expect(decideAdaptation(plan, { member: true, valid: true, org: plan.org, held: "x" as never }).outcome).toBe("accepted");
     expect(decideAdaptation(plan, undefined as never)).toEqual({ outcome: "refused", refusal: "not-a-member" });
     expect(decideAdaptation({ ...plan, type: 7 }, { member: true, valid: false, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });

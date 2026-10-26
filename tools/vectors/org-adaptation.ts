@@ -49,7 +49,7 @@ export function orgAdaptationVectors(): Json {
       { name: "the first plan", plan, context: { member: true, valid: true, org }, expected: { outcome: "accepted", held } },
       { name: "a higher revision", plan: next, context: { member: true, valid: true, org, held }, expected: { outcome: "accepted", held: { revision: 3, digest: digest(next) } } },
       { name: "the same revision and digest", plan, context: { member: true, valid: true, org, held }, expected: { outcome: "repeated", held } },
-      { name: "the same revision, another digest", plan: { ...plan, items: [] }, context: { member: true, valid: true, org, held }, expected: { outcome: "refused", refusal: "revision-conflict" } },
+      { name: "the same revision, another digest", plan: { ...plan, items: (plan.items as Json[]).map((item, i) => (i === 0 ? { ...item, label: "Another label" } : item)) }, context: { member: true, valid: true, org, held }, expected: { outcome: "refused", refusal: "revision-conflict" } },
       { name: "a lower revision", plan: { ...plan, revision: 1 }, context: { member: true, valid: true, org, held }, expected: { outcome: "refused", refusal: "stale-revision" } },
       { name: "another organization", plan: { ...plan, org: "org:org-b" }, context: { member: true, valid: true, org }, expected: { outcome: "refused", refusal: "wrong-organization" } },
       { name: "a plan that failed its schema or FAC-SEM-153", plan, context: { member: true, valid: false, org }, expected: { outcome: "refused", refusal: "malformed" } },

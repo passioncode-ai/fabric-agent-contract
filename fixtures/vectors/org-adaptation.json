@@ -289,7 +289,17 @@
         "type": "org-adaptation/1",
         "org": "org:org-7f3a",
         "revision": 2,
-        "items": [],
+        "items": [
+          {
+            "ref": "q7Xk2mP9vLr4Tn8w",
+            "kind": "project",
+            "label": "Another label"
+          },
+          {
+            "ref": "Hb3Zt6Yc1Nq5Ws0e",
+            "kind": "schedule"
+          }
+        ],
         "requests": [
           {
             "id": "req-access-01",

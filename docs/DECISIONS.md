@@ -8333,7 +8333,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/protocol-revisions.test.ts`, `test/schema-compilation.test.ts`, `tools/vectors/run.ts`, `fixtures/catalogue.json`;
   `docs/specification/membership.md` (header, OM-5, OM-7's row, The adaptation plan, `FAC-SEM-153`, Who adopts it,
   Privacy, Not decided here), `contexts.md` (Linkability), `devices.md` (what stays linkable),
-  `docs/specification/README.md` (the membership row), `conformance.md` (rule table, code table, a row), `CONTEXT.md` (Adaptation plan), `docs/DOCMAP.md`,
+  `docs/specification/README.md` (the membership row), `conformance.md` (rule table, code table, the module row, the membership reader's row, the adopter row), `CONTEXT.md` (Adaptation plan), `docs/DOCMAP.md`,
   `docs/ux/flows.md` (FLW-32), `docs/ux/foundation.md` (ST-038), `docs/ux/scenarios.md` (SCN-047; SCN-050, draft), `docs/ux/screens.md` (SCR-31); backlog CT-159, CT-169, CT-171 (the readings' non-blocking findings); the
   handoff `docs/handoffs/2026-10-26-adaptation-plan.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-169; the first organization server's request N-4 (board message `38f108ba`, thread `0fee99ae`); the

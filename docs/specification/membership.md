@@ -463,8 +463,9 @@ person's passkey signs (R1-D12), which never leaves; a `ref` only lets the perso
 server issued it for the person, the same way it reads the person's attestations; how a reader authenticates to the
 issuer is the issuer's and the reader's (*Not decided here*), and the server attributes the plan to that credential's
 person. The route is `PUT /fabric/adaptation/v1/{org}/plan` under the issuer's origin, `{org}` being the part of
-`org:<orgId>` after `org:`; `GET` on it answers the person's receipt, or `404` with the code `no-plan` before the
-first. Fabric sends a plan only after a `GET` answered a receipt or `no-plan`. It retries a `GET` that got no answer or
+`org:<orgId>` after `org:`; `GET` on it answers the person's receipt, or, before the first plan, `404` with the body `{error: {code:
+"no-plan", message}}`; a server that answers a `404` without that code there leaves every person's Fabric reading
+that it takes no plans. Fabric sends a plan only after a `GET` answered a receipt or `no-plan`. It retries a `GET` that got no answer or
 a `5xx` with backoff, as AD-4 retries a `PUT`, backs off on `429`, and reads a `401` or a `403` by the code its body
 carries: an AD-4 code is that refusal (`not-a-member` as AD-4 says); any other code (a sign-in the server asks for
 again, say) is shown to the person, and Fabric holds the plan and asks again after the person acts. Another `404`, or
@@ -473,7 +474,7 @@ credential, means the server takes no plans from this credential: Fabric sends n
 the server again. A server accepts a plan body of at least 512 KiB, which holds the largest plan this schema allows
 written as compact JSON in UTF-8, the form Fabric sends. A suspended membership (OM-6) authorises nothing new, so Fabric
 refreshes the attestation before a `PUT` and sends only once the membership is active again; a withdrawal on leaving
-is sent whatever the membership's state.
+is sent whether the membership is active or suspended.
 Any other `4xx` to a `GET` Fabric shows to the person, as AD-4 shows one to a `PUT`. Where Fabric keeps the
 credential is Fabric's; nothing here asks the app to hold it. A server may ask the person to consent to plans when they
 connect Fabric to it.
@@ -569,9 +570,10 @@ retention says.
   revision as AD-4 says, binds decisions as AD-5 says, ends the plan with the membership (AD-6), and runs
   `fixtures/vectors/org-adaptation.json` (DEC-0138). **The person's Fabric** draws each `ref` and request `id` at random
   per organization and keeps them (AD-2), fills no text from the estate, takes only the person's choices, keeps one
-  revision counter per organization, sends the plan with the credential the server issued it (AD-3), and withdraws it
-  by an empty revision when the person leaves, before it asks the passkey to sign the unpinning (OM-5); it turns CRLF
-into LF and trims the text (AD-2), never reopens a plan withdrawn on the server's page without the person (AD-4), and
+  revision counter per organization, sends the plan with the credential the server issued it after a `GET`, reads a
+  `401` or `403` by its code and sends no `PUT` while the membership is suspended (AD-3), and withdraws it by an empty
+  revision when the person leaves, before it asks the passkey to sign the unpinning, telling the person the plan may
+  remain when no receipt confirmed the withdrawal (OM-5); it turns a CRLF or a CR into LF and trims the text (AD-2), never reopens a plan withdrawn on the server's page without the person (AD-4), and
 waits for the answer to a withdrawal on leaving no longer than the person agrees to (OM-5). The server serves a plan and its
   receipt only to the organization's administrators and the person it came from (AD-6).
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same

@@ -50,6 +50,9 @@ requests to the administrators. The first organization server needs it by 2026-1
   `\s`), the leave notice on any withdrawal no receipt confirmed, a suspended membership sends no plan, the body size
   stated for compact UTF-8, edge tests for white space. The first server's objection (a `401` with `idp-sign-in-required` while its sign-in is stale) taken: AD-3 reads a
   `401` or `403` by its code. At merge, write the merge date into DEC-0138's Status.
+- Round 8: unit and seam pass, product fail (SCN-050 put `invalid_token` with the other codes). Fixed, with the
+  `no-plan` body, the suspended hold in SCN-050, SCR-31 and FLW-32, the full duty lists in row 160 and Who adopts it, a
+  valid plan in the revision-conflict vector, and `held` typed nullable.
 
 ## Open
 
