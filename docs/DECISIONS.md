@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0134` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0135` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -8031,3 +8031,42 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/org-exchange.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`;
   `docs/specification/README.md`; backlog CT-37, CT-158, CT-159, CT-160; `docs/handoffs/README.md`.
 - **Source:** CT-158; Fabric ADR-0180 (fabric `1d49ed3b`; thread `115ef7fb`); DEC-0129, DEC-0131.
+
+### DEC-0134: the organization's relay, its handshake on the signed member list
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). Additive: a second `welcome` variant in `relay-frame.schema.json`, and
+  `sessionStands` takes an organization's admission result (`SessionAdmission`, which both admission results satisfy).
+  Adoption: the relay serves an organization; the first organization server issues the relay its read credential and
+  tells it of new lists; Fabric's nodes and Project Observatory's node connect with an enrollment key (CT-37).
+- **Context:** DEC-0129 gave an organization's relay its admission set (`orgRelayAdmissionSet`) and left the handshake
+  waiting on an organization's heartbeat and delta: what a member signs in `auth.estate`, what `welcome` carries, and
+  when an open session stands (CT-37). Fabric ADR-0180 point 4 adds a stricter status check against attestations.
+- **Decision:**
+  1. **OR-1, auth.** A member signs the same `relay-auth/1` with an enrollment's `#sig` key the list names and
+     `estate` the organization's context id `org:<orgId>`, never its estate id; the relay admits it as `admit` does,
+     the organization being the record it admits from.
+  2. **OR-2, welcome.** `{session, list: {org, revision, digest}, limits?}`: no estate revision, delta head or
+     heartbeat, which an organization does not have in this release.
+  3. **OR-3, sessions** stand while `sessionStands` answers `ok` under the list's admission set: a newer list or key set
+     ends a session whose kid left or changed (`not-admitted`), the held list's window ends every session (`expired`);
+     a refused candidate leaves the held list.
+  4. **OR-4, sources.** The relay pins the root at setup and reads the key set and list from the server at least hourly
+     and when told of a new one, with a credential the server issues it; it applies only what the verifiers accept.
+  5. **OR-5, between members:** T2 unless the recipient's own estate places the sender in T1; no presence across
+     members; one relay origin per organization.
+- **Why:** the list's 7-day window and OL-5's draft on every end already bound how long an ended member stays admitted,
+  so an organization heartbeat and delta only shorten that bound; they stay additive (a member delta kind, membership's
+  Not decided). Naming the organization in `estate` keeps one `admit` for both kinds of relay and never shows a member's
+  estate id to an organization's relay (DEC-0128).
+- **Alternatives considered:** waiting for an organization heartbeat and delta (they shorten the bound; nothing in the
+  handshake needs them); a new frame type for an organization's auth (the existing frame names its record already);
+  taking ADR-0180 point 4's status check now (the relay is not yet an attestation audience: CT-162).
+- **Compatibility:** additive. `contractVersion` stays `0.1.0`. No organization relay ran before this decision, so no
+  client met the new `welcome`. `FRAME_TYPES` is unchanged; `welcome` has two schema variants.
+- **Consequences / affects:** `schemas/relay-frame.schema.json`; `src/relay.ts` (`SessionAdmission`);
+  `docs/specification/relay.md` (The organization's relay, OR-1 to OR-5; the header and the member-list paragraph),
+  `membership.md` (OL-4, OL-6, OX-6, Not decided), `conformance.md`, `CONTEXT.md` (Admission set),
+  `docs/specification/README.md`, `docs/DOCMAP.md`; `test/org-authority.test.ts`, `test/relay.test.ts`; backlog CT-37,
+  CT-162.
+- **Source:** CT-37; DEC-0047, DEC-0066, DEC-0084, DEC-0128, DEC-0129; Fabric ADR-0180 point 4.

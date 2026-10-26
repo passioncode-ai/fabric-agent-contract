@@ -195,6 +195,100 @@
         "v",
         "type",
         "id",
+        "session",
+        "list"
+      ],
+      "properties": {
+        "v": {
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "type": {
+          "const": "welcome"
+        },
+        "session": {
+          "type": "string",
+          "minLength": 1
+        },
+        "list": {
+          "type": "object",
+          "required": [
+            "org",
+            "revision",
+            "digest"
+          ],
+          "properties": {
+            "org": {
+              "$ref": "org-membership.schema.json#/$defs/org"
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "digest": {
+              "$ref": "common.schema.json#/$defs/sha256"
+            }
+          },
+          "additionalProperties": false,
+          "description": "DEC-0134: on an organization's relay, the member list (org-authority/1) the relay admits from: its organization, revision and digest. An organization has no heartbeat or revocation delta in this release, so this welcome carries none."
+        },
+        "limits": {
+          "type": "object",
+          "description": "the limits this relay enforces, each optional and chosen by the relay; a frame over one is answered rate-limited or mailbox-full (DEC-0066)",
+          "properties": {
+            "sendPerMinute": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "description": "send frames per minute per session"
+            },
+            "presenceQueryPerMinute": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "description": "presence-query frames per minute per session"
+            },
+            "deltaQueryPerMinute": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "description": "delta-query frames per minute per session"
+            },
+            "mailboxMessages": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "description": "messages a recipient's mailbox holds"
+            },
+            "mailboxBytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "description": "bytes a recipient's mailbox holds; omitted while the relay has no byte quota"
+            },
+            "blobBytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "description": "the largest blob, in bytes (at most MAX_BLOB_BYTES)"
+            }
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "The welcome of an organization's relay (DEC-0134): the session and the member list it admits from, in place of an estate's revision, delta head and heartbeat."
+    },
+    {
+      "type": "object",
+      "required": [
+        "v",
+        "type",
+        "id",
         "to",
         "msgId",
         "body",

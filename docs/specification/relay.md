@@ -2,7 +2,7 @@
 
 A relay carries sessions, messages, sealed secret envelopes, personal credential envelopes and package blobs between the machines it admits: one
 owner's estate (an organization's members have an admission set from its signed member list, `org-authority/1`, DEC-0129;
-an organization relay's handshake is not decided, CT-37). **It holds no authority.** End-to-end signatures and seals carry every decision a machine relies on.
+its handshake is [the organization's relay](#the-organizations-relay), DEC-0134). **It holds no authority.** End-to-end signatures and seals carry every decision a machine relies on.
 A compromised relay can delay, drop or count traffic. It cannot read a secret, forge a message, or replay one past
 the recipient's checks. Decided in DEC-0047 and amended in place by DEC-0066 (nothing was deployed); the reference
 server is [passioncode-ai/relay](https://github.com/passioncode-ai/relay).
@@ -188,9 +188,44 @@ mailboxes. **It is not authorization**: a recipient checks the sender itself (se
 - **An organization's member list.** An organization's admission set comes from its member list
   (`orgRelayAdmissionSet`, [membership](membership.md#the-organizations-member-list) OL-4, DEC-0129), under the
   organization's root the relay pins at setup and the key set it applied. A refused candidate leaves the held list's set
-in force; a refused held list, or none, admits nobody. The handshake
-  above is still the estate's: what a member signs in `estate` and what `welcome` carries on an organization's relay
-  wait on the organization's heartbeat and delta (CT-37).
+in force; a refused held list, or none, admits nobody. Its handshake is
+  [the organization's relay](#the-organizations-relay) (DEC-0134).
+
+## The organization's relay
+
+DEC-0134 (CT-37) · code [`src/org-authority.ts`](../../src/org-authority.ts) (`orgRelayAdmissionSet`) and the relay's
+own `admit` and `sessionStands` · schema [`relay-frame`](../../schemas/relay-frame.schema.json) (the organization's
+`welcome`)
+
+An organization's relay admits the enrollments its signed member list names (OL-4) by the same handshake as an
+estate's, with the list in place of the estate record. The list's window (at most 7 days) and the server's duty to draft
+a new list when a membership ends (OL-5) bound how long an ended member stays admitted, so the handshake needs no
+organization heartbeat or delta.
+
+**OR-1, auth.** A member's node sends the same `auth` frame, signed by an enrollment's `#sig` key the list names, with
+`estate` the organization's context id `org:<orgId>`, never the member's estate id (DEC-0128). The relay admits it as
+`admit` does, with the organization as the record it admits from (`AuthContext.estate`) and the list's admission set:
+the same order, the same one `unauthenticated` answer for every unproven caller, the same one signature's work.
+
+**OR-2, welcome.** The relay answers `welcome` with `{session, list: {org, revision, digest}, limits?}`: the member list
+it admits from. It carries no `estateRevision`, `deltaHead` or `heartbeat`, which an organization does not have in this
+release; a member's node reads no estate record from an organization's relay.
+
+**OR-3, open sessions.** An open session stands only while `sessionStands` answers `ok` under the list's admission set.
+When the relay applies a newer list (or a key set that changes which administrators the root certifies), it ends every
+session whose kid left the set or now names another key (`not-admitted`, close 4403); when the held list's window ends
+it ends every session (`expired`, close 4403) and admits nobody until a newer list verifies. A candidate it refuses
+leaves the held list: it reads the held list again, without the candidate, for its sessions.
+
+**OR-4, where the relay reads the list.** The relay pins the organization's root when it is set up for it (OM-2's
+root route, its fingerprint compared out of band), and reads the key set (`GET .../key-set`) and the member list
+(`GET .../authority`, OX-6) from the organization's server at least every hour and when the server tells it of a new
+one; it authenticates to the server with a credential the server issues when it sets the relay up (the server's).
+Every document it applies is one `verifyOrgKeySet` and `orgRelayAdmissionSet` accept: the server's word adds nothing.
+
+**OR-5, between members.** Members of the organization are T2 to each other unless the recipient places the sender in
+T1 by its own estate (they share an owner); the relay sends no presence from one member to another (DEC-0047). One
+relay origin serves one organization (one context per origin, above).
 
 ## Messages
 

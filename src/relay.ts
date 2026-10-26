@@ -392,6 +392,12 @@ export function relayAdmissionSet(input: AdmissionInput): AdmissionResult {
   return { ok: true, held: record, revision, set, excluded, unread };
 }
 
+/**
+ * What a session stands under: an estate's admission result (`relayAdmissionSet`) or, on an organization's relay, its
+ * member list's (`orgRelayAdmissionSet`, DEC-0134); only the set, or the refusal's name, is read.
+ */
+export type SessionAdmission = { ok: true; set: ReadonlyMap<string, Uint8Array> } | { ok: false; refusal: string };
+
 /** A proven session: the kid it authenticated as and the `#sig` key octets that signature verified under. */
 export interface ProvenSession { kid: string; key: Uint8Array }
 
@@ -399,10 +405,10 @@ export interface ProvenSession { kid: string; key: Uint8Array }
  * Whether an open session still stands under the relay's current admission set (DEC-0066, amended by DEC-0084): only
  * while its kid maps to the same key octets it was proven under. A key replacement keeps the kid (`<id>#sig`, DEC-0053),
  * so a kid alone would keep a session proven under the old key open; the octets close it. `not-admitted` (close 4403)
- * when the kid left the set or now names another key; `expired` when the held record's window ended (close 4403); any
- * other refusal of the set is `not-admitted`.
+ * when the kid left the set or now names another key; `expired` when the held record's (or member list's) window ended
+ * (close 4403); any other refusal of the set is `not-admitted`.
  */
-export function sessionStands(session: ProvenSession, admission: AdmissionResult): { ok: true } | { ok: false; code: "not-admitted" | "expired" } {
+export function sessionStands(session: ProvenSession, admission: SessionAdmission): { ok: true } | { ok: false; code: "not-admitted" | "expired" } {
   if (!admission.ok) return { ok: false, code: admission.refusal === "expired" ? "expired" : "not-admitted" };
   const key = admission.set.get(session.kid);
   return key !== undefined && Buffer.from(key).equals(Buffer.from(session.key)) ? { ok: true } : { ok: false, code: "not-admitted" };

@@ -142,7 +142,8 @@ describe("frames DEC-0066 adds: replyTo, presence-result, retryAfter and welcome
 
   it("names in FRAME_TYPES exactly the types the schema's variants carry (owner's item 12)", () => {
     const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/relay-frame.schema.json"), "utf8")) as { oneOf: Array<{ properties: { type: { const: string } } }> };
-    expect(schema.oneOf.map((variant) => variant.properties.type.const).sort()).toEqual([...FRAME_TYPES].sort());
+    // `welcome` has two variants: an estate's and an organization's relay's (DEC-0134).
+    expect([...new Set(schema.oneOf.map((variant) => variant.properties.type.const))].sort()).toEqual([...FRAME_TYPES].sort());
   });
 
   it("answers a presence-query with one presence-result, correlated by replyTo", () => {
