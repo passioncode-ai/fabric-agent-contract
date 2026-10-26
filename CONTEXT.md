@@ -690,7 +690,7 @@ administrator's acceptance. Any organization server issues it, so a reader works
 ([membership](docs/specification/membership.md)).
 
 **Draft exchange**: How an organization server's unsigned draft of a key set or a member list reaches the person who
-signs it and comes back signed (DEC-0131): the server serves a key set's draft at a public route and a member list's
+signs it and comes back signed (DEC-0131): the server serves a key set's (`org-key-set/1`) draft at a public route and a member list's
 draft only to the organization's administrators and its relay (OX-6), the owner's Fabric (a key set, with the root) or
 an administrator's (a list, with their passkey) shows its changes, signs it on the person's confirmation and POSTs it,
 and the server accepts only the pending draft, signed. Before the first key set the owner's Fabric registers the root

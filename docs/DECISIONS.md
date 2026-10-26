@@ -7897,7 +7897,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the server showed the owner's signed-in account (32 bytes, one use, 15 minutes). The claim is a bearer secret,
      never in a URL or a link (DEC-0123's links carry none); the server checks it last and uses it up only on a
      registration it accepts. The server then drafts revision 1 with that administrator, and the root's signature over
-     it is the proof of the root; a root whose first set is accepted is registered for good.
+     it is the proof of the root; a root whose first set is accepted is registered for good. OM-7's owner row gains the
+     owner's credential and the claim.
   4. **OX-3, matching.** A signed set is accepted only when it verifies under the registered root against the set held
      and its signed bytes have the pending draft's digest (`draft-mismatch`, `no-draft` otherwise); a repeat of the held
      set is `unchanged`.
@@ -7914,8 +7915,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the server from serving what the owner did not sign. The root and the owner's credential reach the server before the
   first draft because the draft names that credential as its administrator.
 - **Alternatives considered:** the device check-in's `records` (it needs an enrollment, which an organization being
-  created does not have, and only the node sends device requests); a credential per owner for reading drafts (drafts
-  are public); the root signing a claim document (OM-3 keeps the root to key sets); the claim in an open link (DEC-0123's links
+  created does not have, and only the node sends device requests); a credential per owner for reading key-set drafts
+  (they are public); the root signing a claim document (OM-3 keeps the root to key sets); the claim in an open link (DEC-0123's links
   carry no secret); the root and the first signed set in one POST (the server could not draft a set naming an
   administrator it had not yet received); public member lists (a list names every member); the server pushing drafts to Fabric
   (left for later: reading the route on start and daily is enough at a 7-day lead).

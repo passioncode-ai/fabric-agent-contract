@@ -126,13 +126,14 @@ describe("acceptSignedAuthority (OX-6)", () => {
 describe("verifyRootRegistration (OX-2)", () => {
   const ctx = { org: "org:org-a", issuer: "https://orgs.example", registered: false, claimValid: (claim: string) => claim === REG.claim };
   it("registers the root and the owner's administrator credential before the first set, on the claim the server showed", () => {
-    expect(verifyRootRegistration(REG, ctx)).toEqual({ ok: true, root: { issuer: ctx.issuer, org: ctx.org, kid: ROOT.kid, x: ROOT.x }, administrator: REG.administrator });
+    const registered = verifyRootRegistration(REG, ctx);
+    expect(registered).toEqual({ ok: true, root: { issuer: ctx.issuer, org: ctx.org, kid: ROOT.kid, x: ROOT.x }, administrator: REG.administrator });
     // The first set then verifies under the root just registered, as any set does (OX-3).
-    expect(acceptSignedKeySet(R1, { root: ROOT, draftDigest: held1.digest })).toMatchObject({ ok: true, unchanged: false, digest: held1.digest });
+    expect(acceptSignedKeySet(R1, { root: (registered as { root: typeof ROOT }).root, draftDigest: held1.digest })).toMatchObject({ ok: true, unchanged: false, digest: held1.digest });
   });
 
   it("refuses a malformed body before anything else", () => {
-    for (const body of [null, { ...REG, type: "x" }, { ...REG, org: 1 }, { ...REG, org: "org-a" }, { ...REG, issuer: 1 }, { ...REG, root: "r" }, { ...REG, root: { ...REG.root, kid: 1 } }, { ...REG, root: { ...REG.root, x: 1 } }, { ...REG, root: { ...REG.root, x: "short" } }, { ...REG, root: { ...REG.root, kid: "bad kid!" } }, { ...REG, extra: 1 }, { ...REG, root: { ...REG.root, extra: 1 } }, { ...REG, root: { ...REG.root, kid: "" } }, { ...REG, administrator: "a" },
+    for (const body of [null, { ...REG, type: "x" }, { ...REG, org: 1 }, { ...REG, org: "org-a" }, { ...REG, issuer: 1 }, { ...REG, issuer: "https://orgs.example/" }, { ...REG, root: "r" }, { ...REG, root: { ...REG.root, kid: 1 } }, { ...REG, root: { ...REG.root, x: 1 } }, { ...REG, root: { ...REG.root, x: "short" } }, { ...REG, root: { ...REG.root, kid: "bad kid!" } }, { ...REG, extra: 1 }, { ...REG, root: { ...REG.root, extra: 1 } }, { ...REG, root: { ...REG.root, kid: "" } }, { ...REG, administrator: "a" },
       // The administrator exactly as the first set's administrators must carry it, or the claim would buy a set that never verifies.
       strip(REG, "administrator"), { ...REG, administrator: strip(REG.administrator, "credentialId") }, { ...REG, administrator: { ...REG.administrator, origins: [] } },
       { ...REG, administrator: { ...REG.administrator, extra: 1 } }, { ...REG, administrator: { ...REG.administrator, publicKey: { ...REG.administrator.publicKey, d: "x" } } },
@@ -152,7 +153,10 @@ describe("verifyRootRegistration (OX-2)", () => {
     // The claim is checked last and never consumed on a refusal: a body refused for its keys leaves the claim usable.
     let checked = 0;
     const counting = { ...ctx, claimValid: () => { checked += 1; return true; } };
-    verifyRootRegistration({ ...REG, root: { ...REG.root, x: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" } }, counting);
+    for (const body of [{ ...REG, root: { ...REG.root, x: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" } }, { ...REG, administrator: { ...REG.administrator, rpId: "orgs.example" } }, { ...REG, extra: 1 }, { ...REG, issuer: "https://orgs.example/" }]) {
+      verifyRootRegistration(body, { ...counting, issuer: (body as Json).issuer });
+    }
+    verifyRootRegistration(REG, { ...counting, registered: true });
     expect(checked).toBe(0);
     expect(verifyRootRegistration(REG, { ...ctx, claimValid: () => false })).toEqual({ ok: false, problem: "claim-invalid" });
   });

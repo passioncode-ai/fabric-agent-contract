@@ -27,6 +27,8 @@ who signs it and come back signed (CT-156; request `1822d650`, thread `bd508780`
   every draft public). Fixed: the registration checks the credential with `administratorOk` and the kid as an opaque
   id, and refuses a body or root with an extra member, as the schema does; both texts scope public reads to key sets.
   The unit tier of round 2 found the same registration gap.
+- Round 3 (head `24052d56`): unit, seam and product pass. Their cheap non-blocking items were applied before round 4:
+  the issuer's shape at registration, the claim-not-spent tests, the decision's wording on key-set drafts and OM-7.
 
 ## Decisions
 

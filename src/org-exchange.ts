@@ -43,6 +43,8 @@ const X = /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 /** `activity-common#/$defs/opaqueId`, as `verifyOrgKeySet` reads the root's kid. */
 const OPAQUE = /^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$/;
 const ORG = /^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
+/** `entitlement#/$defs/issuer`, as `verifyOrgKeySet` reads the root's issuer. */
+const ISSUER = /^https:\/\/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 const digestOf = (bytes: Buffer) => `sha256:${createHash("sha256").update(bytes).digest("hex")}`;
 const baseOk = (base: unknown) => base === null || (isObject(base) && Number.isSafeInteger(base.revision) && (base.revision as number) >= 1 && isString(base.digest) && SHA256.test(base.digest));
 
@@ -128,10 +130,10 @@ export function acceptSignedAuthority(
 export type RootRegistrationProblem = "malformed" | "wrong-org" | "root-registered" | "claim-invalid" | "unusable-key" | "small-order-key";
 
 /**
- * The server's check of an `org-root-registration/1` (OX-2), in order: the shape, the organization and issuer, no first
- * key set accepted yet (`root-registered`; before it a newer registration replaces an older one), the shape including
- * the root's kid and the administrator credential exactly as the first set must carry them, the root not of small
- * order and the administrator's credential a usable signing credential (FAC-SEM-092's rule), and last the claim
+ * The server's check of an `org-root-registration/1` (OX-2), in order: the shape (`malformed`), the root's kid, the
+ * issuer and the administrator credential included, exactly as the first set must carry them; the organization and
+ * issuer (`wrong-org`); no first key set accepted yet (`root-registered`; before it a newer registration replaces an
+ * older one); the root not of small order and the administrator's credential a usable signing credential (FAC-SEM-092's rule), and last the claim
  * (one-time, shown to the owner's signed-in account, at most 15 minutes old). `claimValid` only checks the server's
  * store and never consumes: on `ok` the server uses the claim up and records the registration in one transaction. The
  * registration proves no possession; the root's signature over the first set does (OX-3). It answers and never throws.
@@ -141,7 +143,7 @@ export function verifyRootRegistration(
   /** `registered`: a first key set under a root of this organization was accepted (OX-3), not merely a registration recorded. */
   ctx: { org: string; issuer: string; registered: boolean; claimValid: (claim: string) => boolean }
 ): { ok: true; root: OrgRoot; administrator: JsonObject } | { ok: false; problem: RootRegistrationProblem } {
-  if (!isObject(body) || Object.keys(body).sort().join(",") !== "administrator,claim,issuer,org,root,type" || body.type !== ROOT_REGISTRATION_TYPE || !isString(body.org) || !ORG.test(body.org) || !isString(body.issuer) || !isObject(body.root) || Object.keys(body.root).sort().join(",") !== "kid,x" ||
+  if (!isObject(body) || Object.keys(body).sort().join(",") !== "administrator,claim,issuer,org,root,type" || body.type !== ROOT_REGISTRATION_TYPE || !isString(body.org) || !ORG.test(body.org) || !isString(body.issuer) || !ISSUER.test(body.issuer) || !isObject(body.root) || Object.keys(body.root).sort().join(",") !== "kid,x" ||
     !isString(body.root.kid) || !OPAQUE.test(body.root.kid) || !isString(body.root.x) || !X.test(body.root.x) || !administratorOk(body.administrator) || !isString(body.claim) || !NONCE.test(body.claim)) {
     return { ok: false, problem: "malformed" };
   }
