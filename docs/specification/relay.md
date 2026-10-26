@@ -142,7 +142,7 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
 **A reasonless 4401, seen from the client.** A node or a surface refused with `unauthenticated` and close 4401 learns
 no reason, by design. It tells the person, in this order: check that this machine is in the estate's current revision
 (not revoked, its device key the one the record lists), which the estate's owner sees in the hub; then check the clock
-(an `iat` more than 60 s off is refused the same way) and update the client, since a client that signs high-S or an
+(an `iat` more than 60 s old is refused the same way) and update the client, since a client that signs high-S or an
 old protocol is refused the same way too. On an organization's relay (DEC-0134) it
 says instead to check that this machine's enrollment is on the organization's current signed member list (a new join
 waits for an administrator's signature, and a list expires), which one of the organization's administrators sees; then

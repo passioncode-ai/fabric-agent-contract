@@ -95,7 +95,8 @@ describe("welcome and delta carry the check-in's revocation-delta shape (DEC-004
     expect(validateDocument(validator, frame, { ...welcome, deltaHead: { ...head, sha256: "A".repeat(64) } }).valid).toBe(false);
     expect(validateDocument(validator, frame, { ...welcome, estateRevision: 0 }).valid).toBe(false);
     expect(validateDocument(validator, frame, { ...welcome, estateRevision: null }).valid).toBe(false);
-    // A relay admits only from a verified estate record, so every welcome names its revision.
+    // An estate's relay admits only from a verified estate record, so its welcome names its revision; a welcome with
+    // neither a revision nor an organization's list (DEC-0134 OR-2) is neither variant.
     const { estateRevision: _omitted, ...withoutRevision } = welcome;
     expect(validateDocument(validator, frame, withoutRevision).valid).toBe(false);
   });

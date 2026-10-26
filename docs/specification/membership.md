@@ -431,7 +431,8 @@ an administrator's passkey makes a list that passes.
   and from `organization-closed`; a revoked certificate alone keeps its DEC-0103 meaning. Until every reader is pinned
   at or after DEC-0128 no revision carries `organizations`, so a node ends an enrollment as DEC-0103 and its own
   adoption already do.
-- **Every organization server** also drafts the organization's member list (OL-5) and lists the administrators'
+- **Every organization server** also issues its organization's relay the credential it reads the list with and tells it
+  of a new list (relay.md OR-4), drafts the organization's member list (OL-5) and lists the administrators'
   passkeys in its key sets, which the root signs; it signs no list itself.
 - **The organization owner's Fabric** holds the membership root and signs each key set the server drafts, only after
   the owner confirms its changes (OM-3, DEC-0129).
