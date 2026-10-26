@@ -7201,6 +7201,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-24
 - **Status:** Accepted (2026-10-24). AP-3 extended by DEC-0125 (2026-10-26): a mandate handed on carries the operator's words from another agent. Extended by DEC-0126 (2026-10-26): a relay OA-2 and OA-3 accept carries them too. Additive on the wire (a new extension key, an optional `_meta` member and the
   sealed call's `decision`); a behaviour rule a service adopts at its next pin. Consumer adoption: CT-124 to CT-127.
+- **Annotated (2026-10-27):** DEC-0140 makes one exception to AP-1: the operator's move of a board slot is offered in
+  the host's controls only until its agent twin's conditions land (CT-125).
 - **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
   does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
   DL-26 already says that inside the machine boundary the operator's instruction is the authority and that a callee
@@ -8301,7 +8303,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2. **PR-2.** The operator who owns the Project (in an organization, that member only) moves an occupied (Project,
      capability) slot to another live, authorized session of that Project than its holder, in
      the host's controls only (its agent twin, whose decision must bind slot, generation and receiving session and which
-     no mandate covers, is owed with CT-125), never by an agent; from the
+     no mandate covers, is owed: CT-181, then CT-125), never by an agent; from the
      generation the operator saw (`revision_conflict` otherwise); one transition as `com.responder_replace` would
      make it for the receiving session, transferring nothing; refused `held` under a slot or Project hold. After it
      the board's ordinary rules govern the slot: a move bars nobody, and a host keeps the operator's choice as its own
@@ -8328,8 +8330,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   be a second narrowing no released client meets; it is the clients' own improvement, CT-175); a session role that grants a slot (a claim would become authority).
 - **Compatibility:** additive, with the one narrowing named in Status. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/project-comms.md` (header, C4's wording, Owner settlement's paths, PR-1 to PR-3, the hold
-  table), `conformance.md` (a row), `interop.md` (the reserved name), `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder,
+  table), `conformance.md` (a row), `interop.md` (the reserved name), `service.md` (AP-1's exception for the move), `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder,
   Session role), `src/comms-hold.ts` (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`, `docs/ux/scenarios.md`
-  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022 and DEC-0081 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176 and CT-179 (filed); the handoff
+  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022, DEC-0081 and DEC-0121 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176, CT-179 and CT-181 (filed); the handoff
   `docs/handoffs/2026-10-26-simple-fabric-decisions.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-174; Fabric's request `23ba0e97` (thread `6a8d2f9c`).

@@ -36,9 +36,9 @@ export const HOLD_SCOPES: ReadonlyMap<string, readonly ("thread" | "project" | "
 ]);
 
 /**
- * The reserved capability of a Project's primary responder (DEC-0140 PR-1): the capability a requester names to reach
- * it. The board never re-routes another capability to it; a capability like any other otherwise, and no service serves
- * it as a tool of its own.
+ * The reserved capability of a Project's primary responder (DEC-0140 PR-1, docs/specification/project-comms.md#the-primary-responder):
+ * the capability a requester names to reach it. The board never re-routes another capability to it; a capability like
+ * any other otherwise, and no service serves it as a tool of its own.
  */
 export const PRIMARY_CAPABILITY = "project.work" as const;
 

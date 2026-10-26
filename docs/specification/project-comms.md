@@ -705,10 +705,10 @@ constraint (`comms-refusal.schema.json`).
 settlement](#owner-settlement)) may move an occupied (Project, capability) responder slot (one `com.status` shows `active` or `stale`) from its
 holder to another live
 session of that Project, in the host's operator controls. An agent never moves a slot, on its own account or as a
-relay: the move's agent twin ([service](service.md#actions) AP-1) is owed with the board's other operator controls
+relay: the move's agent twin ([service](service.md#actions) AP-1) is owed: its contract half is CT-181, then the host's with the board's other operator controls
 (CT-125), and before a host offers it the twin's decision must bind the slot, the generation and the receiving
-session (AP-2 lets a decision without a `target` cover any object) and no mandate may cover it (MD-6). Until then a host
-offers the move in its controls only. `com.responder_replace` still takes a slot for its own caller only: its closed
+session (AP-2 lets a decision without a `target` cover any object) and no mandate may cover it (an MD-6 entry; both are CT-181). Until then a host
+offers the move in its controls only, an exception to AP-1's parity that DEC-0140 makes for this one control. `com.responder_replace` still takes a slot for its own caller only: its closed
 arguments name no session.
 
 - **One transition, from the generation the operator saw.** The move names the slot's generation the operator's view
@@ -721,7 +721,9 @@ arguments name no session.
 - **Who may receive it.** A live session of that Project already authorized to respond for that capability, as for
   `com.enroll`, other than the slot's holder; the host refuses any other `not_authorized`, and a move grants nothing.
   The host refuses a mover that is not the owning operator `not_authorized`, and a move of an `absent` slot
-  `invalid_transition` (there is no holder to move from; retrying changes nothing until a session enrolls). The move answers the board's refusals
+  `invalid_transition` (there is no holder to move from; retrying changes nothing until a session enrolls). The host checks in this order and answers the first that applies: `not_authorized` (the mover, then the receiving
+  session), `held`, `invalid_transition` (absent, `retryable: false`), `revision_conflict`; a reused idempotency key with
+  another move is `idempotency_conflict`. The move answers the board's refusals
   in `comms-refusal.schema.json`'s shape, `held` staged by the reader's pin as the [holds](#holds) Compatibility says. An `absent` slot is not moved: an authorized session takes it by its own `com.enroll`.
 - **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
 - **After the move.** The board's ordinary rules then govern the slot, and a move bars nobody and adds no
@@ -729,7 +731,7 @@ arguments name no session.
   client included, under a new session id after a restart, when its checkpoint carries accepted work), and a receiving session that lets its lease lapse goes `stale` and,
   as any stale holder, may lose the slot to another authorized session's enrollment or replacement. A host keeps the operator's choice as its own state: when the slot's holder is no longer the
   session the operator chose, it shows so and offers the move again while the chosen session is live and the slot is occupied (an `absent` slot it
-  shows as no main session, until a session enrolls); once the chosen session has ended, it shows the choice as
+  shows with no holder, for `project.work` as no main session, until a session enrolls); once the chosen session has ended, it shows the choice as
   ended. Whether a client should leave a slot moved off
   it is the client's (CT-175).
 - **What was in flight.** The receiving session continues the kept accepted work only by its own `com.responder_replace`

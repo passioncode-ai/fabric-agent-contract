@@ -20,7 +20,7 @@ session; an optional session `role` and `branch` with a privacy rule.
 - The shape was posted on thread `6a8d2f9c` (`0b88a552`); round 1 of the readings failed on all three tiers, and the
   rewrite above answers its findings. Rounds 2 and 3 failed on how a move stays put: a host bar (a reconnect gets a
   new session id) and a client rule (released kits replace at the generation `com.status` shows, as the replace
-  schema says, and re-enroll a lapsed slot) both failed, so PR-2 now leaves the slot to the ordinary rules and the
+  schema says, and re-enroll a slot whose holder's lease lapsed) both failed, so PR-2 now leaves the slot to the ordinary rules and the
   client improvement is CT-175 (probe on kit v0.51.2 in round 3). The thread's message said a transfer needs the leaving responder's checkpoint:
   wrong (the caller writes it), corrected on the thread with the rewrite.
 
@@ -30,7 +30,7 @@ session; an optional session `role` and `branch` with a privacy rule.
 - Objection window until 2026-10-28 18:00 UTC; then Status to Accepted in the merge commit, release, answer on the
   thread.
 - After release, and only once the adapter enrolls sessions for `project.work` (until then a request naming it waits
-  with `noResponder` and expires after 7 days): a line in fabric-workspace `knowledge/agents-first.md` (a requester that knows no capability names
+  (with `noResponder` while no grant exists) and expires after 7 days): a line in fabric-workspace `knowledge/agents-first.md` (a requester that knows no capability names
   `project.work`) and the adapter's working-with-fabric skill, which enrolls a coding agent's session for
   `project.work` under the grant the operator gives in Fabric; until a session enrolls, Fabric shows no main session.
 - CT-175 (the adapter's kits): whether a client leaves a slot moved off it, and an `outcome_unknown` a move produces

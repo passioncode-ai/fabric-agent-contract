@@ -965,7 +965,9 @@ Every button a person has, the person's agent has, and an operator's decision re
 - **AP-1, parity.** Every action a service's dashboard, app or page lets a person take (approve, reject, choose, edit,
   pause, resume, cancel, retry, send, publish, restore, set a policy, and any other) MUST have a tool on the service's
   agent surface with the same effect, the same checks, the same audit record and an idempotency key. An action offered
-  only on a page is nonconformant (DEC-0121). A service declares its actions in its well-known document under the
+  only on a page is nonconformant (DEC-0121), with one exception: the operator's move of a board slot ([project
+  communication](project-comms.md#the-operator-moves-a-slot) PR-2) is a host control without an agent twin until the
+  twin's conditions land (CT-181, then CT-125; DEC-0140). A service declares its actions in its well-known document under the
   extension key `https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1`, `actions[]` of `{id, title,
   tool, gate, humanStep?}`: `tool` names the capability that performs it; `gate` is `none` (the caller's own act),
   `relayed` (the operator decides, AP-2) or `human` (AP-4), and `humanStep` is present exactly when `gate` is `human`

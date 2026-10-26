@@ -404,6 +404,7 @@ flowchart TD
   U -->|observed reconciliation| D
   U -->|no responder holds the slot: owner's observed settlement with a summary| O[Completed or failed_known, settled by the owner]
   C -->|the operator moves the slot| Q
+  A -->|the operator moves the slot: kept, C4| A
   E -->|the operator moves the slot| U
   Q -->|deadline before accept| X[Expired]
   Q -->|the target's participant replies to it| N[Answered]

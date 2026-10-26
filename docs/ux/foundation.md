@@ -498,7 +498,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Story:** As P-02, I want each request between Projects to show its request state and its effect state, so that I know what happened and what is unknown.
 - **Traces:** JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3, JRN-08/#5
 - **Acceptance criteria:**
-  - Given a Project whose main session (the holder of `project.work`) the operator moves to another authorized session, then the old session's claimed requests return to the queue, its in-progress ones show `outcome_unknown`, its accepted ones are kept until the new session takes them over or the requester cancels them, and the host shows when the slot later changes hands.
+  - Given a Project whose main session is the holder of `project.work`, when the operator moves that slot to another authorized session, then the old session's claimed requests return to the queue, its in-progress ones show `outcome_unknown`, its accepted ones are kept until the new session takes them over or the requester cancels them, and the host shows when the slot later changes hands.
   - Given a request sent to a Project's capability, when the responder accepts and completes it, then the thread shows `accepted`, then `completed` with an observed result.
   - Given a request whose result was lost after its effect began, then the thread shows `outcome_unknown`, and only an observed reconciliation settles it.
   - Given such a request whose slot no responder holds, when the operator settles it with a summary of what they observed, then the thread shows it `completed` or `failed_known`, settled by the owner; without a summary it stays `outcome_unknown`, and it can never be closed as cancelled.

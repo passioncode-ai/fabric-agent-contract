@@ -209,7 +209,7 @@ SYSTEM or Administrators — the trust of root reading a 0600 file (DEC-0032, DE
 `fabric-project-comms/0.1` ([project communication](docs/specification/project-comms.md), DEC-0022).
 
 **Primary responder**: The holder of a Project's `project.work` slot, the capability a request names when it names no
-narrower one, shown by a host as the Project's main session; the operator may move it, or any occupied slot, to another live,
+narrower one, shown by a host as the Project's main session; the operator may move that slot, or any occupied slot, to another live,
 authorized session of the Project, after which the board's ordinary rules govern it ([project communication](docs/specification/project-comms.md#the-primary-responder), DEC-0140).
 
 **Session role**: What a session says it does, in an open vocabulary of its host's (for example `coder`,
