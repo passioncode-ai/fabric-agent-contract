@@ -487,6 +487,45 @@ source is never another agent's key or vault slot at any tier ([spend policy](sp
 ([service](service.md#actions) AP-2, DEC-0121). A call that carries the operator's mandate for its task instead is
 decided by it ([below](#the-operators-mandate), DEC-0125).
 
+## The family and the agent network
+
+DEC-0130 (CT-143, the operator's task of 2026-10-25, board request `9db9e09e` item 1)
+
+The operator named two circles: the **family**, the agents the operator runs, trusted most and open to everything open
+to the operator; and the network of every agent reachable, each open to what its context was granted, here the
+**agent network**. It is not NET-1's network ([CONTEXT](../../CONTEXT.md), a context seen as its machines): the
+operator's own network in that sense is their estate, whose agents are the family. The contract already draws the line
+at the machine boundary, so neither is a new tier or a new context.
+
+**DL-27, the family.** The family is every agent placed on a machine of the operator's estate (the estate record's
+placements, DEC-0055, DEC-0082) and the operator's own local sessions. A callee knows a family caller only by placing
+it in T0 or T1 (DL-25): the family is T0 and T1 named from the agents' side (T0 being any process the operator's OS
+account runs on that machine, which the boundary treats as the operator's own, DEC-0045), and `personal` and `org:<orgId>` stay the
+only contexts. What DL-26 opens to a T0 or T1 caller is what is open to the family: everything open to the operator, in
+the context the call runs in, with no token, approval or grant record; one approval of the operator travels along the
+family's chain as a mandate (DEC-0125). What still binds the family: the money limits, the human gates, the
+contexts, the machine profiles (a `view` machine takes no call with an effect, DEC-0106), and for a `relayed` action the
+operator's decision or a mandate that covers it (DEC-0121, DEC-0125). A family agent placed in an organization's context works under that context's routing and grants
+(DEC-0082): the family carries nothing of `personal` into an organization's context, nor back.
+
+**DL-28, nothing declares a family.** A caller's own claim never places it in the family: a header, a session label, a
+token class it names itself, an agent id it states. A call relayed onto loopback from off the machine stays T2 unless the
+relay proves the origin's tier (DL-25; over the relay, `relayCallerTier`, DEC-0106), and a caller under another OS
+account stays T2. Only the placement of DL-25 counts, so an agent that a prompt injection
+turns against the operator is still a family agent, which is why the money limits and the human gates hold inside the
+family too; a watcher for that case is a running service, not a contract format (proposed to Fabric, board message
+`35b8301c`).
+
+**DL-29, the agent network.** The agent network is every agent a caller can reach: the family, organizations' agents,
+partners' agents (DEC-0090) and other people's agents on their own machines. An agent placed on the operator's machine
+is the family whatever it serves; one placed in an organization's context or published by a partner stays bound by
+that context's routing and grants (DL-27). Outside the family a caller is T2 and is
+open to what its context was granted, a share grant, a partner grant or an organization's grant, with a delegation
+token per call (DL-8, DL-13). A service off the estate's machines (a platform the operator uses) has no family caller:
+every caller reaches it as T2. The operator's agents reach it, once Fabric's issuer serves (MD-5), with a token the operator's
+hub issues in `personal` (the estate's issuer), whose scope is all they carry; a service that keeps its own token classes may map such a token
+onto a class of its own for the operator's account (the first consumer's `internal`), never a caller's claim.
+
 ## The operator's mandate
 
 DEC-0125 · rule code `FAC-SEM-144` · schema [`mandate.schema.json`](../../schemas/mandate.schema.json) · reference
@@ -644,6 +683,9 @@ tests: [`test/delegation.test.ts`](../../test/delegation.test.ts), [`test/delega
 
 ## Not decided here
 
+- A watcher that looks for a family agent turned against the operator (the operator's task of 2026-10-25, item 3): a
+  running service, proposed to Fabric (board message `35b8301c`); the contract adds a signal format only when its owner
+  asks (DEC-0130).
 - A carrier between the operator's local sessions that the contract itself defines (OA-3 accepts the runner's own
   delivery, which the contract does not specify; DEC-0126).
 - The hub's token-exchange and introspection tools, their names and arguments (`fabric.delegation.mint`,
