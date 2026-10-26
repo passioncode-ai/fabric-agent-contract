@@ -7832,6 +7832,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/ux/` (SCN-047, SCN-049); `tools/vectors/org-membership.ts`,
   `fixtures/vectors/org-membership.json`, positive and negative fixtures; `test/org-authority.test.ts`,
   `test/signing-challenges.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`,
-  `vitest.config.ts`; backlog CT-04, CT-37 (open for the relay's handshake), CT-122, CT-137, CT-153 (filed).
+  `vitest.config.ts`; backlog CT-04, CT-37 (open for the relay's handshake), CT-122, CT-137, CT-153 and CT-155 (filed).
 - **Source:** CT-37; Fabric ADR-0178 (fabric `cf99c32f`); board request `d5cbabfd` (thread `8d115bed`, TP-03's
   organization part); DEC-0047, DEC-0055, DEC-0063, DEC-0127, DEC-0128; v4 §7.

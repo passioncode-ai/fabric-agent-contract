@@ -23,7 +23,7 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
 
 ## Checks actually run
 
-- `pnpm run check`: 104 files, 9 184 tests, UX lint, docs, privacy 0. `pnpm vectors:check`: 23 files match.
+- `pnpm run check`: 104 files, 9 189 tests, UX lint, docs, privacy 0. `pnpm vectors:check`: 23 files match.
 - Blind readings, round 1: unit pass (five risks, fixed); seam fail (the relay's handshake, narrowed); product fail
   (the root's holder, the `iss` row, the passkey type list, DEC-0051 and DEC-0063, scenarios; fixed).
 - Round 2: unit pass, seam pass (risks fixed: the admission set moved beside its verifier), product fail (package.md,
@@ -41,6 +41,7 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
   product fail (SCN-047's precondition; the person's admission against the relay's, in OL-2 and FLW-32; fixed).
 - Round 9: unit pass, seam pass; product fail (DEC-0129's Alternatives on the owner's passkeys; DEC-0119 restated in the
   register rule; fixed). Non-blocking findings of rounds 8 and 9 are CT-155.
+- Rounds 10 and 11: unit, seam and product pass, nothing blocking; their non-blocking findings joined CT-155.
 
 ## Decisions
 
@@ -59,7 +60,7 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
   Fabric.
 - **For the first organization server.** Its design describes a server-signed `org-authority/1` carrying levels,
   allowances, presets, approvers and listings; DEC-0129 makes it a member list only, signed by an administrator's
-  passkey, with the root in the owner's Fabric. Told in the reply on thread `8d115bed`.
+  passkey, with the root in the owner's Fabric. Told on the board, thread `bd508780` (message `03c84356`), before the merge.
 - **For Fabric (board thread `8d115bed`).** A passkey root; how a member's estate verifies an administrator's passkey
   over a project's leaving (MC-13, ADR-0178 point 7), since the estate record admits its own passkeys only.
 - **CT-143** (the family, T0 over the operator's estate), due 2026-11-07. CT-150, CT-151, CT-152.

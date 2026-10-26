@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-26 the organization's member list](2026-10-26-org-authority.md) | DEC-0129 (CT-37 to adoption; OM-7's TP-03 row) | pending |
+| [2026-10-26 the organization's member list](2026-10-26-org-authority.md) | DEC-0129 (CT-37 open for the relay's handshake; OM-7's rows; CT-153, CT-155 filed) | pending |
 | [2026-10-26 membership attestation, unlinkable memberships](2026-10-26-membership.md) | DEC-0127 (CT-137; CT-37 narrowed, CT-151 filed), DEC-0128 (CT-122; CT-152 filed) | merged, #194 `b79bd14c`, #196 `6f3abaa5`; not released yet |
 | [2026-10-26 the operator's mandate, one approval for all their agents](2026-10-26-mandate-one-approval.md) | DEC-0125 (CT-142), DEC-0126 (request `519d7b21`); CT-149 widened, CT-150 filed | merged, #191 `e6c4fc16`, #192 `39c89773`; released `v0.1.0+2026-10-26.2`, `v0.1.0+2026-10-26.3` |
 | [2026-10-26 the A2A Agent Card, links to a service's pages, Fabric's button in the page's language](2026-10-26-a2a-open-link-button.md) | DEC-0122 (CT-131), DEC-0123 (CT-130), DEC-0124 (CT-148); CT-135, CT-144 closed; CT-145 to CT-147 filed | merged, #187 `7044eb0a`, #188 `9efcc222`, #189 `a3a66eb0`; released `v0.1.0+2026-10-26` |
