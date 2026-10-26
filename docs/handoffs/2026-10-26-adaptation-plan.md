@@ -11,7 +11,9 @@ requests to the administrators. The first organization server needs it by 2026-1
 - DEC-0138, [membership](../specification/membership.md#the-adaptation-plan) AD-1 to AD-6:
   - `org-adaptation/1`: items by a random per-organization `ref`, requests `access`, `spend`, `role` (`admin` only);
     `FAC-SEM-153`;
-  - sent whole as a device request by the member's node (DEC-0056), route `PUT /fabric/adaptation/v1/{org}/plan`;
+  - sent whole by the person's Fabric with the credential the server issued it, route
+    `PUT /fabric/adaptation/v1/{org}/plan`; refusals `not-a-member`, `schema-unsupported`, `malformed`,
+    `wrong-organization`, `stale-revision`, `revision-conflict`;
   - the server keeps the newest revision (`decideAdaptation`); an empty revision withdraws;
   - each decision bound to its request's digest (`adaptationReceipt`, `org-adaptation-receipt/1`).
 - `src/org-adaptation.ts`, two schemas, fixtures, vectors `fixtures/vectors/org-adaptation.json` with their generator,
@@ -21,8 +23,12 @@ requests to the administrators. The first organization server needs it by 2026-1
 
 ## Checks actually run
 
-- `pnpm typecheck`, vitest with coverage (106 + 1 files, 9 400 tests, `src/org-adaptation.ts` at 100 % branches), `pnpm ux:lint`,
+- `pnpm typecheck`, vitest with coverage (107 files, 9 404 tests, `src/org-adaptation.ts` at 100 % branches), `pnpm ux:lint`,
   `pnpm docs:check` (0 errors), `pnpm privacy:check` (0 findings), `pnpm vectors:check` (26 files): exit 0.
+
+- Readings: round 1 fail (a home path in a fixture tripped the privacy check; the device-request transport, which the
+  plan's author does not hold; the role wording; `schema-unsupported`); the transport is now the person's Fabric's
+  credential, as the first organization server proposed.
 
 ## Open
 

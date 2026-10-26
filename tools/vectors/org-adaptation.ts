@@ -36,21 +36,23 @@ export function orgAdaptationVectors(): Json {
     { id: role.id, digest: digest(role), state: "refused", at: "2026-10-27T10:05:00Z" }
   ];
   return {
-    description: "DEC-0138: the organization part of an adaptation plan. `digests` are adaptationDigest and requestDigest (SHA-256 over RFC 8785). `decide` is the server's decision on a PUT plan that passed the device transport: `valid` says the plan passed its schema and FAC-SEM-153, `org` is the route's organization, `held` the revision held. `receipts` binds each request's decision by its id and digest.",
+    description: "DEC-0138: the organization part of an adaptation plan. `digests` are adaptationDigest and requestDigest (SHA-256 over RFC 8785). `decide` is the server's decision on a PUT plan that passed the device transport: `member` says the credential's person holds an active or suspended membership, `valid` that the plan passed its schema and FAC-SEM-153, `org` is the route's organization in its full `org:<orgId>` form, `held` the revision held. `receipts` binds each request's decision by its id and digest.",
     digests: [
       { name: "the plan", value: plan, digest: digest(plan) },
       ...(plan.requests as Json[]).map((request) => ({ name: `request ${request.id}`, value: request, digest: digest(request) })),
       { name: "a withdrawn plan", value: withdrawn, digest: digest(withdrawn) }
     ],
     decide: [
-      { name: "the first plan", plan, context: { valid: true, org }, expected: { outcome: "accepted", held } },
-      { name: "a higher revision", plan: next, context: { valid: true, org, held }, expected: { outcome: "accepted", held: { revision: 3, digest: digest(next) } } },
-      { name: "the same revision and bytes", plan, context: { valid: true, org, held }, expected: { outcome: "repeated", held } },
-      { name: "the same revision, other bytes", plan: { ...plan, items: [] }, context: { valid: true, org, held }, expected: { outcome: "refused", refusal: "revision-conflict" } },
-      { name: "a lower revision", plan: { ...plan, revision: 1 }, context: { valid: true, org, held }, expected: { outcome: "refused", refusal: "stale-revision" } },
-      { name: "another organization", plan: { ...plan, org: "org:org-b" }, context: { valid: true, org }, expected: { outcome: "refused", refusal: "wrong-organization" } },
-      { name: "a plan that failed its schema or FAC-SEM-153", plan, context: { valid: false, org }, expected: { outcome: "refused", refusal: "malformed" } },
-      { name: "a withdrawal", plan: withdrawn, context: { valid: true, org, held }, expected: { outcome: "accepted", held: { revision: 3, digest: digest(withdrawn) } } }
+      { name: "the first plan", plan, context: { member: true, valid: true, org }, expected: { outcome: "accepted", held } },
+      { name: "a higher revision", plan: next, context: { member: true, valid: true, org, held }, expected: { outcome: "accepted", held: { revision: 3, digest: digest(next) } } },
+      { name: "the same revision and digest", plan, context: { member: true, valid: true, org, held }, expected: { outcome: "repeated", held } },
+      { name: "the same revision, another digest", plan: { ...plan, items: [] }, context: { member: true, valid: true, org, held }, expected: { outcome: "refused", refusal: "revision-conflict" } },
+      { name: "a lower revision", plan: { ...plan, revision: 1 }, context: { member: true, valid: true, org, held }, expected: { outcome: "refused", refusal: "stale-revision" } },
+      { name: "another organization", plan: { ...plan, org: "org:org-b" }, context: { member: true, valid: true, org }, expected: { outcome: "refused", refusal: "wrong-organization" } },
+      { name: "a plan that failed its schema or FAC-SEM-153", plan, context: { member: true, valid: false, org }, expected: { outcome: "refused", refusal: "malformed" } },
+      { name: "a person who is not a member", plan, context: { member: false, valid: true, org }, expected: { outcome: "refused", refusal: "not-a-member" } },
+      { name: "another revision of the type", plan: { ...plan, type: "org-adaptation/2" }, context: { member: true, valid: false, org }, expected: { outcome: "refused", refusal: "schema-unsupported" } },
+      { name: "a withdrawal", plan: withdrawn, context: { member: true, valid: true, org, held }, expected: { outcome: "accepted", held: { revision: 3, digest: digest(withdrawn) } } }
     ],
     receipts: [
       {

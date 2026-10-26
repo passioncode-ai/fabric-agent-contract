@@ -44,9 +44,11 @@ describe("org-adaptation/1 (DEC-0138)", () => {
 
   it("decides every PUT as the vectors say", () => {
     for (const vector of vectors.decide) expect(decideAdaptation(vector.plan, vector.context), vector.name).toEqual(vector.expected);
-    expect(decideAdaptation("x", { valid: true, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
-    expect(decideAdaptation({ ...plan, revision: 1.5 }, { valid: true, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
-    expect(decideAdaptation({ ...plan, extra: Number.POSITIVE_INFINITY }, { valid: true, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
+    expect(decideAdaptation("x", { member: true, valid: true, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
+    expect(decideAdaptation({ ...plan, revision: 1.5 }, { member: true, valid: true, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
+    expect(decideAdaptation({ ...plan, extra: Number.POSITIVE_INFINITY }, { member: true, valid: true, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
+    expect(decideAdaptation(plan, undefined as never)).toEqual({ outcome: "refused", refusal: "not-a-member" });
+    expect(decideAdaptation({ ...plan, type: 7 }, { member: true, valid: false, org: plan.org })).toEqual({ outcome: "refused", refusal: "malformed" });
     expect([...new Set(vectors.decide.filter((v: Json) => v.expected.refusal).map((v: Json) => v.expected.refusal))].sort()).toEqual([...ORG_ADAPTATION_REFUSALS].sort());
   });
 
@@ -62,6 +64,8 @@ describe("org-adaptation/1 (DEC-0138)", () => {
     expect(adaptationReceipt({ ...plan, requests: "none" }, [])?.requests).toEqual([]);
     expect(adaptationReceipt({ ...plan, requests: [5] }, [])).toBeUndefined();
     expect(adaptationReceipt({ ...plan, x: Number.NaN }, [])).toBeUndefined();
+    expect(adaptationReceipt(plan, null as never)).toBeUndefined();
+    expect(adaptationReceipt(plan, [null] as never)?.requests.map((r) => r.state)).toEqual(["pending", "pending", "pending"]);
   });
 
   it("holds FAC-SEM-153 through the public entry", () => {

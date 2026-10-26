@@ -2,6 +2,7 @@ import { CALL_RECORD_TYPE, CREDENTIAL_DECISION_TYPE, CREDENTIAL_ENVELOPE_TYPE, C
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { ORG_ADAPTATION_RECEIPT_TYPE, ORG_ADAPTATION_TYPE } from "../src/org-adaptation.js";
 import { projectRoot } from "../src/contract.js";
 import { acceptedRevisions, negotiateRevision, NAMED_ONLY, parseRevision, PROTOCOL_REVISIONS, protocolsFindings } from "../src/protocol-revisions.js";
 import { COMMS_PROTOCOL } from "../src/comms-digest.js";
@@ -45,7 +46,7 @@ describe("the register", () => {
     for (const named of NAMED_ONLY) expect(pinned.has(named), named).toBe(false);
   });
   it("keeps every module's own revision constant at its protocol's newest revision, so a new revision widens them", () => {
-    for (const constant of [COMMS_PROTOCOL, ESTATE_RECORD_SCHEMA, RELAY_PROTOCOL, DELTA_TYPE, HEARTBEAT_TYPE, ENVELOPE_TYPE, HANDOFF_FORMAT, SETTINGS_BACKUP_FORMAT, WINDOW_LEASE_TYPE, ENTITLEMENT_TYPE, ENTITLEMENT_KEY_SET_TYPE, SHARE_REGISTRATION_TYPE, SHARE_REGISTRATION_RECEIPT_TYPE, AGENT_CALL_TYPE, MACHINE_REPORT_TYPE, MACHINE_REPORT_MESSAGE_TYPE, CREDENTIAL_ENVELOPE_TYPE, CREDENTIAL_REQUEST_TYPE, CREDENTIAL_DECISION_TYPE, CREDENTIAL_REVOCATION_TYPE, CALL_RECORD_TYPE]) {
+    for (const constant of [ORG_ADAPTATION_TYPE, ORG_ADAPTATION_RECEIPT_TYPE, COMMS_PROTOCOL, ESTATE_RECORD_SCHEMA, RELAY_PROTOCOL, DELTA_TYPE, HEARTBEAT_TYPE, ENVELOPE_TYPE, HANDOFF_FORMAT, SETTINGS_BACKUP_FORMAT, WINDOW_LEASE_TYPE, ENTITLEMENT_TYPE, ENTITLEMENT_KEY_SET_TYPE, SHARE_REGISTRATION_TYPE, SHARE_REGISTRATION_RECEIPT_TYPE, AGENT_CALL_TYPE, MACHINE_REPORT_TYPE, MACHINE_REPORT_MESSAGE_TYPE, CREDENTIAL_ENVELOPE_TYPE, CREDENTIAL_REQUEST_TYPE, CREDENTIAL_DECISION_TYPE, CREDENTIAL_REVOCATION_TYPE, CALL_RECORD_TYPE]) {
       const parsed = parseRevision(constant)!;
       expect(PROTOCOL_REVISIONS.get(parsed.name)?.at(-1), constant).toBe(parsed.revision);
     }

@@ -8271,35 +8271,41 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0138: the organization part of an adaptation plan, `org-adaptation/1`
 
 - **Date:** 2026-10-26
-- **Status:** Accepted (2026-10-26). Additive: two new protocol revisions, `org-adaptation/1` and
-  `org-adaptation-receipt/1`, a rule code (`FAC-SEM-153`) and a route. Adoption: CT-169 (every organization server
+- **Status:** Accepted (2026-10-26) on merge, its shape posted to the first organization server and Fabric for
+  objections until 2026-10-27 18:00 UTC (thread `5d2ea917`). Additive: two new protocol revisions, `org-adaptation/1`
+  and `org-adaptation-receipt/1`, a rule code (`FAC-SEM-153`) and a route. Adoption: CT-169 (every organization server
   taking plans; Fabric's TP-04).
 - **Context:** OM-7 (DEC-0129) allows an adaptation plan's organization part to leave a person's Fabric, by reference,
   with the person's requests to the administrators, and left the form and a reference's shape undecided (membership.md
   Not decided here). The first organization server builds its side for its release of 2026-11-03 and asked for the
-  form by 2026-10-30 (its request N-4, relayed by fabric-workspace); it proposed the shape this decision keeps, and
-  Fabric's TP-04 builds against it.
+  form by 2026-10-30 (its request N-4, relayed by fabric-workspace); it proposed the shape and the transport this
+  decision keeps. Fabric's TP-04 sends it; Fabric has no organization device enrollment, and its bridge to the server
+  is the credential the server issues it for the person (Fabric CO-130).
 - **Decision:** [membership](specification/membership.md#the-adaptation-plan) AD-1 to AD-6.
   1. **AD-1.** `org-adaptation/1` `{type, org, revision, items, requests}`, closed: at most 200 items `{ref, kind,
      label?}` (`project`, `history`, `result`, `schedule`) and 50 requests (`access`, `spend`, `role`); `role` is
-     `admin` only. `FAC-SEM-153`: refs and request ids once each, an `itemRef` names an item.
-  2. **AD-2.** A `ref` is random, per organization, 16 to 64 of `A-Za-z0-9_-`, never derived from the estate
-     (DEC-0128); a `label` is typed by the person, never filled from the estate.
-  3. **AD-3.** The node sends the whole plan as a device request (DEC-0056) to its own enrollment's organization server,
-     which lists `org-adaptation/1` in its `protocols`; the route is `PUT /fabric/adaptation/v1/{org}/plan`, with `GET`
-     for the receipt.
-  4. **AD-4.** The server keeps the newest revision (`decideAdaptation`): `malformed`, `wrong-organization`,
-     `stale-revision`, `revision-conflict`, a repeat answering the same receipt; an empty revision withdraws.
+     `admin` only (`owner` is never asked for, `member` is held). One revision counter per organization.
+     `FAC-SEM-153`: refs and request ids once each, an `itemRef` names an item.
+  2. **AD-2.** A `ref` and a request `id` are random, per organization, never derived from the estate (DEC-0128), and
+     kept while their item or request stands; `label`, `resource`, `note` and `purpose` are typed by the person.
+  3. **AD-3.** The person's Fabric sends the whole plan with the credential the server issued it for the person;
+     the route is `PUT /fabric/adaptation/v1/{org}/plan`, with `GET` for the receipt (`404 no-plan` before the first).
+  4. **AD-4.** The server keeps the newest revision (`decideAdaptation`): `not-a-member`, `schema-unsupported`,
+     `malformed`, `wrong-organization`, `stale-revision`, `revision-conflict`, a repeat answering the same receipt; an
+     empty revision withdraws.
   5. **AD-5.** Each decision is bound to its request's id and digest (`requestDigest`, `adaptationReceipt`), so a
-     changed request waits for a new decision; a decision grants nothing by itself.
-  6. **AD-6.** Read by the organization's administrators and the member only.
-- **Why:** a device request keeps one identity for everything a person's machine sends an organization (OM-7's other
-  rows travel the same way), so no consent scope is added; a random per-organization reference keeps two organizations
+     changed request waits for a new decision; a lapsed one reads `pending`; a decision grants nothing by itself, and
+     a granted `admin` role is display and routing, never authority (OL-6, OM-3).
+  6. **AD-6.** Read by the organization's administrators and the person only; ended with the membership (OM-5).
+- **Why:** the plan is the person's, authored in their Fabric, which reads the person's attestations with the
+  credential the server issued it; sending the plan the same way adds no identity and no enrollment Fabric lacks. A
+  random per-organization reference keeps two organizations
   from linking one person's work; binding a decision to a digest lets the person revise a plan without losing what was
   granted, and without carrying a grant over to a request that changed.
-- **Alternatives considered:** a new app-token scope for the person's Fabric (the first server's proposal: a second
-  identity beside the enrollment, and a consent the person gives again); a `finance` role (no such role in
-  `org-authority/1`; a role the member list does not carry would grant nothing); `DELETE` to withdraw (a revision with
+- **Alternatives considered:** a device request by the enrolled node (like `share-registration/1`; first posted on
+  the board, withdrawn after the readings: the plan's author, the person's Fabric, holds no enrollment key, and the
+  enrolled node derives nothing from the estate record that tells it the plan); a `finance` role (no such role in
+  `org-membership/1` or `org-authority/1`); `DELETE` to withdraw (a revision with
   nothing in it says the same and keeps one write path); per-item PUTs (the plan is small and whole-document
   replacement keeps the server's state one revision).
 - **Compatibility:** additive; no existing document changes validity. `contractVersion` stays `0.1.0`.
@@ -8307,8 +8313,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `src/org-adaptation.ts`, `src/semantic-rules.ts`, `src/semantic-kinds.ts`, `src/protocol-revisions.ts`;
   `fixtures/vectors/org-adaptation.json` written by `tools/vectors/org-adaptation.ts`; fixtures `org-adaptation*`;
   `test/org-adaptation.test.ts`, `test/positive-sweep.test.ts`, `test/rule-tolerance.test.ts`, `vitest.config.ts`;
-  `docs/specification/membership.md` (header, OM-7's row, The adaptation plan, `FAC-SEM-153`, Who adopts it, Not decided
-  here), `conformance.md` (rule table, code table, a row), `CONTEXT.md` (Adaptation plan), `docs/DOCMAP.md`; backlog
-  CT-169; the handoff `docs/handoffs/2026-10-26-adaptation-plan.md`.
+  `test/protocol-revisions.test.ts`; `docs/specification/membership.md` (header, OM-7's row, The adaptation plan,
+  `FAC-SEM-153`, Who adopts it, Not decided here), `contexts.md` (Linkability), `conformance.md` (rule table, code table,
+  a row), `CONTEXT.md` (Adaptation plan), `docs/DOCMAP.md`, `docs/ux/scenarios.md` (SCN-050, draft), `docs/ux/screens.md` (SCR-31); backlog CT-159, CT-169; the
+  handoff `docs/handoffs/2026-10-26-adaptation-plan.md`.
 - **Source:** CT-169; the first organization server's request N-4 (board message `38f108ba`, thread `0fee99ae`); the
-  shape agreed in thread `5d2ea917`; DEC-0029 (rule codes), DEC-0056, DEC-0067, DEC-0128, DEC-0129.
+  shape posted in thread `5d2ea917`; DEC-0029 (rule codes), DEC-0056, DEC-0067, DEC-0128, DEC-0129.

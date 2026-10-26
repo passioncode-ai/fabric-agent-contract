@@ -5,11 +5,11 @@ import { type Finding, type JsonObject, isObject } from "./findings.js";
 // #region org-adaptation, docs: docs/specification/membership.md#the-adaptation-plan
 /**
  * The organization part of an adaptation plan (DEC-0138, OM-7's adaptation row): what a person chose to bring into an
- * organization, each item by an opaque reference, and the person's requests to its administrators. The person's node
- * sends the whole plan as a device request (DEC-0056) to the organization server of its own enrollment; each revision
- * replaces the last, and a revision with no items and no requests withdraws it. The server keeps the newest revision it
- * accepted and binds each administrator's decision to the request's digest, so a changed request waits for a new
- * decision and an unchanged one keeps its decision. Every function here answers and never throws.
+ * organization, each item by an opaque reference, and the person's requests to its administrators. The person's Fabric
+ * sends the whole plan to the organization's server with the credential the server issued it for that person; each
+ * revision replaces the last, and a revision with no items and no requests withdraws it. The server keeps the newest
+ * revision it accepted and binds each administrator's decision to the request's digest, so a changed request waits for
+ * a new decision and an unchanged one keeps its decision. Every function here answers and never throws.
  */
 export const ORG_ADAPTATION_TYPE = "org-adaptation/1";
 export const ORG_ADAPTATION_RECEIPT_TYPE = "org-adaptation-receipt/1";
@@ -17,8 +17,8 @@ export const ORG_ADAPTATION_RECEIPT_TYPE = "org-adaptation-receipt/1";
 export const ORG_ADAPTATION_PATH = "/fabric/adaptation/v1/{org}/plan";
 export const MAX_ITEMS = 200;
 export const MAX_REQUESTS = 50;
-/** The server's refusals of a plan, beside the device transport's (DEC-0056). */
-export const ORG_ADAPTATION_REFUSALS = ["malformed", "wrong-organization", "stale-revision", "revision-conflict"] as const;
+/** The server's refusals of a plan, in the order `decideAdaptation` reads them. */
+export const ORG_ADAPTATION_REFUSALS = ["not-a-member", "schema-unsupported", "malformed", "wrong-organization", "stale-revision", "revision-conflict"] as const;
 export type OrgAdaptationRefusal = (typeof ORG_ADAPTATION_REFUSALS)[number];
 export type RequestState = "pending" | "granted" | "refused";
 
@@ -97,30 +97,34 @@ export interface AdaptationReceipt {
  */
 export function adaptationReceipt(plan: JsonObject, decisions: readonly RequestDecision[]): AdaptationReceipt | undefined {
   const digest = adaptationDigest(plan);
-  if (digest === undefined || typeof plan.org !== "string" || !Number.isSafeInteger(plan.revision)) return undefined;
+  if (digest === undefined || typeof plan.org !== "string" || !Number.isSafeInteger(plan.revision) || !Array.isArray(decisions)) return undefined;
   const requests: AdaptationReceipt["requests"] = [];
   for (const request of list(plan.requests)) {
     const requestId = isObject(request) ? request.id : undefined;
     const bound = requestDigest(request);
     if (typeof requestId !== "string" || bound === undefined) return undefined;
-    const decision = decisions.find((entry) => entry.id === requestId && entry.digest === bound);
+    const decision = decisions.find((entry) => isObject(entry) && entry.id === requestId && entry.digest === bound);
     requests.push(decision ? { id: requestId, digest: bound, state: decision.state, at: decision.at } : { id: requestId, digest: bound, state: "pending" });
   }
   return { type: ORG_ADAPTATION_RECEIPT_TYPE, org: plan.org, revision: plan.revision as number, digest, requests };
 }
 
 /**
- * The server's decision on a PUT plan, after the device transport accepted the request (DEC-0056) and the plan passed
- * its schema and FAC-SEM-153 (`valid`), in this order: `malformed` (not valid), `wrong-organization` (the plan names
- * another organization than the route's and the enrollment's), then against the held revision: a lower revision is
- * `stale-revision`; the same revision with another digest is `revision-conflict`; the same revision and digest is
- * `repeated` (answered with the same receipt, nothing stored); a higher revision is `accepted` and replaces the held
- * one. A plan with no items and no requests is accepted the same way, and withdraws what the member brought.
+ * The server's decision on a PUT plan, after it authenticated the person's credential, in this order: `not-a-member`
+ * (the credential's person holds no active or suspended membership of the route's organization, `member` false);
+ * `schema-unsupported` (the body names another `type` than `org-adaptation/1`, DEC-0067); `malformed` (the plan failed
+ * its schema or FAC-SEM-153, `valid` false); `wrong-organization` (the plan names another organization than `org`, the
+ * route's in its full `org:<orgId>` form); then against the held revision: a lower revision is `stale-revision`; the
+ * same revision with another digest is `revision-conflict`; the same revision and digest is `repeated` (answered with
+ * the same receipt, nothing stored); a higher revision is `accepted` and replaces the held one. A plan with no items
+ * and no requests is accepted the same way, and withdraws what the member brought.
  */
 export function decideAdaptation(
   plan: unknown,
-  ctx: { valid: boolean; org: string; held?: HeldAdaptation }
+  ctx: { member: boolean; valid: boolean; org: string; held?: HeldAdaptation }
 ): { outcome: "accepted" | "repeated"; held: HeldAdaptation } | { outcome: "refused"; refusal: OrgAdaptationRefusal } {
+  if (!isObject(ctx) || ctx.member !== true) return { outcome: "refused", refusal: "not-a-member" };
+  if (isObject(plan) && typeof plan.type === "string" && plan.type !== ORG_ADAPTATION_TYPE) return { outcome: "refused", refusal: "schema-unsupported" };
   if (!ctx.valid || !isObject(plan) || !Number.isSafeInteger(plan.revision)) return { outcome: "refused", refusal: "malformed" };
   const digest = adaptationDigest(plan);
   if (digest === undefined) return { outcome: "refused", refusal: "malformed" };

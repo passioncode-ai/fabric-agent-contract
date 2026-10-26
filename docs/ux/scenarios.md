@@ -55,6 +55,7 @@
 | SCN-047 | Join an organization by my own passkey: my Fabric trusts the membership only from what the organization signed | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-048 | Enrolled in two organizations, my machine looks like two strangers to them | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-049 | As an administrator, I sign who my organization's relay admits; no server signs it | membership | P-03 | ST-038, FLW-32 | draft | not audited |
+| SCN-050 | I bring my work into an organization and ask its administrators for what it needs | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 
 ## Personas
 
@@ -1082,4 +1083,25 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a refused list -> its reason is shown to the administrator; the relay keeps the list it held until it expires or its signer leaves the key set.
 - **Status:** draft
 - **Coverage:** DEC-0129 OL-1 to OL-5, `verifyOrgAuthority` in `src/org-authority.ts`, `orgRelayAdmissionSet` in `src/org-authority.ts`, `FAC-SEM-146`, `FAC-SEM-150`, `test/org-authority.test.ts`; the relay's handshake for an organization is DEC-0134 (relay.md OR-1 to OR-5, `sessionStands`)
+- **Product:** unobserved
+
+### SCN-050: I bring my work into an organization and ask its administrators for what it needs
+
+- **Persona:** P-03
+- **Feature:** membership
+- **Traces:** ST-038, FLW-32 (JTBD-04, JRN-03/#1)
+- **Entry point:** the person's Fabric shows the adaptation plan for an organization they joined
+- **Preconditions:** the person's membership of the organization is active; the organization's server serves the adaptation route (DEC-0138 AD-3)
+- **Steps:**
+  1. The person chooses what to bring (a project, its history, results, schedules) and types a label the organization will read -> Fabric draws a random reference for each item, for this organization only, and fills nothing from the estate.
+  2. The person asks for what the work needs (access to a named resource, a spend for a purpose, the admin role) -> Fabric sends the plan as the next revision (`org-adaptation/1`).
+  3. An administrator decides each request -> the person's receipt shows each one `pending`, `granted` or `refused`, with when it was decided.
+  4. The person changes one request and keeps the others -> the changed request is `pending` again; the unchanged ones keep their decision.
+- **Expected result:** the organization sees only what the person chose, by references that name nothing of their estate; each decision stays with the request it was made on.
+- **Alt paths:** the person withdraws -> Fabric sends an empty revision and the plan is withdrawn. Two sends cross -> `stale-revision` or `revision-conflict`, and Fabric reads the receipt and sends the next revision. The server does not take plans -> Fabric says so and sends nothing. The membership ends -> the plan and its decisions end. A granted admin role shows as the person's role; signing as an administrator still needs the owner to list their signing passkey (OM-3).
+- **UI elements:** SCR-31: the chosen items and their labels, the requests and each one's state and decision time.
+- **States covered:** success, error, empty
+- **Errors & recovery:** a refused plan -> its code and message are shown; `not-a-member` stops sending to that organization.
+- **Status:** draft
+- **Coverage:** DEC-0138 AD-1 to AD-6, `decideAdaptation` and `adaptationReceipt` in `src/org-adaptation.ts`, `FAC-SEM-153`, `fixtures/vectors/org-adaptation.json`, `test/org-adaptation.test.ts`
 - **Product:** unobserved

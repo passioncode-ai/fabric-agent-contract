@@ -1,5 +1,5 @@
 {
-  "description": "DEC-0138: the organization part of an adaptation plan. `digests` are adaptationDigest and requestDigest (SHA-256 over RFC 8785). `decide` is the server's decision on a PUT plan that passed the device transport: `valid` says the plan passed its schema and FAC-SEM-153, `org` is the route's organization, `held` the revision held. `receipts` binds each request's decision by its id and digest.",
+  "description": "DEC-0138: the organization part of an adaptation plan. `digests` are adaptationDigest and requestDigest (SHA-256 over RFC 8785). `decide` is the server's decision on a PUT plan that passed the device transport: `member` says the credential's person holds an active or suspended membership, `valid` that the plan passed its schema and FAC-SEM-153, `org` is the route's organization in its full `org:<orgId>` form, `held` the revision held. `receipts` binds each request's decision by its id and digest.",
   "digests": [
     {
       "name": "the plan",
@@ -126,6 +126,7 @@
         ]
       },
       "context": {
+        "member": true,
         "valid": true,
         "org": "org:org-7f3a"
       },
@@ -177,6 +178,7 @@
         ]
       },
       "context": {
+        "member": true,
         "valid": true,
         "org": "org:org-7f3a",
         "held": {
@@ -193,7 +195,7 @@
       }
     },
     {
-      "name": "the same revision and bytes",
+      "name": "the same revision and digest",
       "plan": {
         "type": "org-adaptation/1",
         "org": "org:org-7f3a",
@@ -232,6 +234,7 @@
         ]
       },
       "context": {
+        "member": true,
         "valid": true,
         "org": "org:org-7f3a",
         "held": {
@@ -248,7 +251,7 @@
       }
     },
     {
-      "name": "the same revision, other bytes",
+      "name": "the same revision, another digest",
       "plan": {
         "type": "org-adaptation/1",
         "org": "org:org-7f3a",
@@ -277,6 +280,7 @@
         ]
       },
       "context": {
+        "member": true,
         "valid": true,
         "org": "org:org-7f3a",
         "held": {
@@ -329,6 +333,7 @@
         ]
       },
       "context": {
+        "member": true,
         "valid": true,
         "org": "org:org-7f3a",
         "held": {
@@ -381,6 +386,7 @@
         ]
       },
       "context": {
+        "member": true,
         "valid": true,
         "org": "org:org-7f3a"
       },
@@ -429,12 +435,111 @@
         ]
       },
       "context": {
+        "member": true,
         "valid": false,
         "org": "org:org-7f3a"
       },
       "expected": {
         "outcome": "refused",
         "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a person who is not a member",
+      "plan": {
+        "type": "org-adaptation/1",
+        "org": "org:org-7f3a",
+        "revision": 2,
+        "items": [
+          {
+            "ref": "q7Xk2mP9vLr4Tn8w",
+            "kind": "project",
+            "label": "Billing migration"
+          },
+          {
+            "ref": "Hb3Zt6Yc1Nq5Ws0e",
+            "kind": "schedule"
+          }
+        ],
+        "requests": [
+          {
+            "id": "req-access-01",
+            "kind": "access",
+            "itemRef": "q7Xk2mP9vLr4Tn8w",
+            "resource": "staging database",
+            "note": "read-only, to finish the migration"
+          },
+          {
+            "id": "req-spend-01",
+            "kind": "spend",
+            "amountUsd": 200,
+            "period": "month",
+            "purpose": "model calls for the migration agent"
+          },
+          {
+            "id": "req-role-01",
+            "kind": "role",
+            "role": "admin"
+          }
+        ]
+      },
+      "context": {
+        "member": false,
+        "valid": true,
+        "org": "org:org-7f3a"
+      },
+      "expected": {
+        "outcome": "refused",
+        "refusal": "not-a-member"
+      }
+    },
+    {
+      "name": "another revision of the type",
+      "plan": {
+        "type": "org-adaptation/2",
+        "org": "org:org-7f3a",
+        "revision": 2,
+        "items": [
+          {
+            "ref": "q7Xk2mP9vLr4Tn8w",
+            "kind": "project",
+            "label": "Billing migration"
+          },
+          {
+            "ref": "Hb3Zt6Yc1Nq5Ws0e",
+            "kind": "schedule"
+          }
+        ],
+        "requests": [
+          {
+            "id": "req-access-01",
+            "kind": "access",
+            "itemRef": "q7Xk2mP9vLr4Tn8w",
+            "resource": "staging database",
+            "note": "read-only, to finish the migration"
+          },
+          {
+            "id": "req-spend-01",
+            "kind": "spend",
+            "amountUsd": 200,
+            "period": "month",
+            "purpose": "model calls for the migration agent"
+          },
+          {
+            "id": "req-role-01",
+            "kind": "role",
+            "role": "admin"
+          }
+        ]
+      },
+      "context": {
+        "member": true,
+        "valid": false,
+        "org": "org:org-7f3a"
+      },
+      "expected": {
+        "outcome": "refused",
+        "refusal": "schema-unsupported"
       }
     },
     {
@@ -447,6 +552,7 @@
         "requests": []
       },
       "context": {
+        "member": true,
         "valid": true,
         "org": "org:org-7f3a",
         "held": {

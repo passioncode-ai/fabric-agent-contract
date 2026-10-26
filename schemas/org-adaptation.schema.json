@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/org-adaptation.schema.json",
   "title": "The organization part of a person's adaptation plan (DEC-0138)",
-  "description": "What a person's Fabric sends an organization's server when the person brings work into that organization (OM-7's adaptation row, TP-03): the items the person chose, each by an opaque reference, and the person's requests to the organization's administrators. Sent whole as a device request by the enrollment's node (DEC-0056), each revision replacing the last; a revision with no items and no requests withdraws the plan. Never the plan's draft, its inventory or anything the person did not choose. docs/specification/membership.md#the-adaptation-plan.",
+  "description": "What a person's Fabric sends an organization's server when the person brings work into that organization (OM-7's adaptation row, TP-03): the items the person chose, each by an opaque reference, and the person's requests to the organization's administrators. Sent whole by the person's Fabric with the credential the organization's server issued it for that person, each revision replacing the last; a revision with no items and no requests withdraws the plan. Never the plan's draft, its inventory or anything the person did not choose. docs/specification/membership.md#the-adaptation-plan.",
   "type": "object",
   "required": [
     "type",
@@ -46,7 +46,7 @@
     "ref": {
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]{16,64}$",
-      "description": "An opaque reference the person's Fabric draws at random for this organization: never derived from a name, path or id of the person's estate, and never reused for another organization (DEC-0128)."
+      "description": "An opaque reference the person's Fabric draws at random for an item and this organization: never derived from a name, path or id of the person's estate, never reused for another organization (DEC-0128), and kept for that item in every later revision to this organization, a withdrawal included."
     },
     "item": {
       "type": "object",
@@ -79,7 +79,7 @@
     "requestId": {
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]{8,64}$",
-      "description": "The request's id within the plan, drawn by the person's Fabric; stable across revisions while the request stands."
+      "description": "The request's id within the plan, drawn at random by the person's Fabric for this organization and kept while the request stands."
     },
     "request": {
       "type": "object",
@@ -107,14 +107,14 @@
           "minLength": 1,
           "maxLength": 120,
           "pattern": "^\\S(?:[\\s\\S]*\\S)?$",
-          "description": "access: the organization's own name of the account, environment or credential asked for."
+          "description": "access: the organization's own name of the account, environment or credential asked for, typed by the person."
         },
         "note": {
           "type": "string",
           "minLength": 1,
           "maxLength": 200,
           "pattern": "^\\S(?:[\\s\\S]*\\S)?$",
-          "description": "access: why, in the person's words."
+          "description": "access: why, typed by the person; never filled from the estate."
         },
         "amountUsd": {
           "type": "number",
@@ -134,11 +134,11 @@
           "minLength": 1,
           "maxLength": 200,
           "pattern": "^\\S(?:[\\s\\S]*\\S)?$",
-          "description": "spend: what it is for."
+          "description": "spend: what it is for, typed by the person; never filled from the estate."
         },
         "role": {
           "const": "admin",
-          "description": "role: the member list's role asked for (org-authority/1); owner is never asked for, and no other role exists in the contract."
+          "description": "role: the member list's role asked for (org-authority/1). owner is never asked for and member is the role the person already holds, so admin is the only role a request names."
         }
       },
       "additionalProperties": false,
