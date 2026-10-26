@@ -714,7 +714,10 @@ session of that Project: in the host's operator controls, or through their agent
   session, in the form the host's move tool publishes (at most 200 characters, `decision.schema.json`; a host whose plain form
   would be longer publishes a compact reference that binds the slot, that generation and the receiving session, such
   as a digest of the three, never the slot alone), so a new call
-  under the same decision (AP-2's coverage) is refused `revision_conflict` once the slot has moved on. A retry of the
+  under the same decision (AP-2's coverage) is refused `revision_conflict` once the slot has moved on. A relayed
+  decision that names no `target`, or one that does not bind those three, is refused `decision-invalid`: the host
+  checks this itself before `actionDecision`, which alone lets a decision without a target cover the action on any
+  object (CT-181). A stored result answers a retry only while the decision is still valid (AP-2's 24 hours). A retry of the
   same call with its idempotency key answers the stored result (a rule of the move, DEC-0140, as for every board
   write that stores a receipt; the move keeps its keys in the Project's own namespace, a family of its own), so a lost answer never reads as a failed move. Otherwise the host applies it atomically, as `com.responder_replace` would for the receiving session:
   the generation goes up by one; a `claimed` request returns to `queued`; an `in_progress` one becomes
@@ -723,16 +726,17 @@ session of that Project: in the host's operator controls, or through their agent
 - **Who may receive it.** A live session of that Project already authorized to respond for that capability, as for
   `com.enroll`, other than the slot's holder; the host refuses any other `not_authorized`, and a move grants nothing.
   The host refuses a mover that is not the owning operator `not_authorized`, and a move of an `absent` slot
-  `revision_conflict` (there is no session's generation to move from). The move tool answers the board's refusals
+  `invalid_transition` (there is no holder to move from; retrying changes nothing until a session enrolls). The move tool answers the board's refusals
   in `comms-refusal.schema.json`'s shape, `held` staged by the reader's pin as the [holds](#holds) Compatibility says, and on the relayed path DL-19's codes as
   `structuredContent` (AP-2). An `absent` slot is not moved: an authorized session takes it by its own `com.enroll`.
 - **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
 - **After the move.** The board's ordinary rules then govern the slot, and a move bars nobody and adds no
   refusal: another authorized session may replace it, a client's recovery may replace it (the moved-off session's
-  client included, under a new session id after a restart, when its checkpoint carries accepted work), and a receiving session that lets its lease lapse loses it as any
-  lapsed holder does. A host keeps the operator's choice as its own state: when the slot's holder is no longer the
-  session the operator chose, it shows so and offers the move again while the chosen session is live; once the chosen session has ended, it shows the choice as
-  lapsed. Whether a client should leave a slot moved off
+  client included, under a new session id after a restart, when its checkpoint carries accepted work), and a receiving session that lets its lease lapse goes `stale` and,
+  as any stale holder, may lose the slot to another authorized session's enrollment or replacement. A host keeps the operator's choice as its own state: when the slot's holder is no longer the
+  session the operator chose, it shows so and offers the move again while the chosen session is live and the slot is occupied (an `absent` slot it
+  shows as no main session, until a session enrolls); once the chosen session has ended, it shows the choice as
+  ended. Whether a client should leave a slot moved off
   it is the client's (CT-175).
 - **What was in flight.** The receiving session continues the kept accepted work only by its own `com.responder_replace`
   with a transfer, whose checkpoint it writes as the replacement (a holder may replace itself at its current
@@ -748,7 +752,7 @@ session of that Project: in the host's operator controls, or through their agent
   moved, which is how the operator replaces a main session that stopped answering.
 - **The record.** The host's own slot record of the move names the operator as the actor and the receiving session as
   the holder; each request the move changes is journaled as op `replace` (`claimed` to `queued`) or `lost_result`
-  (`in_progress` to `outcome_unknown`), (`FAC-SEM-027`), carrying the operator principal, which no rule checks. `com.status` shows the slot as
+  (`in_progress` to `outcome_unknown`) (`FAC-SEM-027`), carrying the operator principal, which no rule checks. `com.status` shows the slot as
   before (generation, lease, `provenance`), and no tool's answer gains a member. The host's move action is one of its
   tools for the operator's controls (CT-125).
 
@@ -766,7 +770,7 @@ tool carries either.
   session may read or do.
 - **The host keeps a reported branch in its Project.** A branch name is repository text and can name a person, a client or an
   unreleased plan. The operator and the sessions of that Project may see the branch a session reported. The host never
-  copies it into what it writes itself: the board's own content (a receipt, a progress note it generates), the
+  copies it into what it writes itself: the board's own content (a receipt, a reply or an event it writes), the
   directory, `com.status`, a relay, an organization server, an events feed read off the machine, or another Project's
   sessions. A host may leave it out without reporting itself degraded. An agent's own message text stays under its own
   rules, and the `git.branch` of an activity event follows the organization's `telemetry.git_branch` policy

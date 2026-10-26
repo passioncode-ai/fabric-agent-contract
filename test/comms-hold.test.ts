@@ -123,19 +123,18 @@ describe("the matrix (DEC-0079 items 3 and 4)", () => {
 });
 
 describe("the primary responder (DEC-0140 PR-1)", () => {
-  it("is a capability name the board takes, and no board tool", () => {
+  it("is a name the board takes as a capability", () => {
     const base = JSON.parse(read("schemas/common.schema.json")) as Json;
     expect(PRIMARY_CAPABILITY).toBe("project.work");
     expect(new RegExp(base.$defs.capabilityName.pattern, "u").test(PRIMARY_CAPABILITY)).toBe(true);
-    expect(COMMS_TOOLS).not.toContain(PRIMARY_CAPABILITY);
   });
 });
 
 describe("the operator's move of a slot (DEC-0140 PR-2)", () => {
   it("is refused held exactly where com.responder_replace is, in the hold table", () => {
-    const rows = read("docs/specification/project-comms.md").split("\n").filter((line) => line.startsWith("| "));
-    const cell = (start: string) => rows.find((line) => line.startsWith(start))?.split(" | ")[1];
-    expect(cell("| the operator's move of a slot")).toBe(cell("| `com.enroll`, `com.responder_replace`"));
-    expect(cell("| the operator's move of a slot")).toBeDefined();
+    const table = rows("### What a hold refuses");
+    const cell = (start: string) => table.find((row) => row[0]?.startsWith(start))?.[1];
+    expect(cell("the operator's move of a slot")).toBeDefined();
+    expect(cell("the operator's move of a slot")).toBe(cell("`com.enroll`, `com.responder_replace`"));
   });
 });

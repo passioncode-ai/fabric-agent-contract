@@ -4688,8 +4688,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   its ADR-0117 §4 and its Comms screen (CT-41); the adapter's kits read `settledBy` (CT-42).
 - **Amends:** DEC-0022 (who may call `com.reconcile`) and DEC-0073 (the receipt's `request`; the message view). No tool,
   argument, state, transition or refusal code is added.
-- **Annotated (2026-10-27):** amended by DEC-0140: the operator's move of a slot (PR-2) is one more way the
-  lost-result operation runs, beside a holder that took the slot and then left.
+- **Annotated (2026-10-27):** amended by DEC-0140: the lost-result operation runs whenever the next holder takes
+  the slot: after a holder left, by a replacement (already so in the replace schema), or by the operator's move of a
+  slot (PR-2).
 - **Decision:** in [project communication → Owner settlement](specification/project-comms.md#owner-settlement) —
   1. **Who.** The settler is the operator principal that owns the request's target Project, `trusted` and verified by
      the host; in an organization estate, that member only. No Project grant makes one. Every other caller, another
@@ -8309,7 +8310,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3. **PR-3.** A session role is a claim, display and routing only, never authority, and not a role assignment; the
      host never copies a session's reported branch into the board, the directory, `com.status`, a relay, an
      organization server, an events feed read off the machine or another Project's sessions; an activity event's
-     `git.branch` keeps following `telemetry.git_branch` (DEC-0031).
+     `git.branch` keeps following `telemetry.git_branch` (DEC-0031) and is never fed from a reported branch until
+     CT-176 decides.
 - **Why:** one name lets a requester reach a Project without knowing its capabilities and lets every host show the
   same main session; a move by the operator's act, guarded by the generation the operator saw and made as one fenced
   transition, keeps the fences' guarantees while the person decides who works, and leaving the slot to the board's
@@ -8326,6 +8328,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `docs/specification/project-comms.md` (header, C4's wording, Owner settlement's paths, PR-1 to PR-3, the hold
   table), `conformance.md` (a row), `interop.md` (the reserved name), `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder,
   Session role), `src/comms-hold.ts` (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`, `docs/ux/scenarios.md`
-  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022 and DEC-0081 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176 and CT-179 (filed); the handoff
+  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022 and DEC-0081 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176, CT-179 and CT-181 (filed); the handoff
   `docs/handoffs/2026-10-26-simple-fabric-decisions.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-174; Fabric's request `23ba0e97` (thread `6a8d2f9c`).

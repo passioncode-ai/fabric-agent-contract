@@ -14,7 +14,9 @@ session; an optional session `role` and `branch` with a privacy rule.
   a reported branch stays in its Project, activity's `git.branch` under `telemetry.git_branch`).
 - `PRIMARY_CAPABILITY` in `src/comms-hold.ts` with a test; a conformance row (the host); `interop.md`'s amendment (the
   reserved name, a narrowing);
-  SCN-051; CONTEXT (Primary responder, Session role); README, DOCMAP, backlog CT-174.
+  SCN-051, SCR-32, FLW-16 (the move's edges), JRN-08 stage 5 and an ST-020 criterion; CONTEXT (Primary responder,
+  Session role, Board hold); README, DOCMAP; DEC-0020, DEC-0022 and DEC-0081 annotated; backlog CT-125 (the move's
+  twin), CT-174, and CT-175, CT-176, CT-179 filed from the readings (rounds 1 to 10).
 - The shape was posted on thread `6a8d2f9c` (`0b88a552`); round 1 of the readings failed on all three tiers, and the
   rewrite above answers its findings. Rounds 2 and 3 failed on how a move stays put: a host bar (a reconnect gets a
   new session id) and a client rule (released kits replace at the generation `com.status` shows, as the replace
@@ -41,8 +43,10 @@ session; an optional session `role` and `branch` with a privacy rule.
 
 ## Checks actually run
 
-`pnpm typecheck`, vitest with coverage written to the session scratchpad, `pnpm ux:lint`, `pnpm docs:check`,
-`pnpm privacy:check`, `pnpm vectors:check`, no U+2014 in the added lines.
+On each head, the gate from the worktree, exit 0 at each head through round 10: `pnpm typecheck`; vitest with coverage written to the
+session scratchpad (106 files, 9360 tests passed); `pnpm ux:lint` (38 stories, 32 flows, 32 screens, 50 scenarios);
+`pnpm docs:check` (0 errors over 246 files); `pnpm privacy:check` (0 findings); `pnpm vectors:check` (25 files match);
+no U+2014 in the added lines.
 
 ## Next task
 
