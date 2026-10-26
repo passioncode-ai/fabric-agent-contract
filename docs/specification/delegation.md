@@ -490,16 +490,21 @@ it reaches acts on them without asking, within what they cover.
   `at`, `expiresAt` (after `at` and at most 7 days after it; the shortest that covers the task), a `scope` stated from
   the operator's words, and `chain` with itself first. The scope lists `capabilities`, relayed `actions` and
   `projects` (a list left out means any), an effect ceiling `effects`, and `perCallMaxUsd` only where the words name an
-  amount. It never states a scope wider than the words; where they are unclear, it asks the operator (AP-3). A task
-  still open when the mandate expires asks the operator once, in one line, for a new one.
+  amount. It never states a scope wider than the words; where they are unclear, it asks the operator (AP-3). An agent
+  names itself in the chain by its registry id, or, a coding session with none, by its runner kind (`claude-code`,
+  `codex`), as it does in its own audit. A task still open when the mandate expires asks the operator once, in one
+  line, for a new one.
 - **MD-2, every call appends its callee.** An agent that calls another agent for the task sends the mandate with that
   agent appended to `chain`, and with the scope it hands on when it hands on less (`handOn`). The chain is the agents
   that held the mandate: the leading agent, then each callee in turn. A hand-over never widens a list, the effects or
   the ceiling, never drops a list or the ceiling, never changes `task`, `instruction`, `at` or `expiresAt`, and never
   names an agent twice; the chain holds at most four agents, as a delegation chain (DL-6). `FAC-SEM-144` refuses a
   document that breaks this.
-- **MD-3, taking a call.** A callee takes the mandate only when the chain ends in itself and the agent before it is
-  the caller it authenticated, from a T0 or T1 caller (DL-25); then it takes a call the mandate covers as the
+- **MD-3, taking a call.** A callee takes the mandate only from a T0 or T1 caller (DL-25) and only when the chain ends
+  in itself; when it authenticated its caller's agent id (a per-agent credential, `surfaces.mcp.auth: own`; a
+  delegation token's outermost actor; the hub's own authenticated call naming the origin in its delegation token), that
+  id must be the agent before it. On loopback with the shared descriptor token the callee knows no caller agent, and the
+  chain's end alone binds the mandate to the call. Then it takes a call the mandate covers as the
   operator's decision: a `relayed` action without a decision ([service](service.md#actions) AP-2), and any approval the
   product itself asks of the operator before a step, such as a paid run. For a job, the step reads the mandate its
   start call carried: a covered step raises no input request ([interop C3.3](interop.md#c33-awaiting-a-choice)). The
@@ -508,9 +513,10 @@ it reaches acts on them without asking, within what they cover.
   that lists `mandate/1`), or in a project-board request ([project-comms](project-comms.md)) whose sender the target
   places by the rule there. **Covered** means: a relayed action is in `actions`, or, with no actions listed, its tool
   is in `capabilities`; the capability is in `capabilities` (or none is listed); the effect is within the closure of
-  `effects` (as a grant's ceiling), never `change-policy` (AP-5), and an effect beyond `draft` needs `capabilities` or
-  `actions` listed; with `perCallMaxUsd`, the callee's own estimate for the call exists and is at most that; the project
-  is in `projects` (or none is listed); the scope read being the last narrower one in `chain`. Without
+  `effects` (as a grant's ceiling), never `change-policy` (AP-5), and an effect beyond `draft` needs the call named, a
+  relayed action in `actions` or `capabilities`, any other call in `capabilities`; with `perCallMaxUsd`, the callee's
+  own estimate for the call exists and is at most that; the project is in `projects` (or none is listed; a call that
+  acts in no project is not limited by `projects`); the scope read being the last narrower one in `chain`. Without
   `perCallMaxUsd` the money limits decide the spend, as the operator's rule reserves only spend above a limit (MD-6).
   The callee records `{by: "operator", via: "mandate", task, chain}` with the caller it authenticated and the
   operator's words, as AP-2 records a decision. A decision in the same call is read first.

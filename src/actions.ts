@@ -50,8 +50,11 @@ export interface ActionDecisionInput {
   now?: unknown;
   /** The call's `_meta.mandate` (or `call.mandate`), as received (DEC-0125); read only when the call carries no decision. */
   mandate?: unknown;
-  /** The service's own agent id, which a mandate's chain must end in (DEC-0125 MD-3). */
+  /** The service's own agent id, which a mandate's chain must end in (DEC-0125 MD-3); required to read a mandate. */
   self?: unknown;
+  /** The caller's agent id, when the service authenticated one (a per-agent credential, a delegation token's outermost
+   * actor, the hub's attested origin); a mandate's chain must then name it before `self`. */
+  callerAgent?: unknown;
   /** The action's effect class, the service's own knowledge, required to read a mandate. */
   effect?: unknown;
   /** The service's own estimate of what this call spends, USD, to read a mandate's spend. */
@@ -69,7 +72,7 @@ export type ActionDecisionAnswer =
   | { ok: false; code: typeof APPROVAL_REQUIRED; data: { actionDigest: string } }
   | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID; data?: { detail: string; estimateUsd?: number; perCallMaxUsd?: number } }
   /** The service's own fault, never sent to a caller: an input it owes is missing or unreadable. */
-  | { fault: "action-invalid" | "caller-missing" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" };
+  | { fault: "action-invalid" | "caller-missing" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" | "self-missing" };
 
 /** How long after the operator decided a relayed decision still stands: approval/1's lifetime (DL-17, FAC-SEM-051). */
 export const DECISION_LIFETIME_SECONDS = 24 * 60 * 60;
@@ -141,8 +144,10 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
 function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: string): ActionDecisionAnswer {
   const { effect, spendUsd, project } = input;
   if (typeof effect !== "string") return { fault: "effect-missing" };
+  if (typeof input.self !== "string") return { fault: "self-missing" };
   const answer = mandateCovers({
-    mandate: input.mandate, tier: input.tier, now: input.now, self: input.self, caller,
+    mandate: input.mandate, tier: input.tier, now: input.now, self: input.self,
+    ...(input.callerAgent === undefined ? {} : { callerAgent: input.callerAgent }),
     call: { capability: action.tool, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}) }
   });
   if ("recordAs" in answer) return { ok: true, recordAs: { ...answer.recordAs, caller } };

@@ -7470,11 +7470,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      appends the agent called, with the scope handed on when narrower; never a wider or dropped list, effect or
      ceiling, never a repeated agent, at most four (DL-6). `handOn` is the reference and `FAC-SEM-144` checks the
      document.
-  3. **MD-3, taking a call.** A callee takes the mandate only when the chain ends in itself and the agent before it is
-     the caller it authenticated, from T0 or T1; then a call the mandate covers is the operator's decision: a
+  3. **MD-3, taking a call.** A callee takes the mandate only from T0 or T1 and only when the chain ends in itself, and,
+     when it authenticated its caller's agent id (a per-agent credential, a delegation token's actor, the hub's token
+     naming the origin), only when that id is the agent before it; with the shared descriptor token on loopback the
+     chain's end alone binds it; then a call the mandate covers is the operator's decision: a
      `relayed` action without a decision (AP-2), any approval the product asks of the operator before a step, and a
      job's approval step (no input request raised). Covered: the action or the capability listed (an effect beyond
-     `draft` needs one of the lists), the effect within the ceiling and never `change-policy` (AP-5), the callee's own
+     `draft` needs the call named: a relayed action in either list, any other call in `capabilities`), the effect within the ceiling and never `change-policy` (AP-5), the callee's own
      estimate within `perCallMaxUsd` when there is one (the money limits decide otherwise), the project listed. It
      records `via: mandate` with the task, the chain and the caller. The mandate travels in `_meta.mandate`, in
      `call.mandate` (the hub forwards it as it does a decision; a sealed call carries it only to a target listing
@@ -7527,4 +7529,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the operator's decision of 2026-10-25 (fabric-workspace `knowledge/integration.md`, PR #439,
   announcement `a509fcc0`); requests `fa9a40c8` (thread `c9d5be94`) and `9db9e09e` item 2; CT-142; the seam and
   product readings of the first draft (2026-10-26), which found the chain rule unfollowable and unbound to its caller,
-  spend unenforceable and the operator's literal example refused, the hub and job routes missing and T1 contradicted.
+  spend unenforceable and the operator's literal example refused, the hub and job routes missing and T1 contradicted;
+  a second seam reading, which found no authenticated agent id on the operator's own routes, an actions-only scope
+  covering every external call and the reference's table stale.

@@ -269,7 +269,8 @@ mode never requests a secret (MCP rule); secrets use URL mode. A job whose start
 for its task reads it at its own approval step: a step the mandate covers raises no input request and goes on as the
 operator's decision; a step it does not cover waits `input_required` as here, its message naming the part not covered,
 and its answer may carry a mandate that covers it in the `_meta.mandate` of the `fabric.job.get` call
-([delegation](delegation.md#the-operators-mandate) MD-3, MD-4, DEC-0125). A URL-mode request on the service's own page MUST carry
+([delegation](delegation.md#the-operators-mandate) MD-3, MD-4, DEC-0125). A mandate that expired before the step waits
+there too, its message saying the operator's mandate expired. A URL-mode request on the service's own page MUST carry
 its open_link as `url`, never a raw local address (**FAC-SEM-143**, [service](service.md#page-links) PL-4,
 DEC-0123), and a tool answer that names a page for a person MUST carry it in `open_link`.
 
@@ -366,7 +367,9 @@ delegation token names as the relaying caller (DEC-0121). The hub's own `fabric.
 forwards a T0 or T1 origin's to the callee as `_meta.mandate` (on `agent.call` and on its own `fabric.job.get`), drops
 a T2 origin's, passes the callee's refusals back unchanged and never answers a resend that carries a mandate from what
 it remembered of the same call without one. The hub is not an agent of the chain: the origin appends the callee before
-it calls, and the callee reads the origin as the agent before it.
+it calls, and the callee compares the origin the hub's delegation token names, when one is present, with the agent
+before it. An origin sends `mandate` only to a hub whose `protocols` list `mandate/1`, since a hub pinned before
+DEC-0125 refuses the member.
 
 **Amendment (DEC-0039).** The hub is the only **issuer** between agents, not the only
 **route**. It signs a [delegation token](delegation.md) naming the person the work is for,

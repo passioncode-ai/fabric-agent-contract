@@ -777,7 +777,7 @@ flowchart TD
   O[Operator gives the task] --> L[Leading agent states the mandate]
   L --> C[Calls the next agent with it, narrowed]
   C --> T{caller's tier}
-  T -->|T2| X[decision-invalid: a token is needed]
+  T -->|T2| X[mandate ignored: the whole profile applies]
   T -->|T0 or T1| V{mandate valid}
   V -->|no| I[decision-invalid with the reason]
   V -->|yes| K{covers the call}

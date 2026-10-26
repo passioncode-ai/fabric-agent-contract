@@ -10,7 +10,8 @@
       "gate": "relayed"
     },
     "tier": "T0",
-    "caller": "example-developer",
+    "caller": "agent:claude-code",
+    "callerAgent": "example-developer",
     "self": "example-researcher",
     "now": "2026-10-26T12:00:00Z",
     "mandate": {
@@ -60,7 +61,7 @@
           "example-developer",
           "example-researcher"
         ],
-        "caller": "example-developer"
+        "caller": "agent:claude-code"
       }
     }
   }

@@ -116,14 +116,15 @@ export function mandateProblem(mandate: unknown): "mandate-malformed" | "mandate
 
 /**
  * Whether a callee takes one call as the operator's decision under a mandate (DEC-0125 MD-3 to MD-5), after it has
- * placed the caller's tier (DL-25) and authenticated it. `self` is the callee's own agent id and `caller` the caller's
- * as the callee authenticated it: the mandate is for this call only when the chain ends in `self` and the agent before
- * it is `caller`. A T2 caller's mandate is ignored. An invalid, widened, expired, not yet given or misaddressed mandate
- * is `decision-invalid`; a valid one that does not cover the call is `operator-decision-required`, its detail naming
- * the first part not covered (MD-4).
+ * placed the caller's tier (DL-25). `self` is the callee's own agent id: the mandate is for this call only when the
+ * chain ends in it. `callerAgent` is the caller's agent id when the callee authenticated one (a per-agent credential,
+ * a delegation token's outermost actor, the hub's attested origin); it must then be the agent before `self`. Without
+ * one (the shared descriptor token on loopback) the chain's end alone binds the mandate (MD-3). A T2 caller's mandate is
+ * ignored. An invalid, widened, expired, not yet given or misaddressed mandate is `decision-invalid`; a valid one that
+ * does not cover the call is `operator-decision-required`, its detail naming the first part not covered (MD-4).
  */
-export function mandateCovers(input: { mandate: unknown; tier: unknown; now: unknown; self: unknown; caller: unknown; call: MandateCall }): MandateAnswer {
-  const { mandate, tier, now, self, caller, call } = input;
+export function mandateCovers(input: { mandate: unknown; tier: unknown; now: unknown; self: unknown; callerAgent?: unknown; call: MandateCall }): MandateAnswer {
+  const { mandate, tier, now, self, callerAgent, call } = input;
   const clock = strictTime(now);
   if (Number.isNaN(clock)) return { fault: "now-unreadable" };
   if (tier !== "T0" && tier !== "T1") return { ignored: "mandate-at-t2" };
@@ -131,7 +132,7 @@ export function mandateCovers(input: { mandate: unknown; tier: unknown; now: unk
   if (problem) return { ok: false, code: MANDATE_INVALID, data: { detail: problem } };
   const read = mandate as Mandate;
   const holders = read.chain.map((step) => step.agent);
-  if (holders.length < 2 || holders[holders.length - 1] !== self || holders[holders.length - 2] !== caller) {
+  if (holders.length < 2 || holders[holders.length - 1] !== self || (callerAgent !== undefined && holders[holders.length - 2] !== callerAgent)) {
     return { ok: false, code: MANDATE_INVALID, data: { detail: "mandate-not-for-this-call" } };
   }
   if (strictTime(read.at) > clock + CLOCK_SKEW_SECONDS * 1000) return { ok: false, code: MANDATE_INVALID, data: { detail: "mandate-early" } };
@@ -142,7 +143,9 @@ export function mandateCovers(input: { mandate: unknown; tier: unknown; now: unk
   if (call.action !== undefined && scope.actions === undefined && scope.capabilities === undefined) return outside("outside-mandate: action");
   if (scope.capabilities !== undefined && !scope.capabilities.includes(call.capability)) return outside("outside-mandate: capability");
   if (call.effect === NEVER_BY_MANDATE || !effectClosure(scope.effects).has(call.effect)) return outside("outside-mandate: effect");
-  if (!READS_AND_DRAFTS.has(call.effect) && scope.capabilities === undefined && scope.actions === undefined) return outside("outside-mandate: capability");
+  // An external effect needs the call named: a relayed action by `actions` or `capabilities`, any other call by
+  // `capabilities`, since `actions` covers relayed actions only.
+  if (!READS_AND_DRAFTS.has(call.effect) && scope.capabilities === undefined && (call.action === undefined || scope.actions === undefined)) return outside("outside-mandate: capability");
   if (scope.perCallMaxUsd !== undefined && (call.spendUsd === undefined || call.spendUsd > scope.perCallMaxUsd)) {
     return { ok: false, code: OUTSIDE_MANDATE, data: { detail: "outside-mandate: spend", ...(call.spendUsd === undefined ? {} : { estimateUsd: call.spendUsd }), perCallMaxUsd: scope.perCallMaxUsd } };
   }
