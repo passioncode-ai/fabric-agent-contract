@@ -319,5 +319,5 @@ signs.
 - Registrations from unassigned devices (refused for now, SR-5).
 - Refusing a share grant that is dropped from placements but not revoked (an extension of `FAC-SEM-114`).
 - Carried from DEC-0082: corrections of a day's `grant.usage` after it was emitted, two collectors of one device,
-  mapping `audience` to `agentRef`, CX-CON-06.
+  mapping `audience` to `agentRef` (CX-CON-06 is DEC-0128's).
 - A signature on the receipt.

@@ -279,9 +279,12 @@ export const validDeviceKey = (key: JsonObject): boolean => {
 /**
  * FAC-SEM-073: every key is usable — a machine has exactly one `<id>#sig` key and at most one `#kem` (DEC-0053), each
  * named by the machine and its role, valid for its algorithm and used in one role only; machine ids and hub kids are
- * unique, and a hub key is of full order; every passkey's public key is valid and named once.
+ * unique, and a hub key is of full order; every passkey's public key is valid and named once. A context hub key (DEC-0128)
+ * is unique among every hub key of the record, of full order, once per context on its machine, in a pinned context, and
+ * held only by a machine that holds the personal hub key.
  */
 function keys(value: JsonObject, flag: Flag): void {
+  const pinned = new Set<unknown>(list(value.organizations).map((pin) => pin.org));
   const ids = new Set<unknown>();
   const hubKids = new Set<unknown>();
   const hubKeys = new Set<unknown>();
@@ -311,6 +314,25 @@ function keys(value: JsonObject, flag: Flag): void {
       const raw = Buffer.from(show(hub.x ?? ""), "base64url");
       if (isSmallOrderKey(raw)) flag(`${at}/hubKey/x`, "a hub key of small order verifies forged tokens and is never certified (DEC-0045)");
     }
+    // DEC-0128: a context's hub key is as unique as the personal one, across every hub key of the record, and belongs to a
+    // pinned organization, so a token in that context verifies only under its own context's key.
+    const contexts = new Set<unknown>();
+    // A context's key lives with the personal hub key, so a hub move carries every context's key with it (DL-15).
+    if (list(machine.contextHubKeys).length > 0 && !isObject(machine.hubKey)) flag(`${at}/contextHubKeys`, "a context's hub key is held only by the machine that holds the personal hub key (DEC-0128)");
+    indexed(machine.contextHubKeys).forEach(([entry, c]) => {
+      const keyAt = `${at}/contextHubKeys/${c}`;
+      if (contexts.has(entry.context)) flag(`${keyAt}/context`, `context ${show(entry.context)} has two hub keys on one machine`);
+      contexts.add(entry.context);
+      if (!pinned.has(entry.context)) flag(`${keyAt}/context`, `context ${show(entry.context)} is not an organization the record pins (DEC-0127)`);
+      // A key that is not an object is the schema's to refuse; nothing here reads it.
+      if (!isObject(entry.key)) return;
+      const key = entry.key;
+      if (hubKids.has(key.kid)) flag(`${keyAt}/key/kid`, `hub key ${show(key.kid)} is certified twice: one kid per hub key, personal or per context`);
+      hubKids.add(key.kid);
+      if (hubKeys.has(key.x)) flag(`${keyAt}/key/x`, "one public key is certified as two hub keys: a context key is its own key");
+      hubKeys.add(key.x);
+      if (isSmallOrderKey(Buffer.from(show(key.x ?? ""), "base64url"))) flag(`${keyAt}/key/x`, "a hub key of small order verifies forged tokens and is never certified (DEC-0045)");
+    });
   });
   const credentials = new Set<unknown>();
   indexed(value.authorities).forEach(([authority, index]) => {
@@ -423,6 +445,7 @@ function machineProfiles(value: JsonObject, flag: Flag): void {
       return;
     }
     if (machine.profile !== "full" && machine.hubKey !== undefined) flag(`/machines/${m}/hubKey`, `a ${machine.profile} machine is never the hub's: only a full machine carries a hub key`);
+    if (machine.profile !== "full" && list(machine.contextHubKeys).length > 0) flag(`/machines/${m}/contextHubKeys`, `a ${machine.profile} machine is never the hub's: only a full machine carries a context's hub key (DEC-0128)`);
     if (machine.profile === "view") {
       views.add(machine.id);
       if (list(machine.packages).length > 0) flag(`/machines/${m}/packages`, "a view machine runs no agent: it has no placement");
@@ -490,7 +513,10 @@ function grantsAndRevocations(value: JsonObject, flag: Flag): void {
     machine: new Set(machines.map((machine) => machine.id)),
     // A kid, and each listed key's own reference (`deviceKeyRef`, DEC-0084): revoking either while listing it is refused.
     "device-key": new Set(machines.flatMap((machine) => list(machine.deviceKeys).flatMap((key) => [key.kid, deviceKeyRef(key)].filter((ref) => ref !== undefined)))),
-    "hub-key": new Set(machines.flatMap((machine) => (isObject(machine.hubKey) ? [machine.hubKey.kid] : []))),
+    "hub-key": new Set(machines.flatMap((machine) => [
+      ...(isObject(machine.hubKey) ? [machine.hubKey.kid] : []),
+      ...list(machine.contextHubKeys).map((entry) => (isObject(entry.key) ? entry.key.kid : undefined))
+    ])),
     "publisher-key": new Set(list(value.publisherKeys).map((key) => key.kid)),
     package: new Set(machines.flatMap((machine) => list(machine.packages).map((placement) => placement.digest))),
     grant: grantIds
@@ -508,6 +534,10 @@ function grantsAndRevocations(value: JsonObject, flag: Flag): void {
     if (listed.get(show(revocation.kind))?.has(ref)) flag(`/revocations/${index}/ref`, `the record still lists the ${show(revocation.kind)} it revokes: revocation outranks addition`);
   });
 }
+
+/** A machine's context hub keys that are objects, with their indexes, each with the context it is certified for. */
+const contextKeys = (machine: JsonObject): Array<[JsonObject, number, unknown]> =>
+  indexed(machine.contextHubKeys).filter(([entry]) => isObject(entry.key)).map(([entry, c]) => [entry.key as JsonObject, c, entry.context]);
 
 /**
  * FAC-SEM-114 across two revisions (DEC-0084): what a revision drops, it revokes in the same revision.
@@ -533,6 +563,9 @@ function droppedFindings(parent: JsonObject, next: JsonObject): Finding[] {
     if (!kept) {
       if (!revoked("machine", machine.id)) flag(`${at}/id`, `machine ${show(machine.id)} is removed without its revocation: a revision that drops a machine lists machine ${show(machine.id)} in revocations`);
       if (hub && !revoked("hub-key", hub.kid)) flag(`${at}/hubKey/kid`, `the hub key ${show(hub.kid)} of a removed machine is revoked in the same revision`);
+      contextKeys(machine).forEach(([key, c]) => {
+        if (!revoked("hub-key", key.kid)) flag(`${at}/contextHubKeys/${c}/key/kid`, `the context hub key ${show(key.kid)} of a removed machine is revoked in the same revision (DEC-0128)`);
+      });
       return;
     }
     const listed = new Set(list(kept.deviceKeys).map(deviceKeyRef).filter((ref) => ref !== undefined));
@@ -545,21 +578,42 @@ function droppedFindings(parent: JsonObject, next: JsonObject): Finding[] {
     if (hub && !(nextHub && nextHub.kid === hub.kid && nextHub.x === hub.x) && !revoked("hub-key", hub.kid)) {
       flag(`${at}/hubKey/kid`, `the hub key ${show(hub.kid)} is no longer certified as it was: the same revision revokes hub-key ${show(hub.kid)}, and a re-certified hub key takes a new kid`);
     }
+    // DEC-0128: a context's hub key dropped (its context unpinned, OM-5, or the key replaced) is revoked the same way.
+    // A key is kept only in its own context: one moved to another organization is a key that organization must not inherit.
+    const keptContext = new Set(contextKeys(kept).map(([key, , context]) => `${show(context)} ${show(key.kid)} ${show(key.x)}`));
+    contextKeys(machine).forEach(([key, c, context]) => {
+      if (!keptContext.has(`${show(context)} ${show(key.kid)} ${show(key.x)}`) && !revoked("hub-key", key.kid)) {
+        flag(`${at}/contextHubKeys/${c}/key/kid`, `the context hub key ${show(key.kid)} is no longer certified as it was: the same revision revokes hub-key ${show(key.kid)} (DEC-0128)`);
+      }
+    });
   });
   return findings;
 }
 
 /**
  * FAC-SEM-147: the organizations the person admitted (DEC-0127 OM-2), each once by its context, and no root of small
- * order (DEC-0045), since the root's key sets are what every attestation of that organization verifies under.
+ * order (DEC-0045), since the root's key sets are what every attestation of that organization verifies under; each
+ * context issuer once and never containing the estate id (DEC-0128).
  */
 function organizationPins(value: JsonObject, flag: (instancePath: string, message: string) => void): void {
   const seen = new Set<string>();
+  const issuers = new Set<unknown>();
   for (const [pin, index] of indexed(value.organizations)) {
     const at = `/organizations/${index}`;
     const org = show(pin.org);
     if (seen.has(org)) flag(`${at}/org`, `organization ${org} is pinned twice`);
     seen.add(org);
+    // DEC-0128: a context's issuer is its own and names no estate, so two organizations' tokens share nothing.
+    if (typeof pin.iss === "string") {
+      if (issuers.has(pin.iss)) flag(`${at}/iss`, `context issuer ${show(pin.iss)} is used by two organizations`);
+      issuers.add(pin.iss);
+    }
+    // Only the opaque part is the pin's own: the fixed prefix would match a short estate id by chance.
+    const opaquePart = typeof pin.iss === "string" ? pin.iss.replace(/^urn:fabric:context:/, "").toLowerCase() : "";
+    // An estate id shorter than eight characters appears inside any random id by chance; the issuer's duty covers it.
+    if (typeof value.estate === "string" && value.estate.length >= 8 && opaquePart.includes(value.estate.toLowerCase())) {
+      flag(`${at}/iss`, "a context issuer never contains the estate id (DEC-0128)");
+    }
     const x = isObject(pin.root) ? pin.root.x : undefined;
     if (typeof x === "string" && /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/.test(x) && isSmallOrderKey(Buffer.from(x, "base64url"))) {
       flag(`${at}/root/x`, "a root of small order lets anyone forge the organization's key sets (DEC-0045)");

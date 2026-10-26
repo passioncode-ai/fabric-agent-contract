@@ -391,6 +391,6 @@
 - **Elements:** the organization's id and server origin; the root key's fingerprint; "Join" (the passkey prompt); per membership: role, `active`, `suspended` or `ended`, and what leaves for the organization (OM-7's rows).
 - **States:** joining, the root shown; joined, the role; suspended, the attestation expired and when it was last verified; ended, when and why; ended, the passkey's signature pending; refused, the verifier's reason.
 - **Coverage:** `src/org-membership.ts` (`verifyOrgMembership`, `verifyOrgKeySet`, `FAC-SEM-145` to `FAC-SEM-147`), `test/org-membership.test.ts`
-- **Scenarios:** SCN-047
+- **Scenarios:** SCN-047, SCN-048
 - **Resources:** membership specification, The organization's keys, Ending, What leaves a person's Fabric
 - **Status:** proposed

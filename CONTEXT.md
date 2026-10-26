@@ -646,12 +646,12 @@ organization's relay has none of its own until `org-authority/1` (decided with C
 
 **Revocation delta**: The estate record's fast path (`revocation-delta/1`, DEC-0054): an append-only chain of
 entries, one revocation each, signed by an **Estate key** and chained by RFC 8785 hash, so its head is
-`{sequence, sha256}` — what a check-in reports and a **Relay**'s `welcome` carries. A revision issued after an entry
+`{sequence, sha256}`: what a machine reports to its hub and a **Relay**'s `welcome` carries. A revision issued after an entry
 lists it ([revocation delta](docs/specification/revocation-delta.md)).
 
 **Window lease**: A hub-signed share of one estate window instance for one machine (`window-lease/1`, DEC-0062):
 the meter spends within the smaller of its own remainder and the lease's, fails closed at expiry, and reports `spent`
-in its check-in ([window lease](docs/specification/window-lease.md)).
+to its hub over the relay ([window lease](docs/specification/window-lease.md)).
 
 **Entitlement**: The issuer's signed record of what one order entitles one subject to (an organization,
 `org:<orgId>`, or one person's estate, `personal`) for at most 38 days: a member allowance, a hosting product, a
@@ -662,6 +662,11 @@ expires ([entitlement](docs/specification/entitlement.md)).
 **Entitlement key set**: The issuer's signing keys for entitlements under a rising revision, each with a window, and the
 kids it revokes (`entitlement-key-set/1`, DEC-0085), signed by the issuer's root key, which a verifier pins at
 installation and which signs nothing else ([entitlement](docs/specification/entitlement.md#issuer-keys)).
+
+**Unlinkable enrollment**: An organization enrollment of a machine that shares nothing with the machine's other
+enrollments or its estate: its own `device.id`, keys, kids, telemetry key, collector ids and counters, no estate record
+in its check-ins and no estate document in their answers, and in its organization's context a hub key and token issuer
+of its own (DEC-0128, [devices](docs/specification/devices.md#unlinkable-enrollments)).
 
 **Membership attestation**: What an organization server states about one person's membership of one organization,
 for one reader, for at most a day: the organization, a subject pairwise to that reader, a role (`owner`, `admin`,

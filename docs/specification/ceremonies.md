@@ -336,8 +336,12 @@ alert:
    one continues the one chain from the switch (its first entry is the next sequence after the head it holds); a second
    revision drops the old key, revokes it as `hub-key <old kid>` (`FAC-SEM-114`) and anchors the head as it then stands.
    `hubMove` reads that pair as an addition, then a removal (`moved` is `false` in each).
+   Every context hub key moves the same way (DEC-0128): the first revision certifies the new hub machine's key per pinned
+   context beside the old ones, and the second drops and revokes the old machine's.
 4. **A lost hub** is replaced in one revision: the new `hubKey`, the old key dropped and revoked, the lost machine removed
-   and revoked as `machine <id>` ([Remove a machine](#remove-a-machine)), and the delta anchored at the head the new hub
+   and revoked as `machine <id>` ([Remove a machine](#remove-a-machine)) with every context hub key it held, the new hub's
+   key per pinned context certified in the same revision and each context's published key set withdrawing the lost keys
+   at once (DEC-0128), and the delta anchored at the head the new hub
    holds; the new hub's first entry is the anchor's sequence + 1. Fabric withdraws the lost key from the key set it
    publishes online (DL-14) at once, with no DL-15 grace. A service whose `auth.delegation.jwks` (DL-16) names that
    published copy stops accepting the lost key within its cache time (at most 10 minutes, DL-15); one that names the old hub's own `/.well-known/jwks.json`, which
@@ -363,8 +367,8 @@ alert:
    away by the relay (`unauthenticated`, 4401, with no reason, [relay](relay.md#admission)), so nothing it signs reaches
    a machine. A machine that applied the revision refuses
    anything the old key signs after it (`revoked-signer`, RD-7). A machine holding an old-hub entry the revision does
-   not list refuses the revision as `unreconciled` and keeps its parent; Fabric watches check-ins
-   (`records.estateRecord.revision`) after a move and drafts the revision that lists it. An entry the old hub signed at
+   not list refuses the revision as `unreconciled` and keeps its parent; Fabric watches its machines' reports
+   (`records.estateRecord.revision`, over the relay, never an organization's check-ins, DEC-0128; CT-152) after a move and drafts the revision that lists it. An entry the old hub signed at
    a sequence the new hub also used, before a machine applied the revision, is a second signed history (`fork`):
    recovery from a fork is still the revocation delta's open item.
 7. **What the move ends.** Everything the old key signed is refused once a verifier applies the revision that revokes it
@@ -416,16 +420,16 @@ DEC-0106 ([machine calls](machine-calls.md#compatibility)).
 ## Linkability
 
 NET-2 answers K-1: each organization enrollment of a machine gets its own keys, so organizations cannot link the
-machine (CX-22). The contract's part — a `kid` and an `iss` per context, and what `FAC-SEM-044`, `FAC-SEM-073` and the
-check-in carry for each (CX-CON-06) — is stage 2 and **not in this decision**; until it lands, the pilot's single key
-stays linkable ([contexts](contexts.md#linkability)).
+machine (CX-22). DEC-0128 decides the contract's part (CX-CON-06): an identity per enrollment, nothing of the estate's in
+an organization's check-in, and a hub key and issuer per context ([devices](devices.md#unlinkable-enrollments),
+[contexts](contexts.md#linkability)).
 
 ## Semantic rules
 
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-113"></a>`FAC-SEM-113` | `enroll-token` | an `enroll-token/1`'s statement is the register's: `type` `enroll-token/1` and exactly its fields, `purpose` `agent-host`, `uses` 1, `scope` `estate:<id>`, `genesis` a digest, a 32-byte `nonce`, `ceiling` `null` or a digest; `notBefore` and `expiresAt` RFC 3339 read strictly, `expiresAt` after `notBefore` and at most 900 s after it |
-| <a id="fac-sem-114"></a>`FAC-SEM-114` | `estate-record-revision` | what a revision drops, it revokes in the same revision: a machine of the parent it no longer lists as `machine <id>`, with its hub key as `hub-key <kid>`; a device key of a machine both list that it no longer lists, by its key reference `<kid>@sha256:<hex>` or by its kid; a hub key of a machine both list that it no longer certifies with the same kid and key, as `hub-key <old kid>`. `verifyEstateRecord` runs it whenever it has a parent (`rule-violation`) |
+| <a id="fac-sem-114"></a>`FAC-SEM-114` | `estate-record-revision` | what a revision drops, it revokes in the same revision: a machine of the parent it no longer lists as `machine <id>`, with its hub key as `hub-key <kid>`; a device key of a machine both list that it no longer lists, by its key reference `<kid>@sha256:<hex>` or by its kid; a hub key of a machine both list that it no longer certifies with the same kid and key, as `hub-key <old kid>`. `verifyEstateRecord` runs it whenever it has a parent (`rule-violation`); a context hub key a revision drops or replaces is revoked as `hub-key` in the same revision (DEC-0128) |
 
 DEC-0084 also extends two rules of the [estate record](estate-record.md#semantic-rules): `FAC-SEM-076` reads a
 `device-key` revocation as a kid or a key reference, refuses a record that lists the key either names, and refuses a ref
@@ -522,8 +526,7 @@ before a reader moves, the overlapping page `applyDelta` now accepts) are in
 
 ## Not decided here
 
-- CX-CON-06 (a `kid` and an `iss` per context) and how an organization enrollment's ceremony differs from these
-  (stage 2, Fabric's D8).
+- How an organization enrollment's ceremony differs from these (Fabric's D8); CX-CON-06 is DEC-0128's.
 - `node-summary/1`, DV-CON-01's other half: no step of these ceremonies needs it.
 - The ceremonies' interface: screens, wording and the QR code's encoding of a local connection or a rendezvous.
 - The relay's frame types for a rendezvous (the relay's RLY rows); this page fixes what a rendezvous carries and when it

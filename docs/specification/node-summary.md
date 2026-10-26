@@ -22,7 +22,7 @@ DEC-0056 signs, so it carries no signature of its own. Over the relay it would n
 
 | Member | What it says |
 |---|---|
-| `device`, `context`, `sequence`, `at` | the device, the client certificate's, which the receiver compares (DEC-0114); the enrollment's own organization, `org:<org.id>` exactly as the certificate binds it, which the receiver compares and refuses when it differs (never `personal`, DEC-0102); a number that rises with every summary of this device and context; the time |
+| `device`, `context`, `sequence`, `at` | the device, the client certificate's (the enrollment's own `device.id`, DEC-0128 UE-1), which the receiver compares (DEC-0114); the enrollment's own organization, `org:<org.id>` exactly as the certificate binds it, which the receiver compares and refuses when it differs (never `personal`, DEC-0102); a number that rises with every summary of this device and context; the time |
 | `harness.codingAgents` | each installed coding agent by its [catalogue](runners.md#the-coding-agent-catalogue-dec-0093) id (DEC-0093) and its version |
 | `harness.mcpServers` | each MCP server the coding agents load: `name`, `source` (`user`, `project`, `local`, `plugin`, `managed`, `other`), `transport`, `health` |
 | `harness.skills`, `harness.plugins` | each by name and source, a skill's digest, a plugin's version and digest |

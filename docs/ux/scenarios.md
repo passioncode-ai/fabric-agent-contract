@@ -53,6 +53,7 @@
 | SCN-045 | Give a task once: the research agent my developer agent engages runs it without asking me again | delegation | P-02 | ST-037, FLW-31 | draft | not audited |
 | SCN-046 | Approve once in one agent's chat: the agent that holds the key acts without asking me again | delegation | P-02 | ST-037, FLW-31 | draft | not audited |
 | SCN-047 | Join an organization by my own passkey: my Fabric trusts the membership only from what the organization signed | membership | P-03 | ST-038, FLW-32 | draft | not audited |
+| SCN-048 | Enrolled in two organizations, my machine looks like two strangers to them | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 
 ## Personas
 
@@ -1027,10 +1028,10 @@ independent agent author and P-02 project operator.
 - **Feature:** membership
 - **Traces:** ST-038, FLW-32 (JTBD-04, JRN-03/#1)
 - **Entry point:** the member's join in Fabric
-- **Preconditions:** the organization `org:org-a` is served by `https://orgs.example`, which holds a root per organization; the member's Fabric is pinned at or after DEC-0127
+- **Preconditions:** the organization `org:org-a` is served by `https://orgs.example`, which holds a root per organization; the member's Fabric and every reader of the estate record are pinned at or after DEC-0128
 - **Steps:**
   1. The member starts the join -> Fabric reads the organization's root from its server and shows the organization, the server and the root's fingerprint (what the member compares it with is pending Fabric's D8).
-  2. The member confirms with their passkey -> the estate revision that pins `{org, issuer, root, pinnedAt}` is signed; no administrator is asked.
+  2. The member confirms with their passkey -> the estate revision that pins `{org, issuer, iss, root, pinnedAt}` (`iss` the context's opaque issuer Fabric generates) is signed; no administrator is asked.
   3. The server sends the organization's key set and an attestation for the member's Fabric as audience -> Fabric applies the set under the pin and verifies the attestation: `active`, role `member`.
   4. Fifteen minutes before expiry -> Fabric fetches the next revision and holds it per subject.
 - **Expected result:** the membership is trusted from a document the organization's pinned root vouches for, and the member's personal work never leaves for the organization.
@@ -1040,4 +1041,24 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a refused attestation -> its reason is shown; the member can retry or leave the organization.
 - **Status:** draft
 - **Coverage:** DEC-0127 OM-1 to OM-8, `verifyOrgMembership` and `verifyOrgKeySet` in `src/org-membership.ts`, `FAC-SEM-145` to `FAC-SEM-147`, `fixtures/vectors/org-membership.json`, `test/org-membership.test.ts`
+- **Product:** unobserved
+
+### SCN-048: Enrolled in two organizations, my machine looks like two strangers to them
+
+- **Persona:** P-03
+- **Feature:** membership
+- **Traces:** ST-038, FLW-32 (JTBD-04, JRN-03/#1)
+- **Entry point:** the member enrolls the same machine in a second organization
+- **Preconditions:** the machine is enrolled in `org:org-a`; the node and both organization servers are pinned at or after DEC-0128
+- **Steps:**
+  1. The member enrolls in `org:org-b` -> the node gives the enrollment a fresh device id, its own keys, telemetry key and collector, and records the pair in its local registry, which it never sends.
+  2. The node checks in to each organization -> each check-in carries only that enrollment's identity and streams, and no estate record (`FAC-SEM-149`).
+  3. An agent shared into `org:org-b` gets a delegation token -> it names `org:org-b`'s own context issuer and subject and is signed by that context's hub key (DL-14a).
+- **Expected result:** neither organization finds a value the other sees: device ids, keys, hashes, collectors, check-in records and token issuers all differ.
+- **Alt paths:** the member shares the same agent into both -> its `agentRef` is the same, the member's own choice. The machine is stolen -> Fabric offers to ask each organization to revoke, from the local registry; nothing is sent automatically.
+- **UI elements:** SCR-31: each membership's state; nothing that shows one organization the other.
+- **States covered:** success
+- **Errors & recovery:** a node that would send an estate record -> its own check (`FAC-SEM-149`) refuses before sending.
+- **Status:** draft
+- **Coverage:** DEC-0128 UE-1 to UE-3 and DL-14a, `src/node-enrollments.ts`, `hubKeyCertified` with a context, `test/context-keys.test.ts`, `fixtures/semantic/node-enrollments-*`, `check-in-*-outbound-*`
 - **Product:** unobserved

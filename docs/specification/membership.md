@@ -62,14 +62,15 @@ nothing else; a key of small order is refused before anything is verified under 
 ## The organization's keys
 
 **OM-2, the pin.** The person admits an organization into their estate by pinning its root in the estate record's
-`organizations`: `{org, issuer, root: {kid, x}, pinnedAt}`. The passkey's signature over that estate revision is the
+`organizations`: `{org, issuer, iss, root: {kid, x}, pinnedAt}`, `iss` being the opaque issuer of that context's tokens
+Fabric generates at the join (DEC-0128). The passkey's signature over that estate revision is the
 person's admission (R1-D12); no administrator signs it, and no admission receipt exists. Fabric reads the root from the
 issuer at the moment the person joins and shows it to them before the passkey signs; how the issuer serves it, and
 what the person compares the fingerprint with (an administrator's invitation, a second channel) is Fabric's
 organization decision (D8). Unpinning an organization in a later
 revision ends every membership of it ([OM-5](#ending)). `FAC-SEM-147` refuses an organization pinned twice and a root of
-small order. A reader pinned before DEC-0127 refuses the member, so Fabric writes it only once every reader of the
-record is pinned at or after: every machine of the person and the relay that holds the record (as DEC-0106 and DEC-0107
+small order, and each context issuer once (`FAC-SEM-147`). A reader pinned before DEC-0128 refuses the member as
+DEC-0128 shapes it, so Fabric writes it only once every reader of the record is pinned at or after DEC-0128: every machine of the person and the relay that holds the record (as DEC-0106 and DEC-0107
 gated theirs).
 
 **OM-3, the key set.** The membership root signs only `org-key-set/1` documents; signing keys sign attestations. It is
@@ -145,7 +146,8 @@ Everything the membership carried ends with it, as one rule:
 
 - Fabric revokes every share grant whose context is that `org:<orgId>`: the next estate revision lists a `grant`
   revocation for each, and in the same revision removes the grant from `shareGrants` and every placement and secret
-  placement in that context, and drops the organization's pin, so the revision passes `FAC-SEM-075`, `FAC-SEM-076` and
+  placement in that context, and drops the organization's pin and every machine's hub key of that context (each revoked
+  as `hub-key`, DEC-0128), so the revision passes `FAC-SEM-075`, `FAC-SEM-076` and
   `FAC-SEM-111` and every machine of the person reads the end from it once the person's passkey signs it (Fabric
   drafts it at the end and asks for the signature; until then the server already refuses the revoked certificate, and
   the hub mints nothing in the context); the revocation delta carries the revocation fast (DEC-0054), so the
@@ -158,7 +160,7 @@ Everything the membership carried ends with it, as one rule:
   DEC-0103's meaning and is not read as a membership's end. Ending it, the node stops every
   request to that organization, drops what it buffered for it, discards that organization's `server` policy layer and
   its locks, key set, collection start and streams, deletes every credential of the context (DEC-0111) and drops the
-  enrollment's keys (CT-122 adds the context's own `iss` and hub key, dropped the same way); an `mdm` layer stays the
+  enrollment's keys (the context's hub keys go with the pin, DEC-0128); an `mdm` layer stays the
   operating system's;
 - nothing of the organization's leaves the person's machine from then on ([OM-7](#what-leaves-a-persons-fabric)).
 
@@ -189,11 +191,11 @@ for that organization's server, and nothing else ([contexts](contexts.md#routing
 | a membership refresh | the audience and the subject the issuer gave | this decision |
 
 Personal work, another organization's work, the estate record and its members, passkeys, secrets, the person's other
-memberships and anything a row does not name never leave for an organization. A new row needs a decision. One gap is
-recorded, not allowed: until CT-122 every check-in also carries the estate's own records (the estate record's revision
-and digest, the heartbeat, the revocation delta's head, the leases, DEC-0053, DEC-0054, DEC-0056, DEC-0062), which link
-one machine across organizations ([contexts](contexts.md#linkability)); CT-122 removes them from what goes to an
-organization.
+memberships and anything a row does not name never leave for an organization. A new row needs a decision. The estate's own
+records a check-in could carry (the estate record's revision and digest, the heartbeat, the revocation delta's head, the
+leases, DEC-0053, DEC-0054, DEC-0056, DEC-0062) and the estate documents an answer could carry are not on the list:
+DEC-0128 makes leaving them out the sender's duty ([devices](devices.md#unlinkable-enrollments) UE-2, `FAC-SEM-149`),
+and until a node adopts it they still link one machine across organizations ([contexts](contexts.md#linkability)).
 
 ## The issuer's duties
 
@@ -217,7 +219,7 @@ organization.
 |---|---|---|
 | <a id="fac-sem-145"></a>`FAC-SEM-145` | `org-membership` | the times are strict RFC 3339 with at most three fraction digits and `issuedAt` ≤ `notBefore` < `expiresAt`, the life is at most 24 hours, and `membershipEndsAt` is `null` or such a time |
 | <a id="fac-sem-146"></a>`FAC-SEM-146` | `org-key-set` | each kid once, the root's kid not among the keys, every key window strict and positive, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt` |
-| <a id="fac-sem-147"></a>`FAC-SEM-147` | `estate-record` | each organization pinned once by its context, and no pinned root of small order |
+| <a id="fac-sem-147"></a>`FAC-SEM-147` | `estate-record` | each organization pinned once by its context, and no pinned root of small order; each context issuer once and its opaque part never containing an estate id of eight characters or more (DEC-0128) |
 
 ## Who adopts it
 
@@ -227,11 +229,11 @@ organization.
 - **Fabric** pins an organization's root in the estate record at the person's join (OM-2), applies key sets with
   `verifyOrgKeySet`, verifies attestations with `verifyOrgMembership` before it trusts a membership, keeps the held
   record per subject, and acts on OM-5, OM-6 and OM-7. It writes `organizations` only once every reader is pinned at or
-  after DEC-0127 and the node is measured ending an enrollment on the unpinning revision (CT-137).
+  after DEC-0128 and the node is measured ending an enrollment on the unpinning revision (CT-137).
 - **Project Observatory's node** ends an enrollment on a membership's end as on `organization-closed` (OM-5): it learns
   of the end from an estate revision that no longer pins the organization, which Fabric writes on every end (OM-5),
   and from `organization-closed`; a revoked certificate alone keeps its DEC-0103 meaning. Until every reader is pinned
-  at or after DEC-0127 no revision carries `organizations`, so a node ends an enrollment as DEC-0103 and its own
+  at or after DEC-0128 no revision carries `organizations`, so a node ends an enrollment as DEC-0103 and its own
   adoption already do.
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same
   pin, with its own audience.

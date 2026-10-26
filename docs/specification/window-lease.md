@@ -26,11 +26,11 @@ meter's owner, on 2026-10-12 (its `docs/design/METER.md`, sections M3 and M4). T
 | Field | Rule |
 |---|---|
 | `type` | `window-lease/1` |
-| `leaseId` | the lease's opaque id; the check-in reports it |
+| `leaseId` | the lease's opaque id; the machine reports it to its hub over the relay (CT-152; never in a check-in to an organization server, DEC-0128 UE-2) |
 | `sequence` | rises with every lease the hub issues one machine for one scope, window and period ([one lease per slot](#one-lease-per-slot)) |
 | `estate` | the estate whose record certifies the signing hub key |
 | `estateRevision` | the estate-record revision the hub followed; a machine that applies an earlier one refuses the lease until it has caught up |
-| `machine` | the device id of the one machine whose meter holds the lease (DEC-0031; `machines[].id` in the estate record) |
+| `machine` | the estate id of the one machine whose meter holds the lease (`machines[].id` in the estate record; never an organization enrollment's `device.id`, DEC-0128) |
 | `scope` | whose window: `estate` (L0), `project:<id>` (L1) or `grant:<id>#<revision>`; v4 leases only `estate`, and the field is kept so a later version needs no new type |
 | `window` | `day`, `week` or `month`: the spend policy's calendar windows in UTC, a week starting on Monday (DEC-0038) |
 | `period` | the window instance ([the window instance](#the-window-instance)) |
@@ -104,7 +104,8 @@ overrun is at most one call's error per meter (v4 Path 5 step 1).
 
 ## Reporting
 
-A meter reports each lease it holds in its check-in, `records.leases[]`: `{leaseId, expiresAt, spent}` (DEC-0053's
+A meter reports each lease it holds to its hub, `records.leases[]` (in a report over the relay, never in a check-in to an
+organization server, DEC-0128 UE-2; the report message is CT-152): `{leaseId, expiresAt, spent}` (DEC-0053's
 names; `spent` is this decision's, optional and additive). `spent` is an upper bound on what the meter spent in the
 lease's window instance: settled receipts plus open reservations, a decimal string.
 
@@ -122,8 +123,9 @@ counts what was spent. A machine's own earlier leases are what its new lease rep
 lease a machine is the window's limit less what every **other** machine holds; a shrunk share frees its difference only
 once the larger lease expires or is reported.
 
-A lease reaches its machine unchanged: an organization server hands it in the check-in response's `records.leases`,
-whose items are this schema; the relay carries one from the hub's machine as a message (DEC-0047). The transport adds
+A lease reaches its machine unchanged: the relay carries it from the hub's machine as a message (DEC-0047). An estate's
+lease never travels through an organization server once UE-2 is adopted (DEC-0128; the node adopts it after CT-152); a check-in response's `records.leases`, whose items
+are this schema, carries an organization's own leases once organization windows exist. The transport adds
 nothing and decides nothing.
 
 ## The verifier
@@ -176,14 +178,14 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
   (DEC-0107, [Reporting](#reporting)). v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
   how the hub sizes it within the remainder is its own.
 - **Project Observatory's meter** (CT-20) verifies each lease with `verifyWindowLease` before it spends against it,
-  holds one per slot, reserves only as `mayReserve` answers — the smaller of its own remainder and the lease's, and
-  nothing after expiry — and reports `records.leases[]` with `spent` in its check-in.
+  holds one per slot, reserves only as `mayReserve` answers (the smaller of its own remainder and the lease's, and
+  nothing after expiry), and reports `records.leases[]` with `spent` (to its hub over the relay, CT-152; never in a check-in to an organization server, DEC-0128 UE-2).
 - **An organization server** hands leases of organization windows in the check-in response (v4 Path 5); the scope
   `estate` is the only one v4 uses, and organization windows wait on `org-authority/1`.
 
 ## Privacy
 
-A lease names an estate, a machine by its device id, a window and an amount. It carries no person and no caller
+A lease names an estate, a machine by its estate id, a window and an amount. It carries no person and no caller
 identity (J10; v4 Path 5 step 3: per-member period totals come from lease returns inside the organization's own
 server, and the public contract stays without a person dimension). `spent` is a sum over a window instance on one
 machine.

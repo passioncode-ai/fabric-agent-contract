@@ -174,9 +174,15 @@ describe("ending a membership in the estate record (OM-5)", () => {
       ...record,
       organizations: (record.organizations as Json[]).filter((pin) => pin.org !== org),
       shareGrants: (record.shareGrants as Json[]).filter((grant) => grant.context !== org),
-      revocations: [...(record.revocations as Json[]), ...grants.map((grant) => ({ kind: "grant", ref: grant.meta.id, revokedAt: record.issuedAt }))],
+      revocations: [
+        ...(record.revocations as Json[]),
+        ...grants.map((grant) => ({ kind: "grant", ref: grant.meta.id, revokedAt: record.issuedAt })),
+        // DEC-0128: the context's hub keys go with the pin, each revoked (FAC-SEM-114).
+        ...(record.machines as Json[]).flatMap((machine) => ((machine.contextHubKeys ?? []) as Json[]).filter((entry) => entry.context === org).map((entry) => ({ kind: "hub-key", ref: entry.key.kid, revokedAt: record.issuedAt })))
+      ],
       machines: (record.machines as Json[]).map((machine) => ({
         ...machine,
+        ...(machine.contextHubKeys ? { contextHubKeys: (machine.contextHubKeys as Json[]).filter((entry) => entry.context !== org) } : {}),
         packages: (machine.packages as Json[]).filter((placement) => placement.context !== org),
         secrets: (machine.secrets as Json[]).filter((secret) => secret.context !== org)
       }))
@@ -187,5 +193,9 @@ describe("ending a membership in the estate record (OM-5)", () => {
     const half: Json = { ...record, revocations: ended.revocations };
     half.digest = estateRecordDigest(half);
     expect(codes("estate-record", half)).toEqual(["FAC-SEM-076", "FAC-SEM-111"]);
+    // Dropping the pin and leaving the context's hub key is refused: the key would name an organization the record no longer pins.
+    const keyLeft: Json = { ...ended, machines: record.machines, revocations: ended.revocations.filter((entry: Json) => entry.kind !== "hub-key") };
+    keyLeft.digest = estateRecordDigest(keyLeft);
+    expect(codes("estate-record", keyLeft)).toContain("FAC-SEM-073");
   });
 });

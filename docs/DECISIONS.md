@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0128` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0129` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -7623,6 +7623,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   or after: every machine of the person and the relay that holds the record, and the node ends an enrollment on the
   unpinning revision as measured (CT-137). Adoption: every organization server,
   Fabric and the products that read membership (CT-137).
+- **Annotated (2026-10-26):** DEC-0128 makes `organizationPin.iss` required, a narrowing of this unadopted member
+  (DEC-0119); the release that carries both lists it as a narrowing.
 - **Context:** the organization train's packet TP-00 (row N-1, step 1.1 of fabric-workspace
   `docs/reports/2026-10-25-organization-r1/README.md` at `d438e3dc`): Fabric cannot trust an organization server's
   membership, and a product cannot be granted one, without a document Fabric verifies. MD-9 path (a)
@@ -7689,3 +7691,55 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   decision), CT-37 (narrowed to `org-authority/1`'s member list, with CT-122).
 - **Source:** CT-137; the organization train's TP-00, N-1, step 1.1 and X-6; MD-9; R1-D12; board request `8e2d5099`
   (thread `8d115bed`); DEC-0031, DEC-0045, DEC-0063, DEC-0082, DEC-0085, DEC-0103.
+
+### DEC-0128: unlinkable memberships, an identity per enrollment and a key and issuer per context
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). `machines[].contextHubKeys` is additive; `iss`, required on DEC-0127's
+  `organizationPin`, narrows a member no reader has adopted (DEC-0119: the release notes list it as a narrowing); which Fabric writes only once every reader of the record is pinned at or after (as
+  DEC-0106, DEC-0107 and DEC-0127); new rules a sender runs on itself. Adoption: CT-122; a node adopts UE-2 only once the machines' report to the hub over
+  the relay exists (CT-152), since DL-15, the hub move and the window leases read those reports.
+- **Context:** the operator decided K-1 on 2026-10-15 (NET-2, DEC-0084): each organization enrollment of a machine gets
+  keys of its own, so two organizations cannot link the machine (CX-22). The scope brief
+  (`docs/evidence/specs/2026-10-24-ct122-unlinkable/brief.md`) listed twelve values two enrollments share today, and the
+  plan (`docs/evidence/plans/2026-10-26-ct122-org-authority.md`) mapped them; DEC-0127 left the check-in's estate records
+  as the recorded gap.
+- **Decision:**
+  1. **UE-1, an identity per enrollment.** A fresh opaque `device.id` (never the estate machine id), its own `#sig` and
+     `#kem` keys and kids, telemetry key, collector ids and counters; no hardware-unique id in its attestation (SHOULD
+     NOT). `FAC-SEM-148` on the node's local registry (kind `node-enrollments`), which the node never sends.
+  2. **UE-2, nothing of the estate's.** No estate record in a check-in's `records` and no estate document in its answer,
+     the sender's duty (`FAC-SEM-149`, kinds `check-in-outbound` and `check-in-response-outbound`, the response rule
+     refusing only documents that name an estate); a receiver ignores them and never refuses a check-in for them; they
+     travel on the estate's own channel, the relay (the machines' report message is CT-152).
+  3. **UE-3, independent schedules** with jitter (SHOULD).
+  4. **DL-14a, a key and an issuer per context.** `organizations[].iss` (`urn:fabric:context:<opaque>`, never the estate
+     id) and `machines[].contextHubKeys` `{context, key}`; an organization-context token is signed by that context's key
+     under that issuer with a per-context `sub`, published in a key set per context; a context key lives only on the machine
+     holding the personal hub key and is re-keyed with it on a hub move; `hubKeyCertified` and `verifyDelegation` read a context's keys only for
+     that context and only while it is pinned; a context key signs nothing of the estate's. `FAC-SEM-073`, `076`, `114`,
+     `134`, `147` and `081` read them; `hubMove` moves them; OM-5 drops and revokes them with the pin.
+  5. **Residual linkability, named,** at the brief's defaults for the operator's questions: low-entropy values, mode
+     `C`'s harness lines (DEC-0118), a shared `agentRef`, the relay operator's view of `org:<orgId>` until per-context
+     relay sessions; one `iss` per (estate, organization); a stolen machine prompts the person to ask each organization.
+- **Why:** CX-22 needs every value an organization sees to be one only it sees. Making UE-2 the sender's duty keeps
+  every node pinned before working while a node pinned after stops leaking; putting the context issuer on the pin keeps
+  one place that names an organization in the estate.
+- **Alternatives considered:** a receiver rule refusing check-ins with estate records (it would cut off every node
+  pinned before, and the members still serve the personal channel); a top-level `contextIssuers[]` (a second list keyed
+  by organization beside `organizations`); one hub key for every context (the kid would link them, the brief's row C).
+- **Compatibility:** a reader pinned before refuses `iss` and `contextHubKeys` (closed schema), and a reader pinned at
+  or after refuses a DEC-0127 pin without `iss` (a narrowing of an unadopted member, DEC-0119), so Fabric writes them
+  only once every reader is pinned at or after; the outbound rules are the sender's and refuse nothing a receiver gets.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/estate-record.schema.json`; `src/estate-record-rules.ts`, `src/hub-key-rules.ts`,
+  `src/delegation.ts`, `src/hub-move.ts`, `src/node-enrollments.ts` (new), `src/semantic-rules.ts`,
+  `src/semantic-kinds.ts`; `docs/specification/devices.md` (Unlinkable enrollments UE-1 to UE-3, the rules),
+  `contexts.md` (Linkability), `delegation.md` (DL-2's `iss` and `sub`, DL-14a, `FAC-SEM-081`), `estate-record.md`,
+  `ceremonies.md` (`FAC-SEM-114`, the hub move, Linkability), `window-lease.md` and `revocation-delta.md` (the estate's
+  records off the organization channel), `share-registration.md`, `machine-calls.md` (`FAC-SEM-134`), `membership.md` (OM-5, OM-7, `FAC-SEM-147`),
+  `activity.md` (the telemetry key), `node-summary.md`, `credentials.md` (the enrollment's `#kem`), `conformance.md`,
+  `CONTEXT.md`, `docs/ux/` (SCN-048); fixtures and `test/context-keys.test.ts`, `test/org-membership.test.ts`,
+  `vitest.config.ts`; backlog CT-122.
+- **Source:** CT-122; the brief and plan above; NET-2 (DEC-0084); the first organization server's request on board
+  thread `305f39c3`.

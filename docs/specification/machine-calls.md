@@ -143,7 +143,7 @@ calls only from a machine that has one.
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-134"></a>`FAC-SEM-134` | `estate-record` | a machine's `profile`, when present, is `full`, `member` or `view`; only a `full` machine carries a `hubKey`; a `view` machine has no placement and no secret placement, and no secret placement names it as `from` (DEC-0106) |
+| <a id="fac-sem-134"></a>`FAC-SEM-134` | `estate-record` | a machine's `profile`, when present, is `full`, `member` or `view`; only a `full` machine carries a `hubKey`; a `view` machine has no placement and no secret placement, and no secret placement names it as `from` (DEC-0106); only a `full` machine carries a context hub key (DEC-0128) |
 | <a id="fac-sem-135"></a>`FAC-SEM-135` | `relay-caller` | a node places the sender of a relay message as `relayCallerTier(applied, self, from, at, freshness, revocations)` answers (DEC-0106) |
 | <a id="fac-sem-136"></a>`FAC-SEM-136` | `machine-call` | a T1 call's verdict is `machineCallVerdict(caller, target, capability, effect)`'s (DEC-0106) |
 

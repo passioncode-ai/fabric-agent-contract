@@ -9,7 +9,7 @@ import { WINDOW_LEASE_FIELDS, signingStatement } from "./signing-challenges.js";
  * `window-lease/1` (DEC-0062): the estate's hub signs, once per machine, that machine's share of one instance of a
  * spending window — the most the machine's meter may spend in that window instance — valid for at most 24 hours. The
  * meter spends the smaller of its own remainder and the lease's, refuses beyond it, and at expiry reserves nothing more
- * in that window until a new lease arrives. It reports what it spent in its check-in; what it does not report counts
+ * in that window until a new lease arrives. It reports what it spent to its hub (over the relay, CT-152); what it does not report counts
  * as spent until it does.
  */
 export const WINDOW_LEASE_TYPE = "window-lease/1";
@@ -194,7 +194,7 @@ export type LeaseVerdict =
 export interface LeaseTrust {
   /** The meter's clock. */
   at: Date;
-  /** This machine's device id: a lease for any other machine is refused. */
+  /** This machine's estate id (estate-record machines[].id; never an organization enrollment's device.id, DEC-0128): a lease for any other machine is refused. */
   machine: string;
   /** The estate record this machine applies (verified by `verifyEstateRecord`): it certifies the hub's key. */
   estateRecord: JsonObject;
@@ -321,7 +321,7 @@ export function mayReserve(lease: unknown, request: ReserveRequest): ReserveVerd
 
 // ---- The hub -----------------------------------------------------------------------------------------------------
 
-/** A meter's report of one lease, as the hub received it: the check-in's `records.leases[]` entry and its time. */
+/** A meter's report of one lease, as the hub received it: the `records.leases[]` entry it reported and its time. */
 export interface LeaseReport {
   leaseId: string;
   /** Settled receipts plus open reservations in the window instance, an upper bound; absent, the lease is unreported. */
