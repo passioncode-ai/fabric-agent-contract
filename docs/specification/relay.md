@@ -327,7 +327,8 @@ whether an organization's relay answers it differently is part of CT-163.
   - **T1** is an enrolled machine of the recipient's **same owner** (DL-25), listed in the current record and not
     revoked: `relayCallerTier` places it, and `machineCallVerdict` judges its call by the two machines' profiles
     ([machine calls](machine-calls.md), DEC-0106). DL-26 applies.
-  - **T2** is anything else. That includes every member of an organization to every other, on its relay (OR-5), and a body signed by an outsider and forwarded by a T1 machine's session. DL-8 applies; a `fabric-agent-call/1` from a T2 sender is refused and not answered, since calls over the
+  - **T2** is anything else, except that on the estate's relay `relayCallerTier`'s `unknown-state` is a denial, not
+    T2, and its call is refused (DL-28, DEC-0106). That includes every member of an organization to every other, on its relay (OR-5), and a body signed by an outsider and forwarded by a T1 machine's session. DL-8 applies; a `fabric-agent-call/1` from a T2 sender is refused and not answered, since calls over the
     relay from outside the estate are not decided ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
 
 ## The secret envelope

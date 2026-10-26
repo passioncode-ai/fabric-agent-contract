@@ -326,6 +326,11 @@ describe("TRUST-TIERS — proof starts at the machine boundary (Fabric ADR-0144 
   const text = read("docs/specification/delegation.md");
   it("defines T0, T1 and T2 and pins the amendment", () => {
     for (const rule of ["DL-25", "DL-26"]) expect(text.match(new RegExp(`\\*\\*${rule} — `, "g")), rule).toHaveLength(1);
+    // DEC-0130's rules use a comma after the number, never an em dash.
+    for (const rule of ["DL-27", "DL-28", "DL-29"]) {
+      expect(text.match(new RegExp(`\\*\\*${rule}, `, "g")), rule).toHaveLength(1);
+      expect(text.match(new RegExp(`\\*\\*${rule} — `, "g")), rule).toBeNull();
+    }
     expect(text).toMatch(/\*\*T0\*\*/);
     expect(text).toMatch(/\*\*T1\*\*/);
     expect(text).toMatch(/\*\*T2\*\*/);
