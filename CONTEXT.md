@@ -374,7 +374,8 @@ call between machines over the relay that a profile does not allow is refused `p
 
 **Machine report**: What one machine of an estate tells its estate's hub machine (both of them during a hub move) over the relay (DEC-0132): the estate
 revision it applied, its heartbeat, its revocation-delta head and the window leases it holds with what it spent, by the
-check-in's own `records` names, sealed to the hub's `#kem` so the relay reads none of it. Never sent to an organization
+check-in's own `records` names, sealed to the hub's `#kem` so the relay reads none of it (on the hub's own machine,
+read from the node's `machine.report` over the local channel instead). Never sent to an organization
 server (DEC-0128 UE-2). Not a **Node summary**, which goes to an organization
 ([relay](docs/specification/relay.md#the-machines-report)).
 

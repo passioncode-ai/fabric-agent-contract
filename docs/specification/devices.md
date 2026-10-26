@@ -586,7 +586,7 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   (kind `check-in-outbound`), an organization server what it is about to answer (`check-in-response-outbound`). A
   receiver ignores the members and never refuses a check-in for them, so a node pinned before still checks in. They
   travel on the estate's own channel instead: the relay (DEC-0047), which carries the hub's heartbeats, delta pages and
-  leases unchanged and the machines' reports back to the hub, and the local channel on one machine. How a machine
+  leases unchanged and the machines' reports back to the hub, and the local channel on one machine (the hub's own machine's report, `machine.report`). How a machine
   reports `records` to its hub over the relay (the machines' report) is DEC-0132. The members stay in the schema for an
   organization's own records later; the response rule refuses only documents that name an estate.
 - **UE-3, independent schedules.** Each enrollment schedules its check-ins on its own, with jitter (SHOULD), so their

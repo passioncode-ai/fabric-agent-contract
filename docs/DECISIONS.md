@@ -7953,8 +7953,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      on its parent reaches the new hub, the hub move's step 6), after it applies a revision, a heartbeat or a delta
      page (at most once a minute), at or after each lease's expiry, and at least every 24 hours
      while it holds a lease or applies the estate's records. A report carries the whole state, is never answered, and
-     a lost one is replaced by the next. The hub machine's own node gives its hub the same report on the machine
-     (the local channel), so the hub's own leases and revision count like any machine's.
+     a lost one is replaced by the next. On the hub's own machine the hub calls the node's `machine.report` over the
+     local channel (`{report}`, written at the call), when it connects, before each division and at least daily, and
+     reads it with the same checks, so the hub machine's own leases and revision count like any machine's.
   3. **MR-3, how.** Sealed to the hub machine's `#kem` as `fabric-machine-report/1` `{type, kem, enc, ct}` inside a
      `fabric-relay-message/1` body: HPKE base mode, suite `[16, 1, 1]`, `info` the protocol name, the additional data
      the RFC 8785 bytes of `{type, from, to, msgId, kem}`, the plaintext at most 65 536 bytes.
@@ -7987,7 +7988,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `CONTEXT.md` (Machine report), `docs/DOCMAP.md`, `docs/specification/README.md`; fixtures;
   `test/machine-report.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`,
   `test/rule-tolerance.test.ts`, `test/protocol-revisions.test.ts`, `vitest.config.ts`, `docs/specification/versioning.md`,
-  `docs/specification/local-channel.md` (cited); backlog CT-152, CT-161.
+  `docs/specification/local-channel.md` (`machine.report`), `schemas/local-channel.schema.json`, `src/local-channel.ts`,
+  `test/local-channel.test.ts`; backlog CT-152, CT-161.
 - **Source:** CT-152 (filed by DEC-0128's seam reading); DEC-0047, DEC-0053, DEC-0062, DEC-0106, DEC-0128.
 
 ### DEC-0133: the draft exchange's shared vectors, the root's answer, and a role is no authority

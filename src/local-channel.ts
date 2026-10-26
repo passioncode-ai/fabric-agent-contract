@@ -5,14 +5,15 @@ import { negotiateRevision, parseRevision } from "./protocol-revisions.js";
 /**
  * The local channel to the node (DEC-0075, CON-OE-10 in its v4 edition): JSON-RPC 2.0 over a Unix socket or named pipe
  * whose peer is the same OS user. A peer of another user is refused before anything is read; the first call is
- * `channel.hello`, which negotiates the protocol revision (DEC-0067). The node serves `health` and `enroll.status`; it
+ * `channel.hello`, which negotiates the protocol revision (DEC-0067). The node serves `health`, `enroll.status` and
+ * `machine.report` (DEC-0132); it
  * calls `consent.prompt` on a client that declared `consent.ui`; other methods belong to their owners' decisions. There
  * is no `policy.decide`.
  */
 
 export const LOCAL_CHANNEL_PROTOCOL = "fabric-local-channel/0.1";
 /** Methods a client calls on the node. */
-export const NODE_METHODS: ReadonlySet<string> = new Set(["channel.hello", "health", "enroll.status"]);
+export const NODE_METHODS: ReadonlySet<string> = new Set(["channel.hello", "health", "enroll.status", "machine.report"]);
 /** Methods the node calls on a client, each needing the capability named. */
 export const CLIENT_METHODS: ReadonlyMap<string, string> = new Map([["consent.prompt", "consent.ui"]]);
 /** JSON-RPC error codes for the contract's codes (DEC-0075). */

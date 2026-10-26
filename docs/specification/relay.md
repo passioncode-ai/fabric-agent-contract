@@ -481,9 +481,13 @@ It sends one:
   records.
 
 A report is never answered. A lost one is replaced by the next, since each report carries the whole state, never a
-change. The hub machine's own node writes the same `machine-report/1` for its own hub at the same moments, with its own
-`at`, and gives it on the machine itself (the [local channel](local-channel.md), unsealed, never the relay); the hub
-holds it as that machine's newest report, so its own leases and revision count under MR-5 like any machine's.
+change. On the hub machine itself the hub reads its own node's report over the [local channel](local-channel.md),
+never the relay: it calls the node's `machine.report` (no params), which answers `{report}`, the node's whole state as
+a `machine-report/1` written at the call (its own `at`), or `null` while the node applies no estate records. The hub
+calls it when it connects, before each division and at least every 24 hours, and reads the answer as MR-4 reads an
+opened report: the schema, `FAC-SEM-152`, `machine` equal to its own machine id (`wrong-machine` otherwise) and `at`
+after the report it holds (`stale` otherwise); it holds it as that machine's newest report, so the hub machine's own
+leases and revision count under MR-5 like any machine's.
 
 **MR-3, how it travels.** The report is the inner `payload` of a relay message body (`fabric-relay-message/1`), sealed
 to the hub machine's `#kem`, as the revision that certifies that hub machine lists it, as `fabric-machine-report/1` `{type, kem, enc, ct}`: HPKE base mode, suite `[16, 1, 1]`

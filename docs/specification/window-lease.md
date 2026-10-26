@@ -2,7 +2,8 @@
 
 DEC-0062 · rule codes `FAC-SEM-089`…`FAC-SEM-091` · schema
 [`window-lease`](../../schemas/window-lease.schema.json) and `records.leases` in the
-[`device-check-in`](../../schemas/device-check-in.schema.json) · code
+[`device-check-in`](../../schemas/device-check-in.schema.json) and the
+[`machine-report`](../../schemas/machine-report.schema.json) (DEC-0132) · code
 [`src/window-lease.ts`](../../src/window-lease.ts) · vectors
 [`fixtures/vectors/window-lease.json`](../../fixtures/vectors/window-lease.json)
 
@@ -105,8 +106,8 @@ overrun is at most one call's error per meter (v4 Path 5 step 1).
 ## Reporting
 
 A meter reports each lease it holds to its hub, `records.leases[]` (in the [machines' report](relay.md#the-machines-report) over the
-relay, DEC-0132, or on the hub's own machine through the local channel; never in a check-in to an organization server,
-DEC-0128 UE-2): `{leaseId, expiresAt, spent}` (DEC-0053's
+relay, DEC-0132, or on the hub's own machine through the local channel's `machine.report`; never in a check-in to an
+organization server, DEC-0128 UE-2): `{leaseId, expiresAt, spent}` (DEC-0053's
 names; `spent` is this decision's, optional and additive). `spent` is an upper bound on what the meter spent in the
 lease's window instance: settled receipts plus open reservations, a decimal string.
 
@@ -182,7 +183,7 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
   how the hub sizes it within the remainder is its own.
 - **Project Observatory's meter** (CT-20) verifies each lease with `verifyWindowLease` before it spends against it,
   holds one per slot, reserves only as `mayReserve` answers (the smaller of its own remainder and the lease's, and
-  nothing after expiry), and reports `records.leases[]` with `spent` (to its hub over the relay, DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2).
+  nothing after expiry), and reports `records.leases[]` with `spent` (to its hub over the relay, or through `machine.report` on the hub's own machine, DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2).
 - **An organization server** hands leases of organization windows in the check-in response (v4 Path 5); the scope
   `estate` is the only one v4 uses, and organization windows wait on a decision beyond the member list `org-authority/1` (DEC-0129).
 
@@ -198,8 +199,8 @@ machine.
 - v4's static split of each estate window per machine in the estate record (§6 Path 5): no field of `estate-record/1`
   carries it. The hub's leases are the split; past a lease's expiry with the hub asleep, a meter reserves nothing in
   that window, as the meter's owner agreed, instead of falling back to a passkey-signed share.
-- How a lease reaches a machine from an estate's hub, and how the hub receives a meter's report, beyond the check-in's
-  fields and the relay's message carriage (DEC-0047).
+- How a lease reaches a machine from an estate's hub, beyond the check-in's fields and the relay's message carriage
+  (DEC-0047). The meter's report is DEC-0132's ([the machines' report](relay.md#the-machines-report)).
 - Where an estate's window limits are signed (`limits/1`, [signing challenges](conformance.md#signing-challenges)):
   until a document carries them, a meter's `remainderUsd` is its configured limit.
 - Organization windows, member allowances and their leases (beyond DEC-0129's member list); `ES256` hub keys (Fabric's D2).

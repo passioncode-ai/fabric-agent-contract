@@ -519,6 +519,26 @@
       "additionalProperties": false,
       "description": "enroll.status result: whether this machine is enrolled, and in which organization."
     },
+    "machineReport": {
+      "type": "object",
+      "required": [
+        "report"
+      ],
+      "properties": {
+        "report": {
+          "oneOf": [
+            {
+              "$ref": "machine-report.schema.json"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "description": "machine.report result (DEC-0132 MR-2): the node's whole state as a machine-report/1 written at the call, its own `at`, or null while the node applies no estate records. The hub on the same machine reads it in place of a relayed report."
+    },
     "consentPrompt": {
       "type": "object",
       "required": [

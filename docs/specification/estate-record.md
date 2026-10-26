@@ -303,8 +303,8 @@ records no use. A credential's id is an opaque handle.
   and its administrators' signing passkeys (DEC-0127, DEC-0129), such as the organization network's hub key (Fabric
   ADR-0178 point 1), stay open.
 - A fork: two revisions with one number from one parent, signed by two listed passkeys. A machine accepts only the one
-  whose `parent` is the digest it holds, and its check-in may report that revision's `digest` beside the number
-  (`records.estateRecord.digest`, DEC-0056), so a receiver tells the two apart; what a receiver does on seeing a fork is
+  whose `parent` is the digest it holds, and its report to its hub may carry that revision's `digest` beside the number
+  (`records.estateRecord.digest`, DEC-0056; the machines' report, DEC-0132), so a receiver tells the two apart; what a receiver does on seeing a fork is
   not decided here.
 - The ceiling within which a later version of a placed agent installs without a new revision (v4 Path 2 places an agent
   by its `agentRef`, publisher key and ceiling): until Fabric's ADR-0138 amendment (D2b) and the listing contract

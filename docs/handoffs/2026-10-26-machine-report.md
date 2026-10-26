@@ -39,6 +39,10 @@ move's step 6 and the window lease's reporting.
 - Round 4 (head `956ce65a`): unit and seam pass; product fail (the hub machine's own leases had no way to reach its
   hub, so step 7 could not finish). Fixed: the hub's own node gives the same report locally. Non-blocking findings of
   every round are CT-161.
+- Round 5 (head `bdcb3111`): unit pass; seam and product fail (the local channel had no method for the hub's own
+  report; CT-152's status read `unknown` in the workspace collector; window-lease.md still listed the report as not
+  decided). Fixed: `machine.report` on the local channel, read with the same checks; CT-152 "open, adoption"; the
+  window-lease bullet narrowed.
 
 ## Decisions
 
