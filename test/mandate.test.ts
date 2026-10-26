@@ -110,14 +110,17 @@ describe("a relayed action under a mandate (MD-3, DEC-0121 AP-2)", () => {
 
 describe("MD-2a, no hand-over covers a call the scope in force does not (DEC-0136)", () => {
   // Every shape of the two naming lists, a projects list or none, and three effect ceilings, against every call shape.
-  const lists = [undefined, ["a"], ["a", "b"]];
+  // Capability names follow the schema's capabilityName (two characters at least); a name it refuses would make every
+  // scope with a capabilities list malformed, and the property would never see that half of the rule.
+  const capabilityLists = [undefined, ["x.a"], ["x.a", "x.b"]];
+  const actionLists = [undefined, ["a"], ["a", "b"]];
   const effects = [["draft"], ["charge"], ["charge", "publish"]];
   const scopes: MandateScope[] = [];
-  for (const capabilities of lists) for (const actions of lists) for (const projects of [undefined, ["p"]]) for (const fx of effects) {
+  for (const capabilities of capabilityLists) for (const actions of actionLists) for (const projects of [undefined, ["p"]]) for (const fx of effects) {
     scopes.push({ ...(capabilities ? { capabilities } : {}), ...(actions ? { actions } : {}), ...(projects ? { projects } : {}), effects: fx });
   }
   const calls: MandateCall[] = [];
-  for (const capability of ["a", "b", "c"]) for (const action of [undefined, "a", "b", "c"]) for (const effect of ["none", "draft", "charge", "publish"]) for (const project of [undefined, "p", "q"]) {
+  for (const capability of ["x.a", "x.b", "x.c"]) for (const action of [undefined, "a", "b", "c"]) for (const effect of ["none", "draft", "charge", "publish"]) for (const project of [undefined, "p", "q"]) {
     calls.push({ capability, ...(action ? { action } : {}), effect, ...(project ? { project } : {}) });
   }
   const covered = (scope: MandateScope, call: MandateCall) => {
@@ -133,5 +136,8 @@ describe("MD-2a, no hand-over covers a call the scope in force does not (DEC-013
       for (const call of calls) if (covered(child, call) && !covered(parent, call)) leaks.push(JSON.stringify({ parent, child, call }));
     }
     expect(leaks.slice(0, 3)).toEqual([]);
+    // The property is not vacuous: a scope that names capabilities covers some call, and so does one that names actions.
+    expect(calls.some((call) => covered({ capabilities: ["x.a"], effects: ["charge"] }, call))).toBe(true);
+    expect(calls.some((call) => covered({ capabilities: ["x.a"], actions: ["a"], effects: ["charge"] }, call))).toBe(true);
   });
 });

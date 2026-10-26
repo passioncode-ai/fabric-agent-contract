@@ -8066,6 +8066,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `src/mandate.ts` (`scopeWithin`, the finding's text); `schemas/mandate.schema.json`
   (descriptions); `docs/specification/conformance.md` (the leading agent's row); `tools/vectors/mandate.ts`,
   `fixtures/vectors/mandate.json` (`handOn`, one more `cases` vector); `test/mandate.test.ts` (with a property test:
-  no hand-over `scopeWithin` accepts covers a call the scope in force does not, over every list shape);
+  no hand-over `scopeWithin` accepts covers a call the scope in force does not, over every list shape, with
+  capability names the schema accepts; it fails under the old rule and under each of three weaker forms of MD-2a);
   `docs/specification/delegation.md` (MD-1, MD-2a, `FAC-SEM-144`); DEC-0125 annotated; backlog CT-149.
 - **Source:** CT-149's readings (round 2 of the hand-over vectors, 2026-10-26).
