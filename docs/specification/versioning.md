@@ -105,7 +105,8 @@ on different releases still talk:
   there and widens each module's own constant, which a test keeps at the newest revision (`RELAY_PROTOCOL`,
   `DELTA_TYPE`, `HEARTBEAT_TYPE`, `ENVELOPE_TYPE`, `ESTATE_RECORD_SCHEMA`, `HANDOFF_FORMAT`, `SETTINGS_BACKUP_FORMAT`,
   `WINDOW_LEASE_TYPE`, `COMMS_PROTOCOL`, `AGENT_CALL_TYPE` for `fabric-agent-call/1`, DEC-0106;
-  `CREDENTIAL_ENVELOPE_TYPE` for `fabric-credential-envelope/1`, DEC-0111).
+  `CREDENTIAL_ENVELOPE_TYPE` for `fabric-credential-envelope/1`, DEC-0111; `MACHINE_REPORT_TYPE` and
+  `MACHINE_REPORT_MESSAGE_TYPE` for `fabric-machine-report/1` and `machine-report/1`, DEC-0132).
 - **N and N−1.** A receiver accepts the newest revision of a protocol it implements (N) and the one before it in the
   register (N−1), and no other (`acceptedRevisions`). A protocol with one published revision has no N−1.
 - **`protocols`.** A party says which revisions it reads in a list of at most N and N−1 per protocol

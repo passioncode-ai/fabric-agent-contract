@@ -20,7 +20,7 @@ move's step 6 and the window lease's reporting.
 
 ## Checks actually run
 
-- `pnpm run check`: 106 files, 9 245 tests, UX lint, docs, markdownlint 0 errors, privacy 0; `pnpm vectors:check`: 24
+- `pnpm run check` on the head after each round's fixes: 106 files, 9 245 tests, UX lint, docs, markdownlint 0 errors, privacy 0; `pnpm vectors:check`: 24
   files match.
 - Blind readings, round 1 (head `14d59122`): unit pass; seam and product fail on two shared blockers: MR-2 sent a
   machine left on its parent after a hub move to the old hub only, so the new hub never saw the report step 6 waits
@@ -33,6 +33,9 @@ move's step 6 and the window lease's reporting.
   while a machine that refused the move's revision still reports to the new hub). Fixed: a report names every held
   lease and the newest expired lease of each slot until its window instance ends (whole state); "after the
   revocation" is the newest report's `estateRecord.revision` at or above the revoking revision, everywhere.
+- Round 3 (head `7f0a4661`): unit and seam pass; product fail ("a machine that refused it never qualifies" against
+  step 6's catch-up revision; FAC-SEM-090's row still said "received"; the spec index called the report adopted).
+  Fixed: such a machine qualifies once it applies a later revision; the row says written; the index says owed.
 
 ## Decisions
 

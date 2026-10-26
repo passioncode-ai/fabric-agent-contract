@@ -167,7 +167,7 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-089"></a>`FAC-SEM-089` | `window-lease` | a lease's period is an instance of its window that exists, its times are strict RFC 3339, its life is positive and at most 24 hours and ends no later than its window instance, and its amount is a decimal string |
-| <a id="fac-sem-090"></a>`FAC-SEM-090` | `window-lease-division` | the hub's division of one window instance (`{limitUsd, leases, reports}`): every lease of one estate, scope, window and period, each `leaseId` once, a machine's sequences rising with issue time, and no lease above what `windowRemainder` left its machine when it was issued, counting the leases issued and the reports received before it |
+| <a id="fac-sem-090"></a>`FAC-SEM-090` | `window-lease-division` | the hub's division of one window instance (`{limitUsd, leases, reports}`): every lease of one estate, scope, window and period, each `leaseId` once, a machine's sequences rising with issue time, and no lease above what `windowRemainder` left its machine when it was issued, counting the leases issued and the reports written before it (their `at`, DEC-0132 MR-5) |
 | <a id="fac-sem-091"></a>`FAC-SEM-091` | `lease-reservation` | a meter's decision (`{lease, request, decision}`, `reserve` or `refuse`) is the one `mayReserve` gives |
 
 ## Who adopts it
@@ -177,7 +177,7 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
   inside the window instance, sequences rising per slot; it counts an expired, unreported lease as spent and credits
   a late report at its next division. After a hub move it issues no lease of a window instance the old hub divided
   until that instance ends or every machine holding one of the old hub's leases has reported it after the revocation
-  (its newest report's `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it never qualifies) (DEC-0107, [Reporting](#reporting)). v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
+  (its newest report's `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it) (DEC-0107, [Reporting](#reporting)). v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
   how the hub sizes it within the remainder is its own.
 - **Project Observatory's meter** (CT-20) verifies each lease with `verifyWindowLease` before it spends against it,
   holds one per slot, reserves only as `mayReserve` answers (the smaller of its own remainder and the lease's, and

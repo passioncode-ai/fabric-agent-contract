@@ -14,7 +14,7 @@ The reference code is in five files:
 - [`src/relay-vectors.ts`](../../src/relay-vectors.ts): the runner of the shared vectors (see [Shared vectors](#shared-vectors));
 - [`src/machine-report.ts`](../../src/machine-report.ts): the machines' report to their hub (DEC-0132).
 
-Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`, `p256.json`).
+Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`, `p256.json`, `machine-report.json`).
 
 ## Roles
 
@@ -498,7 +498,8 @@ hub places the sender with `relayCallerTier`; a sender that is not T1 is ignored
 (another `kem`), `cannot-open` (HPKE fails, another body's `from`, `to` or `msgId` included), `malformed` (a plaintext
 that is not a report in its own RFC 8785 form, or that the schema refuses), `wrong-machine` (the report names another
 machine than the one `relayCallerTier` named) and `stale` (its `at` is not after the report the hub holds for that
-machine). The hub keeps, per machine, the newest report it accepted.
+machine). The hub keeps, per machine, the newest report it accepted. A machine writes `at` from its clock at the moment
+it seals the report, never after the body's signed `iat`, so the body's 60-second bound on `iat` bounds `at` too.
 
 **MR-5, what the hub reads in it.** The hub reads everything from the newest report it holds per machine. A machine has applied a revision when its newest report's `estateRecord.revision` is
 that revision's or above (and, when the report carries `digest` for that same revision, the digest is that revision's).
