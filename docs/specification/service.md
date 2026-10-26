@@ -196,7 +196,7 @@ The smallest answer to `GET /.well-known/fabric-service`, for the descriptor abo
 | `process` | yes | the live process: `pid` and `startedAt` |
 | `status` | yes | `starting`, `ready`, `degraded` or `stopping` |
 | `degraded` | yes | the sources that do not work now; an empty list asserts full health |
-| `surfaces` | yes | at least `events`; `dashboard`, `mcp` and `usage` when the service has them |
+| `surfaces` | yes | at least `events`; `dashboard`, `mcp`, `usage` and `a2a` when the service has them |
 
 `GET /.well-known/fabric-service` MUST answer without authentication, from memory, in
 under 100 ms, for a local placement. Host and Origin checks (below) still apply. A remote
@@ -241,6 +241,8 @@ placement requires the token here too ([Remote placement](#remote-placement)).
 - `surfaces.operatorChannel` MAY name the path of the service's operator-channel status, which
   requires the service token ([operator channel](operator-channel.md) OC-9, DEC-0034). The
   channel's state never changes the service's `status` or `degraded` list.
+- `surfaces.a2a` MAY name where a service that answers A2A peers serves its Agent Card: the card's `path` on the
+  service origin and the A2A `protocolVersion`, `1.0` ([A2A Agent Card](#a2a-agent-card), DEC-0122).
 - `configuration` MAY name what the operator can configure for this agent (`slots`: `runner`, `model`) and the
   profiles that apply now (`resolved`), read-only: a change is made in Fabric and reaches the agent through its
   binding ([runners](runners.md#what-an-agent-declares), DEC-0046).
@@ -809,7 +811,7 @@ supervisor, rather than as a stdio server each session starts (LC-19, [profiles]
 |---|---|
 | Another agent on the same machine | MCP `2026-07-28`, `streamable-http`, at `surfaces.mcp.path` on the service origin, token in the declared header — unless `surfaces.mcp.auth` is `own` or `delegation` ([below](#mcp-credentials)); an agent of the estate presents a delegation token ([delegation](delegation.md), DEC-0039) |
 | The operator, a script | the service's CLI, delegating start, stop and restart to the supervisor |
-| A remote agent | A2A `1.0` over HTTPS, or MCP behind an authenticated gateway |
+| A remote agent | A2A `1.0` over HTTPS, found through its [Agent Card](#a2a-agent-card), or MCP behind an authenticated gateway |
 | The dashboard page | same-origin requests with the session cookie and the custom request header; its layout and appearance inside a host follow [`fabric-dashboard/0.1`](embedded-dashboard.md) (DEC-0036) |
 
 <a id="mcp-credentials"></a>
@@ -839,6 +841,46 @@ descriptor's token. The descriptor's token stays the host's: once a caller can m
 token, it never presents a service's own descriptor token to call that service's capabilities
 ([delegation](delegation.md) DL-12). A host creating a sign-in for the dashboard it shows
 (`POST /fabric/v1/login-code`) is the host's operation and keeps using the descriptor's token.
+
+<a id="a2a-agent-card"></a>
+
+### A2A Agent Card (DEC-0122)
+
+A service that answers A2A peers ([A2A peer profile](profiles.md#a2a-peer-profile), DEC-0002) serves an Agent Card
+as A2A `1.0` defines it and names it in its well-known document, so a host and a peer find it without probing:
+
+```json
+"surfaces": {
+  "events": { "path": "/fabric/v1/events" },
+  "a2a": { "path": "/.well-known/agent-card.json", "protocolVersion": "1.0" }
+}
+```
+
+- `surfaces.a2a.path` is the public card's path on the service origin, normally `/.well-known/agent-card.json`
+  (A2A 1.0 §8.2). `protocolVersion` is `1.0`, the version every entry of the card's `supportedInterfaces` exposes
+  (A2A 1.0 §4.4.6). The card, not this document, names its interfaces, bindings and security schemes;
+  `surfaces.a2a` only says where it is.
+- On a local placement the public card MUST answer without authentication, as the well-known document does, and the
+  Host and Origin checks still apply; its interface URLs are on the service origin (`http://127.0.0.1:<port>`), whose
+  trust anchor is loopback ([Remote placement](#remote-placement)). On a remote placement it MAY answer without the
+  token, since a peer that holds no credential yet discovers the service through it. On either placement the public
+  card carries no secret and none of the well-known document's members about the running process (build, pid,
+  status, tiles, the degraded list), which are why the remote well-known route takes the token (DEC-0109). A
+  manifest's `a2a` profile, which admits a peer from outside the machine, keeps its `https://` `agentCardUrl`.
+- A call on the card's interfaces is authenticated as a call on the MCP surface is: the descriptor's token unless
+  `surfaces.mcp.auth` names `own` or `delegation`, and the estate's delegation tokens when the service declares
+  `auth.delegation` ([MCP credentials](#mcp-credentials), DEC-0039). The card's `securitySchemes` name that
+  credential. An A2A interface MUST NOT accept a credential the MCP surface refuses, so it is never a way around it.
+- An authenticated extended card (`capabilities.extendedAgentCard: true`, fetched with `GetExtendedAgentCard` or REST
+  `GET /extendedAgentCard`, A2A 1.0 §4.4.3, §5.3) MUST require that same credential on every placement.
+- An extension the card declares for a Fabric fact, such as the service's limits or its load (DEC-0104), MUST carry
+  `required: false` (A2A 1.0 §4.4.4), so a peer that does not know it still calls; a required extension the peer did
+  not declare fails its call with `ExtensionSupportRequiredError` (A2A 1.0 §3.3.4). Such an extension names no person,
+  caller or prompt, as the load report does not, and the load report stays what a host reads.
+- The skill ids the service's manifest names in its `a2a` profile (`skillIds`) are skills of this card; the manifest
+  remains the authority on capabilities, as it is for `surfaces.mcp.capabilities`.
+- An `ai-catalog.json` entry (MCP's SEP-2127) is not part of `fabric-service/0.1`: it is MCP-side discovery, and the
+  contract takes it when an MCP revision it pins (`2026-07-28` today, [sources](../evidence/sources.md)) carries it.
 
 ## Actions
 
