@@ -105,7 +105,8 @@ overrun is at most one call's error per meter (v4 Path 5 step 1).
 
 ## Reporting
 
-A meter reports each lease it holds to its hub, `records.leases[]` (in the [machines' report](relay.md#the-machines-report) over the
+A meter reports each lease it holds, and the newest expired lease of each slot until its window instance ends (MR-1),
+to its hub, `records.leases[]` (in the [machines' report](relay.md#the-machines-report) over the
 relay, DEC-0132, or on the hub's own machine through the local channel's `machine.report`; never in a check-in to an
 organization server, DEC-0128 UE-2): `{leaseId, expiresAt, spent}` (DEC-0053's
 names; `spent` is this decision's, optional and additive). `spent` is an upper bound on what the meter spent in the

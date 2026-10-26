@@ -7938,7 +7938,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-26
 - **Status:** Accepted (2026-10-26). Additive: two new schemas, a rule (`FAC-SEM-152`), reference functions and
   vectors; nothing an existing reader validates changes. Adoption: Fabric's nodes and Project Observatory's node send
-  reports and Fabric's hub reads them (CT-152).
+  reports and Fabric's hub reads them; on the hub's machine the node serves the local channel's `machine.report` and
+  Fabric's hub calls it (CT-152). A node pinned before DEC-0132 answers `machine.report` with `unknown-method`, and its
+  leases then count at their whole amounts until it reports.
 - **Context:** DEC-0128 UE-2 keeps the estate's records (the applied revision, the heartbeat, the delta head, the
   leases with `spent`) off every check-in to an organization server, and left the message that carries them to the hub
   open (CT-152). Three readers wait on it: the hub's key rotation (DL-15), the hub move's step 6 and the window lease's

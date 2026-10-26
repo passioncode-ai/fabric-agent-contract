@@ -21,7 +21,7 @@ move's step 6 and the window lease's reporting.
 ## Checks actually run
 
 - `pnpm run check` on the head after each round's fixes: 106 files, 9 245 tests, UX lint, docs, markdownlint 0 errors, privacy 0; `pnpm vectors:check`: 24
-  files match.
+  files match before DEC-0133's merge, 25 after.
 - Blind readings, round 1 (head `14d59122`): unit pass; seam and product fail on two shared blockers: MR-2 sent a
   machine left on its parent after a hub move to the old hub only, so the new hub never saw the report step 6 waits
   for; and the window lease still timed a final `spent` by receipt while MR-5 used the report's `at`. Product also
@@ -43,6 +43,8 @@ move's step 6 and the window lease's reporting.
   report; CT-152's status read `unknown` in the workspace collector; window-lease.md still listed the report as not
   decided). Fixed: `machine.report` on the local channel, read with the same checks; CT-152 "open, adoption"; the
   window-lease bullet narrowed.
+- Round 6 (head `26119b4e`): unit and seam pass; product fail (`machine.report` named as owed nowhere). Fixed: the
+  spec index, CT-152 and DEC-0132's adoption line name it and its two adopters.
 
 ## Decisions
 
@@ -52,7 +54,7 @@ move's step 6 and the window lease's reporting.
 
 ## Open
 
-- Adoption by Fabric's nodes and hub and Project Observatory's node (CT-152).
+- Adoption by Fabric's nodes and hub and Project Observatory's node, `machine.report` included (CT-152).
 
 ## Next task
 
