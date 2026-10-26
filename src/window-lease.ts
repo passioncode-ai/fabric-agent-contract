@@ -321,7 +321,7 @@ export function mayReserve(lease: unknown, request: ReserveRequest): ReserveVerd
 
 // ---- The hub -----------------------------------------------------------------------------------------------------
 
-/** A meter's report of one lease, as the hub received it: the `records.leases[]` entry it reported and its time. */
+/** A meter's report of one lease: the `records.leases[]` entry it reported and the report's time (DEC-0132 MR-5). */
 export interface LeaseReport {
   leaseId: string;
   /** Settled receipts plus open reservations in the window instance, an upper bound; absent, the lease is unreported. */
@@ -342,7 +342,7 @@ export interface WindowLedger {
   machine: string;
   /** Every lease the hub issued for this window instance (one estate, scope, window and period). */
   leases: readonly unknown[];
-  /** The reports received. */
+  /** The reports the hub accepted, each at its report's `at`. */
   reports: readonly LeaseReport[];
 }
 
@@ -350,7 +350,7 @@ export type RemainderVerdict = { ok: true; remainderUsd: string; heldUsd: string
 
 /**
  * What one machine holds of a window instance, at `at`: the most it may have spent. For each of its leases, the amount
- * while the lease is valid (it may still spend it); after expiry, the `spent` of a report received at or after that
+ * while the lease is valid (it may still spend it); after expiry, the `spent` of a report written (its `at`) at or after that
  * expiry under this lease or a later one of the machine (spent counts the whole window instance), else the amount —
  * an expired lease nobody reported counts as spent. A late report lowers the claim at the next division: that is its
  * refund.
@@ -418,7 +418,7 @@ function leaseDocument(value: JsonObject, flag: Flag): void {
  * FAC-SEM-090: the hub's division of one window instance (`{limitUsd, leases, reports}`) — every lease is of that one
  * instance, each `leaseId` once, a machine's sequences rise with its leases' issue times, and no lease exceeded what
  * `windowRemainder` allowed its machine when it was issued, counting the leases issued before it (at one instant, the
- * ones listed before it) and the reports received before it.
+ * ones listed before it) and the reports written before it.
  */
 function division(value: JsonObject): Finding[] {
   const findings: Finding[] = [];

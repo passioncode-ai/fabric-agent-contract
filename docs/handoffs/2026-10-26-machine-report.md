@@ -28,6 +28,11 @@ move's step 6 and the window lease's reporting.
   found MR-5's 24-hour rule taking back a credited refund. Fixed: MR-2 reports to every hub machine of the applied
   revision and of a newer refused one; every text and `LeaseReport.receivedAt` take the report's `at`; the 24-hour
   rule is gone.
+- Round 2 (head `925587c4`): unit pass; product fail (a report named an expired lease once while the hub keeps only
+  the newest report, so a final `spent` could be lost); seam fail (a report "after the revocation" judged by time,
+  while a machine that refused the move's revision still reports to the new hub). Fixed: a report names every held
+  lease and the newest expired lease of each slot until its window instance ends (whole state); "after the
+  revocation" is the newest report's `estateRecord.revision` at or above the revoking revision, everywhere.
 
 ## Decisions
 

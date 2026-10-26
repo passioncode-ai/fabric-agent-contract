@@ -7945,12 +7945,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reporting (DEC-0062), and the schema descriptions already name the check-in's `records` members.
 - **Decision:**
   1. **MR-1, the report** `machine-report/1` is `{type, machine, at, records}`; `records` reuses the check-in's
-     `estateRecord` (required), `heartbeat`, `revocationDelta` and `leases` by name and shape; each lease once
-     (`FAC-SEM-152`).
+     `estateRecord` (required), `heartbeat`, `revocationDelta` and `leases` by name and shape. `leases` names every
+     lease the machine holds and the newest expired lease of each slot whose window instance has not ended, each with
+     its latest `spent`, so a report is the machine's whole state; each lease once (`FAC-SEM-152`).
   2. **MR-2, to whom and when.** A machine reports to every other machine whose `hubKey` the revision it applied
      certifies (both, during a planned move) or a newer revision it verified but refused certifies (so a machine left
      on its parent reaches the new hub, the hub move's step 6), after it applies a revision, a heartbeat or a delta
-     page (at most once a minute), at or after each lease's expiry with its final `spent`, and at least every 24 hours
+     page (at most once a minute), at or after each lease's expiry, and at least every 24 hours
      while it holds a lease or applies the estate's records. A report carries the whole state, is never answered, and
      a lost one is replaced by the next.
   3. **MR-3, how.** Sealed to the hub machine's `#kem` as `fabric-machine-report/1` `{type, kem, enc, ct}` inside a
@@ -7958,10 +7959,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the RFC 8785 bytes of `{type, from, to, msgId, kem}`, the plaintext at most 65 536 bytes.
   4. **MR-4, reading.** The hub ignores a sender `relayCallerTier` does not place in T1, and reads a report only as
      `openMachineReport` does: `malformed`, `wrong-recipient`, `cannot-open`, `malformed`, `wrong-machine` (the report
-     names another machine than the sender), `stale` (not after the one held). It keeps the newest per machine.
+     names another machine than the sender), `stale` (not after the one held). It keeps the newest per machine and reads
+     everything from it.
   5. **MR-5, what it means.** A machine applied a revision when its newest report's `estateRecord.revision` is at or
      above it; a lease's final `spent` is in a report whose own `at` is at or after its `expiresAt`, never one judged
-     by its delivery, and the window lease's reporting and `windowRemainder` take a report's `at` as its time.
+     by its delivery, and the window lease's reporting and `windowRemainder` take a report's `at` as its time; a report
+     after a hub move's revocation is one whose `estateRecord.revision` is at or above the revoking revision.
 - **Why:** the relay is the estate's own carrier (DEC-0047) and already delivers to a sleeping hub; sealing keeps what a
   machine spent away from the relay's operator, as a machine call is (DEC-0106). Whole-state reports make loss and
   reordering harmless with one rule (`stale`), and reusing the check-in's member names keeps every existing reference

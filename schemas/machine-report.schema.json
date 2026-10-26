@@ -39,7 +39,7 @@
         },
         "leases": {
           "$ref": "device-check-in.schema.json#/$defs/checkIn/properties/records/properties/leases",
-          "description": "Every window lease the machine holds, and each one it held that expired since its last report (MR-2), with spent (DEC-0062's reporting); empty when it holds none."
+          "description": "Every window lease the machine holds, and the newest expired lease of each slot whose window instance has not ended, each with its latest spent (MR-1, DEC-0062's reporting); a spent covers the whole instance, so later reports keep naming a lease until its instance ends and the newest report alone carries the machine's whole state. Empty when it holds none."
         }
       },
       "additionalProperties": false,

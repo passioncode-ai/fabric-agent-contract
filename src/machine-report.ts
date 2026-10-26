@@ -22,7 +22,7 @@ export const MACHINE_REPORT_TYPE = "fabric-machine-report/1";
 export const MACHINE_REPORT_MESSAGE_TYPE = "machine-report/1";
 /** The plaintext's largest RFC 8785 form: 64 leases fit in a twentieth of it. */
 export const MAX_MACHINE_REPORT_BYTES = 65_536;
-/** A machine reports at least this often while it holds a lease or runs a hub's revision (MR-2). */
+/** A machine reports at least this often while it holds a lease or applies the estate's records (MR-2). */
 export const MACHINE_REPORT_INTERVAL_SECONDS = 86_400;
 export const MACHINE_REPORT_SEAL_REFUSALS = ["malformed", "bad-key", "too-large"] as const;
 export const MACHINE_REPORT_REFUSALS = ["malformed", "wrong-recipient", "cannot-open", "wrong-machine", "stale"] as const;

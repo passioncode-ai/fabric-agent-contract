@@ -458,9 +458,11 @@ window lease's [reporting](window-lease.md#reporting).
 **MR-1, the report.** `machine-report/1` is `{type, machine, at, records}`: `machine` the reporting machine's id in the
 estate record, `at` when it wrote the report, and `records` the check-in's members by the same names and shapes
 (DEC-0053, DEC-0056, DEC-0062): `estateRecord` (`revision`, optionally `digest`), `heartbeat` (`sequence`, `at`),
-`revocationDelta` (`sequence`, `sha256`) and `leases` (`[{leaseId, expiresAt, spent}]`, `spent` optional as in the
-check-in, carried by the report at a lease's expiry). `estateRecord` is required;
-each lease is named once (`FAC-SEM-152`).
+`revocationDelta` (`sequence`, `sha256`) and `leases` (`[{leaseId, expiresAt, spent}]`): every lease the machine holds,
+and the newest expired lease of each slot whose window instance has not ended, each with its latest `spent` (optional
+as in the check-in; a `spent` covers the whole instance, so the newest lease of a slot speaks for its earlier ones,
+[reporting](window-lease.md#reporting)). `estateRecord` is required; each lease is named once (`FAC-SEM-152`). A
+report therefore holds the machine's whole state, and the newest report alone tells the hub everything.
 
 **MR-2, to whom and when.** Every machine of the estate sends a report to each **hub machine**, a machine other than
 itself whose `hubKey` one of these revisions certifies:
@@ -473,7 +475,8 @@ itself whose `hubKey` one of these revisions certifies:
 It sends one:
 - after it applies a revision, accepts a heartbeat or applies a delta page, at most once a minute (later changes wait
   for the next report);
-- once at or after each of its leases' `expiresAt`, naming that lease with its final `spent`;
+- once at or after each of its leases' `expiresAt`, so the lease's final `spent` reaches the hub soon (later reports
+  keep naming it until its window instance ends, MR-1);
 - and at least every 24 hours (`MACHINE_REPORT_INTERVAL_SECONDS`) while it holds a lease or applies the estate's
   records.
 
@@ -481,7 +484,7 @@ A report is never answered. A lost one is replaced by the next, since each repor
 change.
 
 **MR-3, how it travels.** The report is the inner `payload` of a relay message body (`fabric-relay-message/1`), sealed
-to the hub machine's `#kem` as `fabric-machine-report/1` `{type, kem, enc, ct}`: HPKE base mode, suite `[16, 1, 1]`
+to the hub machine's `#kem`, as the revision that certifies that hub machine lists it, as `fabric-machine-report/1` `{type, kem, enc, ct}`: HPKE base mode, suite `[16, 1, 1]`
 (the [secret envelope](#the-secret-envelope)'s), `info` the ASCII `fabric-machine-report/1`, the additional data the
 RFC 8785 bytes of `{type, from, to, msgId, kem}` (the body's own `from`, `to` and `msgId`, so a sealed report copied
 into another body does not open), the plaintext the report's RFC 8785 form, at most 65 536 bytes
@@ -497,12 +500,14 @@ that is not a report in its own RFC 8785 form, or that the schema refuses), `wro
 machine than the one `relayCallerTier` named) and `stale` (its `at` is not after the report the hub holds for that
 machine). The hub keeps, per machine, the newest report it accepted.
 
-**MR-5, what the hub reads in it.** A machine has applied a revision when its newest report's `estateRecord.revision` is
+**MR-5, what the hub reads in it.** The hub reads everything from the newest report it holds per machine. A machine has applied a revision when its newest report's `estateRecord.revision` is
 that revision's or above (and, when the report carries `digest` for that same revision, the digest is that revision's).
 A lease's final `spent` is the one in a report whose own `at` is at or after the lease's `expiresAt`, never one judged by
 its delivery: a relay may deliver a report written before the expiry days later, while the meter could still spend.
 The time the [window lease's reporting](window-lease.md#reporting) and `windowRemainder` take for a report is its `at`;
-a report "after the revocation" of a hub move is one whose `at` is after the revocation's revision applied.
+a holder has reported "after the revocation" of a hub move when its newest report's `estateRecord.revision` is at or
+above the revision that revokes the old hub's key (never by time: a machine that refused that revision still reports
+to the new hub, MR-2, and still spends under the old hub's leases).
 
 ## The pairing rendezvous
 

@@ -111,7 +111,8 @@ lease's window instance: settled receipts plus open reservations, a decimal stri
 
 What a meter has not reported counts as spent. After a hub move the new hub holds none of the old hub's division, so it
 issues no lease of a window instance the old hub divided until that instance ends or every machine holding one of the
-old hub's leases has reported it after the revocation (DEC-0107, [ceremonies](ceremonies.md#move-the-hub)). The hub
+old hub's leases has reported it after the revocation (DEC-0107, [ceremonies](ceremonies.md#move-the-hub); a report
+whose `estateRecord.revision` is at or above the revoking revision, DEC-0132 MR-5). The hub
 counts, for each machine, the most it may have spent (`windowRemainder`):
 
 - a lease still valid counts its whole `amount`, since the meter may still spend it;
@@ -176,7 +177,7 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
   inside the window instance, sequences rising per slot; it counts an expired, unreported lease as spent and credits
   a late report at its next division. After a hub move it issues no lease of a window instance the old hub divided
   until that instance ends or every machine holding one of the old hub's leases has reported it after the revocation
-  (DEC-0107, [Reporting](#reporting)). v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
+  (its newest report's `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it never qualifies) (DEC-0107, [Reporting](#reporting)). v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
   how the hub sizes it within the remainder is its own.
 - **Project Observatory's meter** (CT-20) verifies each lease with `verifyWindowLease` before it spends against it,
   holds one per slot, reserves only as `mayReserve` answers (the smaller of its own remainder and the lease's, and
