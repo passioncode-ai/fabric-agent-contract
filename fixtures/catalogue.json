@@ -1007,5 +1007,8 @@
   {"name": "org-key-set-draft-no-digest", "schema": "org-key-set-draft.schema.json", "path": "negative/org-key-set-draft-no-digest.json", "valid": false, "keyword": "required"},
   {"name": "org-authority-draft", "schema": "org-authority-draft.schema.json", "path": "positive/org-authority-draft.json", "valid": true},
   {"name": "org-root-registration", "schema": "org-root-registration.schema.json", "path": "positive/org-root-registration.json", "valid": true},
-  {"name": "org-root-registration-short-claim", "schema": "org-root-registration.schema.json", "path": "negative/org-root-registration-short-claim.json", "valid": false, "keyword": "pattern"}
+  {"name": "org-root-registration-short-claim", "schema": "org-root-registration.schema.json", "path": "negative/org-root-registration-short-claim.json", "valid": false, "keyword": "pattern"},
+  {"name": "machine-report", "schema": "machine-report.schema.json", "path": "positive/machine-report.json", "valid": true},
+  {"name": "machine-report-no-estate-record", "schema": "machine-report.schema.json", "path": "negative/machine-report-no-estate-record.json", "valid": false, "keyword": "required"},
+  {"name": "machine-report-sealed", "schema": "machine-report-sealed.schema.json", "path": "positive/machine-report-sealed.json", "valid": true}
 ]

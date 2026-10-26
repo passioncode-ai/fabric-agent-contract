@@ -45,6 +45,7 @@ import { nodeSummaryRules } from "./node-summary.js";
 import { agentNetworkRules, loadExtensionRules } from "./agent-network.js";
 import { actionRules, actionsExtensionRules } from "./actions.js";
 import { machineCallRules } from "./machine-call.js";
+import { machineReportRules } from "./machine-report.js";
 import { checkInCredentialFindings, credentialRules } from "./credentials.js";
 import { jobLimitRules, usageFindings } from "./job-limits.js";
 import { folderAttributionRules } from "./folder-attribution.js";
@@ -116,6 +117,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (summary) return summary;
   const network = agentNetworkRules(kind, value);
   if (network) return network;
+  const machineReport = machineReportRules(kind, value);
+  if (machineReport) return machineReport;
   const machineCall = machineCallRules(kind, value);
   if (machineCall) return machineCall;
   const action = actionRules(kind, value);

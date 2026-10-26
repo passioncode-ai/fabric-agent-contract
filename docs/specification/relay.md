@@ -7,11 +7,12 @@ A compromised relay can delay, drop or count traffic. It cannot read a secret, f
 the recipient's checks. Decided in DEC-0047 and amended in place by DEC-0066 (nothing was deployed); the reference
 server is [passioncode-ai/relay](https://github.com/passioncode-ai/relay).
 
-The reference code is in four files:
+The reference code is in five files:
 - [`src/relay.ts`](../../src/relay.ts): admission, blob requests, message bodies and the close codes;
 - [`src/secret-envelope.ts`](../../src/secret-envelope.ts): the envelope;
 - [`src/p256.ts`](../../src/p256.ts): key validation and the low-S rule;
-- [`src/relay-vectors.ts`](../../src/relay-vectors.ts): the runner of the shared vectors (see [Shared vectors](#shared-vectors)).
+- [`src/relay-vectors.ts`](../../src/relay-vectors.ts): the runner of the shared vectors (see [Shared vectors](#shared-vectors));
+- [`src/machine-report.ts`](../../src/machine-report.ts): the machines' report to their hub (DEC-0132).
 
 Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`, `p256.json`).
 
@@ -440,6 +441,60 @@ revocation signed by an estate key (a hub key the estate record certifies) and c
   sessions closed 4403 (see [Admission](#admission)), within one push rather than at the next revision.
 - The window lease is DEC-0062's.
 
+## The machines' report
+
+DEC-0132 (CT-152) · schemas [`machine-report`](../../schemas/machine-report.schema.json),
+[`machine-report-sealed`](../../schemas/machine-report-sealed.schema.json) · code
+[`src/machine-report.ts`](../../src/machine-report.ts) · vectors
+[`fixtures/vectors/machine-report.json`](../../fixtures/vectors/machine-report.json), written by
+[`tools/vectors/machine-report.ts`](../../tools/vectors/machine-report.ts) · rule `FAC-SEM-152`
+
+Each machine tells its estate's hub what it applied and what it spent. A check-in to an organization server carries
+none of it (DEC-0128 UE-2), so the report goes over the relay, sealed so the relay reads none of it. Three readers
+depend on it: the hub's key rotation (DL-15), the hub move's step 6 ([ceremonies](ceremonies.md#move-the-hub)) and the
+window lease's [reporting](window-lease.md#reporting).
+
+**MR-1, the report.** `machine-report/1` is `{type, machine, at, records}`: `machine` the reporting machine's id in the
+estate record, `at` when it wrote the report, and `records` the check-in's members by the same names and shapes
+(DEC-0053, DEC-0056, DEC-0062): `estateRecord` (`revision`, optionally `digest`), `heartbeat` (`sequence`, `at`),
+`revocationDelta` (`sequence`, `sha256`) and `leases` (`[{leaseId, expiresAt, spent}]`). `estateRecord` is required;
+each lease is named once (`FAC-SEM-152`).
+
+**MR-2, when.** Every machine of the estate other than the hub's sends a report to the hub machine, the one machine
+whose `hubKey` the revision it applied certifies (after a hub move, the new hub once it applied the revision that names
+it):
+- after it applies a revision, accepts a heartbeat or applies a delta page, at most once a minute (later changes wait
+  for the next report);
+- once at or after each of its leases' `expiresAt`, naming that lease with its final `spent`;
+- and at least every 24 hours (`MACHINE_REPORT_INTERVAL_SECONDS`) while it holds a lease or applies the estate's
+  records.
+
+A report is never answered. A lost one is replaced by the next, since each report carries the whole state, never a
+change.
+
+**MR-3, how it travels.** The report is the inner `payload` of a relay message body (`fabric-relay-message/1`), sealed
+to the hub machine's `#kem` as `fabric-machine-report/1` `{type, kem, enc, ct}`: HPKE base mode, suite `[16, 1, 1]`
+(the [secret envelope](#the-secret-envelope)'s), `info` the ASCII `fabric-machine-report/1`, the additional data the
+RFC 8785 bytes of `{type, from, to, msgId, kem}` (the body's own `from`, `to` and `msgId`, so a sealed report copied
+into another body does not open), the plaintext the report's RFC 8785 form, at most 65 536 bytes
+(`MAX_MACHINE_REPORT_BYTES`). `sealMachineReport` seals it and refuses `malformed`, `bad-key` and `too-large`. The
+machine `send`s it to the hub machine's `#sig` with a new `msgId`; a body whose signed `exp` is up to 7 days later
+reaches a hub that was asleep. A hub machine with no usable `#kem` gets no report.
+
+**MR-4, the hub's reading.** After the body is verified (`verifyMessageBody`) and is not a replay (`checkReplay`), the
+hub places the sender with `relayCallerTier`; a sender that is not T1 is ignored, its delivery acknowledged. Then
+`openMachineReport` refuses, in this order: `malformed` (the sealed object is not the schema's), `wrong-recipient`
+(another `kem`), `cannot-open` (HPKE fails, another body's `from`, `to` or `msgId` included), `malformed` (a plaintext
+that is not a report in its own RFC 8785 form, or that the schema refuses), `wrong-machine` (the report names another
+machine than the one `relayCallerTier` named) and `stale` (its `at` is not after the report the hub holds for that
+machine). The hub keeps, per machine, the newest report it accepted.
+
+**MR-5, what the hub reads in it.** A machine has applied a revision when its newest report's `estateRecord.revision` is
+at or above it (and, when it carries `digest`, names that revision's digest). A lease's final `spent` is the one in a
+report whose `at` is at or after the lease's `expiresAt` ([reporting](window-lease.md#reporting)): the hub counts such
+a report as received at or after the expiry. A machine whose last report is older than 24 hours is counted as not
+having applied anything newer than that report says, and its leases as its whole amounts.
+
 ## The pairing rendezvous
 
 When a machine joins an estate from afar, the trusted machine opens a **one-time rendezvous** on its relay session and
@@ -480,6 +535,7 @@ Every refusal of the relay family is data a port runs, not only a test in this r
 |---|---|---|
 | <a id="fac-sem-070"></a>`FAC-SEM-070` | `secret-envelope` | sealed to a `#kem` key by a `#sig` key under `alg` `ES256`, with the one admitted suite, a life of more than zero and at most 24 hours between real instants, and an encapsulated key that is a valid uncompressed P-256 point |
 | <a id="fac-sem-071"></a>`FAC-SEM-071` | `relay-frame` | `auth` names a `#sig` key, `alg` `ES256` and `fabric-relay/0.1`; `send` addresses a `#sig` key, with a `ttl` of 1 s to 7 days and a body of at most 765 KiB decoded |
+| <a id="fac-sem-152"></a>`FAC-SEM-152` | `machine-report` | a machine's report names each lease once (DEC-0132) |
 
 ## Not decided here
 

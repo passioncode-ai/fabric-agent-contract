@@ -10,7 +10,7 @@ signed by a passkey, and machines fetch it hourly. The **revocation delta** is i
 signed entries, one revocation each, that the relay pushes to every machine within seconds
 ([relay](relay.md#revocation-and-heartbeat), DEC-0047). The **timestamp heartbeat** is a signed commitment to the
 delta's head and to the estate revision, so a relay that withholds an entry is caught: it can delay revocation, never
-forge or hide it for long. A machine reports the head it applied and the heartbeat it holds to its hub over the relay (CT-152; never in a check-in
+forge or hide it for long. A machine reports the head it applied and the heartbeat it holds to its hub over the relay (DEC-0132; never in a check-in
 to an organization server, DEC-0128 UE-2)
 (`records.revocationDelta`, `records.heartbeat`, [devices](devices.md#check-in), DEC-0053).
 
@@ -71,10 +71,10 @@ An **entry** (`$defs/entry` of [`revocation-delta`](../../schemas/revocation-del
   (`deltaGenesis`), so one estate's chain cannot be spliced onto another's.
 - **The head** is `{sequence, sha256}`: the last entry's sequence and hash, or `{0, genesis}` before any (`deltaHead`).
   It is the shape of a check-in's `records.revocationDelta` (DEC-0053) and of a relay's `welcome.deltaHead` (DEC-0047),
-  so a node reports what it holds (to its hub over the relay, CT-152; never in a check-in to an organization server,
+  so a node reports what it holds (to its hub over the relay, DEC-0132; never in a check-in to an organization server,
   DEC-0128 UE-2), and passes on what it was handed, unchanged.
 - **A page** is `{head, entries}` (the schema's root): consecutive entries, oldest first, at most 256, so a relay frame
-  stays under 1 MiB. A relay's `delta` frame and a check-in response's `records.revocationDelta` (only from an organization server that has not adopted DEC-0128's UE-2; the estate's own carrier is the relay, CT-152) carry one unchanged. The
+  stays under 1 MiB. A relay's `delta` frame and a check-in response's `records.revocationDelta` (only from an organization server that has not adopted DEC-0128's UE-2; the estate's own carrier is the relay, DEC-0132) carry one unchanged. The
   page's `head` is the carrier's hint and binds nothing; only a heartbeat's head binds.
 
 **The hub's duties.** One chain per estate: a hub issues the next sequence after the head it holds and never two entries
@@ -88,7 +88,7 @@ A **heartbeat** ([`heartbeat`](../../schemas/heartbeat.schema.json)) is `{type: 
 sequence, at, deltaHead, estateRecord: {revision, digest}, kid, sig}`, signed like an entry. `sequence` is the estate's
 heartbeat counter; `deltaHead` is the head of the delta when it was signed; `estateRecord` is the latest revision with
 its `digest` (required here, so two revisions with one number are told apart, DEC-0056). A machine reports the held
-heartbeat's `sequence` and `at` (`records.heartbeat`, DEC-0053) to its hub over the relay (CT-152; never in a check-in to an organization server, DEC-0128 UE-2).
+heartbeat's `sequence` and `at` (`records.heartbeat`, DEC-0053) to its hub over the relay (DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2).
 
 A running hub signs a heartbeat right after every entry and every revision, SHOULD sign one every 60 minutes
 (`HEARTBEAT_INTERVAL_SECONDS`), and lets no more than 24 hours pass between two (v4 §7 "daily",
@@ -209,8 +209,8 @@ v4 §7 also gives an organization a heartbeat signed by its own timestamp key, a
 organization's own heartbeat would travel in DEC-0053's check-in, which an organization server receives. Where an organization pins that key (a role in DEC-0031's key set, or
 one `org-key-set/1` would have to list, DEC-0127; the member list `org-authority/1`, DEC-0129, lists members and no such key) is not decided, so this version defines the estate's documents only: every
 document names its `estate`. An organization's documents join additively, with their own scope member and key, once
-that record exists. Under DEC-0128 UE-2 (adopted by a node once CT-152 exists), the estate's heartbeat never goes to an organization: a device reports it to its hub
-over the relay (CT-152).
+that record exists. Under DEC-0128 UE-2 (adopted by a node once it sends the machines' report, DEC-0132), the estate's heartbeat never goes to an organization: a device reports it to its hub
+over the relay (DEC-0132).
 
 ## Semantic rules
 
@@ -226,7 +226,7 @@ over the relay (CT-152).
 - **Fabric's hub** issues entries and heartbeats under the estate key, keeps one chain, lists every entry in the next
   revision (every entry up to an anchor it sets, whatever its time, DEC-0107), and sends each page and heartbeat to the relay on its own admitted session (DEC-0066; backlog CT-19).
 - **Project Observatory's node** applies pages and heartbeats under the highest revision it applied, reports the head and
-  the heartbeat (to its hub over the relay, CT-152; never in a check-in to an organization server, DEC-0128 UE-2), refuses what arrives from other machines unless `current`, refuses an unreconciled
+  the heartbeat (to its hub over the relay, DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2), refuses what arrives from other machines unless `current`, refuses an unreconciled
   revision (CT-20, CT-34), and applies each revision's delta anchor with `anchorDelta` (DEC-0107, CT-113).
 - **The relay** takes pages and heartbeats from an admitted hub machine's session and applies them under the record it
   holds (`applyDelta`, `acceptHeartbeat`), answering a refused one with their own problem code; it carries them

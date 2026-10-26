@@ -566,9 +566,9 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   yet taken). The relay ([DEC-0047](relay.md#revocation-and-heartbeat)) carries heartbeats and pages of the delta
   unchanged, and a check-in response carried a heartbeat and a page (both typed by DEC-0054's schemas) and leases in
   `records` unchanged. A relay's `welcome.deltaHead` has the `revocationDelta` shape, so a node reports it as it came.
-  DEC-0128 (UE-2) ends both directions toward an organization: these members are what a node that has not adopted UE-2 sends (one pinned before DEC-0128, or before CT-152's report
+  DEC-0128 (UE-2) ends both directions toward an organization: these members are what a node that has not adopted UE-2 sends (one pinned before DEC-0128, or before DEC-0132's report
   over the relay exists),
-  and the estate's records travel to and from its hub over the relay (CT-152).
+  and the estate's records travel to and from its hub over the relay (DEC-0132).
 
 <a id="unlinkable-enrollments"></a>
 
@@ -587,7 +587,7 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   receiver ignores the members and never refuses a check-in for them, so a node pinned before still checks in. They
   travel on the estate's own channel instead: the relay (DEC-0047), which carries the hub's heartbeats, delta pages and
   leases unchanged and the machines' reports back to the hub, and the local channel on one machine. How a machine
-  reports `records` to its hub over the relay (a report message) is CT-152. The members stay in the schema for an
+  reports `records` to its hub over the relay (the machines' report) is DEC-0132. The members stay in the schema for an
   organization's own records later; the response rule refuses only documents that name an estate.
 - **UE-3, independent schedules.** Each enrollment schedules its check-ins on its own, with jitter (SHOULD), so their
   timing does not pair them.
@@ -753,7 +753,7 @@ Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the 
   and key sets.
 - How a receiver behind a TLS-terminating host learns of a certificate's revocation beyond its own records (DEC-0056).
 - What a receiver does when a reported `records.estateRecord.digest` shows a fork of the estate record (DEC-0056): the hub
-  over the relay (CT-152), or an organization server toward a node that has not adopted DEC-0128's UE-2.
+  over the relay (DEC-0132), or an organization server toward a node that has not adopted DEC-0128's UE-2.
 - RFC 9421's successor drafts and its `Accept-Signature` field (DEC-0056).
 - Clock skew: whether a device reports a `signature-stale` refusal in a later check-in, and how a receiver tells skew from
   replay (DEC-0056).

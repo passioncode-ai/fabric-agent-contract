@@ -266,8 +266,8 @@ machine word for `error.data.detail`, never the token. A verifier in another lan
   [ceremonies](ceremonies.md#move-the-hub)), since a copy on a lost disk must not keep signing. Where callees read the estate record, a new key is also certified by a revision before the issuer signs
   with it: a callee whose applied revision does not certify the key refuses its tokens `kid-not-certified` (DL-14).
   To keep every callee answering, the hub certifies the new key while the old one stays certified, signs with the new
-  key once its machines' reports (`records.estateRecord.revision`, DEC-0053, over the relay and never through an
-organization server, DEC-0128; CT-152) show the certifying revision applied, and
+  key once its machines' reports (`records.estateRecord.revision`, DEC-0053, in the [machines' report](relay.md#the-machines-report) over the relay
+and never through an organization server, DEC-0128, DEC-0132) show the certifying revision applied, and
   revokes the old key in a later revision. A revision that certifies the new key and revokes the old one at once (as
   the rotation vector does) is valid, but callees on the older revision refuse the new key until they apply it.
 

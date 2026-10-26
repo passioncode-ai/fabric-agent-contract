@@ -371,6 +371,12 @@ without moving either (DEC-0111).
 (no hub key) or `view` (no placement, no secret, no hub key; over the relay it calls and is called only to read); a
 call between machines over the relay that a profile does not allow is refused `profile-forbids` ([machine calls](docs/specification/machine-calls.md)).
 
+**Machine report**: What one machine of an estate tells its estate's hub machine over the relay (DEC-0132): the estate
+revision it applied, its heartbeat, its revocation-delta head and the window leases it holds with what it spent, by the
+check-in's own `records` names, sealed to the hub's `#kem` so the relay reads none of it. Never sent to an organization
+server (DEC-0128 UE-2). Not a **Node summary**, which goes to an organization
+([relay](docs/specification/relay.md#the-machines-report)).
+
 **Small-order key**: An Ed25519 public key whose point has order 1, 2, 4 or 8 — libsodium's seven encodings, sign bit
 ignored. Anyone can forge a signature under one, and Node 20 and 22 accept the forgery, so every Ed25519 check in
 the contract refuses such a key before verifying (`src/ed25519.ts`, DEC-0045, CT-29).

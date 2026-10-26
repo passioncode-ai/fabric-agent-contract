@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0132` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0133` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -7932,3 +7932,51 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`, `vitest.config.ts`; backlog CT-156.
 - **Source:** CT-156; request `1822d650` (thread `bd508780`); fabric-workspace MD-14; DEC-0123 (open links), DEC-0127,
   DEC-0129; the vector root of `fixtures/vectors/org-membership.json`.
+
+### DEC-0132: the machines' report to their hub over the relay
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). Additive: two new schemas, a rule (`FAC-SEM-152`), reference functions and
+  vectors; nothing an existing reader validates changes. Adoption: Fabric's nodes and Project Observatory's node send
+  reports and Fabric's hub reads them (CT-152).
+- **Context:** DEC-0128 UE-2 keeps the estate's records (the applied revision, the heartbeat, the delta head, the
+  leases with `spent`) off every check-in to an organization server, and left the message that carries them to the hub
+  open (CT-152). Three readers wait on it: the hub's key rotation (DL-15), the hub move's step 6 and the window lease's
+  reporting (DEC-0062), and the schema descriptions already name the check-in's `records` members.
+- **Decision:**
+  1. **MR-1, the report** `machine-report/1` is `{type, machine, at, records}`; `records` reuses the check-in's
+     `estateRecord` (required), `heartbeat`, `revocationDelta` and `leases` by name and shape; each lease once
+     (`FAC-SEM-152`).
+  2. **MR-2, when.** Every machine but the hub's reports to the hub machine (the one whose `hubKey` the applied
+     revision certifies) after it applies a revision, a heartbeat or a delta page (at most once a minute), at or after
+     each lease's expiry with its final `spent`, and at least every 24 hours while it holds a lease or applies the
+     estate's records. A report carries the whole state, is never answered, and a lost one is replaced by the next.
+  3. **MR-3, how.** Sealed to the hub machine's `#kem` as `fabric-machine-report/1` `{type, kem, enc, ct}` inside a
+     `fabric-relay-message/1` body: HPKE base mode, suite `[16, 1, 1]`, `info` the protocol name, the additional data
+     the RFC 8785 bytes of `{type, from, to, msgId, kem}`, the plaintext at most 65 536 bytes.
+  4. **MR-4, reading.** The hub ignores a sender `relayCallerTier` does not place in T1, and reads a report only as
+     `openMachineReport` does: `malformed`, `wrong-recipient`, `cannot-open`, `malformed`, `wrong-machine` (the report
+     names another machine than the sender), `stale` (not after the one held). It keeps the newest per machine.
+  5. **MR-5, what it means.** A machine applied a revision when its newest report's `estateRecord.revision` is at or
+     above it; a lease's final `spent` is in a report whose `at` is at or after its `expiresAt`; a machine silent for
+     more than 24 hours counts as what its last report says, its leases as their whole amounts.
+- **Why:** the relay is the estate's own carrier (DEC-0047) and already delivers to a sleeping hub; sealing keeps what a
+  machine spent away from the relay's operator, as a machine call is (DEC-0106). Whole-state reports make loss and
+  reordering harmless with one rule (`stale`), and reusing the check-in's member names keeps every existing reference
+  to `records.estateRecord.revision` and `records.leases` true.
+- **Alternatives considered:** a machine call to a hub capability (a report has no answer, and a call's profile rule
+  would forbid a view machine's report); the report in clear in the body (the relay's operator would read every
+  machine's spending); deltas instead of whole state (one lost message would need a resend protocol); the hub pulling
+  reports (a hub cannot reach a sleeping machine; the relay's mailbox carries a push).
+- **Compatibility:** additive. `contractVersion` stays `0.1.0`. The texts that named CT-152 as the open carrier
+  (delegation.md DL-15, ceremonies.md's hub move, window-lease.md, estate-record.md, revocation-delta.md, devices.md
+  UE-2, the check-in schema's `records` description) now name DEC-0132.
+- **Consequences / affects:** `schemas/machine-report.schema.json`, `schemas/machine-report-sealed.schema.json` (new);
+  `src/machine-report.ts` (new), `src/semantic-rules.ts`, `src/semantic-kinds.ts`, `src/protocol-revisions.ts`;
+  `tools/vectors/machine-report.ts`, `tools/vectors/run.ts`, `fixtures/vectors/machine-report.json`;
+  `docs/specification/relay.md` (The machines' report, MR-1 to MR-5, `FAC-SEM-152`), `delegation.md`,
+  `ceremonies.md`, `window-lease.md`, `estate-record.md`, `revocation-delta.md`, `devices.md`, `conformance.md`,
+  `CONTEXT.md` (Machine report), `docs/DOCMAP.md`, `docs/specification/README.md`; fixtures;
+  `test/machine-report.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`,
+  `test/rule-tolerance.test.ts`, `vitest.config.ts`; backlog CT-152.
+- **Source:** CT-152 (filed by DEC-0128's seam reading); DEC-0047, DEC-0053, DEC-0062, DEC-0106, DEC-0128.

@@ -368,7 +368,7 @@ alert:
    a machine. A machine that applied the revision refuses
    anything the old key signs after it (`revoked-signer`, RD-7). A machine holding an old-hub entry the revision does
    not list refuses the revision as `unreconciled` and keeps its parent; Fabric watches its machines' reports
-   (`records.estateRecord.revision`, over the relay, never an organization's check-ins, DEC-0128; CT-152) after a move and drafts the revision that lists it. An entry the old hub signed at
+   (`records.estateRecord.revision`, in the [machines' report](relay.md#the-machines-report) over the relay, never an organization's check-ins, DEC-0128, DEC-0132) after a move and drafts the revision that lists it. An entry the old hub signed at
    a sequence the new hub also used, before a machine applied the revision, is a second signed history (`fork`):
    recovery from a fork is still the revocation delta's open item.
 7. **What the move ends.** Everything the old key signed is refused once a verifier applies the revision that revokes it

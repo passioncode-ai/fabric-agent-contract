@@ -26,7 +26,7 @@ meter's owner, on 2026-10-12 (its `docs/design/METER.md`, sections M3 and M4). T
 | Field | Rule |
 |---|---|
 | `type` | `window-lease/1` |
-| `leaseId` | the lease's opaque id; the machine reports it to its hub over the relay (CT-152; never in a check-in to an organization server, DEC-0128 UE-2) |
+| `leaseId` | the lease's opaque id; the machine reports it to its hub over the relay (DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2) |
 | `sequence` | rises with every lease the hub issues one machine for one scope, window and period ([one lease per slot](#one-lease-per-slot)) |
 | `estate` | the estate whose record certifies the signing hub key |
 | `estateRevision` | the estate-record revision the hub followed; a machine that applies an earlier one refuses the lease until it has caught up |
@@ -104,8 +104,8 @@ overrun is at most one call's error per meter (v4 Path 5 step 1).
 
 ## Reporting
 
-A meter reports each lease it holds to its hub, `records.leases[]` (in a report over the relay, never in a check-in to an
-organization server, DEC-0128 UE-2; the report message is CT-152): `{leaseId, expiresAt, spent}` (DEC-0053's
+A meter reports each lease it holds to its hub, `records.leases[]` (in the [machines' report](relay.md#the-machines-report) over the
+relay, DEC-0132, never in a check-in to an organization server, DEC-0128 UE-2): `{leaseId, expiresAt, spent}` (DEC-0053's
 names; `spent` is this decision's, optional and additive). `spent` is an upper bound on what the meter spent in the
 lease's window instance: settled receipts plus open reservations, a decimal string.
 
@@ -124,7 +124,7 @@ lease a machine is the window's limit less what every **other** machine holds; a
 once the larger lease expires or is reported.
 
 A lease reaches its machine unchanged: the relay carries it from the hub's machine as a message (DEC-0047). An estate's
-lease never travels through an organization server once UE-2 is adopted (DEC-0128; the node adopts it after CT-152); a check-in response's `records.leases`, whose items
+lease never travels through an organization server once UE-2 is adopted (DEC-0128; the node adopts it after DEC-0132); a check-in response's `records.leases`, whose items
 are this schema, carries an organization's own leases once organization windows exist. The transport adds
 nothing and decides nothing.
 
@@ -179,7 +179,7 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
   how the hub sizes it within the remainder is its own.
 - **Project Observatory's meter** (CT-20) verifies each lease with `verifyWindowLease` before it spends against it,
   holds one per slot, reserves only as `mayReserve` answers (the smaller of its own remainder and the lease's, and
-  nothing after expiry), and reports `records.leases[]` with `spent` (to its hub over the relay, CT-152; never in a check-in to an organization server, DEC-0128 UE-2).
+  nothing after expiry), and reports `records.leases[]` with `spent` (to its hub over the relay, DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2).
 - **An organization server** hands leases of organization windows in the check-in response (v4 Path 5); the scope
   `estate` is the only one v4 uses, and organization windows wait on a decision beyond the member list `org-authority/1` (DEC-0129).
 
