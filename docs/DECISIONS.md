@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0135` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0137` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -7475,7 +7475,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted (2026-10-26). Additive on the wire (a new schema, `mandate/1`; an optional `_meta.mandate` and
   `call.mandate`); a behaviour rule a callee adopts at its next pin. Adoption: CT-149. Amended by DEC-0126 (2026-10-26):
   a relay of the operator's approval from one of their own Projects or sessions is accepted, and `source` names where
-  the words were said.
+  the words were said. Amended by DEC-0136 (2026-10-26): a hand-over adds no naming list the scope in force leaves out
+  (MD-2a: no `capabilities` or `actions` list, except `actions` under listed `capabilities`).
+- **Annotated (2026-10-26, CT-149):** `fixtures/vectors/mandate.json` gains a `handOn` group (30 cases): the mandate an
+  agent sends when it calls the next one, or the first problem that stops it, so a leading agent's port (the adapter's
+  kits, FAA-131) checks MD-2 as a callee checks MD-3 to MD-5. Amended by DEC-0136 (2026-10-26): MD-2a, with one more
+  `cases` vector for it.
 - **Context:** the operator decided on 2026-10-25 that their mandate goes with the task: an agent leading the
   operator's task holds the operator's authority for it, hands work to other agents on the operator's behalf with the
   mandate narrowed to the part handed on, and the agent that receives it acts without asking the operator again
@@ -8101,3 +8106,37 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/org-authority.test.ts`, `test/relay.test.ts`, `test/relay-rules.test.ts`; backlog CT-36, CT-37, CT-162,
   CT-163, CT-164; the handoff.
 - **Source:** CT-37; DEC-0047, DEC-0066, DEC-0084, DEC-0128, DEC-0129; Fabric ADR-0180 point 4.
+
+### DEC-0136: a mandate's hand-over adds no naming list the scope in force leaves out
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). A narrowing of DEC-0125 MD-2 before any agent hands a mandate on (the adapter's
+  kits adopt it in FAA-131, unreleased, told on board thread `aa86a675` before its 0.51.0 ships). Adoption: CT-149.
+- **Context:** CT-149's blind readings of the hand-over vectors found that `scopeWithin` let a hand-over add an
+  `actions` or `capabilities` list where the scope in force had none. MD-1 reads a list left out as "any", but MD-3
+  covers a relayed action only when `actions` or `capabilities` names it, and an external effect only when the call is
+  named. So a scope with neither list covers reads and drafts only, and a callee that added `actions: [publish-page]`
+  would then take a publish the operator never named: a hand-over that widened while `FAC-SEM-144` called it narrower.
+- **Decision:** [delegation](specification/delegation.md#the-operators-mandate) **MD-2a**. A hand-over never adds a
+  `capabilities` or `actions` list the scope in force leaves out, except `actions` where the scope in force lists
+  `capabilities` (it then narrows the relayed actions those name); it may add `projects`. Otherwise the mandate is
+  `mandate-widened`, from `mandateProblem` (`FAC-SEM-144`) and so from `handOn` and `mandateCovers`. The vectors gain
+  this case in both groups, and the `handOn` group states the order in which a document's problems are read. The
+  `FAC-SEM-144` row now says what the code always did: a step at the same time as the one before is in order, and the
+  first problem in that order is the answer. MD-1's "a list left out means any" and the schema's descriptions of an
+  absent `capabilities` and `actions` say what MD-3 reads it as.
+- **Why:** the mandate exists so an agent acts on the operator's words without asking, which is safe only if no agent
+  of the chain can grant itself what the words did not; "a list left out means any" cannot mean "any" for naming,
+  since MD-3 reads the same absence as naming nothing.
+- **Alternatives considered:** allowing a naming list where the hand-over's own effects stay within `draft` (a rare
+  case, and it would still let `capabilities` name relayed actions the scope in force did not); reading an absent naming
+  list as "every call" in MD-3 (it would let an operator's vague words cover every external effect).
+- **Compatibility:** a narrowing: a mandate that added such a list was `ok` under DEC-0125 and is `mandate-widened`
+  now. No agent hands one on yet (CT-149 open, FAA-131 unreleased). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/mandate.ts` (`scopeWithin`, the finding's text); `schemas/mandate.schema.json`
+  (descriptions); `docs/specification/conformance.md` (the leading agent's row); `tools/vectors/mandate.ts`,
+  `fixtures/vectors/mandate.json` (`handOn`, one more `cases` vector); `test/mandate.test.ts` (with a property test:
+  no hand-over `scopeWithin` accepts covers a call the scope in force does not, over every list shape, with
+  capability names the schema accepts; it fails under the old rule and under each of three weaker forms of MD-2a);
+  `docs/specification/delegation.md` (MD-1, MD-2a, `FAC-SEM-144`); DEC-0125 annotated; backlog CT-149.
+- **Source:** CT-149's readings (round 2 of the hand-over vectors, 2026-10-26).
