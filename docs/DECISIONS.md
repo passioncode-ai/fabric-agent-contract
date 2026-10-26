@@ -8287,21 +8287,23 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      label?}` (`project`, `history`, `result`, `schedule`) and 50 requests (`access`, `spend`, `role`); `role` is
      `admin` only (`owner` is never asked for, `member` is held). One revision counter per organization.
      `FAC-SEM-153`: refs and request ids once each, an `itemRef` names an item.
-  2. **AD-2.** A `ref` and a request `id` are random, per organization, never derived from the estate (DEC-0128), and
-     kept while their item or request stands; `label`, `resource`, `note` and `purpose` are typed by the person.
+  2. **AD-2.** A `ref` and a request `id` are random, per organization, never derived from the estate (DEC-0128); a
+     `ref` is kept for its item across revisions and withdrawals to that organization, an `id` while its request
+     stands; `label`, `resource`, `note` and `purpose` are typed by the person.
   3. **AD-3.** The person's Fabric sends the whole plan with the credential the server issued it for the person;
      the route is `PUT /fabric/adaptation/v1/{org}/plan`, with `GET` for the receipt (`404 no-plan` before the first).
      Fabric sends only after a `GET` answered a receipt or `no-plan`; any other answer means the server takes no plans
      from this credential.
   4. **AD-4.** The server keeps the newest revision (`decideAdaptation`): `not-a-member`, `schema-unsupported`,
      `malformed`, `wrong-organization`, `stale-revision`, `revision-conflict`, a repeat answering the same receipt; an
-     empty revision withdraws.
+     empty revision withdraws, and a withdrawal on the server's own page is held as the next, empty revision.
   5. **AD-5.** Each decision is bound to its request's id and digest (`requestDigest`, `adaptationReceipt`), so a
      changed request waits for a new decision; a request the server closes without one reads `expired` (the first
      server's objection); a decision grants nothing by itself, and a granted `admin` role is display and routing,
      never authority (OL-6, OM-3).
   6. **AD-6.** Read by the organization's administrators and the person only. A person who leaves by unpinning
-     withdraws the plan first (OM-5); an end the server issues ends the plan.
+     withdraws the plan first, without waiting on the server longer than they agree to (OM-5); an end the server
+     issues ends the plan.
 - **Why:** the plan is the person's, authored in their Fabric, which reads the person's attestations with the
   credential the server issued it; sending the plan the same way adds no identity and no enrollment Fabric lacks. A
   random per-organization reference keeps two organizations

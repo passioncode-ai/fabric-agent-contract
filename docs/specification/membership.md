@@ -181,7 +181,9 @@ organization answers `organization-closed` (DEC-0103), or when the person unpins
 Everything the membership carried ends with it, as one rule:
 
 - when the person ends it by unpinning, their Fabric first sends the organization the empty revision that withdraws an
-  adaptation plan it sent there ([AD-6](#the-adaptation-plan)), then asks the passkey to sign the revision that unpins it;
+  adaptation plan it sent there ([AD-6](#the-adaptation-plan)), waiting for an answer no longer than the person agrees
+  to, then asks the passkey to sign the revision that unpins it whatever the answer; a withdrawal left unanswered is
+  the server's to end with the membership, and Fabric tells the person the plan may remain with the server;
 
 - Fabric revokes every share grant whose context is that `org:<orgId>`: the next estate revision lists a `grant`
   revocation for each, and in the same revision removes the grant from `shareGrants` and every placement and secret
@@ -235,7 +237,8 @@ list come from them (DEC-0129):
 | an adaptation plan's organization part (TP-03) | what the person chose to bring into that organization (projects, history, results, schedules), by reference, the text the person typed for it (labels, the resources asked for, notes, purposes), and the person's requests to its administrators; never the plan's draft, its inventory or anything the person did not choose; sent as `org-adaptation/1` ([the adaptation plan](#the-adaptation-plan)) | DEC-0129, DEC-0138 |
 | a membership refresh | the audience and the subject the issuer gave | DEC-0127 |
 
-Personal work beyond the references the person chose in an adaptation plan (never their content), another
+Personal work beyond the references the person chose, and the text they typed, in an adaptation plan (never content
+Fabric reads from the estate), another
 organization's work, the estate record and its members, the estate's passkeys, secrets, the person's other
 memberships and anything a row does not name never leave for an organization. The adaptation row carries no project's
 entry: a project enters by the estate revision its person's passkey signs (R1-D12, Fabric ADR-0178 point 7), which never
@@ -471,7 +474,11 @@ A server may ask the person to consent to plans when they connect Fabric to it.
 `schema-unsupported` answers versioning's document (`{error: {code, message, data: {protocol, accepted}}}`); every other
 refusal's body is `{error: {code, message}}`, the message at most 200 characters. Fabric sends again with backoff after
 no answer or a `5xx`, sends the next revision after `stale-revision` or `revision-conflict` once it has read the
-receipt, and sends nothing more for that membership after `not-a-member` (a later membership, pinned again, may send).
+receipt, and sends nothing more for that membership after `not-a-member` (a later membership, pinned again, may send),
+refreshing the person's attestation at once (OM-6). A server may also take a withdrawal the person makes on its own
+page: it records it as the next revision, with no items and no requests, so a plan Fabric sends at that revision meets
+`revision-conflict`; Fabric, reading a receipt at a revision it did not send, takes the plan as withdrawn and sends
+nothing until the person acts again.
 
 **AD-5, a decision is bound to its request.** Each request's digest is SHA-256 over its RFC 8785 form
 (`requestDigest`); the plan's is the same over the whole plan (`adaptationDigest`). An administrator's decision is
@@ -484,7 +491,8 @@ decision that lapsed); `at` is when it was decided or closed, absent exactly whi
 its request, not the item the request names: changing an item's label or kind does not reopen a decided request. A
 decision grants nothing by itself: an access or a spend
 reaches the person only through the organization's own grants and budgets, and a granted `admin` role reaches the
-person as the role their attestation and the member list carry, which is display and routing, never authority (OL-6).
+person as the role their attestation carries, the member list following when it is next drafted, which is display
+and routing, never authority (OL-6).
 Authority to sign as an administrator comes only from a signing credential the person's Fabric registers for that
 organization alone, listed in a key set the owner's root signs once the owner confirms (OM-3); how a later
 administrator's credential reaches the owner's draft is CT-158.
@@ -538,7 +546,8 @@ retention says.
   revision as AD-4 says, binds decisions as AD-5 says, ends the plan with the membership (AD-6), and runs
   `fixtures/vectors/org-adaptation.json` (DEC-0138). **The person's Fabric** draws each `ref` and request `id` at random
   per organization and keeps them (AD-2), fills no text from the estate, takes only the person's choices, keeps one
-  revision counter per organization, and sends the plan with the credential the server issued it (AD-3).
+  revision counter per organization, sends the plan with the credential the server issued it (AD-3), and withdraws it
+  by an empty revision before it asks the passkey to sign an unpinning (OM-5).
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same
   pin, with its own audience.
 

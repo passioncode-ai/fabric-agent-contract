@@ -33,6 +33,10 @@ requests to the administrators. The first organization server needs it by 2026-1
   `decideAdaptation` on `held: null`; the vector text). Fixed: Fabric withdraws before unpinning (OM-5, AD-6), sends only
   after a `GET` answered a receipt or `no-plan`, the receipt gains `expired` (the first server's objection), typed text
   is named in OM-7, Privacy and the linkable lists.
+- Round 3 fail (the conformance row still showed a lapsed decision `pending`; SCR-31 lacked `expired`; SCN-050's
+  withdrawal on the server's page had no rule). Fixed: `expired` everywhere, a server-page withdrawal is held as the next
+  empty revision, the withdrawal before unpinning waits no longer than the person agrees to, `not-a-member` refreshes the
+  attestation, combined-refusal vectors.
 
 ## Open
 

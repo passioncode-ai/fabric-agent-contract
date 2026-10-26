@@ -97,6 +97,7 @@ export interface AdaptationReceipt {
  * The receipt for a plan the server holds: each request with its digest and the decision bound to that id and digest
  * (`granted`, `refused`, or `expired` when the server closed it without one), or `pending` when none is (a request
  * whose digest changed keeps no earlier decision). A decision that is not one of those, or has no `at`, is not bound.
+ * `decisions` holds one entry per id and digest, its `at` an RFC 3339 time; the first that matches is the one shown.
  */
 export function adaptationReceipt(plan: JsonObject, decisions: readonly RequestDecision[]): AdaptationReceipt | undefined {
   const digest = adaptationDigest(plan);

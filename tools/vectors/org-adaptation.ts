@@ -52,6 +52,10 @@ export function orgAdaptationVectors(): Json {
       { name: "a plan that failed its schema or FAC-SEM-153", plan, context: { member: true, valid: false, org }, expected: { outcome: "refused", refusal: "malformed" } },
       { name: "a person who is not a member", plan, context: { member: false, valid: true, org }, expected: { outcome: "refused", refusal: "not-a-member" } },
       { name: "another revision of the type", plan: { ...plan, type: "org-adaptation/2" }, context: { member: true, valid: false, org }, expected: { outcome: "refused", refusal: "schema-unsupported" } },
+      { name: "not a member, and another type", plan: { ...plan, type: "org-adaptation/2" }, context: { member: false, valid: false, org }, expected: { outcome: "refused", refusal: "not-a-member" } },
+      { name: "malformed, and another organization", plan: { ...plan, org: "org:org-b" }, context: { member: true, valid: false, org }, expected: { outcome: "refused", refusal: "malformed" } },
+      { name: "another organization, at a lower revision", plan: { ...plan, org: "org:org-b", revision: 1 }, context: { member: true, valid: true, org, held }, expected: { outcome: "refused", refusal: "wrong-organization" } },
+      { name: "a plan crossing a withdrawal made on the server's page", plan: next, context: { member: true, valid: true, org, held: { revision: 3, digest: digest({ ...withdrawn, revision: 3 }) } }, expected: { outcome: "refused", refusal: "revision-conflict" } },
       { name: "a withdrawal", plan: withdrawn, context: { member: true, valid: true, org, held }, expected: { outcome: "accepted", held: { revision: 3, digest: digest(withdrawn) } } }
     ],
     receipts: [
