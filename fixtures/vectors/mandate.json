@@ -1,14 +1,14 @@
 {
-  "about": "Vectors for the operator's mandate, mandate/1 (DEC-0125, MD-1 to MD-5), written by tools/vectors/mandate.ts, never by hand. mandateCovers({mandate, tier, now, call: {capability, action?, effect, spendUsd?, project?}}) answers {ok: true, recordAs: {by: operator, via: mandate, task, chain}} for a call the mandate's effective scope covers (the last chain entry's scope, else the mandate's) from a T0 or T1 caller; {ok: false, code: operator-decision-required, data: {detail: outside-mandate: <capability|action|effect|spend|project>}} for a valid one that does not cover it, naming the first part not covered in that order; {ok: false, code: decision-invalid, data: {detail}} for a T2 caller (mandate-at-t2), a document that is not the schema's or stands more than 7 days or whose chain steps go back in time, repeat an agent or exceed four (mandate-malformed), a hand-over that widens a list, the effects or the spend (mandate-widened), one given more than 60 s after the clock (mandate-early) or one past its expiry (mandate-expired); {fault} is the callee's own and never sent. A relayed action is covered only when the scope's actions list it, or, when the scope lists no actions, its capabilities include the action's tool.",
+  "about": "Vectors for the operator's mandate, mandate/1 (DEC-0125, MD-1 to MD-6), written by tools/vectors/mandate.ts, never by hand. mandateCovers({mandate, tier, now, self, caller, call: {capability, action?, effect, spendUsd?, project?}}) answers {ignored: mandate-at-t2} for a T2 caller (its mandate changes nothing); {ok: false, code: decision-invalid, data: {detail}} for a document that is not the schema's, stands more than 7 days, or whose chain goes back in time, repeats an agent or exceeds four (mandate-malformed), a hand-over that widens a list, the effects or the per-call ceiling or drops one (mandate-widened), a chain that does not end in self with caller before it (mandate-not-for-this-call), one given more than 60 s after the clock (mandate-early) or past its expiry (mandate-expired); {ok: false, code: operator-decision-required, data: {detail: outside-mandate: <action|capability|effect|spend|project>, estimateUsd?, perCallMaxUsd?}} for a valid one that does not cover the call, naming the first part not covered in that order; otherwise {ok: true, recordAs: {by: operator, via: mandate, task, chain}}. The scope in force is the last chain entry's that names one, else the mandate's. A relayed action is covered when the scope's actions list it, or, with no actions listed, its capabilities include its tool; change-policy is never covered (AP-5); an effect beyond draft needs capabilities or actions listed; with perCallMaxUsd the call's own estimate must exist and be within it, without it the money limits decide. {fault} is the callee's own and never sent.",
   "cases": [
     {
-      "name": "the paid research the operator asked for, from the developer's machine",
+      "name": "the operator's words with no amount: the paid research is covered, the money limits decide its spend",
       "input": {
         "mandate": {
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -21,113 +21,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
-            "projects": [
-              "example-site"
-            ]
-          },
-          "chain": [
-            {
-              "agent": "example-developer",
-              "at": "2026-10-26T10:01:00Z"
-            }
-          ]
-        },
-        "tier": "T0",
-        "now": "2026-10-26T12:00:00Z",
-        "call": {
-          "capability": "research.run",
-          "effect": "charge",
-          "spendUsd": 12,
-          "project": "example-site"
-        }
-      },
-      "expected": {
-        "ok": true,
-        "recordAs": {
-          "by": "operator",
-          "via": "mandate",
-          "task": "research the eSIM market for the pricing page",
-          "chain": [
-            "example-developer"
-          ]
-        }
-      }
-    },
-    {
-      "name": "the same from another of the operator's machines (T1)",
-      "input": {
-        "mandate": {
-          "kind": "mandate/1",
-          "by": "operator",
-          "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
-          "at": "2026-10-26T10:00:00Z",
-          "expiresAt": "2026-10-27T10:00:00Z",
-          "scope": {
-            "capabilities": [
-              "research.run",
-              "research.ask",
-              "page.update"
-            ],
-            "effects": [
-              "charge",
-              "draft"
-            ],
-            "spendUsd": 20,
-            "projects": [
-              "example-site"
-            ]
-          },
-          "chain": [
-            {
-              "agent": "example-developer",
-              "at": "2026-10-26T10:01:00Z"
-            }
-          ]
-        },
-        "tier": "T1",
-        "now": "2026-10-26T12:00:00Z",
-        "call": {
-          "capability": "research.run",
-          "effect": "charge",
-          "spendUsd": 12,
-          "project": "example-site"
-        }
-      },
-      "expected": {
-        "ok": true,
-        "recordAs": {
-          "by": "operator",
-          "via": "mandate",
-          "task": "research the eSIM market for the pricing page",
-          "chain": [
-            "example-developer"
-          ]
-        }
-      }
-    },
-    {
-      "name": "handed on narrowed, then used within the narrower scope",
-      "input": {
-        "mandate": {
-          "kind": "mandate/1",
-          "by": "operator",
-          "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
-          "at": "2026-10-26T10:00:00Z",
-          "expiresAt": "2026-10-27T10:00:00Z",
-          "scope": {
-            "capabilities": [
-              "research.run",
-              "research.ask",
-              "page.update"
-            ],
-            "effects": [
-              "charge",
-              "draft"
-            ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -139,24 +32,14 @@
             },
             {
               "agent": "example-researcher",
-              "at": "2026-10-26T10:05:00Z",
-              "scope": {
-                "capabilities": [
-                  "research.run"
-                ],
-                "effects": [
-                  "charge"
-                ],
-                "spendUsd": 15,
-                "projects": [
-                  "example-site"
-                ]
-              }
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -178,13 +61,13 @@
       }
     },
     {
-      "name": "handed on unchanged",
+      "name": "the same from another of the operator's machines (T1)",
       "input": {
         "mandate": {
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -197,7 +80,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -213,8 +95,10 @@
             }
           ]
         },
-        "tier": "T0",
+        "tier": "T1",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -242,7 +126,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -255,7 +139,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -264,11 +147,17 @@
             {
               "agent": "example-developer",
               "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.ask",
           "effect": "none"
@@ -281,19 +170,20 @@
           "via": "mandate",
           "task": "research the eSIM market for the pricing page",
           "chain": [
-            "example-developer"
+            "example-developer",
+            "example-researcher"
           ]
         }
       }
     },
     {
-      "name": "a T2 caller: across the boundary only a delegation token carries authority",
+      "name": "a per-call ceiling the estimate stays within",
       "input": {
         "mandate": {
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -306,7 +196,66 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
+            "projects": [
+              "example-site"
+            ],
+            "perCallMaxUsd": 20
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
+            }
+          ]
+        },
+        "tier": "T0",
+        "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
+        "call": {
+          "capability": "research.run",
+          "effect": "charge",
+          "spendUsd": 12,
+          "project": "example-site"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "mandate",
+          "task": "research the eSIM market for the pricing page",
+          "chain": [
+            "example-developer",
+            "example-researcher"
+          ]
+        }
+      }
+    },
+    {
+      "name": "handed on narrowed, used within the narrower scope",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
             "projects": [
               "example-site"
             ]
@@ -315,11 +264,202 @@
             {
               "agent": "example-developer",
               "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z",
+              "scope": {
+                "capabilities": [
+                  "research.run"
+                ],
+                "effects": [
+                  "charge"
+                ],
+                "perCallMaxUsd": 15,
+                "projects": [
+                  "example-site"
+                ]
+              }
+            }
+          ]
+        },
+        "tier": "T0",
+        "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
+        "call": {
+          "capability": "research.run",
+          "effect": "charge",
+          "spendUsd": 12,
+          "project": "example-site"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "mandate",
+          "task": "research the eSIM market for the pricing page",
+          "chain": [
+            "example-developer",
+            "example-researcher"
+          ]
+        }
+      }
+    },
+    {
+      "name": "a third agent the researcher called",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
+            },
+            {
+              "agent": "example-crawler",
+              "at": "2026-10-26T10:06:00Z"
+            }
+          ]
+        },
+        "tier": "T0",
+        "now": "2026-10-26T12:00:00Z",
+        "self": "example-crawler",
+        "caller": "example-researcher",
+        "call": {
+          "capability": "research.run",
+          "effect": "charge",
+          "spendUsd": 12,
+          "project": "example-site"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "mandate",
+          "task": "research the eSIM market for the pricing page",
+          "chain": [
+            "example-developer",
+            "example-researcher",
+            "example-crawler"
+          ]
+        }
+      }
+    },
+    {
+      "name": "a T2 caller: its mandate changes nothing, the profile applies",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T2",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
+        "call": {
+          "capability": "research.run",
+          "effect": "charge",
+          "spendUsd": 12,
+          "project": "example-site"
+        }
+      },
+      "expected": {
+        "ignored": "mandate-at-t2"
+      }
+    },
+    {
+      "name": "the callee is not the chain's last agent",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
+            }
+          ]
+        },
+        "tier": "T0",
+        "now": "2026-10-26T12:00:00Z",
+        "self": "example-other",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -331,18 +471,18 @@
         "ok": false,
         "code": "decision-invalid",
         "data": {
-          "detail": "mandate-at-t2"
+          "detail": "mandate-not-for-this-call"
         }
       }
     },
     {
-      "name": "a capability the operator did not name",
+      "name": "the caller is not the agent before the callee",
       "input": {
         "mandate": {
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -355,7 +495,60 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
+            }
+          ]
+        },
+        "tier": "T0",
+        "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-other",
+        "call": {
+          "capability": "research.run",
+          "effect": "charge",
+          "spendUsd": 12,
+          "project": "example-site"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "mandate-not-for-this-call"
+        }
+      }
+    },
+    {
+      "name": "a chain of the leading agent alone names no callee",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
             "projects": [
               "example-site"
             ]
@@ -369,6 +562,62 @@
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-developer",
+        "caller": "example-developer",
+        "call": {
+          "capability": "research.run",
+          "effect": "charge",
+          "spendUsd": 12,
+          "project": "example-site"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "mandate-not-for-this-call"
+        }
+      }
+    },
+    {
+      "name": "a capability the operator did not name",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
+            }
+          ]
+        },
+        "tier": "T0",
+        "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "billing.topup",
           "effect": "charge",
@@ -391,7 +640,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -404,7 +653,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -413,11 +661,17 @@
             {
               "agent": "example-developer",
               "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "page.update",
           "effect": "publish",
@@ -433,13 +687,157 @@
       }
     },
     {
-      "name": "more than the mandate may spend",
+      "name": "a policy change, which no mandate covers (AP-5)",
       "input": {
         "mandate": {
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "change-policy"
+            ],
+            "projects": [
+              "example-site"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
+            }
+          ]
+        },
+        "tier": "T0",
+        "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
+        "call": {
+          "capability": "page.update",
+          "effect": "change-policy",
+          "project": "example-site"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "outside-mandate: effect"
+        }
+      }
+    },
+    {
+      "name": "an external effect under a mandate that names no capability or action",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "effects": [
+              "charge"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
+            }
+          ]
+        },
+        "tier": "T0",
+        "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
+        "call": {
+          "capability": "research.run",
+          "effect": "charge",
+          "spendUsd": 1
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "outside-mandate: capability"
+        }
+      }
+    },
+    {
+      "name": "a draft under a mandate that names no capability",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "effects": [
+              "draft"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
+            }
+          ]
+        },
+        "tier": "T0",
+        "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
+        "call": {
+          "capability": "page.update",
+          "effect": "draft"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "mandate",
+          "task": "research the eSIM market for the pricing page",
+          "chain": [
+            "example-developer",
+            "example-researcher"
+          ]
+        }
+      }
+    },
+    {
+      "name": "above the per-call ceiling",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -452,20 +850,26 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
-            ]
+            ],
+            "perCallMaxUsd": 20
           },
           "chain": [
             {
               "agent": "example-developer",
               "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -477,18 +881,20 @@
         "ok": false,
         "code": "operator-decision-required",
         "data": {
-          "detail": "outside-mandate: spend"
+          "detail": "outside-mandate: spend",
+          "estimateUsd": 25,
+          "perCallMaxUsd": 20
         }
       }
     },
     {
-      "name": "more than the narrower scope may spend",
+      "name": "no estimate under a per-call ceiling",
       "input": {
         "mandate": {
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -501,7 +907,61 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
+            "projects": [
+              "example-site"
+            ],
+            "perCallMaxUsd": 20
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
+            }
+          ]
+        },
+        "tier": "T0",
+        "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
+        "call": {
+          "capability": "research.run",
+          "effect": "charge",
+          "project": "example-site"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "outside-mandate: spend",
+          "perCallMaxUsd": 20
+        }
+      }
+    },
+    {
+      "name": "above the narrower ceiling",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
             "projects": [
               "example-site"
             ]
@@ -521,7 +981,7 @@
                 "effects": [
                   "charge"
                 ],
-                "spendUsd": 15,
+                "perCallMaxUsd": 15,
                 "projects": [
                   "example-site"
                 ]
@@ -531,6 +991,8 @@
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -542,55 +1004,9 @@
         "ok": false,
         "code": "operator-decision-required",
         "data": {
-          "detail": "outside-mandate: spend"
-        }
-      }
-    },
-    {
-      "name": "spend under a mandate that names none",
-      "input": {
-        "mandate": {
-          "kind": "mandate/1",
-          "by": "operator",
-          "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
-          "at": "2026-10-26T10:00:00Z",
-          "expiresAt": "2026-10-27T10:00:00Z",
-          "scope": {
-            "capabilities": [
-              "research.run",
-              "research.ask",
-              "page.update"
-            ],
-            "effects": [
-              "charge",
-              "draft"
-            ],
-            "projects": [
-              "example-site"
-            ]
-          },
-          "chain": [
-            {
-              "agent": "example-developer",
-              "at": "2026-10-26T10:01:00Z"
-            }
-          ]
-        },
-        "tier": "T0",
-        "now": "2026-10-26T12:00:00Z",
-        "call": {
-          "capability": "research.run",
-          "effect": "charge",
-          "spendUsd": 12,
-          "project": "example-site"
-        }
-      },
-      "expected": {
-        "ok": false,
-        "code": "operator-decision-required",
-        "data": {
-          "detail": "outside-mandate: spend"
+          "detail": "outside-mandate: spend",
+          "estimateUsd": 16,
+          "perCallMaxUsd": 15
         }
       }
     },
@@ -601,7 +1017,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -614,7 +1030,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -623,11 +1038,17 @@
             {
               "agent": "example-developer",
               "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -650,7 +1071,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -663,7 +1084,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ],
@@ -675,11 +1095,17 @@
             {
               "agent": "example-developer",
               "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "page.update",
           "action": "publish-page",
@@ -702,7 +1128,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -715,7 +1141,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ],
@@ -727,11 +1152,17 @@
             {
               "agent": "example-developer",
               "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "page.update",
           "action": "approve-draft",
@@ -746,7 +1177,8 @@
           "via": "mandate",
           "task": "research the eSIM market for the pricing page",
           "chain": [
-            "example-developer"
+            "example-developer",
+            "example-researcher"
           ]
         }
       }
@@ -758,7 +1190,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -770,11 +1202,17 @@
             {
               "agent": "example-developer",
               "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "page.update",
           "action": "approve-draft",
@@ -790,13 +1228,13 @@
       }
     },
     {
-      "name": "a hand-over that widens the spend",
+      "name": "a hand-over that raises the ceiling",
       "input": {
         "mandate": {
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -809,10 +1247,10 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
-            ]
+            ],
+            "perCallMaxUsd": 20
           },
           "chain": [
             {
@@ -829,7 +1267,7 @@
                 "effects": [
                   "charge"
                 ],
-                "spendUsd": 50,
+                "perCallMaxUsd": 50,
                 "projects": [
                   "example-site"
                 ]
@@ -839,6 +1277,74 @@
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
+        "call": {
+          "capability": "research.run",
+          "effect": "charge",
+          "spendUsd": 12,
+          "project": "example-site"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "mandate-widened"
+        }
+      }
+    },
+    {
+      "name": "a hand-over that drops the ceiling",
+      "input": {
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "research the eSIM market for the pricing page",
+          "instruction": "run the research on eSIM competitors' prices",
+          "at": "2026-10-26T10:00:00Z",
+          "expiresAt": "2026-10-27T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "research.run",
+              "research.ask",
+              "page.update"
+            ],
+            "effects": [
+              "charge",
+              "draft"
+            ],
+            "projects": [
+              "example-site"
+            ],
+            "perCallMaxUsd": 20
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z",
+              "scope": {
+                "capabilities": [
+                  "research.run"
+                ],
+                "effects": [
+                  "charge"
+                ],
+                "projects": [
+                  "example-site"
+                ]
+              }
+            }
+          ]
+        },
+        "tier": "T0",
+        "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -861,7 +1367,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -874,7 +1380,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -895,7 +1400,7 @@
                 "effects": [
                   "charge"
                 ],
-                "spendUsd": 15,
+                "perCallMaxUsd": 15,
                 "projects": [
                   "example-site"
                 ]
@@ -905,6 +1410,8 @@
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -927,7 +1434,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -940,7 +1447,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -959,14 +1465,15 @@
                 ],
                 "effects": [
                   "charge"
-                ],
-                "spendUsd": 15
+                ]
               }
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -989,7 +1496,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -1002,7 +1509,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -1011,11 +1517,17 @@
             {
               "agent": "example-developer",
               "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-27T10:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -1038,7 +1550,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T12:02:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -1051,7 +1563,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -1060,11 +1571,17 @@
             {
               "agent": "example-developer",
               "at": "2026-10-26T12:03:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T12:04:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -1087,7 +1604,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-11-03T10:00:01Z",
           "scope": {
@@ -1100,7 +1617,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -1109,11 +1625,17 @@
             {
               "agent": "example-developer",
               "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -1136,7 +1658,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -1149,7 +1671,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -1158,11 +1679,17 @@
             {
               "agent": "example-developer",
               "at": "2026-10-26T09:00:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -1185,7 +1712,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -1198,7 +1725,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -1209,13 +1735,19 @@
               "at": "2026-10-26T10:01:00Z"
             },
             {
-              "agent": "example-developer",
+              "agent": "example-researcher",
               "at": "2026-10-26T10:05:00Z"
+            },
+            {
+              "agent": "example-developer",
+              "at": "2026-10-26T10:07:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-developer",
+        "caller": "example-researcher",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -1238,7 +1770,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -1251,7 +1783,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -1281,6 +1812,8 @@
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -1316,7 +1849,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -1325,11 +1857,17 @@
             {
               "agent": "example-developer",
               "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "2026-10-26T12:00:00Z",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",
@@ -1352,7 +1890,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "research the eSIM market for the pricing page",
-          "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+          "instruction": "run the research on eSIM competitors' prices",
           "at": "2026-10-26T10:00:00Z",
           "expiresAt": "2026-10-27T10:00:00Z",
           "scope": {
@@ -1365,7 +1903,6 @@
               "charge",
               "draft"
             ],
-            "spendUsd": 20,
             "projects": [
               "example-site"
             ]
@@ -1374,11 +1911,17 @@
             {
               "agent": "example-developer",
               "at": "2026-10-26T10:01:00Z"
+            },
+            {
+              "agent": "example-researcher",
+              "at": "2026-10-26T10:05:00Z"
             }
           ]
         },
         "tier": "T0",
         "now": "yesterday",
+        "self": "example-researcher",
+        "caller": "example-developer",
         "call": {
           "capability": "research.run",
           "effect": "charge",

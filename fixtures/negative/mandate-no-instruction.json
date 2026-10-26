@@ -14,7 +14,6 @@
       "charge",
       "draft"
     ],
-    "spendUsd": 20,
     "projects": [
       "example-site"
     ]
@@ -23,6 +22,10 @@
     {
       "agent": "example-developer",
       "at": "2026-10-26T10:01:00Z"
+    },
+    {
+      "agent": "example-researcher",
+      "at": "2026-10-26T10:05:00Z"
     }
   ]
 }

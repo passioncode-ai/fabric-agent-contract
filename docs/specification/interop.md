@@ -265,7 +265,11 @@ A job or call that needs a person returns `input_required` with MCP
 elicitation `inputRequests` in **form mode**; a choice is a single-select enum with titles
 (`oneOf: [{const, title}]`). Fabric maps it to an interaction point (ADR-0017) and answers with
 `tasks/update` (Task) or `fabric.job.get` + `inputResponses` (job handle). **FAC-SEM-018** form
-mode never requests a secret (MCP rule); secrets use URL mode. A URL-mode request on the service's own page MUST carry
+mode never requests a secret (MCP rule); secrets use URL mode. A job whose start call carried the operator's mandate
+for its task reads it at its own approval step: a step the mandate covers raises no input request and goes on as the
+operator's decision; a step it does not cover waits `input_required` as here, its message naming the part not covered,
+and its answer may carry a mandate that covers it in the `_meta.mandate` of the `fabric.job.get` call
+([delegation](delegation.md#the-operators-mandate) MD-3, MD-4, DEC-0125). A URL-mode request on the service's own page MUST carry
 its open_link as `url`, never a raw local address (**FAC-SEM-143**, [service](service.md#page-links) PL-4,
 DEC-0123), and a tool answer that names a page for a person MUST carry it in `open_link`.
 
@@ -305,8 +309,8 @@ each in the `structuredContent` of an `isError` tool result:
 
 | Code | Meaning | Who answers | What the caller does |
 |---|---|---|---|
-| `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without a decision | the service | asks the operator and calls again with their answer in `_meta.decision` |
-| `decision-invalid` | the decision is not valid against its schema, names another action or another object, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3) |
+| `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without a decision, or the caller's mandate does not cover the call (`data.detail` `outside-mandate: <part>`, DEC-0125) | the service | hands on again within its own mandate when that covers the call; otherwise asks the operator for that part and calls again with their answer in `_meta.decision` or a mandate that covers it |
+| `decision-invalid` | the decision is not valid against its schema, names another action or another object, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it; or the mandate is not valid (`data.detail` `mandate-*`, DEC-0125) | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3) |
 | `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit, a passkey signature | the service, with `error.data.humanStep` and `error.data.url`, the direct link to the step | hands the person that link |
 
 A `relayed` action from a T2 caller keeps [delegation](delegation.md#refusal-codes)'s `approval-required` (DL-17); its
@@ -340,7 +344,7 @@ trace id is accepted but its span is recorded `incomplete`.
 ## C3.5 The hub
 
 Fabric's MCP is the only route between agents: an agent reaches another agent
-by calling Fabric's `agent.call {agentId, capability, input, idempotencyKey?, decision?}` (and
+by calling Fabric's `agent.call {agentId, capability, input, idempotencyKey?, decision?, mandate?}` (and
 `fabric.job.get/cancel` for the job it returns). Fabric enforces the caller's MCP access binding
 (ADR-0026), mints the callee's credential itself, and journals one span per hop. Credentials
 travel over HTTP only in headers (`Authorization: Bearer <token>`), and over the relay only in a sealed call's
@@ -350,14 +354,19 @@ Arguments: [`interop-agent-call.schema.json`](../../schemas/interop-agent-call.s
 one estate the same arguments travel over the relay inside a sealed `fabric-agent-call/1`
 ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
 `agentId` is a registry id — a provider id, or a service `id` optionally followed by
-`.instance`. The schema admits no field beyond these and `decision`, so a credential cannot ride in
+`.instance`. The schema admits no field beyond these, `decision` and `mandate`, so a credential cannot ride in
 the arguments. `decision` is the operator's decision on a `relayed` action ([service](service.md#actions) AP-2): the hub
 forwards a T0 or T1 origin's to the callee as the hop's `_meta.decision`, unchanged, and drops a T2 origin's, which
 would change nothing there; it passes the callee's DL-19 refusals (`operator-decision-required`, `decision-invalid`,
 `human-step-required` with their `data`) back unchanged, never as a product error, and never answers a resend that
 carries a decision from what it remembered of the same call without one; the callee records the hub and the origin its
 delegation token names as the relaying caller (DEC-0121). The hub's own `fabric.job.get` forwards a T0 or T1 origin's
-`_meta.decision` to the callee the same way (DEC-0121).
+`_meta.decision` to the callee the same way (DEC-0121). `mandate` is the operator's mandate for the task
+([delegation](delegation.md#the-operators-mandate), DEC-0125), and the hub treats it as it treats `decision`: it
+forwards a T0 or T1 origin's to the callee as `_meta.mandate` (on `agent.call` and on its own `fabric.job.get`), drops
+a T2 origin's, passes the callee's refusals back unchanged and never answers a resend that carries a mandate from what
+it remembered of the same call without one. The hub is not an agent of the chain: the origin appends the callee before
+it calls, and the callee reads the origin as the agent before it.
 
 **Amendment (DEC-0039).** The hub is the only **issuer** between agents, not the only
 **route**. It signs a [delegation token](delegation.md) naming the person the work is for,

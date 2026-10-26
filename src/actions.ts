@@ -50,6 +50,8 @@ export interface ActionDecisionInput {
   now?: unknown;
   /** The call's `_meta.mandate` (or `call.mandate`), as received (DEC-0125); read only when the call carries no decision. */
   mandate?: unknown;
+  /** The service's own agent id, which a mandate's chain must end in (DEC-0125 MD-3). */
+  self?: unknown;
   /** The action's effect class, the service's own knowledge, required to read a mandate. */
   effect?: unknown;
   /** The service's own estimate of what this call spends, USD, to read a mandate's spend. */
@@ -65,7 +67,7 @@ export type ActionDecisionAnswer =
   | { ok: true; recordAs: DecisionRecord }
   | { ok: false; code: typeof HUMAN_STEP_REQUIRED; data: { humanStep: HumanStep; url: string } }
   | { ok: false; code: typeof APPROVAL_REQUIRED; data: { actionDigest: string } }
-  | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID; data?: { detail: string } }
+  | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID; data?: { detail: string; estimateUsd?: number; perCallMaxUsd?: number } }
   /** The service's own fault, never sent to a caller: an input it owes is missing or unreadable. */
   | { fault: "action-invalid" | "caller-missing" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" };
 
@@ -140,10 +142,12 @@ function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: s
   const { effect, spendUsd, project } = input;
   if (typeof effect !== "string") return { fault: "effect-missing" };
   const answer = mandateCovers({
-    mandate: input.mandate, tier: input.tier, now: input.now,
+    mandate: input.mandate, tier: input.tier, now: input.now, self: input.self, caller,
     call: { capability: action.tool, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}) }
   });
-  return "recordAs" in answer ? { ok: true, recordAs: { ...answer.recordAs, caller } } : answer;
+  if ("recordAs" in answer) return { ok: true, recordAs: { ...answer.recordAs, caller } };
+  // Never `ignored`: actionDecision reads the tier first, so a T2 call answered approval-required before (MD-5).
+  return answer as Exclude<typeof answer, { ignored: string }>;
 }
 
 /** What a host reads of a well-known document's actions declaration: the actions, or why it is not declared. */

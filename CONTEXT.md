@@ -146,10 +146,11 @@ authenticated as the relayer, refuses one without it `operator-decision-required
 
 **Mandate**: The operator's instruction for one task, carried with the task down a chain of the operator's agents
 (`mandate/1`): the task, the operator's words verbatim, when they were given, an expiry within 7 days, a scope
-(capabilities, relayed actions, an effect ceiling, a spend ceiling, projects) and the chain of agents that held it,
-each hand-over narrowing it. A callee takes a call it covers from a T0 or T1 caller as the operator's decision and
-refuses only the part it does not cover, so the operator is asked again for that alone; across the machine boundary
-it grants nothing, a delegation token carries the authority there (`mandateCovers`,
+(capabilities, relayed actions, an effect ceiling, a per-call spend ceiling, projects) and the chain of agents that
+held it, each call appending its callee and never widening the scope. A callee that is the chain's last agent, called
+by the one before it from T0 or T1, takes a call it covers as the operator's decision and refuses only the part it does
+not cover, so the operator is asked again for that alone; a T2 caller's mandate changes nothing, beyond the estate a
+delegation token carries the authority (`mandateCovers`,
 [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
 
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and

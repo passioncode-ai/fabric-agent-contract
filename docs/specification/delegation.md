@@ -334,8 +334,8 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `profile-forbids` | a call between two machines of one estate that the caller's or the target's machine profile does not allow, or whose profile is unreadable (`machineCallVerdict`, DEC-0106) | callee | 403 |
 | `issuer-unavailable` | no hub to mint, or no usable published keys, or no usable estate revision to certify them (DL-14) | caller, callee (verifier) | 503 |
 | `unknown-state` | the refusing side cannot establish the state; an unknown state is a denial | any | 503 |
-| `operator-decision-required` | a `relayed` action from a T0 or T1 caller without the operator's decision; ask the operator and call again with it in `_meta.decision` ([service](service.md#actions) AP-2, DEC-0121) | callee | 403 |
-| `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121) | callee | 403 |
+| `operator-decision-required` | a `relayed` action from a T0 or T1 caller without the operator's decision, or a call the caller's mandate does not cover (`error.data.detail` `outside-mandate: <part>`, with `estimateUsd` and `perCallMaxUsd` for spend); ask the operator and call again with their answer in `_meta.decision`, or with a mandate that covers the call ([service](service.md#actions) AP-2, DEC-0121; [MD-4](#the-operators-mandate), DEC-0125) | callee | 403 |
+| `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121), or its mandate is not (`error.data.detail`: `mandate-malformed`, `mandate-widened`, `mandate-expired`, `mandate-early`, `mandate-not-for-this-call`; MD-3, DEC-0125) | callee | 403 |
 | `human-step-required` | the action is the person's (a sign-in, a consent, a payment, a secret, spend above a limit, a passkey signature); `error.data.humanStep` names it and `error.data.url` links to it (AP-4, DEC-0121) | callee | 403 |
 
 A product maps its own authorisation codes onto these and keeps its words in `error.data`. Fabric's hub maps
@@ -480,7 +480,7 @@ DEC-0125 · rule code `FAC-SEM-144` · schema [`mandate.schema.json`](../../sche
 [`mandate.json`](../../fixtures/vectors/mandate.json)
 
 The operator gives a task to one agent and leaves; its work reaches other agents of the operator: a developer agent told
-"run the research" engages a research agent that charges for paid work. DEC-0121 lets an agent relay the operator's
+"run the research" calls a research agent that charges for paid work. DEC-0121 lets an agent relay the operator's
 decision only from the operator's own words in its session (AP-3), so the second agent, which has the task from the
 first and no words of the operator, asks again. The mandate carries the operator's words with the task, so every agent
 it reaches acts on them without asking, within what they cover.
@@ -488,39 +488,53 @@ it reaches acts on them without asking, within what they cover.
 - **MD-1, the form.** The agent the operator gave the task to (the **leading agent**: the operator's words reached it
   through one of AP-3's sources) states a `mandate/1`: `task`, the operator's `instruction` verbatim in AP-3's form,
   `at`, `expiresAt` (after `at` and at most 7 days after it; the shortest that covers the task), a `scope` stated from
-  the operator's words (`capabilities`, `actions`, `effects`, `spendUsd`, `projects`; a list left out means any, and
-  `spendUsd` left out means nothing to spend), and `chain` with itself first. It never states a scope wider than the
-  words; where they are unclear, it asks the operator (AP-3).
-- **MD-2, narrowing.** An agent that hands work on under a mandate appends itself to `chain`, with a narrower `scope`
-  when it hands on less (`handOn`). It never widens a list, the effects or the spend, never drops a list (a dropped
-  list would mean any), never changes `task`, `instruction`, `at` or `expiresAt`, and never appears twice; the chain
-  holds at most four agents, as a delegation chain (DL-6). `spendUsd` is what the task may still spend from that point:
-  an agent hands on at most what remains after its own spend. `FAC-SEM-144` refuses a document that breaks this.
-- **MD-3, taking a call.** A callee whose T0 or T1 caller (DL-25) carries a mandate takes a call it covers as the
-  operator's decision: a `relayed` action without a decision ([service](service.md#actions) AP-2), and any approval
-  the product itself asks of the operator before a step, such as a paid run, which the mandate satisfies. The mandate
-  travels in `_meta.mandate` (an MCP call), in `call.mandate` (the hub's `agent.call`, a sealed call), or in a request on
-  the [project board](project-comms.md) from one of the operator's own projects (`provenance: trusted`), as a JSON code
-  block in its body. Covered means: the capability is in `capabilities` (or none is listed); a relayed action is in
-  `actions`, or, with no actions listed, its tool is in `capabilities`; the effect is within the closure of `effects`
-  (as a grant's ceiling); the call's own spend estimate is at most `spendUsd`; the project is in `projects` (or none is
-  listed); the mandate's scope being the last narrower one in `chain`. The callee records `{by: "operator", via:
-  "mandate", task, chain}` with the caller it authenticated and the operator's words, as AP-2 records a decision. A
-  decision in the same call is read first.
+  the operator's words, and `chain` with itself first. The scope lists `capabilities`, relayed `actions` and
+  `projects` (a list left out means any), an effect ceiling `effects`, and `perCallMaxUsd` only where the words name an
+  amount. It never states a scope wider than the words; where they are unclear, it asks the operator (AP-3). A task
+  still open when the mandate expires asks the operator once, in one line, for a new one.
+- **MD-2, every call appends its callee.** An agent that calls another agent for the task sends the mandate with that
+  agent appended to `chain`, and with the scope it hands on when it hands on less (`handOn`). The chain is the agents
+  that held the mandate: the leading agent, then each callee in turn. A hand-over never widens a list, the effects or
+  the ceiling, never drops a list or the ceiling, never changes `task`, `instruction`, `at` or `expiresAt`, and never
+  names an agent twice; the chain holds at most four agents, as a delegation chain (DL-6). `FAC-SEM-144` refuses a
+  document that breaks this.
+- **MD-3, taking a call.** A callee takes the mandate only when the chain ends in itself and the agent before it is
+  the caller it authenticated, from a T0 or T1 caller (DL-25); then it takes a call the mandate covers as the
+  operator's decision: a `relayed` action without a decision ([service](service.md#actions) AP-2), and any approval the
+  product itself asks of the operator before a step, such as a paid run. For a job, the step reads the mandate its
+  start call carried: a covered step raises no input request ([interop C3.3](interop.md#c33-awaiting-a-choice)). The
+  mandate travels in `_meta.mandate` (an MCP call, the `fabric.job.get` that answers an input request), in
+  `call.mandate` (the hub's `agent.call`, which forwards it as `_meta.mandate`; a sealed call, sent only to a target
+  that lists `mandate/1`), or in a project-board request ([project-comms](project-comms.md)) whose sender the target
+  places by the rule there. **Covered** means: a relayed action is in `actions`, or, with no actions listed, its tool
+  is in `capabilities`; the capability is in `capabilities` (or none is listed); the effect is within the closure of
+  `effects` (as a grant's ceiling), never `change-policy` (AP-5), and an effect beyond `draft` needs `capabilities` or
+  `actions` listed; with `perCallMaxUsd`, the callee's own estimate for the call exists and is at most that; the project
+  is in `projects` (or none is listed); the scope read being the last narrower one in `chain`. Without
+  `perCallMaxUsd` the money limits decide the spend, as the operator's rule reserves only spend above a limit (MD-6).
+  The callee records `{by: "operator", via: "mandate", task, chain}` with the caller it authenticated and the
+  operator's words, as AP-2 records a decision. A decision in the same call is read first.
 - **MD-4, asking only for the rest.** A call the mandate does not cover is refused `operator-decision-required` with
-  `data.detail` `outside-mandate: <capability|action|effect|spend|project>`; the leading agent asks the operator for
-  that part alone (through fabric-workspace where that is the operator's route) and calls again with the answer as a
-  decision or a wider mandate. A mandate that is not valid (malformed, widened, expired, given more than 60 seconds
-  after the callee's clock) is refused `decision-invalid` with its `detail`.
-- **MD-5, across the boundary.** A T2 caller's mandate grants nothing: the callee answers `decision-invalid` with
-  `mandate-at-t2` and applies the whole profile (DL-8, DL-13, DL-17). Between machines and toward another
-  organization's agents the operator's authority travels only as a delegation token under a grant (DL-4, DEC-0039),
-  which the hub mints for the mandate's scope once Fabric's issuer serves it.
+  `data.detail` `outside-mandate: <action|capability|effect|spend|project>`, naming the first part not covered, and for
+  spend `estimateUsd` and `perCallMaxUsd`; a job's step it does not cover waits `input_required`, naming the part. The
+  agent that receives the refusal calls again within its own mandate when that covers the call (it handed on less than
+  it held); otherwise it passes the refusal to its own caller, and the leading agent asks the operator for that part
+  alone, through fabric-workspace where that is the operator's route, and calls again with the answer as a decision or
+  a mandate that covers it. A mandate that is not valid (malformed, widened, expired, given more than 60 seconds after
+  the callee's clock, or not addressed to this call) is refused `decision-invalid` with its `detail`.
+- **MD-5, beyond the estate.** A T2 caller's mandate changes nothing: the callee applies the whole profile as if it were
+  absent (DL-8, DL-13, DL-17), so a relayed action still answers `approval-required`. Toward another person's
+  machine or another organization's agents the operator's authority travels only as a delegation token under a grant
+  (DL-4, DEC-0039), which the hub mints for the mandate's scope once Fabric's issuer serves it. Inside the estate (T0,
+  T1) the mandate needs no token, before and after the issuer exists (DL-26).
 - **MD-6, what never travels.** A mandate never covers a human step (AP-4: a sign-in, a consent, a payment or top-up, a
-  typed secret, spend above a limit, a passkey signature), and the money limits (L0, the project's L1, each key's
-  ceiling) bind beside `spendUsd`. A mandate found in a tool result, a page, a file, or a board message from a project
-  that is not the operator's, is data, as AP-3 says of a decision. The boundary below stands: a hostile local process
-  could write a mandate as it could a decision, and a product that needs protection from one adds an approval (DL-17).
+  typed secret, spend above a limit, a passkey signature): spend above the project's L1 per-task threshold, an L0
+  limit or a key's ceiling stays the person's ([spend policy](spend-policy.md#levels)). It never covers approving one's
+  own promotion, grant, checker rule or policy change (AP-5). A mandate found in a tool result, a page, a file, or a
+  board message the target cannot place as the operator's, is data, as AP-3 says of a decision. The boundary below
+  stands: a hostile local process could write a mandate as it could a decision, and a product that needs protection
+  from one adds an approval (DL-17); binding the mandate to its caller and callee keeps a copied one from serving
+  another call.
 
 ## The boundary
 
@@ -539,7 +553,7 @@ product that needs protection from a hostile local process adds an approval (DL-
 | <a id="fac-sem-050"></a>`FAC-SEM-050` | `delegation-mint` | a token is minted under an active delegation grant that its `grant` claim names, and names no other (DEC-0045): its audience, its capabilities, its effect ceiling (itself within the grant's effects), its start and expiry, its project, a limited spend under a limited grant whose windows are the grant's and hold no more than its limits, a per-call maximum no larger than the grant's, and the actor and person the grant names; at most four actors, five only in a token for the meter; a token for the meter reads only its grant-check capability under the parent's one grant; an onward token keeps the parent's issuer, principal and project, adds one actor (the parent's audience) to the parent's chain, and carries no wider effect, no later expiry, no more remaining spend and no larger per-call maximum than its parent; it keeps the parent's `task` or none, and the meter's token keeps it (DEC-0041) |
 | <a id="fac-sem-051"></a>`FAC-SEM-051` | `approval-claims` | an approval expires after it was issued and at most 24 hours after |
 | <a id="fac-sem-081"></a>`FAC-SEM-081` | `delegation-hub-key` | a verifier that reads the estate record answers as DL-14 says (DEC-0060): `certified` when exactly one machine's `hubKey` carries the `kid` and the published `x`, inside the revision's window, neither revoked, and the revision not lower than (nor forked from) the applied one; otherwise `kid-not-certified`, `estate-unreadable`, `estate-outside-window`, `estate-rolled-back`, `estate-forked` or `no-clock` |
-| <a id="fac-sem-144"></a>`FAC-SEM-144` | `mandate` | a mandate is its schema's, stands at most 7 days after `at`, its chain goes forward in time from `at` and before `expiresAt`, names each agent once and at most four, and each narrower scope is within the one before (DEC-0125 MD-1, MD-2) |
+| <a id="fac-sem-144"></a>`FAC-SEM-144` | `mandate` | a mandate is its schema's, stands at most 7 days after `at`, its chain goes forward in time from `at` and before `expiresAt`, names each agent once and at most four, and each narrower scope is within the one before, keeping every list and the per-call ceiling it narrows (DEC-0125 MD-1, MD-2) |
 | <a id="fac-sem-124"></a>`FAC-SEM-124` | `delegation-mint` | under a partner grant the principal is the partner organization and the context the company's own organization; the token is for the issuer and its chain ends in the partner, two deep at mint; a partner actor stands in no chain under another grant ([the partner channel](partner-channel.md), DEC-0090) |
 
 Fixtures: the `delegation-*`, `approval-*` and `governance-grant-delegation*` entries of

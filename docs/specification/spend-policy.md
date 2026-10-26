@@ -19,7 +19,7 @@ The most specific level that exists decides. A level that does not exist is skip
 |---|---|---|
 | **L0 estate** | the limits no grant can raise: everything the estate spends across all provider keys in a month, **and** each provider key's own ceiling (DEC-0039); the hard stop | the estate's operator, once, and each key's ceiling where the key is issued; the registry alerts at 80% |
 | **L1 project** | every agent working on one project: the monthly limit, the auto-approve threshold per task, the model classes and the credential sources ([spend policy](#the-spend-policy)) | the person, at the project's first paid run, from options computed for that project |
-| **L2 task** | one run of a task whose cost varies, through the presets its agent declares (`costPresets`) | the person at launch, or the agent itself within L1's threshold |
+| **L2 task** | one run of a task whose cost varies, through the presets its agent declares (`costPresets`) | the person at launch, the agent itself within L1's threshold, or the operator's mandate for the task within L1's threshold and its own `perCallMaxUsd` ([delegation](delegation.md#the-operators-mandate), DEC-0125) |
 | **L3 call** | one call (`perCallMaxUsd`; a callee's own per-call limit); exceeding it is `limit-reached` with window `call` | derived from L2 |
 
 ## The spend policy

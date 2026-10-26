@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/mandate.schema.json",
   "title": "The operator's mandate a task carries down a chain of agents (mandate/1, DEC-0125)",
-  "description": "The operator's instruction for one task, carried by the agent leading it and handed on, narrowed, to the agents it engages (docs/specification/delegation.md#the-operators-mandate). It travels in a request's _meta.mandate, a hub agent.call's or a sealed call's call.mandate, or a project-board request's body. A callee takes a call it covers from a T0 or T1 caller as the operator's decision (MD-3); across the machine boundary it grants nothing (MD-5). mandateCovers in src/mandate.ts is the reference; FAC-SEM-144 checks the document.",
+  "description": "The operator's instruction for one task, carried by the agent leading it and handed on, narrowed, to the agents it engages (docs/specification/delegation.md#the-operators-mandate). It travels in a request's _meta.mandate, a hub agent.call's or a sealed call's call.mandate, or a project-board request's body. A callee takes a call it covers from a T0 or T1 caller as the operator's decision (MD-3); a T2 caller's mandate changes nothing (MD-5). mandateCovers in src/mandate.ts is the reference; FAC-SEM-144 checks the document.",
   "type": "object",
   "required": [
     "kind",
@@ -50,7 +50,7 @@
       "type": "array",
       "minItems": 1,
       "maxItems": 4,
-      "description": "The agents the mandate passed through, the leading agent first: each hand-over appends the agent handing on and, when it narrows, the narrower scope. At most four, as a delegation chain (DL-6).",
+      "description": "The agents that held the mandate, the leading agent first: every call under it appends the agent it calls (the receiver), with the scope it hands on when narrower. The callee takes it only when it is the last and its caller the one before (MD-2, MD-3). At most four, as a delegation chain (DL-6).",
       "items": {
         "type": "object",
         "required": [
@@ -61,15 +61,15 @@
         "properties": {
           "agent": {
             "$ref": "common.schema.json#/$defs/agentId",
-            "description": "The agent that held the mandate at this step."
+            "description": "The agent that held the mandate at this step: the one it was handed to."
           },
           "at": {
             "$ref": "common.schema.json#/$defs/timestamp",
-            "description": "When it took or handed it on."
+            "description": "When it was handed to that agent."
           },
           "scope": {
             "$ref": "#/$defs/scope",
-            "description": "The narrower scope it handed on; absent, it handed on what it held."
+            "description": "The narrower scope it was handed; absent, the scope before it."
           }
         }
       }
@@ -113,11 +113,11 @@
           },
           "description": "The effect ceiling, read as a grant's effectCeiling is (none below every class, draft below every external effect)."
         },
-        "spendUsd": {
+        "perCallMaxUsd": {
           "type": "number",
           "minimum": 0,
           "maximum": 100000,
-          "description": "The most the task may spend in USD from this point of the chain; absent, nothing. A call whose own estimate exceeds it is outside the mandate. The money limits (L0, L1, each key's ceiling) bind besides."
+          "description": "The most one call under the mandate may spend, USD, by the callee's own estimate; a call with no estimate is then outside it. Absent: the mandate sets no ceiling and the money limits decide (L0, the project's L1 with its per-task threshold, each key's ceiling), as the operator's rule reserves only spend above a limit (MD-3, MD-6)."
         },
         "projects": {
           "type": "array",

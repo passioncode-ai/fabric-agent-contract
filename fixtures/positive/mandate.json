@@ -2,7 +2,7 @@
   "kind": "mandate/1",
   "by": "operator",
   "task": "research the eSIM market for the pricing page",
-  "instruction": "run the research on eSIM competitors' prices, up to 20 dollars",
+  "instruction": "run the research on eSIM competitors' prices",
   "at": "2026-10-26T10:00:00Z",
   "expiresAt": "2026-10-27T10:00:00Z",
   "scope": {
@@ -15,7 +15,6 @@
       "charge",
       "draft"
     ],
-    "spendUsd": 20,
     "projects": [
       "example-site"
     ]
@@ -24,6 +23,10 @@
     {
       "agent": "example-developer",
       "at": "2026-10-26T10:01:00Z"
+    },
+    {
+      "agent": "example-researcher",
+      "at": "2026-10-26T10:05:00Z"
     }
   ]
 }

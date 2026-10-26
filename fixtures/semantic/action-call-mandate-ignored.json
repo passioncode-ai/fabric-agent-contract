@@ -1,0 +1,60 @@
+{
+  "description": "The same call answered as if no mandate covered it: FAC-SEM-142 reports an answer actionDecision would not give (DEC-0125 MD-3).",
+  "kind": "action-call",
+  "expect": [
+    "FAC-SEM-142"
+  ],
+  "input": {
+    "action": {
+      "id": "approve-draft",
+      "title": "Approve the draft",
+      "tool": "page.update",
+      "gate": "relayed"
+    },
+    "tier": "T0",
+    "caller": "example-developer",
+    "self": "example-researcher",
+    "now": "2026-10-26T12:00:00Z",
+    "mandate": {
+      "kind": "mandate/1",
+      "by": "operator",
+      "task": "research the eSIM market for the pricing page",
+      "instruction": "run the research on eSIM competitors' prices",
+      "at": "2026-10-26T10:00:00Z",
+      "expiresAt": "2026-10-27T10:00:00Z",
+      "scope": {
+        "capabilities": [
+          "research.run",
+          "research.ask",
+          "page.update"
+        ],
+        "effects": [
+          "charge",
+          "draft"
+        ],
+        "projects": [
+          "example-site"
+        ],
+        "actions": [
+          "approve-draft"
+        ]
+      },
+      "chain": [
+        {
+          "agent": "example-developer",
+          "at": "2026-10-26T10:01:00Z"
+        },
+        {
+          "agent": "example-researcher",
+          "at": "2026-10-26T10:05:00Z"
+        }
+      ]
+    },
+    "effect": "draft",
+    "project": "example-site",
+    "answer": {
+      "ok": false,
+      "code": "operator-decision-required"
+    }
+  }
+}
