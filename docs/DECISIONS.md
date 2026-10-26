@@ -7617,7 +7617,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-26
 - **Status:** Accepted (2026-10-26). Additive: two new schemas (`org-membership/1`, `org-key-set/1`) and an optional
   member of the estate record (`organizations`), which Fabric writes only once every reader of the record is pinned at
-  or after. Adoption: every organization server, Fabric and the products that read membership (CT-137).
+  or after: every machine of the person and the relay that holds the record. Adoption: every organization server,
+  Fabric and the products that read membership (CT-137).
 - **Context:** the organization train's packet TP-00 (row N-1, step 1.1 of fabric-workspace
   `docs/reports/2026-10-25-organization-r1/README.md` at `d438e3dc`): Fabric cannot trust an organization server's
   membership, and a product cannot be granted one, without a document Fabric verifies. MD-9 path (a)
@@ -7634,17 +7635,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2. **OM-2, the pin.** The person admits an organization by pinning `{org, issuer, root: {kid, x}, pinnedAt}` in the
      estate record's `organizations`; the passkey's signature over that revision is the admission; no administrator
      signs it. Unpinning ends every membership of it. `FAC-SEM-147`: each organization once, no root of small order.
-  3. **OM-3, the key set.** `org-key-set/1`, the organization's root signing only key sets, one root per organization
-     even on a server that hosts many; rotation, revocation and replay as `entitlement-key-set/1`.
+  3. **OM-3, the key set.** `org-key-set/1`, the organization's membership root (never its `policyRootKey`) signing
+     only key sets, one per organization even on a server that hosts many, each signing key in one organization's set;
+     rotation, revocation and replay as `entitlement-key-set/1`.
   4. **OM-4, the verifiers.** `verifyOrgKeySet` and `verifyOrgMembership` (`src/org-membership.ts`), offline, in the
      OK and OM tables' order; no grace (`expired` at `expiresAt`); `ended` when stated or past `membershipEndsAt`;
      `refreshDue` 15 minutes before expiry; one held record per (organization, audience, subject).
   5. **OM-5, what ends with a membership.** An `ended` attestation, `organization-closed` (DEC-0103) or an unpin ends
      it, and with it the context's share grants (revoked in the next revision), delegation tokens in the context, the
-     device enrollment and anything leaving for the organization.
+     device enrollment (ended as on `organization-closed`: the `server` layer and its locks, key set, streams and the
+     context's credentials; devices.md amended) and anything leaving for the organization.
   6. **OM-6, suspended is not ended.** An expired or unverifiable attestation authorises nothing new; what runs keeps
      its expiry. A refresh the issuer refuses for the membership is an end.
-  7. **OM-7, the allowlist.** Only check-ins of that enrollment, the context's session events, its grants' usage and
+  7. **OM-7, the allowlist.** Only the enrollment's own requests (enrollment, rotation, renewal) and its sessionless
+     activity events, proposals, check-ins of that enrollment, the context's session events, its grants' usage and
      share registrations, the enrollment's node summary, credential requests and call records, and the membership
      refresh leave a person's Fabric for an organization. A new row needs a decision.
   8. **OM-8, the issuer's duties.** Rising revisions, a stated end, a pairwise opaque subject, roles mapped onto three,
@@ -7669,7 +7673,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `schemas/org-membership.schema.json`, `schemas/org-key-set.schema.json` (new),
   `schemas/estate-record.schema.json` (`organizations`, `$defs/organizationPin`); `src/org-membership.ts` (new),
   `src/signing-challenges.ts` (two statements), `src/estate-record-rules.ts` (`FAC-SEM-147`), `src/semantic-rules.ts`,
-  `src/semantic-kinds.ts`, `src/protocol-revisions.ts`; `docs/specification/membership.md` (new), `estate-record.md`
+  `src/semantic-kinds.ts`, `src/protocol-revisions.ts`; `relay.md`, `revocation-delta.md`, `CONTEXT.md` and `src/relay.ts` (`org-authority/1` decided with CT-122),
+  `docs/specification/membership.md` (new), `devices.md` (a membership's end ends a `server` layer's locks), `estate-record.md`
   (Organizations), `contexts.md` (Membership and its expiry), `conformance.md` (modules, rows, the two tables, codes,
   the next free code), `README.md`, `docs/DOCMAP.md`, `CONTEXT.md`, `docs/ux/` (ST-038, FLW-32, SCN-047);
   `tools/vectors/org-membership.ts`, `tools/vectors/run.ts`, `fixtures/vectors/org-membership.json`, positive, negative

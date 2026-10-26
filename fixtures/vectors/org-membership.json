@@ -1241,7 +1241,7 @@
       }
     },
     {
-      "name": "wrong organization: A's attestation read for B",
+      "name": "wrong organization: a server listing one key in two organizations' sets (against OM-3), A's attestation read for B",
       "attestation": {
         "type": "org-membership/1",
         "issuer": "https://orgs.example",

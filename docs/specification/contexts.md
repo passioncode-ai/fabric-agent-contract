@@ -192,8 +192,8 @@ verifies it before it trusts the membership ([membership](membership.md), DEC-01
 what leaves a person's Fabric for an organization, are [OM-5 and OM-7](membership.md#ending). Only the device certificate (DEC-0031) follows the membership by
 itself: the organization server stops renewing or revokes it. The share grant does not: it runs to its own `expiresAt`
 or to its `grant` revocation in the estate record (`FAC-SEM-076`, carried fast by the revocation delta, DEC-0054). So
-Fabric's share flow (CX-FAB-04) sets a share grant's `expiresAt` no later than the membership's expiry the organization
-server shows. An instance whose share grant is revoked fails `FAC-SEM-111` from the next revision, and its usage stops
+Fabric's share flow (CX-FAB-04) sets a share grant's `expiresAt` no later than the `membershipEndsAt` of the
+accepted `org-membership/1` (DEC-0127). An instance whose share grant is revoked fails `FAC-SEM-111` from the next revision, and its usage stops
 when no call is metered under it.
 
 ## Linkability
@@ -257,7 +257,7 @@ Fixtures: `fixtures/semantic/grant-context-*`, `fixtures/semantic/estate-share-g
 ## Who adopts it
 
 - **Fabric** writes a share grant's `context` when it shares an agent into an organization (its CX-FAB-04), sets that
-  grant's `expiresAt` no later than the membership's expiry the organization server shows, drafts placements by context
+  grant's `expiresAt` no later than the `membershipEndsAt` of the accepted `org-membership/1` (DEC-0127), drafts placements by context
   with their grants and an organization's slots filled locally, runs `FAC-SEM-110` and `FAC-SEM-111` before the passkey
   signs a revision, and writes `context` on a grant only once the meter reading its projection is pinned at or after
   DEC-0082.

@@ -133,11 +133,20 @@
   ],
   "organizations": [
     {
-      "org": "org:org-a",
+      "org": "org:org_3fh9p1zc",
       "issuer": "https://orgs.example",
       "root": {
         "kid": "root-org-a-1",
         "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
+      },
+      "pinnedAt": "2026-10-12T09:00:00Z"
+    },
+    {
+      "org": "org:org_7kq2m4xw",
+      "issuer": "https://orgs.example",
+      "root": {
+        "kid": "root-org-b-1",
+        "x": "CFn01c2fmBAFHuF99_902jC141_T2rt7ORxIljXv8rk"
       },
       "pinnedAt": "2026-10-12T09:00:00Z"
     }

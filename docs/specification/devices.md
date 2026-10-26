@@ -332,8 +332,8 @@ it stops every request to that organization, drops what it buffered for it (even
 enrollment, discarding that organization's `server` policy layer, key set, collection start and streams, and deleting every
 credential of its context ([credentials](credentials.md#revocation), DEC-0111) (an `mdm` layer stays the operating
 system's); its other enrollments are untouched. `certificate-revoked`, `certificate-unknown` and a
-server's own enrollment refusals keep their meaning. The enrollment's end on `organization-closed` is the one event this
-contract decides, besides a newer signed policy, that ends a `server` layer's locks (an `mdm` lock survives it); an
+server's own enrollment refusals keep their meaning. The enrollment's end on `organization-closed`, and on a membership's end ([membership](membership.md#ending) OM-5,
+DEC-0127), are the events this contract decides, besides a newer signed policy, that end a `server` layer's locks (an `mdm` lock survives it); an
 enrollment a node ends on `certificate-revoked` is not decided here ([precedence and locks](#policy)), except that the node
 deletes every credential of that organization's context and its marks at once, for an answer to a request signed under its
 current certificate ([credentials](credentials.md#revocation),

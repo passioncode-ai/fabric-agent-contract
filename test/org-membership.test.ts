@@ -20,6 +20,7 @@ import {
   verifyOrgMembership
 } from "../src/org-membership.js";
 import { strictTime } from "../src/rfc3339.js";
+import { estateRecordDigest } from "../src/estate-record-rules.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { ORG_KEY_SET_FIELDS, ORG_MEMBERSHIP_FIELDS, SIGNING_STATEMENTS } from "../src/signing-challenges.js";
 import { createValidator, validateDocument } from "../src/validator.js";
@@ -160,5 +161,31 @@ describe("the verifiers' edges", () => {
     expect(verifyOrgKeySet(KEY_SET, { root: { ...vectors.root, x: 7 as never } })).toEqual({ ok: false, problem: "context-invalid" });
     expect(verifyOrgKeySet(KEY_SET, { root: vectors.root, held: { revision: 1, digest: "x" } })).toEqual({ ok: false, problem: "context-invalid" });
     expect(verifyOrgKeySet(KEY_SET, null as never)).toEqual({ ok: false, problem: "context-invalid" });
+  });
+});
+
+describe("ending a membership in the estate record (OM-5)", () => {
+  it("revokes the context's grants and removes them, their placements and secret placements in one revision that passes the rules", () => {
+    const record = read("fixtures/positive/estate-record-organizations.json");
+    const org = "org:org_3fh9p1zc";
+    const grants = (record.shareGrants as Json[]).filter((grant) => grant.context === org);
+    expect(grants.length).toBeGreaterThan(0);
+    const ended: Json = {
+      ...record,
+      organizations: (record.organizations as Json[]).filter((pin) => pin.org !== org),
+      shareGrants: (record.shareGrants as Json[]).filter((grant) => grant.context !== org),
+      revocations: [...(record.revocations as Json[]), ...grants.map((grant) => ({ kind: "grant", ref: grant.meta.id, revokedAt: record.issuedAt }))],
+      machines: (record.machines as Json[]).map((machine) => ({
+        ...machine,
+        packages: (machine.packages as Json[]).filter((placement) => placement.context !== org),
+        secrets: (machine.secrets as Json[]).filter((secret) => secret.context !== org)
+      }))
+    };
+    ended.digest = estateRecordDigest(ended);
+    expect(codes("estate-record", ended)).toEqual([]);
+    // Revoking the grant alone, keeping it and its placements, is what OM-5 rules out.
+    const half: Json = { ...record, revocations: ended.revocations };
+    half.digest = estateRecordDigest(half);
+    expect(codes("estate-record", half)).toEqual(["FAC-SEM-076", "FAC-SEM-111"]);
   });
 });

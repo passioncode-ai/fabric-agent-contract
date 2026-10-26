@@ -1029,12 +1029,12 @@ independent agent author and P-02 project operator.
 - **Entry point:** the member's join in Fabric
 - **Preconditions:** the organization `org:org-a` is served by `https://orgs.example`, which holds a root per organization; the member's Fabric is pinned at or after DEC-0127
 - **Steps:**
-  1. The member starts the join -> Fabric reads the organization's root from its server and shows the organization, the server and the root's fingerprint.
+  1. The member starts the join -> Fabric reads the organization's root from its server and shows the organization, the server and the root's fingerprint (what the member compares it with is pending Fabric's D8).
   2. The member confirms with their passkey -> the estate revision that pins `{org, issuer, root, pinnedAt}` is signed; no administrator is asked.
   3. The server sends the organization's key set and an attestation for the member's Fabric as audience -> Fabric applies the set under the pin and verifies the attestation: `active`, role `member`.
   4. Fifteen minutes before expiry -> Fabric fetches the next revision and holds it per subject.
 - **Expected result:** the membership is trusted from a document the organization's pinned root vouches for, and the member's personal work never leaves for the organization.
-- **Alt paths:** the server goes offline for a day -> the attestation expires and the membership is suspended: nothing new is authorised, nothing is revoked. The administrator removes the member -> the server issues an `ended` attestation; Fabric revokes the context's share grants in the next revision and sends nothing more. An attestation signed for another organization on the same server -> refused `wrong-org`. A server that changes its root silently -> attestations under the new key set do not verify until the member pins the new root.
+- **Alt paths:** the server goes offline for a day -> the attestation expires and the membership is suspended: nothing new is authorised, nothing is revoked, and the shared agents stop answering the organization within ten minutes, as running tokens expire. The administrator removes the member -> the server issues an `ended` attestation; Fabric revokes the context's share grants in the next revision and sends nothing more. An attestation signed for another organization on the same server -> refused (`unknown-key` under that organization's own keys, or `wrong-org` where a server lists one key for both). A server that changes its root silently -> attestations under the new key set do not verify until the member pins the new root.
 - **UI elements:** SCR-31: the organization, the server, the root's fingerprint, the passkey prompt; each membership's role and state.
 - **States covered:** success, error
 - **Errors & recovery:** a refused attestation -> its reason is shown; the member can retry or leave the organization.

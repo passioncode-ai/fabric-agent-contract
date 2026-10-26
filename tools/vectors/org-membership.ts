@@ -149,7 +149,7 @@ function verifyCases(): Json[] {
     c("ended: the issuer states the end with a higher revision", ended, trust({ held: held(BASE) }), accepted(ended, "ended", false)),
     c("ended: past membershipEndsAt the attestation reads ended", termOver, trust(), accepted(termOver, "ended", false)),
     c("ended: a millisecond before membershipEndsAt it is still active", termOver, trust({ now: "2026-10-25T11:14:59.999Z" }), accepted(termOver, "active", false)),
-    c("wrong organization: A's attestation read for B", BASE, trust({ org: ORG_B, keySet: "orgB" }), refused("wrong-org")),
+    c("wrong organization: a server listing one key in two organizations' sets (against OM-3), A's attestation read for B", BASE, trust({ org: ORG_B, keySet: "orgB" }), refused("wrong-org")),
     c("wrong organization: orgs compare as written", BASE, trust({ org: "org:ORG-A" }), refused("context-invalid")),
     c("wrong audience: an attestation for another reader", BASE, trust({ audience: "product-client-9" }), refused("wrong-audience")),
     c("wrong subject: a reader that knows its member gets another member's attestation", BASE, trust({ subject: "m-00c4e1aa" }), refused("wrong-subject")),

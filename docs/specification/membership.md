@@ -65,15 +65,20 @@ nothing else; a key of small order is refused before anything is verified under 
 `organizations`: `{org, issuer, root: {kid, x}, pinnedAt}`. The passkey's signature over that estate revision is the
 person's admission (R1-D12); no administrator signs it, and no admission receipt exists. Fabric reads the root from the
 issuer at the moment the person joins and shows it to them before the passkey signs; how the issuer serves it, and
-whether Fabric's organization decision (D8) adds a second check, is Fabric's. Unpinning an organization in a later
+what the person compares the fingerprint with (an administrator's invitation, a second channel) is Fabric's
+organization decision (D8). Unpinning an organization in a later
 revision ends every membership of it ([OM-5](#ending)). `FAC-SEM-147` refuses an organization pinned twice and a root of
 small order. A reader pinned before DEC-0127 refuses the member, so Fabric writes it only once every reader of the
-record is pinned at or after (as DEC-0106 and DEC-0107 gated theirs).
+record is pinned at or after: every machine of the person and the relay that holds the record (as DEC-0106 and DEC-0107
+gated theirs).
 
-**OM-3, the key set.** The root signs only `org-key-set/1` documents; signing keys sign attestations. One root signs
-for one organization, even on a server that hosts many: an issuer key belongs to the organization, so another server
-can take the organization over by the person's new pin, and an organization deleted at one server leaves nothing that
-signs for it.
+**OM-3, the key set.** The membership root signs only `org-key-set/1` documents; signing keys sign attestations. It is
+a key of its own, never the same key as the organization's `policyRootKey` (DEC-0031), which signs device policy key
+sets only. One membership root signs for one organization, even on a server that hosts many: an issuer key belongs to
+the organization, so another server can take the organization over under the same `org:<orgId>` by the person's new
+pin (a new id is a new organization and context), and an organization deleted at one server leaves nothing that signs
+for it. A signing key is listed in one organization's set only; the verifier still checks the attestation's `org`, so
+a server that lists one key for two organizations is refused `wrong-org` rather than trusted.
 
 | Field | Rule |
 |---|---|
@@ -138,18 +143,26 @@ keeps one per subject.
 organization answers `organization-closed` (DEC-0103), or when the person unpins the organization from their estate.
 Everything the membership carried ends with it, as one rule:
 
-- Fabric revokes every share grant whose context is that `org:<orgId>` (a `grant` revocation in the next estate
-  revision, carried fast by the revocation delta, DEC-0054), so the agents the person shared stop running for it
-  (`FAC-SEM-111`);
+- Fabric revokes every share grant whose context is that `org:<orgId>`: the next estate revision lists a `grant`
+  revocation for each, and in the same revision removes the grant from `shareGrants` and every placement and secret
+  placement in that context, so the revision passes `FAC-SEM-075`, `FAC-SEM-076` and `FAC-SEM-111` (and drops the
+  organization's pin when the person unpinned it); the revocation delta carries the revocation fast (DEC-0054), so the
+  agents the person shared stop running for it;
 - the hub mints no delegation token in that context, and no relayed decision or mandate of the organization's context
   is taken;
-- the device enrollment stops: the organization server revokes the device certificate (DEC-0031), and the node drops
-  that enrollment's keys (CT-122 adds the context's own `iss` and hub key, dropped the same way);
+- the device enrollment ends: the organization server revokes the device certificate (DEC-0031), and the node ends
+  that enrollment as on `organization-closed` ([devices](devices.md#a-closed-organization), DEC-0103): it stops every
+  request to that organization, drops what it buffered for it, discards that organization's `server` policy layer and
+  its locks, key set, collection start and streams, deletes every credential of the context (DEC-0111) and drops the
+  enrollment's keys (CT-122 adds the context's own `iss` and hub key, dropped the same way); an `mdm` layer stays the
+  operating system's;
 - nothing of the organization's leaves the person's machine from then on ([OM-7](#what-leaves-a-persons-fabric)).
 
 **OM-6, suspended is not ended.** An attestation that expired, could not be refreshed or no longer verifies under the
 applied key set **suspends** the membership: nothing new is authorised for the organization (no share grant created or
-widened, no delegation token minted in its context), while what already runs keeps its own expiry. A refresh the issuer
+widened, no delegation token minted in its context), while what already runs keeps its own expiry. Since a delegation
+token lives at most 600 s (`FAC-SEM-049`), calls in the organization's context stop within ten minutes of a suspension,
+so an issuer sizes the attestation's life against its own outage budget. A refresh the issuer
 refuses for the membership (it answers that the person is not a member) is an end, as an `ended` attestation is. The
 reader asks for the next revision once `refreshDue` is true, and at least whenever it would act in the organization's
 context.
@@ -161,15 +174,22 @@ for that organization's server, and nothing else ([contexts](contexts.md#routing
 
 | What | Which | Rule |
 |---|---|---|
+| the enrollment's own requests | enrollment (its `org.id`, `device.id`, platform, key description, CSR, an optional platform attestation and its proof), certificate rotation, renewal | [devices](devices.md), DEC-0031, DEC-0094, DEC-0100 |
 | check-ins | the enrollment of that organization, its streams only | [devices](devices.md#check-in), DEC-0031 |
 | a session's events | sessions whose context is that `org:<orgId>`, as `routeTarget` answers | DEC-0082 |
+| the enrollment's own activity events | events that carry no session, such as `policy.violation` | [activity](activity.md), DEC-0052 |
+| proposals | proposals submitted to that organization's server | [proposals](proposals.md), DEC-0072 |
 | `grant.usage` and share registrations | grants whose context is that `org:<orgId>` | DEC-0086 |
-| `node-summary/1` | the enrollment's own record | DEC-0102, DEC-0118 |
+| `node-summary/1` | the enrollment's own record: what DEC-0118 lists for the machine's mode (under `C` this context only, under `A` the whole harness) | DEC-0102, DEC-0118 |
 | `credentialRequests`, `callRecords` | the enrollment's own | DEC-0111 |
 | a membership refresh | the audience and the subject the issuer gave | this decision |
 
 Personal work, another organization's work, the estate record and its members, passkeys, secrets, the person's other
-memberships and anything a row does not name never leave for an organization. A new row needs a decision.
+memberships and anything a row does not name never leave for an organization. A new row needs a decision. One gap is
+recorded, not allowed: until CT-122 every check-in also carries the estate's own records (the estate record's revision
+and digest, the heartbeat, the revocation delta's head, the leases, DEC-0053, DEC-0054, DEC-0056, DEC-0062), which link
+one machine across organizations ([contexts](contexts.md#linkability)); CT-122 removes them from what goes to an
+organization.
 
 ## The issuer's duties
 
@@ -181,8 +201,9 @@ memberships and anything a row does not name never leave for an organization. A 
   it, never silence alone.
 - It keeps the subject pairwise and opaque, and puts no person's name, address or email in any member.
 - It maps its own roles onto `owner`, `admin` and `member`; a finer role goes in `extensions`, which grant nothing.
-- It holds one root per organization, signs only key sets with it, rotates signing keys with overlapping windows, and
-  re-issues under a listed key before it revokes one.
+- It holds one membership root per organization, distinct from the `policyRootKey`, signs only `org-key-set/1` with
+  it, lists each signing key in one organization's set, rotates signing keys with overlapping windows, and re-issues
+  under a listed key before it revokes one.
 - It issues attestations with a life of at most 24 hours; a short life (an hour) bounds how long an end it could not
   deliver still reads active.
 
@@ -202,14 +223,18 @@ memberships and anything a row does not name never leave for an organization. A 
 - **Fabric** pins an organization's root in the estate record at the person's join (OM-2), applies key sets with
   `verifyOrgKeySet`, verifies attestations with `verifyOrgMembership` before it trusts a membership, keeps the held
   record per subject, and acts on OM-5, OM-6 and OM-7.
+- **Project Observatory's node** ends an enrollment on a membership's end as on `organization-closed` (OM-5): it learns
+  of the end from the organization server's answers (a revoked certificate, `organization-closed`) and from an estate
+  revision that no longer pins the organization, which it applies anyway.
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same
   pin, with its own audience.
 
 ## Privacy
 
 An attestation names an organization's opaque id, a reader, an opaque subject pairwise to that reader, a role and
-times. Two readers of one person's membership see two subjects, and two organizations never see each other: each
-attestation is one organization's, for one audience. The estate record's `organizations` lists the person's
+times. Two readers of one person's membership see two subjects, and an attestation adds no link between organizations:
+each is one organization's, for one audience. What still links one machine across organizations until CT-122 is in
+[contexts](contexts.md#linkability). The estate record's `organizations` lists the person's
 organizations to the person's own machines; the relay operator reads it today as it reads `org:<orgId>` in share
 grants, until per-context relay sessions (CT-122's question 3).
 
@@ -219,6 +244,8 @@ grants, until per-context relay sessions (CT-122's question 3).
   are the members' per-context keys, decided with CT-122.
 - How an issuer serves its root and key sets (a URL, a push), and how Fabric shows the root before the passkey signs:
   the issuer's and Fabric's (D8).
+- How attestations reach a reader (a push, a fetch) and how a reader authenticates to the issuer to fetch one: the
+  issuer's and the reader's, beside OM-7's refresh row, which bounds what that exchange carries about the person.
 - A faster end than expiry (an organization's revocation delta with a `member` kind): additive, when a reader needs it.
 - What each role may do in a reader: the reader's. An administrator's signature to release a project created in an
   organization (MC-13) is not an attestation and is not decided here.

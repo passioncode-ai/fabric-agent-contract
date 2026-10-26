@@ -36,6 +36,7 @@ owner; this repository's owner accepted §12's contract set into the board run's
 | `publisherKeys[]` | the publisher keys the estate's machines pin, as public Ed25519 JWKs naming their `alg` |
 | `publisherScopes[]` | optional: a partner's publisher key scoped to the organization contexts it is trusted in, `{kid, partner, contexts}` ([the partner channel](partner-channel.md#a-partners-publisher-key-trusted-per-context-fac-sem-122), DEC-0090) |
 | `shareGrants[]` | standing grants to principals outside the estate ([share grants](#share-grants)) |
+| `organizations[]` | optional: the organizations the person admitted, each with its membership root ([organizations](#organizations), DEC-0127) |
 | `revocations[]` | every revocation of the estate so far ([revocations](#revocations)) |
 | `deltaAnchor` | optional: the revocation delta's head this revision vouches for, where a machine that lacks the entries before it starts its chain ([revocation delta](revocation-delta.md#the-anchor), DEC-0107, `FAC-SEM-137`) |
 | `digest` | the [digest](#the-digest) |
@@ -232,7 +233,7 @@ steps of WebAuthn Level 3 §7.2 that bind an assertion to this record:
 | ER-8 | `wrong-rp`, `bad-flags`, `no-user-presence`, `no-user-verification` | the authority's RP ID is not a signing RP, `sign.<domain>` (DEC-0063: checked as soon as ER-4 has chosen the authority, before any check of the assertion); the `rpIdHash`; AT set or BS without BE; UP clear; UV clear |
 | ER-9 | `bad-signature` | the signature does not verify |
 | ER-10 | `no-clock`, `too-long-lived`, `not-yet-valid`, `expired` | the verifier's clock is not a readable time (checked first, so no window comparison runs on NaN); `issuedAt` or `validUntil` is not an RFC 3339 date-time with `T`, an offset and a day that exists (stricter than the schema's `date-time`: a leap second `:60` and a space separator are refused too), or the window is not positive or exceeds 30 days; or the clock is more than 60 s before `issuedAt` (`CLOCK_SKEW_SECONDS`, DEC-0066) or after `validUntil` (both instants are inside the window) |
-| ER-11 | `rule-violation` | the record breaks `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110`, `FAC-SEM-111` or `FAC-SEM-122` (DEC-0090), or, with a parent, `FAC-SEM-114` (DEC-0084); the verdict names the codes |
+| ER-11 | `rule-violation` | the record breaks `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110`, `FAC-SEM-111`, `FAC-SEM-122` (DEC-0090), `FAC-SEM-134` (DEC-0106) or `FAC-SEM-147` (DEC-0127), or, with a parent, `FAC-SEM-114` (DEC-0084) or `FAC-SEM-137`; the verdict names the codes |
 
 The vectors hold one case or more per problem, the EdDSA test passkey's seed (Ed25519 is deterministic, so a port's
 signer reproduces its signatures), the ES256 test passkey (ECDSA signatures are randomized, so a port verifies rather
@@ -264,7 +265,7 @@ keys are DEC-0053's.
   pinned static page (v4 §7), and certifies each machine's hub key before the hub signs with it; its delegation verifier
   trusts a `kid` only as [DL-14](delegation.md#keys-publication-and-rotation) says (DEC-0060).
 - **Project Observatory's node** applies a revision only when it is schema-valid and `verifyEstateRecord` accepts it
-  (the chain, a passkey the parent lists and does not revoke, the window and `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110`, `FAC-SEM-111`, `FAC-SEM-122` and `FAC-SEM-134`, and with a parent `FAC-SEM-114` and `FAC-SEM-137`) and it is
+  (the chain, a passkey the parent lists and does not revoke, the window and `FAC-SEM-072`…`FAC-SEM-076`, `FAC-SEM-110`, `FAC-SEM-111`, `FAC-SEM-122`, `FAC-SEM-134` and `FAC-SEM-147`, and with a parent `FAC-SEM-114` and `FAC-SEM-137`) and it is
   reconciled with the revocation-delta entries the node holds (`reconcileRevision`, DEC-0054), then applies its delta anchor (`anchorDelta`, DEC-0107), refusing the revision and keeping its parent when either refuses it; installs a
   package only when `verifyPackage` accepts it under `placementTrust`'s key and the `estate-placement` rule finds it
   is the one placed (its digest and `agentRef`: `verifyPackage` alone accepts any version signed under that key), each
@@ -274,7 +275,9 @@ keys are DEC-0053's.
 - **The relay** serves the latest revision by digest ([DEC-0047](relay.md#blobs)); it never decides trust.
 - **Every reader** (the Fabric Agent Adapter's kits and the first organization server's vendored schema among them)
   reads a revision that carries a machine's `profile` only once pinned at or after DEC-0106, and one that carries
-  `deltaAnchor` only once pinned at or after DEC-0107; Fabric writes neither before ([machine calls](machine-calls.md#compatibility),
+  `deltaAnchor` only once pinned at or after DEC-0107, and one that carries `organizations` only once pinned at or after
+  DEC-0127, which also adds `org-membership.schema.json` and `entitlement.schema.json` to the record schema's closure, so
+  a reader that vendors the schema vendors those two with it; Fabric writes none of them before ([machine calls](machine-calls.md#compatibility),
   [ceremonies](ceremonies.md#move-the-hub)).
 
 ## Privacy
