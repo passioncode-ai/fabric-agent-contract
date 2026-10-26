@@ -43,7 +43,7 @@ const X = /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 /** `activity-common#/$defs/opaqueId`, as `verifyOrgKeySet` reads the root's kid. */
 const OPAQUE = /^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$/;
 const ORG = /^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
-/** `entitlement#/$defs/issuer`, as `verifyOrgKeySet` reads the root's issuer. */
+/** `entitlement#/$defs/issuer` (with its 261-character cap below), as `verifyOrgKeySet` reads the root's issuer. */
 const ISSUER = /^https:\/\/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 const digestOf = (bytes: Buffer) => `sha256:${createHash("sha256").update(bytes).digest("hex")}`;
 const baseOk = (base: unknown) => base === null || (isObject(base) && Number.isSafeInteger(base.revision) && (base.revision as number) >= 1 && isString(base.digest) && SHA256.test(base.digest));
@@ -143,7 +143,7 @@ export function verifyRootRegistration(
   /** `registered`: a first key set under a root of this organization was accepted (OX-3), not merely a registration recorded. */
   ctx: { org: string; issuer: string; registered: boolean; claimValid: (claim: string) => boolean }
 ): { ok: true; root: OrgRoot; administrator: JsonObject } | { ok: false; problem: RootRegistrationProblem } {
-  if (!isObject(body) || Object.keys(body).sort().join(",") !== "administrator,claim,issuer,org,root,type" || body.type !== ROOT_REGISTRATION_TYPE || !isString(body.org) || !ORG.test(body.org) || !isString(body.issuer) || !ISSUER.test(body.issuer) || !isObject(body.root) || Object.keys(body.root).sort().join(",") !== "kid,x" ||
+  if (!isObject(body) || Object.keys(body).sort().join(",") !== "administrator,claim,issuer,org,root,type" || body.type !== ROOT_REGISTRATION_TYPE || !isString(body.org) || !ORG.test(body.org) || !isString(body.issuer) || body.issuer.length > 261 || !ISSUER.test(body.issuer) || !isObject(body.root) || Object.keys(body.root).sort().join(",") !== "kid,x" ||
     !isString(body.root.kid) || !OPAQUE.test(body.root.kid) || !isString(body.root.x) || !X.test(body.root.x) || !administratorOk(body.administrator) || !isString(body.claim) || !NONCE.test(body.claim)) {
     return { ok: false, problem: "malformed" };
   }

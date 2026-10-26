@@ -17,6 +17,7 @@ import {
 } from "../src/org-exchange.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
+import { VECTOR_FILE, buildOrgExchangeVectors } from "../tools/vectors/org-exchange.js";
 
 // DEC-0131: the draft exchange. A server drafts a key set or a member list, the owner's (or an administrator's)
 // Fabric signs it, and the server accepts only the pending draft, signed; the first key set registers the root.
@@ -159,5 +160,40 @@ describe("verifyRootRegistration (OX-2)", () => {
     verifyRootRegistration(REG, { ...counting, registered: true });
     expect(checked).toBe(0);
     expect(verifyRootRegistration(REG, { ...ctx, claimValid: () => false })).toEqual({ ok: false, problem: "claim-invalid" });
+  });
+});
+
+describe("the draft-exchange vectors (DEC-0133)", () => {
+  const exchange = read(VECTOR_FILE);
+  it("are the generator's output, and the root's answer is its schema's", () => {
+    expect(readFileSync(path.join(root, VECTOR_FILE), "utf8")).toBe(buildOrgExchangeVectors());
+    expect(valid(exchange.rootAnswer, "org-root")).toBe(true);
+    expect(valid({ org: exchange.root.org, issuer: exchange.root.issuer, kid: exchange.root.kid, x: exchange.root.x }, "org-root")).toBe(false);
+  });
+
+  it.each(exchange.digest as Json[])("digest: $name", (c) => {
+    expect((c.kind === "key-set" ? keySetDraftDigest(c.draft) : authorityDraftDigest(c.draft)) ?? null).toEqual(c.expected);
+  });
+
+  it.each(exchange.rules as Json[])("rules: $name", (c) => {
+    expect(evaluateSemanticRules(c.kind, c.envelope).map((finding) => [finding.code, finding.instancePath])).toEqual(c.expected);
+  });
+
+  it.each(exchange.keySet as Json[])("key set: $name", (c) => {
+    expect(acceptSignedKeySet(c.signed, c.context)).toEqual(c.expected);
+  });
+
+  it.each(exchange.authority as Json[])("authority: $name", (c) => {
+    expect(acceptSignedAuthority(c.signed, { ...c.context, now: new Date(c.context.now) })).toEqual(c.expected);
+  });
+
+  it.each(exchange.registration as Json[])("registration: $name", (c) => {
+    let checked = false;
+    const claimValid = (claim: string) => {
+      checked = true;
+      return (c.context.validClaims as string[]).includes(claim);
+    };
+    expect(verifyRootRegistration(c.body, { org: c.context.org, issuer: c.context.issuer, registered: c.context.registered, claimValid })).toEqual(c.expected);
+    expect(checked).toBe(c.claimChecked);
   });
 });
