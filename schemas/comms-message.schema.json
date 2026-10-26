@@ -58,6 +58,10 @@
       "description": "Only on a reply to an announcement (DEC-0098).",
       "$ref": "comms-common.schema.json#/$defs/reaction"
     },
+    "deliverTo": {
+      "description": "On a reply only: the deliverTo its sender gave (DEC-0135 RD-4); absent, the reply was delivered as sender.",
+      "$ref": "comms-common.schema.json#/$defs/deliverTo"
+    },
     "request": {
       "type": "object",
       "required": [
@@ -188,7 +192,8 @@
       },
       "else": {
         "properties": {
-          "reaction": false
+          "reaction": false,
+          "deliverTo": false
         }
       }
     }

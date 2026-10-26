@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0134` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0136` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -8031,3 +8031,43 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/org-exchange.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`;
   `docs/specification/README.md`; backlog CT-37, CT-158, CT-159, CT-160; `docs/handoffs/README.md`.
 - **Source:** CT-158; Fabric ADR-0180 (fabric `1d49ed3b`; thread `115ef7fb`); DEC-0129, DEC-0131.
+
+### DEC-0135: a reply is delivered to the sender it answers, or to whom it names
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (2026-10-26). Additive: one optional member, `deliverTo`, on `com.reply`, `com.submit` and a
+  message; delivery rules for what is unread. Adoption: CT-154 (Fabric's board, CO-437).
+- **Context:** since Fabric's migration 124 (CO-370, schema 97) a reply on the board is delivered to the sender of the
+  message it answers, not to every participant, and an unread count holds the reader's deliveries only. The contract
+  fixed a thread's participants at creation and said nothing of a reply's audience, so no reply to everyone could be
+  asked for (Fabric CO-437, relayed by fabric-workspace on 2026-10-26).
+- **Decision:** [project comms](specification/project-comms.md#who-a-message-is-delivered-to) RD-1 to RD-4.
+  1. **Delivery is not reading.** Every participant reads every message of a thread (C2). A message's delivery decides
+     only what counts as unread for a Project (`com.list` with `unread`, `com.status`'s count) and what a transport
+     mirror may send to it.
+  2. **RD-1.** A message, request, finding or announcement is delivered to every participant but the sender.
+  3. **RD-2.** A participant's reply is delivered as its optional `deliverTo` says: `sender` (the default, Fabric's
+     behaviour since migration 124; as `thread` when the replier answers its own Project's message), `thread` (every
+     participant but the replier), or a list of 1 to 16 participants other than the replier. A listed non-participant
+     is refused `immutable_participants`, the replier's own Project `invalid_arguments`; `deliverTo` on another kind is
+     refused `invalid_arguments`.
+  4. **RD-3.** A responder's fenced reply is delivered to the requester and takes no `deliverTo`.
+  5. **RD-4.** A reply as read carries the `deliverTo` its sender gave; the same idempotency key with another
+     `deliverTo` is `idempotency_conflict`.
+- **Why:** replies to a broadcast were most of a board's deliveries (Fabric BD-4: 69 %), so the sender default stays;
+  a person still needs to answer a whole thread, or the two Projects that asked the same thing, without opening a new
+  thread, which would lose the context. Keeping delivery apart from reading keeps C2: a reply never widens or narrows
+  who may read a thread.
+- **Alternatives considered:** a boolean `toAll` (Fabric's first suggestion; a list covers it and the two-Project case);
+  delivery to every participant by default (the fan-out CO-370 removed); narrowing who may read a reply (a second
+  audience inside a thread, against C2 and the fixed participants).
+- **Compatibility:** additive for a writer: a reply without `deliverTo` is unchanged and is delivered as Fabric
+  delivers it now. A board pinned before this refuses `deliverTo` as an unknown member (`invalid_arguments`); a writer
+  that gets that refusal and still means the thread says so in a new message rather than dropping the member. A
+  reader pinned before this meets `deliverTo` on a reply it reads and takes this pin to read it. `contractVersion`
+  stays `0.1.0`.
+- **Consequences / affects:** `schemas/comms-common.schema.json` (`deliverTo`), `comms-reply.schema.json`,
+  `comms-submit.schema.json`, `comms-message.schema.json`; fixtures; `docs/specification/project-comms.md` (header,
+  delivery, messages, `com.status`, transport mirror); backlog CT-154.
+- **Source:** CT-154; Fabric CO-437, CO-370 (fabric `20261026000124_one_schema_step.sql`); fabric-workspace's relay of
+  2026-10-26.

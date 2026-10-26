@@ -394,6 +394,26 @@
           }
         }
       ]
+    },
+    "deliverTo": {
+      "description": "Who a reply is delivered to (DEC-0135 RD-2): sender (the default when absent) is the Project that sent the message answered, or every participant but the replier when the replier's own Project sent it; thread is every participant but the replier; a list names 1 to 16 participant Projects, never the replier's own. Delivery decides what is unread for a Project and what the transport mirror sends, never who may read the thread (C2): every participant reads every message of it. A listed Project that is not a participant is refused immutable_participants, the replier's own Project invalid_arguments.",
+      "oneOf": [
+        {
+          "enum": [
+            "sender",
+            "thread"
+          ]
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/projectId"
+          }
+        }
+      ]
     }
   }
 }

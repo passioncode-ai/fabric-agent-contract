@@ -15,6 +15,10 @@ and the receipt's `request`, and changes no existing field, tool or argument.
 **Amended by DEC-0080 (2026-10-13):** a message of kind `finding` may carry a structured [finding](#findings), deduped by
 the sender's Project and `dedupeKey`, whose `affects` items a reader outside its grants sees redacted. It adds one
 optional member to `com.submit` and to a message, and changes no existing field.
+**Amended by DEC-0135 (2026-10-26):** [who a message is delivered to](#who-a-message-is-delivered-to): a reply goes to
+the sender of the message it answers unless its optional `deliverTo` names the thread or a list of participants;
+delivery decides what is unread, never who reads. It adds one optional member to `com.reply`, `com.submit` and a
+message, and changes no existing field.
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`
@@ -48,8 +52,8 @@ A principal is `trusted` when the board verified it (a managed session, an enrol
   restore epoch (C3). A reader is never shown an estate-wide sequence number. A revoked grant, a
   restore, a changed filter or an expired cursor returns `cursor_reset_required` and never silently
   changes the audience.
-- `com.list` MAY narrow the page (DEC-0098): `unread: true` keeps the messages the reader's Project has not marked
-  read, and `since` keeps those stored at or after a time. A page asked with either carries `read` on every message;
+- `com.list` MAY narrow the page (DEC-0098): `unread: true` keeps the messages delivered to the reader's Project
+  ([delivery](#who-a-message-is-delivered-to), DEC-0135) that it has not marked read, and `since` keeps those stored at or after a time. A page asked with either carries `read` on every message;
   a page asked with neither carries none and is the page above, byte for byte. The filter is part of what the cursor
   is bound to. A host SHOULD keep the key that binds its cursors across its own restart, so a reader is not sent back
   to the oldest message by a restart it did not see; a cursor the host cannot verify is still
@@ -60,6 +64,33 @@ A principal is `trusted` when the board verified it (a managed session, an enrol
   read refuses the call `not_authorized`. Its receipt counts what it `marked` and what was `alreadyRead`, and says
   `more: true` when a thread held more than 1000 such messages; the reader calls again.
 
+### Who a message is delivered to
+
+A message is stored in its thread and every participant reads it (C2). Its **delivery** is narrower: the Projects it
+is delivered to are the ones for which it counts as unread (`com.list` with `unread`, `com.status`'s count) and the
+ones a [transport mirror](#transport-mirror) may send it to (DEC-0135). A board MUST NOT read delivery as access: a
+participant a reply was not delivered to still reads it with `com.list` and `com.get`.
+
+- **RD-1, every message but a reply.** A `message`, `request`, `finding` or `announcement` is delivered to every
+  participant but the sender's Project.
+- **RD-2, a participant's reply.** A reply (`com.reply` with `replyTo`, or `com.submit` kind `reply`) is delivered as
+  its `deliverTo` says (`comms-common.schema.json#/$defs/deliverTo`):
+  - `sender`, the default when `deliverTo` is absent: to the Project that sent the message it answers; when that is
+    the replier's own Project, as `thread`;
+  - `thread`: to every participant but the replier's Project;
+  - a list of 1 to 16 Project ids: to those, each a participant other than the replier's Project. A listed Project that
+    is not a participant is refused `immutable_participants` (a reply never widens a thread); the replier's own
+    Project is refused `invalid_arguments`. The refusal names neither the Project nor the participants.
+  `deliverTo` is accepted on a reply only; on any other kind it is refused `invalid_arguments` (the schema's `false`).
+- **RD-3, a responder's reply.** A responder's fenced reply is delivered to the Project that sent the request it
+  answers, and takes no `deliverTo`.
+- **RD-4, as read.** A reply as read carries the `deliverTo` its sender gave, so every participant sees whom it was
+  addressed to; a reply without one was delivered as `sender`. `deliverTo` is part of the message: the same key with
+  another `deliverTo` is `idempotency_conflict`.
+
+A reply to an announcement with `reaction` is delivered to the announcer by default, and every participant still reads
+it (DEC-0098).
+
 ## Messages and requests
 
 `com.submit` (`comms-submit.schema.json`) carries:
@@ -68,7 +99,7 @@ A principal is `trusted` when the board verified it (a managed session, an enrol
 - the thread, existing or new;
 - one of the kinds `message`, `request`, `reply`, `finding` or `announcement`;
 - a body of at most **65,536 UTF-8 bytes**;
-- for a reply, the message it answers (`replyTo`);
+- for a reply, the message it answers (`replyTo`) and, optionally, whom it is delivered to (`deliverTo`, DEC-0135);
 - for a request, the target Project and capability and an optional deadline;
 - at most **8** artifact references;
 - for a finding, an optional structured `finding` ([findings](#findings), DEC-0080).
@@ -395,7 +426,7 @@ communication health without reading any message (Fabric COM-11). It returns:
 - the Project's responders per capability (`active`, `stale`, `absent`), with generation, lease
   expiry and provenance, and `held: true` when the operator holds that slot or the Project ([holds](#holds));
 - the Telegram transport state;
-- the reader's unread count.
+- the reader's unread count (the messages delivered to its Project and not marked read, DEC-0135).
 
 A host shows a board it cannot reach as unreachable, never as an empty board.
 
@@ -549,7 +580,8 @@ never a second source of truth. Chat membership is not consent: a person's quest
 becomes a board request only for an allowlisted numeric user id. A confirmed send proves that
 Telegram accepted the message, not that anyone read it. A lost send response becomes durable
 `outcome_unknown` (transport state), never an automatic resend. Loops between bots are bounded
-by causal origin, depth, deadline, rate and cost.
+by causal origin, depth, deadline, rate and cost. A mirror sends a message to a Project's chat only when the message
+was delivered to that Project ([delivery](#who-a-message-is-delivered-to), DEC-0135).
 
 An agent's own channel to its operator is a different thing: [operator channel](operator-channel.md)
 (`fabric-operator-channel/0.1`, DEC-0034) reuses these principles for one agent's notifications
