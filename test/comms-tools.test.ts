@@ -150,6 +150,8 @@ describe("fabric-project-comms/0.1 tools (DEC-0073)", () => {
     expect(finding.properties.consequence.maxLength).toBe(500);
     expect(limits.get("A finding's consequence")).toBe("500 characters (code points)");
     expect(common.$defs.dedupeKey.pattern).toBe("^[A-Za-z0-9._:-]{8,128}$");
+    expect(common.$defs.deliverTo.oneOf[1].maxItems).toBe(16);
+    expect(limits.get("Projects a reply's `deliverTo` names")).toBe("16 (DEC-0135)");
     expect(limits.get("A finding's `dedupeKey`")).toBe("8–128 characters `[A-Za-z0-9._:-]`");
   });
 
@@ -308,10 +310,19 @@ const PLANTS: Array<{ schema: string; killer: string; fixtures?: string } & Muta
   { schema: SUBMIT, killer: "comms-submit-reaction-on-message", name: "reaction on any kind", mutate: (s) => { s.allOf = (s.allOf as Record<string, any>[]).filter((branch) => !(branch.if?.properties?.kind?.const === "reply" && branch.else)); } },
   { schema: "comms-host-wait.schema.json", killer: "comms-host-wait-unknown-code", name: "code any string", mutate: (s) => { s.properties.code = { type: "string" }; } },
   { schema: "comms-host-wait.schema.json", killer: "comms-host-wait-not-retryable", name: "retryable any boolean", mutate: (s) => { s.properties.retryable = { type: "boolean" }; } },
-  { schema: "comms-read-ack.schema.json", killer: "comms-read-ack-empty", name: "an empty list of messages", mutate: (s) => { s.oneOf[1].properties.messages.minItems = 0; } }
+  { schema: "comms-read-ack.schema.json", killer: "comms-read-ack-empty", name: "an empty list of messages", mutate: (s) => { s.oneOf[1].properties.messages.minItems = 0; } },
+  // DEC-0135: a reply's delivery.
+  { schema: C, fixtures: "comms-reply.schema.json", killer: "comms-reply-deliver-empty-list", name: "an empty deliverTo list", mutate: (s) => { delete common(s).deliverTo.oneOf[1].minItems; } },
+  { schema: C, fixtures: "comms-reply.schema.json", killer: "comms-reply-deliver-too-many", name: "a deliverTo list of any length", mutate: (s) => { delete common(s).deliverTo.oneOf[1].maxItems; } },
+  { schema: C, fixtures: "comms-reply.schema.json", killer: "comms-reply-deliver-duplicate", name: "a deliverTo list naming a Project twice", mutate: (s) => { delete common(s).deliverTo.oneOf[1].uniqueItems; } },
+  { schema: C, fixtures: "comms-reply.schema.json", killer: "comms-reply-deliver-empty-id", name: "a deliverTo list of any strings", mutate: (s) => { common(s).deliverTo.oneOf[1].items = { type: "string" }; } },
+  { schema: C, fixtures: "comms-reply.schema.json", killer: "comms-reply-deliver-unknown", name: "deliverTo any string", mutate: (s) => { common(s).deliverTo.oneOf[0] = { type: "string" }; } },
+  { schema: "comms-reply.schema.json", killer: "comms-reply-responder-deliver", name: "a fenced reply with deliverTo", mutate: (s) => { s.oneOf[1].properties.deliverTo = { $ref: "comms-common.schema.json#/$defs/deliverTo" }; } },
+  { schema: SUBMIT, killer: "comms-submit-deliver-on-message", name: "deliverTo on any kind", mutate: (s) => { for (const branch of s.allOf as Record<string, any>[]) if (branch.else?.properties?.deliverTo === false) delete branch.else.properties.deliverTo; } },
+  { schema: MESSAGE, killer: "comms-message-deliver-on-message", name: "deliverTo on any kind as read", mutate: (s) => { for (const branch of s.allOf as Record<string, any>[]) if (branch.else?.properties?.deliverTo === false) delete branch.else.properties.deliverTo; } }
 ];
 
-describe("every refusal of DEC-0073 and its amendments (DEC-0078, DEC-0079, DEC-0080) is killed by its fixture", () => {
+describe("every refusal of DEC-0073 and its amendments (DEC-0078, DEC-0079, DEC-0080, DEC-0135) is killed by its fixture", () => {
   it.each(PLANTS)("$schema: $name → $killer", async ({ schema: file, killer, name, mutate, fixtures }) => {
     expect(await killers(file, { name, mutate }, fixtures)).toContain(killer);
   });

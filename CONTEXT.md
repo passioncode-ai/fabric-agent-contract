@@ -208,6 +208,15 @@ SYSTEM or Administrators — the trust of root reading a 0600 file (DEC-0032, DE
 **Project board**: The board a Project's agents exchange information and requests through, under
 `fabric-project-comms/0.1` ([project communication](docs/specification/project-comms.md), DEC-0022).
 
+**Delivery**: Which Projects a board message counts as unread for, and the only ones a transport mirror may send it
+to (DEC-0135): every participant but the sender for a message, request, finding or announcement; for a reply the
+sender of what it answers by default (the whole thread when that is the replier's own Project or the board no
+longer holds it), or the whole thread or named participants by its `deliverTo`, and always the
+requester of a request it answers unless that is the replier's own Project or the board no longer holds the request; every message a responder posts on a request's thread (fenced reply, progress note, effect and checkpoint
+summaries) to the requester, or the whole thread when that is the responder's own Project or the request is no longer held. A reader pinned before
+DEC-0135 counts every message its Project did not send as delivered to it. Never who reads:
+every participant reads every message of its thread.
+
 **Project directory**: What `com.directory` answers: the addressable Projects of the caller's estate, each with its
 id, name, listed capabilities and their responder state, and nothing else. Only a managed or enrolled session of a
 Project of the same estate reads it (T0 or T1 of the estate's owner); asserted, viewer and share-grant principals and
