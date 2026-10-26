@@ -8275,9 +8275,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   thread `6a8d2f9c`); accepted on merge after that window. Additive but for one narrowing under the compatibility
   policy's second exception: no service may serve or declare `project.work` (PR-1). The serving parties were checked
   on 2026-10-26 by `git grep project.work` at their released tags: Fabric `v0.3.13` (only i18n keys), the adapter
-  `v0.51.2`, Fabric Dashboards `v0.8.7`, Fabric Switchboard `v0.6.83`, Project Observatory `v0.1.0`, and the
-  estate's four provider agents at their released revisions, none of which serves or declares it; fabric-workspace has
-  no tag and none at its head. The release notes list it as a narrowing. No tool, argument or field of any tool's schema changes. Adoption: Fabric in 0.3.15
+  `v0.52.0`, Fabric Dashboards `v0.8.7`, Fabric Switchboard `v0.6.83`, Project Observatory `v0.1.0`, Fabric Inbox
+  `v0.40.0`, the first organization server `v0.4.0`, and every other repository on the operator's machine at its
+  latest tag, else its head (165 in all, the estate's provider agents among them), none of which serves or declares
+  it (the only matches are i18n keys and longer identifiers such as `project.workspace_ids`); fabric-workspace has no
+  tag and none at its head. The release notes will list it as a narrowing. No tool, argument or field of any tool's schema changes. Adoption: Fabric in 0.3.15
   (CT-174); whether a client leaves a slot moved off it is the clients' own (CT-175).
 - **Context:** Fabric's simple Fabric shows each Project's main session and lets the operator hand a Project's work to
   another session; its request `23ba0e97` asked for one rule for "the main one", for the operator's move of a slot, and

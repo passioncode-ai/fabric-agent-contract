@@ -533,8 +533,8 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 **PR-1 (DEC-0140).** `project.work` (`PRIMARY_CAPABILITY`) is reserved: it is the capability of a Project's **primary
 responder**. A requester that knows no narrower capability of the target names `project.work` in its request; the
 board never re-routes a request that names another capability. Beyond that it is a capability like any other: one slot
-per Project (C4), fenced, listed in the [project directory](#project-directory) as the host lists its capabilities
-(with an `absent` responder until one enrolls), and held by the operator like any slot. A host that shows a Project's
+per Project (C4), fenced, listed in the [project directory](#project-directory) only for a Project whose host takes requests for
+it (with an `absent` responder until one enrolls), and held by the operator like any slot. A host that shows a Project's
 main session shows the holder of that slot, and shows none while nobody holds it. No service serves `project.work` as
 a tool or declares it as a capability of its own (`surfaces.mcp.capabilities`, an action's `tool`); the checker does
 not test this today, and the board reserves no other capability name (memory/0.1 reserves its own, [memory and
@@ -713,8 +713,8 @@ Project: in the host's operator controls, or through their agent, which relays t
 - **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
 - **After the move.** The slot is then held under the board's ordinary rules, and a move bars nobody and adds no
   refusal: another authorized session may replace it, a client's recovery may replace it (the moved-off session's
-  included, when its checkpoint holds accepted work), and a receiving session that lets its lease lapse loses it to
-  the next `com.enroll`. A host keeps the operator's choice as its own state: when the slot's holder is no longer the
+  included, when its checkpoint holds accepted work), and a receiving session that lets its lease lapse loses it as any
+  lapsed holder does. A host keeps the operator's choice as its own state: when the slot's holder is no longer the
   session the operator chose, it shows so and offers the move again. Whether a client should leave a slot moved off
   it is the client's (CT-175).
 - **What was in flight.** The receiving session continues held accepted work only by its own `com.responder_replace`
@@ -725,11 +725,11 @@ Project: in the host's operator controls, or through their agent, which relays t
   settlement](#owner-settlement)). The host shows the slot's `accepted` and `in_progress` counts before the operator
   confirms a move, and that in-progress work will wait for the new holder's observation.
 - **Learning it holds the slot.** The host tells the receiving session through its own session surface; a client
-  that cannot hear it learns it holds the slot when its `com.enroll` renews it or its `com.claim` succeeds, and renews
-  from there.
+  that cannot hear it learns it holds the slot when its `com.claim` succeeds, and renews from there; one that does
+  neither within its lease loses the slot as any holder does (After the move).
 - **The record.** The host's own slot record of the move names the operator as the actor and the receiving session as
   the holder; each request the move changes is journaled as op `replace` (`claimed` to `queued`) or `lost_result`
-  (`in_progress` to `outcome_unknown`), carrying the operator principal (`FAC-SEM-027`). `com.status` shows the slot as
+  (`in_progress` to `outcome_unknown`), (`FAC-SEM-027`), carrying the operator principal, which no rule checks. `com.status` shows the slot as
   before (generation, lease, `provenance`), and no tool's answer gains a member. The host's move action is one of its
   tools for the operator's controls (CT-125).
 

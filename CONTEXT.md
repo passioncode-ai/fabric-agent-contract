@@ -212,7 +212,8 @@ SYSTEM or Administrators — the trust of root reading a 0600 file (DEC-0032, DE
 narrower one, shown by a host as the Project's main session; the operator may move it, or any slot, to another live,
 authorized session of the Project, after which the board's ordinary rules hold it ([project communication](docs/specification/project-comms.md#the-primary-responder), DEC-0140).
 
-**Session role**: What a session says it does (`coder`, `observer`, `monitor`, `responder`) when its host enrolls it:
+**Session role**: What a session says it does, in an open vocabulary of its host's (for example `coder`,
+`observer`, `monitor`, `responder`), as its host records it, not through `com.enroll`:
 display and routing only, never authority, and not a role assignment of `roles.schema.json`
 ([project communication](docs/specification/project-comms.md#a-sessions-role-and-branch), DEC-0140).
 

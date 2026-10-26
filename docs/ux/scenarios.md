@@ -33,7 +33,7 @@
 | SCN-025 | Follow a request on the Project board to its result, or to outcome_unknown | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
 | SCN-026 | A second copy of a service starts, by hand or by its supervisor | service | P-02 | ST-021, FLW-17 | draft | not audited |
 | SCN-027 | The operator unlists a Project: it leaves the directory, and a sender that knows its id still reaches it | project-board | P-02 | ST-022, FLW-18 | draft | not audited |
-| SCN-051 | The operator makes another session the Project's main one, and the old one does not take it back | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
+| SCN-051 | The operator makes another session the Project's main one, and the host shows when it changes hands again | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
 | SCN-028 | Add a second machine from afar: compare the code, sign with the passkey | network | P-02 | ST-023, FLW-19 | draft | not audited |
 | SCN-029 | Create my network on the always-on machine | network | P-02 | ST-024, FLW-20 | draft | not audited |
 | SCN-030 | Remove a lost machine, then replace another machine's key | network | P-02 | ST-025, FLW-20 | draft | not audited |
@@ -738,7 +738,7 @@ independent agent author and P-02 project operator.
 - **Coverage:** project-comms Project directory; `comms-directory.schema.json`, `comms-directory-args.schema.json`; `test/comms-tools.test.ts` (the directory's boundary)
 - **Product:** unobserved
 
-### SCN-051: The operator makes another session the Project's main one, and the old one does not take it back
+### SCN-051: The operator makes another session the Project's main one, and the host shows when it changes hands again
 
 - **Persona:** P-02
 - **Feature:** project-board
@@ -748,13 +748,13 @@ independent agent author and P-02 project operator.
 - **Steps:**
   1. The operator chooses to make `s-2` the main session -> the host shows the slot's work first: one accepted, one in progress, and that the accepted one waits for `s-2` and the in-progress one becomes unknown.
   2. The operator confirms -> the host moves the slot from the generation the operator saw: `s-2` holds `project.work`, the in-progress request reads `outcome_unknown`, the accepted one is held, and `s-1`'s next fenced call is `fenced`.
-  3. `s-1`'s client restarts and its recovery replaces the slot to take its accepted work back -> the host shows that `s-1` holds the main slot again, not the session the operator chose, and offers "Make main" for `s-2` again.
-  4. `s-2` continues the accepted request by replacing itself with a transfer and its own checkpoint, and settles the unknown one once it observes its outcome.
-- **Expected result:** the main session is the one the operator chose at the moment of the move, the host always shows who holds the slot now, and no work is lost or done twice. Under the board's ordinary rules the slot can leave `s-2` by another move, by `s-2`'s session ending or its lease lapsing to another enrollment, or by another authorized session replacing it; the host then shows the change and offers the move again.
-- **Alt paths:** someone else moved or re-enrolled the slot after the operator's view was drawn -> the host refuses `revision_conflict` and shows the slot as it is now. The slot or `project-b` is held -> the move is refused `held` until the hold is lifted. An agent relays the operator's decision -> the same move, recorded as the operator's act. `s-2`'s session ends -> the slot is released and the host shows no main session until someone holds `project.work`.
+  3. `s-2` replaces itself with a transfer of the accepted request and its own checkpoint, before it claims anything -> it continues that request under a new attempt.
+  4. The in-progress request stays `outcome_unknown` until `s-2` observes its outcome and reconciles it; if only `s-1` could observe it, the owner settles it once nobody holds the slot (CT-175).
+- **Expected result:** the main session is the one the operator chose at the moment of the move, the host always shows who holds the slot now, and no request the board fences is lost or continued by two holders (an effect outside the board is not covered: exactly-once is not claimed). Under the board's ordinary rules the slot can leave `s-2` by another move, by `s-2`'s session ending or its lease lapsing to another enrollment, or by another authorized session replacing it; the host then shows the change and offers the move again.
+- **Alt paths:** someone else moved or re-enrolled the slot after the operator's view was drawn -> the host refuses `revision_conflict` and shows the slot as it is now. The slot or `project-b` is held -> the move is refused `held` until the hold is lifted. An agent relays the operator's decision -> the same move, recorded as the operator's act. `s-2`'s session ends -> the slot is released and the host shows no main session until someone holds `project.work`. `s-1`'s client restarts and its recovery replaces the slot -> the host shows that `s-1` holds the main slot again, not the session the operator chose, and offers "Make main" for `s-2` again.
 - **UI elements:** the sessions list with the main one marked; "Make main"; the confirmation with the slot's accepted and in-progress counts.
-- **States covered:** success, error
-- **Errors & recovery:** `s-2` is not authorized for the capability -> the host refuses `not_authorized` and says the session needs the grant first; nothing moves.
+- **States covered:** success, error, the slot changed hands after the move
+- **Errors & recovery:** `s-2` is not authorized for the capability -> the host refuses `not_authorized` and says the session needs the grant first; nothing moves. The operator cannot settle the unknown request while `s-2` holds the slot (owner settlement needs no holder) -> the host says it waits for `s-2`'s observation.
 - **Status:** draft
 - **Coverage:** project-comms PR-1, PR-2 (DEC-0140); `test/comms-hold.test.ts` (`PRIMARY_CAPABILITY`)
 - **Product:** unobserved

@@ -27,7 +27,8 @@ session; an optional session `role` and `branch` with a privacy rule.
 - Readings until two clean rounds in a row.
 - Objection window until 2026-10-28 18:00 UTC; then Status to Accepted in the merge commit, release, answer on the
   thread.
-- After release: a line in fabric-workspace `knowledge/agents-first.md` (a requester that knows no capability names
+- After release, and only once the adapter enrolls sessions for `project.work` (until then a request naming it waits
+  with `noResponder` and expires after 7 days): a line in fabric-workspace `knowledge/agents-first.md` (a requester that knows no capability names
   `project.work`) and the adapter's working-with-fabric skill, which enrolls a coding agent's session for
   `project.work` under the grant the operator gives in Fabric; until a session enrolls, Fabric shows no main session.
 - CT-175 (the adapter's kits): whether a client leaves a slot moved off it, and an `outcome_unknown` a move produces
