@@ -248,8 +248,8 @@ package records no use and no user (the organization edition's open/private spli
 
 ## Not decided here
 
-- `ES256` — when Fabric records D2; the passkey-assertion countersignature and its challenge type with
-  `org-authority/1` and the signing-challenge types (v4 §12, later waves).
+- `ES256`: when Fabric records D2; the passkey-assertion countersignature, whose challenge type
+  `org-countersign/1` DEC-0063 registered, waits on the decision that defines its verifier (v4 §12, later waves).
 - How a countersignature chains to an organization's root: an administrator's credential is listed by the root in
   `org-key-set/1`'s `administrators` (DEC-0129); the `org-countersign/1` verifier that reads it is not decided. Which keys a machine pins for a
   publisher is decided by the [estate record](estate-record.md#machines) (DEC-0055: `publisherKeys` and

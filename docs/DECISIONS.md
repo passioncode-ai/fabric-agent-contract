@@ -3434,6 +3434,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   CT-19); Project Observatory's meter verifies, holds and spends them and reports `spent` (CT-20); an organization server
   hands leases of organization windows once `org-authority/1` exists. Agreed with Project Observatory's session as the
   meter's owner on 2026-10-12 (its `METER.md` M3/M4).
+- **Annotated (2026-10-26):** DEC-0129 decides `org-authority/1` as the member list only; organization windows and
+  their leases wait on a later decision (`window-lease.md`).
 - **Annotated (2026-10-12):** a held lease without a whole `sequence` and a `leaseId` is `context-invalid`; the verifier's `estateRevocations` is named in window-lease.md; the check-in's `records.leases[]` was narrowed from any object to `window-lease/1`, a placeholder before, so the Compatibility line's "Additive" holds for every real check-in (the owed reading of #65; packet P6-08).
 - **Amends:** nothing; it gives DEC-0053 item 9's check-in `records.leases` its document and adds an optional `spent`.
   Implements the first organization server's target architecture v4 (commit `9c6a780`) §6 Path 5 and §12's row
@@ -7779,7 +7781,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      over the register's `org-authority/1` challenge `{type, digest}`; no server, the drafting one included. A
      credential a later set drops signs nothing from that set on.
   3. **OL-3, the verifier** `verifyOrgAuthority` in `src/org-authority.ts`, in the order of membership.md's OL table.
-  4. **OL-4, the relay's admission set.** `orgRelayAdmissionSet` in `src/relay.ts`: an organization's relay pins the
+  4. **OL-4, the relay's admission set.** `orgRelayAdmissionSet` in `src/org-authority.ts` (outside `src/relay.ts`, so the relay's import closure is unchanged): an organization's relay pins the
      organization's root at setup, applies key sets under it, and takes the listed `#sig` keys of a list that verifies;
      on any refusal the set is empty (DEC-0047). Without a candidate the held list is verified again under the current
      key set. The organization relay's handshake (what `auth` signs in `estate`, what `welcome` carries) waits on the
@@ -7812,7 +7814,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   that built on DEC-0127's main. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/org-authority.schema.json` (new), `schemas/org-key-set.schema.json`
   (`administrators`); `src/org-authority.ts` (new), `src/org-membership.ts` (`administrators`, `FAC-SEM-146`),
-  `src/relay.ts` (`orgRelayAdmissionSet`), `src/signing-challenges.ts` (`org-authority/1`, `ORG_KEY_SET_FIELDS`),
+  `src/relay.ts` (a comment), `src/signing-challenges.ts` (`org-authority/1`, `ORG_KEY_SET_FIELDS`),
   `src/semantic-rules.ts`, `src/semantic-kinds.ts`, `src/protocol-revisions.ts`; `docs/specification/membership.md` (the
   member list OL-1 to OL-5, OM-2's fingerprint, OM-3's administrators and root holder, OM-7's rows, OM-8, the rules),
   `relay.md`, `signing.md` (the sixth passkey type), `package.md`, `revocation-delta.md`, `window-lease.md`,

@@ -12,7 +12,7 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
     most 7 days, `FAC-SEM-150`.
   - **Signer.** An administrator's signing passkey that the root lists in `org-key-set/1`'s new `administrators`
     (`FAC-SEM-146` widened); the register's `org-authority/1` challenge.
-  - **Code.** `verifyOrgAuthority` (`src/org-authority.ts`), `orgRelayAdmissionSet` (`src/relay.ts`), the admission
+  - **Code.** `verifyOrgAuthority` (`src/org-authority.ts`), `orgRelayAdmissionSet` (also `src/org-authority.ts`, outside the relay's import closure), the admission
     set only: an organization relay's handshake waits on the organization's heartbeat and delta (CT-37 keeps it).
   - **The root's holder.** The organization owner's Fabric, never a server (A-3); OM-8 annotated.
   - **OM-7.** Rows for the member list's `iss` and for an adaptation plan's organization part (TP-03).

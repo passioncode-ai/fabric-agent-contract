@@ -5,7 +5,8 @@ DEC-0063 · rule code `FAC-SEM-092` · the register of signed statements in
 vectors [`fixtures/vectors/signing-challenges.json`](../../fixtures/vectors/signing-challenges.json)
 
 A person's passkey signs the records that decide what runs on their machines and what money may be spent: an estate
-revision, a share grant, limits, and in an organization an administrator's countersignature. This page makes two things
+revision, a share grant, limits, and in an organization an administrator's countersignature and the organization's
+member list (DEC-0129). This page makes two things
 a contract: **what** a passkey signs — a challenge derived from a typed statement in one register — and **where** it
 signs — under a dedicated signing RP, `sign.<domain>`, with a credential that is never the one the person signs in with.
 
@@ -100,7 +101,8 @@ another grant (`wrong-challenge`), one by a sign-in credential (`wrong-rp`) and 
   ([ceremonies](ceremonies.md), DEC-0084); it registers each person's signing credential under its signing RP ID, apart from the sign-in
   credential; runs every ceremony in the person's Fabric or the pinned static page; computes each challenge with the
   register's statement; and signs `share-grant/1` when an owner confirms an outside person, and `limits/1` when a person
-  sets their estate's limits.
+  sets their estate's limits; in an administrator's Fabric it signs `org-authority/1`, the organization's member list
+  (DEC-0129).
 - **Project Observatory's node** (CT-20) verifies estate revisions under signing credentials only (`verifyEstateRecord`,
   which now refuses a sign-in credential); a node that later verifies a countersignature or a share-grant binding uses
   `verifySigningAssertion` with the register's type.

@@ -4,7 +4,7 @@ DEC-0127, DEC-0129 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SEM-147`, `F
 [`org-membership`](../../schemas/org-membership.schema.json), [`org-key-set`](../../schemas/org-key-set.schema.json),
 [`org-authority`](../../schemas/org-authority.schema.json) and the estate record's `organizations`
 ([`estate-record`](../../schemas/estate-record.schema.json)) · code [`src/org-membership.ts`](../../src/org-membership.ts),
-[`src/org-authority.ts`](../../src/org-authority.ts) and `orgRelayAdmissionSet` in [`src/relay.ts`](../../src/relay.ts) · vectors
+[`src/org-authority.ts`](../../src/org-authority.ts) (with `orgRelayAdmissionSet`) · vectors
 [`fixtures/vectors/org-membership.json`](../../fixtures/vectors/org-membership.json), written by
 [`tools/vectors/org-membership.ts`](../../tools/vectors/org-membership.ts)
 
@@ -280,7 +280,8 @@ checks the list against the schema first, as a relay does an estate record:
 estate's relay pins the estate's first passkeys, applies key sets under it, and admits from the list it holds:
 `orgRelayAdmissionSet({held, candidate, org, keySet, at, schemaValid})` answers the set of listed `#sig` keys, kid to
 SEC 1 octets, or a refusal, and then admits nobody (DEC-0047, fail closed). A candidate must be schema-valid and verify
-against the held list, and a held list that cannot be read back (no positive revision, no RFC 8785 form) refuses it
+against the held list (a refused candidate answers `unverified` with its problem, its window included; `expired` and
+`not-yet-valid` name only the held list's own window), and a held list that cannot be read back (no positive revision, no RFC 8785 form) refuses it
 `invalid`; without one the held list is verified again under the key set applied now, so a list past its
 window, or one whose signer a later set dropped, admits nobody until a newer list verifies. A refused candidate changes
 nothing. Only the admission set is decided: what a member's `auth` signs in `estate` (never the member's estate id,
@@ -289,7 +290,8 @@ heartbeat wait on the organization's own heartbeat and delta ([revocation delta]
 so no organization relay runs on this release (CT-37).
 
 **OL-5, the duties.** The server drafts a new revision whenever a member joins, ends (OM-5) or changes an enrollment's
-key, and well before `expiresAt`; an administrator signs it. Ending a membership drops the member from the next list, so
+key, and well before `expiresAt`; an administrator signs it. Before it asks the root to sign a key set that drops an
+administrator, it has another administrator sign a fresh list, so the relay's admission set does not empty. Ending a membership drops the member from the next list, so
 the relay stops admitting their enrollments once that list is signed and applied, and within 7 days at the latest.
 
 ## Semantic rules
@@ -298,7 +300,7 @@ the relay stops admitting their enrollments once that list is signed and applied
 |---|---|---|
 | <a id="fac-sem-145"></a>`FAC-SEM-145` | `org-membership` | the times are strict RFC 3339 with at most three fraction digits and `issuedAt` ≤ `notBefore` < `expiresAt`, the life is at most 24 hours, and `membershipEndsAt` is `null` or such a time |
 | <a id="fac-sem-146"></a>`FAC-SEM-146` | `org-key-set` | each kid once, the root's kid not among the keys, every key window strict and positive, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt`; each administrator's credential once, with a usable key of its algorithm (never of small order), under a signing RP with every origin within it (DEC-0129) |
-| <a id="fac-sem-150"></a>`FAC-SEM-150` | `org-authority` | the window is two strict instants with at most three fraction digits, `expiresAt` after `issuedAt` and at most 7 days after it; at most 1024 members of 1 to 8 keys, each key an object; each subject, each `iss` and each kid once across the list; every kid a `#sig` kid and every key a P-256 point SEC 1 accepts (DEC-0129) |
+| <a id="fac-sem-150"></a>`FAC-SEM-150` | `org-authority` | the window is two strict instants with at most three fraction digits, `expiresAt` after `issuedAt` and at most 7 days after it; at most 1024 members, each an object of 1 to 8 keys, each key an object; each subject, each `iss` and each kid once across the list; every kid a `#sig` kid and every key a P-256 point SEC 1 accepts (DEC-0129) |
 | <a id="fac-sem-147"></a>`FAC-SEM-147` | `estate-record` | each organization pinned once by its context, and no pinned root of small order; each context issuer once and its opaque part never containing an estate id of eight characters or more (DEC-0128) |
 
 ## Who adopts it
@@ -317,6 +319,8 @@ the relay stops admitting their enrollments once that list is signed and applied
   adoption already do.
 - **Every organization server** also drafts the organization's member list (OL-5) and lists the administrators'
   passkeys in its key sets, which the root signs; it signs no list itself.
+- **The organization owner's Fabric** holds the membership root and signs each key set the server drafts (OM-3,
+  DEC-0129).
 - **An administrator's Fabric** (or a pinned page) signs the list with the administrator's passkey (OL-2).
 - **An organization's relay** admits only from a list `orgRelayAdmissionSet` accepts (OL-4).
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same
@@ -333,6 +337,8 @@ grants, until per-context relay sessions (CT-122's question 3).
 
 ## Not decided here
 
+- Losing the root: the owner's Fabric holds it, so its loss means a new pin by every member (OM-3), and every key set
+  waits on that Fabric being reachable; a recovery of the root, as DEC-0107 recovers a passkey, is not decided.
 - The organization relay's handshake (OL-4): `auth.estate` and the `welcome` frame on an organization's relay (CT-37).
 - Whether a reader checks an attestation's `role` or `status` against the latest signed member list; until then the
   list's role grants nothing anywhere but its own document.

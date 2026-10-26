@@ -3,9 +3,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
-import { MAX_AUTHORITY_SECONDS, ORG_AUTHORITY_TYPE, memberKeyOctets, orgAuthorityDigest, orgAuthorityFindings, orgAuthorityRules, verifyOrgAuthority } from "../src/org-authority.js";
+import { MAX_AUTHORITY_SECONDS, ORG_AUTHORITY_TYPE, memberKeyOctets, orgAuthorityDigest, orgAuthorityFindings, orgAuthorityRules, orgRelayAdmissionSet, verifyOrgAuthority } from "../src/org-authority.js";
 import { orgKeySetWellFormed } from "../src/org-membership.js";
-import { orgRelayAdmissionSet } from "../src/relay.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { SIGNING_STATEMENTS, signingChallenge } from "../src/signing-challenges.js";
 import { createValidator, validateDocument } from "../src/validator.js";
@@ -103,6 +102,7 @@ describe("FAC-SEM-150", () => {
     expect(orgAuthorityFindings({ ...BASE, members: [{ subject: "s", iss: "i", keys: [{ kid: "k#sig", publicKey: 1 }, "k"] }] }).map((f) => f.instancePath)).toEqual(["/members/0/keys/1", "/members/0/keys/0/publicKey"]);
     expect(orgAuthorityFindings({ ...BASE, members: [{ subject: "s", iss: "i", keys: "none" }] }).map((f) => f.instancePath)).toEqual(["/members/0/keys"]);
     expect(orgAuthorityFindings({ ...BASE, members: "none" })).toEqual([]);
+    expect(orgAuthorityFindings({ ...BASE, members: [null, BASE.members[0]] }).map((f) => f.instancePath)).toEqual(["/members/0"]);
     expect(orgAuthorityFindings({ ...BASE, members: Array.from({ length: 1025 }, (_v, i) => ({ ...BASE.members[0], subject: `s-${i}`, iss: `i-${i}`, keys: [] })) })[0]?.instancePath).toBe("/members");
     expect(orgAuthorityRules("org-key-set", BASE)).toBeUndefined();
   });
@@ -223,6 +223,9 @@ describe("orgRelayAdmissionSet: an organization's relay admits from its member l
     expect(admit({ held: BASE, at: new Date("2026-11-03T00:00:00Z") })).toEqual({ ok: false, refusal: "expired" });
     expect(admit({ held: BASE, at: new Date("2026-10-20T00:00:00Z") })).toEqual({ ok: false, refusal: "not-yet-valid" });
     expect(admit({ held: BASE, keySet: { ...KEY_SET, administrators: [] } })).toEqual({ ok: false, refusal: "unverified", problem: "unknown-administrator" });
+    // A candidate out of its window is refused as a candidate: the held list's own window is what ends sessions.
+    expect(admit({ held: BASE, candidate: resign({ ...BASE, revision: 4 }), at: new Date("2026-11-03T00:00:00Z") })).toEqual({ ok: false, refusal: "unverified", problem: "expired" });
+    expect(admit({ candidate: BASE, at: new Date("2026-10-20T00:00:00Z") })).toEqual({ ok: false, refusal: "unverified", problem: "not-yet-valid" });
   });
 
   it("reads a held list that was never schema-checked without throwing, and admits only usable keys", () => {

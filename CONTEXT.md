@@ -648,8 +648,8 @@ caller's signature is proven it tells it nothing it holds (DEC-0066).
 applied only after `verifyEstateRecord`, minus revoked machines and keys (and the revocations of verified delta
 entries), minus keys that could never verify; none once the record's window ends, when open sessions close too. It
 keeps strangers out of mailboxes and is not authorization: a recipient decides the tier from the signed sender. An
-organization's relay admits from the organization's member list (`org-authority/1`, DEC-0129) instead, verified under
-the organization's key set.
+organization's relay takes its set from the organization's member list (`org-authority/1`, DEC-0129) instead, verified
+under the organization's key set; it runs once its handshake is decided (CT-37).
 
 **Revocation delta**: The estate record's fast path (`revocation-delta/1`, DEC-0054): an append-only chain of
 entries, one revocation each, signed by an **Estate key** and chained by RFC 8785 hash, so its head is

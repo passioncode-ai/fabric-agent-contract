@@ -1076,10 +1076,10 @@ independent agent author and P-02 project operator.
   2. The administrator's Fabric shows the change against the list it signed last -> the administrator confirms with their passkey over the register's `org-authority/1` challenge.
   3. The relay applies the signed list -> its admission set holds exactly the listed keys (`orgRelayAdmissionSet`).
 - **Expected result:** who the organization's relay admits is decided by an administrator's passkey, which the organization's root certified; the server only drafts.
-- **Alt paths:** nobody signs before `expiresAt` -> the relay's admission set is empty and nobody is admitted until a newer list verifies; Fabric reminds the administrators a day before. A membership ends -> the next list drops the member. The root's next key set drops the administrator's passkey -> every list it signed stops verifying at once, and another administrator signs a fresh one. A list signed by a passkey the set does not list, or under a sign-in RP -> refused (`unknown-administrator`, `wrong-rp`).
+- **Alt paths:** nobody signs before `expiresAt` -> the relay's admission set is empty and nobody is admitted until a newer list verifies. A membership ends -> the next list drops the member. The root's next key set drops the administrator's passkey -> every list it signed stops verifying at once, and another administrator signs a fresh one. A list signed by a passkey the set does not list, or under a sign-in RP -> refused (`unknown-administrator`, `wrong-rp`).
 - **UI elements:** SCR-31: the drafted list's changes, the passkey prompt, the list's expiry.
 - **States covered:** success, error
 - **Errors & recovery:** a refused list -> its reason is shown to the administrator; the relay keeps the list it held until that one expires.
 - **Status:** draft
-- **Coverage:** DEC-0129 OL-1 to OL-5, `verifyOrgAuthority` in `src/org-authority.ts`, `orgRelayAdmissionSet` in `src/relay.ts`, `FAC-SEM-146`, `FAC-SEM-150`, `test/org-authority.test.ts`; the relay's handshake for an organization is not decided (CT-37)
+- **Coverage:** DEC-0129 OL-1 to OL-5, `verifyOrgAuthority` in `src/org-authority.ts`, `orgRelayAdmissionSet` in `src/org-authority.ts`, `FAC-SEM-146`, `FAC-SEM-150`, `test/org-authority.test.ts`; the relay's handshake for an organization is not decided (CT-37)
 - **Product:** unobserved

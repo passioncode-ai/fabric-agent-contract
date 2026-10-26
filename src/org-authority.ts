@@ -66,6 +66,9 @@ export function orgAuthorityFindings(value: JsonObject): Finding[] {
   }
   if (Array.isArray(value.members) && value.members.length > MAX_MEMBERS) flag("/members", `a member list holds at most ${MAX_MEMBERS} members`);
   const subjects = new Set<string>(), issuers = new Set<string>(), kids = new Set<string>();
+  (Array.isArray(value.members) ? value.members : []).forEach((member, index) => {
+    if (!isObject(member)) flag(`/members/${index}`, "a member is an object {subject, role, iss, keys}");
+  });
   for (const [member, index] of indexed(value.members)) {
     const at = `/members/${index}`;
     const subject = show(member.subject), iss = show(member.iss);
@@ -194,5 +197,64 @@ export function verifyOrgAuthority(value: unknown, trust: OrgAuthorityTrust): Or
     held: { revision, digest },
     members: (value.members as unknown[]).filter(isObject)
   };
+}
+// ---- The relay's admission set ---------------------------------------------------------------------------------
+
+/**
+ * What an organization's relay admits from (DEC-0129, CT-37): the organization's member list (`org-authority/1`) it
+ * holds, under the organization's key set it applied (`verifyOrgKeySet` under the root it pinned when it was set up for
+ * the organization, as an estate's relay pins the estate's first passkeys).
+ */
+export interface OrgAdmissionInput {
+  held?: JsonObject; // the list the relay verified and applied last, if any
+  candidate?: unknown; // a newer list offered to it
+  org: string; // the organization the relay serves, `org:<orgId>`
+  keySet: JsonObject; // the organization's key set the relay applied
+  at: Date;
+  schemaValid: (doc: unknown) => boolean;
+}
+
+export type OrgAdmissionResult =
+  | { ok: true; held: JsonObject; revision: number; set: Map<string, Uint8Array> }
+  | { ok: false; refusal: "no-record" | "invalid" | "unverified" | "not-yet-valid" | "expired"; problem?: OrgAuthorityProblem };
+
+/**
+ * An organization relay's admission set, kid → `#sig` key as SEC 1 octets, from its member list; or why there is none,
+ * and then the relay admits nobody (DEC-0047, fail closed). A candidate must be schema-valid and verify against the held
+ * list's revision; without one, the held list is verified again under the key set applied now, so a list whose window
+ * ended, or whose signer the root no longer certifies, admits nobody until a newer list verifies. A refused candidate
+ * changes nothing: the caller keeps `held`. FAC-SEM-150 holds for every verified list, so every listed key is a P-256
+ * point, each kid once.
+ */
+export function orgRelayAdmissionSet(input: OrgAdmissionInput): OrgAdmissionResult {
+  const offered = input.candidate !== undefined;
+  if (offered && !input.schemaValid(input.candidate)) return { ok: false, refusal: "invalid" };
+  const doc = offered ? input.candidate : input.held;
+  if (doc === undefined) return { ok: false, refusal: "no-record" };
+  // A held list that cannot be read back (no positive revision, no RFC 8785 form) is refused, never treated as none:
+  // dropping it would drop the rollback guard (as `relayAdmissionSet` in `src/relay.ts` refuses such a record, CT-111).
+  let held: { revision: number; digest: string } | undefined;
+  if (offered && input.held !== undefined) {
+    const revision = isObject(input.held) ? input.held.revision : undefined;
+    if (typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 1) return { ok: false, refusal: "invalid" };
+    try {
+      held = { revision, digest: orgAuthorityDigest(input.held as JsonObject) };
+    } catch {
+      return { ok: false, refusal: "invalid" };
+    }
+  }
+  const verdict = verifyOrgAuthority(doc, { now: input.at, org: input.org, keySet: input.keySet, ...(held ? { held } : {}) });
+  if (!verdict.ok) {
+    // `expired` and `not-yet-valid` name the held list's own window, on which the relay ends its sessions; a refused
+    // candidate is `unverified` with its problem, as relayAdmissionSet answers, and the held list stands.
+    if (!offered && (verdict.problem === "expired" || verdict.problem === "not-yet-valid")) return { ok: false, refusal: verdict.problem };
+    return { ok: false, refusal: "unverified", problem: verdict.problem };
+  }
+  // FAC-SEM-150 held for the verified list: every member's keys are 1 to 8 objects, each a #sig kid with a P-256 key.
+  const set = new Map<string, Uint8Array>();
+  for (const member of verdict.members) {
+    for (const key of member.keys as JsonObject[]) set.set(key.kid as string, memberKeyOctets(key.publicKey) as Uint8Array);
+  }
+  return { ok: true, held: doc as JsonObject, revision: verdict.revision, set };
 }
 // #endregion org-authority
