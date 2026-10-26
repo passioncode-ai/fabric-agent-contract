@@ -821,7 +821,7 @@ flowchart TD
   L -->|no plan| E
   L -->|yes| W[Withdrawal sent as an empty revision, bounded wait]
   W -->|answered| E
-  W -->|no answer| M[Person told the plan may remain, withdrawable on the server's page]
+  W -->|no answer| M[Person told the plan may remain, withdrawable there where the server offers a page]
   M --> E
 ```
 

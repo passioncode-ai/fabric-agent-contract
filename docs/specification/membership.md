@@ -183,8 +183,8 @@ Everything the membership carried ends with it, as one rule:
 - when the person ends it by unpinning, their Fabric first sends the organization the empty revision that withdraws an
   adaptation plan it sent there ([AD-6](#the-adaptation-plan)), waiting for an answer no longer than the person agrees
   to, then asks the passkey to sign the revision that unpins it whatever the answer; a withdrawal left unanswered is
-  the server's to end with the membership, and Fabric tells the person the plan may remain with the server and that
-  they can withdraw it on the server's own page (AD-4);
+  the server's to end with the membership, and Fabric tells the person the plan may remain with the server and, where
+  the server offers a page to withdraw it (AD-4), that they can withdraw it there;
 
 - Fabric revokes every share grant whose context is that `org:<orgId>`: the next estate revision lists a `grant`
   revocation for each, and in the same revision removes the grant from `shareGrants` and every placement and secret
@@ -448,9 +448,12 @@ by it (CT-159) still find it. A request `id` is drawn the same way, per organiza
 stands; a later membership of that organization gets new request ids, so no decision made under an ended membership
 binds a request of the next (AD-6). `label`, `resource`, `note` and `purpose` are what the person typed for the organization; Fabric never fills
 them from the estate. They hold no control character but tab and line feed (no U+0000 to U+0008, U+000B to U+001F or
-U+007F to U+009F) and no lone surrogate, so a server can keep them where U+0000 cannot go and digest them under RFC 8785;
-Fabric turns a CRLF or a CR the person typed into a line feed before it sends, and a plan with one is `malformed`
-(AD-4). Text the person types into two organizations' plans is the person's to repeat, and can link
+U+007F to U+009F) and no lone surrogate, so a server can keep them where U+0000 cannot go and digest them under RFC 8785,
+and none is blank or begins or ends with white space. Fabric turns a CRLF or a CR the person typed into a line feed and
+trims white space from both ends before it sends, and leaves out an optional text the person left blank; a plan
+breaking any of these is `malformed` (AD-4). The schema's patterns are ECMA-262 patterns read in Unicode mode (the `u`
+flag): without it a surrogate pair, an emoji, is refused, so a validator without that mode checks lone surrogates
+another way. Text the person types into two organizations' plans is the person's to repeat, and can link
 them ([contexts](contexts.md#linkability)). A project's own entry into the organization is the estate revision its
 person's passkey signs (R1-D12), which never leaves; a `ref` only lets the person and the administrators talk about it.
 
@@ -561,7 +564,8 @@ retention says.
   per organization and keeps them (AD-2), fills no text from the estate, takes only the person's choices, keeps one
   revision counter per organization, sends the plan with the credential the server issued it (AD-3), and withdraws it
   by an empty revision when the person leaves, before it asks the passkey to sign the unpinning (OM-5); it turns CRLF
-into LF (AD-2) and never reopens a plan withdrawn on the server's page without the person (AD-4). The server serves a plan and its
+into LF and trims the text (AD-2), never reopens a plan withdrawn on the server's page without the person (AD-4), and
+waits for the answer to a withdrawal on leaving no longer than the person agrees to (OM-5). The server serves a plan and its
   receipt only to the organization's administrators and the person it came from (AD-6).
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same
   pin, with its own audience.
@@ -602,6 +606,9 @@ its relay (OX-6).
 - A push of a pending draft to the owner's or an administrator's Fabric (beside OX-5's reading of the route).
 - What the hub answers a caller it refuses to mint for in a suspended or ended organization's context (OM-5, OM-6):
   the hub's refusal code, Fabric's to state beside DL-4.
+- When the person's Fabric reads an adaptation plan's receipt besides before a `PUT` (AD-3), so the person learns of a
+  decision or of a withdrawal on the server's page: Fabric's, as OX-5 leaves a draft's reading to its reader; no push
+  is defined.
 - Where the person's Fabric keeps an adaptation plan's references, request ids and revision counter when the person
   runs it on more than one machine or moves their hub (AD-2, AD-4): Fabric's (TP-04), so long as they stay one set per
   organization.

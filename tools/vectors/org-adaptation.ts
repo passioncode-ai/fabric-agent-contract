@@ -36,7 +36,7 @@ export function orgAdaptationVectors(): Json {
     { id: role.id, digest: digest(role), state: "refused", at: "2026-10-27T10:05:00Z" }
   ];
   return {
-    description: "DEC-0138: the organization part of an adaptation plan. `digests` are adaptationDigest and requestDigest (SHA-256 over RFC 8785). `decide` is the server's decision on a PUT plan whose credential (the one it issued the person's Fabric for the person) it authenticated: `member` says the credential's person holds an active or suspended membership, `valid` that the plan passed its schema and FAC-SEM-153, `org` is the route's organization in its full `org:<orgId>` form, `held` the revision held. `receipts` binds each request's decision by its id and digest.",
+    description: "DEC-0138: the organization part of an adaptation plan. `digests` are adaptationDigest and requestDigest (SHA-256 over RFC 8785). `decide` is the server's decision on a PUT plan whose credential (the one it issued the person's Fabric for the person) it authenticated: `member` says the credential's person holds a membership the server has not ended, `valid` that the plan passed its schema and FAC-SEM-153, `org` is the route's organization in its full `org:<orgId>` form, `held` the revision held. `receipts` binds each request's decision by its id and digest.",
     digests: [
       { name: "the plan", value: plan, digest: digest(plan) },
       ...(plan.requests as Json[]).map((request) => ({ name: `request ${request.id}`, value: request, digest: digest(request) })),

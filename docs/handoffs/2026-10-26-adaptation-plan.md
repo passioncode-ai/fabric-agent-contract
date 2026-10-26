@@ -23,7 +23,7 @@ requests to the administrators. The first organization server needs it by 2026-1
 
 ## Checks actually run
 
-- `pnpm typecheck`, vitest with coverage (107 files, 9 404 tests, `src/org-adaptation.ts` at 100 % branches), `pnpm ux:lint`,
+- `pnpm typecheck`, vitest with coverage (107 files, 9 410 tests, `src/org-adaptation.ts` at 100 % branches), `pnpm ux:lint`,
   `pnpm docs:check` (0 errors), `pnpm privacy:check` (0 findings), `pnpm vectors:check` (26 files): exit 0.
 
 - Readings: round 1 fail (a home path in a fixture tripped the privacy check; the device-request transport, which the
@@ -43,6 +43,9 @@ requests to the administrators. The first organization server needs it by 2026-1
 - Round 5: unit and seam pass, product fail (the text said no control character while C1 passed; SCN-050 gave up on a
   transient `GET`). Fixed with the first server's U+0000 objection (`fcf8ee88`), Fabric's two points (`d71d8534`: no
   reopening without the person, the credential's place is Fabric's) and the readings' risks; the rest is CT-171.
+- Round 6: unit and seam pass, product fail (the white-space rule unstated, a server page promised that is optional,
+  DEC-0138 item 3 behind AD-3 on a `403`). Fixed, with Fabric's trim, the Unicode-mode note, the receipt-reading
+  question in *Not decided here*, and the adoption order and closure in CT-169.
 
 ## Open
 

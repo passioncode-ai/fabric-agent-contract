@@ -8294,12 +8294,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `ref` is kept for its item across revisions and withdrawals to that organization, an `id` while its request
      stands, and a later membership gets new request ids; `label`, `resource`, `note` and `purpose` are typed by the
      person and hold no control character but tab and line feed (U+0000 to U+0008, U+000B to U+001F, U+007F to
-     U+009F) and no lone surrogate, Fabric turning CRLF into LF (the first server stores them where U+0000 cannot go,
-     its objection in `0fee99ae`).
+     U+009F) and no lone surrogate, and none is blank or begins or ends with white space; Fabric turns a CRLF or a CR
+     into LF and trims the text before it sends (the first server stores them where U+0000 cannot go, its objection
+     in `0fee99ae`).
   3. **AD-3.** The person's Fabric sends the whole plan with the credential the server issued it for the person;
      the route is `PUT /fabric/adaptation/v1/{org}/plan`, with `GET` for the receipt (`404 no-plan` before the first).
-     Fabric sends only after a `GET` answered a receipt or `no-plan`, retrying no answer or a `5xx`; another `404`, or
-     a `401` or `403` that persists after a credential refresh, means the server takes no plans from this credential.
+     Fabric sends only after a `GET` answered a receipt or `no-plan`, retrying no answer or a `5xx` and backing off on
+     `429`; a `403` carrying an AD-4 code is that refusal, and another `404`, or a `401` or a `403` without an AD-4
+     code that persists after a credential refresh, means the server takes no plans from this credential.
   4. **AD-4.** The server keeps the newest revision (`decideAdaptation`): `not-a-member`, `schema-unsupported`,
      `malformed`, `wrong-organization`, `stale-revision`, `revision-conflict`, a repeat answering the same receipt; an
      empty revision withdraws, and a withdrawal on the server's own page is held as the next, empty revision.

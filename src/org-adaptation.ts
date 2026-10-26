@@ -116,7 +116,7 @@ export function adaptationReceipt(plan: JsonObject, decisions: readonly RequestD
 
 /**
  * The server's decision on a PUT plan, after it authenticated the person's credential, in this order: `not-a-member`
- * (the credential's person holds no active or suspended membership of the route's organization, `member` false);
+ * (the credential's person holds no membership of the route's organization that the server has not ended, `member` not true);
  * `schema-unsupported` (the body names another `type` than `org-adaptation/1`, DEC-0067); `malformed` (the plan failed
  * its schema or FAC-SEM-153, `valid` not true, or has no RFC 8785 form); `wrong-organization` (the plan names another organization than `org`, the
  * route's in its full `org:<orgId>` form); then against the held revision: a lower revision is `stale-revision`; the
