@@ -315,7 +315,7 @@
     }
   ],
   "revocations": [],
-  "digest": "sha256:9f6dcf95c381fc83b33795e86eaacbc0fa141d421cc2b77df83656bc461bffe0",
+  "digest": "sha256:c7aa13c84fb6c85ba672d927efbca2bedf2edf98f6dfac7eb9c6e64a0dc38371",
   "signature": {
     "format": "webauthn-assertion",
     "credentialId": "0nGFzb4RDddKfO7TtqkdYA",

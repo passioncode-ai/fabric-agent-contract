@@ -139,11 +139,20 @@
     ],
     "organizations": [
       {
-        "org": "org:org-a",
+        "org": "org:org_3fh9p1zc",
         "issuer": "https://orgs.example",
         "root": {
           "kid": "root-org-a-1",
           "x": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        "pinnedAt": "2026-10-12T09:00:00Z"
+      },
+      {
+        "org": "org:org_7kq2m4xw",
+        "issuer": "https://orgs.example",
+        "root": {
+          "kid": "root-org-b-1",
+          "x": "CFn01c2fmBAFHuF99_902jC141_T2rt7ORxIljXv8rk"
         },
         "pinnedAt": "2026-10-12T09:00:00Z"
       }
@@ -312,7 +321,7 @@
       }
     ],
     "revocations": [],
-    "digest": "sha256:750e2cbf0ca1b4c891e2f023f1e9144e36fba75d8c4c0a5f917a59e269a3e633",
+    "digest": "sha256:a26d62e0ab098e2f47df642471d3afc19e829dbf1b8197a2f1fc3c3deb6670a9",
     "signature": {
       "format": "webauthn-assertion",
       "credentialId": "0nGFzb4RDddKfO7TtqkdYA",
