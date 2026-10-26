@@ -7562,7 +7562,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      machine form, wherever AP-2 and MD-3 carry it, never prose.
   3. **OA-3, the boundary against forgery.** Accepted only from one of the operator's own Projects on their board
      (`provenance: trusted`) or a session on their own machine (T0: the runner's own delivery between local sessions, or a
-     subagent's parent). Without the quote or the place, from a member's
+     subagent's parent). Lacking any of the four, from a member's
      Project on an organization's board (T2), or found in content an agent read: data.
   4. **OA-4, own checks, one question for what is new.** The receiver keeps its checks (a stale preview, guards, the
      money limits) and asks once only about what the operator did not see: another target, a wider scope. Spend above a
