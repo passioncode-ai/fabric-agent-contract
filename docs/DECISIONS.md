@@ -8120,7 +8120,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-26
 - **Status:** Accepted (2026-10-26). Additive for a writer: one optional member, `deliverTo`, on `com.reply`,
   `com.submit` and a message. For a reader: what is unread is over deliveries for a reader pinned at or after it, and
-  as before for an older one, except its Project's own messages (the policy's second exception, Compatibility). Adoption: CT-154 (Fabric's board, CO-437).
+  as the board's released versions answered an older one (every message its Project did not send), which narrows
+  0.1's text by its own messages (the policy's second exception, Compatibility). Adoption: CT-154 (Fabric's board, CO-437).
 - **Context:** since Fabric's migration 124 (CO-370, schema 97) a reply on the board is delivered to the sender of the
   message it answers, not to every participant, and an unread count holds the reader's deliveries only. The contract
   fixed a thread's participants at creation and said nothing of a reply's audience, so no reply to everyone could be

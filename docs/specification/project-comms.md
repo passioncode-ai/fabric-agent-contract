@@ -20,8 +20,8 @@ the sender of the message it answers unless its optional `deliverTo` names the t
 delivery decides what is unread, never who reads. It adds one optional member to `com.reply`, `com.submit` and a
 message. For a reader pinned at or after DEC-0135 it narrows what `unread`, `com.status`'s count and the `read` of a
 filtered page hold to the messages delivered to it; an older reader is answered as the board's released versions
-answered it, except that its Project's own messages are not unread to it (DR-5, the compatibility policy's second
-exception).
+answered it, every message its Project did not send (DR-5); against 0.1's text, which kept every message not marked
+read, that leaves out its own messages, a narrowing made under the compatibility policy's second exception.
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`

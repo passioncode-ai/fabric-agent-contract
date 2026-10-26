@@ -20,7 +20,7 @@ the message it answers, and the contract had no field to ask for the whole threa
     not send).
 - Schemas: `$defs/deliverTo` in `comms-common`; `deliverTo` on `comms-reply`, `comms-submit` and `comms-message`;
   `unread` and `read` described over deliveries; `com.read_ack` and its receipt unchanged. Fixtures and eight mutant plants.
-- DEC-0022, DEC-0073 and DEC-0098 annotated; the narrowing of `unread` recorded as an exception to the compatibility
+- DEC-0022, DEC-0073, DEC-0098 and DEC-0119 annotated; the narrowing of `unread` recorded as an exception to the compatibility
   policy (Fabric's released board counts unread over its deliveries, migration 107); conformance, CONTEXT (Delivery), DOCMAP, SCR-19.
 
 ## Checks actually run
@@ -35,7 +35,8 @@ the message it answers, and the contract had no field to ask for the whole threa
   (the reply default rested on Fabric's unreleased migration 124: an older reader's count is now staged by its pin,
   and the exception requires released tags); round 7 clean (unit, seam, product all pass; their risks fixed:
   DR-5 numbered apart, the full released range v0.3.2 to v0.3.12, SCR-19's fallback, the README's owed clause).
-  Fabric told on the board before its 0.3.13 tag (thread `7ef21793`). Fixed after each. Non-blocking findings:
+  Fabric told on the board before its 0.3.13 tag (thread `7ef21793`); round 8 fail (CT-154 cited DR-4 for DR-5; the
+  header put the own-message narrowing against the released versions, not 0.1's text). Fixed after each. Non-blocking findings:
   CT-166.
 
 ## Open
