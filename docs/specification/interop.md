@@ -107,7 +107,9 @@ The manifest capability `name`, hub `agent.call.capability`, service
 definition. C3.1's equality between the manifest capability name and served MCP
 tool name still applies; this amendment does not rename a product's tool or add
 an alternative `toolName` field. Binding capability identity remains a URI, and
-an allowed name still grants no admission, binding or access authority.
+an allowed name still grants no admission, binding or access authority. One name is reserved: `project.work`, the
+capability of a Project's primary responder on the board ([project communication](project-comms.md#the-primary-responder)
+PR-1, DEC-0140), which no service serves or declares as its own.
 
 This is an additive acceptance change under DEC-0016: `contractVersion` remains
 `0.1.0`, with the source revision selected by the consumer's

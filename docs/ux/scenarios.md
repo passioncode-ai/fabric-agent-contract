@@ -748,10 +748,10 @@ independent agent author and P-02 project operator.
 - **Steps:**
   1. The operator chooses to make `s-2` the main session -> the host shows the slot's work first: one accepted, one in progress, and that the accepted one waits for `s-2` and the in-progress one becomes unknown.
   2. The operator confirms -> the host moves the slot from the generation the operator saw: `s-2` holds `project.work`, the in-progress request reads `outcome_unknown`, the accepted one is held, and `s-1`'s next fenced call is `fenced`.
-  3. `s-1`'s client restarts and tries to take the slot back -> the host refuses `not_authorized`, and the client leaves it.
+  3. `s-1`'s client restarts under a new session id -> it reads the slot's generation above the one its checkpoint held and leaves the slot instead of replacing it.
   4. `s-2` continues the accepted request by replacing itself with a transfer and its own checkpoint, and settles the unknown one once it observes its outcome.
-- **Expected result:** the main session is the one the operator chose, and it stays so until the operator moves it again; no work is lost or done twice.
-- **Alt paths:** someone else moved or re-enrolled the slot after the operator's view was drawn -> the host refuses `revision_conflict` and shows the slot as it is now. The slot or `project-b` is held -> the move is refused `held` until the hold is lifted. An agent relays the operator's decision -> the same move, recorded as the operator's act.
+- **Expected result:** the main session is the one the operator chose, and `s-1`'s recovery does not take it back; no work is lost or done twice. The slot leaves `s-2` only by another move, by `s-2`'s session ending, or by another authorized session replacing it.
+- **Alt paths:** someone else moved or re-enrolled the slot after the operator's view was drawn -> the host refuses `revision_conflict` and shows the slot as it is now. The slot or `project-b` is held -> the move is refused `held` until the hold is lifted. An agent relays the operator's decision -> the same move, recorded as the operator's act. `s-2`'s session ends -> the slot is released and the host shows no main session until someone holds `project.work`.
 - **UI elements:** the sessions list with the main one marked; "Make main"; the confirmation with the slot's accepted and in-progress counts.
 - **States covered:** success, error
 - **Errors & recovery:** `s-2` is not authorized for the capability -> the host refuses `not_authorized` and says the session needs the grant first; nothing moves.

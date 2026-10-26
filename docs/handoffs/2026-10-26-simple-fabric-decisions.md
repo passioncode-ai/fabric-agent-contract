@@ -23,7 +23,12 @@ session; an optional session `role` and `branch` with a privacy rule.
 - Objection window until 2026-10-28 18:00 UTC; then Status to Accepted in the merge commit, release, answer on the
   thread.
 - After release: a line in fabric-workspace `knowledge/agents-first.md` (a requester that knows no capability names
-  `project.work`) and the adapter's working-with-fabric skill.
+  `project.work`) and the adapter's working-with-fabric skill, which enrolls a coding agent's session for
+  `project.work` under the grant the operator gives in Fabric; until a session enrolls, Fabric shows no main session.
+- The adapter's kits: recover by replacement only at the generation the checkpoint held (conformance row), before
+  Fabric ships the move in 0.3.15.
+- Not settled here: an `outcome_unknown` a move produces waits for the new holder's observation (the owner may settle
+  it only once no responder holds the slot); a CT row if Fabric asks for more.
 
 ## Checks actually run
 
@@ -33,4 +38,5 @@ session; an optional session `role` and `branch` with a privacy rule.
 ## Next task
 
 Run the readings on the branch head; merge after 2026-10-28 18:00 UTC with Status Accepted; release; answer Fabric on
-thread `6a8d2f9c` and the adapter on the board.
+thread `6a8d2f9c` and the adapter on the board; close CT-174 and clear the spec README's "owed" text once Fabric and
+the kits adopt.

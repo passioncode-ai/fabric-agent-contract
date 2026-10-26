@@ -8273,10 +8273,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-26
 - **Status:** Proposed (2026-10-26), its shape posted to Fabric for objections until 2026-10-28 18:00 UTC (board
   thread `6a8d2f9c`); accepted on merge after that window. Additive but for one narrowing under the compatibility
-  policy's second exception: no service may serve or declare `project.work` (PR-1); the serving parties were checked
-  on 2026-10-26 by `git grep project.work` in Fabric, the adapter, Fabric Dashboards, Project Observatory, Fabric
-  Switchboard and fabric-workspace (none serves or declares it; Fabric's only hits are i18n keys), and the release
-  notes list it as a narrowing. No tool, argument or field of any tool's schema changes. Adoption: Fabric in 0.3.15,
+  policy's second exception: no service may serve or declare `project.work` (PR-1). The serving parties were checked
+  on 2026-10-26 by `git grep project.work` at their released tags: Fabric `v0.3.13` (only i18n keys), the adapter
+  `v0.51.2`, Fabric Dashboards `v0.8.7`, Fabric Switchboard `v0.6.83`, Project Observatory `v0.1.0`, and the
+  estate's four provider agents at their released revisions, none of which serves or declares it; fabric-workspace has
+  no tag and none at its head. The release notes list it as a narrowing. No tool, argument or field of any tool's schema changes. Adoption: Fabric in 0.3.15,
   the adapter's kits for a moved-off slot (CT-174).
 - **Context:** Fabric's simple Fabric shows each Project's main session and lets the operator hand a Project's work to
   another session; its request `23ba0e97` asked for one rule for "the main one", for the operator's move of a slot, and
@@ -8288,13 +8289,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2. **PR-2.** The operator moves a (Project, capability) slot to another live, authorized session of that Project, in
      the host's controls or by a relayed decision (`gate: relayed`), never an agent on its own account; from the
      generation the operator saw (`revision_conflict` otherwise); one transition as `com.responder_replace` would
-     make it for the receiving session, transferring nothing; refused `held` under a slot or Project hold. The
-     moved-off session cannot take the slot back until the operator moves it again. The receiving session continues
-     accepted work by its own replacement with a transfer, or the requester cancels it.
+     make it for the receiving session, transferring nothing; refused `held` under a slot or Project hold. A client
+     recovers a slot by replacement only at the generation its own checkpoint held, so its recovery never undoes a
+     move, under any session id. The receiving session continues accepted work by its own replacement with a
+     transfer, or the requester cancels it.
   3. **PR-3.** A session role is a claim, display and routing only, never authority, and not a role assignment; the
      host never copies a session's reported branch into the board, the directory, `com.status`, a relay, an
      organization server, an events feed read off the machine or another Project's sessions; an activity event's
-     `git.branch` keeps following `telemetry.git_branch` (DEC-0030).
+     `git.branch` keeps following `telemetry.git_branch` (DEC-0031).
 - **Why:** one name lets a requester reach a Project without knowing its capabilities and lets every host show the
   same main session; a move by the operator's act, guarded by the generation the operator saw and kept by refusing
   the moved-off session, holds the fences' guarantees while the person decides who works; a branch name can carry what
@@ -8302,11 +8304,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Alternatives considered:** an argument on `com.responder_replace` naming the receiving session (a closed schema
   would change, and an agent could move slots by itself); transferring accepted work as part of the move (a transfer's
   checkpoint is written by its caller, and the operator writes none; the receiving session writes its own by
-  replacing itself); letting the moved-off session retake the slot (a client's recovery would undo the operator's
-  choice); a session role that grants a slot (a claim would become authority).
+  replacing itself); a host bar on the moved-off session (a reconnect gets a new session id, and barring the binding
+  would bar the same agent's other terminals; the generation its checkpoint held is what a client already knows); a
+  session role that grants a slot (a claim would become authority).
 - **Compatibility:** additive, with the one narrowing named in Status. `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `docs/specification/project-comms.md` (header, C5's wording, PR-1 to PR-3, the hold
-  table), `conformance.md` (two rows), `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder,
+- **Consequences / affects:** `docs/specification/project-comms.md` (header, C4's wording, PR-1 to PR-3, the hold
+  table), `conformance.md` (two rows), `interop.md` (the reserved name), `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder,
   Session role), `src/comms-hold.ts` (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`, `docs/ux/scenarios.md`
   (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16); backlog CT-174; the handoff
   `docs/handoffs/2026-10-26-simple-fabric-decisions.md` and its row in `docs/handoffs/README.md`.
