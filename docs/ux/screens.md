@@ -394,3 +394,14 @@
 - **Scenarios:** SCN-047, SCN-048, SCN-049
 - **Resources:** membership specification, The organization's keys, Ending, What leaves a person's Fabric
 - **Status:** proposed
+
+### SCR-32: A Project's sessions and its main one
+
+- **Used by:** FLW-16
+- **Purpose:** the operator sees which session of a Project is its main one (the holder of `project.work`) and moves that slot, or another, to another live session.
+- **Elements:** the Project's live sessions, each with its session role and, for this Project only, its reported branch; the main one marked; per slot held, the capability and its holder; "Make main" (or "Move") on an authorized session; the confirmation with the slot's `accepted` and `in_progress` counts.
+- **States:** success, the slot moved; refused, `revision_conflict` (the slot moved on since the view was drawn), `held` (the slot or the Project is held) or `not_authorized` (the session has no grant for the capability); no main session, nobody holds `project.work`.
+- **Coverage:** project-comms PR-1, PR-2, PR-3 (DEC-0140); `src/comms-hold.ts` (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`
+- **Scenarios:** SCN-051
+- **Resources:** project-comms specification, The primary responder, The operator moves a slot, A session's role and branch
+- **Status:** proposed

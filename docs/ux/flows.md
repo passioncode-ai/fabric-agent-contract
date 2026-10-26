@@ -409,7 +409,7 @@ flowchart TD
   N -->|the requester cancels| K[Cancelled]
 ```
 
-- **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired; SCR-19 answered.
+- **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired; SCR-19 answered; SCR-32 success when the operator moves the slot that answers the request (DEC-0140).
 
 ### FLW-17: A second copy of a service starts while one runs
 

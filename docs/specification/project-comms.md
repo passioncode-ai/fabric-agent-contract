@@ -382,7 +382,7 @@ decision adds no transition.
 
 ## Responders and fences
 
-One primary responder slot exists per Project and capability (C5). It has a generation that only
+One responder slot exists per Project and capability (C5). It has a generation that only
 grows and survives deletion and restore. Every responder mutation carries a fence
 (`comms-fence.schema.json`):
 
@@ -530,12 +530,13 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 ### The primary responder
 
 **PR-1 (DEC-0140).** `project.work` (`PRIMARY_CAPABILITY`) is reserved: it is the capability of a Project's **primary
-responder**, the slot that answers a request naming no narrower capability. A requester that knows no capability of the
-target addresses its request to `project.work`; a host that shows a Project's main session shows the holder of that
-slot. Beyond that it is a capability like any other: one slot per Project (C5), fenced, listed in the
-[project directory](#project-directory) once a responder enrolls, and held by the operator like any slot. No service
-serves `project.work` as a tool or declares it as a capability of its own (`surfaces.mcp.capabilities`, an action's
-`tool`), and no other capability name is reserved.
+responder**. A requester that knows no narrower capability of the target names `project.work` in its request; the
+board never re-routes a request that names another capability. Beyond that it is a capability like any other: one slot
+per Project (C5), fenced, listed in the [project directory](#project-directory) as the host lists its capabilities
+(with an `absent` responder until one enrolls), and held by the operator like any slot. A host that shows a Project's
+main session shows the holder of that slot, and shows none while nobody holds it. No service serves `project.work` as
+a tool or declares it as a capability of its own (`surfaces.mcp.capabilities`, an action's `tool`); the checker does
+not test this today, and no other capability name is reserved.
 
 ### Slots end with the session
 
@@ -669,23 +670,6 @@ Project hold, enrollment and replacement wait for the lift, and its accepted wor
   reader it omits `held` and answers the same matrix with `not_authorized`. A viewer principal such as Fabric
   Dashboards is such a reader until it repins.
 
-### The operator moves a slot
-
-**PR-2 (DEC-0140).** The operator may move a (Project, capability) responder slot to another live session of that
-Project: in the host's operator controls, or through their agent, which relays the decision to the host's move action
-(`gate: relayed`, [service](service.md#actions) AP-2, DEC-0121). An agent never moves a slot on its own account, and
-`com.responder_replace` still takes a slot for its own caller only: its closed arguments name no session.
-
-- **One transition.** The host applies the move atomically, as `com.responder_replace` would for the receiving
-  session: the slot's generation goes up by one; a `claimed` request returns to `queued`; an `in_progress` one becomes
-  `outcome_unknown`; an `accepted` one is held (C4) and is not transferred, since a transfer carries the leaving
-  responder's checkpoint, which only that responder writes.
-- **Who may receive it.** The receiving session must already be authorized to respond for that capability, as for
-  `com.enroll`; a move grants nothing. A session that is not live, or not of that Project, cannot receive it.
-- **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
-- **The record.** The slot's provenance names the operator as the actor and the receiving session as the holder; the
-  leaving responder's next fenced call is `fenced`.
-
 ### What a hold refuses
 
 | Tool | Refused `held` when |
@@ -693,6 +677,7 @@ Project: in the host's operator controls, or through their agent, which relays t
 | `com.submit` | the thread it writes into is held. A new thread is never held, and a request to a held Project or slot is not refused: it queues, its deadline running, until the hold is lifted |
 | `com.reply` | a participant's reply (`replyTo`) into a held thread. A responder's fenced reply: never |
 | `com.enroll`, `com.responder_replace` | the slot is held, or its Project is held |
+| the operator's move of a slot (PR-2, the host's action) | the slot is held, or its Project is held |
 | `com.claim` | the request it names is held work; without a named request, the slot or its Project is held. Without a named request on an unheld slot, the board passes over requests in held threads and answers nothing claimable when only held ones are left |
 | `com.accept`, `com.effect_begin` | the fenced request is held work |
 | `com.complete`, `com.reconcile`, `com.progress`, `com.renew` | never: they settle, report on or keep alive started work |
@@ -708,18 +693,53 @@ No semantic rule checks holds. The matrix is decided on board state, the holds i
 document the checker reads carries. The one property a document does carry, that `held` is retryable, is a schema
 constraint (`comms-refusal.schema.json`).
 
+### The operator moves a slot
+
+**PR-2 (DEC-0140).** The operator may move a (Project, capability) responder slot to another live session of that
+Project: in the host's operator controls, or through their agent, which relays the decision to the host's move action
+(`gate: relayed`, [service](service.md#actions) AP-2, DEC-0121). An agent never moves a slot on its own account, and
+`com.responder_replace` still takes a slot for its own caller only: its closed arguments name no session.
+
+- **One transition, from the generation the operator saw.** The move names the slot's generation the operator's view
+  showed, and the host refuses it `revision_conflict` when the slot has moved on since, as `expectedGeneration` refuses
+  a replacement. Otherwise the host applies it atomically, as `com.responder_replace` would for the receiving session:
+  the generation goes up by one; a `claimed` request returns to `queued`; an `in_progress` one becomes
+  `outcome_unknown` (`lost_result`); an `accepted` one is held (C4). The move transfers no request, since a transfer
+  carries a checkpoint its caller writes, and the operator writes none.
+- **Who may receive it.** A live session of that Project already authorized to respond for that capability, as for
+  `com.enroll`; the host refuses any other `not_authorized`, and a move grants nothing.
+- **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
+- **The session moved off.** Until the operator moves the slot again, the host refuses that session's `com.enroll` and
+  `com.responder_replace` on the slot `not_authorized`, so a client's recovery cannot take it back; the session ends
+  its claims there and leaves its accepted work held.
+- **What was in flight.** The receiving session continues held accepted work only by its own `com.responder_replace`
+  with a transfer, whose checkpoint it writes as the replacement (a holder may replace itself at its current
+  generation), or the requester cancels it. An `outcome_unknown` request is settled as before: by the slot's holder
+  with an observed outcome, or by the estate owner once no responder holds the slot ([owner
+  settlement](#owner-settlement)). The host shows the slot's `accepted` and `in_progress` counts before the operator
+  confirms a move.
+- **The record.** The host's own transition record of the move names the operator as the actor and the receiving
+  session as the holder; `com.status` shows the slot as before (generation, lease, `provenance`), and no tool's answer
+  gains a member.
+
 ## A session's role and branch
 
-**PR-3 (DEC-0140).** A host may let a session name its `role` when it enrolls (`coder`, `observer`, `monitor`,
-`responder`) and its Git `branch` when it reports its activity. Both are the host's own session surface, not the
-board's, and no board tool carries either.
+**PR-3 (DEC-0140).** A host may let a session name its **session role** when the host enrolls the session (`coder`,
+`observer`, `monitor`, `responder`; not `com.enroll`, whose closed arguments carry none) and the Git `branch` it works on
+when it reports its activity to the host. Both belong to the host's own session surface, not the board's, and no board
+tool carries either.
 
-- **A role is a claim.** It is display and routing only, never authority: a `responder` role takes no slot (only
-  `com.enroll` under its grant, or the operator's move, does), and no role widens what a session may read or do.
-- **A branch stays in its Project.** A branch name is repository text and can name a person, a client or an unreleased
-  plan. The operator and the sessions of that Project may see it. It is never written to the board (a message, the
-  directory, `com.status`), to an events feed read off the machine, to an organization server or to a relay, and never
-  from one Project's sessions to another Project's. A host may leave it out without reporting itself degraded.
+- **A session role is a claim.** It is display and routing only, never authority, and it is not a role assignment
+  (`roles.schema.json`, which can carry authority): a `responder` role takes no slot (only `com.enroll` or
+  `com.responder_replace` under the session's grant, or the operator's move, does), and no session role widens what a
+  session may read or do.
+- **A reported branch stays in its Project.** A branch name is repository text and can name a person, a client or an
+  unreleased plan. The operator and the sessions of that Project may see the branch a session reported. The host never
+  copies it into what it writes itself: the board's own content (a receipt, a progress note it generates), the
+  directory, `com.status`, a relay, an organization server, an events feed read off the machine, or another Project's
+  sessions. A host may leave it out without reporting itself degraded. An agent's own message text stays under its own
+  rules, and the `git.branch` of an activity event follows the organization's `telemetry.git_branch` policy
+  ([activity](activity.md), DEC-0030), not this rule.
 
 ## Refusals
 

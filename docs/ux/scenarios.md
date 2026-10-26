@@ -33,6 +33,7 @@
 | SCN-025 | Follow a request on the Project board to its result, or to outcome_unknown | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
 | SCN-026 | A second copy of a service starts, by hand or by its supervisor | service | P-02 | ST-021, FLW-17 | draft | not audited |
 | SCN-027 | The operator unlists a Project: it leaves the directory, and a sender that knows its id still reaches it | project-board | P-02 | ST-022, FLW-18 | draft | not audited |
+| SCN-051 | The operator makes another session the Project's main one, and the old one does not take it back | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
 | SCN-028 | Add a second machine from afar: compare the code, sign with the passkey | network | P-02 | ST-023, FLW-19 | draft | not audited |
 | SCN-029 | Create my network on the always-on machine | network | P-02 | ST-024, FLW-20 | draft | not audited |
 | SCN-030 | Remove a lost machine, then replace another machine's key | network | P-02 | ST-025, FLW-20 | draft | not audited |
@@ -735,6 +736,27 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** the host cannot save the setting -> it says the change was not saved, and the Project stays as it was.
 - **Status:** draft
 - **Coverage:** project-comms Project directory; `comms-directory.schema.json`, `comms-directory-args.schema.json`; `test/comms-tools.test.ts` (the directory's boundary)
+- **Product:** unobserved
+
+### SCN-051: The operator makes another session the Project's main one, and the old one does not take it back
+
+- **Persona:** P-02
+- **Feature:** project-board
+- **Traces:** ST-020, FLW-16 (JTBD-09, JRN-08/#1)
+- **Entry point:** the host's view of `project-b`'s sessions, where session `s-1` holds `project.work` (the main one) and `s-2` is live
+- **Preconditions:** `s-2` is authorized to respond for `project.work`; the slot holds one `accepted` request and one `in_progress` request of `s-1`
+- **Steps:**
+  1. The operator chooses to make `s-2` the main session -> the host shows the slot's work first: one accepted, one in progress, and that the accepted one waits for `s-2` and the in-progress one becomes unknown.
+  2. The operator confirms -> the host moves the slot from the generation the operator saw: `s-2` holds `project.work`, the in-progress request reads `outcome_unknown`, the accepted one is held, and `s-1`'s next fenced call is `fenced`.
+  3. `s-1`'s client restarts and tries to take the slot back -> the host refuses `not_authorized`, and the client leaves it.
+  4. `s-2` continues the accepted request by replacing itself with a transfer and its own checkpoint, and settles the unknown one once it observes its outcome.
+- **Expected result:** the main session is the one the operator chose, and it stays so until the operator moves it again; no work is lost or done twice.
+- **Alt paths:** someone else moved or re-enrolled the slot after the operator's view was drawn -> the host refuses `revision_conflict` and shows the slot as it is now. The slot or `project-b` is held -> the move is refused `held` until the hold is lifted. An agent relays the operator's decision -> the same move, recorded as the operator's act.
+- **UI elements:** the sessions list with the main one marked; "Make main"; the confirmation with the slot's accepted and in-progress counts.
+- **States covered:** success, error
+- **Errors & recovery:** `s-2` is not authorized for the capability -> the host refuses `not_authorized` and says the session needs the grant first; nothing moves.
+- **Status:** draft
+- **Coverage:** project-comms PR-1, PR-2 (DEC-0140); `test/comms-hold.test.ts` (`PRIMARY_CAPABILITY`)
 - **Product:** unobserved
 
 ## Services
