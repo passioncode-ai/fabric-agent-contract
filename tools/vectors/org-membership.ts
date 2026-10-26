@@ -158,6 +158,8 @@ function verifyCases(): Json[] {
     c("revoked key: signed by K0, which the key set revokes", attestation({}, K0), trust(), refused("key-revoked")),
     c("revoked key: K1 revoked by revision 3, inside its window", byK1, trust({ keySet: "r3" }), refused("key-revoked")),
     c("rotated key: K1, rotated out, issuedAt inside its window", byK1, trust(), accepted(byK1, "active", false)),
+    c("key window: K1 after its window, issuedAt at its notAfter", attestation({ issuedAt: "2026-11-01T00:00:00Z", notBefore: "2026-11-01T00:00:00Z", expiresAt: "2026-11-01T01:00:00Z" }, K1), trust({ now: "2026-11-01T00:30:00Z" }), refused("key-not-valid")),
+    c("key window: K2 a millisecond before its window", attestation({ issuedAt: "2026-10-14T23:59:59.999Z", notBefore: "2026-10-15T00:00:00Z", expiresAt: "2026-10-15T01:00:00Z" }), trust({ now: "2026-10-15T00:30:00Z" }), refused("key-not-valid")),
     c("small-order key: a listed key of order 4, refused before the signature is read", forged, trust({ keySet: "smallOrder" }), refused("small-order-key")),
     c("unusable key: the listed key names another algorithm", BASE, trust({ keySet: "algMismatch" }), refused("unusable-key")),
     c("wrong issuer: another server's attestation", attestation({ issuer: "https://other.example" }), trust(), refused("wrong-issuer")),

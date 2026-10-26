@@ -131,6 +131,8 @@ describe("the documents", () => {
     expect(codes("org-key-set", { ...KEY_SET, keys: [{ ...keys[1], notAfter: "late" }] })).toEqual(["FAC-SEM-146"]);
     expect(codes("org-key-set", { ...KEY_SET, keys: [...keys, { ...keys[1], kid: "zero", x: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" }] })).toEqual(["FAC-SEM-146"]);
     expect(codes("org-key-set", { ...KEY_SET, issuedAt: "2027-06-01T00:00:00Z" })).toEqual(["FAC-SEM-146"]);
+    // A revoked list that is not a list reads as empty: the schema refuses it, the rule adds nothing of its own.
+    expect(codes("org-key-set", { ...KEY_SET, revoked: "none" })).toEqual([]);
   });
 
   it("flags an attestation's times FAC-SEM-145", () => {
@@ -152,7 +154,7 @@ describe("the verifiers' edges", () => {
     expect(verifyOrgMembership(BASE, { ...TRUST, now: "2026-10-25T11:30:00Z" as never })).toEqual({ ok: false, problem: "no-clock" });
     expect(verifyOrgMembership(BASE, { ...TRUST, keySet: "r2" as never })).toEqual({ ok: false, problem: "context-invalid" });
     expect(verifyOrgMembership(BASE, { ...TRUST, held: { subject: "m-1", revision: 1, digest: "sha256:x" } })).toEqual({ ok: false, problem: "context-invalid" });
-    expect(verifyOrgKeySet(KEY_SET, { root: { ...vectors.root, kid: "" }, held: undefined })).toEqual({ ok: false, problem: "context-invalid" });
+    expect(verifyOrgKeySet(KEY_SET, { root: { ...vectors.root, kid: "" } })).toEqual({ ok: false, problem: "context-invalid" });
     expect(verifyOrgKeySet(KEY_SET, { root: { ...vectors.root, x: 7 as never } })).toEqual({ ok: false, problem: "context-invalid" });
     expect(verifyOrgKeySet(KEY_SET, { root: vectors.root, held: { revision: 1, digest: "x" } })).toEqual({ ok: false, problem: "context-invalid" });
     expect(verifyOrgKeySet(KEY_SET, null as never)).toEqual({ ok: false, problem: "context-invalid" });
