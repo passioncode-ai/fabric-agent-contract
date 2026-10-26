@@ -145,7 +145,8 @@ Everything the membership carried ends with it, as one rule:
 
 - Fabric revokes every share grant whose context is that `org:<orgId>`: the next estate revision lists a `grant`
   revocation for each, and in the same revision removes the grant from `shareGrants` and every placement and secret
-  placement in that context, and drops the organization's pin, so the revision passes `FAC-SEM-075`, `FAC-SEM-076` and
+  placement in that context, and drops the organization's pin and every machine's hub key of that context (each revoked
+  as `hub-key`, DEC-0128), so the revision passes `FAC-SEM-075`, `FAC-SEM-076` and
   `FAC-SEM-111` and every machine of the person reads the end from it once the person's passkey signs it (Fabric
   drafts it at the end and asks for the signature; until then the server already refuses the revoked certificate, and
   the hub mints nothing in the context); the revocation delta carries the revocation fast (DEC-0054), so the

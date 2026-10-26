@@ -58,6 +58,19 @@
         "use": "sig",
         "alg": "EdDSA"
       },
+      "contextHubKeys": [
+        {
+          "context": "org:org_3fh9p1zc",
+          "key": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+            "kid": "hub-ctx-a-1",
+            "use": "sig",
+            "alg": "EdDSA"
+          }
+        }
+      ],
       "packages": [
         {
           "agentRef": "urn:fabric:agent:example:inbox-digest",
@@ -135,6 +148,7 @@
     {
       "org": "org:org_3fh9p1zc",
       "issuer": "https://orgs.example",
+      "iss": "urn:fabric:context:c7d2a91f0b3e4c58",
       "root": {
         "kid": "root-org-a-1",
         "x": "bfkD5KBvkcHA-_BwPJxUzu7jiwq2SmtVRyLuNpSQRmQ"
@@ -144,6 +158,7 @@
     {
       "org": "org:org_7kq2m4xw",
       "issuer": "https://orgs.example",
+      "iss": "urn:fabric:context:4e19b08d2a6f7c31",
       "root": {
         "kid": "root-org-b-1",
         "x": "CFn01c2fmBAFHuF99_902jC141_T2rt7ORxIljXv8rk"
@@ -315,7 +330,7 @@
     }
   ],
   "revocations": [],
-  "digest": "sha256:c7aa13c84fb6c85ba672d927efbca2bedf2edf98f6dfac7eb9c6e64a0dc38371",
+  "digest": "sha256:ec20a77976d6872c6f6319e4145bb1981640c6bccb1b242b2659e0dac1f6150e",
   "signature": {
     "format": "webauthn-assertion",
     "credentialId": "0nGFzb4RDddKfO7TtqkdYA",

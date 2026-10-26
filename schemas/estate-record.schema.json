@@ -354,6 +354,14 @@
           "$ref": "#/$defs/edKey",
           "description": "The certificate of the hub key on this machine: the passkey-signed record binds this kid and public key to this machine. A delegation verifier that reads the record trusts a token's kid only while the revision it reads certifies it: one it verified and the highest its machine applied (delegation.md DL-14, hubKeyCertified, DEC-0060)."
         },
+        "contextHubKeys": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/contextHubKey"
+          },
+          "description": "The hub keys of this machine per organization context (DEC-0128): each signs the delegation tokens of its context under that context's iss, and nothing of the estate's (heartbeats, delta entries, leases stay the personal hubKey's). Each context once, every kid and key unique across all hub keys of the record, the context pinned in organizations, only on a full machine (FAC-SEM-073, FAC-SEM-134). A reader pinned before DEC-0128 refuses the member, so Fabric writes it only once every reader of the record is pinned at or after."
+        },
         "packages": {
           "type": "array",
           "maxItems": 256,
@@ -546,6 +554,7 @@
       "required": [
         "org",
         "issuer",
+        "iss",
         "root",
         "pinnedAt"
       ],
@@ -557,6 +566,12 @@
         "issuer": {
           "$ref": "entitlement.schema.json#/$defs/issuer",
           "description": "The organization server's origin, as its attestations name it."
+        },
+        "iss": {
+          "type": "string",
+          "maxLength": 160,
+          "pattern": "^urn:fabric:context:[A-Za-z0-9][A-Za-z0-9._~-]{15,127}$",
+          "description": "The delegation issuer of this organization's context (DEC-0128): an opaque id per (estate, organization), stable across key rotation and hub moves, never containing the estate id, so a token in this context names no estate. Each pin's own (FAC-SEM-147)."
         },
         "root": {
           "type": "object",
@@ -580,6 +595,23 @@
           "description": "When the person admitted the organization."
         }
       }
+    },
+    "contextHubKey": {
+      "type": "object",
+      "required": [
+        "context",
+        "key"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "org-membership.schema.json#/$defs/org"
+        },
+        "key": {
+          "$ref": "#/$defs/edKey"
+        }
+      },
+      "description": "One organization context's hub key on a machine (DEC-0128)."
     }
   }
 }
