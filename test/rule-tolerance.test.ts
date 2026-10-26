@@ -29,13 +29,15 @@ const KINDS = [
   // A recorded profile resolution, whose profiles that read user content have an open-vendor route (FAC-SEM-060, FAC-SEM-112, DEC-0083).
   "profile-resolution",
   // An enroll token, whose statement is the register's, for one use and at most 900 s (FAC-SEM-113, DEC-0084).
-  "enroll-token"
+  "enroll-token",
+  // A server's draft of a key set or a member list, whose digest is its draft's (FAC-SEM-151, DEC-0131).
+  "org-key-set-draft", "org-authority-draft"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
 const filled = (names: string[], value: unknown) => Object.fromEntries(names.map((name) => [name, value]));
 const MEMBERS = [
-  "events", "known", "batch", "ack", "cells", "log", "consents", "current", "next", "trustedKeys", "at", "layers", "effective",
+  "draft", "base", "events", "known", "batch", "ack", "cells", "log", "consents", "current", "next", "trustedKeys", "at", "layers", "effective",
   "checkIn", "health", "request", "response", "enrolled", "token", "proof", "issuedEpochs", "binding", "epochs", "root",
   "action", "decision", "pinned", "certification", "revocations", "data", "collector", "device", "user", "session", "kind",
   "seq", "record", "machine", "package", "parent", "machines", "authorities", "publisherKeys", "shareGrants",

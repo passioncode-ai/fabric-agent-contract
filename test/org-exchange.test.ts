@@ -47,8 +47,14 @@ describe("the routes and the documents (DEC-0131)", () => {
     expect(valid(KS_DRAFT, "org-key-set-draft")).toBe(true);
     expect(valid(AU_DRAFT, "org-authority-draft")).toBe(true);
     expect(valid(REG, "org-root-registration")).toBe(true);
+    expect(valid({ ...REG, keySet: R2 }, "org-root-registration")).toBe(false);
+    const { administrator: _a, ...noAdministrator } = REG;
+    expect(valid(noAdministrator, "org-root-registration")).toBe(false);
     expect(evaluateSemanticRules("org-key-set-draft", KS_DRAFT)).toEqual([]);
     expect(evaluateSemanticRules("org-authority-draft", AU_DRAFT)).toEqual([]);
+    // The public entry reaches FAC-SEM-151, so an empty answer above is the rule's, not a missing dispatch.
+    expect(evaluateSemanticRules("org-key-set-draft", { ...KS_DRAFT, org: "org:org-b" }).map((finding) => finding.code)).toEqual(["FAC-SEM-151"]);
+    expect(evaluateSemanticRules("org-authority-draft", { ...AU_DRAFT, digest: `sha256:${"1".repeat(64)}` }).map((finding) => finding.code)).toEqual(["FAC-SEM-151"]);
   });
 });
 
@@ -61,6 +67,8 @@ describe("the draft's digest", () => {
     expect(authorityDraftDigest(strip(AUTHORITY, "digest", "signature"))).toBe(AUTHORITY.digest);
     expect(authorityDraftDigest(AUTHORITY)).toBeUndefined();
     expect(authorityDraftDigest(strip(AUTHORITY, "digest"))).toBeUndefined();
+    expect(authorityDraftDigest({ ...strip(AUTHORITY, "digest", "signature"), type: "org-key-set/1" })).toBeUndefined();
+    expect(authorityDraftDigest({ ...strip(AUTHORITY, "digest", "signature"), extra: 1 })).toBeUndefined();
     expect(authorityDraftDigest(null)).toBeUndefined();
     expect(authorityDraftDigest({ ...strip(AUTHORITY, "digest", "signature"), revision: Number.NaN })).toBeUndefined();
   });
@@ -116,25 +124,32 @@ describe("acceptSignedAuthority (OX-6)", () => {
 });
 
 describe("verifyRootRegistration (OX-2)", () => {
-  const ctx = { org: "org:org-a", issuer: "https://orgs.example", registered: false, claimValid: (claim: string) => claim === REG.claim, draftDigest: held1.digest };
-  it("registers the root with the first set, the claim the server gave and the draft", () => {
-    expect(verifyRootRegistration(REG, ctx)).toEqual({ ok: true, root: { issuer: ctx.issuer, org: ctx.org, kid: ROOT.kid, x: ROOT.x }, held: held1 });
+  const ctx = { org: "org:org-a", issuer: "https://orgs.example", registered: false, claimValid: (claim: string) => claim === REG.claim };
+  it("registers the root and the owner's administrator credential before the first set, on the claim the server showed", () => {
+    expect(verifyRootRegistration(REG, ctx)).toEqual({ ok: true, root: { issuer: ctx.issuer, org: ctx.org, kid: ROOT.kid, x: ROOT.x }, administrator: REG.administrator });
+    // The first set then verifies under the root just registered, as any set does (OX-3).
+    expect(acceptSignedKeySet(R1, { root: ROOT, draftDigest: held1.digest })).toMatchObject({ ok: true, unchanged: false, digest: held1.digest });
   });
 
   it("refuses a malformed body before anything else", () => {
-    for (const body of [null, { ...REG, type: "x" }, { ...REG, org: 1 }, { ...REG, org: "org-a" }, { ...REG, issuer: 1 }, { ...REG, root: "r" }, { ...REG, root: { ...REG.root, kid: 1 } }, { ...REG, root: { ...REG.root, x: 1 } }, { ...REG, claim: 1 }, { ...REG, claim: "short" }, { ...REG, keySet: "k" }]) {
+    for (const body of [null, { ...REG, type: "x" }, { ...REG, org: 1 }, { ...REG, org: "org-a" }, { ...REG, issuer: 1 }, { ...REG, root: "r" }, { ...REG, root: { ...REG.root, kid: 1 } }, { ...REG, root: { ...REG.root, x: 1 } }, { ...REG, root: { ...REG.root, x: "short" } }, { ...REG, administrator: "a" }, { ...REG, claim: 1 }, { ...REG, claim: "short" }]) {
       expect(verifyRootRegistration(body, ctx), JSON.stringify(body)?.slice(0, 50)).toEqual({ ok: false, problem: "malformed" });
     }
   });
 
-  it("refuses another organization, a root already registered, a claim the server did not give, and a set that is not the first draft", () => {
+  it("refuses another organization, a root already registered, an unusable key, and last a claim the server did not show", () => {
     expect(verifyRootRegistration({ ...REG, org: "org:org-b" }, ctx)).toEqual({ ok: false, problem: "wrong-org" });
     expect(verifyRootRegistration({ ...REG, issuer: "https://other.example" }, ctx)).toEqual({ ok: false, problem: "wrong-org" });
     expect(verifyRootRegistration(REG, { ...ctx, registered: true })).toEqual({ ok: false, problem: "root-registered" });
+    expect(verifyRootRegistration({ ...REG, root: { ...REG.root, x: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" } }, ctx)).toEqual({ ok: false, problem: "small-order-key" });
+    expect(verifyRootRegistration({ ...REG, administrator: { ...REG.administrator, rpId: "orgs.example" } }, ctx)).toEqual({ ok: false, problem: "unusable-key" });
+    expect(verifyRootRegistration({ ...REG, administrator: { ...REG.administrator, publicKey: { ...REG.administrator.publicKey, x: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" } } }, ctx)).toEqual({ ok: false, problem: "small-order-key" });
+    expect(verifyRootRegistration({ ...REG, administrator: { ...REG.administrator, alg: 7 } }, ctx)).toEqual({ ok: false, problem: "unusable-key" });
+    // The claim is checked last and never consumed on a refusal: a body refused for its keys leaves the claim usable.
+    let checked = 0;
+    const counting = { ...ctx, claimValid: () => { checked += 1; return true; } };
+    verifyRootRegistration({ ...REG, root: { ...REG.root, x: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" } }, counting);
+    expect(checked).toBe(0);
     expect(verifyRootRegistration(REG, { ...ctx, claimValid: () => false })).toEqual({ ok: false, problem: "claim-invalid" });
-    expect(verifyRootRegistration({ ...REG, keySet: R2 }, ctx)).toEqual({ ok: false, problem: "malformed" });
-    const { draftDigest: _d, ...noDraft } = ctx;
-    expect(verifyRootRegistration(REG, noDraft)).toEqual({ ok: false, problem: "no-draft" });
-    expect(verifyRootRegistration({ ...REG, root: { ...REG.root, x: vectors.keys.k1.x } }, ctx)).toEqual({ ok: false, problem: "bad-signature" });
   });
 });

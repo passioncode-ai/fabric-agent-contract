@@ -2,15 +2,15 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/org-root-registration.schema.json",
   "title": "Organization root registration, org-root-registration/1 (DEC-0131)",
-  "description": "What the owner's Fabric POSTs to {issuer}/fabric/membership/v1/{org}/root once (DEC-0131 OX-2): the membership root's public half and the first key set it signed, authorised by the one-time claim the server issued to the owner's account (at most 15 minutes old). The signed set is the proof the sender holds the root. docs/specification/membership.md.",
+  "description": "What the owner's Fabric POSTs to {issuer}/fabric/membership/v1/{org}/root before the first key set (DEC-0131 OX-2): the membership root's public half and the owner's signing credential for this organization, authorised by the one-time claim the server showed the owner's signed-in account (at most 15 minutes old). The server then drafts revision 1 with them; the root's signature over that set is the proof the sender holds the root. docs/specification/membership.md.",
   "type": "object",
   "required": [
     "type",
     "org",
     "issuer",
     "root",
-    "claim",
-    "keySet"
+    "administrator",
+    "claim"
   ],
   "properties": {
     "type": {
@@ -39,14 +39,14 @@
       "additionalProperties": false,
       "description": "The root as members pin it (OM-2)."
     },
+    "administrator": {
+      "$ref": "estate-record.schema.json#/$defs/authority",
+      "description": "The owner's signing passkey registered for this organization alone (OM-3), which the server lists as the first set's administrator."
+    },
     "claim": {
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]{43}$",
-      "description": "The one-time claim: 32 random bytes, base64url, that the server issued to the owner's signed-in account for this organization and delivered by an open link (DEC-0123)."
-    },
-    "keySet": {
-      "$ref": "org-key-set.schema.json",
-      "description": "The first org-key-set/1, revision 1, signed by the root; equal to the pending draft."
+      "description": "The one-time claim, a bearer secret: 32 random bytes, base64url, that the server showed the owner on its signed-in page for this organization and the owner gave their Fabric. Never in a URL or a link (FAC-SEM-143's rule); used up only by a registration the server accepts."
     }
   },
   "additionalProperties": false

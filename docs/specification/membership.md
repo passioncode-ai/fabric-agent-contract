@@ -67,8 +67,8 @@ nothing else; a key of small order is refused before anything is verified under 
 `organizations`: `{org, issuer, iss, root: {kid, x}, pinnedAt}`, `iss` being the opaque issuer of that context's tokens
 Fabric generates at the join (DEC-0128). The passkey's signature over that estate revision is the
 person's admission (R1-D12); no administrator signs it, and no admission receipt exists. Fabric reads the root from the
-issuer at the moment the person joins and shows it to them before the passkey signs; how the issuer serves it, and
-what the person compares the fingerprint with is Fabric's: ADR-0178 point 6 shows the root's `kid` and a fingerprint of
+issuer's root route ([the draft exchange](#the-draft-exchange), DEC-0131) at the moment the person joins and shows it
+to them before the passkey signs; what the person compares the fingerprint with is Fabric's: ADR-0178 point 6 shows the root's `kid` and a fingerprint of
 its `x`, which the person compares with the one in the administrator's invitation, reached by a second channel, and
 pins nothing on a mismatch. Unpinning an organization in a later
 revision ends every membership of it ([OM-5](#ending)). `FAC-SEM-147` refuses an organization pinned twice and a root of
@@ -216,7 +216,7 @@ list come from them (DEC-0129):
 | `grant.usage` and share registrations | grants whose context is that `org:<orgId>` | DEC-0086 |
 | `node-summary/1` | the enrollment's own record: what DEC-0118 lists for the machine's mode (under `C` this context only, under `A` the whole harness) | DEC-0102, DEC-0118 |
 | `credentialRequests`, `callRecords` | the enrollment's own | DEC-0111 |
-| for the organization's owner | the membership root's public key and the root's signatures over the key sets the server drafted (OM-3), and the claim the server gave back with the first (OX-2) | DEC-0129, DEC-0131 |
+| for the organization's owner | the membership root's public key, the owner's signing credential for this organization (as its first administrator), the root's signatures over the key sets the server drafted (OM-3), and the claim the server showed the owner (OX-2) | DEC-0129, DEC-0131 |
 | for an administrator | the public part of their signing passkey (an `administrators` entry) and their signatures over member lists (OL-2) | DEC-0129 |
 | the member list's own entry | the context's `iss` (DEC-0128), so the server can draft `org-authority/1`; the enrollment's `#sig` key it already holds from the enrollment | DEC-0129 |
 | an adaptation plan's organization part (TP-03) | what the person chose to bring into that organization (projects, history, results, schedules), by reference, and the person's requests to its administrators; never the plan's draft, its inventory or anything the person did not choose | DEC-0129 |
@@ -330,29 +330,36 @@ comes back. Every route is under the issuer's origin, `{org}` being the organiza
 
 | Route | Answers |
 |---|---|
-| `GET /fabric/membership/v1/{org}/root` | `{org, issuer, root: {kid, x}}`, the root members pin (OM-2), once registered; `404 no-root` before |
+| `GET /fabric/membership/v1/{org}/root` | `{org, issuer, root: {kid, x}}`, the root members pin (OM-2), once its first key set is accepted; `404 no-root` before |
+| `POST /fabric/membership/v1/{org}/root` | registers the root and the owner's administrator credential before the first key set (OX-2) |
 | `GET /fabric/membership/v1/{org}/key-set` | the last signed `org-key-set/1`; `404 no-signed-key-set` before the first |
 | `GET /fabric/membership/v1/{org}/key-set/draft` | the pending `org-key-set-draft/1`; `404 no-draft` when none waits |
-| `POST /fabric/membership/v1/{org}/key-set` | accepts a signed set as OX-3 says; `POST .../root` registers the root with the first (OX-2) |
-| `GET`, `POST /fabric/membership/v1/{org}/authority`, `GET .../authority/draft` | the same for `org-authority/1` and `org-authority-draft/1` (OX-6) |
+| `POST /fabric/membership/v1/{org}/key-set` | accepts a signed set as OX-3 says; `409 no-root` before a root is registered |
+| `GET`, `POST /fabric/membership/v1/{org}/authority`, `GET .../authority/draft` | the same for `org-authority/1` and `org-authority-draft/1`, read only by the organization's administrators and its relay (OX-6) |
 
 **OX-1, the draft.** `org-key-set-draft/1` is `{type, org, base, draft, digest}`: `draft` is the next `org-key-set/1`
 without `sig`, every member the root signs, exactly; `base` is the last signed set's `{revision, digest}`, or `null`
 before the first; `draft.revision` is one above `base` (1 with none); `digest` is SHA-256 of the root's signing input
-over `draft` (`keySetDraftDigest`). `FAC-SEM-151` holds the envelope to that. A draft holds public material only (the
+over `draft` (`keySetDraftDigest`). `FAC-SEM-151` holds the envelope to that. A key-set draft holds public material only (the
 signing keys' public halves, the administrators' public credentials, OM-7's owner and administrator rows), so the
-routes are read without a credential, and a draft is never served as a signed set. One draft waits at a time; a newer
+key-set and root routes are read without a credential, and a draft is never served as a signed set. One draft waits at a time; a newer
 draft replaces it before it is signed.
 
-**OX-2, the first key set and the root.** The owner signs in to the server in a browser and creates the organization;
-the server issues a **claim**: 32 random bytes, bound to that organization and that signed-in account, used once, for
-at most 15 minutes (`MAX_CLAIM_SECONDS`), delivered to the owner's Fabric by an open link (DEC-0123). The owner's
-Fabric creates the root, reads the draft of revision 1, shows it (OM-3), and once the owner confirms, POSTs
-`org-root-registration/1` `{type, org, issuer, root: {kid, x}, claim, keySet}` with the signed first set. The server
-checks it as `verifyRootRegistration` does: the shape, its organization and issuer, no root yet (`409
-root-registered`), the claim (`403 claim-invalid`), then the set: revision 1, verified under the root it registers
-(the signature is the proof the sender holds the root) and equal to the draft (OX-3). Only then does it serve the root
-and the set. A root is registered once; replacing it is a new organization root and every member's new pin (OM-3).
+**OX-2, the root and the first key set.** The owner signs in to the server in a browser and creates the organization;
+the server shows that signed-in page a **claim**: 32 random bytes, bound to that organization and that account, used
+once, for at most 15 minutes (`MAX_CLAIM_SECONDS`). The claim is a bearer secret: the owner gives it to their Fabric
+(a copy from that page is enough), and it never travels in a URL or a link, so never by an open link (DEC-0123 links
+carry none). The owner's Fabric creates the root and a signing credential for this organization alone (OM-3) and
+POSTs `org-root-registration/1` `{type, org, issuer, root: {kid, x}, administrator, claim}` to `.../root`. The server
+checks it as `verifyRootRegistration` does: the shape, its organization and issuer (`422`), no first set accepted yet
+(`409 root-registered`), a root not of small order and a usable administrator credential (`422`), and last the claim
+(`403 claim-invalid`). The check never uses the claim up; on success the server uses it up and records the
+registration in one transaction, and until the first set is accepted a newer registration replaces an older one. The
+registration proves nothing about the root: the server then drafts revision 1 with its signing keys and that
+administrator (OX-1), the owner's Fabric reads the draft, shows it (OM-3) and, once the owner confirms, POSTs the set
+signed by the root to `.../key-set`, and the server accepts it as OX-3 says under the registered root. That signature is
+the proof the sender holds the root; only then does the server serve the root and the set. A root whose first set is
+accepted is registered for good; replacing it is a new organization root and every member's new pin (OM-3).
 
 **OX-3, accepting a signed set.** The server accepts a POSTed `org-key-set/1` only when `acceptSignedKeySet` does: it
 verifies under the registered root against the set held (`verifyOrgKeySet`), and the bytes the root signed have the
@@ -376,7 +383,11 @@ extends a key's window itself.
 digest}` with `draft` the list without `digest` and `signature` and `digest` its `orgAuthorityDigest`; an
 administrator's Fabric reads `GET .../authority/draft`, shows the changes against the last signed list (OL-2) and
 POSTs the signed list; the server accepts it only as `acceptSignedAuthority` does (it verifies under the applied key
-set and is the draft). A relay reads the signed list from `GET .../authority`.
+set and is the draft). A relay reads the signed list from `GET .../authority`. A list names every member's pairwise
+subject, role, `iss` and keys, so unlike a key set it is not public: the server answers the two authority GETs only to
+a caller it authenticates as one of the organization's administrators or its relay, and `404` to anyone else; how it
+authenticates them is the server's until CT-37 names the relay's registration. A POST still needs no credential: only
+an administrator's passkey makes a list that passes.
 
 ## Semantic rules
 
@@ -421,6 +432,12 @@ each is one organization's, for one audience. What still links one machine acros
 [contexts](contexts.md#linkability). The estate record's `organizations` lists the person's
 organizations to the person's own machines; the relay operator reads it today as it reads `org:<orgId>` in share
 grants, until per-context relay sessions (CT-122's question 3).
+
+The draft exchange (DEC-0131) serves an organization's root, key sets and key-set drafts to anyone: they name the
+organization's opaque id, its signing keys and its administrators' public credentials, one credential per
+organization, so they add no link between organizations, but anyone can count the administrators and see when a set
+changes. The member list and its draft name every member and are served only to the organization's administrators and
+its relay (OX-6).
 
 ## Not decided here
 

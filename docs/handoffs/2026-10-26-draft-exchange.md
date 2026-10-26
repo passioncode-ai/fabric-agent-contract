@@ -3,12 +3,13 @@
 ## Objective
 
 Give the first organization server and Fabric one way for a server's draft key set or member list to reach the person
-who signs it and come back signed (CT-156; request `1822d650`, thread `bd508780`), due 2026-10-30 for its N-3.
+who signs it and come back signed (CT-156; request `1822d650`, thread `bd508780`), asked by 2026-10-31 for its N-3 (due 2026-11-04); promised on the board by 2026-10-30.
 
 ## Done
 
 - DEC-0131: [membership](../specification/membership.md#the-draft-exchange), OX-1 to OX-6.
-  - **Routes** under the issuer: `root`, `key-set`, `key-set/draft`, `authority`, `authority/draft`, all public reads.
+  - **Routes** under the issuer: `root`, `key-set`, `key-set/draft`, `authority`, `authority/draft`. The root and key
+    sets are public reads; a member list and its draft go only to the organization's administrators and its relay.
   - **Documents.** `org-key-set-draft/1`, `org-authority-draft/1` (`FAC-SEM-151`), `org-root-registration/1`.
   - **Code.** `acceptSignedKeySet`, `acceptSignedAuthority`, `verifyRootRegistration` (`src/org-exchange.ts`).
 - CT-156 filed and decided; adoption open.
@@ -19,8 +20,10 @@ who signs it and come back signed (CT-156; request `1822d650`, thread `bd508780`
 
 ## Decisions
 
-- **Public reads, signed writes.** A draft holds public material; only a signature over the pending draft passes.
-- **The root by a claim.** The server's own sign-in issues a one-time claim; the first signed set proves the root.
+- **Public key sets, private lists, signed writes.** Only a signature over the pending draft makes a POST pass.
+- **The root first, by a claim.** The owner's Fabric registers the root and its administrator credential with a
+  one-time claim the server showed its signed-in page (a bearer secret, never in a link); the server then drafts
+  revision 1, and the root's signature over it proves the root.
 - **A 7-day lead.** The server drafts the next key set a week before the newest key ends; Fabric reads daily.
 
 ## Open

@@ -7884,15 +7884,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   how a draft reaches the signer and comes back (board request `1822d650`, thread `bd508780`, five points), by
   2026-10-31; fabric-workspace recorded the owner's choice (MD-14) to keep the root with the owner's Fabric.
 - **Decision:**
-  1. **Routes** under the issuer's origin, `{org}` the organization's opaque id: `GET .../root`, `GET`/`POST
-     .../key-set`, `GET .../key-set/draft`, the same for `authority` (`ORG_EXCHANGE_PATHS`). Drafts and signed
-     documents hold public material only, so they are read without a credential; only a signature makes a POST pass.
+  1. **Routes** under the issuer's origin, `{org}` the organization's opaque id: `GET`/`POST .../root`, `GET`/`POST
+     .../key-set`, `GET .../key-set/draft`, the same for `authority` (`ORG_EXCHANGE_PATHS`). The root, key sets and
+     their drafts hold public material only, so they are read without a credential; a member list and its draft name
+     every member, so the server serves them only to the organization's administrators and its relay. Only a
+     signature makes a key-set or list POST pass.
   2. **OX-1, the draft envelope** `org-key-set-draft/1` and `org-authority-draft/1`: `{type, org, base, draft,
      digest}`, the draft unsigned, its revision one above `base`, `digest` the signer's input digest (`FAC-SEM-151`).
      One draft waits at a time; a draft is never served as a signed document.
-  3. **OX-2, the root.** The first key set registers the root by `org-root-registration/1`, authorised by a claim the
-     server issued to the owner's signed-in account (32 bytes, one use, 15 minutes, delivered by an open link); the
-     signed set is the proof of the root; a root is registered once.
+  3. **OX-2, the root.** Before the first key set the owner's Fabric registers the root's public key and the owner's
+     signing credential for this organization by `org-root-registration/1` at `POST .../root`, authorised by a claim
+     the server showed the owner's signed-in account (32 bytes, one use, 15 minutes). The claim is a bearer secret,
+     never in a URL or a link (DEC-0123's links carry none); the server checks it last and uses it up only on a
+     registration it accepts. The server then drafts revision 1 with that administrator, and the root's signature over
+     it is the proof of the root; a root whose first set is accepted is registered for good.
   4. **OX-3, matching.** A signed set is accepted only when it verifies under the registered root against the set held
      and its signed bytes have the pending draft's digest (`draft-mismatch`, `no-draft` otherwise); a repeat of the held
      set is `unchanged`.
@@ -7906,12 +7911,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   exchange works for the owner's Fabric before any enrollment exists and needs no new credential type. A claim tied to
   the server's own sign-in binds the root to the person who created the organization there, without the root signing
   anything but key sets. Matching by the draft's digest keeps the owner from signing what the server did not draft and
-  the server from serving what the owner did not sign.
+  the server from serving what the owner did not sign. The root and the owner's credential reach the server before the
+  first draft because the draft names that credential as its administrator.
 - **Alternatives considered:** the device check-in's `records` (it needs an enrollment, which an organization being
   created does not have, and only the node sends device requests); a credential per owner for reading drafts (drafts
-  are public); the root signing a claim document (OM-3 keeps the root to key sets); the server pushing drafts to Fabric
+  are public); the root signing a claim document (OM-3 keeps the root to key sets); the claim in an open link (DEC-0123's links
+  carry no secret); the root and the first signed set in one POST (the server could not draft a set naming an
+  administrator it had not yet received); public member lists (a list names every member); the server pushing drafts to Fabric
   (left for later: reading the route on start and daily is enough at a 7-day lead).
 - **Compatibility:** additive. `contractVersion` stays `0.1.0`. OM-3's "the server drafts each set" now has its wire.
+  OM-2 named how an issuer serves its root as Fabric's; it is now the root route, and OM-2 says so. The first
+  organization server's unmerged N-3 serves `/v1/orgs/:orgId/membership/{root,key-set}` and answers the root flat
+  (`{issuer, org, kid, x}`); it moves to these paths and the nested `root`.
 - **Consequences / affects:** `schemas/org-key-set-draft.schema.json`, `schemas/org-authority-draft.schema.json`,
   `schemas/org-root-registration.schema.json` (new); `src/org-exchange.ts` (new), `src/semantic-rules.ts`,
   `src/semantic-kinds.ts`, `src/protocol-revisions.ts`; `docs/specification/membership.md` (The draft exchange, OX-1 to

@@ -1,7 +1,10 @@
 import { createHash } from "node:crypto";
+import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { orgAuthorityDigest, verifyOrgAuthority, type OrgAuthorityProblem } from "./org-authority.js";
 import { orgKeySetSigningInput, verifyOrgKeySet, type HeldOrgKeySet, type OrgKeySetProblem, type OrgRoot } from "./org-membership.js";
+import { signingCredentialFindings } from "./signing-challenges.js";
+import { credentialKey } from "./webauthn.js";
 
 // #region org-exchange, docs: docs/specification/membership.md#the-draft-exchange
 /**
@@ -9,7 +12,8 @@ import { orgKeySetSigningInput, verifyOrgKeySet, type HeldOrgKeySet, type OrgKey
  * owner's Fabric (for a key set) or an administrator's (for a member list) reads the pending draft, shows its changes,
  * signs it, and returns it; the server accepts a signed document only when its signed bytes are the pending draft's.
  * A draft holds public material only, so it is read without a credential; its authenticity is the signature over it.
- * The first key set also registers the root, authorised by a one-time claim the server gave the owner's account.
+ * Before the first key set the owner's Fabric registers the root and its administrator credential, authorised by a
+ * one-time claim the server showed the owner's signed-in account.
  */
 export const KEY_SET_DRAFT_TYPE = "org-key-set-draft/1";
 export const AUTHORITY_DRAFT_TYPE = "org-authority-draft/1";
@@ -32,6 +36,8 @@ export const ROTATION_LEAD_SECONDS = 7 * 24 * 60 * 60;
 const isString = (value: unknown): value is string => typeof value === "string";
 const SHA256 = /^sha256:[a-f0-9]{64}$/;
 const NONCE = /^[A-Za-z0-9_-]{43}$/;
+/** 32 bytes, base64url without padding, canonical. */
+const X = /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 const ORG = /^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 const digestOf = (bytes: Buffer) => `sha256:${createHash("sha256").update(bytes).digest("hex")}`;
 const baseOk = (base: unknown) => base === null || (isObject(base) && Number.isSafeInteger(base.revision) && (base.revision as number) >= 1 && isString(base.digest) && SHA256.test(base.digest));
@@ -43,9 +49,12 @@ export function keySetDraftDigest(draft: unknown): string | undefined {
   return input ? digestOf(input) : undefined;
 }
 
-/** The digest a member-list draft is matched by: the list's own `orgAuthorityDigest` over it. */
+/** The members of an `org-authority/1` an administrator signs over: every member but `digest` and `signature`. */
+const AUTHORITY_DRAFT_FIELDS = ["type", "issuer", "org", "revision", "issuedAt", "expiresAt", "members"];
+
+/** The digest a member-list draft is matched by: the list's own `orgAuthorityDigest` over it, for an `org-authority/1`'s exact members. */
 export function authorityDraftDigest(draft: unknown): string | undefined {
-  if (!isObject(draft) || Object.hasOwn(draft, "digest") || Object.hasOwn(draft, "signature")) return undefined;
+  if (!isObject(draft) || draft.type !== "org-authority/1" || Object.keys(draft).length !== AUTHORITY_DRAFT_FIELDS.length || !AUTHORITY_DRAFT_FIELDS.every((name) => Object.hasOwn(draft, name))) return undefined;
   try {
     return orgAuthorityDigest(draft);
   } catch {
@@ -112,29 +121,32 @@ export function acceptSignedAuthority(
 
 // ---- Registering the root ----------------------------------------------------------------------------------------
 
-export type RootRegistrationProblem = "malformed" | "wrong-org" | "root-registered" | "claim-invalid" | OrgKeySetProblem | DraftMatchProblem;
+export type RootRegistrationProblem = "malformed" | "wrong-org" | "root-registered" | "claim-invalid" | "unusable-key" | "small-order-key";
 
 /**
- * The server's check of an `org-root-registration/1` (OX-2), in order: the shape, the organization and issuer, no root
- * registered yet, the claim (one-time, issued to the owner's account, at most 15 minutes old: `claimValid` is the
- * server's own store), then the first key set: revision 1, verified under the root it registers (the proof the sender
- * holds the root) and equal to the pending draft. It answers and never throws.
+ * The server's check of an `org-root-registration/1` (OX-2), in order: the shape, the organization and issuer, no first
+ * key set accepted yet (`root-registered`; before it a newer registration replaces an older one), the root not of small
+ * order and the administrator's credential a usable signing credential (FAC-SEM-092's rule), and last the claim
+ * (one-time, shown to the owner's signed-in account, at most 15 minutes old). `claimValid` only checks the server's
+ * store and never consumes: on `ok` the server uses the claim up and records the registration in one transaction. The
+ * registration proves no possession; the root's signature over the first set does (OX-3). It answers and never throws.
  */
 export function verifyRootRegistration(
   body: unknown,
-  ctx: { org: string; issuer: string; registered: boolean; claimValid: (claim: string) => boolean; draftDigest?: string }
-): { ok: true; root: OrgRoot; held: HeldOrgKeySet } | { ok: false; problem: RootRegistrationProblem } {
+  ctx: { org: string; issuer: string; registered: boolean; claimValid: (claim: string) => boolean }
+): { ok: true; root: OrgRoot; administrator: JsonObject } | { ok: false; problem: RootRegistrationProblem } {
   if (!isObject(body) || body.type !== ROOT_REGISTRATION_TYPE || !isString(body.org) || !ORG.test(body.org) || !isString(body.issuer) || !isObject(body.root) ||
-    !isString(body.root.kid) || !isString(body.root.x) || !isString(body.claim) || !NONCE.test(body.claim) || !isObject(body.keySet)) {
+    !isString(body.root.kid) || !isString(body.root.x) || !X.test(body.root.x) || !isObject(body.administrator) || !isString(body.claim) || !NONCE.test(body.claim)) {
     return { ok: false, problem: "malformed" };
   }
   if (body.org !== ctx.org || body.issuer !== ctx.issuer) return { ok: false, problem: "wrong-org" };
   if (ctx.registered) return { ok: false, problem: "root-registered" };
+  if (isSmallOrderKey(Buffer.from(body.root.x, "base64url"))) return { ok: false, problem: "small-order-key" };
+  const admin = body.administrator;
+  if (signingCredentialFindings(admin, "").length > 0) return { ok: false, problem: "unusable-key" };
+  const usable = credentialKey(admin.publicKey, isString(admin.alg) ? admin.alg : "");
+  if ("problem" in usable) return { ok: false, problem: usable.problem };
   if (!ctx.claimValid(body.claim)) return { ok: false, problem: "claim-invalid" };
-  if (body.keySet.revision !== 1) return { ok: false, problem: "malformed" };
-  const root: OrgRoot = { issuer: ctx.issuer, org: ctx.org, kid: body.root.kid, x: body.root.x };
-  const accepted = acceptSignedKeySet(body.keySet, { root, ...(ctx.draftDigest !== undefined ? { draftDigest: ctx.draftDigest } : {}) });
-  if (!accepted.ok) return accepted;
-  return { ok: true, root, held: accepted.held };
+  return { ok: true, root: { issuer: ctx.issuer, org: ctx.org, kid: body.root.kid, x: body.root.x }, administrator: admin };
 }
 // #endregion org-exchange
