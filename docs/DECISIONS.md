@@ -7436,9 +7436,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   say otherwise); translate *Fabric* too (a product name, and the visible word would no longer match the mark);
   keep the old sentence with its dash (text for people carries none).
 - **Compatibility:** no schema changes; `contractVersion` stays `0.1.0`. A page that still shows the English name or
-  the old English sentence on an English page stays readable; a kit adopts the wording at its next pin. The adapter's
-  kit 1.1.4 (adapter 0.49.3) already follows items 1 to 3, in English and Russian; Fabric Dashboards follows them too
-  (`src/core/i18n.ts` at `4679ea0`, its English sentence ending in a full stop).
+  the old English sentence on an English page stays readable; on a page in another language an older kit is
+  nonconformant until its next pin. The adapter's kit 1.1.4 (adapter 0.49.3) already follows items 1 to 3, in English
+  and Russian; Fabric Dashboards follows items 1 and 3 (`src/core/i18n.ts` at `4679ea0`, its English sentence ending in
+  a full stop) and shows no item menu.
 - **Consequences / affects:** `docs/specification/fabric-button.md` (FB-3, FB-4, FB-5), `test/fabric-button.test.ts`,
   `docs/ux/flows.md` (FLW-09), `docs/ux/foundation.md` (ST-011), `docs/ux/scenarios.md` (SCN-015),
   `docs/ux/screens.md` (SCR-12), `docs/DOCMAP.md`; DEC-0040's status; backlog CT-148 (closed by this decision).

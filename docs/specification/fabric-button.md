@@ -39,10 +39,10 @@ clear of it. It holds at the page's floor (ED-1) and does not count as sticky ch
 viewport it MAY show the mark alone. Its accessible name is **Open Fabric** in the page's language (DEC-0124): the
 `lang` of the document the button is drawn in, matched on its primary language subtag (`ru-RU` is `ru`), and English
 when the page names no language or one the button has no words for; a host's own button (FB-1, FB-6) follows the
-host's language. The product name *Fabric* stays in English in every language, as the visible word and inside the
-name. A page MAY supply its own words for its language, and they keep *Fabric*, the visible label, inside the name
-(WCAG 2.2 SC 2.5.3, Label in Name): for example Fabric Dashboards' «Открыть Fabric» (`src/core/i18n.ts` at
-`4679ea0`). Its target is at least 44 × 44 CSS pixels. Its colours come from the page's theme tokens and follow the host's appearance
+host's language, as Fabric Dashboards' «Открыть Fabric» does (`src/core/i18n.ts` at `4679ea0`). The product name
+*Fabric* stays in English in every language, as the visible word and inside the name. A page MAY supply its own words
+for its language (the adapter's kit takes them as `data-label-open` and its siblings), and they keep *Fabric*, the
+visible label, inside the name and in each menu item (WCAG 2.2 SC 2.5.3, Label in Name). Its target is at least 44 × 44 CSS pixels. Its colours come from the page's theme tokens and follow the host's appearance
 (ED-6, ED-8); its text meets 4.5:1 and its boundary 3:1 against the page (WCAG 2.2 AA), and its meaning is
 never carried by colour alone.
 
@@ -66,9 +66,8 @@ final full stop optional:
 
 > Fabric is not installed. Get it at passioncode.ai/fabric
 
-and in another language it says the same, in that language's own words.
-
-where *passioncode.ai/fabric* links to `https://passioncode.ai/fabric`, opened in a new browsing context with
+and in another language it says the same, in that language's own words. In every language *passioncode.ai/fabric*
+links to `https://passioncode.ai/fabric`, opened in a new browsing context with
 `rel="noopener"`. The page never downloads anything by itself and never retries a link in a loop. A page knows
 Fabric is absent from the host's `fabric_button` cookie (FB-6) or, for a local service, from its own server,
 which MAY check whether the hub document of [Fabric's lifecycle](https://github.com/passioncode-ai/fabric/blob/7e2aed4ceef2e8db6a1463e2940eb0f651c2a795/AGENTS.md#lifecycle)

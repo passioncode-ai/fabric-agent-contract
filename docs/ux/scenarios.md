@@ -374,7 +374,7 @@ independent agent author and P-02 project operator.
 - **States covered:** success, empty, error
 - **Errors & recovery:** Fabric is not installed -> the menu says "Fabric is not installed. Get it at passioncode.ai/fabric" (in the page's language) with the link; a link carrying a token or a bad id -> Fabric refuses the whole link and says why.
 - **Status:** draft
-- **Coverage:** DEC-0040 FB-1…FB-8, FL-1…FL-7, `fabric-link.schema.json`, `test/fabric-button.test.ts`
+- **Coverage:** DEC-0040 FB-1…FB-8, FL-1…FL-7, DEC-0124 (the page's language; proven in fabric-agent-adapter `test/fabric-button.test.mjs`), `fabric-link.schema.json`, `test/fabric-button.test.ts`
 - **Product:** unobserved
 
 ## Spend and delegation
