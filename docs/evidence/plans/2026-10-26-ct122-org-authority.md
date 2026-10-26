@@ -62,6 +62,25 @@ The scope brief is [`2026-10-24-ct122-unlinkable/brief.md`](../specs/2026-10-24-
   its generator. Extended: `hub-key.json`, `estate-record.json`, `revocation-delta.json` and `window-lease.json`, all
   hand-committed and signed, so they need the signing harness (CT-151 overlaps).
 
+## Progress and design notes (2026-10-26)
+
+- **Done on the branch.** Context issuers on `organizationPin`; `machines[].contextHubKeys`. `FAC-SEM-073`, `076`, `114`,
+  `134` and `147` read them. `hubKeyCertified` and `verifyDelegation` take a context (`estateContext`).
+  `FAC-SEM-081` gains `context`, tested in `test/context-keys.test.ts`. OM-5 now also drops and revokes the context's
+  hub keys.
+- **`FAC-SEM-149` is the sender's duty, not a receiver's refusal.**
+  - Today `records` (`devices.md:556-567`) and the response's heartbeat, delta page and leases are part of the check-in
+    contract: the delta-freshness rules and the relay route depend on them.
+  - A receiver rule on `device-check-in` would refuse every node pinned before.
+  - So the rule runs on a new kind, `check-in-outbound` (what a node is about to send an organization), and
+    `check-in-response-outbound` (what an organization server is about to answer).
+  - Receivers ignore the members and never refuse them. The personal channel (the hub) carries them.
+  - The positive fixtures `device-check-in-records*.json` stay valid against the schema.
+- **Next steps.**
+  - `src/node-enrollments.ts`: `FAC-SEM-148` on kind `node-enrollments`, and `FAC-SEM-149` on the two outbound kinds.
+  - `hub-move.ts` reports context keys.
+  - The docs listed above, then DEC-0128, then the gate and readings.
+
 ## DEC-0129: `org-authority/1`, the member list only (CT-37)
 
 - **The document.** One new schema, `org-authority/1`: an organization's signed list of admitted members. Each entry is

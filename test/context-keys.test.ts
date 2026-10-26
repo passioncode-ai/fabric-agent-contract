@@ -94,3 +94,21 @@ describe("context hub keys in the record's rules (DEC-0128)", () => {
     expect(removedCodes.some((message) => message.includes("context hub key"))).toBe(true);
   });
 });
+
+describe("unlinkable enrollments (DEC-0128 FAC-SEM-148, FAC-SEM-149)", () => {
+  it("flags each value two enrollments share, and the estate id as a device id", async () => {
+    const { enrollmentsLinkable, nodeEnrollmentRules } = await import("../src/node-enrollments.js");
+    const one = { org: "org:org-a", deviceId: "d-1", kids: ["d-1#sig"], publicKeys: ["k-1"], telemetryKeyId: "t-1", collectorIds: ["c-1"] };
+    const two = { org: "org:org-b", deviceId: "d-2", kids: ["d-2#sig"], publicKeys: ["k-2"], telemetryKeyId: "t-2", collectorIds: ["c-2"] };
+    expect(enrollmentsLinkable({ estateMachineId: "m-1", enrollments: [one, two] })).toBe(false);
+    expect(enrollmentsLinkable("registry")).toBe(false);
+    for (const shared of [{ org: "org:org-a" }, { deviceId: "d-1" }, { kids: ["d-1#sig"] }, { publicKeys: ["k-1"] }, { telemetryKeyId: "t-1" }, { collectorIds: ["c-1"] }, { deviceId: "m-1" }]) {
+      expect(enrollmentsLinkable({ estateMachineId: "m-1", enrollments: [one, { ...two, ...shared }] }), JSON.stringify(shared)).toBe(true);
+    }
+    // Shapes the registry does not hold are read as absent, never as a match.
+    expect(nodeEnrollmentRules("node-enrollments", { enrollments: [{ ...one, kids: "d-1#sig", deviceId: 7 }, { ...two, kids: [3] }] })).toEqual([]);
+    expect(nodeEnrollmentRules("check-in-outbound", { checkIn: "x" })).toEqual([]);
+    expect(nodeEnrollmentRules("check-in-response-outbound", {})).toEqual([]);
+    expect(nodeEnrollmentRules("another", {})).toBeUndefined();
+  });
+});

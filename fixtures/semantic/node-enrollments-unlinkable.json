@@ -1,0 +1,40 @@
+{
+  "description": "Two enrollments of one machine with their own device ids, keys, telemetry keys and collectors (FAC-SEM-148, DEC-0128).",
+  "kind": "node-enrollments",
+  "expect": [],
+  "input": {
+    "estateMachineId": "m-4c1e",
+    "enrollments": [
+      {
+        "org": "org:org-a",
+        "deviceId": "d-7f2c19a0",
+        "kids": [
+          "d-7f2c19a0#sig",
+          "d-7f2c19a0#kem"
+        ],
+        "publicKeys": [
+          "MCowBQYDK2VwAyEAx1"
+        ],
+        "telemetryKeyId": "tk-a-91c2",
+        "collectorIds": [
+          "c-a-1"
+        ]
+      },
+      {
+        "org": "org:org-b",
+        "deviceId": "d-03b8e6d4",
+        "kids": [
+          "d-03b8e6d4#sig",
+          "d-03b8e6d4#kem"
+        ],
+        "publicKeys": [
+          "MCowBQYDK2VwAyEAx2"
+        ],
+        "telemetryKeyId": "tk-b-4e07",
+        "collectorIds": [
+          "c-b-1"
+        ]
+      }
+    ]
+  }
+}

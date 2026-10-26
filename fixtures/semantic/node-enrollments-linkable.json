@@ -1,0 +1,42 @@
+{
+  "description": "An enrollment reusing the machine's estate id as its device id and another enrollment's telemetry key (FAC-SEM-148, DEC-0128).",
+  "kind": "node-enrollments",
+  "expect": [
+    "FAC-SEM-148"
+  ],
+  "input": {
+    "estateMachineId": "m-4c1e",
+    "enrollments": [
+      {
+        "org": "org:org-a",
+        "deviceId": "d-7f2c19a0",
+        "kids": [
+          "d-7f2c19a0#sig",
+          "d-7f2c19a0#kem"
+        ],
+        "publicKeys": [
+          "MCowBQYDK2VwAyEAx1"
+        ],
+        "telemetryKeyId": "tk-a-91c2",
+        "collectorIds": [
+          "c-a-1"
+        ]
+      },
+      {
+        "org": "org:org-b",
+        "deviceId": "m-4c1e",
+        "kids": [
+          "d-03b8e6d4#sig",
+          "d-03b8e6d4#kem"
+        ],
+        "publicKeys": [
+          "MCowBQYDK2VwAyEAx2"
+        ],
+        "telemetryKeyId": "tk-a-91c2",
+        "collectorIds": [
+          "c-b-1"
+        ]
+      }
+    ]
+  }
+}
