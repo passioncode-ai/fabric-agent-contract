@@ -13,7 +13,8 @@ question to CT-172.
     - It answers `malformed` for a `FAC-SEM-152` finding or for an `at` that `strictTime` cannot read.
     - Otherwise it answers `wrong-machine` or `stale`.
     - `openMachineReport` refuses that unreadable `at` too.
-  - Vectors: an off-curve `enc`, a leap second, a space for `T`, and the `accept` group. No earlier vector's answer
+  - Vectors: an off-curve `enc`, a leap second, an unreadable `at` from another machine, a space for `T`, and the
+    `accept` group. No earlier vector's answer
     changes.
   - MR-2 to MR-4 and local-channel.md:
     - a send refused `unknown-recipient`, `mailbox-full` or `rate-limited` is dropped, and the next report replaces it;

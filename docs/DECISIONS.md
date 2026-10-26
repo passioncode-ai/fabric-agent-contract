@@ -7974,7 +7974,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reports and Fabric's hub reads them; on the hub's machine the node serves the local channel's `machine.report` and
   Fabric's hub calls it (CT-152). A node pinned before DEC-0132 answers `machine.report` with `unknown-method`, and its
   leases then count at their whole amounts until it reports.
-- **Annotated (2026-10-26):** DEC-0139 settles the readings' text and test items: the hub's reading after opening (`acceptMachineReport`, a `FAC-SEM-152` finding and an `at` `strictTime` cannot read are `malformed`), refused sends, an unusable `#kem`, `machine.report`'s callers, and names a pre-DEC-0132 hub's handling as open (CT-172).
+- **Annotated (2026-10-26):** DEC-0139 settles the readings' text and test items: the hub's reading after opening (`acceptMachineReport`, a `FAC-SEM-152` finding and an `at` `strictTime` cannot read are `malformed`), refused sends, an unusable `#kem`, `machine.report`'s callers, and names a pre-DEC-0132 hub's handling as open (CT-172). A node pinned before DEC-0132 was promised no answer to `machine.report`: DEC-0139 reads any error, or none, as no report, where the Status above says `unknown-method`.
 - **Context:** DEC-0128 UE-2 keeps the estate's records (the applied revision, the heartbeat, the delta head, the
   leases with `spent`) off every check-in to an organization server, and left the message that carries them to the hub
   open (CT-152). Three readers wait on it: the hub's key rotation (DL-15), the hub move's step 6 and the window lease's
@@ -8275,10 +8275,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted (2026-10-26). A narrowing of the hub's reading: a relayed report, or its own node's
   `machine.report`, whose `at` RFC 3339 as
   `strictTime` reads does not, or that carries a `FAC-SEM-152` finding, is now `malformed` (before, the first read
-  `stale` when a report was held and was accepted otherwise, and the second was accepted with a finding). No machine
+  `stale` when a report was held and was accepted otherwise, and the second was accepted with a finding on the relayed path, the local read already refusing it). No machine
   that follows MR-1 sends either (MR-1 names each lease once; relay.md's times refuse a leap second and a space for `T`). Additive: a
   reference function (`acceptMachineReport`), a constant (`MACHINE_REPORT_ACCEPT_REFUSALS`) and a vector group
-  (`accept`) a port's runner adds, and three new `open` vectors; no earlier vector's answer changes. Node-side: a
+  (`accept`) a port's runner adds, and four new `open` vectors; no earlier vector's answer changes. Node-side: a
   method of `NODE_METHODS` a node does not serve answers `unknown-method` (JSON-RPC -32601), and `machine.report`
   filters none of its same-user clients. Adoption: CT-152's adopters (Fabric's hub and nodes, Project Observatory's
   node).
@@ -8292,9 +8292,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      itself refuses that `at` as `malformed`.
   2. **Refused sends.** A report the relay refuses with `unknown-recipient`, `mailbox-full` or `rate-limited` is
      dropped; the next report, which carries the whole state, replaces it (after `rate-limited`, not before its
-     `retryAfter`).
+     `retryAfter`). A send answered `internal`, or whose `accepted` never came, may go again under the same `msgId`,
+     which the relay's tombstone of `(from, msgId)` keeps one message.
   3. **A hub that cannot read reports** (its own `#kem` not listed in the revision it applied, or its private half
-     unreadable) names it in its own health (its well-known document's `degraded` where it serves
+     unreadable or not the listed key's) names it in its own health (its well-known document's `degraded` where it serves
      `fabric-service/0.1`, otherwise the surface on which it shows the operator its state), so a key rotation, a move's step 6 and a division do not
      wait in silence. What a hub not yet on DEC-0132 does with a report is not decided here (CT-172).
   4. **The local channel.** A method of `NODE_METHODS` a node does not serve answers `unknown-method`; a hub reads
@@ -8308,9 +8309,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   vector adopters run; the second function keeps the first's answers).
 - **Compatibility:** a narrowing for senders that resent a report the relay refused (the next report replaces it);
   additive for a node; a narrowing for the hub's reading of reports no conforming machine writes; no earlier vector's
-  answer changes. `contractVersion` stays `0.1.0`.
+  answer changes, and four window-lease case names now say "written" for "received" (a port that keys on names follows). `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/machine-report.ts` (`acceptMachineReport`, `MACHINE_REPORT_ACCEPT_REFUSALS`, the
-  `at` check), `fixtures/vectors/machine-report.json` (open: the off-curve `enc`, the leap second, the space; accept),
+  `at` check), `fixtures/vectors/machine-report.json` (open: the off-curve `enc`, the leap second, an unreadable `at` from another machine, the space; accept),
   `test/machine-report.test.ts`, `tools/vectors/machine-report.ts`; `relay.md` (MR-2 to MR-4), `local-channel.md` (the
   node's methods), `devices.md`, `conformance.md` (the module row and the reporter and hub rows), `CONTEXT.md` (Window
   lease), `schemas/machine-report.schema.json` (description), `src/window-lease.ts` (`receivedAt`'s comment),

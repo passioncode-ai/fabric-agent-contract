@@ -573,7 +573,7 @@ into another body does not open), the plaintext the report's RFC 8785 form, at m
 (`MAX_MACHINE_REPORT_BYTES`). `sealMachineReport` seals it and refuses `malformed`, `bad-key` and `too-large`. The
 machine `send`s it to the hub machine's `#sig` with a new `msgId`; a body whose signed `exp` is up to 7 days later
 reaches a hub that was asleep. A hub machine with no usable `#kem` gets no report; a hub whose own `#kem` the revision
-it applied does not list, or whose private half it cannot read, names that in its own health: the `degraded` of its
+it applied does not list, or whose private half it cannot read or does not match the listed key, names that in its own health: the `degraded` of its
 [well-known document](service.md#well-known-document) where it serves `fabric-service/0.1`, otherwise the surface on
 which it shows the operator its state, so DL-15's switch, a move's step 6 and its division do not wait on reports in silence (DEC-0139). What a hub
 not yet on DEC-0132 does with a body whose payload it does not know is not decided here (CT-172); the machine hears
@@ -587,7 +587,8 @@ that is not a report in its own RFC 8785 form, that the schema refuses, or whose
 does not: a leap second, a space for `T`, DEC-0139), `wrong-machine` (the report names another machine than the one
 `relayCallerTier` named) and `stale` (its `at` is not after the report the hub holds for that machine). It then reads
 the opened report as `acceptMachineReport` does, so a `FAC-SEM-152` finding (a lease named twice) drops it as
-`malformed`, as the local read does (DEC-0139). The hub keeps, per machine, the newest report it accepted. A machine writes `at` from its clock at the moment
+`malformed`, as the local read does (DEC-0139); a relayed report that also names another machine, or is not after the
+one held, keeps `openMachineReport`'s answer (`wrong-machine`, `stale`), and is dropped either way. The hub keeps, per machine, the newest report it accepted. A machine writes `at` from its clock at the moment
 it seals the report, never after the body's signed `iat`, so the body's 60-second bound on `iat` bounds `at` too.
 
 **MR-5, what the hub reads in it.** The hub reads everything from the newest report it holds per machine. A machine has applied a revision when its newest report's `estateRecord.revision` is
