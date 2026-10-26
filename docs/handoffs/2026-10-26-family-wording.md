@@ -28,7 +28,9 @@ rules they rest on (DEC-0045, DEC-0099, DEC-0106, DEC-0125, DL-26, MD-6).
 - Readings: round 1 fail (DL-27's profiles read wider than DEC-0106; CT-167's link count); fixed with the round's risks.
 - Round 2 clean (unit, seam, product pass); its risks fixed: the conformance row and CONTEXT's Family carry the
   credential source and the relay-only profiles, CT-168 named in Not decided here, relay.md's T2 bullet, CT-30's T1
-  wording. fabric-workspace `knowledge/authority.md` still says "enrolled in the agent network" for T1: asked of its owner.
+  wording.
+- Round 3 clean (unit, seam, product pass): two clean rounds; its risks filed as CT-170 and in CT-168 (DL-26's
+  MUST NOT against a protective approval).
 
 ## Checks actually run
 
@@ -42,4 +44,5 @@ rules they rest on (DEC-0045, DEC-0099, DEC-0106, DEC-0125, DL-26, MD-6).
 
 ## Next task
 
-Finish DEC-0137's readings (two clean rounds), merge, release; then CT-161, CT-164, CT-165, CT-167 by priority.
+Merge and release DEC-0137; then DEC-0138 (CT-169, the first organization server's N-4, due 2026-10-29), then CT-161, CT-164, CT-165,
+CT-167, CT-170 by priority.
