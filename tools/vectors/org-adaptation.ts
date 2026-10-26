@@ -1,0 +1,100 @@
+/**
+ * The generator of the adaptation-plan vectors (DEC-0138): `fixtures/vectors/org-adaptation.json`, shared by every
+ * organization server that accepts a plan and every Fabric that sends one.
+ *
+ *   tsx tools/vectors/org-adaptation.ts --check   compare the committed file with what this writes (exit 1 on a difference)
+ *   tsx tools/vectors/org-adaptation.ts --write   write it
+ *
+ * Every vector change is made here and written by `--write`, never by hand; `test/org-adaptation.test.ts` runs the
+ * check. Digests are computed here from the decision's own words (SHA-256 of the RFC 8785 bytes); each expected answer
+ * is written here by hand from DEC-0138's items. Nothing here imports `src/org-adaptation.ts`.
+ */
+import { createHash } from "node:crypto";
+import { readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { rfc8785 } from "../../src/canonical.js";
+import { projectRoot } from "../../src/contract.js";
+
+type Json = Record<string, any>;
+export const VECTOR_FILE = "fixtures/vectors/org-adaptation.json";
+
+const digest = (doc: unknown) => `sha256:${createHash("sha256").update(Buffer.from(rfc8785(doc), "utf8")).digest("hex")}`;
+const fixture = (name: string): Json => JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive", `${name}.json`), "utf8"));
+
+export function orgAdaptationVectors(): Json {
+  const plan = fixture("org-adaptation");
+  const withdrawn = fixture("org-adaptation-withdrawn");
+  const org = plan.org as string;
+  const held = { revision: plan.revision, digest: digest(plan) };
+  const [access, spend, role] = plan.requests as [Json, Json, Json];
+  const changedSpend = { ...spend, amountUsd: 300 };
+  const next = { ...plan, revision: 3, requests: [access, changedSpend, role] };
+  const decisions = [
+    { id: access.id, digest: digest(access), state: "granted", at: "2026-10-27T10:00:00Z" },
+    { id: spend.id, digest: digest(spend), state: "granted", at: "2026-10-27T10:01:00Z" },
+    { id: role.id, digest: digest(role), state: "refused", at: "2026-10-27T10:05:00Z" }
+  ];
+  return {
+    description: "DEC-0138: the organization part of an adaptation plan. `digests` are adaptationDigest and requestDigest (SHA-256 over RFC 8785). `decide` is the server's decision on a PUT plan that passed the device transport: `valid` says the plan passed its schema and FAC-SEM-153, `org` is the route's organization, `held` the revision held. `receipts` binds each request's decision by its id and digest.",
+    digests: [
+      { name: "the plan", value: plan, digest: digest(plan) },
+      ...(plan.requests as Json[]).map((request) => ({ name: `request ${request.id}`, value: request, digest: digest(request) })),
+      { name: "a withdrawn plan", value: withdrawn, digest: digest(withdrawn) }
+    ],
+    decide: [
+      { name: "the first plan", plan, context: { valid: true, org }, expected: { outcome: "accepted", held } },
+      { name: "a higher revision", plan: next, context: { valid: true, org, held }, expected: { outcome: "accepted", held: { revision: 3, digest: digest(next) } } },
+      { name: "the same revision and bytes", plan, context: { valid: true, org, held }, expected: { outcome: "repeated", held } },
+      { name: "the same revision, other bytes", plan: { ...plan, items: [] }, context: { valid: true, org, held }, expected: { outcome: "refused", refusal: "revision-conflict" } },
+      { name: "a lower revision", plan: { ...plan, revision: 1 }, context: { valid: true, org, held }, expected: { outcome: "refused", refusal: "stale-revision" } },
+      { name: "another organization", plan: { ...plan, org: "org:org-b" }, context: { valid: true, org }, expected: { outcome: "refused", refusal: "wrong-organization" } },
+      { name: "a plan that failed its schema or FAC-SEM-153", plan, context: { valid: false, org }, expected: { outcome: "refused", refusal: "malformed" } },
+      { name: "a withdrawal", plan: withdrawn, context: { valid: true, org, held }, expected: { outcome: "accepted", held: { revision: 3, digest: digest(withdrawn) } } }
+    ],
+    receipts: [
+      {
+        name: "every request decided",
+        plan,
+        decisions,
+        expected: {
+          type: "org-adaptation-receipt/1", org, revision: 2, digest: digest(plan),
+          requests: decisions.map((d) => ({ id: d.id, digest: d.digest, state: d.state, at: d.at }))
+        }
+      },
+      {
+        name: "a changed request waits for a new decision; unchanged ones keep theirs",
+        plan: next,
+        decisions,
+        expected: {
+          type: "org-adaptation-receipt/1", org, revision: 3, digest: digest(next),
+          requests: [
+            { id: access.id, digest: digest(access), state: "granted", at: "2026-10-27T10:00:00Z" },
+            { id: spend.id, digest: digest(changedSpend), state: "pending" },
+            { id: role.id, digest: digest(role), state: "refused", at: "2026-10-27T10:05:00Z" }
+          ]
+        }
+      },
+      { name: "a withdrawn plan", plan: withdrawn, decisions, expected: { type: "org-adaptation-receipt/1", org, revision: 3, digest: digest(withdrawn), requests: [] } }
+    ]
+  };
+}
+
+/** What `--write` writes: the vector file's exact text. */
+export function buildOrgAdaptationVectors(): string {
+  return `${JSON.stringify(orgAdaptationVectors(), null, 2)}\n`;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const target = path.join(projectRoot(), VECTOR_FILE);
+  const built = buildOrgAdaptationVectors();
+  if (process.argv.includes("--write")) {
+    writeFileSync(target, built);
+    console.log(`wrote ${VECTOR_FILE}`);
+  } else if (readFileSync(target, "utf8") !== built) {
+    console.error(`stale vector file (run with --write): ${VECTOR_FILE}`);
+    process.exitCode = 1;
+  } else {
+    console.log("vector file matches the generator");
+  }
+}

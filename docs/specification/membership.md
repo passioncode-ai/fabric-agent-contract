@@ -1,12 +1,13 @@
 # Membership: `org-membership/1`, `org-key-set/1` and `org-authority/1`
 
-DEC-0127, DEC-0129, DEC-0131, DEC-0133 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SEM-147`, `FAC-SEM-150`, `FAC-SEM-151` · schemas
+DEC-0127, DEC-0129, DEC-0131, DEC-0133, DEC-0138 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SEM-147`, `FAC-SEM-150`, `FAC-SEM-151`, `FAC-SEM-153` · schemas
 [`org-membership`](../../schemas/org-membership.schema.json), [`org-key-set`](../../schemas/org-key-set.schema.json),
 [`org-authority`](../../schemas/org-authority.schema.json), the exchange's
 [`org-key-set-draft`](../../schemas/org-key-set-draft.schema.json),
 [`org-authority-draft`](../../schemas/org-authority-draft.schema.json) and
 [`org-root-registration`](../../schemas/org-root-registration.schema.json) and the root's answer
-[`org-root`](../../schemas/org-root.schema.json), and the estate record's `organizations`
+[`org-root`](../../schemas/org-root.schema.json), the adaptation plan's
+[`org-adaptation`](../../schemas/org-adaptation.schema.json) and its receipt, and the estate record's `organizations`
 ([`estate-record`](../../schemas/estate-record.schema.json)) · code [`src/org-membership.ts`](../../src/org-membership.ts),
 [`src/org-authority.ts`](../../src/org-authority.ts) (with `orgRelayAdmissionSet`),
 [`src/org-exchange.ts`](../../src/org-exchange.ts) · vectors
@@ -226,7 +227,7 @@ list come from them (DEC-0129):
 | for the organization's owner | the membership root's public key, the owner's signing credential for this organization (as its first administrator), the root's signatures over the key sets the server drafted (OM-3), and the claim the server showed the owner (OX-2) | DEC-0129, DEC-0131 |
 | for an administrator | the public part of their signing passkey (an `administrators` entry) and their signatures over member lists (OL-2) | DEC-0129 |
 | the member list's own entry | the context's `iss` (DEC-0128), so the server can draft `org-authority/1`; the enrollment's `#sig` key it already holds from the enrollment | DEC-0129 |
-| an adaptation plan's organization part (TP-03) | what the person chose to bring into that organization (projects, history, results, schedules), by reference, and the person's requests to its administrators; never the plan's draft, its inventory or anything the person did not choose | DEC-0129 |
+| an adaptation plan's organization part (TP-03) | what the person chose to bring into that organization (projects, history, results, schedules), by reference, and the person's requests to its administrators; never the plan's draft, its inventory or anything the person did not choose; sent as `org-adaptation/1` ([the adaptation plan](#the-adaptation-plan)) | DEC-0129, DEC-0138 |
 | a membership refresh | the audience and the subject the issuer gave | DEC-0127 |
 
 Personal work beyond the references the person chose in an adaptation plan (never their content), another
@@ -407,6 +408,60 @@ a caller it authenticates as one of the organization's administrators or its rel
 authenticates them is the server's (DEC-0134 OR-4: a credential it issues when it sets the relay up). A POST still needs no credential: only
 an administrator's passkey makes a list that passes.
 
+## The adaptation plan
+
+DEC-0138 (CT-169, TP-03; the first organization server's request N-4, agreed with Fabric's TP-04) · schemas
+[`org-adaptation`](../../schemas/org-adaptation.schema.json),
+[`org-adaptation-receipt`](../../schemas/org-adaptation-receipt.schema.json) · code
+[`src/org-adaptation.ts`](../../src/org-adaptation.ts) · vectors
+[`fixtures/vectors/org-adaptation.json`](../../fixtures/vectors/org-adaptation.json) · rule `FAC-SEM-153`
+
+When a person brings work into an organization, their Fabric sends the organization part of the adaptation plan:
+the items the person chose, each by an opaque reference, and the person's requests to the organization's
+administrators. It is OM-7's adaptation row made a document; nothing else of the plan leaves.
+
+**AD-1, the document.** `org-adaptation/1` is `{type, org, revision, items, requests}`, closed.
+- `revision` counts up from 1.
+- `items` (at most 200) are `{ref, kind, label?}`. `kind` is `project`, `history`, `result` or `schedule`.
+- `requests` (at most 50) are `{id, kind, itemRef?, ...}`:
+  - `access`: `resource` (the organization's own name of an account, environment or credential), `note?`;
+  - `spend`: `amountUsd` (1 to 100 000), `period` (`once` or `month`), `purpose`;
+  - `role`: `role`, which is `admin`. A role is one of `org-authority/1`'s, `owner` is never asked for, and the
+    contract has no other role.
+- `FAC-SEM-153`: each `ref` is named once, each request `id` once, and an `itemRef` names one of the plan's items.
+
+**AD-2, a reference names nothing of the estate.** A `ref` is 16 to 64 of `A-Za-z0-9_-`, drawn at random by the
+person's Fabric for that organization. It is never derived from a name, a path or an id of the estate, and never reused
+for another organization (DEC-0128's unlinkability). A `label` (at most 80 characters) is what the person typed for the
+organization; Fabric never fills it from the estate. A project's own entry into the organization is the estate
+revision its person's passkey signs (R1-D12), which never leaves; a `ref` only lets the person and the administrators
+talk about it.
+
+**AD-3, the transport.** The person's node sends the plan as a device request ([devices](devices.md#transport),
+DEC-0056) to the organization server of its own enrollment there: mutual TLS and the `fabric-device` signature by that
+enrollment's `#sig` key. The server attributes the plan to the enrollment's member, so no app token or consent scope
+is added. The receiver lists `org-adaptation/1` in its `protocols`, and the node sends only to a receiver whose latest
+`protocols` list names it. The route is `PUT /fabric/adaptation/v1/{org}/plan` under the issuer's origin, `{org}` being
+the part of `org:<orgId>` after `org:`; `GET` on it answers the member's receipt, `404 no-plan` before the first.
+
+**AD-4, the server keeps the newest revision** (`decideAdaptation`). After the transport accepts the request, in order:
+a plan that fails its schema or `FAC-SEM-153` is `422 malformed`; one that names another organization than the route
+and the enrollment is `422 wrong-organization`; a revision lower than the held one is `409 stale-revision`; the held
+revision with other bytes is `409 revision-conflict`; the held revision with the same bytes answers the same receipt
+and stores nothing; a higher revision is accepted and replaces the held one. A revision with no items and no requests
+withdraws the plan; there is no `DELETE`.
+
+**AD-5, a decision is bound to its request.** Each request's digest is SHA-256 over its RFC 8785 form
+(`requestDigest`); the plan's is the same over the whole plan (`adaptationDigest`). An administrator's decision is
+recorded against the request's `id` and digest, so a request that changes in a later revision waits for a new
+decision and one that does not keeps its decision. The receipt `org-adaptation-receipt/1` is `{type, org, revision,
+digest, requests}`, each request `{id, digest, state, at?}` with `state` `pending`, `granted` or `refused`
+(`adaptationReceipt`); `at` is when an administrator decided. A decision grants nothing by itself: an access, a spend
+or a role reaches the person only through the organization's own grants, budgets and member list (OL-5).
+
+**AD-6, privacy.** The plan is read by the organization's administrators and the member it came from, never by
+another member. A withdrawn plan's earlier revisions are the server's record, kept as its retention says.
+
 ## Semantic rules
 
 | Code | Kind | Rule |
@@ -415,6 +470,7 @@ an administrator's passkey makes a list that passes.
 | <a id="fac-sem-146"></a>`FAC-SEM-146` | `org-key-set` | each kid once, the root's kid not among the keys, every key window strict and positive, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt`; each administrator's credential once, with a usable key of its algorithm (never of small order), under a signing RP with every origin within it (DEC-0129) |
 | <a id="fac-sem-150"></a>`FAC-SEM-150` | `org-authority` | the window is two strict instants with at most three fraction digits, `expiresAt` after `issuedAt` and at most 7 days after it; at most 1024 members, each an object of 1 to 8 keys, each key an object; each subject, each `iss` and each kid once across the list; every kid a `#sig` kid and every key a P-256 point SEC 1 accepts (DEC-0129) |
 | <a id="fac-sem-151"></a>`FAC-SEM-151` | `org-key-set-draft`, `org-authority-draft` | a draft envelope's `digest` is its draft's (what its signer signs), its draft names the envelope's organization, and its revision is one above its base's (1 with none) (DEC-0131) |
+| <a id="fac-sem-153"></a>`FAC-SEM-153` | `org-adaptation` | an adaptation plan names each item's `ref` once and each request's `id` once, and a request's `itemRef` names one of its items (DEC-0138) |
 | <a id="fac-sem-147"></a>`FAC-SEM-147` | `estate-record` | each organization pinned once by its context, and no pinned root of small order; each context issuer once and its opaque part never containing an estate id of eight characters or more (DEC-0128) |
 
 ## Who adopts it
@@ -445,6 +501,10 @@ an administrator's passkey makes a list that passes.
 - **A member's node** signs `auth` with an enrollment's `#sig` key and the organization's context id in `estate`, reads
   the organization's `welcome`, told from an estate's by `estateRevision`, for its `list`, and expects no estate record
   from that relay (relay.md OR-1, OR-2).
+- **Every organization server** that takes adaptation plans lists `org-adaptation/1` in its `protocols`, keeps each
+  member's newest revision as AD-4 says, binds decisions as AD-5 says, and runs `fixtures/vectors/org-adaptation.json`
+  (DEC-0138). **The person's Fabric** draws each `ref` at random per organization (AD-2), takes only the person's
+  choices, and its node sends the plan as a device request (AD-3).
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same
   pin, with its own audience.
 
@@ -472,8 +532,6 @@ its relay (OX-6).
   (`org-root`) is closed (CT-160).
 - How the person's Fabric sends the context's `iss` to the server for its entry (OM-7's row allows it; no message
   carries it yet), and how a relay is registered as an attestation audience for the subject OL-1 names (CT-162).
-- What a "reference" in the adaptation plan's OM-7 row is: its form must name nothing of the person's estate (DEC-0128);
-  TP-03 defines it with Fabric.
 - How a member's node learns its organization relay's origin (an estate's relay's origin is configuration today too).
 - Whether an organization's relay checks a member's attestation status against the list, the stricter answer winning
   (Fabric ADR-0180 point 4; OL-6), which needs the relay registered as an attestation audience (CT-162).

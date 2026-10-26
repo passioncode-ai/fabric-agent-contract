@@ -1,0 +1,25 @@
+{
+  "type": "org-adaptation-receipt/1",
+  "org": "org:org-7f3a",
+  "revision": 2,
+  "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "requests": [
+    {
+      "id": "req-access-01",
+      "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "state": "granted",
+      "at": "2026-10-27T10:00:00Z"
+    },
+    {
+      "id": "req-spend-01",
+      "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "state": "withdrawn"
+    },
+    {
+      "id": "req-role-01",
+      "digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "state": "refused",
+      "at": "2026-10-27T10:05:00Z"
+    }
+  ]
+}

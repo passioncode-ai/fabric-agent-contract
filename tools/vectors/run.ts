@@ -23,6 +23,7 @@ import * as enrollToken from "./enroll-token.js";
 import * as entitlement from "./entitlement.js";
 import * as orgMembership from "./org-membership.js";
 import * as orgExchange from "./org-exchange.js";
+import * as orgAdaptation from "./org-adaptation.js";
 import * as folderAttribution from "./folder-attribution.js";
 import * as hubMove from "./hub-move.js";
 import * as jobLimits from "./job-limits.js";
@@ -52,6 +53,7 @@ export const GENERATORS: readonly Generator[] = [
   { source: "entitlement.ts", build: one(entitlement.VECTOR_FILE, entitlement.buildEntitlementVectors) },
   { source: "org-membership.ts", build: one(orgMembership.VECTOR_FILE, orgMembership.buildOrgMembershipVectors) },
   { source: "org-exchange.ts", build: one(orgExchange.VECTOR_FILE, orgExchange.buildOrgExchangeVectors) },
+  { source: "org-adaptation.ts", build: one(orgAdaptation.VECTOR_FILE, orgAdaptation.buildOrgAdaptationVectors) },
   { source: "folder-attribution.ts", build: one(folderAttribution.VECTOR_FILE, folderAttribution.buildFolderAttributionVectors) },
   { source: "hub-move.ts", build: one(hubMove.VECTOR_FILE, hubMove.buildHubMoveVectors) },
   { source: "job-limits.ts", build: one(jobLimits.VECTOR_FILE, jobLimits.buildJobLimitVectors) },

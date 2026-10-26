@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/org-adaptation.schema.json",
+  "title": "The organization part of a person's adaptation plan (DEC-0138)",
+  "description": "What a person's Fabric sends an organization's server when the person brings work into that organization (OM-7's adaptation row, TP-03): the items the person chose, each by an opaque reference, and the person's requests to the organization's administrators. Sent whole as a device request by the enrollment's node (DEC-0056), each revision replacing the last; a revision with no items and no requests withdraws the plan. Never the plan's draft, its inventory or anything the person did not choose. docs/specification/membership.md#the-adaptation-plan.",
+  "type": "object",
+  "required": [
+    "type",
+    "org",
+    "revision",
+    "items",
+    "requests"
+  ],
+  "properties": {
+    "type": {
+      "const": "org-adaptation/1"
+    },
+    "org": {
+      "$ref": "org-membership.schema.json#/$defs/org"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991,
+      "description": "Counts up from 1; the server keeps the newest it accepted."
+    },
+    "items": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/$defs/item"
+      },
+      "description": "What the person chose to bring, each once by its ref (FAC-SEM-153)."
+    },
+    "requests": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "$ref": "#/$defs/request"
+      },
+      "description": "The person's requests to the organization's administrators, each id once (FAC-SEM-153)."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "ref": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{16,64}$",
+      "description": "An opaque reference the person's Fabric draws at random for this organization: never derived from a name, path or id of the person's estate, and never reused for another organization (DEC-0128)."
+    },
+    "item": {
+      "type": "object",
+      "required": [
+        "ref",
+        "kind"
+      ],
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "kind": {
+          "enum": [
+            "project",
+            "history",
+            "result",
+            "schedule"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$",
+          "description": "A name the person typed for the organization; Fabric never fills it from the estate."
+        }
+      },
+      "additionalProperties": false
+    },
+    "requestId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{8,64}$",
+      "description": "The request's id within the plan, drawn by the person's Fabric; stable across revisions while the request stands."
+    },
+    "request": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/requestId"
+        },
+        "kind": {
+          "enum": [
+            "access",
+            "spend",
+            "role"
+          ]
+        },
+        "itemRef": {
+          "$ref": "#/$defs/ref",
+          "description": "The item this request is for, one of the plan's items (FAC-SEM-153)."
+        },
+        "resource": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$",
+          "description": "access: the organization's own name of the account, environment or credential asked for."
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$",
+          "description": "access: why, in the person's words."
+        },
+        "amountUsd": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100000,
+          "description": "spend: the amount asked for, in US dollars."
+        },
+        "period": {
+          "enum": [
+            "once",
+            "month"
+          ],
+          "description": "spend: once, or each calendar month."
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$",
+          "description": "spend: what it is for."
+        },
+        "role": {
+          "const": "admin",
+          "description": "role: the member list's role asked for (org-authority/1); owner is never asked for, and no other role exists in the contract."
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "access"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "resource"
+            ],
+            "properties": {
+              "amountUsd": false,
+              "period": false,
+              "purpose": false,
+              "role": false,
+              "resource": true
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "spend"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "amountUsd",
+              "period",
+              "purpose"
+            ],
+            "properties": {
+              "resource": false,
+              "note": false,
+              "role": false,
+              "amountUsd": true,
+              "period": true,
+              "purpose": true
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "role"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "resource": false,
+              "note": false,
+              "amountUsd": false,
+              "period": false,
+              "purpose": false,
+              "role": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -720,6 +720,12 @@ and the server accepts only the pending draft, signed. Before the first key set 
 and its own administrator credential with a one-time claim
 ([membership](docs/specification/membership.md#the-draft-exchange)).
 
+**Adaptation plan (organization part)**: What a person's Fabric sends an organization when the person brings work into
+it (DEC-0138, OM-7): `org-adaptation/1`, the items the person chose, each by a random per-organization reference that
+names nothing of the estate, and the person's requests (access, spend, role `admin`) to the administrators. The node
+sends it whole as a device request; the server keeps the newest revision and binds each decision to its request's
+digest. Never the plan's draft or inventory. ([membership](docs/specification/membership.md#the-adaptation-plan))
+
 **Member list**: An organization's signed list of admitted members, the source of its relay's admission set
 (`org-authority/1`, DEC-0129): each member by a subject pairwise to the relay, a role, its context's token issuer and
 its enrollments' `#sig` keys, for at most 7 days. An organization server drafts it; an administrator's signing passkey,

@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-26 the adaptation plan's organization part](2026-10-26-adaptation-plan.md) | DEC-0138 (CT-169) | pending |
 | [2026-10-26 a reply's delivery on the board](2026-10-26-reply-delivery.md) | DEC-0135 (CT-154; CT-166 filed) | merged, #210 `1197a90d`; released `v0.1.0+2026-10-26.12` |
 | [2026-10-26 the family's wording settled](2026-10-26-family-wording.md) | DEC-0137 (CT-157 closed; CT-167, CT-168, CT-170 filed) | merged, #209 `471978ec`; released `v0.1.0+2026-10-26.11` |
 | [2026-10-26 the organization's relay](2026-10-26-org-relay.md) | DEC-0134 (CT-37; CT-162, CT-163, CT-164 filed) | merged, #205 `8a733416`; released `v0.1.0+2026-10-26.10` |
