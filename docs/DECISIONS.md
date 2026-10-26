@@ -8130,8 +8130,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      is refused `immutable_participants`, the replier's own Project `invalid_arguments`; `deliverTo` on another kind is
      refused `invalid_arguments`. A reply to a request is also delivered to the requester whatever `deliverTo` says,
      so a target's reply that answers a request (`answered`, DEC-0098) always reaches it.
-  4. **DR-3.** A responder's fenced reply and its progress notes are delivered to the requester (as `thread` when the
-     requester is the responder's own Project), and take no `deliverTo`.
+  4. **DR-3.** Every message a responder posts on a request's thread (fenced reply, progress note, effect or
+     checkpoint summary) is read as a reply to the request and delivered to the requester (as `thread` when the
+     requester is the responder's own Project), and takes no `deliverTo`.
   5. **DR-4.** A reply as read carries the `deliverTo` its sender gave (one stored before its board adopted this was
      delivered as that board delivered it then); the same idempotency key with other arguments, an explicit `sender`
      against an absent `deliverTo` included, is `idempotency_conflict`.

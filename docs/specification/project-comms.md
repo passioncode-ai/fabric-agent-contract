@@ -90,13 +90,14 @@ one not delivered to it.
   A reply whose `replyTo` is a request is also delivered to the Project that sent the request, whatever `deliverTo`
   says, unless that is the replier's own Project, so a target's reply that answers a request
   ([request lifecycle](#request-lifecycle), `answered`) always reaches the requester.
-- **DR-3, a responder's messages.** A responder's fenced reply and its progress notes are read as kind `reply` with
-  `replyTo` the request (as Fabric stores them), are delivered to the Project that sent the request, and take no
+- **DR-3, a responder's messages.** Every message a responder posts on a request's thread (its fenced reply, a
+  progress note, the summary of `com.effect_begin` or of a replacement's checkpoint) is read as kind `reply` with
+  `replyTo` the request (as Fabric stores them), is delivered to the Project that sent the request, and takes no
   `deliverTo`; when that Project is the responder's own, as `thread`.
 - **DR-4, as read.** A reply as read carries the `deliverTo` its sender gave, so every participant sees whom it was
   addressed to; a reply without one was delivered as `sender`, except one stored before its board adopted this
-  decision, which was delivered as that board delivered it then (Fabric before its migration 124: to every
-  participant). A host sends `deliverTo` only to a reader pinned at or after DEC-0135 and omits it for an older one
+  decision, whose audience an absent `deliverTo` does not tell (Fabric delivered it to every participant before its
+  migration 124, and as `sender` once a restore re-derives its deliveries). A host sends `deliverTo` only to a reader pinned at or after DEC-0135 and omits it for an older one
   (as DEC-0079 staged `held`), so only such a reader sees it. `deliverTo` is part of the message: the same key with
   other arguments, an explicit `sender` against an absent `deliverTo` and a list in another order included, is
   `idempotency_conflict`; a retry resends its arguments byte for byte.
