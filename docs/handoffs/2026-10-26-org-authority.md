@@ -50,5 +50,6 @@ Fabric ADR-0178 (D8, fabric `cf99c32f`) requires, and answer the board's request
 
 ## Next task
 
-Merge, tag `v0.1.0+2026-10-26.4` (or the next free suffix) carrying DEC-0127 to DEC-0129 (DEC-0108), answer `d5cbabfd` in
+Merge, update fabric-workspace `knowledge/integration.md` row X-6 (it says `org-authority/1` follows as DEC-0128; it is
+DEC-0129) and publish, then tag `v0.1.0+2026-10-26.4` (or the next free suffix) carrying DEC-0127 to DEC-0129 (DEC-0108), answer `d5cbabfd` in
 thread `8d115bed`, then CT-143.
