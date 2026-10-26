@@ -8041,7 +8041,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-26
 - **Status:** Accepted (2026-10-26). A narrowing of DEC-0125 MD-2 before any agent hands a mandate on (the adapter's
-  kits adopt it in FAA-131, unreleased). Adoption: CT-149.
+  kits adopt it in FAA-131, unreleased, told on board thread `aa86a675` before its 0.51.0 ships). Adoption: CT-149.
 - **Context:** CT-149's blind readings of the hand-over vectors found that `scopeWithin` let a hand-over add an
   `actions` or `capabilities` list where the scope in force had none. MD-1 reads a list left out as "any", but MD-3
   covers a relayed action only when `actions` or `capabilities` names it, and an external effect only when the call is
@@ -8051,7 +8051,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `capabilities` or `actions` list the scope in force leaves out, except `actions` where the scope in force lists
   `capabilities` (it then narrows the relayed actions those name); it may add `projects`. Otherwise the mandate is
   `mandate-widened`, from `mandateProblem` (`FAC-SEM-144`) and so from `handOn` and `mandateCovers`. The vectors gain
-  this case in both groups, and the `handOn` group states the order in which a document's problems are read.
+  this case in both groups, and the `handOn` group states the order in which a document's problems are read. The
+  `FAC-SEM-144` row now says what the code always did: a step at the same time as the one before is in order, and the
+  first problem in that order is the answer. MD-1's "a list left out means any" and the schema's descriptions of an
+  absent `capabilities` and `actions` say what MD-3 reads it as.
 - **Why:** the mandate exists so an agent acts on the operator's words without asking, which is safe only if no agent
   of the chain can grant itself what the words did not; "a list left out means any" cannot mean "any" for naming,
   since MD-3 reads the same absence as naming nothing.
@@ -8060,7 +8063,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   list as "every call" in MD-3 (it would let an operator's vague words cover every external effect).
 - **Compatibility:** a narrowing: a mandate that added such a list was `ok` under DEC-0125 and is `mandate-widened`
   now. No agent hands one on yet (CT-149 open, FAA-131 unreleased). `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `src/mandate.ts` (`scopeWithin`); `tools/vectors/mandate.ts`,
+- **Consequences / affects:** `src/mandate.ts` (`scopeWithin`, the finding's text); `schemas/mandate.schema.json`
+  (descriptions); `docs/specification/conformance.md` (the leading agent's row); `tools/vectors/mandate.ts`,
   `fixtures/vectors/mandate.json` (`handOn`, one more `cases` vector); `test/mandate.test.ts`;
-  `docs/specification/delegation.md` (MD-2a, `FAC-SEM-144`); DEC-0125 annotated; backlog CT-149.
+  `docs/specification/delegation.md` (MD-1, MD-2a, `FAC-SEM-144`); DEC-0125 annotated; backlog CT-149.
 - **Source:** CT-149's readings (round 2 of the hand-over vectors, 2026-10-26).

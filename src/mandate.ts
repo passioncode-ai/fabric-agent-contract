@@ -189,7 +189,7 @@ export function handOn(mandate: Mandate, callee: string, at: string, narrower?: 
 export function mandateRules(kind: string, value: JsonObject): Finding[] | undefined {
   if (kind === "mandate") {
     const problem = mandateProblem(value);
-    return problem ? [{ code: "FAC-SEM-144", instancePath: "", message: `the mandate is not valid: ${problem} (DEC-0125 MD-1, MD-2)` }] : [];
+    return problem ? [{ code: "FAC-SEM-144", instancePath: "", message: `the mandate is not valid: ${problem} (DEC-0125 MD-1, MD-2; DEC-0136 MD-2a)` }] : [];
   }
   return undefined;
 }
