@@ -241,7 +241,8 @@ in force; a refused held list, or none, admits nobody. The handshake
     life (at most 7 days) and a relay cannot push a replay past it.
   - A payload that must stay secret from the relay carries a secret envelope, a personal `fabric-credential-envelope/1`
     ([credentials](credentials.md#the-envelope), DEC-0111), or, for a call between machines and its answer, a sealed
-    `fabric-agent-call/1` ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
+    `fabric-agent-call/1` ([machine calls](machine-calls.md#the-sealed-call), DEC-0106), or, for a machine's report to
+    its hub, a sealed `fabric-machine-report/1` ([the machines' report](#the-machines-report), DEC-0132).
 - **Presence**: `presence` frames `{kid, state: online | offline, lastSeen}` go only to machines of the same owner. An
   organization's relay sends no presence from one member to another. A node may ask with `presence-query` `{kids}`
   (at most 256). The relay answers with one `presence-result` `{replyTo, presences: [{kid, state, lastSeen}], unknown:
@@ -457,12 +458,19 @@ window lease's [reporting](window-lease.md#reporting).
 **MR-1, the report.** `machine-report/1` is `{type, machine, at, records}`: `machine` the reporting machine's id in the
 estate record, `at` when it wrote the report, and `records` the check-in's members by the same names and shapes
 (DEC-0053, DEC-0056, DEC-0062): `estateRecord` (`revision`, optionally `digest`), `heartbeat` (`sequence`, `at`),
-`revocationDelta` (`sequence`, `sha256`) and `leases` (`[{leaseId, expiresAt, spent}]`). `estateRecord` is required;
+`revocationDelta` (`sequence`, `sha256`) and `leases` (`[{leaseId, expiresAt, spent}]`, `spent` optional as in the
+check-in, carried by the report at a lease's expiry). `estateRecord` is required;
 each lease is named once (`FAC-SEM-152`).
 
-**MR-2, when.** Every machine of the estate other than the hub's sends a report to the hub machine, the one machine
-whose `hubKey` the revision it applied certifies (after a hub move, the new hub once it applied the revision that names
-it):
+**MR-2, to whom and when.** Every machine of the estate sends a report to each **hub machine**, a machine other than
+itself whose `hubKey` one of these revisions certifies:
+- the revision it applied (during a planned move its first revision certifies two machines, the old hub and the new
+  one: both get the report);
+- and a newer revision it verified but refused (`unreconciled`, or a delta anchor it could not apply), so a machine
+  left on its parent after a move still reaches the new hub that drafts the revision it needs (the hub move's
+  [step 6](ceremonies.md#move-the-hub)). A send the relay refuses (`unknown-recipient`, a removed machine) is dropped.
+
+It sends one:
 - after it applies a revision, accepts a heartbeat or applies a delta page, at most once a minute (later changes wait
   for the next report);
 - once at or after each of its leases' `expiresAt`, naming that lease with its final `spent`;
@@ -490,10 +498,11 @@ machine than the one `relayCallerTier` named) and `stale` (its `at` is not after
 machine). The hub keeps, per machine, the newest report it accepted.
 
 **MR-5, what the hub reads in it.** A machine has applied a revision when its newest report's `estateRecord.revision` is
-at or above it (and, when it carries `digest`, names that revision's digest). A lease's final `spent` is the one in a
-report whose `at` is at or after the lease's `expiresAt` ([reporting](window-lease.md#reporting)): the hub counts such
-a report as received at or after the expiry. A machine whose last report is older than 24 hours is counted as not
-having applied anything newer than that report says, and its leases as its whole amounts.
+that revision's or above (and, when the report carries `digest` for that same revision, the digest is that revision's).
+A lease's final `spent` is the one in a report whose own `at` is at or after the lease's `expiresAt`, never one judged by
+its delivery: a relay may deliver a report written before the expiry days later, while the meter could still spend.
+The time the [window lease's reporting](window-lease.md#reporting) and `windowRemainder` take for a report is its `at`;
+a report "after the revocation" of a hub move is one whose `at` is after the revocation's revision applied.
 
 ## The pairing rendezvous
 

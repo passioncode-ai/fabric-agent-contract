@@ -62,8 +62,13 @@ export function sealMachineReport(report: unknown, ctx: { from: unknown; to: unk
     return { ok: false, refusal: "malformed" };
   }
   if (plaintext.length > MAX_MACHINE_REPORT_BYTES) return { ok: false, refusal: "too-large" };
-  const { enc, ct } = hpkeSealBase(key, INFO, aad, plaintext, ctx.ephemeral);
-  return { ok: true, sealed: { type: MACHINE_REPORT_TYPE, kem: kid, enc: enc.toString("base64url"), ct: ct.toString("base64url") } };
+  try {
+    const { enc, ct } = hpkeSealBase(key, INFO, aad, plaintext, ctx.ephemeral);
+    return { ok: true, sealed: { type: MACHINE_REPORT_TYPE, kem: kid, enc: enc.toString("base64url"), ct: ct.toString("base64url") } };
+  } catch {
+    // Only a fixed ephemeral scalar that is no valid key gets here.
+    return { ok: false, refusal: "malformed" };
+  }
 }
 
 /**
@@ -107,7 +112,7 @@ export function openMachineReport(sealed: unknown, ctx: { from: unknown; to: unk
   }
   if (!valid) return { ok: false, refusal: "malformed" };
   if (report.machine !== ctx.sender) return { ok: false, refusal: "wrong-machine" };
-  if (ctx.held !== undefined) {
+  if (isObject(ctx.held)) {
     const held = isString(ctx.held.at) ? strictTime(ctx.held.at) : Number.NaN;
     const at = isString(report.at) ? strictTime(report.at) : Number.NaN;
     // A held time the hub cannot read keeps nothing back: the report replaces it.

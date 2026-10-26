@@ -115,8 +115,9 @@ old hub's leases has reported it after the revocation (DEC-0107, [ceremonies](ce
 counts, for each machine, the most it may have spent (`windowRemainder`):
 
 - a lease still valid counts its whole `amount`, since the meter may still spend it;
-- an expired lease counts the `spent` of a report received at or after its expiry, under it or a later lease of the
-  same slot (`spent` covers the whole instance); without such a report it counts its whole `amount`.
+- an expired lease counts the `spent` of a report written at or after its expiry (the report's own `at`, never its
+  delivery, which a relay may delay by days: DEC-0132 MR-5), under it or a later lease of the same slot (`spent`
+  covers the whole instance); without such a report it counts its whole `amount`.
 
 A late report is credited at the hub's next division, as a refund: the expired lease stops counting its amount and
 counts what was spent. A machine's own earlier leases are what its new lease replaces, so the remainder the hub may

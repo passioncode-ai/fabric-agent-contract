@@ -20,7 +20,14 @@ move's step 6 and the window lease's reporting.
 
 ## Checks actually run
 
-- See the pull request for the gate and the blind readings on its head.
+- `pnpm run check`: 106 files, 9 245 tests, UX lint, docs, markdownlint 0 errors, privacy 0; `pnpm vectors:check`: 24
+  files match.
+- Blind readings, round 1 (head `14d59122`): unit pass; seam and product fail on two shared blockers: MR-2 sent a
+  machine left on its parent after a hub move to the old hub only, so the new hub never saw the report step 6 waits
+  for; and the window lease still timed a final `spent` by receipt while MR-5 used the report's `at`. Product also
+  found MR-5's 24-hour rule taking back a credited refund. Fixed: MR-2 reports to every hub machine of the applied
+  revision and of a newer refused one; every text and `LeaseReport.receivedAt` take the report's `at`; the 24-hour
+  rule is gone.
 
 ## Decisions
 

@@ -368,7 +368,8 @@ the outcome and the cost, never a person, an argument or an output; kept apart f
 without moving either (DEC-0111).
 
 **Machine profile**: What a machine of an estate may do, in the signed record (DEC-0106): `full` (the default), `member`
-(no hub key) or `view` (no placement, no secret, no hub key; over the relay it calls and is called only to read); a
+(no hub key) or `view` (no placement, no secret, no hub key; over the relay it calls and is called only to read, and
+reports to its hub like any machine, DEC-0132); a
 call between machines over the relay that a profile does not allow is refused `profile-forbids` ([machine calls](docs/specification/machine-calls.md)).
 
 **Machine report**: What one machine of an estate tells its estate's hub machine over the relay (DEC-0132): the estate

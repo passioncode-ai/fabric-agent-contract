@@ -7947,10 +7947,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. **MR-1, the report** `machine-report/1` is `{type, machine, at, records}`; `records` reuses the check-in's
      `estateRecord` (required), `heartbeat`, `revocationDelta` and `leases` by name and shape; each lease once
      (`FAC-SEM-152`).
-  2. **MR-2, when.** Every machine but the hub's reports to the hub machine (the one whose `hubKey` the applied
-     revision certifies) after it applies a revision, a heartbeat or a delta page (at most once a minute), at or after
-     each lease's expiry with its final `spent`, and at least every 24 hours while it holds a lease or applies the
-     estate's records. A report carries the whole state, is never answered, and a lost one is replaced by the next.
+  2. **MR-2, to whom and when.** A machine reports to every other machine whose `hubKey` the revision it applied
+     certifies (both, during a planned move) or a newer revision it verified but refused certifies (so a machine left
+     on its parent reaches the new hub, the hub move's step 6), after it applies a revision, a heartbeat or a delta
+     page (at most once a minute), at or after each lease's expiry with its final `spent`, and at least every 24 hours
+     while it holds a lease or applies the estate's records. A report carries the whole state, is never answered, and
+     a lost one is replaced by the next.
   3. **MR-3, how.** Sealed to the hub machine's `#kem` as `fabric-machine-report/1` `{type, kem, enc, ct}` inside a
      `fabric-relay-message/1` body: HPKE base mode, suite `[16, 1, 1]`, `info` the protocol name, the additional data
      the RFC 8785 bytes of `{type, from, to, msgId, kem}`, the plaintext at most 65 536 bytes.
@@ -7958,8 +7960,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `openMachineReport` does: `malformed`, `wrong-recipient`, `cannot-open`, `malformed`, `wrong-machine` (the report
      names another machine than the sender), `stale` (not after the one held). It keeps the newest per machine.
   5. **MR-5, what it means.** A machine applied a revision when its newest report's `estateRecord.revision` is at or
-     above it; a lease's final `spent` is in a report whose `at` is at or after its `expiresAt`; a machine silent for
-     more than 24 hours counts as what its last report says, its leases as their whole amounts.
+     above it; a lease's final `spent` is in a report whose own `at` is at or after its `expiresAt`, never one judged
+     by its delivery, and the window lease's reporting and `windowRemainder` take a report's `at` as its time.
 - **Why:** the relay is the estate's own carrier (DEC-0047) and already delivers to a sleeping hub; sealing keeps what a
   machine spent away from the relay's operator, as a machine call is (DEC-0106). Whole-state reports make loss and
   reordering harmless with one rule (`stale`), and reusing the check-in's member names keeps every existing reference
@@ -7968,7 +7970,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   would forbid a view machine's report); the report in clear in the body (the relay's operator would read every
   machine's spending); deltas instead of whole state (one lost message would need a resend protocol); the hub pulling
   reports (a hub cannot reach a sleeping machine; the relay's mailbox carries a push).
-- **Compatibility:** additive. `contractVersion` stays `0.1.0`. The texts that named CT-152 as the open carrier
+- **Compatibility:** additive. `contractVersion` stays `0.1.0`. The window lease's reporting said a report "received"
+  at or after a lease's expiry; it now says written (the report's `at`), and `LeaseReport.receivedAt` is that time for
+  a relayed report. The texts that named CT-152 as the open carrier
   (delegation.md DL-15, ceremonies.md's hub move, window-lease.md, estate-record.md, revocation-delta.md, devices.md
   UE-2, the check-in schema's `records` description) now name DEC-0132.
 - **Consequences / affects:** `schemas/machine-report.schema.json`, `schemas/machine-report-sealed.schema.json` (new);

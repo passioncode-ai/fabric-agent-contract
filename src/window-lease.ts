@@ -326,7 +326,10 @@ export interface LeaseReport {
   leaseId: string;
   /** Settled receipts plus open reservations in the window instance, an upper bound; absent, the lease is unreported. */
   spent?: string;
-  /** When the hub received the report. */
+  /**
+   * The report's time: for a machine's report over the relay, its own `at` (DEC-0132 MR-5), never its delivery, since a
+   * relay may deliver a report written before the lease's expiry after it.
+   */
   receivedAt: string;
 }
 

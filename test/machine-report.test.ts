@@ -49,6 +49,7 @@ describe("the machine-report vectors (DEC-0132)", () => {
     if (c.expect.ok && !("report" in c.expect)) {
       expect(answer.ok).toBe(true);
       const report = (answer as { report: Json }).report;
+      expect(report.machine).toBe(c.context.sender);
       expect(evaluateSemanticRules("machine-report", report).map((finding) => finding.code)).toEqual(c.findings ?? []);
     } else {
       expect(json(answer)).toEqual(c.expect);
@@ -73,8 +74,16 @@ describe("sealMachineReport (MR-3)", () => {
     for (const recipient of [{ kid: "m-hub#sig", publicKey: c.recipient.publicKey }, { kid: 1, publicKey: c.recipient.publicKey }, { kid: c.recipient.kid, publicKey: "AAAA" }, { kid: c.recipient.kid, publicKey: 7 }, { kid: c.recipient.kid, publicKey: Buffer.alloc(65, 4).toString("base64") }]) {
       expect(sealMachineReport(REPORT, { ...base, recipient }), JSON.stringify(recipient).slice(0, 40)).toEqual({ ok: false, refusal: "bad-key" });
     }
-    const big = { ...REPORT, records: { ...REPORT.records, padding: "x".repeat(MAX_MACHINE_REPORT_BYTES) } };
-    expect(sealMachineReport(big, base)).toEqual({ ok: false, refusal: "too-large" });
+    // The limit is the plaintext's RFC 8785 length: exactly 65 536 bytes seal and open, one more is too large.
+    const padded = (bytes: number) => {
+      const shell = Buffer.byteLength(rfc8785({ ...REPORT, machine: "" }), "utf8");
+      return { ...REPORT, machine: "m".repeat(bytes - shell) };
+    };
+    const exact = sealMachineReport(padded(MAX_MACHINE_REPORT_BYTES), base);
+    expect(exact.ok).toBe(true);
+    expect(openMachineReport((exact as { sealed: unknown }).sealed, ctx({ sender: padded(MAX_MACHINE_REPORT_BYTES).machine, schemaValid: () => true })).ok).toBe(true);
+    expect(sealMachineReport(padded(MAX_MACHINE_REPORT_BYTES + 1), base)).toEqual({ ok: false, refusal: "too-large" });
+    expect(sealMachineReport(REPORT, { ...base, ephemeral: Buffer.alloc(32) })).toEqual({ ok: false, refusal: "malformed" });
   });
 
   it("round-trips without a fixed ephemeral key", () => {
@@ -117,6 +126,7 @@ describe("openMachineReport (MR-4)", () => {
   it("keeps a held report it cannot read from refusing a newer one, and a report whose time it cannot read never replaces one it holds", () => {
     expect(openMachineReport(SEALED, ctx({ held: { at: "not a time" } }))).toEqual({ ok: true, report: REPORT });
     expect(openMachineReport(SEALED, ctx({ held: { at: 7 } }))).toEqual({ ok: true, report: REPORT });
+    expect(openMachineReport(SEALED, ctx({ held: null }))).toEqual({ ok: true, report: REPORT });
     const timeless = sealMachineReport({ ...REPORT, at: 5 }, { from: vectors.seal.context.from, to: vectors.seal.context.to, msgId: vectors.seal.context.msgId, recipient: vectors.seal.context.recipient });
     const sealed = (timeless as { sealed: unknown }).sealed;
     expect(openMachineReport(sealed, ctx({ schemaValid: () => true, held: { at: "2026-10-27T07:00:00Z" } }))).toEqual({ ok: false, refusal: "stale" });
