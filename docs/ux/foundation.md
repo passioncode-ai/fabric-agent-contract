@@ -151,7 +151,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Personas:** P-02
 - **Type:** functional
 - **Forces:** push: keys pasted into chats and messengers, no idea who still holds them, agents asking for tokens in a chat; pull: a link and a six-digit code, a count of uses, one button to take it back; anxiety: a cloud or a stranger catching the link, a copy outliving the share, a window an agent drew to look like the real one; habit: sending the key itself.
-- **Success metric:** a shared value opens only on the recipient's machine for the share's key, after the two people compared one code; a share the sender chose to seal without comparing is shown as not confirmed, with the risk that whoever claimed first holds it; the sender sees uses per day and takes the share back in three steps, each shown with what confirmed it; a secret an agent asked for is stored without the value ever reaching the agent, a chat or a log.
+- **Success metric:** a shared value opens only on the recipient's machine for the share's key, after the two people compared one code; a share the sender chose to seal without comparing is shown as not confirmed, with the risk that whoever claimed first holds it; the sender sees uses per day and takes the share back in three steps, each shown with what confirmed it; a secret an agent asked for is stored without the value reaching the agent through the request, a chat or a log; a command the agent later runs with it can still print it.
 
 ## 3. Customer journeys
 

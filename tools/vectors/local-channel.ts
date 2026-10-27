@@ -64,11 +64,37 @@ function outcomes(): Json[] {
   return list.map(([name, deadline, answers, written, expect]) => ({ name, promptedAt: T, deadline, answers, written, expect }));
 }
 
+/** The shapes a node and a signed app exchange: each `secret.prompt` params and result against its definition, valid or not. */
+function prompts(): Json[] {
+  const prompt = { requestId: "r-1", agent: "claude-code", project: "example-site", slot: { env: "prod", name: "OPENROUTER_API_KEY" }, provider: "openrouter", reason: "Deploy the site's search", replaces: false, deadline: "2026-10-27T10:10:00Z" };
+  const { provider: _provider, ...noProvider } = prompt;
+  const list: Array<[string, "secretPrompt" | "secretResult", unknown, boolean]> = [
+    ["a prompt for one slot", "secretPrompt", prompt, true],
+    ["a prompt with no provider: the member is left out", "secretPrompt", noProvider, true],
+    ["a prompt with a null provider", "secretPrompt", { ...prompt, provider: null }, false],
+    ["a provider that is no slug", "secretPrompt", { ...prompt, provider: "open.router" }, false],
+    ["a prompt that carries a member more (lastChange)", "secretPrompt", { ...prompt, lastChange: "2026-10-20T09:00:00Z" }, false],
+    ["a prompt that carries a value", "secretPrompt", { ...prompt, value: "sk-1" }, false],
+    ["a slot name that starts with an underscore", "secretPrompt", { ...prompt, slot: { env: "prod", name: "_LEADING" } }, false],
+    ["a slot name of 64 characters", "secretPrompt", { ...prompt, slot: { env: "prod", name: `K${"A".repeat(63)}` } }, true],
+    ["a slot name of 65 characters", "secretPrompt", { ...prompt, slot: { env: "prod", name: `K${"A".repeat(64)}` } }, false],
+    ["a slot name in lower case", "secretPrompt", { ...prompt, slot: { env: "prod", name: "openrouter_key" } }, false],
+    ["an empty reason", "secretPrompt", { ...prompt, reason: "" }, false],
+    ["a result: stored", "secretResult", { outcome: "stored", at: "2026-10-27T10:01:00Z" }, true],
+    ["a result: declined", "secretResult", { outcome: "declined", at: "2026-10-27T10:01:00Z" }, true],
+    ["a result with no time", "secretResult", { outcome: "declined" }, false],
+    ["a result that carries the value", "secretResult", { outcome: "stored", at: "2026-10-27T10:01:00Z", value: "sk-1" }, false],
+    ["a result the client may not send (cancelled)", "secretResult", { outcome: "cancelled", at: "2026-10-27T10:01:00Z" }, false]
+  ];
+  return list.map(([name, definition, value, valid]) => ({ name, definition, value, valid }));
+}
+
 export function localChannelVectors(): Json {
   return {
-    about: "Vectors for fabric-local-channel/0.1 (DEC-0075, DEC-0143), written by tools/vectors/local-channel.ts, never by hand. `sessions`: from a fresh session (hello false, accepted [fabric-local-channel/0.1], signedApp as given: the node's own operating-system check of the peer, absent when it made none), channelStep over `messages` in order answers each as `answers` says ({ok, code, hello, capabilities?}: code null when nothing is answered, hello and capabilities the session after), and then mayPrompt and maySecretPrompt answer as `after` says. `outcomes`: secretOutcome(promptedAt, deadline, answers, written), times in milliseconds by the node's receipt time; a withdrawn request passes the withdrawal's time as its deadline (SP-3).",
+    about: "Vectors for fabric-local-channel/0.1 (DEC-0075, DEC-0143), written by tools/vectors/local-channel.ts, never by hand. `sessions`: from a fresh session (hello false, accepted [fabric-local-channel/0.1], signedApp as given: the node's own operating-system check of the peer, absent when it made none), channelStep over `messages` in order answers each as `answers` says ({ok, code, hello, capabilities?}: code null when nothing is answered, hello and capabilities the session after), and then mayPrompt and maySecretPrompt answer as `after` says. `outcomes`: secretOutcome(promptedAt, deadline, answers, written), times in milliseconds by the node's receipt time; a withdrawn request passes the withdrawal's time as its deadline (SP-3). `prompts`: each `value` validates against local-channel.schema.json#/$defs/<definition> exactly when `valid` is true.",
     sessions: sessions(),
-    outcomes: outcomes()
+    outcomes: outcomes(),
+    prompts: prompts()
   };
 }
 

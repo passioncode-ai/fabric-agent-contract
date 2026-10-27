@@ -35,8 +35,13 @@ that the share works between two personal estates with no organization, from the
 ## Open
 
 - Readings until two clean rounds in a row; merge; release; answer Observatory on thread `faa32585` (request
-  `c50f590b`) with the two decision ids and the tag, and what its engine adopts at its next pin: replace
-  `observatory-share-envelope/1` with `fabric-peer-share-envelope/1`, symmetric commit-reveal and a five-byte code in
+  `c50f590b`) with the two decision ids and the tag, and what its engine adopts at its next pin, the whole list being
+  backlog row CT-186: replace `observatory-share-envelope/1` with the whole `fabric-peer-share/1` profile (per-share
+  keys, the link and its pin, every claim counting, the three-step take-back), the mailbox running `peerExchangeVerdict`
+  until the first envelope is stored, carrying a burning frame to both nodes and refusing the upload of a burnt share,
+  the sender's node warning of a claim or abort after a share stored without comparing, human steps linking to the
+  node's page, its vault's slot names (`[A-Z_][A-Z0-9_]{0,127}`) against the contract's `^[A-Z][A-Z0-9_]{0,63}$`, and
+  `local-channel.json`'s `prompts` section, which its OBS-260 `prompt_view` fails today; symmetric commit-reveal and a five-byte code in
   place of its asymmetric four-byte one, the RFC 8785 transcript and claim MAC, the ceilings (claim deadline 7 days, lease
   24 hours, envelope 90 days), no report nonce, mailbox requests signed under DEC-0056's RFC 9421 subset with the share
   keys, and `secret.prompt` with the broker launching its app (SP-3). Tell it

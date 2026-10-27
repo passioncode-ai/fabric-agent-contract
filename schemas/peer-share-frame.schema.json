@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/peer-share-frame.schema.json",
   "title": "A share's exchange frame, peer-share-frame/1 (DEC-0142)",
-  "description": "One frame of the exchange that confirms a person-to-person share (DEC-0142, docs/specification/peer-share.md): the recipient's claim (its share keys, the claim MAC under the link's code and its commitment), the sender's commit (its share keys and commitment), a side's reveal, or an abort. Both sides commit before either reveals; the comparison code is derived from both reveals (peerComparisonCode). The mailbox carries the frames and checks nothing in them.",
+  "description": "One frame of the exchange that confirms a person-to-person share (DEC-0142, docs/specification/peer-share.md): the recipient's claim (its share keys, the claim MAC under the link's code and its commitment), the sender's commit (its share keys and commitment), a side's reveal, or an abort. Both sides commit before either reveals; the comparison code is derived from both reveals (peerComparisonCode). The mailbox checks no claim MAC and opens nothing; it runs peerExchangeVerdict over a share's frames until the first envelope is stored (PS-6, PS-10).",
   "oneOf": [
     {
       "type": "object",

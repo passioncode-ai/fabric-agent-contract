@@ -100,7 +100,8 @@ before either reveals:
    `confirmed: false` and says so: whoever claimed first may hold the value, and when the link went through the
    mailbox's page nothing checked the recipient. An uncompared share also leaves the recipient unable to tell who
    sealed what it holds: a mailbox in the middle can seal a value of its own choosing, so the recipient's app shows
-   its code with "They differ" too, and says when the share it holds was not compared. Both are the person's own acts: each is declared with `gate: human` and `humanStep:
+   its code with "They differ" too. Nothing the recipient receives says whether the sender compared, so its app cannot
+   know, and its own comparison is its only check. Both are the person's own acts: each is declared with `gate: human` and `humanStep:
    comparison` (DEC-0121 AP-4), so the agent's tool for it answers `human-step-required` with the link to the node's page that shows the pending share and names the app
    window that holds the comparison,
    and no agent can confirm a code or skip the comparison for the person. The product declares its other buttons under
@@ -117,10 +118,12 @@ is `aborted` wherever it comes, before any claim included, never `out-of-order`.
 reason. A commit that reflects the claim's own keys is not a burn of the verdict: it stops at the code, which
 `checkedPeerCode` refuses as `same-keys`, so nothing is sealed. A node keeps the first burnt verdict it reaches and reads the share no further: the verdict carries no arrival times, so `expired` holds only for a
 node that kept it. Once the sender has confirmed or shared without comparing, the sender's node runs the verdict no
-further: it reads only the mailbox's answer to its upload and any later claim the mailbox carries. The mailbox, which
+further: it reads only the mailbox's answer to its upload and any later claim or abort the mailbox carries. The mailbox, which
 cannot see the confirmation, stops at the first envelope stored for the share. The mailbox learns the share is sealed from the first envelope
 stored for it, and still carries a claim that arrives after that to the sender's node, which shows it beside a share
-sealed without comparing as a warning to take the share back. Until the first envelope is stored the mailbox keeps
+sealed without comparing as a warning to take the share back. A recipient's "They differ" after that point stops its
+own node, which opens nothing more for the share and deletes its ciphertext, and the mailbox carries its `abort` to the
+sender's node the same way, as a warning to take the share back. Until the first envelope is stored the mailbox keeps
 running the verdict: a frame that burns the exchange there (a claim after completion is `closed`) it carries to both
 nodes with its reason, and it then stores no envelope and grants no lease for the share, refusing the sender's upload
 with the burn, so a share sealed in that moment is never served and the sender's screen reads it burnt. A burnt exchange seals nothing. A new attempt is a new share, with a new id and a new code, that
@@ -156,7 +159,7 @@ and the commit frames; the nonces carry the bound.
 `fabric-peer-share-envelope/1` is `{header, ct, sig}`: the value sealed with HPKE (RFC 9180) base mode, suite
 `[16, 1, 1]` as the [secret envelope](relay.md#the-secret-envelope), to the recipient's share `#kem`, `info` the ASCII
 `fabric-peer-share-envelope/1`, the additional data the RFC 8785 bytes of the header; `sig` is ES256 by the sender's
-share `#sig` over the RFC 8785 bytes of `{header, ct}`. The header names `alg` (`ES256`), `suite`, `recipient` and
+share `#sig` over the RFC 8785 bytes of `{header, ct}`. The header names `type` (`fabric-peer-share-envelope/1`), `alg` (`ES256`), `suite`, `recipient` and
 `signer` (thumbprints), `shareId`, `slot`, `provider`, `sequence` (the sender's, per share and slot), `iat`, `exp` (a
 life of at most 90 days) and `enc`; never the value. A share's envelope never opens as a personal credential or an
 organization's (DEC-0111), nor the reverse: the `info` differs.
@@ -183,7 +186,8 @@ digest}` with the ciphertext.
 
 The recipient's node sends, at each renewal and at least daily, `fabric-peer-share-report/1`: a body sealed with the
 same construction to the sender's share `#kem`, `info` the ASCII `fabric-peer-share-report/1`, signed ES256 by the
-recipient's share `#sig`; the header names `recipient`, `signer`, `shareId`, `sequence` and `iat`. The body
+recipient's share `#sig`; the header names `type` (`fabric-peer-share-report/1`), `alg` (`ES256`), `suite`,
+`recipient`, `signer`, `shareId`, `sequence`, `iat` and `enc`, as `peer-share-report.schema.json` gives them. The body
 (`peer-share-report.schema.json#/$defs/body`, `peerReportBody`) holds, per slot and UTC day, the uses the node counted
 and the last one, the consumer labels (agent names from its journal) and the exports made with the export button; never
 a value, a command, an argument or an output (the rule of `call-record/1`, DEC-0111 item 6).
@@ -224,7 +228,7 @@ The mailbox is any HTTPS service the sender names as the link's origin: hosted i
 by a personal cloud. It carries frames, envelopes, reports and records unchanged and holds revocations; it signs
 nothing, opens nothing, and decides nothing about a value or about whom the sender trusts. Its own duties are
 mechanical: it runs `peerExchangeVerdict` over a share's frames and stops carrying the exchange of a burnt one, runs no
-verdict after the first envelope stored for the share but still carries a later claim to the sender (PS-6), carries
+verdict after the first envelope stored for the share but still carries a later claim or abort to the sender (PS-6), carries
 the frame that burns an exchange to both nodes with its reason and then stores no envelope and grants no lease for that
 share, grants
 an honest recipient a lease of at most 24 hours and counts each delivery (PS-7), and refuses every renewal and delivery

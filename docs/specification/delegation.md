@@ -672,7 +672,7 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
   scope covers the case, the receiver acts and says so in its reply.
 - **OA-5, what stays the person's.** The human steps of AP-4 and MD-6: a sign-in (with its one-time code), a consent,
   a payment or top-up, a typed secret, spend above a limit, a passkey signature, a comparison of codes between two
-  people (DEC-0142); and a decision recorded as the
+  people or the choice to share without one (DEC-0142); and a decision recorded as the
   operator's own when the relay does not carry it.
 - **OA-6, the record.** The receiver records the relay as its reason: the operator's words, `at` and `source` in its
   change log or audit record, its reply in the thread, its handoff. A service records `source` with the decision or

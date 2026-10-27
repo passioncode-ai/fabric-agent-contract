@@ -282,7 +282,7 @@ describe("the message definitions validate what they name", () => {
 });
 
 describe("the shared vectors (local-channel.json)", () => {
-  const vectors = JSON.parse(readFileSync(path.join(projectRoot(), VECTOR_FILE), "utf8")) as { sessions: any[]; outcomes: any[] };
+  const vectors = JSON.parse(readFileSync(path.join(projectRoot(), VECTOR_FILE), "utf8")) as { sessions: any[]; outcomes: any[]; prompts: any[] };
   it("is what its generator writes", () => {
     expect(readFileSync(path.join(projectRoot(), VECTOR_FILE), "utf8")).toBe(buildLocalChannelVectors());
   });
@@ -298,5 +298,8 @@ describe("the shared vectors (local-channel.json)", () => {
   });
   it.each(vectors.outcomes)("outcome: $name", (c) => {
     expect(secretOutcome(c.promptedAt, c.deadline, c.answers, c.written)).toBe(c.expect);
+  });
+  it.each(vectors.prompts)("prompt shape: $name", (c) => {
+    expect(def(c.definition, c.value)).toBe(c.valid);
   });
 });

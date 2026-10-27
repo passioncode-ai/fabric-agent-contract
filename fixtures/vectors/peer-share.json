@@ -1127,6 +1127,58 @@
       }
     },
     {
+      "name": "read exactly at the claim deadline: still open",
+      "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+      "claimDeadline": "2026-11-03T10:00:00Z",
+      "at": "2026-11-03T10:00:00Z",
+      "frames": [
+        {
+          "schema": "peer-share-frame/1",
+          "step": "claim",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+              "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+              "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+            }
+          },
+          "mac": "PBOuZKG6B9AmujGPxz_3jO0CfBBe0aCl63WtO0H8S5E",
+          "commit": "sha256:68a58116a84599f0d55e5497590bb452695d49907d9db82b23584a18c4ebb84a"
+        },
+        {
+          "schema": "peer-share-frame/1",
+          "step": "commit",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "ZPoT-OGvtIdwz8QBOesU_t_H-P5uy2HsYzRwy8bZH2Y",
+              "y": "5-6SUYwUO9hRAnHAueIYlxVVPR4cmqiXQEjP-Ekcmtk"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "tclfmsWQIDzgkW_MalbJbWZZuWF_ca-3l6qR6QKuBYw",
+              "y": "po-kQezo1MJ4xNXdFUqlemLpHag-mGmEt5aYBgWq1v8"
+            }
+          },
+          "commit": "sha256:6413fec4b3b407d23edb8bf84ce62f68a9c3696f098956ede5a9b748b6a9e79d"
+        }
+      ],
+      "expect": {
+        "state": "open"
+      }
+    },
+    {
       "name": "a completed exchange does not expire",
       "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
       "claimDeadline": "2026-11-03T10:00:00Z",
@@ -3450,6 +3502,56 @@
       }
     },
     {
+      "name": "issued exactly 60 s ahead of the clock",
+      "envelope": {
+        "header": {
+          "type": "fabric-peer-share-envelope/1",
+          "alg": "ES256",
+          "suite": [
+            16,
+            1,
+            1
+          ],
+          "recipient": "gIzibVDCRJZOBx8ZMmM-plOmb7gZMLkTFSyZppnXWqc",
+          "signer": "6FQ6dHA0zvjOeSrGS91a_UtmVZiSB7B8WZ5eTrHFlYE",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "slot": "OPENROUTER_API_KEY",
+          "provider": "openrouter",
+          "sequence": 1,
+          "iat": "2026-10-27T09:59:00Z",
+          "exp": "2026-11-26T09:59:00Z",
+          "enc": "BE1naJwbRbSAgucV84qcSqf7h3foKgh9O3SVJ0W0naY8LFTlBGZ8IS_kChTzJ6yD4R6d0nfEkt6UMi2JDf4opGo"
+        },
+        "ct": "_aHWDplsk3OHZDcNCD6qaHvs4A-8LClXSA1sVsXwYiihN-LIDGbMOrm5ROs",
+        "sig": "hf4qgpNRw8HttRvGbH2JtV_vEL_BzNNRPSdjkALqmJIcj-jpYa0s7-rt96gSM4HOZeXR8wRc6lQq1HK_ShYZDA"
+      },
+      "context": {
+        "at": "2026-10-27T09:58:00Z",
+        "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+        "ownKem": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+          "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+        },
+        "senderSig": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "ZPoT-OGvtIdwz8QBOesU_t_H-P5uy2HsYzRwy8bZH2Y",
+          "y": "5-6SUYwUO9hRAnHAueIYlxVVPR4cmqiXQEjP-Ekcmtk"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "mark": {
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "slot": "OPENROUTER_API_KEY",
+          "sequence": 1,
+          "digest": "sha256:1d55ee421b3833d6443e5c5c22e9fd62fdddda3aaafc6ea748fe4e747409b5bf"
+        }
+      }
+    },
+    {
       "name": "an envelope that lives more than 90 days",
       "envelope": {
         "header": {
@@ -4198,6 +4300,65 @@
       "expect": {
         "ok": false,
         "refusal": "not-yet-valid"
+      }
+    },
+    {
+      "name": "issued exactly 60 s ahead of the clock",
+      "report": {
+        "header": {
+          "type": "fabric-peer-share-report/1",
+          "alg": "ES256",
+          "suite": [
+            16,
+            1,
+            1
+          ],
+          "recipient": "dLqwsZ1lyEB70VOmFzD4-uRdRix5XTdwBH0wXzGC5fM",
+          "signer": "XbqsqXRCEqFDKxIhCNk-5YRTX1XtW8a08-pvb9uTH20",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "sequence": 1,
+          "iat": "2026-10-27T09:59:00Z",
+          "enc": "BE1naJwbRbSAgucV84qcSqf7h3foKgh9O3SVJ0W0naY8LFTlBGZ8IS_kChTzJ6yD4R6d0nfEkt6UMi2JDf4opGo"
+        },
+        "ct": "K99DxIs0eJ8ua6V3l_BhXhaQX64Q_FmG7zvvoOF1VMkzKICxbUvRqz1NnxyowpdyDCUkvYUCYsyIreTaCS9py0aIjQEb6YYaeGDqN-gW6ofl_0BHovrpdndp7qz4H56CQ52fAs1B79RaNkFxoI7e7IW7QGQP-f6p9fjpF540quBsX-neqrWF0vdml_oWEnj9OV5hofm3Th78KAfCSZ5EIuM4ubD8jAmS47l03QxMV_jU8FwZ7gmHHquSiAaUQXIrHlC-iFE",
+        "sig": "P2Sf8nruy993W3lBg1YKaBBoUz8HJZzStw4K4zMKcFZMIlDqUJYdTvZ9anRqtOYt8BckWEMkhVICtDoJk5aE7g"
+      },
+      "context": {
+        "at": "2026-10-27T09:58:00Z",
+        "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+        "ownKem": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "tclfmsWQIDzgkW_MalbJbWZZuWF_ca-3l6qR6QKuBYw",
+          "y": "po-kQezo1MJ4xNXdFUqlemLpHag-mGmEt5aYBgWq1v8"
+        },
+        "recipientSig": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+          "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "sequence": 1,
+        "body": {
+          "days": [
+            {
+              "date": "2026-10-27",
+              "slot": "OPENROUTER_API_KEY",
+              "uses": 3,
+              "lastUse": "2026-10-27T09:40:00Z"
+            }
+          ],
+          "consumers": [
+            {
+              "slot": "OPENROUTER_API_KEY",
+              "agent": "claude-code"
+            }
+          ],
+          "exports": []
+        }
       }
     },
     {

@@ -134,6 +134,8 @@ the vault slot itself.
   and `humanStep: secret` (DEC-0121 AP-4), so an agent's tool for them answers `human-step-required`, with the link to
   the node's page that shows the pending request and names the app window that holds it, and never stores a value.
   The value never reaches the agent through the prompt; any command the agent later runs with it can still print it.
+  The person's acts in the window are theirs only while no program holds the Accessibility permission over the app,
+  which can press its buttons (SP-6).
 - **SP-5. The outcome the agent sees** (`secretOutcome`): the first `stored` or `declined` the node received between the
   prompt and its deadline, at most 10 minutes after it (`MAX_SECRET_DEADLINE_MS`), by the node's receipt time; no answer
   by then is `no-answer`, a late answer is ignored. `stored` counts only when the node confirmed, in its own vault
