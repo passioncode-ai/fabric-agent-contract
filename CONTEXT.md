@@ -770,7 +770,7 @@ a socket or pipe the operating system proves is the same user's, hello first, co
 
 **Peer share**: One or more credentials one person shares from their estate with another person's estate, with no
 organization on either side (`fabric-peer-share/1`): a key pair per share on each side, a link with a one-time code, a six-digit code
-the two people compare, the value sealed to the recipient's share key, usage reports back, taken back in three steps.
+the two people compare, the value sealed to the recipient's share key, usage reports back (each restating its last 35 days, DEC-0147), taken back in three steps.
 Not a context and not a share grant (DEC-0142, [peer share](docs/specification/peer-share.md)).
 
 **Secret prompt**: The window in which the person types a value an agent asked for (`secret.prompt` on the local
