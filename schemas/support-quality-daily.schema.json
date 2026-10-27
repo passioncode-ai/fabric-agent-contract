@@ -197,6 +197,45 @@
           "$ref": "#/$defs/count"
         }
       }
+    },
+    "calibration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "week",
+        "labelled",
+        "helped"
+      ],
+      "description": "Optional (DEC-0144): how well the judge agreed with people on the latest ISO week a person labelled answers, starting no later than day, carried on every day it still holds for (a reader never carries it forward). Absent means no calibration. week is that ISO week, labelled the answers a person labelled, helped the share of those whose helped verdict the judge matched (null when helped was not labelled, named calibration.helped in notMeasured). Each check's agreement is calibrationChecks, at the top level so data.value stays two levels deep (DEC-0070). It is of the day's judge and rubric, and a week no later than day. A producer carries it once every reader of its feed it knows of has adopted DEC-0144: the schema is closed, so a reader validating against an older copy refuses that day's value.",
+      "properties": {
+        "week": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$",
+          "description": "The ISO 8601 week of the labelling, YYYY-Www."
+        },
+        "labelled": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The answers a person labelled that week."
+        },
+        "helped": {
+          "$ref": "#/$defs/rate"
+        }
+      }
+    },
+    "calibrationChecks": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 16,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z_]{0,31}$"
+      },
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "description": "Optional (DEC-0144), only beside calibration: each rubric check's share of the labelled verdicts the judge matched, named as in checks; a check a person did not label is left out, and with none labelled the member is absent, never empty."
     }
   },
   "additionalProperties": false,
