@@ -269,7 +269,8 @@ machine word for `error.data.detail`, never the token. A verifier in another lan
   with it: a callee whose applied revision does not certify the key refuses its tokens `kid-not-certified` (DL-14).
   To keep every callee answering, the hub certifies the new key while the old one stays certified, signs with the new
   key once its machines' reports (`records.estateRecord.revision`, DEC-0053, in the [machines' report](relay.md#the-machines-report) over the relay,
-or `machine.report` on the hub's own machine, and never through an organization server, DEC-0128, DEC-0132) show the certifying revision applied, and
+or `machine.report` on the hub's own machine, and never through an organization server, DEC-0128, DEC-0132) show the certifying revision applied (a machine that never
+reports keeps the switch waiting until the person removes it, MR-6, DEC-0146), and
   revokes the old key in a later revision. A revision that certifies the new key and revokes the old one at once (as
   the rotation vector does) is valid, but callees on the older revision refuse the new key until they apply it.
 

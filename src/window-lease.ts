@@ -9,7 +9,7 @@ import { WINDOW_LEASE_FIELDS, signingStatement } from "./signing-challenges.js";
  * `window-lease/1` (DEC-0062): the estate's hub signs, once per machine, that machine's share of one instance of a
  * spending window — the most the machine's meter may spend in that window instance — valid for at most 24 hours. The
  * meter spends the smaller of its own remainder and the lease's, refuses beyond it, and at expiry reserves nothing more
- * in that window until a new lease arrives. It reports what it spent to its hub (over the relay, DEC-0132); what it does not report counts
+ * in that window until a new lease arrives. It reports what it spent to its hub (over the relay, or through `machine.report` on the hub's own machine, DEC-0132); what it does not report counts
  * as spent until it does.
  */
 export const WINDOW_LEASE_TYPE = "window-lease/1";

@@ -379,7 +379,7 @@ alert:
    and the hub's tokens on calls between machines. Callers mint again from the new hub. The new hub holds none of the old
    hub's lease division, so it issues no lease of a window instance the old hub divided until that instance ends or every
    machine holding one of the old hub's leases has reported it after the revocation
-   (its newest report's `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it) ([window lease](window-lease.md#reporting)); how a meter orders a new hub's lease after an old hub's (`superseded`)
+   (its newest report's `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it) ([window lease](window-lease.md#reporting)); the new hub reads "every machine holding one" as every machine the revision lists, since it cannot know which held one, and its first division of such an instance counts each old-hub lease a report names at its final `spent` (DEC-0146); a machine that never reports keeps it waiting until the person removes it (MR-6); how a meter orders a new hub's lease after an old hub's (`superseded`)
    is CT-113's.
 
 A copy of the old key on a lost disk signs nothing a machine on the new revision accepts, nor anything a verifier that

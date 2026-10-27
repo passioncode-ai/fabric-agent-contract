@@ -12,6 +12,7 @@ import {
   machineReportAad,
   machineReportRules,
   openMachineReport,
+  readMachineReport,
   sealMachineReport
 } from "../src/machine-report.js";
 import { rfc8785 } from "../src/canonical.js";
@@ -71,6 +72,28 @@ describe("acceptMachineReport (MR-2, MR-4)", () => {
     expect(acceptMachineReport(REPORT, { machine: "m-a", schemaValid: () => { throw new Error("x"); } })).toEqual({ ok: false, refusal: "malformed" });
     expect(acceptMachineReport(REPORT, { machine: "m-a", held: { at: "unreadable" }, schemaValid: reportValid })).toEqual({ ok: true, report: REPORT });
     expect(acceptMachineReport(REPORT, { machine: "m-a", held: { at: 7 }, schemaValid: reportValid })).toEqual({ ok: true, report: REPORT });
+  });
+});
+
+describe("readMachineReport (MR-4's whole reading, DEC-0146)", () => {
+  it.each(vectors.read as Json[])("read: $name", (c) => {
+    const answer = readMachineReport(c.sealed, { ...c.context, schemaValid: reportValid });
+    expect(json(answer)).toEqual(c.expect);
+  });
+
+  it("answers what openMachineReport refuses, and what acceptMachineReport then refuses, never throwing", () => {
+    expect(readMachineReport(null, ctx())).toEqual({ ok: false, refusal: "malformed" });
+    expect(readMachineReport(SEALED, ctx({ msgId: "other" }))).toEqual({ ok: false, refusal: "cannot-open" });
+    expect(readMachineReport(SEALED, ctx())).toEqual({ ok: true, report: REPORT });
+  });
+});
+
+describe("FAC-SEM-154: a report's at is a relay time (DEC-0146)", () => {
+  it("flags an at the hub refuses and passes one it reads", () => {
+    const codes = (at: unknown) => evaluateSemanticRules("machine-report", { ...REPORT, at }).map((finding) => finding.code);
+    for (const at of ["2026-10-27T08:00:00+00:00", "2026-10-27t08:00:00Z", "2026-10-27T08:00:00.0000000001Z", "2026-12-31T23:59:60Z", "2026-02-30T08:00:00Z"]) expect(codes(at), at).toEqual(["FAC-SEM-154"]);
+    for (const at of ["2026-10-27T08:00:00Z", "2026-10-27T08:00:00.123456789Z"]) expect(codes(at), at).toEqual([]);
+    expect(codes(7)).toEqual([]);
   });
 });
 

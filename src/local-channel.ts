@@ -122,6 +122,17 @@ export function channelStep(state: ChannelState, request: unknown): ChannelAnswe
   return { ok: true, state: { ...state, hello: true, capabilities } };
 }
 
+/**
+ * A node's answer to a request after hello (DEC-0139 item 4, DEC-0146): a method it does not serve is `unknown-method`
+ * (JSON-RPC -32601), whether `NODE_METHODS` names it (a node pinned before a method existed, or one that applies no
+ * estate records and serves no `machine.report`) or not; a method it serves is its own to answer, to any client of the
+ * session. No capability gates `machine.report`: every process of the node's own user is inside its trust boundary.
+ * `served` is the set the node implements; `channel.hello` is `channelStep`'s, never dispatched here.
+ */
+export function nodeMethodAnswer(method: unknown, served: ReadonlySet<string>): { ok: true } | { ok: false; code: "unknown-method" } {
+  return typeof method === "string" && method !== "channel.hello" && served.has(method) ? { ok: true } : { ok: false, code: "unknown-method" };
+}
+
 /** Whether the node may send `consent.prompt` on this session: only to a client that declared `consent.ui` in its hello. */
 export function mayPrompt(state: ChannelState): boolean {
   return state.hello && (state.capabilities ?? []).includes("consent.ui");

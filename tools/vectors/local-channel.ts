@@ -92,12 +92,27 @@ function prompts(): Json[] {
   return list.map(([name, definition, value, valid]) => ({ name, definition, value, valid }));
 }
 
+/** `nodeMethodAnswer(method, served)`: what a node answers after hello (DEC-0139 item 4, DEC-0146). */
+function dispatch(): Json[] {
+  const all = ["health", "enroll.status", "machine.report"];
+  const list: Array<[string, string, string[], Json]> = [
+    ["a node that serves machine.report answers it", "machine.report", all, { ok: true }],
+    ["a node pinned before DEC-0132 does not serve machine.report", "machine.report", ["health", "enroll.status"], { ok: false, code: "unknown-method" }],
+    ["a node that applies no estate records and serves no machine.report", "machine.report", ["health"], { ok: false, code: "unknown-method" }],
+    ["a method no revision names", "estate.export", all, { ok: false, code: "unknown-method" }],
+    ["a client method sent to the node", "consent.prompt", all, { ok: false, code: "unknown-method" }],
+    ["hello is the session's, never dispatched", "channel.hello", ["channel.hello", ...all], { ok: false, code: "unknown-method" }]
+  ];
+  return list.map(([name, method, served, expect]) => ({ name, method, served, expect }));
+}
+
 export function localChannelVectors(): Json {
   return {
-    about: "Vectors for fabric-local-channel/0.1 (DEC-0075, DEC-0143), written by tools/vectors/local-channel.ts, never by hand. `sessions`: from a fresh session (hello false, accepted [fabric-local-channel/0.1], signedApp as given: the node's own operating-system check of the peer, absent when it made none), channelStep over `messages` in order answers each as `answers` says ({ok, code, hello, capabilities?}: code null when nothing is answered, hello and capabilities the session after), and then mayPrompt and maySecretPrompt answer as `after` says. `outcomes`: secretOutcome(promptedAt, deadline, answers, written), times in milliseconds by the node's receipt time; a withdrawn request passes the withdrawal's time as its deadline (SP-3). `prompts`: each `value` validates against local-channel.schema.json#/$defs/<definition> exactly when `valid` is true.",
+    about: "Vectors for fabric-local-channel/0.1 (DEC-0075, DEC-0143, DEC-0146), written by tools/vectors/local-channel.ts, never by hand. `sessions`: from a fresh session (hello false, accepted [fabric-local-channel/0.1], signedApp as given: the node's own operating-system check of the peer, absent when it made none), channelStep over `messages` in order answers each as `answers` says ({ok, code, hello, capabilities?}: code null when nothing is answered, hello and capabilities the session after), and then mayPrompt and maySecretPrompt answer as `after` says. `outcomes`: secretOutcome(promptedAt, deadline, answers, written), times in milliseconds by the node's receipt time; a withdrawn request passes the withdrawal's time as its deadline (SP-3). `prompts`: each `value` validates against local-channel.schema.json#/$defs/<definition> exactly when `valid` is true. `dispatch`: nodeMethodAnswer(method, served) after hello, `served` the methods the node implements, for any client of the session (DEC-0139 item 4, DEC-0146).",
     sessions: sessions(),
     outcomes: outcomes(),
-    prompts: prompts()
+    prompts: prompts(),
+    dispatch: dispatch()
   };
 }
 

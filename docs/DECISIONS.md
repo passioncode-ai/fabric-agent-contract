@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0146` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0147` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -8414,7 +8414,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   lease), `schemas/machine-report.schema.json` (description), `src/window-lease.ts` (`receivedAt`'s comment),
   `schemas/heartbeat.schema.json` and `schemas/window-lease.schema.json` (descriptions), `fixtures/vectors/window-lease.json`
   and `test/window-lease.test.ts` (case names say "written"), `docs/ux/flows.md` (FLW-27), `docs/ux/scenarios.md`
-  (SCN-038), `docs/specification/window-lease.md` (Reporting), `docs/specification/README.md` and `docs/DOCMAP.md` (their
+  (SCN-038), `docs/specification/ceremonies.md` (step 6, added by DEC-0146), `docs/specification/window-lease.md` (Reporting), `docs/specification/README.md` and `docs/DOCMAP.md` (their
   rows); DEC-0132 annotated; backlog CT-152 (its adopters' reading), CT-161 (closed), CT-172 (filed), CT-122 and
   CT-154 notes (the latter from the board: Fabric `7ef21793`, the adapter `aa86a675`); the handoff
   `docs/handoffs/2026-10-26-machine-report-loose-ends.md` and its row in `docs/handoffs/README.md`.
@@ -8691,3 +8691,85 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `AGENTS.md`, `docs/DOCMAP.md`; DEC-0042 annotated; backlog CT-123 and CT-167 closed, CT-191, CT-192 and CT-193 filed; `src/registry-rules.ts` (FAC-SEM-014's stem after either separator), `test/registry-rules.test.ts`.
 - **Source:** the operator's request of 2026-10-27; the first Windows runs of the gate (runs 40506221946 and after).
 
+
+### DEC-0146: the machines' report, its open design questions decided
+
+- **Date:** 2026-10-27
+- **Status:** Accepted (on merge of its pull request, after its objection window: 2026-10-29 18:00 UTC, thread
+  `5d2ea917` with Fabric). A narrowing of the hub's reading of reports no conforming machine writes (an `at` that is no
+  relay time, or later than the body's `iat`); new duties for the hub (counting an old hub's leases, the wait it
+  shows, the `degraded` entry's form, acknowledging a payload it does not know) and for a reporting machine (the `#kem`
+  it seals to, the leases of each hub key, a lease a revoked key signed). Additive: a reference function
+  (`readMachineReport`), a context member (`notAfter`), a rule code (`FAC-SEM-154`), a node dispatch function
+  (`nodeMethodAnswer`) with the vector group `dispatch`, and vectors in `machine-report.json` (`open`, `accept`, a new
+  group `read`); no earlier vector's answer changes. Adoption: CT-152's adopters (Fabric's hub and nodes, Project
+  Observatory's node).
+- **Context:** DEC-0132's and DEC-0139's blind readings left design questions open (CT-172): the report's lease cap,
+  which key a report is sealed to, what "newest" means, a lease a revoked hub key signed, the gate after a lost hub, the
+  new hub's count of the old hub's spend, machines that never report, a hub that cannot read reports, and a hub not
+  yet on DEC-0132; and text items (the strictness of `at`, sub-millisecond order, the `at` against `iat`, missing
+  vectors and conformance rows, wording that named only the relay).
+- **Decision:** [relay](specification/relay.md#the-machines-report) MR-1 to MR-6,
+  [window lease](specification/window-lease.md#reporting), [ceremonies](specification/ceremonies.md#move-the-hub) step 7,
+  [local channel](specification/local-channel.md#the-session), [devices](specification/devices.md#unlinkable-enrollments).
+  1. **The cap.** A report names at most 64 leases, as now. While leases name only the `estate` scope a machine holds at
+     most twelve (two hub keys, three windows, a held and a newest expired lease each); a hub signs no `project:` or
+     `grant:` lease until the revision that admits them decides the report's cap with them, and a machine never drops
+     a lease to fit.
+  2. **Newest and the hub keys.** The newest lease of a slot is the highest `sequence` among the slot's leases one hub
+     key signed (WL-11); after a move a machine names the newest of each hub key it held in the instance.
+  3. **A lease a revoked key signed** ends for the meter when it applies the revoking revision (WL-6), before its
+     `expiresAt`: it spends nothing more, later reports keep naming it with its own `expiresAt` until the instance
+     ends, and its final `spent` is a report whose `estateRecord.revision` is at or above that revision (MR-5).
+  4. **The gate after a move, and the old hub's spend.** "Every holder" of the old hub's leases is every machine the
+     revision lists, since a lost hub's successor cannot know which held one; a machine whose report names none held
+     none. The new hub's first division of such an instance counts each old-hub lease at its reported final `spent`,
+     as an ended lease of that amount, never at nothing. How the reference orders leases across hub keys stays CT-113's.
+  5. **Which `#kem`.** A machine seals each report to the `#kem` the newest revision it verified (applied, or newer and
+     refused) lists for that hub machine: the hub that drafted it holds that key.
+  6. **A machine that does not report** (MR-6): DL-15's switch, step 6 and step 7's gate wait for every machine the
+     revision lists, with no timeout; Fabric shows each machine waited on, since when and why when known, and the ways
+     out (bring it back, update it, remove it). A removed machine is no longer waited on.
+  7. **The hub's own machine.** The node that applies the estate's records there serves `machine.report`, Fabric's own
+     node included. A node answers a method it does not serve `unknown-method`, as `nodeMethodAnswer` does.
+  8. **A payload a hub does not know.** A recipient acknowledges every delivered message once it has read it, a body it
+     cannot verify and a payload type it does not know included, and drops what it cannot read; a hub not yet on
+     DEC-0132 so drops reports, and its mailbox does not fill with them (Fabric's confirmation asked).
+  9. **A hub that cannot read reports.** Its `degraded` entry's `source` is `machine-report`: a setup state while its
+     new `#kem` waits only for the person to sign a revision the hub drafted, a failure otherwise. A hub with no
+     `fabric-service/0.1` well-known shows it on its own machine's row in My network's machines (SCR-23, error); SCR-23
+     gains the waiting state of item 6.
+  10. **The report's `at`.** It is a relay time (`Z`, an upper-case `T`, at most nine fraction digits; `instantKey`,
+      `FAC-SEM-154`, so `pnpm validate` flags it), ordered to the nanosecond, and not after `notAfter`: the body's
+      signed `iat` for a relayed report, the hub's clock when its own node answered. An unreadable `notAfter` refuses.
+      `readMachineReport` is MR-4's whole reading (`openMachineReport`, then `acceptMachineReport`, one context).
+  11. **Text.** The relay's resend keeps its `msgId` after `internal` (MR-3 names the exception); a local error answer
+      erases no held report (MR-2); the wording that named only the relay names the local channel too; the schema no
+      longer calls the local answer sealed; `FAC-SEM-090` states that it bounds a division by the reports written
+      before a lease, not by what the hub had received; an organization's instance placed on a machine can call
+      `machine.report`, which devices.md now names among what stays linkable.
+- **Why:** each question had one answer that keeps spending bounded and keys verifiable with no new message: counting
+  an old lease at its final `spent` closes a gap where the new hub could lease the window's whole limit again; waiting
+  without a timeout keeps a returning machine from refusing the new key, and the person's way out already exists
+  (Remove); the narrowings close readings the relay's own times already refuse.
+- **Alternatives considered:** a timeout on the wait (a machine that came back after it would refuse the new key's
+  tokens; an unreported lease already counts at its whole amount); sealing to both keys when two revisions disagree (two
+  sends, and the older key's holder is the same hub, which applied the newer revision); restricting `machine.report` to
+  the hub's verified process (a process of the person's user can read the node's files anyway); auditing
+  `FAC-SEM-090` by receipt time (the division record holds none; a new member would be a schema change for an audit).
+- **Compatibility:** a narrowing for the hub's reading of reports no conforming machine writes, and for a hub that
+  issued a lease of an instance the old hub divided without counting the old hub's spend; additive for a node and for
+  ports (a new function, a context member, a rule code, vector groups); no earlier vector's answer changes.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/machine-report.ts` (`readMachineReport`, `notAfter`, `FAC-SEM-154`, the relay time),
+  `src/rfc3339.ts` (`instantKey`), `src/local-channel.ts` (`nodeMethodAnswer`), `fixtures/vectors/machine-report.json`
+  and `tools/vectors/machine-report.ts` (`open`, `accept`, `read`), `fixtures/vectors/local-channel.json` and
+  `tools/vectors/local-channel.ts` (`dispatch`), `test/machine-report.test.ts`, `test/local-channel.test.ts`;
+  `relay.md` (MR-1 to MR-6, the rule table), `window-lease.md` (Reporting, `FAC-SEM-090`), `ceremonies.md` (step 7),
+  `delegation.md` (DL-15), `local-channel.md`, `devices.md` (UE-2's wording, what stays linkable), `revocation-delta.md`
+  and `estate-record.md` (wording), `conformance.md` (the module row, the meter, hub, reporter and hub-reader rows, a
+  node row, the rule list), `schemas/machine-report.schema.json` and `schemas/device-check-in.schema.json`
+  (descriptions), `src/revocation-delta.ts` and `src/window-lease.ts` (comments), `docs/ux/screens.md` (SCR-23),
+  `docs/ux/scenarios.md` (SCN-038); DEC-0139 annotated (`ceremonies.md` step 6 among its consequences); backlog CT-172
+  (closed), CT-152 (its adopters' reading); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
+- **Source:** CT-172; DEC-0132's and DEC-0139's readings.
