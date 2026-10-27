@@ -66,7 +66,9 @@ requests to the administrators. The first organization server needs it by 2026-1
 
 ## Open
 
-- Readings (two clean rounds), then merge and release; adoption is CT-169.
+- Merged 2026-10-27 after the objection window closed (none open in `5d2ea917` or `0fee99ae`) as #212 (`3fd4c95a`),
+  gate on the merged tree exit 0 (9662 tests); released `v0.1.0+2026-10-27.5`; the tag posted in `0fee99ae` and
+  `5d2ea917` with Fabric's TP-04 duties; fabric-workspace #526 (products, roadmap, integration rows). Adoption is CT-169.
 
 ## Next task
 
