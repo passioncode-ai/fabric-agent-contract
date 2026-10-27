@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
+import { isoWeekMonday } from "../src/support-quality-rules.js";
 
 // DEC-0095: support-quality-daily/1, FAC-SEM-126.
 type Json = Record<string, any>;
@@ -66,7 +67,7 @@ describe("FAC-SEM-126: support-quality-daily/1", () => {
     expect(paths(value)).toEqual(["FAC-SEM-126 /judgeModel"]);
   });
   it("reads a calibration as the judge's (DEC-0144): its helped follows the not-measured rule, its checks stand only beside it", () => {
-    const calibrated = (): Json => Object.assign(ok(), { calibration: { week: "2026-W43", labelled: 40, helped: 0.85 as number | null }, calibrationChecks: { addressed: 0.9, policy_safe: 1 } });
+    const calibrated = (): Json => Object.assign(ok(), { calibration: { week: "2026-W42", labelled: 40, helped: 0.85 as number | null }, calibrationChecks: { addressed: 0.9, policy_safe: 1 } });
     expect(paths(calibrated())).toEqual([]);
     const unlabelled = calibrated();
     unlabelled.calibration.helped = null;
@@ -85,8 +86,28 @@ describe("FAC-SEM-126: support-quality-daily/1", () => {
     judgeless.notMeasured = [...judgeless.notMeasured, "checks"];
     judgeless.judgeModel = null;
     expect(paths(judgeless)).toEqual(["FAC-SEM-126 /judgeModel"]);
+    const both = calibrated();
+    both.judgeModel = null;
+    expect(paths(both)).toEqual(["FAC-SEM-126 /judgeModel"]);
     const alone = Object.assign(ok(), { calibrationChecks: { addressed: 0.9 } });
     expect(paths(alone)).toEqual(["FAC-SEM-126 /calibrationChecks"]);
+  });
+  it("reads a calibration's week as a real ISO week no later than the day (DEC-0144)", () => {
+    const at = (week: string, day = "2026-10-18"): string[] => paths(Object.assign(ok(), { day, calibration: { week, labelled: 40, helped: 0.85 } }));
+    expect(at("2026-W42")).toEqual([]);
+    expect(at("2026-W43")).toEqual(["FAC-SEM-126 /calibration/week"]);
+    expect(at("2026-W43", "2026-10-19")).toEqual([]);
+    expect(at("2025-W53", "2025-12-31")).toEqual(["FAC-SEM-126 /calibration/week"]);
+    expect(at("2026-W53", "2026-12-31")).toEqual([]);
+    expect(at("2020-W53", "2020-12-31")).toEqual([]);
+    expect(at("2026-W00")).toEqual(["FAC-SEM-126 /calibration/week"]);
+    expect(isoWeekMonday("2026-W01")).toBe("2025-12-29");
+    expect(isoWeekMonday("2020-W53")).toBe("2020-12-28");
+    expect(isoWeekMonday("2026-W53")).toBe("2026-12-28");
+    expect(isoWeekMonday("2025-W53")).toBeNull();
+    expect(isoWeekMonday("week 3")).toBeNull();
+    const numeric = Object.assign(ok(), { calibration: { week: 43, labelled: 40, helped: 0.85 } });
+    expect(paths(numeric)).toEqual([]);
   });
   it("travels with a calibration as an event's data.value (DEC-0070's two levels)", async () => {
     const ajv = await createValidator();

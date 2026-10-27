@@ -1,9 +1,9 @@
 # Support quality: `support-quality-daily/1`
 
-DEC-0095 · rule code `FAC-SEM-126` · schema [`support-quality-daily.schema.json`](../../schemas/support-quality-daily.schema.json) ·
+DEC-0095, DEC-0144 · rule code `FAC-SEM-126` · schema [`support-quality-daily.schema.json`](../../schemas/support-quality-daily.schema.json) ·
 code [`src/support-quality-rules.ts`](../../src/support-quality-rules.ts) · tests
 [`test/support-quality.test.ts`](../../test/support-quality.test.ts) · fixtures `fixtures/positive/support-quality-daily.json`,
-`fixtures/semantic/support-quality-daily-*`
+`fixtures/positive/support-quality-daily-calibrated.json`, `fixtures/semantic/support-quality-daily-*`
 
 An agent that answers people (chat, mail, reviews, community) MAY publish its support quality; one that does publishes,
 on its events feed, one event of kind
@@ -21,28 +21,31 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 |---|---|
 | `kind` | `support-quality-daily/1` |
 | `day`, `channel` | the closed UTC day, and `chat` (one person's chat), `mail`, `reviews` (store review replies) or `community` (group chats and forums) |
-| `rubricVersion`, `judgeModel` | the rubric's version and the judge's `<vendor>/<model>`, or `null` when nothing was judged |
+| `rubricVersion`, `judgeModel` | the rubric's version and the judge's `<vendor>/<model>`, or `null` when nothing was judged and no calibration is carried |
 | `notMeasured` | each metric not computed that day, as `family.metric`, or `checks` when nothing was judged |
 | `nobodyDropped` | `turns`, `replyCoverage` (0 to 1), `firstReplyP50Ms`, `firstReplyP90Ms`, `repeatAskRate`, `agentRepeats`, `answeredLater` |
 | `quality` | the judged `sampled` turns, `helpedYes`, `helpedPartly`, `helpedNo` |
 | `checks` | each rubric check's pass rate among its non-NA verdicts, a check with no verdict left out; `null` when nothing was judged, never an empty object. A member of its own, so the payload stays two levels deep |
 | `stability` | `turnErrors`, `modelCallFailures`, `recoveredByFallback`, `processErrors`, `restarts`, `knowledgeAgeHours` |
 | `autonomy` | `resolvedWithoutPerson`, `toPersonPolicy`, `toPersonInability`, `queueOldestMinutes`, `queueSlaMinutes` |
-| `calibration` | optional (DEC-0144): how well the judge agreed with people, `week` (the ISO week a person labelled answers, `YYYY-Www`), `labelled` (how many, at least 1) and `helped` (the share of those whose helped verdict the judge matched, `null` when helped was not labelled); absent means no calibration |
+| `calibration` | optional (DEC-0144): how well the day's judge, under the day's rubric, agreed with people: `week` (the ISO week a person labelled answers, `YYYY-Www`, no later than `day`), `labelled` (how many, at least 1) and `helped` (the share of those whose helped verdict the judge matched, `null` when helped was not labelled); absent means no calibration. A producer whose judge or rubric changed after the labelled week leaves it out |
 | `calibrationChecks` | optional, only beside `calibration`: each rubric check's share of the labelled verdicts the judge matched, named as in `checks`; a check a person did not label is left out, and with none labelled the member is absent. A member of its own, so the payload stays two levels deep |
 
 Counts and rates only: no person's words, no ids and no judge notes, so `FAC-SEM-101` (a credential detector) finds nothing in it; keeping a
 person's words out is the producer's duty (service.md).
-A party sends `calibration` and `calibrationChecks` only to a reader pinned at or after DEC-0144: the schema is
-closed, so an older copy refuses a payload that carries them; a reader that reads them takes their absence as no
-calibration, never as a judge that disagreed.
+The feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries `calibration` and
+`calibrationChecks` once every reader of its feed it knows of has adopted DEC-0144. A reader that validates against an
+older copy of the schema (closed) refuses that day's `value` whole and keeps the event's `text`, so the day's numbers
+are lost to it, not only the calibration; a reader that reads the members takes their absence as no calibration, never
+as a judge that disagreed. A reader validates against its own pinned copy, never one fetched by `$id` alone: DEC-0144
+widened the bytes under the unchanged `$id`.
 It fits `data.value`'s two levels (`test/support-quality.test.ts` carries it inside an events page).
 
 ## Semantic rules
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-126"></a>`FAC-SEM-126` | `support-quality-daily` | a metric not computed is `null` and named in `notMeasured`, and a named one is `null`, never a `0` standing for it; the helped verdicts are at most the sample, the fallback's recoveries at most the failures, the outcomes at most the turns; p50 is at most p90; a judged sample (any sample, helped verdict or check rate) names its rubric version and its judge; a calibration names them too, its `helped` follows the not-measured rule as `calibration.helped`, and `calibrationChecks` stands only beside a `calibration` (DEC-0144) |
+| <a id="fac-sem-126"></a>`FAC-SEM-126` | `support-quality-daily` | a metric not computed is `null` and named in `notMeasured`, and a named one is `null`, never a `0` standing for it; the helped verdicts are at most the sample, the fallback's recoveries at most the failures, the outcomes at most the turns; p50 is at most p90; a judged sample (any sample, helped verdict or check rate) names its rubric version and its judge; a calibration names them too, its `helped` follows the not-measured rule as `calibration.helped`, its week is a real ISO week no later than `day`, and `calibrationChecks` stands only beside a `calibration` (DEC-0144) |
 
 ## Not decided here
 
@@ -53,7 +56,8 @@ It fits `data.value`'s two levels (`test/support-quality.test.ts` carries it ins
   `undelivered`, `followupsPending`, `limitReplies`, `smalltalk`, `personQueueWaiting`, `noSafeDefault` and `questions`
   (the calibration members found a home in DEC-0144).
 - The agreement threshold a reader asks of a calibrated judge (the asker's 80 %) and how it ranks or alerts on a judge
-  below it: the reader's. `replyCoverage` is over inbound messages for `chat` and `mail` and over owed questions for
-  `community` and `reviews`, as the standard measures it; a later revision may name the basis.
+  below it: the reader's.
+- `replyCoverage` is over inbound messages for `chat` and `mail` and over owed questions for `community` and
+  `reviews`, as the standard measures it; a later revision may name the basis.
 - The move from the asker's first implementation (its v2 shape, under its own URN): its producers move to
   `support-quality-daily/1`, and until then a `/1` reader reads none of their events (board row CT-61).

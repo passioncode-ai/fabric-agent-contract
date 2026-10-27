@@ -8336,35 +8336,44 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-27
 - **Status:** Accepted (on merge of its pull request). A widening of DEC-0095's closed schema at the same revision: two
-  optional members, which a reader pinned before refuses, so a party sends them only to a reader pinned at or after
-  this decision. Consumer adoption: CT-188.
+  optional members, which a reader validating against an older copy refuses. Consumer adoption: CT-188.
 - **Context:** a project on the board asked (request `b05d8bc9`, thread `afd3dc71`, 2026-10-27) for a way to say on
   what share of the answers a person labelled the judge agreed with the person: without it a reader treats every
   judge as uncalibrated and never ranks or alerts on its checks, even when the producer calibrated it. Producers on the
-  asker's v2 shape, outside the contract, already send it; support-quality.md listed the calibration members among
-  those with no `/1` home.
+  asker's v2 shape, outside the contract, already send it, flat inside `calibration` as `<check>Agree` keys; the
+  asker's reader first read the check shares inside `calibration` from the thread's earlier answer, and since its
+  release of 2026-10-27 reads them from `calibrationChecks` and still reads the older form. support-quality.md listed
+  the calibration members among those with no `/1` home.
 - **Decision:** [support quality](specification/support-quality.md):
   1. `calibration {week, labelled, helped}`, optional: the ISO week of the labelling (`YYYY-Www`), how many answers a
      person labelled (at least 1), and the share of them whose helped verdict the judge matched (`null` when helped was
-     not labelled, named `calibration.helped` in `notMeasured`). Absent means no calibration.
+     not labelled, named `calibration.helped` in `notMeasured`). Absent means no calibration. A calibration is of the
+     day's judge and rubric: a producer whose judge or rubric changed after the labelled week leaves it out.
   2. `calibrationChecks`, optional and only beside `calibration`: each rubric check's share of the labelled verdicts
      the judge matched, named as in `checks`; a check a person did not label is left out, and none labelled leaves the
      member out (never an empty object).
-  3. `FAC-SEM-126` widens: a calibration names its rubric version and judge; `calibration.helped` follows the
-     not-measured rule; `calibrationChecks` without `calibration` is a finding.
+  3. `FAC-SEM-126` widens: a calibration names its rubric version and judge (one finding with a judged sample's);
+     `calibration.helped` follows the not-measured rule; the week is a real ISO week no later than `day`;
+     `calibrationChecks` without `calibration` is a finding.
 - **Why:** the judge's agreement with people is what lets a reader trust a check's rate; carrying it in the payload
   lets any reader decide by its own threshold instead of trusting none.
 - **Alternatives considered:** the asker's nested `calibration.agree {helped, addressed, ...}` (a third level, which
-  DEC-0070's `data.value` refuses; the checks' agreement sits at the top level, as `checks` does); a new revision
+  DEC-0070's `data.value` refuses; the checks' agreement sits at the top level, as `checks` does); the check shares
+  flat inside `calibration`, as the asker's v2 `<check>Agree` keys are (two levels too, but `calibration` would then
+  mix its own facts with a map named by the rubric, so a check named `week` or `labelled` would collide; the
+  separate member keeps the check names as free as in `checks`); a new revision
   `support-quality-daily/2` (two optional members change nothing a `/1` reader reads, and DEC-0095's annotation of
   2026-10-21 set the precedent of a change at the same revision before producers moved); a `0` for an unlabelled check
   (FAC-SEM-126: a metric not measured is `null` or absent, never `0`).
-- **Compatibility:** a widening of a closed object: a `/1` payload without the two members validates as before; a
-  reader pinned before this decision refuses one that carries them, so a producer sends them only to readers pinned at
-  or after it. `contractVersion` stays `0.1.0`.
+- **Compatibility:** a widening of a closed object: a `/1` payload without the two members validates as before. The
+  feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries the members once every reader of
+  its feed it knows of has adopted this decision. A reader that validates against an older copy refuses that day's
+  `value` whole and keeps the event's `text` (DEC-0070); a reader that only parses ignores them. The bytes under the
+  unchanged `$id` widen, so a reader validates against its own pinned copy, never one fetched by `$id` alone.
+  `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/support-quality-daily.schema.json`, `src/support-quality-rules.ts`,
   `test/support-quality.test.ts`, `fixtures/positive/support-quality-daily-calibrated.json`,
   `fixtures/negative/support-quality-daily-calibration-nested.json` and `-calibration-week.json` with their catalogue
-  rows; `docs/specification/support-quality.md`, `conformance.md` (the producer and reader rows); DEC-0095 annotated;
+  rows, `fixtures/semantic/support-quality-daily-calibration-checks-alone.json` and `-calibration-week-after-day.json`; `docs/specification/support-quality.md`, `conformance.md` (the producer and reader rows); DEC-0095 annotated;
   backlog CT-188.
 - **Source:** CT-188; the board request `b05d8bc9` (thread `afd3dc71`).
