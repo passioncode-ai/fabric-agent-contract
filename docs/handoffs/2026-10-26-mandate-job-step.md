@@ -1,0 +1,39 @@
+# 2026-10-26: a job's step under a mandate (CT-177, DEC-0141)
+
+## Objective
+
+Answer the adapter's question (`46433e3a`, thread `aa86a675`): under which capability a mandate is read when it
+answers a job's input request, and add a vector for it.
+
+## Done
+
+- DEC-0141, [delegation](../specification/delegation.md#the-operators-mandate) MJ-1: the job's own capability, the
+  request key as the action, the job's effect; `fabric.job.get` in a mandate covers no other job's step.
+- `actionDecision` takes `mandateCapability` for a job's input request; without it the service's fault
+  `mandate-capability-missing` (`src/actions.ts`).
+- `fixtures/vectors/actions.json` gains `jobSteps` (14 cases, written by `tools/vectors/actions.ts`), run by
+  `test/actions.test.ts`.
+- AP-2 (`service.md`), C3.3 (`interop.md`), the callee and leading-agent rows in `conformance.md`, `CONTEXT.md` (Mandate) and
+  SCN-045 (`docs/ux/scenarios.md`) name it; DEC-0121 and DEC-0125 annotated.
+- CT-180 filed for MJ-1's neighbours (the round-2, round-4, round-5 and round-6 readings), non-blocking.
+- CT-178 filed for Project Observatory's three asks (request `c50f590b`), acknowledged on the board.
+
+## Open
+
+- Reply on thread `aa86a675` with the DEC id and the release tag once merged. At its repin the adapter adopts the
+  reference's reading in its exported `actionDecision` (7 of 14 `jobSteps` differ on kit 0.52.0: absent, empty,
+  blank, non-name or non-string `mandateCapability` answer `outside-mandate: capability` and `fabric.job.get` as
+  `mandateCapability` is taken as covered, both instead of the fault; an ordinary action reads `mandateCapability`
+  instead of its tool), vendors the `jobSteps` group, and expects 18 `action-call` fixtures (its vendoring reads them
+  by glob, so its two count asserts pinned at 16 and the no-capability fixture go red until it adopts). Its ports map
+  the fault to the caller as `operator-decision-required` (MJ-1), not `unknown-state`.
+- CT-178: answer Observatory by 2026-11-04.
+
+## Checks actually run
+
+`pnpm typecheck`, vitest with coverage written to the session scratchpad, `pnpm ux:lint`, `pnpm docs:check`,
+`pnpm privacy:check`, `pnpm vectors:check`, no U+2014 in the added lines.
+
+## Next task
+
+Readings until two clean rounds; merge; release; answer the adapter on thread `aa86a675`.

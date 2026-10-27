@@ -151,8 +151,8 @@ authenticated as the relayer, refuses one without it `operator-decision-required
 held it, each call appending its callee and never widening the scope. A callee that is the chain's last agent, called
 from T0 or T1 (by the agent before it, where it authenticated its caller's agent id), takes a call it covers as the operator's decision and refuses only the part it does
 not cover, so the operator is asked again for that alone; a T2 caller's mandate changes nothing, beyond the estate a
-delegation token carries the authority (`mandateCovers`,
-[delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
+delegation token carries the authority. A job's step is read under the job's capability (MJ-1, DEC-0141; `actionDecision`'s
+`mandateCapability`) (`mandateCovers`, [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
 
 **Relayed approval**: The operator's approval, given in one agent's session, carried to another of their agents by a
 relay: the words verbatim, when and where they were said (`source`: the project, and the session or the board thread)

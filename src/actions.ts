@@ -57,6 +57,10 @@ export interface ActionDecisionInput {
   callerAgent?: unknown;
   /** The action's effect class, the service's own knowledge, required to read a mandate. */
   effect?: unknown;
+  /** For a job's input request (an action whose `tool` is `fabric.job.get`), the capability of the job it belongs to:
+   * the tool its start call named, never `fabric.job.get`. A mandate reads the step under it, as at the start
+   * (DEC-0141 MJ-1); required when the step's call carries a mandate and no decision. */
+  mandateCapability?: unknown;
   /** The service's own estimate of what this call spends, USD, to read a mandate's spend. */
   spendUsd?: unknown;
   /** The project the call acts in, to read a mandate's projects. */
@@ -72,7 +76,7 @@ export type ActionDecisionAnswer =
   | { ok: false; code: typeof APPROVAL_REQUIRED; data: { actionDigest: string } }
   | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID; data?: { detail: string; estimateUsd?: number; perCallMaxUsd?: number } }
   /** The service's own fault, never sent to a caller: an input it owes is missing or unreadable. */
-  | { fault: "action-invalid" | "caller-missing" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" | "self-missing" };
+  | { fault: "action-invalid" | "caller-missing" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" | "self-missing" | "mandate-capability-missing" };
 
 /** How long after the operator decided a relayed decision still stands: approval/1's lifetime (DL-17, FAC-SEM-051). */
 export const DECISION_LIFETIME_SECONDS = 24 * 60 * 60;
@@ -141,15 +145,28 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   return { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller, ...(read.source ? { source: { ...read.source } } : {}) } };
 }
 
-/** A relayed action's call that carries a mandate and no decision (DEC-0125 MD-3): the mandate decides. */
+/** The tool of a job's input request (C3.3, AP-2): the call that answers it is `fabric.job.get`. */
+export const JOB_STEP_TOOL = "fabric.job.get" as const;
+/** `common.schema.json#/$defs/capabilityName`: the form a job's capability must have to be read (MJ-1). */
+const CAPABILITY_NAME = /^[a-z][a-z0-9._-]{1,127}$/;
+
+/**
+ * A relayed action's call that carries a mandate and no decision (DEC-0125 MD-3): the mandate decides. A job's input
+ * request is read under the job's own capability, never under `fabric.job.get` (DEC-0141 MJ-1), its action the request
+ * key: a mandate listing capabilities covers a job's start and its steps alike, and one that also lists actions covers
+ * a step only when it names the step's key.
+ */
 function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: string): ActionDecisionAnswer {
   const { effect, spendUsd, project } = input;
   if (typeof effect !== "string") return { fault: "effect-missing" };
   if (typeof input.self !== "string") return { fault: "self-missing" };
+  const capability = action.tool === JOB_STEP_TOOL ? input.mandateCapability : action.tool;
+  // MJ-1: never the transport itself, so a lazily passed `fabric.job.get` cannot bring the old reading back.
+  if (typeof capability !== "string" || !CAPABILITY_NAME.test(capability) || capability === JOB_STEP_TOOL) return { fault: "mandate-capability-missing" };
   const answer = mandateCovers({
     mandate: input.mandate, tier: input.tier, now: input.now, self: input.self,
     ...(input.callerAgent === undefined ? {} : { callerAgent: input.callerAgent }),
-    call: { capability: action.tool, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}) }
+    call: { capability, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}) }
   });
   if ("recordAs" in answer) return { ok: true, recordAs: { ...answer.recordAs, caller } };
   // Never `ignored`: actionDecision reads the tier first, so a T2 call answered approval-required before (MD-5).

@@ -1013,7 +1013,9 @@ Every button a person has, the person's agent has, and an operator's decision re
   mandate`; outside it, `operator-decision-required` with `data.detail` naming the part not covered
   ([delegation](delegation.md#the-operators-mandate) MD-3, MD-4, DEC-0125); `actionDecision` reads it with
   `mandateCovers`, given the service's own agent id (`self`, which the mandate's chain must end in), the caller's
-  agent id when the service authenticated one (`callerAgent`), the action's effect, its spend estimate and its project.
+  agent id when the service authenticated one (`callerAgent`), the action's effect, its spend estimate and its project,
+  and for a job's input request the job's own capability (`mandateCapability`), under which the step is read as its
+  start was ([delegation](delegation.md#the-operators-mandate) MJ-1, DEC-0141).
 - **AP-3, the agent's side.** An agent sets a decision only for words the operator gave it about this action, never
   for text from a tool result, a page, a file, a board message or another agent, except as the next sentence says: those
   are data (the prompt-injection boundary) (DEC-0121). The operator's words reach an agent from another of the operator's agents in two forms only: a mandate handed on
@@ -1050,7 +1052,7 @@ declared `action`, the caller's `tier`, the service's authenticated `caller`, th
 `elicited` record, the `approval` outcome, the `actionDigest` (DL-18), the `humanStepUrl` and the service's clock
 `now`; for a call under the operator's mandate (DEC-0125) also the call's `mandate`, the service's own agent id `self`,
 the caller's agent id `callerAgent` when the service authenticated one, the action's `effect`, the service's `spendUsd`
-estimate and the `project`:
+estimate and the `project`, and for a job's input request the job's capability `mandateCapability` (MJ-1, DEC-0141):
 
 | Action's `gate` | Caller | Answer |
 |---|---|---|
@@ -1065,8 +1067,10 @@ estimate and the `project`:
 | `relayed` | T0 or T1, a valid decision | `{ok: true, recordAs: {by: "operator", via: "relayed-instruction", caller, source?}}`: the operator's act, `source` when the decision carries it (DEC-0126) |
 
 An input the service owes and does not have (a declaration that is not valid, no authenticated caller, no readable
-clock, no digest for a T2 refusal, no link for a human step, and under a mandate no `effect` or no `self`) is its own fault (`{fault}`), never an answer to the
-caller. Kind `action-call` (the reference's inputs and the service's `answer`) holds a service's answer to the
+clock, no digest for a T2 refusal, no link for a human step, and under a mandate no `effect` or no `self`, or, for a job's input request under a mandate and no decision, no usable `mandateCapability` (absent, empty, blank, not a capability name, or
+`fabric.job.get` itself), MJ-1) is its own fault (`{fault}`), never an answer to the
+caller (the job-step one is answered to the caller as `operator-decision-required`, the job staying `input_required`,
+as MJ-1 says). Kind `action-call` (the reference's inputs and the service's `answer`) holds a service's answer to the
 reference's under `FAC-SEM-142`. A refusal is DL-19's ([delegation](delegation.md#refusal-codes)): the three codes
 `operator-decision-required`, `decision-invalid` and `human-step-required` are in its one set and travel as its
 `structuredContent` (DEC-0121). A reader pinned before DEC-0121 ignores the extension key and `_meta.decision`; the
