@@ -34,6 +34,8 @@ that the share works between two personal estates with no organization, from the
 
 ## Open
 
+After merge (2026-10-27): #218 merged as `759704b4` after thirteen rounds of readings, the last two clean, and released as [`v0.1.0+2026-10-27.3`](https://github.com/passioncode-ai/fabric-agent-contract/releases/tag/v0.1.0%2B2026-10-27.3); the tag and the changes since its acceptance went to Observatory on thread `faa32585` (reply `f9dac514`); the adapter, Fabric Dashboards and Fabric were asked to re-pin on thread `ba94b8f5`; the risks of rounds 12 and 13 are CT-189. The list below is the state before merge, kept as written.
+
 - Readings until two clean rounds in a row; merge; release; answer Observatory on thread `faa32585` (request
   `c50f590b`) with the two decision ids and the tag, and what its engine adopts at its next pin, the whole list being
   backlog row CT-186: replace `observatory-share-envelope/1` with the whole `fabric-peer-share/1` profile (per-share
