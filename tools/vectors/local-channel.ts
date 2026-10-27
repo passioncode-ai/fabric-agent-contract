@@ -28,6 +28,9 @@ function sessions(): Json[] {
   const list: Array<[string, boolean | string | undefined, unknown[], Json[], { mayPrompt: boolean; maySecretPrompt: boolean }]> = [
     ["a signed app declares both: admitted for consent and secrets", true, [hello(["consent.ui", "secret.ui"])], [answer(true, null, true, ["consent.ui", "secret.ui"])], { mayPrompt: true, maySecretPrompt: true }],
     ["an unverified peer declares secret.ui: forbidden, then a hello without it is accepted", undefined, [hello(["consent.ui", "secret.ui"]), hello(["consent.ui"])], [answer(false, "forbidden", false), answer(true, null, true, ["consent.ui"])], { mayPrompt: true, maySecretPrompt: false }],
+    ["an unverified peer declares secret.ui twice: invalid-params comes before forbidden", undefined, [hello(["secret.ui", "secret.ui"])], [answer(false, "invalid-params", false)], { mayPrompt: false, maySecretPrompt: false }],
+    ["an unverified peer declares secret.ui and offers only an unknown revision: schema-unsupported comes before forbidden", undefined,
+      [{ jsonrpc: "2.0", id: 1, method: "channel.hello", params: { protocols: ["fabric-local-channel/0.2"], client: CLIENT, capabilities: ["secret.ui"] } }], [answer(false, "schema-unsupported", false)], { mayPrompt: false, maySecretPrompt: false }],
     ["a peer the check refused: forbidden", false, [hello(["secret.ui"])], [answer(false, "forbidden", false)], { mayPrompt: false, maySecretPrompt: false }],
     ["a check result that is not true: forbidden", "yes", [hello(["secret.ui"])], [answer(false, "forbidden", false)], { mayPrompt: false, maySecretPrompt: false }],
     ["a signed app that declares only consent.ui is never sent a secret prompt", true, [hello(["consent.ui"])], [answer(true, null, true, ["consent.ui"])], { mayPrompt: true, maySecretPrompt: false }],

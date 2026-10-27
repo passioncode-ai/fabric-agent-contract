@@ -3,7 +3,7 @@
 DEC-0075, DEC-0143 (secret requests) · rule code `FAC-SEM-106` · schema [`local-channel`](../../schemas/local-channel.schema.json) · code
 [`src/local-channel.ts`](../../src/local-channel.ts)
 
-How Fabric, Fabric Switchboard and Fabric Dashboards talk to Project Observatory's node on the same machine: the
+How Fabric, Fabric Switchboard, Fabric Dashboards and, for secret requests, the node's own signed app (DEC-0143) talk to Project Observatory's node on the same machine: the
 organization edition's CON-OE-10 in the edition its CROSSWALK-v4 gives (the first organization server's target
 architecture v4 §5 at `9c6a780`: "local channel: Unix socket / named pipe with peer credentials, or per-account token
 files"), agreed with Project Observatory's session on 2026-10-12. There is no `policy.decide`: v4 has no policy decision
@@ -31,7 +31,7 @@ point.
   `channels.local` `{protocol, path | pipe}` ([service](service.md#descriptor)); a remote placement carries none. A
   client reads it from the descriptor whose `id` it is configured to trust as the node's. A process of the same user is
   inside the trust boundary, as on any desktop: the server check stops another user, not another program of the same
-  user. A published path says where the node listens, never that it runs: a client probes it.
+  user, except for `secret.ui`, which the node admits only after its signed-app check (SP-2). A published path says where the node listens, never that it runs: a client probes it.
 - **A token** only where the operating system gives no peer credentials (none of the platforms above): read from the
   per-account token file (DEC-0033 ACLs) and passed in `channel.hello`, never in argv or the environment. A node that
   has peer credentials ignores a token; no side ever logs one.
@@ -55,7 +55,8 @@ an `id` that is otherwise well formed is a notification and is not answered; a m
    `consent.ui` and `secret.ui` (`invalid-params`); a hello that declares `secret.ui` from a peer the node did not
    verify as its product's signed app is `forbidden` and agrees nothing (DEC-0143, [secret requests](#secret-requests)). A
    hello refused `invalid-params` or `forbidden` agrees nothing and leaves the session open, so the client may send
-   another within the 5 s: a client refused for `secret.ui` says hello again without it and keeps `consent.ui`. A second hello after one that was accepted is `invalid-request` and
+   another within the 5 s: a client refused for `secret.ui` says hello again without it and keeps `consent.ui`. When
+   several apply, the node answers `invalid-params` first, then `schema-unsupported` (which closes), then `forbidden`. A second hello after one that was accepted is `invalid-request` and
    changes nothing.
 2. **The node's methods** (`NODE_METHODS`): `channel.hello`; `health` → `{status, version, protocols, degraded[]}` (an
    empty `degraded` asserts full health); `enroll.status` → `{enrolled, org?}`; `machine.report` (DEC-0132) →
@@ -136,6 +137,8 @@ the vault slot itself.
   The value never reaches the agent through the prompt; any command the agent later runs with it can still print it.
   The person's acts in the window are theirs only while no program holds the Accessibility permission over the app,
   which can press its buttons (SP-6).
+  The node validates every `secret.prompt` params it sends against `$defs/secretPrompt` and sends none that fails: no
+  member beyond the definition's, no `null` for an absent `provider`, a slot name and a provider within their patterns.
 - **SP-5. The outcome the agent sees** (`secretOutcome`): the first `stored` or `declined` the node received between the
   prompt and its deadline, at most 10 minutes after it (`MAX_SECRET_DEADLINE_MS`), by the node's receipt time; no answer
   by then is `no-answer`, a late answer is ignored. `stored` counts only when the node confirmed, in its own vault

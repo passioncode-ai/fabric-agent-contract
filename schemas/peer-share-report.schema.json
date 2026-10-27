@@ -190,7 +190,7 @@
           "description": "Exports made with the export button, recorded before the value left; not every way a value can leave."
         }
       },
-      "description": "The report's plaintext (peerReportBody): counts and labels only, never a value, a command, an argument or an output (DEC-0111's call-record rule)."
+      "description": "The report's plaintext (peerReportBody): counts, consumer labels and the time of each day's last use and of each export, never a value, a command, an argument or an output (DEC-0111's call-record rule)."
     }
   }
 }

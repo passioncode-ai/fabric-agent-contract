@@ -41,7 +41,10 @@ that the share works between two personal estates with no organization, from the
   until the first envelope is stored, carrying a burning frame to both nodes and refusing the upload of a burnt share,
   the sender's node warning of a claim or abort after a share stored without comparing, human steps linking to the
   node's page, its vault's slot names (`[A-Z_][A-Z0-9_]{0,127}`) against the contract's `^[A-Z][A-Z0-9_]{0,63}$`, and
-  `local-channel.json`'s `prompts` section, which its OBS-260 `prompt_view` fails today; symmetric commit-reveal and a five-byte code in
+  `local-channel.json`'s `prompts` section, which checks its validator; its OBS-260 `prompt_view` does not conform
+  today, which only a producer-side test catches (one that validates `prompt_view(record)` against the vendored
+  `$defs/secretPrompt` for a record with no provider, one with a filled slot, and names at the patterns' edges; its
+  `test_secret_prompt.py` assertion on `lastChange` flips with it); symmetric commit-reveal and a five-byte code in
   place of its asymmetric four-byte one, the RFC 8785 transcript and claim MAC, the ceilings (claim deadline 7 days, lease
   24 hours, envelope 90 days), no report nonce, mailbox requests signed under DEC-0056's RFC 9421 subset with the share
   keys, and `secret.prompt` with the broker launching its app (SP-3). Tell it
@@ -56,8 +59,10 @@ that the share works between two personal estates with no organization, from the
   answer at the deadline counts, as `local-channel.json` pins); and that until CT-187 is decided a recipient's metered agent cannot use a share.
 - Ask the Fabric Agent Adapter (its kits' `HUMAN_STEPS`, the 67-case and 11-declaration asserts, the test-side
   `HUMAN_STEPS` copies in its delegation tests, its register port's six new entries and its two reference docs that
-  list six steps), Fabric Dashboards (its actions reader's `STEPS`, against the new declaration vector) and Fabric
-  (CT-125) to re-pin at or after DEC-0142 before Observatory declares `comparison` (CT-186).
+  list six steps) and Fabric Dashboards (its actions reader's `STEPS`, against the new declaration vector) to re-pin
+  at or after DEC-0142 before Observatory declares `comparison` (CT-186). Fabric's hub reads no action declaration
+  today and forwards `human-step-required` unchanged, so it gates nothing; whichever reader CT-125 adds passes the
+  declaration vector "a human comparison of codes, a step DEC-0142 added".
 - After merge: the knowledge base's products and plans rows for the new revisions (`fabric-workspace/knowledge/`),
   then `node scripts/workspace.mjs sync` or the scheduled sync.
 - The UX artefacts reference ids SCN-052, SCN-053, SCR-33 and SCR-34 because SCN-050, SCN-051 and SCR-32 are taken on

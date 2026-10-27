@@ -8379,7 +8379,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   7. `fabric-peer-share-envelope/1`: DEC-0111's construction under its own `info`, to the recipient's share `#kem`,
      signed by the sender's share `#sig`, a sequence per share and slot, a life of at most 90 days, opened at each use
      while an honest node holds a lease of at most 24 hours (PS-7).
-  8. `fabric-peer-share-report/1`: counts and labels only, sealed to the sender's share `#kem`, bound to its share and
+  8. `fabric-peer-share-report/1`: counts, consumer labels and the time of each day's last use and of each export; never a value, a command, an argument or an output, sealed to the sender's share `#kem`, bound to its share and
      sequence (PS-8).
   9. Taking back in three steps, the mailbox's refusal, the recipient's signed deletion receipt and the provider's
      revocation or rotation, "taken back" only with the first observed and the third confirmed, and a copy stated as

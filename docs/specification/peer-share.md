@@ -165,11 +165,11 @@ life of at most 90 days) and `enc`; never the value. A share's envelope never op
 organization's (DEC-0111), nor the reverse: the `info` differs.
 
 `checkPeerShareEnvelope(envelope, context)` runs every check short of opening, in this order, the first that fails
-naming the refusal: `malformed` (shape, a clock, marks or a revocation flag that do not read), `unsupported-alg`, `wrong-share`,
+naming the refusal: `malformed` (a shape, or a context that does not read: a clock, the share id, the node's keys, marks or a revocation flag), `unsupported-alg`, `wrong-share`,
 `wrong-recipient` (not this share's `#kem`), `bad-key` (an `enc` off the curve, or a signer other than the sender's
 share `#sig` confirmed in the exchange), `bad-signature`, `revoked` (a revocation stands, PS-9), `replayed` (a sequence
 below the mark for the share and slot) and `sequence-reused` (another envelope at the mark's sequence; the same
-envelope again passes), `not-yet-valid` (`iat` more than 60 s ahead), `lifetime-too-long`, `expired`.
+envelope again passes), `not-yet-valid` (`iat` more than 60 s ahead), `lifetime-too-long` (`exp` not after `iat`, or more than 90 days), `expired`.
 `openPeerShare` then opens it (`cannot-open` when it does not). The node writes the mark `{shareId, slot, sequence,
 digest}` with the ciphertext.
 
@@ -190,7 +190,9 @@ recipient's share `#sig`; the header names `type` (`fabric-peer-share-report/1`)
 `recipient`, `signer`, `shareId`, `sequence`, `iat` and `enc`, as `peer-share-report.schema.json` gives them. The body
 (`peer-share-report.schema.json#/$defs/body`, `peerReportBody`) holds, per slot and UTC day, the uses the node counted
 and the last one, the consumer labels (agent names from its journal) and the exports made with the export button; never
-a value, a command, an argument or an output (the rule of `call-record/1`, DEC-0111 item 6).
+a value, a command, an argument or an output (the rule of `call-record/1`, DEC-0111 item 6). The report is a condition
+of the share, not a disclosure DEC-0052 governs: the recipient's "Accept" names what the sender will see (agent names,
+uses per day, the time of the last use and of each export), and accepting is the recipient's consent to it.
 
 `checkPeerReport` refuses, in order, `malformed`, `unsupported-alg`, `wrong-share`, `wrong-recipient`, `bad-key`,
 `bad-signature`, `replayed` (a sequence not above the last one the sender read) and `not-yet-valid`; `openPeerReport`

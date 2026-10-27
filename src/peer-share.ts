@@ -414,11 +414,11 @@ function marksRead(marks: unknown): marks is PeerMark[] | undefined {
 
 /**
  * Every check of a peer-share envelope short of opening it, in this order; the first that fails names the refusal:
- * `malformed` (shape, clock, marks or a revocation flag that do not read), `unsupported-alg`, `wrong-share`, `wrong-recipient`, `bad-key`
+ * `malformed` (a shape, or a context: clock, share id, keys, marks or a revocation flag, that does not read), `unsupported-alg`, `wrong-share`, `wrong-recipient`, `bad-key`
  * (an `enc` off the curve, or a signer other than the sender's confirmed share `#sig`), `bad-signature`, `revoked`,
  * `replayed` (a sequence below the mark for the share and slot) and `sequence-reused` (another envelope at the mark's
- * sequence; the same envelope again passes), `not-yet-valid` (`iat` more than 60 s ahead), `lifetime-too-long` (more
- * than 90 days), `expired`.
+ * sequence; the same envelope again passes), `not-yet-valid` (`iat` more than 60 s ahead), `lifetime-too-long` (`exp`
+ * not after `iat`, or more than 90 days), `expired`.
  */
 export function checkPeerShareEnvelope(value: unknown, ctx: unknown): { ok: true; mark: PeerMark } | { ok: false; refusal: PeerEnvelopeRefusal } {
   const no = (refusal: PeerEnvelopeRefusal) => ({ ok: false as const, refusal });

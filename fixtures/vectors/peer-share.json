@@ -3597,6 +3597,93 @@
       }
     },
     {
+      "name": "an envelope whose exp is its iat",
+      "envelope": {
+        "header": {
+          "type": "fabric-peer-share-envelope/1",
+          "alg": "ES256",
+          "suite": [
+            16,
+            1,
+            1
+          ],
+          "recipient": "gIzibVDCRJZOBx8ZMmM-plOmb7gZMLkTFSyZppnXWqc",
+          "signer": "6FQ6dHA0zvjOeSrGS91a_UtmVZiSB7B8WZ5eTrHFlYE",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "slot": "OPENROUTER_API_KEY",
+          "provider": "openrouter",
+          "sequence": 1,
+          "iat": "2026-10-27T09:59:00Z",
+          "exp": "2026-10-27T09:59:00Z",
+          "enc": "BPXSHIhfUoQWtDTgiNkgSYbMG0teqvkXi0LUswSxEHbEUNwheZDDbzpP9Q0Fjhm1om8ixcAXXu1D7MXBEcONJXg"
+        },
+        "ct": "qh0KTehqA_pWbi96Dn_dPwhHS3etKVnAhJevCvs6H0SlKew4Igcv31BnDf0",
+        "sig": "OFH3GYykhdThbSPhE1amY4Mck_idOuGd4lrelEDcgcNwwukpFASQomPHZEkOvYBL1enFB6qV1RamO6LEpa3_tA"
+      },
+      "context": {
+        "at": "2026-10-27T10:00:00Z",
+        "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+        "ownKem": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+          "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+        },
+        "senderSig": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "ZPoT-OGvtIdwz8QBOesU_t_H-P5uy2HsYzRwy8bZH2Y",
+          "y": "5-6SUYwUO9hRAnHAueIYlxVVPR4cmqiXQEjP-Ekcmtk"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "lifetime-too-long"
+      }
+    },
+    {
+      "name": "a node key that does not read",
+      "envelope": {
+        "header": {
+          "type": "fabric-peer-share-envelope/1",
+          "alg": "ES256",
+          "suite": [
+            16,
+            1,
+            1
+          ],
+          "recipient": "gIzibVDCRJZOBx8ZMmM-plOmb7gZMLkTFSyZppnXWqc",
+          "signer": "6FQ6dHA0zvjOeSrGS91a_UtmVZiSB7B8WZ5eTrHFlYE",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "slot": "OPENROUTER_API_KEY",
+          "provider": "openrouter",
+          "sequence": 1,
+          "iat": "2026-10-27T09:59:00Z",
+          "exp": "2026-11-26T09:59:00Z",
+          "enc": "BE1naJwbRbSAgucV84qcSqf7h3foKgh9O3SVJ0W0naY8LFTlBGZ8IS_kChTzJ6yD4R6d0nfEkt6UMi2JDf4opGo"
+        },
+        "ct": "_aHWDplsk3OHZDcNCD6qaHvs4A-8LClXSA1sVsXwYiihN-LIDGbMOrm5ROs",
+        "sig": "hf4qgpNRw8HttRvGbH2JtV_vEL_BzNNRPSdjkALqmJIcj-jpYa0s7-rt96gSM4HOZeXR8wRc6lQq1HK_ShYZDA"
+      },
+      "context": {
+        "at": "2026-10-27T10:00:00Z",
+        "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+        "ownKem": {
+          "kty": "EC"
+        },
+        "senderSig": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "ZPoT-OGvtIdwz8QBOesU_t_H-P5uy2HsYzRwy8bZH2Y",
+          "y": "5-6SUYwUO9hRAnHAueIYlxVVPR4cmqiXQEjP-Ekcmtk"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
       "name": "an envelope of exactly 90 days",
       "envelope": {
         "header": {
@@ -4085,6 +4172,45 @@
           "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
         },
         "lastSequence": -1
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a node key that does not read",
+      "report": {
+        "header": {
+          "type": "fabric-peer-share-report/1",
+          "alg": "ES256",
+          "suite": [
+            16,
+            1,
+            1
+          ],
+          "recipient": "dLqwsZ1lyEB70VOmFzD4-uRdRix5XTdwBH0wXzGC5fM",
+          "signer": "XbqsqXRCEqFDKxIhCNk-5YRTX1XtW8a08-pvb9uTH20",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "sequence": 1,
+          "iat": "2026-10-27T09:59:00Z",
+          "enc": "BE1naJwbRbSAgucV84qcSqf7h3foKgh9O3SVJ0W0naY8LFTlBGZ8IS_kChTzJ6yD4R6d0nfEkt6UMi2JDf4opGo"
+        },
+        "ct": "K99DxIs0eJ8ua6V3l_BhXhaQX64Q_FmG7zvvoOF1VMkzKICxbUvRqz1NnxyowpdyDCUkvYUCYsyIreTaCS9py0aIjQEb6YYaeGDqN-gW6ofl_0BHovrpdndp7qz4H56CQ52fAs1B79RaNkFxoI7e7IW7QGQP-f6p9fjpF540quBsX-neqrWF0vdml_oWEnj9OV5hofm3Th78KAfCSZ5EIuM4ubD8jAmS47l03QxMV_jU8FwZ7gmHHquSiAaUQXIrHlC-iFE",
+        "sig": "P2Sf8nruy993W3lBg1YKaBBoUz8HJZzStw4K4zMKcFZMIlDqUJYdTvZ9anRqtOYt8BckWEMkhVICtDoJk5aE7g"
+      },
+      "context": {
+        "at": "2026-10-27T10:00:00Z",
+        "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+        "ownKem": {
+          "kty": "EC"
+        },
+        "recipientSig": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+          "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+        }
       },
       "expect": {
         "ok": false,

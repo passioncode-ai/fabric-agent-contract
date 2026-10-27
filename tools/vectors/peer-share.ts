@@ -207,6 +207,8 @@ function envelopes(): Json[] {
     ["issued more than 60 s ahead of the clock", env, ctx({ at: "2026-10-27T09:57:59Z" }), no("not-yet-valid")],
     ["issued exactly 60 s ahead of the clock", env, ctx({ at: "2026-10-27T09:58:00Z" }), ok(env)],
     ["an envelope that lives more than 90 days", envelope({ exp: "2027-01-25T09:59:01Z" }, "long"), ctx(), no("lifetime-too-long")],
+    ["an envelope whose exp is its iat", envelope({ exp: IAT }, "no-life"), ctx(), no("lifetime-too-long")],
+    ["a node key that does not read", env, ctx({ ownKem: { kty: "EC" } }), no("malformed")],
     ["an envelope of exactly 90 days", envelope({ exp: "2027-01-25T09:59:00Z" }, "ninety"), ctx(), ok(envelope({ exp: "2027-01-25T09:59:00Z" }, "ninety"))],
     ["an envelope past its exp", env, ctx({ at: EXP }), no("expired")],
     ["a time with an offset, not UTC", envelope({ iat: "2026-10-27T10:59:00+01:00" }, "offset"), ctx(), no("malformed")]
@@ -231,6 +233,7 @@ function reports(): Json[] {
     ["signed ES384", report({ alg: "ES384" }, "es384"), ctx(), no("unsupported-alg")],
     ["one character of the ciphertext changed", { ...rep, ct: `${String(rep.ct).slice(0, 8)}${String(rep.ct)[8] === "A" ? "B" : "A"}${String(rep.ct).slice(9)}` }, ctx(), no("bad-signature")],
     ["a last sequence that does not read", rep, ctx({ lastSequence: -1 }), no("malformed")],
+    ["a node key that does not read", rep, ctx({ ownKem: { kty: "EC" } }), no("malformed")],
     ["a member more", { ...rep, note: "x" }, ctx(), no("malformed")],
     ["a report of another share", report({ shareId: OTHER_SHARE }, "other-share"), ctx(), no("wrong-share")],
     ["sealed to another key", report({}, "stranger-kem", BODY, { key: K.rSig }, K.xKem), ctx(), no("wrong-recipient")],

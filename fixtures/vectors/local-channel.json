@@ -100,6 +100,73 @@
       }
     },
     {
+      "name": "an unverified peer declares secret.ui twice: invalid-params comes before forbidden",
+      "messages": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "secret.ui",
+              "secret.ui"
+            ]
+          }
+        }
+      ],
+      "answers": [
+        {
+          "ok": false,
+          "code": "invalid-params",
+          "hello": false
+        }
+      ],
+      "after": {
+        "mayPrompt": false,
+        "maySecretPrompt": false
+      }
+    },
+    {
+      "name": "an unverified peer declares secret.ui and offers only an unknown revision: schema-unsupported comes before forbidden",
+      "messages": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.2"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "secret.ui"
+            ]
+          }
+        }
+      ],
+      "answers": [
+        {
+          "ok": false,
+          "code": "schema-unsupported",
+          "hello": false
+        }
+      ],
+      "after": {
+        "mayPrompt": false,
+        "maySecretPrompt": false
+      }
+    },
+    {
       "name": "a peer the check refused: forbidden",
       "signedApp": false,
       "messages": [
