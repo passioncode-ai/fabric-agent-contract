@@ -59,6 +59,8 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["memory", ["0.1"]],
   ["node-summary", ["1"]],
   ["operator-source", ["1"]],
+  ["org-adaptation", ["1"]],
+  ["org-adaptation-receipt", ["1"]],
   ["org-authority", ["1"]],
   ["org-authority-draft", ["1"]],
   ["org-key-set", ["1"]],

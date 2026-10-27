@@ -7683,6 +7683,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-26):** DEC-0129 adds the required member `administrators` to `org-key-set/1` before any tag
   carried it; a reader pinned at a main commit of DEC-0127 or DEC-0128 refuses a set that lists it, and the release
   that carries DEC-0127 to DEC-0129 lists it as a narrowing (DEC-0119).
+- **Annotated (2026-10-26):** DEC-0138 adds to OM-5 that, when the person leaves by unpinning, Fabric first withdraws
+  an adaptation plan it sent by an empty revision, waiting no longer than the person agrees to, and to OM-6 that a
+  suspension holds an adaptation plan's `PUT` but not that withdrawal.
 - **Context:** the organization train's packet TP-00 (row N-1, step 1.1 of fabric-workspace
   `docs/reports/2026-10-25-organization-r1/README.md` at `d438e3dc`): Fabric cannot trust an organization server's
   membership, and a product cannot be granted one, without a document Fabric verifies. MD-9 path (a)
@@ -7753,6 +7756,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0128: unlinkable memberships, an identity per enrollment and a key and issuer per context
 
 - **Date:** 2026-10-26
+- **Annotated (2026-10-26):** DEC-0138 adds to item 5's residual linkability the text a person types into two organizations' adaptation plans, and a server serving both linking the person's plans by whatever identifies the person to it.
 - **Status:** Accepted (2026-10-26). `machines[].contextHubKeys` is additive; `iss`, required on DEC-0127's
   `organizationPin`, narrows a member no reader has adopted (DEC-0119: the release notes list it as a narrowing); which Fabric writes only once every reader of the record is pinned at or after (as
   DEC-0106, DEC-0107 and DEC-0127); new rules a sender runs on itself. Adoption: CT-122; a node adopts UE-2 only once the machines' report to the hub over
@@ -7810,6 +7814,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0129: the organization's member list, `org-authority/1`, signed by an administrator's passkey
 
 - **Date:** 2026-10-26
+- **Annotated (2026-10-26):** DEC-0138 decides OM-7's adaptation row: the organization part of an adaptation plan, `org-adaptation/1`, and what a reference is, and widens it with the text the person types (labels, resources, notes, purposes).
 - **Status:** Accepted (2026-10-26). A new schema (`org-authority/1`), a new register statement, a new rule
   (`FAC-SEM-150`) and a relay admission source; `org-key-set/1` gains the required `administrators` before any tag
   carried the type (DEC-0127's annotation: the release lists it as a narrowing, DEC-0119). Adoption: CT-37 (every
@@ -8290,6 +8295,74 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/delegation-sealed.test.ts` (DL-27 to DL-29's heading form), `relay.md` (Trust tiers' T2); DEC-0130 annotated; backlog CT-143, CT-149, CT-157
   (closed), CT-167 and CT-168 (filed).
 - **Source:** CT-157; DEC-0130's readings, rounds 1 to 5.
+
+### DEC-0138: the organization part of an adaptation plan, `org-adaptation/1`
+
+- **Date:** 2026-10-26
+- **Status:** Accepted, merged 2026-10-27 after its objection window closed (2026-10-27 18:00 UTC, threads
+  `5d2ea917` and `0fee99ae`: the first organization server's objections taken, none open). Additive: two new protocol revisions, `org-adaptation/1`
+  and `org-adaptation-receipt/1`, a rule code (`FAC-SEM-153`) and a route. Adoption: CT-169 (every organization server
+  taking plans; Fabric's TP-04).
+- **Context:** OM-7 (DEC-0129) allows an adaptation plan's organization part to leave a person's Fabric, by reference,
+  with the person's requests to the administrators, and left the form and a reference's shape undecided (membership.md
+  Not decided here). The first organization server builds its side for its release of 2026-11-03 and asked for the
+  form by 2026-10-30 (its request N-4, relayed by fabric-workspace); it proposed the shape and the transport this
+  decision keeps. Fabric's TP-04 sends it; Fabric has no organization device enrollment, and its bridge to the server
+  is the credential the server issues it for the person (Fabric CO-130).
+- **Decision:** [membership](specification/membership.md#the-adaptation-plan) AD-1 to AD-6.
+  1. **AD-1.** `org-adaptation/1` `{type, org, revision, items, requests}`, closed: at most 200 items `{ref, kind,
+     label?}` (`project`, `history`, `result`, `schedule`) and 50 requests (`access`, `spend`, `role`); `role` is
+     `admin` only (`owner` is never asked for, `member` is held). One revision counter per organization.
+     `FAC-SEM-153`: refs and request ids once each, an `itemRef` names an item.
+  2. **AD-2.** A `ref` and a request `id` are random, per organization, never derived from the estate (DEC-0128); a
+     `ref` is kept for its item across revisions and withdrawals to that organization, an `id` while its request
+     stands, and a later membership gets new request ids; `label`, `resource`, `note` and `purpose` are typed by the
+     person and hold no control character but tab and line feed (U+0000 to U+0008, U+000B to U+001F, U+007F to
+     U+009F) and no lone surrogate, and none is blank or begins or ends with white space; Fabric turns a CRLF or a CR
+     into LF and trims the text before it sends (the first server stores them where U+0000 cannot go, its objection
+     in `0fee99ae`).
+  3. **AD-3.** The person's Fabric sends the whole plan with the credential the server issued it for the person;
+     the route is `PUT /fabric/adaptation/v1/{org}/plan`, with `GET` for the receipt (`404 no-plan` before the first).
+     Fabric sends only after a `GET` answered a receipt or `no-plan`, retrying no answer or a `5xx` and backing off on
+     `429`; a `401` or `403` is read by its body's code, which wins over `WWW-Authenticate` (an AD-4 code is that
+     refusal; another but `invalid_token` is shown and the plan held until the person acts, the first server's
+     `idp-sign-in-required` objection), and only another `404`, or a `401` or `403` whose body carries no code or
+     `invalid_token`, persisting after a credential refresh, means the server takes no plans from this credential.
+  4. **AD-4.** The server keeps the newest revision (`decideAdaptation`): `not-a-member`, `schema-unsupported`,
+     `malformed`, `wrong-organization`, `stale-revision`, `revision-conflict`, a repeat answering the same receipt; an
+     empty revision withdraws, and a withdrawal on the server's own page is held as the next, empty revision.
+  5. **AD-5.** Each decision is bound to its request's id and digest (`requestDigest`, `adaptationReceipt`), so a
+     changed request waits for a new decision; a request the server closes, undecided after a time it sets or a decision that lapsed, reads `expired` (the first
+     server's objection); a decision grants nothing by itself, and a granted `admin` role is display and routing,
+     never authority (OL-6, OM-3).
+  6. **AD-6.** Read by the organization's administrators and the person only. A person who leaves by unpinning
+     withdraws the plan first, without waiting on the server longer than they agree to (OM-5); an end the server
+     issues ends the plan.
+- **Why:** the plan is the person's, authored in their Fabric, which reads the person's attestations with the
+  credential the server issued it; sending the plan the same way adds no identity and no enrollment Fabric lacks. A
+  random per-organization reference keeps two organizations
+  from linking one person's work; binding a decision to a digest lets the person revise a plan without losing what was
+  granted, and without carrying a grant over to a request that changed.
+- **Alternatives considered:** a device request by the enrolled node (like `share-registration/1`; first posted on
+  the board, withdrawn after the readings: the plan's author, the person's Fabric, holds no enrollment key, and the
+  enrolled node derives nothing from the estate record that tells it the plan); a `finance` role (no such role in
+  `org-membership/1` or `org-authority/1`); `DELETE` to withdraw (a revision with
+  nothing in it says the same and keeps one write path); per-item PUTs (the plan is small and whole-document
+  replacement keeps the server's state one revision).
+- **Compatibility:** additive; no existing document changes validity. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/org-adaptation.schema.json`, `schemas/org-adaptation-receipt.schema.json` (new);
+  `src/org-adaptation.ts`, `src/semantic-rules.ts`, `src/semantic-kinds.ts`, `src/protocol-revisions.ts`;
+  `fixtures/vectors/org-adaptation.json` written by `tools/vectors/org-adaptation.ts`; fixtures `org-adaptation*`;
+  `test/org-adaptation.test.ts`, `test/positive-sweep.test.ts`, `test/rule-tolerance.test.ts`, `vitest.config.ts`,
+  `test/protocol-revisions.test.ts`, `test/schema-compilation.test.ts`, `tools/vectors/run.ts`, `fixtures/catalogue.json`;
+  `docs/specification/membership.md` (header, OM-5, OM-6, OM-7's row, The adaptation plan, `FAC-SEM-153`, Who adopts it,
+  Privacy, Not decided here), `contexts.md` (Linkability), `devices.md` (what stays linkable),
+  `docs/specification/README.md` (the membership row), `conformance.md` (rule table, code table, the module row, the membership reader's row, the adopter row), `CONTEXT.md` (Adaptation plan), `docs/DOCMAP.md`,
+  `docs/ux/flows.md` (FLW-32), `docs/ux/foundation.md` (ST-038), `docs/ux/scenarios.md` (SCN-047; SCN-050, draft), `docs/ux/screens.md` (SCR-31); backlog CT-159, CT-169, CT-171 (the readings' non-blocking findings); the
+  handoff `docs/handoffs/2026-10-26-adaptation-plan.md` and its row in `docs/handoffs/README.md`.
+- **Source:** CT-169; the first organization server's request N-4 (board message `38f108ba`, thread `0fee99ae`); the
+  shape posted in thread `5d2ea917` and, for the server, in `0fee99ae` (`6d41733c`, `24327dbf`, superseding the device
+  transport of `28b7a5b3`); DEC-0029 (rule codes), DEC-0056, DEC-0067, DEC-0128, DEC-0129.
 
 ### DEC-0141: a job's step under a mandate is read under the job's capability
 

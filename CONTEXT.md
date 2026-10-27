@@ -357,7 +357,8 @@ Over the relay a node places a sender in T1 from the estate record it applied (`
 The plan's draft and the inventory it is chosen from stay in the person's Fabric; only its organization part, what the
 person chose and their requests to the organization's administrators, leaves for that organization (OM-7, DEC-0129,
 [membership](docs/specification/membership.md#what-leaves-a-persons-fabric)). A project's entry is the estate revision
-the person's passkey signs, never part of the plan that leaves.
+the person's passkey signs, never part of the plan that leaves. The part that leaves is the **Adaptation plan
+(organization part)** below (DEC-0138).
 
 **Family**: The operator's agents: every agent placed on a machine of the operator's estate and the operator's own
 local sessions, which a callee recognises only by placing them in **T0** or **T1** (any process of the owner's OS account,
@@ -719,6 +720,12 @@ an administrator's (a list, with their passkey) shows its changes, signs it on t
 and the server accepts only the pending draft, signed. Before the first key set the owner's Fabric registers the root
 and its own administrator credential with a one-time claim
 ([membership](docs/specification/membership.md#the-draft-exchange)).
+
+**Adaptation plan (organization part)**: What a person's Fabric sends an organization when the person brings work into
+it (DEC-0138, OM-7): `org-adaptation/1`, the items the person chose, each by a random per-organization reference that
+names nothing of the estate with the label the person typed for it, and the person's requests (access, spend, role `admin`) to the administrators. The
+person's Fabric sends it whole with the credential the server issued it; the server keeps the newest revision and binds
+each decision to its request's digest. Never the plan's draft or inventory. ([membership](docs/specification/membership.md#the-adaptation-plan))
 
 **Member list**: An organization's signed list of admitted members, the source of its relay's admission set
 (`org-authority/1`, DEC-0129): each member by a subject pairwise to the relay, a role, its context's token issuer and

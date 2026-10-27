@@ -55,6 +55,7 @@
 | SCN-047 | Join an organization by my own passkey: my Fabric trusts the membership only from what the organization signed | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-048 | Enrolled in two organizations, my machine looks like two strangers to them | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-049 | As an administrator, I sign who my organization's relay admits; no server signs it | membership | P-03 | ST-038, FLW-32 | draft | not audited |
+| SCN-050 | I bring my work into an organization and ask its administrators for what it needs | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-052 | Share a model key with a colleague's machine, compare six digits, take it back | peer share | P-02 | ST-039, FLW-33 | draft | not audited |
 | SCN-053 | An agent needs a token; I type it into my app's own window | secret prompt | P-02 | ST-040, FLW-34 | draft | not audited |
 
@@ -1037,7 +1038,7 @@ independent agent author and P-02 project operator.
   2. The member confirms with their passkey -> the estate revision that pins `{org, issuer, iss, root, pinnedAt}` (`iss` the context's opaque issuer Fabric generates) is signed; no administrator is asked.
   3. The server sends the organization's key set and an attestation for the member's Fabric as audience -> Fabric applies the set under the pin and verifies the attestation: `active`, role `member`.
   4. Fifteen minutes before expiry -> Fabric fetches the next revision and holds it per subject.
-- **Expected result:** the membership is trusted from a document the organization's pinned root vouches for, and nothing of the member's personal work leaves for the organization beyond the references they choose in an adaptation plan.
+- **Expected result:** the membership is trusted from a document the organization's pinned root vouches for, and nothing of the member's personal work leaves for the organization beyond the references they choose, and the text they type, in an adaptation plan (DEC-0138).
 - **Alt paths:** the server goes offline for a day -> the attestation expires and the membership is suspended: nothing new is authorised, nothing is revoked, and the shared agents stop answering the organization within ten minutes, as running tokens expire. The administrator removes the member -> the server issues an `ended` attestation; Fabric drafts the next revision, which revokes the context's share grants and drops the organization's pin, and the member's passkey signs it; the device's enrollment then ends and the organization's locks lift, nothing more is sent, and rejoining takes a new pin. The member has not signed that revision yet -> the server already refuses the device's revoked certificate and the hub mints nothing in the context, while the contract lifts the organization's locks only on the signed revision (a node's own end on `certificate-revoked` is not decided); Fabric shows the signature as pending. An attestation signed for another organization on the same server -> refused (`unknown-key` under that organization's own keys, or `wrong-org` where a server lists one key for both). The fingerprint does not match the invitation's, or the invitation carries none -> nothing is pinned and Fabric says why. A server that changes its root silently -> attestations under the new key set do not verify until the member pins the new root.
 - **UI elements:** SCR-31: the organization, the server, the root's fingerprint, the passkey prompt; each membership's role and state.
 - **States covered:** success, error
@@ -1084,6 +1085,27 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a refused list -> its reason is shown to the administrator; the relay keeps the list it held until it expires or its signer leaves the key set.
 - **Status:** draft
 - **Coverage:** DEC-0129 OL-1 to OL-5, `verifyOrgAuthority` in `src/org-authority.ts`, `orgRelayAdmissionSet` in `src/org-authority.ts`, `FAC-SEM-146`, `FAC-SEM-150`, `test/org-authority.test.ts`; the relay's handshake for an organization is DEC-0134 (relay.md OR-1 to OR-5, `sessionStands`)
+- **Product:** unobserved
+
+### SCN-050: I bring my work into an organization and ask its administrators for what it needs
+
+- **Persona:** P-03
+- **Feature:** membership
+- **Traces:** ST-038, FLW-32 (JTBD-04, JRN-03/#1)
+- **Entry point:** the person's Fabric shows the adaptation plan for an organization they joined
+- **Preconditions:** the person's membership of the organization is active; the organization's server serves the adaptation route (DEC-0138 AD-3)
+- **Steps:**
+  1. The person chooses what to bring (a project, its history, results, schedules) and types a label the organization will read -> Fabric draws a random reference for each item, for this organization only, and fills nothing from the estate.
+  2. The person asks for what the work needs (access to a named resource, a spend for a purpose, the admin role) -> Fabric sends the plan as the next revision (`org-adaptation/1`).
+  3. An administrator decides each request -> the person's receipt shows each one `pending`, `granted`, `refused` or `expired`, with when it was decided or closed.
+  4. The person changes one request and keeps the others -> the changed request is `pending` again; the unchanged ones keep their decision.
+- **Expected result:** the organization sees only what the person chose, by references that name nothing of their estate; each decision stays with the request it was made on.
+- **Alt paths:** the person withdraws -> Fabric sends an empty revision and the plan is withdrawn. The person leaves the organization -> Fabric withdraws the plan first, then asks the passkey to sign the unpinning. Two sends cross -> `stale-revision` or `revision-conflict`, and Fabric reads the receipt and sends the next revision. The person withdrew on the server's own page -> the server holds that withdrawal as the next revision, Fabric's crossing send meets `revision-conflict`, and Fabric shows the plan withdrawn and sends nothing until the person acts. No receipt confirms the withdrawal within the wait when the person leaves (no answer, or a refusal) -> Fabric still asks for the unpinning signature and tells the person the plan may remain with the server and, where the server offers a page to withdraw it, that they can withdraw it there. The server closes a request (undecided after its own time, or a decision that lapsed) -> it shows `expired`; the person changes it to ask again. The server does not take plans from Fabric's credential (its `GET` answers another `404`, or a `401` or a `403` with no code, or OAuth's `invalid_token` (as the code, or in `WWW-Authenticate` when the body carries none), that persists after Fabric refreshed the credential; a `401` or `403` with another code (not an AD-4 code and not `invalid_token`), a sign-in asked again say, is shown and retried after the person acts; no answer, a `5xx` or a `429` is retried) -> Fabric says so, sends nothing, and asks again after the person connects the server again. The membership is suspended -> a changed plan is held and sent once a fresh attestation shows it active; leaving still sends the withdrawal. The server ends the membership -> the plan and its decisions end. A granted admin role shows as the person's role once their next attestation carries it; signing as an administrator still needs the owner to list their signing passkey (OM-3), and how a later administrator's credential reaches the owner is CT-158.
+- **UI elements:** SCR-31: the chosen items and their labels, the requests and each one's state and decision time.
+- **States covered:** success, error, empty
+- **Errors & recovery:** `stale-revision` and `revision-conflict` -> the receipt is read and the next revision sent, unless it shows a withdrawal on the server's page; no answer, a `5xx` or a `429` -> retried with backoff; any other refusal -> its code and message are shown and the plan is held until the person acts; `not-a-member` stops sending for that membership; a later membership starts with new request ids.
+- **Status:** draft
+- **Coverage:** DEC-0138 AD-1 to AD-6, `decideAdaptation` and `adaptationReceipt` in `src/org-adaptation.ts`, `FAC-SEM-153`, `fixtures/vectors/org-adaptation.json`, `test/org-adaptation.test.ts`
 - **Product:** unobserved
 
 ### SCN-052: Share a model key with a colleague's machine, compare six digits, take it back

@@ -796,9 +796,9 @@ flowchart TD
 
 - **Traces:** ST-038 (JTBD-04, JRN-03/#1)
 - **Goal:** the member joins by their own act; their Fabric trusts the membership only from what the organization's pinned root vouches for
-- **Entry points:** the member's join in Fabric; an organization server's attestation; a refresh due 15 minutes before expiry; an `ended` attestation or `organization-closed`
+- **Entry points:** the member's join in Fabric; an organization server's attestation; a refresh due 15 minutes before expiry; an `ended` attestation or `organization-closed`; the member's own leave
 - **Success exit:** the organization pinned in the estate record, a verified attestation held per subject, the role read from it
-- **Task analysis:** the member starts a join → Fabric reads the organization's root from its server and shows it → the member compares its fingerprint with the administrator's invitation (a mismatch pins nothing) → the member's passkey signs the estate revision that pins it → Fabric applies the organization's key set under the pin → it verifies each attestation for its own organization and audience → it refreshes before expiry; an end revokes the context's share grants and stops what leaves; an expiry only suspends.
+- **Task analysis:** the member starts a join → Fabric reads the organization's root from its server and shows it → the member compares its fingerprint with the administrator's invitation (a mismatch pins nothing) → the member's passkey signs the estate revision that pins it → Fabric applies the organization's key set under the pin → it verifies each attestation for its own organization and audience → it refreshes before expiry; the member brings work in by an adaptation plan (items by reference, requests to the administrators, DEC-0138) and withdraws it before unpinning; an end revokes the context's share grants and stops what leaves; an expiry only suspends.
 - **Rejected shape:** an administrator admitting the member, or a reader trusting a server's key fetched on each request: rejected, because R1-D12 keeps the admission the person's, and a pin makes a new root the person's act rather than a silent re-key (DEC-0127). The organization's relay is a separate matter: who it delivers to is a member list an administrator signs (DEC-0129 OL-2, ADR-0178 point 2), which never decides the membership.
 - **Flow:**
 
@@ -816,6 +816,16 @@ flowchart TD
   T --> F{refresh due or expired}
   F -->|refreshed| A
   F -->|expired| U[Suspended: nothing new authorised]
+  U --> H[Plan held: no PUT until a fresh attestation shows it active]
+  H -->|fresh attestation| A
+  U --> L
+  T --> D[Adaptation plan sent: references, typed text, requests]
+  T --> L{member leaves, a plan was sent}
+  L -->|no plan| E
+  L -->|yes| W[Withdrawal sent as an empty revision, bounded wait]
+  W -->|receipt confirms it| E
+  W -->|no receipt: no answer or a refusal| M[Person told the plan may remain, withdrawable there where the server offers a page]
+  M --> E
 ```
 
 - **Screens traversed:** SCR-31 joining an organization.
