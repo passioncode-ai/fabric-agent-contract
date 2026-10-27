@@ -13,14 +13,15 @@ answers a job's input request, and add a vector for it.
   `mandate-capability-missing` (`src/actions.ts`).
 - `fixtures/vectors/actions.json` gains `jobSteps` (14 cases, written by `tools/vectors/actions.ts`), run by
   `test/actions.test.ts`.
-- AP-2 (`service.md`), C3.3 (`interop.md`) and the callee row in `conformance.md` name it; DEC-0125 annotated.
+- AP-2 (`service.md`), C3.3 (`interop.md`) and the callee row in `conformance.md` name it; DEC-0121 and DEC-0125 annotated.
+- CT-180 filed for MJ-1's neighbours (the round-2 and round-4 readings), non-blocking.
 - CT-178 filed for Project Observatory's three asks (request `c50f590b`), acknowledged on the board.
 
 ## Open
 
 - Reply on thread `aa86a675` with the DEC id and the release tag once merged. At its repin the adapter adopts the
-  reference's reading in its exported `actionDecision` (6 of 14 `jobSteps` differ on kit 0.52.0: absent, empty,
-  blank or non-string `mandateCapability` answer `outside-mandate: capability` and `fabric.job.get` as
+  reference's reading in its exported `actionDecision` (7 of 14 `jobSteps` differ on kit 0.52.0: absent, empty,
+  blank, non-name or non-string `mandateCapability` answer `outside-mandate: capability` and `fabric.job.get` as
   `mandateCapability` is taken as covered, both instead of the fault; an ordinary action reads `mandateCapability`
   instead of its tool), vendors the `jobSteps` group, and expects 18 `action-call` fixtures (its vendoring reads them
   by glob, so its two count asserts pinned at 16 and the no-capability fixture go red until it adopts). Its ports map

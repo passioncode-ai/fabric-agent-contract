@@ -8278,10 +8278,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted (on merge of its pull request). A clarification of DEC-0125 and DEC-0121 where they read two
   ways; `actionDecision` gains one input. Consumer adoption: the adapter's kits 0.52.0 (their brief
   `docs/evidence/specs/2026-10-26-faa-138-134-repin-1197a90d-brief.md` D10) pass the job's capability from the Python
-  kit's built-in step gate, but their exported `actionDecision` differs from the reference in three ways over 6 of the
-  14 `jobSteps` (measured by the readings on both ports): with `mandateCapability` absent, empty, only whitespace or
-  not a string it answers `outside-mandate: capability` where the reference answers its fault (a non-string is read
-  as `fabric.job.get`, an empty or blank one as given); with
+  kit's built-in step gate, but their exported `actionDecision` differs from the reference in three ways over 7 of the
+  14 `jobSteps` (measured by the readings on both ports): with `mandateCapability` absent, empty, only whitespace,
+  not a capability name or not a string it answers `outside-mandate: capability` where the reference answers its fault (an absent or non-string
+  one is read as `fabric.job.get`, an empty, blank or non-name string as given); with
   `mandateCapability` `fabric.job.get` it takes the step as the operator's act where the reference answers its fault;
   and it reads `mandateCapability` on an ordinary action where the reference reads the action's tool. At their repin
   they adopt the reference's reading and vendor the `jobSteps` group; their vendoring already reads every
@@ -8308,8 +8308,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   service pinned before it reads the step under `fabric.job.get`: it asks the operator where a mandate names the job's
   capability (an extra question), and it acts where a mandate names `fabric.job.get` itself, which now covers no step
   (an act the operator's words did not name, so such a mandate was already outside AP-3's intent). The adapter's
-  kits read it under the job's capability on the Python kit's built-in step gate, and under `fabric.job.get` when a
-  caller of their exported `actionDecision` passes no usable `mandateCapability` (Status); no other released service
+  kits read it under the job's capability on the Python kit's built-in step gate, and, in their exported `actionDecision`,
+  under `fabric.job.get` when `mandateCapability` is absent or not a string and under the value as given when it is
+  an empty, blank or non-name string (Status); no other released service
   is known to read a step's mandate.
   `actionDecision` answers its own fault for `fabric.job.get`, or any value that is not a capability name, as
   `mandateCapability`. A service that repins passes `mandateCapability`
