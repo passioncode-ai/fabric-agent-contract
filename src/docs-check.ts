@@ -66,10 +66,16 @@ export function outsideFences(text: string): string {
  * emphasis and HTML tags render to their text first.
  */
 export function headingSlug(heading: string): string {
+  // A code span renders its text as written, `<id>` included; HTML outside one renders without its tags, and an entity
+  // as its character. The span's text is set aside before tags are dropped, so `<id>` in code is not read as a tag.
+  const spans: string[] = [];
   const rendered = heading
+    .replace(/`+([^`]*)`+/g, (_whole, code: string) => `\u0000${spans.push(code) - 1}\u0000`)
     .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
     .replace(/<[^>]+>/g, "")
-    .replace(/[`*]/g, "")
+    .replace(/&(amp|lt|gt|quot|#39);/g, (_whole, name: string) => ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" })[name] ?? "")
+    .replace(/\u0000(\d+)\u0000/g, (_whole, index: string) => spans[Number(index)] ?? "")
+    .replace(/\*/g, "")
     .replace(/(^|\s)_+|_+(?=\s|$)/g, "$1")
     .trim()
     .toLowerCase();
@@ -121,8 +127,12 @@ export async function checkLinks(file: string, text: string): Promise<string[]> 
   const name = shownName(file);
   const { outside, unclosed } = scanFences(text);
   if (unclosed !== undefined) findings.push(`${name}:${unclosed}: code fence never closed`);
-  for (const raw of markdownLinks(outside)) {
-    const link = raw.replace(/^<|>$/g, "").trim().split(/\s+/, 1)[0] ?? "";
+  // A link quoted in inline code is text, not a link.
+  for (const raw of markdownLinks(outside.replace(/(`+)[^`]*?\1/g, ""))) {
+    // `<a b.md>` (CommonMark's angle destination) may hold spaces; otherwise the destination ends at the first space,
+    // and what follows is the link's title.
+    const angle = /^\s*<([^>]*)>/.exec(raw);
+    const link = angle ? (angle[1] ?? "") : (raw.trim().split(/\s+/, 1)[0] ?? "");
     const hash = link.indexOf("#");
     const target = hash < 0 ? link : link.slice(0, hash);
     const fragment = hash < 0 ? undefined : link.slice(hash + 1);
@@ -226,6 +236,7 @@ export function decisionPathFindings(text: string, files: readonly string[]): st
 }
 
 export async function runDocsCheck(): Promise<string[]> {
+  anchorCache.clear();
   const root = projectRoot();
   const files = (await walk(root)).filter((file) => file.endsWith(".md"));
   const findings: string[] = [];

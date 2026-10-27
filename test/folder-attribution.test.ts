@@ -267,7 +267,8 @@ describe("totality: every function answers and never throws", () => {
     // CPU time, not wall time: preemption on a loaded machine inflates the longer run's wall time, not its CPU time.
     const cpuMs = () => { const { user, system } = process.cpuUsage(); return (user + system) / 1000; };
     // The CPU clock ticks coarsely on Windows (about 15.6 ms): a sample repeats the call `reps` times, chosen so the
-    // small run takes at least 20 ms, and the large run repeats it as often, so the ratio still measures growth.
+    // least of three small samples takes at least 25 ms, two ticks (one sample can straddle a tick), and the large run repeats it
+    // as often, so the ratio still measures growth.
     let reps = 1;
     const sample = (run: () => void) => {
       const started = cpuMs();
@@ -275,7 +276,7 @@ describe("totality: every function answers and never throws", () => {
       return cpuMs() - started;
     };
     const calibrate = build(n);
-    while (reps < 1024 && sample(calibrate) < 20) reps *= 2;
+    while (reps < 4096 && Math.min(sample(calibrate), sample(calibrate), sample(calibrate)) < 25) reps *= 2;
     const best = (size: number) => Math.min(...[0, 1, 2, 3, 4].map(() => sample(build(size))));
     const limit = (small: number) => 2 * factor * small + Math.max(factor * small, 25);
     // Up to three tries: a loaded machine (load average 440 on 2026-10-21) slows one try, while quadratic growth fails
@@ -304,7 +305,7 @@ describe("totality: every function answers and never throws", () => {
       const snapshot = { folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git, projects: [{ id: "p:o", folders, sources: [] }] };
       return () => expect(attributeFolder(snapshot)).toEqual({ outcome: "new", root: "/u/ana/work/x" });
     }, 500);
-  }, 30_000);
+  }, 60_000);
   it("copies sources in linear time: 20 Projects of up to 10000 short sources each (CT-72)", () => {
     // Short sources keep trimming cheap, so a copy of the per-source list that grows with its length (a spread in a
     // reduce) is most of the cost; sixteen times the input then costs about 160 times as much, against 48 allowed.
@@ -314,7 +315,7 @@ describe("totality: every function answers and never throws", () => {
       const snapshot = { folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects };
       return () => expect(attributeFolder(snapshot)).toEqual({ outcome: "new", root: "/u/ana/work/x" });
     }, 625, 16);
-  }, 30_000);
+  }, 60_000);
   it("reads tombstones in linear time: up to 10000 tombstones and 10000 Project folders", () => {
     const at = (n: number) => {
       const folders = [...Array(n - 1).fill({ path: "/u/ana/work/old/other", commonDir: null }), { path: "/u/ana/work/old/keep", commonDir: null }];
@@ -322,7 +323,7 @@ describe("totality: every function answers and never throws", () => {
       return () => expect(attributeFolder(snapshot)).toEqual({ outcome: "attached", project: "p:k", rule: "folder" });
     };
     linear(at, 2500);
-  }, 30_000);
+  }, 60_000);
   it("reads work records in linear time: up to 10000 Projects and 10000 records with ids of 256 astral characters", () => {
     const id = (n: number) => `${"\u{1F600}".repeat(250)}${String(n).padStart(6, "0")}`;
     const git = { toplevel: "/u/ana/work/lib", commonDir: "/u/ana/work/lib/.git", mainCheckout: "/u/ana/work/lib", origin: null };
@@ -333,7 +334,7 @@ describe("totality: every function answers and never throws", () => {
       return () => expect(attributeFolder(snapshot)).toEqual({ outcome: "new", root: "/u/ana/work/lib" });
     };
     linear(at, 2500);
-  }, 30_000);
+  }, 60_000);
   it("never throws when any one node of any vector's snapshot is replaced by a hostile value", () => {
     const hostile: unknown[] = [null, undefined, 7, "", [], {}, "/"];
     const paths = (value: unknown, at: Array<string | number> = []): Array<Array<string | number>> => {

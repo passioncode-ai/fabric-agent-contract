@@ -132,6 +132,9 @@ describe("documentation helpers", () => {
       expect(headingSlug("snake_case _emphasis_")).toBe("snake_case-emphasis");
       expect(headingSlug("Контракт и Fabric")).toBe("контракт-и-fabric");
       expect(headingSlug("DL-26 \u2014 the rule")).toBe("dl-26--the-rule");
+      // A code span keeps its `<…>` text; an entity renders as its character before the slug drops it.
+      expect(headingSlug("The `<id>.<instance>.json` file")).toBe("the-idinstancejson-file");
+      expect(headingSlug("Keys &amp; <em>locks</em>")).toBe("keys--locks");
     });
 
     it("answers each heading outside fences, numbers repeats, and reads explicit anchors", () => {
@@ -156,6 +159,13 @@ describe("documentation helpers", () => {
       const file = path.join(projectRoot(), "README.md");
       const text = '[l](docs/specification/delegation.md#L12-L20) [s](src/docs-check.ts#anything) [t](README.md "a title") [w](https://example.com/x#y) [d](docs/#x)';
       expect(await checkLinks(file, text)).toEqual([]);
+    });
+
+    it("reads an angle destination whole, and no link quoted in inline code", async () => {
+      const file = path.join(projectRoot(), "README.md");
+      expect(await checkLinks(file, "[a](<docs/no such file.md>)")).toEqual(["README.md: broken link <docs/no such file.md>"]);
+      expect(await checkLinks(file, "[a](<docs/specification/delegation.md#the-verifier>)")).toEqual([]);
+      expect(await checkLinks(file, "see `[x](#nope)` and ``[y](gone.md)``")).toEqual([]);
     });
 
     it("reports a malformed escape in a fragment", async () => {

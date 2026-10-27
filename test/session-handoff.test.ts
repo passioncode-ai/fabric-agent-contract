@@ -109,23 +109,32 @@ describe("validateSessionHandoff(dir): a folder on disk", () => {
     expect((await validateSessionHandoff(writeFolder("session-handoff-folder-ok"))).valid).toBe(true);
   });
 
-  // Modes are POSIX: on Windows the profile's ACL guards the folder and the modes are not checked (`permissions: acl`),
-  // and a symlink needs a privilege a test runner lacks.
-  it.skipIf(process.platform === "win32")("refuses a folder or a file readable by others, and a link in place of a file", async () => {
+  // Modes are POSIX: on Windows the profile's ACL guards the folder and the modes are not checked (`permissions: acl`).
+  it.skipIf(process.platform === "win32")("refuses a folder or a file readable by others", async () => {
     const loose = writeFolder("session-handoff-folder-ok");
     chmodSync(loose, 0o755);
     chmodSync(path.join(loose, "mcp.json"), 0o644);
     const findings = (await check(loose)).findings.map((finding) => finding.message);
     expect(findings).toContain("the folder is 0700; this one 755");
     expect(findings).toContain("mcp.json is 0600; this one 644");
+  });
+
+  // A file symlink on Windows needs a privilege an unelevated runner lacks; the test then has nothing to observe. A
+  // folder link is a junction there, which needs none.
+  it("refuses a link in place of a file, and a link to the folder", async (context) => {
     const linked = writeFolder("session-handoff-folder-ok");
     rmSync(path.join(linked, "context.md"));
     writeFileSync(path.join(scratch, "elsewhere.md"), "# elsewhere\n", { mode: 0o600 });
-    symlinkSync(path.join(scratch, "elsewhere.md"), path.join(linked, "context.md"));
+    try {
+      symlinkSync(path.join(scratch, "elsewhere.md"), path.join(linked, "context.md"));
+    } catch (error) {
+      if (process.platform === "win32" && (error as NodeJS.ErrnoException).code === "EPERM") return context.skip();
+      throw error;
+    }
     expect((await check(linked)).findings.map((finding) => finding.message)).toContain("context.md is a regular file, not a symlink");
     const target = writeFolder("session-handoff-folder-ok");
     const alias = path.join(scratch, `alias-${serial}`);
-    symlinkSync(target, alias);
+    symlinkSync(target, alias, process.platform === "win32" ? "junction" : "dir");
     expect((await check(alias)).findings.map((finding) => finding.message)).toEqual(["the handoff is a folder, not a link to one"]);
   });
 
@@ -189,5 +198,7 @@ describe("a launch argument names the folder's file as the host reads paths", ()
     expect(samePath("C:\\h\\s1/mcp.json", "C:\\h\\s1\\mcp.json", "win32")).toBe(true);
     expect(samePath("c:/H/S1/mcp.json", "C:\\h\\s1\\mcp.json", "win32")).toBe(true);
     expect(samePath("C:\\h\\s2\\mcp.json", "C:\\h\\s1\\mcp.json", "win32")).toBe(false);
+    expect(samePath("MCP.json", "mcp.json", "win32")).toBe(true);
+    expect(samePath("MCP.json", "mcp.json", "linux")).toBe(false);
   });
 });

@@ -370,7 +370,7 @@ export function sessionHandoffManifestFindings(manifest: Json): Finding[] {
     if (configs.length !== 1) findings.push(sem053(at, `Claude Code is given exactly one --mcp-config=<path>/mcp.json; found ${configs.length}`));
     for (const config of configs) {
       const value = config.slice("--mcp-config=".length);
-      if (!path.isAbsolute(value) || path.basename(value) !== "mcp.json") findings.push(sem053(at, `--mcp-config names the handoff's mcp.json by its absolute path; found ${value}`));
+      if (!path.isAbsolute(value) || !samePath(path.basename(value), "mcp.json")) findings.push(sem053(at, `--mcp-config names the handoff's mcp.json by its absolute path; found ${value}`));
     }
     if (args.includes("--strict-mcp-config") !== strict) findings.push(sem053(at, strict ? "mcp.strict is true, so Claude Code is given --strict-mcp-config" : "mcp.strict is false, so Claude Code is not given --strict-mcp-config"));
     const inline = flagValues(args, "--append-system-prompt");

@@ -8547,7 +8547,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   against a copy pinned before refuses an entry whose `manifest` is a Windows path: Fabric's registry reads provider
   entries on Windows (`apps/desktop/src/main/agentRegistry.ts`) and the adapter's `fabric_provider.py` mirrors the old
   pattern, so a writer does not emit a `manifest` whose name follows a backslash until both re-pin (provider.md, CT-192).
-  The SH-4 change accepts more on Windows only and nothing more on POSIX; a host that copied
+  The SH-4 change, SH-11's `mcp.json` name in any case and FAC-SEM-014's stem after either separator accept more on
+  Windows only and nothing more on POSIX; a host that copied
   `validateSessionHandoff` compares bytes until it takes `samePath`.
   `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/provider.schema.json`, `src/session-handoff.ts`, `src/docs-check.ts`,
@@ -8557,6 +8558,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   paths (`test/docs-check.test.ts`, `test/validate-cli.test.ts`, `test/session-handoff.test.ts`,
   `test/session-handoff-standalone.test.ts`, `test/meter-grant.test.ts`, `test/pin-check.test.ts`,
   `test/folder-attribution.test.ts`); `docs/specification/conformance.md` (the gate's platforms, item 4's fragments),
-  `AGENTS.md`, `docs/DOCMAP.md`; DEC-0042 annotated; backlog CT-123 and CT-167 closed, CT-191 and CT-192 filed.
+  `AGENTS.md`, `docs/DOCMAP.md`; DEC-0042 annotated; backlog CT-123 and CT-167 closed, CT-191, CT-192 and CT-193 filed; `src/registry-rules.ts` (FAC-SEM-014's stem after either separator), `test/registry-rules.test.ts`.
 - **Source:** the operator's request of 2026-10-27; the first Windows runs of the gate (runs 40506221946 and after).
 
