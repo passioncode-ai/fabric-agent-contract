@@ -124,8 +124,8 @@ export function channelStep(state: ChannelState, request: unknown): ChannelAnswe
 
 /**
  * A node's answer to a request after hello (DEC-0139 item 4, DEC-0146): a method it does not serve is `unknown-method`
- * (JSON-RPC -32601), whether `NODE_METHODS` names it (a node pinned before a method existed, or one that applies no
- * estate records and serves no `machine.report`) or not; a method it serves is its own to answer, to any client of the
+ * (JSON-RPC -32601), whether `NODE_METHODS` names it (a node pinned before a method existed) or not; a node that
+ * applies no estate records still serves `machine.report` and answers `null`; a method it serves is its own to answer, to any client of the
  * session. No capability gates `machine.report`: every process of the node's own user is inside its trust boundary.
  * `served` is the set the node implements; `channel.hello` is `channelStep`'s, never dispatched here.
  */

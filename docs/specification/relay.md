@@ -575,7 +575,7 @@ it holds that key (DEC-0146). On the hub's own machine the node that applies the
 A report is never answered. A lost one is replaced by the next, since each report carries the whole state, never a
 change. On the hub machine itself the hub reads its own node's report over the [local channel](local-channel.md),
 never the relay: it calls the node's `machine.report` (no params), which answers `{report}`, the node's whole state as
-a `machine-report/1` written at the call (its own `at`), or `null` while the node applies no estate records. The hub
+a `machine-report/1` written at the call (its own `at`), or `null` while the node applies no estate records: no report, so the hub keeps what it holds for its machine (DEC-0146). The hub
 calls it when it connects, before each division and at least every 24 hours, and reads the answer as MR-4 reads an
 opened report (`acceptMachineReport`, DEC-0139): the schema, `FAC-SEM-152` and an `at` that is a relay time
 (`FAC-SEM-154`) and not after the moment the answer arrived (`malformed` otherwise, DEC-0146), `machine` equal to its own machine id (`wrong-machine` otherwise) and `at` after the report it
@@ -656,7 +656,9 @@ report"), and the person's ways out: bring the machine back, update it, or remov
 ([Remove a machine](ceremonies.md#remove-a-machine)), after which DL-15's switch and step 6 no longer wait on it.
 Step 7's gate still does: what a machine spent under the old hub's leases is known only from its reports, so a removed
 machine that never reported after the revocation keeps the instances the old hub divided closed to new leases until
-they end, and the wait says so.
+they end, and the wait says so. After a lost hub none of these opens it (MR-5). When the machine waited on is the
+hub's own, the way out is to update it: removing it means moving the hub ([Move the hub](ceremonies.md#move-the-hub)),
+whose step 6 waits on the same machine's report (DEC-0146).
 
 ## The pairing rendezvous
 

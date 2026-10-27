@@ -1,7 +1,7 @@
 import { createPublicKey, verify as verifySignature } from "node:crypto";
 import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, isObject, show, toNumber } from "./findings.js";
-import { strictTime } from "./rfc3339.js";
+import { instantKey, strictTime } from "./rfc3339.js";
 import { WINDOW_LEASE_FIELDS, signingStatement } from "./signing-challenges.js";
 
 // #region window-lease — docs: docs/specification/window-lease.md
@@ -356,6 +356,20 @@ export type RemainderVerdict = { ok: true; remainderUsd: string; heldUsd: string
  * an expired lease nobody reported counts as spent. A late report lowers the claim at the next division: that is its
  * refund.
  */
+/**
+ * Orders two reports of a machine by their `at` (DEC-0146 MR-1): to the nanosecond as relay times, else to the
+ * millisecond for a time held from before DEC-0146; a tie goes to the larger `spent`, so the claim is never the lower one.
+ */
+function byReportTime(a: LeaseReport, b: LeaseReport): number {
+  const keyA = instantKey(a.receivedAt);
+  const keyB = instantKey(b.receivedAt);
+  const byTime = keyA !== undefined && keyB !== undefined ? (keyA < keyB ? -1 : keyA > keyB ? 1 : 0) : strictTime(a.receivedAt) - strictTime(b.receivedAt);
+  if (byTime !== 0) return byTime;
+  const spentA = usdMicros(a.spent) as bigint;
+  const spentB = usdMicros(b.spent) as bigint;
+  return spentA < spentB ? -1 : spentA > spentB ? 1 : 0;
+}
+
 function heldBy(leases: JsonObject[], reports: readonly LeaseReport[], at: number): bigint {
   let held = 0n;
   for (const lease of leases) {
@@ -366,7 +380,7 @@ function heldBy(leases: JsonObject[], reports: readonly LeaseReport[], at: numbe
       const covering = new Set(leases.filter((other) => (other.sequence as number) >= (lease.sequence as number)).map((other) => other.leaseId));
       const final = reports
         .filter((report) => covering.has(report.leaseId) && usdMicros(report.spent) !== undefined && strictTime(report.receivedAt) >= expiresAt && strictTime(report.receivedAt) <= at)
-        .sort((a, b) => strictTime(a.receivedAt) - strictTime(b.receivedAt))
+        .sort(byReportTime)
         .at(-1);
       if (final) claim = usdMicros(final.spent) as bigint;
     }
