@@ -351,7 +351,9 @@ grant (DEC-0045).
 operator's own machine, **T1** an enrolled machine of the same owner, **T2** everything else. A callee requires no
 **Delegation token**, approval or grant record of a T0 or T1 caller; money limits and human gates bind at every tier.
 A `relayed` action from a T0 or T1 caller carries the operator's decision (**Relayed decision**, DEC-0121).
-Over the relay a node places a sender in T1 from the estate record it applied (`relayCallerTier`, DEC-0106).
+Over the relay a node places a sender in T1 from the estate record it applied (`relayCallerTier`, DEC-0106); over the
+estate's relay a sender that is not T1 is T2 and its call is refused, and `unknown-state` is a denial, not T2 (DL-28,
+DEC-0106, the wording DEC-0137).
 
 **Adaptation plan**: What a person moves into an organization they join: projects, history, results and schedules.
 The plan's draft and the inventory it is chosen from stay in the person's Fabric; only its organization part, what the
