@@ -38,14 +38,14 @@
       "maxLength": 200
     },
     "manifest": {
-      "description": "The local path of the provider's manifest, a file named fabric-agent.json (docs/specification/provider.md#what-the-schema-adds-to-the-table).",
+      "description": "The local path of the provider's manifest, a file named fabric-agent.json after either separator, so a Windows path (DEC-0032) names it too (DEC-0145; docs/specification/provider.md#what-the-schema-adds-to-the-table).",
       "allOf": [
         {
           "$ref": "service-common.schema.json#/$defs/localPath"
         },
         {
           "type": "string",
-          "pattern": "(^|/)fabric-agent\\.json$"
+          "pattern": "(^|[\\\\/])fabric-agent\\.json$"
         }
       ]
     },

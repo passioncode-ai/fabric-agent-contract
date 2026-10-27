@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { checkLinks, decisionPathFindings, mermaidBodies, outsideFences, scanFences } from "../src/docs-check.js";
+import { checkLinks, decisionPathFindings, headingSlug, markdownAnchors, mermaidBodies, outsideFences, scanFences } from "../src/docs-check.js";
 import { projectRoot } from "../src/contract.js";
 import { trackedFiles } from "../src/tracked-files.js";
 
@@ -120,5 +120,57 @@ describe("documentation helpers", () => {
   it("reports a link whose percent escape is malformed instead of throwing", async () => {
     const file = path.join(projectRoot(), "README.md");
     expect(await checkLinks(file, "[bad](docs/100%.md) [ok](README.md)")).toEqual(["README.md: malformed link docs/100%.md"]);
+  });
+
+  // CT-167: a renamed heading broke its inbound links silently, because the fragment was dropped.
+  describe("a link's fragment (CT-167)", () => {
+    it("slugs a heading as GitHub renders it", () => {
+      expect(headingSlug("The verifier")).toBe("the-verifier");
+      expect(headingSlug("Delegation (`fabric-delegation/0.1`)")).toBe("delegation-fabric-delegation01");
+      expect(headingSlug("A [link](x.md) and **bold** text")).toBe("a-link-and-bold-text");
+      expect(headingSlug("Keys: publication, rotation")).toBe("keys-publication-rotation");
+      expect(headingSlug("snake_case _emphasis_")).toBe("snake_case-emphasis");
+      expect(headingSlug("Контракт и Fabric")).toBe("контракт-и-fabric");
+      expect(headingSlug("DL-26 \u2014 the rule")).toBe("dl-26--the-rule");
+      // A code span keeps its `<…>` text; an entity renders as its character before the slug drops it.
+      expect(headingSlug("The `<id>.<instance>.json` file")).toBe("the-idinstancejson-file");
+      expect(headingSlug("Keys &amp; <em>locks</em>")).toBe("keys--locks");
+    });
+
+    it("answers each heading outside fences, numbers repeats, and reads explicit anchors", () => {
+      const anchors = markdownAnchors('# Top\n## Notes\n## Notes #\n```\n## Fenced\n```\n<a id="Custom-Id"></a>\n<span name="n1">x</span>\n#Not a heading\n');
+      expect([...anchors].sort()).toEqual(["custom-id", "n1", "notes", "notes-1", "top"]);
+    });
+
+    it("reports a fragment no heading or anchor of the target answers, and passes one that does", async () => {
+      const file = path.join(projectRoot(), "README.md");
+      expect(await checkLinks(file, "[a](docs/specification/delegation.md#the-verifier) [b](docs/specification/delegation.md#The-Verifier)")).toEqual([]);
+      expect(await checkLinks(file, "[a](docs/specification/delegation.md#no-such-heading)")).toEqual([
+        "README.md: broken anchor docs/specification/delegation.md#no-such-heading"
+      ]);
+    });
+
+    it("checks a fragment of the file itself", async () => {
+      const file = path.join(projectRoot(), "docs/specification/delegation.md");
+      expect(await checkLinks(file, "[ok](#the-verifier) [gone](#nowhere)")).toEqual(["docs/specification/delegation.md: broken anchor #nowhere"]);
+    });
+
+    it("leaves line fragments, fragments on other files, titles and external links alone", async () => {
+      const file = path.join(projectRoot(), "README.md");
+      const text = '[l](docs/specification/delegation.md#L12-L20) [s](src/docs-check.ts#anything) [t](README.md "a title") [w](https://example.com/x#y) [d](docs/#x)';
+      expect(await checkLinks(file, text)).toEqual([]);
+    });
+
+    it("reads an angle destination whole, and no link quoted in inline code", async () => {
+      const file = path.join(projectRoot(), "README.md");
+      expect(await checkLinks(file, "[a](<docs/no such file.md>)")).toEqual(["README.md: broken link <docs/no such file.md>"]);
+      expect(await checkLinks(file, "[a](<docs/specification/delegation.md#the-verifier>)")).toEqual([]);
+      expect(await checkLinks(file, "see `[x](#nope)` and ``[y](gone.md)``")).toEqual([]);
+    });
+
+    it("reports a malformed escape in a fragment", async () => {
+      const file = path.join(projectRoot(), "README.md");
+      expect(await checkLinks(file, "[x](README.md#100%)")).toEqual(["README.md: malformed link README.md#100%"]);
+    });
   });
 });

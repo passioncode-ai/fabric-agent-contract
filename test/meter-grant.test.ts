@@ -162,6 +162,9 @@ describe("3 — the meter reads the hub's projection of a grant (DEC-0041)", () 
     chmodSync(dir, mode);
     return dir;
   }
+  // The local profile is POSIX-only in 0.1 (delegation.md): its files are named `<meta.id>.json`, which holds `:`, a
+  // character no Windows file name may hold, and are checked by their mode. On Windows only the refusal is tested.
+  const posix = it.skipIf(process.platform === "win32");
   const at = (dir: string, value: string) => projection.readProjectedGrant(dir, value, { now: NOW });
   const result = (dir: string, value: string = ref) => {
     const answer = at(dir, value);
@@ -170,13 +173,13 @@ describe("3 — the meter reads the hub's projection of a grant (DEC-0041)", () 
   const file = `${String(meta.id)}.json`;
   const revised = (changes: Json) => ({ ...grant, ...changes });
 
-  it("returns the grant when the file is there, at the token's revision and active", () => {
+  posix("returns the grant when the file is there, at the token's revision and active", () => {
     const answer = at(hubDir({ [file]: grant }), ref);
     expect(answer).toMatchObject({ ok: true, ref });
     if (answer.ok) expect(answer.grant).toEqual(grant);
   });
 
-  it("no-grant: no file, another revision, a reference that names no grant, a grant not yet started", () => {
+  posix("no-grant: no file, another revision, a reference that names no grant, a grant not yet started", () => {
     expect(result(hubDir({}))).toBe("no-grant/not-projected");
     expect(result(hubDir({ [file]: revised({ meta: { ...meta, revision: 4 } }) }))).toBe("no-grant/revised");
     for (const bad of ["no-revision", `${String(meta.id)}#x`, `${String(meta.id)}#-1`, "../escape#3", "a/b#3", "#3", `${String(meta.id)}#3#4`, ".hidden#3", "a b#3", "a\\b#3", `${"a".repeat(201)}#3`]) {
@@ -185,13 +188,13 @@ describe("3 — the meter reads the hub's projection of a grant (DEC-0041)", () 
     expect(result(hubDir({ [file]: revised({ startsAt: "2026-10-13T00:00:00Z" }) }))).toBe("no-grant/not-started");
   });
 
-  it("grant-revoked and grant-expired: the projected state, or an expiry that has passed", () => {
+  posix("grant-revoked and grant-expired: the projected state, or an expiry that has passed", () => {
     expect(result(hubDir({ [file]: revised({ state: "revoked" }) }))).toBe("grant-revoked/revoked");
     expect(result(hubDir({ [file]: revised({ state: "expired" }) }))).toBe("grant-expired/expired");
     expect(result(hubDir({ [file]: revised({ expiresAt: "2026-10-12T08:59:59Z" }) }))).toBe("grant-expired/expired");
   });
 
-  it("unknown-state: no directory, an unreadable or malformed file, a projection behind the token, a file for another grant, loose permissions", () => {
+  posix("unknown-state: no directory, an unreadable or malformed file, a projection behind the token, a file for another grant, loose permissions", () => {
     expect(result(path.join(scratch, "absent"))).toBe("unknown-state/no-projection");
     expect(result(hubDir({ [file]: "{not json" }))).toBe("unknown-state/malformed-file");
     expect(result(hubDir({ [file]: { ...grant, kind: "one-shot-grant" } }))).toBe("unknown-state/malformed-file");
@@ -211,7 +214,7 @@ describe("3 — the meter reads the hub's projection of a grant (DEC-0041)", () 
     }
   });
 
-  it("unknown-state: a time that is not RFC 3339 with a zone, a file outside the standing-grant shape", () => {
+  posix("unknown-state: a time that is not RFC 3339 with a zone, a file outside the standing-grant shape", () => {
     for (const expiresAt of ["2026-11-11T09:00:00", "12 Nov 2026", "2026-11-11", "2026-11-11 09:00:00Z", "2026-11-11T09:00:00+0200", "1794393600"]) {
       expect(result(hubDir({ [file]: revised({ expiresAt }) })), expiresAt).toBe("unknown-state/malformed-file");
     }
@@ -243,7 +246,7 @@ describe("3 — the meter reads the hub's projection of a grant (DEC-0041)", () 
     expect(execFileSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", script], { cwd: root, timeout: 15000, encoding: "utf8" })).toBe("unknown-state/not-a-file");
   });
 
-  it("no-grant: a request's grantRef the verified token does not name is refused before anything is read", () => {
+  posix("no-grant: a request's grantRef the verified token does not name is refused before anything is read", () => {
     const dir = hubDir({ [file]: grant });
     expect(projection.readProjectedGrant(dir, ref, { now: NOW, tokenGrants: [ref] })).toMatchObject({ ok: true });
     expect(projection.readProjectedGrant(dir, ref, { now: NOW, tokenGrants: [`${String(meta.id)}#${Number(meta.revision) + 1}`] })).toEqual({ ok: false, code: "no-grant", detail: "not-named" });
@@ -251,15 +254,15 @@ describe("3 — the meter reads the hub's projection of a grant (DEC-0041)", () 
   });
 
   it("answers unknown-state on Windows before reading: the local profile is POSIX-only in 0.1", () => {
-    const answer = projection.readProjectedGrant(hubDir({ [file]: grant }), ref, { now: NOW, platform: "win32" });
+    const answer = projection.readProjectedGrant(process.platform === "win32" ? scratch : hubDir({ [file]: grant }), ref, { now: NOW, platform: "win32" });
     expect(answer).toEqual({ ok: false, code: "unknown-state", detail: "unsupported-platform" });
     expect(projection.readProjectedGrant(path.join(scratch, "absent"), ref, { now: NOW, platform: "win32" })).toMatchObject({ detail: "unsupported-platform" });
     // The option only adds the refusal: naming another platform on Windows still refuses (exercised where the suite runs on Windows).
-    if (process.platform === "win32") expect(projection.readProjectedGrant(hubDir({ [file]: grant }), ref, { now: NOW, platform: "linux" })).toMatchObject({ detail: "unsupported-platform" });
+    if (process.platform === "win32") expect(projection.readProjectedGrant(scratch, ref, { now: NOW, platform: "linux" })).toMatchObject({ detail: "unsupported-platform" });
     expect(read("docs/specification/delegation.md")).toMatch(/POSIX-only in 0\.1[^\n]*\n?[^\n]*`unknown-state`/);
   });
 
-  it("authorises nothing alone: every refusal is a meter denial with level null", () => {
+  posix("authorises nothing alone: every refusal is a meter denial with level null", () => {
     const answer = at(hubDir({}), ref);
     expect(answer.ok).toBe(false);
     if (!answer.ok) {

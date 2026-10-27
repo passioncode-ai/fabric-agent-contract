@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0145` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0146` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -1679,7 +1679,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-11
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric (the reference
   writer, `sessionBundle.ts`, release 0.4.0 REQ-06), Fabric Dashboards (its console pack, `src/core/handoff.ts`),
-  Switchboard (carries the arguments in place).
+  Switchboard (carries the arguments in place). SH-4's path comparison and SH-11's `mcp.json` and `brief.md` names amended by DEC-0145
+  (2026-10-27): on Windows either separator and any case.
 - **Decision:** the profile [session handoff](specification/session-handoff.md), one format for every product:
   - a folder in the writing host's user data, never in a repository, `0700` with every file `0600`, holding
     `handoff.json` (the manifest, `schemas/session-handoff.schema.json`), `context.md`, `mcp.json` and, as
@@ -8515,3 +8516,49 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   rows, `fixtures/semantic/support-quality-daily-calibration-checks-alone.json` and `-calibration-week-after-day.json`; `docs/specification/support-quality.md`, `conformance.md` (the producer and reader rows), `DOCMAP.md`; DEC-0095 annotated;
   backlog CT-188.
 - **Source:** CT-188; the board request `b05d8bc9` (thread `afd3dc71`).
+
+### DEC-0145: a Windows path names a provider's manifest and a handoff's files
+
+- **Date:** 2026-10-27
+- **Status:** Accepted (on merge of its pull request). A widening of `provider.schema.json`'s `manifest` pattern at the
+  same revision, and a reference check that reads Windows paths as Windows does.
+- **Context:** the operator asked (2026-10-27) to close the contract's debts on stability and Windows. The contract's
+  gate had never run on Windows; its first run there (`windows-latest`, Node 24) found that DEC-0032's Windows paths
+  are a `localPath`, but a provider entry's `manifest` also had to match `(^|/)fabric-agent\.json$`, so
+  `C:\…\fabric-agent.json` and `~\fabric-agent.json` were refused; and that `validateSessionHandoff` (FAC-SEM-054,
+  SH-4) compared a launch argument with the folder's file byte for byte, so `C:\…\s1/mcp.json`, which names the same
+  file, was a finding. The run also found the gate's own path handling (`docs:check`'s G-13 register match,
+  `pnpm validate`'s stored paths) reading `\` where it compares `/`, which are tooling and decide nothing.
+- **Decision:**
+  1. A provider entry's `manifest` ends in `fabric-agent.json` after `/` or `\` ([provider](specification/provider.md#what-the-schema-adds-to-the-table)).
+  2. SH-4 (and SH-11's `mcp.json` and `brief.md` names): a host compares a launch argument's path with the folder's file byte for byte
+     on POSIX, macOS included even on a case-insensitive volume; on Windows with either separator and in any case ([session handoff](specification/session-handoff.md), `samePath`).
+  3. The repository keeps every text file LF on every platform (`.gitattributes`), and its nightly gate runs on Windows
+     as well as Linux (`.github/workflows/ci.yml`).
+- **Why:** DEC-0032 already makes a Windows path a local path, and DEC-0057 the Windows token reader; a pattern that
+  reads only `/` refused the Windows form of the one file the contract names by its name, and a check that compares
+  bytes refused a writer that joins a path with the other separator. The schemas, vectors and licence texts are compared
+  byte for byte, and a Windows checkout with `core.autocrlf` rewrote them.
+- **Alternatives considered:** normalising a Windows path to `/` before the pattern (a reader that validates the raw
+  document would still refuse it); a Windows-only `manifest` member (two members for one path); leaving Windows to the
+  consumers (Fabric and the adapter's kits run on Windows, and the contract's own checker, `pnpm validate`, refused a
+  valid Windows entry and reported a Windows file's stored path wrongly in run 40506221946).
+- **Compatibility:** a widening of a closed pattern: every entry that validated still does. A reader that validates
+  against a copy pinned before refuses an entry whose `manifest` is a Windows path: Fabric's registry reads provider
+  entries on Windows (`apps/desktop/src/main/agentRegistry.ts`) and the adapter's `fabric_provider.py` mirrors the old
+  pattern, so a writer does not emit a `manifest` whose name follows a backslash until both re-pin (provider.md, CT-192).
+  The SH-4 change and SH-11's `mcp.json` and `brief.md` names in any case accept more on Windows only and nothing more on POSIX;
+  FAC-SEM-014's stem after either separator, like the widened pattern, also reads the part of a POSIX file name after
+  a backslash as the stem (CT-193); a host that copied
+  `validateSessionHandoff` compares bytes until it takes `samePath`.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/provider.schema.json`, `src/session-handoff.ts`, `src/docs-check.ts`,
+  `src/validate-cli.ts`, `tools/catalogue/seed.py`, `fixtures/positive/provider-entry-windows-path.json`,
+  `fixtures/negative/provider-entry-windows-path-other-file.json` with their catalogue rows, `.gitattributes`,
+  `.github/workflows/ci.yml`; `docs/specification/provider.md`, `session-handoff.md`; the tests of the gate's own
+  paths (`test/docs-check.test.ts`, `test/validate-cli.test.ts`, `test/session-handoff.test.ts`,
+  `test/session-handoff-standalone.test.ts`, `test/meter-grant.test.ts`, `test/pin-check.test.ts`,
+  `test/folder-attribution.test.ts`); `docs/specification/conformance.md` (the gate's platforms, item 4's fragments),
+  `AGENTS.md`, `docs/DOCMAP.md`; DEC-0042 annotated; backlog CT-123 and CT-167 closed, CT-191, CT-192 and CT-193 filed; `src/registry-rules.ts` (FAC-SEM-014's stem after either separator), `test/registry-rules.test.ts`.
+- **Source:** the operator's request of 2026-10-27; the first Windows runs of the gate (runs 40506221946 and after).
+

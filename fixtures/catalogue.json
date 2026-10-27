@@ -212,6 +212,8 @@
   {"name": "interop-job-tool-output-malformed-handle", "schema": "interop-job-tool-output.schema.json", "path": "negative/interop-job-tool-output-malformed.json", "valid": false, "keyword": "oneOf"},
   {"name": "provider-entry-without-provider-id", "schema": "provider.schema.json", "path": "negative/provider-entry-no-provider-id.json", "valid": false, "keyword": "required"},
   {"name": "provider-entry-stdio-on-demand", "schema": "provider.schema.json", "path": "positive/provider-entry-stdio-on-demand.json", "valid": true},
+  {"name": "provider-entry-windows-path", "schema": "provider.schema.json", "path": "positive/provider-entry-windows-path.json", "valid": true},
+  {"name": "provider-entry-windows-path-other-file", "schema": "provider.schema.json", "path": "negative/provider-entry-windows-path-other-file.json", "valid": false},
   {"name": "interop-job-tool-output-not-an-object", "schema": "interop-job-tool-output.schema.json", "path": "negative/interop-job-tool-output-array.json", "valid": false, "keyword": "type"},
   {"name": "service-descriptor-remote", "schema": "service-descriptor.schema.json", "path": "positive/service-descriptor-remote.json", "valid": true},
   {"name": "service-descriptor-systemd", "schema": "service-descriptor.schema.json", "path": "positive/service-descriptor-systemd.json", "valid": true},
