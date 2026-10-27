@@ -1,0 +1,4 @@
+# Every text file is LF on every platform: schemas, vectors and the licence texts are compared byte for byte
+# (DEC-0108 pins, the knowledge base templates), and a Windows checkout with core.autocrlf would rewrite them.
+* text=auto eol=lf
+*.png binary

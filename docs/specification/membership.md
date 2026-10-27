@@ -1,13 +1,16 @@
 # Membership: `org-membership/1`, `org-key-set/1` and `org-authority/1`
 
-DEC-0127, DEC-0129, DEC-0131, DEC-0133 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SEM-147`, `FAC-SEM-150`, `FAC-SEM-151` · schemas
+DEC-0127, DEC-0129, DEC-0131, DEC-0133, DEC-0138 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SEM-147`, `FAC-SEM-150`, `FAC-SEM-151`, `FAC-SEM-153` · schemas
 [`org-membership`](../../schemas/org-membership.schema.json), [`org-key-set`](../../schemas/org-key-set.schema.json),
 [`org-authority`](../../schemas/org-authority.schema.json), the exchange's
 [`org-key-set-draft`](../../schemas/org-key-set-draft.schema.json),
 [`org-authority-draft`](../../schemas/org-authority-draft.schema.json) and
 [`org-root-registration`](../../schemas/org-root-registration.schema.json) and the root's answer
-[`org-root`](../../schemas/org-root.schema.json), and the estate record's `organizations`
-([`estate-record`](../../schemas/estate-record.schema.json)) · code [`src/org-membership.ts`](../../src/org-membership.ts),
+[`org-root`](../../schemas/org-root.schema.json), the adaptation plan's
+[`org-adaptation`](../../schemas/org-adaptation.schema.json) and
+[`org-adaptation-receipt`](../../schemas/org-adaptation-receipt.schema.json), and the estate record's `organizations`
+([`estate-record`](../../schemas/estate-record.schema.json)) · code [`src/org-membership.ts`](../../src/org-membership.ts), [`src/org-adaptation.ts`](../../src/org-adaptation.ts) (with the vectors
+[`fixtures/vectors/org-adaptation.json`](../../fixtures/vectors/org-adaptation.json)),
 [`src/org-authority.ts`](../../src/org-authority.ts) (with `orgRelayAdmissionSet`),
 [`src/org-exchange.ts`](../../src/org-exchange.ts) · vectors
 [`fixtures/vectors/org-membership.json`](../../fixtures/vectors/org-membership.json), written by
@@ -177,6 +180,15 @@ keeps one per subject.
 organization answers `organization-closed` (DEC-0103), or when the person unpins the organization from their estate.
 Everything the membership carried ends with it, as one rule:
 
+- when the person ends it by unpinning, their Fabric first sends the organization the empty revision that withdraws an
+  adaptation plan it sent there ([AD-6](#the-adaptation-plan)), waiting for an answer no longer than the person agrees
+  to, then asks the passkey to sign the revision that unpins it whatever the answer; a withdrawal no receipt confirmed
+  within that wait is the server's to end with the membership (inside the wait a `stale-revision` or
+  `revision-conflict` is met as AD-4 says: a receipt that already holds an empty plan confirms the withdrawal, and
+  otherwise Fabric sends the empty plan at the next revision; no answer or any other refusal leaves it unconfirmed), and Fabric tells the person
+  the plan may remain with the server and, where
+  the server offers a page to withdraw it (AD-4), that they can withdraw it there;
+
 - Fabric revokes every share grant whose context is that `org:<orgId>`: the next estate revision lists a `grant`
   revocation for each, and in the same revision removes the grant from `shareGrants` and every placement and secret
   placement in that context, and drops the organization's pin and every machine's hub key of that context (each revoked
@@ -204,7 +216,8 @@ token lives at most 600 s (`FAC-SEM-049`), calls in the organization's context s
 so an issuer sizes the attestation's life against its own outage budget. A refresh the issuer
 refuses for the membership (it answers that the person is not a member) is an end, as an `ended` attestation is. The
 reader asks for the next revision once `refreshDue` is true, and at least whenever it would act in the organization's
-context.
+context. A suspension also holds an adaptation plan's `PUT`, but not the withdrawal sent on leaving
+([AD-3](#the-adaptation-plan)).
 
 ## What leaves a person's Fabric
 
@@ -226,10 +239,11 @@ list come from them (DEC-0129):
 | for the organization's owner | the membership root's public key, the owner's signing credential for this organization (as its first administrator), the root's signatures over the key sets the server drafted (OM-3), and the claim the server showed the owner (OX-2) | DEC-0129, DEC-0131 |
 | for an administrator | the public part of their signing passkey (an `administrators` entry) and their signatures over member lists (OL-2) | DEC-0129 |
 | the member list's own entry | the context's `iss` (DEC-0128), so the server can draft `org-authority/1`; the enrollment's `#sig` key it already holds from the enrollment | DEC-0129 |
-| an adaptation plan's organization part (TP-03) | what the person chose to bring into that organization (projects, history, results, schedules), by reference, and the person's requests to its administrators; never the plan's draft, its inventory or anything the person did not choose | DEC-0129 |
+| an adaptation plan's organization part (TP-03) | what the person chose to bring into that organization (projects, history, results, schedules), by reference, the text the person typed for it (labels, the resources asked for, notes, purposes), and the person's requests to its administrators; never the plan's draft, its inventory or anything the person did not choose; sent as `org-adaptation/1` ([the adaptation plan](#the-adaptation-plan)) | DEC-0129, DEC-0138 |
 | a membership refresh | the audience and the subject the issuer gave | DEC-0127 |
 
-Personal work beyond the references the person chose in an adaptation plan (never their content), another
+Personal work beyond the references the person chose, and the text they typed, in an adaptation plan (never content
+Fabric reads from the estate), another
 organization's work, the estate record and its members, the estate's passkeys, secrets, the person's other
 memberships and anything a row does not name never leave for an organization. The adaptation row carries no project's
 entry: a project enters by the estate revision its person's passkey signs (R1-D12, Fabric ADR-0178 point 7), which never
@@ -407,6 +421,119 @@ a caller it authenticates as one of the organization's administrators or its rel
 authenticates them is the server's (DEC-0134 OR-4: a credential it issues when it sets the relay up). A POST still needs no credential: only
 an administrator's passkey makes a list that passes.
 
+## The adaptation plan
+
+DEC-0138 (CT-169, TP-03; the first organization server's request N-4, for Fabric's TP-04) · schemas
+[`org-adaptation`](../../schemas/org-adaptation.schema.json),
+[`org-adaptation-receipt`](../../schemas/org-adaptation-receipt.schema.json) · code
+[`src/org-adaptation.ts`](../../src/org-adaptation.ts) · vectors
+[`fixtures/vectors/org-adaptation.json`](../../fixtures/vectors/org-adaptation.json) · rule `FAC-SEM-153`
+
+When a person brings work into an organization, their Fabric sends the organization part of the adaptation plan:
+the items the person chose, each by an opaque reference, and the person's requests to the organization's
+administrators. It is OM-7's adaptation row made a document; nothing else of the plan leaves.
+
+**AD-1, the document.** `org-adaptation/1` is `{type, org, revision, items, requests}`, closed.
+- `revision` counts up from 1. The person's Fabric keeps one counter per organization, so every plan it sends there
+  is the next revision.
+- `items` (at most 200) are `{ref, kind, label?}`. `kind` is `project`, `history`, `result` or `schedule`; `label` is at
+  most 80 characters (code points).
+- `requests` (at most 50) are `{id, kind, itemRef?, ...}`, `id` being 8 to 64 of `A-Za-z0-9_-`:
+  - `access`: `resource` (the organization's own name of an account, environment or credential, at most 120
+    characters), `note?` (at most 200);
+  - `spend`: `amountUsd` (1 to 100 000), `period` (`once` or `month`), `purpose` (at most 200 characters);
+  - `role`: `role`, which is `admin`. `owner` is never asked for and `member` is the role the person already holds,
+    so `admin` is the only role of `org-authority/1` a request can name.
+- `FAC-SEM-153`: each `ref` is named once, each request `id` once, and an `itemRef` names one of the plan's items.
+
+**AD-2, nothing of the estate.** A `ref` is 16 to 64 of `A-Za-z0-9_-`, drawn at random by the person's Fabric for an
+item and that organization. It is never derived from a name, a path or an id of the estate, never reused for another
+organization (DEC-0128's unlinkability). Fabric keeps the `ref` it drew for an item and reuses it in every later
+revision to that organization that names the item, after a withdrawal too, so a decision bound to a request that names it (AD-5) and a later release that names the project
+by it (CT-159) still find it. A request `id` is drawn the same way, per organization, and kept while the request
+stands; a later membership of that organization gets new request ids, so no decision made under an ended membership
+binds a request of the next (AD-6). `label`, `resource`, `note` and `purpose` are what the person typed for the organization; Fabric never fills
+them from the estate. They hold no control character but tab and line feed (no U+0000 to U+0008, U+000B to U+001F or
+U+007F to U+009F) and no lone surrogate, so a server can keep them where U+0000 cannot go and digest them under RFC 8785,
+and none is blank or begins or ends with white space, white space being what ECMA-262's `\s` matches (its WhiteSpace
+and LineTerminator, U+FEFF included, which `String.prototype.trim` removes). Fabric turns a CRLF or a CR the person typed into a line feed and
+trims white space from both ends before it sends, and leaves out an optional text the person left blank; a plan
+breaking any of these is `malformed` (AD-4). The schema's patterns are ECMA-262 patterns read in Unicode mode (the `u`
+flag): without it a surrogate pair, an emoji, is refused, so a validator without that mode checks lone surrogates
+another way. Text the person types into two organizations' plans is the person's to repeat, and can link
+them ([contexts](contexts.md#linkability)). A project's own entry into the organization is the estate revision its
+person's passkey signs (R1-D12), which never leaves; a `ref` only lets the person and the administrators talk about it.
+
+**AD-3, the transport.** The person's Fabric sends the plan to the organization's server with the credential that
+server issued it for the person, the same way it reads the person's attestations; how a reader authenticates to the
+issuer is the issuer's and the reader's (*Not decided here*), and the server attributes the plan to that credential's
+person. The route is `PUT /fabric/adaptation/v1/{org}/plan` under the issuer's origin, `{org}` being the part of
+`org:<orgId>` after `org:`; `GET` on it answers the person's receipt, or, before the first plan, `404` with the body `{error: {code:
+"no-plan", message}}`; a server that answers a `404` without that code there leaves every person's Fabric reading
+that it takes no plans. Fabric sends a plan only after a `GET` answered a receipt or `no-plan`. It retries a `GET` that got no answer or
+a `5xx` with backoff, as AD-4 retries a `PUT`, backs off on `429`, and reads a `401` or a `403` by the code its body
+carries, which wins over a `WWW-Authenticate` header: an AD-4 code is that refusal (`not-a-member` as AD-4 says);
+any other code but `invalid_token` (a sign-in the server asks for again, say) is shown to the person, and Fabric holds
+the plan and asks again after the person acts. Another `404`, or a `401` or a `403` whose body carries no code or
+`invalid_token` (OAuth's, which a codeless body may carry in `WWW-Authenticate` instead, RFC 6750 section 3) that
+persists after Fabric refreshed the credential, means the server takes no plans from this credential: Fabric sends nothing, tells the person so, and asks again only after the person connects
+the server again. A server accepts a plan body of at least 512 KiB, which holds the largest plan this schema allows
+written as compact JSON in UTF-8, the form Fabric sends. A suspended membership (OM-6) authorises nothing new, so Fabric
+refreshes the attestation before a `PUT` and sends only once the membership is active again; a withdrawal on leaving
+is sent whether the membership is active or suspended.
+Any other `4xx` to a `GET` Fabric shows to the person, as AD-4 shows one to a `PUT`. Where Fabric keeps the
+credential is Fabric's; nothing here asks the app to hold it. A server may ask the person to consent to plans when they
+connect Fabric to it.
+
+**AD-4, the server keeps the newest revision** (`decideAdaptation`). After it authenticates the credential, in order:
+- `403 not-a-member`: the credential's person holds no membership of the route's organization that the server has not
+  ended;
+- `400 schema-unsupported`: the body names another `type` than `org-adaptation/1`, answered with the revisions the
+  server accepts ([versioning](versioning.md), DEC-0067);
+- `422 malformed`: the plan fails its schema or `FAC-SEM-153`, or has no RFC 8785 form (a lone surrogate);
+- `422 wrong-organization`: the plan names another organization than the route's;
+- `409 stale-revision`: a revision lower than the held one;
+- `409 revision-conflict`: the held revision with another digest (`adaptationDigest`);
+- the held revision with the same digest answers the same receipt and stores nothing; a higher revision is accepted
+  and replaces the held one. A revision with no items and no requests withdraws the plan; there is no `DELETE`.
+
+`schema-unsupported` answers versioning's document (`{error: {code, message, data: {protocol, accepted}}}`); every other
+refusal's body is `{error: {code, message}}`, the message at most 200 characters. Fabric sends again with backoff after
+no answer or a `5xx`, sends the next revision after `stale-revision` or `revision-conflict` once it has read the
+receipt and found it is not a withdrawal it did not make, shows any other `4xx` to the person and holds the plan until they act (backing off on `429`), and sends
+nothing more for that membership after `not-a-member` (a later membership, pinned again, may send),
+refreshing the person's attestation at once (OM-6). A server may also take a withdrawal the person makes on its own
+page: it records it as the next revision, with no items and no requests, so a plan Fabric sends at that revision meets
+`revision-conflict`. A receipt whose digest is that of the empty plan at its revision (`adaptationDigest` of `{type,
+org, revision, items: [], requests: []}`), at a revision Fabric did not send empty, is such a withdrawal: Fabric shows
+the person the plan was withdrawn on the server and never reopens it without the person, sending again only when the
+person acts in Fabric.
+
+**AD-5, a decision is bound to its request.** Each request's digest is SHA-256 over its RFC 8785 form
+(`requestDigest`); the plan's is the same over the whole plan (`adaptationDigest`). An administrator's decision is
+recorded against the request's `id` and digest, so a request that changes in a later revision waits for a new
+decision and one that does not keeps its decision. The receipt `org-adaptation-receipt/1` is `{type, org, revision,
+digest, requests}`, each request `{id, digest, state, at?}` with `state` `pending`, `granted`, `refused` or `expired`
+(`adaptationReceipt`). `expired` is a request the server closed: undecided after a time it sets, or a decision
+that lapsed; `at` is when it was decided or closed, absent exactly while `pending`. An expired request stays
+`expired` while it is unchanged; to ask again, the person changes it or sends it under a new `id`. A decision follows
+its request, not the item the request names: changing an item's label or kind does not reopen a decided request. A
+decision grants nothing by itself: an access or a spend
+reaches the person only through the organization's own grants and budgets, and a granted `admin` role reaches the
+person as the role their attestation carries, the member list following when it is next drafted, which is display
+and routing, never authority (OL-6).
+Authority to sign as an administrator comes only from a signing credential the person's Fabric registers for that
+organization alone, listed in a key set the owner's root signs once the owner confirms (OM-3); how a later
+administrator's credential reaches the owner's draft is CT-158.
+
+**AD-6, privacy and the end.** The plan is read by the organization's administrators and the person it came from,
+never by another member. When the person ends the membership by unpinning, their Fabric first sends the empty
+revision that withdraws the plan (OM-5); when the server ends it, or the organization closes, the server ends the plan
+and its decisions, and serves none of them under a later membership: that membership starts with no plan held, so its
+`GET` answers `no-plan` and its first plan is accepted at any revision. Either way the person's Fabric sends no further plan under that membership; a later
+membership, pinned again, may send, with new request ids (AD-2). A withdrawn plan's earlier revisions are the server's record, kept as its
+retention says.
+
 ## Semantic rules
 
 | Code | Kind | Rule |
@@ -415,6 +542,7 @@ an administrator's passkey makes a list that passes.
 | <a id="fac-sem-146"></a>`FAC-SEM-146` | `org-key-set` | each kid once, the root's kid not among the keys, every key window strict and positive, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt`; each administrator's credential once, with a usable key of its algorithm (never of small order), under a signing RP with every origin within it (DEC-0129) |
 | <a id="fac-sem-150"></a>`FAC-SEM-150` | `org-authority` | the window is two strict instants with at most three fraction digits, `expiresAt` after `issuedAt` and at most 7 days after it; at most 1024 members, each an object of 1 to 8 keys, each key an object; each subject, each `iss` and each kid once across the list; every kid a `#sig` kid and every key a P-256 point SEC 1 accepts (DEC-0129) |
 | <a id="fac-sem-151"></a>`FAC-SEM-151` | `org-key-set-draft`, `org-authority-draft` | a draft envelope's `digest` is its draft's (what its signer signs), its draft names the envelope's organization, and its revision is one above its base's (1 with none) (DEC-0131) |
+| <a id="fac-sem-153"></a>`FAC-SEM-153` | `org-adaptation` | an adaptation plan names each item's `ref` once and each request's `id` once, and a request's `itemRef` names one of its items (DEC-0138) |
 | <a id="fac-sem-147"></a>`FAC-SEM-147` | `estate-record` | each organization pinned once by its context, and no pinned root of small order; each context issuer once and its opaque part never containing an estate id of eight characters or more (DEC-0128) |
 
 ## Who adopts it
@@ -445,6 +573,16 @@ an administrator's passkey makes a list that passes.
 - **A member's node** signs `auth` with an enrollment's `#sig` key and the organization's context id in `estate`, reads
   the organization's `welcome`, told from an estate's by `estateRevision`, for its `list`, and expects no estate record
   from that relay (relay.md OR-1, OR-2).
+- **Every organization server** that takes adaptation plans serves the route of AD-3, keeps each member's newest
+  revision as AD-4 says, binds decisions as AD-5 says, ends the plan with the membership (AD-6), and runs
+  `fixtures/vectors/org-adaptation.json` (DEC-0138). **The person's Fabric** draws each `ref` and request `id` at random
+  per organization and keeps them (AD-2), fills no text from the estate, takes only the person's choices, keeps one
+  revision counter per organization, sends the plan with the credential the server issued it after a `GET`, reads a
+  `401` or `403` by its code and sends no `PUT` but the withdrawal on leaving while the membership is suspended (AD-3), and withdraws it by an empty
+  revision when the person leaves, before it asks the passkey to sign the unpinning, telling the person the plan may
+  remain when no receipt confirmed the withdrawal (OM-5); it turns a CRLF or a CR into LF and trims the text (AD-2), never reopens a plan withdrawn on the server's page without the person (AD-4), and
+waits for the answer to a withdrawal on leaving no longer than the person agrees to (OM-5). The server serves a plan and its
+  receipt only to the organization's administrators and the person it came from (AD-6).
 - **A product** that reads membership (an open product of the organization train) verifies the same way under the same
   pin, with its own audience.
 
@@ -455,7 +593,10 @@ times. Two readers of one person's membership see two subjects, and an attestati
 each is one organization's, for one audience. What still links one machine across organizations until CT-122 is in
 [contexts](contexts.md#linkability). The estate record's `organizations` lists the person's
 organizations to the person's own machines; the relay operator reads it today as it reads `org:<orgId>` in share
-grants, until per-context relay sessions (CT-122's question 3).
+grants, until per-context relay sessions (CT-122's question 3). An adaptation plan is served only to the organization's
+administrators and the person (AD-6), and a server serving two organizations can link the person's plans to both by
+whatever identifies the person to it ([contexts](contexts.md#linkability)); its references and request ids name nothing of the estate, and the text the
+person types into two organizations' plans is theirs to repeat (AD-2).
 
 The draft exchange (DEC-0131) serves an organization's root, key sets and key-set drafts to anyone: they name the
 organization's opaque id, its signing keys and its administrators' public credentials, one credential per
@@ -472,8 +613,6 @@ its relay (OX-6).
   (`org-root`) is closed (CT-160).
 - How the person's Fabric sends the context's `iss` to the server for its entry (OM-7's row allows it; no message
   carries it yet), and how a relay is registered as an attestation audience for the subject OL-1 names (CT-162).
-- What a "reference" in the adaptation plan's OM-7 row is: its form must name nothing of the person's estate (DEC-0128);
-  TP-03 defines it with Fabric.
 - How a member's node learns its organization relay's origin (an estate's relay's origin is configuration today too).
 - Whether an organization's relay checks a member's attestation status against the list, the stricter answer winning
   (Fabric ADR-0180 point 4; OL-6), which needs the relay registered as an attestation audience (CT-162).
@@ -483,6 +622,12 @@ its relay (OX-6).
 - A push of a pending draft to the owner's or an administrator's Fabric (beside OX-5's reading of the route).
 - What the hub answers a caller it refuses to mint for in a suspended or ended organization's context (OM-5, OM-6):
   the hub's refusal code, Fabric's to state beside DL-4.
+- When the person's Fabric reads an adaptation plan's receipt besides before a `PUT` (AD-3), so the person learns of a
+  decision or of a withdrawal on the server's page: Fabric's, as OX-5 leaves a draft's reading to its reader; no push
+  is defined.
+- Where the person's Fabric keeps an adaptation plan's references, request ids and revision counter when the person
+  runs it on more than one machine or moves their hub (AD-2, AD-4): Fabric's (TP-04), so long as they stay one set per
+  organization.
 - How attestations reach a reader (a push, a fetch) and how a reader authenticates to the issuer to fetch one: the
   issuer's and the reader's, beside OM-7's refresh row, which bounds what that exchange carries about the person.
 - A faster end than expiry (an organization's revocation delta with a `member` kind): additive, when a reader needs it.

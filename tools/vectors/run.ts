@@ -23,15 +23,18 @@ import * as enrollToken from "./enroll-token.js";
 import * as entitlement from "./entitlement.js";
 import * as orgMembership from "./org-membership.js";
 import * as orgExchange from "./org-exchange.js";
+import * as orgAdaptation from "./org-adaptation.js";
 import * as folderAttribution from "./folder-attribution.js";
 import * as hubMove from "./hub-move.js";
 import * as jobLimits from "./job-limits.js";
+import * as localChannel from "./local-channel.js";
 import * as machineCall from "./machine-call.js";
 import * as machineReport from "./machine-report.js";
 import * as mandate from "./mandate.js";
 import * as pageLinks from "./page-links.js";
 import * as pairing from "./pairing.js";
 import * as partnerUsage from "./partner-usage.js";
+import * as peerShare from "./peer-share.js";
 import * as relayCrypto from "./relay-crypto.js";
 import * as repairDecision from "./repair-decision.js";
 import * as shareRegistration from "./share-registration.js";
@@ -52,15 +55,18 @@ export const GENERATORS: readonly Generator[] = [
   { source: "entitlement.ts", build: one(entitlement.VECTOR_FILE, entitlement.buildEntitlementVectors) },
   { source: "org-membership.ts", build: one(orgMembership.VECTOR_FILE, orgMembership.buildOrgMembershipVectors) },
   { source: "org-exchange.ts", build: one(orgExchange.VECTOR_FILE, orgExchange.buildOrgExchangeVectors) },
+  { source: "org-adaptation.ts", build: one(orgAdaptation.VECTOR_FILE, orgAdaptation.buildOrgAdaptationVectors) },
   { source: "folder-attribution.ts", build: one(folderAttribution.VECTOR_FILE, folderAttribution.buildFolderAttributionVectors) },
   { source: "hub-move.ts", build: one(hubMove.VECTOR_FILE, hubMove.buildHubMoveVectors) },
   { source: "job-limits.ts", build: one(jobLimits.VECTOR_FILE, jobLimits.buildJobLimitVectors) },
+  { source: "local-channel.ts", build: one(localChannel.VECTOR_FILE, localChannel.buildLocalChannelVectors) },
   { source: "machine-call.ts", build: one(machineCall.VECTOR_FILE, machineCall.buildMachineCallVectors) },
   { source: "machine-report.ts", build: one(machineReport.VECTOR_FILE, machineReport.buildMachineReportVectors) },
   { source: "mandate.ts", build: one(mandate.VECTOR_FILE, mandate.buildMandateVectors) },
   { source: "page-links.ts", build: one(pageLinks.VECTOR_FILE, pageLinks.buildPageLinkVectors) },
   { source: "pairing.ts", build: one(pairing.VECTOR_FILE, pairing.buildPairingVectors) },
   { source: "partner-usage.ts", build: one(partnerUsage.VECTOR_FILE, partnerUsage.buildPartnerUsageVectors) },
+  { source: "peer-share.ts", build: one(peerShare.VECTOR_FILE, peerShare.buildPeerShareVectors) },
   { source: "relay-crypto.ts", build: () => relayCrypto.buildVectorFiles() },
   { source: "repair-decision.ts", build: one(repairDecision.VECTOR_FILE, repairDecision.buildRepairDecisionVectors) },
   { source: "share-registration.ts", build: one(shareRegistration.VECTOR_FILE, shareRegistration.buildShareRegistrationVectors) }

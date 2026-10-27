@@ -45,6 +45,10 @@ describe("fabric-provider/0.1 semantic rules", () => {
     expect(codes("provider-observation", { ...ok, file: "example-writer.json" })).toContain("FAC-SEM-014");
     expect(codes("provider-observation", { ...ok, manifest: manifest("https://agents.example/providers/example-writer") })).toContain("FAC-SEM-014");
     expect(codes("provider-observation", { ...ok, manifest: manifest("example-agent") })).toContain("FAC-SEM-014");
+    // A stored path's last segment after either separator: a Windows host writes `providers\\<id>.json` (DEC-0145).
+    expect(codes("provider-observation", { ...ok, file: "providers/example-agent.json" })).toEqual([]);
+    expect(codes("provider-observation", { ...ok, file: "providers\\example-agent.json" })).toEqual([]);
+    expect(codes("provider-observation", { ...ok, file: "providers\\example-writer.json" })).toContain("FAC-SEM-014");
   });
 
   it("FAC-SEM-014 compares providerId with provider.id by normal form (DEC-0076), the file stem as written", () => {

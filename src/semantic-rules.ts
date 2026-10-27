@@ -39,6 +39,7 @@ import { entitlementRules } from "./entitlement.js";
 import { nodeEnrollmentRules } from "./node-enrollments.js";
 import { orgAuthorityRules } from "./org-authority.js";
 import { orgExchangeRules } from "./org-exchange.js";
+import { orgAdaptationRules } from "./org-adaptation.js";
 import { orgMembershipRules } from "./org-membership.js";
 import { shareRegistrationRules } from "./share-registration.js";
 import { nodeSummaryRules } from "./node-summary.js";
@@ -105,6 +106,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (authority) return authority;
   const exchange = orgExchangeRules(kind, value);
   if (exchange) return exchange;
+  const adaptation = orgAdaptationRules(kind, value);
+  if (adaptation) return adaptation;
   const enrollments = nodeEnrollmentRules(kind, value);
   if (enrollments) return enrollments;
   const folderAttribution = folderAttributionRules(kind, value);

@@ -101,7 +101,7 @@ on different releases still talk:
 - **The register.** [`src/protocol-revisions.ts`](../../src/protocol-revisions.ts) `PROTOCOL_REVISIONS` lists each
   contract protocol's published revisions, oldest first; a test keeps it equal to the revisions the schemas pin with
   `const` plus `NAMED_ONLY` (`approval/1`, `fabric-actions/0.1` (the actions extension, DEC-0121), `fabric-connections/0.1` (the connections extension), `fabric-dashboard/0.1`, `fabric-delegation/0.1`, `fabric-interop/0.1` and `/0.2` (DEC-0087),
-  `fabric-load/0.1` (the load extension, DEC-0104), `fabric-local-channel/0.1`, `operator-source/1` (`source` in a decision or a mandate, DEC-0126), `pipeline/0.1`, which a specification names and no schema pins). A decision that publishes a new revision appends it
+  `fabric-load/0.1` (the load extension, DEC-0104), `fabric-local-channel/0.1`, `fabric-peer-share/1` (the person-to-person share profile, DEC-0142), `operator-source/1` (`source` in a decision or a mandate, DEC-0126), `pipeline/0.1`, which a specification names and no schema pins). A decision that publishes a new revision appends it
   there and widens each module's own constant, which a test keeps at the newest revision (`RELAY_PROTOCOL`,
   `DELTA_TYPE`, `HEARTBEAT_TYPE`, `ENVELOPE_TYPE`, `ESTATE_RECORD_SCHEMA`, `HANDOFF_FORMAT`, `SETTINGS_BACKUP_FORMAT`,
   `WINDOW_LEASE_TYPE`, `COMMS_PROTOCOL`, `AGENT_CALL_TYPE` for `fabric-agent-call/1`, DEC-0106;

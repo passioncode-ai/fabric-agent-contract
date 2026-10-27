@@ -30,7 +30,7 @@ the agent's installer, removed by its uninstaller.
 | `providerId` | absolute URI | yes | equals the manifest's `provider.id`, compared by their normal forms ([identifiers](identifiers.md), DEC-0076; `FAC-SEM-014`, DEC-0017) |
 | `name` | string of at most 80 characters | yes | |
 | `summary` | string of at most 200 characters | no | |
-| `manifest` | absolute or `~/` path to `fabric-agent.json` | yes | the manifest must resolve |
+| `manifest` | absolute, `~/` or `~\` path to `fabric-agent.json`, the name after either separator (DEC-0145) | yes | the manifest must resolve |
 | `run` | one of `{mcp: {stdio: {command: [argv…], env: {NAME: "secret-ref:…"}, scope}}}` or `{mcp: {url: "http://127.0.0.1:<port>/mcp"}}` | yes | argv arrays only, never a shell string, and no argument carries a credential (`FAC-SEM-057`); env values are secret references, never values (DEC-0013). `scope` is `project` or `on-demand` (the default), never `session` (`FAC-SEM-056`, DEC-0044). **Do not emit `run.mcp.stdio.scope` yet:** the Fabric Agent Adapter's reader accepts it (FAA-22), but Fabric's registry admits only `command` and `env` today (CT-27, [below](#what-the-schema-adds-to-the-table)); leave it out and the reader takes `on-demand` |
 | `source` | `{repository: URL}` | no | |
 | `installedAt` | RFC 3339 | yes | |
@@ -61,7 +61,7 @@ manifest's `provider.id`, and an `env` value is checked by its form.
 |---|---|
 | macOS | `~/Library/Application Support/ai.passioncode.fabric/providers/` |
 | Linux | `${XDG_DATA_HOME:-~/.local/share}/passioncode-fabric/providers/` |
-| Windows | `%LOCALAPPDATA%\passioncode-fabric\providers\`: the same root as the services folder (DEC-0032 names only that one); no Windows reader of provider entries exists yet |
+| Windows | `%LOCALAPPDATA%\passioncode-fabric\providers\`: the same root as the services folder (DEC-0032 names only that one); Fabric's registry reads entries here (`apps/desktop/src/main/agentRegistry.ts`) |
 | any | the value of `FABRIC_PROVIDERS_DIR` when set |
 
 The file is written atomically (temporary file, `fsync`, rename), as a descriptor is.
@@ -71,7 +71,10 @@ The file is written atomically (temporary file, `fsync`, rename), as a descripto
 These follow from the table and are enforced by the schema:
 
 - `providerId` is an absolute URI (DEC-0017).
-- `manifest` ends in `fabric-agent.json`.
+- `manifest` ends in `fabric-agent.json` after either separator, so a Windows path (`C:\…\fabric-agent.json`,
+  `~\…\fabric-agent.json`, DEC-0032) names it too (DEC-0145). A writer does not emit a `manifest` whose name follows
+  a backslash until every reader accepts it: Fabric's registry (`agentRegistry.ts`) and the adapter's `fabric_provider.py`
+  still read the pattern before DEC-0145 and refuse such an entry until they re-pin (CT-192).
 - `run.mcp` is exactly one of `stdio` or `url`; `command` is an argument array of at
   most 32 items.
 - An `env` name is an environment variable name (`^[A-Z_][A-Z0-9_]*$`) and every value

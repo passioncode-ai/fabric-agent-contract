@@ -65,4 +65,6 @@ def entry(row, permissions):
 if __name__ == "__main__":
     permissions = json.load(open(sys.argv[1])) if len(sys.argv) > 1 else {}
     doc = {"schema": "coding-agents/1", "revision": REVISION, "agents": [entry(r, permissions) for r in SEED]}
+    # LF on every platform: the catalogue is compared byte for byte (test/coding-agents.test.ts).
+    sys.stdout.reconfigure(newline="\n", encoding="utf-8")
     print(json.dumps(doc, indent=2, ensure_ascii=False))

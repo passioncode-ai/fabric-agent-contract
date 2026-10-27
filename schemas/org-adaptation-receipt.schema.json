@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/org-adaptation-receipt.schema.json",
+  "title": "An organization server's receipt for an adaptation plan (DEC-0138)",
+  "description": "What the server answers to an accepted or repeated org-adaptation/1, and to a GET of the plan: the revision it holds, that revision's digest, and each request's decision, bound to the request's digest. docs/specification/membership.md#the-adaptation-plan.",
+  "type": "object",
+  "required": [
+    "type",
+    "org",
+    "revision",
+    "digest",
+    "requests"
+  ],
+  "properties": {
+    "type": {
+      "const": "org-adaptation-receipt/1"
+    },
+    "org": {
+      "$ref": "org-membership.schema.json#/$defs/org"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "digest": {
+      "$ref": "common.schema.json#/$defs/sha256",
+      "description": "adaptationDigest of the plan held: SHA-256 over its RFC 8785 form."
+    },
+    "requests": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "digest",
+          "state"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "org-adaptation.schema.json#/$defs/requestId"
+          },
+          "digest": {
+            "$ref": "common.schema.json#/$defs/sha256",
+            "description": "requestDigest of the request the decision is bound to."
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "granted",
+              "refused",
+              "expired"
+            ],
+            "description": "pending: waiting for a decision; granted or refused: an administrator's decision; expired: the server closed the request, undecided after a time it sets or a decision that lapsed. Bound to the request's digest: a changed request is pending again."
+          },
+          "at": {
+            "$ref": "common.schema.json#/$defs/timestamp",
+            "description": "When an administrator decided, or when the server closed the request or the decision lapsed (expired); absent while pending."
+          }
+        },
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "state": {
+                  "const": "pending"
+                }
+              },
+              "required": [
+                "state"
+              ]
+            },
+            "then": {
+              "properties": {
+                "at": false
+              }
+            },
+            "else": {
+              "required": [
+                "at"
+              ],
+              "properties": {
+                "at": true
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}

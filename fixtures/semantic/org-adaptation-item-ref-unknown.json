@@ -1,0 +1,44 @@
+{
+  "description": "A plan with a request's itemRef naming no item (FAC-SEM-153, DEC-0138).",
+  "kind": "org-adaptation",
+  "expect": [
+    "FAC-SEM-153"
+  ],
+  "input": {
+    "type": "org-adaptation/1",
+    "org": "org:org-7f3a",
+    "revision": 2,
+    "items": [
+      {
+        "ref": "q7Xk2mP9vLr4Tn8w",
+        "kind": "project",
+        "label": "Billing migration"
+      },
+      {
+        "ref": "Hb3Zt6Yc1Nq5Ws0e",
+        "kind": "schedule"
+      }
+    ],
+    "requests": [
+      {
+        "id": "req-access-01",
+        "kind": "access",
+        "itemRef": "Zz9Yy8Xx7Ww6Vv5U",
+        "resource": "staging database",
+        "note": "read-only, to finish the migration"
+      },
+      {
+        "id": "req-spend-01",
+        "kind": "spend",
+        "amountUsd": 200,
+        "period": "month",
+        "purpose": "model calls for the migration agent"
+      },
+      {
+        "id": "req-role-01",
+        "kind": "role",
+        "role": "admin"
+      }
+    ]
+  }
+}

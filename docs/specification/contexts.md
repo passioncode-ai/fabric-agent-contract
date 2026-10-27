@@ -28,6 +28,9 @@ alike.
   up to 127 of `[A-Za-z0-9_-]` (1–128 characters). (Informative: the first organization server, at its commit `03d454b`, issues ids of the form
   `org_<base32>`.)
 
+A credential one person shares with another person's estate is in neither: it is held apart from every context's
+vault and is no context of its own ([peer share](peer-share.md#a-share-is-not-a-context-ps-3), DEC-0142).
+
 Context ids compare **as written**: never case-folded, never trimmed, never by prefix, as DEC-0077 compares board ids.
 `Personal`, `ORG:x`, `org:` with an empty or a 129-character id, a surrounding space and a trailing newline are not
 context ids (the schema, `parseContext`, and the vectors' `contexts`, which `test/context-route.test.ts` runs through
@@ -210,7 +213,11 @@ keys of its own, so organizations cannot link the machine (CX-22). DEC-0128 (CX-
   context's hub key ([delegation](delegation.md#keys-publication-and-rotation) DL-14a).
 
 What stays linkable is named in UE's last item (low-entropy values, mode `C`'s harness lines, a shared `agentRef`, the
-relay operator's view of `org:<orgId>`, and one operator running two of a machine's relays). An administrator's signing credential is one per organization when the
+relay operator's view of `org:<orgId>`, and one operator running two of a machine's relays). An adaptation plan's
+references and request ids are drawn per organization ([membership](membership.md#the-adaptation-plan) AD-2, DEC-0138);
+the text a person types into two organizations' plans is theirs to repeat, and can link them; a server that serves
+two organizations links the person's plans to both by whatever identifies the person to it (one account, or one
+credential where it issues one), as it does for their attestations (Fabric CO-130). An administrator's signing credential is one per organization when the
 administrator's Fabric registers it so (DEC-0129); no server can check that, and a Fabric that reused one would link
 the administrator. The slice meets CX-22 once the node (UE-1, UE-2), the first organization
 server (per-organization device and key lookups) and Fabric's hub (context keys and issuers) adopt it (CT-122); until
