@@ -8547,8 +8547,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   against a copy pinned before refuses an entry whose `manifest` is a Windows path: Fabric's registry reads provider
   entries on Windows (`apps/desktop/src/main/agentRegistry.ts`) and the adapter's `fabric_provider.py` mirrors the old
   pattern, so a writer does not emit a `manifest` whose name follows a backslash until both re-pin (provider.md, CT-192).
-  The SH-4 change, SH-11's `mcp.json` name in any case and FAC-SEM-014's stem after either separator accept more on
-  Windows only and nothing more on POSIX; a host that copied
+  The SH-4 change and SH-11's `mcp.json` name in any case accept more on Windows only and nothing more on POSIX;
+  FAC-SEM-014's stem after either separator, like the widened pattern, also reads the part of a POSIX file name after
+  a backslash as the stem (CT-193); a host that copied
   `validateSessionHandoff` compares bytes until it takes `samePath`.
   `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/provider.schema.json`, `src/session-handoff.ts`, `src/docs-check.ts`,

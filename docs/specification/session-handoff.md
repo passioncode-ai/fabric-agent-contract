@@ -55,8 +55,9 @@ a temporary file left by an interrupted write, a stray credential — is refused
 
 **SH-4 — The launch names this folder's own files.** Where the launch names a file by path (Claude Code's
 `--mcp-config=` and `--append-system-prompt-file`), it names this folder's `mcp.json` and `brief.md` by their
-absolute paths. A host compares the path as its own file system reads it: exactly on POSIX; on Windows with either
-separator and in any case (`samePath` in `src/session-handoff.ts`, DEC-0145).
+absolute paths. A host compares the path (and SH-11's `mcp.json` name): byte for byte on POSIX, macOS included even on
+a case-insensitive volume; on Windows with either separator and in any case (`samePath` in `src/session-handoff.ts`,
+DEC-0145).
 
 ## The manifest
 
