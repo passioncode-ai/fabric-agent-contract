@@ -65,6 +65,18 @@ export function outsideFences(text: string): string {
  * character that is not a letter, a mark, a digit, a space, `-` or `_` dropped, each space a `-`. Inline code, links,
  * emphasis and HTML tags render to their text first.
  */
+const NAMED_ENTITIES: Readonly<Record<string, string>> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: "\u00a0", copy: "\u00a9", reg: "\u00ae", hellip: "\u2026", ndash: "\u2013", mdash: "\u2014", lsquo: "\u2018", rsquo: "\u2019", ldquo: "\u201c", rdquo: "\u201d", middot: "\u00b7", times: "\u00d7", rarr: "\u2192", larr: "\u2190" };
+
+/** A character reference as its character: a decimal or hexadecimal one, or a named one of `NAMED_ENTITIES`; any other is left as written. */
+function decodeEntity(whole: string, body: string): string {
+  const numeric = /^#(?:x([0-9a-f]{1,6})|([0-9]{1,7}))$/i.exec(body);
+  if (numeric) {
+    const code = numeric[1] !== undefined ? Number.parseInt(numeric[1], 16) : Number(numeric[2]);
+    return code > 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff) ? String.fromCodePoint(code) : "\ufffd";
+  }
+  return NAMED_ENTITIES[body] ?? whole;
+}
+
 export function headingSlug(heading: string): string {
   // A code span renders its text as written, `<id>` included; HTML outside one renders without its tags, and an entity
   // as its character. The span's text is set aside before tags are dropped, so `<id>` in code is not read as a tag.
@@ -73,7 +85,7 @@ export function headingSlug(heading: string): string {
     .replace(/`+([^`]*)`+/g, (_whole, code: string) => `\u0000${spans.push(code) - 1}\u0000`)
     .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
     .replace(/<[^>]+>/g, "")
-    .replace(/&(amp|lt|gt|quot|#39);/g, (_whole, name: string) => ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" })[name] ?? "")
+    .replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z][a-z0-9]*);/gi, (whole, body: string) => decodeEntity(whole, body))
     .replace(/\u0000(\d+)\u0000/g, (_whole, index: string) => spans[Number(index)] ?? "")
     .replace(/\*/g, "")
     .replace(/(^|\s)_+|_+(?=\s|$)/g, "$1")
@@ -83,16 +95,28 @@ export function headingSlug(heading: string): string {
 }
 
 /**
- * The fragments a Markdown file answers on GitHub: each ATX heading's slug outside fenced code (a repeated slug gains
- * `-1`, `-2`, …), and every explicit `id` or `name` of an HTML element.
+ * The fragments a Markdown file answers on GitHub: each heading's slug outside fenced code (a repeated slug gains
+ * `-1`, `-2`, …), ATX (`# x`) and setext (a paragraph line underlined by `===` or `---`, CT-193), and every explicit
+ * `id` or `name` of an HTML element. A YAML front matter block at the top is no heading.
  */
 export function markdownAnchors(text: string): Set<string> {
   const anchors = new Set<string>();
   const seen = new Map<string, number>();
-  for (const line of outsideFences(text).split("\n")) {
-    const heading = /^ {0,3}#{1,6}[ \t]+(.*?)(?:[ \t]+#+)?[ \t]*$/.exec(line);
-    if (heading) {
-      const slug = headingSlug(heading[1] ?? "");
+  const lines = outsideFences(text).split("\n");
+  // Front matter: `---` on the first line up to the next `---`, which is not a setext underline.
+  let start = 0;
+  if (lines[0]?.trim() === "---") {
+    const end = lines.findIndex((line, index) => index > 0 && line.trim() === "---");
+    if (end > 0) start = end + 1;
+  }
+  const paragraphLine = (line: string | undefined) => line !== undefined && line.trim() !== "" && !/^ {0,3}(?:#{1,6}(?:[ \t]|$)|[-*+][ \t]|\d{1,9}[.)][ \t]|>|\||(?:[-*_][ \t]*){3,}$|<)/.test(line);
+  for (let index = start; index < lines.length; index += 1) {
+    const line = lines[index] as string;
+    const atx = /^ {0,3}#{1,6}[ \t]+(.*?)(?:[ \t]+#+)?[ \t]*$/.exec(line);
+    const setext = !atx && /^ {0,3}(?:=+|-+)[ \t]*$/.test(line) && index > start && paragraphLine(lines[index - 1]) ? (lines[index - 1] as string).trim() : undefined;
+    const heading = atx ? atx[1] ?? "" : setext;
+    if (heading !== undefined) {
+      const slug = headingSlug(heading);
       const count = seen.get(slug) ?? 0;
       seen.set(slug, count + 1);
       anchors.add(count === 0 ? slug : `${slug}-${count}`);
@@ -127,8 +151,10 @@ export async function checkLinks(file: string, text: string): Promise<string[]> 
   const name = shownName(file);
   const { outside, unclosed } = scanFences(text);
   if (unclosed !== undefined) findings.push(`${name}:${unclosed}: code fence never closed`);
-  // A link quoted in inline code is text, not a link.
-  for (const raw of markdownLinks(outside.replace(/(`+)[^`]*?\1/g, ""))) {
+  // A link quoted in inline code is text, not a link. A code span closes by a run of as many backticks, within its own
+  // paragraph (CommonMark §6.1): a run that never closes is literal text, and the links after it are still read (CT-193).
+  const spanless = outside.split(/(\n[ \t]*\n)/).map((block) => block.replace(/(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/g, "")).join("");
+  for (const raw of markdownLinks(spanless)) {
     // `<a b.md>` (CommonMark's angle destination) may hold spaces; otherwise the destination ends at the first space,
     // and what follows is the link's title.
     const angle = /^\s*<([^>]*)>/.exec(raw);

@@ -51,7 +51,8 @@ commands in order and stops at the first that fails:
    CT-40).
 
 The merging session runs the same frozen command on the candidate and records its output in the pull request;
-hosted CI runs it nightly on `main` and on a manual dispatch (`gh workflow run ci.yml --ref <branch>`), on Linux with Node 22
+hosted CI runs its parts as separate steps, each one even after an earlier one failed, so one run shows every failing
+part (CT-193), nightly on `main` and on a manual dispatch (`gh workflow run ci.yml --ref <branch>`), on Linux with Node 22
 and 24 and on Windows with Node 24 (DEC-0145); on Windows the tests run without the coverage floors, because the
 ones that need POSIX-only facilities (modes, root, FIFOs, file symlinks, `shasum`, `:` in a file name) are skipped there
 (CT-191). A green check never
