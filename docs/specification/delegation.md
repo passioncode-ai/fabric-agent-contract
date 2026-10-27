@@ -545,7 +545,8 @@ caller's claim.
 
 DEC-0125, DEC-0141 (MJ-1) · rule code `FAC-SEM-144` · schema [`mandate.schema.json`](../../schemas/mandate.schema.json) · reference
 [`src/mandate.ts`](../../src/mandate.ts) (`mandateCovers`, `handOn`) · vectors
-[`mandate.json`](../../fixtures/vectors/mandate.json)
+[`mandate.json`](../../fixtures/vectors/mandate.json); MJ-1: [`src/actions.ts`](../../src/actions.ts) (`mandateCapability`),
+[`actions.json`](../../fixtures/vectors/actions.json) (`jobSteps`)
 
 The operator gives a task to one agent and leaves; its work reaches other agents of the operator: a developer agent told
 "run the research" calls a research agent that charges for paid work. DEC-0121 lets an agent relay the operator's

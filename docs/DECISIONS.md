@@ -8275,8 +8275,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0141: a job's step under a mandate is read under the job's capability
 
 - **Date:** 2026-10-26
-- **Status:** Accepted (on merge of its pull request). A clarification of DEC-0125 and DEC-0121 where they read two
-  ways; `actionDecision` gains one input. Consumer adoption: the adapter's kits 0.52.0 (their brief
+- **Status:** Accepted (on merge of its pull request). An amendment of DEC-0125 and a clarification of DEC-0121, where they
+  read two ways; `actionDecision` gains one input. Consumer adoption: the adapter's kits 0.52.0 (their brief
   `docs/evidence/specs/2026-10-26-faa-138-134-repin-1197a90d-brief.md` D10) pass the job's capability from the Python
   kit's built-in step gate, but their exported `actionDecision` differs from the reference in three ways over 7 of the
   14 `jobSteps` (measured by the readings on both ports): with `mandateCapability` absent, empty, only whitespace,
@@ -8296,7 +8296,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   start was, under the job's own capability (the tool its start call named), its action the step's request key, its
   effect the class the service knows for what the step does (its own knowledge, as AP-2's effect); a mandate whose `capabilities` name `fabric.job.get` covers no step of another capability.
   `actionDecision` takes the job's capability as `mandateCapability` for an action whose tool is `fabric.job.get` and
-  answers the service's fault `mandate-capability-missing` without it; every other action reads its own tool. AP-2's
+  answers the service's fault `mandate-capability-missing` without it; every other action reads its own tool. Under MJ-1 an
+  `actions`-only mandate covers a request key on every job of the service, a mandate that lists `actions` covers only
+  the steps whose keys it names (so a leading agent covering a job's steps lists the capability without `actions`),
+  and a step the service cannot read (its own fault) is answered to the caller as `operator-decision-required`, the job
+  staying `input_required`. AP-2's
   decision path is unchanged: a decision still names the request key, one `fabric.job.get` call per key.
 - **Why:** an operator's mandate names the work ("approve this week's replies"), not the transport its steps are
   answered on; reading the step under `fabric.job.get` would make every mandate either cover every job's steps or
@@ -8322,6 +8326,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/semantic/action-call-mandate-job-step*.json`, `tools/vectors/actions.ts`,
   `fixtures/vectors/actions.json`, `test/actions.test.ts`; `docs/specification/delegation.md` (MJ-1, MD-1, MD-2a,
   Covered), `schemas/mandate.schema.json` (the `actions` description), `service.md` (AP-2, the reference's inputs and
-  faults), `interop.md` (C3.3), `conformance.md` (the callee row), `DOCMAP.md`; DEC-0121 and DEC-0125 annotated; backlog CT-177 (closed on merge),
+  faults), `interop.md` (C3.3), `conformance.md` (the callee and leading-agent rows), `CONTEXT.md` (Mandate), `docs/ux/scenarios.md` (SCN-045), `DOCMAP.md`; DEC-0121 and DEC-0125 annotated; backlog CT-177 (closed on merge),
   CT-149 (the adoption) and CT-180 (filed); the handoff `docs/handoffs/2026-10-26-mandate-job-step.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-177; the adapter's question `46433e3a` (thread `aa86a675`).

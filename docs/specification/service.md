@@ -1069,7 +1069,8 @@ estimate and the `project`, and for a job's input request the job's capability `
 An input the service owes and does not have (a declaration that is not valid, no authenticated caller, no readable
 clock, no digest for a T2 refusal, no link for a human step, and under a mandate no `effect` or no `self`, or for a job's input request no usable `mandateCapability` (absent, empty, blank, not a capability name, or
 `fabric.job.get` itself), MJ-1) is its own fault (`{fault}`), never an answer to the
-caller. Kind `action-call` (the reference's inputs and the service's `answer`) holds a service's answer to the
+caller (the job-step one is answered to the caller as `operator-decision-required`, the job staying `input_required`,
+as MJ-1 says). Kind `action-call` (the reference's inputs and the service's `answer`) holds a service's answer to the
 reference's under `FAC-SEM-142`. A refusal is DL-19's ([delegation](delegation.md#refusal-codes)): the three codes
 `operator-decision-required`, `decision-invalid` and `human-step-required` are in its one set and travel as its
 `structuredContent` (DEC-0121). A reader pinned before DEC-0121 ignores the extension key and `_meta.decision`; the
