@@ -1679,8 +1679,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-11
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric (the reference
   writer, `sessionBundle.ts`, release 0.4.0 REQ-06), Fabric Dashboards (its console pack, `src/core/handoff.ts`),
-  Switchboard (carries the arguments in place). SH-4's path comparison amended by DEC-0145 (2026-10-27): on Windows
-  either separator and any case.
+  Switchboard (carries the arguments in place). SH-4's path comparison and SH-11's `mcp.json` and `brief.md` names amended by DEC-0145
+  (2026-10-27): on Windows either separator and any case.
 - **Decision:** the profile [session handoff](specification/session-handoff.md), one format for every product:
   - a folder in the writing host's user data, never in a repository, `0700` with every file `0600`, holding
     `handoff.json` (the manifest, `schemas/session-handoff.schema.json`), `context.md`, `mcp.json` and, as

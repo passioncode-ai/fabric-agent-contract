@@ -20,7 +20,7 @@ permissions:
 jobs:
   contract:
     runs-on: ${{ matrix.os }}
-    # Every Node the package admits (`engines: >=22.13`) on Linux, and the newest on Windows, where consumers run the
+    # Node 22 and 24 on Linux (the package admits `engines: >=22.13`), and Node 24 on Windows, where consumers run the
     # Windows rules (service paths, the token reader, the local channel's pipe) and the gate must pass too. Node 22
     # accepts an Ed25519 signature under a small-order key, so only it proves the small-order guard of CT-29 (DEC-0045).
     strategy:

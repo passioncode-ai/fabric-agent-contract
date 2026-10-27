@@ -192,6 +192,21 @@ describe("the specification", () => {
 });
 
 describe("a launch argument names the folder's file as the host reads paths", () => {
+  // Through the call sites, not samePath alone: on Windows the folder's own path joined with `/` and the file names in
+  // another case pass SH-4 and SH-11 (DEC-0145); POSIX keeps the byte comparison, which the folder tests above cover.
+  it.runIf(process.platform === "win32")("passes a Windows folder named with `/` before an upper-case MCP.json and BRIEF.md", async () => {
+    for (const fixture of ["session-handoff-folder-ok", "session-handoff-folder-brief-file-ok"]) {
+      const dir = writeFolder(fixture, (folder, manifest) => {
+        const launch = manifest.launch as { args: string[] };
+        launch.args = launch.args.map((arg) => arg
+          .replace(`${folder}\\mcp.json`, `${folder.toUpperCase()}/MCP.json`).replace(`${folder}/mcp.json`, `${folder.toUpperCase()}/MCP.json`)
+          .replace(`${folder}\\brief.md`, `${folder}/BRIEF.md`).replace(`${folder}/brief.md`, `${folder}/BRIEF.md`));
+      });
+      const verdict = await check(dir);
+      expect(verdict.findings.filter((finding) => finding.code === "FAC-SEM-053" || finding.code === "FAC-SEM-054"), fixture).toEqual([]);
+    }
+  });
+
   it("compares exactly on POSIX, and with either separator and case on Windows", () => {
     expect(samePath("/h/s1/mcp.json", "/h/s1/mcp.json", "darwin")).toBe(true);
     expect(samePath("/h/s1/MCP.json", "/h/s1/mcp.json", "linux")).toBe(false);
