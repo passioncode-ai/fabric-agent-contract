@@ -46,7 +46,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # The gate, `pnpm run check`, one step per part so a failure in one does not hide the next.
       - run: pnpm typecheck
-      - run: pnpm test
+      # On Windows the tests that need POSIX modes, root or `:` in a file name are skipped (CT-191), so the branches they
+      # reach are not covered there: the coverage floors are measured on Linux, and Windows runs the same tests without them.
+      - run: pnpm ${{ runner.os == 'Windows' && 'test:fast' || 'test' }}
         if: ${{ !cancelled() }}
       - run: pnpm ux:lint
         if: ${{ !cancelled() }}

@@ -39,7 +39,8 @@ commands in order and stops at the first that fails:
    runs the semantic rule fixtures, the cross-object policy tests, the pipeline reference checker's rules PL-1 to
    PL-4 and every [reference module's](#reference-modules-and-vectors) shared vectors.
 3. `pnpm ux:lint`: the UX trace lint of `docs/ux/`.
-4. `pnpm docs:check`: relative links resolve (a link inside a fenced code block is text and is not resolved; a fence
+4. `pnpm docs:check`: relative links resolve, and a link's fragment to a Markdown file names one of its headings or
+   anchors as GitHub renders them (CT-167; a line fragment `#L12` is not checked) (a link inside a fenced code block is text and is not resolved; a fence
    never closed and a malformed percent escape are findings), Mermaid source parses, the contract version and the
    canonical schema ids agree, every extension key has one spelling (G-08), the glossary's profile names equal the
    manifest schema's (G-12), every semantic rule code has one allocation and one definition (G-13), every path a
@@ -51,7 +52,8 @@ commands in order and stops at the first that fails:
 
 The merging session runs the same frozen command on the candidate and records its output in the pull request;
 hosted CI runs it nightly on `main` and on a manual dispatch (`gh workflow run ci.yml --ref <branch>`), on Linux with Node 22
-and 24 and on Windows with Node 24 (DEC-0145). A green check never
+and 24 and on Windows with Node 24 (DEC-0145); on Windows the tests run without the coverage floors, because the
+ones that need POSIX modes, root or `:` in a file name are skipped there (CT-191). A green check never
 substitutes for semantic review of prose. Before release, at least one planted
 negative fixture is temporarily inverted and observed failing; the restored green
 run is recorded in the retrospective.

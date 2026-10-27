@@ -1679,7 +1679,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-11
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric (the reference
   writer, `sessionBundle.ts`, release 0.4.0 REQ-06), Fabric Dashboards (its console pack, `src/core/handoff.ts`),
-  Switchboard (carries the arguments in place).
+  Switchboard (carries the arguments in place). SH-4's path comparison amended by DEC-0145 (2026-10-27): on Windows
+  either separator and any case.
 - **Decision:** the profile [session handoff](specification/session-handoff.md), one format for every product:
   - a folder in the writing host's user data, never in a repository, `0700` with every file `0600`, holding
     `handoff.json` (the manifest, `schemas/session-handoff.schema.json`), `context.md`, `mcp.json` and, as
@@ -8540,10 +8541,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   byte for byte, and a Windows checkout with `core.autocrlf` rewrote them.
 - **Alternatives considered:** normalising a Windows path to `/` before the pattern (a reader that validates the raw
   document would still refuse it); a Windows-only `manifest` member (two members for one path); leaving Windows to the
-  consumers (the adapter's kits and Fabric run on Windows, and the contract's own checker refused their files).
+  consumers (Fabric and the adapter's kits run on Windows, and the contract's own checker, `pnpm validate`, refused a
+  valid Windows entry and reported a Windows file's stored path wrongly in run 40506221946).
 - **Compatibility:** a widening of a closed pattern: every entry that validated still does. A reader that validates
-  against a copy pinned before refuses an entry whose `manifest` is a Windows path; provider.md records that no Windows
-  reader of provider entries exists yet. The SH-4 change accepts more on Windows only and nothing more on POSIX.
+  against a copy pinned before refuses an entry whose `manifest` is a Windows path: Fabric's registry reads provider
+  entries on Windows (`apps/desktop/src/main/agentRegistry.ts`) and the adapter's `fabric_provider.py` mirrors the old
+  pattern, so a writer does not emit a `manifest` whose name follows a backslash until both re-pin (provider.md, CT-192).
+  The SH-4 change accepts more on Windows only and nothing more on POSIX; a host that copied
+  `validateSessionHandoff` compares bytes until it takes `samePath`.
   `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/provider.schema.json`, `src/session-handoff.ts`, `src/docs-check.ts`,
   `src/validate-cli.ts`, `tools/catalogue/seed.py`, `fixtures/positive/provider-entry-windows-path.json`,
@@ -8551,6 +8556,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `.github/workflows/ci.yml`; `docs/specification/provider.md`, `session-handoff.md`; the tests of the gate's own
   paths (`test/docs-check.test.ts`, `test/validate-cli.test.ts`, `test/session-handoff.test.ts`,
   `test/session-handoff-standalone.test.ts`, `test/meter-grant.test.ts`, `test/pin-check.test.ts`,
-  `test/folder-attribution.test.ts`); backlog CT-191.
+  `test/folder-attribution.test.ts`); `docs/specification/conformance.md` (the gate's platforms, item 4's fragments),
+  `AGENTS.md`, `docs/DOCMAP.md`; DEC-0042 annotated; backlog CT-123 and CT-167 closed, CT-191 and CT-192 filed.
 - **Source:** the operator's request of 2026-10-27; the first Windows runs of the gate (runs 40506221946 and after).
 
