@@ -123,14 +123,15 @@ the vault slot itself.
   broker and prompt it once it is admitted, within the request's deadline; when none is admitted by then, or on a
   machine with no desktop session, the request is answered `no-client` and nothing is shown by anyone; the agent then
   tells the person to put the value in with the vault's own command in their shell. A request withdrawn with
-  `secret.cancel` reads `no-answer` to the agent unless an answer came first.
+  `secret.cancel` reads `no-answer` to the agent unless an answer came first: the node passes the cancel time to
+  `secretOutcome` as the deadline.
 - **SP-4. No value on the channel.** The prompt and its result carry no value, in either direction. The app writes the
   value into the slot in its own process; the value never crosses the channel or another process boundary, and is in
   no argument, environment variable, log, notification or result. The node reads each answer against
   `$defs/secretResult` (the whole message's `result` is any object); an answer it refuses counts as no answer and is
   never recorded or logged. Typing and "Store" are the person's own acts: the product declares them with `gate: human`
-  and `humanStep: secret` (DEC-0121 AP-4), so an agent's tool for them answers `human-step-required` and never stores a
-  value.
+  and `humanStep: secret` (DEC-0121 AP-4), so an agent's tool for them answers `human-step-required`, with the link to
+  the node's page that shows the pending request and names the app window that holds it, and never stores a value.
 - **SP-5. The outcome the agent sees** (`secretOutcome`): the first `stored` or `declined` the node received between the
   prompt and its deadline, at most 10 minutes after it (`MAX_SECRET_DEADLINE_MS`), by the node's receipt time; no answer
   by then is `no-answer`, a late answer is ignored. `stored` counts only when the node confirmed, in its own vault
@@ -145,7 +146,8 @@ the vault slot itself.
   (Project Observatory's design shows a phrase the person chose), and it is only as strong as the store that hides it:
   on macOS a data-protection keychain item of the app's own access group, which another program of the user cannot
   read; on Windows, and wherever another program of the user can read the app's store, the mark stops only an agent that
-  does not look for it.
+  does not look for it. Every genuine prompt also shows the mark on screen, so a program holding the person's
+  screen-recording permission (often granted to the terminal agents run in) can learn it from one.
 - **SP-7. Where the request comes from** is the node's: an agent asks through the node's own surface (a tool on its MCP
   server, a job), and the node keeps its own limits (one open request per slot, a rate per agent). The channel carries
   only the prompt and its outcome.

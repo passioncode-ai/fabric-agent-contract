@@ -23,8 +23,8 @@ that the share works between two personal estates with no organization, from the
   none on Linux, CT-184), `secretOutcome`; `src/local-channel.ts`, `schemas/local-channel.schema.json`,
   `test/local-channel.test.ts`.
 - `contexts.md`, `versioning.md`, `conformance.md` (four rows), the specification README, `DOCMAP.md`, `CONTEXT.md`;
-  `docs/ux` JTBD-15, JRN-14, ST-039, ST-040, FLW-33, FLW-34, SCR-33, SCR-34, SCN-052, SCN-053; DEC-0075, DEC-0084,
-  DEC-0086, DEC-0111 and DEC-0128 annotated; CT-178 closed on merge; CT-184, CT-185, CT-186 (adoption) and CT-187 filed.
+  `docs/ux` JTBD-15, JRN-14, ST-039, ST-040, FLW-33, FLW-34, SCR-33, SCR-34, SCN-052, SCN-053; `service.md` AP-4, `delegation.md` (DL-26, the refusal table, MD-6, OA-5) and `interop.md` for
+  `humanStep: comparison`; DEC-0075, DEC-0084, DEC-0086, DEC-0111, DEC-0121 and DEC-0128 annotated; CT-178 closed on merge; CT-184, CT-185, CT-186 (adoption) and CT-187 filed.
 
 ## Open
 
@@ -32,10 +32,15 @@ that the share works between two personal estates with no organization, from the
   `c50f590b`) with the two decision ids and the tag, and what its engine adopts at its next pin: replace
   `observatory-share-envelope/1` with `fabric-peer-share-envelope/1`, symmetric commit-reveal and a five-byte code in
   place of its asymmetric four-byte one, the RFC 8785 transcript and claim MAC, the ceilings (claim deadline 7 days, lease
-  24 hours, envelope 90 days), no report nonce, and `secret.prompt` with the broker launching its app (SP-3). Tell it
+  24 hours, envelope 90 days), no report nonce, mailbox requests signed under DEC-0056's RFC 9421 subset with the share
+  keys, and `secret.prompt` with the broker launching its app (SP-3). Tell it
   that DEC-0143 admits no `secret.ui` client on Linux (CT-184), where its D4 had the Tauri window, and that the mailbox's
   routes stay its own (CT-185), that a share is no `share:` context (PS-3), that its job sees five outcomes (SP-5), and
-  that the comparison and "Store" are DEC-0121 human gates (`humanStep: comparison`, a new value, and `secret`).
+  that the comparison and "Store" are DEC-0121 human gates (`humanStep: comparison`, a new value, and `secret`),
+  declared only after the readers below re-pin.
+- Ask the Fabric Agent Adapter (its kits' `HUMAN_STEPS` and the 67-case asserts), Fabric Dashboards (its actions
+  reader's `STEPS`, against the new declaration vector) and Fabric (CT-125) to re-pin at or after DEC-0142 before
+  Observatory declares `comparison` (CT-186).
 - The UX artefacts reference ids SCN-052, SCN-053, SCR-33 and SCR-34 because SCN-050, SCN-051 and SCR-32 are taken on
   the branches of DEC-0138 and DEC-0140; whichever merges later keeps them.
 

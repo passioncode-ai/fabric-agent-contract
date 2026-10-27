@@ -158,6 +158,7 @@ function declarations(): Json[] {
     ["no key: nothing to check", { surfaces: {}, extensions: {} }, []],
     ["no extensions: nothing to check", { surfaces: {} }, []],
     ["three actions, each tool served", doc({ actions: [none, relayed, human("sign-in")] }, served), []],
+    ["a human comparison of codes, a step DEC-0142 added", doc({ actions: [relayed, human("comparison")] }, served), []],
     ["no capability list: tools are not compared", doc({ actions: [relayed] }), []],
     ["an id declared twice", doc({ actions: [relayed, { ...none, id: relayed.id }] }, served), [`${KEY_PATH}/actions/1/id`]],
     ["a human action without its step", doc({ actions: [{ ...none, gate: "human" }] }, served), [`${KEY_PATH}/actions/0/humanStep`]],

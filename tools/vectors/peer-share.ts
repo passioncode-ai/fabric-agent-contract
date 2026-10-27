@@ -138,6 +138,7 @@ function exchanges(): Json[] {
     run("a recipient reveals twice", [CLAIM, COMMIT, REVEAL_R, REVEAL_R], { state: "burnt", reason: "repeated", index: 3 }),
     run("a reveal that does not open its commitment", [CLAIM, COMMIT, frame("reveal", { role: "recipient", shareId: SHARE, nonce: N_X })], { state: "burnt", reason: "commit-mismatch", index: 2 }),
     run("an abort before completion", [CLAIM, COMMIT, ABORT_R], { state: "burnt", reason: "aborted", index: 2 }),
+    run("an abort before any claim: aborted, not out of order", [ABORT_R], { state: "burnt", reason: "aborted", index: 0 }),
     run("the codes differ: one abort after completion", [CLAIM, COMMIT, REVEAL_R, REVEAL_S, ABORT_R], { state: "burnt", reason: "aborted", index: 4 }),
     run("anything after that abort", [CLAIM, COMMIT, REVEAL_R, REVEAL_S, ABORT_R, ABORT_R], { state: "burnt", reason: "closed", index: 5 }),
     run("a second frame after completion that is no abort", [CLAIM, COMMIT, REVEAL_R, REVEAL_S, REVEAL_S], { state: "burnt", reason: "closed", index: 4 }),

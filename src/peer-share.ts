@@ -224,7 +224,7 @@ export function peerComparisonCode(sender: unknown, recipient: unknown): { ok: t
   const mine = [peerThumbprint(s.keys.sig), peerThumbprint(s.keys.kem)], theirs = [peerThumbprint(r.keys.sig), peerThumbprint(r.keys.kem)];
   if (mine.some((key) => theirs.includes(key))) return { ok: false, problem: "same-keys" };
   const transcript = rfc8785({ type: PEER_CODE_TYPE, shareId: s.shareId, sender: { keys: s.keys, nonce: s.nonce }, recipient: { keys: r.keys, nonce: r.nonce } });
-  return { ok: true, code: String(sha256(transcript).readUIntBE(0, 5) % 1_000_000).padStart(PEER_CODE_DIGITS, "0") };
+  return { ok: true, code: String(sha256(transcript).readUIntBE(0, 5) % 10 ** PEER_CODE_DIGITS).padStart(PEER_CODE_DIGITS, "0") };
 }
 
 /** The code only after each reveal opened its own commitment: a port that codes reveals straight away loses the one-guess bound. */
@@ -346,7 +346,7 @@ export interface PeerSealInput {
   sequence: number; // the sealer's next for the share (and slot); never one it used
   iat: Date;
   plaintext: Buffer;
-  ephemeralPrivateKey?: Buffer; // vectors only
+  ephemeralPrivateKey?: Buffer; // tests only: a fixed ephemeral key repeats a seal; never reuse one for two values
 }
 
 /** Throws unless `privateKey` is the P-256 private key of the share `#sig` named: a mismatched pair signs what no reader verifies. */

@@ -1572,6 +1572,25 @@
       }
     },
     {
+      "name": "an abort before any claim: aborted, not out of order",
+      "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+      "claimDeadline": "2026-11-03T10:00:00Z",
+      "at": "2026-10-27T10:00:00Z",
+      "frames": [
+        {
+          "schema": "peer-share-frame/1",
+          "step": "abort",
+          "role": "recipient",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd"
+        }
+      ],
+      "expect": {
+        "state": "burnt",
+        "reason": "aborted",
+        "index": 0
+      }
+    },
+    {
       "name": "the codes differ: one abort after completion",
       "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
       "claimDeadline": "2026-11-03T10:00:00Z",

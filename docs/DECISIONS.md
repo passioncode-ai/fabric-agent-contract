@@ -4276,7 +4276,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   fell through to `hello-first` or was passed on (the board run's final verification; w7 close).
 - **Annotated (2026-10-27):** extended by DEC-0143: a second client capability, `secret.ui`, accepted only from a peer the
   node verified as its product's signed app (else `forbidden`), and `secret.prompt` and `secret.cancel` for a
-  secret request whose value never crosses the channel (local-channel.md, Secret requests).
+  secret request whose value never crosses the channel (local-channel.md, Secret requests). Item 3's "answered once per
+  session" means accepted once: a hello refused `invalid-params` or `forbidden` agrees nothing, and the client may send
+  another within the 5 s.
 - **Amends:** DEC-0015's service descriptor (an optional `channels.local`). Implements the organization edition's
   CON-OE-10 in its CROSSWALK-v4 edition (v4 §5 at `9c6a780`; no `policy.decide`). Closes the board run's inventory item
   CON-OE-10 (node N12, packet P6-04).
@@ -8401,13 +8403,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   stays `0.1.0`.
 - **Consequences / affects:** `src/peer-share.ts`, `src/protocol-revisions.ts`, `src/actions.ts` (`HumanStep`),
   `schemas/service-actions-extension.schema.json` and `schemas/delegation-refusal.schema.json` (`comparison`),
-  `tools/vectors/actions.ts` and `fixtures/vectors/actions.json` (one case), `docs/specification/service.md` (AP-4), `schemas/peer-share-*.schema.json`
+  `tools/vectors/actions.ts` and `fixtures/vectors/actions.json` (one case), `docs/specification/service.md` (AP-4), `delegation.md` (DL-26, the refusal table, MD-6, OA-5), `interop.md`, `schemas/peer-share-*.schema.json`
   (four), `tools/vectors/peer-share.ts` and `tools/vectors/run.ts`, `fixtures/vectors/peer-share.json`,
   `test/peer-share.test.ts`, `fixtures/positive/peer-share-*.json` and `fixtures/negative/peer-share-*.json` with their
   catalogue rows, `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`; `docs/specification/peer-share.md`,
   `contexts.md`, `versioning.md`, `conformance.md`, `docs/specification/README.md`, `DOCMAP.md`, `CONTEXT.md`;
   `docs/ux/foundation.md` (JTBD-15, JRN-14, ST-039), `docs/ux/flows.md` (FLW-33), `docs/ux/screens.md` (SCR-33),
-  `docs/ux/scenarios.md` (SCN-052); DEC-0084, DEC-0086, DEC-0111 and DEC-0128 annotated;
+  `docs/ux/scenarios.md` (SCN-052); DEC-0084, DEC-0086, DEC-0111, DEC-0121 and DEC-0128 annotated;
   backlog CT-178 (closed on merge with DEC-0143), CT-185, CT-186 and CT-187; the handoff `docs/handoffs/2026-10-27-peer-share.md`.
 - **Source:** CT-178; Project Observatory's request `c50f590b` (thread `faa32585`), its reply `1623e11f`.
 
@@ -8456,7 +8458,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `src/local-channel.ts` (`CLIENT_CAPABILITIES`, `secret.prompt`, `ChannelState.signedApp`,
   `maySecretPrompt`, `secretOutcome`, the `forbidden` hello), `schemas/local-channel.schema.json` (`secret.ui`,
   `secretPrompt`, `secretResult`, `secret.cancel`), `test/local-channel.test.ts`,
-  `fixtures/positive/local-channel-secret-cancel.json`; `docs/specification/local-channel.md`, `conformance.md`,
+  `fixtures/positive/local-channel-secret-cancel.json`; `docs/specification/local-channel.md`, `conformance.md`, `docs/specification/README.md`,
   `DOCMAP.md`, `CONTEXT.md`; `docs/ux/foundation.md` (ST-040), `docs/ux/flows.md` (FLW-34), `docs/ux/screens.md` (SCR-34),
   `docs/ux/scenarios.md` (SCN-053); DEC-0075 annotated; backlog CT-178, CT-184
   and CT-186.

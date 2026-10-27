@@ -99,7 +99,8 @@ before either reveals:
    second seals to a key nobody confirmed (trust on first use), and the sender's screen records the share as
    `confirmed: false` and says so: whoever claimed first may hold the value, and when the link went through the
    mailbox's page nothing checked the recipient. Both are the person's own acts: each is declared with `gate: human` and `humanStep:
-   comparison` (DEC-0121 AP-4), so the agent's tool for it answers `human-step-required` with the link to the screen,
+   comparison` (DEC-0121 AP-4), so the agent's tool for it answers `human-step-required` with the link to the node's page that shows the pending share and names the app
+   window that holds the comparison,
    and no agent can confirm a code or skip the comparison for the person. The product declares its other buttons under
    DEC-0121 too; "They differ" and the recipient's "Decline" only stop a share.
 
@@ -109,11 +110,14 @@ then at most one `abort` after completion (a person said the codes differ). The 
 order (`out-of-order`), a second frame of one step and role before completion (`repeated`, a second claim included), a
 reveal that does not open its commitment (`commit-mismatch`), an abort before completion or the one after it
 (`aborted`), any other frame after completion and anything after that abort (`closed`), a frame of another share or
-another shape (`malformed`), or the claim deadline passing before completion (`expired`). A frame of another share or another shape is `malformed` wherever it comes, before any other
+another shape (`malformed`), or the claim deadline passing before completion (`expired`). An abort before completion
+is `aborted` wherever it comes, before any claim included, never `out-of-order`. A frame of another share or another shape is `malformed` wherever it comes, before any other
 reason. A commit that reflects the claim's own keys is not a burn of the verdict: it stops at the code, which
 `checkedPeerCode` refuses as `same-keys`, so nothing is sealed. A node keeps the first burnt verdict it reaches and reads the share no further: the verdict carries no arrival times, so `expired` holds only for a
 node that kept it. Once the sender has confirmed or shared without comparing, the exchange is over: the nodes and the mailbox read no further exchange frames for the
-share, so a late frame burns nothing that is already sealed. A burnt exchange seals nothing. A new attempt is a new share, with a new id and a new code, that
+share, so a late frame burns nothing that is already sealed. The mailbox learns the share is sealed from the first envelope
+stored for it, and still carries a claim that arrives after that to the sender's node, which shows it beside a share
+sealed without comparing as a warning to take the share back. A burnt exchange seals nothing. A new attempt is a new share, with a new id and a new code, that
 the sender makes. The recipient's app reveals a nonce for a share id once and never again, so a mailbox posing as the
 sender cannot rerun the recipient's side for fresh codes.
 
@@ -210,7 +214,8 @@ A screen says "taken back" only when step 1 is observed and step 3 is confirmed.
 The mailbox is any HTTPS service the sender names as the link's origin: hosted in the sender's own account, or later
 by a personal cloud. It carries frames, envelopes, reports and records unchanged and holds revocations; it signs
 nothing, opens nothing, and decides nothing about a value or about whom the sender trusts. Its own duties are
-mechanical: it runs `peerExchangeVerdict` over a share's frames and stops carrying the exchange of a burnt one, grants
+mechanical: it runs `peerExchangeVerdict` over a share's frames and stops carrying the exchange of a burnt one, runs no
+verdict after the first envelope stored for the share but still carries a later claim to the sender (PS-6), grants
 an honest recipient a lease of at most 24 hours and counts each delivery (PS-7), and refuses every renewal and delivery
 after a revocation (PS-9). The recipient's node never opens a ciphertext on a lease older than 24 hours from its grant,
 whatever the mailbox said.

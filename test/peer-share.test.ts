@@ -145,6 +145,9 @@ describe("the envelope", () => {
     expect(checkPeerShareEnvelope(env, { ...ctx, marks: [{ shareId, slot: "OPENROUTER_API_KEY", sequence: 1 }] })).toEqual({ ok: false, refusal: "malformed" });
     expect(checkPeerShareEnvelope(env, { ...ctx, marks: "none" })).toEqual({ ok: false, refusal: "malformed" });
     expect(openPeerShare(env, { ...ctx, revoked: true }, scalar("rKem"))).toEqual({ ok: false, refusal: "revoked" });
+    // A fixed ephemeral key repeats the seal byte for byte: a test seam, never reused for two values.
+    const fixed = { ...base, signer: { sig: key("sSig").jwk, privateKey: priv("sSig") }, ephemeralPrivateKey: Buffer.alloc(32, 7) };
+    expect(sealPeerShare(fixed).header.enc).toBe(sealPeerShare(fixed).header.enc);
   });
 });
 
