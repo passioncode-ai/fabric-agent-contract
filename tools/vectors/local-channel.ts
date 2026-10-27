@@ -98,8 +98,8 @@ function dispatch(): Json[] {
   const list: Array<[string, string, string[], Json]> = [
     ["a node that serves machine.report answers it", "machine.report", all, { ok: true }],
     ["a node pinned before DEC-0132 does not serve machine.report", "machine.report", ["health", "enroll.status"], { ok: false, code: "unknown-method" }],
-    ["a node that applies no estate records and serves no machine.report", "machine.report", ["health"], { ok: false, code: "unknown-method" }],
     ["a method no revision names", "estate.export", all, { ok: false, code: "unknown-method" }],
+    ["a method an owner's decision added, which this node serves", "grant.check", [...all, "grant.check"], { ok: true }],
     ["a client method sent to the node", "consent.prompt", all, { ok: false, code: "unknown-method" }],
     ["hello is the session's, never dispatched", "channel.hello", ["channel.hello", ...all], { ok: false, code: "unknown-method" }]
   ];

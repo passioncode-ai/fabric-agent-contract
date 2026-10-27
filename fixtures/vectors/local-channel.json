@@ -962,17 +962,6 @@
       }
     },
     {
-      "name": "a node that applies no estate records and serves no machine.report",
-      "method": "machine.report",
-      "served": [
-        "health"
-      ],
-      "expect": {
-        "ok": false,
-        "code": "unknown-method"
-      }
-    },
-    {
       "name": "a method no revision names",
       "method": "estate.export",
       "served": [
@@ -983,6 +972,19 @@
       "expect": {
         "ok": false,
         "code": "unknown-method"
+      }
+    },
+    {
+      "name": "a method an owner's decision added, which this node serves",
+      "method": "grant.check",
+      "served": [
+        "health",
+        "enroll.status",
+        "machine.report",
+        "grant.check"
+      ],
+      "expect": {
+        "ok": true
       }
     },
     {

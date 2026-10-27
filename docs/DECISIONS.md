@@ -8703,9 +8703,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `5d2ea917` with Fabric). A narrowing of the hub's reading of a report's `at` (one that is no relay time, which
   DEC-0139's `strictTime` admitted with an offset, or one later than the body's `iat`); new duties for the hub
   (counting an old hub's leases, the wait it shows, the `degraded` entry's form) and for a reporting machine (the
-  `#kem` it seals to, the leases of each hub key, a lease a revoked key signed), none deployed yet (CT-152); and a duty
+  `#kem` it seals to, the leases of each hub key, a lease a revoked key signed) and for a meter (re-verifying its leases
+  when it applies a revision), none deployed yet (CT-152); and a duty
   for every recipient of relay messages, deployed ones included (Fabric's hub and nodes, Project Observatory's node):
-  acknowledging a payload type it does not know, whose compliance is unconfirmed and asked in thread `5d2ea917`. Additive: a reference function
+  acknowledging a verified body whose payload type it does not know, whose compliance is unconfirmed and asked in
+  threads `5d2ea917` (Fabric) and `41a9b0cb` (Project Observatory). Additive: a reference function
   (`readMachineReport`), a context member (`notAfter`), a rule code (`FAC-SEM-154`), a node dispatch function
   (`nodeMethodAnswer`) with the vector group `dispatch`, and vectors in `machine-report.json` (`open`, `accept`, a new
   group `read`); no earlier vector's answer changes. Adoption: CT-152's adopters (Fabric's hub and nodes, Project
@@ -8718,9 +8720,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Decision:** [relay](specification/relay.md#the-machines-report) MR-1 to MR-6,
   [window lease](specification/window-lease.md#reporting), [ceremonies](specification/ceremonies.md#move-the-hub) step 7,
   [local channel](specification/local-channel.md#the-session), [devices](specification/devices.md#unlinkable-enrollments).
-  1. **The cap.** A report names at most 64 leases, as now. While leases name only the `estate` scope a machine holds at
-     six per hub key whose leases it holds in one window instance (three windows, a held and a newest expired lease
-  each), so 64 holds ten hub keys; a hub signs no `project:` or
+  1. **The cap.** A report names at most 64 leases, as now. While leases name only the `estate` scope a machine names
+     at most six per hub key whose leases it holds (one instance of each of the three windows, a held and a newest
+     expired lease each), so 64 holds ten hub keys; a hub signs no `project:` or
      `grant:` lease until the revision that admits them decides the report's cap with them, and a machine never drops
      a lease to fit.
   2. **Newest and the hub keys.** The newest lease of a slot is the highest `sequence` among the slot's leases one hub
@@ -8732,6 +8734,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      revision lists, since a lost hub's successor cannot know which held one; a machine whose report names none held
      none. The new hub's first division of such an instance counts each old-hub lease at its reported final `spent`,
      as an ended lease of that amount, never at nothing. How the reference orders leases across hub keys stays CT-113's.
+     This opens the gate only after a planned move. After a lost hub the lost machine, removed in the move's revision,
+     never reports and may have held the old hub's leases itself, so every instance the old hub divided stays closed
+     to new leases until it ends (item 6's rule for a removed machine that never reported).
   5. **Which `#kem`.** A machine seals each report to the `#kem` the newest revision it verified (applied, or newer and
      refused) lists for that hub machine: the hub that drafted it holds that key.
   6. **A machine that does not report** (MR-6): DL-15's switch, step 6 and step 7's gate wait for every machine the
@@ -8771,7 +8776,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** a narrowing for the hub's reading of an `at` that is no relay time (one with an offset was
   accepted under DEC-0139) or later than the body's `iat`, and for a hub that issued a lease of an instance the old hub
   divided without counting the old hub's spend; new duties for reporting machines (none deployed yet, CT-152) and for
-  relay recipients (deployed: whether they already acknowledge an unknown payload is asked in `5d2ea917`). Additive for ports (a new function, a context member, a rule code, vector groups); no
+  relay recipients (deployed: whether they already acknowledge an unknown payload is asked in `5d2ea917` and
+  `41a9b0cb`). Additive for ports (two new functions, a context member, a rule code, vector groups); no
   earlier vector's answer changes, and a held report accepted with an offset before still guards against an older
   one.
   `contractVersion` stays `0.1.0`.

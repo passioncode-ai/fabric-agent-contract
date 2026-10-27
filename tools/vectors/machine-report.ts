@@ -96,6 +96,7 @@ function machineReportVectors(): Json {
       { name: "a report half a microsecond after the one held is newer", sealed: seal("sub-ms", SUB_MS), context: ctx({ held: { at: "2026-10-27T08:00:00.0000004Z" } }), expect: { ok: true, report: SUB_MS } },
       { name: "a report half a microsecond before the one held is stale", sealed: seal("sub-ms", SUB_MS), context: ctx({ held: { at: "2026-10-27T08:00:00.0000006Z" } }), expect: { ok: false, refusal: "stale" } },
       { name: "an at at the body's iat", sealed, context: ctx({ notAfter: "2026-10-27T08:00:00Z" }), expect: { ok: true, report: REPORT } },
+      { name: "an at within the millisecond of the body's iat, to a finer fraction, is not after it", sealed: seal("sub-ms", SUB_MS), context: ctx({ notAfter: "2026-10-27T08:00:00.000Z" }), expect: { ok: true, report: SUB_MS } },
       { name: "an at after the body's iat", sealed, context: ctx({ notAfter: "2026-10-27T07:59:59.999Z" }), expect: { ok: false, refusal: "malformed" } },
       { name: "an at after the body's iat is malformed before the machine is compared", sealed, context: ctx({ notAfter: "2026-10-27T07:59:59Z", sender: "m-b" }), expect: { ok: false, refusal: "malformed" } },
       { name: "a notAfter the hub cannot read refuses rather than lets through", sealed, context: ctx({ notAfter: "yesterday" }), expect: { ok: false, refusal: "malformed" } }

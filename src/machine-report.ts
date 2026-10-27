@@ -135,7 +135,9 @@ function orderReport(report: Json, machine: unknown, held: unknown, notAfter: un
   if (at === undefined) return "malformed";
   if (notAfter !== undefined) {
     const bound = instantKey(notAfter);
-    if (bound === undefined || at > bound) return "malformed";
+    // To the millisecond: a clock that writes `notAfter` or `iat` as `toISOString` does reads to the millisecond, so a
+    // report written within that millisecond, to a finer fraction, is not after it (DEC-0146).
+    if (bound === undefined || at.slice(0, 23) > bound.slice(0, 23)) return "malformed";
   }
   if (report.machine !== machine) return "wrong-machine";
   if (isObject(held)) {

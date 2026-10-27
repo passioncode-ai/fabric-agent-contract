@@ -675,7 +675,7 @@ flowchart TD
   C -->|no| Z[The alert clears; no move]
   C -->|yes, but the hub still answers elsewhere| L
   C -->|yes| M[Pick an always-on full machine; it makes a new hub key]
-  M --> R[Revision: new hubKey, old hub-key revoked, the delta anchored once readers are pinned]
+  M --> R[Revision: new hubKey, old hub-key revoked, the delta anchored once readers are pinned; the windows the lost hub divided stay paused until each ends]
   A -->|a passkey lost| P{Another passkey left?}
   P -->|yes| Q[Revision signed by it: lost one removed and revoked, a new one added]
   P -->|no| N[No revision can be signed: create a new network]
