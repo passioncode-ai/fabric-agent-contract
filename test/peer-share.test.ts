@@ -121,6 +121,8 @@ describe("the envelope", () => {
     expect(openPeerShare(env, ctx, scalar("xKem"))).toEqual({ ok: false, refusal: "cannot-open" });
     expect(() => sealPeerShare({ recipientKem: key("rKem").jwk, signer: { sig: key("sSig").jwk, privateKey: priv("sSig") }, shareId, sequence: 1, iat, exp: new Date(iat.getTime() + (MAX_PEER_ENVELOPE_DAYS * 86_400_000) + 1000), plaintext: Buffer.from("v"), slot: "OPENROUTER_API_KEY", provider: "openrouter" })).toThrow(/lifetime-too-long/);
     expect(() => sealPeerShare({ recipientKem: key("rKem").jwk, signer: { sig: key("sSig").jwk, privateKey: priv("sSig") }, shareId, sequence: 1, iat, exp: new Date(iat.getTime() + 1000), plaintext: Buffer.from("v"), slot: "lower", provider: "openrouter" })).toThrow(/malformed/);
+    // A private key that is not the share #sig named would sign what no recipient verifies.
+    expect(() => sealPeerShare({ recipientKem: key("rKem").jwk, signer: { sig: key("sSig").jwk, privateKey: priv("xSig") }, shareId, sequence: 1, iat, exp: new Date(iat.getTime() + 1000), plaintext: Buffer.from("v"), slot: "OPENROUTER_API_KEY", provider: "openrouter" })).toThrow(/bad-key/);
     // A life inside one second is no life once the header carries whole seconds.
     const within = new Date("2026-10-27T09:59:00.100Z");
     expect(() => sealPeerShare({ recipientKem: key("rKem").jwk, signer: { sig: key("sSig").jwk, privateKey: priv("sSig") }, shareId, sequence: 1, iat: within, exp: new Date(within.getTime() + 800), plaintext: Buffer.from("v"), slot: "OPENROUTER_API_KEY", provider: "openrouter" })).toThrow(/lifetime-too-long/);
@@ -145,6 +147,7 @@ describe("usage reports", () => {
     expect(validateDocument(validator, `${SCHEMA_PREFIX}schemas/peer-share-report.schema.json#/$defs/body`, body).valid).toBe(true);
     expect(openPeerReport(rep, { at: "2026-10-27T10:00:00Z", shareId, ownKem: key("sKem").jwk, recipientSig: key("rSig").jwk, lastSequence: 6 }, scalar("sKem"))).toEqual({ ok: true, sequence: 7, body });
     expect(() => sealPeerReport({ recipientKem: key("sKem").jwk, signer: { sig: key("rSig").jwk, privateKey: priv("rSig") }, shareId, sequence: 8, iat: new Date(), body: { ...body, value: "sk" } })).toThrow(/bad-body/);
+    expect(() => sealPeerReport({ recipientKem: key("sKem").jwk, signer: { sig: key("rSig").jwk, privateKey: priv("xSig") }, shareId, sequence: 8, iat: new Date(), body })).toThrow(/bad-key/);
   });
 });
 
@@ -159,6 +162,9 @@ describe("taking a share back", () => {
     const shareId = (vectors.records as Json[])[0]!.record.shareId as string;
     const record = signPeerRecord({ type: "peer-share-revocation/1", shareId, at: "2026-10-28T10:00:00Z" }, { sig: key("sSig").jwk, privateKey: createPrivateKey({ key: { ...key("sSig").jwk, d: key("sSig").d }, format: "jwk" }) });
     expect(peerRecordStands(record, "peer-share-revocation/1", shareId, key("sSig").jwk)).toEqual({ ok: true });
+    const priv = (name: string) => createPrivateKey({ key: { ...key(name).jwk, d: key(name).d }, format: "jwk" });
+    expect(() => signPeerRecord({ type: "peer-share-revocation/1", shareId, at: "2026-10-28T10:00:00Z" }, { sig: key("sSig").jwk, privateKey: priv("xSig") })).toThrow(/bad-key/);
+    expect(() => signPeerRecord({ type: "peer-share-revocation/1", shareId, at: "2026-10-28T10:00:00Z", note: "x" }, { sig: key("sSig").jwk, privateKey: priv("sSig") })).toThrow(/malformed/);
     expect(valid("peer-share-record.schema.json", record)).toBe(true);
   });
 });

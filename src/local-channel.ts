@@ -132,6 +132,10 @@ export function maySecretPrompt(state: ChannelState): boolean {
   return state.hello && state.signedApp === true && (state.capabilities ?? []).includes("secret.ui");
 }
 
+/**
+ * What `secretOutcome` answers for a prompt the node sent. The agent can also be told `no-client`: the node's answer
+ * before any prompt, when no signed app is admitted (DEC-0143 SP-2, SP-3), which this function never returns.
+ */
 export type SecretOutcome = "stored" | "declined" | "no-answer" | "unconfirmed";
 
 /**

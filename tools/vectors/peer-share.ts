@@ -145,6 +145,7 @@ function exchanges(): Json[] {
     run("a claim whose MAC does not hold, first: it is the link's one claim, and the holder's claim burns it", [{ ...CLAIM, keys: STRANGER, mac: macOf(OTHER_CODE, SHARE, STRANGER, FPR), commit: commitOf("recipient", SHARE, STRANGER, N_X) }, CLAIM], { state: "burnt", reason: "repeated", index: 1 }),
     run("a frame of another share", [CLAIM, { ...COMMIT, shareId: OTHER_SHARE }], { state: "burnt", reason: "malformed", index: 1 }),
     run("a frame with a member more", [{ ...CLAIM, note: "x" }], { state: "burnt", reason: "malformed", index: 0 }),
+    run("a frame of another shape after that abort: malformed wherever it comes", [CLAIM, COMMIT, REVEAL_R, REVEAL_S, ABORT_R, { bad: 1 }], { state: "burnt", reason: "malformed", index: 5 }),
     run("a clock that does not read", [CLAIM], { state: "burnt", reason: "malformed", index: -1 }, "today")
   ];
 }
@@ -191,6 +192,7 @@ function envelopes(): Json[] {
     ["a share taken back", env, ctx({ revoked: true }), no("revoked")],
     ["a sequence below the mark", env, ctx({ marks: mark(2, "sha256:" + "0".repeat(64)) }), no("replayed")],
     ["another envelope at the mark's sequence", env, ctx({ marks: mark(1, "sha256:" + "0".repeat(64)) }), no("sequence-reused")],
+    ["marks that name one share and slot twice", env, ctx({ marks: [...mark(1, digestOf(env)), ...mark(1, digestOf(env))] }), no("malformed")],
     ["a mark of another slot does not apply", env, ctx({ marks: [{ shareId: SHARE, slot: "OTHER_KEY", sequence: 9, digest: "sha256:" + "0".repeat(64) }] }), ok(env)],
     ["issued more than 60 s ahead of the clock", env, ctx({ at: "2026-10-27T09:57:59Z" }), no("not-yet-valid")],
     ["an envelope that lives more than 90 days", envelope({ exp: "2027-01-25T09:59:01Z" }, "long"), ctx(), no("lifetime-too-long")],
@@ -214,6 +216,10 @@ function reports(): Json[] {
     ["the recipient's report, read by the sender", rep, ctx(), { ok: true, sequence: 1, body: BODY }],
     ["the next report after sequence 1", report({ sequence: 2 }, "next"), ctx({ lastSequence: 1 }), { ok: true, sequence: 2, body: BODY }],
     ["a report played again", rep, ctx({ lastSequence: 1 }), no("replayed")],
+    ["a body that names an export made with the button", report({}, "export", { ...BODY, exports: [{ slot: "OPENROUTER_API_KEY", at: "2026-10-27T09:50:00Z" }] }), ctx(), { ok: true, sequence: 1, body: { ...BODY, exports: [{ slot: "OPENROUTER_API_KEY", at: "2026-10-27T09:50:00Z" }] } }],
+    ["signed ES384", report({ alg: "ES384" }, "es384"), ctx(), no("unsupported-alg")],
+    ["one character of the ciphertext changed", { ...rep, ct: `${String(rep.ct).slice(0, 8)}${String(rep.ct)[8] === "A" ? "B" : "A"}${String(rep.ct).slice(9)}` }, ctx(), no("bad-signature")],
+    ["a last sequence that does not read", rep, ctx({ lastSequence: -1 }), no("malformed")],
     ["a member more", { ...rep, note: "x" }, ctx(), no("malformed")],
     ["a report of another share", report({ shareId: OTHER_SHARE }, "other-share"), ctx(), no("wrong-share")],
     ["sealed to another key", report({}, "stranger-kem", BODY, { key: K.rSig }, K.xKem), ctx(), no("wrong-recipient")],

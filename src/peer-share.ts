@@ -12,7 +12,7 @@
  * thumbprint. Every function answers malformed input with a verdict and never throws on a JSON value; the seal
  * functions throw on an input no receiver would open.
  */
-import { createECDH, createHash, createHmac, timingSafeEqual, type KeyObject } from "node:crypto";
+import { createECDH, createHash, createHmac, createPublicKey, timingSafeEqual, type KeyObject } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
 import { type JsonObject, isObject } from "./findings.js";
 import { p256KeyRefusal, p256Point, signEs256 } from "./p256.js";
@@ -315,7 +315,11 @@ const HEADERS: Record<string, readonly string[]> = {
   [PEER_REPORT_TYPE]: ["type", "alg", "suite", "recipient", "signer", "shareId", "sequence", "iat", "enc"]
 };
 
-/** Whether a value has exactly the shape `peer-share-envelope.schema.json` (or the report's) gives a sealed message of `type`. */
+/**
+ * Whether a value has exactly the shape `peer-share-envelope.schema.json` (or the report's) gives a sealed message of
+ * `type`, its times real instants: the schema's time pattern admits a day or a second that does not exist, which the
+ * calendar check here (`instant`, as the relay family reads times) refuses.
+ */
 export function peerSealedShape(value: unknown, type: typeof PEER_ENVELOPE_TYPE | typeof PEER_REPORT_TYPE): value is PeerSealed {
   if (!isObject(value) || !exactly(value, ["header", "ct", "sig"]) || !isObject(value.header)) return false;
   const h = value.header;
@@ -345,10 +349,19 @@ export interface PeerSealInput {
   ephemeralPrivateKey?: Buffer; // vectors only
 }
 
-function seal(type: PeerSealedHeader["type"], input: PeerSealInput, extra: Partial<PeerSealedHeader>): PeerSealed {
-  const key = input.signer.privateKey;
+/** Throws unless `privateKey` is the P-256 private key of the share `#sig` named: a mismatched pair signs what no reader verifies. */
+function signerKeyHolds(signer: { sig: PeerJwk; privateKey: KeyObject }): void {
+  const key = signer.privateKey;
   if (key.type !== "private" || key.asymmetricKeyType !== "ec" || key.asymmetricKeyDetails?.namedCurve !== "prime256v1") throw new Error("bad-key: the signer's key is not a P-256 private key");
-  if (!peerJwk(input.recipientKem) || !peerJwk(input.signer.sig)) throw new Error("bad-key: a share key is not a P-256 public JWK");
+  if (!peerJwk(signer.sig)) throw new Error("bad-key: a share key is not a P-256 public JWK");
+  const pub = createPublicKey(key).export({ format: "jwk" }) as { x?: string; y?: string };
+  if (pub.x !== signer.sig.x || pub.y !== signer.sig.y) throw new Error("bad-key: the private key is not the signer's share #sig");
+}
+
+function seal(type: PeerSealedHeader["type"], input: PeerSealInput, extra: Partial<PeerSealedHeader>): PeerSealed {
+  signerKeyHolds(input.signer);
+  const key = input.signer.privateKey;
+  if (!peerJwk(input.recipientKem)) throw new Error("bad-key: a share key is not a P-256 public JWK");
   const ephemeral = createECDH("prime256v1");
   if (input.ephemeralPrivateKey) ephemeral.setPrivateKey(input.ephemeralPrivateKey);
   else ephemeral.generateKeys();
@@ -529,9 +542,17 @@ export function peerRecordStands(record: unknown, type: typeof PEER_REVOCATION_T
   return verifyEs256(signerSig, rfc8785(unsigned), sig) === true ? { ok: true } : { ok: false, reason: "bad-signature" };
 }
 
-/** Signs a revocation (the sender's share `#sig`) or a deletion receipt (the recipient's). */
+/**
+ * Signs a revocation (the sender's share `#sig`) or a deletion receipt (the recipient's). Throws on a key that is not
+ * the share `#sig` named, or a record `peerRecordStands` would refuse, so nothing unreadable is sent.
+ */
 export function signPeerRecord(record: Record<string, unknown>, signer: { sig: PeerJwk; privateKey: KeyObject }): JsonObject {
+  signerKeyHolds(signer);
   const unsigned = { ...record, signer: peerThumbprint(signer.sig) };
-  return { ...unsigned, sig: signEs256(signer.privateKey, rfc8785(unsigned)) } as JsonObject;
+  const signed = { ...unsigned, sig: signEs256(signer.privateKey, rfc8785(unsigned)) } as JsonObject;
+  const type = record.type === PEER_DELETION_TYPE ? PEER_DELETION_TYPE : PEER_REVOCATION_TYPE;
+  const stands = peerRecordStands(signed, type, record.shareId, signer.sig);
+  if (!stands.ok) throw new Error(`${stands.reason}: the record would not stand`);
+  return signed;
 }
 // #endregion peer-share

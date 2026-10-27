@@ -53,8 +53,10 @@ an `id` that is otherwise well formed is a notification and is not answered; a m
    `schema-unsupported` and closes. No other method is answered before it (`hello-first`; `channelStep`;
    `FAC-SEM-106`, kind `local-channel-session`). A hello refuses a missing `client` or a capability other than
    `consent.ui` and `secret.ui` (`invalid-params`); a hello that declares `secret.ui` from a peer the node did not
-   verify as its product's signed app is `forbidden` and agrees nothing (DEC-0143, [secret requests](#secret-requests)), and
-   a second hello is `invalid-request` and changes nothing.
+   verify as its product's signed app is `forbidden` and agrees nothing (DEC-0143, [secret requests](#secret-requests)). A
+   refused hello agrees nothing, so the client may send another within the 5 s: a client refused for `secret.ui` says
+   hello again without it and keeps `consent.ui`. A second hello after one that was accepted is `invalid-request` and
+   changes nothing.
 2. **The node's methods** (`NODE_METHODS`): `channel.hello`; `health` → `{status, version, protocols, degraded[]}` (an
    empty `degraded` asserts full health); `enroll.status` → `{enrolled, org?}`; `machine.report` (DEC-0132) →
    `{report}`: the node's whole state as `machine-report/1` written at the call, or `null` while it applies no estate
@@ -122,7 +124,10 @@ the vault slot itself.
   machine with no desktop session, the request is answered `no-client` and nothing is shown by anyone.
 - **SP-4. No value on the channel.** The prompt and its result carry no value, in either direction. The app writes the
   value into the slot in its own process; the value never crosses the channel or another process boundary, and is in
-  no argument, environment variable, log, notification or result.
+  no argument, environment variable, log, notification or result. The node reads each answer against
+  `$defs/secretResult` (the whole message's `result` is any object); an answer it refuses counts as no answer and is
+  never recorded or logged. Typing and "Store" are the person's own acts: no agent twin of them exists (DEC-0121's
+  human gate).
 - **SP-5. The outcome the agent sees** (`secretOutcome`): the first `stored` or `declined` the node received between the
   prompt and its deadline, at most 10 minutes after it (`MAX_SECRET_DEADLINE_MS`), by the node's receipt time; no answer
   by then is `no-answer`, a late answer is ignored. `stored` counts only when the node confirmed, in its own vault

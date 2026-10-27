@@ -8367,7 +8367,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      burn a link, never take it (PS-5).
   6. DEC-0084's comparison code under `fabric-peer-commit/1` and `fabric-peer-code/1`, both sides committing before
      either reveals, one attempt per link at both ends (`peerExchangeVerdict`), nothing sealed until the sender confirms
-     the codes match, a skipped comparison recorded as `confirmed: false` (PS-6).
+     the codes match, the confirmation the person's own act with no agent twin (DEC-0121's human gate), a skipped
+     comparison recorded as `confirmed: false` (PS-6).
   7. `fabric-peer-share-envelope/1`: DEC-0111's construction under its own `info`, to the recipient's share `#kem`,
      signed by the sender's share `#sig`, a sequence per share and slot, a life of at most 90 days, opened at each use
      while an honest node holds a lease of at most 24 hours (PS-7).
@@ -8397,7 +8398,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `contexts.md`, `versioning.md`, `conformance.md`, `docs/specification/README.md`, `DOCMAP.md`, `CONTEXT.md`;
   `docs/ux/foundation.md` (JTBD-15, JRN-14, ST-039), `docs/ux/flows.md` (FLW-33), `docs/ux/screens.md` (SCR-33),
   `docs/ux/scenarios.md` (SCN-052); DEC-0084, DEC-0086, DEC-0111 and DEC-0128 annotated;
-  backlog CT-178 (closed on merge with DEC-0143), CT-185 and CT-186; the handoff `docs/handoffs/2026-10-27-peer-share.md`.
+  backlog CT-178 (closed on merge with DEC-0143), CT-185, CT-186 and CT-187; the handoff `docs/handoffs/2026-10-27-peer-share.md`.
 - **Source:** CT-178; Project Observatory's request `c50f590b` (thread `faa32585`), its reply `1623e11f`.
 
 ### DEC-0143: a secret request on the local channel, `secret.prompt`, shown only by the product's signed app
@@ -8419,7 +8420,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `no-client` with the reason `secret-ui-unavailable`, its health unchanged (SP-2).
   3. One client per request; the node may start its signed app through its lifecycle broker within the deadline; none
      admitted by then, or no desktop session, is `no-client` (SP-3).
-  4. No value on the channel in either direction: the app writes the slot itself (SP-4).
+  4. No value on the channel in either direction: the app writes the slot itself, the node reads each answer against
+     `$defs/secretResult` and never records one it refuses; typing and "Store" are the person's acts with no agent
+     twin (SP-4).
   5. The agent sees `stored` only after the node confirmed the write in its own vault record (`unconfirmed`
      otherwise), `declined`, `no-answer` (10 minutes at most, by the node's receipt time) or `no-client`, never a value
      (SP-5).
@@ -8436,8 +8439,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   of its choosing); Linux admission by the executable's path (no signature of the image to check, and another program
   of the user can replace what runs; CT-184 holds the question).
 - **Compatibility:** a widening behind the hello: a node pinned before DEC-0143 answers a `secret.ui` hello
-  `invalid-params`, and the client goes on without it (consent unchanged). `$defs/notification` gains `secret.cancel`;
-  every message that validated still validates. `contractVersion` stays `0.1.0`.
+  `invalid-params`, and the client says hello again without it (consent unchanged). `$defs/notification` gains
+  `secret.cancel`. Every message that validated still validates but one: a `secret.prompt` whose params
+  `$defs/secretPrompt` refuses (empty, or none), which no party sent, since no node served the method before.
+  `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/local-channel.ts` (`CLIENT_CAPABILITIES`, `secret.prompt`, `ChannelState.signedApp`,
   `maySecretPrompt`, `secretOutcome`, the `forbidden` hello), `schemas/local-channel.schema.json` (`secret.ui`,
   `secretPrompt`, `secretResult`, `secret.cancel`), `test/local-channel.test.ts`,

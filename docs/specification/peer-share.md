@@ -94,7 +94,8 @@ before either reveals:
    bytes of its SHA-256 as a big-endian integer, modulo 10^6, six digits with leading zeros. It binds both sides' keys,
    both nonces and the share.
 4. The two people compare the codes by a call or a thread they already trust. The sender's node seals nothing until
-   the sender confirms they match. A sender who skips the comparison seals to a key nobody confirmed (trust on first
+   the sender confirms they match. The confirmation is the person's own act, never an agent's: no agent twin of it
+   exists (DEC-0121's human gate), since an agent that confirmed would make every share trust on first use. A sender who skips the comparison seals to a key nobody confirmed (trust on first
    use): the sender's screen records the share as `confirmed: false` and says so.
 
 **One attempt per link, at both ends** (`peerExchangeVerdict`, which the sender's node, the recipient's node and the
@@ -103,9 +104,10 @@ then at most one `abort` after completion (a person said the codes differ). The 
 order (`out-of-order`), a second frame of one step and role before completion (`repeated`, a second claim included), a
 reveal that does not open its commitment (`commit-mismatch`), an abort before completion or the one after it
 (`aborted`), any other frame after completion and anything after that abort (`closed`), a frame of another share or
-another shape (`malformed`), or the claim deadline passing before completion (`expired`). A node keeps the first burnt
-verdict it reaches and reads the share no further: the verdict carries no arrival times, so `expired` holds only for a
-node that kept it. A burnt exchange seals nothing. A new attempt is a new share, with a new id and a new code, that
+another shape (`malformed`), or the claim deadline passing before completion (`expired`). A frame of another share or another shape is `malformed` wherever it comes, before any other
+reason. A node keeps the first burnt verdict it reaches and reads the share no further: the verdict carries no arrival times, so `expired` holds only for a
+node that kept it. Once the sender has confirmed, the exchange is over: the nodes and the mailbox read no further exchange frames for the
+share, so a late frame burns nothing that is already sealed. A burnt exchange seals nothing. A new attempt is a new share, with a new id and a new code, that
 the sender makes. The recipient's app reveals a nonce for a share id once and never again, so a mailbox posing as the
 sender cannot rerun the recipient's side for fresh codes.
 
@@ -200,7 +202,11 @@ A screen says "taken back" only when step 1 is observed and step 3 is confirmed.
 
 The mailbox is any HTTPS service the sender names as the link's origin: hosted in the sender's own account, or later
 by a personal cloud. It carries frames, envelopes, reports and records unchanged and holds revocations; it signs
-nothing, decides nothing and opens nothing.
+nothing, opens nothing, and decides nothing about a value or about whom the sender trusts. Its own duties are
+mechanical: it runs `peerExchangeVerdict` over a share's frames and stops carrying the exchange of a burnt one, grants
+an honest recipient a lease of at most 24 hours and counts each delivery (PS-7), and refuses every renewal and delivery
+after a revocation (PS-9). The recipient's node never opens a ciphertext on a lease older than 24 hours from its grant,
+whatever the mailbox said.
 
 - **Requests** to it are signed under DEC-0056's RFC 9421 subset (`@method`, `@target-uri`, `content-digest`, `created`,
   `nonce`, `keyid`; [devices](devices.md)) by the share key of the side that sends them, the recipient's from its claim
@@ -211,6 +217,9 @@ nothing, decides nothing and opens nothing.
   the sender's labels for the recipient and the keys unless the product seals them, the number of keys, end dates, the
   time and frequency of every claim, renewal and report, and the IP addresses of both machines. Whoever controls the
   account it runs in can read those.
+- **Times** in every message are UTC instants ending in `Z`, the relay family's form; the schemas' pattern admits a day
+  or a second that does not exist, and the reference refuses it (`instant`, as relay.md reads times), so a port checks
+  the calendar too.
 - **Its HTTP routes and its name** are the product's, not the contract's (Project Observatory's `observatory-cloud/1`):
   the contract fixes the frames and sealed messages that cross between the two estates and what the mailbox may see and
   do. The routes are not fixed (CT-185): until a decision fixes them, a recipient claims, renews, reports and returns its

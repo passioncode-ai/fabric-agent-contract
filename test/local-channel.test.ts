@@ -63,6 +63,9 @@ describe("secret.ui and secret.prompt", () => {
   it("accepts secret.ui only from a peer the node verified as its signed app, and agrees nothing otherwise", () => {
     expect(ask({ signedApp: true })).toMatchObject({ ok: true, state: { hello: true, capabilities: ["secret.ui"] } });
     for (const state of [{}, { signedApp: false }, { signedApp: "yes" }]) expect(ask(state)).toMatchObject({ ok: false, code: "forbidden", state: { hello: false } });
+    // A refused hello agrees nothing: the client says hello again without secret.ui and keeps consent.
+    const refused = ask({});
+    expect(channelStep(refused.state, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client, capabilities: ["consent.ui"] }))).toMatchObject({ ok: true, state: { hello: true, capabilities: ["consent.ui"] } });
     // The refusal comes after the hello's own checks: a bad hello is still invalid-params, an unknown revision schema-unsupported.
     expect(channelStep(fresh, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client, capabilities: ["secret.ui", "secret.ui"] }))).toMatchObject({ ok: false, code: "invalid-params" });
     expect(channelStep(fresh, hello({ protocols: ["fabric-local-channel/0.2"], client, capabilities: ["secret.ui"] }))).toMatchObject({ ok: false, code: "schema-unsupported" });

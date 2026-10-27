@@ -24,7 +24,7 @@ that the share works between two personal estates with no organization, from the
   `test/local-channel.test.ts`.
 - `contexts.md`, `versioning.md`, `conformance.md` (four rows), the specification README, `DOCMAP.md`, `CONTEXT.md`;
   `docs/ux` JTBD-15, JRN-14, ST-039, ST-040, FLW-33, FLW-34, SCR-33, SCR-34, SCN-052, SCN-053; DEC-0075, DEC-0084,
-  DEC-0086, DEC-0111 and DEC-0128 annotated; CT-178 closed on merge; CT-184, CT-185 and CT-186 (adoption) filed.
+  DEC-0086, DEC-0111 and DEC-0128 annotated; CT-178 closed on merge; CT-184, CT-185, CT-186 (adoption) and CT-187 filed.
 
 ## Open
 
@@ -39,6 +39,11 @@ that the share works between two personal estates with no organization, from the
   the branches of DEC-0138 and DEC-0140; whichever merges later keeps them.
 
 ## Checks actually run
+
+The specification README's "no released consumer runs a session yet" rests on the round-1 and round-2 seam readings:
+`git grep` for `channel.hello`, `consent.ui` and `secret.ui` at Project Observatory v0.29.2, Fabric v0.3.14, Fabric
+Dashboards v0.8.8, Fabric Switchboard v0.6.83 and the Fabric Agent Adapter v0.52.0 found no session client or
+server.
 
 `pnpm typecheck`, vitest with coverage written to the session scratchpad (every floor met), `pnpm ux:lint`,
 `pnpm docs:check`, `pnpm privacy:check`, `pnpm vectors:check`, no U+2014 in the added lines.
