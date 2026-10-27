@@ -725,7 +725,8 @@ arguments name no session.
   The host refuses a mover that is not the owning operator `not_authorized`, and a move of an `absent` slot
   `invalid_transition` (there is no holder to move from; retrying changes nothing until a session enrolls). The host checks in this order and answers the first that applies: `not_authorized` (the mover); a stored result for
   the same key (a replay) or `idempotency_conflict` for another move under it, with the epoch's `capacity_exceeded` and
-  `idempotency_window_expired`; `not_authorized` (the receiving session); `held`; `invalid_transition` (absent,
+  `idempotency_window_expired`; `not_authorized` (the receiving session; when it is already the slot's holder, a host shows the move as already
+  made, not as a failure); `held`; `invalid_transition` (absent,
   `retryable: false`); `revision_conflict`. The move answers the board's refusals
   in `comms-refusal.schema.json`'s shape, `held` staged by the reader's pin as the [holds](#holds) Compatibility says. An `absent` slot is not moved: an authorized session takes it by its own `com.enroll`.
 - **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
