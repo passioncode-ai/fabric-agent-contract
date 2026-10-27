@@ -8354,7 +8354,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the judge matched, named as in `checks`; a check a person did not label is left out, and none labelled leaves the
      member out (never an empty object).
   3. `FAC-SEM-126` widens: a calibration names its rubric version and judge (one finding with a judged sample's);
-     `calibration.helped` follows the not-measured rule; the week is a real ISO week no later than `day`;
+     `calibration.helped` follows the not-measured rule; the week is a real ISO week that starts no later than `day`;
      `calibrationChecks` without `calibration` is a finding.
 - **Why:** the judge's agreement with people is what lets a reader trust a check's rate; carrying it in the payload
   lets any reader decide by its own threshold instead of trusting none.
@@ -8363,8 +8363,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   flat inside `calibration`, as the asker's v2 `<check>Agree` keys are (two levels too, but `calibration` would then
   mix its own facts with a map named by the rubric, so a check named `week` or `labelled` would collide; the
   separate member keeps the check names as free as in `checks`); a new revision
-  `support-quality-daily/2` (two optional members change nothing a `/1` reader reads, and DEC-0095's annotation of
-  2026-10-21 set the precedent of a change at the same revision before producers moved); a `0` for an unlabelled check
+  `support-quality-daily/2` (a reader that only parses reads nothing new, and one that validates against an older copy
+  loses the day until it re-pins, as it would on a `/2` kind; a widening leaves every producer's payload valid, where a
+  new revision is one every producer and reader must move to); a `0` for an unlabelled check
   (FAC-SEM-126: a metric not measured is `null` or absent, never `0`).
 - **Compatibility:** a widening of a closed object: a `/1` payload without the two members validates as before. The
   feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries the members once every reader of
@@ -8375,6 +8376,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `schemas/support-quality-daily.schema.json`, `src/support-quality-rules.ts`,
   `test/support-quality.test.ts`, `fixtures/positive/support-quality-daily-calibrated.json`,
   `fixtures/negative/support-quality-daily-calibration-nested.json` and `-calibration-week.json` with their catalogue
-  rows, `fixtures/semantic/support-quality-daily-calibration-checks-alone.json` and `-calibration-week-after-day.json`; `docs/specification/support-quality.md`, `conformance.md` (the producer and reader rows); DEC-0095 annotated;
+  rows, `fixtures/semantic/support-quality-daily-calibration-checks-alone.json` and `-calibration-week-after-day.json`; `docs/specification/support-quality.md`, `conformance.md` (the producer and reader rows), `DOCMAP.md`; DEC-0095 annotated;
   backlog CT-188.
 - **Source:** CT-188; the board request `b05d8bc9` (thread `afd3dc71`).

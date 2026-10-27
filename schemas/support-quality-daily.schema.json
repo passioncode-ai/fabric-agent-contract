@@ -206,7 +206,7 @@
         "labelled",
         "helped"
       ],
-      "description": "Optional (DEC-0144): how well the judge agreed with people on the latest week a person labelled answers. Absent means no calibration. week is that ISO week, labelled the answers a person labelled, helped the share of those whose helped verdict the judge matched (null when helped was not labelled, named calibration.helped in notMeasured). Each check's agreement is calibrationChecks, at the top level so data.value stays two levels deep (DEC-0070). It is of the day's judge and rubric, and a week no later than day. A producer carries it once every reader of its feed it knows of has adopted DEC-0144: the schema is closed, so a reader validating against an older copy refuses that day's value.",
+      "description": "Optional (DEC-0144): how well the judge agreed with people on the latest ISO week a person labelled answers, starting no later than day, carried on every day it still holds for (a reader never carries it forward). Absent means no calibration. week is that ISO week, labelled the answers a person labelled, helped the share of those whose helped verdict the judge matched (null when helped was not labelled, named calibration.helped in notMeasured). Each check's agreement is calibrationChecks, at the top level so data.value stays two levels deep (DEC-0070). It is of the day's judge and rubric, and a week no later than day. A producer carries it once every reader of its feed it knows of has adopted DEC-0144: the schema is closed, so a reader validating against an older copy refuses that day's value.",
       "properties": {
         "week": {
           "type": "string",

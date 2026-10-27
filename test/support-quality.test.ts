@@ -143,5 +143,11 @@ describe("FAC-SEM-126: support-quality-daily/1", () => {
     partial.nobodyDropped.turns = "142";
     // A sum with an unknown part, or a whole that is not a number, is not checked: nothing is claimed about it.
     expect(paths(partial)).toEqual([]);
+    const dayless = Object.assign(ok(), { day: 20261018, calibration: { week: "2026-W43", labelled: 40, helped: 0.85 } });
+    expect(paths(dayless)).toEqual([]);
+  });
+  it("finds each new semantic fixture at the path its name says (DEC-0144)", () => {
+    expect(paths(load("support-quality-daily-calibration-checks-alone.json").input as Json)).toEqual(["FAC-SEM-126 /calibrationChecks"]);
+    expect(paths(load("support-quality-daily-calibration-week-after-day.json").input as Json)).toEqual(["FAC-SEM-126 /calibration/week"]);
   });
 });
