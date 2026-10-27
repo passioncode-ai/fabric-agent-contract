@@ -106,6 +106,8 @@ describe("FAC-SEM-126: support-quality-daily/1", () => {
     expect(isoWeekMonday("2026-W53")).toBe("2026-12-28");
     expect(isoWeekMonday("2025-W53")).toBeNull();
     expect(isoWeekMonday("week 3")).toBeNull();
+    expect(isoWeekMonday("0001-W01")).toBe("0001-01-01");
+    expect(isoWeekMonday("9999-W52")).toBe("9999-12-27");
     const numeric = Object.assign(ok(), { calibration: { week: 43, labelled: 40, helped: 0.85 } });
     expect(paths(numeric)).toEqual([]);
   });

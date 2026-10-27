@@ -18,12 +18,19 @@ export function isoWeekMonday(week: string): string | null {
   if (!match) return null;
   const year = Number(match[1]);
   const number = Number(match[2]);
-  const jan4 = Date.UTC(year, 0, 4);
-  const firstMonday = jan4 - ((new Date(jan4).getUTCDay() + 6) % 7) * 86_400_000;
-  const nextFirstMonday = Date.UTC(year + 1, 0, 4) - ((new Date(Date.UTC(year + 1, 0, 4)).getUTCDay() + 6) % 7) * 86_400_000;
+  // setUTCFullYear, never Date.UTC: Date.UTC reads the years 0 to 99 as 1900 to 1999.
+  const mondayOfWeekOne = (y: number): number => {
+    const jan4 = new Date(0);
+    jan4.setUTCFullYear(y, 0, 4);
+    return jan4.getTime() - ((jan4.getUTCDay() + 6) % 7) * 86_400_000;
+  };
+  const firstMonday = mondayOfWeekOne(year);
+  const nextFirstMonday = mondayOfWeekOne(year + 1);
   const weeks = (nextFirstMonday - firstMonday) / (7 * 86_400_000);
   if (number < 1 || number > weeks) return null;
-  return new Date(firstMonday + (number - 1) * 7 * 86_400_000).toISOString().slice(0, 10);
+  const monday = new Date(firstMonday + (number - 1) * 7 * 86_400_000);
+  const pad = (n: number, width: number) => String(n).padStart(width, "0");
+  return `${pad(monday.getUTCFullYear(), 4)}-${pad(monday.getUTCMonth() + 1, 2)}-${pad(monday.getUTCDate(), 2)}`;
 }
 
 export function supportQualityRules(value: JsonObject): Finding[] {

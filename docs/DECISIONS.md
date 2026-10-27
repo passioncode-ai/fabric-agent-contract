@@ -5937,7 +5937,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-21):** `checks` is never an empty object (`minProperties: 1`): with no check judged it is `null`,
   as the page already said. A stricter schema at the same revision, because no producer had moved to `/1` yet (CT-61).
 - **Annotated (2026-10-27):** DEC-0144 adds the optional `calibration` and `calibrationChecks` members at the same
-  revision; a party sends them only to a reader pinned at or after it.
+  revision; a producer carries them once every reader of its feed it knows of has adopted DEC-0144, and a reader
+  validating against an older copy refuses that day's `value` (DEC-0070).
 - **Decision:** in [support quality](specification/support-quality.md):
   1. An agent that answers people MAY publish, on its events feed, one event per closed UTC day and channel (`chat`,
      `mail`, `reviews`, `community`), of kind `support.quality_daily`, whose `data.value` (DEC-0070) is a
@@ -8339,8 +8340,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   optional members, which a reader validating against an older copy refuses. Consumer adoption: CT-188.
 - **Context:** a project on the board asked (request `b05d8bc9`, thread `afd3dc71`, 2026-10-27) for a way to say on
   what share of the answers a person labelled the judge agreed with the person: without it a reader treats every
-  judge as uncalibrated and never ranks or alerts on its checks, even when the producer calibrated it. Producers on the
-  asker's v2 shape, outside the contract, already send it, flat inside `calibration` as `<check>Agree` keys; the
+  judge as uncalibrated and never ranks or alerts on its checks, even when the producer calibrated it. One producer on the
+  asker's v2 shape, outside the contract, already sends it, flat inside `calibration` as `<check>Agree` keys; the
   asker's reader first read the check shares inside `calibration` from the thread's earlier answer, and since its
   release of 2026-10-27 reads them from `calibrationChecks` and still reads the older form. support-quality.md listed
   the calibration members among those with no `/1` home.
