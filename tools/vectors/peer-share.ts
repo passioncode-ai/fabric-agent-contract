@@ -75,6 +75,7 @@ function links(): Json[] {
     { name: "a port in the origin", link: `https://mailbox.example:8443/s/${SHARE}#c=${CODE}&k=${FPR}`, expect: { ok: true, link: { ...ok.link, origin: "https://mailbox.example:8443" } } },
     { name: "plain HTTP", link: LINK.replace("https:", "http:"), expect: bad },
     { name: "user information in the authority", link: `https://a@mailbox.example/s/${SHARE}#c=${CODE}&k=${FPR}`, expect: bad },
+    { name: "an empty user information, which URL normalisation drops", link: `https://:@mailbox.example/s/${SHARE}#c=${CODE}&k=${FPR}`, expect: ok },
     { name: "a query", link: `${ORIGIN}/s/${SHARE}?x=1#c=${CODE}&k=${FPR}`, expect: bad },
     { name: "a third fragment member", link: `${LINK}&x=1`, expect: bad },
     { name: "the code twice", link: `${ORIGIN}/s/${SHARE}#c=${CODE}&c=${CODE}`, expect: bad },

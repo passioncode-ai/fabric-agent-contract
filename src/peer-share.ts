@@ -109,7 +109,7 @@ export function parseShareLink(value: unknown): { ok: true; link: ShareLink } | 
   return { ok: true, link: { origin: url.origin, shareId: path[1] as string, code, fpr } };
 }
 
-/** The link's text for a share; a parse of it answers the same parts. */
+/** The link's text for a share; for parts `parseShareLink` answered, a parse of it answers the same parts. */
 export function shareLink(link: ShareLink): string {
   return `${link.origin}/s/${link.shareId}#c=${link.code}&k=${link.fpr}`;
 }

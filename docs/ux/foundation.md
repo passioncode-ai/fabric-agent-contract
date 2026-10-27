@@ -700,7 +700,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given a service that declares an action `relayed`, when my agent calls its tool from my machine with my decision naming the action and quoting me, then the service takes it as my decision and its audit names the agent it authenticated (`actionDecision`, DEC-0121).
   - Given my agent calls without my decision, when the service answers `operator-decision-required`, then the agent asks me and calls again with my answer quoted.
-  - Given a step only I can take (a sign-in, a consent, a payment, a secret, a passkey signature, spend above a limit, a comparison of codes with another person), when my agent calls it, then the service answers `human-step-required` with the link to that step.
+  - Given a step only I can take (a sign-in, a consent, a payment, a secret, a passkey signature, spend above a limit, a comparison of codes with another person or the choice to share without one), when my agent calls it, then the service answers `human-step-required` with the link to that step.
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
@@ -725,7 +725,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given I tell my developer agent "run the research on competitors' prices", when it engages the research agent, then the research agent runs the paid research within my project's money limits without asking me and records my words, the task and the chain (`mandateCovers`, DEC-0125).
   - Given the research would cost more than an amount I named, or reach a capability, an effect or a project my words do not name, when the research agent is called, then it refuses with the part not covered and only that part is put to me.
   - Given I approve a change in one agent's chat and another of my agents holds the key, when the first relays my words verbatim with when and where I said them and the scope, from one of my own projects or sessions, then the second acts without asking me again and records my words and where I said them (DEC-0126 OA-1 to OA-7).
-  - Given a sign-in, a consent, a payment, a typed secret, spend above a limit, a passkey signature or a comparison of codes with another person, then my mandate never covers it and the step comes to me.
+  - Given a sign-in, a consent, a payment, a typed secret, spend above a limit, a passkey signature or a comparison of codes with another person or the choice to share without one, then my mandate never covers it and the step comes to me.
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
@@ -760,7 +760,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-040: Give an agent a secret in my own app's window, never in a chat
 
-- **Story:** As P-02, I want an agent's request for a secret to reach only my product's signed app, which shows my own mark and writes the value into my vault itself, so that the agent never sees the value and I can tell its window from a lookalike, both where the operating system keeps other programs out of the app (macOS), unless a program holds my screen-recording permission, which can read the mark from any genuine prompt; on Windows another program of mine can reach into the app, so the promise is weaker there.
+- **Story:** As P-02, I want an agent's request for a secret to reach only my product's signed app, which shows my own mark and writes the value into my vault itself, so that the agent never sees the value through the prompt (a command it runs with the value can still print it) and I can tell its window from a lookalike, both where the operating system keeps other programs out of the app (macOS), unless a program holds my screen-recording or Accessibility permission, which can read the mark from any genuine prompt; on Windows another program of mine can reach into the app, so the promise is weaker there.
 - **Traces:** JTBD-15, JRN-14/#4
 - **Acceptance criteria:**
   - Given a client that declares `secret.ui`, when the node has not verified it as its product's signed app by the operating system, then its hello is `forbidden` (`channelStep`).

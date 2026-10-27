@@ -17,7 +17,8 @@ that the share works between two personal estates with no organization, from the
   answered by PS-10, not by a protocol of its own.
 - `src/peer-share.ts`; schemas `peer-share-frame`, `peer-share-envelope`, `peer-share-report`, `peer-share-record`;
   `fixtures/vectors/peer-share.json` (written by `tools/vectors/peer-share.ts`, which imports nothing of
-  `src/peer-share.ts`), `test/peer-share.test.ts`; four positive and four negative fixtures; `src/peer-share.ts` under a coverage floor.
+  `src/peer-share.ts`), `test/peer-share.test.ts`; four positive and four negative fixtures, and `fixtures/positive/local-channel-secret-cancel.json`, with their rows in
+  `fixtures/catalogue.json`; `src/peer-share.ts` under a coverage floor.
 - DEC-0143, [local channel](../specification/local-channel.md#secret-requests) SP-1 to SP-7: `secret.prompt`,
   `secret.cancel`, the `secret.ui` capability accepted only after the node's own signed-app check (macOS and Windows;
   none on Linux, CT-184), `secretOutcome`; `src/local-channel.ts`, `schemas/local-channel.schema.json`,
@@ -26,6 +27,7 @@ that the share works between two personal estates with no organization, from the
   `schemas/delegation-refusal.schema.json`, `tools/vectors/actions.ts` and `fixtures/vectors/actions.json` (one case,
   one declaration); `src/protocol-revisions.ts` and its test, `tools/vectors/run.ts`, `test/positive-sweep.test.ts`,
   `test/schema-compilation.test.ts`, `vitest.config.ts`.
+- The handoff's row in `docs/handoffs/README.md`.
 - `contexts.md`, `versioning.md`, `conformance.md` (four rows), the specification README, `DOCMAP.md`, `CONTEXT.md`;
   `docs/ux` JTBD-15, JRN-14, ST-035, ST-037, ST-039, ST-040, FLW-33, FLW-34, SCR-33, SCR-34, SCN-052, SCN-053; `service.md` AP-4, `delegation.md` (DL-26, the refusal table, MD-6, OA-5) and `interop.md` for
   `humanStep: comparison`; DEC-0075, DEC-0084, DEC-0086, DEC-0111, DEC-0121 and DEC-0128 annotated; CT-178 closed on merge; CT-184, CT-185, CT-186 (adoption) and CT-187 filed.
@@ -42,10 +44,11 @@ that the share works between two personal estates with no organization, from the
   routes stay its own (CT-185), that a share is no `share:` context (PS-3), that its job sees five outcomes (SP-5), and
   that the comparison and "Store" are DEC-0121 human gates (`humanStep: comparison`, a new value, and `secret`),
   declared only after the readers below re-pin; that it vendors `local-channel.json` as well as `peer-share.json`;
-  that its OBS-260 branch (its PR #378) differs from DEC-0143 in four points to fix before it ships (`secretPrompt`
+  that its OBS-260 branch (its PR #378) differs from DEC-0143 in six points to fix before it ships (`secretPrompt`
   carries no `lastChange` and leaves `provider` out rather than null; no desktop answers `no-client`; a withdrawn
   request reads `no-answer`, never a sixth outcome `cancelled`; `stored` counts a write after the prompt, not after
-  filing); and that until CT-187 is decided a recipient's metered agent cannot use a share.
+  filing; its provider names follow `common.schema.json#/$defs/slug`, as the prompt and the share envelope read them; an
+  answer at the deadline counts, as `local-channel.json` pins); and that until CT-187 is decided a recipient's metered agent cannot use a share.
 - Ask the Fabric Agent Adapter (its kits' `HUMAN_STEPS`, the 67-case and 11-declaration asserts, the test-side
   `HUMAN_STEPS` copies in its delegation tests, its register port's six new entries and its two reference docs that
   list six steps), Fabric Dashboards (its actions reader's `STEPS`, against the new declaration vector) and Fabric

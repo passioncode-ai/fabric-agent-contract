@@ -126,6 +126,19 @@
       }
     },
     {
+      "name": "an empty user information, which URL normalisation drops",
+      "link": "https://:@mailbox.example/s/1cbbf01dbcb842d86e9b25c6cb286dbd#c=MJGtQw3bQT7dBTn6Paa3Zg&k=6FQ6dHA0zvjOeSrGS91a_UtmVZiSB7B8WZ5eTrHFlYE",
+      "expect": {
+        "ok": true,
+        "link": {
+          "origin": "https://mailbox.example",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "code": "MJGtQw3bQT7dBTn6Paa3Zg",
+          "fpr": "6FQ6dHA0zvjOeSrGS91a_UtmVZiSB7B8WZ5eTrHFlYE"
+        }
+      }
+    },
+    {
       "name": "a query",
       "link": "https://mailbox.example/s/1cbbf01dbcb842d86e9b25c6cb286dbd?x=1#c=MJGtQw3bQT7dBTn6Paa3Zg&k=6FQ6dHA0zvjOeSrGS91a_UtmVZiSB7B8WZ5eTrHFlYE",
       "expect": {

@@ -133,6 +133,7 @@ the vault slot itself.
   never recorded or logged. Typing and "Store" are the person's own acts: the product declares them with `gate: human`
   and `humanStep: secret` (DEC-0121 AP-4), so an agent's tool for them answers `human-step-required`, with the link to
   the node's page that shows the pending request and names the app window that holds it, and never stores a value.
+  The value never reaches the agent through the prompt; any command the agent later runs with it can still print it.
 - **SP-5. The outcome the agent sees** (`secretOutcome`): the first `stored` or `declined` the node received between the
   prompt and its deadline, at most 10 minutes after it (`MAX_SECRET_DEADLINE_MS`), by the node's receipt time; no answer
   by then is `no-answer`, a late answer is ignored. `stored` counts only when the node confirmed, in its own vault
@@ -148,7 +149,9 @@ the vault slot itself.
   on macOS a data-protection keychain item of the app's own access group, which another program of the user cannot
   read; on Windows, and wherever another program of the user can read the app's store, the mark stops only an agent that
   does not look for it. Every genuine prompt also shows the mark on screen, so a program holding the person's
-  screen-recording permission (often granted to the terminal agents run in) can learn it from one.
+  screen-recording permission (often granted to the terminal agents run in) can learn it from one, and a program
+  holding the Accessibility permission may read the window's text and press its buttons; while either is held, the
+  mark does not tell the two windows apart.
 - **SP-7. Where the request comes from** is the node's: an agent asks through the node's own surface (a tool on its MCP
   server, a job), and the node keeps its own limits (one open request per slot, a rate per agent). The channel carries
   only the prompt and its outcome.

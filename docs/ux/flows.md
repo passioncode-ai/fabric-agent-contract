@@ -842,6 +842,8 @@ flowchart TD
   V -->|burnt| B
   V -->|complete| S{The codes match?}
   S -->|no, an abort| B
+  E -.->|a burn reaches the mailbox before storage| B
+  F -.->|a burn reaches the mailbox before storage| B
   S -->|yes, the sender confirms| E[Envelope sealed to the recipient's share key]
   S -->|not compared, the sender shares anyway| F[Sealed, recorded confirmed: false]
   F --> U

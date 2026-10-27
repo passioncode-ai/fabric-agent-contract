@@ -47,7 +47,7 @@ separation the proposal wanted, with no reader's pattern changed.
 ## The link (PS-4)
 
 `https://<mailbox origin>/s/<shareId>#c=<code>&k=<fpr>` (`parseShareLink`, `shareLink`; the link is read after WHATWG URL
-normalisation, so a dot segment or an upper-case host reads as the same parts):
+normalisation, so a dot segment, an upper-case host or an empty `:@` reads as the same parts):
 
 - the mailbox's HTTPS origin (PS-10), no user information, no query; the path `/s/` and the share id, 16 random bytes
   the sender's node draws as 32 lower-case hex digits, never derived from a name, a path or an id of either estate;
@@ -98,7 +98,9 @@ before either reveals:
    sender's node seals nothing until the sender either confirms they match or chooses "Share without comparing"; the
    second seals to a key nobody confirmed (trust on first use), and the sender's screen records the share as
    `confirmed: false` and says so: whoever claimed first may hold the value, and when the link went through the
-   mailbox's page nothing checked the recipient. Both are the person's own acts: each is declared with `gate: human` and `humanStep:
+   mailbox's page nothing checked the recipient. An uncompared share also leaves the recipient unable to tell who
+   sealed what it holds: a mailbox in the middle can seal a value of its own choosing, so the recipient's app shows
+   its code with "They differ" too, and says when the share it holds was not compared. Both are the person's own acts: each is declared with `gate: human` and `humanStep:
    comparison` (DEC-0121 AP-4), so the agent's tool for it answers `human-step-required` with the link to the node's page that shows the pending share and names the app
    window that holds the comparison,
    and no agent can confirm a code or skip the comparison for the person. The product declares its other buttons under
@@ -114,8 +116,9 @@ another shape (`malformed`), or the claim deadline passing before completion (`e
 is `aborted` wherever it comes, before any claim included, never `out-of-order`. A frame of another share or another shape is `malformed` wherever it comes, before any other
 reason. A commit that reflects the claim's own keys is not a burn of the verdict: it stops at the code, which
 `checkedPeerCode` refuses as `same-keys`, so nothing is sealed. A node keeps the first burnt verdict it reaches and reads the share no further: the verdict carries no arrival times, so `expired` holds only for a
-node that kept it. Once the sender has confirmed or shared without comparing, the exchange is over: the nodes and the mailbox read no further exchange frames for the
-share, so a late frame burns nothing that is already sealed. The mailbox learns the share is sealed from the first envelope
+node that kept it. Once the sender has confirmed or shared without comparing, the sender's node runs the verdict no
+further: it reads only the mailbox's answer to its upload and any later claim the mailbox carries. The mailbox, which
+cannot see the confirmation, stops at the first envelope stored for the share. The mailbox learns the share is sealed from the first envelope
 stored for it, and still carries a claim that arrives after that to the sender's node, which shows it beside a share
 sealed without comparing as a warning to take the share back. Until the first envelope is stored the mailbox keeps
 running the verdict: a frame that burns the exchange there (a claim after completion is `closed`) it carries to both
@@ -270,6 +273,7 @@ another estate's use.
 | the envelope | `sealPeerShare`, `checkPeerShareEnvelope`, `openPeerShare` | `envelopes` |
 | usage reports | `sealPeerReport`, `peerReportBody`, `checkPeerReport`, `openPeerReport` | `reports` |
 | revocation, deletion | `signPeerRecord`, `peerRecordStands` | `records` |
+| requests to the mailbox (PS-10) | none: the DEC-0056 reference reads only its own label and a certificate's serial | none until CT-185 |
 
 The 7-day claim deadline and the 24-hour lease are bounds the sender's node and the mailbox keep; the reference checks
 neither (`MAX_CLAIM_DAYS` and `MAX_LEASE_SECONDS` name them), and no vector carries them until the mailbox's routes do
