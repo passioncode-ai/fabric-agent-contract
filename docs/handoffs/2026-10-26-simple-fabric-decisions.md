@@ -25,7 +25,7 @@ session; an optional session `role` and `branch` with a privacy rule.
   holder, the relayed move and AP-1); round 15 passed on all three tiers at `f91bdcb1`; round 16 passed unit and seam
   at `04da414b`, and its product tier found the double-press case and this stale handoff, both answered here.
 - The board: Fabric agreed on 2026-10-27 (`94a41d8c`: the 'oldest live slot is main' fallback dropped, no relayed
-  move in 0.3.15, held request ids handed on its session surface); the adapter took the moved-off client part as
+  move in 0.3.15, the slot's accepted request ids handed on its session surface); the adapter took the moved-off client part as
   FAA-155 (0.53.0, due 2026-11-12, `27df7ae1`).
 
 ## Open
@@ -47,7 +47,7 @@ session; an optional session `role` and `branch` with a privacy rule.
 
 ## Checks actually run
 
-The gate from the worktree, exit 0 on each head through round 16 (`04da414b`): `pnpm typecheck`; vitest with
+The gate from the worktree, exit 0 on each head through round 17's fixes: `pnpm typecheck`; vitest with
 coverage outside the worktree (106 files, 9360 tests passed); `pnpm ux:lint` (38 stories, 32 flows, 32 screens, 50
 scenarios); `pnpm docs:check` (0 errors over 246 files); `pnpm privacy:check` (0 findings); `pnpm vectors:check` (25
 files match); no U+2014 in the added lines.
