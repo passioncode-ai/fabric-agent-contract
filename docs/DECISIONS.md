@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0142` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0144` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -4274,6 +4274,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   object, `jsonrpc` not `"2.0"`, an `id` not a 1–128 code-point string or an integer, a method that is not a method name,
   `params` not an object, another member), tested against the schema on the same inputs; before, a malformed request
   fell through to `hello-first` or was passed on (the board run's final verification; w7 close).
+- **Annotated (2026-10-27):** extended by DEC-0143: a second client capability, `secret.ui`, accepted only from a peer the
+  node verified as its product's signed app (else `forbidden`), and `secret.prompt` and `secret.cancel` for a
+  secret request whose value never crosses the channel (local-channel.md, Secret requests).
 - **Amends:** DEC-0015's service descriptor (an optional `channels.local`). Implements the organization edition's
   CON-OE-10 in its CROSSWALK-v4 edition (v4 §5 at `9c6a780`; no `policy.decide`). Closes the board run's inventory item
   CON-OE-10 (node N12, packet P6-04).
@@ -5095,6 +5098,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-15
 - **Status:** Accepted source change (on merge of its pull request). The owner's design for RM-21 stage 1, packet P3,
   with the changes its pull request names and argues under *Changes from the design*. Consumer adoption: board row CT-53.
+- **Annotated (2026-10-27):** its comparison code's construction (both commit, then both reveal; five bytes modulo 10^6) is
+  reused by DEC-0142 for a person-to-person share under its own types (`fabric-peer-commit/1`, `fabric-peer-code/1`).
 - **Amends:** DEC-0055 (D3 settled for a personal estate; a `device-key` revocation by key reference, read by
   `FAC-SEM-076`, which also refuses a malformed one; `FAC-SEM-073` refuses a non-canonical device key; `FAC-SEM-114` in
   the chain and in `verifyEstateRecord`; the revocation `ref`'s schema description), DEC-0063 (the register gains
@@ -5381,6 +5386,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-18
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-56.
+- **Annotated (2026-10-27):** a person-to-person share (DEC-0142) is not a share grant: no `urn:fabric:share:` id, no
+  context, no share registration.
 - **Amends:** DEC-0082 item 5 (a `grant.usage` carries its grant's own `org:<orgId>`; no event carries its session's
   context and no check-in carries a context) and item 6 (`grantUsage` requires `context`, and `grantId` is a share grant
   id); DEC-0031 and DEC-0056 (a share-registration request is a device request; `FAC-SEM-045` checks a `grant.usage`'s
@@ -6841,6 +6848,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   first organization server, Fabric, Fabric Switchboard, each at its next pin (CT-117). Annotated (2026-10-23): items 3
   and 4 amended by DEC-0113 (a revocation names its request and deletes only that credential; it ends the request; the
   mark is kept as revoked).
+- **Annotated (2026-10-27):** the envelope's construction is reused by DEC-0142 for a person-to-person share under its own
+  `info` (`fabric-peer-share-envelope/1`, `fabric-peer-share-report/1`), so neither opens as the other.
 - **Context:** S5 of the agent network asks that an agent in an organization request a narrow credential (a token for
   one DNS zone, an OpenRouter key with a ceiling), that the organization decide, and that the value arrive sealed into
   that organization's context on the agent's machine, never into the person's own context, every request, decision and
@@ -7743,6 +7752,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-26, DEC-0134):** item 5's residual linkability gains one link: an operator that runs two of a
   machine's relays (an estate's and an organization's, or two organizations') sees that machine's two connections
   (devices.md What stays linkable; relay.md OR-5).
+- **Annotated (2026-10-27):** UE-1's rule of an identity per membership applies to a person-to-person share: a key pair per
+  share on each side, never the device keys (DEC-0142 PS-2).
 - **Context:** the operator decided K-1 on 2026-10-15 (NET-2, DEC-0084): each organization enrollment of a machine gets
   keys of its own, so two organizations cannot link the machine (CX-22). The scope brief
   (`docs/evidence/specs/2026-10-24-ct122-unlinkable/brief.md`) listed twelve values two enrollments share today, and the
@@ -8329,3 +8340,105 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   faults), `interop.md` (C3.3), `conformance.md` (the callee and leading-agent rows), `CONTEXT.md` (Mandate), `docs/ux/scenarios.md` (SCN-045), `DOCMAP.md`; DEC-0121 and DEC-0125 annotated; backlog CT-177 (closed on merge),
   CT-149 (the adoption) and CT-180 (filed); the handoff `docs/handoffs/2026-10-26-mandate-job-step.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-177; the adapter's question `46433e3a` (thread `aa86a675`).
+
+### DEC-0142: a credential shared with another person's estate, `fabric-peer-share/1`
+
+- **Date:** 2026-10-27
+- **Status:** Accepted (on merge of its pull request). Additive: new schemas (`peer-share-frame/1`,
+  `fabric-peer-share-envelope/1`, `fabric-peer-share-report/1`, `peer-share-revocation/1`, `peer-share-deletion/1`) and
+  a named profile, `fabric-peer-share/1`; no existing schema, vector or rule changes. Consumer adoption: Project
+  Observatory's engine replaces its own `observatory-share-envelope/1` with this profile at its next pin (CT-178).
+- **Context:** Project Observatory asked (board request `c50f590b`, thread `faa32585`; its row OBS-262; its design
+  `docs/design/PERSON-SURFACES.md` at `b0bb0abd`, D2, D3, D8) for a person-to-person share profile, for the operator's
+  ask of 2026-10-26: share keys safely with other people's Observatories, track their use, revoke. DEC-0111 covers one
+  estate's machines and an organization's credentials only. Asked whether the share must work between estates with no
+  organization, it answered yes, from the first version (reply `1623e11f`, 2026-10-27).
+- **Decision:** [peer-share](specification/peer-share.md) PS-1 to PS-10:
+  1. Between two estates with no organization on either side; a share binds one recipient machine; never a
+     subscription sign-in (PS-1).
+  2. A P-256 key pair per share on each side, never the device keys, named by RFC 7638 thumbprint (PS-2).
+  3. A share is no context and no share grant: `contextId` stays `personal` or `org:<id>`, and the recipient's node holds
+     the value apart from every context's vault, serving it only through its own use path (PS-3).
+  4. The link `https://<mailbox origin>/s/<shareId>#c=<code>&k=<fpr>`: a 16-byte single-use code, a claim deadline of
+     at most 7 days, the sender's share `#sig` thumbprint pinned only when the link reaches the recipient's app as sent
+     (PS-4).
+  5. A claim MAC under the code (`fabric-peer-claim/1`), checked by the sender's node, stated as a filter that
+     authenticates nothing against the mailbox; one claim per link (PS-5).
+  6. DEC-0084's comparison code under `fabric-peer-commit/1` and `fabric-peer-code/1`, both sides committing before
+     either reveals, one attempt per link at both ends (`peerExchangeVerdict`), nothing sealed until the sender confirms
+     the codes match, a skipped comparison recorded as `confirmed: false` (PS-6).
+  7. `fabric-peer-share-envelope/1`: DEC-0111's construction under its own `info`, to the recipient's share `#kem`,
+     signed by the sender's share `#sig`, a sequence per share and slot, a life of at most 90 days, opened at each use
+     while an honest node holds a lease of at most 24 hours (PS-7).
+  8. `fabric-peer-share-report/1`: counts and labels only, sealed to the sender's share `#kem`, bound to its share and
+     sequence (PS-8).
+  9. Taking back in three steps, the mailbox's refusal, the recipient's signed deletion receipt and the provider's
+     revocation or rotation, "taken back" only with the first observed and the third confirmed, and a copy stated as
+     ended only by the provider (PS-9).
+  10. The mailbox carries and holds and decides nothing, under DEC-0056's request signing; its HTTP routes and its name
+      are the product's (PS-10).
+- **Why:** sharing between two people has no organization to issue under, so its trust has to come from what the two
+  people hold: the link and a code they compare. Reusing DEC-0084's code and DEC-0111's envelope keeps one construction
+  for each job in the contract and lets a port reuse its tests.
+- **Alternatives considered:** a context kind `share:<id>` (Observatory's proposal: the word is taken by share grants,
+  the pattern is closed for every pinned reader, and a context places agents, not a value); the asymmetric commit-reveal
+  and a four-byte code (Observatory's proposal: DEC-0084's order is the contract's one order for a comparison code, with
+  the same bound); a contract protocol for the mailbox's HTTP routes, `observatory-cloud/1` (one product implements
+  them; what two estates must agree on is the frames and the sealed messages, which this decision fixes); the cloud
+  holding the value under its own key (every breach of the mailbox would be a breach of the key).
+- **Compatibility:** additive. No reader changes: new schemas, new protocol names in the register, a new vector file.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/peer-share.ts`, `src/protocol-revisions.ts`, `schemas/peer-share-*.schema.json`
+  (four), `tools/vectors/peer-share.ts` and `tools/vectors/run.ts`, `fixtures/vectors/peer-share.json`,
+  `test/peer-share.test.ts`, `fixtures/positive/peer-share-*.json` and `fixtures/negative/peer-share-*.json` with their
+  catalogue rows, `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`; `docs/specification/peer-share.md`,
+  `contexts.md`, `versioning.md`, `conformance.md`, `docs/specification/README.md`, `DOCMAP.md`, `CONTEXT.md`;
+  `docs/ux/foundation.md` (JTBD-15, JRN-14, ST-039), `docs/ux/flows.md` (FLW-33), `docs/ux/screens.md` (SCR-33),
+  `docs/ux/scenarios.md` (SCN-052); DEC-0084, DEC-0086, DEC-0111 and DEC-0128 annotated;
+  backlog CT-178 (closed on merge with DEC-0143) and CT-185; the handoff `docs/handoffs/2026-10-27-peer-share.md`.
+- **Source:** CT-178; Project Observatory's request `c50f590b` (thread `faa32585`), its reply `1623e11f`.
+
+### DEC-0143: a secret request on the local channel, `secret.prompt`, shown only by the product's signed app
+
+- **Date:** 2026-10-27
+- **Status:** Accepted (on merge of its pull request). A widening of DEC-0075: a second client capability and method,
+  behind a hello a node pinned before refuses (`invalid-params`), so a client learns the node does not serve it.
+  Consumer adoption: Project Observatory's node and its signed apps (CT-178).
+- **Context:** Project Observatory asked (the same request `c50f590b`; its design D4) for a local-channel method for
+  secret requests: an agent needs a value only the person can give and must never see it typed or ask for it in a chat.
+  DEC-0075's `consent.prompt` carries no request text, is answered `given` or `denied` and goes to every `consent.ui`
+  client; local-channel.md left the check that a peer is a signed binary undecided.
+- **Decision:** [local channel](specification/local-channel.md#secret-requests) SP-1 to SP-7:
+  1. `secret.prompt {requestId, agent, project, slot, provider?, reason, replaces, deadline}` from the node to one
+     client, answered `{outcome: stored | declined, at}`; `secret.cancel {requestId}` withdraws it (SP-1).
+  2. A client declares `secret.ui` at hello, and the node accepts it only after its own operating-system check that the
+     peer is its product's signed app (macOS: the audit token and the designated requirement; Windows: Authenticode on
+     the held process), else `forbidden`; on Linux no client is admitted, `secret-ui-unavailable` is degraded and a
+     request answers `no-client` (SP-2).
+  3. One client per request; none connected, or no desktop session, is `no-client` (SP-3).
+  4. No value on the channel in either direction: the app writes the slot itself (SP-4).
+  5. The agent sees `stored` only after the node confirmed the write in its own vault record (`unconfirmed`
+     otherwise), `declined`, `no-answer` (10 minutes at most, by the node's receipt time) or `no-client`, never a value
+     (SP-5).
+  6. The prompt names the agent from the node's binding and quotes the agent's reason; a scripted dialog is not a
+     secret prompt (SP-6). How an agent asks the node, and the node's limits, are the node's (SP-7).
+- **Why:** the person must be able to tell the real prompt from an imitation, and only the operating system can tell
+  the node which program is on the other end of the socket: a process of the same user is otherwise inside the
+  channel's trust boundary (DEC-0075). Confirming the write keeps the agent from learning a success the app only
+  claimed.
+- **Alternatives considered:** reusing `consent.prompt` (no request text, an answer of another kind, every client
+  prompted); admitting by a token or by the client's declared name (any program of the user can read a token file or
+  write a name); a terminal prompt on a machine with no desktop (an agent can drive a pseudo-terminal and type a value
+  of its choosing); Linux admission by the executable's path (another program of the user can still imitate or inject
+  into it; CT-184 holds the question).
+- **Compatibility:** a widening behind the hello: a node pinned before DEC-0143 answers a `secret.ui` hello
+  `invalid-params`, and the client goes on without it (consent unchanged). `$defs/notification` gains `secret.cancel`;
+  every message that validated still validates. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/local-channel.ts` (`CLIENT_CAPABILITIES`, `secret.prompt`, `ChannelState.signedApp`,
+  `maySecretPrompt`, `secretOutcome`, the `forbidden` hello), `schemas/local-channel.schema.json` (`secret.ui`,
+  `secretPrompt`, `secretResult`, `secret.cancel`), `test/local-channel.test.ts`,
+  `fixtures/positive/local-channel-secret-cancel.json`; `docs/specification/local-channel.md`, `conformance.md`,
+  `DOCMAP.md`, `CONTEXT.md`; `docs/ux/foundation.md` (ST-040), `docs/ux/flows.md` (FLW-34), `docs/ux/screens.md` (SCR-34),
+  `docs/ux/scenarios.md` (SCN-053); DEC-0075 annotated; backlog CT-178 and
+  CT-184.
+- **Source:** CT-178; Project Observatory's request `c50f590b` (thread `faa32585`).

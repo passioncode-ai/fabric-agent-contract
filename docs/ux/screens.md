@@ -35,6 +35,8 @@
 | SCR-27 | A job's status for its caller | FLW-23, FLW-25 | disabled | proposed | `test/agent-network.test.ts` |
 | SCR-28 | Credentials issued into an organization | FLW-28 | disabled | proposed | `test/credential-envelope.test.ts` |
 | SCR-29 | Calls between agents | FLW-28 | disabled | proposed | `test/credential-envelope.test.ts` |
+| SCR-33 | Sharing a key with another person | FLW-33 | disabled | proposed | `test/peer-share.test.ts` |
+| SCR-34 | An agent's secret request | FLW-34 | disabled | proposed | `test/local-channel.test.ts` |
 
 ## Design system
 
@@ -393,4 +395,26 @@
 - **Coverage:** `src/org-membership.ts` (`verifyOrgMembership`, `verifyOrgKeySet`, `FAC-SEM-145` to `FAC-SEM-147`), `test/org-membership.test.ts`
 - **Scenarios:** SCN-047, SCN-048, SCN-049
 - **Resources:** membership specification, The organization's keys, Ending, What leaves a person's Fabric
+- **Status:** proposed
+
+### SCR-33: Sharing a key with another person
+
+- **Used by:** FLW-33
+- **Purpose:** the sender makes a share, compares the code, reads its use and takes it back; the recipient opens a share and compares the code.
+- **Elements:** "Share" on a vault slot, the link to send and its claim deadline; the six-digit code on both screens and "The codes match" / "They differ"; per share: the recipient's label, confirmed or not, uses per day and consumer labels (reported by their machine), the mailbox's delivery count, exports with the button; "Take back", with each of its three steps and what confirmed it.
+- **States:** waiting for the claim; comparing, the code shown; burnt, a second claim, a code that differs, an abort or the deadline; active, confirmed or `confirmed: false`; taken back, the mailbox's refusal observed and the provider's revocation confirmed; reported deleted.
+- **Coverage:** `src/peer-share.ts`, `fixtures/vectors/peer-share.json`, `test/peer-share.test.ts`
+- **Scenarios:** SCN-052
+- **Resources:** peer share specification
+- **Status:** proposed
+
+### SCR-34: An agent's secret request
+
+- **Used by:** FLW-34
+- **Purpose:** the person types a value an agent asked for into a window only the product's signed app can show.
+- **Elements:** the agent's name from the node's binding; the project and the slot; the agent's reason, quoted as its own words; whether the slot already holds a value; a secure field; "Store" and "Decline".
+- **States:** asking; stored; declined; no answer by the deadline; withdrawn (`secret.cancel`); unavailable, no signed app or no desktop, with the person's step.
+- **Coverage:** `src/local-channel.ts` (`channelStep`, `maySecretPrompt`, `secretOutcome`), `test/local-channel.test.ts`
+- **Scenarios:** SCN-053
+- **Resources:** local channel specification, Secret requests
 - **Status:** proposed

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/local-channel.schema.json",
   "title": "Local channel message, fabric-local-channel/0.1 (DEC-0075)",
-  "description": "One JSON-RPC 2.0 message on the local channel between a Fabric surface (Fabric, Switchboard, Dashboards) and Project Observatory's node on the same machine: a Unix socket or named pipe whose peer is the same OS user, one JSON object per line. The first call is channel.hello (FAC-SEM-106).",
+  "description": "One JSON-RPC 2.0 message on the local channel between a Fabric surface (Fabric, Switchboard, Dashboards), or the node's own product app for secret prompts (DEC-0143), and Project Observatory's node on the same machine: a Unix socket or named pipe whose peer is the same OS user, one JSON object per line. The first call is channel.hello (FAC-SEM-106).",
   "oneOf": [
     {
       "$ref": "#/$defs/request"
@@ -437,10 +437,11 @@
           "uniqueItems": true,
           "items": {
             "enum": [
-              "consent.ui"
+              "consent.ui",
+              "secret.ui"
             ]
           },
-          "description": "What the client serves back: consent.ui lets the node send it consent.prompt."
+          "description": "What the client serves back: consent.ui lets the node send it consent.prompt (DEC-0075); secret.ui lets the node send it secret.prompt, and the node accepts it only from a peer it verified as the product's signed app (DEC-0143), else forbidden."
         },
         "token": {
           "type": "string",
@@ -608,35 +609,157 @@
       "description": "consent.prompt result: given (with its time, the receipt evidence, DEC-0052) or denied."
     },
     "notification": {
-      "type": "object",
-      "required": [
-        "jsonrpc",
-        "method"
-      ],
-      "properties": {
-        "jsonrpc": {
-          "const": "2.0"
-        },
-        "method": {
-          "const": "consent.cancel"
-        },
-        "params": {
+      "oneOf": [
+        {
           "type": "object",
           "required": [
-            "promptId"
+            "jsonrpc",
+            "method"
           ],
           "properties": {
-            "promptId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 128
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "method": {
+              "const": "consent.cancel"
+            },
+            "params": {
+              "type": "object",
+              "required": [
+                "promptId"
+              ],
+              "properties": {
+                "promptId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "jsonrpc",
+            "method",
+            "params"
+          ],
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0"
+            },
+            "method": {
+              "const": "secret.cancel"
+            },
+            "params": {
+              "type": "object",
+              "required": [
+                "requestId"
+              ],
+              "properties": {
+                "requestId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "additionalProperties": false
             }
           },
           "additionalProperties": false
         }
+      ],
+      "description": "The two notifications (no id): the node withdraws a consent prompt (consent.cancel, DEC-0075) or a secret request (secret.cancel, DEC-0143) it no longer needs."
+    },
+    "secretPrompt": {
+      "type": "object",
+      "required": [
+        "requestId",
+        "agent",
+        "project",
+        "slot",
+        "reason",
+        "replaces",
+        "deadline"
+      ],
+      "properties": {
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "agent": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "The agent that asked, as the node's own binding for its caller names it, never words the agent sent."
+        },
+        "project": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "The vault project the slot belongs to."
+        },
+        "slot": {
+          "type": "object",
+          "required": [
+            "env",
+            "name"
+          ],
+          "properties": {
+            "env": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._-]{0,31}$"
+            },
+            "name": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,127}$"
+            }
+          },
+          "additionalProperties": false
+        },
+        "provider": {
+          "$ref": "common.schema.json#/$defs/slug"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "The agent's own words, which the client shows quoted as the agent's."
+        },
+        "replaces": {
+          "type": "boolean",
+          "description": "Whether the slot already holds a value the person would replace."
+        },
+        "deadline": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
       },
       "additionalProperties": false,
-      "description": "The one notification (no id): the node withdraws a consent prompt it no longer needs."
+      "description": "secret.prompt params, sent by the node to one client that declared secret.ui and passed its signed-app check (DEC-0143): ask the person to type a value for one vault slot. The value never travels on the channel: the client writes it into the slot itself."
+    },
+    "secretResult": {
+      "type": "object",
+      "required": [
+        "outcome",
+        "at"
+      ],
+      "properties": {
+        "outcome": {
+          "enum": [
+            "stored",
+            "declined"
+          ]
+        },
+        "at": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
+      },
+      "additionalProperties": false,
+      "description": "secret.prompt result: stored (the client wrote the slot) or declined, never the value. The node answers the agent stored only after it confirmed the write itself."
     }
   }
 }

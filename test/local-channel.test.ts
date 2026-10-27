@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { createValidator, validateDocument } from "../src/validator.js";
-import { admitPeer, CLIENT_METHODS, channelStep, consentOutcome, ERROR_CODES, lineWithinLimit, LOCAL_CHANNEL_PROTOCOL, MAX_LINE_BYTES, mayPrompt, NODE_METHODS } from "../src/local-channel.js";
+import { admitPeer, CLIENT_CAPABILITIES, CLIENT_METHODS, channelStep, consentOutcome, ERROR_CODES, lineWithinLimit, LOCAL_CHANNEL_PROTOCOL, MAX_LINE_BYTES, MAX_SECRET_DEADLINE_MS, mayPrompt, maySecretPrompt, NODE_METHODS, secretOutcome } from "../src/local-channel.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
 // DEC-0075 (CON-OE-10, v4 edition, agreed with Project Observatory's session): the local channel to the node.
@@ -56,6 +56,66 @@ describe("channelStep", () => {
   });
 });
 
+// DEC-0143: a secret request goes only to the product's signed app, checked by the node before hello; no value on the channel.
+describe("secret.ui and secret.prompt", () => {
+  const client = { name: "project-observatory", version: "0.32.0" };
+  const ask = (state: Record<string, unknown>) => channelStep({ ...fresh, ...state }, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client, capabilities: ["secret.ui"] }));
+  it("accepts secret.ui only from a peer the node verified as its signed app, and agrees nothing otherwise", () => {
+    expect(ask({ signedApp: true })).toMatchObject({ ok: true, state: { hello: true, capabilities: ["secret.ui"] } });
+    for (const state of [{}, { signedApp: false }, { signedApp: "yes" }]) expect(ask(state)).toMatchObject({ ok: false, code: "forbidden", state: { hello: false } });
+    // The refusal comes after the hello's own checks: a bad hello is still invalid-params, an unknown revision schema-unsupported.
+    expect(channelStep(fresh, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client, capabilities: ["secret.ui", "secret.ui"] }))).toMatchObject({ ok: false, code: "invalid-params" });
+    expect(channelStep(fresh, hello({ protocols: ["fabric-local-channel/0.2"], client, capabilities: ["secret.ui"] }))).toMatchObject({ ok: false, code: "schema-unsupported" });
+    // consent.ui alone needs no signed-app check (DEC-0075 unchanged).
+    expect(channelStep(fresh, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client, capabilities: ["consent.ui"] }))).toMatchObject({ ok: true });
+  });
+  it("prompts only a signed app that declared secret.ui", () => {
+    const signed = ask({ signedApp: true }).state;
+    expect(maySecretPrompt(signed)).toBe(true);
+    expect(mayPrompt(signed)).toBe(false);
+    const consentOnly = channelStep({ ...fresh, signedApp: true }, hello({ protocols: [LOCAL_CHANNEL_PROTOCOL], client, capabilities: ["consent.ui"] })).state;
+    expect(maySecretPrompt(consentOnly)).toBe(false);
+    expect(maySecretPrompt({ hello: true, accepted: [], capabilities: ["secret.ui"] })).toBe(false);
+    expect(maySecretPrompt({ hello: true, accepted: [], signedApp: true })).toBe(false);
+    expect(maySecretPrompt({ hello: false, accepted: [], capabilities: ["secret.ui"], signedApp: true })).toBe(false);
+    // A client that sends secret.prompt to the node gets unknown-method, before hello hello-first.
+    expect(channelStep(signed, { jsonrpc: "2.0", id: 4, method: "secret.prompt", params: {} })).toMatchObject({ ok: false, code: "unknown-method" });
+    expect(channelStep(fresh, { jsonrpc: "2.0", id: 4, method: "secret.prompt" })).toMatchObject({ ok: false, code: "hello-first" });
+  });
+  it("answers the agent stored only after the node confirmed the write; never a value", () => {
+    const t = 1_000_000;
+    expect(MAX_SECRET_DEADLINE_MS).toBe(600_000);
+    expect(secretOutcome(t, t + 60_000, [{ at: t + 5, outcome: "stored" }], true)).toBe("stored");
+    expect(secretOutcome(t, t + 60_000, [{ at: t + 5, outcome: "stored" }], false)).toBe("unconfirmed");
+    expect(secretOutcome(t, t + 60_000, [{ at: t + 6, outcome: "stored" }, { at: t + 5, outcome: "declined" }], true)).toBe("declined");
+    expect(secretOutcome(t, t + 60_000, [{ at: t + 60_001, outcome: "stored" }], true)).toBe("no-answer");
+    expect(secretOutcome(t, t + 60_000, [{ at: t - 1, outcome: "stored" }], true)).toBe("no-answer");
+    expect(secretOutcome(t, t + 60_000, [{ at: t + 1, outcome: "maybe" }], true)).toBe("no-answer");
+    expect(secretOutcome(t, t + 600_001, [{ at: t + 1, outcome: "stored" }], true)).toBe("no-answer");
+    expect(secretOutcome(t, t, [{ at: t, outcome: "stored" }], true)).toBe("no-answer");
+    expect(secretOutcome(Number.NaN, t, [], true)).toBe("no-answer");
+    expect(secretOutcome(t, t + 1000, [], true)).toBe("no-answer");
+  });
+  it("binds the prompt, its result and its cancel", () => {
+    const prompt = { requestId: "r-1", agent: "claude-code", project: "example-site", slot: { env: "prod", name: "OPENROUTER_API_KEY" }, provider: "openrouter", reason: "Deploy the site's search", replaces: false, deadline: "2026-10-27T10:10:00Z" };
+    expect(def("secretPrompt", prompt)).toBe(true);
+    expect(def("secretPrompt", { ...prompt, value: "sk-1" })).toBe(false);
+    expect(def("secretPrompt", { ...prompt, slot: { env: "prod", name: "has space" } })).toBe(false);
+    expect(def("secretPrompt", { ...prompt, reason: "" })).toBe(false);
+    const { provider: _provider, ...noProvider } = prompt;
+    expect(def("secretPrompt", noProvider)).toBe(true);
+    expect(def("secretResult", { outcome: "stored", at: "2026-10-27T10:01:00Z" })).toBe(true);
+    expect(def("secretResult", { outcome: "stored", at: "2026-10-27T10:01:00Z", value: "sk-1" })).toBe(false);
+    expect(def("secretResult", { outcome: "no-answer", at: "2026-10-27T10:01:00Z" })).toBe(false);
+    expect(def("secretResult", { outcome: "declined" })).toBe(false);
+    expect(whole({ jsonrpc: "2.0", method: "secret.cancel", params: { requestId: "r-1" } })).toBe(true);
+    expect(whole({ jsonrpc: "2.0", method: "secret.cancel" })).toBe(false);
+    expect(whole({ jsonrpc: "2.0", method: "consent.cancel", params: { promptId: "p" } })).toBe(true);
+    expect(def("hello", { protocols: [LOCAL_CHANNEL_PROTOCOL], client, capabilities: ["consent.ui", "secret.ui"] })).toBe(true);
+    expect(def("hello", { protocols: [LOCAL_CHANNEL_PROTOCOL], client, capabilities: ["secret.prompt"] })).toBe(false);
+  });
+});
+
 describe("FAC-SEM-106: hello first", () => {
   it.each(cases)("%s", (_name, c) => expect([...new Set(evaluateSemanticRules(c.kind, c.input).map((f) => f.code))]).toEqual(c.expect));
   it("reads a session without requests, or without a method, as nothing", () => {
@@ -67,7 +127,8 @@ describe("FAC-SEM-106: hello first", () => {
 describe("methods, codes and consent outcomes", () => {
   it("keeps the node's methods and the client's apart", () => {
     expect([...NODE_METHODS]).toEqual(["channel.hello", "health", "enroll.status", "machine.report"]);
-    expect([...CLIENT_METHODS]).toEqual([["consent.prompt", "consent.ui"]]);
+    expect([...CLIENT_METHODS]).toEqual([["consent.prompt", "consent.ui"], ["secret.prompt", "secret.ui"]]);
+    expect([...CLIENT_CAPABILITIES]).toEqual(["consent.ui", "secret.ui"]);
   });
   it("maps every code to one JSON-RPC integer", () => {
     expect(Object.fromEntries(ERROR_CODES)).toEqual({ "invalid-request": -32600, "unknown-method": -32601, "invalid-params": -32602, unauthenticated: -32001, forbidden: -32003, "schema-unsupported": -32004, "hello-first": -32005 });

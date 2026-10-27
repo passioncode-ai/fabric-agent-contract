@@ -55,6 +55,8 @@
 | SCN-047 | Join an organization by my own passkey: my Fabric trusts the membership only from what the organization signed | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-048 | Enrolled in two organizations, my machine looks like two strangers to them | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-049 | As an administrator, I sign who my organization's relay admits; no server signs it | membership | P-03 | ST-038, FLW-32 | draft | not audited |
+| SCN-052 | Share a model key with a colleague's machine, compare six digits, take it back | peer share | P-02 | ST-039, FLW-33 | draft | not audited |
+| SCN-053 | An agent needs a token; I type it into my app's own window | secret prompt | P-02 | ST-040, FLW-34 | draft | not audited |
 
 ## Personas
 
@@ -1082,4 +1084,47 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a refused list -> its reason is shown to the administrator; the relay keeps the list it held until it expires or its signer leaves the key set.
 - **Status:** draft
 - **Coverage:** DEC-0129 OL-1 to OL-5, `verifyOrgAuthority` in `src/org-authority.ts`, `orgRelayAdmissionSet` in `src/org-authority.ts`, `FAC-SEM-146`, `FAC-SEM-150`, `test/org-authority.test.ts`; the relay's handshake for an organization is DEC-0134 (relay.md OR-1 to OR-5, `sessionStands`)
+- **Product:** unobserved
+
+### SCN-052: Share a model key with a colleague's machine, compare six digits, take it back
+
+- **Persona:** P-02
+- **Feature:** peer share
+- **Traces:** ST-039, FLW-33 (JTBD-15, JRN-14/#1, JRN-14/#2, JRN-14/#3)
+- **Entry point:** "Share" on a vault slot
+- **Preconditions:** a key minted for the share; the colleague has their own estate and the product's app; no organization between us
+- **Steps:**
+  1. I share the slot -> my node makes the share's key pair and writes a link with a one-time code and my share key's fingerprint; I send it by a message.
+  2. The colleague pastes the link into their app and accepts -> their node makes its own key pair and claims with a MAC under the code and its commitment.
+  3. My node checks the MAC and commits, both reveal -> both apps show six digits, and we read them to each other on a call.
+  4. I confirm they match -> my node seals the key to their share key; their node opens it at each use while its lease lasts.
+  5. A day later I read uses per day and the agents that used it -> reported by their machine, beside the mailbox's count.
+  6. I press "Take back" -> the mailbox refuses from now on, their node deletes it and sends a receipt, and I revoke the key at the provider; the share reads taken back.
+- **Expected result:** the key opened only on the colleague's machine, for that share's key; I saw its use; it no longer works anywhere.
+- **Alt paths:** the link went through the mailbox's page -> no fingerprint is pinned and the six digits are the only check. The codes differ -> either of us says so, the link burns and nothing is sealed; I make a new share. Someone read the link first and claimed -> the MAC holds, but our codes differ one time in a million or more, so I refuse and nothing is sealed. A second claim arrives -> the link burns. I skip the comparison -> the share is sealed but recorded as `confirmed: false`, and my screen says so.
+- **UI elements:** "Share", the link, the six digits on both screens, "The codes match", the uses per day, "Take back" with its three steps.
+- **States covered:** waiting for the claim, comparing, burnt, active, taken back
+- **Errors & recovery:** the colleague's machine is offline when I take it back -> the mailbox refuses at once and the provider's revocation ends the key; the deletion receipt arrives at its next contact. A copy made on their machine -> only the provider's revocation ends it, which the screen says.
+- **Status:** draft
+- **Coverage:** DEC-0142 PS-1 to PS-10, `src/peer-share.ts`, `fixtures/vectors/peer-share.json`, `test/peer-share.test.ts`
+- **Product:** unobserved
+
+### SCN-053: An agent needs a token; I type it into my app's own window
+
+- **Persona:** P-02
+- **Feature:** secret prompt
+- **Traces:** ST-040, FLW-34 (JTBD-15, JRN-14/#4)
+- **Entry point:** an agent's request for a slot it lacks
+- **Preconditions:** the product's signed app is running on my desktop and connected to the node with `secret.ui`
+- **Steps:**
+  1. The agent asks the node for the slot -> the node names the agent from its own binding and sends `secret.prompt` to the signed app only.
+  2. The app shows its window: the agent, the project, the slot and the agent's reason in quotes -> I type the token and press "Store".
+  3. The app writes the slot itself -> the node sees the slot written after the prompt and tells the agent `stored`.
+- **Expected result:** the token is in the slot; the agent never saw it, and it is in no chat, log or argument.
+- **Alt paths:** I press "Decline" -> the agent is told `declined`. I do not answer in 10 minutes -> `no-answer`. The app says stored but the node sees no write -> `unconfirmed`. Another program connects declaring `secret.ui` -> its hello is `forbidden` and it is never prompted. On Linux, or with no desktop -> `no-client`, and the agent tells me to put the value in with the vault command in my own shell.
+- **UI elements:** the window with the agent's name, the slot, the quoted reason and a secure field; "Store", "Decline".
+- **States covered:** asking, stored, declined, no answer, unavailable
+- **Errors & recovery:** the node is not running -> the request fails and no window is shown by anyone; the agent asks again once the node is up.
+- **Status:** draft
+- **Coverage:** DEC-0143 SP-1 to SP-7, `channelStep`, `maySecretPrompt` and `secretOutcome` in `src/local-channel.ts`, `test/local-channel.test.ts`
 - **Product:** unobserved

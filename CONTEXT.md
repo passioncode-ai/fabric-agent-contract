@@ -756,7 +756,19 @@ usage lines, joined by the runtime's `session.id` (DEC-0068, [activity](docs/spe
 
 **Local channel**: How Fabric's surfaces reach Project Observatory's node on one machine (`fabric-local-channel/0.1`):
 a socket or pipe the operating system proves is the same user's, hello first, consent prompts the other way (DEC-0075,
-[local channel](docs/specification/local-channel.md)).
+[local channel](docs/specification/local-channel.md)), and secret prompts to the product's signed app only (DEC-0143).
+
+**Peer share**: A credential one person shares from their estate with another person's estate, with no organization on
+either side (`fabric-peer-share/1`): a key pair per share on each side, a link with a one-time code, a six-digit code
+the two people compare, the value sealed to the recipient's share key, usage reports back, taken back in three steps.
+Not a context and not a share grant (DEC-0142, [peer share](docs/specification/peer-share.md)).
+
+**Secret prompt**: The window in which the person types a value an agent asked for (`secret.prompt` on the local
+channel), shown only by the product's signed app, which writes the value into the vault itself; the agent learns only
+whether it was stored (DEC-0143, [local channel](docs/specification/local-channel.md#secret-requests)).
+
+**Share mailbox**: The HTTPS service a peer share's link names, which carries its frames and sealed messages and holds
+its revocations, and sees ciphertext and names only (DEC-0142 PS-10).
 **Proposal**: A change proposed to a project's manager or the CEO (`fabric-proposal/1`): a rule, an agent, a skill, a
 listing or a fix, with evidence by reference; a rule is approved by a person, nothing applies itself, and nothing
 about a private agent leaves (DEC-0072, [proposals](docs/specification/proposals.md)).
