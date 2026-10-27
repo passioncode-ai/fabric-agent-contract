@@ -15,7 +15,7 @@ answers a job's input request, and add a vector for it.
   `test/actions.test.ts`.
 - AP-2 (`service.md`), C3.3 (`interop.md`), the callee and leading-agent rows in `conformance.md`, `CONTEXT.md` (Mandate) and
   SCN-045 (`docs/ux/scenarios.md`) name it; DEC-0121 and DEC-0125 annotated.
-- CT-180 filed for MJ-1's neighbours (the round-2 and round-4 readings), non-blocking.
+- CT-180 filed for MJ-1's neighbours (the round-2, round-4, round-5 and round-6 readings), non-blocking.
 - CT-178 filed for Project Observatory's three asks (request `c50f590b`), acknowledged on the board.
 
 ## Open
