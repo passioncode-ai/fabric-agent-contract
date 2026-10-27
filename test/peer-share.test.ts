@@ -105,7 +105,7 @@ describe("the envelope", () => {
   it.each(vectors.envelopes as Json[])("$name", (c) => {
     expect(checkPeerShareEnvelope(c.envelope, c.context)).toEqual(c.expect);
     // The schema refuses exactly the envelopes whose own shape is wrong; a context that does not read is the node's.
-    const shapeWrong = c.name === "a member more" || c.name === "a header that carries the value";
+    const shapeWrong = c.name === "a member more" || c.name === "a header that carries the value" || c.name === "a time with an offset, not UTC";
     expect(valid("peer-share-envelope.schema.json", c.envelope)).toBe(!shapeWrong);
     if (c.expect.ok === true) expect(openPeerShare(c.envelope, c.context, scalar("rKem"))).toEqual({ ok: true, secret: Buffer.from(vectors.secret, "utf8"), mark: c.expect.mark });
   });
@@ -121,6 +121,9 @@ describe("the envelope", () => {
     expect(openPeerShare(env, ctx, scalar("xKem"))).toEqual({ ok: false, refusal: "cannot-open" });
     expect(() => sealPeerShare({ recipientKem: key("rKem").jwk, signer: { sig: key("sSig").jwk, privateKey: priv("sSig") }, shareId, sequence: 1, iat, exp: new Date(iat.getTime() + (MAX_PEER_ENVELOPE_DAYS * 86_400_000) + 1000), plaintext: Buffer.from("v"), slot: "OPENROUTER_API_KEY", provider: "openrouter" })).toThrow(/lifetime-too-long/);
     expect(() => sealPeerShare({ recipientKem: key("rKem").jwk, signer: { sig: key("sSig").jwk, privateKey: priv("sSig") }, shareId, sequence: 1, iat, exp: new Date(iat.getTime() + 1000), plaintext: Buffer.from("v"), slot: "lower", provider: "openrouter" })).toThrow(/malformed/);
+    // A life inside one second is no life once the header carries whole seconds.
+    const within = new Date("2026-10-27T09:59:00.100Z");
+    expect(() => sealPeerShare({ recipientKem: key("rKem").jwk, signer: { sig: key("sSig").jwk, privateKey: priv("sSig") }, shareId, sequence: 1, iat: within, exp: new Date(within.getTime() + 800), plaintext: Buffer.from("v"), slot: "OPENROUTER_API_KEY", provider: "openrouter" })).toThrow(/lifetime-too-long/);
   });
 });
 
@@ -129,6 +132,8 @@ describe("usage reports", () => {
     const opened = openPeerReport(c.report, c.context, scalar("sKem"));
     expect(opened).toEqual(c.expect);
     if (c.expect.ok === true) expect(checkPeerReport(c.report, c.context)).toEqual({ ok: true, sequence: c.expect.sequence });
+    // The schema refuses a report whose own shape is wrong, and only that.
+    expect(valid("peer-share-report.schema.json", c.report)).toBe(!["a member more", "a time with an offset, not UTC"].includes(c.name));
   });
   it("seals a report the sender opens, and refuses a body that carries more than counts", async () => {
     const { createPrivateKey } = await import("node:crypto");
@@ -146,7 +151,8 @@ describe("usage reports", () => {
 describe("taking a share back", () => {
   it.each(vectors.records as Json[])("$name", (c) => {
     expect(peerRecordStands(c.record, c.type, c.shareId, c.signerSig)).toEqual(c.expect);
-    if (c.expect.ok === true) expect(valid("peer-share-record.schema.json", c.record)).toBe(true);
+    // The schema and the check agree on a record's shape: the offset time is refused by both.
+    if (c.expect.ok === true || c.name.includes("offset")) expect(valid("peer-share-record.schema.json", c.record)).toBe(c.expect.ok === true);
   });
   it("signs a record that stands", async () => {
     const { createPrivateKey } = await import("node:crypto");

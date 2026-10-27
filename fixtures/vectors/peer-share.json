@@ -190,6 +190,14 @@
       }
     },
     {
+      "name": "an authority that does not parse",
+      "link": "https://[/s/1cbbf01dbcb842d86e9b25c6cb286dbd#c=MJGtQw3bQT7dBTn6Paa3Zg&k=6FQ6dHA0zvjOeSrGS91a_UtmVZiSB7B8WZ5eTrHFlYE",
+      "expect": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
       "name": "not a string",
       "link": 7,
       "expect": {
@@ -1793,6 +1801,150 @@
       }
     },
     {
+      "name": "a second claim after completion",
+      "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+      "claimDeadline": "2026-11-03T10:00:00Z",
+      "at": "2026-10-27T10:00:00Z",
+      "frames": [
+        {
+          "schema": "peer-share-frame/1",
+          "step": "claim",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+              "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+              "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+            }
+          },
+          "mac": "PBOuZKG6B9AmujGPxz_3jO0CfBBe0aCl63WtO0H8S5E",
+          "commit": "sha256:68a58116a84599f0d55e5497590bb452695d49907d9db82b23584a18c4ebb84a"
+        },
+        {
+          "schema": "peer-share-frame/1",
+          "step": "commit",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "ZPoT-OGvtIdwz8QBOesU_t_H-P5uy2HsYzRwy8bZH2Y",
+              "y": "5-6SUYwUO9hRAnHAueIYlxVVPR4cmqiXQEjP-Ekcmtk"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "tclfmsWQIDzgkW_MalbJbWZZuWF_ca-3l6qR6QKuBYw",
+              "y": "po-kQezo1MJ4xNXdFUqlemLpHag-mGmEt5aYBgWq1v8"
+            }
+          },
+          "commit": "sha256:6413fec4b3b407d23edb8bf84ce62f68a9c3696f098956ede5a9b748b6a9e79d"
+        },
+        {
+          "schema": "peer-share-frame/1",
+          "step": "reveal",
+          "role": "recipient",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "nonce": "setAGcY7mbdJwquwljsBT8_kupNgcEupJacBgNhmOR4"
+        },
+        {
+          "schema": "peer-share-frame/1",
+          "step": "reveal",
+          "role": "sender",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "nonce": "vYx4DGtClTafiKY9ihJQjyFIS8PLQ2jK-4AbeERbIcA"
+        },
+        {
+          "schema": "peer-share-frame/1",
+          "step": "claim",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+              "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+              "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+            }
+          },
+          "mac": "PBOuZKG6B9AmujGPxz_3jO0CfBBe0aCl63WtO0H8S5E",
+          "commit": "sha256:68a58116a84599f0d55e5497590bb452695d49907d9db82b23584a18c4ebb84a"
+        }
+      ],
+      "expect": {
+        "state": "burnt",
+        "reason": "closed",
+        "index": 4
+      }
+    },
+    {
+      "name": "a claim whose MAC does not hold, first: it is the link's one claim, and the holder's claim burns it",
+      "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+      "claimDeadline": "2026-11-03T10:00:00Z",
+      "at": "2026-10-27T10:00:00Z",
+      "frames": [
+        {
+          "schema": "peer-share-frame/1",
+          "step": "claim",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "AKW1JagET02-E321aojeXxfI5UNcN30_nhGw2Kzrmz4",
+              "y": "N_etlCVhyGfR1YpTucJjyyVBziBP207E9QWrHyJ7uhY"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "_h-7TlSW-xz1tj1YUKyj3HLJ2L7v9-XgMHl1MzuX18U",
+              "y": "qbklomHe2rXnJSOyOYVpva-diExH5xVZYlOqY1BbamA"
+            }
+          },
+          "mac": "VPXi0yX_-X7vbzpdwiLG-4k6hJUPlWmCQCwp1TzHlYI",
+          "commit": "sha256:d9d4d42fc7aec0ea1f989469cdfef7bd505c8283b032799277d4f95586cc95bf"
+        },
+        {
+          "schema": "peer-share-frame/1",
+          "step": "claim",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+              "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+              "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+            }
+          },
+          "mac": "PBOuZKG6B9AmujGPxz_3jO0CfBBe0aCl63WtO0H8S5E",
+          "commit": "sha256:68a58116a84599f0d55e5497590bb452695d49907d9db82b23584a18c4ebb84a"
+        }
+      ],
+      "expect": {
+        "state": "burnt",
+        "reason": "repeated",
+        "index": 1
+      }
+    },
+    {
       "name": "a frame of another share",
       "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
       "claimDeadline": "2026-11-03T10:00:00Z",
@@ -2962,6 +3114,51 @@
         "ok": false,
         "refusal": "expired"
       }
+    },
+    {
+      "name": "a time with an offset, not UTC",
+      "envelope": {
+        "header": {
+          "type": "fabric-peer-share-envelope/1",
+          "alg": "ES256",
+          "suite": [
+            16,
+            1,
+            1
+          ],
+          "recipient": "gIzibVDCRJZOBx8ZMmM-plOmb7gZMLkTFSyZppnXWqc",
+          "signer": "6FQ6dHA0zvjOeSrGS91a_UtmVZiSB7B8WZ5eTrHFlYE",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "slot": "OPENROUTER_API_KEY",
+          "provider": "openrouter",
+          "sequence": 1,
+          "iat": "2026-10-27T10:59:00+01:00",
+          "exp": "2026-11-26T09:59:00Z",
+          "enc": "BL8hp8H-eeSp24NXbf9exI7FhFP7FMxTPYSDfwX7LWZs2rs9qXK97DU-xa-_5hm6FUblZOe7CyEkPU2XugcvuXk"
+        },
+        "ct": "5fq-Jz_k35_jQ_K-0Fgvt4K-3ViTH9gVP3uSummQ6lKOEpGnkmZ95haZOJ8",
+        "sig": "P8DNRwgr917y-EYdvZev165pbgWDW_inwSGfG8AGtxlvioYbc6MiJ-1ifYOrrr7GuoR1nRckpsojz1s7FEWK8w"
+      },
+      "context": {
+        "at": "2026-10-27T10:00:00Z",
+        "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+        "ownKem": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+          "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+        },
+        "senderSig": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "ZPoT-OGvtIdwz8QBOesU_t_H-P5uy2HsYzRwy8bZH2Y",
+          "y": "5-6SUYwUO9hRAnHAueIYlxVVPR4cmqiXQEjP-Ekcmtk"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
     }
   ],
   "reports": [
@@ -3421,6 +3618,132 @@
         "ok": false,
         "refusal": "bad-body"
       }
+    },
+    {
+      "name": "a body that is no JSON",
+      "report": {
+        "header": {
+          "type": "fabric-peer-share-report/1",
+          "alg": "ES256",
+          "suite": [
+            16,
+            1,
+            1
+          ],
+          "recipient": "dLqwsZ1lyEB70VOmFzD4-uRdRix5XTdwBH0wXzGC5fM",
+          "signer": "XbqsqXRCEqFDKxIhCNk-5YRTX1XtW8a08-pvb9uTH20",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "sequence": 1,
+          "iat": "2026-10-27T09:59:00Z",
+          "enc": "BDzuJlssRnClBu85qr6Wc7jpB0x7uqbgHxQRleU_3j1Hp3JZdxENSaPFFgqziXeFI-JsHdvvcXAhWExF1Nt7jdU"
+        },
+        "ct": "EHTYWH22fLnFf_bHUY93Muf9OcKNr54",
+        "sig": "6PVYtaMKVBOzfCFq784sZgHezHrf0Baj6XUXAG2POI8c36iZOiCamCpAuExPhZHz3_13eP16G42NMpDJ6THtIw"
+      },
+      "context": {
+        "at": "2026-10-27T10:00:00Z",
+        "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+        "ownKem": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "tclfmsWQIDzgkW_MalbJbWZZuWF_ca-3l6qR6QKuBYw",
+          "y": "po-kQezo1MJ4xNXdFUqlemLpHag-mGmEt5aYBgWq1v8"
+        },
+        "recipientSig": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+          "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "bad-body"
+      }
+    },
+    {
+      "name": "sealed to another key under the sender's thumbprint: the checks pass and it does not open",
+      "report": {
+        "header": {
+          "type": "fabric-peer-share-report/1",
+          "alg": "ES256",
+          "suite": [
+            16,
+            1,
+            1
+          ],
+          "recipient": "dLqwsZ1lyEB70VOmFzD4-uRdRix5XTdwBH0wXzGC5fM",
+          "signer": "XbqsqXRCEqFDKxIhCNk-5YRTX1XtW8a08-pvb9uTH20",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "sequence": 1,
+          "iat": "2026-10-27T09:59:00Z",
+          "enc": "BI8zu1-lopQkskBKPN0ygue4SniwQ857b0bhlro2XN2KwnTVAGF4WXeeDq9jmNb98FtUs2X7cLvDC7JtWmFeFCw"
+        },
+        "ct": "i-bGUUzFPJy4rDJxwrok_g5X2nU9_QpbQGwsngd0XexXYCrNjMk_NZ2ZfNb1ogitg6hhqq0sY8omKikS__bqItZblUxfnWS6n2We5SXnn30F599ESDuThlAhze7FWP8zFfpUjA3-CjVPXISUMwr0CZEcEB3nPQ5WnmiawDXD02Ww9nFVeHOH4hdrneTlxK4ejJrM8WHQPNQxmDUVgpHH-XohCTIkEIiO9xo2xKlcfIdBvWGOB-h3tuuPTwLnW-yA3G8XK8A",
+        "sig": "L29t90_KjDWc_dVmBrc5EX47U5lUfh3J2ZzxPRezwC8KG6stGNRHHWoSplSJy9seuequXKVgHOxYJtrpfwocxg"
+      },
+      "context": {
+        "at": "2026-10-27T10:00:00Z",
+        "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+        "ownKem": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "tclfmsWQIDzgkW_MalbJbWZZuWF_ca-3l6qR6QKuBYw",
+          "y": "po-kQezo1MJ4xNXdFUqlemLpHag-mGmEt5aYBgWq1v8"
+        },
+        "recipientSig": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+          "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "cannot-open"
+      }
+    },
+    {
+      "name": "a time with an offset, not UTC",
+      "report": {
+        "header": {
+          "type": "fabric-peer-share-report/1",
+          "alg": "ES256",
+          "suite": [
+            16,
+            1,
+            1
+          ],
+          "recipient": "dLqwsZ1lyEB70VOmFzD4-uRdRix5XTdwBH0wXzGC5fM",
+          "signer": "XbqsqXRCEqFDKxIhCNk-5YRTX1XtW8a08-pvb9uTH20",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "sequence": 1,
+          "iat": "2026-10-27T10:59:00+01:00",
+          "enc": "BL8hp8H-eeSp24NXbf9exI7FhFP7FMxTPYSDfwX7LWZs2rs9qXK97DU-xa-_5hm6FUblZOe7CyEkPU2XugcvuXk"
+        },
+        "ct": "O6ONE2jPXbHekQn6TALD-ICvBC8TPX5f3B_Sm8fwhQDIF67YH3JJgS8LA_V5Az9CgpkGcTr64iHV4QKcQQixsLo6Aorb3DUF1I1T2c_fhjQcIaNUjVZa_Rf-iHNuUnAj2ua5Bwx2hjkDyL6ouEQl-xYa9m4xNlHBHmA_qKfTIydGYb_RVOCAdO-qc3xnQ_0CNQ6qXdbtczvjZboIs9y-c0w1VXYkksEQwKzqpBcL4cTqV_0Qk_XZfwhUAQnQrHaePU2WZS4",
+        "sig": "HEea6i0VDP9No6Gk6BGPw1SRtJBo0-UnvHkruj5CPnoaVl7rIk2vdkgcC31HYQx-qdcJHHQbTg10tBrslVxloA"
+      },
+      "context": {
+        "at": "2026-10-27T10:00:00Z",
+        "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+        "ownKem": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "tclfmsWQIDzgkW_MalbJbWZZuWF_ca-3l6qR6QKuBYw",
+          "y": "po-kQezo1MJ4xNXdFUqlemLpHag-mGmEt5aYBgWq1v8"
+        },
+        "recipientSig": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+          "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
     }
   ],
   "records": [
@@ -3565,6 +3888,28 @@
         "sig": "auTRBuqdwyyAp4c7rA5PPp40v5-o6CMkv4uuDbkV1jx_5Hsvnw90sXWyGvXdPHtrDZg0uR62P_V0HxE2F2va6w"
       },
       "type": "peer-share-deletion/1",
+      "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+      "signerSig": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "ZPoT-OGvtIdwz8QBOesU_t_H-P5uy2HsYzRwy8bZH2Y",
+        "y": "5-6SUYwUO9hRAnHAueIYlxVVPR4cmqiXQEjP-Ekcmtk"
+      },
+      "expect": {
+        "ok": false,
+        "reason": "malformed"
+      }
+    },
+    {
+      "name": "a revocation dated with an offset, not UTC",
+      "record": {
+        "type": "peer-share-revocation/1",
+        "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+        "at": "2026-10-28T11:00:00+01:00",
+        "signer": "6FQ6dHA0zvjOeSrGS91a_UtmVZiSB7B8WZ5eTrHFlYE",
+        "sig": "K7LzsNwbQqJkaHDMRwVmEGOF8LwaJz_JF8_c5RzMENxLiBvjeRDD8-1_edR7ioHGW_eVaqXU8dTB9wS4zGGUqg"
+      },
+      "type": "peer-share-revocation/1",
       "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
       "signerSig": {
         "kty": "EC",

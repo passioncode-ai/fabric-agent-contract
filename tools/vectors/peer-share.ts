@@ -83,6 +83,7 @@ function links(): Json[] {
     { name: "a share id in upper case", link: `${ORIGIN}/s/${SHARE.toUpperCase()}#c=${CODE}&k=${FPR}`, expect: bad },
     { name: "another path", link: `${ORIGIN}/share/${SHARE}#c=${CODE}&k=${FPR}`, expect: bad },
     { name: "a space", link: `${LINK} `, expect: bad },
+    { name: "an authority that does not parse", link: `https://[/s/${SHARE}#c=${CODE}&k=${FPR}`, expect: bad },
     { name: "not a string", link: 7, expect: bad }
   ];
 }
@@ -140,6 +141,8 @@ function exchanges(): Json[] {
     run("the codes differ: one abort after completion", [CLAIM, COMMIT, REVEAL_R, REVEAL_S, ABORT_R], { state: "burnt", reason: "aborted", index: 4 }),
     run("anything after that abort", [CLAIM, COMMIT, REVEAL_R, REVEAL_S, ABORT_R, ABORT_R], { state: "burnt", reason: "closed", index: 5 }),
     run("a second frame after completion that is no abort", [CLAIM, COMMIT, REVEAL_R, REVEAL_S, REVEAL_S], { state: "burnt", reason: "closed", index: 4 }),
+    run("a second claim after completion", [CLAIM, COMMIT, REVEAL_R, REVEAL_S, CLAIM], { state: "burnt", reason: "closed", index: 4 }),
+    run("a claim whose MAC does not hold, first: it is the link's one claim, and the holder's claim burns it", [{ ...CLAIM, keys: STRANGER, mac: macOf(OTHER_CODE, SHARE, STRANGER, FPR), commit: commitOf("recipient", SHARE, STRANGER, N_X) }, CLAIM], { state: "burnt", reason: "repeated", index: 1 }),
     run("a frame of another share", [CLAIM, { ...COMMIT, shareId: OTHER_SHARE }], { state: "burnt", reason: "malformed", index: 1 }),
     run("a frame with a member more", [{ ...CLAIM, note: "x" }], { state: "burnt", reason: "malformed", index: 0 }),
     run("a clock that does not read", [CLAIM], { state: "burnt", reason: "malformed", index: -1 }, "today")
@@ -192,7 +195,8 @@ function envelopes(): Json[] {
     ["issued more than 60 s ahead of the clock", env, ctx({ at: "2026-10-27T09:57:59Z" }), no("not-yet-valid")],
     ["an envelope that lives more than 90 days", envelope({ exp: "2027-01-25T09:59:01Z" }, "long"), ctx(), no("lifetime-too-long")],
     ["an envelope of exactly 90 days", envelope({ exp: "2027-01-25T09:59:00Z" }, "ninety"), ctx(), ok(envelope({ exp: "2027-01-25T09:59:00Z" }, "ninety"))],
-    ["an envelope past its exp", env, ctx({ at: EXP }), no("expired")]
+    ["an envelope past its exp", env, ctx({ at: EXP }), no("expired")],
+    ["a time with an offset, not UTC", envelope({ iat: "2026-10-27T10:59:00+01:00" }, "offset"), ctx(), no("malformed")]
   ];
   return cases.map(([name, envelope, context, expect]) => ({ name, envelope, context, expect }));
 }
@@ -216,7 +220,10 @@ function reports(): Json[] {
     ["signed by a key other than the recipient's confirmed share #sig", report({}, "stranger-sig", BODY, { key: K.xSig }), ctx(), no("bad-key")],
     ["issued more than 60 s ahead of the clock", rep, ctx({ at: "2026-10-27T09:57:59Z" }), no("not-yet-valid")],
     ["a body that carries a value", report({}, "value-body", { ...BODY, value: SECRET }), ctx(), no("bad-body")],
-    ["a body with a negative count", report({}, "negative", { ...BODY, days: [{ ...BODY.days[0], uses: -1 }] }), ctx(), no("bad-body")]
+    ["a body with a negative count", report({}, "negative", { ...BODY, days: [{ ...BODY.days[0], uses: -1 }] }), ctx(), no("bad-body")],
+    ["a body that is no JSON", sealed(REPORT, { sequence: 1, iat: IAT }, { key: K.rSig }, K.sKem, "not-json", Buffer.from("uses: 3", "utf8")), ctx(), no("bad-body")],
+    ["sealed to another key under the sender's thumbprint: the checks pass and it does not open", sealed(REPORT, { recipient: thumb(K.sKem), sequence: 1, iat: IAT }, { key: K.rSig }, K.xKem, "misdirected", Buffer.from(rfc8785(BODY), "utf8")), ctx(), no("cannot-open")],
+    ["a time with an offset, not UTC", report({ iat: "2026-10-27T10:59:00+01:00" }, "offset"), ctx(), no("malformed")]
   ];
   return cases.map(([name, sealedReport, context, expect]) => ({ name, report: sealedReport, context, expect }));
 }
@@ -235,7 +242,8 @@ function records(): Json[] {
     { name: "a revocation with its time changed", record: { ...revocation, at: "2026-10-28T11:00:00Z" }, type: "peer-share-revocation/1", shareId: SHARE, signerSig: K.sSig.jwk, expect: { ok: false, reason: "bad-signature" } },
     { name: "a revocation of another share", record: revocation, type: "peer-share-revocation/1", shareId: OTHER_SHARE, signerSig: K.sSig.jwk, expect: { ok: false, reason: "wrong-share" } },
     { name: "a deletion receipt that names no revocation", record: (({ revocation: _r, ...rest }) => rest)(deletion), type: "peer-share-deletion/1", shareId: SHARE, signerSig: K.rSig.jwk, expect: { ok: false, reason: "malformed" } },
-    { name: "a revocation read as a deletion receipt", record: revocation, type: "peer-share-deletion/1", shareId: SHARE, signerSig: K.sSig.jwk, expect: { ok: false, reason: "malformed" } }
+    { name: "a revocation read as a deletion receipt", record: revocation, type: "peer-share-deletion/1", shareId: SHARE, signerSig: K.sSig.jwk, expect: { ok: false, reason: "malformed" } },
+    { name: "a revocation dated with an offset, not UTC", record: sign({ type: "peer-share-revocation/1", shareId: SHARE, at: "2026-10-28T11:00:00+01:00" }, K.sSig), type: "peer-share-revocation/1", shareId: SHARE, signerSig: K.sSig.jwk, expect: { ok: false, reason: "malformed" } }
   ];
 }
 

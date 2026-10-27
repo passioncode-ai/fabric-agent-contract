@@ -1101,7 +1101,7 @@ independent agent author and P-02 project operator.
   5. A day later I read uses per day and the agents that used it -> reported by their machine, beside the mailbox's count.
   6. I press "Take back" -> the mailbox refuses from now on, their node deletes it and sends a receipt, and I revoke the key at the provider; the share reads taken back.
 - **Expected result:** the key opened only on the colleague's machine, for that share's key; I saw its use; it no longer works anywhere.
-- **Alt paths:** the link went through the mailbox's page -> no fingerprint is pinned and the six digits are the only check. The codes differ -> either of us says so, the link burns and nothing is sealed; I make a new share. Someone read the link first and claimed -> the MAC holds, but our codes differ one time in a million or more, so I refuse and nothing is sealed. A second claim arrives -> the link burns. I skip the comparison -> the share is sealed but recorded as `confirmed: false`, and my screen says so.
+- **Alt paths:** the link went through the mailbox's page -> no fingerprint is pinned and the six digits are the only check. The codes differ -> either of us says so, the link burns and nothing is sealed; I make a new share. Someone read the link first and claimed -> the MAC holds, and the colleague's claim then burns the link; even a party in the middle matches our codes only one time in a million, so I refuse and nothing is sealed, and I make a new share. Someone who saw only the share id claims first -> the MAC does not hold, my node refuses it and the link is spent; I make a new share. A second claim arrives -> the link burns. I skip the comparison -> the share is sealed but recorded as `confirmed: false`, and my screen says so.
 - **UI elements:** "Share", the link, the six digits on both screens, "The codes match", the uses per day, "Take back" with its three steps.
 - **States covered:** waiting for the claim, comparing, burnt, active, taken back
 - **Errors & recovery:** the colleague's machine is offline when I take it back -> the mailbox refuses at once and the provider's revocation ends the key; the deletion receipt arrives at its next contact. A copy made on their machine -> only the provider's revocation ends it, which the screen says.
@@ -1115,13 +1115,13 @@ independent agent author and P-02 project operator.
 - **Feature:** secret prompt
 - **Traces:** ST-040, FLW-34 (JTBD-15, JRN-14/#4)
 - **Entry point:** an agent's request for a slot it lacks
-- **Preconditions:** the product's signed app is running on my desktop and connected to the node with `secret.ui`
+- **Preconditions:** the product's signed app is on my desktop; the node starts it through its lifecycle broker if it is not running, and it connects with `secret.ui`
 - **Steps:**
   1. The agent asks the node for the slot -> the node names the agent from its own binding and sends `secret.prompt` to the signed app only.
   2. The app shows its window: the agent, the project, the slot and the agent's reason in quotes -> I type the token and press "Store".
   3. The app writes the slot itself -> the node sees the slot written after the prompt and tells the agent `stored`.
 - **Expected result:** the token is in the slot; the agent never saw it, and it is in no chat, log or argument.
-- **Alt paths:** I press "Decline" -> the agent is told `declined`. I do not answer in 10 minutes -> `no-answer`. The app says stored but the node sees no write -> `unconfirmed`. Another program connects declaring `secret.ui` -> its hello is `forbidden` and it is never prompted. On Linux, or with no desktop -> `no-client`, and the agent tells me to put the value in with the vault command in my own shell.
+- **Alt paths:** I press "Decline" -> the agent is told `declined`. I do not answer in 10 minutes -> `no-answer`. The app says stored but the node sees no write -> `unconfirmed`. Another program connects declaring `secret.ui` -> its hello is `forbidden` and it is never prompted. A window without my mark -> not my app's; I close it. On Linux, or with no desktop -> `no-client`, and the agent tells me to put the value in with the vault command in my own shell.
 - **UI elements:** the window with the agent's name, the slot, the quoted reason and a secure field; "Store", "Decline".
 - **States covered:** asking, stored, declined, no answer, unavailable
 - **Errors & recovery:** the node is not running -> the request fails and no window is shown by anyone; the agent asks again once the node is up.

@@ -15,8 +15,8 @@ other people's Observatories, track their use, revoke. Between two personal esta
 
 ## Who and what (PS-1)
 
-- **The sender** shares one credential, a vault slot of their estate. **The recipient** is another person, with their
-  own estate, on one machine. A share binds that one machine; a second machine of the recipient needs its own share.
+- **The sender** shares one or more credentials, each a vault slot of their estate, under one share and one comparison
+  of codes. **The recipient** is another person, with their own estate, on one machine. A share binds that one machine; a second machine of the recipient needs its own share.
 - **No organization** on either side, and none is needed: no DEC-0111 organization key, no membership. An organization
   both people belong to may add its own checks later, never as a precondition.
 - **Never a subscription sign-in.** A person's account under a provider's terms (a coding agent's monthly plan) is
@@ -71,8 +71,12 @@ MAC (`claimHolds`, constant time); the mailbox relays the claim and checks nothi
 
 The MAC filters claims to those of a link's holder. **It authenticates nothing against the mailbox:** the landing page
 is the mailbox's script and can read the code, so a mailbox, or anyone who read the link first, can claim with keys of
-its own and a MAC that holds. The comparison code is the defence against that, and nothing else is. **One claim per
-link:** the sender's node answers the first claim whose MAC holds and no other; a second claim burns the link (PS-6).
+its own and a MAC that holds. The comparison code is the defence against that, and nothing else is.
+
+**One claim per link, whatever its MAC.** The mailbox cannot check a MAC, so every claim it carries counts: the first is
+the link's one claim, and a second burns the link (PS-6). When the first claim's MAC does not hold, the sender's node
+refuses it and the link is spent. Whoever learns the share id, which travels in the request path unlike the fragment,
+can therefore burn a link, never take it; the sender makes a new share.
 
 ## The comparison code (PS-6)
 
@@ -96,10 +100,12 @@ before either reveals:
 **One attempt per link, at both ends** (`peerExchangeVerdict`, which the sender's node, the recipient's node and the
 mailbox each run over the frames in the order received): claim, then commit, then the two reveals in either order,
 then at most one `abort` after completion (a person said the codes differ). The exchange burns on a frame out of that
-order (`out-of-order`), a second frame of one step and role (`repeated`, a second claim included), a reveal that does
-not open its commitment (`commit-mismatch`), an abort before completion or after it (`aborted`), anything after that
-abort (`closed`), a frame of another share or another shape (`malformed`), or the claim deadline passing before
-completion (`expired`). A burnt exchange seals nothing. A new attempt is a new share, with a new id and a new code, that
+order (`out-of-order`), a second frame of one step and role before completion (`repeated`, a second claim included), a
+reveal that does not open its commitment (`commit-mismatch`), an abort before completion or the one after it
+(`aborted`), any other frame after completion and anything after that abort (`closed`), a frame of another share or
+another shape (`malformed`), or the claim deadline passing before completion (`expired`). A node keeps the first burnt
+verdict it reaches and reads the share no further: the verdict carries no arrival times, so `expired` holds only for a
+node that kept it. A burnt exchange seals nothing. A new attempt is a new share, with a new id and a new code, that
 the sender makes. The recipient's app reveals a nonce for a share id once and never again, so a mailbox posing as the
 sender cannot rerun the recipient's side for fresh codes.
 
@@ -108,10 +114,21 @@ before it learns the honest side's nonce, so each code is a fresh random value i
 probability 10^-6, one guess per link (RFC 6189 §4.4.1.1, as DEC-0084 reads it). Keys travel in the clear in the claim
 and the commit frames; the nonces carry the bound.
 
-**Departures from Project Observatory's proposal.** Both sides commit, then both reveal (DEC-0084's order, one order
-for every exchange of the contract), where the proposal had the asymmetric order (the recipient commits, the sender
-answers its nonce in the clear, the recipient reveals); the bound is the same. The code is the first five bytes, not
-four, and the transcript is RFC 8785, not a concatenation of unspecified encoding.
+**Departures from Project Observatory's proposal**, each with its reason:
+
+- both sides commit, then both reveal (DEC-0084's order, one order for every comparison code of the contract), where the
+  proposal had the asymmetric order (the recipient commits, the sender answers its nonce in the clear, the recipient
+  reveals); the bound is the same;
+- the code is the first five bytes, not four, as DEC-0084's is;
+- the code's transcript and the claim's MAC are over RFC 8785 objects with a `type`, not a concatenation of unspecified
+  encoding, so no two inputs read alike and no MAC or code of one kind is one of another;
+- the claim deadline is at most 7 days, where the proposal had 7 days by default, so a link cannot wait for its claim
+  indefinitely;
+- the lease is at most 24 hours (the proposal: one hour by default, set by the sender), so a sender's stop reaches an
+  honest recipient within a day whatever was set;
+- an envelope lives at most 90 days, so a value is sealed again at least that often and an old ciphertext stops opening;
+- a usage report carries no random nonce: its sequence and the header bound into the additional data already refuse a
+  replay or a report moved between shares (PS-8).
 
 ## The envelope (PS-7)
 
@@ -195,12 +212,14 @@ nothing, decides nothing and opens nothing.
   time and frequency of every claim, renewal and report, and the IP addresses of both machines. Whoever controls the
   account it runs in can read those.
 - **Its HTTP routes and its name** are the product's, not the contract's (Project Observatory's `observatory-cloud/1`):
-  the contract fixes what crosses between the two estates and what the mailbox may see and do, and two products that
-  implement PS-1 to PS-9 interoperate through any mailbox that meets these rules.
+  the contract fixes the frames and sealed messages that cross between the two estates and what the mailbox may see and
+  do. The routes are not fixed (CT-185): until a decision fixes them, a recipient claims, renews, reports and returns its
+  receipt only through a product that speaks the sender's mailbox's routes, so two different products agree on every
+  message and still need those routes in common.
 
 ## Not decided here
 
-The mailbox's HTTP routes, and the signed record it leaves when it moves to another host; a recipient's second machine
+The mailbox's HTTP routes (CT-185), and the signed record it leaves when it moves to another host; a recipient's second machine
 (until an estate carries a share between its own machines); sealing the sender's labels; using the mailbox for sealed
 transport between one person's own machines when no relay is deployed.
 

@@ -246,8 +246,11 @@ export type PeerExchangeVerdict = { state: "open" | "complete" } | { state: "bur
  * order received: the recipient's claim, then the sender's commit, then the two reveals in either order (each only
  * after both commitments); after both reveals open their commitments it is `complete` and carries exactly one more
  * frame, an `abort` (a person said the codes differ). It burns on the first frame out of that order, a second frame of
- * one step and role, a reveal that does not open its commitment, an abort before completion, a frame for another share,
- * or the claim deadline passing before completion (`at` and `claimDeadline` read as RFC 3339). A burnt exchange seals
+ * one step and role before completion (a second claim included: every claim counts, whatever its MAC, since the mailbox
+ * cannot check one), a reveal that does not open its commitment, an abort before completion, any frame after completion
+ * other than that one abort (`closed`), a frame for another share, or the claim deadline passing before completion (`at`
+ * and `claimDeadline` read as RFC 3339). A node keeps the first burnt verdict it reached and never reads the share
+ * again: the verdict carries no arrival times, so `expired` holds only for a node that kept it. A burnt exchange seals
  * nothing; a new attempt is a new share with a new link.
  */
 export function peerExchangeVerdict(shareId: unknown, claimDeadline: unknown, frames: unknown, at: unknown): PeerExchangeVerdict {
@@ -359,14 +362,15 @@ function seal(type: PeerSealedHeader["type"], input: PeerSealInput, extra: Parti
   return { ...unsigned, sig: signEs256(key, Buffer.from(signingInput(unsigned), "utf8")) };
 }
 
-/** Seals a shared value to the recipient's share `#kem` (DEC-0142 PS-6). Throws on an input no recipient would open. */
+/** Seals a shared value to the recipient's share `#kem` (DEC-0142 PS-7). Throws on an input no recipient would open. */
 export function sealPeerShare(input: PeerSealInput & { slot: string; provider: string; exp: Date }): PeerSealed {
-  const life = input.exp.getTime() - input.iat.getTime();
+  // The header carries whole seconds, so the life is judged on what the recipient reads.
+  const life = Date.parse(second(input.exp)) - Date.parse(second(input.iat));
   if (!(life > 0 && life <= MAX_PEER_ENVELOPE_DAYS * DAY_MS)) throw new Error("lifetime-too-long: an envelope lives more than zero and at most 90 days");
   return seal(PEER_ENVELOPE_TYPE, input, { slot: input.slot, provider: input.provider, exp: second(input.exp) });
 }
 
-/** Seals a usage report to the sender's share `#kem` (DEC-0142 PS-7); the body is checked first. */
+/** Seals a usage report to the sender's share `#kem` (DEC-0142 PS-8); the body is checked first. */
 export function sealPeerReport(input: Omit<PeerSealInput, "plaintext"> & { body: unknown }): PeerSealed {
   if (!peerReportBody(input.body)) throw new Error("bad-body: the report's body is not a peer-share report body");
   return seal(PEER_REPORT_TYPE, { ...input, plaintext: Buffer.from(rfc8785(input.body), "utf8") }, {});

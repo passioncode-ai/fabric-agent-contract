@@ -102,6 +102,14 @@ describe("secret.ui and secret.prompt", () => {
     expect(def("secretPrompt", { ...prompt, value: "sk-1" })).toBe(false);
     expect(def("secretPrompt", { ...prompt, slot: { env: "prod", name: "has space" } })).toBe(false);
     expect(def("secretPrompt", { ...prompt, reason: "" })).toBe(false);
+    expect(def("secretPrompt", { ...prompt, slot: { env: "prod", name: "openrouter_key" } })).toBe(false);
+    expect(def("secretPrompt", { ...prompt, project: "a project with spaces" })).toBe(false);
+    // The whole message binds secret.prompt's params to its definition: no value travels, no field is missing.
+    const request = (params?: unknown) => ({ jsonrpc: "2.0", id: 1, method: "secret.prompt", ...(params === undefined ? {} : { params }) });
+    expect(whole(request(prompt))).toBe(true);
+    expect(whole(request({ ...prompt, value: "sk-1" }))).toBe(false);
+    expect(whole(request({}))).toBe(false);
+    expect(whole(request())).toBe(false);
     const { provider: _provider, ...noProvider } = prompt;
     expect(def("secretPrompt", noProvider)).toBe(true);
     expect(def("secretResult", { outcome: "stored", at: "2026-10-27T10:01:00Z" })).toBe(true);

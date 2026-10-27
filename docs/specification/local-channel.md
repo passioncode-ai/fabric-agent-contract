@@ -109,13 +109,17 @@ the vault slot itself.
     with the hardened runtime. A check by process id alone is no check: a process id is reused.
   - **Windows:** the client process from `GetNamedPipeClientProcessId`, opened and held while its image
     (`QueryFullProcessImageNameW`) is verified by Authenticode (`WinVerifyTrust`) for the publisher the node is
-    configured with, and its creation time compared before and after, so a reused process id cannot pass.
-  - **Linux and any other platform:** no platform code signing separates one program of a user from another, so the
-    node admits no `secret.ui` client, names `secret-ui-unavailable` in `health.degraded`, and answers a request
-    `no-client` with the person's step: put the value into the vault in their own shell.
+    configured with, and its creation time compared before and after, so a reused process id cannot pass. This proves the
+    image, not the running process: another process of the same user at the same integrity level can still open and
+    write into the app unless the app protects its own process, so on Windows the check is weaker than on macOS.
+  - **Linux and any other platform:** the node has no signature of the client's image it can check, so it admits no
+    `secret.ui` client and answers each request `no-client`, its reason `secret-ui-unavailable`, with the person's step:
+    put the value into the vault in their own shell. Its `health` stays as it is: a feature it does not offer is no
+    degradation (CT-184).
 - **SP-3. One client.** The node sends a request to one session `maySecretPrompt` admits (a signed app that declared
-  `secret.ui`), never to every one; with none connected, or on a machine with no desktop session, the request is
-  answered `no-client` and nothing is shown by anyone.
+  `secret.ui`), never to every one. With none connected the node may start its signed app through its lifecycle
+  broker and prompt it once it is admitted, within the request's deadline; when none is admitted by then, or on a
+  machine with no desktop session, the request is answered `no-client` and nothing is shown by anyone.
 - **SP-4. No value on the channel.** The prompt and its result carry no value, in either direction. The app writes the
   value into the slot in its own process; the value never crosses the channel or another process boundary, and is in
   no argument, environment variable, log, notification or result.
@@ -126,7 +130,10 @@ the vault slot itself.
   `no-answer`, `unconfirmed` or `no-client`, never a value.
 - **SP-6. What the prompt shows.** The agent named by the node's own binding for its caller, never words the agent
   wrote; the project and the slot; `reason` quoted as the agent's own words; whether the slot already holds a value
-  (`replaces`). A prompt any program of the user can draw (a scripted dialog) is not a secret prompt.
+  (`replaces`). A prompt any program of the user can draw (a scripted dialog) is not a secret prompt. The channel
+  makes sure only the signed app receives the node's genuine requests; it cannot stop another program of the user from
+  drawing a lookalike window outside the channel. What lets the person tell the two apart is the product's own: a mark
+  only the signed app can show (Project Observatory's design keeps a phrase the person chose in the app's own store).
 - **SP-7. Where the request comes from** is the node's: an agent asks through the node's own surface (a tool on its MCP
   server, a job), and the node keeps its own limits (one open request per slot, a rate per agent). The channel carries
   only the prompt and its outcome.

@@ -758,8 +758,8 @@ usage lines, joined by the runtime's `session.id` (DEC-0068, [activity](docs/spe
 a socket or pipe the operating system proves is the same user's, hello first, consent prompts the other way (DEC-0075,
 [local channel](docs/specification/local-channel.md)), and secret prompts to the product's signed app only (DEC-0143).
 
-**Peer share**: A credential one person shares from their estate with another person's estate, with no organization on
-either side (`fabric-peer-share/1`): a key pair per share on each side, a link with a one-time code, a six-digit code
+**Peer share**: One or more credentials one person shares from their estate with another person's estate, with no
+organization on either side (`fabric-peer-share/1`): a key pair per share on each side, a link with a one-time code, a six-digit code
 the two people compare, the value sealed to the recipient's share key, usage reports back, taken back in three steps.
 Not a context and not a share grant (DEC-0142, [peer share](docs/specification/peer-share.md)).
 

@@ -835,8 +835,8 @@ flowchart TD
   L[Sender's node writes the link] --> A{Recipient accepts}
   A -->|no| N[Nothing is claimed]
   A -->|yes| C[Claim: keys, MAC, commitment]
-  C --> M{MAC holds and first claim?}
-  M -->|no| B[The link burns; a new share is needed]
+  C --> M{The first claim, and its MAC holds?}
+  M -->|no| B[The link is spent or burns; a new share is needed]
   M -->|yes| K[Sender commits; both reveal]
   K --> V{peerExchangeVerdict}
   V -->|burnt| B

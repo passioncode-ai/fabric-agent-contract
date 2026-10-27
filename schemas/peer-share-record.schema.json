@@ -21,7 +21,9 @@
           "$ref": "peer-share-frame.schema.json#/$defs/shareId"
         },
         "at": {
-          "$ref": "common.schema.json#/$defs/timestamp"
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?Z$",
+          "description": "An RFC 3339 instant in UTC, ending in Z, as the relay family reads it."
         },
         "signer": {
           "type": "string",
@@ -54,7 +56,9 @@
           "$ref": "peer-share-frame.schema.json#/$defs/shareId"
         },
         "at": {
-          "$ref": "common.schema.json#/$defs/timestamp"
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?Z$",
+          "description": "An RFC 3339 instant in UTC, ending in Z, as the relay family reads it."
         },
         "revocation": {
           "$ref": "common.schema.json#/$defs/sha256",

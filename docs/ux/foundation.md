@@ -277,7 +277,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 1 | Share | I make a share and send its link | my app's share screen | 3 | the key itself goes into a chat | a link with a one-time code and my share key's fingerprint, no value (priority 9) |
 | 2 | Confirm | we compare six digits on a call | both apps | 3 | no way to know the link reached the right person | a comparison code a party in the middle matches one time in a million (priority 9) |
 | 3 | Watch and take back | I read uses per day and press "Take back" | my app's share screen | 4 | no idea who still uses it | reports by their machine beside the mailbox's count and the provider's spend; three confirmed steps (priority 8) |
-| 4 | Give a secret | an agent asks me for a token | my app's own window | 3 | the agent asks in a chat, or a lookalike dialog | a window only the signed app can show, the value written straight into the vault (priority 8) |
+| 4 | Give a secret | an agent asks me for a token | my app's own window | 3 | the agent asks in a chat, or a lookalike dialog | a request the node sends only to the signed app, which shows the person's own mark and writes the value straight into the vault (priority 8) |
 
 ## 4. User stories
 
@@ -760,7 +760,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-040: Give an agent a secret in my own app's window, never in a chat
 
-- **Story:** As P-02, I want an agent's request for a secret to open a window only my product's signed app can show, which writes the value into my vault itself, so that the agent never sees the value and no lookalike window can collect it.
+- **Story:** As P-02, I want an agent's request for a secret to reach only my product's signed app, which shows a mark only it can show and writes the value into my vault itself, so that the agent never sees the value and I can tell its window from a lookalike.
 - **Traces:** JTBD-15, JRN-14/#4
 - **Acceptance criteria:**
   - Given a client that declares `secret.ui`, when the node has not verified it as its product's signed app by the operating system, then its hello is `forbidden` (`channelStep`).

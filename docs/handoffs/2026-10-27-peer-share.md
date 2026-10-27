@@ -17,21 +17,24 @@ that the share works between two personal estates with no organization, from the
   answered by PS-10, not by a protocol of its own.
 - `src/peer-share.ts`; schemas `peer-share-frame`, `peer-share-envelope`, `peer-share-report`, `peer-share-record`;
   `fixtures/vectors/peer-share.json` (written by `tools/vectors/peer-share.ts`, which imports nothing of
-  `src/peer-share.ts`), `test/peer-share.test.ts`; four positive and four negative fixtures.
+  `src/peer-share.ts`), `test/peer-share.test.ts`; four positive and four negative fixtures; `src/peer-share.ts` under a coverage floor.
 - DEC-0143, [local channel](../specification/local-channel.md#secret-requests) SP-1 to SP-7: `secret.prompt`,
   `secret.cancel`, the `secret.ui` capability accepted only after the node's own signed-app check (macOS and Windows;
   none on Linux, CT-184), `secretOutcome`; `src/local-channel.ts`, `schemas/local-channel.schema.json`,
   `test/local-channel.test.ts`.
 - `contexts.md`, `versioning.md`, `conformance.md` (four rows), the specification README, `DOCMAP.md`, `CONTEXT.md`;
   `docs/ux` JTBD-15, JRN-14, ST-039, ST-040, FLW-33, FLW-34, SCR-33, SCR-34, SCN-052, SCN-053; DEC-0075, DEC-0084,
-  DEC-0086, DEC-0111 and DEC-0128 annotated; CT-178 closed on merge; CT-184 and CT-185 filed.
+  DEC-0086, DEC-0111 and DEC-0128 annotated; CT-178 closed on merge; CT-184, CT-185 and CT-186 (adoption) filed.
 
 ## Open
 
 - Readings until two clean rounds in a row; merge; release; answer Observatory on thread `faa32585` (request
   `c50f590b`) with the two decision ids and the tag, and what its engine adopts at its next pin: replace
   `observatory-share-envelope/1` with `fabric-peer-share-envelope/1`, symmetric commit-reveal and a five-byte code in
-  place of its asymmetric four-byte one, the RFC 8785 transcript, `secret.prompt` in place of its broker-only path.
+  place of its asymmetric four-byte one, the RFC 8785 transcript and claim MAC, the ceilings (claim deadline 7 days, lease
+  24 hours, envelope 90 days), no report nonce, and `secret.prompt` with the broker launching its app (SP-3). Tell it
+  that DEC-0143 admits no `secret.ui` client on Linux (CT-184), where its D4 had the Tauri window, and that the mailbox's
+  routes stay its own (CT-185).
 - The UX artefacts reference ids SCN-052, SCN-053, SCR-33 and SCR-34 because SCN-050, SCN-051 and SCR-32 are taken on
   the branches of DEC-0138 and DEC-0140; whichever merges later keeps them.
 
