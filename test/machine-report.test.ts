@@ -16,6 +16,8 @@ import {
   sealMachineReport
 } from "../src/machine-report.js";
 import { rfc8785 } from "../src/canonical.js";
+import { instantKey } from "../src/rfc3339.js";
+import { instant } from "../src/relay.js";
 import { hpkeSealBase } from "../src/secret-envelope.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
@@ -89,6 +91,13 @@ describe("readMachineReport (MR-4's whole reading, DEC-0146)", () => {
 });
 
 describe("FAC-SEM-154: a report's at is a relay time (DEC-0146)", () => {
+  it("reads exactly the times the relay's own instant reads (relay.json's instant group)", () => {
+    const relayVectors = JSON.parse(readFileSync(path.join(root, "fixtures/vectors/relay.json"), "utf8")) as Json;
+    const cases = (relayVectors.instant as Json).cases as Json[];
+    expect(cases.length).toBeGreaterThan(0);
+    for (const c of cases) expect(instantKey(c.value) !== undefined, String(c.value)).toBe(instant(c.value) !== undefined);
+  });
+
   it("flags an at the hub refuses and passes one it reads", () => {
     const codes = (at: unknown) => evaluateSemanticRules("machine-report", { ...REPORT, at }).map((finding) => finding.code);
     for (const at of ["2026-10-27T08:00:00+00:00", "2026-10-27t08:00:00Z", "2026-10-27T08:00:00.0000000001Z", "2026-12-31T23:59:60Z", "2026-02-30T08:00:00Z"]) expect(codes(at), at).toEqual(["FAC-SEM-154"]);

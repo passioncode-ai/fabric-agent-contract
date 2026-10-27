@@ -121,7 +121,9 @@ whose `estateRecord.revision` is at or above the revoking revision, DEC-0132 MR-
 machines held one, so it waits for every machine the revision lists, and its first division of such an instance counts
 each old-hub lease a report names at its final `spent`, as an ended lease of that amount (DEC-0146 MR-5; the
 reference's order across hub keys is CT-113's); a machine the person removes without its report after the revocation
-leaves its spend under the old hub's leases unknown, so the instance stays closed to new leases until it ends (MR-6). A lease of a hub key a revision revokes ends for the meter when it
+leaves its spend under the old hub's leases unknown, so the instance stays closed to new leases until it ends (MR-6).
+The hub passes `windowRemainder` each machine's newest report only, so two of a machine's reports never tie at the
+millisecond `heldBy` reads (MR-4 orders them to the nanosecond, DEC-0146). A lease of a hub key a revision revokes ends for the meter when it
 applies that revision, before its `expiresAt` (WL-6): it spends nothing more under it, and its final `spent` is the
 one in a report whose `estateRecord.revision` is at or above that revision (DEC-0146). The hub
 counts, for each machine, the most it may have spent (`windowRemainder`):

@@ -287,9 +287,10 @@ whether an organization's relay answers it differently is part of CT-163.
   relay has no byte quota) and `blobBytes` (at most `MAX_BLOB_BYTES`).
 - **`deliver`**: `{from, msgId, seq, body, sentAt}`, in `seq` order, to every connection the recipient holds. `from`
   is the kid the relay admitted on the sender's connection. `deliver` has no `to`.
-  - The recipient answers `ack` with `{seq}` once it has read the message, whatever it holds: a body it cannot verify
-    and a payload type it does not know are acknowledged and dropped, so they never fill its mailbox (DEC-0146).
-    Acknowledged and expired messages are deleted.
+  - The recipient answers `ack` with `{seq}`. A body it verified whose payload type it does not know is acknowledged
+    and dropped, so such messages never fill its mailbox (DEC-0146); a body it cannot verify keeps the handling its
+    refusal has, since `unknown-sender` and `not-yet-valid` may pass once the recipient applies a revision or the
+    sender's clock is behind it. Acknowledged and expired messages are deleted.
   - Delivery is at least once.
 - **The body is end to end** (`fabric-relay-message/1`): a compact JWS with `alg: ES256` and
   `typ: fabric-relay-message+jwt`. Its payload is the RFC 8785 bytes of `{type, from, to, msgId, iat, exp, payload}`;
@@ -587,7 +588,7 @@ report it holds for its own machine, if any, and reads MR-5 from it; nothing is 
 moment the answer arrived, by its own clock, as `notAfter`: a report whose `at` is later is `malformed`.
 
 **MR-3, how it travels.** The report is the inner `payload` of a relay message body (`fabric-relay-message/1`), sealed
-to the hub machine's `#kem`, as the revision that certifies that hub machine lists it, as `fabric-machine-report/1` `{type, kem, enc, ct}`: HPKE base mode, suite `[16, 1, 1]`
+to the hub machine's `#kem`, as the newest revision MR-2 names lists it, as `fabric-machine-report/1` `{type, kem, enc, ct}`: HPKE base mode, suite `[16, 1, 1]`
 (the [secret envelope](#the-secret-envelope)'s), `info` the ASCII `fabric-machine-report/1`, the additional data the
 RFC 8785 bytes of `{type, from, to, msgId, kem}` (the body's own `from`, `to` and `msgId`, so a sealed report copied
 into another body does not open), the plaintext the report's RFC 8785 form, at most 65 536 bytes
@@ -603,9 +604,8 @@ machine's key") while the hub's new `#kem` waits only for a revision the hub dra
 a failure otherwise (a private half it cannot read, or one that does not match the listed key: "replace this
 machine's key"), which a watcher reports after 5 minutes (DEC-0146). Fabric's hub, which serves no well-known document
 today, shows it on its own machine's row in My network's machines (SCR-23, its error state). A recipient acknowledges
-(`ack`) every message delivered to it once it has read it, a body it cannot verify and a payload type it does not
-know included, and drops what it cannot read ([Messages](#messages), DEC-0146), so a hub not yet on DEC-0132 that does
-so drops a report and its mailbox does not fill with them (whether Fabric's deployed hub does is asked in thread
+(`ack`) and drops a body it verified whose payload type it does not know ([Messages](#messages), DEC-0146), so a hub
+not yet on DEC-0132 that does so drops a report and its mailbox does not fill with them (whether Fabric's deployed hub does is asked in thread
 `5d2ea917`); the machine hears nothing back either way, since a report is never answered.
 
 **MR-4, the hub's reading.** After the body is verified (`verifyMessageBody`) and is not a replay (`checkReplay`), the

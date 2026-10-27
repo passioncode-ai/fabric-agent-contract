@@ -66,7 +66,9 @@ an `id` that is otherwise well formed is a notification and is not answered; a m
    `consent.prompt` and `secret.prompt` (DEC-0143), called by the node; a client that sends one to the node gets
    `unknown-method`, and so does a method of `NODE_METHODS` that this node does not serve (DEC-0139), as
    `nodeMethodAnswer` answers (vectors `dispatch`, DEC-0146). The node that applies the estate's records on a machine
-   serves `machine.report`, whichever node it is: on the hub's machine Fabric's own node too (DEC-0146). A node pinned
+   serves `machine.report`, whichever node it is: on the hub's machine Fabric's own node too (DEC-0146). A node reads
+   each request with `channelStep` first and dispatches with `nodeMethodAnswer` only a method other than
+   `channel.hello` that `channelStep` let through after hello; a hello is never dispatched. A node pinned
    before DEC-0132 was promised no answer to `machine.report`: its hub reads any error, or none before a deadline of
    its own, as no report (relay.md MR-2). Other payload methods (`node.lifecycle.*`, `grant.check`, …) are added by
    their owners' decisions, in this envelope. `machine.report` answers any client of the channel: a process of the

@@ -8742,9 +8742,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      unknown.
   7. **The hub's own machine.** The node that applies the estate's records there serves `machine.report`, Fabric's own
      node included. A node answers a method it does not serve `unknown-method`, as `nodeMethodAnswer` does.
-  8. **A payload a recipient does not know.** Every recipient of relay messages acknowledges each delivered message once
-     it has read it, a body it cannot verify and a payload type it does not know included, and drops what it cannot
-     read. A hub not yet on DEC-0132 that does so drops reports, and its mailbox does not fill with them; whether
+  8. **A payload a recipient does not know.** Every recipient of relay messages acknowledges and drops a body it verified
+     whose payload type it does not know; a body it cannot verify keeps its refusal's handling, since `unknown-sender`
+     and `not-yet-valid` can pass later. A hub not yet on DEC-0132 that does so drops reports, and its mailbox does not fill with them; whether
      Fabric's deployed hub does is asked in thread `5d2ea917`, and if it does not, its date is CT-152's.
   9. **A hub that cannot read reports.** Its `degraded` entry's `source` is `machine-report`: a setup state while its
      new `#kem` waits only for the person to sign a revision the hub drafted, a failure otherwise. A hub with no
