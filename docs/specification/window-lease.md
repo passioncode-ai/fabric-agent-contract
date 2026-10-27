@@ -186,8 +186,8 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
   the current estate record certifies, its amount at most `windowRemainder`'s answer, its life at most 24 hours and
   inside the window instance, sequences rising per slot; it counts an expired, unreported lease as spent and credits
   a late report at its next division. After a hub move it issues no lease of a window instance the old hub divided
-  until that instance ends or every machine holding one of the old hub's leases has reported it after the revocation
-  (its newest report's `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it) (DEC-0107, [Reporting](#reporting)). v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
+  until that instance ends or every machine the revision lists has reported after the revocation (its newest report's
+  `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it), and then counts each old-hub lease a report names at its final `spent` (DEC-0107, DEC-0146, [Reporting](#reporting)); the wait is shown with each machine it waits on (MR-6). v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
   how the hub sizes it within the remainder is its own.
 - **Project Observatory's meter** (CT-20) verifies each lease with `verifyWindowLease` before it spends against it,
   holds one per slot, reserves only as `mayReserve` answers (the smaller of its own remainder and the lease's, and

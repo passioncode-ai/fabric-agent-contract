@@ -111,7 +111,8 @@ function machineReportVectors(): Json {
       { name: "a report not after the one held", report: { ...REPORT, machine: "m-hub" }, context: { machine: "m-hub", held: { at: "2026-10-27T08:00:00Z" } }, expect: { ok: false, refusal: "stale" } },
       { name: "a report after the one held replaces it", report: { ...REPORT, machine: "m-hub" }, context: { machine: "m-hub", held: { at: "2026-10-27T07:59:59Z" } }, expect: { ok: true } },
       { name: "an at with an offset (FAC-SEM-154)", report: { ...REPORT, machine: "m-hub", at: "2026-10-27T08:00:00+00:00" }, context: { machine: "m-hub" }, expect: { ok: false, refusal: "malformed" } },
-      { name: "a held report written with an offset keeps nothing back", report: { ...REPORT, machine: "m-hub" }, context: { machine: "m-hub", held: { at: "2026-10-27T09:00:00+01:00" } }, expect: { ok: true } },
+      { name: "a held report accepted with an offset before DEC-0146 still makes a report not after it stale", report: { ...REPORT, machine: "m-hub" }, context: { machine: "m-hub", held: { at: "2026-10-27T09:00:00+01:00" } }, expect: { ok: false, refusal: "stale" } },
+      { name: "a held report accepted with an offset before DEC-0146 is replaced by a newer one", report: { ...REPORT, machine: "m-hub" }, context: { machine: "m-hub", held: { at: "2026-10-27T08:59:59+01:00" } }, expect: { ok: true } },
       { name: "the hub's own node answers with an at after the hub's clock", report: { ...REPORT, machine: "m-hub" }, context: { machine: "m-hub", notAfter: "2026-10-27T07:59:00Z" }, expect: { ok: false, refusal: "malformed" } }
     ],
     read: [

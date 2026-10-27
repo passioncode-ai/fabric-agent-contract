@@ -3,7 +3,7 @@
 DEC-0075, DEC-0132 (`machine.report`), DEC-0139 (`unknown-method`, its callers), DEC-0143 (secret requests), DEC-0146 (`nodeMethodAnswer`) · rule code `FAC-SEM-106` · schema [`local-channel`](../../schemas/local-channel.schema.json) · code
 [`src/local-channel.ts`](../../src/local-channel.ts)
 
-How Fabric, Fabric Switchboard, Fabric Dashboards and, for secret requests, the node's own signed app (DEC-0143) talk to Project Observatory's node on the same machine: the
+How Fabric, Fabric Switchboard, Fabric Dashboards and, for secret requests, the node's own signed app (DEC-0143) talk to Project Observatory's node on the same machine, and Fabric's hub to whichever node applies the estate's records on its machine (`machine.report`, DEC-0146): the
 organization edition's CON-OE-10 in the edition its CROSSWALK-v4 gives (the first organization server's target
 architecture v4 §5 at `9c6a780`: "local channel: Unix socket / named pipe with peer credentials, or per-account token
 files"), agreed with Project Observatory's session on 2026-10-12. There is no `policy.decide`: v4 has no policy decision

@@ -8379,6 +8379,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   method of `NODE_METHODS` a node does not serve answers `unknown-method` (JSON-RPC -32601), and `machine.report`
   filters none of its same-user clients. Adoption: CT-152's adopters (Fabric's hub and nodes, Project Observatory's
   node).
+- **Annotated (2026-10-27):** DEC-0146 decides what this decision left open (CT-172): a pre-DEC-0132 hub's handling
+  (every recipient acknowledges a payload type it does not know), the unusable-`#kem` entry's form and surface, and the
+  strict `at` (a relay time, not after the body's `iat`). This decision also changed `ceremonies.md` (step 6), which its
+  Consequences do not list.
 - **Context:** DEC-0132's blind readings left non-blocking findings (CT-161): rules a sender keeps by duty with no
   reader's check, refusals the text did not name, a local read with no reference function, and stale names.
 - **Decision:** [relay](specification/relay.md#the-machines-report) MR-2 to MR-4 and
@@ -8414,7 +8418,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   lease), `schemas/machine-report.schema.json` (description), `src/window-lease.ts` (`receivedAt`'s comment),
   `schemas/heartbeat.schema.json` and `schemas/window-lease.schema.json` (descriptions), `fixtures/vectors/window-lease.json`
   and `test/window-lease.test.ts` (case names say "written"), `docs/ux/flows.md` (FLW-27), `docs/ux/scenarios.md`
-  (SCN-038), `docs/specification/ceremonies.md` (step 6, added by DEC-0146), `docs/specification/window-lease.md` (Reporting), `docs/specification/README.md` and `docs/DOCMAP.md` (their
+  (SCN-038), `docs/specification/window-lease.md` (Reporting), `docs/specification/README.md` and `docs/DOCMAP.md` (their
   rows); DEC-0132 annotated; backlog CT-152 (its adopters' reading), CT-161 (closed), CT-172 (filed), CT-122 and
   CT-154 notes (the latter from the board: Fabric `7ef21793`, the adapter `aa86a675`); the handoff
   `docs/handoffs/2026-10-26-machine-report-loose-ends.md` and its row in `docs/handoffs/README.md`.
@@ -8697,9 +8701,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-27
 - **Status:** Accepted (on merge of its pull request, after its objection window: 2026-10-29 18:00 UTC, thread
   `5d2ea917` with Fabric). A narrowing of the hub's reading of reports no conforming machine writes (an `at` that is no
-  relay time, or later than the body's `iat`); new duties for the hub (counting an old hub's leases, the wait it
-  shows, the `degraded` entry's form, acknowledging a payload it does not know) and for a reporting machine (the `#kem`
-  it seals to, the leases of each hub key, a lease a revoked key signed). Additive: a reference function
+  relay time, or later than the body's `iat`; DEC-0139 read `at` as `strictTime`, so a machine that wrote an offset
+  conformed until now); new duties for the hub (counting an old hub's leases, the wait it shows, the `degraded` entry's
+  form), for a reporting machine (the `#kem` it seals to, the leases of each hub key, a lease a revoked key signed) and
+  for every recipient of relay messages (acknowledging a payload type it does not know). None of CT-152's adopters
+  ships the report yet, so no deployed machine or hub changes. Additive: a reference function
   (`readMachineReport`), a context member (`notAfter`), a rule code (`FAC-SEM-154`), a node dispatch function
   (`nodeMethodAnswer`) with the vector group `dispatch`, and vectors in `machine-report.json` (`open`, `accept`, a new
   group `read`); no earlier vector's answer changes. Adoption: CT-152's adopters (Fabric's hub and nodes, Project
@@ -8713,7 +8719,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   [window lease](specification/window-lease.md#reporting), [ceremonies](specification/ceremonies.md#move-the-hub) step 7,
   [local channel](specification/local-channel.md#the-session), [devices](specification/devices.md#unlinkable-enrollments).
   1. **The cap.** A report names at most 64 leases, as now. While leases name only the `estate` scope a machine holds at
-     most twelve (two hub keys, three windows, a held and a newest expired lease each); a hub signs no `project:` or
+     six per hub key whose leases it holds in one window instance (three windows, a held and a newest expired lease
+  each), so 64 holds ten hub keys; a hub signs no `project:` or
      `grant:` lease until the revision that admits them decides the report's cap with them, and a machine never drops
      a lease to fit.
   2. **Newest and the hub keys.** The newest lease of a slot is the highest `sequence` among the slot's leases one hub
@@ -8732,9 +8739,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      out (bring it back, update it, remove it). A removed machine is no longer waited on.
   7. **The hub's own machine.** The node that applies the estate's records there serves `machine.report`, Fabric's own
      node included. A node answers a method it does not serve `unknown-method`, as `nodeMethodAnswer` does.
-  8. **A payload a hub does not know.** A recipient acknowledges every delivered message once it has read it, a body it
-     cannot verify and a payload type it does not know included, and drops what it cannot read; a hub not yet on
-     DEC-0132 so drops reports, and its mailbox does not fill with them (Fabric's confirmation asked).
+  8. **A payload a recipient does not know.** Every recipient of relay messages acknowledges each delivered message once
+     it has read it, a body it cannot verify and a payload type it does not know included, and drops what it cannot
+     read. A hub not yet on DEC-0132 that does so drops reports, and its mailbox does not fill with them; whether
+     Fabric's deployed hub does is asked in thread `5d2ea917`, and if it does not, its date is CT-152's.
   9. **A hub that cannot read reports.** Its `degraded` entry's `source` is `machine-report`: a setup state while its
      new `#kem` waits only for the person to sign a revision the hub drafted, a failure otherwise. A hub with no
      `fabric-service/0.1` well-known shows it on its own machine's row in My network's machines (SCR-23, error); SCR-23
@@ -8757,9 +8765,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   sends, and the older key's holder is the same hub, which applied the newer revision); restricting `machine.report` to
   the hub's verified process (a process of the person's user can read the node's files anyway); auditing
   `FAC-SEM-090` by receipt time (the division record holds none; a new member would be a schema change for an audit).
-- **Compatibility:** a narrowing for the hub's reading of reports no conforming machine writes, and for a hub that
-  issued a lease of an instance the old hub divided without counting the old hub's spend; additive for a node and for
-  ports (a new function, a context member, a rule code, vector groups); no earlier vector's answer changes.
+- **Compatibility:** a narrowing for the hub's reading of an `at` that is no relay time (one with an offset was
+  accepted under DEC-0139) or later than the body's `iat`, and for a hub that issued a lease of an instance the old hub
+  divided without counting the old hub's spend; new duties for reporting machines and relay recipients; none of these
+  is deployed yet (CT-152). Additive for ports (a new function, a context member, a rule code, vector groups); no
+  earlier vector's answer changes, and a held report accepted with an offset before still guards against an older
+  one.
   `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/machine-report.ts` (`readMachineReport`, `notAfter`, `FAC-SEM-154`, the relay time),
   `src/rfc3339.ts` (`instantKey`), `src/local-channel.ts` (`nodeMethodAnswer`), `fixtures/vectors/machine-report.json`
@@ -8770,6 +8781,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and `estate-record.md` (wording), `conformance.md` (the module row, the meter, hub, reporter and hub-reader rows, a
   node row, the rule list), `schemas/machine-report.schema.json` and `schemas/device-check-in.schema.json`
   (descriptions), `src/revocation-delta.ts` and `src/window-lease.ts` (comments), `docs/ux/screens.md` (SCR-23),
-  `docs/ux/scenarios.md` (SCN-038); DEC-0139 annotated (`ceremonies.md` step 6 among its consequences); backlog CT-172
+  `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-27), `docs/specification/window-lease.md` (who adopts it);
+  DEC-0139 annotated; backlog CT-172
   (closed), CT-152 (its adopters' reading); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
 - **Source:** CT-172; DEC-0132's and DEC-0139's readings.

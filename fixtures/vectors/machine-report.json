@@ -1024,7 +1024,7 @@
       }
     },
     {
-      "name": "a held report written with an offset keeps nothing back",
+      "name": "a held report accepted with an offset before DEC-0146 still makes a report not after it stale",
       "report": {
         "type": "machine-report/1",
         "machine": "m-hub",
@@ -1055,6 +1055,45 @@
         "machine": "m-hub",
         "held": {
           "at": "2026-10-27T09:00:00+01:00"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "stale"
+      }
+    },
+    {
+      "name": "a held report accepted with an offset before DEC-0146 is replaced by a newer one",
+      "report": {
+        "type": "machine-report/1",
+        "machine": "m-hub",
+        "at": "2026-10-27T08:00:00Z",
+        "records": {
+          "estateRecord": {
+            "revision": 7,
+            "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "heartbeat": {
+            "sequence": 12,
+            "at": "2026-10-27T07:00:00Z"
+          },
+          "revocationDelta": {
+            "sequence": 3,
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "leases": [
+            {
+              "leaseId": "lease-1",
+              "expiresAt": "2026-10-27T20:00:00Z",
+              "spent": "1.25"
+            }
+          ]
+        }
+      },
+      "context": {
+        "machine": "m-hub",
+        "held": {
+          "at": "2026-10-27T08:59:59+01:00"
         }
       },
       "expect": {

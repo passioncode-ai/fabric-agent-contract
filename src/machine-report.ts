@@ -1,7 +1,7 @@
 import { rfc8785 } from "./canonical.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { p256KeyRefusal } from "./p256.js";
-import { instantKey } from "./rfc3339.js";
+import { instantKey, strictTime } from "./rfc3339.js";
 import { hpkeOpenBase, hpkeSealBase } from "./secret-envelope.js";
 
 // #region machine-report, docs: docs/specification/relay.md#the-machines-report
@@ -126,7 +126,9 @@ export function openMachineReport(sealed: unknown, ctx: { from: unknown; to: unk
  * offset, a lower-case `t`, ten fraction digits) cannot be ordered against the report held, so it is `malformed` held
  * or not, and so is an `at` after `notAfter` when the caller gives one (the body's `iat`, or the hub's clock when its
  * own node answered; an unreadable `notAfter` refuses rather than lets through); then `wrong-machine`; then `stale`,
- * compared to the nanosecond (DEC-0146). A held time the hub cannot read keeps nothing back.
+ * compared to the nanosecond (DEC-0146). A held time is read as a relay time, or, for a report the hub accepted
+ * before DEC-0146 (an offset, a lower-case `t`, more fraction digits), to the millisecond as `strictTime` reads it, so
+ * an upgrade never stops it guarding against an older report; a held time neither reads keeps nothing back.
  */
 function orderReport(report: Json, machine: unknown, held: unknown, notAfter: unknown): "malformed" | "wrong-machine" | "stale" | undefined {
   const at = instantKey(report.at);
@@ -137,10 +139,18 @@ function orderReport(report: Json, machine: unknown, held: unknown, notAfter: un
   }
   if (report.machine !== machine) return "wrong-machine";
   if (isObject(held)) {
-    const heldAt = instantKey(held.at);
+    const heldAt = heldKey(held.at);
     if (heldAt !== undefined && !(at > heldAt)) return "stale";
   }
   return undefined;
+}
+
+/** A held report's time as `instantKey`'s key, through `strictTime` to the millisecond when it is no relay time. */
+function heldKey(value: unknown): string | undefined {
+  const key = instantKey(value);
+  if (key !== undefined) return key;
+  const ms = strictTime(value);
+  return Number.isFinite(ms) ? instantKey(new Date(ms).toISOString()) : undefined;
 }
 
 /**
