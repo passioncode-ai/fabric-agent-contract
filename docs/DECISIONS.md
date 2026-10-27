@@ -8294,7 +8294,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `docs/specification/delegation.md` (header, DL-25's T1 and T2 rows, the family section's intro,
   DL-27 to DL-29), `conformance.md` (the family's row), `README.md` (the delegation row), `CONTEXT.md` (Family),
   `test/delegation-sealed.test.ts` (DL-27 to DL-29's heading form), `relay.md` (Trust tiers' T2); DEC-0130 annotated; backlog CT-143, CT-149, CT-157
-  (closed), CT-167 and CT-168 (filed).
+  (closed), CT-167 and CT-168 (filed). Completed 2026-10-27 (CT-170): also backlog CT-30 and the handoff
+  `docs/handoffs/2026-10-26-family-wording.md`.
 - **Source:** CT-157; DEC-0130's readings, rounds 1 to 5.
 
 ### DEC-0138: the organization part of an adaptation plan, `org-adaptation/1`

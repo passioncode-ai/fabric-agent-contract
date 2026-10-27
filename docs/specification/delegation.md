@@ -1,7 +1,7 @@
 # Delegation `fabric-delegation/0.1`
 
-DEC-0039, DEC-0041, DEC-0043, DEC-0045, DEC-0055, DEC-0060, DEC-0066, DEC-0082, DEC-0090 ([the partner
-channel](partner-channel.md)), DEC-0106, DEC-0107, DEC-0111, DEC-0121, DEC-0125, DEC-0126, DEC-0128, DEC-0130,
+DEC-0039, DEC-0041, DEC-0043, DEC-0045, DEC-0055, DEC-0060, DEC-0066, DEC-0082, DEC-0084, DEC-0090 ([the partner
+channel](partner-channel.md)), DEC-0099, DEC-0104, DEC-0106, DEC-0107, DEC-0111, DEC-0121, DEC-0125, DEC-0126, DEC-0128, DEC-0130,
 DEC-0132, DEC-0136, DEC-0137, DEC-0141 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
 · schemas [`delegation-token`](../../schemas/delegation-token.schema.json),
 [`delegation-jwks`](../../schemas/delegation-jwks.schema.json), [`approval`](../../schemas/approval.schema.json),
@@ -467,7 +467,7 @@ Proof starts at the machine boundary (DEC-0045; Fabric ADR-0144
 |---|---|---|
 | **T0** | the operator's own machine: a caller on loopback, running under the owner's OS account | the local placement's floor ([service](service.md#authentication-and-network)), which this profile does not change |
 | **T1** | an enrolled machine of the same owner | its enrolment in the owner's estate (the estate record, DEC-0084); over the relay, `relayCallerTier` from the estate record the callee's node applied ([machine calls](machine-calls.md#the-t1-binding-over-the-relay), DEC-0106) |
-| **T2** | everything else: another person's machine (a share grant, `principalKind: external`), and any caller the callee cannot place in T0 or T1 (over the estate's relay an unplaced sender is refused instead, DL-28) | the default: no placement |
+| **T2** | everything else: another person's machine (a share grant, `principalKind: external`), and any caller the callee cannot place in T0 or T1 (over the estate's relay a sender that is not T1 is T2 and its call is refused, and a sender `relayCallerTier` reads `unknown-state` is a denial rather than T2, DL-28, [machine calls](machine-calls.md#the-t1-binding-over-the-relay), DEC-0106) | the default: no placement |
 
 A caller's tier is its origin's, not its connection's. A call relayed onto loopback from off the machine — through
 a tunnel, a reverse proxy, or the hub forwarding (DL-10) a T2 caller's call — is T2 unless the relay proves the
@@ -508,7 +508,7 @@ DEC-0045; so a callee treats every T0 process as the family, though the family t
 and sessions), and `personal` and `org:<orgId>` stay the only contexts. What DL-26 opens to a T0 or T1 caller is what is
 open to the family: everything open to the operator, in the context the call runs in (a call without a token runs in
 the context of the callee instance it reaches, [contexts](contexts.md#one-instance-per-context-on-a-machine),
-DEC-0082), with no token, approval or grant record; one approval of the operator
+DEC-0082, DEC-0137), with no token, approval or grant record; one approval of the operator
 travels along the family's chain as a mandate (DEC-0125). What still binds the family: the money limits, the human
 gates, the credential source (never another agent's key or vault slot, DL-26), the contexts, the machine profiles on
 calls between the estate's machines over the relay (a `view` machine neither takes nor makes a call with an effect,
