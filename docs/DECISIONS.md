@@ -8363,6 +8363,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** CT-169; the first organization server's request N-4 (board message `38f108ba`, thread `0fee99ae`); the
   shape posted in thread `5d2ea917` and, for the server, in `0fee99ae` (`6d41733c`, `24327dbf`, superseding the device
   transport of `28b7a5b3`); DEC-0029 (rule codes), DEC-0056, DEC-0067, DEC-0128, DEC-0129.
+
 ### DEC-0141: a job's step under a mandate is read under the job's capability
 
 - **Date:** 2026-10-26
