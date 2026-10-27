@@ -28,6 +28,9 @@ alike.
   up to 127 of `[A-Za-z0-9_-]` (1–128 characters). (Informative: the first organization server, at its commit `03d454b`, issues ids of the form
   `org_<base32>`.)
 
+A credential one person shares with another person's estate is in neither: it is held apart from every context's
+vault and is no context of its own ([peer share](peer-share.md#a-share-is-not-a-context-ps-3), DEC-0142).
+
 Context ids compare **as written**: never case-folded, never trimmed, never by prefix, as DEC-0077 compares board ids.
 `Personal`, `ORG:x`, `org:` with an empty or a 129-character id, a surrounding space and a trailing newline are not
 context ids (the schema, `parseContext`, and the vectors' `contexts`, which `test/context-route.test.ts` runs through

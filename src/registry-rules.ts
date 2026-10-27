@@ -29,7 +29,8 @@ function providerObservation(value: JsonObject): Finding[] {
   const entry = isObject(value.entry) ? value.entry : {};
   const findings: Finding[] = [];
   if (typeof value.file === "string") {
-    const stem = value.file.replace(/^.*\//, "").replace(/\.json$/, "");
+    // The stored path's last segment after either separator: a Windows host writes `providers\\<id>.json` (DEC-0145).
+    const stem = value.file.replace(/^.*[\\/]/, "").replace(/\.json$/, "");
     if (stem !== entry.id) findings.push({ code: "FAC-SEM-014", instancePath: "/entry/id", message: `entry ${show(entry.id)} is stored as ${value.file}; the file is named <id>.json` });
   }
   const manifest = value.manifest;

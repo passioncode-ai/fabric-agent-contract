@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0139` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0146` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -1679,7 +1679,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-11
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric (the reference
   writer, `sessionBundle.ts`, release 0.4.0 REQ-06), Fabric Dashboards (its console pack, `src/core/handoff.ts`),
-  Switchboard (carries the arguments in place).
+  Switchboard (carries the arguments in place). SH-4's path comparison and SH-11's `mcp.json` and `brief.md` names amended by DEC-0145
+  (2026-10-27): on Windows either separator and any case.
 - **Decision:** the profile [session handoff](specification/session-handoff.md), one format for every product:
   - a folder in the writing host's user data, never in a repository, `0700` with every file `0600`, holding
     `handoff.json` (the manifest, `schemas/session-handoff.schema.json`), `context.md`, `mcp.json` and, as
@@ -4274,6 +4275,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   object, `jsonrpc` not `"2.0"`, an `id` not a 1–128 code-point string or an integer, a method that is not a method name,
   `params` not an object, another member), tested against the schema on the same inputs; before, a malformed request
   fell through to `hello-first` or was passed on (the board run's final verification; w7 close).
+- **Annotated (2026-10-27):** extended by DEC-0143: a second client capability, `secret.ui`, accepted only from a peer the
+  node verified as its product's signed app (else `forbidden`), and `secret.prompt` and `secret.cancel` for a
+  secret request whose value never crosses the channel (local-channel.md, Secret requests). Item 3's "answered once per
+  session" means accepted once: a hello refused `invalid-params` or `forbidden` agrees nothing, and the client may send
+  another within the 5 s.
 - **Amends:** DEC-0015's service descriptor (an optional `channels.local`). Implements the organization edition's
   CON-OE-10 in its CROSSWALK-v4 edition (v4 §5 at `9c6a780`; no `policy.decide`). Closes the board run's inventory item
   CON-OE-10 (node N12, packet P6-04).
@@ -5095,6 +5101,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-15
 - **Status:** Accepted source change (on merge of its pull request). The owner's design for RM-21 stage 1, packet P3,
   with the changes its pull request names and argues under *Changes from the design*. Consumer adoption: board row CT-53.
+- **Annotated (2026-10-27):** its comparison code's construction (both commit, then both reveal; five bytes modulo 10^6) is
+  reused by DEC-0142 for a person-to-person share under its own types (`fabric-peer-commit/1`, `fabric-peer-code/1`).
 - **Amends:** DEC-0055 (D3 settled for a personal estate; a `device-key` revocation by key reference, read by
   `FAC-SEM-076`, which also refuses a malformed one; `FAC-SEM-073` refuses a non-canonical device key; `FAC-SEM-114` in
   the chain and in `verifyEstateRecord`; the revocation `ref`'s schema description), DEC-0063 (the register gains
@@ -5381,6 +5389,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-18
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-56.
+- **Annotated (2026-10-27):** a person-to-person share (DEC-0142) is not a share grant: no `urn:fabric:share:` id, no
+  context, no share registration.
 - **Amends:** DEC-0082 item 5 (a `grant.usage` carries its grant's own `org:<orgId>`; no event carries its session's
   context and no check-in carries a context) and item 6 (`grantUsage` requires `context`, and `grantId` is a share grant
   id); DEC-0031 and DEC-0056 (a share-registration request is a device request; `FAC-SEM-045` checks a `grant.usage`'s
@@ -5936,6 +5946,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2026-10-21 reservation force-updated the ref (`4c4598f...b52fc3d`), the receipt-chain defect CT-44 records.
 - **Annotated (2026-10-21):** `checks` is never an empty object (`minProperties: 1`): with no check judged it is `null`,
   as the page already said. A stricter schema at the same revision, because no producer had moved to `/1` yet (CT-61).
+- **Annotated (2026-10-27):** DEC-0144 adds the optional `calibration` and `calibrationChecks` members at the same
+  revision; a producer carries them once every reader of its feed it knows of has adopted DEC-0144, and a reader
+  validating against an older copy refuses that day's `value` (DEC-0070).
 - **Decision:** in [support quality](specification/support-quality.md):
   1. An agent that answers people MAY publish, on its events feed, one event per closed UTC day and channel (`chat`,
      `mail`, `reviews`, `community`), of kind `support.quality_daily`, whose `data.value` (DEC-0070) is a
@@ -6841,6 +6854,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   first organization server, Fabric, Fabric Switchboard, each at its next pin (CT-117). Annotated (2026-10-23): items 3
   and 4 amended by DEC-0113 (a revocation names its request and deletes only that credential; it ends the request; the
   mark is kept as revoked).
+- **Annotated (2026-10-27):** the envelope's construction is reused by DEC-0142 for a person-to-person share under its own
+  `info` (`fabric-peer-share-envelope/1`, `fabric-peer-share-report/1`), so neither opens as the other.
 - **Context:** S5 of the agent network asks that an agent in an organization request a narrow credential (a token for
   one DNS zone, an OpenRouter key with a ceiling), that the organization decide, and that the value arrive sealed into
   that organization's context on the agent's machine, never into the person's own context, every request, decision and
@@ -7192,6 +7207,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-24
 - **Status:** Accepted (2026-10-24). AP-3 extended by DEC-0125 (2026-10-26): a mandate handed on carries the operator's words from another agent. Extended by DEC-0126 (2026-10-26): a relay OA-2 and OA-3 accept carries them too. Additive on the wire (a new extension key, an optional `_meta` member and the
   sealed call's `decision`); a behaviour rule a service adopts at its next pin. Consumer adoption: CT-124 to CT-127.
+- **Annotated (2026-10-26):** clarified by DEC-0141: a job's input request answered under a mandate is read under the
+  job's capability (MJ-1); a decision still names the request key on `fabric.job.get`.
+- **Annotated (2026-10-27):** AP-4's `humanStep` gains `comparison` (DEC-0142): a comparison of codes between two
+  people, the person's act like the others.
 - **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
   does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
   DL-26 already says that inside the machine boundary the operator's instruction is the authority and that a callee
@@ -7489,6 +7508,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   agent sends when it calls the next one, or the first problem that stops it, so a leading agent's port (the adapter's
   kits, FAA-131) checks MD-2 as a callee checks MD-3 to MD-5. Amended by DEC-0136 (2026-10-26): MD-2a, with one more
   `cases` vector for it.
+- **Annotated (2026-10-26):** amended by DEC-0141: a job's step under a mandate is read under the job's capability,
+  never under `fabric.job.get` (MJ-1).
 - **Context:** the operator decided on 2026-10-25 that their mandate goes with the task: an agent leading the
   operator's task holds the operator's authority for it, hands work to other agents on the operator's behalf with the
   mandate narrowed to the part handed on, and the agent that receives it acts without asking the operator again
@@ -7743,6 +7764,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-26, DEC-0134):** item 5's residual linkability gains one link: an operator that runs two of a
   machine's relays (an estate's and an organization's, or two organizations') sees that machine's two connections
   (devices.md What stays linkable; relay.md OR-5).
+- **Annotated (2026-10-27):** UE-1's rule of an identity per membership applies to a person-to-person share: a key pair per
+  share on each side, never the device keys (DEC-0142 PS-2).
 - **Context:** the operator decided K-1 on 2026-10-15 (NET-2, DEC-0084): each organization enrollment of a machine gets
   keys of its own, so two organizations cannot link the machine (CX-22). The scope brief
   (`docs/evidence/specs/2026-10-24-ct122-unlinkable/brief.md`) listed twelve values two enrollments share today, and the
@@ -8276,8 +8299,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0138: the organization part of an adaptation plan, `org-adaptation/1`
 
 - **Date:** 2026-10-26
-- **Status:** Accepted (2026-10-26) on merge, its shape posted to the first organization server and Fabric for
-  objections until 2026-10-27 18:00 UTC (thread `5d2ea917`). Additive: two new protocol revisions, `org-adaptation/1`
+- **Status:** Accepted, merged 2026-10-27 after its objection window closed (2026-10-27 18:00 UTC, threads
+  `5d2ea917` and `0fee99ae`: the first organization server's objections taken, none open). Additive: two new protocol revisions, `org-adaptation/1`
   and `org-adaptation-receipt/1`, a rule code (`FAC-SEM-153`) and a route. Adoption: CT-169 (every organization server
   taking plans; Fabric's TP-04).
 - **Context:** OM-7 (DEC-0129) allows an adaptation plan's organization part to leave a person's Fabric, by reference,
@@ -8340,3 +8363,274 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** CT-169; the first organization server's request N-4 (board message `38f108ba`, thread `0fee99ae`); the
   shape posted in thread `5d2ea917` and, for the server, in `0fee99ae` (`6d41733c`, `24327dbf`, superseding the device
   transport of `28b7a5b3`); DEC-0029 (rule codes), DEC-0056, DEC-0067, DEC-0128, DEC-0129.
+### DEC-0141: a job's step under a mandate is read under the job's capability
+
+- **Date:** 2026-10-26
+- **Status:** Accepted (on merge of its pull request). An amendment of DEC-0125 and a clarification of DEC-0121, where they
+  read two ways; `actionDecision` gains one input. Consumer adoption: the adapter's kits 0.52.0 (their brief
+  `docs/evidence/specs/2026-10-26-faa-138-134-repin-1197a90d-brief.md` D10) pass the job's capability from the Python
+  kit's built-in step gate, but their exported `actionDecision` differs from the reference in three ways over 7 of the
+  14 `jobSteps` (measured by the readings on both ports): with `mandateCapability` absent, empty, only whitespace,
+  not a capability name or not a string it answers `outside-mandate: capability` where the reference answers its fault (an absent or non-string
+  one is read as `fabric.job.get`, an empty, blank or non-name string as given); with
+  `mandateCapability` `fabric.job.get` it takes the step as the operator's act where the reference answers its fault;
+  and it reads `mandateCapability` on an ordinary action where the reference reads the action's tool. At their repin
+  they adopt the reference's reading and vendor the `jobSteps` group; their vendoring already reads every
+  `action-call` semantic fixture, so the two new ones (18 in all) reach their tests at the repin. Any other service with a job that waits `input_required`
+  passes `mandateCapability` (CT-149, with the adapter's repin).
+- **Context:** the adapter asked (board thread `aa86a675`) under which capability a mandate is read when it answers a
+  job's input request. AP-2 makes the input request an action whose tool is `fabric.job.get`, and `actionDecision`
+  read a mandate with `capability = action.tool`; C3.3 and MD-3 read the step as the start, under the job's
+  capability. A mandate listing `capabilities: [reviews.approve]` covered the start and not its step under the first
+  reading, so C3.3's promise that a covered step raises no input request did not hold.
+- **Decision:** [delegation](specification/delegation.md#the-operators-mandate) MJ-1: a job's step is read as its
+  start was, under the job's own capability (the tool its start call named), its action the step's request key, its
+  effect the class the service knows for what the step does (its own knowledge, as AP-2's effect); a mandate whose `capabilities` name `fabric.job.get` covers no step of another capability.
+  `actionDecision` takes the job's capability as `mandateCapability` for an action whose tool is `fabric.job.get` and
+  answers the service's fault `mandate-capability-missing` without it; every other action reads its own tool. Under MJ-1 an
+  `actions`-only mandate covers a request key on every job of the service, a mandate that lists `actions` covers only
+  the steps whose keys it names (so a leading agent covering a job's steps lists the capability without `actions`),
+  and a step the service cannot read (its own fault) is answered to the caller as `operator-decision-required`, the job
+  staying `input_required`. AP-2's
+  decision path is unchanged: a decision still names the request key, one `fabric.job.get` call per key.
+- **Why:** an operator's mandate names the work ("approve this week's replies"), not the transport its steps are
+  answered on; reading the step under `fabric.job.get` would make every mandate either cover every job's steps or
+  none.
+- **Alternatives considered:** keeping `fabric.job.get` and asking mandates to list it (it would cover the steps of
+  every job, a widening no operator wrote); a new field on the input request naming the capability (the service
+  already knows its own job; nothing needs to travel).
+- **Compatibility:** a narrowing in one place and a widening in another, both only for a mandate on a job's step. A
+  service pinned before it reads the step under `fabric.job.get`: it asks the operator where a mandate names the job's
+  capability (an extra question), and it acts where a mandate names `fabric.job.get` itself, which now covers no step
+  (an act the operator's words did not name, so such a mandate was already outside AP-3's intent). The adapter's
+  kits read it under the job's capability on the Python kit's built-in step gate, and, in their exported `actionDecision`,
+  under `fabric.job.get` when `mandateCapability` is absent or not a string and under the value as given when it is
+  an empty, blank or non-name string (Status); no other released service
+  is known to read a step's mandate.
+  `actionDecision` answers its own fault for `fabric.job.get`, or any value that is not a capability name, as
+  `mandateCapability`. A service that repins passes `mandateCapability`
+  for every job step its mandate path reads; on its own fault the step waits `input_required`, as for a mandate that
+  does not cover it (MD-4), and the operator is asked. `fixtures/vectors/actions.json` gains a `jobSteps`
+  group (14 cases); `cases` is unchanged; kind `action-call` gains member `mandateCapability`, with two fixtures. `contractVersion` stays
+  `0.1.0`.
+- **Consequences / affects:** `src/actions.ts` (`mandateCapability`, `JOB_STEP_TOOL`, the fault), `src/semantic-kinds.ts` (`action-call`'s member),
+  `fixtures/semantic/action-call-mandate-job-step*.json`, `tools/vectors/actions.ts`,
+  `fixtures/vectors/actions.json`, `test/actions.test.ts`; `docs/specification/delegation.md` (MJ-1, MD-1, MD-2a,
+  Covered), `schemas/mandate.schema.json` (the `actions` description), `service.md` (AP-2, the reference's inputs and
+  faults), `interop.md` (C3.3), `conformance.md` (the callee and leading-agent rows), `CONTEXT.md` (Mandate), `docs/ux/scenarios.md` (SCN-045), `DOCMAP.md`; DEC-0121 and DEC-0125 annotated; backlog CT-177 (closed on merge),
+  CT-149 (the adoption) and CT-180 (filed); the handoff `docs/handoffs/2026-10-26-mandate-job-step.md` and its row in `docs/handoffs/README.md`.
+- **Source:** CT-177; the adapter's question `46433e3a` (thread `aa86a675`).
+
+### DEC-0142: a credential shared with another person's estate, `fabric-peer-share/1`
+
+- **Date:** 2026-10-27
+- **Status:** Accepted (on merge of its pull request). Additive: new schemas (`peer-share-frame/1`,
+  `fabric-peer-share-envelope/1`, `fabric-peer-share-report/1`, `peer-share-revocation/1`, `peer-share-deletion/1`) and
+  a named profile, `fabric-peer-share/1`; and one widening: `humanStep` gains `comparison` in
+  `service-actions-extension.schema.json` and `delegation-refusal.schema.json`, which a reader pinned before refuses, and
+  `actions.json` gains one case and one declaration. Consumer adoption: Project
+  Observatory's engine replaces its own `observatory-share-envelope/1` with this profile at its next pin (CT-186).
+- **Context:** Project Observatory asked (board request `c50f590b`, thread `faa32585`; its row OBS-262; its design
+  `docs/design/PERSON-SURFACES.md` at `b0bb0abd`, D2, D3, D8) for a person-to-person share profile, for the operator's
+  ask of 2026-10-26: share keys safely with other people's Observatories, track their use, revoke. DEC-0111 covers one
+  estate's machines and an organization's credentials only. Asked whether the share must work between estates with no
+  organization, it answered yes, from the first version (reply `1623e11f`, 2026-10-27).
+- **Decision:** [peer-share](specification/peer-share.md) PS-1 to PS-10:
+  1. Between two estates with no organization on either side; one or more slots under one share and one comparison; a
+     share binds one recipient machine; never a subscription sign-in (PS-1).
+  2. A P-256 key pair per share on each side, never the device keys, named by RFC 7638 thumbprint (PS-2).
+  3. A share is no context and no share grant: `contextId` stays `personal` or `org:<id>`, and the recipient's node holds
+     the value apart from every context's vault, serving it only through its own use path (PS-3).
+  4. The link `https://<mailbox origin>/s/<shareId>#c=<code>&k=<fpr>`: a 16-byte single-use code, a claim deadline of
+     at most 7 days, the sender's share `#sig` thumbprint pinned only when the link reaches the recipient's app as sent
+     (PS-4).
+  5. A claim MAC under the code (`fabric-peer-claim/1`), checked by the sender's node, stated as a filter that
+     authenticates nothing against the mailbox; one claim per link whatever its MAC, so whoever learns the share id can
+     burn a link, never take it (PS-5).
+  6. DEC-0084's comparison code under `fabric-peer-commit/1` and `fabric-peer-code/1`, both sides committing before
+     either reveals, one attempt per link at both ends (`peerExchangeVerdict`), nothing sealed until the exchange
+     completes and the sender confirms the codes match or shares without comparing (recorded `confirmed: false`), both
+     the person's acts, declared `gate: human` with a new `humanStep`, `comparison` (DEC-0121 AP-4; the enum in
+     `service-actions-extension.schema.json` and `delegation-refusal.schema.json` widened) (PS-6).
+  7. `fabric-peer-share-envelope/1`: DEC-0111's construction under its own `info`, to the recipient's share `#kem`,
+     signed by the sender's share `#sig`, a sequence per share and slot, a life of at most 90 days, opened at each use
+     while an honest node holds a lease of at most 24 hours (PS-7).
+  8. `fabric-peer-share-report/1`: counts, consumer labels and the time of each day's last use and of each export; never a value, a command, an argument or an output, sealed to the sender's share `#kem`, bound to its share and
+     sequence (PS-8).
+  9. Taking back in three steps, the mailbox's refusal, the recipient's signed deletion receipt and the provider's
+     revocation or rotation, "taken back" only with the first observed and the third confirmed, and a copy stated as
+     ended only by the provider (PS-9).
+  10. The mailbox decides nothing about a value or whom the sender trusts: it carries the frames and sealed messages,
+      runs the exchange verdict, grants leases and refuses after a revocation, under DEC-0056's request signing; its HTTP routes and its name
+      are the product's, so two products also need the mailbox's routes in common until a decision fixes them (PS-10,
+      CT-185).
+- **Why:** sharing between two people has no organization to issue under, so its trust has to come from what the two
+  people hold: the link and a code they compare. Reusing DEC-0084's code and DEC-0111's envelope keeps one construction
+  for each job in the contract and lets a port reuse its tests.
+- **Alternatives considered:** a context kind `share:<id>` (Observatory's proposal: the word is taken by share grants,
+  the pattern is closed for every pinned reader, and a context places agents, not a value); the asymmetric commit-reveal
+  and a four-byte code (Observatory's proposal: DEC-0084's order is the contract's one order for a comparison code, with
+  the same bound); a contract protocol for the mailbox's HTTP routes now, `observatory-cloud/1` (one product implements
+  them today; the frames and the sealed messages are fixed here, and the routes wait for a second implementer, CT-185); the cloud
+  holding the value under its own key (every breach of the mailbox would be a breach of the key).
+- **Compatibility:** additive: new schemas, new protocol names in the register, a new vector file; and one widening of
+  a closed enum, `humanStep` gaining `comparison`, which a reader pinned before refuses, so a product declares it only to
+  readers at or after DEC-0142; `actions.json` gains one case (`human comparison from T0`) and one declaration (`a human comparison of codes, a step
+  DEC-0142 added`). `contractVersion`
+  stays `0.1.0`.
+- **Consequences / affects:** `src/peer-share.ts`, `src/protocol-revisions.ts`, `src/actions.ts` (`HumanStep`),
+  `schemas/service-actions-extension.schema.json` and `schemas/delegation-refusal.schema.json` (`comparison`),
+  `tools/vectors/actions.ts` and `fixtures/vectors/actions.json` (one case, one declaration), `test/protocol-revisions.test.ts`, `vitest.config.ts`, `docs/specification/service.md` (AP-4), `delegation.md` (DL-26, the refusal table, MD-6, OA-5), `interop.md`, `schemas/peer-share-*.schema.json`
+  (four), `tools/vectors/peer-share.ts` and `tools/vectors/run.ts`, `fixtures/vectors/peer-share.json`,
+  `test/peer-share.test.ts`, `fixtures/positive/peer-share-*.json` and `fixtures/negative/peer-share-*.json` with their
+  catalogue rows, `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`; `docs/specification/peer-share.md`,
+  `contexts.md`, `versioning.md`, `conformance.md`, `docs/specification/README.md`, `DOCMAP.md`, `CONTEXT.md`;
+  `docs/ux/foundation.md` (JTBD-15, JRN-14, ST-035, ST-037, ST-039), `docs/ux/flows.md` (FLW-33), `docs/ux/screens.md` (SCR-33),
+  `docs/ux/scenarios.md` (SCN-052); DEC-0084, DEC-0086, DEC-0111, DEC-0121 and DEC-0128 annotated;
+  backlog CT-178 (closed on merge with DEC-0143), CT-185, CT-186 and CT-187; the handoff `docs/handoffs/2026-10-27-peer-share.md` and its row in `docs/handoffs/README.md`.
+- **Source:** CT-178; Project Observatory's request `c50f590b` (thread `faa32585`), its reply `1623e11f`.
+
+### DEC-0143: a secret request on the local channel, `secret.prompt`, shown only by the product's signed app
+
+- **Date:** 2026-10-27
+- **Status:** Accepted (on merge of its pull request). A widening of DEC-0075: a second client capability and method,
+  behind a hello a node pinned before refuses (`invalid-params`), so a client learns the node does not serve it.
+  Consumer adoption: Project Observatory's node and its signed apps (CT-186).
+- **Context:** Project Observatory asked (the same request `c50f590b`; its design D4) for a local-channel method for
+  secret requests: an agent needs a value only the person can give and must never see it typed or ask for it in a chat.
+  DEC-0075's `consent.prompt` carries no request text, is answered `given` or `denied` and goes to every `consent.ui`
+  client; local-channel.md left the check that a peer is a signed binary undecided.
+- **Decision:** [local channel](specification/local-channel.md#secret-requests) SP-1 to SP-7:
+  1. `secret.prompt {requestId, agent, project, slot, provider?, reason, replaces, deadline}` from the node to one
+     client, answered `{outcome: stored | declined, at}`; `secret.cancel {requestId}` withdraws it (SP-1).
+  2. A client declares `secret.ui` at hello, and the node accepts it only after its own operating-system check that the
+     peer is its product's signed app (macOS: the audit token and the designated requirement; Windows: Authenticode on
+     the held process, a weaker check), else `forbidden`; on Linux no client is admitted and a request answers
+     `no-client` with the reason `secret-ui-unavailable`, its health unchanged (SP-2).
+  3. One client per request; the node may start its signed app through its lifecycle broker within the deadline; none
+     admitted by then, or no desktop session, is `no-client` (SP-3).
+  4. No value on the channel in either direction: the app writes the slot itself, the node reads each answer against
+     `$defs/secretResult` and never records one it refuses; typing and "Store" are the person's acts, declared
+     `gate: human` with `humanStep: secret` (SP-4).
+  5. The agent sees `stored` only after the node confirmed the write in its own vault record (`unconfirmed`
+     otherwise), `declined`, `no-answer` (10 minutes at most, by the node's receipt time) or `no-client`, never a value
+     (SP-5).
+  6. The prompt names the agent from the node's binding and quotes the agent's reason; a scripted dialog is not a
+     secret prompt (SP-6). How an agent asks the node, and the node's limits, are the node's (SP-7).
+- **Why:** only the signed app should receive the node's genuine requests, and only the operating system can tell the
+  node which program is on the other end of the socket (a lookalike window drawn outside the channel is the product's to
+  answer, by a mark only its app shows): a process of the same user is otherwise inside the
+  channel's trust boundary (DEC-0075). Confirming the write keeps the agent from learning a success the app only
+  claimed.
+- **Alternatives considered:** reusing `consent.prompt` (no request text, an answer of another kind, every client
+  prompted); admitting by a token or by the client's declared name (any program of the user can read a token file or
+  write a name); a terminal prompt on a machine with no desktop (an agent can drive a pseudo-terminal and type a value
+  of its choosing); Linux admission by the executable's path (no signature of the image to check, and another program
+  of the user can replace what runs; CT-184 holds the question).
+- **Compatibility:** a widening behind the hello: a node pinned before DEC-0143 answers a `secret.ui` hello
+  `invalid-params`, and the client says hello again without it (consent unchanged). `$defs/notification` gains
+  `secret.cancel`. Every message that validated still validates but one: a `secret.prompt` whose params
+  `$defs/secretPrompt` refuses (empty, or none), which no party sent, since no node served the method before.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/local-channel.ts` (`CLIENT_CAPABILITIES`, `secret.prompt`, `ChannelState.signedApp`,
+  `maySecretPrompt`, `secretOutcome`, the `forbidden` hello), `schemas/local-channel.schema.json` (`secret.ui`,
+  `secretPrompt`, `secretResult`, `secret.cancel`), `test/local-channel.test.ts`, `fixtures/vectors/local-channel.json`
+  (written by `tools/vectors/local-channel.ts`, registered in `tools/vectors/run.ts`),
+  `fixtures/positive/local-channel-secret-cancel.json` with its catalogue row; `docs/specification/local-channel.md`, `conformance.md`, `docs/specification/README.md`,
+  `DOCMAP.md`, `CONTEXT.md`; `docs/ux/foundation.md` (ST-040), `docs/ux/flows.md` (FLW-34), `docs/ux/screens.md` (SCR-34),
+  `docs/ux/scenarios.md` (SCN-053); DEC-0075 annotated; backlog CT-178, CT-184
+  and CT-186.
+- **Source:** CT-178; Project Observatory's request `c50f590b` (thread `faa32585`).
+
+### DEC-0144: a judge's calibration in `support-quality-daily/1`
+
+- **Date:** 2026-10-27
+- **Status:** Accepted (on merge of its pull request). A widening of DEC-0095's closed schema at the same revision: two
+  optional members, which a reader validating against an older copy refuses. Consumer adoption: CT-188.
+- **Context:** a project on the board asked (request `b05d8bc9`, thread `afd3dc71`, 2026-10-27) for a way to say on
+  what share of the answers a person labelled the judge agreed with the person: without it a reader treats every
+  judge as uncalibrated and never ranks or alerts on its checks, even when the producer calibrated it. One producer on the
+  asker's v2 shape, outside the contract, already sends it, flat inside `calibration` as `<check>Agree` keys; the
+  asker's reader first read the check shares inside `calibration` from the thread's earlier answer, and since its
+  release of 2026-10-27 reads them from `calibrationChecks` and still reads the older form. support-quality.md listed
+  the calibration members among those with no `/1` home.
+- **Decision:** [support quality](specification/support-quality.md):
+  1. `calibration {week, labelled, helped}`, optional: the ISO week of the labelling (`YYYY-Www`), how many answers a
+     person labelled (at least 1), and the share of them whose helped verdict the judge matched (`null` when helped was
+     not labelled, named `calibration.helped` in `notMeasured`). Absent means no calibration. A calibration is of the
+     day's judge and rubric: a producer whose judge or rubric changed after the labelled week leaves it out.
+  2. `calibrationChecks`, optional and only beside `calibration`: each rubric check's share of the labelled verdicts
+     the judge matched, named as in `checks`; a check a person did not label is left out, and none labelled leaves the
+     member out (never an empty object).
+  3. `FAC-SEM-126` widens: a calibration names its rubric version and judge (one finding with a judged sample's);
+     `calibration.helped` follows the not-measured rule; the week is a real ISO week that starts no later than `day`;
+     `calibrationChecks` without `calibration` is a finding.
+- **Why:** the judge's agreement with people is what lets a reader trust a check's rate; carrying it in the payload
+  lets any reader decide by its own threshold instead of trusting none.
+- **Alternatives considered:** the asker's nested `calibration.agree {helped, addressed, ...}` (a third level, which
+  DEC-0070's `data.value` refuses; the checks' agreement sits at the top level, as `checks` does); the check shares
+  flat inside `calibration`, as the asker's v2 `<check>Agree` keys are (two levels too, but `calibration` would then
+  mix its own facts with a map named by the rubric, so a check named `week` or `labelled` would collide; the
+  separate member keeps the check names as free as in `checks`); a new revision
+  `support-quality-daily/2` (a reader that only parses reads nothing new, and one that validates against an older copy
+  loses the day until it re-pins, as it would on a `/2` kind; a widening leaves every producer's payload valid, where a
+  new revision is one every producer and reader must move to); a `0` for an unlabelled check
+  (FAC-SEM-126: a metric not measured is `null` or absent, never `0`).
+- **Compatibility:** a widening of a closed object: a `/1` payload without the two members validates as before. The
+  feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries the members once every reader of
+  its feed it knows of has adopted this decision. A reader that validates against an older copy refuses that day's
+  `value` whole and keeps the event's `text` (DEC-0070); a reader that only parses ignores them. The bytes under the
+  unchanged `$id` widen, so a reader validates against its own pinned copy, never one fetched by `$id` alone.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/support-quality-daily.schema.json`, `src/support-quality-rules.ts`,
+  `test/support-quality.test.ts`, `fixtures/positive/support-quality-daily-calibrated.json`,
+  `fixtures/negative/support-quality-daily-calibration-nested.json` and `-calibration-week.json` with their catalogue
+  rows, `fixtures/semantic/support-quality-daily-calibration-checks-alone.json` and `-calibration-week-after-day.json`; `docs/specification/support-quality.md`, `conformance.md` (the producer and reader rows), `DOCMAP.md`; DEC-0095 annotated;
+  backlog CT-188.
+- **Source:** CT-188; the board request `b05d8bc9` (thread `afd3dc71`).
+
+### DEC-0145: a Windows path names a provider's manifest and a handoff's files
+
+- **Date:** 2026-10-27
+- **Status:** Accepted (on merge of its pull request). A widening of `provider.schema.json`'s `manifest` pattern at the
+  same revision, and a reference check that reads Windows paths as Windows does.
+- **Context:** the operator asked (2026-10-27) to close the contract's debts on stability and Windows. The contract's
+  gate had never run on Windows; its first run there (`windows-latest`, Node 24) found that DEC-0032's Windows paths
+  are a `localPath`, but a provider entry's `manifest` also had to match `(^|/)fabric-agent\.json$`, so
+  `C:\…\fabric-agent.json` and `~\fabric-agent.json` were refused; and that `validateSessionHandoff` (FAC-SEM-054,
+  SH-4) compared a launch argument with the folder's file byte for byte, so `C:\…\s1/mcp.json`, which names the same
+  file, was a finding. The run also found the gate's own path handling (`docs:check`'s G-13 register match,
+  `pnpm validate`'s stored paths) reading `\` where it compares `/`, which are tooling and decide nothing.
+- **Decision:**
+  1. A provider entry's `manifest` ends in `fabric-agent.json` after `/` or `\` ([provider](specification/provider.md#what-the-schema-adds-to-the-table)).
+  2. SH-4 (and SH-11's `mcp.json` and `brief.md` names): a host compares a launch argument's path with the folder's file byte for byte
+     on POSIX, macOS included even on a case-insensitive volume; on Windows with either separator and in any case ([session handoff](specification/session-handoff.md), `samePath`).
+  3. The repository keeps every text file LF on every platform (`.gitattributes`), and its nightly gate runs on Windows
+     as well as Linux (`.github/workflows/ci.yml`).
+- **Why:** DEC-0032 already makes a Windows path a local path, and DEC-0057 the Windows token reader; a pattern that
+  reads only `/` refused the Windows form of the one file the contract names by its name, and a check that compares
+  bytes refused a writer that joins a path with the other separator. The schemas, vectors and licence texts are compared
+  byte for byte, and a Windows checkout with `core.autocrlf` rewrote them.
+- **Alternatives considered:** normalising a Windows path to `/` before the pattern (a reader that validates the raw
+  document would still refuse it); a Windows-only `manifest` member (two members for one path); leaving Windows to the
+  consumers (Fabric and the adapter's kits run on Windows, and the contract's own checker, `pnpm validate`, refused a
+  valid Windows entry and reported a Windows file's stored path wrongly in run 40506221946).
+- **Compatibility:** a widening of a closed pattern: every entry that validated still does. A reader that validates
+  against a copy pinned before refuses an entry whose `manifest` is a Windows path: Fabric's registry reads provider
+  entries on Windows (`apps/desktop/src/main/agentRegistry.ts`) and the adapter's `fabric_provider.py` mirrors the old
+  pattern, so a writer does not emit a `manifest` whose name follows a backslash until both re-pin (provider.md, CT-192).
+  The SH-4 change and SH-11's `mcp.json` and `brief.md` names in any case accept more on Windows only and nothing more on POSIX;
+  FAC-SEM-014's stem after either separator, like the widened pattern, also reads the part of a POSIX file name after
+  a backslash as the stem (CT-193); a host that copied
+  `validateSessionHandoff` compares bytes until it takes `samePath`.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/provider.schema.json`, `src/session-handoff.ts`, `src/docs-check.ts`,
+  `src/validate-cli.ts`, `tools/catalogue/seed.py`, `fixtures/positive/provider-entry-windows-path.json`,
+  `fixtures/negative/provider-entry-windows-path-other-file.json` with their catalogue rows, `.gitattributes`,
+  `.github/workflows/ci.yml`; `docs/specification/provider.md`, `session-handoff.md`; the tests of the gate's own
+  paths (`test/docs-check.test.ts`, `test/validate-cli.test.ts`, `test/session-handoff.test.ts`,
+  `test/session-handoff-standalone.test.ts`, `test/meter-grant.test.ts`, `test/pin-check.test.ts`,
+  `test/folder-attribution.test.ts`); `docs/specification/conformance.md` (the gate's platforms, item 4's fragments),
+  `AGENTS.md`, `docs/DOCMAP.md`; DEC-0042 annotated; backlog CT-123 and CT-167 closed, CT-191, CT-192 and CT-193 filed; `src/registry-rules.ts` (FAC-SEM-014's stem after either separator), `test/registry-rules.test.ts`.
+- **Source:** the operator's request of 2026-10-27; the first Windows runs of the gate (runs 40506221946 and after).
+

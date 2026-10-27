@@ -45,7 +45,7 @@ function cases(): Json[] {
     ["none from T2", { action: none, tier: "T2" }, caller],
     ["none from T1 with a decision: still the caller's act", { action: none, tier: "T1", decision: instructed }, caller],
     // gate human (AP-4): the person's step and its direct link, at every tier; a decision changes nothing.
-    ...["sign-in", "consent", "payment", "secret", "spend-above-limit", "passkey"].map((name): [string, Json, Json] => [`human ${name} from T0`, { action: human(name), tier: "T0", humanStepUrl: URL }, step(name)]),
+    ...["sign-in", "consent", "payment", "secret", "spend-above-limit", "passkey", "comparison"].map((name): [string, Json, Json] => [`human ${name} from T0`, { action: human(name), tier: "T0", humanStepUrl: URL }, step(name)]),
     ["human from T1 with the operator's decision: still the person's step", { action: human("payment"), tier: "T1", decision: instructed, humanStepUrl: URL }, step("payment")],
     ["human from T2", { action: human("consent"), tier: "T2", humanStepUrl: URL }, step("consent")],
     ["human with a path on the service's origin", { action: human("consent"), tier: "T0", humanStepUrl: "/dashboard/connect" }, { ok: false, code: "human-step-required", data: { humanStep: "consent", url: "/dashboard/connect" } }],
@@ -114,6 +114,39 @@ function cases(): Json[] {
   return list.map(([name, input, expected]) => ({ name, input, expected }));
 }
 
+/**
+ * A job's input request under the operator's mandate (DEC-0141 MJ-1): the step is read under the job's capability
+ * (`mandateCapability`, the tool its start call named), its action the request key, as at the start.
+ */
+function jobSteps(): Json[] {
+  const step = { id: "choose-variant", title: "Choose a variant", tool: "fabric.job.get", gate: "relayed" };
+  const mandate = (scope: Json) => ({
+    kind: "mandate/1", by: "operator", task: "answer the reviews of the week",
+    instruction: "approve the replies to this week's reviews", at: "2026-10-24T08:00:00Z", expiresAt: "2026-10-25T08:00:00Z",
+    scope, chain: [{ agent: "example-developer", at: "2026-10-24T08:01:00Z" }, { agent: "example-reviewer", at: "2026-10-24T08:02:00Z" }]
+  });
+  const job = { ...base, action: step, tier: "T0", self: "example-reviewer", callerAgent: "example-developer", effect: "reply" };
+  const byMandate = { ok: true, recordAs: { by: "operator", via: "mandate", task: "answer the reviews of the week", chain: ["example-developer", "example-reviewer"], caller: CALLER } };
+  const outside = (part: string) => ({ ok: false, code: "operator-decision-required", data: { detail: `outside-mandate: ${part}` } });
+  const list: Array<[string, Json, Json]> = [
+    ["a step of a job the mandate's capabilities cover", { ...job, mandateCapability: "reviews.approve", mandate: mandate({ capabilities: ["reviews.approve"], effects: ["reply"] }) }, byMandate],
+    ["a step whose request key the mandate's actions list", { ...job, mandateCapability: "reviews.approve", mandate: mandate({ actions: ["choose-variant"], effects: ["reply"] }) }, byMandate],
+    ["a mandate naming fabric.job.get covers no step of another capability", { ...job, mandateCapability: "reviews.approve", mandate: mandate({ capabilities: ["fabric.job.get"], effects: ["reply"] }) }, outside("capability")],
+    ["a step of a job outside the mandate's capabilities", { ...job, mandateCapability: "reviews.delete", mandate: mandate({ capabilities: ["reviews.approve"], effects: ["reply"] }) }, outside("capability")],
+    ["a step whose effect is outside the mandate's ceiling", { ...job, mandateCapability: "reviews.approve", effect: "publish", mandate: mandate({ capabilities: ["reviews.approve"], effects: ["reply"] }) }, outside("effect")],
+    ["a decision still decides a step: with a mandate too, the job's capability is not read", { ...job, mandate: mandate({ capabilities: ["reviews.approve"], effects: ["reply"] }), decision: decided(NOW, { action: "choose-variant", instruction: "take the second variant" }) }, operator("relayed-instruction")],
+    ["a step under a mandate without the job's capability: the service's own fault", { ...job, mandate: mandate({ capabilities: ["reviews.approve"], effects: ["reply"] }) }, { fault: "mandate-capability-missing" }],
+    ["a step whose job's capability is empty", { ...job, mandateCapability: "", mandate: mandate({ capabilities: ["reviews.approve"], effects: ["reply"] }) }, { fault: "mandate-capability-missing" }],
+    ["a step whose job's capability is only whitespace", { ...job, mandateCapability: "  ", mandate: mandate({ capabilities: ["reviews.approve"], effects: ["reply"] }) }, { fault: "mandate-capability-missing" }],
+    ["a step whose job's capability is not a capability name", { ...job, mandateCapability: "Reviews Approve", mandate: mandate({ capabilities: ["reviews.approve"], effects: ["reply"] }) }, { fault: "mandate-capability-missing" }],
+    ["a step whose job's capability is not a string", { ...job, mandateCapability: 7, mandate: mandate({ capabilities: ["reviews.approve"], effects: ["reply"] }) }, { fault: "mandate-capability-missing" }],
+    ["a step passed fabric.job.get as its job's capability: never the transport", { ...job, mandateCapability: "fabric.job.get", mandate: mandate({ capabilities: ["fabric.job.get"], effects: ["reply"] }) }, { fault: "mandate-capability-missing" }],
+    ["a mandate that also lists actions covers a step only when it names the step's key", { ...job, mandateCapability: "reviews.approve", mandate: mandate({ capabilities: ["reviews.approve"], actions: ["approve-reply"], effects: ["reply"] }) }, outside("action")],
+    ["an ordinary action ignores mandateCapability: its own tool is read", { ...job, action: relayed, mandateCapability: "reviews.delete", mandate: mandate({ capabilities: ["reviews.approve"], effects: ["reply"] }) }, byMandate]
+  ];
+  return list.map(([name, input, expected]) => ({ name, input, expected }));
+}
+
 /** FAC-SEM-142 on a well-known document: the instance paths of its findings, none for a conforming declaration. */
 function declarations(): Json[] {
   const doc = (value: unknown, capabilities?: string[]) => ({
@@ -125,6 +158,7 @@ function declarations(): Json[] {
     ["no key: nothing to check", { surfaces: {}, extensions: {} }, []],
     ["no extensions: nothing to check", { surfaces: {} }, []],
     ["three actions, each tool served", doc({ actions: [none, relayed, human("sign-in")] }, served), []],
+    ["a human comparison of codes, a step DEC-0142 added", doc({ actions: [relayed, human("comparison")] }, served), []],
     ["no capability list: tools are not compared", doc({ actions: [relayed] }), []],
     ["an id declared twice", doc({ actions: [relayed, { ...none, id: relayed.id }] }, served), [`${KEY_PATH}/actions/1/id`]],
     ["a human action without its step", doc({ actions: [{ ...none, gate: "human" }] }, served), [`${KEY_PATH}/actions/0/humanStep`]],
@@ -139,8 +173,9 @@ function declarations(): Json[] {
 
 export function actionsVectors(): Json {
   return {
-    about: "Vectors for fabric-actions/0.1 (DEC-0121), written by tools/vectors/actions.ts, never by hand. `cases`: actionDecision({action, tier, caller, decision?, target?, elicited?, approval?, actionDigest?, humanStepUrl?, now}) answers {ok: true, recordAs: \"caller\"} for gate none; {ok: false, code: \"human-step-required\", data: {humanStep, url}} for gate human; for gate relayed an accepted approval/1 at any tier is the approver's ({by: approver, via: \"approval\", caller}), a T2 caller without one gets {ok: false, code: \"approval-required\", data: {actionDigest}} (DL-17, DL-18, DL-25), and from T0 or T1 the service's own accepted elicitation, else {ok: false, code: \"operator-decision-required\"} without a decision, {ok: false, code: \"decision-invalid\"} for one invalid against decision.schema.json, for another action or another target, read strictly, more than 60 s ahead of now or more than 24 h behind it, else {ok: true, recordAs: {by: \"operator\", via, caller, source?}} (source: where the operator said the words, when the decision carries it, DEC-0126), caller being the service's own identity of who relayed it; {fault} is the service's own and is never sent. `declarations`: the instance paths of FAC-SEM-142's findings on a well-known document's extensions/actions/0.1. Under the operator's mandate (DEC-0125) a relayed action's call with no decision is answered as mandateCovers answers, given mandate, self, callerAgent, effect, spendUsd and project; fixtures/vectors/mandate.json holds those cases.",
+    about: "Vectors for fabric-actions/0.1 (DEC-0121), written by tools/vectors/actions.ts, never by hand. `cases`: actionDecision({action, tier, caller, decision?, target?, elicited?, approval?, actionDigest?, humanStepUrl?, now}) answers {ok: true, recordAs: \"caller\"} for gate none; {ok: false, code: \"human-step-required\", data: {humanStep, url}} for gate human; for gate relayed an accepted approval/1 at any tier is the approver's ({by: approver, via: \"approval\", caller}), a T2 caller without one gets {ok: false, code: \"approval-required\", data: {actionDigest}} (DL-17, DL-18, DL-25), and from T0 or T1 the service's own accepted elicitation, else {ok: false, code: \"operator-decision-required\"} without a decision, {ok: false, code: \"decision-invalid\"} for one invalid against decision.schema.json, for another action or another target, read strictly, more than 60 s ahead of now or more than 24 h behind it, else {ok: true, recordAs: {by: \"operator\", via, caller, source?}} (source: where the operator said the words, when the decision carries it, DEC-0126), caller being the service's own identity of who relayed it; {fault} is the service's own and is never sent. `declarations`: the instance paths of FAC-SEM-142's findings on a well-known document's extensions/actions/0.1. Under the operator's mandate (DEC-0125) a relayed action's call with no decision is answered as mandateCovers answers, given mandate, self, callerAgent, effect, spendUsd and project; fixtures/vectors/mandate.json holds those cases. `jobSteps` (DEC-0141 MJ-1): a job's input request (tool fabric.job.get) under a mandate is read with capability mandateCapability, the job's own (the tool its start call named), and action its request key, as at the start; without mandateCapability, or with an empty or blank one, one that is not a capability name, a non-string or fabric.job.get itself, it is the service's fault mandate-capability-missing; any other action reads its own tool.",
     cases: cases(),
+    jobSteps: jobSteps(),
     declarations: declarations()
   };
 }

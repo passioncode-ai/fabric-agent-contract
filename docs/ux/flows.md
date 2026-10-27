@@ -830,6 +830,70 @@ flowchart TD
 
 - **Screens traversed:** SCR-31 joining an organization.
 
+### FLW-33: A key shared with another person's machine, from the link to taking it back
+
+- **Traces:** ST-039 (JTBD-15, JRN-14/#1, JRN-14/#2, JRN-14/#3)
+- **Goal:** the recipient's node holds the value sealed to its share key, the sender reads its use, and the sender can end it
+- **Entry points:** the sender's "Share" on a vault slot; the recipient's "Open a share"; the sender's "Take back"
+- **Success exit:** the value opens only on the recipient's machine for the share's key (once the codes were compared; a share sealed without comparing may be held by whoever claimed first); reports arrive; after "Take back" the mailbox refuses and the provider has revoked or rotated the key
+- **Task analysis:** the sender's node makes the share's keys and the link → the person sends the link → the recipient accepts and its node claims (keys, MAC, commitment) → the sender's node checks the MAC and commits → both reveal → both apps show the code and the people compare it → the sender confirms, or chooses to share without comparing (recorded `confirmed: false`), and its node seals the envelope → the recipient's node renews its lease and opens the value at each use, sending reports → the sender takes it back: a signed revocation, the mailbox refusing, the recipient's deletion receipt, the provider's revocation or rotation.
+- **Rejected shape:** the value pasted into a chat, or held by the cloud under a key the cloud also holds, rejected because the sender could stop neither and a breach of the cloud would be a breach of the key (DEC-0142).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  L[Sender's node writes the link] --> A{Recipient accepts}
+  A -->|no| N[Nothing is claimed]
+  A -->|yes| C[Claim: keys, MAC, commitment]
+  C --> M{The first claim, and its MAC holds?}
+  M -->|no| B[The link is spent or burns; a new share is needed]
+  M -->|yes| K[Sender commits; both reveal]
+  K --> V{peerExchangeVerdict}
+  V -->|burnt| B
+  V -->|complete| S{The codes match?}
+  S -->|no, an abort| B
+  E -.->|a burn reaches the mailbox before storage| B
+  F -.->|a burn reaches the mailbox before storage| B
+  S -->|yes, the sender confirms| E[Envelope sealed to the recipient's share key]
+  S -->|not compared, the sender shares anyway| F[Sealed, recorded confirmed: false]
+  F --> U
+  U -.->|a claim after a share sealed without comparing| WN[A warning beside the share: take it back]
+  U -.->|the recipient says they differ after storage| WN
+  E --> U[Recipient opens it at each use under a live lease and sends reports]
+  U --> T{Take back}
+  T --> R[Revocation: the mailbox refuses; the recipient deletes and sends a receipt]
+  R --> P[The provider revokes or rotates: taken back]
+```
+
+- **Screens traversed:** SCR-33 the share's link, its code, its use and taking it back.
+
+### FLW-34: An agent asks the person for a secret, and the signed app stores it
+
+- **Traces:** ST-040 (JTBD-15, JRN-14/#4)
+- **Goal:** the value is in the vault slot and the agent knows it is there, without having seen it
+- **Entry points:** an agent's request to the node for a slot it lacks
+- **Success exit:** the slot holds the value the person typed, and the agent is told `stored`
+- **Task analysis:** the agent asks the node → the node names the agent from its own binding → the node finds one connected client it verified as its signed app that declared `secret.ui` → it sends `secret.prompt` → the app shows the window → the person types or declines → the app writes the slot itself and answers → the node confirms the write in its own vault record → the agent learns the outcome.
+- **Rejected shape:** the agent asking in a chat, or a scripted dialog any program of the user can draw, rejected because the agent would see the value or a lookalike could collect it (DEC-0143).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  Q[Agent asks the node for a slot] --> C{A signed app with secret.ui connected?}
+  C -->|no| L{The node starts its signed app through its broker; admitted before the deadline?}
+  L -->|yes| P
+  L -->|no, or no desktop| X[no-client: the person's step is to put the value in their own shell]
+  C -->|yes| P[secret.prompt to that one app]
+  P --> W{The person answers before the deadline?}
+  W -->|no, or the agent withdrew it| Z[no-answer]
+  W -->|declines| D[declined]
+  W -->|stores| S{The node sees the slot written after the prompt?}
+  S -->|yes| O[stored]
+  S -->|no| U[unconfirmed]
+```
+
+- **Screens traversed:** SCR-34 the agent's secret request.
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

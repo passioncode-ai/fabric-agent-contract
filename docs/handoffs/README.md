@@ -4,6 +4,10 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-10-27 the contract on Windows](2026-10-27-windows.md) | DEC-0145 (MD-18; CT-123 and CT-167 closed; CT-191 to CT-193 filed) | merged, #224 `802c8d27`; released `v0.1.0+2026-10-27.4` |
+| [2026-10-27 a credential shared with another person, and a secret request](2026-10-27-peer-share.md) | DEC-0142, DEC-0143 (CT-178; CT-184 to CT-187 filed, CT-189 after merge) | merged, #218 `759704b4`; released `v0.1.0+2026-10-27.3` |
+| [2026-10-27 a judge's calibration](2026-10-27-judge-calibration.md) | DEC-0144 (CT-188 filed for adoption) | merged, #219 `854fd71f`; released `v0.1.0+2026-10-27.2` |
+| [2026-10-26 a job's step under a mandate](2026-10-26-mandate-job-step.md) | DEC-0141 (CT-177; CT-178 and CT-180 filed) | merged, #216; released `v0.1.0+2026-10-27.1` |
 | [2026-10-26 the adaptation plan's organization part](2026-10-26-adaptation-plan.md) | DEC-0138 (CT-169) | pending |
 | [2026-10-26 a reply's delivery on the board](2026-10-26-reply-delivery.md) | DEC-0135 (CT-154; CT-166 filed) | merged, #210 `1197a90d`; released `v0.1.0+2026-10-26.12` |
 | [2026-10-26 the family's wording settled](2026-10-26-family-wording.md) | DEC-0137 (CT-157 closed; CT-167, CT-168, CT-170 filed) | merged, #209 `471978ec`; released `v0.1.0+2026-10-26.11` |

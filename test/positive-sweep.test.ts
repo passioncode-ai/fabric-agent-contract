@@ -98,6 +98,12 @@ export const NOT_SWEPT: readonly string[] = [
   // A pairing message is read by the pairing functions (src/pairing.ts, DEC-0084), against its commitment or the other
   // side's reveal, never whole by a rule kind.
   "pairing-message.schema.json",
+  // A person-to-person share (DEC-0142) is read by its functions (src/peer-share.ts) against the share's keys, marks
+  // and frames, never whole by a rule kind.
+  "peer-share-envelope.schema.json",
+  "peer-share-frame.schema.json",
+  "peer-share-record.schema.json",
+  "peer-share-report.schema.json",
   // The agent network (DEC-0104): a directory is checked against what it derives from (kind `agent-directory-view`), the
   // load extension and fabric.job.list are shapes only.
   "agent-directory.schema.json",

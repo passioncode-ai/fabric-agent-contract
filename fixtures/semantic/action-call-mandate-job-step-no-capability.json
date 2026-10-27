@@ -1,0 +1,60 @@
+{
+  "description": "The same step answered as covered with no job's capability: actionDecision's answer is the service's own fault, so FAC-SEM-142 reports it (DEC-0141 MJ-1).",
+  "kind": "action-call",
+  "expect": [
+    "FAC-SEM-142"
+  ],
+  "input": {
+    "action": {
+      "id": "choose-variant",
+      "title": "Choose a variant",
+      "tool": "fabric.job.get",
+      "gate": "relayed"
+    },
+    "tier": "T0",
+    "caller": "agent:claude-code",
+    "callerAgent": "example-developer",
+    "self": "example-reviewer",
+    "now": "2026-10-24T09:30:00Z",
+    "mandate": {
+      "kind": "mandate/1",
+      "by": "operator",
+      "task": "answer the reviews of the week",
+      "instruction": "approve the replies to this week's reviews",
+      "at": "2026-10-24T08:00:00Z",
+      "expiresAt": "2026-10-25T08:00:00Z",
+      "scope": {
+        "capabilities": [
+          "reviews.approve"
+        ],
+        "effects": [
+          "reply"
+        ]
+      },
+      "chain": [
+        {
+          "agent": "example-developer",
+          "at": "2026-10-24T08:01:00Z"
+        },
+        {
+          "agent": "example-reviewer",
+          "at": "2026-10-24T08:02:00Z"
+        }
+      ]
+    },
+    "effect": "reply",
+    "answer": {
+      "ok": true,
+      "recordAs": {
+        "by": "operator",
+        "via": "mandate",
+        "task": "answer the reviews of the week",
+        "chain": [
+          "example-developer",
+          "example-reviewer"
+        ],
+        "caller": "agent:claude-code"
+      }
+    }
+  }
+}

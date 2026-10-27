@@ -19,14 +19,18 @@ permissions:
 
 jobs:
   contract:
-    runs-on: ubuntu-latest
-    # Every Node the package admits (`engines: >=20`): Node 20 and 22 accept an Ed25519 signature under a small-order
-    # key, so only they prove the small-order guard of CT-29 (DEC-0045).
+    runs-on: ${{ matrix.os }}
+    # Node 22 and 24 on Linux (the package admits `engines: >=22.13`), and Node 24 on Windows, where consumers run the
+    # Windows rules (service paths, the token reader, the local channel's pipe) and the gate must pass too. Node 22
+    # accepts an Ed25519 signature under a small-order key, so only it proves the small-order guard of CT-29 (DEC-0045).
     strategy:
       fail-fast: false
       matrix:
-        node: [22, 24]
-    timeout-minutes: 10
+        include:
+          - { os: ubuntu-latest, node: 22 }
+          - { os: ubuntu-latest, node: 24 }
+          - { os: windows-latest, node: 24 }
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v6
         with:
@@ -40,4 +44,15 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run check
+      # The gate, `pnpm run check`, one step per part so a failure in one does not hide the next.
+      - run: pnpm typecheck
+      # On Windows the tests that need POSIX modes, root or `:` in a file name are skipped (CT-191), so the branches they
+      # reach are not covered there: the coverage floors are measured on Linux, and Windows runs the same tests without them.
+      - run: pnpm ${{ runner.os == 'Windows' && 'test:fast' || 'test' }}
+        if: ${{ !cancelled() }}
+      - run: pnpm ux:lint
+        if: ${{ !cancelled() }}
+      - run: pnpm docs:check
+        if: ${{ !cancelled() }}
+      - run: pnpm privacy:check
+        if: ${{ !cancelled() }}

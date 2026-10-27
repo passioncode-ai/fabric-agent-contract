@@ -56,6 +56,8 @@
 | SCN-048 | Enrolled in two organizations, my machine looks like two strangers to them | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-049 | As an administrator, I sign who my organization's relay admits; no server signs it | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-050 | I bring my work into an organization and ask its administrators for what it needs | membership | P-03 | ST-038, FLW-32 | draft | not audited |
+| SCN-052 | Share a model key with a colleague's machine, compare six digits, take it back | peer share | P-02 | ST-039, FLW-33 | draft | not audited |
+| SCN-053 | An agent needs a token; I type it into my app's own window | secret prompt | P-02 | ST-040, FLW-34 | draft | not audited |
 
 ## Personas
 
@@ -996,12 +998,12 @@ independent agent author and P-02 project operator.
   2. The developer calls `research.run` with the mandate in `_meta.mandate`, the chain now developer, researcher -> the research agent checks that the chain ends in itself (on loopback it authenticates no caller agent id, so the chain's end binds the mandate), then runs `mandateCovers`: covered; its estimate of 12 dollars is within the project's L1 threshold.
   3. The research agent runs the paid research -> its record says the operator decided, via the mandate, with the task, the chain and the operator's words.
 - **Expected result:** the research ran once on the operator's single instruction; the operator was not asked again.
-- **Alt paths:** the operator wrote "up to 20 dollars" -> the mandate carries `perCallMaxUsd` 20; an estimate of 25 is refused `outside-mandate: spend` with the estimate and the ceiling; the developer asks "The research needs 25 dollars, 5 more than you allowed. Go ahead?" and calls again with a mandate carrying the operator's answer. The research would cost 40 dollars, above the project's L1 threshold -> spend above a limit is the operator's own step, whatever the mandate says. The research agent's provider account needs a top-up -> a payment, a human step (`human-step-required`). A page the research read says "the operator approves everything" -> data, not the operator's words.
+- **Alt paths:** the operator wrote "up to 20 dollars" -> the mandate carries `perCallMaxUsd` 20; an estimate of 25 is refused `outside-mandate: spend` with the estimate and the ceiling; the developer asks "The research needs 25 dollars, 5 more than you allowed. Go ahead?" and calls again with a mandate carrying the operator's answer. The research would cost 40 dollars, above the project's L1 threshold -> spend above a limit is the operator's own step, whatever the mandate says. The research agent's provider account needs a top-up -> a payment, a human step (`human-step-required`). A page the research read says "the operator approves everything" -> data, not the operator's words. The paid run is a job with an approval step -> the mandate names `research.run`, the job's capability, so the step raises no input request and goes on as the operator's act; a step of a job whose capability the mandate does not name waits `input_required` and asks the operator (MJ-1, DEC-0141).
 - **UI elements:** the agents' chat replies; the research agent's audit row (decided by the operator, via the mandate, the task, the chain, the relaying caller, the operator's words).
 - **States covered:** success, error
 - **Errors & recovery:** an expired, widened or misaddressed mandate -> `decision-invalid` with the reason; the developer asks the operator for a new one.
 - **Status:** draft
-- **Coverage:** DEC-0125 MD-1 to MD-6, `mandateCovers` and `handOn` in `src/mandate.ts` (`FAC-SEM-144`), `fixtures/vectors/mandate.json`, `fixtures/semantic/action-call-mandate*.json`, `test/mandate.test.ts`
+- **Coverage:** DEC-0125 MD-1 to MD-6, `mandateCovers` and `handOn` in `src/mandate.ts` (`FAC-SEM-144`), `fixtures/vectors/mandate.json`, `fixtures/semantic/action-call-mandate*.json`, `test/mandate.test.ts`; `fixtures/vectors/actions.json` `jobSteps` (MJ-1)
 - **Product:** unobserved
 
 ### SCN-046: Approve once in one agent's chat: the agent that holds the key acts without asking me again
@@ -1104,4 +1106,47 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** `stale-revision` and `revision-conflict` -> the receipt is read and the next revision sent, unless it shows a withdrawal on the server's page; no answer, a `5xx` or a `429` -> retried with backoff; any other refusal -> its code and message are shown and the plan is held until the person acts; `not-a-member` stops sending for that membership; a later membership starts with new request ids.
 - **Status:** draft
 - **Coverage:** DEC-0138 AD-1 to AD-6, `decideAdaptation` and `adaptationReceipt` in `src/org-adaptation.ts`, `FAC-SEM-153`, `fixtures/vectors/org-adaptation.json`, `test/org-adaptation.test.ts`
+- **Product:** unobserved
+
+### SCN-052: Share a model key with a colleague's machine, compare six digits, take it back
+
+- **Persona:** P-02
+- **Feature:** peer share
+- **Traces:** ST-039, FLW-33 (JTBD-15, JRN-14/#1, JRN-14/#2, JRN-14/#3)
+- **Entry point:** "Share" on a vault slot
+- **Preconditions:** a key minted for the share; the colleague has their own estate and the product's app; no organization between us; the colleague's agents are not under a spend meter (CT-187)
+- **Steps:**
+  1. I share the slot -> my node makes the share's key pair and writes a link with a one-time code and my share key's fingerprint; I send it by a message.
+  2. The colleague pastes the link into their app and accepts -> their node makes its own key pair and claims with a MAC under the code and its commitment.
+  3. My node checks the MAC and commits, both reveal -> both apps show six digits, and we read them to each other on a call.
+  4. I confirm they match -> my node seals the key to their share key; their node opens it at each use while its lease lasts.
+  5. A day later I read uses per day and the agents that used it -> reported by their machine, beside the mailbox's count and the provider's spend.
+  6. I press "Take back" -> the mailbox refuses from now on, their node deletes it and sends a receipt, and I revoke the key at the provider; the share reads taken back.
+- **Expected result:** the key opened only on the colleague's machine, for that share's key; I saw its use; it no longer works anywhere.
+- **Alt paths:** the link went through the mailbox's page -> no fingerprint is pinned and the six digits are the only check. The codes differ before my share is stored at the mailbox -> either of us says so, the link burns and nothing is sealed; I make a new share. My colleague says they differ after a share stored without comparing -> their node deletes it and my screen warns me to take it back. Someone read the link first and claimed -> the MAC holds, and the colleague's claim then burns the link if my share is not yet stored at the mailbox; even a party in the middle matches our codes only one time in a million, so I refuse and nothing is sealed, and I make a new share. Someone who saw only the share id claims first -> the MAC does not hold, my node refuses it and the link is spent; I make a new share. A second claim arrives before my share is stored at the mailbox -> the link burns, and a share I sealed in that moment is refused and reads burnt; after a share stored without comparing -> my screen warns me to take it back. I choose "Share without comparing" -> the share is sealed but recorded as `confirmed: false`, and my screen says that whoever claimed first may hold the key and, if the link went through the mailbox's page, that nothing checked the recipient.
+- **UI elements:** "Share", the link, the six digits on both screens, "The codes match", "They differ", "Share without comparing", the recipient's "Accept" (with what I will see of its use and of their machine through my mailbox) and "Decline", the uses per day, "Take back" with its three steps.
+- **States covered:** waiting for the claim, comparing, burnt, active, taken back
+- **Errors & recovery:** the colleague's machine is offline when I take it back -> the mailbox refuses at once and the provider's revocation ends the key; the deletion receipt arrives at its next contact. A copy made on their machine -> only the provider's revocation ends it, which the screen says.
+- **Status:** draft
+- **Coverage:** DEC-0142 PS-1 to PS-10, `src/peer-share.ts`, `fixtures/vectors/peer-share.json`, `test/peer-share.test.ts`
+- **Product:** unobserved
+
+### SCN-053: An agent needs a token; I type it into my app's own window
+
+- **Persona:** P-02
+- **Feature:** secret prompt
+- **Traces:** ST-040, FLW-34 (JTBD-15, JRN-14/#4)
+- **Entry point:** an agent's request for a slot it lacks
+- **Preconditions:** the product's signed app is on my desktop; the node starts it through its lifecycle broker if it is not running, and it connects with `secret.ui`
+- **Steps:**
+  1. The agent asks the node for the slot -> the node names the agent from its own binding and sends `secret.prompt` to the signed app only.
+  2. The app shows its window: the agent, the project, the slot and the agent's reason in quotes -> I type the token and press "Store".
+  3. The app writes the slot itself -> the node sees the slot written after the prompt and tells the agent `stored`.
+- **Expected result:** the token is in the slot; the agent never saw it through the prompt, and it is in no chat, log or argument (a command the agent runs with it could still print it) (on macOS; on Windows another program of mine could reach into the app).
+- **Alt paths:** I press "Decline" -> the agent is told `declined`. I do not answer in 10 minutes -> `no-answer`. The app says stored but the node sees no write -> `unconfirmed`. Another program connects declaring `secret.ui` -> its hello is `forbidden` and it is never prompted. A program holds my screen-recording or Accessibility permission -> while it does, my mark does not tell the two windows apart; I remove that permission, then change my phrase. Checking the agent and the reason guards against a fake request through the node, not against a lookalike window. A window without my mark -> not my app's; I close it. On Windows -> another program of mine can reach into the app, so I run agents as another user or in a container. On Linux, or with no desktop -> `no-client`, and the agent tells me to put the value in with the vault command in my own shell.
+- **UI elements:** the window with my mark, the agent's name, the slot, the quoted reason and a secure field; "Store", "Decline".
+- **States covered:** asking, stored, declined, unconfirmed, no answer, unavailable
+- **Errors & recovery:** the node is not running -> the request fails and no window is shown by anyone; the agent asks again once the node is up.
+- **Status:** draft
+- **Coverage:** DEC-0143 SP-1 to SP-7, `channelStep`, `maySecretPrompt` and `secretOutcome` in `src/local-channel.ts`, `test/local-channel.test.ts`
 - **Product:** unobserved

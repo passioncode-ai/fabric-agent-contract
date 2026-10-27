@@ -1,0 +1,939 @@
+{
+  "about": "Vectors for fabric-local-channel/0.1 (DEC-0075, DEC-0143), written by tools/vectors/local-channel.ts, never by hand. `sessions`: from a fresh session (hello false, accepted [fabric-local-channel/0.1], signedApp as given: the node's own operating-system check of the peer, absent when it made none), channelStep over `messages` in order answers each as `answers` says ({ok, code, hello, capabilities?}: code null when nothing is answered, hello and capabilities the session after), and then mayPrompt and maySecretPrompt answer as `after` says. `outcomes`: secretOutcome(promptedAt, deadline, answers, written), times in milliseconds by the node's receipt time; a withdrawn request passes the withdrawal's time as its deadline (SP-3). `prompts`: each `value` validates against local-channel.schema.json#/$defs/<definition> exactly when `valid` is true.",
+  "sessions": [
+    {
+      "name": "a signed app declares both: admitted for consent and secrets",
+      "signedApp": true,
+      "messages": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "consent.ui",
+              "secret.ui"
+            ]
+          }
+        }
+      ],
+      "answers": [
+        {
+          "ok": true,
+          "code": null,
+          "hello": true,
+          "capabilities": [
+            "consent.ui",
+            "secret.ui"
+          ]
+        }
+      ],
+      "after": {
+        "mayPrompt": true,
+        "maySecretPrompt": true
+      }
+    },
+    {
+      "name": "an unverified peer declares secret.ui: forbidden, then a hello without it is accepted",
+      "messages": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "consent.ui",
+              "secret.ui"
+            ]
+          }
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "consent.ui"
+            ]
+          }
+        }
+      ],
+      "answers": [
+        {
+          "ok": false,
+          "code": "forbidden",
+          "hello": false
+        },
+        {
+          "ok": true,
+          "code": null,
+          "hello": true,
+          "capabilities": [
+            "consent.ui"
+          ]
+        }
+      ],
+      "after": {
+        "mayPrompt": true,
+        "maySecretPrompt": false
+      }
+    },
+    {
+      "name": "an unverified peer declares secret.ui twice: invalid-params comes before forbidden",
+      "messages": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "secret.ui",
+              "secret.ui"
+            ]
+          }
+        }
+      ],
+      "answers": [
+        {
+          "ok": false,
+          "code": "invalid-params",
+          "hello": false
+        }
+      ],
+      "after": {
+        "mayPrompt": false,
+        "maySecretPrompt": false
+      }
+    },
+    {
+      "name": "an unverified peer declares secret.ui and offers only an unknown revision: schema-unsupported comes before forbidden",
+      "messages": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.2"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "secret.ui"
+            ]
+          }
+        }
+      ],
+      "answers": [
+        {
+          "ok": false,
+          "code": "schema-unsupported",
+          "hello": false
+        }
+      ],
+      "after": {
+        "mayPrompt": false,
+        "maySecretPrompt": false
+      }
+    },
+    {
+      "name": "a peer the check refused: forbidden",
+      "signedApp": false,
+      "messages": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "secret.ui"
+            ]
+          }
+        }
+      ],
+      "answers": [
+        {
+          "ok": false,
+          "code": "forbidden",
+          "hello": false
+        }
+      ],
+      "after": {
+        "mayPrompt": false,
+        "maySecretPrompt": false
+      }
+    },
+    {
+      "name": "a check result that is not true: forbidden",
+      "signedApp": "yes",
+      "messages": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "secret.ui"
+            ]
+          }
+        }
+      ],
+      "answers": [
+        {
+          "ok": false,
+          "code": "forbidden",
+          "hello": false
+        }
+      ],
+      "after": {
+        "mayPrompt": false,
+        "maySecretPrompt": false
+      }
+    },
+    {
+      "name": "a signed app that declares only consent.ui is never sent a secret prompt",
+      "signedApp": true,
+      "messages": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "consent.ui"
+            ]
+          }
+        }
+      ],
+      "answers": [
+        {
+          "ok": true,
+          "code": null,
+          "hello": true,
+          "capabilities": [
+            "consent.ui"
+          ]
+        }
+      ],
+      "after": {
+        "mayPrompt": true,
+        "maySecretPrompt": false
+      }
+    },
+    {
+      "name": "a capability the contract does not name: invalid-params, then a retry is accepted",
+      "signedApp": true,
+      "messages": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "camera.ui"
+            ]
+          }
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "secret.ui"
+            ]
+          }
+        }
+      ],
+      "answers": [
+        {
+          "ok": false,
+          "code": "invalid-params",
+          "hello": false
+        },
+        {
+          "ok": true,
+          "code": null,
+          "hello": true,
+          "capabilities": [
+            "secret.ui"
+          ]
+        }
+      ],
+      "after": {
+        "mayPrompt": false,
+        "maySecretPrompt": true
+      }
+    },
+    {
+      "name": "a second hello after an accepted one: invalid-request, the first stands",
+      "signedApp": true,
+      "messages": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "secret.ui"
+            ]
+          }
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "consent.ui"
+            ]
+          }
+        }
+      ],
+      "answers": [
+        {
+          "ok": true,
+          "code": null,
+          "hello": true,
+          "capabilities": [
+            "secret.ui"
+          ]
+        },
+        {
+          "ok": false,
+          "code": "invalid-request",
+          "hello": true,
+          "capabilities": [
+            "secret.ui"
+          ]
+        }
+      ],
+      "after": {
+        "mayPrompt": false,
+        "maySecretPrompt": true
+      }
+    },
+    {
+      "name": "a client that sends the node's own secret.prompt: hello-first before hello, unknown-method after",
+      "signedApp": true,
+      "messages": [
+        {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "secret.prompt",
+          "params": {}
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "secret.ui"
+            ]
+          }
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "secret.prompt",
+          "params": {}
+        }
+      ],
+      "answers": [
+        {
+          "ok": false,
+          "code": "hello-first",
+          "hello": false
+        },
+        {
+          "ok": true,
+          "code": null,
+          "hello": true,
+          "capabilities": [
+            "secret.ui"
+          ]
+        },
+        {
+          "ok": false,
+          "code": "unknown-method",
+          "hello": true,
+          "capabilities": [
+            "secret.ui"
+          ]
+        }
+      ],
+      "after": {
+        "mayPrompt": false,
+        "maySecretPrompt": true
+      }
+    },
+    {
+      "name": "secret.cancel is a notification: never answered",
+      "signedApp": true,
+      "messages": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "channel.hello",
+          "params": {
+            "protocols": [
+              "fabric-local-channel/0.1"
+            ],
+            "client": {
+              "name": "example-app",
+              "version": "1.0.0"
+            },
+            "capabilities": [
+              "secret.ui"
+            ]
+          }
+        },
+        {
+          "jsonrpc": "2.0",
+          "method": "secret.cancel",
+          "params": {
+            "requestId": "r-1"
+          }
+        }
+      ],
+      "answers": [
+        {
+          "ok": true,
+          "code": null,
+          "hello": true,
+          "capabilities": [
+            "secret.ui"
+          ]
+        },
+        {
+          "ok": false,
+          "code": null,
+          "hello": true,
+          "capabilities": [
+            "secret.ui"
+          ]
+        }
+      ],
+      "after": {
+        "mayPrompt": false,
+        "maySecretPrompt": true
+      }
+    }
+  ],
+  "outcomes": [
+    {
+      "name": "stored, and the node saw the write",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600000,
+      "answers": [
+        {
+          "at": 1761552060000,
+          "outcome": "stored"
+        }
+      ],
+      "written": true,
+      "expect": "stored"
+    },
+    {
+      "name": "stored, but the node saw no write",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600000,
+      "answers": [
+        {
+          "at": 1761552060000,
+          "outcome": "stored"
+        }
+      ],
+      "written": false,
+      "expect": "unconfirmed"
+    },
+    {
+      "name": "declined",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600000,
+      "answers": [
+        {
+          "at": 1761552060000,
+          "outcome": "declined"
+        }
+      ],
+      "written": false,
+      "expect": "declined"
+    },
+    {
+      "name": "the first answer wins, by the node's receipt time",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600000,
+      "answers": [
+        {
+          "at": 1761552120000,
+          "outcome": "stored"
+        },
+        {
+          "at": 1761552060000,
+          "outcome": "declined"
+        }
+      ],
+      "written": true,
+      "expect": "declined"
+    },
+    {
+      "name": "an answer at the prompt's own time counts",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600000,
+      "answers": [
+        {
+          "at": 1761552000000,
+          "outcome": "stored"
+        }
+      ],
+      "written": true,
+      "expect": "stored"
+    },
+    {
+      "name": "an answer at the deadline counts",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600000,
+      "answers": [
+        {
+          "at": 1761552600000,
+          "outcome": "stored"
+        }
+      ],
+      "written": true,
+      "expect": "stored"
+    },
+    {
+      "name": "a late answer is ignored",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600000,
+      "answers": [
+        {
+          "at": 1761552600001,
+          "outcome": "stored"
+        }
+      ],
+      "written": true,
+      "expect": "no-answer"
+    },
+    {
+      "name": "an answer before the prompt is ignored",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600000,
+      "answers": [
+        {
+          "at": 1761551999999,
+          "outcome": "stored"
+        }
+      ],
+      "written": true,
+      "expect": "no-answer"
+    },
+    {
+      "name": "no answer",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600000,
+      "answers": [],
+      "written": false,
+      "expect": "no-answer"
+    },
+    {
+      "name": "an outcome the result does not name is no answer",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600000,
+      "answers": [
+        {
+          "at": 1761552060000,
+          "outcome": "cancelled"
+        }
+      ],
+      "written": false,
+      "expect": "no-answer"
+    },
+    {
+      "name": "a deadline more than 10 minutes after the prompt",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600001,
+      "answers": [
+        {
+          "at": 1761552060000,
+          "outcome": "stored"
+        }
+      ],
+      "written": true,
+      "expect": "no-answer"
+    },
+    {
+      "name": "a deadline at or before the prompt",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552000000,
+      "answers": [
+        {
+          "at": 1761552000000,
+          "outcome": "stored"
+        }
+      ],
+      "written": true,
+      "expect": "no-answer"
+    },
+    {
+      "name": "withdrawn before an answer: the cancel time is the deadline",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552120000,
+      "answers": [
+        {
+          "at": 1761552180000,
+          "outcome": "stored"
+        }
+      ],
+      "written": true,
+      "expect": "no-answer"
+    },
+    {
+      "name": "withdrawn after an answer: the answer stands",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552120000,
+      "answers": [
+        {
+          "at": 1761552060000,
+          "outcome": "declined"
+        }
+      ],
+      "written": false,
+      "expect": "declined"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "a prompt for one slot",
+      "definition": "secretPrompt",
+      "value": {
+        "requestId": "r-1",
+        "agent": "claude-code",
+        "project": "example-site",
+        "slot": {
+          "env": "prod",
+          "name": "OPENROUTER_API_KEY"
+        },
+        "provider": "openrouter",
+        "reason": "Deploy the site's search",
+        "replaces": false,
+        "deadline": "2026-10-27T10:10:00Z"
+      },
+      "valid": true
+    },
+    {
+      "name": "a prompt with no provider: the member is left out",
+      "definition": "secretPrompt",
+      "value": {
+        "requestId": "r-1",
+        "agent": "claude-code",
+        "project": "example-site",
+        "slot": {
+          "env": "prod",
+          "name": "OPENROUTER_API_KEY"
+        },
+        "reason": "Deploy the site's search",
+        "replaces": false,
+        "deadline": "2026-10-27T10:10:00Z"
+      },
+      "valid": true
+    },
+    {
+      "name": "a prompt with a null provider",
+      "definition": "secretPrompt",
+      "value": {
+        "requestId": "r-1",
+        "agent": "claude-code",
+        "project": "example-site",
+        "slot": {
+          "env": "prod",
+          "name": "OPENROUTER_API_KEY"
+        },
+        "provider": null,
+        "reason": "Deploy the site's search",
+        "replaces": false,
+        "deadline": "2026-10-27T10:10:00Z"
+      },
+      "valid": false
+    },
+    {
+      "name": "a provider that is no slug",
+      "definition": "secretPrompt",
+      "value": {
+        "requestId": "r-1",
+        "agent": "claude-code",
+        "project": "example-site",
+        "slot": {
+          "env": "prod",
+          "name": "OPENROUTER_API_KEY"
+        },
+        "provider": "open.router",
+        "reason": "Deploy the site's search",
+        "replaces": false,
+        "deadline": "2026-10-27T10:10:00Z"
+      },
+      "valid": false
+    },
+    {
+      "name": "a prompt that carries a member more (lastChange)",
+      "definition": "secretPrompt",
+      "value": {
+        "requestId": "r-1",
+        "agent": "claude-code",
+        "project": "example-site",
+        "slot": {
+          "env": "prod",
+          "name": "OPENROUTER_API_KEY"
+        },
+        "provider": "openrouter",
+        "reason": "Deploy the site's search",
+        "replaces": false,
+        "deadline": "2026-10-27T10:10:00Z",
+        "lastChange": "2026-10-20T09:00:00Z"
+      },
+      "valid": false
+    },
+    {
+      "name": "a prompt that carries a value",
+      "definition": "secretPrompt",
+      "value": {
+        "requestId": "r-1",
+        "agent": "claude-code",
+        "project": "example-site",
+        "slot": {
+          "env": "prod",
+          "name": "OPENROUTER_API_KEY"
+        },
+        "provider": "openrouter",
+        "reason": "Deploy the site's search",
+        "replaces": false,
+        "deadline": "2026-10-27T10:10:00Z",
+        "value": "sk-1"
+      },
+      "valid": false
+    },
+    {
+      "name": "a slot name that starts with an underscore",
+      "definition": "secretPrompt",
+      "value": {
+        "requestId": "r-1",
+        "agent": "claude-code",
+        "project": "example-site",
+        "slot": {
+          "env": "prod",
+          "name": "_LEADING"
+        },
+        "provider": "openrouter",
+        "reason": "Deploy the site's search",
+        "replaces": false,
+        "deadline": "2026-10-27T10:10:00Z"
+      },
+      "valid": false
+    },
+    {
+      "name": "a slot name of 64 characters",
+      "definition": "secretPrompt",
+      "value": {
+        "requestId": "r-1",
+        "agent": "claude-code",
+        "project": "example-site",
+        "slot": {
+          "env": "prod",
+          "name": "KAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        "provider": "openrouter",
+        "reason": "Deploy the site's search",
+        "replaces": false,
+        "deadline": "2026-10-27T10:10:00Z"
+      },
+      "valid": true
+    },
+    {
+      "name": "a slot name of 65 characters",
+      "definition": "secretPrompt",
+      "value": {
+        "requestId": "r-1",
+        "agent": "claude-code",
+        "project": "example-site",
+        "slot": {
+          "env": "prod",
+          "name": "KAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        },
+        "provider": "openrouter",
+        "reason": "Deploy the site's search",
+        "replaces": false,
+        "deadline": "2026-10-27T10:10:00Z"
+      },
+      "valid": false
+    },
+    {
+      "name": "a slot name in lower case",
+      "definition": "secretPrompt",
+      "value": {
+        "requestId": "r-1",
+        "agent": "claude-code",
+        "project": "example-site",
+        "slot": {
+          "env": "prod",
+          "name": "openrouter_key"
+        },
+        "provider": "openrouter",
+        "reason": "Deploy the site's search",
+        "replaces": false,
+        "deadline": "2026-10-27T10:10:00Z"
+      },
+      "valid": false
+    },
+    {
+      "name": "an empty reason",
+      "definition": "secretPrompt",
+      "value": {
+        "requestId": "r-1",
+        "agent": "claude-code",
+        "project": "example-site",
+        "slot": {
+          "env": "prod",
+          "name": "OPENROUTER_API_KEY"
+        },
+        "provider": "openrouter",
+        "reason": "",
+        "replaces": false,
+        "deadline": "2026-10-27T10:10:00Z"
+      },
+      "valid": false
+    },
+    {
+      "name": "a result: stored",
+      "definition": "secretResult",
+      "value": {
+        "outcome": "stored",
+        "at": "2026-10-27T10:01:00Z"
+      },
+      "valid": true
+    },
+    {
+      "name": "a result: declined",
+      "definition": "secretResult",
+      "value": {
+        "outcome": "declined",
+        "at": "2026-10-27T10:01:00Z"
+      },
+      "valid": true
+    },
+    {
+      "name": "a result with no time",
+      "definition": "secretResult",
+      "value": {
+        "outcome": "declined"
+      },
+      "valid": false
+    },
+    {
+      "name": "a result that carries the value",
+      "definition": "secretResult",
+      "value": {
+        "outcome": "stored",
+        "at": "2026-10-27T10:01:00Z",
+        "value": "sk-1"
+      },
+      "valid": false
+    },
+    {
+      "name": "a result the client may not send (cancelled)",
+      "definition": "secretResult",
+      "value": {
+        "outcome": "cancelled",
+        "at": "2026-10-27T10:01:00Z"
+      },
+      "valid": false
+    }
+  ]
+}

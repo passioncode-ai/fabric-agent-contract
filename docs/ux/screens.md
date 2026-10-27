@@ -35,6 +35,8 @@
 | SCR-27 | A job's status for its caller | FLW-23, FLW-25 | disabled | proposed | `test/agent-network.test.ts` |
 | SCR-28 | Credentials issued into an organization | FLW-28 | disabled | proposed | `test/credential-envelope.test.ts` |
 | SCR-29 | Calls between agents | FLW-28 | disabled | proposed | `test/credential-envelope.test.ts` |
+| SCR-33 | Sharing a key with another person | FLW-33 | disabled | proposed | `test/peer-share.test.ts` |
+| SCR-34 | An agent's secret request | FLW-34 | disabled | proposed | `test/local-channel.test.ts` |
 
 ## Design system
 
@@ -393,4 +395,26 @@
 - **Coverage:** `src/org-membership.ts` (`verifyOrgMembership`, `verifyOrgKeySet`, `FAC-SEM-145` to `FAC-SEM-147`), `test/org-membership.test.ts`, `src/org-adaptation.ts` (`decideAdaptation`, `adaptationReceipt`, `FAC-SEM-153`), `test/org-adaptation.test.ts`
 - **Scenarios:** SCN-047, SCN-048, SCN-049, SCN-050
 - **Resources:** membership specification, The organization's keys, Ending, What leaves a person's Fabric, The adaptation plan
+- **Status:** proposed
+
+### SCR-33: Sharing a key with another person
+
+- **Used by:** FLW-33
+- **Purpose:** the sender makes a share, compares the code, reads its use and takes it back; the recipient opens a share and compares the code.
+- **Elements:** "Share" on a vault slot, the link to send and its claim deadline; the six-digit code on both screens and "The codes match" / "They differ" / "Share without comparing"; for the recipient, "Open a share", "Accept" with what the sender will see (agent names, uses per day, the time of each day's last use and of each export, and, through the mailbox the sender runs, the recipient machine's IP address and when it claims, renews and reports) and "Decline" beside it, before any claim, the name the recipient gives the share at "Accept", the code with "They differ", and a note that its own comparison is its only check (nothing it receives says whether the sender compared); per share: the recipient's label, confirmed or not, uses per day and consumer labels (reported by their machine), the mailbox's delivery count, the provider's spend, exports with the button; "Take back", with each of its three steps and what confirmed it.
+- **States:** waiting for the claim; comparing, the code shown; burnt, a second claim, a code that differs, an abort or the deadline, each with its reason as the mailbox carries it; for the recipient, a claim made after the share was stored, which the mailbox carries only to the sender, so the claimant learns nothing before its deadline until the mailbox's routes say so (CT-185); a "They differ" after storage, the share deleted on the recipient's side; received, on the recipient's side, under the name the recipient gave it at "Accept"; active, confirmed or `confirmed: false`; a later claim on a share sealed without comparing, or the recipient's abort on any stored share, a warning to take it back; for the recipient, an envelope past its `exp` waiting for the sender to seal it again; taken back, the mailbox's refusal observed and the provider's revocation or rotation confirmed; reported deleted.
+- **Coverage:** `src/peer-share.ts`, `fixtures/vectors/peer-share.json`, `test/peer-share.test.ts`
+- **Scenarios:** SCN-052
+- **Resources:** peer share specification
+- **Status:** proposed
+
+### SCR-34: An agent's secret request
+
+- **Used by:** FLW-34
+- **Purpose:** the person types a value an agent asked for into a window only the product's signed app can show.
+- **Elements:** the person's own mark (hidden from other programs on macOS; on Windows another program of the user can read it; a program with the person's screen-recording or Accessibility permission can read it on any genuine prompt, and with Accessibility press its buttons; while either is held the mark does not tell the windows apart: remove the permission, then change the mark; on Windows, run agents as another user or in a container); the agent's name from the node's binding; the project and the slot; the agent's reason, quoted as its own words; whether the slot already holds a value; a secure field; "Store" and "Decline".
+- **States:** asking; stored; declined; stored but not seen by the node (`unconfirmed`); no answer by the deadline; withdrawn (`secret.cancel`, which the agent then learns as `no-answer`); unavailable, no signed app or no desktop, with the person's step.
+- **Coverage:** `src/local-channel.ts` (`channelStep`, `maySecretPrompt`, `secretOutcome`), `test/local-channel.test.ts`
+- **Scenarios:** SCN-053
+- **Resources:** local channel specification, Secret requests
 - **Status:** proposed
