@@ -330,7 +330,7 @@ describe("a folder is checked file by file and as pairs", () => {
     writeFileSync(path.join(dir, "providers", "renamed.json"), JSON.stringify({ ...entry, manifest: manifestPath }));
     const renamed = run(dir);
     expect(renamed.code).toBe(1);
-    expect(renamed.out).toMatch(/providers\/renamed\.json  \/entry\/id  FAC-SEM-014  .*the file is named <id>\.json/);
+    expect(renamed.out).toMatch(/providers[\\/]renamed\.json  \/entry\/id  FAC-SEM-014  .*the file is named <id>\.json/);
     expect(renamed.out).toContain("FAC-SEM-013");
   });
 
