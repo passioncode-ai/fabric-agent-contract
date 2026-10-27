@@ -513,7 +513,7 @@ revocation signed by an estate key (a hub key the estate record certifies) and c
 
 ## The machines' report
 
-DEC-0132 (CT-152) · schemas [`machine-report`](../../schemas/machine-report.schema.json),
+DEC-0132 (CT-152), DEC-0139 (CT-161) · schemas [`machine-report`](../../schemas/machine-report.schema.json),
 [`machine-report-sealed`](../../schemas/machine-report-sealed.schema.json) · code
 [`src/machine-report.ts`](../../src/machine-report.ts) · vectors
 [`fixtures/vectors/machine-report.json`](../../fixtures/vectors/machine-report.json), written by
@@ -539,7 +539,10 @@ itself whose `hubKey` one of these revisions certifies:
   one: both get the report);
 - and a newer revision it verified but refused (`unreconciled`, or a delta anchor it could not apply), so a machine
   left on its parent after a move still reaches the new hub that drafts the revision it needs (the hub move's
-  [step 6](ceremonies.md#move-the-hub)). A send the relay refuses (`unknown-recipient`, a removed machine) is dropped.
+  [step 6](ceremonies.md#move-the-hub)). A send the relay refuses is dropped, never resent as such: `unknown-recipient`
+  (a removed machine), `mailbox-full` and `rate-limited` alike, the next report carrying the whole state in its place
+  (after `rate-limited`, not before its `retryAfter`; DEC-0139). A send answered `internal`, or whose `accepted` never
+  came, may go again under the same `msgId`, which the relay's tombstone keeps one message.
 
 It sends one:
 - after it applies a revision, accepts a heartbeat or applies a delta page, at most once a minute (later changes wait
@@ -554,11 +557,13 @@ change. On the hub machine itself the hub reads its own node's report over the [
 never the relay: it calls the node's `machine.report` (no params), which answers `{report}`, the node's whole state as
 a `machine-report/1` written at the call (its own `at`), or `null` while the node applies no estate records. The hub
 calls it when it connects, before each division and at least every 24 hours, and reads the answer as MR-4 reads an
-opened report: the schema, `FAC-SEM-152`, `machine` equal to its own machine id (`wrong-machine` otherwise) and `at`
-after the report it holds (`stale` otherwise); it holds it as that machine's newest report, so the hub machine's own
+opened report (`acceptMachineReport`, DEC-0139): the schema, `FAC-SEM-152` and an `at` that `strictTime` reads
+(`malformed` otherwise), `machine` equal to its own machine id (`wrong-machine` otherwise) and `at` after the report it
+holds (`stale` otherwise); it holds it as that machine's newest report, so the hub machine's own
 leases and revision count under MR-5 like any machine's. A node that answers `unknown-method` (pinned before
 DEC-0132) has reported nothing: its leases count at their whole amounts, and it has applied no revision the hub can
-count, so the hub waits for it as for any machine that has not reported.
+count, so the hub waits for it as for any machine that has not reported. Any other error answer, or none before a deadline the hub
+sets itself (the local channel sets none on a method), reads the same (DEC-0139).
 
 **MR-3, how it travels.** The report is the inner `payload` of a relay message body (`fabric-relay-message/1`), sealed
 to the hub machine's `#kem`, as the revision that certifies that hub machine lists it, as `fabric-machine-report/1` `{type, kem, enc, ct}`: HPKE base mode, suite `[16, 1, 1]`
@@ -567,15 +572,23 @@ RFC 8785 bytes of `{type, from, to, msgId, kem}` (the body's own `from`, `to` an
 into another body does not open), the plaintext the report's RFC 8785 form, at most 65 536 bytes
 (`MAX_MACHINE_REPORT_BYTES`). `sealMachineReport` seals it and refuses `malformed`, `bad-key` and `too-large`. The
 machine `send`s it to the hub machine's `#sig` with a new `msgId`; a body whose signed `exp` is up to 7 days later
-reaches a hub that was asleep. A hub machine with no usable `#kem` gets no report.
+reaches a hub that was asleep. A hub machine with no usable `#kem` gets no report; a hub whose own `#kem` the revision
+it applied does not list, or whose private half it cannot read or does not match the listed key, names that in its own health: the `degraded` of its
+[well-known document](service.md#well-known-document) where it serves `fabric-service/0.1`, otherwise the surface on
+which it shows the operator its state, so DL-15's switch, a move's step 6 and its division do not wait on reports in silence (DEC-0139). What a hub
+not yet on DEC-0132 does with a body whose payload it does not know is not decided here (CT-172); the machine hears
+nothing back either way, since a report is never answered.
 
 **MR-4, the hub's reading.** After the body is verified (`verifyMessageBody`) and is not a replay (`checkReplay`), the
 hub places the sender with `relayCallerTier`; a sender that is not T1 is ignored, its delivery acknowledged. Then
 `openMachineReport` refuses, in this order: `malformed` (the sealed object is not the schema's), `wrong-recipient`
 (another `kem`), `cannot-open` (HPKE fails, another body's `from`, `to` or `msgId` included), `malformed` (a plaintext
-that is not a report in its own RFC 8785 form, or that the schema refuses), `wrong-machine` (the report names another
-machine than the one `relayCallerTier` named) and `stale` (its `at` is not after the report the hub holds for that
-machine). The hub keeps, per machine, the newest report it accepted. A machine writes `at` from its clock at the moment
+that is not a report in its own RFC 8785 form, that the schema refuses, or whose `at` RFC 3339 as `strictTime` reads
+does not: a leap second, a space for `T`, DEC-0139), `wrong-machine` (the report names another machine than the one
+`relayCallerTier` named) and `stale` (its `at` is not after the report the hub holds for that machine). It then reads
+the opened report as `acceptMachineReport` does, so a `FAC-SEM-152` finding (a lease named twice) drops it as
+`malformed`, as the local read does (DEC-0139); a relayed report that also names another machine, or is not after the
+one held, keeps `openMachineReport`'s answer (`wrong-machine`, `stale`), and is dropped either way. The hub keeps, per machine, the newest report it accepted. A machine writes `at` from its clock at the moment
 it seals the report, never after the body's signed `iat`, so the body's 60-second bound on `iat` bounds `at` too.
 
 **MR-5, what the hub reads in it.** The hub reads everything from the newest report it holds per machine. A machine has applied a revision when its newest report's `estateRecord.revision` is

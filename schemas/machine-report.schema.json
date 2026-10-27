@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/machine-report.schema.json",
   "title": "A machine's report to its hub (machine-report/1, DEC-0132)",
-  "description": "What one machine of an estate tells the estate's hub machine over the relay (DEC-0132, CT-152): the estate record revision it applied, the heartbeat it accepted, the head of the revocation delta it applied, and the window leases it holds with what it spent, under the same member names as a check-in's records (DEC-0053, DEC-0056, DEC-0062), which DEC-0128 UE-2 keeps off every check-in to an organization server. The plaintext of a fabric-machine-report/1 sealed to the hub's #kem (machine-report-sealed.schema.json); the relay reads none of it. Each lease once (FAC-SEM-152). docs/specification/relay.md#the-machines-report.",
+  "description": "What one machine of an estate tells the estate's hub machine over the relay, or, on the hub's own machine, through the node's machine.report on the local channel (DEC-0132, CT-152): the estate record revision it applied, the heartbeat it accepted, the head of the revocation delta it applied, and the window leases it holds with what it spent, under the same member names as a check-in's records (DEC-0053, DEC-0056, DEC-0062), which DEC-0128 UE-2 keeps off every check-in to an organization server. The plaintext of a fabric-machine-report/1 sealed to the hub's #kem (machine-report-sealed.schema.json); the relay reads none of it. Each lease once (FAC-SEM-152). docs/specification/relay.md#the-machines-report.",
   "type": "object",
   "required": [
     "type",
@@ -16,11 +16,11 @@
     },
     "machine": {
       "$ref": "activity-common.schema.json#/$defs/opaqueId",
-      "description": "The reporting machine's id in the estate record; the hub refuses a report whose machine is not the one relayCallerTier named for the body's sender (wrong-machine)."
+      "description": "The reporting machine's id in the estate record; the hub refuses a report whose machine is not the one relayCallerTier named for the body's sender, or, for its own node's machine.report on the local channel, not its own machine id (wrong-machine)."
     },
     "at": {
       "$ref": "common.schema.json#/$defs/timestamp",
-      "description": "When the machine wrote the report. The hub keeps, per machine, the report with the latest at and refuses one not after it (stale)."
+      "description": "When the machine wrote the report. The hub keeps, per machine, the report with the latest at and refuses one not after it (stale), and one whose at strictTime cannot read, a leap second or a space for T (malformed, DEC-0139)."
     },
     "records": {
       "type": "object",

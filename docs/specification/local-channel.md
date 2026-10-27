@@ -1,6 +1,6 @@
 # The local channel to the node — `fabric-local-channel/0.1`
 
-DEC-0075, DEC-0143 (secret requests) · rule code `FAC-SEM-106` · schema [`local-channel`](../../schemas/local-channel.schema.json) · code
+DEC-0075, DEC-0132 (`machine.report`), DEC-0139 (`unknown-method`, its callers), DEC-0143 (secret requests) · rule code `FAC-SEM-106` · schema [`local-channel`](../../schemas/local-channel.schema.json) · code
 [`src/local-channel.ts`](../../src/local-channel.ts)
 
 How Fabric, Fabric Switchboard, Fabric Dashboards and, for secret requests, the node's own signed app (DEC-0143) talk to Project Observatory's node on the same machine: the
@@ -64,8 +64,13 @@ an `id` that is otherwise well formed is a notification and is not answered; a m
    records; the hub on the same machine reads it in place of a relayed report
    ([the machines' report](relay.md#the-machines-report), MR-2). The client's methods (`CLIENT_METHODS`) are
    `consent.prompt` and `secret.prompt` (DEC-0143), called by the node; a client that sends one to the node gets
-   `unknown-method`. Other payload methods
-   (`node.lifecycle.*`, `grant.check`, …) are added by their owners' decisions, in this envelope.
+   `unknown-method`, and so does a method of `NODE_METHODS` that this node does not serve (DEC-0139). A node pinned
+   before DEC-0132 was promised no answer to `machine.report`: its hub reads any error, or none before a deadline of
+   its own, as no report (relay.md MR-2). Other payload methods (`node.lifecycle.*`, `grant.check`, …) are added by
+   their owners' decisions, in this envelope. `machine.report` answers any client of the channel: a process of the
+   node's own user, inside the trust boundary ([who may connect](#transport-and-who-may-connect)), may read the
+   machine's leases and what they spent, as it may read the node's files; a node keeps it from no such process
+   (DEC-0139).
 3. **Consent, the other way.** After hello the channel is bidirectional. A client that declares `capabilities:
    ["consent.ui"]` may receive the node's `consent.prompt {promptId, purposeId, noticeVersion, deadline}` and answers
    `{state: given | denied, at}` — `at` required for `given`, the receipt evidence (DEC-0052). The deadline is at most

@@ -272,7 +272,7 @@ describe("window-lease semantic fixtures (FAC-SEM-089…091)", () => {
     expect(codes("window-lease-division", over)).toEqual(["FAC-SEM-090"]);
   });
 
-  it("counts a report only when it was received before a lease was issued, not at the same instant", () => {
+  it("counts a report only when it was written before a lease was issued, not at the same instant", () => {
     const division = load("semantic/window-lease-division-ok.json").input;
     const [first, second, third] = division.leases as [Json, Json, Json];
     const later = { ...third, leaseId: "lease-mb2c3-2026-10-0002", sequence: third.sequence + 1, issuedAt: "2026-10-12T09:00:00Z", expiresAt: "2026-10-13T09:00:00Z", amount: "749.5" };

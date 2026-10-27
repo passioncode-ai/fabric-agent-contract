@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for window-lease/1 (DEC-0062). verify: verifyWindowLease(lease, trust) with trust.at an RFC 3339 string a port parses strictly (an unparseable one is an unreadable clock) and trust.estateRecord, when absent, the estateRecord below — the members of fixtures/positive/estate-record-first.json the verifier reads. reserve: mayReserve(lease, request), the meter's decision under a verified lease. remainder: windowRemainder(ledger), the hub's division. decimals: usdMicros; periods: periodBounds and periodOf. The hub key's seed is the test key of fixtures/vectors/estate-record.json (keys.hub); Ed25519 is deterministic, so a port's signer reproduces every sig. Never real credentials.",
+  "about": "Vectors for window-lease/1 (DEC-0062). verify: verifyWindowLease(lease, trust) with trust.at an RFC 3339 string a port parses strictly (an unparseable one is an unreadable clock) and trust.estateRecord, when absent, the estateRecord below: the members of fixtures/positive/estate-record-first.json the verifier reads. reserve: mayReserve(lease, request), the meter's decision under a verified lease. remainder: windowRemainder(ledger), the hub's division; a report's receivedAt is its own at (DEC-0132 MR-5), never its delivery. decimals: usdMicros; periods: periodBounds and periodOf. The hub key's seed is the test key of fixtures/vectors/estate-record.json (keys.hub); Ed25519 is deterministic, so a port's signer reproduces every sig. Never real credentials.",
   "keys": {
     "hub": {
       "seed": "ed3a3c05e3661e523882ffe441ffec074ad025722fb67357b8d5388e0faa3866",
@@ -2810,7 +2810,7 @@
       }
     },
     {
-      "name": "a report received after expiry: the late report is the refund",
+      "name": "a report written after expiry: the late report is the refund",
       "ledger": {
         "limitUsd": "1000",
         "at": "2026-10-12T09:00:00Z",
@@ -2868,7 +2868,7 @@
       }
     },
     {
-      "name": "two reports after expiry: the latest received counts",
+      "name": "two reports after expiry: the latest written counts",
       "ledger": {
         "limitUsd": "1000",
         "at": "2026-10-12T09:00:00Z",
@@ -2931,7 +2931,7 @@
       }
     },
     {
-      "name": "a report received before expiry does not end the lease's claim",
+      "name": "a report written before expiry does not end the lease's claim",
       "ledger": {
         "limitUsd": "1000",
         "at": "2026-10-12T09:00:00Z",
@@ -3208,7 +3208,7 @@
       }
     },
     {
-      "name": "a report received after the hub's clock is not counted yet",
+      "name": "a report written after the hub's clock is not counted yet",
       "ledger": {
         "limitUsd": "1000",
         "at": "2026-10-12T09:00:00Z",

@@ -28,7 +28,7 @@
     },
     "leaseId": {
       "$ref": "activity-common.schema.json#/$defs/opaqueId",
-      "description": "The lease's id: the machine reports it to its hub (records.leases[].leaseId, DEC-0053), over the relay and never in a check-in to an organization server (DEC-0128)."
+      "description": "The lease's id: the machine reports it to its hub (records.leases[].leaseId, DEC-0053), over the relay or through machine.report on the hub's own machine, and never in a check-in to an organization server (DEC-0128)."
     },
     "sequence": {
       "type": "integer",
