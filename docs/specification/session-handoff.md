@@ -55,7 +55,7 @@ a temporary file left by an interrupted write, a stray credential — is refused
 
 **SH-4 — The launch names this folder's own files.** Where the launch names a file by path (Claude Code's
 `--mcp-config=` and `--append-system-prompt-file`), it names this folder's `mcp.json` and `brief.md` by their
-absolute paths. A host compares the path (and SH-11's `mcp.json` name): byte for byte on POSIX, macOS included even on
+absolute paths. A host compares the path (and SH-11's `mcp.json` and `brief.md` names): byte for byte on POSIX, macOS included even on
 a case-insensitive volume; on Windows with either separator and in any case (`samePath` in `src/session-handoff.ts`,
 DEC-0145).
 
@@ -197,7 +197,7 @@ from Fabric gets Fabric's (`fabric_whoami`, `mcp.auth: bearer`, per session). Bo
 validateSessionHandoff(dir, { schema? }): Promise<{ valid, schemaErrors, findings }>
 readSessionHandoff(dir): HandoffSnapshot           // reads without following links
 checkSessionHandoff(snapshot, schema)              // the same, on a snapshot
-sessionHandoffManifestFindings(manifest)           // FAC-SEM-053 only, pure but for the host's path rules (SH-4)
+sessionHandoffManifestFindings(manifest)           // FAC-SEM-053 only, pure but for the host's path rules (SH-11's names)
 ```
 
 `schema` is a compiled check of `session-handoff.schema.json`; omitted, the kit's own validator is loaded. The

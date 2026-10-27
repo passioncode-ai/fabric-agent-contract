@@ -8531,7 +8531,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `pnpm validate`'s stored paths) reading `\` where it compares `/`, which are tooling and decide nothing.
 - **Decision:**
   1. A provider entry's `manifest` ends in `fabric-agent.json` after `/` or `\` ([provider](specification/provider.md#what-the-schema-adds-to-the-table)).
-  2. SH-4 (and SH-11's `mcp.json` name): a host compares a launch argument's path with the folder's file byte for byte
+  2. SH-4 (and SH-11's `mcp.json` and `brief.md` names): a host compares a launch argument's path with the folder's file byte for byte
      on POSIX, macOS included even on a case-insensitive volume; on Windows with either separator and in any case ([session handoff](specification/session-handoff.md), `samePath`).
   3. The repository keeps every text file LF on every platform (`.gitattributes`), and its nightly gate runs on Windows
      as well as Linux (`.github/workflows/ci.yml`).
@@ -8547,7 +8547,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   against a copy pinned before refuses an entry whose `manifest` is a Windows path: Fabric's registry reads provider
   entries on Windows (`apps/desktop/src/main/agentRegistry.ts`) and the adapter's `fabric_provider.py` mirrors the old
   pattern, so a writer does not emit a `manifest` whose name follows a backslash until both re-pin (provider.md, CT-192).
-  The SH-4 change and SH-11's `mcp.json` name in any case accept more on Windows only and nothing more on POSIX;
+  The SH-4 change and SH-11's `mcp.json` and `brief.md` names in any case accept more on Windows only and nothing more on POSIX;
   FAC-SEM-014's stem after either separator, like the widened pattern, also reads the part of a POSIX file name after
   a backslash as the stem (CT-193); a host that copied
   `validateSessionHandoff` compares bytes until it takes `samePath`.

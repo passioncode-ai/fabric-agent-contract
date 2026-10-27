@@ -378,7 +378,7 @@ export function sessionHandoffManifestFindings(manifest: Json): Finding[] {
     if (brief.delivery === "inline" && (inline.length !== 1 || inline[0] !== brief.text || file.length)) findings.push(sem053(at, "an inline brief is the one value of --append-system-prompt"));
     if (brief.delivery === "file") {
       if (file.length !== 1 || inline.length) findings.push(sem053(at, "a brief file is the one value of --append-system-prompt-file"));
-      for (const value of file) if (!path.isAbsolute(value) || path.basename(value) !== "brief.md") findings.push(sem053(at, `--append-system-prompt-file names the handoff's brief.md by its absolute path; found ${value}`));
+      for (const value of file) if (!path.isAbsolute(value) || !samePath(path.basename(value), "brief.md")) findings.push(sem053(at, `--append-system-prompt-file names the handoff's brief.md by its absolute path; found ${value}`));
     }
   } else if (runtime === "codex") {
     const overrides = codexOverrides(args);
