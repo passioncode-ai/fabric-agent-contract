@@ -704,8 +704,8 @@ constraint (`comms-refusal.schema.json`).
 **PR-2 (DEC-0140).** The operator who owns the Project (in an organization, that member only, as in [owner
 settlement](#owner-settlement)) may move an occupied (Project, capability) responder slot (one `com.status` shows `active` or `stale`) from its
 holder to another live
-session of that Project, in the host's operator controls. An agent never moves a slot, on its own account or as a
-relay: the move's agent twin ([service](service.md#actions) AP-1) is owed: its contract half is CT-181, then the host's with the board's other operator controls
+session of that Project, in the host's operator controls. Until that host ships the move's agent twin, an agent does not move a slot, on its
+own account or as a relay: the move's agent twin ([service](service.md#actions) AP-1) is owed: its contract half is CT-181, then the host's with the board's other operator controls
 (CT-125), and before a host offers it the twin's decision must bind the slot, the generation and the receiving
 session (AP-2 lets a decision without a `target` cover any object) and no mandate may cover it (an MD-6 entry; both are CT-181). Until a host ships the twin it
 offers the move in its controls only, an exception to AP-1's parity that DEC-0140 makes for this one control and
@@ -753,7 +753,7 @@ arguments name no session.
   the holder; each request the move changes is journaled as op `replace` (`claimed` to `queued`) or `lost_result`
   (`in_progress` to `outcome_unknown`) (`FAC-SEM-027`), carrying the operator principal, which no rule checks. `com.status` shows the slot as
   before (generation, lease, `provenance`), and no tool's answer gains a member. The move is one of the host's
-  operator controls; its agent twin is CT-125's.
+  operator controls; its agent twin is CT-181's, then CT-125's.
 
 ## A session's role and branch
 

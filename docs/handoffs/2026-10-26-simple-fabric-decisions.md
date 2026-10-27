@@ -15,7 +15,7 @@ session; an optional session `role` and `branch` with a privacy rule.
 - `PRIMARY_CAPABILITY` in `src/comms-hold.ts` with a test; a conformance row (the host); `interop.md`'s amendment (the
   reserved name, a narrowing);
   SCN-051, SCR-32, FLW-16 (the move's edges), JRN-08 stage 5 and an ST-020 criterion; CONTEXT (Primary responder,
-  Session role, Board hold); README, DOCMAP; DEC-0020, DEC-0022, DEC-0081 and DEC-0121 (AP-1's exception for the move) annotated; backlog CT-125 (the
+  Session role, Board hold); README, DOCMAP; DEC-0020, DEC-0022, DEC-0079, DEC-0081 and DEC-0121 (AP-1's exception for the move) annotated; backlog CT-125 (the
   move's host twin), CT-174, and CT-175, CT-176, CT-179, CT-181 (the twin's contract half) and CT-182 filed from the
   readings (rounds 1 to 13). The move is a host control only (round 11): a relayed move needs CT-181 first.
 - The shape was posted on thread `6a8d2f9c` (`0b88a552`); round 1 of the readings failed on all three tiers, and the
@@ -26,6 +26,10 @@ session; an optional session `role` and `branch` with a privacy rule.
   wrong (the caller writes it), corrected on the thread with the rewrite.
 
 ## Open
+
+- In the same run as the merge: fabric-workspace `knowledge/agents-first.md`'s 'Every button has an agent twin'
+  paragraph gains the exception (the operator's move of a board slot, a host control until a host ships its twin,
+  DEC-0140, CT-181 then CT-125).
 
 - Readings until two clean rounds in a row.
 - Objection window until 2026-10-28 18:00 UTC; then Status to Accepted in the merge commit, release, answer on the

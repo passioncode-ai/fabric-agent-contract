@@ -8289,7 +8289,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   policy's second exception: no service may serve or declare `project.work` (PR-1). The serving parties were checked
   on 2026-10-26 by `git grep project.work` at their released tags: Fabric `v0.3.13` (only i18n keys), the adapter
   `v0.52.0`, Fabric Dashboards `v0.8.7`, Fabric Switchboard `v0.6.83`, Project Observatory `v0.1.0`, Fabric Inbox
-  `v0.42.0`, the first organization server `v0.4.0`, and every other repository on the operator's machine at its
+  `v0.42.0` (re-checked at `v0.45.0`), the first organization server `v0.4.0`, and every other repository on the operator's machine at its
   latest tag, else its head (165 in all, the estate's provider agents among them), none of which serves or declares
   it (the only matches are i18n keys and longer identifiers such as `project.workspace_ids`); fabric-workspace has no
   tag and none at its head (a head was read only where a repository has no tag). The release notes will list it as a narrowing. No tool, argument or field of any tool's schema changes. Adoption: Fabric in 0.3.15
@@ -8305,7 +8305,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2. **PR-2.** The operator who owns the Project (in an organization, that member only) moves an occupied (Project,
      capability) slot to another live, authorized session of that Project than its holder, in
      the host's controls only (its agent twin, whose decision must bind slot, generation and receiving session and which
-     no mandate covers, is owed: CT-181, then CT-125), never by an agent; from the
+     no mandate covers, is owed: CT-181, then CT-125), not by an agent until that host ships it; from the
      generation the operator saw (`revision_conflict` otherwise); one transition as `com.responder_replace` would
      make it for the receiving session, transferring nothing; refused `held` under a slot or Project hold. After it
      the board's ordinary rules govern the slot: a move bars nobody, and a host keeps the operator's choice as its own
@@ -8337,6 +8337,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `docs/specification/project-comms.md` (header, C4's wording, Owner settlement's paths, PR-1 to PR-3, the hold
   table), `conformance.md` (a row), `interop.md` (the reserved name), `service.md` (AP-1's exception for the move), `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder,
   Session role), `src/comms-hold.ts` (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`, `docs/ux/scenarios.md`
-  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022, DEC-0079, DEC-0081 and DEC-0121 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176, CT-179, CT-181 and CT-182 (filed); the handoff
+  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16, FLW-29's rejected shape), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022, DEC-0079, DEC-0081 and DEC-0121 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176, CT-179, CT-181 and CT-182 (filed); fabric-workspace `knowledge/agents-first.md` (its parity paragraph, at the merge); the handoff
   `docs/handoffs/2026-10-26-simple-fabric-decisions.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-174; Fabric's request `23ba0e97` (thread `6a8d2f9c`).
