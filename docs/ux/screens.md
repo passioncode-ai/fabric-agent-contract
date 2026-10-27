@@ -412,8 +412,8 @@
 
 - **Used by:** FLW-34
 - **Purpose:** the person types a value an agent asked for into a window only the product's signed app can show.
-- **Elements:** the person's own mark; the agent's name from the node's binding; the project and the slot; the agent's reason, quoted as its own words; whether the slot already holds a value; a secure field; "Store" and "Decline".
-- **States:** asking; stored; declined; no answer by the deadline; withdrawn (`secret.cancel`); unavailable, no signed app or no desktop, with the person's step.
+- **Elements:** the person's own mark (hidden from other programs on macOS; on Windows another program of the user can read it); the agent's name from the node's binding; the project and the slot; the agent's reason, quoted as its own words; whether the slot already holds a value; a secure field; "Store" and "Decline".
+- **States:** asking; stored; declined; no answer by the deadline; withdrawn (`secret.cancel`, which the agent then learns as `no-answer`); unavailable, no signed app or no desktop, with the person's step.
 - **Coverage:** `src/local-channel.ts` (`channelStep`, `maySecretPrompt`, `secretOutcome`), `test/local-channel.test.ts`
 - **Scenarios:** SCN-053
 - **Resources:** local channel specification, Secret requests

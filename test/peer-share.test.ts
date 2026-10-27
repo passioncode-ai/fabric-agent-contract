@@ -89,6 +89,13 @@ describe("commit, reveal and the comparison code", () => {
       expect(peerCommit(c.sender)).toEqual({ ok: true, commit: c.senderCommit });
     }
   });
+  it("names what is wrong with a side or a commitment", () => {
+    const c = (vectors.codes as Json[]).find((v) => v.expect.ok === true)!;
+    expect(peerCommit("side")).toEqual({ ok: false, problem: "malformed" });
+    expect(peerCommit({ ...c.sender, role: "witness" })).toEqual({ ok: false, problem: "bad-role" });
+    expect(peerCommit({ ...c.sender, shareId: "NOT-AN-ID" })).toEqual({ ok: false, problem: "bad-share" });
+    expect(checkedPeerCode("sha256:short", c.sender, c.recipientCommit, c.recipient)).toEqual({ ok: false, problem: "malformed" });
+  });
 });
 
 describe("one attempt per link", () => {
@@ -127,6 +134,17 @@ describe("the envelope", () => {
     // A life inside one second is no life once the header carries whole seconds.
     const within = new Date("2026-10-27T09:59:00.100Z");
     expect(() => sealPeerShare({ recipientKem: key("rKem").jwk, signer: { sig: key("sSig").jwk, privateKey: priv("sSig") }, shareId, sequence: 1, iat: within, exp: new Date(within.getTime() + 800), plaintext: Buffer.from("v"), slot: "OPENROUTER_API_KEY", provider: "openrouter" })).toThrow(/lifetime-too-long/);
+    // The signer's key must be a P-256 private key; the recipient's share #kem a P-256 public JWK.
+    const { createPublicKey, generateKeyPairSync } = await import("node:crypto");
+    const base = { recipientKem: key("rKem").jwk, shareId, sequence: 1, iat, exp: new Date(iat.getTime() + 1000), plaintext: Buffer.from("v"), slot: "OPENROUTER_API_KEY", provider: "openrouter" };
+    expect(() => sealPeerShare({ ...base, signer: { sig: key("sSig").jwk, privateKey: generateKeyPairSync("ed25519").privateKey } })).toThrow(/bad-key/);
+    expect(() => sealPeerShare({ ...base, signer: { sig: key("sSig").jwk, privateKey: createPublicKey(priv("sSig")) } })).toThrow(/bad-key/);
+    expect(() => sealPeerShare({ ...base, signer: { sig: { ...key("sSig").jwk, x: "x" } as never, privateKey: priv("sSig") } })).toThrow(/bad-key/);
+    expect(() => sealPeerShare({ ...base, recipientKem: { ...key("rKem").jwk, y: key("rKem").jwk.x } as never, signer: { sig: key("sSig").jwk, privateKey: priv("sSig") } })).toThrow(/bad-key/);
+    // Marks that do not read, and a refusal the opener passes on.
+    expect(checkPeerShareEnvelope(env, { ...ctx, marks: [{ shareId, slot: "OPENROUTER_API_KEY", sequence: 1 }] })).toEqual({ ok: false, refusal: "malformed" });
+    expect(checkPeerShareEnvelope(env, { ...ctx, marks: "none" })).toEqual({ ok: false, refusal: "malformed" });
+    expect(openPeerShare(env, { ...ctx, revoked: true }, scalar("rKem"))).toEqual({ ok: false, refusal: "revoked" });
   });
 });
 

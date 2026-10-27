@@ -121,7 +121,9 @@ the vault slot itself.
 - **SP-3. One client.** The node sends a request to one session `maySecretPrompt` admits (a signed app that declared
   `secret.ui`), never to every one. With none connected the node may start its signed app through its lifecycle
   broker and prompt it once it is admitted, within the request's deadline; when none is admitted by then, or on a
-  machine with no desktop session, the request is answered `no-client` and nothing is shown by anyone.
+  machine with no desktop session, the request is answered `no-client` and nothing is shown by anyone; the agent then
+  tells the person to put the value in with the vault's own command in their shell. A request withdrawn with
+  `secret.cancel` reads `no-answer` to the agent unless an answer came first.
 - **SP-4. No value on the channel.** The prompt and its result carry no value, in either direction. The app writes the
   value into the slot in its own process; the value never crosses the channel or another process boundary, and is in
   no argument, environment variable, log, notification or result. The node reads each answer against

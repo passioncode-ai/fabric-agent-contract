@@ -826,7 +826,7 @@ flowchart TD
 - **Goal:** the recipient's node holds the value sealed to its share key, the sender reads its use, and the sender can end it
 - **Entry points:** the sender's "Share" on a vault slot; the recipient's "Open a share"; the sender's "Take back"
 - **Success exit:** the value opens only on the recipient's machine for the share's key; reports arrive; after "Take back" the mailbox refuses and the provider has revoked or rotated the key
-- **Task analysis:** the sender's node makes the share's keys and the link → the person sends the link → the recipient accepts and its node claims (keys, MAC, commitment) → the sender's node checks the MAC and commits → both reveal → both apps show the code and the people compare it → the sender confirms and its node seals the envelope → the recipient's node renews its lease and opens the value at each use, sending reports → the sender takes it back: a signed revocation, the mailbox refusing, the recipient's deletion receipt, the provider's revocation or rotation.
+- **Task analysis:** the sender's node makes the share's keys and the link → the person sends the link → the recipient accepts and its node claims (keys, MAC, commitment) → the sender's node checks the MAC and commits → both reveal → both apps show the code and the people compare it → the sender confirms, or chooses to share without comparing (recorded `confirmed: false`), and its node seals the envelope → the recipient's node renews its lease and opens the value at each use, sending reports → the sender takes it back: a signed revocation, the mailbox refusing, the recipient's deletion receipt, the provider's revocation or rotation.
 - **Rejected shape:** the value pasted into a chat, or held by the cloud under a key the cloud also holds, rejected because the sender could stop neither and a breach of the cloud would be a breach of the key (DEC-0142).
 - **Flow:**
 
@@ -843,6 +843,8 @@ flowchart TD
   V -->|complete| S{The codes match?}
   S -->|no, an abort| B
   S -->|yes, the sender confirms| E[Envelope sealed to the recipient's share key]
+  S -->|not compared, the sender shares anyway| F[Sealed, recorded confirmed: false]
+  F --> U
   E --> U[Recipient opens it at each use under a live lease and sends reports]
   U --> T{Take back}
   T --> R[Revocation: the mailbox refuses; the recipient deletes and sends a receipt]
@@ -864,10 +866,12 @@ flowchart TD
 ```mermaid
 flowchart TD
   Q[Agent asks the node for a slot] --> C{A signed app with secret.ui connected?}
-  C -->|no, or no desktop| X[no-client: the person's step is to put the value in their own shell]
+  C -->|no| L{The node starts its signed app through its broker; admitted before the deadline?}
+  L -->|yes| P
+  L -->|no, or no desktop| X[no-client: the person's step is to put the value in their own shell]
   C -->|yes| P[secret.prompt to that one app]
   P --> W{The person answers before the deadline?}
-  W -->|no| Z[no-answer]
+  W -->|no, or the agent withdrew it| Z[no-answer]
   W -->|declines| D[declined]
   W -->|stores| S{The node sees the slot written after the prompt?}
   S -->|yes| O[stored]

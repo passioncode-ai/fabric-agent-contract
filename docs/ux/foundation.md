@@ -151,7 +151,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Personas:** P-02
 - **Type:** functional
 - **Forces:** push: keys pasted into chats and messengers, no idea who still holds them, agents asking for tokens in a chat; pull: a link and a six-digit code, a count of uses, one button to take it back; anxiety: a cloud or a stranger catching the link, a copy outliving the share, a window an agent drew to look like the real one; habit: sending the key itself.
-- **Success metric:** a shared value opens only on the recipient's machine for the share's key, after the two people compared one code (or after the sender chose to share without comparing, shown as not confirmed); the sender sees uses per day and takes the share back in three steps, each shown with what confirmed it; a secret an agent asked for is stored without the value ever reaching the agent, a chat or a log.
+- **Success metric:** a shared value opens only on the recipient's machine for the share's key, after the two people compared one code; a share the sender chose to seal without comparing is shown as not confirmed, with the risk that whoever claimed first holds it; the sender sees uses per day and takes the share back in three steps, each shown with what confirmed it; a secret an agent asked for is stored without the value ever reaching the agent, a chat or a log.
 
 ## 3. Customer journeys
 
@@ -700,7 +700,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given a service that declares an action `relayed`, when my agent calls its tool from my machine with my decision naming the action and quoting me, then the service takes it as my decision and its audit names the agent it authenticated (`actionDecision`, DEC-0121).
   - Given my agent calls without my decision, when the service answers `operator-decision-required`, then the agent asks me and calls again with my answer quoted.
-  - Given a step only I can take (a sign-in, a consent, a payment, a secret, a passkey signature, spend above a limit), when my agent calls it, then the service answers `human-step-required` with the link to that step.
+  - Given a step only I can take (a sign-in, a consent, a payment, a secret, a passkey signature, spend above a limit, a comparison of codes with another person), when my agent calls it, then the service answers `human-step-required` with the link to that step.
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
@@ -746,7 +746,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-039: Share a key with another person's machine, see its use, take it back
 
-- **Story:** As P-02, I want to share one key with another person's estate by a link and a code we compare, read how it is used, and take it back, so that the key reaches only their machine and I know when it no longer works.
+- **Story:** As P-02, I want to share one key with another person's estate by a link and a code we compare, read how it is used, and take it back, so that, once we compared the code, the key reaches only their machine and I know when it no longer works.
 - **Traces:** JTBD-15, JRN-14/#1, JRN-14/#2, JRN-14/#3
 - **Acceptance criteria:**
   - Given a share, when my node writes its link, then the link carries a one-time code and my share key's fingerprint in its fragment and no value (`shareLink`, `parseShareLink`).
@@ -760,7 +760,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-040: Give an agent a secret in my own app's window, never in a chat
 
-- **Story:** As P-02, I want an agent's request for a secret to reach only my product's signed app, which shows my own mark and writes the value into my vault itself, so that the agent never sees the value and, where the app's store hides the mark from other programs (macOS), I can tell its window from a lookalike.
+- **Story:** As P-02, I want an agent's request for a secret to reach only my product's signed app, which shows my own mark and writes the value into my vault itself, so that the agent never sees the value and I can tell its window from a lookalike, both where the operating system keeps other programs out of the app (macOS); on Windows another program of mine can reach into the app, so the promise is weaker there.
 - **Traces:** JTBD-15, JRN-14/#4
 - **Acceptance criteria:**
   - Given a client that declares `secret.ui`, when the node has not verified it as its product's signed app by the operating system, then its hello is `forbidden` (`channelStep`).

@@ -529,8 +529,9 @@ export function openPeerReport(value: unknown, ctx: unknown, ownKemPrivateKey: B
 
 /**
  * Whether a signed record stands: a `peer-share-revocation/1` the sender's share `#sig` signed, or a
- * `peer-share-deletion/1` the recipient's share `#sig` signed naming the revocation it answers by digest; `sig` is
- * ES256 over the RFC 8785 bytes of the record without `sig`. `signer` is the thumbprint of the key given.
+ * `peer-share-deletion/1` the recipient's share `#sig` signed, naming a revocation by `peerDigest` of the signed
+ * revocation; `sig` is ES256 over the RFC 8785 bytes of the record without `sig`. `signer` is the thumbprint of the key
+ * given. Which revocation a receipt answers is not checked here: the sender's node compares the digest with its own.
  */
 export function peerRecordStands(record: unknown, type: typeof PEER_REVOCATION_TYPE | typeof PEER_DELETION_TYPE, shareId: unknown, signerSig: unknown): { ok: true } | { ok: false; reason: "malformed" | "wrong-share" | "bad-key" | "bad-signature" } {
   const members = type === PEER_REVOCATION_TYPE ? ["type", "shareId", "at", "signer", "sig"] : ["type", "shareId", "at", "revocation", "signer", "sig"];

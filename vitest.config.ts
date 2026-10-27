@@ -80,7 +80,7 @@ export default defineConfig({
         "src/signing-challenges.ts": { branches: 100 },
         "src/protocol-revisions.ts": { branches: 100 },
         "src/local-channel.ts": { branches: 100 },
-        "src/peer-share.ts": { branches: 97.1 },
+        "src/peer-share.ts": { branches: 99.27 },
         "src/session-join.ts": { branches: 100 },
         "src/app-descriptor.ts": { branches: 100 },
         "src/feed-data.ts": { branches: 100 },

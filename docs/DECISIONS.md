@@ -8348,7 +8348,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-27
 - **Status:** Accepted (on merge of its pull request). Additive: new schemas (`peer-share-frame/1`,
   `fabric-peer-share-envelope/1`, `fabric-peer-share-report/1`, `peer-share-revocation/1`, `peer-share-deletion/1`) and
-  a named profile, `fabric-peer-share/1`; no existing schema, vector or rule changes. Consumer adoption: Project
+  a named profile, `fabric-peer-share/1`; and one widening: `humanStep` gains `comparison` in
+  `service-actions-extension.schema.json` and `delegation-refusal.schema.json`, which a reader pinned before refuses, and
+  `actions.json` gains one case. Consumer adoption: Project
   Observatory's engine replaces its own `observatory-share-envelope/1` with this profile at its next pin (CT-186).
 - **Context:** Project Observatory asked (board request `c50f590b`, thread `faa32585`; its row OBS-262; its design
   `docs/design/PERSON-SURFACES.md` at `b0bb0abd`, D2, D3, D8) for a person-to-person share profile, for the operator's
@@ -8380,7 +8382,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   9. Taking back in three steps, the mailbox's refusal, the recipient's signed deletion receipt and the provider's
      revocation or rotation, "taken back" only with the first observed and the third confirmed, and a copy stated as
      ended only by the provider (PS-9).
-  10. The mailbox carries and holds and decides nothing, under DEC-0056's request signing; its HTTP routes and its name
+  10. The mailbox decides nothing about a value or whom the sender trusts: it carries the frames and sealed messages,
+      runs the exchange verdict, grants leases and refuses after a revocation, under DEC-0056's request signing; its HTTP routes and its name
       are the product's, so two products also need the mailbox's routes in common until a decision fixes them (PS-10,
       CT-185).
 - **Why:** sharing between two people has no organization to issue under, so its trust has to come from what the two

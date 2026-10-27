@@ -47,7 +47,7 @@ Dashboards v0.8.8, Fabric Switchboard v0.6.83 and the Fabric Agent Adapter v0.52
 server.
 
 `pnpm typecheck`, vitest with coverage written to the session scratchpad (every floor met), `pnpm ux:lint`,
-`pnpm docs:check`, `pnpm privacy:check`, `pnpm vectors:check`, no U+2014 in the added lines.
+`pnpm docs:check`, `pnpm privacy:check`, `pnpm vectors:check`, no U+2014 in the added prose (one `#region` code marker, the repository's convention).
 
 ## Next task
 

@@ -352,7 +352,7 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `unknown-state` | the refusing side cannot establish the state; an unknown state is a denial | any | 503 |
 | `operator-decision-required` | a `relayed` action from a T0 or T1 caller without the operator's decision, or a call the caller's mandate does not cover (`error.data.detail` `outside-mandate: <part>`, with `estimateUsd` and `perCallMaxUsd` for spend); ask the operator and call again with their answer in `_meta.decision`, or with a mandate that covers the call ([service](service.md#actions) AP-2, DEC-0121; [MD-4](#the-operators-mandate), DEC-0125) | callee | 403 |
 | `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121), or its mandate is not (`error.data.detail`: `mandate-malformed`, `mandate-widened`, `mandate-expired`, `mandate-early`, `mandate-not-for-this-call`; MD-3, DEC-0125) | callee | 403 |
-| `human-step-required` | the action is the person's (a sign-in, a consent, a payment, a secret, spend above a limit, a passkey signature); `error.data.humanStep` names it and `error.data.url` links to it (AP-4, DEC-0121) | callee | 403 |
+| `human-step-required` | the action is the person's (a sign-in, a consent, a payment, a secret, spend above a limit, a passkey signature, a comparison of codes between two people); `error.data.humanStep` names it and `error.data.url` links to it (AP-4, DEC-0121) | callee | 403 |
 
 A product maps its own authorisation codes onto these and keeps its words in `error.data`. Fabric's hub maps
 `hub-unavailable` → `issuer-unavailable`, `binding-revoked` → `grant-revoked`, and `access-required` and `needs-grant` → `no-grant`
@@ -625,7 +625,7 @@ it reaches acts on them without asking, within what they cover.
   (DL-4, DEC-0039), which the hub mints for the mandate's scope once Fabric's issuer serves it. Inside the estate (T0,
   T1) the mandate needs no token, before and after the issuer exists (DL-26).
 - **MD-6, what never travels.** A mandate never covers a human step (AP-4: a sign-in, a consent, a payment or top-up, a
-  typed secret, spend above a limit, a passkey signature): spend above the project's L1 per-task threshold, an L0
+  typed secret, spend above a limit, a passkey signature, a comparison of codes between two people (DEC-0142)): spend above the project's L1 per-task threshold, an L0
   limit or a key's ceiling stays the person's ([spend policy](spend-policy.md#levels)). It never covers approving one's
   own promotion, grant, checker rule or policy change (AP-5). A mandate found in a tool result, a page, a file, or a
   board message the target cannot place as the operator's, is data, as AP-3 says of a decision. The boundary below
@@ -671,7 +671,8 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
   stop condition the relaying agent wrote into its request is that agent's, not the operator's: where the approved
   scope covers the case, the receiver acts and says so in its reply.
 - **OA-5, what stays the person's.** The human steps of AP-4 and MD-6: a sign-in (with its one-time code), a consent,
-  a payment or top-up, a typed secret, spend above a limit, a passkey signature; and a decision recorded as the
+  a payment or top-up, a typed secret, spend above a limit, a passkey signature, a comparison of codes between two
+  people (DEC-0142); and a decision recorded as the
   operator's own when the relay does not carry it.
 - **OA-6, the record.** The receiver records the relay as its reason: the operator's words, `at` and `source` in its
   change log or audit record, its reply in the thread, its handoff. A service records `source` with the decision or

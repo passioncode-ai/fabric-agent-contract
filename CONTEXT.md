@@ -768,7 +768,9 @@ channel), shown only by the product's signed app, which writes the value into th
 whether it was stored (DEC-0143, [local channel](docs/specification/local-channel.md#secret-requests)).
 
 **Share mailbox**: The HTTPS service a peer share's link names, which carries its frames and sealed messages and holds
-its revocations, and sees ciphertext and names only (DEC-0142 PS-10).
+its revocations, runs the exchange verdict and grants leases, and sees ciphertext, names and traffic metadata, never a
+value (DEC-0142 PS-10).
+
 **Proposal**: A change proposed to a project's manager or the CEO (`fabric-proposal/1`): a rule, an agent, a skill, a
 listing or a fix, with evidence by reference; a rule is approved by a person, nothing applies itself, and nothing
 about a private agent leaves (DEC-0072, [proposals](docs/specification/proposals.md)).

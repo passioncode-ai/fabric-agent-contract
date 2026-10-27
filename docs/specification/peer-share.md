@@ -68,7 +68,7 @@ DEC-0040 (FL-1 to FL-6); no claim code is ever put in a `fabric://` link.
 After the person accepts on the recipient's side, the recipient's node sends a claim frame (`peer-share-frame/1`,
 `step: "claim"`): its share keys, its commitment (PS-6) and `mac`, HMAC-SHA-256 keyed with the code's 16 bytes over the
 UTF-8 RFC 8785 form of `{type: "fabric-peer-claim/1", shareId, keys, fpr}` (`claimMac`). The sender's node checks the
-MAC (`claimHolds`, constant time); the mailbox relays the claim and checks nothing.
+MAC (`claimHolds`, constant time); the mailbox relays the claim and checks no MAC.
 
 The MAC filters claims to those of a link's holder. **It authenticates nothing against the mailbox:** the landing page
 is the mailbox's script and can read the code, so a mailbox, or anyone who read the link first, can claim with keys of
@@ -97,7 +97,8 @@ before either reveals:
 4. The two people compare the codes by a call or a thread they already trust. After the exchange completes, the
    sender's node seals nothing until the sender either confirms they match or chooses "Share without comparing"; the
    second seals to a key nobody confirmed (trust on first use), and the sender's screen records the share as
-   `confirmed: false` and says so. Both are the person's own acts: each is declared with `gate: human` and `humanStep:
+   `confirmed: false` and says so: whoever claimed first may hold the value, and when the link went through the
+   mailbox's page nothing checked the recipient. Both are the person's own acts: each is declared with `gate: human` and `humanStep:
    comparison` (DEC-0121 AP-4), so the agent's tool for it answers `human-step-required` with the link to the screen,
    and no agent can confirm a code or skip the comparison for the person. The product declares its other buttons under
    DEC-0121 too; "They differ" and the recipient's "Decline" only stop a share.
@@ -111,7 +112,7 @@ reveal that does not open its commitment (`commit-mismatch`), an abort before co
 another shape (`malformed`), or the claim deadline passing before completion (`expired`). A frame of another share or another shape is `malformed` wherever it comes, before any other
 reason. A commit that reflects the claim's own keys is not a burn of the verdict: it stops at the code, which
 `checkedPeerCode` refuses as `same-keys`, so nothing is sealed. A node keeps the first burnt verdict it reaches and reads the share no further: the verdict carries no arrival times, so `expired` holds only for a
-node that kept it. Once the sender has confirmed, the exchange is over: the nodes and the mailbox read no further exchange frames for the
+node that kept it. Once the sender has confirmed or shared without comparing, the exchange is over: the nodes and the mailbox read no further exchange frames for the
 share, so a late frame burns nothing that is already sealed. A burnt exchange seals nothing. A new attempt is a new share, with a new id and a new code, that
 the sender makes. The recipient's app reveals a nonce for a share id once and never again, so a mailbox posing as the
 sender cannot rerun the recipient's side for fresh codes.
@@ -194,8 +195,9 @@ Started in this order, each step shown with what confirmed it:
    then on, observed by the sender against the mailbox.
 2. **The recipient deletes.** At its next contact the recipient's node learns the revocation, deletes the share's
    ciphertexts and lease, and returns `peer-share-deletion/1` (`{type, shareId, at, revocation, signer, sig}`, signed by
-   the recipient's share `#sig`, naming the revocation by digest), reported by the recipient's machine.
-   `peerRecordStands` checks either record against the key that signs it.
+   the recipient's share `#sig`, naming the revocation by `peerDigest` of the signed revocation, `sig` included), reported
+   by the recipient's machine. `peerRecordStands` checks either record's shape and signature against the key that signs
+   it; which revocation a receipt answers the sender's node compares with the digest of the revocation it sent.
 3. **The provider ends it.** A value that reached another machine can have been copied by that machine's owner (from a
    running process's environment, or by a modified client). Stopping service ends access through the recipient's node;
    it does not unlearn a copy. Only the provider ends a copied value's power: a key minted for the share is revoked at
