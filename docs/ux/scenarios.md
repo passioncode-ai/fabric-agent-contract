@@ -744,9 +744,9 @@ independent agent author and P-02 project operator.
 - **Feature:** project-board
 - **Traces:** ST-020, FLW-16 (JTBD-09, JRN-08/#5)
 - **Entry point:** the host's view of `project-b`'s sessions, where session `s-1` is the holder of `project.work` (the main one) and `s-2` is live
-- **Preconditions:** `s-2` is authorized to respond for `project.work` and runs a client that hears the move through its host's session surface and learns there the ids of the slot's accepted requests, writing its own checkpoint for them; the operator owns `project-b`; the slot carries one `accepted` request and one `in_progress` request of `s-1`
+- **Preconditions:** `s-2` is authorized to respond for `project.work` and runs a client that hears the move through its host's session surface and learns there the ids of the slot's accepted requests, writing its own checkpoint for them (a host's part owed by CT-175); the operator owns `project-b`; the slot carries one `accepted` request and one `in_progress` request of `s-1`
 - **Steps:**
-  1. The operator chooses to make `s-2` the main session -> the host shows the slot's work first: one accepted, one in progress, and that the accepted one waits for `s-2` and the in-progress one becomes unknown.
+  1. The operator chooses to make `s-2` the main session -> the host shows the slot's work first: one accepted, one in progress, and that the accepted one is kept until `s-2` continues it or the requester cancels it and the in-progress one becomes unknown.
   2. The operator confirms -> the host moves the slot from the generation the operator saw: `s-2` is the holder of `project.work`, the in-progress request reads `outcome_unknown`, the accepted one is kept (C4), and `s-1`'s next fenced call is `fenced`.
   3. `s-2` replaces itself with a transfer of the accepted request and its own checkpoint, before it claims anything -> it continues that request under a new attempt.
   4. The in-progress request stays `outcome_unknown` until `s-2` observes its outcome and reconciles it; if only `s-1` could observe it, the owner may settle it once the slot is `absent`, or `stale` with no current enrollment (owner settlement, CT-175).

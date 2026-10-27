@@ -131,7 +131,7 @@ always-on machine, never a machine's `#sig` key (the operator's NET-3, DEC-0084)
 **Action parity**: Every action a service's dashboard, app or page lets a person take has a tool on the service's
 agent surface with the same effect, checks and audit record, declared in its well-known document under
 `extensions/actions/0.1` with its `gate` (`none`, `relayed` or `human`); an action offered only on a page is
-nonconformant. `FAC-SEM-142` checks the declared actions (a button whose tool the MCP surface does not serve); a host
+nonconformant (except the operator's move of a board slot, a host control until a host ships its twin, DEC-0140 PR-2). `FAC-SEM-142` checks the declared actions (a button whose tool the MCP surface does not serve); a host
 reports a dashboard that declares none (CT-126) ([service](docs/specification/service.md#actions) AP-1, DEC-0121).
 
 **Relayed decision**: The operator's decision on one action an agent carries in a call's `_meta.decision`

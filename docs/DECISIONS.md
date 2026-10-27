@@ -4488,6 +4488,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-13):** amended by DEC-0080: for a finding the hold check comes before dedupe, so a dedupe hit into a held thread answers `held` and stores nothing.
 - **Amends:** DEC-0022 and DEC-0073 (one refusal code, one optional member in `com.status` and in the directory; no
   tool, argument, state or transition changes).
+- **Annotated (2026-10-27):** amended by DEC-0140: the operator's move of a slot is refused `held` where
+  `com.responder_replace` is (a row of the hold table).
 - **Decision:** in [project communication](specification/project-comms.md#holds) —
   1. **The refusal.** `held` joins `comms-common.schema.json#/$defs/refusalCode`. It is always `retryable: true`
      (`comms-refusal.schema.json` refuses it with `false`). Its message is one sentence that says the operator resumes
@@ -7202,7 +7204,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted (2026-10-24). AP-3 extended by DEC-0125 (2026-10-26): a mandate handed on carries the operator's words from another agent. Extended by DEC-0126 (2026-10-26): a relay OA-2 and OA-3 accept carries them too. Additive on the wire (a new extension key, an optional `_meta` member and the
   sealed call's `decision`); a behaviour rule a service adopts at its next pin. Consumer adoption: CT-124 to CT-127.
 - **Annotated (2026-10-27):** DEC-0140 makes one exception to AP-1: the operator's move of a board slot is offered in
-  the host's controls only until its agent twin's conditions land (CT-125).
+  the host's controls only until a host ships its agent twin (CT-181, the twin's contract half, then CT-125).
 - **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
   does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
   DL-26 already says that inside the machine boundary the operator's instruction is the authority and that a callee
@@ -8328,10 +8330,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   would bar the same agent's other terminals); a client rule to recover only at the generation its checkpoint recorded
   (released clients replace at the generation `com.status` shows, which the replace schema tells them to, so it would
   be a second narrowing no released client meets; it is the clients' own improvement, CT-175); a session role that grants a slot (a claim would become authority).
-- **Compatibility:** additive, with the one narrowing named in Status. `contractVersion` stays `0.1.0`.
+- **Compatibility:** additive, with the one narrowing named in Status, and one relaxation confined to an action this
+  decision creates: AP-1's parity does not bind the operator's move until a host ships its twin (no released host
+  offers the move, Fabric `v0.3.13` having none, and FAC-SEM-142's readers see only declared actions). It follows
+  the operator's rule of 2026-10-24 that where an agent has no door yet, a backlog row is filed (CT-181, CT-125). `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/project-comms.md` (header, C4's wording, Owner settlement's paths, PR-1 to PR-3, the hold
   table), `conformance.md` (a row), `interop.md` (the reserved name), `service.md` (AP-1's exception for the move), `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder,
   Session role), `src/comms-hold.ts` (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`, `docs/ux/scenarios.md`
-  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022, DEC-0081 and DEC-0121 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176, CT-179 and CT-181 (filed); the handoff
+  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022, DEC-0079, DEC-0081 and DEC-0121 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176, CT-179, CT-181 and CT-182 (filed); the handoff
   `docs/handoffs/2026-10-26-simple-fabric-decisions.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-174; Fabric's request `23ba0e97` (thread `6a8d2f9c`).

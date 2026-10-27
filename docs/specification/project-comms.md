@@ -707,13 +707,15 @@ holder to another live
 session of that Project, in the host's operator controls. An agent never moves a slot, on its own account or as a
 relay: the move's agent twin ([service](service.md#actions) AP-1) is owed: its contract half is CT-181, then the host's with the board's other operator controls
 (CT-125), and before a host offers it the twin's decision must bind the slot, the generation and the receiving
-session (AP-2 lets a decision without a `target` cover any object) and no mandate may cover it (an MD-6 entry; both are CT-181). Until then a host
-offers the move in its controls only, an exception to AP-1's parity that DEC-0140 makes for this one control. `com.responder_replace` still takes a slot for its own caller only: its closed
+session (AP-2 lets a decision without a `target` cover any object) and no mandate may cover it (an MD-6 entry; both are CT-181). Until a host ships the twin it
+offers the move in its controls only, an exception to AP-1's parity that DEC-0140 makes for this one control and
+that ends when the twin ships. `com.responder_replace` still takes a slot for its own caller only: its closed
 arguments name no session.
 
 - **One transition, from the generation the operator saw.** The move names the slot's generation the operator's view
   showed, and the host refuses it `revision_conflict` when the slot has moved on since, as `expectedGeneration` refuses
-  a replacement. A retry of the same move with its idempotency key answers the stored result (a rule of the move, DEC-0140, as for every
+  a replacement. A retry of the same move with its idempotency key answers the stored result, after the mover's authorization as for
+  every board write (what makes another move under the same key is CT-181's digest) (a rule of the move, DEC-0140, as for every
   board write that stores a receipt; the move keeps its keys in the Project's own namespace, a family of its own), so a lost answer never reads as a failed move. Otherwise the host applies it atomically, as `com.responder_replace` would for the receiving session:
   the generation goes up by one; a `claimed` request returns to `queued`; an `in_progress` one becomes
   `outcome_unknown` (`lost_result`); an `accepted` one is kept (C4). The move transfers no request, since a transfer
@@ -721,9 +723,10 @@ arguments name no session.
 - **Who may receive it.** A live session of that Project already authorized to respond for that capability, as for
   `com.enroll`, other than the slot's holder; the host refuses any other `not_authorized`, and a move grants nothing.
   The host refuses a mover that is not the owning operator `not_authorized`, and a move of an `absent` slot
-  `invalid_transition` (there is no holder to move from; retrying changes nothing until a session enrolls). The host checks in this order and answers the first that applies: `not_authorized` (the mover, then the receiving
-  session), `held`, `invalid_transition` (absent, `retryable: false`), `revision_conflict`; a reused idempotency key with
-  another move is `idempotency_conflict`. The move answers the board's refusals
+  `invalid_transition` (there is no holder to move from; retrying changes nothing until a session enrolls). The host checks in this order and answers the first that applies: `not_authorized` (the mover); a stored result for
+  the same key (a replay) or `idempotency_conflict` for another move under it, with the epoch's `capacity_exceeded` and
+  `idempotency_window_expired`; `not_authorized` (the receiving session); `held`; `invalid_transition` (absent,
+  `retryable: false`); `revision_conflict`. The move answers the board's refusals
   in `comms-refusal.schema.json`'s shape, `held` staged by the reader's pin as the [holds](#holds) Compatibility says. An `absent` slot is not moved: an authorized session takes it by its own `com.enroll`.
 - **Holds.** A move is refused `held` when the slot or its Project is held, as `com.responder_replace` is.
 - **After the move.** The board's ordinary rules then govern the slot, and a move bars nobody and adds no

@@ -724,7 +724,7 @@ flowchart TD
 - **Entry points:** the operator's chat with their agent; a service's `operator-decision-required`; a job waiting for a choice
 - **Success exit:** the service took the action as the operator's decision, and its audit names the agent that relayed it
 - **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the object when the operator named one, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision.
-- **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121).
+- **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121); the one page-only step is the operator's move of a board slot until its twin ships (DEC-0140, SCN-051).
 - **Flow:**
 
 ```mermaid
