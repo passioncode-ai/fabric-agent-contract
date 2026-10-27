@@ -2326,6 +2326,23 @@
       }
     },
     {
+      "name": "a step named after an Object.prototype member",
+      "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+      "claimDeadline": "2026-11-03T10:00:00Z",
+      "at": "2026-10-27T10:00:00Z",
+      "frames": [
+        {
+          "schema": "peer-share-frame/1",
+          "step": "__defineGetter__"
+        }
+      ],
+      "expect": {
+        "state": "burnt",
+        "reason": "malformed",
+        "index": 0
+      }
+    },
+    {
       "name": "a commit that reflects the claim's own keys: open; the code refuses it",
       "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
       "claimDeadline": "2026-11-03T10:00:00Z",
@@ -3684,6 +3701,104 @@
       }
     },
     {
+      "name": "a share id in the context that does not read",
+      "envelope": {
+        "header": {
+          "type": "fabric-peer-share-envelope/1",
+          "alg": "ES256",
+          "suite": [
+            16,
+            1,
+            1
+          ],
+          "recipient": "gIzibVDCRJZOBx8ZMmM-plOmb7gZMLkTFSyZppnXWqc",
+          "signer": "6FQ6dHA0zvjOeSrGS91a_UtmVZiSB7B8WZ5eTrHFlYE",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "slot": "OPENROUTER_API_KEY",
+          "provider": "openrouter",
+          "sequence": 1,
+          "iat": "2026-10-27T09:59:00Z",
+          "exp": "2026-11-26T09:59:00Z",
+          "enc": "BE1naJwbRbSAgucV84qcSqf7h3foKgh9O3SVJ0W0naY8LFTlBGZ8IS_kChTzJ6yD4R6d0nfEkt6UMi2JDf4opGo"
+        },
+        "ct": "_aHWDplsk3OHZDcNCD6qaHvs4A-8LClXSA1sVsXwYiihN-LIDGbMOrm5ROs",
+        "sig": "hf4qgpNRw8HttRvGbH2JtV_vEL_BzNNRPSdjkALqmJIcj-jpYa0s7-rt96gSM4HOZeXR8wRc6lQq1HK_ShYZDA"
+      },
+      "context": {
+        "at": "2026-10-27T10:00:00Z",
+        "shareId": "xyz",
+        "ownKem": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+          "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+        },
+        "senderSig": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "ZPoT-OGvtIdwz8QBOesU_t_H-P5uy2HsYzRwy8bZH2Y",
+          "y": "5-6SUYwUO9hRAnHAueIYlxVVPR4cmqiXQEjP-Ekcmtk"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
+      "name": "a mark whose slot does not read",
+      "envelope": {
+        "header": {
+          "type": "fabric-peer-share-envelope/1",
+          "alg": "ES256",
+          "suite": [
+            16,
+            1,
+            1
+          ],
+          "recipient": "gIzibVDCRJZOBx8ZMmM-plOmb7gZMLkTFSyZppnXWqc",
+          "signer": "6FQ6dHA0zvjOeSrGS91a_UtmVZiSB7B8WZ5eTrHFlYE",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "slot": "OPENROUTER_API_KEY",
+          "provider": "openrouter",
+          "sequence": 1,
+          "iat": "2026-10-27T09:59:00Z",
+          "exp": "2026-11-26T09:59:00Z",
+          "enc": "BE1naJwbRbSAgucV84qcSqf7h3foKgh9O3SVJ0W0naY8LFTlBGZ8IS_kChTzJ6yD4R6d0nfEkt6UMi2JDf4opGo"
+        },
+        "ct": "_aHWDplsk3OHZDcNCD6qaHvs4A-8LClXSA1sVsXwYiihN-LIDGbMOrm5ROs",
+        "sig": "hf4qgpNRw8HttRvGbH2JtV_vEL_BzNNRPSdjkALqmJIcj-jpYa0s7-rt96gSM4HOZeXR8wRc6lQq1HK_ShYZDA"
+      },
+      "context": {
+        "at": "2026-10-27T10:00:00Z",
+        "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+        "ownKem": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+          "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+        },
+        "senderSig": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "ZPoT-OGvtIdwz8QBOesU_t_H-P5uy2HsYzRwy8bZH2Y",
+          "y": "5-6SUYwUO9hRAnHAueIYlxVVPR4cmqiXQEjP-Ekcmtk"
+        },
+        "marks": [
+          {
+            "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+            "slot": "lower case",
+            "sequence": 1,
+            "digest": "sha256:1d55ee421b3833d6443e5c5c22e9fd62fdddda3aaafc6ea748fe4e747409b5bf"
+          }
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
       "name": "an envelope of exactly 90 days",
       "envelope": {
         "header": {
@@ -4507,6 +4622,48 @@
         },
         "ct": "zSmtw0yVRYao6vP-iakOQ0MzQiISo6Ri1gzkMxj1OqclfMpPVA8iSxewg2HpF-sXuMocoBaYjorf2xbkWge81qWJn1hDKXn0RmNwxBwZQbFknpur1esfwvbs6hsS4rCpYLw6Ad0n26qgJbnqHNsWvS1nS6TuV8FxnDdENRUPHa3jn1cMIdKD_w2dklEM4q-eVTdX_bnc3izGA-POnBs9cp94I55dAs1r0IMW_LYpG-caPDwWGT0itJrmp3lfNIbboeArTQuTo0TkKwOsE8p-u8zM9FD6ekLSwlKAucLdw56i2DnqUthIdw8EsOs",
         "sig": "2Cx-KFWY0lGN07v0lhTc2f0fmZiNYO--OIv17DmBChYpsELRs0kNrqEedUPgb_yN_wPA7X7uA0UujQFtfZpi4g"
+      },
+      "context": {
+        "at": "2026-10-27T10:00:00Z",
+        "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+        "ownKem": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "tclfmsWQIDzgkW_MalbJbWZZuWF_ca-3l6qR6QKuBYw",
+          "y": "po-kQezo1MJ4xNXdFUqlemLpHag-mGmEt5aYBgWq1v8"
+        },
+        "recipientSig": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+          "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "bad-body"
+      }
+    },
+    {
+      "name": "a body with two entries for one day and slot",
+      "report": {
+        "header": {
+          "type": "fabric-peer-share-report/1",
+          "alg": "ES256",
+          "suite": [
+            16,
+            1,
+            1
+          ],
+          "recipient": "dLqwsZ1lyEB70VOmFzD4-uRdRix5XTdwBH0wXzGC5fM",
+          "signer": "XbqsqXRCEqFDKxIhCNk-5YRTX1XtW8a08-pvb9uTH20",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "sequence": 1,
+          "iat": "2026-10-27T09:59:00Z",
+          "enc": "BDT62ncDgX6rrWcgbWCv-g4lprHKq5uGnJWq0S1gwfQgXOo5TMm5AOnNrrcqZnuKmpKK3hB6HQAJQK7NJKSka2g"
+        },
+        "ct": "Mfw_bFpYL_9utY2qCo6iw3f_prq6AmeZVi04pYgwYpze_6-7slQib8z47jAyS1spDRWqNdbbFtWMQvez1qGDoe5WbPY8_qy-0-NA31hfLJtcq1HtjBQGvXQIskCTqoGsufjD_x5dBt4rWxWucXzlyfxNJaspgSIsPwujUlnbiJXVYAZUhJQiMHIs4FBvrQCXtItXkcdNW3Xowj53jKzIHuDsy-w5eiB__e3SCtcC8L5yPhHWIFAF8MVM2UC6HoG-j4aQniREkLakvMpnPZgC3-AgV5oFUPU7HWJa_8kktLLMTK87WpCsE8jJIjEBrNzbcX5dp9DOpmhNZbQOhDtkWbDYofASPo7282U1WUChgqRdiXqhyo9rcz3tc4n-eHHJqg",
+        "sig": "sLtGUgJ0YElWEobg2xw_pPmfhItDjtHWPHp_LxdVKVgNqqXYo__gqAxH6MJxQquTLHFGmLemI8IgmlS5EBqTGw"
       },
       "context": {
         "at": "2026-10-27T10:00:00Z",

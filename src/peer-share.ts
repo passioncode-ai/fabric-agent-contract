@@ -164,7 +164,8 @@ const FRAME_MEMBERS: Record<string, readonly string[]> = {
 /** A `peer-share-frame/1` of one step with the members `peer-share-frame.schema.json` gives it, or undefined. */
 export function peerFrame(value: unknown): PeerFrame | undefined {
   if (!isObject(value) || value.schema !== PEER_FRAME_SCHEMA || !isString(value.step)) return undefined;
-  const members = FRAME_MEMBERS[value.step];
+  // An own key only: a step named after an Object.prototype member is no step.
+  const members = Object.hasOwn(FRAME_MEMBERS, value.step) ? FRAME_MEMBERS[value.step] : undefined;
   if (members === undefined || !exactly(value, members) || !isString(value.shareId) || !SHARE_ID.test(value.shareId)) return undefined;
   if ((value.step === "claim" || value.step === "commit") && (!peerKeys(value.keys) || !isString(value.commit) || !COMMIT.test(value.commit))) return undefined;
   if (value.step === "claim" && (!isString(value.mac) || !BYTES32.test(value.mac))) return undefined;
@@ -404,7 +405,7 @@ function marksRead(marks: unknown): marks is PeerMark[] | undefined {
   if (!Array.isArray(marks)) return false;
   const keys = new Set<string>();
   for (const mark of marks) {
-    if (!isObject(mark) || !exactly(mark, ["shareId", "slot", "sequence", "digest"]) || !isString(mark.shareId) || !isString(mark.slot) || !counter(mark.sequence) || !isString(mark.digest) || !DIGEST.test(mark.digest)) return false;
+    if (!isObject(mark) || !exactly(mark, ["shareId", "slot", "sequence", "digest"]) || !isString(mark.shareId) || !SHARE_ID.test(mark.shareId) || !isString(mark.slot) || !SLOT.test(mark.slot) || !counter(mark.sequence) || !isString(mark.digest) || !DIGEST.test(mark.digest)) return false;
     const key = `${mark.shareId}\u0000${mark.slot}`;
     if (keys.has(key)) return false;
     keys.add(key);
@@ -425,7 +426,7 @@ export function checkPeerShareEnvelope(value: unknown, ctx: unknown): { ok: true
   if (!peerSealedShape(value, PEER_ENVELOPE_TYPE) || !isObject(ctx)) return no("malformed");
   const at = instant(ctx.at);
   // A revocation flag that does not read fails closed, as marks and the clock do.
-  if (at === undefined || !marksRead(ctx.marks) || !isString(ctx.shareId) || !peerJwk(ctx.ownKem) || !peerJwk(ctx.senderSig) || (ctx.revoked !== undefined && typeof ctx.revoked !== "boolean")) return no("malformed");
+  if (at === undefined || !marksRead(ctx.marks) || !isString(ctx.shareId) || !SHARE_ID.test(ctx.shareId) || !peerJwk(ctx.ownKem) || !peerJwk(ctx.senderSig) || (ctx.revoked !== undefined && typeof ctx.revoked !== "boolean")) return no("malformed");
   const h = value.header;
   if (h.alg !== ALG) return no("unsupported-alg");
   if (h.shareId !== ctx.shareId) return no("wrong-share");
@@ -467,7 +468,8 @@ const AGENT_NAME = /^[A-Za-z0-9][A-Za-z0-9 ._:@/-]{0,127}$/;
 /**
  * A report's body (`peer-share-report.schema.json#/$defs/body`): per slot and UTC day the uses the recipient's node
  * counted, the last use, the consumer labels (agent names from its journal) and the exports made with the export
- * button; never a value, a command, an argument or an output. At most 400 entries in each list.
+ * button; never a value, a command, an argument or an output. At most 400 entries in each list, and one day entry per
+ * date and slot.
  */
 export function peerReportBody(value: unknown): boolean {
   if (!isObject(value) || !exactly(value, ["days", "consumers", "exports"])) return false;
@@ -476,7 +478,9 @@ export function peerReportBody(value: unknown): boolean {
     && isString(entry.slot) && SLOT.test(entry.slot) && Number.isSafeInteger(entry.uses) && (entry.uses as number) >= 0 && (entry.lastUse === null || instant(entry.lastUse) !== undefined);
   const consumer = (entry: JsonObject) => exactly(entry, ["slot", "agent"]) && isString(entry.slot) && SLOT.test(entry.slot) && isString(entry.agent) && AGENT_NAME.test(entry.agent);
   const exported = (entry: JsonObject) => exactly(entry, ["slot", "at"]) && isString(entry.slot) && SLOT.test(entry.slot) && instant(entry.at) !== undefined;
-  return list(value.days, day) && list(value.consumers, consumer) && list(value.exports, exported);
+  if (!list(value.days, day) || !list(value.consumers, consumer) || !list(value.exports, exported)) return false;
+  const keys = (value.days as JsonObject[]).map((entry) => `${entry.date as string}\u0000${entry.slot as string}`);
+  return new Set(keys).size === keys.length;
 }
 
 export type PeerReportRefusal = "malformed" | "unsupported-alg" | "wrong-share" | "wrong-recipient" | "bad-key" | "bad-signature" | "replayed" | "not-yet-valid" | "cannot-open" | "bad-body";
@@ -493,7 +497,7 @@ export function checkPeerReport(value: unknown, ctx: unknown): { ok: true; seque
   const no = (refusal: PeerReportRefusal) => ({ ok: false as const, refusal });
   if (!peerSealedShape(value, PEER_REPORT_TYPE) || !isObject(ctx)) return no("malformed");
   const at = instant(ctx.at);
-  if (at === undefined || !isString(ctx.shareId) || !peerJwk(ctx.ownKem) || !peerJwk(ctx.recipientSig) || (ctx.lastSequence !== undefined && !(Number.isSafeInteger(ctx.lastSequence) && (ctx.lastSequence as number) >= 0))) return no("malformed");
+  if (at === undefined || !isString(ctx.shareId) || !SHARE_ID.test(ctx.shareId) || !peerJwk(ctx.ownKem) || !peerJwk(ctx.recipientSig) || (ctx.lastSequence !== undefined && !(Number.isSafeInteger(ctx.lastSequence) && (ctx.lastSequence as number) >= 0))) return no("malformed");
   const h = value.header;
   if (h.alg !== ALG) return no("unsupported-alg");
   if (h.shareId !== ctx.shareId) return no("wrong-share");
@@ -537,7 +541,7 @@ export function peerRecordStands(record: unknown, type: typeof PEER_REVOCATION_T
   const members = type === PEER_REVOCATION_TYPE ? ["type", "shareId", "at", "signer", "sig"] : ["type", "shareId", "at", "revocation", "signer", "sig"];
   if (!isObject(record) || record.type !== type || !exactly(record, members) || !isString(record.shareId) || !SHARE_ID.test(record.shareId) || instant(record.at) === undefined
     || !isString(record.signer) || !BYTES32.test(record.signer) || !isString(record.sig) || !SIG.test(record.sig)
-    || (type === PEER_DELETION_TYPE && (!isString(record.revocation) || !DIGEST.test(record.revocation))) || !isString(shareId) || !peerJwk(signerSig)) return { ok: false, reason: "malformed" };
+    || (type === PEER_DELETION_TYPE && (!isString(record.revocation) || !DIGEST.test(record.revocation))) || !isString(shareId) || !SHARE_ID.test(shareId) || !peerJwk(signerSig)) return { ok: false, reason: "malformed" };
   if (record.shareId !== shareId) return { ok: false, reason: "wrong-share" };
   if (record.signer !== peerThumbprint(signerSig)) return { ok: false, reason: "bad-key" };
   const { sig, ...unsigned } = record;

@@ -153,6 +153,7 @@ function exchanges(): Json[] {
     run("a reveal in no role", [CLAIM, COMMIT, { ...REVEAL_R, role: "witness" }], { state: "burnt", reason: "malformed", index: 2 }),
     run("a reveal whose nonce is not 32 bytes", [CLAIM, COMMIT, { ...REVEAL_R, nonce: N_R.slice(0, 40) }], { state: "burnt", reason: "malformed", index: 2 }),
     run("a step that does not exist", [frame("accept", { shareId: SHARE })], { state: "burnt", reason: "malformed", index: 0 }),
+    run("a step named after an Object.prototype member", [{ schema: "peer-share-frame/1", step: "__defineGetter__" }], { state: "burnt", reason: "malformed", index: 0 }),
     run("a commit that reflects the claim's own keys: open; the code refuses it", [CLAIM, { ...COMMIT, keys: RECIPIENT, commit: commitOf("sender", SHARE, RECIPIENT, N_S) }], { state: "open" }),
     run("a frame of another shape after that abort: malformed wherever it comes", [CLAIM, COMMIT, REVEAL_R, REVEAL_S, ABORT_R, { bad: 1 }], { state: "burnt", reason: "malformed", index: 5 }),
     run("a clock that does not read", [CLAIM], { state: "burnt", reason: "malformed", index: -1 }, "today")
@@ -209,6 +210,8 @@ function envelopes(): Json[] {
     ["an envelope that lives more than 90 days", envelope({ exp: "2027-01-25T09:59:01Z" }, "long"), ctx(), no("lifetime-too-long")],
     ["an envelope whose exp is its iat", envelope({ exp: IAT }, "no-life"), ctx(), no("lifetime-too-long")],
     ["a node key that does not read", env, ctx({ ownKem: { kty: "EC" } }), no("malformed")],
+    ["a share id in the context that does not read", env, ctx({ shareId: "xyz" }), no("malformed")],
+    ["a mark whose slot does not read", env, ctx({ marks: [{ shareId: SHARE, slot: "lower case", sequence: 1, digest: digestOf(env) }] }), no("malformed")],
     ["an envelope of exactly 90 days", envelope({ exp: "2027-01-25T09:59:00Z" }, "ninety"), ctx(), ok(envelope({ exp: "2027-01-25T09:59:00Z" }, "ninety"))],
     ["an envelope past its exp", env, ctx({ at: EXP }), no("expired")],
     ["a time with an offset, not UTC", envelope({ iat: "2026-10-27T10:59:00+01:00" }, "offset"), ctx(), no("malformed")]
@@ -241,6 +244,7 @@ function reports(): Json[] {
     ["issued more than 60 s ahead of the clock", rep, ctx({ at: "2026-10-27T09:57:59Z" }), no("not-yet-valid")],
     ["issued exactly 60 s ahead of the clock", rep, ctx({ at: "2026-10-27T09:58:00Z" }), { ok: true, sequence: 1, body: BODY }],
     ["a body that carries a value", report({}, "value-body", { ...BODY, value: SECRET }), ctx(), no("bad-body")],
+    ["a body with two entries for one day and slot", report({}, "twice", { ...BODY, days: [BODY.days[0], { ...BODY.days[0], uses: 0 }] }), ctx(), no("bad-body")],
     ["a body with a negative count", report({}, "negative", { ...BODY, days: [{ ...BODY.days[0], uses: -1 }] }), ctx(), no("bad-body")],
     ["a body that is no JSON", sealed(REPORT, { sequence: 1, iat: IAT }, { key: K.rSig }, K.sKem, "not-json", Buffer.from("uses: 3", "utf8")), ctx(), no("bad-body")],
     ["sealed to another key under the sender's thumbprint: the checks pass and it does not open", sealed(REPORT, { recipient: thumb(K.sKem), sequence: 1, iat: IAT }, { key: K.rSig }, K.xKem, "misdirected", Buffer.from(rfc8785(BODY), "utf8")), ctx(), no("cannot-open")],

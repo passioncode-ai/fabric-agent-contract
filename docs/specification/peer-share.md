@@ -60,8 +60,10 @@ normalisation, so a dot segment, an upper-case host or an empty `:@` reads as th
 app as the sender sent it (pasted into the app, or opened by the app's own scheme carrying the `k` the person can see
 in the link they were sent): then it aborts unless the sender's commit frame names that key (`pinHolds`). A link
 handed over by the mailbox's landing page carries no pin, because the page is the mailbox's own script, and that share
-rests on the comparison code alone (PS-6). A product's own scheme for the hand-over follows the link grammar of
-DEC-0040 (FL-1 to FL-6); no claim code is ever put in a `fabric://` link.
+rests on the comparison code alone (PS-6). A product's own scheme for the hand-over carries the share link's parts as
+the link does: the share id in the path and `c` and `k` in the fragment only, never in a query, never logged, the
+code used once. It is not a `fabric://` link: DEC-0040's rule that a link carries ids only (FL-4) governs those, and no
+claim code is ever put in a `fabric://` link.
 
 ## The claim (PS-5)
 
@@ -105,7 +107,9 @@ before either reveals:
    comparison` (DEC-0121 AP-4), so the agent's tool for it answers `human-step-required` with the link to the node's page that shows the pending share and names the app
    window that holds the comparison,
    and no agent can confirm a code or skip the comparison for the person. The product declares its other buttons under
-   DEC-0121 too; "They differ" and the recipient's "Decline" only stop a share.
+   DEC-0121 too: the recipient's "Accept", its consent to the reports (PS-8), is `gate: human` with `humanStep:
+   consent`, and the export button, which hands the value out, is `gate: human` with `humanStep: secret`; "They
+   differ" and the recipient's "Decline" only stop a share.
 
 **One attempt per link, at both ends** (`peerExchangeVerdict`, which the sender's node, the recipient's node and the
 mailbox each run over the frames in the order received): claim, then commit, then the two reveals in either order,
@@ -147,7 +151,8 @@ and the commit frames; the nonces carry the bound.
   indefinitely;
 - the lease is at most 24 hours (the proposal: one hour by default, set by the sender), so a sender's stop reaches an
   honest recipient within a day whatever was set;
-- an envelope lives at most 90 days, so a value is sealed again at least that often and an old ciphertext stops opening;
+- an envelope lives at most 90 days, so the sender's node seals the value again before `exp` and an old ciphertext
+  stops opening; while the sender's machine is away past `exp`, the recipient's share stops until it is sealed again;
 - a usage report carries no random nonce: its sequence and the header bound into the additional data already refuse a
   replay or a report moved between shares (PS-8);
 - requests to the mailbox are signed with DEC-0056's construction and the share keys (PS-10), not D8's own scheme with
@@ -190,7 +195,10 @@ recipient's share `#sig`; the header names `type` (`fabric-peer-share-report/1`)
 `recipient`, `signer`, `shareId`, `sequence`, `iat` and `enc`, as `peer-share-report.schema.json` gives them. The body
 (`peer-share-report.schema.json#/$defs/body`, `peerReportBody`) holds, per slot and UTC day, the uses the node counted
 and the last one, the consumer labels (agent names from its journal) and the exports made with the export button; never
-a value, a command, an argument or an output (the rule of `call-record/1`, DEC-0111 item 6). The report is a condition
+a value, a command, an argument or an output (the rule of `call-record/1`, DEC-0111 item 6). A report holds the UTC days
+since the last day of the previous report the sender read (the current day again, as it grows), one entry per day and
+slot; the sender adds the days into its totals, a later report's entry for a day and slot replacing an earlier one's.
+The report is a condition
 of the share, not a disclosure DEC-0052 governs: the recipient's "Accept" names what the sender will see (agent names,
 uses per day, the time of the last use and of each export), and accepting is the recipient's consent to it.
 

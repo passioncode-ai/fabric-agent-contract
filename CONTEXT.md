@@ -828,6 +828,8 @@ placement run guards against rollback (DEC-0066).
 
 ## Flagged ambiguities
 
+- "Share" names three things: a share grant (DEC-0086, an id `urn:fabric:share:` and 32 hex digits), a share
+  registration, and a peer share (DEC-0142), whose `shareId` is 32 hex digits alone. Contract documents name which.
 - A2A `AgentSkill` is a remote capability advertisement, not an Agent Skills
   `SKILL.md` instruction package. Contract documents must qualify the term.
 - `Product manager` replaces Fabric's earlier `project manager` term: exactly one

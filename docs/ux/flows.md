@@ -848,6 +848,7 @@ flowchart TD
   S -->|not compared, the sender shares anyway| F[Sealed, recorded confirmed: false]
   F --> U
   U -.->|a claim after a share sealed without comparing| WN[A warning beside the share: take it back]
+  U -.->|the recipient says they differ after storage| WN
   E --> U[Recipient opens it at each use under a live lease and sends reports]
   U --> T{Take back}
   T --> R[Revocation: the mailbox refuses; the recipient deletes and sends a receipt]
