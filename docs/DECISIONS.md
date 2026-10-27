@@ -8337,6 +8337,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `docs/specification/project-comms.md` (header, C4's wording, Owner settlement's paths, PR-1 to PR-3, the hold
   table), `conformance.md` (a row), `interop.md` (the reserved name), `service.md` (AP-1's exception for the move), `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder,
   Session role), `src/comms-hold.ts` (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`, `docs/ux/scenarios.md`
-  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16, FLW-29's rejected shape), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022, DEC-0079, DEC-0081 and DEC-0121 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176, CT-179, CT-181 and CT-182 (filed); fabric-workspace `knowledge/agents-first.md` (its parity paragraph, at the merge); the handoff
+  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16, FLW-29's rejected shape), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022, DEC-0079, DEC-0081 and DEC-0121 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176, CT-179, CT-181, CT-182 and CT-183 (filed); fabric-workspace `knowledge/agents-first.md` (its parity paragraph, at the merge); the handoff
   `docs/handoffs/2026-10-26-simple-fabric-decisions.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-174; Fabric's request `23ba0e97` (thread `6a8d2f9c`).
