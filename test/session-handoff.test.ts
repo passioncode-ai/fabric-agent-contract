@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
-import { MAX_INLINE_BRIEF, MAX_LAUNCH_ARG, MAX_LAUNCH_ARGS, readSessionHandoff, validateSessionHandoff } from "../src/session-handoff.js";
+import { MAX_INLINE_BRIEF, MAX_LAUNCH_ARG, MAX_LAUNCH_ARGS, readSessionHandoff, samePath, validateSessionHandoff } from "../src/session-handoff.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 
 // DEC-0042 (Fabric ADR-0140, 0.4.0 REQ-06): session-handoff/1, the folder a host hands a coding-agent session.
@@ -109,7 +109,9 @@ describe("validateSessionHandoff(dir): a folder on disk", () => {
     expect((await validateSessionHandoff(writeFolder("session-handoff-folder-ok"))).valid).toBe(true);
   });
 
-  it("refuses a folder or a file readable by others, and a link in place of a file", async () => {
+  // Modes are POSIX: on Windows the profile's ACL guards the folder and the modes are not checked (`permissions: acl`),
+  // and a symlink needs a privilege a test runner lacks.
+  it.skipIf(process.platform === "win32")("refuses a folder or a file readable by others, and a link in place of a file", async () => {
     const loose = writeFolder("session-handoff-folder-ok");
     chmodSync(loose, 0o755);
     chmodSync(path.join(loose, "mcp.json"), 0o644);
@@ -177,5 +179,15 @@ describe("the specification", () => {
   it("names the per-runtime rows the kit checks", () => {
     for (const runtime of ["claude-code", "codex", "kilo", "hermes", "kimi-code", "cline", "pi"]) expect(spec).toMatch(new RegExp(`^\\| \`${runtime}\` \\|`, "m"));
     expect(spec).toContain("`--mcp-config=<folder>/mcp.json`");
+  });
+});
+
+describe("a launch argument names the folder's file as the host reads paths", () => {
+  it("compares exactly on POSIX, and with either separator and case on Windows", () => {
+    expect(samePath("/h/s1/mcp.json", "/h/s1/mcp.json", "darwin")).toBe(true);
+    expect(samePath("/h/s1/MCP.json", "/h/s1/mcp.json", "linux")).toBe(false);
+    expect(samePath("C:\\h\\s1/mcp.json", "C:\\h\\s1\\mcp.json", "win32")).toBe(true);
+    expect(samePath("c:/H/S1/mcp.json", "C:\\h\\s1\\mcp.json", "win32")).toBe(true);
+    expect(samePath("C:\\h\\s2\\mcp.json", "C:\\h\\s1\\mcp.json", "win32")).toBe(false);
   });
 });

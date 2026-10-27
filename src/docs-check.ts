@@ -60,17 +60,85 @@ export function outsideFences(text: string): string {
   return scanFences(text).outside;
 }
 
+/**
+ * A heading's anchor as GitHub renders it (github-slugger 2.0): the heading's rendered text in lower case, every
+ * character that is not a letter, a mark, a digit, a space, `-` or `_` dropped, each space a `-`. Inline code, links,
+ * emphasis and HTML tags render to their text first.
+ */
+export function headingSlug(heading: string): string {
+  const rendered = heading
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/<[^>]+>/g, "")
+    .replace(/[`*]/g, "")
+    .replace(/(^|\s)_+|_+(?=\s|$)/g, "$1")
+    .trim()
+    .toLowerCase();
+  return rendered.replace(/[^\p{L}\p{M}\p{N} _-]/gu, "").replace(/ /g, "-");
+}
+
+/**
+ * The fragments a Markdown file answers on GitHub: each ATX heading's slug outside fenced code (a repeated slug gains
+ * `-1`, `-2`, …), and every explicit `id` or `name` of an HTML element.
+ */
+export function markdownAnchors(text: string): Set<string> {
+  const anchors = new Set<string>();
+  const seen = new Map<string, number>();
+  for (const line of outsideFences(text).split("\n")) {
+    const heading = /^ {0,3}#{1,6}[ \t]+(.*?)(?:[ \t]+#+)?[ \t]*$/.exec(line);
+    if (heading) {
+      const slug = headingSlug(heading[1] ?? "");
+      const count = seen.get(slug) ?? 0;
+      seen.set(slug, count + 1);
+      anchors.add(count === 0 ? slug : `${slug}-${count}`);
+    }
+    for (const match of line.matchAll(/<[a-z][a-z0-9]*\b[^>]*?\b(?:id|name)=["']([^"']+)["']/gi)) anchors.add((match[1] ?? "").toLowerCase());
+  }
+  return anchors;
+}
+
+const anchorCache = new Map<string, Set<string>>();
+
+async function anchorsOf(file: string): Promise<Set<string>> {
+  const cached = anchorCache.get(file);
+  if (cached) return cached;
+  const anchors = markdownAnchors(await readFile(file, "utf8"));
+  anchorCache.set(file, anchors);
+  return anchors;
+}
+
+/** `file`'s name relative to the project, with `/` on every platform. */
+function shownName(file: string): string {
+  return path.relative(projectRoot(), file).split(path.sep).join("/");
+}
+
+/**
+ * Every relative link outside fenced code names a file that exists, and a fragment on a link to a Markdown file names
+ * one of its headings or explicit anchors as GitHub renders them (CT-167). A line fragment (`#L12`, `#L12-L20`) and a
+ * fragment on any other file are not checked.
+ */
 export async function checkLinks(file: string, text: string): Promise<string[]> {
   const findings: string[] = [];
-  const name = path.relative(projectRoot(), file);
+  const name = shownName(file);
   const { outside, unclosed } = scanFences(text);
   if (unclosed !== undefined) findings.push(`${name}:${unclosed}: code fence never closed`);
   for (const raw of markdownLinks(outside)) {
-    const target = raw.replace(/^<|>$/g, "").split("#", 1)[0] ?? "";
-    if (!target || /^[a-z][a-z0-9+.-]*:/i.test(target)) continue;
+    const link = raw.replace(/^<|>$/g, "").trim().split(/\s+/, 1)[0] ?? "";
+    const hash = link.indexOf("#");
+    const target = hash < 0 ? link : link.slice(0, hash);
+    const fragment = hash < 0 ? undefined : link.slice(hash + 1);
+    if (/^[a-z][a-z0-9+.-]*:/i.test(target)) continue;
+    if (!target && fragment === undefined) continue;
     let decoded: string;
-    try { decoded = decodeURIComponent(target); } catch { findings.push(`${name}: malformed link ${raw}`); continue; }
-    try { await stat(path.resolve(path.dirname(file), decoded)); } catch { findings.push(`${name}: broken link ${raw}`); }
+    let decodedFragment: string | undefined;
+    try {
+      decoded = decodeURIComponent(target);
+      decodedFragment = fragment === undefined ? undefined : decodeURIComponent(fragment);
+    } catch { findings.push(`${name}: malformed link ${raw}`); continue; }
+    const resolved = decoded ? path.resolve(path.dirname(file), decoded) : file;
+    let isFile = false;
+    try { isFile = (await stat(resolved)).isFile(); } catch { findings.push(`${name}: broken link ${raw}`); continue; }
+    if (!decodedFragment || !isFile || !resolved.endsWith(".md") || /^L\d+(?:-L\d+)?$/.test(decodedFragment)) continue;
+    if (!(await anchorsOf(resolved)).has(decodedFragment.toLowerCase())) findings.push(`${name}: broken anchor ${raw}`);
   }
   return findings;
 }
@@ -87,7 +155,7 @@ export async function checkMermaid(file: string, text: string): Promise<string[]
       // Mermaid 11 parses these diagram types in Node, then its browser-only
       // sanitizer throws. Parser errors are different and remain fatal.
       if (!/DOMPurify\.(?:addHook|sanitize) is not a function/.test(message)) {
-        findings.push(`${path.relative(projectRoot(), file)}: Mermaid block ${index}: ${message}`);
+        findings.push(`${shownName(file)}: Mermaid block ${index}: ${message}`);
       }
     }
   }
@@ -111,7 +179,8 @@ export function schemaProfileKinds(manifest: unknown): string[] {
 
 /** G-13: one allocation and one definition of every semantic rule code (src/rule-codes.ts). */
 export async function checkRuleCodes(root = projectRoot()): Promise<string[]> {
-  const read = async (file: string) => ({ path: path.relative(root, file), text: await readFile(file, "utf8") });
+  // A path with `/` on every platform: the register is matched by `endsWith("/<file>")`.
+  const read = async (file: string) => ({ path: path.relative(root, file).split(path.sep).join("/"), text: await readFile(file, "utf8") });
   const specDir = path.join(root, "docs", "specification");
   const specs = await Promise.all((await readdir(specDir)).filter((name) => name.endsWith(".md")).map((name) => read(path.join(specDir, name))));
   const sourceDir = path.join(root, "src");
@@ -167,7 +236,7 @@ export async function runDocsCheck(): Promise<string[]> {
   }
   const keyed = (await walk(root)).filter((file) => /\.(md|json)$/.test(file) && !file.includes(`${path.sep}test${path.sep}`));
   for (const file of keyed) {
-    for (const key of foreignExtensionKeys(await readFile(file, "utf8"))) findings.push(`${path.relative(root, file)}: extension key ${key} is not one of EXTENSION_KEYS (G-08)`);
+    for (const key of foreignExtensionKeys(await readFile(file, "utf8"))) findings.push(`${shownName(file)}: extension key ${key} is not one of EXTENSION_KEYS (G-08)`);
   }
   const context = contextProfileNames(await readFile(path.join(root, "CONTEXT.md"), "utf8"));
   const kinds = schemaProfileKinds(JSON.parse(await readFile(path.join(root, "schemas/manifest.schema.json"), "utf8")));

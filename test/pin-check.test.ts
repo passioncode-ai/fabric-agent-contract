@@ -249,6 +249,7 @@ describe("pin:check: files and folders it cannot read (contract review 2026-10-2
     const locked = path.join(dir, "locked");
     mkdirSync(locked);
     writeFileSync(path.join(locked, "x.md"), "x");
+    // Root reads any folder, and Windows ignores the mode: the folder is then simply read.
     const root = process.getuid?.() === 0;
     if (!root) chmodSync(locked, 0o000);
     try {
@@ -259,7 +260,8 @@ describe("pin:check: files and folders it cannot read (contract review 2026-10-2
     }
   });
 
-  it("a repository it cannot list is exit 2, not a clean run", async () => {
+  // A mode that forbids listing exists only on POSIX, and root lists anything.
+  it.skipIf(process.platform === "win32")("a repository it cannot list is exit 2, not a clean run", async () => {
     if (process.getuid?.() === 0) return;
     const dir = consumer({ "README.md": "x" });
     chmodSync(dir, 0o300);

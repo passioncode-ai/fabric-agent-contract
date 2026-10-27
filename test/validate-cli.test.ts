@@ -402,8 +402,8 @@ describe("usage errors exit 2", () => {
     chmodSync(file, 0o000);
     const result = run(file);
     chmodSync(file, 0o600);
-    // Root reads any file; the case is then not observable here.
-    if (process.getuid?.() !== 0) expect(result).toEqual({ code: 2, out: expect.stringContaining("cannot read") });
+    // Root reads any file, and Windows ignores the mode; the case is then not observable here.
+    if (process.getuid?.() !== 0 && process.platform !== "win32") expect(result).toEqual({ code: 2, out: expect.stringContaining("cannot read") });
   });
 
   it("--kind on a wrapper kind checks the semantic rule alone", () => {
@@ -415,11 +415,12 @@ describe("pnpm validate runs as a command", () => {
   it("exits 1 with the problem line, and 0 on the repository's own manifest example", () => {
     const manifest = json("positive/manifest-mcp.json");
     manifest.capabilities[0].profile.protocolRevision = "2025-06-18";
-    const tsx = path.join(root, "node_modules/.bin/tsx");
-    const bad = spawnSync(tsx, [path.join(root, "src/validate-cli.ts"), one("fabric-agent.json", manifest)], { encoding: "utf8" });
+    // tsx's own entry point under this Node: `node_modules/.bin/tsx` is a shell script, which Windows does not run.
+    const tsx = path.join(root, "node_modules/tsx/dist/cli.mjs");
+    const bad = spawnSync(process.execPath, [tsx, path.join(root, "src/validate-cli.ts"), one("fabric-agent.json", manifest)], { encoding: "utf8" });
     expect(bad.status).toBe(1);
     expect(bad.stdout).toContain("schema/const");
-    const good = spawnSync(tsx, [path.join(root, "src/validate-cli.ts"), fixture("positive/manifest-mcp.json")], { encoding: "utf8" });
+    const good = spawnSync(process.execPath, [tsx, path.join(root, "src/validate-cli.ts"), fixture("positive/manifest-mcp.json")], { encoding: "utf8" });
     expect(good.status).toBe(0);
     // Two cold tsx processes, under a second of CPU each; on a loaded machine one took 22 s of wall time (2026-10-21).
   }, 120_000);
@@ -427,7 +428,8 @@ describe("pnpm validate runs as a command", () => {
 
 describe("the first unit and product readings' cases (contract review 2026-10-21)", () => {
   it("an unreadable folder is a usage error, never a throw", () => {
-    if (process.getuid?.() === 0) return;
+    // Root lists any folder, and Windows ignores the mode.
+    if (process.getuid?.() === 0 || process.platform === "win32") return;
     const dir = folder({ "fabric-agent.json": json("positive/manifest-mcp.json") });
     const locked = path.join(dir, "locked");
     mkdirSync(locked);
@@ -996,14 +998,19 @@ describe("the sixth readings' cases (contract review 2026-10-21)", () => {
 
   it("a Windows home path is the home folder, and its file name is read with either separator", () => {
     const home = folder({ "fabric-agent.json": manifestFor("example-agent.default") });
+    // `os.homedir()` reads HOME on POSIX and USERPROFILE on Windows.
     const before = process.env.HOME;
+    const beforeProfile = process.env.USERPROFILE;
     process.env.HOME = home;
+    process.env.USERPROFILE = home;
     try {
       const result = run(folder({ "example-agent.default.json": service("example-agent", "~\\fabric-agent.json", 47195), "fabric-agent.json": manifestFor("other.default"), "other/fabric-agent.json": manifestFor("other.default") }));
       expect(result.out).not.toMatch(/  FAC-SEM-020  /);
     } finally {
       if (before === undefined) delete process.env.HOME;
       else process.env.HOME = before;
+      if (beforeProfile === undefined) delete process.env.USERPROFILE;
+      else process.env.USERPROFILE = beforeProfile;
     }
     const top = run(folder({ "example-agent.default.json": service("example-agent", "~\\no-such-folder\\fabric-agent.json", 47195), "fabric-agent.json": manifestFor("example-agent.default"), "other/fabric-agent.json": manifestFor("other.default") }));
     expect(top.out).toContain("so the folder's fabric-agent.json is read");

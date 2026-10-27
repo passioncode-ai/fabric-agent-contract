@@ -162,6 +162,16 @@ export interface SessionHandoffVerdict {
   findings: Finding[];
 }
 
+/**
+ * Two absolute paths name the same file as the host reads them: exactly on POSIX; on Windows either separator and
+ * either case, as the file system does (DEC-0032's Windows paths take `\\` or `/`).
+ */
+export function samePath(a: string, b: string, platform: string = process.platform): boolean {
+  if (platform !== "win32") return a === b;
+  const fold = (value: string) => value.replace(/\//g, "\\").toLowerCase();
+  return fold(a) === fold(b);
+}
+
 const octal = (mode: number) => (mode & 0o777).toString(8).padStart(3, "0");
 
 /**
@@ -446,8 +456,8 @@ export function sessionHandoffFolderFindings(snapshot: HandoffSnapshot): Finding
   const launch = isObject(manifest.launch) ? manifest.launch : {};
   const args = strings(launch.args);
   if (launch.runtime === "claude-code") {
-    for (const value of flagValues(args, "--mcp-config")) if (value !== path.join(snapshot.path, "mcp.json")) findings.push(sem054("/launch/args", `--mcp-config names this folder's mcp.json, ${path.join(snapshot.path, "mcp.json")}; found ${value}`));
-    for (const value of flagValues(args, "--append-system-prompt-file")) if (value !== path.join(snapshot.path, "brief.md")) findings.push(sem054("/launch/args", `--append-system-prompt-file names this folder's brief.md; found ${value}`));
+    for (const value of flagValues(args, "--mcp-config")) if (!samePath(value, path.join(snapshot.path, "mcp.json"))) findings.push(sem054("/launch/args", `--mcp-config names this folder's mcp.json, ${path.join(snapshot.path, "mcp.json")}; found ${value}`));
+    for (const value of flagValues(args, "--append-system-prompt-file")) if (!samePath(value, path.join(snapshot.path, "brief.md"))) findings.push(sem054("/launch/args", `--append-system-prompt-file names this folder's brief.md; found ${value}`));
   }
   const brief = isObject(manifest.brief) ? manifest.brief : {};
   const preamble = typeof manifest.preamble === "string" ? manifest.preamble : "";
