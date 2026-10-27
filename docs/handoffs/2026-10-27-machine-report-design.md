@@ -20,8 +20,8 @@ fix the text and test items filed with them.
   type it does not know; the unusable-`#kem` entry's form and its surface without a well-known.
 - **Code:** `instantKey` (`src/rfc3339.ts`); in `src/machine-report.ts` the relay time for `at`, the nanosecond order,
   `notAfter`, `readMachineReport`, `FAC-SEM-154`; `nodeMethodAnswer` (`src/local-channel.ts`).
-- **Vectors:** `machine-report.json` (`open` +10, `accept` +7, new group `read` with 5 cases; no earlier case changed), `local-channel.json` (new group
-  `dispatch`), each written by its generator.
+- **Vectors:** `machine-report.json` (`open` +11, `accept` +7, new group `read` with 5 cases; no earlier case changed), `window-lease.json` (`remainder`:
+  reports in one millisecond, ties, a held offset time), `local-channel.json` (new group `dispatch`), each written by its generator.
 - **Text:** the relay-only wording (revocation-delta.md, estate-record.md, devices.md, window-lease.md, the check-in
   schema, conformance rows, the source comments), MR-2's no-erase, MR-3's `msgId` exception, the schema description,
   `FAC-SEM-090`'s limit, devices.md's "what stays linkable", DEC-0139's consequences, SCR-23 and SCN-038.

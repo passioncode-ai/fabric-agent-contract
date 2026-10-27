@@ -126,7 +126,8 @@ after a lost hub, removed in the move's revision, that is every instance the old
 applies that revision, before its `expiresAt` (WL-6): it spends nothing more under it, and its final `spent` is the
 one in a report whose `estateRecord.revision` is at or above that revision (DEC-0146). The hub
 orders a machine's reports by their `at`, to the nanosecond (a time held from before DEC-0146 to the millisecond), a tie
-going to the larger `spent` (DEC-0146), and counts, for each machine, the most it may have spent (`windowRemainder`):
+going to the larger `spent` (DEC-0146), compares a report's `at` with a lease's `issuedAt` and `expiresAt` to the
+millisecond (the precision a hub writes them in), and counts, for each machine, the most it may have spent (`windowRemainder`):
 
 - a lease still valid counts its whole `amount`, since the meter may still spend it;
 - an expired lease counts the `spent` of a report written at or after its expiry (the report's own `at`, never its
@@ -190,7 +191,7 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
   inside the window instance, sequences rising per slot; it counts an expired, unreported lease as spent and credits
   a late report at its next division. After a hub move it issues no lease of a window instance the old hub divided
   until that instance ends or every machine the revision lists has reported after the revocation (its newest report's
-  `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it), and then counts each old-hub lease a report names at its final `spent` (DEC-0107, DEC-0146, [Reporting](#reporting)); the wait is shown with each machine it waits on (MR-6); after a lost hub it issues no lease of such an instance until it ends. v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
+  `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it), and then counts each old-hub lease a report names at its final `spent` (DEC-0107, DEC-0146, [Reporting](#reporting)); the wait is shown with each machine it waits on (MR-6); after a lost hub, or while a machine the person removed has not reported after the revocation, it issues no lease of such an instance until it ends. v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
   how the hub sizes it within the remainder is its own.
 - **Project Observatory's meter** (CT-20) verifies each lease with `verifyWindowLease` before it spends against it, and again on each lease it holds when it applies a revision (so a lease of a hub key that revision revokes ends, DEC-0146),
   holds one per slot, reserves only as `mayReserve` answers (the smaller of its own remainder and the lease's, and
