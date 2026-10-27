@@ -641,14 +641,18 @@ each old-hub lease at the final `spent` reported for it, as an ended lease of th
 ([window lease](window-lease.md#reporting); how the reference orders leases across hub keys is CT-113's).
 
 **MR-6, a machine that does not report** (DEC-0146). DL-15's switch, a planned move's step 6 and the gate of step 7 wait
-for every machine the revision lists (step 7's gate ends at the latest when the window instance ends). A machine that
+for every machine the revision lists (step 7's gate ends at the latest when the window instance ends: a day, a week or
+a month). A machine that
 is off, lost or pinned before DEC-0132 (its node answers `unknown-method`, or it sends no report) keeps them waiting,
 with no timeout of their own: signing ahead of it would leave it
 refusing the new key's tokens, and an unreported lease counts at its whole amount, which is safe. Fabric shows the wait
 (SCR-23, its waiting state, for a key switch, a planned move and the window leases paused after a move): each machine
 waited on, since when, and why when known ("its software is too old to
 report"), and the person's ways out: bring the machine back, update it, or remove it
-([Remove a machine](ceremonies.md#remove-a-machine)), after which it is no longer waited on.
+([Remove a machine](ceremonies.md#remove-a-machine)), after which DL-15's switch and step 6 no longer wait on it.
+Step 7's gate still does: what a machine spent under the old hub's leases is known only from its reports, so a removed
+machine that never reported after the revocation keeps the instances the old hub divided closed to new leases until
+they end, and the wait says so.
 
 ## The pairing rendezvous
 

@@ -139,23 +139,24 @@ function orderReport(report: Json, machine: unknown, held: unknown, notAfter: un
   }
   if (report.machine !== machine) return "wrong-machine";
   if (isObject(held)) {
-    const heldAt = heldKey(held.at);
-    if (heldAt !== undefined && !(at > heldAt)) return "stale";
+    const heldAt = instantKey(held.at);
+    if (heldAt !== undefined) {
+      if (!(at > heldAt)) return "stale";
+    } else {
+      // A held time accepted before DEC-0146 (an offset, a lower-case `t`, more fraction digits) is compared as it was
+      // then, to the millisecond on both sides, so neither its rounding nor a year past 9999 lets an older report in.
+      const heldMs = strictTime(held.at);
+      if (Number.isFinite(heldMs) && !(strictTime(report.at) > heldMs)) return "stale";
+    }
   }
   return undefined;
 }
 
-/** A held report's time as `instantKey`'s key, through `strictTime` to the millisecond when it is no relay time. */
-function heldKey(value: unknown): string | undefined {
-  const key = instantKey(value);
-  if (key !== undefined) return key;
-  const ms = strictTime(value);
-  return Number.isFinite(ms) ? instantKey(new Date(ms).toISOString()) : undefined;
-}
-
 /**
  * The hub's reading of a report it holds as a machine's newest (MR-2, MR-4): one `openMachineReport` opened, or the
- * `report` its own node's `machine.report` answered over the local channel. In order: `malformed` (not an object, the
+ * `report` its own node's `machine.report` answered over the local channel. `notAfter` is a relay time (`Z`, as
+ * `new Date().toISOString()` writes it): the body's `iat`, or the hub's clock when its own node answered; one in another
+ * form refuses every report. In order: `malformed` (not an object, the
  * schema refuses it, a `FAC-SEM-152` or `FAC-SEM-154` finding, or an `at` after `notAfter`), `wrong-machine` (another
  * machine than `machine`, the sender `relayCallerTier` named or the hub's own machine id) and `stale` (an `at` not after
  * the report held for that machine). The caller handles a `null` answer before it calls: that is no report (the node

@@ -8700,12 +8700,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-27
 - **Status:** Accepted (on merge of its pull request, after its objection window: 2026-10-29 18:00 UTC, thread
-  `5d2ea917` with Fabric). A narrowing of the hub's reading of reports no conforming machine writes (an `at` that is no
-  relay time, or later than the body's `iat`; DEC-0139 read `at` as `strictTime`, so a machine that wrote an offset
-  conformed until now); new duties for the hub (counting an old hub's leases, the wait it shows, the `degraded` entry's
-  form), for a reporting machine (the `#kem` it seals to, the leases of each hub key, a lease a revoked key signed) and
-  for every recipient of relay messages (acknowledging a payload type it does not know). None of CT-152's adopters
-  ships the report yet, so no deployed machine or hub changes. Additive: a reference function
+  `5d2ea917` with Fabric). A narrowing of the hub's reading of a report's `at` (one that is no relay time, which
+  DEC-0139's `strictTime` admitted with an offset, or one later than the body's `iat`); new duties for the hub
+  (counting an old hub's leases, the wait it shows, the `degraded` entry's form) and for a reporting machine (the
+  `#kem` it seals to, the leases of each hub key, a lease a revoked key signed), none deployed yet (CT-152); and a duty
+  for every recipient of relay messages, deployed ones included (Fabric's hub and nodes, Project Observatory's node):
+  acknowledging a payload type it does not know, whose compliance is unconfirmed and asked in thread `5d2ea917`. Additive: a reference function
   (`readMachineReport`), a context member (`notAfter`), a rule code (`FAC-SEM-154`), a node dispatch function
   (`nodeMethodAnswer`) with the vector group `dispatch`, and vectors in `machine-report.json` (`open`, `accept`, a new
   group `read`); no earlier vector's answer changes. Adoption: CT-152's adopters (Fabric's hub and nodes, Project
@@ -8735,8 +8735,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   5. **Which `#kem`.** A machine seals each report to the `#kem` the newest revision it verified (applied, or newer and
      refused) lists for that hub machine: the hub that drafted it holds that key.
   6. **A machine that does not report** (MR-6): DL-15's switch, step 6 and step 7's gate wait for every machine the
-     revision lists, with no timeout; Fabric shows each machine waited on, since when and why when known, and the ways
-     out (bring it back, update it, remove it). A removed machine is no longer waited on.
+     revision lists, with no timeout of their own (step 7's gate ends at the latest with the window instance); Fabric
+     shows each machine waited on, since when and why when known, and the ways out (bring it back, update it, remove
+     it). A removed machine is no longer waited on by DL-15 and step 6; step 7's gate keeps an instance the old hub
+     divided closed until it ends when a removed machine never reported after the revocation, its spend being
+     unknown.
   7. **The hub's own machine.** The node that applies the estate's records there serves `machine.report`, Fabric's own
      node included. A node answers a method it does not serve `unknown-method`, as `nodeMethodAnswer` does.
   8. **A payload a recipient does not know.** Every recipient of relay messages acknowledges each delivered message once
@@ -8767,8 +8770,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `FAC-SEM-090` by receipt time (the division record holds none; a new member would be a schema change for an audit).
 - **Compatibility:** a narrowing for the hub's reading of an `at` that is no relay time (one with an offset was
   accepted under DEC-0139) or later than the body's `iat`, and for a hub that issued a lease of an instance the old hub
-  divided without counting the old hub's spend; new duties for reporting machines and relay recipients; none of these
-  is deployed yet (CT-152). Additive for ports (a new function, a context member, a rule code, vector groups); no
+  divided without counting the old hub's spend; new duties for reporting machines (none deployed yet, CT-152) and for
+  relay recipients (deployed: whether they already acknowledge an unknown payload is asked in `5d2ea917`). Additive for ports (a new function, a context member, a rule code, vector groups); no
   earlier vector's answer changes, and a held report accepted with an offset before still guards against an older
   one.
   `contractVersion` stays `0.1.0`.
@@ -8781,7 +8784,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and `estate-record.md` (wording), `conformance.md` (the module row, the meter, hub, reporter and hub-reader rows, a
   node row, the rule list), `schemas/machine-report.schema.json` and `schemas/device-check-in.schema.json`
   (descriptions), `src/revocation-delta.ts` and `src/window-lease.ts` (comments), `docs/ux/screens.md` (SCR-23),
-  `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-27), `docs/specification/window-lease.md` (who adopts it);
-  DEC-0139 annotated; backlog CT-172
-  (closed), CT-152 (its adopters' reading); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
+  `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-27), `docs/specification/window-lease.md` (who adopts it),
+  `conformance.md`'s delta-applying, drafter and relay-call rows, `docs/DOCMAP.md`, `docs/specification/README.md`,
+  `docs/handoffs/README.md`; DEC-0139 annotated; backlog CT-172
+  (closes on merge), CT-152 (its adopters' reading); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
 - **Source:** CT-172; DEC-0132's and DEC-0139's readings.

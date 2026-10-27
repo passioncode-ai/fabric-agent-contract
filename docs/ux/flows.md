@@ -665,10 +665,11 @@ flowchart TD
   A -->|Remove on the hub's machine| K{Lost or retired?}
   K -->|retired, still reachable| L
   K -->|lost| M
-  L --> W{Has every machine reported the first revision?}
+  L --> T1[Revision 1, DL-15: the new hub key certified; the passkey signs]
+  T1 --> W{Has every machine reported revision 1?}
   W -->|not yet| V[Waiting: each machine named; bring it back, update it or remove it]
   V --> W
-  W -->|yes| T[Two revisions, DL-15: certify and switch, then revoke and anchor]
+  W -->|yes| T[The switch, then revision 2: the old key revoked, the delta anchored]
   T --> S
   A -->|this machine has not heard the hub for 24 h| C{Still silent after reconnecting?}
   C -->|no| Z[The alert clears; no move]
