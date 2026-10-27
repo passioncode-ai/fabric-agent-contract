@@ -8368,7 +8368,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0139: the machines' report, its readings' loose ends settled
 
 - **Date:** 2026-10-26
-- **Status:** Accepted (2026-10-26). A narrowing of the hub's reading: a relayed report, or its own node's
+- **Status:** Accepted (2026-10-26), merged 2026-10-27 (#213). A narrowing of the hub's reading: a relayed report, or its own node's
   `machine.report`, whose `at` RFC 3339 as
   `strictTime` reads does not, or that carries a `FAC-SEM-152` finding, is now `malformed` (before, the first read
   `stale` when a report was held and was accepted otherwise, and the second was accepted with a finding on the relayed path, the local read already refusing it). No machine
