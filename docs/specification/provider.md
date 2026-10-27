@@ -71,7 +71,8 @@ The file is written atomically (temporary file, `fsync`, rename), as a descripto
 These follow from the table and are enforced by the schema:
 
 - `providerId` is an absolute URI (DEC-0017).
-- `manifest` ends in `fabric-agent.json`.
+- `manifest` ends in `fabric-agent.json` after either separator, so a Windows path (`C:\…\fabric-agent.json`,
+  `~\…\fabric-agent.json`, DEC-0032) names it too (DEC-0145).
 - `run.mcp` is exactly one of `stdio` or `url`; `command` is an argument array of at
   most 32 items.
 - An `env` name is an environment variable name (`^[A-Z_][A-Z0-9_]*$`) and every value

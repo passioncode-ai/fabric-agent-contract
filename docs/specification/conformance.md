@@ -50,7 +50,8 @@ commands in order and stops at the first that fails:
    CT-40).
 
 The merging session runs the same frozen command on the candidate and records its output in the pull request;
-hosted CI runs it nightly on `main` and on a manual dispatch (`gh workflow run ci.yml --ref <branch>`). A green check never
+hosted CI runs it nightly on `main` and on a manual dispatch (`gh workflow run ci.yml --ref <branch>`), on Linux with Node 22
+and 24 and on Windows with Node 24 (DEC-0145). A green check never
 substitutes for semantic review of prose. Before release, at least one planted
 negative fixture is temporarily inverted and observed failing; the restored green
 run is recorded in the retrospective.

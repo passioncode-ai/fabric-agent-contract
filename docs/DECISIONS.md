@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0145` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0146` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -8515,3 +8515,42 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   rows, `fixtures/semantic/support-quality-daily-calibration-checks-alone.json` and `-calibration-week-after-day.json`; `docs/specification/support-quality.md`, `conformance.md` (the producer and reader rows), `DOCMAP.md`; DEC-0095 annotated;
   backlog CT-188.
 - **Source:** CT-188; the board request `b05d8bc9` (thread `afd3dc71`).
+
+### DEC-0145: a Windows path names a provider's manifest and a handoff's files
+
+- **Date:** 2026-10-27
+- **Status:** Accepted (on merge of its pull request). A widening of `provider.schema.json`'s `manifest` pattern at the
+  same revision, and a reference check that reads Windows paths as Windows does.
+- **Context:** the operator asked (2026-10-27) to close the contract's debts on stability and Windows. The contract's
+  gate had never run on Windows; its first run there (`windows-latest`, Node 24) found that DEC-0032's Windows paths
+  are a `localPath`, but a provider entry's `manifest` also had to match `(^|/)fabric-agent\.json$`, so
+  `C:\…\fabric-agent.json` and `~\fabric-agent.json` were refused; and that `validateSessionHandoff` (FAC-SEM-054,
+  SH-4) compared a launch argument with the folder's file byte for byte, so `C:\…\s1/mcp.json`, which names the same
+  file, was a finding. The run also found the gate's own path handling (`docs:check`'s G-13 register match,
+  `pnpm validate`'s stored paths) reading `\` where it compares `/`, which are tooling and decide nothing.
+- **Decision:**
+  1. A provider entry's `manifest` ends in `fabric-agent.json` after `/` or `\` ([provider](specification/provider.md#what-the-schema-adds-to-the-table)).
+  2. SH-4: a host compares a launch argument's path with the folder's file as its own file system reads it: exactly on
+     POSIX; on Windows with either separator and in any case ([session handoff](specification/session-handoff.md), `samePath`).
+  3. The repository keeps every text file LF on every platform (`.gitattributes`), and its nightly gate runs on Windows
+     as well as Linux (`.github/workflows/ci.yml`).
+- **Why:** DEC-0032 already makes a Windows path a local path, and DEC-0057 the Windows token reader; a pattern that
+  reads only `/` refused the Windows form of the one file the contract names by its name, and a check that compares
+  bytes refused a writer that joins a path with the other separator. The schemas, vectors and licence texts are compared
+  byte for byte, and a Windows checkout with `core.autocrlf` rewrote them.
+- **Alternatives considered:** normalising a Windows path to `/` before the pattern (a reader that validates the raw
+  document would still refuse it); a Windows-only `manifest` member (two members for one path); leaving Windows to the
+  consumers (the adapter's kits and Fabric run on Windows, and the contract's own checker refused their files).
+- **Compatibility:** a widening of a closed pattern: every entry that validated still does. A reader that validates
+  against a copy pinned before refuses an entry whose `manifest` is a Windows path; provider.md records that no Windows
+  reader of provider entries exists yet. The SH-4 change accepts more on Windows only and nothing more on POSIX.
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/provider.schema.json`, `src/session-handoff.ts`, `src/docs-check.ts`,
+  `src/validate-cli.ts`, `tools/catalogue/seed.py`, `fixtures/positive/provider-entry-windows-path.json`,
+  `fixtures/negative/provider-entry-windows-path-other-file.json` with their catalogue rows, `.gitattributes`,
+  `.github/workflows/ci.yml`; `docs/specification/provider.md`, `session-handoff.md`; the tests of the gate's own
+  paths (`test/docs-check.test.ts`, `test/validate-cli.test.ts`, `test/session-handoff.test.ts`,
+  `test/session-handoff-standalone.test.ts`, `test/meter-grant.test.ts`, `test/pin-check.test.ts`,
+  `test/folder-attribution.test.ts`); backlog CT-191.
+- **Source:** the operator's request of 2026-10-27; the first Windows runs of the gate (runs 40506221946 and after).
+
