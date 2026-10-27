@@ -163,8 +163,8 @@ export interface SessionHandoffVerdict {
 }
 
 /**
- * Two absolute paths name the same file as the host reads them: exactly on POSIX; on Windows either separator and
- * either case, as the file system does (DEC-0032's Windows paths take `\\` or `/`).
+ * Two paths name the same file for SH-4 and SH-11: byte for byte on POSIX, macOS included even on a case-insensitive
+ * volume; on Windows with either separator and in either case (DEC-0032's Windows paths take `\\` or `/`; DEC-0145).
  */
 export function samePath(a: string, b: string, platform: string = process.platform): boolean {
   if (platform !== "win32") return a === b;

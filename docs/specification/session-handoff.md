@@ -197,7 +197,7 @@ from Fabric gets Fabric's (`fabric_whoami`, `mcp.auth: bearer`, per session). Bo
 validateSessionHandoff(dir, { schema? }): Promise<{ valid, schemaErrors, findings }>
 readSessionHandoff(dir): HandoffSnapshot           // reads without following links
 checkSessionHandoff(snapshot, schema)              // the same, on a snapshot
-sessionHandoffManifestFindings(manifest)           // FAC-SEM-053 only, pure
+sessionHandoffManifestFindings(manifest)           // FAC-SEM-053 only, pure but for the host's path rules (SH-4)
 ```
 
 `schema` is a compiled check of `session-handoff.schema.json`; omitted, the kit's own validator is loaded. The

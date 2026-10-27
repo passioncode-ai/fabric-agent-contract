@@ -8531,8 +8531,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `pnpm validate`'s stored paths) reading `\` where it compares `/`, which are tooling and decide nothing.
 - **Decision:**
   1. A provider entry's `manifest` ends in `fabric-agent.json` after `/` or `\` ([provider](specification/provider.md#what-the-schema-adds-to-the-table)).
-  2. SH-4: a host compares a launch argument's path with the folder's file as its own file system reads it: exactly on
-     POSIX; on Windows with either separator and in any case ([session handoff](specification/session-handoff.md), `samePath`).
+  2. SH-4 (and SH-11's `mcp.json` name): a host compares a launch argument's path with the folder's file byte for byte
+     on POSIX, macOS included even on a case-insensitive volume; on Windows with either separator and in any case ([session handoff](specification/session-handoff.md), `samePath`).
   3. The repository keeps every text file LF on every platform (`.gitattributes`), and its nightly gate runs on Windows
      as well as Linux (`.github/workflows/ci.yml`).
 - **Why:** DEC-0032 already makes a Windows path a local path, and DEC-0057 the Windows token reader; a pattern that
