@@ -40,7 +40,7 @@
         },
         {
           "if": { "properties": { "code": { "const": "human-step-required" } }, "required": ["code"] },
-          "then": { "required": ["data"], "properties": { "data": { "type": "object", "required": ["humanStep", "url"], "properties": { "humanStep": { "enum": ["sign-in", "consent", "payment", "secret", "spend-above-limit", "passkey"], "description": "The person's step (DEC-0121 AP-4)." }, "url": { "type": "string", "minLength": 1, "maxLength": 2048, "pattern": "^(https://|/)", "description": "The direct link to that step: an https URL or a path on the service's origin (DEC-0121 AP-4)." } } } } }
+          "then": { "required": ["data"], "properties": { "data": { "type": "object", "required": ["humanStep", "url"], "properties": { "humanStep": { "enum": ["sign-in", "consent", "payment", "secret", "spend-above-limit", "passkey", "comparison"], "description": "The person's step (DEC-0121 AP-4)." }, "url": { "type": "string", "minLength": 1, "maxLength": 2048, "pattern": "^(https://|/)", "description": "The direct link to that step: an https URL or a path on the service's origin (DEC-0121 AP-4)." } } } } }
         }
       ]
     }

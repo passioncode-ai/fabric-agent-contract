@@ -45,7 +45,7 @@ function cases(): Json[] {
     ["none from T2", { action: none, tier: "T2" }, caller],
     ["none from T1 with a decision: still the caller's act", { action: none, tier: "T1", decision: instructed }, caller],
     // gate human (AP-4): the person's step and its direct link, at every tier; a decision changes nothing.
-    ...["sign-in", "consent", "payment", "secret", "spend-above-limit", "passkey"].map((name): [string, Json, Json] => [`human ${name} from T0`, { action: human(name), tier: "T0", humanStepUrl: URL }, step(name)]),
+    ...["sign-in", "consent", "payment", "secret", "spend-above-limit", "passkey", "comparison"].map((name): [string, Json, Json] => [`human ${name} from T0`, { action: human(name), tier: "T0", humanStepUrl: URL }, step(name)]),
     ["human from T1 with the operator's decision: still the person's step", { action: human("payment"), tier: "T1", decision: instructed, humanStepUrl: URL }, step("payment")],
     ["human from T2", { action: human("consent"), tier: "T2", humanStepUrl: URL }, step("consent")],
     ["human with a path on the service's origin", { action: human("consent"), tier: "T0", humanStepUrl: "/dashboard/connect" }, { ok: false, code: "human-step-required", data: { humanStep: "consent", url: "/dashboard/connect" } }],
@@ -158,6 +158,7 @@ function declarations(): Json[] {
     ["no key: nothing to check", { surfaces: {}, extensions: {} }, []],
     ["no extensions: nothing to check", { surfaces: {} }, []],
     ["three actions, each tool served", doc({ actions: [none, relayed, human("sign-in")] }, served), []],
+    ["a human comparison of codes, a step DEC-0142 added", doc({ actions: [relayed, human("comparison")] }, served), []],
     ["no capability list: tools are not compared", doc({ actions: [relayed] }), []],
     ["an id declared twice", doc({ actions: [relayed, { ...none, id: relayed.id }] }, served), [`${KEY_PATH}/actions/1/id`]],
     ["a human action without its step", doc({ actions: [{ ...none, gate: "human" }] }, served), [`${KEY_PATH}/actions/0/humanStep`]],

@@ -145,6 +145,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Forces:** push: keys pasted into chats and `.env` files, one shared key for every agent, no record of which agent called which; pull: one request, one decision, one sealed value that ends by itself; anxiety: a value landing in a person's own context, a relay or a server reading it, a leaver keeping access; habit: creating keys by hand at each provider.
 - **Success metric:** a requested credential reaches only the requesting agent's organization instance, sealed, and ends at most 30 days after it was issued; the server's ledger lists it by name and never by value; every call between agents in the organization's context leaves one record with no person, argument or output.
 
+### JTBD-15: Share a key with someone I trust, see its use, take it back; type a secret into my own app
+
+- **Statement:** When someone I work with needs one of my keys (a model key with a ceiling, a token for one zone), I want to give it to their machine without pasting it, see how much it is used, and take it back, with no organization between us; and when one of my agents needs a value only I can give, I want to type it into my own app's window, never into a chat, so a key reaches only the machine I meant and an agent never sees what I type.
+- **Personas:** P-02
+- **Type:** functional
+- **Forces:** push: keys pasted into chats and messengers, no idea who still holds them, agents asking for tokens in a chat; pull: a link and a six-digit code, a count of uses, one button to take it back; anxiety: a cloud or a stranger catching the link, a copy outliving the share, a window an agent drew to look like the real one; habit: sending the key itself.
+- **Success metric:** a shared value opens only on the recipient's machine for the share's key, after the two people compared one code; a share the sender chose to seal without comparing is shown as not confirmed, with the risk that whoever claimed first holds it; the sender sees uses per day and takes the share back in three steps, each shown with what confirmed it; a secret an agent asked for is stored without the value reaching the agent through the request, a chat or a log; a command the agent later runs with it can still print it.
+
 ## 3. Customer journeys
 
 ### JRN-01: Author — prove provider compatibility (JTBD-01)
@@ -261,6 +269,15 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 2 | Deliver | the token reaches the agent's machine | the agent's vault slot | 4 | the value crosses chats and servers | sealed to the machine's key under the organization's policy key, opened only in its context (priority 9) |
 | 3 | Revoke | a member leaves | the credentials issued into the organization | 2 | keys outlive the people who held them | a signed revocation per credential, deleted at once on the machine (priority 8) |
 | 4 | Trace | the administrator reads who called whom | the calls between agents | 3 | no record, or one full of prompts | one call record per call, agents and outcome only (priority 7) |
+
+### JRN-14: Operator, sharing a key with another person and giving a secret to an agent (JTBD-15)
+
+| # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
+|---|---|---|---|---|---|---|
+| 1 | Share | I make a share and send its link | my app's share screen | 3 | the key itself goes into a chat | a link with a one-time code and my share key's fingerprint, no value (priority 9) |
+| 2 | Confirm | we compare six digits on a call | both apps | 3 | no way to know the link reached the right person | a comparison code a party in the middle matches one time in a million (priority 9) |
+| 3 | Watch and take back | I read uses per day and press "Take back" | my app's share screen | 4 | no idea who still uses it | reports by their machine beside the mailbox's count and the provider's spend; three steps, each shown with what confirmed it (priority 8) |
+| 4 | Give a secret | an agent asks me for a token | my app's own window | 3 | the agent asks in a chat, or a lookalike dialog | a request the node sends only to the signed app, which shows the person's own mark and writes the value straight into the vault (priority 8) |
 
 ## 4. User stories
 
@@ -683,7 +700,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given a service that declares an action `relayed`, when my agent calls its tool from my machine with my decision naming the action and quoting me, then the service takes it as my decision and its audit names the agent it authenticated (`actionDecision`, DEC-0121).
   - Given my agent calls without my decision, when the service answers `operator-decision-required`, then the agent asks me and calls again with my answer quoted.
-  - Given a step only I can take (a sign-in, a consent, a payment, a secret, a passkey signature, spend above a limit), when my agent calls it, then the service answers `human-step-required` with the link to that step.
+  - Given a step only I can take (a sign-in, a consent, a payment, a secret, a passkey signature, spend above a limit, a comparison of codes with another person or the choice to share without one), when my agent calls it, then the service answers `human-step-required` with the link to that step.
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
@@ -708,7 +725,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given I tell my developer agent "run the research on competitors' prices", when it engages the research agent, then the research agent runs the paid research within my project's money limits without asking me and records my words, the task and the chain (`mandateCovers`, DEC-0125).
   - Given the research would cost more than an amount I named, or reach a capability, an effect or a project my words do not name, when the research agent is called, then it refuses with the part not covered and only that part is put to me.
   - Given I approve a change in one agent's chat and another of my agents holds the key, when the first relays my words verbatim with when and where I said them and the scope, from one of my own projects or sessions, then the second acts without asking me again and records my words and where I said them (DEC-0126 OA-1 to OA-7).
-  - Given a sign-in, a consent, a payment, a typed secret or spend above a limit, then my mandate never covers it and the step comes to me.
+  - Given a sign-in, a consent, a payment, a typed secret, spend above a limit, a passkey signature or a comparison of codes with another person or the choice to share without one, then my mandate never covers it and the step comes to me.
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
@@ -723,6 +740,32 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given the organization's server sends my Fabric a membership attestation, when it verifies under the pinned root's key set, for my organization and my audience, then my Fabric trusts the role it states; a forged, revoked-key, other-organization or expired one is refused with the reason (`verifyOrgMembership`, OM-4).
   - Given my membership ends, then my Fabric drafts the revision that revokes the share grants of that organization's context and drops its pin, and once my passkey signs it my device's enrollment ends, the organization's locks lift and nothing more is sent; given only the attestation expired, it authorises nothing new until a fresh one arrives (OM-5, OM-6).
   - Given any of my work, then only what OM-7 lists ever leaves my Fabric for the organization.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-039: Share a key with another person's machine, see its use, take it back
+
+- **Story:** As P-02, I want to share one key with another person's estate by a link and a code we compare, read how it is used, and take it back, so that, once we compared the code, the key reaches only their machine and I know when it no longer works.
+- **Traces:** JTBD-15, JRN-14/#1, JRN-14/#2, JRN-14/#3
+- **Acceptance criteria:**
+  - Given a share, when my node writes its link, then the link carries a one-time code and my share key's fingerprint in its fragment and no value (`shareLink`, `parseShareLink`).
+  - Given a claim whose MAC holds, when we compare the codes, then my node seals nothing until the exchange completes and I confirm the codes match or choose to share without comparing (shown as not confirmed), and a second claim or a code that differs before my share is stored at the mailbox burns the link (a share I sealed in that moment is refused, never served), and a claim after a share stored without comparing warns me to take it back (`claimHolds`, `peerExchangeVerdict`, `checkedPeerCode`).
+  - Given the value sealed to the recipient's share key, when their node opens it, then it opens only for that share's key, signer and sequence (`checkPeerShareEnvelope`).
+  - Given their reports, when I read them, then I see uses per day and consumer labels, never a value (`openPeerReport`), beside the mailbox's own count.
+  - Given "Take back", when the mailbox refuses and the provider confirms the key revoked or rotated, then the share reads taken back; the recipient's deletion receipt is shown as reported by their machine.
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-040: Give an agent a secret in my own app's window, never in a chat
+
+- **Story:** As P-02, I want an agent's request for a secret to reach only my product's signed app, which shows my own mark and writes the value into my vault itself, so that the agent never sees the value through the prompt (a command it runs with the value can still print it) and I can tell its window from a lookalike, both where the operating system keeps other programs out of the app (macOS), unless a program holds my screen-recording or Accessibility permission, which can read the mark from any genuine prompt; on Windows another program of mine can reach into the app, so the promise is weaker there.
+- **Traces:** JTBD-15, JRN-14/#4
+- **Acceptance criteria:**
+  - Given a client that declares `secret.ui`, when the node has not verified it as its product's signed app by the operating system, then its hello is `forbidden` (`channelStep`).
+  - Given an agent's request, when the node prompts, then one admitted client shows the agent the node's binding names, the project, the slot and the agent's reason quoted, and no value travels on the channel (`secret.prompt`).
+  - Given the person stores the value, when the node confirmed the slot was written after the prompt, then the agent is told `stored`; otherwise `unconfirmed`, `declined` or `no-answer` (`secretOutcome`), or `no-client` when no signed app is admitted, the node's answer before it prompts (SP-3).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

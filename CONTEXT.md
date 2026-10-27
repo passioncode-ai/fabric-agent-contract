@@ -756,7 +756,21 @@ usage lines, joined by the runtime's `session.id` (DEC-0068, [activity](docs/spe
 
 **Local channel**: How Fabric's surfaces reach Project Observatory's node on one machine (`fabric-local-channel/0.1`):
 a socket or pipe the operating system proves is the same user's, hello first, consent prompts the other way (DEC-0075,
-[local channel](docs/specification/local-channel.md)).
+[local channel](docs/specification/local-channel.md)), and secret prompts to the product's signed app only (DEC-0143).
+
+**Peer share**: One or more credentials one person shares from their estate with another person's estate, with no
+organization on either side (`fabric-peer-share/1`): a key pair per share on each side, a link with a one-time code, a six-digit code
+the two people compare, the value sealed to the recipient's share key, usage reports back, taken back in three steps.
+Not a context and not a share grant (DEC-0142, [peer share](docs/specification/peer-share.md)).
+
+**Secret prompt**: The window in which the person types a value an agent asked for (`secret.prompt` on the local
+channel), shown only by the product's signed app, which writes the value into the vault itself; the agent learns only
+whether it was stored (DEC-0143, [local channel](docs/specification/local-channel.md#secret-requests)).
+
+**Share mailbox**: The HTTPS service a peer share's link names, which carries its frames and sealed messages and holds
+its revocations, runs the exchange verdict and grants leases, and sees ciphertext, names and traffic metadata, never a
+value (DEC-0142 PS-10).
+
 **Proposal**: A change proposed to a project's manager or the CEO (`fabric-proposal/1`): a rule, an agent, a skill, a
 listing or a fix, with evidence by reference; a rule is approved by a person, nothing applies itself, and nothing
 about a private agent leaves (DEC-0072, [proposals](docs/specification/proposals.md)).
@@ -814,6 +828,8 @@ placement run guards against rollback (DEC-0066).
 
 ## Flagged ambiguities
 
+- "Share" names three things: a share grant (DEC-0086, an id `urn:fabric:share:` and 32 hex digits), a share
+  registration, and a peer share (DEC-0142), whose `shareId` is 32 hex digits alone. Contract documents name which.
 - A2A `AgentSkill` is a remote capability advertisement, not an Agent Skills
   `SKILL.md` instruction package. Contract documents must qualify the term.
 - `Product manager` replaces Fabric's earlier `project manager` term: exactly one

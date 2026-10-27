@@ -61,6 +61,7 @@
   {"name": "local-channel-hello", "schema": "local-channel.schema.json", "path": "positive/local-channel-hello.json", "valid": true},
   {"name": "local-channel-error", "schema": "local-channel.schema.json", "path": "positive/local-channel-error.json", "valid": true},
   {"name": "local-channel-consent-cancel", "schema": "local-channel.schema.json", "path": "positive/local-channel-consent-cancel.json", "valid": true},
+  {"name": "local-channel-secret-cancel", "schema": "local-channel.schema.json", "path": "positive/local-channel-secret-cancel.json", "valid": true},
   {"name": "local-channel-request-without-id", "schema": "local-channel.schema.json", "path": "negative/local-channel-request-without-id.json", "valid": false, "keyword": "oneOf"},
   {"name": "local-channel-unknown-code", "schema": "local-channel.schema.json", "path": "negative/local-channel-unknown-code.json", "valid": false, "keyword": "oneOf"},
   {"name": "local-channel-error-code-mismatch", "schema": "local-channel.schema.json", "path": "negative/local-channel-error-code-mismatch.json", "valid": false, "keyword": "oneOf"},
@@ -1029,5 +1030,13 @@
   {"name": "machine-report-no-estate-record", "schema": "machine-report.schema.json", "path": "negative/machine-report-no-estate-record.json", "valid": false, "keyword": "required"},
   {"name": "machine-report-sealed", "schema": "machine-report-sealed.schema.json", "path": "positive/machine-report-sealed.json", "valid": true},
   {"name": "org-root", "schema": "org-root.schema.json", "path": "positive/org-root.json", "valid": true},
-  {"name": "org-root-flat", "schema": "org-root.schema.json", "path": "negative/org-root-flat.json", "valid": false, "keyword": "required"}
+  {"name": "org-root-flat", "schema": "org-root.schema.json", "path": "negative/org-root-flat.json", "valid": false, "keyword": "required"},
+  {"name": "peer-share-frame-claim", "schema": "peer-share-frame.schema.json", "path": "positive/peer-share-frame-claim.json", "valid": true},
+  {"name": "peer-share-frame-claim-code", "schema": "peer-share-frame.schema.json", "path": "negative/peer-share-frame-claim-code.json", "valid": false, "keyword": "oneOf"},
+  {"name": "peer-share-envelope", "schema": "peer-share-envelope.schema.json", "path": "positive/peer-share-envelope.json", "valid": true},
+  {"name": "peer-share-envelope-value", "schema": "peer-share-envelope.schema.json", "path": "negative/peer-share-envelope-value.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "peer-share-report", "schema": "peer-share-report.schema.json", "path": "positive/peer-share-report.json", "valid": true},
+  {"name": "peer-share-report-device-key", "schema": "peer-share-report.schema.json", "path": "negative/peer-share-report-device-key.json", "valid": false, "keyword": "pattern"},
+  {"name": "peer-share-revocation", "schema": "peer-share-record.schema.json", "path": "positive/peer-share-revocation.json", "valid": true},
+  {"name": "peer-share-deletion-no-revocation", "schema": "peer-share-record.schema.json", "path": "negative/peer-share-deletion-no-revocation.json", "valid": false, "keyword": "oneOf"}
 ]
