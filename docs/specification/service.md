@@ -1037,7 +1037,8 @@ Every button a person has, the person's agent has, and an operator's decision re
   person's ([delegation](delegation.md#trust-tiers) DL-26), and so does a signature by the person's passkey (the
   estate's [ceremonies](ceremonies.md)), and so does a comparison of codes between two people or the choice to share without one (DEC-0142's peer share). Their
   action is still on the agent surface with `gate: human` and its `humanStep` (`sign-in`, `consent`, `payment`, `secret`,
-  `spend-above-limit`, `passkey`, `comparison` from DEC-0142); the tool refuses
+  `spend-above-limit`, `passkey`, `comparison` from DEC-0142; `secret` covers typing a secret in and handing a held one
+  out, as a peer share's export does); the tool refuses
   `human-step-required` with `data.humanStep` and `data.url`, the direct link to that step (an https URL or a path on
   the service's origin; a URL-mode elicitation where the client supports it; for a step held in the product's own app
   window, the comparison and a typed secret, the service's page that names that window), so the agent hands the person the exact

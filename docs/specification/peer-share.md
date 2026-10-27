@@ -108,8 +108,9 @@ before either reveals:
    window that holds the comparison,
    and no agent can confirm a code or skip the comparison for the person. The product declares its other buttons under
    DEC-0121 too: the recipient's "Accept", its consent to the reports (PS-8), is `gate: human` with `humanStep:
-   consent`, and the export button, which hands the value out, is `gate: human` with `humanStep: secret`; "They
-   differ" and the recipient's "Decline" only stop a share.
+   consent`, and the export button, which hands the value out, is `gate: human` with `humanStep: secret`. "Share",
+   "Open a share", "They differ", "Decline" and "Take back" are `gate: relayed`: each only starts, stops or withdraws
+   a share and hands no value out, so an agent presses one on the operator's relayed decision (AP-2).
 
 **One attempt per link, at both ends** (`peerExchangeVerdict`, which the sender's node, the recipient's node and the
 mailbox each run over the frames in the order received): claim, then commit, then the two reveals in either order,
@@ -198,9 +199,10 @@ and the last one, the consumer labels (agent names from its journal) and the exp
 a value, a command, an argument or an output (the rule of `call-record/1`, DEC-0111 item 6). A report holds the UTC days
 since the last day of the previous report the sender read (the current day again, as it grows), one entry per day and
 slot; the sender adds the days into its totals, a later report's entry for a day and slot replacing an earlier one's.
-The report is a condition
-of the share, not a disclosure DEC-0052 governs: the recipient's "Accept" names what the sender will see (agent names,
-uses per day, the time of the last use and of each export), and accepting is the recipient's consent to it.
+Its consumers and exports are those since the previous report the sender read: the sender adds the exports to its
+count and the consumer labels to its list. A list that would pass 400 entries is split over reports of consecutive
+sequences, sent together. The report is a condition of the share, not a disclosure DEC-0052 governs: the recipient's
+"Accept" names what the sender will see (agent names, uses per day, the time of each day's last use and of each export, and, through the mailbox the sender runs, the recipient machine's IP address and when it claims, renews and reports), and accepting is the recipient's consent to it.
 
 `checkPeerReport` refuses, in order, `malformed`, `unsupported-alg`, `wrong-share`, `wrong-recipient`, `bad-key`,
 `bad-signature`, `replayed` (a sequence not above the last one the sender read) and `not-yet-valid`; `openPeerReport`

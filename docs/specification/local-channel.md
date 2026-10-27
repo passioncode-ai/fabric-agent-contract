@@ -134,6 +134,7 @@ the vault slot itself.
   never recorded or logged. Typing and "Store" are the person's own acts: the product declares them with `gate: human`
   and `humanStep: secret` (DEC-0121 AP-4), so an agent's tool for them answers `human-step-required`, with the link to
   the node's page that shows the pending request and names the app window that holds it, and never stores a value.
+  "Decline" is `gate: relayed`: it stores nothing.
   The value never reaches the agent through the prompt; any command the agent later runs with it can still print it.
   The person's acts in the window are theirs only while no program holds the Accessibility permission over the app,
   which can press its buttons (SP-6).

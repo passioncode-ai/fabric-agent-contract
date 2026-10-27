@@ -28,7 +28,7 @@ that the share works between two personal estates with no organization, from the
   one declaration); `src/protocol-revisions.ts` and its test, `tools/vectors/run.ts`, `test/positive-sweep.test.ts`,
   `test/schema-compilation.test.ts`, `vitest.config.ts`.
 - The handoff's row in `docs/handoffs/README.md`.
-- `contexts.md`, `versioning.md`, `conformance.md` (four rows), the specification README, `DOCMAP.md`, `CONTEXT.md`;
+- `contexts.md`, `versioning.md`, `conformance.md` (five rows), the specification README, `DOCMAP.md`, `CONTEXT.md`;
   `docs/ux` JTBD-15, JRN-14, ST-035, ST-037, ST-039, ST-040, FLW-33, FLW-34, SCR-33, SCR-34, SCN-052, SCN-053; `service.md` AP-4, `delegation.md` (DL-26, the refusal table, MD-6, OA-5) and `interop.md` for
   `humanStep: comparison`; DEC-0075, DEC-0084, DEC-0086, DEC-0111, DEC-0121 and DEC-0128 annotated; CT-178 closed on merge; CT-184, CT-185, CT-186 (adoption) and CT-187 filed.
 

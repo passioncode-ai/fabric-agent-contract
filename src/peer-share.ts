@@ -10,7 +10,8 @@
  * The comparison code is DEC-0084's (both sides commit, then both reveal; the first five bytes of a SHA-256 over an
  * RFC 8785 transcript, modulo 10^6) under the share's own types. Keys are P-256 public JWKs, named by their RFC 7638
  * thumbprint. Every checking function answers malformed input with a verdict and never throws on a JSON value; the
- * seal and sign functions throw on an input no receiver would open, and `shareLink` formats only the parts it is given.
+ * seal and sign functions throw on an input no receiver would open, `shareLink` formats only the parts it is given, and
+ * `peerDigest` digests the reader's own values (a string with a lone surrogate has no canonical form).
  */
 import { createECDH, createHash, createHmac, createPublicKey, timingSafeEqual, type KeyObject } from "node:crypto";
 import { rfc8785 } from "./canonical.js";
