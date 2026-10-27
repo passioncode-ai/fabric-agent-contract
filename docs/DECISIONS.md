@@ -8278,14 +8278,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted (on merge of its pull request). A clarification of DEC-0125 and DEC-0121 where they read two
   ways; `actionDecision` gains one input. Consumer adoption: the adapter's kits 0.52.0 (their brief
   `docs/evidence/specs/2026-10-26-faa-138-134-repin-1197a90d-brief.md` D10) pass the job's capability from the Python
-  kit's built-in step gate, but their exported `actionDecision` differs from the reference in three ways over 5 of the
-  13 `jobSteps` (measured by the readings on both ports): with `mandateCapability` absent, empty or not a string it
-  reads `fabric.job.get` and answers `outside-mandate: capability` where the reference answers its fault; with
+  kit's built-in step gate, but their exported `actionDecision` differs from the reference in three ways over 6 of the
+  14 `jobSteps` (measured by the readings on both ports): with `mandateCapability` absent, empty, only whitespace or
+  not a string it answers `outside-mandate: capability` where the reference answers its fault (a non-string is read
+  as `fabric.job.get`, an empty or blank one as given); with
   `mandateCapability` `fabric.job.get` it takes the step as the operator's act where the reference answers its fault;
   and it reads `mandateCapability` on an ordinary action where the reference reads the action's tool. At their repin
   they adopt the reference's reading and vendor the `jobSteps` group; their vendoring already reads every
   `action-call` semantic fixture, so the two new ones (18 in all) reach their tests at the repin. Any other service with a job that waits `input_required`
-  (CT-177).
+  passes `mandateCapability` (CT-149, with the adapter's repin).
 - **Context:** the adapter asked (board thread `aa86a675`) under which capability a mandate is read when it answers a
   job's input request. AP-2 makes the input request an action whose tool is `fabric.job.get`, and `actionDecision`
   read a mandate with `capability = action.tool`; C3.3 and MD-3 read the step as the start, under the job's
@@ -8310,15 +8311,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   kits read it under the job's capability on the Python kit's built-in step gate, and under `fabric.job.get` when a
   caller of their exported `actionDecision` passes no usable `mandateCapability` (Status); no other released service
   is known to read a step's mandate.
-  `actionDecision` refuses `fabric.job.get` as `mandateCapability`. A service that repins passes `mandateCapability`
+  `actionDecision` answers its own fault for `fabric.job.get`, or any value that is not a capability name, as
+  `mandateCapability`. A service that repins passes `mandateCapability`
   for every job step its mandate path reads; on its own fault the step waits `input_required`, as for a mandate that
   does not cover it (MD-4), and the operator is asked. `fixtures/vectors/actions.json` gains a `jobSteps`
-  group (13 cases); `cases` is unchanged; kind `action-call` gains member `mandateCapability`, with two fixtures. `contractVersion` stays
+  group (14 cases); `cases` is unchanged; kind `action-call` gains member `mandateCapability`, with two fixtures. `contractVersion` stays
   `0.1.0`.
 - **Consequences / affects:** `src/actions.ts` (`mandateCapability`, `JOB_STEP_TOOL`, the fault), `src/semantic-kinds.ts` (`action-call`'s member),
   `fixtures/semantic/action-call-mandate-job-step*.json`, `tools/vectors/actions.ts`,
   `fixtures/vectors/actions.json`, `test/actions.test.ts`; `docs/specification/delegation.md` (MJ-1, MD-1, MD-2a,
   Covered), `schemas/mandate.schema.json` (the `actions` description), `service.md` (AP-2, the reference's inputs and
   faults), `interop.md` (C3.3), `conformance.md` (the callee row), `DOCMAP.md`; DEC-0121 and DEC-0125 annotated; backlog CT-177 (closed on merge),
-  CT-178 and CT-180 (filed); the handoff `docs/handoffs/2026-10-26-mandate-job-step.md` and its row in `docs/handoffs/README.md`.
+  CT-149 (the adoption) and CT-180 (filed); the handoff `docs/handoffs/2026-10-26-mandate-job-step.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-177; the adapter's question `46433e3a` (thread `aa86a675`).

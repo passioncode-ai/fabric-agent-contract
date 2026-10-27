@@ -11,7 +11,7 @@ answers a job's input request, and add a vector for it.
   request key as the action, the job's effect; `fabric.job.get` in a mandate covers no other job's step.
 - `actionDecision` takes `mandateCapability` for a job's input request; without it the service's fault
   `mandate-capability-missing` (`src/actions.ts`).
-- `fixtures/vectors/actions.json` gains `jobSteps` (13 cases, written by `tools/vectors/actions.ts`), run by
+- `fixtures/vectors/actions.json` gains `jobSteps` (14 cases, written by `tools/vectors/actions.ts`), run by
   `test/actions.test.ts`.
 - AP-2 (`service.md`), C3.3 (`interop.md`) and the callee row in `conformance.md` name it; DEC-0125 annotated.
 - CT-178 filed for Project Observatory's three asks (request `c50f590b`), acknowledged on the board.
@@ -19,10 +19,12 @@ answers a job's input request, and add a vector for it.
 ## Open
 
 - Reply on thread `aa86a675` with the DEC id and the release tag once merged. At its repin the adapter adopts the
-  reference's reading in its exported `actionDecision` (5 of 13 `jobSteps` differ on kit 0.52.0: absent, empty or
-  non-string `mandateCapability` answer `outside-mandate: capability` and `fabric.job.get` as `mandateCapability` is
-  taken as covered, both instead of the fault; an ordinary action reads `mandateCapability` instead of its tool),
-  vendors the `jobSteps` group, and expects 18 `action-call` fixtures (its vendoring reads them by glob).
+  reference's reading in its exported `actionDecision` (6 of 14 `jobSteps` differ on kit 0.52.0: absent, empty,
+  blank or non-string `mandateCapability` answer `outside-mandate: capability` and `fabric.job.get` as
+  `mandateCapability` is taken as covered, both instead of the fault; an ordinary action reads `mandateCapability`
+  instead of its tool), vendors the `jobSteps` group, and expects 18 `action-call` fixtures (its vendoring reads them
+  by glob, so its two count asserts pinned at 16 and the no-capability fixture go red until it adopts). Its ports map
+  the fault to the caller as `operator-decision-required` (MJ-1), not `unknown-state`.
 - CT-178: answer Observatory by 2026-11-04.
 
 ## Checks actually run

@@ -147,6 +147,8 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
 
 /** The tool of a job's input request (C3.3, AP-2): the call that answers it is `fabric.job.get`. */
 export const JOB_STEP_TOOL = "fabric.job.get" as const;
+/** `common.schema.json#/$defs/capabilityName`: the form a job's capability must have to be read (MJ-1). */
+const CAPABILITY_NAME = /^[a-z][a-z0-9._-]{1,127}$/;
 
 /**
  * A relayed action's call that carries a mandate and no decision (DEC-0125 MD-3): the mandate decides. A job's input
@@ -160,7 +162,7 @@ function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: s
   if (typeof input.self !== "string") return { fault: "self-missing" };
   const capability = action.tool === JOB_STEP_TOOL ? input.mandateCapability : action.tool;
   // MJ-1: never the transport itself, so a lazily passed `fabric.job.get` cannot bring the old reading back.
-  if (typeof capability !== "string" || capability.trim().length === 0 || capability === JOB_STEP_TOOL) return { fault: "mandate-capability-missing" };
+  if (typeof capability !== "string" || !CAPABILITY_NAME.test(capability) || capability === JOB_STEP_TOOL) return { fault: "mandate-capability-missing" };
   const answer = mandateCovers({
     mandate: input.mandate, tier: input.tier, now: input.now, self: input.self,
     ...(input.callerAgent === undefined ? {} : { callerAgent: input.callerAgent }),

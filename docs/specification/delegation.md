@@ -591,8 +591,11 @@ it reaches acts on them without asking, within what they cover.
   what the step does (its own knowledge, as AP-2's effect); a step whose `mandateCapability` the service cannot give
   waits `input_required` as MD-4 says, and a mandate covers a job's steps by the job's capability, since a step's
   request key is the service's own and no leading agent can name it in advance (an `actions`-only mandate covers a
-  request key on every job of the service); a mandate whose
-  `capabilities` name `fabric.job.get` covers no step of another capability. The
+  request key on every job of the service, and a mandate that lists `actions` covers only the steps whose keys it
+  names, so a leading agent covering a job's steps lists the capability without actions); a mandate whose
+  `capabilities` name `fabric.job.get` covers no step of another capability. A step the service cannot read under a
+  mandate (its own fault) is answered to the caller as one the mandate does not cover: `operator-decision-required`,
+  the job staying `input_required`. The
   mandate travels in `_meta.mandate` (an MCP call, the `fabric.job.get` that answers an input request), in
   `call.mandate` (the hub's `agent.call`, which forwards it as `_meta.mandate`; a sealed call, sent only to a target
   that lists `mandate/1`), or in a project-board request ([project-comms](project-comms.md)) whose sender the target
