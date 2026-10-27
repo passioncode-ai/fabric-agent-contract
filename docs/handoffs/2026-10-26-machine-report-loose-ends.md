@@ -40,6 +40,9 @@ question to CT-172.
 - Rounds 1 to 4 each failed on one tier; rounds 5 and 6 passed on all three (unit, seam, product), the finish line.
   Their non-blocking findings are CT-172 rows.
 
+- Merged 2026-10-27 after DEC-0138 as #213 (`3830a335`), gate on the merged tree exit 0 (9676 tests); released
+  `v0.1.0+2026-10-27.6`; Fabric's hub and Observatory's node told on thread `41a9b0cb` (CT-152). The merge with
+  `origin/main` was resolved as planned below.
 - Merge after DEC-0138 (PR #212). Merging `origin/main` in once #212 lands conflicts in `docs/DECISIONS.md` (DEC-0138
   before DEC-0139), `docs/backlog.md` (CT-169, CT-171, CT-172 in id order) and `docs/handoffs/README.md` (DEC-0139's row
   above DEC-0138's); then run the gate again.
