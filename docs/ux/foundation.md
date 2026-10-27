@@ -750,7 +750,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Traces:** JTBD-15, JRN-14/#1, JRN-14/#2, JRN-14/#3
 - **Acceptance criteria:**
   - Given a share, when my node writes its link, then the link carries a one-time code and my share key's fingerprint in its fragment and no value (`shareLink`, `parseShareLink`).
-  - Given a claim whose MAC holds, when we compare the codes, then my node seals nothing until the exchange completes and I confirm the codes match or choose to share without comparing (shown as not confirmed), and a second claim or a code that differs before I confirm burns the link, and a claim after a share sealed without comparing warns me to take it back (`claimHolds`, `peerExchangeVerdict`, `checkedPeerCode`).
+  - Given a claim whose MAC holds, when we compare the codes, then my node seals nothing until the exchange completes and I confirm the codes match or choose to share without comparing (shown as not confirmed), and a second claim or a code that differs before my share is stored at the mailbox burns the link (a share I sealed in that moment is refused, never served), and a claim after a share stored without comparing warns me to take it back (`claimHolds`, `peerExchangeVerdict`, `checkedPeerCode`).
   - Given the value sealed to the recipient's share key, when their node opens it, then it opens only for that share's key, signer and sequence (`checkPeerShareEnvelope`).
   - Given their reports, when I read them, then I see uses per day and consumer labels, never a value (`openPeerReport`), beside the mailbox's own count.
   - Given "Take back", when the mailbox refuses and the provider confirms the key revoked or rotated, then the share reads taken back; the recipient's deletion receipt is shown as reported by their machine.
@@ -760,7 +760,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-040: Give an agent a secret in my own app's window, never in a chat
 
-- **Story:** As P-02, I want an agent's request for a secret to reach only my product's signed app, which shows my own mark and writes the value into my vault itself, so that the agent never sees the value and I can tell its window from a lookalike, both where the operating system keeps other programs out of the app (macOS); on Windows another program of mine can reach into the app, so the promise is weaker there.
+- **Story:** As P-02, I want an agent's request for a secret to reach only my product's signed app, which shows my own mark and writes the value into my vault itself, so that the agent never sees the value and I can tell its window from a lookalike, both where the operating system keeps other programs out of the app (macOS), unless a program holds my screen-recording permission, which can read the mark from any genuine prompt; on Windows another program of mine can reach into the app, so the promise is weaker there.
 - **Traces:** JTBD-15, JRN-14/#4
 - **Acceptance criteria:**
   - Given a client that declares `secret.ui`, when the node has not verified it as its product's signed app by the operating system, then its hello is `forbidden` (`channelStep`).

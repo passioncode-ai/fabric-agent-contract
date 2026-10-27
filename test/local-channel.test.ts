@@ -5,6 +5,7 @@ import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { admitPeer, CLIENT_CAPABILITIES, CLIENT_METHODS, channelStep, consentOutcome, ERROR_CODES, lineWithinLimit, LOCAL_CHANNEL_PROTOCOL, MAX_LINE_BYTES, MAX_SECRET_DEADLINE_MS, mayPrompt, maySecretPrompt, NODE_METHODS, secretOutcome } from "../src/local-channel.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
+import { VECTOR_FILE, buildLocalChannelVectors } from "../tools/vectors/local-channel.js";
 
 // DEC-0075 (CON-OE-10, v4 edition, agreed with Project Observatory's session): the local channel to the node.
 const dir = path.join(projectRoot(), "fixtures/semantic");
@@ -277,5 +278,25 @@ describe("the message definitions validate what they name", () => {
     }
     expect(whole({ jsonrpc: "2.0", id: 1, error: { code: -32004, message: "m" } })).toBe(false);
     expect(whole({ jsonrpc: "2.0", id: 1, error: { code: -32004, message: "m", data: { code: "hello-first" } } })).toBe(false);
+  });
+});
+
+describe("the shared vectors (local-channel.json)", () => {
+  const vectors = JSON.parse(readFileSync(path.join(projectRoot(), VECTOR_FILE), "utf8")) as { sessions: any[]; outcomes: any[] };
+  it("is what its generator writes", () => {
+    expect(readFileSync(path.join(projectRoot(), VECTOR_FILE), "utf8")).toBe(buildLocalChannelVectors());
+  });
+  it.each(vectors.sessions)("session: $name", (c) => {
+    let state: any = { ...fresh, ...(c.signedApp === undefined ? {} : { signedApp: c.signedApp }) };
+    c.messages.forEach((message: unknown, i: number) => {
+      const got = channelStep(state, message);
+      state = got.state;
+      const expected = c.answers[i];
+      expect({ ok: got.ok, code: got.ok ? null : got.code, hello: state.hello, ...(state.capabilities ? { capabilities: [...state.capabilities] } : {}) }, `message ${i}`).toEqual(expected);
+    });
+    expect({ mayPrompt: mayPrompt(state), maySecretPrompt: maySecretPrompt(state) }).toEqual(c.after);
+  });
+  it.each(vectors.outcomes)("outcome: $name", (c) => {
+    expect(secretOutcome(c.promptedAt, c.deadline, c.answers, c.written)).toBe(c.expect);
   });
 });

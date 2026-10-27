@@ -8352,7 +8352,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fabric-peer-share-envelope/1`, `fabric-peer-share-report/1`, `peer-share-revocation/1`, `peer-share-deletion/1`) and
   a named profile, `fabric-peer-share/1`; and one widening: `humanStep` gains `comparison` in
   `service-actions-extension.schema.json` and `delegation-refusal.schema.json`, which a reader pinned before refuses, and
-  `actions.json` gains one case. Consumer adoption: Project
+  `actions.json` gains one case and one declaration. Consumer adoption: Project
   Observatory's engine replaces its own `observatory-share-envelope/1` with this profile at its next pin (CT-186).
 - **Context:** Project Observatory asked (board request `c50f590b`, thread `faa32585`; its row OBS-262; its design
   `docs/design/PERSON-SURFACES.md` at `b0bb0abd`, D2, D3, D8) for a person-to-person share profile, for the operator's
@@ -8399,18 +8399,19 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   holding the value under its own key (every breach of the mailbox would be a breach of the key).
 - **Compatibility:** additive: new schemas, new protocol names in the register, a new vector file; and one widening of
   a closed enum, `humanStep` gaining `comparison`, which a reader pinned before refuses, so a product declares it only to
-  readers at or after DEC-0142; `actions.json`'s `cases` gain one case (`human comparison from T0`). `contractVersion`
+  readers at or after DEC-0142; `actions.json` gains one case (`human comparison from T0`) and one declaration (`a human comparison of codes, a step
+  DEC-0142 added`). `contractVersion`
   stays `0.1.0`.
 - **Consequences / affects:** `src/peer-share.ts`, `src/protocol-revisions.ts`, `src/actions.ts` (`HumanStep`),
   `schemas/service-actions-extension.schema.json` and `schemas/delegation-refusal.schema.json` (`comparison`),
-  `tools/vectors/actions.ts` and `fixtures/vectors/actions.json` (one case), `docs/specification/service.md` (AP-4), `delegation.md` (DL-26, the refusal table, MD-6, OA-5), `interop.md`, `schemas/peer-share-*.schema.json`
+  `tools/vectors/actions.ts` and `fixtures/vectors/actions.json` (one case, one declaration), `test/protocol-revisions.test.ts`, `vitest.config.ts`, `docs/specification/service.md` (AP-4), `delegation.md` (DL-26, the refusal table, MD-6, OA-5), `interop.md`, `schemas/peer-share-*.schema.json`
   (four), `tools/vectors/peer-share.ts` and `tools/vectors/run.ts`, `fixtures/vectors/peer-share.json`,
   `test/peer-share.test.ts`, `fixtures/positive/peer-share-*.json` and `fixtures/negative/peer-share-*.json` with their
   catalogue rows, `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`; `docs/specification/peer-share.md`,
   `contexts.md`, `versioning.md`, `conformance.md`, `docs/specification/README.md`, `DOCMAP.md`, `CONTEXT.md`;
-  `docs/ux/foundation.md` (JTBD-15, JRN-14, ST-039), `docs/ux/flows.md` (FLW-33), `docs/ux/screens.md` (SCR-33),
+  `docs/ux/foundation.md` (JTBD-15, JRN-14, ST-035, ST-037, ST-039), `docs/ux/flows.md` (FLW-33), `docs/ux/screens.md` (SCR-33),
   `docs/ux/scenarios.md` (SCN-052); DEC-0084, DEC-0086, DEC-0111, DEC-0121 and DEC-0128 annotated;
-  backlog CT-178 (closed on merge with DEC-0143), CT-185, CT-186 and CT-187; the handoff `docs/handoffs/2026-10-27-peer-share.md`.
+  backlog CT-178 (closed on merge with DEC-0143), CT-185, CT-186 and CT-187; the handoff `docs/handoffs/2026-10-27-peer-share.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-178; Project Observatory's request `c50f590b` (thread `faa32585`), its reply `1623e11f`.
 
 ### DEC-0143: a secret request on the local channel, `secret.prompt`, shown only by the product's signed app
@@ -8457,8 +8458,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/local-channel.ts` (`CLIENT_CAPABILITIES`, `secret.prompt`, `ChannelState.signedApp`,
   `maySecretPrompt`, `secretOutcome`, the `forbidden` hello), `schemas/local-channel.schema.json` (`secret.ui`,
-  `secretPrompt`, `secretResult`, `secret.cancel`), `test/local-channel.test.ts`,
-  `fixtures/positive/local-channel-secret-cancel.json`; `docs/specification/local-channel.md`, `conformance.md`, `docs/specification/README.md`,
+  `secretPrompt`, `secretResult`, `secret.cancel`), `test/local-channel.test.ts`, `fixtures/vectors/local-channel.json`
+  (written by `tools/vectors/local-channel.ts`, registered in `tools/vectors/run.ts`),
+  `fixtures/positive/local-channel-secret-cancel.json` with its catalogue row; `docs/specification/local-channel.md`, `conformance.md`, `docs/specification/README.md`,
   `DOCMAP.md`, `CONTEXT.md`; `docs/ux/foundation.md` (ST-040), `docs/ux/flows.md` (FLW-34), `docs/ux/screens.md` (SCR-34),
   `docs/ux/scenarios.md` (SCN-053); DEC-0075 annotated; backlog CT-178, CT-184
   and CT-186.

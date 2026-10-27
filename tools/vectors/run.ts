@@ -26,6 +26,7 @@ import * as orgExchange from "./org-exchange.js";
 import * as folderAttribution from "./folder-attribution.js";
 import * as hubMove from "./hub-move.js";
 import * as jobLimits from "./job-limits.js";
+import * as localChannel from "./local-channel.js";
 import * as machineCall from "./machine-call.js";
 import * as machineReport from "./machine-report.js";
 import * as mandate from "./mandate.js";
@@ -56,6 +57,7 @@ export const GENERATORS: readonly Generator[] = [
   { source: "folder-attribution.ts", build: one(folderAttribution.VECTOR_FILE, folderAttribution.buildFolderAttributionVectors) },
   { source: "hub-move.ts", build: one(hubMove.VECTOR_FILE, hubMove.buildHubMoveVectors) },
   { source: "job-limits.ts", build: one(jobLimits.VECTOR_FILE, jobLimits.buildJobLimitVectors) },
+  { source: "local-channel.ts", build: one(localChannel.VECTOR_FILE, localChannel.buildLocalChannelVectors) },
   { source: "machine-call.ts", build: one(machineCall.VECTOR_FILE, machineCall.buildMachineCallVectors) },
   { source: "machine-report.ts", build: one(machineReport.VECTOR_FILE, machineReport.buildMachineReportVectors) },
   { source: "mandate.ts", build: one(mandate.VECTOR_FILE, mandate.buildMandateVectors) },

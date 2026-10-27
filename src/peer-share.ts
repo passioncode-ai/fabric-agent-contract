@@ -414,7 +414,7 @@ function marksRead(marks: unknown): marks is PeerMark[] | undefined {
 
 /**
  * Every check of a peer-share envelope short of opening it, in this order; the first that fails names the refusal:
- * `malformed` (shape, clock or marks that do not read), `unsupported-alg`, `wrong-share`, `wrong-recipient`, `bad-key`
+ * `malformed` (shape, clock, marks or a revocation flag that do not read), `unsupported-alg`, `wrong-share`, `wrong-recipient`, `bad-key`
  * (an `enc` off the curve, or a signer other than the sender's confirmed share `#sig`), `bad-signature`, `revoked`,
  * `replayed` (a sequence below the mark for the share and slot) and `sequence-reused` (another envelope at the mark's
  * sequence; the same envelope again passes), `not-yet-valid` (`iat` more than 60 s ahead), `lifetime-too-long` (more

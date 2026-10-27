@@ -117,7 +117,10 @@ reason. A commit that reflects the claim's own keys is not a burn of the verdict
 node that kept it. Once the sender has confirmed or shared without comparing, the exchange is over: the nodes and the mailbox read no further exchange frames for the
 share, so a late frame burns nothing that is already sealed. The mailbox learns the share is sealed from the first envelope
 stored for it, and still carries a claim that arrives after that to the sender's node, which shows it beside a share
-sealed without comparing as a warning to take the share back. A burnt exchange seals nothing. A new attempt is a new share, with a new id and a new code, that
+sealed without comparing as a warning to take the share back. Until the first envelope is stored the mailbox keeps
+running the verdict: a frame that burns the exchange there (a claim after completion is `closed`) it carries to both
+nodes with its reason, and it then stores no envelope and grants no lease for the share, refusing the sender's upload
+with the burn, so a share sealed in that moment is never served and the sender's screen reads it burnt. A burnt exchange seals nothing. A new attempt is a new share, with a new id and a new code, that
 the sender makes. The recipient's app reveals a nonce for a share id once and never again, so a mailbox posing as the
 sender cannot rerun the recipient's side for fresh codes.
 
@@ -140,7 +143,10 @@ and the commit frames; the nonces carry the bound.
   honest recipient within a day whatever was set;
 - an envelope lives at most 90 days, so a value is sealed again at least that often and an old ciphertext stops opening;
 - a usage report carries no random nonce: its sequence and the header bound into the additional data already refuse a
-  replay or a report moved between shares (PS-8).
+  replay or a report moved between shares (PS-8);
+- requests to the mailbox are signed with DEC-0056's construction and the share keys (PS-10), not D8's own scheme with
+  the node's `#sig`: one request-signing construction in the contract, and the share keys keep a share apart from the
+  device keys (PS-2).
 
 ## The envelope (PS-7)
 
@@ -215,13 +221,18 @@ The mailbox is any HTTPS service the sender names as the link's origin: hosted i
 by a personal cloud. It carries frames, envelopes, reports and records unchanged and holds revocations; it signs
 nothing, opens nothing, and decides nothing about a value or about whom the sender trusts. Its own duties are
 mechanical: it runs `peerExchangeVerdict` over a share's frames and stops carrying the exchange of a burnt one, runs no
-verdict after the first envelope stored for the share but still carries a later claim to the sender (PS-6), grants
+verdict after the first envelope stored for the share but still carries a later claim to the sender (PS-6), carries
+the frame that burns an exchange to both nodes with its reason and then stores no envelope and grants no lease for that
+share, grants
 an honest recipient a lease of at most 24 hours and counts each delivery (PS-7), and refuses every renewal and delivery
 after a revocation (PS-9). The recipient's node never opens a ciphertext on a lease older than 24 hours from its grant,
 whatever the mailbox said.
 
-- **Requests** to it are signed under DEC-0056's RFC 9421 subset (`@method`, `@target-uri`, `content-digest`, `created`,
-  `nonce`, `keyid`; [devices](devices.md)) by the share key of the side that sends them, the recipient's from its claim
+- **Requests** to it are signed with DEC-0056's construction ([devices](devices.md)'s table: components `@method`,
+  `@target-uri`, `content-digest`; parameters `created`, `nonce`, `keyid`, `alg`, in that order) under the label
+  `fabric-peer-share` in place of `fabric-device`, `keyid` the RFC 7638 thumbprint of the signing share `#sig` in place
+  of a certificate's serial, `alg` `ecdsa-p256-sha256`, the mailbox keeping each share's nonces for the 300 s window,
+  by the share key of the side that sends them, the recipient's from its claim
   on; a share's creation by the sender's share `#sig` and a key the product registers for the mailbox's owner.
 - **The landing page** at the share's path sends nothing of the fragment to the server. It may read it to build the
   product's deep link, which is why that hand-over carries no pin (PS-4).
@@ -242,7 +253,10 @@ whatever the mailbox said.
 
 The mailbox's HTTP routes (CT-185), and the signed record it leaves when it moves to another host; a recipient's second machine
 (until an estate carries a share between its own machines); sealing the sender's labels; using the mailbox for sealed
-transport between one person's own machines when no relay is deployed.
+transport between one person's own machines when no relay is deployed. Who pays for a share's use and how a meter
+reads it (CT-187): spend-policy rule 1 refuses a source that is neither the project's own key nor another agent's
+capability, so until that is decided a recipient's metered agent cannot use a share, and the sender's totals count
+another estate's use.
 
 ## Reference and vectors
 

@@ -14,6 +14,7 @@ import {
   openPeerShare,
   parseShareLink,
   peerCommit,
+  peerComparisonCode,
   peerExchangeVerdict,
   peerFrame,
   peerJwk,
@@ -95,6 +96,10 @@ describe("commit, reveal and the comparison code", () => {
     expect(peerCommit({ ...c.sender, role: "witness" })).toEqual({ ok: false, problem: "bad-role" });
     expect(peerCommit({ ...c.sender, shareId: "NOT-AN-ID" })).toEqual({ ok: false, problem: "bad-share" });
     expect(checkedPeerCode("sha256:short", c.sender, c.recipientCommit, c.recipient)).toEqual({ ok: false, problem: "malformed" });
+    // Coding directly, without the commitments: a side that does not read, and the roles swapped.
+    expect(peerComparisonCode(c.sender, { ...c.recipient, nonce: "short" })).toEqual({ ok: false, problem: "bad-nonce" });
+    expect(peerComparisonCode(c.recipient, c.sender)).toEqual({ ok: false, problem: "role-mismatch" });
+    expect(peerComparisonCode(c.sender, c.recipient)).toEqual({ ok: true, code: c.expect.code });
   });
 });
 
