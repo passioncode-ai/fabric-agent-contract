@@ -1035,8 +1035,9 @@ Every button a person has, the person's agent has, and an operator's decision re
   agent that is not sure the operator decided asks them (DEC-0121).
 - **AP-4, human gates stay.** Sign-ins, consents, payments and top-ups, typed secrets and spend above a limit stay the
   person's ([delegation](delegation.md#trust-tiers) DL-26), and so does a signature by the person's passkey (the
-  estate's [ceremonies](ceremonies.md)). Their action is still on the agent surface with `gate: human` and its
-  `humanStep` (`sign-in`, `consent`, `payment`, `secret`, `spend-above-limit`, `passkey`); the tool refuses
+  estate's [ceremonies](ceremonies.md)), and so does a comparison of codes between two people (DEC-0142's peer share). Their
+  action is still on the agent surface with `gate: human` and its `humanStep` (`sign-in`, `consent`, `payment`, `secret`,
+  `spend-above-limit`, `passkey`, `comparison` from DEC-0142); the tool refuses
   `human-step-required` with `data.humanStep` and `data.url`, the direct link to that step (an https URL or a path on
   the service's origin; a URL-mode elicitation where the client supports it), so the agent hands the person the exact
   button (DEC-0121). An https URL is another party's page; a step on the service's own page is a path, which the agent

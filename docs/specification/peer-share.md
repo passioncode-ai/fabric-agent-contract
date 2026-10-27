@@ -46,7 +46,8 @@ separation the proposal wanted, with no reader's pattern changed.
 
 ## The link (PS-4)
 
-`https://<mailbox origin>/s/<shareId>#c=<code>&k=<fpr>` (`parseShareLink`, `shareLink`):
+`https://<mailbox origin>/s/<shareId>#c=<code>&k=<fpr>` (`parseShareLink`, `shareLink`; the link is read after WHATWG URL
+normalisation, so a dot segment or an upper-case host reads as the same parts):
 
 - the mailbox's HTTPS origin (PS-10), no user information, no query; the path `/s/` and the share id, 16 random bytes
   the sender's node draws as 32 lower-case hex digits, never derived from a name, a path or an id of either estate;
@@ -93,10 +94,13 @@ before either reveals:
    `{type: "fabric-peer-code/1", shareId, sender: {keys, nonce}, recipient: {keys, nonce}}`, the code the first five
    bytes of its SHA-256 as a big-endian integer, modulo 10^6, six digits with leading zeros. It binds both sides' keys,
    both nonces and the share.
-4. The two people compare the codes by a call or a thread they already trust. The sender's node seals nothing until
-   the sender confirms they match. The confirmation is the person's own act, never an agent's: no agent twin of it
-   exists (DEC-0121's human gate), since an agent that confirmed would make every share trust on first use. A sender who skips the comparison seals to a key nobody confirmed (trust on first
-   use): the sender's screen records the share as `confirmed: false` and says so.
+4. The two people compare the codes by a call or a thread they already trust. After the exchange completes, the
+   sender's node seals nothing until the sender either confirms they match or chooses "Share without comparing"; the
+   second seals to a key nobody confirmed (trust on first use), and the sender's screen records the share as
+   `confirmed: false` and says so. Both are the person's own acts: each is declared with `gate: human` and `humanStep:
+   comparison` (DEC-0121 AP-4), so the agent's tool for it answers `human-step-required` with the link to the screen,
+   and no agent can confirm a code or skip the comparison for the person. The product declares its other buttons under
+   DEC-0121 too; "They differ" and the recipient's "Decline" only stop a share.
 
 **One attempt per link, at both ends** (`peerExchangeVerdict`, which the sender's node, the recipient's node and the
 mailbox each run over the frames in the order received): claim, then commit, then the two reveals in either order,
@@ -105,7 +109,8 @@ order (`out-of-order`), a second frame of one step and role before completion (`
 reveal that does not open its commitment (`commit-mismatch`), an abort before completion or the one after it
 (`aborted`), any other frame after completion and anything after that abort (`closed`), a frame of another share or
 another shape (`malformed`), or the claim deadline passing before completion (`expired`). A frame of another share or another shape is `malformed` wherever it comes, before any other
-reason. A node keeps the first burnt verdict it reaches and reads the share no further: the verdict carries no arrival times, so `expired` holds only for a
+reason. A commit that reflects the claim's own keys is not a burn of the verdict: it stops at the code, which
+`checkedPeerCode` refuses as `same-keys`, so nothing is sealed. A node keeps the first burnt verdict it reaches and reads the share no further: the verdict carries no arrival times, so `expired` holds only for a
 node that kept it. Once the sender has confirmed, the exchange is over: the nodes and the mailbox read no further exchange frames for the
 share, so a late frame burns nothing that is already sealed. A burnt exchange seals nothing. A new attempt is a new share, with a new id and a new code, that
 the sender makes. The recipient's app reveals a nonce for a share id once and never again, so a mailbox posing as the
@@ -143,7 +148,7 @@ life of at most 90 days) and `enc`; never the value. A share's envelope never op
 organization's (DEC-0111), nor the reverse: the `info` differs.
 
 `checkPeerShareEnvelope(envelope, context)` runs every check short of opening, in this order, the first that fails
-naming the refusal: `malformed` (shape, a clock or marks that do not read), `unsupported-alg`, `wrong-share`,
+naming the refusal: `malformed` (shape, a clock, marks or a revocation flag that do not read), `unsupported-alg`, `wrong-share`,
 `wrong-recipient` (not this share's `#kem`), `bad-key` (an `enc` off the curve, or a signer other than the sender's
 share `#sig` confirmed in the exchange), `bad-signature`, `revoked` (a revocation stands, PS-9), `replayed` (a sequence
 below the mark for the share and slot) and `sequence-reused` (another envelope at the mark's sequence; the same
@@ -182,7 +187,7 @@ value was not exported; it says how many exports were made with the button.
 
 ## Taking a share back (PS-9)
 
-In this order, each step shown with what confirmed it:
+Started in this order, each step shown with what confirmed it:
 
 1. **The mailbox refuses.** The sender's node sends `peer-share-revocation/1` (`{type, shareId, at, signer, sig}`,
    signed by the sender's share `#sig`); the mailbox holds it and refuses every renewal and delivery for the share from
@@ -244,3 +249,7 @@ transport between one person's own machines when no relay is deployed.
 | the envelope | `sealPeerShare`, `checkPeerShareEnvelope`, `openPeerShare` | `envelopes` |
 | usage reports | `sealPeerReport`, `peerReportBody`, `checkPeerReport`, `openPeerReport` | `reports` |
 | revocation, deletion | `signPeerRecord`, `peerRecordStands` | `records` |
+
+The 7-day claim deadline and the 24-hour lease are bounds the sender's node and the mailbox keep; the reference checks
+neither (`MAX_CLAIM_DAYS` and `MAX_LEASE_SECONDS` name them), and no vector carries them until the mailbox's routes do
+(CT-185).

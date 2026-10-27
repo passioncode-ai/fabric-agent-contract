@@ -145,6 +145,12 @@ function exchanges(): Json[] {
     run("a claim whose MAC does not hold, first: it is the link's one claim, and the holder's claim burns it", [{ ...CLAIM, keys: STRANGER, mac: macOf(OTHER_CODE, SHARE, STRANGER, FPR), commit: commitOf("recipient", SHARE, STRANGER, N_X) }, CLAIM], { state: "burnt", reason: "repeated", index: 1 }),
     run("a frame of another share", [CLAIM, { ...COMMIT, shareId: OTHER_SHARE }], { state: "burnt", reason: "malformed", index: 1 }),
     run("a frame with a member more", [{ ...CLAIM, note: "x" }], { state: "burnt", reason: "malformed", index: 0 }),
+    run("a claim whose keys are one key twice", [{ ...CLAIM, keys: { sig: K.rSig.jwk, kem: K.rSig.jwk } }], { state: "burnt", reason: "malformed", index: 0 }),
+    run("a claim whose MAC is not 32 bytes", [{ ...CLAIM, mac: "short" }], { state: "burnt", reason: "malformed", index: 0 }),
+    run("a reveal in no role", [CLAIM, COMMIT, { ...REVEAL_R, role: "witness" }], { state: "burnt", reason: "malformed", index: 2 }),
+    run("a reveal whose nonce is not 32 bytes", [CLAIM, COMMIT, { ...REVEAL_R, nonce: N_R.slice(0, 40) }], { state: "burnt", reason: "malformed", index: 2 }),
+    run("a step that does not exist", [frame("accept", { shareId: SHARE })], { state: "burnt", reason: "malformed", index: 0 }),
+    run("a commit that reflects the claim's own keys: open; the code refuses it", [CLAIM, { ...COMMIT, keys: RECIPIENT, commit: commitOf("sender", SHARE, RECIPIENT, N_S) }], { state: "open" }),
     run("a frame of another shape after that abort: malformed wherever it comes", [CLAIM, COMMIT, REVEAL_R, REVEAL_S, ABORT_R, { bad: 1 }], { state: "burnt", reason: "malformed", index: 5 }),
     run("a clock that does not read", [CLAIM], { state: "burnt", reason: "malformed", index: -1 }, "today")
   ];
@@ -190,6 +196,7 @@ function envelopes(): Json[] {
     ["one character of the ciphertext changed", tampered, ctx(), no("bad-signature")],
     ["the sender's thumbprint, another key's signature", { ...envelope({}, "forged", { key: K.xSig }), header: { ...envelope({}, "forged", { key: K.xSig }).header, signer: thumb(K.sSig) } }, ctx(), no("bad-signature")],
     ["a share taken back", env, ctx({ revoked: true }), no("revoked")],
+    ["a revocation flag that does not read", env, ctx({ revoked: "yes" }), no("malformed")],
     ["a sequence below the mark", env, ctx({ marks: mark(2, "sha256:" + "0".repeat(64)) }), no("replayed")],
     ["another envelope at the mark's sequence", env, ctx({ marks: mark(1, "sha256:" + "0".repeat(64)) }), no("sequence-reused")],
     ["marks that name one share and slot twice", env, ctx({ marks: [...mark(1, digestOf(env)), ...mark(1, digestOf(env))] }), no("malformed")],

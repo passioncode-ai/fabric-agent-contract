@@ -424,7 +424,8 @@ export function checkPeerShareEnvelope(value: unknown, ctx: unknown): { ok: true
   const no = (refusal: PeerEnvelopeRefusal) => ({ ok: false as const, refusal });
   if (!peerSealedShape(value, PEER_ENVELOPE_TYPE) || !isObject(ctx)) return no("malformed");
   const at = instant(ctx.at);
-  if (at === undefined || !marksRead(ctx.marks) || !isString(ctx.shareId) || !peerJwk(ctx.ownKem) || !peerJwk(ctx.senderSig)) return no("malformed");
+  // A revocation flag that does not read fails closed, as marks and the clock do.
+  if (at === undefined || !marksRead(ctx.marks) || !isString(ctx.shareId) || !peerJwk(ctx.ownKem) || !peerJwk(ctx.senderSig) || (ctx.revoked !== undefined && typeof ctx.revoked !== "boolean")) return no("malformed");
   const h = value.header;
   if (h.alg !== ALG) return no("unsupported-alg");
   if (h.shareId !== ctx.shareId) return no("wrong-share");

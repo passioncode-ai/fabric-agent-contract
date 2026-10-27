@@ -20,7 +20,7 @@ export const HUMAN_STEP_REQUIRED = "human-step-required";
 export const APPROVAL_REQUIRED = "approval-required";
 
 export type ActionGate = "none" | "relayed" | "human";
-export type HumanStep = "sign-in" | "consent" | "payment" | "secret" | "spend-above-limit" | "passkey";
+export type HumanStep = "sign-in" | "consent" | "payment" | "secret" | "spend-above-limit" | "passkey" | "comparison";
 /** The caller's trust tier (delegation DL-25). Anything a callee cannot place in T0 or T1 is T2. */
 export type CallerTier = "T0" | "T1" | "T2";
 

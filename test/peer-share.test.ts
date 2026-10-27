@@ -95,8 +95,9 @@ describe("one attempt per link", () => {
   it.each(vectors.exchanges as Json[])("$name", (c) => {
     expect(peerExchangeVerdict(c.shareId, c.claimDeadline, c.frames, c.at)).toEqual(c.expect);
   });
-  it("reads every frame the schema reads, and refuses what it refuses", () => {
-    for (const c of vectors.exchanges as Json[]) for (const frame of c.frames) expect(peerFrame(frame) !== undefined, JSON.stringify(frame)).toBe(valid("peer-share-frame.schema.json", frame));
+  it("reads the vector frames as the schema does, apart from the curve and distinct-key checks the schema leaves to the reference", () => {
+    const semanticOnly = (frame: Json) => frame.keys !== undefined && frame.keys.sig?.x === frame.keys.kem?.x;
+    for (const c of vectors.exchanges as Json[]) for (const frame of c.frames) if (!semanticOnly(frame)) expect(peerFrame(frame) !== undefined, JSON.stringify(frame)).toBe(valid("peer-share-frame.schema.json", frame));
     expect(peerExchangeVerdict("not-an-id", "2026-11-03T00:00:00Z", [], "2026-10-27T00:00:00Z")).toEqual({ state: "burnt", reason: "malformed", index: -1 });
   });
 });
@@ -165,6 +166,9 @@ describe("taking a share back", () => {
     const priv = (name: string) => createPrivateKey({ key: { ...key(name).jwk, d: key(name).d }, format: "jwk" });
     expect(() => signPeerRecord({ type: "peer-share-revocation/1", shareId, at: "2026-10-28T10:00:00Z" }, { sig: key("sSig").jwk, privateKey: priv("xSig") })).toThrow(/bad-key/);
     expect(() => signPeerRecord({ type: "peer-share-revocation/1", shareId, at: "2026-10-28T10:00:00Z", note: "x" }, { sig: key("sSig").jwk, privateKey: priv("sSig") })).toThrow(/malformed/);
+    const deletion = signPeerRecord({ type: "peer-share-deletion/1", shareId, at: "2026-10-28T10:05:00Z", revocation: `sha256:${"0".repeat(64)}` }, { sig: key("rSig").jwk, privateKey: priv("rSig") });
+    expect(peerRecordStands(deletion, "peer-share-deletion/1", shareId, key("rSig").jwk)).toEqual({ ok: true });
+    expect(() => signPeerRecord({ type: "peer-share-revocation/1", shareId, at: "2026-10-28T10:00:00Z" }, { sig: key("sKem").jwk, privateKey: priv("sSig") })).toThrow(/bad-key/);
     expect(valid("peer-share-record.schema.json", record)).toBe(true);
   });
 });

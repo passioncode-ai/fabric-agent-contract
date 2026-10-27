@@ -151,7 +151,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Personas:** P-02
 - **Type:** functional
 - **Forces:** push: keys pasted into chats and messengers, no idea who still holds them, agents asking for tokens in a chat; pull: a link and a six-digit code, a count of uses, one button to take it back; anxiety: a cloud or a stranger catching the link, a copy outliving the share, a window an agent drew to look like the real one; habit: sending the key itself.
-- **Success metric:** a shared value opens only on the recipient's machine for the share's key, after the two people compared one code; the sender sees uses per day and takes the share back in three confirmed steps; a secret an agent asked for is stored without the value ever reaching the agent, a chat or a log.
+- **Success metric:** a shared value opens only on the recipient's machine for the share's key, after the two people compared one code (or after the sender chose to share without comparing, shown as not confirmed); the sender sees uses per day and takes the share back in three steps, each shown with what confirmed it; a secret an agent asked for is stored without the value ever reaching the agent, a chat or a log.
 
 ## 3. Customer journeys
 
@@ -276,7 +276,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 |---|---|---|---|---|---|---|
 | 1 | Share | I make a share and send its link | my app's share screen | 3 | the key itself goes into a chat | a link with a one-time code and my share key's fingerprint, no value (priority 9) |
 | 2 | Confirm | we compare six digits on a call | both apps | 3 | no way to know the link reached the right person | a comparison code a party in the middle matches one time in a million (priority 9) |
-| 3 | Watch and take back | I read uses per day and press "Take back" | my app's share screen | 4 | no idea who still uses it | reports by their machine beside the mailbox's count and the provider's spend; three confirmed steps (priority 8) |
+| 3 | Watch and take back | I read uses per day and press "Take back" | my app's share screen | 4 | no idea who still uses it | reports by their machine beside the mailbox's count and the provider's spend; three steps, each shown with what confirmed it (priority 8) |
 | 4 | Give a secret | an agent asks me for a token | my app's own window | 3 | the agent asks in a chat, or a lookalike dialog | a request the node sends only to the signed app, which shows the person's own mark and writes the value straight into the vault (priority 8) |
 
 ## 4. User stories
@@ -750,7 +750,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Traces:** JTBD-15, JRN-14/#1, JRN-14/#2, JRN-14/#3
 - **Acceptance criteria:**
   - Given a share, when my node writes its link, then the link carries a one-time code and my share key's fingerprint in its fragment and no value (`shareLink`, `parseShareLink`).
-  - Given a claim whose MAC holds, when we compare the codes, then my node seals nothing until the exchange completes and I confirm the codes match, and a second claim or a code that differs burns the link (`claimHolds`, `peerExchangeVerdict`, `checkedPeerCode`).
+  - Given a claim whose MAC holds, when we compare the codes, then my node seals nothing until the exchange completes and I confirm the codes match or choose to share without comparing (shown as not confirmed), and a second claim or a code that differs burns the link (`claimHolds`, `peerExchangeVerdict`, `checkedPeerCode`).
   - Given the value sealed to the recipient's share key, when their node opens it, then it opens only for that share's key, signer and sequence (`checkPeerShareEnvelope`).
   - Given their reports, when I read them, then I see uses per day and consumer labels, never a value (`openPeerReport`), beside the mailbox's own count.
   - Given "Take back", when the mailbox refuses and the provider confirms the key revoked or rotated, then the share reads taken back; the recipient's deletion receipt is shown as reported by their machine.
@@ -760,7 +760,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-040: Give an agent a secret in my own app's window, never in a chat
 
-- **Story:** As P-02, I want an agent's request for a secret to reach only my product's signed app, which shows a mark only it can show and writes the value into my vault itself, so that the agent never sees the value and I can tell its window from a lookalike.
+- **Story:** As P-02, I want an agent's request for a secret to reach only my product's signed app, which shows my own mark and writes the value into my vault itself, so that the agent never sees the value and, where the app's store hides the mark from other programs (macOS), I can tell its window from a lookalike.
 - **Traces:** JTBD-15, JRN-14/#4
 - **Acceptance criteria:**
   - Given a client that declares `secret.ui`, when the node has not verified it as its product's signed app by the operating system, then its hello is `forbidden` (`channelStep`).

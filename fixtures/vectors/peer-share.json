@@ -2034,6 +2034,266 @@
       }
     },
     {
+      "name": "a claim whose keys are one key twice",
+      "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+      "claimDeadline": "2026-11-03T10:00:00Z",
+      "at": "2026-10-27T10:00:00Z",
+      "frames": [
+        {
+          "schema": "peer-share-frame/1",
+          "step": "claim",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+              "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+              "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+            }
+          },
+          "mac": "PBOuZKG6B9AmujGPxz_3jO0CfBBe0aCl63WtO0H8S5E",
+          "commit": "sha256:68a58116a84599f0d55e5497590bb452695d49907d9db82b23584a18c4ebb84a"
+        }
+      ],
+      "expect": {
+        "state": "burnt",
+        "reason": "malformed",
+        "index": 0
+      }
+    },
+    {
+      "name": "a claim whose MAC is not 32 bytes",
+      "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+      "claimDeadline": "2026-11-03T10:00:00Z",
+      "at": "2026-10-27T10:00:00Z",
+      "frames": [
+        {
+          "schema": "peer-share-frame/1",
+          "step": "claim",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+              "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+              "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+            }
+          },
+          "mac": "short",
+          "commit": "sha256:68a58116a84599f0d55e5497590bb452695d49907d9db82b23584a18c4ebb84a"
+        }
+      ],
+      "expect": {
+        "state": "burnt",
+        "reason": "malformed",
+        "index": 0
+      }
+    },
+    {
+      "name": "a reveal in no role",
+      "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+      "claimDeadline": "2026-11-03T10:00:00Z",
+      "at": "2026-10-27T10:00:00Z",
+      "frames": [
+        {
+          "schema": "peer-share-frame/1",
+          "step": "claim",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+              "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+              "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+            }
+          },
+          "mac": "PBOuZKG6B9AmujGPxz_3jO0CfBBe0aCl63WtO0H8S5E",
+          "commit": "sha256:68a58116a84599f0d55e5497590bb452695d49907d9db82b23584a18c4ebb84a"
+        },
+        {
+          "schema": "peer-share-frame/1",
+          "step": "commit",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "ZPoT-OGvtIdwz8QBOesU_t_H-P5uy2HsYzRwy8bZH2Y",
+              "y": "5-6SUYwUO9hRAnHAueIYlxVVPR4cmqiXQEjP-Ekcmtk"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "tclfmsWQIDzgkW_MalbJbWZZuWF_ca-3l6qR6QKuBYw",
+              "y": "po-kQezo1MJ4xNXdFUqlemLpHag-mGmEt5aYBgWq1v8"
+            }
+          },
+          "commit": "sha256:6413fec4b3b407d23edb8bf84ce62f68a9c3696f098956ede5a9b748b6a9e79d"
+        },
+        {
+          "schema": "peer-share-frame/1",
+          "step": "reveal",
+          "role": "witness",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "nonce": "setAGcY7mbdJwquwljsBT8_kupNgcEupJacBgNhmOR4"
+        }
+      ],
+      "expect": {
+        "state": "burnt",
+        "reason": "malformed",
+        "index": 2
+      }
+    },
+    {
+      "name": "a reveal whose nonce is not 32 bytes",
+      "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+      "claimDeadline": "2026-11-03T10:00:00Z",
+      "at": "2026-10-27T10:00:00Z",
+      "frames": [
+        {
+          "schema": "peer-share-frame/1",
+          "step": "claim",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+              "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+              "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+            }
+          },
+          "mac": "PBOuZKG6B9AmujGPxz_3jO0CfBBe0aCl63WtO0H8S5E",
+          "commit": "sha256:68a58116a84599f0d55e5497590bb452695d49907d9db82b23584a18c4ebb84a"
+        },
+        {
+          "schema": "peer-share-frame/1",
+          "step": "commit",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "ZPoT-OGvtIdwz8QBOesU_t_H-P5uy2HsYzRwy8bZH2Y",
+              "y": "5-6SUYwUO9hRAnHAueIYlxVVPR4cmqiXQEjP-Ekcmtk"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "tclfmsWQIDzgkW_MalbJbWZZuWF_ca-3l6qR6QKuBYw",
+              "y": "po-kQezo1MJ4xNXdFUqlemLpHag-mGmEt5aYBgWq1v8"
+            }
+          },
+          "commit": "sha256:6413fec4b3b407d23edb8bf84ce62f68a9c3696f098956ede5a9b748b6a9e79d"
+        },
+        {
+          "schema": "peer-share-frame/1",
+          "step": "reveal",
+          "role": "recipient",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "nonce": "setAGcY7mbdJwquwljsBT8_kupNgcEupJacBgNhm"
+        }
+      ],
+      "expect": {
+        "state": "burnt",
+        "reason": "malformed",
+        "index": 2
+      }
+    },
+    {
+      "name": "a step that does not exist",
+      "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+      "claimDeadline": "2026-11-03T10:00:00Z",
+      "at": "2026-10-27T10:00:00Z",
+      "frames": [
+        {
+          "schema": "peer-share-frame/1",
+          "step": "accept",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd"
+        }
+      ],
+      "expect": {
+        "state": "burnt",
+        "reason": "malformed",
+        "index": 0
+      }
+    },
+    {
+      "name": "a commit that reflects the claim's own keys: open; the code refuses it",
+      "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+      "claimDeadline": "2026-11-03T10:00:00Z",
+      "at": "2026-10-27T10:00:00Z",
+      "frames": [
+        {
+          "schema": "peer-share-frame/1",
+          "step": "claim",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+              "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+              "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+            }
+          },
+          "mac": "PBOuZKG6B9AmujGPxz_3jO0CfBBe0aCl63WtO0H8S5E",
+          "commit": "sha256:68a58116a84599f0d55e5497590bb452695d49907d9db82b23584a18c4ebb84a"
+        },
+        {
+          "schema": "peer-share-frame/1",
+          "step": "commit",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "keys": {
+            "sig": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "eN5VZ_wZXGBXQ9mjGzlAIRB3jof4cLddJvoQRm1xTmw",
+              "y": "TucaNZqx5e16LFjIxPAagDWVUTKDN1_ehGND4xlOfG4"
+            },
+            "kem": {
+              "kty": "EC",
+              "crv": "P-256",
+              "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+              "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+            }
+          },
+          "commit": "sha256:5782afa2fdc761ad9540bee84352c15769fbdb6d6ebe3e563e019653112eb4df"
+        }
+      ],
+      "expect": {
+        "state": "open"
+      }
+    },
+    {
       "name": "a frame of another shape after that abort: malformed wherever it comes",
       "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
       "claimDeadline": "2026-11-03T10:00:00Z",
@@ -2841,6 +3101,52 @@
       "expect": {
         "ok": false,
         "refusal": "revoked"
+      }
+    },
+    {
+      "name": "a revocation flag that does not read",
+      "envelope": {
+        "header": {
+          "type": "fabric-peer-share-envelope/1",
+          "alg": "ES256",
+          "suite": [
+            16,
+            1,
+            1
+          ],
+          "recipient": "gIzibVDCRJZOBx8ZMmM-plOmb7gZMLkTFSyZppnXWqc",
+          "signer": "6FQ6dHA0zvjOeSrGS91a_UtmVZiSB7B8WZ5eTrHFlYE",
+          "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+          "slot": "OPENROUTER_API_KEY",
+          "provider": "openrouter",
+          "sequence": 1,
+          "iat": "2026-10-27T09:59:00Z",
+          "exp": "2026-11-26T09:59:00Z",
+          "enc": "BE1naJwbRbSAgucV84qcSqf7h3foKgh9O3SVJ0W0naY8LFTlBGZ8IS_kChTzJ6yD4R6d0nfEkt6UMi2JDf4opGo"
+        },
+        "ct": "_aHWDplsk3OHZDcNCD6qaHvs4A-8LClXSA1sVsXwYiihN-LIDGbMOrm5ROs",
+        "sig": "hf4qgpNRw8HttRvGbH2JtV_vEL_BzNNRPSdjkALqmJIcj-jpYa0s7-rt96gSM4HOZeXR8wRc6lQq1HK_ShYZDA"
+      },
+      "context": {
+        "at": "2026-10-27T10:00:00Z",
+        "shareId": "1cbbf01dbcb842d86e9b25c6cb286dbd",
+        "ownKem": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "EvVcKVtV7AxOlba4g_lF_24zRSoXFQpV5_zlKeLXlhk",
+          "y": "Ziby9Q51EkqGo1Ql6yI7D-eyboydYVpIzwJpAmsuv_c"
+        },
+        "senderSig": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "ZPoT-OGvtIdwz8QBOesU_t_H-P5uy2HsYzRwy8bZH2Y",
+          "y": "5-6SUYwUO9hRAnHAueIYlxVVPR4cmqiXQEjP-Ekcmtk"
+        },
+        "revoked": "yes"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
       }
     },
     {

@@ -401,8 +401,8 @@
 
 - **Used by:** FLW-33
 - **Purpose:** the sender makes a share, compares the code, reads its use and takes it back; the recipient opens a share and compares the code.
-- **Elements:** "Share" on a vault slot, the link to send and its claim deadline; the six-digit code on both screens and "The codes match" / "They differ"; per share: the recipient's label, confirmed or not, uses per day and consumer labels (reported by their machine), the mailbox's delivery count, exports with the button; "Take back", with each of its three steps and what confirmed it.
-- **States:** waiting for the claim; comparing, the code shown; burnt, a second claim, a code that differs, an abort or the deadline; active, confirmed or `confirmed: false`; taken back, the mailbox's refusal observed and the provider's revocation confirmed; reported deleted.
+- **Elements:** "Share" on a vault slot, the link to send and its claim deadline; the six-digit code on both screens and "The codes match" / "They differ" / "Share without comparing"; for the recipient, "Open a share", "Accept" and the code; per share: the recipient's label, confirmed or not, uses per day and consumer labels (reported by their machine), the mailbox's delivery count, exports with the button; "Take back", with each of its three steps and what confirmed it.
+- **States:** waiting for the claim; comparing, the code shown; burnt, a second claim, a code that differs, an abort or the deadline (until the mailbox's routes say so, CT-185, a side may learn it only at the deadline); received, on the recipient's side, with its sender's label; active, confirmed or `confirmed: false`; taken back, the mailbox's refusal observed and the provider's revocation confirmed; reported deleted.
 - **Coverage:** `src/peer-share.ts`, `fixtures/vectors/peer-share.json`, `test/peer-share.test.ts`
 - **Scenarios:** SCN-052
 - **Resources:** peer share specification
@@ -412,7 +412,7 @@
 
 - **Used by:** FLW-34
 - **Purpose:** the person types a value an agent asked for into a window only the product's signed app can show.
-- **Elements:** the agent's name from the node's binding; the project and the slot; the agent's reason, quoted as its own words; whether the slot already holds a value; a secure field; "Store" and "Decline".
+- **Elements:** the person's own mark; the agent's name from the node's binding; the project and the slot; the agent's reason, quoted as its own words; whether the slot already holds a value; a secure field; "Store" and "Decline".
 - **States:** asking; stored; declined; no answer by the deadline; withdrawn (`secret.cancel`); unavailable, no signed app or no desktop, with the person's step.
 - **Coverage:** `src/local-channel.ts` (`channelStep`, `maySecretPrompt`, `secretOutcome`), `test/local-channel.test.ts`
 - **Scenarios:** SCN-053

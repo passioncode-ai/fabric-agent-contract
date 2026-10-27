@@ -34,7 +34,8 @@ that the share works between two personal estates with no organization, from the
   place of its asymmetric four-byte one, the RFC 8785 transcript and claim MAC, the ceilings (claim deadline 7 days, lease
   24 hours, envelope 90 days), no report nonce, and `secret.prompt` with the broker launching its app (SP-3). Tell it
   that DEC-0143 admits no `secret.ui` client on Linux (CT-184), where its D4 had the Tauri window, and that the mailbox's
-  routes stay its own (CT-185).
+  routes stay its own (CT-185), that a share is no `share:` context (PS-3), that its job sees five outcomes (SP-5), and
+  that the comparison and "Store" are DEC-0121 human gates (`humanStep: comparison`, a new value, and `secret`).
 - The UX artefacts reference ids SCN-052, SCN-053, SCR-33 and SCR-34 because SCN-050, SCN-051 and SCR-32 are taken on
   the branches of DEC-0138 and DEC-0140; whichever merges later keeps them.
 

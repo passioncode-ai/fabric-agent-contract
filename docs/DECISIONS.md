@@ -7203,6 +7203,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   sealed call's `decision`); a behaviour rule a service adopts at its next pin. Consumer adoption: CT-124 to CT-127.
 - **Annotated (2026-10-26):** clarified by DEC-0141: a job's input request answered under a mandate is read under the
   job's capability (MJ-1); a decision still names the request key on `fabric.job.get`.
+- **Annotated (2026-10-27):** AP-4's `humanStep` gains `comparison` (DEC-0142): a comparison of codes between two
+  people, the person's act like the others.
 - **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
   does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
   DL-26 already says that inside the machine boundary the operator's instruction is the authority and that a callee
@@ -8366,9 +8368,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      authenticates nothing against the mailbox; one claim per link whatever its MAC, so whoever learns the share id can
      burn a link, never take it (PS-5).
   6. DEC-0084's comparison code under `fabric-peer-commit/1` and `fabric-peer-code/1`, both sides committing before
-     either reveals, one attempt per link at both ends (`peerExchangeVerdict`), nothing sealed until the sender confirms
-     the codes match, the confirmation the person's own act with no agent twin (DEC-0121's human gate), a skipped
-     comparison recorded as `confirmed: false` (PS-6).
+     either reveals, one attempt per link at both ends (`peerExchangeVerdict`), nothing sealed until the exchange
+     completes and the sender confirms the codes match or shares without comparing (recorded `confirmed: false`), both
+     the person's acts, declared `gate: human` with a new `humanStep`, `comparison` (DEC-0121 AP-4; the enum in
+     `service-actions-extension.schema.json` and `delegation-refusal.schema.json` widened) (PS-6).
   7. `fabric-peer-share-envelope/1`: DEC-0111's construction under its own `info`, to the recipient's share `#kem`,
      signed by the sender's share `#sig`, a sequence per share and slot, a life of at most 90 days, opened at each use
      while an honest node holds a lease of at most 24 hours (PS-7).
@@ -8389,9 +8392,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the same bound); a contract protocol for the mailbox's HTTP routes now, `observatory-cloud/1` (one product implements
   them today; the frames and the sealed messages are fixed here, and the routes wait for a second implementer, CT-185); the cloud
   holding the value under its own key (every breach of the mailbox would be a breach of the key).
-- **Compatibility:** additive. No reader changes: new schemas, new protocol names in the register, a new vector file.
-  `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `src/peer-share.ts`, `src/protocol-revisions.ts`, `schemas/peer-share-*.schema.json`
+- **Compatibility:** additive: new schemas, new protocol names in the register, a new vector file; and one widening of
+  a closed enum, `humanStep` gaining `comparison`, which a reader pinned before refuses, so a product declares it only to
+  readers at or after DEC-0142; `actions.json`'s `cases` gain one case (`human comparison from T0`). `contractVersion`
+  stays `0.1.0`.
+- **Consequences / affects:** `src/peer-share.ts`, `src/protocol-revisions.ts`, `src/actions.ts` (`HumanStep`),
+  `schemas/service-actions-extension.schema.json` and `schemas/delegation-refusal.schema.json` (`comparison`),
+  `tools/vectors/actions.ts` and `fixtures/vectors/actions.json` (one case), `docs/specification/service.md` (AP-4), `schemas/peer-share-*.schema.json`
   (four), `tools/vectors/peer-share.ts` and `tools/vectors/run.ts`, `fixtures/vectors/peer-share.json`,
   `test/peer-share.test.ts`, `fixtures/positive/peer-share-*.json` and `fixtures/negative/peer-share-*.json` with their
   catalogue rows, `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`; `docs/specification/peer-share.md`,
@@ -8421,8 +8428,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3. One client per request; the node may start its signed app through its lifecycle broker within the deadline; none
      admitted by then, or no desktop session, is `no-client` (SP-3).
   4. No value on the channel in either direction: the app writes the slot itself, the node reads each answer against
-     `$defs/secretResult` and never records one it refuses; typing and "Store" are the person's acts with no agent
-     twin (SP-4).
+     `$defs/secretResult` and never records one it refuses; typing and "Store" are the person's acts, declared
+     `gate: human` with `humanStep: secret` (SP-4).
   5. The agent sees `stored` only after the node confirmed the write in its own vault record (`unconfirmed`
      otherwise), `declined`, `no-answer` (10 minutes at most, by the node's receipt time) or `no-client`, never a value
      (SP-5).

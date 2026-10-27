@@ -54,8 +54,8 @@ an `id` that is otherwise well formed is a notification and is not answered; a m
    `FAC-SEM-106`, kind `local-channel-session`). A hello refuses a missing `client` or a capability other than
    `consent.ui` and `secret.ui` (`invalid-params`); a hello that declares `secret.ui` from a peer the node did not
    verify as its product's signed app is `forbidden` and agrees nothing (DEC-0143, [secret requests](#secret-requests)). A
-   refused hello agrees nothing, so the client may send another within the 5 s: a client refused for `secret.ui` says
-   hello again without it and keeps `consent.ui`. A second hello after one that was accepted is `invalid-request` and
+   hello refused `invalid-params` or `forbidden` agrees nothing and leaves the session open, so the client may send
+   another within the 5 s: a client refused for `secret.ui` says hello again without it and keeps `consent.ui`. A second hello after one that was accepted is `invalid-request` and
    changes nothing.
 2. **The node's methods** (`NODE_METHODS`): `channel.hello`; `health` → `{status, version, protocols, degraded[]}` (an
    empty `degraded` asserts full health); `enroll.status` → `{enrolled, org?}`; `machine.report` (DEC-0132) →
@@ -126,19 +126,24 @@ the vault slot itself.
   value into the slot in its own process; the value never crosses the channel or another process boundary, and is in
   no argument, environment variable, log, notification or result. The node reads each answer against
   `$defs/secretResult` (the whole message's `result` is any object); an answer it refuses counts as no answer and is
-  never recorded or logged. Typing and "Store" are the person's own acts: no agent twin of them exists (DEC-0121's
-  human gate).
+  never recorded or logged. Typing and "Store" are the person's own acts: the product declares them with `gate: human`
+  and `humanStep: secret` (DEC-0121 AP-4), so an agent's tool for them answers `human-step-required` and never stores a
+  value.
 - **SP-5. The outcome the agent sees** (`secretOutcome`): the first `stored` or `declined` the node received between the
   prompt and its deadline, at most 10 minutes after it (`MAX_SECRET_DEADLINE_MS`), by the node's receipt time; no answer
   by then is `no-answer`, a late answer is ignored. `stored` counts only when the node confirmed, in its own vault
   record, that the slot was written after the prompt; otherwise `unconfirmed`. The agent learns `stored`, `declined`,
   `no-answer`, `unconfirmed` or `no-client`, never a value.
 - **SP-6. What the prompt shows.** The agent named by the node's own binding for its caller, never words the agent
-  wrote; the project and the slot; `reason` quoted as the agent's own words; whether the slot already holds a value
+  wrote (a binding is the node's, so a same-user agent that read another agent's token file can ask under that name;
+  the slot, the reason and the person's own typing still stand); the project and the slot; `reason` quoted as the agent's own words; whether the slot already holds a value
   (`replaces`). A prompt any program of the user can draw (a scripted dialog) is not a secret prompt. The channel
   makes sure only the signed app receives the node's genuine requests; it cannot stop another program of the user from
-  drawing a lookalike window outside the channel. What lets the person tell the two apart is the product's own: a mark
-  only the signed app can show (Project Observatory's design keeps a phrase the person chose in the app's own store).
+  drawing a lookalike window outside the channel. What lets the person tell the two apart is the product's own mark
+  (Project Observatory's design shows a phrase the person chose), and it is only as strong as the store that hides it:
+  on macOS a data-protection keychain item of the app's own access group, which another program of the user cannot
+  read; on Windows, and wherever another program of the user can read the app's store, the mark stops only an agent that
+  does not look for it.
 - **SP-7. Where the request comes from** is the node's: an agent asks through the node's own surface (a tool on its MCP
   server, a job), and the node keeps its own limits (one open request per slot, a rate per agent). The channel carries
   only the prompt and its outcome.

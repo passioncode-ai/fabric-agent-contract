@@ -189,6 +189,28 @@
       }
     },
     {
+      "name": "human comparison from T0",
+      "input": {
+        "action": {
+          "id": "connect-store",
+          "title": "Do it yourself",
+          "tool": "accounts.connect",
+          "gate": "human",
+          "humanStep": "comparison"
+        },
+        "tier": "T0",
+        "humanStepUrl": "https://store.example/connect"
+      },
+      "expected": {
+        "ok": false,
+        "code": "human-step-required",
+        "data": {
+          "humanStep": "comparison",
+          "url": "https://store.example/connect"
+        }
+      }
+    },
+    {
       "name": "human from T1 with the operator's decision: still the person's step",
       "input": {
         "action": {

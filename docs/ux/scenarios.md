@@ -1122,7 +1122,7 @@ independent agent author and P-02 project operator.
   3. The app writes the slot itself -> the node sees the slot written after the prompt and tells the agent `stored`.
 - **Expected result:** the token is in the slot; the agent never saw it, and it is in no chat, log or argument.
 - **Alt paths:** I press "Decline" -> the agent is told `declined`. I do not answer in 10 minutes -> `no-answer`. The app says stored but the node sees no write -> `unconfirmed`. Another program connects declaring `secret.ui` -> its hello is `forbidden` and it is never prompted. A window without my mark -> not my app's; I close it. On Linux, or with no desktop -> `no-client`, and the agent tells me to put the value in with the vault command in my own shell.
-- **UI elements:** the window with the agent's name, the slot, the quoted reason and a secure field; "Store", "Decline".
+- **UI elements:** the window with my mark, the agent's name, the slot, the quoted reason and a secure field; "Store", "Decline".
 - **States covered:** asking, stored, declined, no answer, unavailable
 - **Errors & recovery:** the node is not running -> the request fails and no window is shown by anyone; the agent asks again once the node is up.
 - **Status:** draft
