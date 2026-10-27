@@ -587,8 +587,11 @@ it reaches acts on them without asking, within what they cover.
   product itself asks of the operator before a step, such as a paid run. For a job, the step reads the mandate its
   start call carried: a covered step raises no input request ([interop C3.3](interop.md#c33-awaiting-a-choice)).
   **MJ-1 (DEC-0141).** A step is read as its start was: under the job's own capability, the tool its start call named,
-  never under `fabric.job.get`, its action the step's request key and its effect the class the service declares for
-  what the step does (DL-3); a mandate whose
+  never under `fabric.job.get`, its action the step's request key and its effect the class the service knows for
+  what the step does (its own knowledge, as AP-2's effect); a step whose `mandateCapability` the service cannot give
+  waits `input_required` as MD-4 says, and a mandate covers a job's steps by the job's capability, since a step's
+  request key is the service's own and no leading agent can name it in advance (an `actions`-only mandate covers a
+  request key on every job of the service); a mandate whose
   `capabilities` name `fabric.job.get` covers no step of another capability. The
   mandate travels in `_meta.mandate` (an MCP call, the `fabric.job.get` that answers an input request), in
   `call.mandate` (the hub's `agent.call`, which forwards it as `_meta.mandate`; a sealed call, sent only to a target

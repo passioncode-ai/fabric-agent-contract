@@ -160,7 +160,7 @@ function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: s
   if (typeof input.self !== "string") return { fault: "self-missing" };
   const capability = action.tool === JOB_STEP_TOOL ? input.mandateCapability : action.tool;
   // MJ-1: never the transport itself, so a lazily passed `fabric.job.get` cannot bring the old reading back.
-  if (typeof capability !== "string" || capability.length === 0 || capability === JOB_STEP_TOOL) return { fault: "mandate-capability-missing" };
+  if (typeof capability !== "string" || capability.trim().length === 0 || capability === JOB_STEP_TOOL) return { fault: "mandate-capability-missing" };
   const answer = mandateCovers({
     mandate: input.mandate, tier: input.tier, now: input.now, self: input.self,
     ...(input.callerAgent === undefined ? {} : { callerAgent: input.callerAgent }),
