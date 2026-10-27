@@ -28,16 +28,21 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 | `checks` | each rubric check's pass rate among its non-NA verdicts, a check with no verdict left out; `null` when nothing was judged, never an empty object. A member of its own, so the payload stays two levels deep |
 | `stability` | `turnErrors`, `modelCallFailures`, `recoveredByFallback`, `processErrors`, `restarts`, `knowledgeAgeHours` |
 | `autonomy` | `resolvedWithoutPerson`, `toPersonPolicy`, `toPersonInability`, `queueOldestMinutes`, `queueSlaMinutes` |
+| `calibration` | optional (DEC-0144): how well the judge agreed with people, `week` (the ISO week a person labelled answers, `YYYY-Www`), `labelled` (how many, at least 1) and `helped` (the share of those whose helped verdict the judge matched, `null` when helped was not labelled); absent means no calibration |
+| `calibrationChecks` | optional, only beside `calibration`: each rubric check's share of the labelled verdicts the judge matched, named as in `checks`; a check a person did not label is left out, and with none labelled the member is absent. A member of its own, so the payload stays two levels deep |
 
 Counts and rates only: no person's words, no ids and no judge notes, so `FAC-SEM-101` (a credential detector) finds nothing in it; keeping a
 person's words out is the producer's duty (service.md).
+A party sends `calibration` and `calibrationChecks` only to a reader pinned at or after DEC-0144: the schema is
+closed, so an older copy refuses a payload that carries them; a reader that reads them takes their absence as no
+calibration, never as a judge that disagreed.
 It fits `data.value`'s two levels (`test/support-quality.test.ts` carries it inside an events page).
 
 ## Semantic rules
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-126"></a>`FAC-SEM-126` | `support-quality-daily` | a metric not computed is `null` and named in `notMeasured`, and a named one is `null`, never a `0` standing for it; the helped verdicts are at most the sample, the fallback's recoveries at most the failures, the outcomes at most the turns; p50 is at most p90; a judged sample (any sample, helped verdict or check rate) names its rubric version and its judge |
+| <a id="fac-sem-126"></a>`FAC-SEM-126` | `support-quality-daily` | a metric not computed is `null` and named in `notMeasured`, and a named one is `null`, never a `0` standing for it; the helped verdicts are at most the sample, the fallback's recoveries at most the failures, the outcomes at most the turns; p50 is at most p90; a judged sample (any sample, helped verdict or check rate) names its rubric version and its judge; a calibration names them too, its `helped` follows the not-measured rule as `calibration.helped`, and `calibrationChecks` stands only beside a `calibration` (DEC-0144) |
 
 ## Not decided here
 
@@ -45,8 +50,10 @@ It fits `data.value`'s two levels (`test/support-quality.test.ts` carries it ins
 - How a reader aggregates channels or alerts: the voice-of-the-customer agent's.
 - Model-call failures per lane: one count and its recoveries here; a split per lane is a later revision.
 - The first implementation's other members have no `/1` home (the schema is closed): `coverageBasis`, `modelCalls`,
-  `undelivered`, `followupsPending`, `limitReplies`, `smalltalk`, `personQueueWaiting`, `noSafeDefault`, `questions` and
-  the calibration members. `replyCoverage` is over inbound messages for `chat` and `mail` and over owed questions for
+  `undelivered`, `followupsPending`, `limitReplies`, `smalltalk`, `personQueueWaiting`, `noSafeDefault` and `questions`
+  (the calibration members found a home in DEC-0144).
+- The agreement threshold a reader asks of a calibrated judge (the asker's 80 %) and how it ranks or alerts on a judge
+  below it: the reader's. `replyCoverage` is over inbound messages for `chat` and `mail` and over owed questions for
   `community` and `reviews`, as the standard measures it; a later revision may name the basis.
 - The move from the asker's first implementation (its v2 shape, under its own URN): its producers move to
   `support-quality-daily/1`, and until then a `/1` reader reads none of their events (board row CT-61).

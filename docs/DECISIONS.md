@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0142` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0145` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -5936,6 +5936,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2026-10-21 reservation force-updated the ref (`4c4598f...b52fc3d`), the receipt-chain defect CT-44 records.
 - **Annotated (2026-10-21):** `checks` is never an empty object (`minProperties: 1`): with no check judged it is `null`,
   as the page already said. A stricter schema at the same revision, because no producer had moved to `/1` yet (CT-61).
+- **Annotated (2026-10-27):** DEC-0144 adds the optional `calibration` and `calibrationChecks` members at the same
+  revision; a party sends them only to a reader pinned at or after it.
 - **Decision:** in [support quality](specification/support-quality.md):
   1. An agent that answers people MAY publish, on its events feed, one event per closed UTC day and channel (`chat`,
      `mail`, `reviews`, `community`), of kind `support.quality_daily`, whose `data.value` (DEC-0070) is a
@@ -8329,3 +8331,40 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   faults), `interop.md` (C3.3), `conformance.md` (the callee and leading-agent rows), `CONTEXT.md` (Mandate), `docs/ux/scenarios.md` (SCN-045), `DOCMAP.md`; DEC-0121 and DEC-0125 annotated; backlog CT-177 (closed on merge),
   CT-149 (the adoption) and CT-180 (filed); the handoff `docs/handoffs/2026-10-26-mandate-job-step.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-177; the adapter's question `46433e3a` (thread `aa86a675`).
+
+### DEC-0144: a judge's calibration in `support-quality-daily/1`
+
+- **Date:** 2026-10-27
+- **Status:** Accepted (on merge of its pull request). A widening of DEC-0095's closed schema at the same revision: two
+  optional members, which a reader pinned before refuses, so a party sends them only to a reader pinned at or after
+  this decision. Consumer adoption: CT-188.
+- **Context:** a project on the board asked (request `b05d8bc9`, thread `afd3dc71`, 2026-10-27) for a way to say on
+  what share of the answers a person labelled the judge agreed with the person: without it a reader treats every
+  judge as uncalibrated and never ranks or alerts on its checks, even when the producer calibrated it. Producers on the
+  asker's v2 shape, outside the contract, already send it; support-quality.md listed the calibration members among
+  those with no `/1` home.
+- **Decision:** [support quality](specification/support-quality.md):
+  1. `calibration {week, labelled, helped}`, optional: the ISO week of the labelling (`YYYY-Www`), how many answers a
+     person labelled (at least 1), and the share of them whose helped verdict the judge matched (`null` when helped was
+     not labelled, named `calibration.helped` in `notMeasured`). Absent means no calibration.
+  2. `calibrationChecks`, optional and only beside `calibration`: each rubric check's share of the labelled verdicts
+     the judge matched, named as in `checks`; a check a person did not label is left out, and none labelled leaves the
+     member out (never an empty object).
+  3. `FAC-SEM-126` widens: a calibration names its rubric version and judge; `calibration.helped` follows the
+     not-measured rule; `calibrationChecks` without `calibration` is a finding.
+- **Why:** the judge's agreement with people is what lets a reader trust a check's rate; carrying it in the payload
+  lets any reader decide by its own threshold instead of trusting none.
+- **Alternatives considered:** the asker's nested `calibration.agree {helped, addressed, ...}` (a third level, which
+  DEC-0070's `data.value` refuses; the checks' agreement sits at the top level, as `checks` does); a new revision
+  `support-quality-daily/2` (two optional members change nothing a `/1` reader reads, and DEC-0095's annotation of
+  2026-10-21 set the precedent of a change at the same revision before producers moved); a `0` for an unlabelled check
+  (FAC-SEM-126: a metric not measured is `null` or absent, never `0`).
+- **Compatibility:** a widening of a closed object: a `/1` payload without the two members validates as before; a
+  reader pinned before this decision refuses one that carries them, so a producer sends them only to readers pinned at
+  or after it. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/support-quality-daily.schema.json`, `src/support-quality-rules.ts`,
+  `test/support-quality.test.ts`, `fixtures/positive/support-quality-daily-calibrated.json`,
+  `fixtures/negative/support-quality-daily-calibration-nested.json` and `-calibration-week.json` with their catalogue
+  rows; `docs/specification/support-quality.md`, `conformance.md` (the producer and reader rows); DEC-0095 annotated;
+  backlog CT-188.
+- **Source:** CT-188; the board request `b05d8bc9` (thread `afd3dc71`).

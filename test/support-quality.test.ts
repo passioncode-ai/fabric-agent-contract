@@ -65,6 +65,38 @@ describe("FAC-SEM-126: support-quality-daily/1", () => {
     value.judgeModel = null;
     expect(paths(value)).toEqual(["FAC-SEM-126 /judgeModel"]);
   });
+  it("reads a calibration as the judge's (DEC-0144): its helped follows the not-measured rule, its checks stand only beside it", () => {
+    const calibrated = (): Json => Object.assign(ok(), { calibration: { week: "2026-W43", labelled: 40, helped: 0.85 as number | null }, calibrationChecks: { addressed: 0.9, policy_safe: 1 } });
+    expect(paths(calibrated())).toEqual([]);
+    const unlabelled = calibrated();
+    unlabelled.calibration.helped = null;
+    expect(paths(unlabelled)).toEqual(["FAC-SEM-126 /calibration/helped"]);
+    unlabelled.notMeasured = [...unlabelled.notMeasured, "calibration.helped"];
+    expect(paths(unlabelled)).toEqual([]);
+    const named = calibrated();
+    named.notMeasured = [...named.notMeasured, "calibration.helped"];
+    expect(paths(named)).toEqual(["FAC-SEM-126 /calibration/helped"]);
+    const nameless = ok();
+    nameless.notMeasured = [...nameless.notMeasured, "calibration.helped"];
+    expect(paths(nameless)).toEqual(["FAC-SEM-126 /notMeasured"]);
+    const judgeless = calibrated();
+    judgeless.quality = { sampled: 0, helpedYes: 0, helpedPartly: 0, helpedNo: 0 };
+    judgeless.checks = null;
+    judgeless.notMeasured = [...judgeless.notMeasured, "checks"];
+    judgeless.judgeModel = null;
+    expect(paths(judgeless)).toEqual(["FAC-SEM-126 /judgeModel"]);
+    const alone = Object.assign(ok(), { calibrationChecks: { addressed: 0.9 } });
+    expect(paths(alone)).toEqual(["FAC-SEM-126 /calibrationChecks"]);
+  });
+  it("travels with a calibration as an event's data.value (DEC-0070's two levels)", async () => {
+    const ajv = await createValidator();
+    const page = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/service-events-page-data.json"), "utf8")) as Json;
+    const payload = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/support-quality-daily-calibrated.json"), "utf8")) as Json;
+    const event = (page.events as Json[]).find((entry) => entry.data) as Json;
+    event.data = { schema: "https://support.example.com/schemas/support-quality-daily.schema.json", value: payload };
+    const result = validateDocument(ajv, `${SCHEMA_PREFIX}schemas/service-events-page.schema.json`, page);
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+  });
   it("lets the median equal the 90th percentile", () => {
     const value = ok();
     value.nobodyDropped.firstReplyP50Ms = value.nobodyDropped.firstReplyP90Ms;

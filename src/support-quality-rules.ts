@@ -6,7 +6,8 @@ import { type Finding, type JsonObject, isObject } from "./findings.js";
  * `notMeasured`, and a named one is `null` (never a `0` standing for it); the parts never exceed their whole: the
  * helped verdicts the sample, the fallback's recoveries the failures, the outcomes the turns; p50 is at most p90; a
  * judged sample names its rubric and its judge. `checks` is the fifth member a not-measured name may address: `checks`
- * when nothing was judged.
+ * when nothing was judged. A calibration (DEC-0144) is the judge's: it names the rubric and the judge, its `helped`
+ * follows the not-measured rule as `calibration.helped`, and `calibrationChecks` stands only beside it.
  */
 const FAMILIES = ["nobodyDropped", "quality", "stability", "autonomy"] as const;
 
@@ -32,6 +33,15 @@ export function supportQualityRules(value: JsonObject): Finding[] {
       if (measured === null && !named.has(name)) flag(`/${family}/${metric}`, `${name} is null, so notMeasured names it`);
       if (measured !== null && named.has(name)) flag(`/${family}/${metric}`, `${name} is named not measured, so it is null, not a value`);
     }
+  }
+  if (isObject(value.calibration)) {
+    const helped = value.calibration.helped;
+    seen.add("calibration.helped");
+    if (helped === null && !named.has("calibration.helped")) flag("/calibration/helped", "calibration.helped is null, so notMeasured names it");
+    if (helped !== null && named.has("calibration.helped")) flag("/calibration/helped", "calibration.helped is named not measured, so it is null, not a value");
+    if (value.rubricVersion === null || value.judgeModel === null) flag("/judgeModel", "a calibration names the rubric version and the judge model it measured");
+  } else if (value.calibrationChecks !== undefined) {
+    flag("/calibrationChecks", "calibrationChecks stands only beside a calibration");
   }
   for (const name of named) if (!seen.has(name)) flag("/notMeasured", `notMeasured names ${name}, which the payload does not carry`);
   const num = (family: string, metric: string): number | null => {
