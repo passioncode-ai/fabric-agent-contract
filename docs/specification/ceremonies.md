@@ -457,7 +457,9 @@ so a machine made `view` can still be called with an effect there; the revision 
 heartbeat, which a running hub signs right after every revision (DEC-0054); with no running hub, the old profile holds
 until the node's delta stops being current, after which it refuses every call from another machine. A change that
 makes the hub's machine `member` or `view` waits for the hub to move first (`FAC-SEM-134` refuses a hub key on either;
-[Move the hub](#move-the-hub)). Fabric writes no `profile` until every reader of its records is pinned at or after
+[Move the hub](#move-the-hub)): Fabric keeps the profile the person chose and offers it for signing once the move's second
+revision is signed, without waiting for the machines' reports of that revision (the paused windows of step 7 do not hold
+it); a move not made (revision 1 declined, or no other `full` machine to move to) drops the choice and changes nothing (DEC-0146 item 6). Fabric writes no `profile` until every reader of its records is pinned at or after
 DEC-0106 ([machine calls](machine-calls.md#compatibility)).
 
 ## Linkability

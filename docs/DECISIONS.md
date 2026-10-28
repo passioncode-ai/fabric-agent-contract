@@ -8778,7 +8778,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      revisions or after) never reported at or above the revoking revision, its spend being unknown. Fabric tells the person before it happens: before the passkey signs a lost-hub revision, that every window the hub divided stays paused until it ends, with the dates, and that running approvals and tokens the old hub kid signed must be issued again; before "Move the hub" starts a planned move, that the old hub's windows pause from the switch until the second revision is signed and reported, and that running approvals and tokens the old hub kid signed must be issued again once it is signed; before "Remove" during a move (from its first revision until every paused instance has opened or ended) for a machine that has not reported at or above the revoking revision, and before "Move the hub" while an instance runs that a machine removed since it began left, that the instance stays paused until it ends
      (SCR-23, SCN-030, SCN-038). After a planned move's switch Fabric asks for revision 2 at once and keeps asking; while
      it is unsigned the old hub's windows stay paused, shown with their end dates and "Finish the move" (signing its second revision) (ceremonies step
-     3, SCR-23).
+     3, SCR-23). "Approvals and tokens the old hub kid signed" in these notices covers every hub key the move or the
+     lost-hub revision replaces, each organization context's hub key included (DEC-0128, DL-14a): tokens issued in an
+     organization's context are issued again too. A profile change chosen on the hub's machine waits for the move: Fabric
+     keeps it and offers it once revision 2 is signed, not reported, and drops it if the move is not made (ceremonies,
+     Change a machine's profile; FLW-26).
   7. **The hub's own machine.** The node that applies the estate's records there serves `machine.report`, Fabric's own
      node included. A node answers a method it does not serve `unknown-method`, as `nodeMethodAnswer` does.
   8. **A payload a recipient does not know** ([relay](specification/relay.md#messages)). Every recipient of relay messages acknowledges and drops a body it verified
@@ -8825,7 +8829,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   decides the report's cap, and draws each `leaseId` unique within the estate across hub keys where one division
   sufficed before (none issues leases yet, CT-19); a report newer than the held one by less than a
   millisecond, which DEC-0139's reading refused as `stale`, is now accepted (item 10; no hub is deployed, CT-152); new
-  duties for Fabric's ceremonies, none implemented (CO-412): the notices of item 6 (the paused windows and the re-issue of approvals and tokens before a move or a lost hub),
+  duties for Fabric's ceremonies, none implemented (CO-412): the notices of item 6 (the paused windows and the re-issue of approvals and tokens, each organization context's included, before a move or a lost hub), the profile change kept on the hub's machine until revision 2 is signed,
   revision 2 asked for at once and kept asked for, the re-key notice (before re-keying the machine that holds the hub key, that running approvals and
   tokens the old kid signed must be issued again), and a re-key on the hub's own machine signing at once with the old kid's leases
   kept in its division (never step 7's gate); a new duty for a meter, re-verifying its leases when it
@@ -8850,5 +8854,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-20, FLW-26, FLW-27), `docs/specification/window-lease.md` (who adopts it),
   `conformance.md`'s delta-applying, drafter and relay-call rows, `docs/DOCMAP.md`, `docs/specification/README.md`,
   `docs/handoffs/README.md`; DEC-0062, DEC-0107, DEC-0132 and DEC-0139 annotated; backlog CT-172
-  (closes on merge), CT-19 (the issuer's `leaseId` and `estate`-only issuance), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty and its re-verification), CT-195, CT-196, CT-197 and CT-199 filed; `docs/ux/scenarios.md` (SCN-030); `ceremonies.md` (Remove a machine; Replace a machine's key, step 3; Move the hub, steps 3 and 4), `contexts.md` (what stays linkable), `delegation.md` (DL-15's way out for the hub's own machine), `src/hub-move.ts` (the `moved` comment), `src/window-lease.ts` (the `periodOf` comment), `docs/ux/foundation.md` (ST-025, ST-032), `docs/ux/scenarios.md` (SCN-048); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
+  (closes on merge), CT-19 (the issuer's `leaseId` and `estate`-only issuance), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty and its re-verification), CT-195, CT-196, CT-197 and CT-199 filed; `docs/ux/scenarios.md` (SCN-030); `ceremonies.md` (Remove a machine; Replace a machine's key, step 3; Move the hub, steps 3 and 4; Change a machine's profile, the kept change), `conformance.md`'s profile-drafter row, `docs/ux/scenarios.md` (SCN-037), `contexts.md` (what stays linkable), `delegation.md` (DL-15's way out for the hub's own machine), `src/hub-move.ts` (the `moved` comment), `src/window-lease.ts` (the `periodOf` comment), `docs/ux/foundation.md` (ST-025, ST-032), `docs/ux/scenarios.md` (SCN-048); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
 - **Source:** CT-172; DEC-0132's and DEC-0139's readings.
