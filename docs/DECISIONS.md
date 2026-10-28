@@ -8720,7 +8720,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   threads `5d2ea917` (Fabric) and `41a9b0cb` (Project Observatory). Additive: reference functions
   (`readMachineReport`, `instantKey`), a context member (`notAfter`), a rule code (`FAC-SEM-154`), a node dispatch function
   (`nodeMethodAnswer`) with the vector group `dispatch`, and vectors in `machine-report.json` (`open`, `accept`, a new
-  group `read`) and the `remainder` vectors in `window-lease.json` (reports in one millisecond, ties, a held offset time); no earlier vector's answer changes. Adoption: CT-152's adopters (Fabric's hub and nodes, Project
+  group `read`) and the `remainder` vectors in `window-lease.json` (reports in one millisecond, ties, a held offset time), and three `move` cases in `hub-move.json` (a re-key with the old kid revoked, a planned move's revoking revision, a later revision that arms nothing); no earlier vector's answer changes. Adoption: CT-152's adopters (Fabric's hub and nodes, Project
   Observatory's node).
 - **Context:** DEC-0132's and DEC-0139's blind readings left design questions open (CT-172): the report's lease cap,
   which key a report is sealed to, what "newest" means, a lease a revoked hub key signed, the gate after a lost hub, the
@@ -8812,7 +8812,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `CONTEXT.md` (Machine report), `src/machine-report.ts` (`readMachineReport`, `notAfter`, `FAC-SEM-154`, the relay time),
   `src/rfc3339.ts` (`instantKey`), `src/local-channel.ts` (`nodeMethodAnswer`), `fixtures/vectors/machine-report.json`
   and `tools/vectors/machine-report.ts` (`open`, `accept`, `read`), `fixtures/vectors/local-channel.json` and
-  `tools/vectors/local-channel.ts` (`dispatch`), `test/machine-report.test.ts`, `test/local-channel.test.ts`;
+  `tools/vectors/local-channel.ts` (`dispatch`), `fixtures/vectors/hub-move.json` and `tools/vectors/hub-move.ts` (three
+  `move` cases), `test/machine-report.test.ts`, `test/local-channel.test.ts`;
   `relay.md` (MR-1 to MR-6, the rule table), `window-lease.md` (Reporting, `FAC-SEM-090`), `ceremonies.md` (step 7),
   `delegation.md` (DL-15), `local-channel.md`, `devices.md` (UE-2's wording, what stays linkable), `revocation-delta.md`
   and `estate-record.md` (wording), `conformance.md` (the module row, the meter, hub, reporter and hub-reader rows, a

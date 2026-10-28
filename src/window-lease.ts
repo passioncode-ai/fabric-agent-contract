@@ -101,7 +101,11 @@ export function periodBounds(window: unknown, period: unknown): { start: number;
   return undefined;
 }
 
-/** The period of `window` that holds the instant `at` (milliseconds, UTC), or `undefined` for an unknown window or clock. */
+/**
+ * The period of `window` that holds the instant `at` (milliseconds, UTC), or `undefined` for an unknown window or clock.
+ * Periods are `[start, end)`: a lease's `expiresAt` at its instance's end names the next period here, while an old hub's
+ * lease is counted in the instance it ends (DEC-0146, window lease Reporting).
+ */
 export function periodOf(window: unknown, at: number): string | undefined {
   if (!Number.isFinite(at)) return undefined;
   const date = new Date(at);
