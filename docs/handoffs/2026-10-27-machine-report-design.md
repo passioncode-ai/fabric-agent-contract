@@ -91,6 +91,8 @@ fix the text and test items filed with them.
 - **Round 26 (passed on both tiers; its risks):** FLW-26 and SCN-037 name SCR-23's waiting state; item 6 says "for the
   hub's machine"; the pending choice's holder across the switch filed under CT-152, the re-key's context hub keys
   under CT-199.
+- **Round 27 (passed on both tiers; the loop converged with rounds 26 and 27):** its risks, all wording on FLW-26's hub
+  path and CT-199's marking in step 3, filed under CT-152 and CT-199.
 
 ## Checks run
 
