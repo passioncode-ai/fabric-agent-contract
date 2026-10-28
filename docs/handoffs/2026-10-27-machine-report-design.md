@@ -62,8 +62,12 @@ The gate on the branch: `pnpm typecheck`, `pnpm vitest run --coverage`, `pnpm ux
 
 ## Open
 
-- Fabric's confirmation that its hub acknowledges a delivered message whose payload type it does not know (DEC-0146
-  item 8), asked in thread `5d2ea917`, and Project Observatory's for its node, asked in thread `41a9b0cb`.
+- Project Observatory's confirmation that its node acknowledges a delivered message whose payload type it does not know
+  (DEC-0146 item 8), asked in thread `41a9b0cb` (Fabric answered in its PL-12: no reader today, its 0.4.0 reader
+  acknowledges and drops, CO-452).
+- Fabric's row for its own node serving the local channel (`channel.hello`, `machine.report`) on a hub machine running
+  only Fabric, asked in thread `5d2ea917` (Fabric's contract-delta record says it serves no node; CO-452 covers only the
+  hub's reading).
 - CT-195: whether the person may reopen a lost hub's windows before they end (the operator's decision).
 - CT-196: where a run stopped for lack of a lease after a move tells the person why (super-ux).
 - CT-197: `strictTime` and the raw `Date.parse` readers read a fraction of ten or more digits late.

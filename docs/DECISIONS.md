@@ -8716,9 +8716,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   machine listed since the window instance began, the wait it shows, the `degraded` entry's form) and for a reporting machine (the
   `#kem` it seals to, the leases of each hub key, a lease a revoked key signed) and for a meter (re-verifying its leases
   when it applies a revision), none deployed yet (CT-152, and for Project Observatory's meter CT-20); and a duty
-  for every recipient of relay messages, deployed ones included (Fabric's hub and nodes, Project Observatory's node):
-  acknowledging a verified body whose payload type it does not know, whose compliance is unconfirmed and asked in
-  threads `5d2ea917` (Fabric) and `41a9b0cb` (Project Observatory). Additive: reference functions
+  for every recipient of relay messages: acknowledging a verified body whose payload type it does not know. Fabric's
+  record (its release plan's PL-12, commit `1145eff6`, 2026-10-27) says no Fabric reads a relay mailbox today and that
+  its reader in 0.4.0 acknowledges every verified body and drops an unknown type (CO-452); Project Observatory's node is
+  asked in thread `41a9b0cb`. Additive: reference functions
   (`readMachineReport`, `instantKey`), a context member (`notAfter`), a rule code (`FAC-SEM-154`), a node dispatch function
   (`nodeMethodAnswer`) with the vector group `dispatch`, and vectors in `machine-report.json` (`open`, `accept`, a new
   group `read`) and the `remainder` vectors in `window-lease.json` (reports in one millisecond, ties, a held offset time), and three `move` cases in `hub-move.json` (a re-key with the old kid revoked, a planned move's revoking revision, a later revision that arms nothing); no earlier vector's answer changes. Adoption: CT-152's adopters (Fabric's hub and nodes, Project
@@ -8776,8 +8777,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      node included. A node answers a method it does not serve `unknown-method`, as `nodeMethodAnswer` does.
   8. **A payload a recipient does not know** ([relay](specification/relay.md#messages)). Every recipient of relay messages acknowledges and drops a body it verified
      whose payload type it does not know; a body it cannot verify keeps its refusal's handling, since `unknown-sender`
-     and `not-yet-valid` can pass later. A hub not yet on DEC-0132 that does so drops reports, and its mailbox does not fill with them; whether
-     Fabric's deployed hub does is asked in thread `5d2ea917`, and if it does not, its date is CT-152's.
+     and `not-yet-valid` can pass later. A hub not yet on DEC-0132 that does so drops reports, and its mailbox does not fill with them; no Fabric
+     reads a relay mailbox today, and its 0.4.0 reader acknowledges and drops an unknown type (Fabric's PL-12, CO-452).
   9. **A hub that cannot read reports.** Its `degraded` entry's `source` is `machine-report`: a setup state while its
      new `#kem` waits only for the person to sign a revision the hub drafted, a failure otherwise. A hub with no
      `fabric-service/0.1` well-known shows it on its own machine's row in My network's machines (SCR-23, a setup note while only the person's signature is missing, an error otherwise); SCR-23

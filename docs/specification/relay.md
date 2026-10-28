@@ -607,8 +607,7 @@ a failure otherwise (a private half it cannot read, or one that does not match t
 machine's key"), which a watcher reports after 5 minutes (DEC-0146). Fabric's hub, which serves no well-known document
 today, shows it on its own machine's row in My network's machines (SCR-23, a setup note while only the person's signature is missing, its error state otherwise). A recipient acknowledges
 (`ack`) and drops a body it verified whose payload type it does not know ([Messages](#messages), DEC-0146), so a hub
-not yet on DEC-0132 that does so drops a report and its mailbox does not fill with them (whether Fabric's deployed hub does is asked in thread
-`5d2ea917`); the machine hears nothing back either way, since a report is never answered.
+not yet on DEC-0132 that does so drops a report and its mailbox does not fill with them (no Fabric reads a relay mailbox today; its 0.4.0 reader does so, Fabric's PL-12, CO-452); the machine hears nothing back either way, since a report is never answered.
 
 **MR-4, the hub's reading.** After the body is verified (`verifyMessageBody`) and is not a replay (`checkReplay`), the
 hub places the sender with `relayCallerTier`; a sender that is not T1 is ignored, its delivery acknowledged. Then
