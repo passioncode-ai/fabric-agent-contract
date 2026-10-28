@@ -15,8 +15,9 @@ fix the text and test items filed with them.
 
 - **Decisions** ([relay](../specification/relay.md#the-machines-report) MR-1 to MR-6): the 64-lease cap while leases are
   `estate` only; the `#kem` of the newest revision a machine verified; newest per hub key; a lease of a revoked hub key
-  ends at the revoking revision; after a planned move every listed machine is a holder and the new hub counts old-hub
-  leases at their final `spent`; after a lost hub every instance the old hub divided stays closed until it ends; machines that do not report keep the waits, shown with the person's ways out (MR-6,
+  ends at the revoking revision; from its first signature (the switch of a planned move) the new hub waits for every machine an
+  estate record listed since the window instance began and counts old-hub leases at their final `spent`; a machine
+  removed since the instance began that never reported keeps it closed until it ends; after a lost hub every instance the old hub divided stays closed until it ends; machines that do not report keep the waits, shown with the person's ways out (MR-6,
   SCR-23 waiting); the hub machine's node serves `machine.report`, Fabric's included; a recipient acknowledges a payload
   type it does not know; the unusable-`#kem` entry's form and its surface without a well-known.
 - **Code:** `instantKey` (`src/rfc3339.ts`); in `src/machine-report.ts` the relay time for `at`, the nanosecond order,

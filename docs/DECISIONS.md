@@ -6680,9 +6680,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   machine's alert and anchor (Fabric's nodes, Project Observatory's node), the relay and the first organization server's
   vendored estate-record schema, the Fabric Agent Adapter's kits (`FAC-SEM-137`, `fixtures/vectors/hub-move.json`),
   each at its next pin (CT-113).
-- **Annotated (2026-10-27):** DEC-0146 reads step 7's gate: "every holder" of the old hub's leases is every machine the
-  revision lists after a planned move, each old-hub lease then counted at its final `spent`; after a lost hub, or while a
-  removed machine has not reported after the revocation, every instance the old hub divided stays closed until it ends.
+- **Annotated (2026-10-27):** DEC-0146 reads step 7's gate: "every holder" of the old hub's leases is every machine an
+  estate record listed since the window instance began, and the gate binds the new hub from its first signature (the
+  switch of a planned move, before the revoking revision); after a planned move each old-hub lease is counted at its
+  final `spent`; after a lost hub, or when a machine removed since the instance began never reported at or above the
+  revoking revision, every instance the old hub divided stays closed until it ends.
 - **Context:** DEC-0084 wrote the estate ceremonies and left two out: moving the hub to another machine, and what
   happens when a passkey is lost. The ecosystem readiness review of 2026-10-22 (board thread `b2511678`, message
   `c938af7d`) asked for both, with an alert when the hub's heartbeat is a day old and two authenticators from revision
@@ -8005,8 +8007,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reports and Fabric's hub reads them; on the hub's machine the node serves the local channel's `machine.report` and
   Fabric's hub calls it (CT-152). A node pinned before DEC-0132 answers `machine.report` with `unknown-method`, and its
   leases then count at their whole amounts until it reports.
-- **Annotated (2026-10-27):** DEC-0146 decides MR-5's gate after a move (counted after a planned move, closed to each
-  instance's end after a lost hub), the report's cap, sealing key and newest lease, and MR-6's wait for a machine that does
+- **Annotated (2026-10-27):** DEC-0146 decides MR-5's gate after a move (binding the new hub from its first signature;
+  counted after a planned move; closed to each instance's end after a lost hub or when a machine removed since the
+  instance began never reported), the report's cap, sealing key and newest lease, and MR-6's wait for a machine that does
   not report.
 - **Annotated (2026-10-26):** DEC-0139 settles the readings' text and test items: the hub's reading after opening (`acceptMachineReport`, a `FAC-SEM-152` finding and an `at` `strictTime` cannot read are `malformed`), refused sends, an unusable `#kem`, `machine.report`'s callers, and names a pre-DEC-0132 hub's handling as open (CT-172). A node pinned before DEC-0132 was promised no answer to `machine.report`: DEC-0139 reads any error, or none, as no report, where the Status above says `unknown-method`.
 - **Context:** DEC-0128 UE-2 keeps the estate's records (the applied revision, the heartbeat, the delta head, the
@@ -8708,7 +8711,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted (on merge of its pull request, after its objection window: 2026-10-29 18:00 UTC, thread
   `5d2ea917` with Fabric). A narrowing of the hub's reading of a report's `at` (one that is no relay time, which
   DEC-0139's `strictTime` admitted with an offset, or one later than the body's `iat`); new duties for the hub
-  (counting an old hub's leases, the wait it shows, the `degraded` entry's form) and for a reporting machine (the
+  (counting an old hub's leases, the gate binding it from its first signature, before the revoking revision, over every
+  machine listed since the window instance began, the wait it shows, the `degraded` entry's form) and for a reporting machine (the
   `#kem` it seals to, the leases of each hub key, a lease a revoked key signed) and for a meter (re-verifying its leases
   when it applies a revision), none deployed yet (CT-152, and for Project Observatory's meter CT-20); and a duty
   for every recipient of relay messages, deployed ones included (Fabric's hub and nodes, Project Observatory's node):
@@ -8795,7 +8799,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   meter could pass the limit the window keeps; whether a person may accept that is the operator's question, CT-195).
 - **Compatibility:** a narrowing for the hub's reading of an `at` that is no relay time (one with an offset was
   accepted under DEC-0139) or later than the body's `iat`, and for a hub that issued a lease of an instance the old hub
-  divided without counting the old hub's spend; new duties for reporting machines (none deployed yet, CT-152) and for
+  divided without counting the old hub's spend, between a planned move's switch and its revoking revision, or after a
+  machine was removed since the instance began; new duties for reporting machines (none deployed yet, CT-152) and for
   relay recipients (deployed: whether they already acknowledge an unknown payload is asked in `5d2ea917` and
   `41a9b0cb`). Additive for ports (three new functions, `readMachineReport`, `instantKey` and `nodeMethodAnswer`, a context member, a rule code, vector groups); no
   earlier vector's answer changes, and a held report accepted with an offset before still guards against an older

@@ -246,7 +246,8 @@ certified, if any, as `hub-key <kid>`, in the same revision (`FAC-SEM-114`); it 
 A machine removed while a window instance runs, before it reported at or above a hub move's revoking revision, keeps
 that instance closed to new leases until it ends when the hub moves to another machine before then: its spend under
 the old hub's leases reached only the old hub ([Move the hub](#move-the-hub) step 7, relay.md MR-6). Fabric says so
-when the person removes a machine during a move, and when the person starts a move while such an instance runs
+when the person removes a machine during a move (from the move's first revision until every paused instance has opened
+or ended), and when the person starts a move while such an instance runs
 (SCR-23).
 The hub issues a revocation-delta entry for each revocation, so it reaches every machine within seconds
 ([revocation delta](revocation-delta.md#the-delta), DEC-0054). The revision lists each entry's revocation exactly as the
