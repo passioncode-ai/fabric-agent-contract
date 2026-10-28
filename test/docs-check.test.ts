@@ -175,6 +175,11 @@ describe("documentation helpers", () => {
       expect([...markdownAnchors("| a |\n|---|\n| 1 |\n---\n")]).toEqual([]);
       expect([...markdownAnchors("| a | b |\n===\n")]).toEqual(["-a--b-"]);
       expect([...markdownAnchors("Line one\nLine two\n===\n")]).toEqual(["line-oneline-two"]);
+      // A leading `---` over no `key:` line is a thematic break: the headings after it count, a later `---` included.
+      expect([...markdownAnchors("---\n\n# Intro\n\nText.\n\n## Usage\n\n---\n\n## End\n")]).toEqual(["intro", "usage", "end"]);
+      // A `...` closer ends front matter; an opener with no closer hides nothing.
+      expect([...markdownAnchors("---\ntitle: x\n...\n# A\n")]).toEqual(["a"]);
+      expect([...markdownAnchors("---\ntitle: x\n# A\n")]).toEqual(["a"]);
       expect(headingSlug("Use &constructor; and &toString; here")).toBe("use-constructor-and-tostring-here");
       expect(headingSlug("A &#38; B &#x26; C")).toBe("a--b--c");
       // A known limit, not GitHub's answer (#cafés-here): named references outside the table stay as written (CT-198).

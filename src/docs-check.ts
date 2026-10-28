@@ -103,10 +103,11 @@ export function markdownAnchors(text: string): Set<string> {
   const anchors = new Set<string>();
   const seen = new Map<string, number>();
   const lines = outsideFences(text).split("\n");
-  // Front matter: `---` on the first line up to the next `---`, which is not a setext underline.
+  // Front matter: `---` on the first line, a YAML mapping's `key:` on the next, up to a `---` or `...` closer, which is no
+  // setext underline. A leading `---` over anything else is a thematic break, and the headings after it count.
   let start = 0;
-  if (lines[0]?.trim() === "---") {
-    const end = lines.findIndex((line, index) => index > 0 && line.trim() === "---");
+  if (lines[0]?.trim() === "---" && /^[A-Za-z0-9_][\w.-]*[ \t]*:/.test(lines[1] ?? "")) {
+    const end = lines.findIndex((line, index) => index > 0 && (line.trim() === "---" || line.trim() === "..."));
     if (end > 0) start = end + 1;
   }
   // A GFM table: a row with `|` over a delimiter row that holds `|` or `:` (a run of `-` alone is a thematic break or an
@@ -133,7 +134,7 @@ export function markdownAnchors(text: string): Set<string> {
       while (paragraphLine(first - 1)) first -= 1;
       setext = lines.slice(first, index).map((part) => part.trim()).join("\n");
     }
-    const heading = atx ? atx[1] ?? "" : setext;
+    const heading = atx ? (atx[1] as string) : setext;
     if (heading !== undefined) {
       const slug = headingSlug(heading);
       const count = seen.get(slug) ?? 0;
