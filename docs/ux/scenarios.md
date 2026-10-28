@@ -842,7 +842,7 @@ independent agent author and P-02 project operator.
 - **Expected result:** by the signed record alone, the machine holds no placement, no secret and no hub key, and sends or takes no call over the relay that changes anything.
 - **Alt paths:** the person marks `m-a`, which holds the hub key, as `member` -> `FAC-SEM-134` refuses a member with a hub key, so the hub moves first ("Move the hub" on `m-a`'s row, a planned move: ceremonies "Move the hub", DEC-0107); `m-a`'s row shows `member` as pending, and Fabric offers it for signing once the move's second revision is signed, without waiting for the machines' reports (ceremonies, Change a machine's profile); if revision 1 is declined, or no other `full` machine can take the hub, the choice is dropped and nothing changed. A record written before profiles -> every machine reads as `full`. Until every reader of the record is pinned at or after DEC-0106, "Change profile" is unavailable and says why. Between the signature and each node applying the revision, a node still on the parent judges calls by the old profile.
 - **UI elements:** the profile in each machine's row; "Change profile" in the overflow menu.
-- **States covered:** success, error
+- **States covered:** success, waiting, error
 - **Errors & recovery:** the passkey ceremony fails -> nothing changed, the person signs again; a revision that keeps a placement on a `view` machine -> `FAC-SEM-134` names it and the drafter removes it.
 - **Status:** draft
 - **Coverage:** DEC-0106, `FAC-SEM-134` in `src/estate-record-rules.ts` (`machineProfile`), fixtures `fixtures/semantic/estate-profile-*`, `test/estate-record.test.ts`, `test/machine-call.test.ts`

@@ -84,6 +84,13 @@ fix the text and test items filed with them.
 - **Round 24 (passed; its risks):** relay.md's report section names the local channel and step 7's gate; CT-19 the
   `estate`-only issuance, CT-20 the meter's re-verification context, CT-196 the window reopened with less; FLW-26 keeps
   the chosen profile and offers it after the move.
+- **Round 25 (product failed on FLW-26; seam passed):** the profile change for the hub's machine is offered once
+  revision 2 is signed, not reported, and dropped if the move is not made (ceremonies, the profile-drafter row, SCR-23,
+  SCN-037, FLW-26's exit); the re-issue notices cover organization context hub keys; devices.md's fork-digest question
+  names the local channel; the hub-move module row cites DEC-0146.
+- **Round 26 (passed on both tiers; its risks):** FLW-26 and SCN-037 name SCR-23's waiting state; item 6 says "for the
+  hub's machine"; the pending choice's holder across the switch filed under CT-152, the re-key's context hub keys
+  under CT-199.
 
 ## Checks run
 
@@ -100,7 +107,11 @@ The gate on the branch: `pnpm typecheck`, `pnpm vitest run --coverage`, `pnpm ux
   hub's reading).
 - CT-152's open design items (super-ux and ceremonies): "Remove" on a planned move's destination machine, "lost" on the
   old hub's machine mid-move, whether MR-6's waits turn on only once the estate's node versions report, which of two
-  nodes on a hub machine answers `machine.report`, the resend of payloads sent once.
+  nodes on a hub machine answers `machine.report`, the resend of payloads sent once, the actions on either hub row
+  while a planned move waits for revision 2, where a pending profile change is kept across the switch, and which flow
+  starts a routine hub-key rotation.
+- CT-199: whether a re-key of the hub's own machine re-certifies its organization context hub keys, and so what its
+  notice covers.
 - CT-195: whether the person may reopen a lost hub's windows before they end (the operator's decision).
 - CT-196: where a run stopped for lack of a lease after a move tells the person why (super-ux).
 - CT-197: `strictTime` and the raw `Date.parse` readers read a fraction of ten or more digits late.

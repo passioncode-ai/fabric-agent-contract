@@ -8780,7 +8780,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      it is unsigned the old hub's windows stay paused, shown with their end dates and "Finish the move" (signing its second revision) (ceremonies step
      3, SCR-23). "Approvals and tokens the old hub kid signed" in these notices covers every hub key the move or the
      lost-hub revision replaces, each organization context's hub key included (DEC-0128, DL-14a): tokens issued in an
-     organization's context are issued again too. A profile change chosen on the hub's machine waits for the move: Fabric
+     organization's context are issued again too. A profile change for the hub's machine waits for the move: Fabric
      keeps it and offers it once revision 2 is signed, not reported, and drops it if the move is not made (ceremonies,
      Change a machine's profile; FLW-26).
   7. **The hub's own machine.** The node that applies the estate's records there serves `machine.report`, Fabric's own

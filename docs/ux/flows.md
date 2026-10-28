@@ -651,7 +651,7 @@ flowchart TD
   G -->|yes| A[Nodes apply the revision; the next call is judged by it]
 ```
 
-- **Screens traversed:** SCR-23 success (signed); SCR-23 error (the passkey ceremony failed; nothing changed).
+- **Screens traversed:** SCR-23 success (signed); SCR-23 waiting (the move's revision 2 unsigned; the chosen profile pending on the hub's row); SCR-23 error (the passkey ceremony failed; nothing changed).
 
 ### FLW-27: Operator moves the hub, or recovers from a lost passkey
 
