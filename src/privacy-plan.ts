@@ -42,4 +42,15 @@ export function privacyPlan(inputs: PrivacyInputs): PrivacyPlan {
   if (script !== undefined) return { action: "run", script };
   return { action: "fail", reason: `the denylist is present but org-index's check_private.py is not at ${[...new Set(candidates)].map((candidate) => tilde(candidate, inputs.home)).join(" or ")}; set ORG_INDEX to the org-index checkout` };
 }
+/**
+ * What the gate prints when running the script threw (CT-191): the script's own findings on stdout, else a named cause,
+ * never an empty failure. Its stderr already reached the console (`execFileSync` passes it through by default).
+ */
+export function privacyRunFailure(error: unknown, script: string, home: string): string {
+  const failure = typeof error === "object" && error !== null ? (error as { code?: unknown; status?: unknown; stdout?: unknown }) : {};
+  if (failure.code === "ENOENT") return `privacy check failed: python3 is not on PATH; it runs ${tilde(script, home)} (install Python 3 and put python3 on PATH)`;
+  const out = typeof failure.stdout === "string" ? failure.stdout.trim() : "";
+  if (out !== "") return out;
+  return `privacy check failed: ${tilde(script, home)} ${typeof failure.status === "number" ? `exited with status ${failure.status}` : "did not run"} and printed no finding`;
+}
 // #endregion privacy-plan
