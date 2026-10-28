@@ -67,7 +67,7 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
   through `strictTime`). `2026-02-30`, hour 24 and a leap second `:60` are refused, never rolled forward or compared. A
   time is read to the millisecond: fraction digits past the third are dropped, so `00:01:00.000999999Z` is the instant
   `00:01:00.000Z` (vectors `instant`, and `admit`'s "iat 60.000999999 s ahead"); the machines' report orders its `at`
-  to the nanosecond instead, against the report held and the body's `iat` (MR-4, DEC-0146). A signed `iat` more than 60 s ahead of
+  to the nanosecond against the report held instead, and reads it against the body's `iat` to the millisecond (MR-4, DEC-0146). A signed `iat` more than 60 s ahead of
   the verifier's clock is `not-yet-valid` (`CLOCK_SKEW_SECONDS`, the same skew the estate record's `issuedAt`, a hub
   key's window and a delta entry have, DEC-0066).
 
@@ -288,8 +288,8 @@ whether an organization's relay answers it differently is part of CT-163.
 - **`deliver`**: `{from, msgId, seq, body, sentAt}`, in `seq` order, to every connection the recipient holds. `from`
   is the kid the relay admitted on the sender's connection. `deliver` has no `to`.
   - The recipient answers `ack` with `{seq}`. A body it verified whose payload type it does not know is acknowledged
-    and dropped, so such messages never fill its mailbox (DEC-0146). DEC-0146 says nothing of a body the recipient
-    cannot verify: `unknown-sender` and `not-yet-valid` may pass once it applies a revision or the sender's clock is
+    and dropped, so such messages never fill its mailbox (DEC-0146). DEC-0146 keeps a body the recipient
+    cannot verify under its refusal's handling: `unknown-sender` and `not-yet-valid` may pass once it applies a revision or the sender's clock is
     behind it, and what a member does with another member's body on an organization's relay is CT-163's. Acknowledged and expired messages are deleted.
   - Delivery is at least once.
 - **The body is end to end** (`fabric-relay-message/1`): a compact JWS with `alg: ES256` and
@@ -615,11 +615,11 @@ held for that machine and the body's signed `iat` as `notAfter` (DEC-0146): `ope
 (another `kem`), `cannot-open` (HPKE fails, another body's `from`, `to` or `msgId` included), `malformed` (a plaintext
 that is not a report in its own RFC 8785 form, that the schema refuses, whose `at` is no relay time (a leap second, a
 space for `T`, an offset, a lower-case `t`, ten fraction digits; DEC-0139, DEC-0146), or whose `at` is after the
-body's `iat`, read to the millisecond as a clock writing `iat` reads, so a report cannot claim to be written later than
+body's `iat`, read to the millisecond as a clock writing `iat` reads (truncated, never rounded: `.0009996Z` is in the millisecond `.000`), so a report cannot claim to be written later than
 it was sent, DEC-0146), `wrong-machine` (the report names another machine than the one
 `relayCallerTier` named) and `stale` (its `at` is not after the report the hub holds for that machine, compared to the nanosecond, so two
 times less than a millisecond apart still order; a held report the hub accepted before DEC-0146 with an offset is read
-to the millisecond, DEC-0146). It then reads
+as the last nanosecond of its millisecond, its fraction truncated to three digits, so a report within that millisecond is not after it, DEC-0146). It then reads
 the opened report as `acceptMachineReport` does, so a `FAC-SEM-152` finding (a lease named twice) drops it as
 `malformed`, as the local read does (DEC-0139); a relayed report that also names another machine, or is not after the
 one held, keeps `openMachineReport`'s answer (`wrong-machine`, `stale`), and is dropped either way, and every dropped report's delivery is acknowledged, so a report refused (one sealed to an

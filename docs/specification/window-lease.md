@@ -125,9 +125,10 @@ leaves its spend under the old hub's leases unknown, so the instance stays close
 after a lost hub, removed in the move's revision, that is every instance the old hub divided (DEC-0146). A lease of a hub key a revision revokes ends for the meter when it
 applies that revision, before its `expiresAt` (WL-6): it spends nothing more under it, and its final `spent` is the
 one in a report whose `estateRecord.revision` is at or above that revision (DEC-0146). The hub
-orders a machine's reports by their `at`, to the nanosecond (a time held from before DEC-0146 to the millisecond), a tie
+orders a machine's reports by their `at`, to the nanosecond (a time held from before DEC-0146 as its millisecond's last nanosecond, as the hub's acceptance
+reads it), a tie
 going to the larger `spent` (DEC-0146), compares a report's `at` with a lease's `issuedAt` and `expiresAt` to the
-millisecond (the precision a hub writes them in), and counts, for each machine, the most it may have spent (`windowRemainder`):
+millisecond, truncated (the precision a hub writes them in), and counts, for each machine, the most it may have spent (`windowRemainder`):
 
 - a lease still valid counts its whole `amount`, since the meter may still spend it;
 - an expired lease counts the `spent` of a report written at or after its expiry (the report's own `at`, never its

@@ -1,5 +1,5 @@
 {
-  "description": "Vectors for a machine's report to its estate's hub over the relay (DEC-0132), written by tools/vectors/machine-report.ts, never by hand. seal: sealMachineReport(report, context), context.ephemeral the hex ephemeral scalar; recipient.publicKey is the base64 uncompressed P-256 point. open: openMachineReport(sealed, context) with schemaValid the machine-report schema; context.own.privateKey is the base64 P-256 scalar; context.sender is the machine relayCallerTier named; context.held, when present, the report the hub holds for that machine; context.notAfter, when present, the body's signed iat (DEC-0146); a case with findings expects the opened report to carry those FAC-SEM codes, and an ok case without report opens the case's own report. accept: acceptMachineReport(report, context) with schemaValid the machine-report schema, the hub's reading of a report it opened or its own node answered over the local channel (MR-2, MR-4); context.machine is the sender relayCallerTier named or the hub's own machine id, context.held the report the hub holds for that machine, context.notAfter the body's iat or the hub's clock when its own node answered, a relay time (Z form) or the report is malformed; an ok case expects the case's own report. read: readMachineReport(sealed, context), openMachineReport then acceptMachineReport under one context (MR-4's whole reading, DEC-0146), the context as open's; an ok case expects the case's own report. A sealed report is HPKE base mode, suite [16, 1, 1], info the ASCII fabric-machine-report/1, the additional data the RFC 8785 UTF-8 bytes of {type, from, to, msgId, kem}, the plaintext the RFC 8785 form of the report; enc and ct are unpadded base64url.",
+  "description": "Vectors for a machine's report to its estate's hub over the relay (DEC-0132), written by tools/vectors/machine-report.ts, never by hand. seal: sealMachineReport(report, context), context.ephemeral the hex ephemeral scalar; recipient.publicKey is the base64 uncompressed P-256 point. open: openMachineReport(sealed, context) with schemaValid the machine-report schema; context.own.privateKey is the base64 P-256 scalar; context.sender is the machine relayCallerTier named; context.held, when present, the report the hub holds for that machine; context.notAfter, when present, the body's signed iat (DEC-0146); a case with findings expects the opened report to carry those FAC-SEM codes, and an ok case without report opens the case's own report. accept: acceptMachineReport(report, context) with schemaValid the machine-report schema, the hub's reading of a report it opened or its own node answered over the local channel (MR-2, MR-4); context.machine is the sender relayCallerTier named or the hub's own machine id, context.held the report the hub holds for that machine, context.notAfter the body's iat or the hub's clock when its own node answered, a relay time (Z form) or the report is malformed; an ok case expects the case's own report. read: readMachineReport(sealed, context), openMachineReport then acceptMachineReport under one context (MR-4's whole reading, DEC-0146), the context as open's with notAfter required; an ok case expects the case's own report. A sealed report is HPKE base mode, suite [16, 1, 1], info the ASCII fabric-machine-report/1, the additional data the RFC 8785 UTF-8 bytes of {type, from, to, msgId, kem}, the plaintext the RFC 8785 form of the report; enc and ct are unpadded base64url.",
   "report": {
     "type": "machine-report/1",
     "machine": "m-a",
@@ -1265,6 +1265,80 @@
       }
     },
     {
+      "name": "a held time from before DEC-0146 with ten fraction digits reads its truncated millisecond, so a newer report replaces it",
+      "report": {
+        "type": "machine-report/1",
+        "machine": "m-hub",
+        "at": "2026-10-27T08:00:00.100Z",
+        "records": {
+          "estateRecord": {
+            "revision": 7,
+            "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "heartbeat": {
+            "sequence": 12,
+            "at": "2026-10-27T07:00:00Z"
+          },
+          "revocationDelta": {
+            "sequence": 3,
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "leases": [
+            {
+              "leaseId": "lease-1",
+              "expiresAt": "2026-10-27T20:00:00Z",
+              "spent": "1.25"
+            }
+          ]
+        }
+      },
+      "context": {
+        "machine": "m-hub",
+        "held": {
+          "at": "2026-10-27T08:00:00.0492040007800+00:00"
+        }
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "an at 0.9996 ms into notAfter's millisecond is not after it: times are truncated, never rounded",
+      "report": {
+        "type": "machine-report/1",
+        "machine": "m-hub",
+        "at": "2026-10-27T08:00:00.0009996Z",
+        "records": {
+          "estateRecord": {
+            "revision": 7,
+            "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "heartbeat": {
+            "sequence": 12,
+            "at": "2026-10-27T07:00:00Z"
+          },
+          "revocationDelta": {
+            "sequence": 3,
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "leases": [
+            {
+              "leaseId": "lease-1",
+              "expiresAt": "2026-10-27T20:00:00Z",
+              "spent": "1.25"
+            }
+          ]
+        }
+      },
+      "context": {
+        "machine": "m-hub",
+        "notAfter": "2026-10-27T08:00:00Z"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
       "name": "the hub's own node answers with an at after the hub's clock",
       "report": {
         "type": "machine-report/1",
@@ -1371,7 +1445,8 @@
         "sender": "m-a",
         "held": {
           "at": "2026-10-27T07:00:00Z"
-        }
+        },
+        "notAfter": "2026-10-27T08:00:01Z"
       },
       "expect": {
         "ok": true,
@@ -1419,7 +1494,8 @@
           "kid": "m-hub#kem",
           "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
         },
-        "sender": "m-a"
+        "sender": "m-a",
+        "notAfter": "2026-10-27T08:00:01Z"
       },
       "expect": {
         "ok": false,
@@ -1442,7 +1518,8 @@
           "kid": "m-hub#kem",
           "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
         },
-        "sender": "m-b"
+        "sender": "m-b",
+        "notAfter": "2026-10-27T08:00:01Z"
       },
       "expect": {
         "ok": false,
@@ -1468,7 +1545,8 @@
         "sender": "m-a",
         "held": {
           "at": "2026-10-27T08:00:00Z"
-        }
+        },
+        "notAfter": "2026-10-27T08:00:01Z"
       },
       "expect": {
         "ok": false,

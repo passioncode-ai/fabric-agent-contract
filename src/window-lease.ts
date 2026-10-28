@@ -351,12 +351,12 @@ export type RemainderVerdict = { ok: true; remainderUsd: string; heldUsd: string
 
 /**
  * A report's `at` as a pair that orders to the nanosecond (DEC-0146 MR-1): the millisecond, then the nanoseconds within
- * it; a time held from before DEC-0146 that is no relay time reads as its millisecond's first nanosecond, so every pair
- * of reports compares on one scale.
+ * it; a time held from before DEC-0146 that is no relay time reads as its millisecond's last nanosecond, as the hub's
+ * acceptance reads it (a report in that millisecond is not after it), so every pair compares on one scale.
  */
 function reportTime(report: LeaseReport): [number, number] {
   const key = instantKey(report.receivedAt);
-  return [strictTime(report.receivedAt), key === undefined ? 0 : Number(key.slice(23, 29))];
+  return [strictTime(report.receivedAt), key === undefined ? 999_999 : Number(key.slice(23, 29))];
 }
 
 /** Orders two reports of a machine by their `at`, a tie going to the larger `spent`, so the claim is never the lower one. */

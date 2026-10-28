@@ -273,7 +273,10 @@ A machine whose device key is lost, or is rotated, keeps its machine id:
    occurs in a kid, so the two forms never collide.
 3. If the hub key was on that machine, the same revision re-certifies it under a **new kid** and revokes the old kid
    (`hub-key`), or revokes it with no successor (`FAC-SEM-114`); like a move, that revision anchors the delta's head
-   ([Move the hub](#move-the-hub), step 5).
+   ([Move the hub](#move-the-hub), step 5). Each meter ends the old kid's leases when it applies that revision (window
+   lease WL-6, DEC-0146 item 3); the hub, on the same machine, issued them and keeps them in its own division at their
+   amounts until a report at or above that revision names their final `spent`, so it signs the next leases under the
+   new kid at once: step 7's gate is a move's, for the old hub's leases a new hub never issued, not a re-key's.
 4. The machine applies the revision only if it holds every key the record lists for it: `ownKeysDecision(record, id,
    held)` answers `apply`, with `retire` naming the held keys the record no longer lists, which the node destroys.
    Otherwise it answers `stop`, `keys-replaced`, and the node stops using the keys it holds: it lost the new key, or

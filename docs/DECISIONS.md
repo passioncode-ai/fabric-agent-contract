@@ -8713,8 +8713,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   when it applies a revision), none deployed yet (CT-152, and for Project Observatory's meter CT-20); and a duty
   for every recipient of relay messages, deployed ones included (Fabric's hub and nodes, Project Observatory's node):
   acknowledging a verified body whose payload type it does not know, whose compliance is unconfirmed and asked in
-  threads `5d2ea917` (Fabric) and `41a9b0cb` (Project Observatory). Additive: a reference function
-  (`readMachineReport`), a context member (`notAfter`), a rule code (`FAC-SEM-154`), a node dispatch function
+  threads `5d2ea917` (Fabric) and `41a9b0cb` (Project Observatory). Additive: reference functions
+  (`readMachineReport`, `instantKey`), a context member (`notAfter`), a rule code (`FAC-SEM-154`), a node dispatch function
   (`nodeMethodAnswer`) with the vector group `dispatch`, and vectors in `machine-report.json` (`open`, `accept`, a new
   group `read`) and the `remainder` vectors in `window-lease.json` (reports in one millisecond, ties, a held offset time); no earlier vector's answer changes. Adoption: CT-152's adopters (Fabric's hub and nodes, Project
   Observatory's node).
@@ -8765,10 +8765,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       `FAC-SEM-154`, so `pnpm validate` flags it), ordered to the nanosecond, and not after `notAfter`, read to the millisecond: the body's
       signed `iat` for a relayed report, the hub's clock when its own node answered. An unreadable `notAfter` refuses.
       The hub's division orders a machine's reports the same way (`windowRemainder`): by millisecond, then the nanoseconds
-      within it, a time held from before DEC-0146 read as its millisecond's first nanosecond, a tie going to the larger
+      within it, a time held from before DEC-0146 read as its millisecond's last nanosecond (as acceptance reads it), a tie going to the larger
       `spent`; it compares a report's `at` with a lease's `issuedAt` and `expiresAt` to the millisecond, the precision a
       hub writes them in.
-      `readMachineReport` is MR-4's whole reading (`openMachineReport`, then `acceptMachineReport`, one context).
+      `readMachineReport` is MR-4's whole reading (`openMachineReport`, then `acceptMachineReport`, one context, `notAfter`
+      required). Every reading truncates a fraction to the millisecond, never rounds; `strictTime` now cuts a fraction of
+      ten or more digits to three before parsing, which V8's `Date.parse` read late (CT-197).
   11. **Text.** The relay's resend keeps its `msgId` after `internal` (MR-3 names the exception); a local error answer
       erases no held report (MR-2); the wording that named only the relay names the local channel too; the schema no
       longer calls the local answer sealed; `FAC-SEM-090` states that it bounds a division by the reports written
@@ -8794,7 +8796,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   one.
   `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/machine-report.ts` (`readMachineReport`, `notAfter`, `FAC-SEM-154`, the relay time),
-  `src/rfc3339.ts` (`instantKey`), `src/local-channel.ts` (`nodeMethodAnswer`), `fixtures/vectors/machine-report.json`
+  `src/rfc3339.ts` (`instantKey`, `strictTime`'s truncation), `src/local-channel.ts` (`nodeMethodAnswer`), `fixtures/vectors/machine-report.json`
   and `tools/vectors/machine-report.ts` (`open`, `accept`, `read`), `fixtures/vectors/local-channel.json` and
   `tools/vectors/local-channel.ts` (`dispatch`), `test/machine-report.test.ts`, `test/local-channel.test.ts`;
   `relay.md` (MR-1 to MR-6, the rule table), `window-lease.md` (Reporting, `FAC-SEM-090`), `ceremonies.md` (step 7),
@@ -8806,5 +8808,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-27), `docs/specification/window-lease.md` (who adopts it),
   `conformance.md`'s delta-applying, drafter and relay-call rows, `docs/DOCMAP.md`, `docs/specification/README.md`,
   `docs/handoffs/README.md`; DEC-0107, DEC-0132 and DEC-0139 annotated; backlog CT-172
-  (closes on merge), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
+  (closes on merge), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty), CT-195 and CT-196 filed, CT-197 done; `ceremonies.md` (Replace a machine's key, step 3); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
 - **Source:** CT-172; DEC-0132's and DEC-0139's readings.
