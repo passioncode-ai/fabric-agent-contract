@@ -170,8 +170,14 @@ describe("documentation helpers", () => {
 
     it("reads setext headings and skips front matter, and decodes every numeric and the common named references (CT-193)", () => {
       const anchors = markdownAnchors("---\ntitle: x\n---\nFirst title\n===\n\nSecond part\n---\n\n---\n- item\n---\n| a |\n---\n");
-      expect([...anchors].sort()).toEqual(["first-title", "second-part"]);
+      // `| a |` over `---` is a paragraph, so a level-2 heading on GitHub; a table with its delimiter row is not.
+      expect([...anchors].sort()).toEqual(["-a-", "first-title", "second-part"]);
+      expect([...markdownAnchors("| a |\n|---|\n| 1 |\n---\n")]).toEqual([]);
+      expect([...markdownAnchors("| a | b |\n===\n")]).toEqual(["-a--b-"]);
+      expect([...markdownAnchors("Line one\nLine two\n===\n")]).toEqual(["line-oneline-two"]);
+      expect(headingSlug("Use &constructor; and &toString; here")).toBe("use-constructor-and-tostring-here");
       expect(headingSlug("A &#38; B &#x26; C")).toBe("a--b--c");
+      // A known limit, not GitHub's answer (#cafés-here): named references outside the table stay as written (CT-198).
       expect(headingSlug("Caf&eacute;s &nbsp;here")).toBe("cafeacutes-here");
       expect(headingSlug("Wait&hellip; done")).toBe("wait-done");
       expect(headingSlug("Odd &#0; and &#xD800;")).toBe("odd--and-");

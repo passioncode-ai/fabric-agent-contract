@@ -74,7 +74,7 @@ function decodeEntity(whole: string, body: string): string {
     const code = numeric[1] !== undefined ? Number.parseInt(numeric[1], 16) : Number(numeric[2]);
     return code > 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff) ? String.fromCodePoint(code) : "\ufffd";
   }
-  return NAMED_ENTITIES[body] ?? whole;
+  return Object.hasOwn(NAMED_ENTITIES, body) ? (NAMED_ENTITIES[body] as string) : whole;
 }
 
 export function headingSlug(heading: string): string {
@@ -109,11 +109,30 @@ export function markdownAnchors(text: string): Set<string> {
     const end = lines.findIndex((line, index) => index > 0 && line.trim() === "---");
     if (end > 0) start = end + 1;
   }
-  const paragraphLine = (line: string | undefined) => line !== undefined && line.trim() !== "" && !/^ {0,3}(?:#{1,6}(?:[ \t]|$)|[-*+][ \t]|\d{1,9}[.)][ \t]|>|\||(?:[-*_][ \t]*){3,}$|<)/.test(line);
+  // A GFM table: a row with `|` over a delimiter row that holds `|` or `:` (a run of `-` alone is a thematic break or an
+  // underline, micromark-extension-gfm-table), and its rows up to a blank line. Its lines are no paragraph's.
+  const table = new Set<number>();
+  const delimiter = /^ {0,3}\|?[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|?[ \t]*$/;
+  for (let index = start; index + 1 < lines.length; index += 1) {
+    const head = lines[index] as string;
+    const next = lines[index + 1] as string;
+    if (table.has(index) || !head.includes("|") || !delimiter.test(next) || !/[|:]/.test(next)) continue;
+    for (let row = index; row < lines.length && (lines[row] as string).trim() !== ""; row += 1) table.add(row);
+  }
+  const paragraphLine = (at: number) => {
+    const line = lines[at];
+    return line !== undefined && at >= start && !table.has(at) && line.trim() !== "" && !/^ {0,3}(?:#{1,6}(?:[ \t]|$)|[-*+][ \t]|\d{1,9}[.)][ \t]|>|(?:[-*_][ \t]*){3,}$|<)/.test(line);
+  };
   for (let index = start; index < lines.length; index += 1) {
     const line = lines[index] as string;
     const atx = /^ {0,3}#{1,6}[ \t]+(.*?)(?:[ \t]+#+)?[ \t]*$/.exec(line);
-    const setext = !atx && /^ {0,3}(?:=+|-+)[ \t]*$/.test(line) && index > start && paragraphLine(lines[index - 1]) ? (lines[index - 1] as string).trim() : undefined;
+    let setext: string | undefined;
+    if (!atx && !table.has(index) && /^ {0,3}(?:=+|-+)[ \t]*$/.test(line) && paragraphLine(index - 1)) {
+      // A setext heading's text is its whole paragraph, its lines joined by a line break the slug then drops.
+      let first = index - 1;
+      while (paragraphLine(first - 1)) first -= 1;
+      setext = lines.slice(first, index).map((part) => part.trim()).join("\n");
+    }
     const heading = atx ? atx[1] ?? "" : setext;
     if (heading !== undefined) {
       const slug = headingSlug(heading);
