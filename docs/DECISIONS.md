@@ -8775,7 +8775,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      shows each machine waited on, since when and why when known, and the ways out (bring it back, update it, remove
      it). A removed machine is no longer waited on by DL-15 and step 6; step 7's gate keeps an instance the old hub
      divided closed until it ends when a machine removed since the instance began (before the move, between its
-     revisions or after) never reported at or above the revoking revision, its spend being unknown. Fabric tells the person before it happens: before the passkey signs a lost-hub revision, that every window the hub divided stays paused until it ends, with the dates; before "Remove" during a move (from its first revision until every paused instance has opened or ended) for a machine that has not reported at or above the revoking revision, and before "Move the hub" while an instance runs that a machine removed since it began left, that the instance stays paused until it ends
+     revisions or after) never reported at or above the revoking revision, its spend being unknown. Fabric tells the person before it happens: before the passkey signs a lost-hub revision, that every window the hub divided stays paused until it ends, with the dates, and that running approvals and tokens the old hub kid signed must be issued again; before "Move the hub" starts a planned move, that the old hub's windows pause from the switch until the second revision is signed and reported, and that running approvals and tokens the old hub kid signed must be issued again once it is signed; before "Remove" during a move (from its first revision until every paused instance has opened or ended) for a machine that has not reported at or above the revoking revision, and before "Move the hub" while an instance runs that a machine removed since it began left, that the instance stays paused until it ends
      (SCR-23, SCN-030, SCN-038). After a planned move's switch Fabric asks for revision 2 at once and keeps asking; while
      it is unsigned the old hub's windows stay paused, shown with their end dates and "Finish the move" (signing its second revision) (ceremonies step
      3, SCR-23).
@@ -8825,8 +8825,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   decides the report's cap, and draws each `leaseId` unique within the estate across hub keys where one division
   sufficed before (none issues leases yet, CT-19); a report newer than the held one by less than a
   millisecond, which DEC-0139's reading refused as `stale`, is now accepted (item 10; no hub is deployed, CT-152); new
-  duties for Fabric's ceremonies, none implemented (CO-412): the notices of item 6, revision 2 asked for at once and
-  kept asked for, the re-key notice (before re-keying the machine that holds the hub key, that running approvals and
+  duties for Fabric's ceremonies, none implemented (CO-412): the notices of item 6 (the paused windows and the re-issue of approvals and tokens before a move or a lost hub),
+  revision 2 asked for at once and kept asked for, the re-key notice (before re-keying the machine that holds the hub key, that running approvals and
   tokens the old kid signed must be issued again), and a re-key on the hub's own machine signing at once with the old kid's leases
   kept in its division (never step 7's gate); a new duty for a meter, re-verifying its leases when it
   applies a revision with its first verification's context (Project Observatory's meter, CT-20); no hub holds a report

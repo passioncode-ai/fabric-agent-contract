@@ -76,6 +76,11 @@ fix the text and test items filed with them.
   and the ceremony-signer row; the re-issue notice before a move and a lost hub (SCR-23, ST-032, the drafter row,
   CT-113); SCR-23 and FLW-27 enter a move from "Change profile"; FLW-27 waits after revision 2; FLW-20's declined
   re-key names the setup note; Status names both objection threads.
+- **Round 23 (product):** the re-issue notice before a planned move and a lost hub, and the planned move's pause
+  announced before it starts, decided in item 6 and Compatibility and carried to ceremonies steps 3 and 4, the drafter
+  row, SCR-23, ST-032, SCN-030, SCN-038 and FLW-27.
+- **Round 23 (seam):** `instantKey` and the relay's `instant` are held equal over a generated grid of 14 112 shapes
+  as well as relay.json's cases (`test/machine-report.test.ts`).
 
 ## Checks run
 

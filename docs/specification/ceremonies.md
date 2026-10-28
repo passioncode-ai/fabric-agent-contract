@@ -346,7 +346,9 @@ alert:
    up before anything is drafted: it holds the delta's head and the latest heartbeat the relay serves, has applied the
    delta and the newest revision up to them, and is not `broken`. It need not be `current`: past 72 hours no machine is
    until the new hub signs. It generates a new Ed25519 hub key; the key is never copied from the old hub.
-3. **A reachable hub** follows DL-15 ([delegation](delegation.md#keys-publication-and-rotation)): a first revision
+3. **A reachable hub** follows DL-15 ([delegation](delegation.md#keys-publication-and-rotation)). Before "Move the hub"
+   starts, Fabric says that the old hub's windows pause from the switch until the second revision is signed and reported,
+   and that running approvals and tokens the old hub kid signed must be issued again once the second revision is signed (DEC-0146 item 6). A first revision
    certifies the new machine's `hubKey`; the new key is published in the key set; the old hub stops signing and the new
    one continues the one chain from the switch (its first entry is the next sequence after the head it holds); a second
    revision drops the old key, revokes it as `hub-key <old kid>` (`FAC-SEM-114`) and anchors the head as it then stands;
@@ -361,7 +363,7 @@ alert:
    key per pinned context certified in the same revision and each context's published key set withdrawing the lost keys
    at once (DEC-0128), and the delta anchored at the head the new hub
    holds; the new hub's first entry is the anchor's sequence + 1. Before the passkey signs it, Fabric says that every
-   window instance the lost hub divided stays paused until it ends, with the dates (step 7, DEC-0146 item 6, SCR-23).
+   window instance the lost hub divided stays paused until it ends, with the dates, and that running approvals and tokens the old hub kid signed must be issued again (step 7, DEC-0146 item 6, SCR-23).
    Fabric withdraws the lost key from the key set it
    publishes online (DL-14) at once, with no DL-15 grace. A service whose `auth.delegation.jwks` (DL-16) names that
    published copy stops accepting the lost key within its cache time (at most 10 minutes, DL-15); one that names the old hub's own `/.well-known/jwks.json`, which

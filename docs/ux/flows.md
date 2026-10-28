@@ -668,7 +668,7 @@ flowchart TD
   A -->|Remove on the hub's machine| K{Lost or retired?}
   K -->|retired, still reachable| L
   K -->|lost| M
-  L --> T1[Revision 1, DL-15: the new hub key certified]
+  L --> T1[Notice: the old hub's windows pause from the switch until revision 2 is reported, approvals and tokens issued again once it is signed; revision 1, DL-15: the new hub key certified]
   T1 --> S1{Passkey signs revision 1?}
   S1 -->|no| X
   S1 -->|yes| W{Has every machine reported revision 1?}
@@ -685,7 +685,7 @@ flowchart TD
   C -->|no| Z[The alert clears; no move]
   C -->|yes, but the hub still answers elsewhere| L
   C -->|yes| M[Pick an always-on full machine; it makes a new hub key]
-  M --> R[Revision: new hubKey, old hub-key revoked, the delta anchored once readers are pinned; the windows the lost hub divided stay paused until each ends]
+  M --> R[Revision: new hubKey, old hub-key revoked, the delta anchored once readers are pinned; the windows the lost hub divided stay paused until each ends; approvals and tokens issued again; both said before signing]
   A -->|a passkey lost| P{Another passkey left?}
   P -->|yes| Q[Revision signed by it: lost one removed and revoked, a new one added]
   P -->|no| N[No revision can be signed: create a new network]
