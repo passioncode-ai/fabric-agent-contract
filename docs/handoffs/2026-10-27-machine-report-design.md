@@ -44,6 +44,9 @@ fix the text and test items filed with them.
 - **Round 15 (product):** ST-032, DEC-0146 item 6 and the drafter row warn before "Remove" only for a machine that
   has not reported the revoking revision, as SCR-23 does; FLW-27 gains revision 2's own failure exit and says a
   retired hub machine stays; FLW-20 says the same; SCN-030's one-machine re-key carries the re-issue notice.
+- **Round 16 (product):** SCR-23's waiting state gains revision 2 unsigned after the switch with "Sign revision 2";
+  FLW-27 returns from X2 to T2; ceremonies step 3 keeps asking; the spec index names Fabric's node for `machine.report`;
+  the Consequences name FLW-20; SCR-23's notices carry the date; FLW-20 points to the during-move warning.
 
 ## Checks run
 

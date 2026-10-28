@@ -8826,7 +8826,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   node row, the rule list), `schemas/machine-report.schema.json` and `schemas/device-check-in.schema.json`
   (descriptions), `src/revocation-delta.ts` (comments), `src/window-lease.ts` (`heldBy`'s order of reports) and
   `fixtures/vectors/window-lease.json` (`remainder` vectors: reports in one millisecond, ties, a held offset time), `docs/ux/screens.md` (SCR-23, SCR-31),
-  `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-27), `docs/specification/window-lease.md` (who adopts it),
+  `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-20, FLW-27), `docs/specification/window-lease.md` (who adopts it),
   `conformance.md`'s delta-applying, drafter and relay-call rows, `docs/DOCMAP.md`, `docs/specification/README.md`,
   `docs/handoffs/README.md`; DEC-0107, DEC-0132 and DEC-0139 annotated; backlog CT-172
   (closes on merge), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty), CT-195, CT-196, CT-197 and CT-199 filed; `docs/ux/scenarios.md` (SCN-030); `ceremonies.md` (Remove a machine; Replace a machine's key, step 3; Move the hub, steps 3 and 4), `contexts.md` (what stays linkable), `delegation.md` (DL-15's way out for the hub's own machine), `src/hub-move.ts` (the `moved` comment), `src/window-lease.ts` (the `periodOf` comment), `docs/ux/foundation.md` (ST-032), `docs/ux/scenarios.md` (SCN-048); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
