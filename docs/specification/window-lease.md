@@ -109,7 +109,8 @@ A meter reports each lease it holds, and the newest expired lease of each slot u
 to its hub, `records.leases[]` (in the [machines' report](relay.md#the-machines-report) over the
 relay, DEC-0132, or on the hub's own machine through the local channel's `machine.report`; never in a check-in to an
 organization server, DEC-0128 UE-2): `{leaseId, expiresAt, spent}` (DEC-0053's
-names; `spent` is this decision's, optional and additive). `spent` is an upper bound on what the meter spent in the
+names; `spent` is this decision's, optional and additive, except on a lease a hub key revoked by the reported
+revision signed, which always carries it, DEC-0146 MR-1). `spent` is an upper bound on what the meter spent in the
 lease's window instance: settled receipts plus open reservations, a decimal string.
 
 What a meter has not reported counts as spent, so a final report the relay refused (MR-2) delays the refund to the next

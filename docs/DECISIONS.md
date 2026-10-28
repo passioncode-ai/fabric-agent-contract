@@ -8751,7 +8751,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      as an ended lease of that amount, never at nothing. A report entry carries no amount, so the new hub has none to fall
      back on (the check-in's "absent `spent` counts the whole amount" cannot apply): a report at or above the revoking
      revision names `spent` on every lease a revoked hub key signed (MR-1), and one that names such a lease without it
-     counts as no report for the gate, the instance staying closed until a report names it or the instance ends.
+     counts as no report for the gate, the instance staying closed until a report names it or the instance ends; once
+     a division has counted a lease's final `spent`, a later report naming it without `spent` changes nothing counted.
      How the reference orders leases across hub keys stays CT-113's.
      This opens the gate only after a planned move. After a lost hub the lost machine, removed in the move's revision,
      never reports and may have held the old hub's leases itself, so every instance the old hub divided stays closed

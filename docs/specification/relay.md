@@ -648,7 +648,8 @@ move (before the revoking revision), at once after a lost hub; the revoking revi
 each old-hub lease at the final `spent` reported for it, as an ended lease of that amount, never at nothing (a report's lease entry names no window instance, so the new hub counts each one against every instance the old hub divided for that machine whose bounds hold its `expiresAt` (after its start, at or before its end) (day, week and month alike: never less than its own instance's spend, and in an estate with several windows more than it in the smaller ones, which may then reopen with less or nothing left until they end))
 ([window lease](window-lease.md#reporting); how the reference orders leases across hub keys is CT-113's). A report entry carries no amount, so a report that
 names an old-hub lease without `spent` counts as no report for the gate (the new hub has nothing to count instead), and
-the instance stays closed until a report names it or the instance ends (DEC-0146). The gate is a move's to another machine, never a
+the instance stays closed until a report names it or the instance ends (DEC-0146); once the new hub has counted a
+lease's final `spent` in a division, a later report naming it without `spent` changes nothing counted. The gate is a move's to another machine, never a
 re-key's on the hub's own machine ([Move the hub](ceremonies.md#move-the-hub) step 7). It
 opens this way only after a planned move, where the old hub's machine stays and reports its own leases. After a lost hub, the lost machine is removed in the move's own revision and never reports, and its own meter may have held the old hub's leases, so every window instance the old hub divided stays closed to new leases until it ends (a day, a week or a month), whatever the other machines report (DEC-0146).
 
