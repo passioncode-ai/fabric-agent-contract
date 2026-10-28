@@ -618,8 +618,8 @@ space for `T`, an offset, a lower-case `t`, ten fraction digits; DEC-0139, DEC-0
 body's `iat`, read to the millisecond as a clock writing `iat` reads (truncated, never rounded: `.0009996Z` is in the millisecond `.000`), so a report cannot claim to be written later than
 it was sent, DEC-0146), `wrong-machine` (the report names another machine than the one
 `relayCallerTier` named) and `stale` (its `at` is not after the report the hub holds for that machine, compared to the nanosecond, so two
-times less than a millisecond apart still order; a held report the hub accepted before DEC-0146 with an offset is read
-as the last nanosecond of its millisecond, its fraction truncated to three digits, so a report within that millisecond is not after it, DEC-0146). It then reads
+times less than a millisecond apart still order; a held report whose `at` is no relay time (an offset, a lower-case `t`, ten or more fraction digits, accepted before
+DEC-0146) is read as the last nanosecond of its millisecond, its fraction truncated to three digits, so a report within that millisecond is not after it, DEC-0146). It then reads
 the opened report as `acceptMachineReport` does, so a `FAC-SEM-152` finding (a lease named twice) drops it as
 `malformed`, as the local read does (DEC-0139); a relayed report that also names another machine, or is not after the
 one held, keeps `openMachineReport`'s answer (`wrong-machine`, `stale`), and is dropped either way, and every dropped report's delivery is acknowledged, so a report refused (one sealed to an
@@ -657,8 +657,9 @@ report"), and the person's ways out: bring the machine back, update it, or remov
 Step 7's gate still does: what a machine spent under the old hub's leases is known only from its reports, so a removed
 machine that never reported after the revocation keeps the instances the old hub divided closed to new leases until
 they end, and the wait says so. After a lost hub none of these opens it (MR-5). When the machine waited on is the
-hub's own, the way out is to update it: removing it means moving the hub ([Move the hub](ceremonies.md#move-the-hub)),
-whose step 6 waits on the same machine's report (DEC-0146).
+hub's own, the way out is to update it: removing it as retired means a planned move ([Move the hub](ceremonies.md#move-the-hub)),
+whose step 6 waits on the same machine's report, and declaring it lost removes it in one revision and pauses the windows
+it divided until they end (DEC-0146).
 
 ## The pairing rendezvous
 

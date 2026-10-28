@@ -188,6 +188,8 @@ export function acceptMachineReport(report: unknown, ctx: { machine: unknown; he
 export function readMachineReport(sealed: unknown, ctx: Parameters<typeof openMachineReport>[1] & { notAfter: unknown }): { ok: true; report: Json } | { ok: false; refusal: MachineReportRefusal } {
   const opened = openMachineReport(sealed, ctx);
   if (!opened.ok) return opened;
+  // `notAfter` is required here: a context without a readable one refuses rather than skips the bound.
+  if (instantKey(ctx.notAfter) === undefined) return { ok: false, refusal: "malformed" };
   return acceptMachineReport(opened.report, { machine: ctx.sender, ...(ctx.held === undefined ? {} : { held: ctx.held }), notAfter: ctx.notAfter, schemaValid: ctx.schemaValid });
 }
 

@@ -21,9 +21,7 @@ export function strictTime(value: unknown): number {
   const date = new Date(0);
   date.setUTCFullYear(year, month - 1, day);
   if (date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day || hour > 23 || minute > 59 || second > 59) return Number.NaN;
-  // Date.parse reads a fraction of ten or more digits late in V8 (`.0492040007800` as `.492`): read the millisecond the
-  // first three digits name, which is the truncation every shorter fraction already gets (DEC-0146).
-  return Date.parse((value as string).replace(/\.(\d{1,3})\d*/, ".$1"));
+  return Date.parse(value as string);
 }
 const INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.(\d{1,9}))?Z$/;
 

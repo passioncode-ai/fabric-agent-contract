@@ -125,7 +125,7 @@ leaves its spend under the old hub's leases unknown, so the instance stays close
 after a lost hub, removed in the move's revision, that is every instance the old hub divided (DEC-0146). A lease of a hub key a revision revokes ends for the meter when it
 applies that revision, before its `expiresAt` (WL-6): it spends nothing more under it, and its final `spent` is the
 one in a report whose `estateRecord.revision` is at or above that revision (DEC-0146). The hub
-orders a machine's reports by their `at`, to the nanosecond (a time held from before DEC-0146 as its millisecond's last nanosecond, as the hub's acceptance
+orders a machine's reports by their `at`, to the nanosecond (a held time that is no relay time (an offset, a lower-case `t`, ten or more fraction digits, accepted before DEC-0146) as its millisecond's last nanosecond, as the hub's acceptance
 reads it), a tie
 going to the larger `spent` (DEC-0146), compares a report's `at` with a lease's `issuedAt` and `expiresAt` to the
 millisecond, truncated (the precision a hub writes them in), and counts, for each machine, the most it may have spent (`windowRemainder`):
@@ -187,7 +187,8 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
 
 ## Who adopts it
 
-- **Fabric's hub** (backlog CT-19) issues leases: for each machine of the estate, one lease per slot under a hub key
+- **Fabric's hub** (backlog CT-19) issues leases, `estate` ones only until the revision that admits `project:` and
+  `grant:` leases decides the report's cap (DEC-0146 MR-1): for each machine of the estate, one lease per slot under a hub key
   the current estate record certifies, its amount at most `windowRemainder`'s answer, its life at most 24 hours and
   inside the window instance, sequences rising per slot; it counts an expired, unreported lease as spent and credits
   a late report at its next division. After a hub move it issues no lease of a window instance the old hub divided

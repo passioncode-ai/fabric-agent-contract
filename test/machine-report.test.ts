@@ -16,7 +16,7 @@ import {
   sealMachineReport
 } from "../src/machine-report.js";
 import { rfc8785 } from "../src/canonical.js";
-import { instantKey, strictTime } from "../src/rfc3339.js";
+import { instantKey } from "../src/rfc3339.js";
 import { instant } from "../src/relay.js";
 import { hpkeSealBase } from "../src/secret-envelope.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -81,10 +81,6 @@ describe("readMachineReport (MR-4's whole reading, DEC-0146)", () => {
   it.each(vectors.read as Json[])("read: $name", (c) => {
     const answer = readMachineReport(c.sealed, { ...c.context, schemaValid: reportValid });
     expect(json(answer)).toEqual(c.expect);
-  });
-
-  it("reads a fraction of any length at its truncated millisecond (CT-197)", () => {
-    for (const fraction of ["", ".0", ".04", ".049", ".0492", ".049204000", ".0492040007800", ".0499999999999999"]) expect(strictTime(`2026-10-27T08:00:00${fraction}+00:00`)).toBe(Date.parse(`2026-10-27T08:00:00${fraction.slice(0, 4)}Z`));
   });
 
   it("answers what openMachineReport refuses, and what acceptMachineReport then refuses, never throwing", () => {

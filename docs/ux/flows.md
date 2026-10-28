@@ -670,7 +670,7 @@ flowchart TD
   W -->|not yet| V[Waiting: each machine named; bring it back, update it or remove it]
   V --> W
   W -->|yes| T[The switch, then revision 2: the old key revoked, the delta anchored]
-  T --> T2[New leases of the windows the old hub divided wait until every machine reports revision 2; removing one does not end the wait]
+  T --> T2[New leases of the windows the old hub divided wait until every machine reports revision 2, or until each window instance ends; removing one does not end the wait]
   T2 --> S
   A -->|this machine has not heard the hub for 24 h| C{Still silent after reconnecting?}
   C -->|no| Z[The alert clears; no move]
