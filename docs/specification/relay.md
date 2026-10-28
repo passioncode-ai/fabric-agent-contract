@@ -526,9 +526,10 @@ DEC-0132 (CT-152), DEC-0139 (CT-161), DEC-0146 (CT-172) · schemas [`machine-rep
 [`tools/vectors/machine-report.ts`](../../tools/vectors/machine-report.ts) · rules `FAC-SEM-152`, `FAC-SEM-154`
 
 Each machine tells its estate's hub what it applied and what it spent. A check-in to an organization server carries
-none of it (DEC-0128 UE-2), so the report goes over the relay, sealed so the relay reads none of it. Three readers
-depend on it: the hub's key rotation (DL-15), the hub move's step 6 ([ceremonies](ceremonies.md#move-the-hub)) and the
-window lease's [reporting](window-lease.md#reporting).
+none of it (DEC-0128 UE-2), so the report goes over the relay, sealed so the relay reads none of it, or, on the hub's own machine, through the
+node's `machine.report` on the local channel (MR-2). Four readers depend on it: the hub's key rotation (DL-15), the hub
+move's step 6 and step 7's gate ([ceremonies](ceremonies.md#move-the-hub)) and the window lease's
+[reporting](window-lease.md#reporting).
 
 **MR-1, the report.** `machine-report/1` is `{type, machine, at, records}`: `machine` the reporting machine's id in the
 estate record, `at` when it wrote the report, and `records` the check-in's members by the same names and shapes

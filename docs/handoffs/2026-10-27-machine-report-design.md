@@ -81,6 +81,9 @@ fix the text and test items filed with them.
   row, SCR-23, ST-032, SCN-030, SCN-038 and FLW-27.
 - **Round 23 (seam):** `instantKey` and the relay's `instant` are held equal over a generated grid of 14 112 shapes
   as well as relay.json's cases (`test/machine-report.test.ts`).
+- **Round 24 (passed; its risks):** relay.md's report section names the local channel and step 7's gate; CT-19 the
+  `estate`-only issuance, CT-20 the meter's re-verification context, CT-196 the window reopened with less; FLW-26 keeps
+  the chosen profile and offers it after the move.
 
 ## Checks run
 

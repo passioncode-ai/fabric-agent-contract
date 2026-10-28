@@ -636,7 +636,7 @@ flowchart TD
 - **Goal:** the machine does only what its new profile allows
 - **Entry points:** My network's machines
 - **Success exit:** the signed revision lists the machine under its new profile, and its nodes apply it
-- **Task analysis:** the person picks a profile → on the machine that holds the hub key, Fabric moves the hub first (FLW-27) → the drafter removes what the profile forbids (placements, secrets) in the same revision → the person signs it with a passkey → every node applies it and judges the next call by it.
+- **Task analysis:** the person picks a profile → on the machine that holds the hub key, Fabric moves the hub first (FLW-27), keeps the chosen profile and offers it for signing once the move's second revision is signed and reported (while "Finish the move" is pending, the profile change waits with it) → the drafter removes what the profile forbids (placements, secrets) in the same revision → the person signs it with a passkey → every node applies it and judges the next call by it.
 - **Rejected shape:** a node's own setting for its profile, rejected because a machine could then widen itself; the profile is the signed record's (DEC-0106).
 - **Flow:**
 
@@ -644,7 +644,7 @@ flowchart TD
 flowchart TD
   P[Person picks a profile] -->|another machine| D[Drafter removes what it forbids]
   P -->|the hub's machine, to member or view| H[Move the hub first, FLW-27; the change follows in a later revision]
-  H --> D
+  H -->|the move finished, its second revision signed and reported| D
   D --> G{Passkey signs?}
   G -->|no| N[Nothing changed]
   G -->|yes| A[Nodes apply the revision; the next call is judged by it]
