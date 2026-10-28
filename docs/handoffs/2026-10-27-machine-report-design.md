@@ -67,6 +67,10 @@ fix the text and test items filed with them.
   links devices' unlinkable enrollments; FLW-20's diagram gains its failure exit and both notices; FLW-26 moves the hub
   first.
 - **Round 20 (seam):** Compatibility names the sub-millisecond stale change and Fabric's ceremony duties (CO-412).
+- **Round 21:** Status and Compatibility name the local-path `at` narrowing; item 2 makes `leaseId` unique within the
+  estate across hub keys (window-lease's row, CT-113's vector); item 10's `pnpm validate` claim limited to a
+  machine-report document; the re-key notice stated and in the ceremony row; ceremonies step 3 and FLW-27 T2 state the
+  full reopening condition; FLW-26's diagram moves the hub first; CT-152 holds the half-done move's other actions.
 
 ## Checks run
 

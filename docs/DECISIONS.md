@@ -8711,7 +8711,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-27
 - **Status:** Accepted (on merge of its pull request, after its objection window: 2026-10-29 18:00 UTC, thread
   `5d2ea917` with Fabric). A narrowing of the hub's reading of a report's `at` (one that is no relay time, which
-  DEC-0139's `strictTime` admitted with an offset, or one later than the body's `iat`); new duties for the hub
+  DEC-0139's `strictTime` admitted with an offset, or one later than the body's `iat`, or, for its own node's answer on the local channel, later than the hub's clock when the answer arrived); new duties for the hub
   (counting an old hub's leases, the gate binding it from its first signature, before the revoking revision, over every
   machine listed since the window instance began, the wait it shows, the `degraded` entry's form) and for a reporting machine (the
   `#kem` it seals to, the leases of each hub key, a lease a revoked key signed) and for a meter (re-verifying its leases
@@ -8739,7 +8739,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `grant:` lease until the revision that admits them decides the report's cap with them, and a machine never drops
      a lease to fit.
   2. **Newest and the hub keys.** The newest lease of a slot is the highest `sequence` among the slot's leases one hub
-     key signed (WL-11); after a move a machine names the newest of each hub key it held in the instance.
+     key signed (WL-11); after a move a machine names the newest of each hub key it held in the instance. Since a report then carries leases
+     of several hub keys, a hub draws each `leaseId` unique within the estate across hub keys (for example 128 random
+     bits, or prefixed by its kid), so a report's entry never names another hub's lease.
   3. **A lease a revoked key signed** ends for the meter when it applies the revoking revision (WL-6), before its
      `expiresAt`: it spends nothing more, later reports keep naming it with its own `expiresAt` until the instance
      ends, and its final `spent` is a report whose `estateRecord.revision` is at or above that revision (MR-5).
@@ -8785,7 +8787,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `fabric-service/0.1` well-known shows it on its own machine's row in My network's machines (SCR-23, a setup note while only the person's signature is missing, an error otherwise); SCR-23
      gains the waiting state of item 6.
   10. **The report's `at`.** It is a relay time (`Z`, an upper-case `T`, at most nine fraction digits; `instantKey`,
-      `FAC-SEM-154`, so `pnpm validate` flags it), ordered to the nanosecond, and not after `notAfter`, read to the millisecond: the body's
+      `FAC-SEM-154`, so `pnpm validate` flags it in a machine-report document; a `machine.report` answer on the local
+      channel is not yet checked for it, CT-152), ordered to the nanosecond, and not after `notAfter`, read to the millisecond: the body's
       signed `iat` for a relayed report, the hub's clock when its own node answered. An unreadable `notAfter` refuses.
       The hub's division orders a machine's reports the same way (`windowRemainder`): by millisecond, then the nanoseconds
       within it, a held time that is no relay time (an offset, a lower-case `t`, ten or more fraction digits, accepted before DEC-0146) read as its millisecond's last nanosecond (as acceptance reads it), a tie going to the larger
@@ -8811,7 +8814,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   letting the person reopen the windows a lost hub divided before they end (the unknown spend of the lost machine's
   meter could pass the limit the window keeps; whether a person may accept that is the operator's question, CT-195).
 - **Compatibility:** a narrowing for the hub's reading of an `at` that is no relay time (one with an offset was
-  accepted under DEC-0139) or later than the body's `iat`, and for a hub that issued a lease of an instance the old hub
+  accepted under DEC-0139) or later than the body's `iat`, or, for its own node's answer on the local channel, later than the hub's clock when the answer arrived, and for a hub that issued a lease of an instance the old hub
   divided without counting the old hub's spend, between a planned move's switch and its revoking revision, or after a
   machine was removed since the instance began; a narrowing of `FAC-SEM-090` and `windowRemainder` for reports of one
   lease in one millisecond (the newer, then the larger `spent`, where the last one passed in won before), which no
@@ -8819,7 +8822,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   decides the report's cap (none issues leases yet, CT-19); a report newer than the held one by less than a
   millisecond, which DEC-0139's reading refused as `stale`, is now accepted (item 10; no hub is deployed, CT-152); new
   duties for Fabric's ceremonies, none implemented (CO-412): the notices of item 6, revision 2 asked for at once and
-  kept asked for, the re-key notice, and a re-key on the hub's own machine signing at once with the old kid's leases
+  kept asked for, the re-key notice (before re-keying the machine that holds the hub key, that running approvals and
+  tokens the old kid signed must be issued again), and a re-key on the hub's own machine signing at once with the old kid's leases
   kept in its division (never step 7's gate); a new duty for a meter, re-verifying its leases when it
   applies a revision with its first verification's context (Project Observatory's meter, CT-20); no hub holds a report
   from before DEC-0146 (none is deployed, CT-152), so no held `at` later than its body's `iat` needs a guard; new duties

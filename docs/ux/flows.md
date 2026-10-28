@@ -642,7 +642,9 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-  P[Person picks a profile] --> D[Drafter removes what it forbids]
+  P[Person picks a profile] -->|another machine| D[Drafter removes what it forbids]
+  P -->|the hub's machine, to member or view| H[Move the hub first, FLW-27; the change follows in a later revision]
+  H --> D
   D --> G{Passkey signs?}
   G -->|no| N[Nothing changed]
   G -->|yes| A[Nodes apply the revision; the next call is judged by it]
@@ -673,7 +675,7 @@ flowchart TD
   W -->|not yet| V[Waiting: each machine named; bring it back, update it or remove it; removing it keeps the old hub's windows paused until they end; the hub's own machine only by updating it]
   V --> W
   W -->|yes| T[The switch: the new hub signs; new leases of the windows the old hub divided wait from here until every machine listed since each window began reports revision 2, or until each window instance ends]
-  T --> T2[Fabric asks for revision 2 at once: the old key revoked, the delta anchored; the leases stay paused until the person signs it and every machine reports it]
+  T --> T2[Fabric asks for revision 2 at once: the old key revoked, the delta anchored; the leases stay paused until the person signs it and every machine listed since each window began reports it, or each window ends]
   T2 --> S2{Passkey signs revision 2?}
   S2 -->|no| X2[Revision 2 not signed: the new hub signs; the old hub's windows stay paused until it is signed and reported, or they end; SCR-23 waiting offers Finish the move]
   X2 -->|Finish the move| T2

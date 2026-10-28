@@ -278,7 +278,7 @@ A machine whose device key is lost, or is rotated, keeps its machine id:
    `FAC-SEM-076` refuses a record that lists a key it revokes; the key reference revokes the old key alone. `@` never
    occurs in a kid, so the two forms never collide.
 3. If the hub key was on that machine, Fabric says first that running approvals and tokens the old kid signed must be
-   issued again (SCR-23, ST-025), and the same revision re-certifies it under a **new kid** and revokes the old kid
+   issued again (SCR-23, ST-025, DEC-0146), and the same revision re-certifies it under a **new kid** and revokes the old kid
    (`hub-key`), or revokes it with no successor (`FAC-SEM-114`); like a move, that revision anchors the delta's head
    ([Move the hub](#move-the-hub), step 5). Each meter ends the old kid's leases when it applies that revision (window
    lease WL-6, DEC-0146 item 3); the hub, on the same machine, issued them and keeps them in its own division at their
@@ -352,7 +352,8 @@ alert:
    revision drops the old key, revokes it as `hub-key <old kid>` (`FAC-SEM-114`) and anchors the head as it then stands;
    Fabric asks the person for it at once after the switch, and keeps asking until it is signed (a declined or failed
    signature leaves the move half done, shown as SCR-23's waiting state), and the old hub's windows stay paused (step 7)
-   until the person signs it and every machine has reported it. `hubMove` reads that pair as an addition, then a removal (`moved` is `false` in each).
+   until the person signs it and every machine listed since each window began has reported it, or each window instance
+   ends (step 7). `hubMove` reads that pair as an addition, then a removal (`moved` is `false` in each).
    Every context hub key moves the same way (DEC-0128): the first revision certifies the new hub machine's key per pinned
    context beside the old ones, and the second drops and revokes the old machine's.
 4. **A lost hub** is replaced in one revision: the new `hubKey`, the old key dropped and revoked, the lost machine removed
