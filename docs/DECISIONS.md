@@ -8769,10 +8769,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      it). A removed machine is no longer waited on by DL-15 and step 6; step 7's gate keeps an instance the old hub
      divided closed until it ends when a machine removed since the instance began (before the move, between its
      revisions or after) never reported at or above the revoking revision, its spend being unknown. Fabric tells the person before it happens: before the passkey signs a lost-hub revision, that every window the hub divided stays paused until it ends, with the dates; before "Remove" during a move (from its first revision until every paused instance has opened or ended) for a machine that has not reported at or above the revoking revision, and before "Move the hub" while an instance runs that a machine removed since it began left, that the instance stays paused until it ends
-     (SCR-23, SCN-030, SCN-038).
+     (SCR-23, SCN-030, SCN-038). After a planned move's switch Fabric asks for revision 2 at once and keeps asking; while
+     it is unsigned the old hub's windows stay paused, shown with their end dates and "Sign revision 2" (ceremonies step
+     3, SCR-23).
   7. **The hub's own machine.** The node that applies the estate's records there serves `machine.report`, Fabric's own
      node included. A node answers a method it does not serve `unknown-method`, as `nodeMethodAnswer` does.
-  8. **A payload a recipient does not know.** Every recipient of relay messages acknowledges and drops a body it verified
+  8. **A payload a recipient does not know** ([relay](specification/relay.md#messages)). Every recipient of relay messages acknowledges and drops a body it verified
      whose payload type it does not know; a body it cannot verify keeps its refusal's handling, since `unknown-sender`
      and `not-yet-valid` can pass later. A hub not yet on DEC-0132 that does so drops reports, and its mailbox does not fill with them; whether
      Fabric's deployed hub does is asked in thread `5d2ea917`, and if it does not, its date is CT-152's.
@@ -8820,10 +8822,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and `tools/vectors/machine-report.ts` (`open`, `accept`, `read`), `fixtures/vectors/local-channel.json` and
   `tools/vectors/local-channel.ts` (`dispatch`), `fixtures/vectors/hub-move.json` and `tools/vectors/hub-move.ts` (three
   `move` cases), `test/machine-report.test.ts`, `test/local-channel.test.ts`;
-  `relay.md` (MR-1 to MR-6, the rule table), `window-lease.md` (Reporting, `FAC-SEM-090`), `ceremonies.md` (step 7),
+  `relay.md` (Times; Messages, `deliver`'s acknowledgement; MR-1 to MR-6; the rule table), `window-lease.md` (the `leaseId` row, Reporting, `FAC-SEM-090`), `ceremonies.md` (step 7),
   `delegation.md` (DL-15), `local-channel.md`, `devices.md` (UE-2's wording, what stays linkable), `revocation-delta.md`
-  and `estate-record.md` (wording), `conformance.md` (the module row, the meter, hub, reporter and hub-reader rows, a
-  node row, the rule list), `schemas/machine-report.schema.json` and `schemas/device-check-in.schema.json`
+  and `estate-record.md` (wording), `conformance.md` (the machine-report and window-lease module rows, the meter, hub, reporter and hub-reader rows, a
+  node row, the network-view row, the rule list), `schemas/machine-report.schema.json` and `schemas/device-check-in.schema.json`
   (descriptions), `src/revocation-delta.ts` (comments), `src/window-lease.ts` (`heldBy`'s order of reports) and
   `fixtures/vectors/window-lease.json` (`remainder` vectors: reports in one millisecond, ties, a held offset time), `docs/ux/screens.md` (SCR-23, SCR-31),
   `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-20, FLW-27), `docs/specification/window-lease.md` (who adopts it),

@@ -489,7 +489,7 @@ flowchart TD
 - **Goal:** a signed revision that creates the network, drops a machine, or replaces a machine's keys, revoking what it drops
 - **Entry points:** Fabric's "Create my network", and the network's machine list with "Remove" and "Replace key" per machine
 - **Success exit:** the person signed; machines apply the revision, and the delta carries each revocation within seconds
-- **Task analysis:** create: the first machine makes its keys → Fabric asks for a second passkey on another authenticator (or tells what one costs) → Fabric drafts revision 1 → the passkey signs → the machine pins it and shows the fingerprint. Remove: choose the machine → Fabric drafts the revision that revokes it (the hub's machine: "Move the hub" instead, FLW-27; a retired one stays in the network until a later "Remove"; during a move, Fabric first warns as FLW-27 says for a machine that has not reported the revoking revision) → the passkey signs. Re-key: the machine pairs again under its id (or, alone in its network, makes new keys) → Fabric drafts the revision with the new keys and the old ones revoked by reference → the passkey signs.
+- **Task analysis:** create: the first machine makes its keys → Fabric asks for a second passkey on another authenticator (or tells what one costs) → Fabric drafts revision 1 → the passkey signs → the machine pins it and shows the fingerprint. Remove: choose the machine → Fabric drafts the revision that revokes it (the hub's machine: "Move the hub" instead, FLW-27; a retired one stays in the network until a later "Remove"; during a move, Fabric first warns as FLW-27 says for a machine that has not reported the revoking revision) → the passkey signs. Re-key: the machine pairs again under its id (or, alone in its network, makes new keys) → on the machine that holds the hub key Fabric says first that running approvals and tokens the old hub kid signed must be issued again → Fabric drafts the revision with the new keys and the old ones revoked by reference → the passkey signs.
 - **Rejected shape:** dropping a machine or a key without revoking it — rejected because a revision that drops without revoking leaves caches and deltas without the revocation (`FAC-SEM-114`).
 - **Flow:**
 
@@ -505,7 +505,7 @@ flowchart TD
   S --> P[Machines apply; the delta carries each revocation]
 ```
 
-- **Screens traversed:** SCR-23 success (signed), error (the passkey ceremony failed; nothing changed).
+- **Screens traversed:** SCR-23 success (signed), error (the passkey ceremony failed; nothing changed); after re-keying the hub's machine, the setup note on its own row while the revision listing its new key is unsigned (DEC-0146).
 
 ### FLW-21: Operator reads what an agent uses
 

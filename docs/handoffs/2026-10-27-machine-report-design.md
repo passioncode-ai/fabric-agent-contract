@@ -50,6 +50,10 @@ fix the text and test items filed with them.
 - **Round 16 (seam):** CT-113 names an old-hub lease ending at an instance's end (`periodOf` reads `[start, end)`);
   CT-152 names the whole-second `iat` pairing and leaves open which of two nodes on a hub machine answers
   `machine.report`; `acceptMachineReport`'s comment says a null answer keeps what the hub holds.
+- **Round 17 (product):** the Consequences name relay Times and Messages, the `leaseId` row and the module and
+  network-view rows; one condition for the re-issue notice (the machine holding the hub key) in SCR-23, SCN-030 and
+  FLW-20; the revision-2 prompt in item 6, the drafter row and CT-113; FLW-20 traverses the setup note; CT-152 holds
+  the waits before reporting nodes ship and the digest key's resend.
 
 ## Checks run
 
