@@ -8715,7 +8715,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (counting an old hub's leases, the gate binding it from its first signature, before the revoking revision, over every
   machine listed since the window instance began, the wait it shows, the `degraded` entry's form) and for a reporting machine (the
   `#kem` it seals to, the leases of each hub key, a lease a revoked key signed) and for a meter (re-verifying its leases
-  when it applies a revision), none deployed yet (CT-152, and for Project Observatory's meter CT-20); and a duty
+  when it applies a revision); a hub signs no `project:` or `grant:` lease until a revision admitting them decides the
+  report's cap, none deployed yet (CT-152, and for Project Observatory's meter CT-20); and a duty
   for every recipient of relay messages: acknowledging a verified body whose payload type it does not know. Fabric's
   record (its release plan's PL-12, commit `1145eff6`, 2026-10-27) says no Fabric reads a relay mailbox today and that
   its reader in 0.4.0 acknowledges every verified body and drops an unknown type (CO-452); Project Observatory's node is
@@ -8814,7 +8815,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   divided without counting the old hub's spend, between a planned move's switch and its revoking revision, or after a
   machine was removed since the instance began; a narrowing of `FAC-SEM-090` and `windowRemainder` for reports of one
   lease in one millisecond (the newer, then the larger `spent`, where the last one passed in won before), which no
-  consumer runs yet; new duties for reporting machines (none deployed yet, CT-152) and for relay recipients (Fabric reads
+  consumer runs yet; a narrowing for a hub, which signs no `project:` or `grant:` lease until the revision admitting them
+  decides the report's cap (none issues leases yet, CT-19); a new duty for a meter, re-verifying its leases when it
+  applies a revision with its first verification's context (Project Observatory's meter, CT-20); no hub holds a report
+  from before DEC-0146 (none is deployed, CT-152), so no held `at` later than its body's `iat` needs a guard; new duties
+  for reporting machines (none deployed yet, CT-152) and for relay recipients (Fabric reads
   no relay mailbox today and its 0.4.0 reader complies, its PL-12; Project Observatory's node is asked in `41a9b0cb`). Additive for ports (three new functions, `readMachineReport`, `instantKey` and `nodeMethodAnswer`, a context member, a rule code, vector groups); no
   earlier vector's answer changes, and a held report accepted with an offset before still guards against an older
   one.

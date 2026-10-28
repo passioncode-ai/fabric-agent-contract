@@ -60,6 +60,9 @@ fix the text and test items filed with them.
 - **Round 18 (seam) and 19 (product):** Compatibility names `FAC-SEM-090`'s narrowing; FLW-27's revision 1 regains
   its "Nothing changed" exit; SCN-038 walks revision 2 unsigned; ceremonies' re-key step 3 and CT-113 carry the
   re-issue notice; CT-152 names payloads sent once to a node that drops unknown types.
+- **Round 19 (seam):** Compatibility and Status name the hub's `project:`/`grant:` restriction, the meter's
+  re-verification (with its first verification's context, so a spent-down remainder never ends a lease) and why no held
+  pre-DEC-0146 report needs an `iat` guard.
 
 ## Checks run
 
