@@ -28,7 +28,10 @@ fix the text and test items filed with them.
 - **Text:** the relay-only wording (revocation-delta.md, estate-record.md, devices.md, window-lease.md, the check-in
   schema, conformance rows, the source comments), MR-2's no-erase, MR-3's `msgId` exception, the schema description,
   `FAC-SEM-090`'s limit, devices.md's "what stays linkable", DEC-0139's consequences, SCR-23, SCN-038 and FLW-27,
-  Replace a machine's key step 3 (a re-keyed hub keeps dividing).
+  Replace a machine's key step 3 (a re-keyed hub keeps dividing; a re-key without the division is CT-199's), Remove a
+  machine and Move the hub steps 3 and 4 (the person's notices, DEC-0146 item 6), contexts.md's linkability, SCN-030,
+  SCN-048, ST-032, CONTEXT.md's "Revoking revision", the meter's duty on CT-20; `hub-move.json` gains three `move`
+  cases by its generator.
 
 ## Checks run
 

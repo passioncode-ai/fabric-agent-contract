@@ -348,8 +348,9 @@ alert:
 3. **A reachable hub** follows DL-15 ([delegation](delegation.md#keys-publication-and-rotation)): a first revision
    certifies the new machine's `hubKey`; the new key is published in the key set; the old hub stops signing and the new
    one continues the one chain from the switch (its first entry is the next sequence after the head it holds); a second
-   revision drops the old key, revokes it as `hub-key <old kid>` (`FAC-SEM-114`) and anchors the head as it then stands.
-   `hubMove` reads that pair as an addition, then a removal (`moved` is `false` in each).
+   revision drops the old key, revokes it as `hub-key <old kid>` (`FAC-SEM-114`) and anchors the head as it then stands;
+   Fabric asks the person for it at once after the switch, and the old hub's windows stay paused (step 7) until the
+   person signs it and every machine has reported it. `hubMove` reads that pair as an addition, then a removal (`moved` is `false` in each).
    Every context hub key moves the same way (DEC-0128): the first revision certifies the new hub machine's key per pinned
    context beside the old ones, and the second drops and revokes the old machine's.
 4. **A lost hub** is replaced in one revision: the new `hubKey`, the old key dropped and revoked, the lost machine removed

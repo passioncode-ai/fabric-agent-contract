@@ -288,7 +288,8 @@ whether an organization's relay answers it differently is part of CT-163.
 - **`deliver`**: `{from, msgId, seq, body, sentAt}`, in `seq` order, to every connection the recipient holds. `from`
   is the kid the relay admitted on the sender's connection. `deliver` has no `to`.
   - The recipient answers `ack` with `{seq}`. A body it verified whose payload type it does not know is acknowledged
-    and dropped, so such messages never fill its mailbox (DEC-0146). DEC-0146 keeps a body the recipient
+    and dropped, so such messages never fill its mailbox (DEC-0146); a payload type added later must therefore tolerate
+    being dropped by a recipient that predates it, or be sent only once the recipient's pin admits it. DEC-0146 keeps a body the recipient
     cannot verify under its refusal's handling: `unknown-sender` and `not-yet-valid` may pass once it applies a revision or the sender's clock is
     behind it, and what a member does with another member's body on an organization's relay is CT-163's. Acknowledged and expired messages are deleted.
   - Delivery is at least once.

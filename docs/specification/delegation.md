@@ -270,7 +270,8 @@ machine word for `error.data.detail`, never the token. A verifier in another lan
   To keep every callee answering, the hub certifies the new key while the old one stays certified, signs with the new
   key once its machines' reports (`records.estateRecord.revision`, DEC-0053, in the [machines' report](relay.md#the-machines-report) over the relay,
 or `machine.report` on the hub's own machine, and never through an organization server, DEC-0128, DEC-0132) show the certifying revision applied (a machine that never
-reports keeps the switch waiting until the person removes it, MR-6, DEC-0146), and
+reports keeps the switch waiting until the person removes it, MR-6, DEC-0146; when that machine is the hub's own, the way out
+is to update it, since its "Remove" opens Move the hub), and
   revokes the old key in a later revision. A revision that certifies the new key and revokes the old one at once (as
   the rotation vector does) is valid, but callees on the older revision refuse the new key until they apply it.
 

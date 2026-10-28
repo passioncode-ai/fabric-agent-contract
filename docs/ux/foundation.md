@@ -589,7 +589,9 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given a record that certifies a hub key and a machine whose last heartbeat is more than 24 hours old, then it tells me at once the hours since, and past 72 hours that calls between machines have stopped; given no readable heartbeat, it tells me that it has none and that calls between machines have stopped; given a clock it cannot read, it says so and offers no move.
   - Given that alert, when the machine reconnects to the estate's relay and the latest heartbeat it then holds is still more than 24 hours old (or none), then it offers to move the hub; given a hub machine I retire or replace, "Move the hub" on its row starts a planned move by DL-15; given a hub machine I declare lost, "Remove" on its row moves the hub in one revision even while it still sends heartbeats.
+  - Given a lost hub, before I sign its revision, then Fabric tells me that every spending window it divided stays paused until it ends, with the dates; given a move or a key switch waiting on machines, then it names each machine, since when and why when known, and my ways out (DEC-0146).
   - Given a lost hub and an always-on `full` machine caught up with the relay, when I sign, then one revision certifies its new hub key, revokes the old one and the lost machine, and anchors the delta once every reader of the record is pinned at or after DEC-0107; given a reachable hub, two revisions follow DL-15.
+  - Given a planned move, from the switch until I sign its second revision and every machine reports it, then new leases of the old hub's windows wait, and Fabric says so (DEC-0146).
   - Given two passkeys in my network and one lost, when I sign with the other, then the lost one is removed and revoked and a new one added; given one passkey, Fabric tells me before I create the network that losing it loses the network.
 - **Priority:** must
 - **Status:** draft

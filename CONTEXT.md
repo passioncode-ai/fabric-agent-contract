@@ -684,6 +684,10 @@ organization's relay takes its set from the organization's member list (`org-aut
 under the organization's key set, and its handshake names the organization in `auth` and the list in `welcome`
 (DEC-0134).
 
+**Revoking revision**: In a hub move, the estate record revision that adds the old hub key's `hub-key` revocation to
+its parent while that key's machine certifies no hub key: a planned move's second revision, a lost hub's one revision.
+The new hub's gate on the old hub's windows opens on machines' reports at or above it ([ceremonies](docs/specification/ceremonies.md#move-the-hub) step 7, DEC-0146).
+
 **Revocation delta**: The estate record's fast path (`revocation-delta/1`, DEC-0054): an append-only chain of
 entries, one revocation each, signed by an **Estate key** and chained by RFC 8785 hash, so its head is
 `{sequence, sha256}`: what a machine reports to its hub and an estate's **Relay** carries in its `welcome` (an organization's relay does not, DEC-0134 OR-2). A revision issued after an entry

@@ -1059,7 +1059,7 @@ independent agent author and P-02 project operator.
   2. The node checks in to each organization -> each check-in carries only that enrollment's identity and streams, and no estate record (`FAC-SEM-149`).
   3. An agent shared into `org:org-b` gets a delegation token -> it names `org:org-b`'s own context issuer and subject and is signed by that context's hub key (DL-14a).
 - **Expected result:** neither organization finds a value the other sees: device ids, keys, hashes, collectors, check-in records and token issuers all differ.
-- **Alt paths:** the member shares the same agent into both -> its `agentRef` is the same, the member's own choice. The machine is stolen -> Fabric offers to ask each organization to revoke, from the local registry; nothing is sent automatically.
+- **Alt paths:** the member shares the same agent into both -> its `agentRef` is the same, the member's own choice. The member places an instance of each organization on the machine -> each runs as the member's user and can read `machine.report` (the estate's revision, heartbeat, leases and spend) and the node's files, so both can link the machine: placing them is the member's choice of trust (devices.md UE, DEC-0146). The machine is stolen -> Fabric offers to ask each organization to revoke, from the local registry; nothing is sent automatically.
 - **UI elements:** SCR-31: each membership's state; nothing that shows one organization the other.
 - **States covered:** success
 - **Errors & recovery:** a node that would send an estate record -> its own check (`FAC-SEM-149`) refuses before sending.

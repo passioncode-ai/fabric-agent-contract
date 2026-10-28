@@ -664,14 +664,13 @@ flowchart TD
   A{What happened?} -->|the hub's machine is retired, replaced or changing profile| L[Move the hub on its row; pick a full machine]
   A -->|Remove on the hub's machine| K{Lost or retired?}
   K -->|retired, still reachable| L
-  D -.->|retired path: once the old machine has reported revision 2| RM[Remove the old machine]
   K -->|lost| M
   L --> T1[Revision 1, DL-15: the new hub key certified; the passkey signs]
   T1 --> W{Has every machine reported revision 1?}
-  W -->|not yet| V[Waiting: each machine named; bring it back, update it or remove it; removing it keeps the old hub's windows paused until they end]
+  W -->|not yet| V[Waiting: each machine named; bring it back, update it or remove it; removing it keeps the old hub's windows paused until they end; the hub's own machine only by updating it]
   V --> W
   W -->|yes| T[The switch: the new hub signs; new leases of the windows the old hub divided wait from here until every machine listed since each window began reports revision 2, or until each window instance ends]
-  T --> T2[Revision 2: the old key revoked, the delta anchored]
+  T --> T2[Fabric asks for revision 2 at once: the old key revoked, the delta anchored; the leases stay paused until the person signs it and every machine reports it]
   T2 --> S
   A -->|this machine has not heard the hub for 24 h| C{Still silent after reconnecting?}
   C -->|no| Z[The alert clears; no move]
