@@ -54,6 +54,9 @@ fix the text and test items filed with them.
   network-view rows; one condition for the re-issue notice (the machine holding the hub key) in SCR-23, SCN-030 and
   FLW-20; the revision-2 prompt in item 6, the drafter row and CT-113; FLW-20 traverses the setup note; CT-152 holds
   the waits before reporting nodes ship and the digest key's resend.
+- **Round 17 (seam) and 18 (product):** Fabric's PL-12 cited for item 8; CT-152 owes Fabric's own node serving the
+  local channel (asked in thread `5d2ea917`); SCN-038's way out names the hub's own machine; MR-6's reason qualified;
+  ST-025 carries the re-issue notice; CT-152 holds Remove on a move's destination or on the old hub mid-move.
 
 ## Checks run
 

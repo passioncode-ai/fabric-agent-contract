@@ -576,7 +576,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Traces:** JTBD-10, JRN-09/#3
 - **Acceptance criteria:**
   - Given a machine I remove, when I sign, then the revision revokes the machine and the relay turns it away; given the hub's machine, "Remove" moves the hub first (ST-032).
-  - Given a machine whose key I replace, when it pairs again under its id and I sign, then the revision lists the new keys and revokes the old ones by their key references, and a session or envelope under the old key is refused.
+  - Given a machine whose key I replace, when it pairs again under its id and I sign, then the revision lists the new keys and revokes the old ones by their key references, and a session or envelope under the old key is refused; given the machine that holds the hub key, before I replace its key, Fabric tells me that running approvals and tokens the old hub kid signed must be issued again (during a move, ST-032 says what Remove warns).
   - Given a network of one machine, when I replace its key, then I sign on the machine itself, with no pairing.
 - **Priority:** should
 - **Status:** draft

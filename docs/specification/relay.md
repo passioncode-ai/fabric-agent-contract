@@ -658,7 +658,8 @@ began, MR-5; it ends at the latest when the window instance ends: a day, a week 
 a month). A machine that
 is off, lost or pinned before DEC-0132 (its node answers `unknown-method`, or it sends no report) keeps them waiting,
 with no timeout of their own: signing ahead of it would leave it
-refusing the new key's tokens, and an unreported lease counts at its whole amount, which is safe. Fabric shows the wait
+refusing the new key's tokens, and an unreported lease counts at its whole amount in the issuing hub's division, while after a move step 7's gate
+stays closed, both of which are safe. Fabric shows the wait
 (SCR-23, its waiting state, for a key switch, a planned move and the window leases paused after a move): each machine
 waited on, since when, and why when known ("its software is too old to
 report"), and the person's ways out: bring the machine back, update it, or remove it
