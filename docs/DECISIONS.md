@@ -8812,9 +8812,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** a narrowing for the hub's reading of an `at` that is no relay time (one with an offset was
   accepted under DEC-0139) or later than the body's `iat`, and for a hub that issued a lease of an instance the old hub
   divided without counting the old hub's spend, between a planned move's switch and its revoking revision, or after a
-  machine was removed since the instance began; new duties for reporting machines (none deployed yet, CT-152) and for
-  relay recipients (deployed: whether they already acknowledge an unknown payload is asked in `5d2ea917` and
-  `41a9b0cb`). Additive for ports (three new functions, `readMachineReport`, `instantKey` and `nodeMethodAnswer`, a context member, a rule code, vector groups); no
+  machine was removed since the instance began; a narrowing of `FAC-SEM-090` and `windowRemainder` for reports of one
+  lease in one millisecond (the newer, then the larger `spent`, where the last one passed in won before), which no
+  consumer runs yet; new duties for reporting machines (none deployed yet, CT-152) and for relay recipients (Fabric reads
+  no relay mailbox today and its 0.4.0 reader complies, its PL-12; Project Observatory's node is asked in `41a9b0cb`). Additive for ports (three new functions, `readMachineReport`, `instantKey` and `nodeMethodAnswer`, a context member, a rule code, vector groups); no
   earlier vector's answer changes, and a held report accepted with an offset before still guards against an older
   one.
     `contractVersion` stays `0.1.0`.
