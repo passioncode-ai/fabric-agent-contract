@@ -180,6 +180,9 @@ describe("documentation helpers", () => {
       // A `...` closer ends front matter; an opener with no closer hides nothing.
       expect([...markdownAnchors("---\ntitle: x\n...\n# A\n")]).toEqual(["a"]);
       expect([...markdownAnchors("---\ntitle: x\n# A\n")]).toEqual(["a"]);
+      // An earlier setext underline ends the paragraph a later one reads.
+      expect([...markdownAnchors("Title\n===\nText\n---\n")]).toEqual(["title", "text"]);
+      expect([...markdownAnchors("Title\n===\n===\n")]).toEqual(["title"]);
       expect(headingSlug("Use &constructor; and &toString; here")).toBe("use-constructor-and-tostring-here");
       expect(headingSlug("A &#38; B &#x26; C")).toBe("a--b--c");
       // A known limit, not GitHub's answer (#cafés-here): named references outside the table stay as written (CT-198).

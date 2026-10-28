@@ -60,11 +60,6 @@ export function outsideFences(text: string): string {
   return scanFences(text).outside;
 }
 
-/**
- * A heading's anchor as GitHub renders it (github-slugger 2.0): the heading's rendered text in lower case, every
- * character that is not a letter, a mark, a digit, a space, `-` or `_` dropped, each space a `-`. Inline code, links,
- * emphasis and HTML tags render to their text first.
- */
 const NAMED_ENTITIES: Readonly<Record<string, string>> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: "\u00a0", copy: "\u00a9", reg: "\u00ae", hellip: "\u2026", ndash: "\u2013", mdash: "\u2014", lsquo: "\u2018", rsquo: "\u2019", ldquo: "\u201c", rdquo: "\u201d", middot: "\u00b7", times: "\u00d7", rarr: "\u2192", larr: "\u2190" };
 
 /** A character reference as its character: a decimal or hexadecimal one, or a named one of `NAMED_ENTITIES`; any other is left as written. */
@@ -77,6 +72,11 @@ function decodeEntity(whole: string, body: string): string {
   return Object.hasOwn(NAMED_ENTITIES, body) ? (NAMED_ENTITIES[body] as string) : whole;
 }
 
+/**
+ * A heading's anchor as GitHub renders it (github-slugger 2.0): the heading's rendered text in lower case, every
+ * character that is not a letter, a mark, a digit, a space, `-` or `_` dropped, each space a `-`. Inline code, links,
+ * emphasis and HTML tags render to their text first.
+ */
 export function headingSlug(heading: string): string {
   // A code span renders its text as written, `<id>` included; HTML outside one renders without its tags, and an entity
   // as its character. The span's text is set aside before tags are dropped, so `<id>` in code is not read as a tag.
@@ -122,7 +122,7 @@ export function markdownAnchors(text: string): Set<string> {
   }
   const paragraphLine = (at: number) => {
     const line = lines[at];
-    return line !== undefined && at >= start && !table.has(at) && line.trim() !== "" && !/^ {0,3}(?:#{1,6}(?:[ \t]|$)|[-*+][ \t]|\d{1,9}[.)][ \t]|>|(?:[-*_][ \t]*){3,}$|<)/.test(line);
+    return line !== undefined && at >= start && !table.has(at) && line.trim() !== "" && !/^ {0,3}(?:#{1,6}(?:[ \t]|$)|[-*+][ \t]|\d{1,9}[.)][ \t]|>|(?:[-*_][ \t]*){3,}$|=+[ \t]*$|<)/.test(line);
   };
   for (let index = start; index < lines.length; index += 1) {
     const line = lines[index] as string;
