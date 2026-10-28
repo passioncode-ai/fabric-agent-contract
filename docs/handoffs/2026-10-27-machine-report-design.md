@@ -47,6 +47,9 @@ fix the text and test items filed with them.
 - **Round 16 (product):** SCR-23's waiting state gains revision 2 unsigned after the switch with "Sign revision 2";
   FLW-27 returns from X2 to T2; ceremonies step 3 keeps asking; the spec index names Fabric's node for `machine.report`;
   the Consequences name FLW-20; SCR-23's notices carry the date; FLW-20 points to the during-move warning.
+- **Round 16 (seam):** CT-113 names an old-hub lease ending at an instance's end (`periodOf` reads `[start, end)`);
+  CT-152 names the whole-second `iat` pairing and leaves open which of two nodes on a hub machine answers
+  `machine.report`; `acceptMachineReport`'s comment says a null answer keeps what the hub holds.
 
 ## Checks run
 
