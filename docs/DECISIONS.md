@@ -8745,7 +8745,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      report names none held none, and a machine removed before such a report never sends one. The gate binds the new
      hub from its first signature (the switch of a planned move, before the revoking revision; at once after a lost
      hub), and the revoking revision is the one that adds the `hub-key` revocation to its parent (later revisions keep
-     it, `FAC-SEM-072`, and do not arm the gate again). The new hub's first division of such an instance counts each old-hub lease at its reported final `spent`,
+     it, `FAC-SEM-072`, and do not arm the gate again). The new hub's first division of such an instance counts each old-hub lease at its reported final `spent`, against
+     every instance of that machine whose bounds hold its `expiresAt` (a report's lease entry names no instance),
      as an ended lease of that amount, never at nothing. How the reference orders leases across hub keys stays CT-113's.
      This opens the gate only after a planned move. After a lost hub the lost machine, removed in the move's revision,
      never reports and may have held the old hub's leases itself, so every instance the old hub divided stays closed

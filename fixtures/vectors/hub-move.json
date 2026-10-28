@@ -834,6 +834,127 @@
         ],
         "removed": []
       }
+    },
+    {
+      "name": "a planned move's second revision: the old key dropped and revoked, nothing added, so the revoking revision (DEC-0146)",
+      "parent": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-b",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          }
+        ]
+      },
+      "next": {
+        "machines": [
+          {
+            "id": "m-a"
+          },
+          {
+            "id": "m-b",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-b",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-a",
+            "revokedAt": "2026-10-23T12:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "moved": false,
+        "added": [],
+        "removed": [
+          {
+            "machine": "m-a",
+            "kid": "hub-a",
+            "revoked": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "a revision after the move keeps the revocation: nothing removed, the gate not armed again (DEC-0146)",
+      "parent": {
+        "machines": [
+          {
+            "id": "m-a"
+          },
+          {
+            "id": "m-b",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-b",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-a",
+            "revokedAt": "2026-10-23T12:00:00Z"
+          }
+        ]
+      },
+      "next": {
+        "machines": [
+          {
+            "id": "m-a"
+          },
+          {
+            "id": "m-b",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-b",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-c"
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-a",
+            "revokedAt": "2026-10-23T12:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "moved": false,
+        "added": [],
+        "removed": []
+      }
     }
   ],
   "anchor": [

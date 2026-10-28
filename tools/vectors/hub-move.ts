@@ -82,7 +82,15 @@ function moveCases(): Json[] {
       { moved: true, added: [{ machine: "m-a", kid: "hub-a" }], removed: [{ machine: "m-a", kid: "hub-a", revoked: false }] }],
     ["a machine listed twice: its first entry only", parent, { machines: [machine("m-a"), machine("m-a", "hub-a"), machine("m-b")] },
       { moved: false, added: [], removed: [{ machine: "m-a", kid: "hub-a", revoked: false }] }],
-    ["revision 1, no parent", null, parent, { moved: false, added: [{ machine: "m-a", kid: "hub-a" }], removed: [] }]
+    ["revision 1, no parent", null, parent, { moved: false, added: [{ machine: "m-a", kid: "hub-a" }], removed: [] }],
+    ["a planned move's second revision: the old key dropped and revoked, nothing added, so the revoking revision (DEC-0146)",
+      { machines: [machine("m-a", "hub-a"), machine("m-b", "hub-b")] },
+      { machines: [machine("m-a"), machine("m-b", "hub-b")], revocations: [{ kind: "hub-key", ref: "hub-a", revokedAt: NOW }] },
+      { moved: false, added: [], removed: [{ machine: "m-a", kid: "hub-a", revoked: true }] }],
+    ["a revision after the move keeps the revocation: nothing removed, the gate not armed again (DEC-0146)",
+      { machines: [machine("m-a"), machine("m-b", "hub-b")], revocations: [{ kind: "hub-key", ref: "hub-a", revokedAt: NOW }] },
+      { machines: [machine("m-a"), machine("m-b", "hub-b"), machine("m-c")], revocations: [{ kind: "hub-key", ref: "hub-a", revokedAt: NOW }] },
+      { moved: false, added: [], removed: [] }]
   ];
   return cases.map(([name, parentRecord, next, expect]) => ({ name, parent: parentRecord, next, expect }));
 }

@@ -121,7 +121,8 @@ before the revoking revision), until that instance ends or every machine an esta
 began has reported after the revocation (DEC-0107, [ceremonies](ceremonies.md#move-the-hub); a report
 whose `estateRecord.revision` is at or above the revoking revision, DEC-0132 MR-5). The new hub cannot know which
 machines held one, hence every machine listed since the instance began, and its first division of such an instance counts
-each old-hub lease a report names at its final `spent`, as an ended lease of that amount (DEC-0146 MR-5; the
+each old-hub lease a report names at its final `spent`, as an ended lease of that amount, against every instance of
+that machine whose bounds hold its `expiresAt` (a report names no instance; DEC-0146 MR-5; the
 reference's order across hub keys is CT-113's); a machine removed since the instance began, before its report at or above the revoking revision,
 leaves its spend under the old hub's leases unknown, so the instance stays closed to new leases until it ends (MR-6);
 after a lost hub, removed in the move's revision, that is every instance the old hub divided (DEC-0146). A lease of a hub key a revision revokes ends for the meter when it
