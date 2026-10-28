@@ -3327,7 +3327,7 @@
       }
     },
     {
-      "name": "two reports inside one millisecond, newer last: the newer one, ordered to the nanosecond (DEC-0146 MR-1)",
+      "name": "two reports inside one millisecond, newer last: the newer one, ordered to the nanosecond (DEC-0146 item 10, window-lease Reporting)",
       "ledger": {
         "limitUsd": "1000",
         "at": "2026-10-12T09:00:00Z",

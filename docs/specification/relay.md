@@ -641,7 +641,8 @@ to the new hub, MR-2, and still spends under the old hub's leases). "Every holde
 new hub, every machine the revision lists, since only the old hub knew which held one: a machine whose report at or
 above that revision names no old-hub lease held none (DEC-0146). The new hub's division of such an instance then counts
 each old-hub lease at the final `spent` reported for it, as an ended lease of that amount, never at nothing
-([window lease](window-lease.md#reporting); how the reference orders leases across hub keys is CT-113's). The gate
+([window lease](window-lease.md#reporting); how the reference orders leases across hub keys is CT-113's). The gate is a move's to another machine, never a
+re-key's on the hub's own machine ([Move the hub](ceremonies.md#move-the-hub) step 7). It
 opens this way only after a planned move, where the old hub's machine stays and reports its own leases. After a lost hub, the lost machine is removed in the move's own revision and never reports, and its own meter may have held the old hub's leases, so every window instance the old hub divided stays closed to new leases until it ends (a day, a week or a month), whatever the other machines report (DEC-0146).
 
 **MR-6, a machine that does not report** (DEC-0146). DL-15's switch, a planned move's step 6 and the gate of step 7 wait
@@ -654,9 +655,9 @@ refusing the new key's tokens, and an unreported lease counts at its whole amoun
 waited on, since when, and why when known ("its software is too old to
 report"), and the person's ways out: bring the machine back, update it, or remove it
 ([Remove a machine](ceremonies.md#remove-a-machine)), after which DL-15's switch and step 6 no longer wait on it.
-Step 7's gate still does: what a machine spent under the old hub's leases is known only from its reports, so a removed
-machine that never reported after the revocation keeps the instances the old hub divided closed to new leases until
-they end, and the wait says so. After a lost hub none of these opens it (MR-5). When the machine waited on is the
+Step 7's gate still does: what a machine spent under the old hub's leases is known only from its reports, so a machine
+removed before it reported at or above the revoking revision keeps the instances the old hub divided closed to new
+leases until they end; the wait says so, and "Remove" says so before the person signs it during a move (SCR-23). After a lost hub none of these opens it (MR-5). When the machine waited on is the
 hub's own, the way out is to update it: removing it as retired means a planned move ([Move the hub](ceremonies.md#move-the-hub)),
 whose step 6 waits on the same machine's report, and declaring it lost removes it in one revision and pauses the windows
 it divided until they end (DEC-0146).

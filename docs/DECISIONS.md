@@ -8745,7 +8745,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      as an ended lease of that amount, never at nothing. How the reference orders leases across hub keys stays CT-113's.
      This opens the gate only after a planned move. After a lost hub the lost machine, removed in the move's revision,
      never reports and may have held the old hub's leases itself, so every instance the old hub divided stays closed
-     to new leases until it ends (item 6's rule for a removed machine that never reported).
+     to new leases until it ends (item 6's rule for a removed machine that never reported). The gate is a move's to
+     another machine, never a re-key's on the hub's own machine, which keeps dividing (ceremonies, Move the hub,
+     step 7; Replace a machine's key, step 3).
   5. **Which `#kem`.** A machine seals each report to the `#kem` the newest revision it verified (applied, or newer and
      refused) lists for that hub machine: the hub that drafted it holds that key.
   6. **A machine that does not report** (MR-6): DL-15's switch, step 6 and step 7's gate wait for every machine the
@@ -8798,7 +8800,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   earlier vector's answer changes, and a held report accepted with an offset before still guards against an older
   one.
     `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `src/machine-report.ts` (`readMachineReport`, `notAfter`, `FAC-SEM-154`, the relay time),
+- **Consequences / affects:** `CONTEXT.md` (Machine report), `src/machine-report.ts` (`readMachineReport`, `notAfter`, `FAC-SEM-154`, the relay time),
   `src/rfc3339.ts` (`instantKey`), `src/local-channel.ts` (`nodeMethodAnswer`), `fixtures/vectors/machine-report.json`
   and `tools/vectors/machine-report.ts` (`open`, `accept`, `read`), `fixtures/vectors/local-channel.json` and
   `tools/vectors/local-channel.ts` (`dispatch`), `test/machine-report.test.ts`, `test/local-channel.test.ts`;
