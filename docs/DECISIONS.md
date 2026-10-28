@@ -8772,7 +8772,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      divided closed until it ends when a machine removed since the instance began (before the move, between its
      revisions or after) never reported at or above the revoking revision, its spend being unknown. Fabric tells the person before it happens: before the passkey signs a lost-hub revision, that every window the hub divided stays paused until it ends, with the dates; before "Remove" during a move (from its first revision until every paused instance has opened or ended) for a machine that has not reported at or above the revoking revision, and before "Move the hub" while an instance runs that a machine removed since it began left, that the instance stays paused until it ends
      (SCR-23, SCN-030, SCN-038). After a planned move's switch Fabric asks for revision 2 at once and keeps asking; while
-     it is unsigned the old hub's windows stay paused, shown with their end dates and "Sign revision 2" (ceremonies step
+     it is unsigned the old hub's windows stay paused, shown with their end dates and "Finish the move" (signing its second revision) (ceremonies step
      3, SCR-23).
   7. **The hub's own machine.** The node that applies the estate's records there serves `machine.report`, Fabric's own
      node included. A node answers a method it does not serve `unknown-method`, as `nodeMethodAnswer` does.
@@ -8816,7 +8816,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   machine was removed since the instance began; a narrowing of `FAC-SEM-090` and `windowRemainder` for reports of one
   lease in one millisecond (the newer, then the larger `spent`, where the last one passed in won before), which no
   consumer runs yet; a narrowing for a hub, which signs no `project:` or `grant:` lease until the revision admitting them
-  decides the report's cap (none issues leases yet, CT-19); a new duty for a meter, re-verifying its leases when it
+  decides the report's cap (none issues leases yet, CT-19); a report newer than the held one by less than a
+  millisecond, which DEC-0139's reading refused as `stale`, is now accepted (item 10; no hub is deployed, CT-152); new
+  duties for Fabric's ceremonies, none implemented (CO-412): the notices of item 6, revision 2 asked for at once and
+  kept asked for, the re-key notice, and a re-key on the hub's own machine signing at once with the old kid's leases
+  kept in its division (never step 7's gate); a new duty for a meter, re-verifying its leases when it
   applies a revision with its first verification's context (Project Observatory's meter, CT-20); no hub holds a report
   from before DEC-0146 (none is deployed, CT-152), so no held `at` later than its body's `iat` needs a guard; new duties
   for reporting machines (none deployed yet, CT-152) and for relay recipients (Fabric reads
@@ -8835,7 +8839,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   node row, the network-view row, the rule list), `schemas/machine-report.schema.json` and `schemas/device-check-in.schema.json`
   (descriptions), `src/revocation-delta.ts` (comments), `src/window-lease.ts` (`heldBy`'s order of reports) and
   `fixtures/vectors/window-lease.json` (`remainder` vectors: reports in one millisecond, ties, a held offset time), `docs/ux/screens.md` (SCR-23, SCR-31),
-  `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-20, FLW-27), `docs/specification/window-lease.md` (who adopts it),
+  `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-20, FLW-26, FLW-27), `docs/specification/window-lease.md` (who adopts it),
   `conformance.md`'s delta-applying, drafter and relay-call rows, `docs/DOCMAP.md`, `docs/specification/README.md`,
   `docs/handoffs/README.md`; DEC-0107, DEC-0132 and DEC-0139 annotated; backlog CT-172
   (closes on merge), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty), CT-195, CT-196, CT-197 and CT-199 filed; `docs/ux/scenarios.md` (SCN-030); `ceremonies.md` (Remove a machine; Replace a machine's key, step 3; Move the hub, steps 3 and 4), `contexts.md` (what stays linkable), `delegation.md` (DL-15's way out for the hub's own machine), `src/hub-move.ts` (the `moved` comment), `src/window-lease.ts` (the `periodOf` comment), `docs/ux/foundation.md` (ST-025, ST-032), `docs/ux/scenarios.md` (SCN-048); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.

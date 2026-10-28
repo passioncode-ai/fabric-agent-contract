@@ -670,7 +670,7 @@ its revisions or after), keeps that instance closed to new leases until it ends;
 before the person removes a machine during a move or starts a move while such an instance runs (SCR-23). After a lost hub none of these opens it (MR-5). When the machine waited on is the
 hub's own, the way out is to update it: removing it as retired means a planned move ([Move the hub](ceremonies.md#move-the-hub)),
 whose step 6 waits on the same machine's report, and declaring it lost removes it in one revision and pauses the windows
-it divided until they end (DEC-0146).
+it divided until they end (DEC-0146); declaring it lost while a planned move is under way is CT-152's, undecided.
 
 ## The pairing rendezvous
 

@@ -496,13 +496,14 @@ flowchart TD
 ```mermaid
 flowchart TD
   A{What changes?} -->|create| C[Revision 1: two passkeys, or one after the warning; first machine]
-  A -->|remove| R[Revision without the machine, revoking it; the hub's machine moves the hub first]
-  A -->|re-key| K[Pair again under the id, or sign on the lone machine]
+  A -->|remove| R[Revision without the machine, revoking it; the hub's machine moves the hub first; during a move, the warning that paused windows stay paused for a machine that has not reported]
+  A -->|re-key| K[Pair again under the id, or sign on the lone machine; on the hub-key machine, the notice that approvals and tokens are issued again]
   K --> N[Revision with the new keys, old ones revoked by reference]
-  C --> S[Passkey signs]
+  C --> S{Passkey signs?}
   R --> S
   N --> S
-  S --> P[Machines apply; the delta carries each revocation]
+  S -->|no| X[Nothing changed]
+  S -->|yes| P[Machines apply; the delta carries each revocation]
 ```
 
 - **Screens traversed:** SCR-23 success (signed), error (the passkey ceremony failed; nothing changed); after re-keying the hub's machine, the setup note on its own row while the revision listing its new key is unsigned (DEC-0146).
@@ -635,7 +636,7 @@ flowchart TD
 - **Goal:** the machine does only what its new profile allows
 - **Entry points:** My network's machines
 - **Success exit:** the signed revision lists the machine under its new profile, and its nodes apply it
-- **Task analysis:** the person picks a profile → the drafter removes what the profile forbids (placements, secrets, the hub key) in the same revision → the person signs it with a passkey → every node applies it and judges the next call by it.
+- **Task analysis:** the person picks a profile → on the machine that holds the hub key, Fabric moves the hub first (FLW-27) → the drafter removes what the profile forbids (placements, secrets) in the same revision → the person signs it with a passkey → every node applies it and judges the next call by it.
 - **Rejected shape:** a node's own setting for its profile, rejected because a machine could then widen itself; the profile is the signed record's (DEC-0106).
 - **Flow:**
 
@@ -674,8 +675,8 @@ flowchart TD
   W -->|yes| T[The switch: the new hub signs; new leases of the windows the old hub divided wait from here until every machine listed since each window began reports revision 2, or until each window instance ends]
   T --> T2[Fabric asks for revision 2 at once: the old key revoked, the delta anchored; the leases stay paused until the person signs it and every machine reports it]
   T2 --> S2{Passkey signs revision 2?}
-  S2 -->|no| X2[Revision 2 not signed: the new hub signs; the old hub's windows stay paused until it is signed and reported, or they end; SCR-23 waiting offers Sign revision 2]
-  X2 -->|Sign revision 2| T2
+  S2 -->|no| X2[Revision 2 not signed: the new hub signs; the old hub's windows stay paused until it is signed and reported, or they end; SCR-23 waiting offers Finish the move]
+  X2 -->|Finish the move| T2
   S2 -->|yes| D
   A -->|this machine has not heard the hub for 24 h| C{Still silent after reconnecting?}
   C -->|no| Z[The alert clears; no move]

@@ -63,6 +63,10 @@ fix the text and test items filed with them.
 - **Round 19 (seam):** Compatibility and Status name the hub's `project:`/`grant:` restriction, the meter's
   re-verification (with its first verification's context, so a spent-down remainder never ends a lease) and why no held
   pre-DEC-0146 report needs an `iat` guard.
+- **Round 20 (product):** the action reads "Finish the move"; MR-6 and SCR-23 leave "lost" mid-move to CT-152; OM-7
+  links devices' unlinkable enrollments; FLW-20's diagram gains its failure exit and both notices; FLW-26 moves the hub
+  first.
+- **Round 20 (seam):** Compatibility names the sub-millisecond stale change and Fabric's ceremony duties (CO-412).
 
 ## Checks run
 
@@ -77,6 +81,9 @@ The gate on the branch: `pnpm typecheck`, `pnpm vitest run --coverage`, `pnpm ux
 - Fabric's row for its own node serving the local channel (`channel.hello`, `machine.report`) on a hub machine running
   only Fabric, asked in thread `5d2ea917` (Fabric's contract-delta record says it serves no node; CO-452 covers only the
   hub's reading).
+- CT-152's open design items (super-ux and ceremonies): "Remove" on a planned move's destination machine, "lost" on the
+  old hub's machine mid-move, whether MR-6's waits turn on only once the estate's node versions report, which of two
+  nodes on a hub machine answers `machine.report`, the resend of payloads sent once.
 - CT-195: whether the person may reopen a lost hub's windows before they end (the operator's decision).
 - CT-196: where a run stopped for lack of a lease after a move tells the person why (super-ux).
 - CT-197: `strictTime` and the raw `Date.parse` readers read a fraction of ten or more digits late.
