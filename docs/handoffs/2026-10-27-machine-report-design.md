@@ -41,6 +41,9 @@ fix the text and test items filed with them.
   ST-032's wait and its notices match MR-6; MR-3 and item 9 show a pending signature as SCR-23's setup note; DEC-0107's
   annotation closes only the instances a removed machine left; OM-7 and SCR-31 say a placed instance can read the
   machine's estate records; SCR-23's "Remove" warning only for a machine that has not reported.
+- **Round 15 (product):** ST-032, DEC-0146 item 6 and the drafter row warn before "Remove" only for a machine that
+  has not reported the revoking revision, as SCR-23 does; FLW-27 gains revision 2's own failure exit and says a
+  retired hub machine stays; FLW-20 says the same; SCN-030's one-machine re-key carries the re-issue notice.
 
 ## Checks run
 

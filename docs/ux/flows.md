@@ -489,7 +489,7 @@ flowchart TD
 - **Goal:** a signed revision that creates the network, drops a machine, or replaces a machine's keys, revoking what it drops
 - **Entry points:** Fabric's "Create my network", and the network's machine list with "Remove" and "Replace key" per machine
 - **Success exit:** the person signed; machines apply the revision, and the delta carries each revocation within seconds
-- **Task analysis:** create: the first machine makes its keys → Fabric asks for a second passkey on another authenticator (or tells what one costs) → Fabric drafts revision 1 → the passkey signs → the machine pins it and shows the fingerprint. Remove: choose the machine → Fabric drafts the revision that revokes it (the hub's machine: "Move the hub" instead, FLW-27) → the passkey signs. Re-key: the machine pairs again under its id (or, alone in its network, makes new keys) → Fabric drafts the revision with the new keys and the old ones revoked by reference → the passkey signs.
+- **Task analysis:** create: the first machine makes its keys → Fabric asks for a second passkey on another authenticator (or tells what one costs) → Fabric drafts revision 1 → the passkey signs → the machine pins it and shows the fingerprint. Remove: choose the machine → Fabric drafts the revision that revokes it (the hub's machine: "Move the hub" instead, FLW-27; a retired one stays in the network until a later "Remove") → the passkey signs. Re-key: the machine pairs again under its id (or, alone in its network, makes new keys) → Fabric drafts the revision with the new keys and the old ones revoked by reference → the passkey signs.
 - **Rejected shape:** dropping a machine or a key without revoking it — rejected because a revision that drops without revoking leaves caches and deltas without the revocation (`FAC-SEM-114`).
 - **Flow:**
 
@@ -671,7 +671,9 @@ flowchart TD
   V --> W
   W -->|yes| T[The switch: the new hub signs; new leases of the windows the old hub divided wait from here until every machine listed since each window began reports revision 2, or until each window instance ends]
   T --> T2[Fabric asks for revision 2 at once: the old key revoked, the delta anchored; the leases stay paused until the person signs it and every machine reports it]
-  T2 --> S
+  T2 --> S2{Passkey signs revision 2?}
+  S2 -->|no| X2[Revision 2 not signed: the new hub signs; the old hub's windows stay paused until it is signed and reported, or they end]
+  S2 -->|yes| D
   A -->|this machine has not heard the hub for 24 h| C{Still silent after reconnecting?}
   C -->|no| Z[The alert clears; no move]
   C -->|yes, but the hub still answers elsewhere| L
@@ -683,7 +685,7 @@ flowchart TD
   R --> S{Passkey signs?}
   Q --> S
   S -->|no| X[Nothing changed]
-  S -->|yes| D[Machines apply it; the new hub's heartbeat follows]
+  S -->|yes| D[Machines apply it; the new hub's heartbeat follows; a retired hub machine stays in the network, removing it is a later Remove, SCR-23]
 ```
 
 - **Screens traversed:** SCR-23 success (signed); SCR-23 error (the passkey ceremony failed; nothing changed); SCR-23 alert (the hub silent); SCR-23 waiting (a machine has not reported, MR-6); SCR-23 error on the hub's own row (it cannot read its machines' reports, DEC-0146).
