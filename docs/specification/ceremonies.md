@@ -409,8 +409,8 @@ alert:
    since the new hub cannot know which machine held one; its first division of such an instance counts each old-hub
    lease a report names at its final `spent`, against every instance of that machine whose bounds hold the lease's
    `expiresAt` (after its start, at or before its end), a report naming no instance (DEC-0146); a report naming an
-   old-hub lease without `spent` counts as no report for this gate, the new hub holding no amount to count instead
-   (MR-1, MR-5). A machine that never reports keeps the instance closed until it
+   old-hub lease without `spent` counts as no report for this gate, the new hub holding no amount to count instead,
+   and a later one without it changes nothing a division counted (MR-1, MR-5). A machine that never reports keeps the instance closed until it
    ends, and so does a machine removed since the instance began (before the move, between its revisions or after) that
    never reported at or above the revoking revision: what it spent under the old hub's leases reached only the old hub
    (MR-6). After a lost hub, which the move's revision removes and which never reports, every instance the old hub

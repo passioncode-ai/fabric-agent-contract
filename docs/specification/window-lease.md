@@ -125,7 +125,7 @@ machines held one, hence every machine listed since the instance began, and its 
 each old-hub lease a report names at its final `spent`, as an ended lease of that amount, against every instance of
 that machine whose bounds hold its `expiresAt` (after its start, at or before its end) (a report names no instance; DEC-0146 MR-5; the
 reference's order across hub keys is CT-113's; a report naming an old-hub lease without `spent` counts as none for
-this gate, MR-1); a machine removed since the instance began, before its report at or above the revoking revision,
+this gate, MR-1, and a later one without it changes nothing a division counted, MR-5); a machine removed since the instance began, before its report at or above the revoking revision,
 leaves its spend under the old hub's leases unknown, so the instance stays closed to new leases until it ends (MR-6);
 after a lost hub, removed in the move's revision, that is every instance the old hub divided (DEC-0146). A lease of a hub key a revision revokes ends for the meter when it
 applies that revision, before its `expiresAt` (WL-6): it spends nothing more under it, and its final `spent` is the

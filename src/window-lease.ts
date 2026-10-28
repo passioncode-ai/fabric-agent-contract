@@ -354,7 +354,7 @@ export interface WindowLedger {
 export type RemainderVerdict = { ok: true; remainderUsd: string; heldUsd: string } | { ok: false; problem: "no-clock" | "malformed" };
 
 /**
- * A report's `at` as a pair that orders to the nanosecond (DEC-0146 MR-1): the millisecond, then the nanoseconds within
+ * A report's `at` as a pair that orders to the nanosecond (DEC-0146 item 10, window-lease.md Reporting): the millisecond, then the nanoseconds within
  * it; a time held from before DEC-0146 that is no relay time reads as its millisecond's last nanosecond, as the hub's
  * acceptance reads it (a report in that millisecond is not after it), so every pair compares on one scale.
  */
