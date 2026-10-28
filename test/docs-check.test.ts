@@ -168,6 +168,36 @@ describe("documentation helpers", () => {
       expect(await checkLinks(file, "see `[x](#nope)` and ``[y](gone.md)``")).toEqual([]);
     });
 
+    it("reads setext headings and skips front matter, and decodes every numeric and the common named references (CT-193)", () => {
+      const anchors = markdownAnchors("---\ntitle: x\n---\nFirst title\n===\n\nSecond part\n---\n\n---\n- item\n---\n| a |\n---\n");
+      // `| a |` over `---` is a paragraph, so a level-2 heading on GitHub; a table with its delimiter row is not.
+      expect([...anchors].sort()).toEqual(["-a-", "first-title", "second-part"]);
+      expect([...markdownAnchors("| a |\n|---|\n| 1 |\n---\n")]).toEqual([]);
+      expect([...markdownAnchors("| a | b |\n===\n")]).toEqual(["-a--b-"]);
+      expect([...markdownAnchors("Line one\nLine two\n===\n")]).toEqual(["line-oneline-two"]);
+      // A leading `---` over no `key:` line is a thematic break: the headings after it count, a later `---` included.
+      expect([...markdownAnchors("---\n\n# Intro\n\nText.\n\n## Usage\n\n---\n\n## End\n")]).toEqual(["intro", "usage", "end"]);
+      // A `...` closer ends front matter; an opener with no closer hides nothing.
+      expect([...markdownAnchors("---\ntitle: x\n...\n# A\n")]).toEqual(["a"]);
+      expect([...markdownAnchors("---\ntitle: x\n# A\n")]).toEqual(["a"]);
+      // An earlier setext underline ends the paragraph a later one reads.
+      expect([...markdownAnchors("Title\n===\nText\n---\n")]).toEqual(["title", "text"]);
+      expect([...markdownAnchors("Title\n===\n===\n")]).toEqual(["title"]);
+      expect(headingSlug("Use &constructor; and &toString; here")).toBe("use-constructor-and-tostring-here");
+      expect(headingSlug("A &#38; B &#x26; C")).toBe("a--b--c");
+      // A known limit, not GitHub's answer (#cafés-here): named references outside the table stay as written (CT-198).
+      expect(headingSlug("Caf&eacute;s &nbsp;here")).toBe("cafeacutes-here");
+      expect(headingSlug("Wait&hellip; done")).toBe("wait-done");
+      expect(headingSlug("Odd &#0; and &#xD800;")).toBe("odd--and-");
+    });
+
+    it("reads links after a backtick that never closes, and keeps a code span inside its paragraph (CT-193)", async () => {
+      const file = path.join(projectRoot(), "README.md");
+      expect(await checkLinks(file, "an ` unclosed tick, then [x](gone.md)")).toEqual(["README.md: broken link gone.md"]);
+      expect(await checkLinks(file, "a ` tick\n\n[x](gone.md) and ` another")).toEqual(["README.md: broken link gone.md"]);
+      expect(await checkLinks(file, "``a ` b`` and [x](gone.md)")).toEqual(["README.md: broken link gone.md"]);
+    });
+
     it("reports a malformed escape in a fragment", async () => {
       const file = path.join(projectRoot(), "README.md");
       expect(await checkLinks(file, "[x](README.md#100%)")).toEqual(["README.md: malformed link README.md#100%"]);
