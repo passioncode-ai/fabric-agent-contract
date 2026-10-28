@@ -48,5 +48,5 @@ The gate on the branch: `pnpm typecheck`, `pnpm vitest run --coverage`, `pnpm ux
 
 After the objection window (2026-10-29 18:00 UTC): read threads `5d2ea917` and `41a9b0cb` for objections; if none blocks, merge
 `origin/main` into the branch, write the merge date into DEC-0146's Status, run the gate, merge the pull request with
-`gh pr merge N --merge`, release the next free `v0.1.0+2026-10-29.N` on the merge commit, close CT-172 and post the tag
+`gh pr merge 230 --merge`, release the next free `v0.1.0+2026-10-29.N` on the merge commit, close CT-172 and post the tag
 in `5d2ea917` and `41a9b0cb` (CT-152's adopters).

@@ -243,9 +243,11 @@ by the receiver's nonce store, as DEC-0056 does for request signatures.
 
 The person signs a revision without the machine that lists `machine <id>` in `revocations`, and the hub key it
 certified, if any, as `hub-key <kid>`, in the same revision (`FAC-SEM-114`); it may also list the machine's device keys.
-A machine removed after a hub move revoked the old hub key, before it reported at or above that revision, keeps every
-window instance the old hub divided closed to new leases until it ends ([Move the hub](#move-the-hub) step 7, relay.md
-MR-6); Fabric says so before the person signs the removal (SCR-23).
+A machine removed while a window instance runs, before it reported at or above a hub move's revoking revision, keeps
+that instance closed to new leases until it ends when the hub moves to another machine before then: its spend under
+the old hub's leases reached only the old hub ([Move the hub](#move-the-hub) step 7, relay.md MR-6). Fabric says so
+when the person removes a machine during a move, and when the person starts a move while such an instance runs
+(SCR-23).
 The hub issues a revocation-delta entry for each revocation, so it reaches every machine within seconds
 ([revocation delta](revocation-delta.md#the-delta), DEC-0054). The revision lists each entry's revocation exactly as the
 entry names it — the same `kind` and `ref` — or a machine holding the entry refuses the revision (`FAC-SEM-084`), so
@@ -279,8 +281,11 @@ A machine whose device key is lost, or is rotated, keeps its machine id:
    ([Move the hub](#move-the-hub), step 5). Each meter ends the old kid's leases when it applies that revision (window
    lease WL-6, DEC-0146 item 3); the hub, on the same machine, issued them and keeps them in its own division at their
    amounts until a report at or above that revision names their final `spent` (the reference `windowRemainder` counts
-   them until their `expiresAt`, its reports carrying no revision: CT-113), so it signs the next leases under the
-   new kid at once: step 7's gate is a move's, for the old hub's leases a new hub never issued, not a re-key's.
+   them until their `expiresAt`, its reports carrying no revision: CT-113), so, re-certified under a new kid, it signs
+   the next leases under it at once: step 7's gate is a move's, for the old hub's leases a new hub never issued, not a
+   re-key's. Revoked with no successor, the hub key leaves that machine: when another machine's hub key goes on
+   dividing, that is a move to it and step 7's gate binds that hub; with none left, no hub divides and no lease is
+   issued.
 4. The machine applies the revision only if it holds every key the record lists for it: `ownKeysDecision(record, id,
    held)` answers `apply`, with `retire` naming the held keys the record no longer lists, which the node destroys.
    Otherwise it answers `stop`, `keys-replaced`, and the node stops using the keys it holds: it lost the new key, or
@@ -383,17 +388,26 @@ alert:
    recovery from a fork is still the revocation delta's open item.
 7. **What the move ends.** Everything the old key signed is refused once a verifier applies the revision that revokes it
    (DL-14): delegation tokens and approvals ([delegation](delegation.md)), window leases ([window lease](window-lease.md))
-   and the hub's tokens on calls between machines. Callers mint again from the new hub. The gate below is a move's: it
-   applies when the hub key moves to another machine: to a revision that revokes a hub key whose machine certifies no hub
-   key in that revision (a planned move's second revision, a lost hub's one revision; `hubMove` read across the whole
-   move, from the revision before its first to the revoking one, names different machines in `added` and `removed`),
-   never to a hub key replaced on its own machine (step 3 of Replace a machine's key: the machine certifies its new key
-   in the revoking revision, and `hubMove` reads it as `moved` with one machine on both sides).
-   The new hub holds none of the old
-   hub's lease division, so it issues no lease of a window instance the old hub divided until that instance ends or every
-   machine the revision lists has reported after the revocation
-   (its newest report's `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it) ([window lease](window-lease.md#reporting)), since the new hub cannot know which machine held one, and its first division of such an instance counts each old-hub lease a report names at its final `spent` (DEC-0146); a machine that never reports keeps it waiting until the instance ends, and removing it does not open the gate, since what it spent under the old hub's leases cannot be known (MR-6); after a lost hub, which the move's revision removes and which never reports, every instance the old hub divided stays closed until it ends (DEC-0146); how a meter orders a new hub's lease after an old hub's (`superseded`)
-   is CT-113's.
+   and the hub's tokens on calls between machines. Callers mint again from the new hub. The gate below is a move's, when
+   the hub key moves to another machine, never a re-key's on the hub's own machine (step 3 of Replace a machine's key
+   re-certifies it in the same revision; `hubMove` reads that as `moved` with one machine on both sides). The
+   **revoking revision** is the one whose parent did not list `hub-key <old kid>` and which does (`hubMove(parent,
+   revision).removed` has it with `revoked`), the old kid's machine certifying no hub key in it: a planned move's
+   second revision, a lost hub's one revision (`hubMove` read from the revision before the move's first to the revoking
+   one names different machines in `added` and `removed`); later revisions keep that revocation (`FAC-SEM-072`) and do
+   not arm the gate again. The new hub holds none of the old hub's lease division, so from its first signature (the
+   switch of step 3 in a planned move, before the revoking revision; at once after a lost hub) it issues no lease of a
+   window instance the old hub divided until that instance ends or, after a planned move, every machine an estate
+   record listed since that instance began has reported after the revocation (its newest report's
+   `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only
+   once it applies a later revision, such as the one step 6 drafts for it) ([window lease](window-lease.md#reporting)),
+   since the new hub cannot know which machine held one; its first division of such an instance counts each old-hub
+   lease a report names at its final `spent` (DEC-0146). A machine that never reports keeps the instance closed until it
+   ends, and so does a machine removed since the instance began (before the move, between its revisions or after) that
+   never reported at or above the revoking revision: what it spent under the old hub's leases reached only the old hub
+   (MR-6). After a lost hub, which the move's revision removes and which never reports, every instance the old hub
+   divided stays closed until it ends (DEC-0146). How a meter orders a new hub's lease after an old hub's
+   (`superseded`) is CT-113's.
 
 A copy of the old key on a lost disk signs nothing a machine on the new revision accepts, nor anything a verifier that
 reads the published key set accepts once the lost key leaves it.

@@ -8736,9 +8736,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3. **A lease a revoked key signed** ends for the meter when it applies the revoking revision (WL-6), before its
      `expiresAt`: it spends nothing more, later reports keep naming it with its own `expiresAt` until the instance
      ends, and its final `spent` is a report whose `estateRecord.revision` is at or above that revision (MR-5).
-  4. **The gate after a move, and the old hub's spend.** "Every holder" of the old hub's leases is every machine the
-     revision lists, since only the old hub knew which held one; a machine whose report names none held
-     none. The new hub's first division of such an instance counts each old-hub lease at its reported final `spent`,
+  4. **The gate after a move, and the old hub's spend.** "Every holder" of the old hub's leases is every machine an
+     estate record listed since the window instance began, since only the old hub knew which held one; a machine whose
+     report names none held none, and a machine removed before such a report never sends one. The gate binds the new
+     hub from its first signature (the switch of a planned move, before the revoking revision; at once after a lost
+     hub), and the revoking revision is the one that adds the `hub-key` revocation to its parent (later revisions keep
+     it, `FAC-SEM-072`, and do not arm the gate again). The new hub's first division of such an instance counts each old-hub lease at its reported final `spent`,
      as an ended lease of that amount, never at nothing. How the reference orders leases across hub keys stays CT-113's.
      This opens the gate only after a planned move. After a lost hub the lost machine, removed in the move's revision,
      never reports and may have held the old hub's leases itself, so every instance the old hub divided stays closed
@@ -8748,11 +8751,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   5. **Which `#kem`.** A machine seals each report to the `#kem` the newest revision it verified (applied, or newer and
      refused) lists for that hub machine: the hub that drafted it holds that key.
   6. **A machine that does not report** (MR-6): DL-15's switch, step 6 and step 7's gate wait for every machine the
-     revision lists, with no timeout of their own (step 7's gate ends at the latest with the window instance); Fabric
+     revision lists (step 7's gate for every machine listed since the window instance began, item 4), with no
+     timeout of their own (step 7's gate ends at the latest with the window instance); Fabric
      shows each machine waited on, since when and why when known, and the ways out (bring it back, update it, remove
      it). A removed machine is no longer waited on by DL-15 and step 6; step 7's gate keeps an instance the old hub
-     divided closed until it ends when a removed machine never reported after the revocation, its spend being
-     unknown.
+     divided closed until it ends when a machine removed since the instance began (before the move, between its
+     revisions or after) never reported at or above the revoking revision, its spend being unknown.
   7. **The hub's own machine.** The node that applies the estate's records there serves `machine.report`, Fabric's own
      node included. A node answers a method it does not serve `unknown-method`, as `nodeMethodAnswer` does.
   8. **A payload a recipient does not know.** Every recipient of relay messages acknowledges and drops a body it verified

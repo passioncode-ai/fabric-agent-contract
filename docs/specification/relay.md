@@ -619,7 +619,7 @@ body's `iat`, read to the millisecond as a clock writing `iat` reads (truncated,
 it was sent, DEC-0146), `wrong-machine` (the report names another machine than the one
 `relayCallerTier` named) and `stale` (its `at` is not after the report the hub holds for that machine, compared to the nanosecond, so two
 times less than a millisecond apart still order; a held report whose `at` is no relay time (an offset, a lower-case `t`, ten or more fraction digits, accepted before
-DEC-0146) is read as the last nanosecond of its millisecond, its fraction truncated to three digits, so a report within that millisecond is not after it, DEC-0146). It then reads
+DEC-0146) is read as the last nanosecond of its millisecond, its fraction truncated to three digits, so a report within that millisecond is not after it, DEC-0146; the reference reads ten or more digits late today, CT-197). It then reads
 the opened report as `acceptMachineReport` does, so a `FAC-SEM-152` finding (a lease named twice) drops it as
 `malformed`, as the local read does (DEC-0139); a relayed report that also names another machine, or is not after the
 one held, keeps `openMachineReport`'s answer (`wrong-machine`, `stale`), and is dropped either way, and every dropped report's delivery is acknowledged, so a report refused (one sealed to an
@@ -638,15 +638,19 @@ The time the [window lease's reporting](window-lease.md#reporting) and `windowRe
 a holder has reported "after the revocation" of a hub move when its newest report's `estateRecord.revision` is at or
 above the revision that revokes the old hub's key (never by time: a machine that refused that revision still reports
 to the new hub, MR-2, and still spends under the old hub's leases). "Every holder" of the old hub's leases is, for the
-new hub, every machine the revision lists, since only the old hub knew which held one: a machine whose report at or
-above that revision names no old-hub lease held none (DEC-0146). The new hub's division of such an instance then counts
+new hub, every machine an estate record listed since the window instance began, since only the old hub knew which held
+one: a machine whose report at or above that revision names no old-hub lease held none, and a machine removed before
+such a report never sends one (DEC-0146). The gate binds the new hub from its first signature, the switch of a planned
+move (before the revoking revision), at once after a lost hub; the revoking revision is the one that adds the
+`hub-key` revocation to its parent ([Move the hub](ceremonies.md#move-the-hub) step 7). The new hub's division of such an instance then counts
 each old-hub lease at the final `spent` reported for it, as an ended lease of that amount, never at nothing
 ([window lease](window-lease.md#reporting); how the reference orders leases across hub keys is CT-113's). The gate is a move's to another machine, never a
 re-key's on the hub's own machine ([Move the hub](ceremonies.md#move-the-hub) step 7). It
 opens this way only after a planned move, where the old hub's machine stays and reports its own leases. After a lost hub, the lost machine is removed in the move's own revision and never reports, and its own meter may have held the old hub's leases, so every window instance the old hub divided stays closed to new leases until it ends (a day, a week or a month), whatever the other machines report (DEC-0146).
 
 **MR-6, a machine that does not report** (DEC-0146). DL-15's switch, a planned move's step 6 and the gate of step 7 wait
-for every machine the revision lists (step 7's gate ends at the latest when the window instance ends: a day, a week or
+for every machine the revision lists (step 7's gate for every machine an estate record listed since the window instance
+began, MR-5; it ends at the latest when the window instance ends: a day, a week or
 a month). A machine that
 is off, lost or pinned before DEC-0132 (its node answers `unknown-method`, or it sends no report) keeps them waiting,
 with no timeout of their own: signing ahead of it would leave it
@@ -656,8 +660,9 @@ waited on, since when, and why when known ("its software is too old to
 report"), and the person's ways out: bring the machine back, update it, or remove it
 ([Remove a machine](ceremonies.md#remove-a-machine)), after which DL-15's switch and step 6 no longer wait on it.
 Step 7's gate still does: what a machine spent under the old hub's leases is known only from its reports, so a machine
-removed before it reported at or above the revoking revision keeps the instances the old hub divided closed to new
-leases until they end; the wait says so, and "Remove" says so before the person signs it during a move (SCR-23). After a lost hub none of these opens it (MR-5). When the machine waited on is the
+removed since a window instance began, before it reported at or above the revoking revision (before the move, between
+its revisions or after), keeps that instance closed to new leases until it ends; the wait says so, and Fabric says so
+before the person removes a machine during a move or starts a move while such an instance runs (SCR-23). After a lost hub none of these opens it (MR-5). When the machine waited on is the
 hub's own, the way out is to update it: removing it as retired means a planned move ([Move the hub](ceremonies.md#move-the-hub)),
 whose step 6 waits on the same machine's report, and declaring it lost removes it in one revision and pauses the windows
 it divided until they end (DEC-0146).
