@@ -145,8 +145,9 @@ function orderReport(report: Json, machine: unknown, held: unknown, notAfter: un
     if (heldAt !== undefined) {
       if (!(at > heldAt)) return "stale";
     } else {
-      // A held time accepted before DEC-0146 (an offset, a lower-case `t`, more fraction digits) is compared as it was
-      // then, to the millisecond on both sides, so neither its rounding nor a year past 9999 lets an older report in.
+      // A held time accepted before DEC-0146 (an offset, a lower-case `t`, more fraction digits) reads as its
+      // millisecond's last nanosecond, as the hub's division reads it (window-lease.md Reporting): a report in the same
+      // millisecond is not after it, so neither its precision nor a year past 9999 lets an older report in.
       const heldMs = strictTime(held.at);
       if (Number.isFinite(heldMs) && !(strictTime(report.at) > heldMs)) return "stale";
     }
@@ -181,12 +182,15 @@ export function acceptMachineReport(report: unknown, ctx: { machine: unknown; he
 /**
  * The hub's whole reading of a relayed report (MR-4): `openMachineReport`, then `acceptMachineReport` on what it opened
  * with the same context, the sender `relayCallerTier` named as the machine. Its refusals are `openMachineReport`'s; a
- * report it opens and `acceptMachineReport` refuses keeps the first refusal in that order (DEC-0146). Never throws.
+ * report it opens and `acceptMachineReport` refuses keeps the first refusal in that order (DEC-0146). `notAfter` is
+ * required here, the body's signed `iat`: `openMachineReport` alone checks no time against it. Never throws.
  */
-export function readMachineReport(sealed: unknown, ctx: Parameters<typeof openMachineReport>[1]): { ok: true; report: Json } | { ok: false; refusal: MachineReportRefusal } {
+export function readMachineReport(sealed: unknown, ctx: Parameters<typeof openMachineReport>[1] & { notAfter: unknown }): { ok: true; report: Json } | { ok: false; refusal: MachineReportRefusal } {
   const opened = openMachineReport(sealed, ctx);
   if (!opened.ok) return opened;
-  return acceptMachineReport(opened.report, { machine: ctx.sender, ...(ctx.held === undefined ? {} : { held: ctx.held }), ...(ctx.notAfter === undefined ? {} : { notAfter: ctx.notAfter }), schemaValid: ctx.schemaValid });
+  // `notAfter` is required here: a context without a readable one refuses rather than skips the bound.
+  if (instantKey(ctx.notAfter) === undefined) return { ok: false, refusal: "malformed" };
+  return acceptMachineReport(opened.report, { machine: ctx.sender, ...(ctx.held === undefined ? {} : { held: ctx.held }), notAfter: ctx.notAfter, schemaValid: ctx.schemaValid });
 }
 
 /** FAC-SEM-152 and FAC-SEM-154 on `machine-report`: each lease once, by its `leaseId`, and an `at` that is a relay time. */

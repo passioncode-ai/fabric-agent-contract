@@ -84,9 +84,10 @@ describe("readMachineReport (MR-4's whole reading, DEC-0146)", () => {
   });
 
   it("answers what openMachineReport refuses, and what acceptMachineReport then refuses, never throwing", () => {
-    expect(readMachineReport(null, ctx())).toEqual({ ok: false, refusal: "malformed" });
-    expect(readMachineReport(SEALED, ctx({ msgId: "other" }))).toEqual({ ok: false, refusal: "cannot-open" });
-    expect(readMachineReport(SEALED, ctx())).toEqual({ ok: true, report: REPORT });
+    const read = (over: Json = {}) => ({ ...ctx(over), notAfter: "2026-10-27T08:00:01Z" });
+    expect(readMachineReport(null, read())).toEqual({ ok: false, refusal: "malformed" });
+    expect(readMachineReport(SEALED, read({ msgId: "other" }))).toEqual({ ok: false, refusal: "cannot-open" });
+    expect(readMachineReport(SEALED, read())).toEqual({ ok: true, report: REPORT });
   });
 });
 

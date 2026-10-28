@@ -8716,10 +8716,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   when it applies a revision), none deployed yet (CT-152, and for Project Observatory's meter CT-20); and a duty
   for every recipient of relay messages, deployed ones included (Fabric's hub and nodes, Project Observatory's node):
   acknowledging a verified body whose payload type it does not know, whose compliance is unconfirmed and asked in
-  threads `5d2ea917` (Fabric) and `41a9b0cb` (Project Observatory). Additive: a reference function
-  (`readMachineReport`), a context member (`notAfter`), a rule code (`FAC-SEM-154`), a node dispatch function
+  threads `5d2ea917` (Fabric) and `41a9b0cb` (Project Observatory). Additive: reference functions
+  (`readMachineReport`, `instantKey`), a context member (`notAfter`), a rule code (`FAC-SEM-154`), a node dispatch function
   (`nodeMethodAnswer`) with the vector group `dispatch`, and vectors in `machine-report.json` (`open`, `accept`, a new
-  group `read`); no earlier vector's answer changes. Adoption: CT-152's adopters (Fabric's hub and nodes, Project
+  group `read`) and the `remainder` vectors in `window-lease.json` (reports in one millisecond, ties, a held offset time); no earlier vector's answer changes. Adoption: CT-152's adopters (Fabric's hub and nodes, Project
   Observatory's node).
 - **Context:** DEC-0132's and DEC-0139's blind readings left design questions open (CT-172): the report's lease cap,
   which key a report is sealed to, what "newest" means, a lease a revoked hub key signed, the gate after a lost hub, the
@@ -8767,8 +8767,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   10. **The report's `at`.** It is a relay time (`Z`, an upper-case `T`, at most nine fraction digits; `instantKey`,
       `FAC-SEM-154`, so `pnpm validate` flags it), ordered to the nanosecond, and not after `notAfter`, read to the millisecond: the body's
       signed `iat` for a relayed report, the hub's clock when its own node answered. An unreadable `notAfter` refuses.
-      The hub's division orders a machine's reports the same way (`windowRemainder`), a tie going to the larger `spent`.
-      `readMachineReport` is MR-4's whole reading (`openMachineReport`, then `acceptMachineReport`, one context).
+      The hub's division orders a machine's reports the same way (`windowRemainder`): by millisecond, then the nanoseconds
+      within it, a held time that is no relay time (an offset, a lower-case `t`, ten or more fraction digits, accepted before DEC-0146) read as its millisecond's last nanosecond (as acceptance reads it), a tie going to the larger
+      `spent`; it compares a report's `at` with a lease's `issuedAt` and `expiresAt` to the millisecond, the precision a
+      hub writes them in.
+      `readMachineReport` is MR-4's whole reading (`openMachineReport`, then `acceptMachineReport`, one context, `notAfter`
+      required). Every reading truncates a fraction to the millisecond, never rounds; `strictTime` reads a fraction of ten
+      or more digits late through V8's `Date.parse`, which is CT-197's, not changed here.
   11. **Text.** The relay's resend keeps its `msgId` after `internal` (MR-3 names the exception); a local error answer
       erases no held report (MR-2); the wording that named only the relay names the local channel too; the schema no
       longer calls the local answer sealed; `FAC-SEM-090` states that it bounds a division by the reports written
@@ -8782,7 +8787,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   tokens; an unreported lease already counts at its whole amount); sealing to both keys when two revisions disagree (two
   sends, and the older key's holder is the same hub, which applied the newer revision); restricting `machine.report` to
   the hub's verified process (a process of the person's user can read the node's files anyway); auditing
-  `FAC-SEM-090` by receipt time (the division record holds none; a new member would be a schema change for an audit).
+  `FAC-SEM-090` by receipt time (the division record holds none; a new member would be a schema change for an audit);
+  letting the person reopen the windows a lost hub divided before they end (the unknown spend of the lost machine's
+  meter could pass the limit the window keeps; whether a person may accept that is the operator's question, CT-195).
 - **Compatibility:** a narrowing for the hub's reading of an `at` that is no relay time (one with an offset was
   accepted under DEC-0139) or later than the body's `iat`, and for a hub that issued a lease of an instance the old hub
   divided without counting the old hub's spend; new duties for reporting machines (none deployed yet, CT-152) and for
@@ -8790,7 +8797,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `41a9b0cb`). Additive for ports (three new functions, `readMachineReport`, `instantKey` and `nodeMethodAnswer`, a context member, a rule code, vector groups); no
   earlier vector's answer changes, and a held report accepted with an offset before still guards against an older
   one.
-  `contractVersion` stays `0.1.0`.
+    `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/machine-report.ts` (`readMachineReport`, `notAfter`, `FAC-SEM-154`, the relay time),
   `src/rfc3339.ts` (`instantKey`), `src/local-channel.ts` (`nodeMethodAnswer`), `fixtures/vectors/machine-report.json`
   and `tools/vectors/machine-report.ts` (`open`, `accept`, `read`), `fixtures/vectors/local-channel.json` and
@@ -8800,11 +8807,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and `estate-record.md` (wording), `conformance.md` (the module row, the meter, hub, reporter and hub-reader rows, a
   node row, the rule list), `schemas/machine-report.schema.json` and `schemas/device-check-in.schema.json`
   (descriptions), `src/revocation-delta.ts` (comments), `src/window-lease.ts` (`heldBy`'s order of reports) and
-  `fixtures/vectors/window-lease.json` (three `remainder` vectors), `docs/ux/screens.md` (SCR-23),
+  `fixtures/vectors/window-lease.json` (`remainder` vectors: reports in one millisecond, ties, a held offset time), `docs/ux/screens.md` (SCR-23),
   `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-27), `docs/specification/window-lease.md` (who adopts it),
   `conformance.md`'s delta-applying, drafter and relay-call rows, `docs/DOCMAP.md`, `docs/specification/README.md`,
   `docs/handoffs/README.md`; DEC-0107, DEC-0132 and DEC-0139 annotated; backlog CT-172
-  (closes on merge), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
+  (closes on merge), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty), CT-195, CT-196 and CT-197 filed; `ceremonies.md` (Replace a machine's key, step 3); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
 - **Source:** CT-172; DEC-0132's and DEC-0139's readings.
 
 ### DEC-0147: a peer share's risks from its readings settled (reports that restate a window, the agent twins, inputs that do not read)

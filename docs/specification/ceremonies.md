@@ -273,7 +273,11 @@ A machine whose device key is lost, or is rotated, keeps its machine id:
    occurs in a kid, so the two forms never collide.
 3. If the hub key was on that machine, the same revision re-certifies it under a **new kid** and revokes the old kid
    (`hub-key`), or revokes it with no successor (`FAC-SEM-114`); like a move, that revision anchors the delta's head
-   ([Move the hub](#move-the-hub), step 5).
+   ([Move the hub](#move-the-hub), step 5). Each meter ends the old kid's leases when it applies that revision (window
+   lease WL-6, DEC-0146 item 3); the hub, on the same machine, issued them and keeps them in its own division at their
+   amounts until a report at or above that revision names their final `spent` (the reference `windowRemainder` counts
+   them until their `expiresAt`, its reports carrying no revision: CT-113), so it signs the next leases under the
+   new kid at once: step 7's gate is a move's, for the old hub's leases a new hub never issued, not a re-key's.
 4. The machine applies the revision only if it holds every key the record lists for it: `ownKeysDecision(record, id,
    held)` answers `apply`, with `retire` naming the held keys the record no longer lists, which the node destroys.
    Otherwise it answers `stop`, `keys-replaced`, and the node stops using the keys it holds: it lost the new key, or
@@ -376,10 +380,13 @@ alert:
    recovery from a fork is still the revocation delta's open item.
 7. **What the move ends.** Everything the old key signed is refused once a verifier applies the revision that revokes it
    (DL-14): delegation tokens and approvals ([delegation](delegation.md)), window leases ([window lease](window-lease.md))
-   and the hub's tokens on calls between machines. Callers mint again from the new hub. The new hub holds none of the old
+   and the hub's tokens on calls between machines. Callers mint again from the new hub. The gate below is a move's: it
+   applies when the hub key moves to another machine (`hubMove`'s `added` and `removed` name different machines), never
+   to a hub key replaced on its own machine (step 3 of Replace a machine's key, which `hubMove` also reads as `moved`).
+   The new hub holds none of the old
    hub's lease division, so it issues no lease of a window instance the old hub divided until that instance ends or every
    machine the revision lists has reported after the revocation
-   (its newest report's `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it) ([window lease](window-lease.md#reporting)); the new hub reads "every machine holding one" as every machine the revision lists, since it cannot know which held one, and its first division of such an instance counts each old-hub lease a report names at its final `spent` (DEC-0146); a machine that never reports keeps it waiting until the instance ends, and removing it does not open the gate, since what it spent under the old hub's leases cannot be known (MR-6); after a lost hub, which the move's revision removes and which never reports, every instance the old hub divided stays closed until it ends (DEC-0146); how a meter orders a new hub's lease after an old hub's (`superseded`)
+   (its newest report's `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it) ([window lease](window-lease.md#reporting)), since the new hub cannot know which machine held one, and its first division of such an instance counts each old-hub lease a report names at its final `spent` (DEC-0146); a machine that never reports keeps it waiting until the instance ends, and removing it does not open the gate, since what it spent under the old hub's leases cannot be known (MR-6); after a lost hub, which the move's revision removes and which never reports, every instance the old hub divided stays closed until it ends (DEC-0146); how a meter orders a new hub's lease after an old hub's (`superseded`)
    is CT-113's.
 
 A copy of the old key on a lost disk signs nothing a machine on the new revision accepts, nor anything a verifier that

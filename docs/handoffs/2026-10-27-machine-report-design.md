@@ -20,11 +20,12 @@ fix the text and test items filed with them.
   type it does not know; the unusable-`#kem` entry's form and its surface without a well-known.
 - **Code:** `instantKey` (`src/rfc3339.ts`); in `src/machine-report.ts` the relay time for `at`, the nanosecond order,
   `notAfter`, `readMachineReport`, `FAC-SEM-154`; `nodeMethodAnswer` (`src/local-channel.ts`).
-- **Vectors:** `machine-report.json` (`open` +10, `accept` +7, new group `read` with 5 cases; no earlier case changed), `local-channel.json` (new group
-  `dispatch`), each written by its generator.
+- **Vectors:** `machine-report.json` (more `open` and `accept` cases, a new group `read`; no earlier case changed), `window-lease.json` (`remainder`:
+  reports in one millisecond, ties, a held legacy time, truncation), `local-channel.json` (new group `dispatch`), each written by its generator.
 - **Text:** the relay-only wording (revocation-delta.md, estate-record.md, devices.md, window-lease.md, the check-in
   schema, conformance rows, the source comments), MR-2's no-erase, MR-3's `msgId` exception, the schema description,
-  `FAC-SEM-090`'s limit, devices.md's "what stays linkable", DEC-0139's consequences, SCR-23 and SCN-038.
+  `FAC-SEM-090`'s limit, devices.md's "what stays linkable", DEC-0139's consequences, SCR-23, SCN-038 and FLW-27,
+  Replace a machine's key step 3 (a re-keyed hub keeps dividing).
 
 ## Checks run
 
@@ -34,7 +35,10 @@ The gate on the branch: `pnpm typecheck`, `pnpm vitest run --coverage`, `pnpm ux
 ## Open
 
 - Fabric's confirmation that its hub acknowledges a delivered message whose payload type it does not know (DEC-0146
-  item 8), asked in thread `5d2ea917`.
+  item 8), asked in thread `5d2ea917`, and Project Observatory's for its node, asked in thread `41a9b0cb`.
+- CT-195: whether the person may reopen a lost hub's windows before they end (the operator's decision).
+- CT-196: where a run stopped for lack of a lease after a move tells the person why (super-ux).
+- CT-197: `strictTime` and the raw `Date.parse` readers read a fraction of ten or more digits late.
 - CT-113 keeps the reference's order of leases across hub keys in `windowRemainder`.
 - Adoption is CT-152's: Fabric's hub and nodes, Project Observatory's node.
 
