@@ -284,11 +284,10 @@ A machine whose device key is lost, or is rotated, keeps its machine id:
    amounts until a report at or above that revision names their final `spent` (the reference `windowRemainder` counts
    them until their `expiresAt`, its reports carrying no revision: CT-113), so, re-certified under a new kid, it signs
    the next leases under it at once: step 7's gate is a move's, for the old hub's leases a new hub never issued, not a
-   re-key's. A hub that re-keys without its division (the machine's state lost with the key) holds none of it, so it
-   takes step 7's gate over the instances it divided before, as a new hub would. Revoked with no successor, the hub key
-   leaves that machine: when another machine's hub key goes on dividing, that is a move to it and step 7's gate binds
-   that hub; with none left, no hub divides and no lease is issued, and a hub certified later takes step 7's gate as
-   after a planned move (its revoking revision the one that revoked the old key), unless the old machine was removed.
+   re-key's. Revoked with no successor, the hub key leaves that machine: when another machine's hub key goes on
+   dividing, that is a move to it and step 7's gate binds that hub; with none left, no hub divides and no lease is
+   issued. A hub that re-keys without its division (the machine's state lost with the key), and a hub certified after
+   a period with none, are not decided yet (CT-199).
 4. The machine applies the revision only if it holds every key the record lists for it: `ownKeysDecision(record, id,
    held)` answers `apply`, with `retire` naming the held keys the record no longer lists, which the node destroys.
    Otherwise it answers `stop`, `keys-replaced`, and the node stops using the keys it holds: it lost the new key, or
@@ -406,7 +405,7 @@ alert:
    once it applies a later revision, such as the one step 6 drafts for it) ([window lease](window-lease.md#reporting)),
    since the new hub cannot know which machine held one; its first division of such an instance counts each old-hub
    lease a report names at its final `spent`, against every instance of that machine whose bounds hold the lease's
-   `expiresAt`, a report naming no instance (DEC-0146). A machine that never reports keeps the instance closed until it
+   `expiresAt` (after its start, at or before its end), a report naming no instance (DEC-0146). A machine that never reports keeps the instance closed until it
    ends, and so does a machine removed since the instance began (before the move, between its revisions or after) that
    never reported at or above the revoking revision: what it spent under the old hub's leases reached only the old hub
    (MR-6). After a lost hub, which the move's revision removes and which never reports, every instance the old hub

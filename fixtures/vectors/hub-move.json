@@ -659,6 +659,66 @@
       }
     },
     {
+      "name": "the hub's key replaced on the same machine and the old kid revoked: a re-key, no move, since the machine still certifies a hub key (DEC-0146)",
+      "parent": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ]
+      },
+      "next": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a2",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-a",
+            "revokedAt": "2026-10-23T12:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "moved": true,
+        "added": [
+          {
+            "machine": "m-a",
+            "kid": "hub-a2"
+          }
+        ],
+        "removed": [
+          {
+            "machine": "m-a",
+            "kid": "hub-a",
+            "revoked": true
+          }
+        ]
+      }
+    },
+    {
       "name": "nothing changed",
       "parent": {
         "machines": [
