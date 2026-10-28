@@ -665,8 +665,10 @@ flowchart TD
   A -->|Remove on the hub's machine| K{Lost or retired?}
   K -->|retired, still reachable| L
   K -->|lost| M
-  L --> T1[Revision 1, DL-15: the new hub key certified; the passkey signs]
-  T1 --> W{Has every machine reported revision 1?}
+  L --> T1[Revision 1, DL-15: the new hub key certified]
+  T1 --> S1{Passkey signs revision 1?}
+  S1 -->|no| X
+  S1 -->|yes| W{Has every machine reported revision 1?}
   W -->|not yet| V[Waiting: each machine named; bring it back, update it or remove it; removing it keeps the old hub's windows paused until they end; the hub's own machine only by updating it]
   V --> W
   W -->|yes| T[The switch: the new hub signs; new leases of the windows the old hub divided wait from here until every machine listed since each window began reports revision 2, or until each window instance ends]

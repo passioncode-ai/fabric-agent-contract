@@ -277,7 +277,8 @@ A machine whose device key is lost, or is rotated, keeps its machine id:
    machine is `<id>#sig` (DEC-0053) — so a `device-key` revocation by kid revokes every key under it, the new one too, and
    `FAC-SEM-076` refuses a record that lists a key it revokes; the key reference revokes the old key alone. `@` never
    occurs in a kid, so the two forms never collide.
-3. If the hub key was on that machine, the same revision re-certifies it under a **new kid** and revokes the old kid
+3. If the hub key was on that machine, Fabric says first that running approvals and tokens the old kid signed must be
+   issued again (SCR-23, ST-025), and the same revision re-certifies it under a **new kid** and revokes the old kid
    (`hub-key`), or revokes it with no successor (`FAC-SEM-114`); like a move, that revision anchors the delta's head
    ([Move the hub](#move-the-hub), step 5). Each meter ends the old kid's leases when it applies that revision (window
    lease WL-6, DEC-0146 item 3); the hub, on the same machine, issued them and keeps them in its own division at their

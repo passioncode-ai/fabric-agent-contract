@@ -57,6 +57,9 @@ fix the text and test items filed with them.
 - **Round 17 (seam) and 18 (product):** Fabric's PL-12 cited for item 8; CT-152 owes Fabric's own node serving the
   local channel (asked in thread `5d2ea917`); SCN-038's way out names the hub's own machine; MR-6's reason qualified;
   ST-025 carries the re-issue notice; CT-152 holds Remove on a move's destination or on the old hub mid-move.
+- **Round 18 (seam) and 19 (product):** Compatibility names `FAC-SEM-090`'s narrowing; FLW-27's revision 1 regains
+  its "Nothing changed" exit; SCN-038 walks revision 2 unsigned; ceremonies' re-key step 3 and CT-113 carry the
+  re-issue notice; CT-152 names payloads sent once to a node that drops unknown types.
 
 ## Checks run
 
