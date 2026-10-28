@@ -1,6 +1,6 @@
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { privacyPlan, type PrivacyInputs } from "../src/privacy-plan.js";
+import { privacyPlan, privacyRunFailure, type PrivacyInputs } from "../src/privacy-plan.js";
 
 // CT-40: the privacy check never passes on the operator's machine without having run.
 // Paths are built at run time from neutral segments, so no machine path sits in the repository's text.
@@ -70,5 +70,35 @@ describe("privacyPlan", () => {
     // An unknown home directory replaces nothing.
     const unknown = privacyPlan(inputs({ home: "", orgIndex: path.join(home, "x") }));
     expect(unknown.action === "fail" && unknown.reason).toContain(`but ${path.join(home, "x", "scripts", "check_private.py")}`);
+  });
+});
+
+// CT-191: a failed run names its cause; a contributor without python3 is told so rather than shown an empty line.
+describe("privacyRunFailure", () => {
+  const home = path.join(path.sep, "home", "someone");
+  const script = path.join(home, "org-index", "scripts", "check_private.py");
+  it("names a missing interpreter, with the script under ~", () => {
+    const message = privacyRunFailure(Object.assign(new Error("spawn python3 ENOENT"), { code: "ENOENT" }), script, home);
+    expect(message).toContain("python3 is not on PATH");
+    expect(message).toContain(path.join("~", "org-index", "scripts", "check_private.py"));
+    expect(message).not.toContain(home);
+  });
+  it("prints the script's findings when it printed some", () => {
+    expect(privacyRunFailure({ status: 1, stdout: "  finding: a name\n" }, script, home)).toBe("finding: a name");
+  });
+  it("names the exit status when the script printed nothing", () => {
+    expect(privacyRunFailure({ status: 2, stdout: "  " }, script, home)).toContain("exited with status 2 and printed nothing on stdout");
+    expect(privacyRunFailure({ status: 3 }, script, home)).toContain("exited with status 3");
+  });
+  it("names the signal that stopped the script", () => {
+    expect(privacyRunFailure({ status: null, signal: "SIGKILL", stdout: "" }, script, home)).toContain("was stopped by SIGKILL");
+  });
+  it("names the error code of a run that never started for another reason than a missing interpreter", () => {
+    expect(privacyRunFailure({ code: "EACCES", status: null, signal: null }, script, home)).toContain("did not run (EACCES)");
+  });
+  it("says the script did not run when the error carries no status", () => {
+    expect(privacyRunFailure(new Error("killed"), script, home)).toContain("did not run");
+    expect(privacyRunFailure(undefined, script, home)).toContain("did not run");
+    expect(privacyRunFailure("odd", script, home)).toContain("did not run");
   });
 });
