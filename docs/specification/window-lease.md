@@ -192,7 +192,7 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
 
 ## Who adopts it
 
-- **Fabric's hub** (backlog CT-19) issues leases, `estate` ones only until the revision that admits `project:` and
+- **Fabric's hub** (backlog CT-19) issues leases, each `leaseId` unique within the estate across hub keys (DEC-0146), `estate` ones only until the revision that admits `project:` and
   `grant:` leases decides the report's cap (DEC-0146 MR-1): for each machine of the estate, one lease per slot under a hub key
   the current estate record certifies, its amount at most `windowRemainder`'s answer, its life at most 24 hours and
   inside the window instance, sequences rising per slot; it counts an expired, unreported lease as spent and credits

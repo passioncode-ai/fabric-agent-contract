@@ -3445,6 +3445,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   CT-19); Project Observatory's meter verifies, holds and spends them and reports `spent` (CT-20); an organization server
   hands leases of organization windows once `org-authority/1` exists. Agreed with Project Observatory's session as the
   meter's owner on 2026-10-12 (its `METER.md` M3/M4).
+- **Annotated (2026-10-27):** DEC-0146 orders a machine's reports in `windowRemainder` and `FAC-SEM-090` to the
+  nanosecond (a tie to the larger `spent`), has the issuer draw each `leaseId` unique within the estate across hub keys,
+  and keeps a hub to `estate` leases until a revision decides the report's cap for `project:` and `grant:` ones.
 - **Annotated (2026-10-26):** DEC-0129 decides `org-authority/1` as the member list only; organization windows and
   their leases wait on a later decision (`window-lease.md`).
 - **Annotated (2026-10-12):** a held lease without a whole `sequence` and a `leaseId` is `context-invalid`; the verifier's `estateRevocations` is named in window-lease.md; the check-in's `records.leases[]` was narrowed from any object to `window-lease/1`, a placeholder before, so the Compatibility line's "Additive" holds for every real check-in (the owed reading of #65; packet P6-08).
@@ -8709,10 +8712,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0146: the machines' report, its open design questions decided
 
 - **Date:** 2026-10-27
-- **Status:** Accepted (on merge of its pull request, after its objection window: 2026-10-29 18:00 UTC, thread
-  `5d2ea917` with Fabric). A narrowing of the hub's reading of a report's `at` (one that is no relay time, which
+- **Status:** Accepted (on merge of its pull request, after its objection window: 2026-10-29 18:00 UTC, threads
+  `5d2ea917` with Fabric and `41a9b0cb` with Project Observatory). A narrowing of the hub's reading of a report's `at` (one that is no relay time, which
   DEC-0139's `strictTime` admitted with an offset, or one later than the body's `iat`, or, for its own node's answer on the local channel, later than the hub's clock when the answer arrived); new duties for the hub
-  (counting an old hub's leases, the gate binding it from its first signature, before the revoking revision, over every
+  (drawing each `leaseId` unique within the estate across hub keys, item 2; counting an old hub's leases, the gate binding it from its first signature, before the revoking revision, over every
   machine listed since the window instance began, the wait it shows, the `degraded` entry's form) and for a reporting machine (the
   `#kem` it seals to, the leases of each hub key, a lease a revoked key signed) and for a meter (re-verifying its leases
   when it applies a revision); a hub signs no `project:` or `grant:` lease until a revision admitting them decides the
@@ -8819,7 +8822,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   machine was removed since the instance began; a narrowing of `FAC-SEM-090` and `windowRemainder` for reports of one
   lease in one millisecond (the newer, then the larger `spent`, where the last one passed in won before), which no
   consumer runs yet; a narrowing for a hub, which signs no `project:` or `grant:` lease until the revision admitting them
-  decides the report's cap (none issues leases yet, CT-19); a report newer than the held one by less than a
+  decides the report's cap, and draws each `leaseId` unique within the estate across hub keys where one division
+  sufficed before (none issues leases yet, CT-19); a report newer than the held one by less than a
   millisecond, which DEC-0139's reading refused as `stale`, is now accepted (item 10; no hub is deployed, CT-152); new
   duties for Fabric's ceremonies, none implemented (CO-412): the notices of item 6, revision 2 asked for at once and
   kept asked for, the re-key notice (before re-keying the machine that holds the hub key, that running approvals and
@@ -8832,7 +8836,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   earlier vector's answer changes, and a held report accepted with an offset before still guards against an older
   one.
     `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `CONTEXT.md` (Machine report, Revoking revision, Local channel), `schemas/local-channel.schema.json` (its description), `docs/specification/membership.md` (OM-7), `src/machine-report.ts` (`readMachineReport`, `notAfter`, `FAC-SEM-154`, the relay time),
+- **Consequences / affects:** `CONTEXT.md` (Machine report, Revoking revision, Local channel), `schemas/window-lease.schema.json` (the `leaseId` description), `conformance.md`'s ceremony-signer row (the re-key notice) and the issuing hub's row (`leaseId`), `schemas/local-channel.schema.json` (its description), `docs/specification/membership.md` (OM-7), `src/machine-report.ts` (`readMachineReport`, `notAfter`, `FAC-SEM-154`, the relay time),
   `src/rfc3339.ts` (`instantKey`), `src/local-channel.ts` (`nodeMethodAnswer`), `fixtures/vectors/machine-report.json`
   and `tools/vectors/machine-report.ts` (`open`, `accept`, `read`), `fixtures/vectors/local-channel.json` and
   `tools/vectors/local-channel.ts` (`dispatch`), `fixtures/vectors/hub-move.json` and `tools/vectors/hub-move.ts` (three
@@ -8845,6 +8849,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/vectors/window-lease.json` (`remainder` vectors: reports in one millisecond, ties, a held offset time), `docs/ux/screens.md` (SCR-23, SCR-31),
   `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-20, FLW-26, FLW-27), `docs/specification/window-lease.md` (who adopts it),
   `conformance.md`'s delta-applying, drafter and relay-call rows, `docs/DOCMAP.md`, `docs/specification/README.md`,
-  `docs/handoffs/README.md`; DEC-0107, DEC-0132 and DEC-0139 annotated; backlog CT-172
-  (closes on merge), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty), CT-195, CT-196, CT-197 and CT-199 filed; `docs/ux/scenarios.md` (SCN-030); `ceremonies.md` (Remove a machine; Replace a machine's key, step 3; Move the hub, steps 3 and 4), `contexts.md` (what stays linkable), `delegation.md` (DL-15's way out for the hub's own machine), `src/hub-move.ts` (the `moved` comment), `src/window-lease.ts` (the `periodOf` comment), `docs/ux/foundation.md` (ST-025, ST-032), `docs/ux/scenarios.md` (SCN-048); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
+  `docs/handoffs/README.md`; DEC-0062, DEC-0107, DEC-0132 and DEC-0139 annotated; backlog CT-172
+  (closes on merge), CT-19 (the issuer's `leaseId`), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty), CT-195, CT-196, CT-197 and CT-199 filed; `docs/ux/scenarios.md` (SCN-030); `ceremonies.md` (Remove a machine; Replace a machine's key, step 3; Move the hub, steps 3 and 4), `contexts.md` (what stays linkable), `delegation.md` (DL-15's way out for the hub's own machine), `src/hub-move.ts` (the `moved` comment), `src/window-lease.ts` (the `periodOf` comment), `docs/ux/foundation.md` (ST-025, ST-032), `docs/ux/scenarios.md` (SCN-048); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
 - **Source:** CT-172; DEC-0132's and DEC-0139's readings.

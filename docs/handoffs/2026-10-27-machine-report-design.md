@@ -71,6 +71,11 @@ fix the text and test items filed with them.
   estate across hub keys (window-lease's row, CT-113's vector); item 10's `pnpm validate` claim limited to a
   machine-report document; the re-key notice stated and in the ceremony row; ceremonies step 3 and FLW-27 T2 state the
   full reopening condition; FLW-26's diagram moves the hub first; CT-152 holds the half-done move's other actions.
+- **Round 22:** the issuer's `leaseId` duty in Status, Compatibility, the hub's conformance row, window-lease's Who
+  adopts it and CT-19; DEC-0062 annotated; CONTEXT's revoking revision names the lost hub; Consequences name the schema
+  and the ceremony-signer row; the re-issue notice before a move and a lost hub (SCR-23, ST-032, the drafter row,
+  CT-113); SCR-23 and FLW-27 enter a move from "Change profile"; FLW-27 waits after revision 2; FLW-20's declined
+  re-key names the setup note; Status names both objection threads.
 
 ## Checks run
 

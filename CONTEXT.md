@@ -686,7 +686,9 @@ under the organization's key set, and its handshake names the organization in `a
 
 **Revoking revision**: In a hub move, the estate record revision that adds the old hub key's `hub-key` revocation to
 its parent while that key's machine certifies no hub key: a planned move's second revision, a lost hub's one revision.
-The new hub's gate on the old hub's windows opens on machines' reports at or above it ([ceremonies](docs/specification/ceremonies.md#move-the-hub) step 7, DEC-0146).
+After a planned move, the new hub's gate on the old hub's windows opens on machines' reports at or above it; after a
+lost hub, or for an instance a machine removed since it began never reported at or above it, the gate stays closed until
+the instance ends ([ceremonies](docs/specification/ceremonies.md#move-the-hub) step 7, DEC-0146).
 
 **Revocation delta**: The estate record's fast path (`revocation-delta/1`, DEC-0054): an append-only chain of
 entries, one revocation each, signed by an **Estate key** and chained by RFC 8785 hash, so its head is

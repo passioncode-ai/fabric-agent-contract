@@ -502,7 +502,7 @@ flowchart TD
   C --> S{Passkey signs?}
   R --> S
   N --> S
-  S -->|no| X[Nothing changed]
+  S -->|no| X[Nothing changed; after re-keying the hub's machine, the setup note on its row until the revision is signed]
   S -->|yes| P[Machines apply; the delta carries each revocation]
 ```
 
@@ -656,7 +656,7 @@ flowchart TD
 
 - **Traces:** ST-032 (JTBD-10, JRN-09/#4)
 - **Goal:** the network keeps a hub and a passkey that can sign its next revision
-- **Entry points:** "Move the hub" on the hub machine's own row (a planned move); "Remove" on the hub's machine (a lost one: the one-revision move, whatever the alert says); a machine's alert that it has not heard from the hub (an unplanned move, while the record certifies a hub key); the network's passkeys in My network's machines
+- **Entry points:** "Move the hub" on the hub machine's own row (a planned move), or "Change profile" there to member or view (FLW-26); "Remove" on the hub's machine (a lost one: the one-revision move, whatever the alert says); a machine's alert that it has not heard from the hub (an unplanned move, while the record certifies a hub key); the network's passkeys in My network's machines
 - **Success exit:** the signed revisions with the new hub key (the old one revoked, the delta anchored once every reader is pinned at or after DEC-0107) or the new passkey (the lost one revoked, or a second one added)
 - **Task analysis:** planned move: the person chooses "Move the hub" on the hub machine's row → picks a `full` machine that stays on → two revisions (DL-15), the switch once every machine's report shows the first applied (a machine that has not reported keeps the move waiting: My network's machines names each one, since when and why when known, and the person brings it back, updates it or removes it, relay.md MR-6; a hub that cannot read reports says so on its own row, DEC-0146) → from the switch, new leases of the windows the old hub divided wait until every machine listed since each window began reports revision 2 (MR-5; a machine removed since a window began keeps it paused until it ends, and "Remove" during a move and "Move the hub" say so first). Unplanned move: a machine reads `hubSilence` → it reconnects to the estate's relay and reads it again → still silent: the person picks an always-on `full` machine caught up with the relay → its node makes a new hub key → a lost hub: Fabric drafts one revision (new key, old key and machine revoked, the delta anchored); a reachable hub: two (DL-15) → the passkey signs → the new hub signs a heartbeat. Recover: the person signs with a passkey left → the revision removes and revokes the lost one and adds a new one (`recoveryReady`). Add later: a network with one passkey → "Add a passkey" → a revision adds the second, signed by the first.
 - **Rejected shape:** copying the hub's private key to the new machine, rejected because a copy left on a lost disk would keep signing; a move is always a new key (DEC-0107).
@@ -679,7 +679,8 @@ flowchart TD
   T2 --> S2{Passkey signs revision 2?}
   S2 -->|no| X2[Revision 2 not signed: the new hub signs; the old hub's windows stay paused until it is signed and reported, or they end; SCR-23 waiting offers Finish the move]
   X2 -->|Finish the move| T2
-  S2 -->|yes| D
+  S2 -->|yes| P2[SCR-23 waiting: new leases of the old hub's windows wait until every machine listed since each window began reports revision 2, or each window ends]
+  P2 --> D
   A -->|this machine has not heard the hub for 24 h| C{Still silent after reconnecting?}
   C -->|no| Z[The alert clears; no move]
   C -->|yes, but the hub still answers elsewhere| L
