@@ -243,6 +243,9 @@ by the receiver's nonce store, as DEC-0056 does for request signatures.
 
 The person signs a revision without the machine that lists `machine <id>` in `revocations`, and the hub key it
 certified, if any, as `hub-key <kid>`, in the same revision (`FAC-SEM-114`); it may also list the machine's device keys.
+A machine removed after a hub move revoked the old hub key, before it reported at or above that revision, keeps every
+window instance the old hub divided closed to new leases until it ends ([Move the hub](#move-the-hub) step 7, relay.md
+MR-6); Fabric says so before the person signs the removal (SCR-23).
 The hub issues a revocation-delta entry for each revocation, so it reaches every machine within seconds
 ([revocation delta](revocation-delta.md#the-delta), DEC-0054). The revision lists each entry's revocation exactly as the
 entry names it — the same `kind` and `ref` — or a machine holding the entry refuses the revision (`FAC-SEM-084`), so
@@ -381,8 +384,11 @@ alert:
 7. **What the move ends.** Everything the old key signed is refused once a verifier applies the revision that revokes it
    (DL-14): delegation tokens and approvals ([delegation](delegation.md)), window leases ([window lease](window-lease.md))
    and the hub's tokens on calls between machines. Callers mint again from the new hub. The gate below is a move's: it
-   applies when the hub key moves to another machine (`hubMove`'s `added` and `removed` name different machines), never
-   to a hub key replaced on its own machine (step 3 of Replace a machine's key, which `hubMove` also reads as `moved`).
+   applies when the hub key moves to another machine: to a revision that revokes a hub key whose machine certifies no hub
+   key in that revision (a planned move's second revision, a lost hub's one revision; `hubMove` read across the whole
+   move, from the revision before its first to the revoking one, names different machines in `added` and `removed`),
+   never to a hub key replaced on its own machine (step 3 of Replace a machine's key: the machine certifies its new key
+   in the revoking revision, and `hubMove` reads it as `moved` with one machine on both sides).
    The new hub holds none of the old
    hub's lease division, so it issues no lease of a window instance the old hub divided until that instance ends or every
    machine the revision lists has reported after the revocation

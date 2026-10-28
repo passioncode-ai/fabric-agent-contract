@@ -3,7 +3,8 @@
 - **Date:** 2026-10-27
 - **Branch:** `agent/ct172-dec0146-20261027`
 - **Decision:** [DEC-0146](../DECISIONS.md) (CT-172)
-- **Merge:** pending; objection window until 2026-10-29 18:00 UTC in thread `5d2ea917` (Fabric)
+- **Merge:** pending; objection window until 2026-10-29 18:00 UTC in threads `5d2ea917` (Fabric) and `41a9b0cb`
+  (Project Observatory)
 
 ## Objective
 
@@ -21,7 +22,8 @@ fix the text and test items filed with them.
 - **Code:** `instantKey` (`src/rfc3339.ts`); in `src/machine-report.ts` the relay time for `at`, the nanosecond order,
   `notAfter`, `readMachineReport`, `FAC-SEM-154`; `nodeMethodAnswer` (`src/local-channel.ts`).
 - **Vectors:** `machine-report.json` (more `open` and `accept` cases, a new group `read`; no earlier case changed), `window-lease.json` (`remainder`:
-  reports in one millisecond, ties, a held legacy time, truncation), `local-channel.json` (new group `dispatch`), each written by its generator.
+  reports in one millisecond, ties, a held legacy time, truncation), `local-channel.json` (new group `dispatch`); `machine-report.json` and `local-channel.json` are written by
+  their generators, `window-lease.json`'s `remainder` cases by hand (no generator; `test/window-lease.test.ts` checks them).
 - **Text:** the relay-only wording (revocation-delta.md, estate-record.md, devices.md, window-lease.md, the check-in
   schema, conformance rows, the source comments), MR-2's no-erase, MR-3's `msgId` exception, the schema description,
   `FAC-SEM-090`'s limit, devices.md's "what stays linkable", DEC-0139's consequences, SCR-23, SCN-038 and FLW-27,
@@ -44,7 +46,7 @@ The gate on the branch: `pnpm typecheck`, `pnpm vitest run --coverage`, `pnpm ux
 
 ## Next task
 
-After the objection window (2026-10-29 18:00 UTC): read thread `5d2ea917` for objections; if none blocks, merge
+After the objection window (2026-10-29 18:00 UTC): read threads `5d2ea917` and `41a9b0cb` for objections; if none blocks, merge
 `origin/main` into the branch, write the merge date into DEC-0146's Status, run the gate, merge the pull request with
 `gh pr merge N --merge`, release the next free `v0.1.0+2026-10-29.N` on the merge commit, close CT-172 and post the tag
 in `5d2ea917` and `41a9b0cb` (CT-152's adopters).
