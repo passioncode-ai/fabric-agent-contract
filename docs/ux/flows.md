@@ -664,6 +664,7 @@ flowchart TD
   A{What happened?} -->|the hub's machine is retired, replaced or changing profile| L[Move the hub on its row; pick a full machine]
   A -->|Remove on the hub's machine| K{Lost or retired?}
   K -->|retired, still reachable| L
+  D -.->|retired path: once the old machine has reported revision 2| RM[Remove the old machine]
   K -->|lost| M
   L --> T1[Revision 1, DL-15: the new hub key certified; the passkey signs]
   T1 --> W{Has every machine reported revision 1?}

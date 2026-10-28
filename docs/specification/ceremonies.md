@@ -356,7 +356,9 @@ alert:
    and revoked as `machine <id>` ([Remove a machine](#remove-a-machine)) with every context hub key it held, the new hub's
    key per pinned context certified in the same revision and each context's published key set withdrawing the lost keys
    at once (DEC-0128), and the delta anchored at the head the new hub
-   holds; the new hub's first entry is the anchor's sequence + 1. Fabric withdraws the lost key from the key set it
+   holds; the new hub's first entry is the anchor's sequence + 1. Before the passkey signs it, Fabric says that every
+   window instance the lost hub divided stays paused until it ends, with the dates (step 7, DEC-0146 item 6, SCR-23).
+   Fabric withdraws the lost key from the key set it
    publishes online (DL-14) at once, with no DL-15 grace. A service whose `auth.delegation.jwks` (DL-16) names that
    published copy stops accepting the lost key within its cache time (at most 10 minutes, DL-15); one that names the old hub's own `/.well-known/jwks.json`, which
    the well-known schema allows, reads nothing once that machine is gone and accepts no token until its declaration

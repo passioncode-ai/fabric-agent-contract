@@ -8762,7 +8762,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      shows each machine waited on, since when and why when known, and the ways out (bring it back, update it, remove
      it). A removed machine is no longer waited on by DL-15 and step 6; step 7's gate keeps an instance the old hub
      divided closed until it ends when a machine removed since the instance began (before the move, between its
-     revisions or after) never reported at or above the revoking revision, its spend being unknown.
+     revisions or after) never reported at or above the revoking revision, its spend being unknown. Fabric tells the person before it happens: before the passkey signs a lost-hub revision, that every window the hub divided stays paused until it ends, with the dates; before "Remove" during a move (from its first revision until every paused instance has opened or ended) and before "Move the hub" while an instance runs that a machine removed since it began left, that the instance stays paused until it ends
+     (SCR-23, SCN-030, SCN-038).
   7. **The hub's own machine.** The node that applies the estate's records there serves `machine.report`, Fabric's own
      node included. A node answers a method it does not serve `unknown-method`, as `nodeMethodAnswer` does.
   8. **A payload a recipient does not know.** Every recipient of relay messages acknowledges and drops a body it verified
@@ -8821,5 +8822,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-27), `docs/specification/window-lease.md` (who adopts it),
   `conformance.md`'s delta-applying, drafter and relay-call rows, `docs/DOCMAP.md`, `docs/specification/README.md`,
   `docs/handoffs/README.md`; DEC-0107, DEC-0132 and DEC-0139 annotated; backlog CT-172
-  (closes on merge), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty), CT-195, CT-196 and CT-197 filed; `ceremonies.md` (Replace a machine's key, step 3); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
+  (closes on merge), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty), CT-195, CT-196, CT-197 and CT-199 filed; `docs/ux/scenarios.md` (SCN-030); `ceremonies.md` (Replace a machine's key, step 3); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
 - **Source:** CT-172; DEC-0132's and DEC-0139's readings.

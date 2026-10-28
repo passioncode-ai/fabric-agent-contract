@@ -42,6 +42,7 @@ The gate on the branch: `pnpm typecheck`, `pnpm vitest run --coverage`, `pnpm ux
 - CT-195: whether the person may reopen a lost hub's windows before they end (the operator's decision).
 - CT-196: where a run stopped for lack of a lease after a move tells the person why (super-ux).
 - CT-197: `strictTime` and the raw `Date.parse` readers read a fraction of ten or more digits late.
+- CT-199: a hub that re-keys without its lease division, and a hub certified after a period with none (undecided).
 - CT-113 keeps the reference's order of leases across hub keys in `windowRemainder`.
 - Adoption is CT-152's: Fabric's hub and nodes, Project Observatory's node.
 
