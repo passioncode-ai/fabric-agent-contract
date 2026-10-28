@@ -535,7 +535,8 @@ estate record, `at` when it wrote the report, and `records` the check-in's membe
 (DEC-0053, DEC-0056, DEC-0062): `estateRecord` (`revision`, optionally `digest`), `heartbeat` (`sequence`, `at`),
 `revocationDelta` (`sequence`, `sha256`) and `leases` (`[{leaseId, expiresAt, spent}]`): every lease the machine holds,
 and the newest expired lease of each slot whose window instance has not ended, each with its latest `spent` (optional
-as in the check-in; a `spent` covers the whole instance, so the newest lease of a slot speaks for its earlier ones,
+as in the check-in, except on a lease a hub key revoked by the revision the report names signed, which always carries
+it, MR-5, DEC-0146; a `spent` covers the whole instance, so the newest lease of a slot speaks for its earlier ones,
 [reporting](window-lease.md#reporting)). The newest lease of a slot is the one with the highest `sequence` among the
 slot's leases one hub key signed (WL-11 orders them so); after a hub move a machine names the newest of each hub key it
 held a lease of in that instance, the old hub's too, so the new hub reads what the old hub's leases spent (DEC-0146). A
@@ -645,7 +646,9 @@ such a report never sends one (DEC-0146). The gate binds the new hub from its fi
 move (before the revoking revision), at once after a lost hub; the revoking revision is the one that adds the
 `hub-key` revocation to its parent ([Move the hub](ceremonies.md#move-the-hub) step 7). The new hub's division of such an instance then counts
 each old-hub lease at the final `spent` reported for it, as an ended lease of that amount, never at nothing (a report's lease entry names no window instance, so the new hub counts each one against every instance the old hub divided for that machine whose bounds hold its `expiresAt` (after its start, at or before its end) (day, week and month alike: never less than its own instance's spend, and in an estate with several windows more than it in the smaller ones, which may then reopen with less or nothing left until they end))
-([window lease](window-lease.md#reporting); how the reference orders leases across hub keys is CT-113's). The gate is a move's to another machine, never a
+([window lease](window-lease.md#reporting); how the reference orders leases across hub keys is CT-113's). A report entry carries no amount, so a report that
+names an old-hub lease without `spent` counts as no report for the gate (the new hub has nothing to count instead), and
+the instance stays closed until a report names it or the instance ends (DEC-0146). The gate is a move's to another machine, never a
 re-key's on the hub's own machine ([Move the hub](ceremonies.md#move-the-hub) step 7). It
 opens this way only after a planned move, where the old hub's machine stays and reports its own leases. After a lost hub, the lost machine is removed in the move's own revision and never reports, and its own meter may have held the old hub's leases, so every window instance the old hub divided stays closed to new leases until it ends (a day, a week or a month), whatever the other machines report (DEC-0146).
 

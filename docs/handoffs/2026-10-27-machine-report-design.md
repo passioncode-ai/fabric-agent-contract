@@ -32,6 +32,11 @@ fix the text and test items filed with them.
   machine and Move the hub steps 3 and 4 (the person's notices, DEC-0146 item 6), contexts.md's linkability, SCN-030,
   SCN-048, ST-032, CONTEXT.md's "Revoking revision", the meter's duty on CT-20; `hub-move.json` gains three `move`
   cases by its generator.
+- **An old-hub lease without `spent`:** a report at or above the revoking revision names `spent` on every lease a
+  revoked hub key signed (MR-1, the schema description); one naming such a lease without it counts as no report for
+  step 7's gate (DEC-0146 item 4, MR-5, ceremonies, window-lease Reporting, the conformance rows, CT-113); the
+  reporter takes `at` and `iat` from one clock reading, and `machine-report.json` gains the `read` case of a
+  whole-second `iat` with a millisecond `at`.
 
 ## Checks run
 
