@@ -768,7 +768,7 @@ usage lines, joined by the runtime's `session.id` (DEC-0068, [activity](docs/spe
 (`kind: agent` without `provider`); a placement checks the roles and tools before it installs (DEC-0071,
 [package](docs/specification/package.md#a-consumer-agent)).
 
-**Local channel**: How Fabric's surfaces reach Project Observatory's node on one machine (`fabric-local-channel/0.1`):
+**Local channel**: How Fabric's surfaces reach Project Observatory's node on one machine, and Fabric's hub whichever node applies the estate's records on its machine (`machine.report`, DEC-0146) (`fabric-local-channel/0.1`):
 a socket or pipe the operating system proves is the same user's, hello first, consent prompts the other way (DEC-0075,
 [local channel](docs/specification/local-channel.md)), and secret prompts to the product's signed app only (DEC-0143).
 

@@ -6683,8 +6683,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-27):** DEC-0146 reads step 7's gate: "every holder" of the old hub's leases is every machine an
   estate record listed since the window instance began, and the gate binds the new hub from its first signature (the
   switch of a planned move, before the revoking revision); after a planned move each old-hub lease is counted at its
-  final `spent`; after a lost hub, or when a machine removed since the instance began never reported at or above the
-  revoking revision, every instance the old hub divided stays closed until it ends.
+  final `spent`; after a lost hub every instance the old hub divided stays closed until it ends, and when a machine
+  removed since an instance began never reported at or above the revoking revision, that instance stays closed until it
+  ends.
 - **Context:** DEC-0084 wrote the estate ceremonies and left two out: moving the hub to another machine, and what
   happens when a passkey is lost. The ecosystem readiness review of 2026-10-22 (board thread `b2511678`, message
   `c938af7d`) asked for both, with an alert when the hub's heartbeat is a day old and two authenticators from revision
@@ -8776,7 +8777,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      Fabric's deployed hub does is asked in thread `5d2ea917`, and if it does not, its date is CT-152's.
   9. **A hub that cannot read reports.** Its `degraded` entry's `source` is `machine-report`: a setup state while its
      new `#kem` waits only for the person to sign a revision the hub drafted, a failure otherwise. A hub with no
-     `fabric-service/0.1` well-known shows it on its own machine's row in My network's machines (SCR-23, error); SCR-23
+     `fabric-service/0.1` well-known shows it on its own machine's row in My network's machines (SCR-23, a setup note while only the person's signature is missing, an error otherwise); SCR-23
      gains the waiting state of item 6.
   10. **The report's `at`.** It is a relay time (`Z`, an upper-case `T`, at most nine fraction digits; `instantKey`,
       `FAC-SEM-154`, so `pnpm validate` flags it), ordered to the nanosecond, and not after `notAfter`, read to the millisecond: the body's
@@ -8813,7 +8814,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   earlier vector's answer changes, and a held report accepted with an offset before still guards against an older
   one.
     `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `CONTEXT.md` (Machine report), `src/machine-report.ts` (`readMachineReport`, `notAfter`, `FAC-SEM-154`, the relay time),
+- **Consequences / affects:** `CONTEXT.md` (Machine report, Revoking revision, Local channel), `schemas/local-channel.schema.json` (its description), `docs/specification/membership.md` (OM-7), `src/machine-report.ts` (`readMachineReport`, `notAfter`, `FAC-SEM-154`, the relay time),
   `src/rfc3339.ts` (`instantKey`), `src/local-channel.ts` (`nodeMethodAnswer`), `fixtures/vectors/machine-report.json`
   and `tools/vectors/machine-report.ts` (`open`, `accept`, `read`), `fixtures/vectors/local-channel.json` and
   `tools/vectors/local-channel.ts` (`dispatch`), `fixtures/vectors/hub-move.json` and `tools/vectors/hub-move.ts` (three
@@ -8823,7 +8824,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and `estate-record.md` (wording), `conformance.md` (the module row, the meter, hub, reporter and hub-reader rows, a
   node row, the rule list), `schemas/machine-report.schema.json` and `schemas/device-check-in.schema.json`
   (descriptions), `src/revocation-delta.ts` (comments), `src/window-lease.ts` (`heldBy`'s order of reports) and
-  `fixtures/vectors/window-lease.json` (`remainder` vectors: reports in one millisecond, ties, a held offset time), `docs/ux/screens.md` (SCR-23),
+  `fixtures/vectors/window-lease.json` (`remainder` vectors: reports in one millisecond, ties, a held offset time), `docs/ux/screens.md` (SCR-23, SCR-31),
   `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-27), `docs/specification/window-lease.md` (who adopts it),
   `conformance.md`'s delta-applying, drafter and relay-call rows, `docs/DOCMAP.md`, `docs/specification/README.md`,
   `docs/handoffs/README.md`; DEC-0107, DEC-0132 and DEC-0139 annotated; backlog CT-172

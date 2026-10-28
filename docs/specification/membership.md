@@ -245,7 +245,9 @@ list come from them (DEC-0129):
 Personal work beyond the references the person chose, and the text they typed, in an adaptation plan (never content
 Fabric reads from the estate), another
 organization's work, the estate record and its members, the estate's passkeys, secrets, the person's other
-memberships and anything a row does not name never leave for an organization. The adaptation row carries no project's
+memberships and anything a row does not name never leave for an organization (an instance of the organization placed on
+the person's machine can read that machine's estate records through the local channel's `machine.report`, which by itself
+sends nothing to the organization, [devices](devices.md#check-in), DEC-0146). The adaptation row carries no project's
 entry: a project enters by the estate revision its person's passkey signs (R1-D12, Fabric ADR-0178 point 7), which never
 leaves. A new row needs a decision. The estate's own
 records a check-in could carry (the estate record's revision and digest, the heartbeat, the revocation delta's head, the

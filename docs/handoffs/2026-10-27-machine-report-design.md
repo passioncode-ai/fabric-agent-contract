@@ -37,6 +37,10 @@ fix the text and test items filed with them.
   step 7's gate (DEC-0146 item 4, MR-5, ceremonies, window-lease Reporting, the conformance rows, CT-113); the
   reporter takes `at` and `iat` from one clock reading, and `machine-report.json` gains the `read` case of a
   whole-second `iat` with a millisecond `at`.
+- **Round 14 (product):** CONTEXT.md's Local channel and the local-channel schema name the hub's `machine.report`;
+  ST-032's wait and its notices match MR-6; MR-3 and item 9 show a pending signature as SCR-23's setup note; DEC-0107's
+  annotation closes only the instances a removed machine left; OM-7 and SCR-31 say a placed instance can read the
+  machine's estate records; SCR-23's "Remove" warning only for a machine that has not reported.
 
 ## Checks run
 
