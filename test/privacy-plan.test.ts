@@ -93,6 +93,9 @@ describe("privacyRunFailure", () => {
   it("names the signal that stopped the script", () => {
     expect(privacyRunFailure({ status: null, signal: "SIGKILL", stdout: "" }, script, home)).toContain("was stopped by SIGKILL");
   });
+  it("names the error code of a run that never started for another reason than a missing interpreter", () => {
+    expect(privacyRunFailure({ code: "EACCES", status: null, signal: null }, script, home)).toContain("did not run (EACCES)");
+  });
   it("says the script did not run when the error carries no status", () => {
     expect(privacyRunFailure(new Error("killed"), script, home)).toContain("did not run");
     expect(privacyRunFailure(undefined, script, home)).toContain("did not run");

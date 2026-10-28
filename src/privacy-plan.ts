@@ -51,7 +51,7 @@ export function privacyRunFailure(error: unknown, script: string, home: string):
   if (failure.code === "ENOENT") return `privacy check failed: python3 is not on PATH; it runs ${tilde(script, home)} (install Python 3 and put python3 on PATH)`;
   const out = typeof failure.stdout === "string" ? failure.stdout.trim() : "";
   if (out !== "") return out;
-  const how = typeof failure.status === "number" ? `exited with status ${failure.status}` : typeof failure.signal === "string" ? `was stopped by ${failure.signal}` : "did not run";
+  const how = typeof failure.status === "number" ? `exited with status ${failure.status}` : typeof failure.signal === "string" ? `was stopped by ${failure.signal}` : typeof failure.code === "string" ? `did not run (${failure.code})` : "did not run";
   return `privacy check failed: ${tilde(script, home)} ${how} and printed nothing on stdout`;
 }
 // #endregion privacy-plan
