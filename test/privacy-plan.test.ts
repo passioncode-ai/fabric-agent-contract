@@ -87,8 +87,11 @@ describe("privacyRunFailure", () => {
     expect(privacyRunFailure({ status: 1, stdout: "  finding: a name\n" }, script, home)).toBe("finding: a name");
   });
   it("names the exit status when the script printed nothing", () => {
-    expect(privacyRunFailure({ status: 2, stdout: "  " }, script, home)).toContain("exited with status 2 and printed no finding");
+    expect(privacyRunFailure({ status: 2, stdout: "  " }, script, home)).toContain("exited with status 2 and printed nothing on stdout");
     expect(privacyRunFailure({ status: 3 }, script, home)).toContain("exited with status 3");
+  });
+  it("names the signal that stopped the script", () => {
+    expect(privacyRunFailure({ status: null, signal: "SIGKILL", stdout: "" }, script, home)).toContain("was stopped by SIGKILL");
   });
   it("says the script did not run when the error carries no status", () => {
     expect(privacyRunFailure(new Error("killed"), script, home)).toContain("did not run");

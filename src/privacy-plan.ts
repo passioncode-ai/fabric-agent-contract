@@ -47,10 +47,11 @@ export function privacyPlan(inputs: PrivacyInputs): PrivacyPlan {
  * never an empty failure. Its stderr already reached the console (`execFileSync` passes it through by default).
  */
 export function privacyRunFailure(error: unknown, script: string, home: string): string {
-  const failure = typeof error === "object" && error !== null ? (error as { code?: unknown; status?: unknown; stdout?: unknown }) : {};
+  const failure = typeof error === "object" && error !== null ? (error as { code?: unknown; status?: unknown; signal?: unknown; stdout?: unknown }) : {};
   if (failure.code === "ENOENT") return `privacy check failed: python3 is not on PATH; it runs ${tilde(script, home)} (install Python 3 and put python3 on PATH)`;
   const out = typeof failure.stdout === "string" ? failure.stdout.trim() : "";
   if (out !== "") return out;
-  return `privacy check failed: ${tilde(script, home)} ${typeof failure.status === "number" ? `exited with status ${failure.status}` : "did not run"} and printed no finding`;
+  const how = typeof failure.status === "number" ? `exited with status ${failure.status}` : typeof failure.signal === "string" ? `was stopped by ${failure.signal}` : "did not run";
+  return `privacy check failed: ${tilde(script, home)} ${how} and printed nothing on stdout`;
 }
 // #endregion privacy-plan
