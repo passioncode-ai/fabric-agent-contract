@@ -35,6 +35,7 @@
 | SCR-27 | A job's status for its caller | FLW-23, FLW-25 | disabled | proposed | `test/agent-network.test.ts` |
 | SCR-28 | Credentials issued into an organization | FLW-28 | disabled | proposed | `test/credential-envelope.test.ts` |
 | SCR-29 | Calls between agents | FLW-28 | disabled | proposed | `test/credential-envelope.test.ts` |
+| SCR-32 | A Project's sessions and its main one | FLW-16 | disabled | proposed | `test/comms-hold.test.ts` |
 | SCR-33 | Sharing a key with another person | FLW-33 | disabled | proposed | `test/peer-share.test.ts` |
 | SCR-34 | An agent's secret request | FLW-34 | disabled | proposed | `test/local-channel.test.ts` |
 
@@ -417,4 +418,15 @@
 - **Coverage:** `src/local-channel.ts` (`channelStep`, `maySecretPrompt`, `secretOutcome`), `test/local-channel.test.ts`
 - **Scenarios:** SCN-053
 - **Resources:** local channel specification, Secret requests
+- **Status:** proposed
+
+### SCR-32: A Project's sessions and its main one
+
+- **Used by:** FLW-16
+- **Purpose:** the operator sees which session of a Project is its main one (the holder of `project.work`) and moves that slot, or another, to another live session.
+- **Elements:** the Project's live sessions, each with its session role and, for this Project only, its reported branch; the main one marked; per occupied slot, the capability and its holder; "Make main" (or "Move") on an authorized session; the confirmation with the slot's `accepted` and `in_progress` counts, saying accepted work stays `accepted` until the receiving session continues it or the requester cancels it, and in-progress work stays unknown until the new holder observes it, or until the owner can settle it once the slot is `absent`, or `stale` with no current enrollment.
+- **States:** success, the slot moved; refused, `revision_conflict` (the slot moved on since the view was drawn), `invalid_transition` (the slot became `absent` since the view was drawn), `idempotency_conflict`, `capacity_exceeded` or `idempotency_window_expired` (shown as the move not made, with its reason), `held` (the slot or the Project is held) or `not_authorized` (the mover is not the owning operator, or the session has no grant for the capability, or has ended); already the main session (the receiving session was already the slot's holder: the move is shown as made, not as a failure); no main session, the `project.work` slot is `absent` (no move is offered; it waits for a session's own enrollment); changed hands, the slot's holder is no longer the session the operator chose, with the move offered again while the chosen session is live and the slot is occupied, or the choice shown as ended once that session has ended; not answering, the main session's lease is stale (`com.status` `stale`), with "Make main" still offered on another session.
+- **Coverage:** project-comms PR-1, PR-2, PR-3 (DEC-0140); PR-2 and PR-3: the host's own test; `test/comms-hold.test.ts` covers `PRIMARY_CAPABILITY`'s name and the move's hold-table row (refused where `com.responder_replace` is)
+- **Scenarios:** SCN-051
+- **Resources:** project-comms specification, The primary responder, The operator moves a slot, A session's role and branch
 - **Status:** proposed

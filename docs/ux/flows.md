@@ -386,7 +386,7 @@ flowchart TD
 
 ### FLW-16: Operator follows a request on the Project board
 
-- **Traces:** ST-020 (JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3)
+- **Traces:** ST-020 (JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3, JRN-08/#5)
 - **Goal:** the operator reads each request between Projects with its request state and its effect state, and a lost result stays visible
 - **Entry points:** a request submitted to a Project's capability on the board
 - **Success exit:** the request terminal with an observed result, or `outcome_unknown` until reconciled by the responder or, when none holds the slot, by the estate owner, or `answered` when the target's participant replied to it while it was queued, or while it was claimed and it returned to queued (DEC-0098, DEC-0102)
@@ -403,13 +403,16 @@ flowchart TD
   E -->|result lost| U[outcome_unknown]
   U -->|observed reconciliation| D
   U -->|no responder holds the slot: owner's observed settlement with a summary| O[Completed or failed_known, settled by the owner]
+  C -->|the operator moves the slot| Q
+  A -->|the operator moves the slot: kept, C4| A
+  E -->|the operator moves the slot| U
   Q -->|deadline before accept| X[Expired]
   Q -->|the target's participant replies to it| N[Answered]
   C -->|responder replaced| Q
   N -->|the requester cancels| K[Cancelled]
 ```
 
-- **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired; SCR-19 answered.
+- **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired; SCR-19 answered; SCR-32 success when the operator moves the slot that answers the request (DEC-0140).
 
 ### FLW-17: A second copy of a service starts while one runs
 
@@ -721,7 +724,7 @@ flowchart TD
 - **Entry points:** the operator's chat with their agent; a service's `operator-decision-required`; a job waiting for a choice
 - **Success exit:** the service took the action as the operator's decision, and its audit names the agent that relayed it
 - **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the object when the operator named one, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision.
-- **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121).
+- **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121); the one page-only step is the operator's move of a board slot until its twin ships (DEC-0140, SCN-051).
 - **Flow:**
 
 ```mermaid

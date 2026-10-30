@@ -228,6 +228,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 2 | Follow | reads its request state and effect state | the board thread | 4 | "done" inferred from a delivery or a read mark | two separate facts, each set only by its operation (priority 9) |
 | 3 | Lost result | finds a request whose result was lost | the board thread | 2 | an effect reported as done or silently retried, or a request stuck forever because its responder is gone | `outcome_unknown`, left only by an observed reconciliation, which the operator gives as the estate owner when no responder holds the slot, shown as the owner's (priority 9) |
 | 4 | Unlist | keeps a Project out of other agents' lookups | the host's Project settings | 3 | every agent of the estate can find a Project the operator keeps to itself | an unlisting that hides it from discovery only, never from a sender that knows its id (priority 6) |
+| 5 | Choose who answers | makes another session the Project's main one | the host's view of a Project's sessions | 3 | the wrong session answers the Project's requests, and taking over by hand loses or doubles work | a move by the operator from the generation they saw, fenced like a replacement, and the host showing when it changes hands again (priority 7) |
 
 ### JRN-09: Operator — my machines as one network (JTBD-10)
 
@@ -512,8 +513,9 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 ### ST-020: Operator follows a request on the Project board
 
 - **Story:** As P-02, I want each request between Projects to show its request state and its effect state, so that I know what happened and what is unknown.
-- **Traces:** JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3
+- **Traces:** JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3, JRN-08/#5
 - **Acceptance criteria:**
+  - Given a Project whose main session is the holder of `project.work`, when the operator moves that slot to another authorized session, then the old session's claimed requests return to the queue, its in-progress ones show `outcome_unknown`, its accepted ones are kept until the new session takes them over or the requester cancels them, and the host shows when the slot later changes hands.
   - Given a request sent to a Project's capability, when the responder accepts and completes it, then the thread shows `accepted`, then `completed` with an observed result.
   - Given a request whose result was lost after its effect began, then the thread shows `outcome_unknown`, and only an observed reconciliation settles it.
   - Given such a request whose slot no responder holds, when the operator settles it with a summary of what they observed, then the thread shows it `completed` or `failed_known`, settled by the owner; without a summary it stays `outcome_unknown`, and it can never be closed as cancelled.
