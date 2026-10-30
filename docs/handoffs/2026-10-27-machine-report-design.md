@@ -97,7 +97,8 @@ fix the text and test items filed with them.
 ## Checks run
 
 The gate on the branch: `pnpm typecheck`, `pnpm vitest run --coverage`, `pnpm ux:lint`, `pnpm docs:check`,
-`pnpm privacy:check`, `pnpm vectors:check` (results in the pull request).
+`pnpm privacy:check`, `pnpm vectors:check`: exit 0 on 0b9f48ca (9735 passed, 1 skipped) and again on the merge head
+with `origin/main` merged (results in the pull request).
 
 ## Open
 
@@ -123,7 +124,7 @@ The gate on the branch: `pnpm typecheck`, `pnpm vitest run --coverage`, `pnpm ux
 
 ## Next task
 
-After the objection window (2026-10-29 18:00 UTC): read threads `5d2ea917` and `41a9b0cb` for objections; if none blocks, merge
-`origin/main` into the branch, write the merge date into DEC-0146's Status, run the gate, merge the pull request with
-`gh pr merge 230 --merge`, release the next free `v0.1.0+2026-10-29.N` on the merge commit, close CT-172 and post the tag
-in `5d2ea917` and `41a9b0cb` (CT-152's adopters).
+DEC-0146 merged on 2026-10-30 (#230) after its objection window closed with no objection on `5d2ea917` or
+`41a9b0cb`, and released as `v0.1.0+2026-10-30.2`. Next: CT-189 (#232, DEC-0147) merges `origin/main`, runs the gate
+and its readings, then merges; CT-152's adopters (Fabric CO-452, Project Observatory OBS-253) take DEC-0146 at their
+next pin, and Project Observatory's answer on item 8 stays asked in `41a9b0cb`.

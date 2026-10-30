@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0147` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0148` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -295,6 +295,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-04
 - **Status:** Accepted source change; consumer adoption pending
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
+- **Annotated (2026-10-26):** amended by DEC-0140: the board reserves `project.work`; no service serves or declares
+  it as a capability of its own (a narrowing; [interop](specification/interop.md)).
 - **Amends:** DEC-0016; C3.1/C3.6 naming in the interop specification
 - **Decision:** `common.schema.json#/$defs/capabilityName` admits
   `^[a-z][a-z0-9._-]{1,127}$`. The manifest capability name, hub argument,
@@ -371,6 +373,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-26):** amended by DEC-0135: who a message is delivered to (what counts as unread and what a
   mirror sends) is decided apart from who reads it; a reply goes to the sender it answers unless its `deliverTo` names
   the thread or a list of participants.
+- **Annotated (2026-10-26):** amended by DEC-0140: `project.work` is the reserved capability of a Project's primary
+  responder; the operator who owns a Project may move an occupied slot to another authorized session as one fenced
+  transition, after which the ordinary rules govern it; a session role is a claim, and a reported branch stays in its
+  Project (whether it may feed an activity event's `git.branch` is CT-176's).
 - **Decision:** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
   board on which messages are addressed to a Project, and through a request to a capability of
   that Project. Identity comes from the authenticated endpoint and never from the payload. A
@@ -4491,6 +4497,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-13):** amended by DEC-0080: for a finding the hold check comes before dedupe, so a dedupe hit into a held thread answers `held` and stores nothing.
 - **Amends:** DEC-0022 and DEC-0073 (one refusal code, one optional member in `com.status` and in the directory; no
   tool, argument, state or transition changes).
+- **Annotated (2026-10-27):** amended by DEC-0140: the operator's move of a slot is refused `held` where
+  `com.responder_replace` is (a row of the hold table).
 - **Decision:** in [project communication](specification/project-comms.md#holds) —
   1. **The refusal.** `held` joins `comms-common.schema.json#/$defs/refusalCode`. It is always `retryable: true`
      (`comms-refusal.schema.json` refuses it with `false`). Its message is one sentence that says the operator resumes
@@ -4691,6 +4699,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   its ADR-0117 §4 and its Comms screen (CT-41); the adapter's kits read `settledBy` (CT-42).
 - **Amends:** DEC-0022 (who may call `com.reconcile`) and DEC-0073 (the receipt's `request`; the message view). No tool,
   argument, state, transition or refusal code is added.
+- **Annotated (2026-10-27):** amended by DEC-0140: the lost-result operation runs whenever the next holder takes
+  the slot: after a holder left, by a replacement (already so in the replace schema), or by the operator's move of a
+  slot (PR-2).
 - **Decision:** in [project communication → Owner settlement](specification/project-comms.md#owner-settlement) —
   1. **Who.** The settler is the operator principal that owns the request's target Project, `trusted` and verified by
      the host; in an organization estate, that member only. No Project grant makes one. Every other caller, another
@@ -7220,6 +7231,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   job's capability (MJ-1); a decision still names the request key on `fabric.job.get`.
 - **Annotated (2026-10-27):** AP-4's `humanStep` gains `comparison` (DEC-0142): a comparison of codes between two
   people, the person's act like the others.
+- **Annotated (2026-10-27):** DEC-0140 makes one exception to AP-1: the operator's move of a board slot is offered in
+  the host's controls only until a host ships its agent twin (CT-181, the twin's contract half, then CT-125).
 - **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
   does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
   DL-26 already says that inside the machine boundary the operator's instruction is the authority and that a callee
@@ -8437,6 +8450,66 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-10-26-machine-report-loose-ends.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-161; DEC-0132's readings.
 
+### DEC-0140: the primary responder, the operator's move of a slot, a session's role and branch
+
+- **Date:** 2026-10-26
+- **Status:** Accepted, merged 2026-10-30 after its objection window closed (2026-10-28 18:00 UTC) with no objection
+  on board thread `6a8d2f9c` (Fabric `f3f92905`, `94a41d8c`). Additive but for one narrowing under the compatibility
+  policy's second exception: no service may serve or declare `project.work` (PR-1). The serving parties were checked
+  on 2026-10-26 by `git grep project.work` at their released tags: Fabric `v0.3.13` (only i18n keys), the adapter
+  `v0.52.0`, Fabric Dashboards `v0.8.7`, Fabric Switchboard `v0.6.83`, Project Observatory `v0.1.0`, Fabric Inbox
+  `v0.42.0` (re-checked at `v0.45.0`), the first organization server `v0.4.0`, and every other repository on the operator's machine at its
+  latest tag, else its head (165 in all, the estate's provider agents among them), none of which serves or declares
+  it (the only matches are i18n keys and longer identifiers such as `project.workspace_ids`); fabric-workspace has no
+  tag and none at its head (a head was read only where a repository has no tag). The release notes will list it as a narrowing. No tool, argument or field of any tool's schema changes. Adoption: Fabric in 0.3.15
+  (CT-174); whether a client leaves a slot moved off it is the clients' own (CT-175).
+- **Context:** Fabric's simple Fabric shows each Project's main session and lets the operator hand a Project's work to
+  another session; its request `23ba0e97` asked for one rule for "the main one", for the operator's move of a slot, and
+  for an optional session `role` and `branch` with a privacy rule. No Project declared a capability when it asked.
+- **Decision:** [project communication](specification/project-comms.md) PR-1 to PR-3.
+  1. **PR-1.** `project.work` (`PRIMARY_CAPABILITY`) is the reserved capability a requester names to reach a Project's
+     primary responder; the board never re-routes another capability to it; otherwise a capability like any other. A
+     host shows its holder as the main session (a `stale` one as not answering), none while the slot is `absent`. No
+     service serves or declares it.
+  2. **PR-2.** The operator who owns the Project (in an organization, that member only) moves an occupied (Project,
+     capability) slot to another live, authorized session of that Project than its holder, in
+     the host's controls only (its agent twin, whose decision must bind slot, generation and receiving session and which
+     no mandate covers, is owed: CT-181, then CT-125), not by an agent until that host ships it; from the
+     generation the operator saw (`revision_conflict` otherwise); one transition as `com.responder_replace` would
+     make it for the receiving session, transferring nothing; refused `held` under a slot or Project hold. After it
+     the board's ordinary rules govern the slot: a move bars nobody, and a host keeps the operator's choice as its own
+     state, showing when the holder is no longer the chosen session and offering the move again while the chosen
+     session is live and the slot occupied, and showing the choice as ended once it has ended; an `absent` slot is
+     refused `invalid_transition`. The receiving
+     session continues accepted work by its own replacement with a transfer, or the requester cancels it.
+  3. **PR-3.** A session role is a claim, display and routing only, never authority, and not a role assignment; the
+     host never copies a session's reported branch into the board, the directory, `com.status`, a relay, an
+     organization server, an events feed read off the machine or another Project's sessions; an activity event's
+     `git.branch` keeps following `telemetry.git_branch` (DEC-0031) and is never fed from a reported branch until
+     CT-176 decides.
+- **Why:** one name lets a requester reach a Project without knowing its capabilities and lets every host show the
+  same main session; a move by the operator's act, guarded by the generation the operator saw and made as one fenced
+  transition, keeps the fences' guarantees while the person decides who works, and leaving the slot to the board's
+  ordinary rules afterwards changes no client; a branch name can carry what
+  the board must not.
+- **Alternatives considered:** an argument on `com.responder_replace` naming the receiving session (a closed schema
+  would change, and an agent could move slots by itself); transferring accepted work as part of the move (a transfer's
+  checkpoint is written by its caller, and the operator writes none; the receiving session writes its own by
+  replacing itself); a host bar on the moved-off session (a reconnect gets a new session id, and barring the binding
+  would bar the same agent's other terminals); a client rule to recover only at the generation its checkpoint recorded
+  (released clients replace at the generation `com.status` shows, which the replace schema tells them to, so it would
+  be a second narrowing no released client meets; it is the clients' own improvement, CT-175); a session role that grants a slot (a claim would become authority).
+- **Compatibility:** additive, with the one narrowing named in Status, and one relaxation confined to an action this
+  decision creates: AP-1's parity does not bind the operator's move until a host ships its twin (no released host
+  offers the move, Fabric `v0.3.13` having none, and FAC-SEM-142's readers see only declared actions). It follows
+  the operator's rule of 2026-10-24 that where an agent has no door yet, a backlog row is filed (CT-181, CT-125). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/project-comms.md` (header, C4's wording, Owner settlement's paths, PR-1 to PR-3, the hold
+  table), `conformance.md` (the host row; AP-1's row carries the exception), `interop.md` (the reserved name), `service.md` (AP-1's exception for the move), `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder,
+  Session role), `src/comms-hold.ts` (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`, `docs/ux/scenarios.md`
+  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16, FLW-29's rejected shape), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022, DEC-0079, DEC-0081 and DEC-0121 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176, CT-179, CT-181, CT-182 and CT-183 (filed); fabric-workspace `knowledge/agents-first.md` (its parity paragraph, at the merge); the handoff
+  `docs/handoffs/2026-10-26-simple-fabric-decisions.md` and its row in `docs/handoffs/README.md`.
+- **Source:** CT-174; Fabric's request `23ba0e97` (thread `6a8d2f9c`).
+
 ### DEC-0141: a job's step under a mandate is read under the job's capability
 
 - **Date:** 2026-10-26
@@ -8712,8 +8785,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0146: the machines' report, its open design questions decided
 
 - **Date:** 2026-10-27
-- **Status:** Accepted (on merge of its pull request, after its objection window: 2026-10-29 18:00 UTC, threads
-  `5d2ea917` with Fabric and `41a9b0cb` with Project Observatory). A narrowing of the hub's reading of a report's `at` (one that is no relay time, which
+- **Status:** Accepted, merged 2026-10-30 after its objection window closed (2026-10-29 18:00 UTC) with no objection
+  on threads `5d2ea917` (Fabric) and `41a9b0cb` (Project Observatory). A narrowing of the hub's reading of a report's `at` (one that is no relay time, which
   DEC-0139's `strictTime` admitted with an offset, or one later than the body's `iat`, or, for its own node's answer on the local channel, later than the hub's clock when the answer arrived); new duties for the hub
   (drawing each `leaseId` unique within the estate across hub keys, item 2; counting an old hub's leases, the gate binding it from its first signature, before the revoking revision, over every
   machine listed since the window instance began, the wait it shows, the `degraded` entry's form) and for a reporting machine (the

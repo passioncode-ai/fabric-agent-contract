@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { COMMS_TOOLS, HOLD_SCOPES, NEVER_HELD, holdRefuses } from "../src/comms-hold.js";
+import { COMMS_TOOLS, HOLD_SCOPES, NEVER_HELD, PRIMARY_CAPABILITY, holdRefuses } from "../src/comms-hold.js";
 import { projectRoot } from "../src/contract.js";
 import { VECTOR_FILE, buildCommsHoldVectors } from "../tools/vectors/comms-hold.js";
 
@@ -119,5 +119,22 @@ describe("the matrix (DEC-0079 items 3 and 4)", () => {
     expect(holdRefuses("__proto__", FULL, ALL)).toBe(false);
     expect(holdRefuses("com.accept", FULL, { threads: "thr-held-0001", projects: 7, slots: [null, "proj-b", { project: "proj-b" }] })).toBe(false);
     expect(holdRefuses("com.accept", { thread: 1, project: ["proj-b"], capability: {} }, ALL)).toBe(false);
+  });
+});
+
+describe("the primary responder (DEC-0140 PR-1)", () => {
+  it("is a name the board takes as a capability", () => {
+    const base = JSON.parse(read("schemas/common.schema.json")) as Json;
+    expect(PRIMARY_CAPABILITY).toBe("project.work");
+    expect(new RegExp(base.$defs.capabilityName.pattern, "u").test(PRIMARY_CAPABILITY)).toBe(true);
+  });
+});
+
+describe("the operator's move of a slot (DEC-0140 PR-2)", () => {
+  it("is refused held exactly where com.responder_replace is, in the hold table", () => {
+    const table = rows("### What a hold refuses");
+    const cell = (start: string) => table.find((row) => row[0]?.startsWith(start))?.[1];
+    expect(cell("the operator's move of a slot")).toBeDefined();
+    expect(cell("the operator's move of a slot")).toBe(cell("`com.enroll`, `com.responder_replace`"));
   });
 });
