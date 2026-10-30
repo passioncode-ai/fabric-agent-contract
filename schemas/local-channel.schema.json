@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/local-channel.schema.json",
   "title": "Local channel message, fabric-local-channel/0.1 (DEC-0075)",
-  "description": "One JSON-RPC 2.0 message on the local channel between a Fabric surface (Fabric, Switchboard, Dashboards), or the node's own product app for secret prompts (DEC-0143), and Project Observatory's node on the same machine: a Unix socket or named pipe whose peer is the same OS user, one JSON object per line. The first call is channel.hello (FAC-SEM-106).",
+  "description": "One JSON-RPC 2.0 message on the local channel between a Fabric surface (Fabric, Switchboard, Dashboards), or the node's own product app for secret prompts (DEC-0143), and Project Observatory's node on the same machine, or, for Fabric's hub, whichever node applies the estate's records on its machine (machine.report, DEC-0146): a Unix socket or named pipe whose peer is the same OS user, one JSON object per line. The first call is channel.hello (FAC-SEM-106).",
   "oneOf": [
     {
       "$ref": "#/$defs/request"

@@ -10,7 +10,7 @@ import { sameIdentifier } from "./identifiers.js";
 /**
  * The revocation delta and the timestamp heartbeat (DEC-0054). The delta is an append-only chain of signed entries,
  * one revocation each; entry n names the hash of the head before it, so the head is `{sequence, sha256}` — the shape a
- * machine reports to its hub (`records.revocationDelta`, DEC-0053; over the relay, DEC-0128) and an estate relay's `welcome.deltaHead` carries (DEC-0047).
+ * machine reports to its hub (`records.revocationDelta`, DEC-0053; in the machines' report over the relay, or through `machine.report` on the hub's own machine, DEC-0132, never in a check-in to an organization server, DEC-0128) and an estate relay's `welcome.deltaHead` carries (DEC-0047).
  * The heartbeat is a signed timestamp that commits to the delta's head and to the estate revision. Both are signed by
  * an estate key: a hub key the highest estate-record revision the machine verified and applied certifies (DEC-0055
  * `hubKey`), not revoked there or by an entry applied before. A machine whose heartbeat is more than 72 hours old, or

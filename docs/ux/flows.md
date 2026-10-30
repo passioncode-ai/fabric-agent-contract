@@ -492,23 +492,24 @@ flowchart TD
 - **Goal:** a signed revision that creates the network, drops a machine, or replaces a machine's keys, revoking what it drops
 - **Entry points:** Fabric's "Create my network", and the network's machine list with "Remove" and "Replace key" per machine
 - **Success exit:** the person signed; machines apply the revision, and the delta carries each revocation within seconds
-- **Task analysis:** create: the first machine makes its keys → Fabric asks for a second passkey on another authenticator (or tells what one costs) → Fabric drafts revision 1 → the passkey signs → the machine pins it and shows the fingerprint. Remove: choose the machine → Fabric drafts the revision that revokes it (the hub's machine: "Move the hub" instead, FLW-27) → the passkey signs. Re-key: the machine pairs again under its id (or, alone in its network, makes new keys) → Fabric drafts the revision with the new keys and the old ones revoked by reference → the passkey signs.
+- **Task analysis:** create: the first machine makes its keys → Fabric asks for a second passkey on another authenticator (or tells what one costs) → Fabric drafts revision 1 → the passkey signs → the machine pins it and shows the fingerprint. Remove: choose the machine → Fabric drafts the revision that revokes it (the hub's machine: "Move the hub" instead, FLW-27; a retired one stays in the network until a later "Remove"; during a move, Fabric first warns as FLW-27 says for a machine that has not reported the revoking revision) → the passkey signs. Re-key: the machine pairs again under its id (or, alone in its network, makes new keys) → on the machine that holds the hub key Fabric says first that running approvals and tokens the old hub kid signed must be issued again → Fabric drafts the revision with the new keys and the old ones revoked by reference → the passkey signs.
 - **Rejected shape:** dropping a machine or a key without revoking it — rejected because a revision that drops without revoking leaves caches and deltas without the revocation (`FAC-SEM-114`).
 - **Flow:**
 
 ```mermaid
 flowchart TD
   A{What changes?} -->|create| C[Revision 1: two passkeys, or one after the warning; first machine]
-  A -->|remove| R[Revision without the machine, revoking it; the hub's machine moves the hub first]
-  A -->|re-key| K[Pair again under the id, or sign on the lone machine]
+  A -->|remove| R[Revision without the machine, revoking it; the hub's machine moves the hub first; during a move, the warning that paused windows stay paused for a machine that has not reported]
+  A -->|re-key| K[Pair again under the id, or sign on the lone machine; on the hub-key machine, the notice that approvals and tokens are issued again]
   K --> N[Revision with the new keys, old ones revoked by reference]
-  C --> S[Passkey signs]
+  C --> S{Passkey signs?}
   R --> S
   N --> S
-  S --> P[Machines apply; the delta carries each revocation]
+  S -->|no| X[Nothing changed; after re-keying the hub's machine, the setup note on its row until the revision is signed]
+  S -->|yes| P[Machines apply; the delta carries each revocation]
 ```
 
-- **Screens traversed:** SCR-23 success (signed), error (the passkey ceremony failed; nothing changed).
+- **Screens traversed:** SCR-23 success (signed), error (the passkey ceremony failed; nothing changed); after re-keying the hub's machine, the setup note on its own row while the revision listing its new key is unsigned (DEC-0146).
 
 ### FLW-21: Operator reads what an agent uses
 
@@ -638,27 +639,30 @@ flowchart TD
 - **Goal:** the machine does only what its new profile allows
 - **Entry points:** My network's machines
 - **Success exit:** the signed revision lists the machine under its new profile, and its nodes apply it
-- **Task analysis:** the person picks a profile → the drafter removes what the profile forbids (placements, secrets, the hub key) in the same revision → the person signs it with a passkey → every node applies it and judges the next call by it.
+- **Task analysis:** the person picks a profile → on the machine that holds the hub key, Fabric moves the hub first (FLW-27), keeps the chosen profile and offers it for signing once the move's second revision is signed, without waiting for the machines' reports of it (while "Finish the move" is pending, the profile change waits with it; a move not made, revision 1 declined or no other `full` machine to pick, drops the choice and nothing changed; ceremonies, Change a machine's profile) → the drafter removes what the profile forbids (placements, secrets) in the same revision → the person signs it with a passkey → every node applies it and judges the next call by it.
 - **Rejected shape:** a node's own setting for its profile, rejected because a machine could then widen itself; the profile is the signed record's (DEC-0106).
 - **Flow:**
 
 ```mermaid
 flowchart TD
-  P[Person picks a profile] --> D[Drafter removes what it forbids]
+  P[Person picks a profile] -->|another machine| D[Drafter removes what it forbids]
+  P -->|the hub's machine, to member or view| H[Move the hub first, FLW-27; the change follows in a later revision]
+  H -->|the move's second revision signed| D
+  H -->|the move not made: revision 1 declined, or no other full machine; the chosen profile dropped| N
   D --> G{Passkey signs?}
   G -->|no| N[Nothing changed]
   G -->|yes| A[Nodes apply the revision; the next call is judged by it]
 ```
 
-- **Screens traversed:** SCR-23 success (signed); SCR-23 error (the passkey ceremony failed; nothing changed).
+- **Screens traversed:** SCR-23 success (signed); SCR-23 waiting (the move's revision 2 unsigned; the chosen profile pending on the hub's row); SCR-23 error (the passkey ceremony failed; nothing changed).
 
 ### FLW-27: Operator moves the hub, or recovers from a lost passkey
 
 - **Traces:** ST-032 (JTBD-10, JRN-09/#4)
 - **Goal:** the network keeps a hub and a passkey that can sign its next revision
-- **Entry points:** "Move the hub" on the hub machine's own row (a planned move); "Remove" on the hub's machine (a lost one: the one-revision move, whatever the alert says); a machine's alert that it has not heard from the hub (an unplanned move, while the record certifies a hub key); the network's passkeys in My network's machines
+- **Entry points:** "Move the hub" on the hub machine's own row (a planned move), or "Change profile" there to member or view (FLW-26); "Remove" on the hub's machine (a lost one: the one-revision move, whatever the alert says); a machine's alert that it has not heard from the hub (an unplanned move, while the record certifies a hub key); the network's passkeys in My network's machines
 - **Success exit:** the signed revisions with the new hub key (the old one revoked, the delta anchored once every reader is pinned at or after DEC-0107) or the new passkey (the lost one revoked, or a second one added)
-- **Task analysis:** planned move: the person chooses "Move the hub" on the hub machine's row → picks a `full` machine that stays on → two revisions (DL-15), the switch once every machine's report shows the first applied (a machine that has not reported keeps the move waiting). Unplanned move: a machine reads `hubSilence` → it reconnects to the estate's relay and reads it again → still silent: the person picks an always-on `full` machine caught up with the relay → its node makes a new hub key → a lost hub: Fabric drafts one revision (new key, old key and machine revoked, the delta anchored); a reachable hub: two (DL-15) → the passkey signs → the new hub signs a heartbeat. Recover: the person signs with a passkey left → the revision removes and revokes the lost one and adds a new one (`recoveryReady`). Add later: a network with one passkey → "Add a passkey" → a revision adds the second, signed by the first.
+- **Task analysis:** planned move: the person chooses "Move the hub" on the hub machine's row → picks a `full` machine that stays on → two revisions (DL-15), the switch once every machine's report shows the first applied (a machine that has not reported keeps the move waiting: My network's machines names each one, since when and why when known, and the person brings it back, updates it or removes it, relay.md MR-6; a hub that cannot read reports says so on its own row, DEC-0146) → from the switch, new leases of the windows the old hub divided wait until every machine listed since each window began reports revision 2 (MR-5; a machine removed since a window began keeps it paused until it ends, and "Remove" during a move and "Move the hub" say so first). Unplanned move: a machine reads `hubSilence` → it reconnects to the estate's relay and reads it again → still silent: the person picks an always-on `full` machine caught up with the relay → its node makes a new hub key → a lost hub: Fabric drafts one revision (new key, old key and machine revoked, the delta anchored); a reachable hub: two (DL-15) → the passkey signs → the new hub signs a heartbeat. Recover: the person signs with a passkey left → the revision removes and revokes the lost one and adds a new one (`recoveryReady`). Add later: a network with one passkey → "Add a passkey" → a revision adds the second, signed by the first.
 - **Rejected shape:** copying the hub's private key to the new machine, rejected because a copy left on a lost disk would keep signing; a move is always a new key (DEC-0107).
 - **Flow:**
 
@@ -668,23 +672,34 @@ flowchart TD
   A -->|Remove on the hub's machine| K{Lost or retired?}
   K -->|retired, still reachable| L
   K -->|lost| M
-  L --> T[Two revisions, DL-15: certify and switch, then revoke and anchor]
-  T --> S
+  L --> T1[Notice: the old hub's windows pause from the switch until revision 2 is reported, approvals and tokens issued again once it is signed; revision 1, DL-15: the new hub key certified]
+  T1 --> S1{Passkey signs revision 1?}
+  S1 -->|no| X
+  S1 -->|yes| W{Has every machine reported revision 1?}
+  W -->|not yet| V[Waiting: each machine named; bring it back, update it or remove it; removing it keeps the old hub's windows paused until they end; the hub's own machine only by updating it]
+  V --> W
+  W -->|yes| T[The switch: the new hub signs; new leases of the windows the old hub divided wait from here until every machine listed since each window began reports revision 2, or until each window instance ends]
+  T --> T2[Fabric asks for revision 2 at once: the old key revoked, the delta anchored; the leases stay paused until the person signs it and every machine listed since each window began reports it, or each window ends]
+  T2 --> S2{Passkey signs revision 2?}
+  S2 -->|no| X2[Revision 2 not signed: the new hub signs; the old hub's windows stay paused until it is signed and reported, or they end; SCR-23 waiting offers Finish the move]
+  X2 -->|Finish the move| T2
+  S2 -->|yes| P2[SCR-23 waiting: new leases of the old hub's windows wait until every machine listed since each window began reports revision 2, or each window ends]
+  P2 --> D
   A -->|this machine has not heard the hub for 24 h| C{Still silent after reconnecting?}
   C -->|no| Z[The alert clears; no move]
   C -->|yes, but the hub still answers elsewhere| L
   C -->|yes| M[Pick an always-on full machine; it makes a new hub key]
-  M --> R[Revision: new hubKey, old hub-key revoked, the delta anchored once readers are pinned]
+  M --> R[Revision: new hubKey, old hub-key revoked, the delta anchored once readers are pinned; the windows the lost hub divided stay paused until each ends; approvals and tokens issued again; both said before signing]
   A -->|a passkey lost| P{Another passkey left?}
   P -->|yes| Q[Revision signed by it: lost one removed and revoked, a new one added]
   P -->|no| N[No revision can be signed: create a new network]
   R --> S{Passkey signs?}
   Q --> S
   S -->|no| X[Nothing changed]
-  S -->|yes| D[Machines apply it; the new hub's heartbeat follows]
+  S -->|yes| D[Machines apply it; the new hub's heartbeat follows; a retired hub machine stays in the network, removing it is a later Remove, SCR-23]
 ```
 
-- **Screens traversed:** SCR-23 success (signed); SCR-23 error (the passkey ceremony failed; nothing changed); SCR-23 alert (the hub silent).
+- **Screens traversed:** SCR-23 success (signed); SCR-23 error (the passkey ceremony failed; nothing changed); SCR-23 alert (the hub silent); SCR-23 waiting (a machine has not reported, MR-6, or revision 2 is unsigned after the switch); SCR-23 error on the hub's own row (it cannot read its machines' reports, DEC-0146).
 
 ### FLW-28: An agent's narrow credential, from request to revocation
 

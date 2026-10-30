@@ -12,7 +12,7 @@ record** is its signed state, one revision at a time. It lists the passkeys that
 with their device keys and a certificate of each machine's hub key, the packages placed on each machine in each context
 (DEC-0082), where each secret slot is filled from, the share grants and every revocation. Fabric's hub drafts a revision; the person's passkey
 signs it; every machine of the estate applies the latest revision it can verify and reports its number, and optionally
-its digest, to its hub over the relay (DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2) (`records.estateRecord`, [devices](devices.md#check-in), DEC-0053, DEC-0056).
+its digest, to its hub over the relay, or on the hub's own machine through the node's `machine.report` (DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2) (`records.estateRecord`, [devices](devices.md#check-in), DEC-0053, DEC-0056).
 
 Sources: the first organization server's target architecture v4 (commit `9c6a780`) — §2 rule 6 (three signed records)
 and rule 12 (algorithms by role), §3 (the nouns *Passkey*, *Estate*, *Machine*, *Device key*, *Signing key*, *Estate
@@ -275,7 +275,7 @@ keys are DEC-0053's.
   reconciled with the revocation-delta entries the node holds (`reconcileRevision`, DEC-0054), then applies its delta anchor (`anchorDelta`, DEC-0107), refusing the revision and keeping its parent when either refuses it; installs a
   package only when `verifyPackage` accepts it under `placementTrust`'s key and the `estate-placement` rule finds it
   is the one placed (its digest and `agentRef`: `verifyPackage` alone accepts any version signed under that key), each
-  instance in its own context and an organization's under its grant (DEC-0082); fills only placed slots; and reports the applied revision to its hub over the relay (DEC-0132, DEC-0128 UE-2) as
+  instance in its own context and an organization's under its grant (DEC-0082); fills only placed slots; and reports the applied revision to its hub over the relay, or on the hub's own machine through the node's `machine.report` (DEC-0132, DEC-0128 UE-2) as
   `records.estateRecord.revision` (DEC-0053) with its `digest` beside it (DEC-0056). As a delegation callee it reads the
   revision it applied, never an older one, and trusts a token's `kid` as DL-14 says (DEC-0060).
 - **The relay** serves the latest revision by digest ([DEC-0047](relay.md#blobs)); it never decides trust.

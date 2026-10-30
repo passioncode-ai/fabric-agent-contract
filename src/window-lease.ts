@@ -1,7 +1,7 @@
 import { createPublicKey, verify as verifySignature } from "node:crypto";
 import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, isObject, show, toNumber } from "./findings.js";
-import { strictTime } from "./rfc3339.js";
+import { instantKey, strictTime } from "./rfc3339.js";
 import { WINDOW_LEASE_FIELDS, signingStatement } from "./signing-challenges.js";
 
 // #region window-lease — docs: docs/specification/window-lease.md
@@ -9,7 +9,7 @@ import { WINDOW_LEASE_FIELDS, signingStatement } from "./signing-challenges.js";
  * `window-lease/1` (DEC-0062): the estate's hub signs, once per machine, that machine's share of one instance of a
  * spending window — the most the machine's meter may spend in that window instance — valid for at most 24 hours. The
  * meter spends the smaller of its own remainder and the lease's, refuses beyond it, and at expiry reserves nothing more
- * in that window until a new lease arrives. It reports what it spent to its hub (over the relay, DEC-0132); what it does not report counts
+ * in that window until a new lease arrives. It reports what it spent to its hub (over the relay, or through `machine.report` on the hub's own machine, DEC-0132); what it does not report counts
  * as spent until it does.
  */
 export const WINDOW_LEASE_TYPE = "window-lease/1";
@@ -101,7 +101,11 @@ export function periodBounds(window: unknown, period: unknown): { start: number;
   return undefined;
 }
 
-/** The period of `window` that holds the instant `at` (milliseconds, UTC), or `undefined` for an unknown window or clock. */
+/**
+ * The period of `window` that holds the instant `at` (milliseconds, UTC), or `undefined` for an unknown window or clock.
+ * Periods are `[start, end)`: a lease's `expiresAt` at its instance's end names the next period here, while an old hub's
+ * lease is counted in the instance it ends (DEC-0146, window lease Reporting).
+ */
 export function periodOf(window: unknown, at: number): string | undefined {
   if (!Number.isFinite(at)) return undefined;
   const date = new Date(at);
@@ -350,6 +354,27 @@ export interface WindowLedger {
 export type RemainderVerdict = { ok: true; remainderUsd: string; heldUsd: string } | { ok: false; problem: "no-clock" | "malformed" };
 
 /**
+ * A report's `at` as a pair that orders to the nanosecond (DEC-0146 item 10, window-lease.md Reporting): the millisecond, then the nanoseconds within
+ * it; a time held from before DEC-0146 that is no relay time reads as its millisecond's last nanosecond, as the hub's
+ * acceptance reads it (a report in that millisecond is not after it), so every pair compares on one scale.
+ */
+function reportTime(report: LeaseReport): [number, number] {
+  const key = instantKey(report.receivedAt);
+  return [strictTime(report.receivedAt), key === undefined ? 999_999 : Number(key.slice(23, 29))];
+}
+
+/** Orders two reports of a machine by their `at`, a tie going to the larger `spent`, so the claim is never the lower one. */
+function byReportTime(a: LeaseReport, b: LeaseReport): number {
+  const [msA, nsA] = reportTime(a);
+  const [msB, nsB] = reportTime(b);
+  if (msA !== msB) return msA - msB;
+  if (nsA !== nsB) return nsA - nsB;
+  const spentA = usdMicros(a.spent) as bigint;
+  const spentB = usdMicros(b.spent) as bigint;
+  return spentA < spentB ? -1 : spentA > spentB ? 1 : 0;
+}
+
+/**
  * What one machine holds of a window instance, at `at`: the most it may have spent. For each of its leases, the amount
  * while the lease is valid (it may still spend it); after expiry, the `spent` of a report written (its `at`) at or after that
  * expiry under this lease or a later one of the machine (spent counts the whole window instance), else the amount —
@@ -366,7 +391,7 @@ function heldBy(leases: JsonObject[], reports: readonly LeaseReport[], at: numbe
       const covering = new Set(leases.filter((other) => (other.sequence as number) >= (lease.sequence as number)).map((other) => other.leaseId));
       const final = reports
         .filter((report) => covering.has(report.leaseId) && usdMicros(report.spent) !== undefined && strictTime(report.receivedAt) >= expiresAt && strictTime(report.receivedAt) <= at)
-        .sort((a, b) => strictTime(a.receivedAt) - strictTime(b.receivedAt))
+        .sort(byReportTime)
         .at(-1);
       if (final) claim = usdMicros(final.spent) as bigint;
     }

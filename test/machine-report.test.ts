@@ -12,9 +12,12 @@ import {
   machineReportAad,
   machineReportRules,
   openMachineReport,
+  readMachineReport,
   sealMachineReport
 } from "../src/machine-report.js";
 import { rfc8785 } from "../src/canonical.js";
+import { instantKey } from "../src/rfc3339.js";
+import { instant } from "../src/relay.js";
 import { hpkeSealBase } from "../src/secret-envelope.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
@@ -71,6 +74,51 @@ describe("acceptMachineReport (MR-2, MR-4)", () => {
     expect(acceptMachineReport(REPORT, { machine: "m-a", schemaValid: () => { throw new Error("x"); } })).toEqual({ ok: false, refusal: "malformed" });
     expect(acceptMachineReport(REPORT, { machine: "m-a", held: { at: "unreadable" }, schemaValid: reportValid })).toEqual({ ok: true, report: REPORT });
     expect(acceptMachineReport(REPORT, { machine: "m-a", held: { at: 7 }, schemaValid: reportValid })).toEqual({ ok: true, report: REPORT });
+  });
+});
+
+describe("readMachineReport (MR-4's whole reading, DEC-0146)", () => {
+  it.each(vectors.read as Json[])("read: $name", (c) => {
+    const answer = readMachineReport(c.sealed, { ...c.context, schemaValid: reportValid });
+    expect(json(answer)).toEqual(c.expect);
+  });
+
+  it("answers what openMachineReport refuses, and what acceptMachineReport then refuses, never throwing", () => {
+    const read = (over: Json = {}) => ({ ...ctx(over), notAfter: "2026-10-27T08:00:01Z" });
+    expect(readMachineReport(null, read())).toEqual({ ok: false, refusal: "malformed" });
+    expect(readMachineReport(SEALED, read({ msgId: "other" }))).toEqual({ ok: false, refusal: "cannot-open" });
+    expect(readMachineReport(SEALED, read())).toEqual({ ok: true, report: REPORT });
+  });
+});
+
+describe("FAC-SEM-154: a report's at is a relay time (DEC-0146)", () => {
+  it("reads exactly the times the relay's own instant reads (relay.json's instant group)", () => {
+    const relayVectors = JSON.parse(readFileSync(path.join(root, "fixtures/vectors/relay.json"), "utf8")) as Json;
+    const cases = (relayVectors.instant as Json).cases as Json[];
+    expect(cases.length).toBeGreaterThan(0);
+    for (const c of cases) expect(instantKey(c.value) !== undefined, String(c.value)).toBe(instant(c.value) !== undefined);
+  });
+
+  it("reads exactly the times the relay's own instant reads over a generated grid of shapes", () => {
+    const dates = ["2026-10-27", "2024-02-29", "2026-02-29", "0000-01-01", "9999-12-31", "2026-13-01", "2026-04-31", "+02026-10-27", "26-10-27"];
+    const seps = ["T", "t", " ", "_"];
+    const clocks = ["08:00:00", "23:59:59", "23:59:60", "24:00:00", "08:60:00", "8:00:00", "08:00"];
+    const fractions = ["", ".", ".5", ".123", ".1234", ".123456789", ".1234567890", ".12a"];
+    const zones = ["Z", "z", "+00:00", "-01:30", "", "UTC", "+0000"];
+    let checked = 0;
+    for (const d of dates) for (const s of seps) for (const c of clocks) for (const f of fractions) for (const z of zones) {
+      const value = `${d}${s}${c}${f}${z}`;
+      expect(instantKey(value) !== undefined, value).toBe(instant(value) !== undefined);
+      checked += 1;
+    }
+    expect(checked).toBe(dates.length * seps.length * clocks.length * fractions.length * zones.length);
+  });
+
+  it("flags an at the hub refuses and passes one it reads", () => {
+    const codes = (at: unknown) => evaluateSemanticRules("machine-report", { ...REPORT, at }).map((finding) => finding.code);
+    for (const at of ["2026-10-27T08:00:00+00:00", "2026-10-27t08:00:00Z", "2026-10-27T08:00:00.0000000001Z", "2026-12-31T23:59:60Z", "2026-02-30T08:00:00Z"]) expect(codes(at), at).toEqual(["FAC-SEM-154"]);
+    for (const at of ["2026-10-27T08:00:00Z", "2026-10-27T08:00:00.123456789Z"]) expect(codes(at), at).toEqual([]);
+    expect(codes(7)).toEqual([]);
   });
 });
 

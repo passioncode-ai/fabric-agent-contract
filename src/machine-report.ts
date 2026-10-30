@@ -1,7 +1,7 @@
 import { rfc8785 } from "./canonical.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { p256KeyRefusal } from "./p256.js";
-import { strictTime } from "./rfc3339.js";
+import { instantKey, strictTime } from "./rfc3339.js";
 import { hpkeOpenBase, hpkeSealBase } from "./secret-envelope.js";
 
 // #region machine-report, docs: docs/specification/relay.md#the-machines-report
@@ -79,12 +79,13 @@ export function sealMachineReport(report: unknown, ctx: { from: unknown; to: unk
  * its sender in T1 as `sender` (the machine it named). In order: `malformed` for a sealed shape that is not the
  * schema's; `wrong-recipient` for another `kem`; `cannot-open` when HPKE fails (another body's `from`, `to` or `msgId`
  * among them); `malformed` for a plaintext that is not UTF-8 JSON in its own RFC 8785 form, not of the report's type, or
- * that `schemaValid` refuses, or whose `at` RFC 3339 as `strictTime` reads does not (a leap second, a space for `T`;
- * DEC-0139); `wrong-machine` when the report names another machine than the sender; `stale` when its `at` is not after
- * the report the hub holds for that machine. The hub then reads the report as `acceptMachineReport` does. It never
- * throws.
+ * that `schemaValid` refuses, whose `at` is not a relay time (`instantKey`: `Z`, an upper-case `T`, at most nine fraction
+ * digits, a day that exists; DEC-0139, DEC-0146), or whose `at` is after `notAfter`, the body's signed `iat` (DEC-0146);
+ * `wrong-machine` when the report names another machine than the sender; `stale` when its `at` is not after the report
+ * the hub holds for that machine, to the nanosecond. The hub then reads the report as `acceptMachineReport` does
+ * (`readMachineReport` does both). It never throws.
  */
-export function openMachineReport(sealed: unknown, ctx: { from: unknown; to: unknown; msgId: unknown; own: { kid: unknown; privateKey: unknown }; sender: unknown; held?: { at: unknown }; schemaValid: (report: unknown) => boolean }): { ok: true; report: Json } | { ok: false; refusal: MachineReportRefusal } {
+export function openMachineReport(sealed: unknown, ctx: { from: unknown; to: unknown; msgId: unknown; own: { kid: unknown; privateKey: unknown }; sender: unknown; held?: { at: unknown }; notAfter?: unknown; schemaValid: (report: unknown) => boolean }): { ok: true; report: Json } | { ok: false; refusal: MachineReportRefusal } {
   if (!isObject(sealed)) return { ok: false, refusal: "malformed" };
   if (Object.keys(sealed).sort().join(",") !== "ct,enc,kem,type" || sealed.type !== MACHINE_REPORT_TYPE || !isString(sealed.kem) || !KEM_KID.test(sealed.kem)) return { ok: false, refusal: "malformed" };
   if (!isString(sealed.enc) || !isString(sealed.ct) || !B64URL.test(sealed.enc) || !B64URL.test(sealed.ct)) return { ok: false, refusal: "malformed" };
@@ -116,36 +117,56 @@ export function openMachineReport(sealed: unknown, ctx: { from: unknown; to: unk
     valid = false;
   }
   if (!valid) return { ok: false, refusal: "malformed" };
-  const order = orderReport(report, ctx.sender, ctx.held);
+  const order = orderReport(report, ctx.sender, ctx.held, ctx.notAfter);
   return order === undefined ? { ok: true, report } : { ok: false, refusal: order };
 }
 
 /**
- * The checks the hub's two readings share, after the schema: an `at` the schema's date-time takes but RFC 3339 as
- * `strictTime` reads does not (a leap second, a space) cannot be ordered against the report held, so it is `malformed`
- * held or not; then `wrong-machine`; then `stale`. A held time the hub cannot read keeps nothing back.
+ * The checks the hub's two readings share, after the schema: an `at` that is no relay time (a leap second, a space, an
+ * offset, a lower-case `t`, ten fraction digits) cannot be ordered against the report held, so it is `malformed` held
+ * or not, and so is an `at` after `notAfter` when the caller gives one (the body's `iat`, or the hub's clock when its
+ * own node answered; an unreadable `notAfter` refuses rather than lets through); then `wrong-machine`; then `stale`,
+ * compared to the nanosecond (DEC-0146). A held time is read as a relay time, or, for a report the hub accepted
+ * before DEC-0146 (an offset, a lower-case `t`, more fraction digits), to the millisecond as `strictTime` reads it, so
+ * an upgrade never stops it guarding against an older report; a held time neither reads keeps nothing back.
  */
-function orderReport(report: Json, machine: unknown, held: unknown): "malformed" | "wrong-machine" | "stale" | undefined {
-  const at = strictTime(report.at);
-  if (!Number.isFinite(at)) return "malformed";
+function orderReport(report: Json, machine: unknown, held: unknown, notAfter: unknown): "malformed" | "wrong-machine" | "stale" | undefined {
+  const at = instantKey(report.at);
+  if (at === undefined) return "malformed";
+  if (notAfter !== undefined) {
+    const bound = instantKey(notAfter);
+    // To the millisecond: a clock that writes `notAfter` or `iat` as `toISOString` does reads to the millisecond, so a
+    // report written within that millisecond, to a finer fraction, is not after it (DEC-0146).
+    if (bound === undefined || at.slice(0, 23) > bound.slice(0, 23)) return "malformed";
+  }
   if (report.machine !== machine) return "wrong-machine";
   if (isObject(held)) {
-    const heldAt = isString(held.at) ? strictTime(held.at) : Number.NaN;
-    if (Number.isFinite(heldAt) && !(at > heldAt)) return "stale";
+    const heldAt = instantKey(held.at);
+    if (heldAt !== undefined) {
+      if (!(at > heldAt)) return "stale";
+    } else {
+      // A held time accepted before DEC-0146 (an offset, a lower-case `t`, more fraction digits) reads as its
+      // millisecond's last nanosecond, as the hub's division reads it (window-lease.md Reporting): a report in the same
+      // millisecond is not after it, so neither its precision nor a year past 9999 lets an older report in.
+      const heldMs = strictTime(held.at);
+      if (Number.isFinite(heldMs) && !(strictTime(report.at) > heldMs)) return "stale";
+    }
   }
   return undefined;
 }
 
 /**
  * The hub's reading of a report it holds as a machine's newest (MR-2, MR-4): one `openMachineReport` opened, or the
- * `report` its own node's `machine.report` answered over the local channel. In order: `malformed` (not an object, the
- * schema refuses it, a `FAC-SEM-152` finding, or an `at` `strictTime` cannot read), `wrong-machine` (another machine
- * than `machine`, the sender `relayCallerTier` named or the hub's own machine id) and `stale` (an `at` not after the
- * report held for that machine). The caller handles a `null` answer before it calls: that is no report (the node
- * applies no estate records, and the hub holds nothing for it), while `acceptMachineReport(null)` is `malformed`, as is
+ * `report` its own node's `machine.report` answered over the local channel. `notAfter` is a relay time (`Z`, as
+ * `new Date().toISOString()` writes it): the body's `iat`, or the hub's clock when its own node answered; one in another
+ * form refuses every report. In order: `malformed` (not an object, the
+ * schema refuses it, a `FAC-SEM-152` or `FAC-SEM-154` finding, or an `at` after `notAfter`), `wrong-machine` (another
+ * machine than `machine`, the sender `relayCallerTier` named or the hub's own machine id) and `stale` (an `at` not after
+ * the report held for that machine). The caller handles a `null` answer before it calls: that is no report (the node
+ * applies no estate records), and the hub keeps what it holds for its machine (relay.md MR-2), while `acceptMachineReport(null)` is `malformed`, as is
  * anything else that is no report. Never throws.
  */
-export function acceptMachineReport(report: unknown, ctx: { machine: unknown; held?: { at: unknown }; schemaValid: (report: unknown) => boolean }): { ok: true; report: Json } | { ok: false; refusal: MachineReportAcceptRefusal } {
+export function acceptMachineReport(report: unknown, ctx: { machine: unknown; held?: { at: unknown }; notAfter?: unknown; schemaValid: (report: unknown) => boolean }): { ok: true; report: Json } | { ok: false; refusal: MachineReportAcceptRefusal } {
   if (!isObject(report) || report.type !== MACHINE_REPORT_MESSAGE_TYPE) return { ok: false, refusal: "malformed" };
   let valid = false;
   try {
@@ -153,14 +174,36 @@ export function acceptMachineReport(report: unknown, ctx: { machine: unknown; he
   } catch {
     valid = false;
   }
-  if (!valid || leaseFindings(report).length > 0) return { ok: false, refusal: "malformed" };
-  const order = orderReport(report, ctx.machine, ctx.held);
+  if (!valid || reportFindings(report).length > 0) return { ok: false, refusal: "malformed" };
+  const order = orderReport(report, ctx.machine, ctx.held, ctx.notAfter);
   return order === undefined ? { ok: true, report } : { ok: false, refusal: order };
 }
 
-/** FAC-SEM-152 on `machine-report`: each lease once, by its `leaseId`. */
+/**
+ * The hub's whole reading of a relayed report (MR-4): `openMachineReport`, then `acceptMachineReport` on what it opened
+ * with the same context, the sender `relayCallerTier` named as the machine. Its refusals are `openMachineReport`'s; a
+ * report it opens and `acceptMachineReport` refuses keeps the first refusal in that order (DEC-0146). `notAfter` is
+ * required here, the body's signed `iat`: `openMachineReport` alone checks no time against it. Never throws.
+ */
+export function readMachineReport(sealed: unknown, ctx: Parameters<typeof openMachineReport>[1] & { notAfter: unknown }): { ok: true; report: Json } | { ok: false; refusal: MachineReportRefusal } {
+  const opened = openMachineReport(sealed, ctx);
+  if (!opened.ok) return opened;
+  // `notAfter` is required here: a context without a readable one refuses rather than skips the bound.
+  if (instantKey(ctx.notAfter) === undefined) return { ok: false, refusal: "malformed" };
+  return acceptMachineReport(opened.report, { machine: ctx.sender, ...(ctx.held === undefined ? {} : { held: ctx.held }), notAfter: ctx.notAfter, schemaValid: ctx.schemaValid });
+}
+
+/** FAC-SEM-152 and FAC-SEM-154 on `machine-report`: each lease once, by its `leaseId`, and an `at` that is a relay time. */
 export function machineReportRules(kind: string, value: Json): Finding[] | undefined {
-  return kind === "machine-report" ? leaseFindings(value) : undefined;
+  return kind === "machine-report" ? reportFindings(value) : undefined;
+}
+
+function reportFindings(value: Json): Finding[] {
+  const findings = leaseFindings(value);
+  if (typeof value.at === "string" && instantKey(value.at) === undefined) {
+    findings.push({ code: "FAC-SEM-154", instancePath: "/at", message: "a report's at is a relay time: Z, an upper-case T, at most nine fraction digits, a day that exists" });
+  }
+  return findings;
 }
 
 function leaseFindings(value: Json): Finding[] {

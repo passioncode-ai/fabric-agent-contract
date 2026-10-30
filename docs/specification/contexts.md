@@ -213,7 +213,8 @@ keys of its own, so organizations cannot link the machine (CX-22). DEC-0128 (CX-
   context's hub key ([delegation](delegation.md#keys-publication-and-rotation) DL-14a).
 
 What stays linkable is named in UE's last item (low-entropy values, mode `C`'s harness lines, a shared `agentRef`, the
-relay operator's view of `org:<orgId>`, and one operator running two of a machine's relays). An adaptation plan's
+relay operator's view of `org:<orgId>`, one operator running two of a machine's relays, and an organization's instance
+placed on a machine, which can call `machine.report`, DEC-0146). An adaptation plan's
 references and request ids are drawn per organization ([membership](membership.md#the-adaptation-plan) AD-2, DEC-0138);
 the text a person types into two organizations' plans is theirs to repeat, and can link them; a server that serves
 two organizations links the person's plans to both by whatever identifies the person to it (one account, or one

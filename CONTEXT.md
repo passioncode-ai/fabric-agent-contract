@@ -397,7 +397,7 @@ call between machines over the relay that a profile does not allow is refused `p
 
 **Machine report**: What one machine of an estate tells its hub machines (DEC-0132): those of the revision it applied,
 both during a hub move, and the hub of a newer revision it refused. It carries the estate revision it applied, its
-heartbeat, its revocation-delta head and the window leases it holds, plus the newest expired lease of each slot until
+heartbeat, its revocation-delta head and the window leases it holds, plus the newest expired lease of each slot (per hub key, DEC-0146) until
 its window instance ends, each with what it spent, by the check-in's own `records` names, sealed to the hub's `#kem`
 over the relay so the relay reads none of it (on the hub's own machine, read from the node's `machine.report` over the
 local channel instead). Never sent to an organization server (DEC-0128 UE-2). Not a **Node summary**, which goes to an
@@ -693,6 +693,12 @@ organization's relay takes its set from the organization's member list (`org-aut
 under the organization's key set, and its handshake names the organization in `auth` and the list in `welcome`
 (DEC-0134).
 
+**Revoking revision**: In a hub move, the estate record revision that adds the old hub key's `hub-key` revocation to
+its parent while that key's machine certifies no hub key: a planned move's second revision, a lost hub's one revision.
+After a planned move, the new hub's gate on the old hub's windows opens on machines' reports at or above it; after a
+lost hub, or for an instance a machine removed since it began never reported at or above it, the gate stays closed until
+the instance ends ([ceremonies](docs/specification/ceremonies.md#move-the-hub) step 7, DEC-0146).
+
 **Revocation delta**: The estate record's fast path (`revocation-delta/1`, DEC-0054): an append-only chain of
 entries, one revocation each, signed by an **Estate key** and chained by RFC 8785 hash, so its head is
 `{sequence, sha256}`: what a machine reports to its hub and an estate's **Relay** carries in its `welcome` (an organization's relay does not, DEC-0134 OR-2). A revision issued after an entry
@@ -773,7 +779,7 @@ usage lines, joined by the runtime's `session.id` (DEC-0068, [activity](docs/spe
 (`kind: agent` without `provider`); a placement checks the roles and tools before it installs (DEC-0071,
 [package](docs/specification/package.md#a-consumer-agent)).
 
-**Local channel**: How Fabric's surfaces reach Project Observatory's node on one machine (`fabric-local-channel/0.1`):
+**Local channel**: How Fabric's surfaces reach Project Observatory's node on one machine, and Fabric's hub whichever node applies the estate's records on its machine (`machine.report`, DEC-0146) (`fabric-local-channel/0.1`):
 a socket or pipe the operating system proves is the same user's, hello first, consent prompts the other way (DEC-0075,
 [local channel](docs/specification/local-channel.md)), and secret prompts to the product's signed app only (DEC-0143).
 

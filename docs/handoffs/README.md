@@ -4,7 +4,8 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-10-26 three decisions for the simple Fabric](2026-10-26-simple-fabric-decisions.md) | DEC-0140 (CT-174) | pending |
+| [2026-10-27 the machines' report, its open design questions](2026-10-27-machine-report-design.md) | DEC-0146 (CT-172) | merged 2026-10-30, #230; released `v0.1.0+2026-10-30.2` |
+| [2026-10-26 three decisions for the simple Fabric](2026-10-26-simple-fabric-decisions.md) | DEC-0140 (CT-174) | merged 2026-10-30, #217 `86f3ebad`; released `v0.1.0+2026-10-30.1` |
 | [2026-10-26 the machines' report, loose ends](2026-10-26-machine-report-loose-ends.md) | DEC-0139 (CT-161 closed; CT-172 filed) | merged 2026-10-27, #213; released `v0.1.0+2026-10-27.6` |
 | [2026-10-26 the adaptation plan's organization part](2026-10-26-adaptation-plan.md) | DEC-0138 (CT-169) | merged 2026-10-27, #212 `3fd4c95a`; released `v0.1.0+2026-10-27.5` |
 | [2026-10-27 the contract on Windows](2026-10-27-windows.md) | DEC-0145 (MD-18; CT-123 and CT-167 closed; CT-191 to CT-193 filed) | merged, #224 `802c8d27`; released `v0.1.0+2026-10-27.4` |

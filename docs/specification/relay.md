@@ -66,7 +66,8 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
 - **Times** are RFC 3339 UTC: `Z`, an upper-case `T`, at most nine fractional digits, on a day its month has (`instant`,
   through `strictTime`). `2026-02-30`, hour 24 and a leap second `:60` are refused, never rolled forward or compared. A
   time is read to the millisecond: fraction digits past the third are dropped, so `00:01:00.000999999Z` is the instant
-  `00:01:00.000Z` (vectors `instant`, and `admit`'s "iat 60.000999999 s ahead"). A signed `iat` more than 60 s ahead of
+  `00:01:00.000Z` (vectors `instant`, and `admit`'s "iat 60.000999999 s ahead"); the machines' report orders its `at`
+  to the nanosecond against the report held instead, and reads it against the body's `iat` to the millisecond (MR-4, DEC-0146). A signed `iat` more than 60 s ahead of
   the verifier's clock is `not-yet-valid` (`CLOCK_SKEW_SECONDS`, the same skew the estate record's `issuedAt`, a hub
   key's window and a delta entry have, DEC-0066).
 
@@ -286,7 +287,11 @@ whether an organization's relay answers it differently is part of CT-163.
   relay has no byte quota) and `blobBytes` (at most `MAX_BLOB_BYTES`).
 - **`deliver`**: `{from, msgId, seq, body, sentAt}`, in `seq` order, to every connection the recipient holds. `from`
   is the kid the relay admitted on the sender's connection. `deliver` has no `to`.
-  - The recipient answers `ack` with `{seq}`. Acknowledged and expired messages are deleted.
+  - The recipient answers `ack` with `{seq}`. A body it verified whose payload type it does not know is acknowledged
+    and dropped, so such messages never fill its mailbox (DEC-0146); a payload type added later must therefore tolerate
+    being dropped by a recipient that predates it, or be sent only once the recipient's pin admits it. DEC-0146 keeps a body the recipient
+    cannot verify under its refusal's handling: `unknown-sender` and `not-yet-valid` may pass once it applies a revision or the sender's clock is
+    behind it, and what a member does with another member's body on an organization's relay is CT-163's. Acknowledged and expired messages are deleted.
   - Delivery is at least once.
 - **The body is end to end** (`fabric-relay-message/1`): a compact JWS with `alg: ES256` and
   `typ: fabric-relay-message+jwt`. Its payload is the RFC 8785 bytes of `{type, from, to, msgId, iat, exp, payload}`;
@@ -514,25 +519,37 @@ revocation signed by an estate key (a hub key the estate record certifies) and c
 
 ## The machines' report
 
-DEC-0132 (CT-152), DEC-0139 (CT-161) · schemas [`machine-report`](../../schemas/machine-report.schema.json),
+DEC-0132 (CT-152), DEC-0139 (CT-161), DEC-0146 (CT-172) · schemas [`machine-report`](../../schemas/machine-report.schema.json),
 [`machine-report-sealed`](../../schemas/machine-report-sealed.schema.json) · code
 [`src/machine-report.ts`](../../src/machine-report.ts) · vectors
 [`fixtures/vectors/machine-report.json`](../../fixtures/vectors/machine-report.json), written by
-[`tools/vectors/machine-report.ts`](../../tools/vectors/machine-report.ts) · rule `FAC-SEM-152`
+[`tools/vectors/machine-report.ts`](../../tools/vectors/machine-report.ts) · rules `FAC-SEM-152`, `FAC-SEM-154`
 
 Each machine tells its estate's hub what it applied and what it spent. A check-in to an organization server carries
-none of it (DEC-0128 UE-2), so the report goes over the relay, sealed so the relay reads none of it. Three readers
-depend on it: the hub's key rotation (DL-15), the hub move's step 6 ([ceremonies](ceremonies.md#move-the-hub)) and the
-window lease's [reporting](window-lease.md#reporting).
+none of it (DEC-0128 UE-2), so the report goes over the relay, sealed so the relay reads none of it, or, on the hub's own machine, through the
+node's `machine.report` on the local channel (MR-2). Four readers depend on it: the hub's key rotation (DL-15), the hub
+move's step 6 and step 7's gate ([ceremonies](ceremonies.md#move-the-hub)) and the window lease's
+[reporting](window-lease.md#reporting).
 
 **MR-1, the report.** `machine-report/1` is `{type, machine, at, records}`: `machine` the reporting machine's id in the
 estate record, `at` when it wrote the report, and `records` the check-in's members by the same names and shapes
 (DEC-0053, DEC-0056, DEC-0062): `estateRecord` (`revision`, optionally `digest`), `heartbeat` (`sequence`, `at`),
 `revocationDelta` (`sequence`, `sha256`) and `leases` (`[{leaseId, expiresAt, spent}]`): every lease the machine holds,
 and the newest expired lease of each slot whose window instance has not ended, each with its latest `spent` (optional
-as in the check-in; a `spent` covers the whole instance, so the newest lease of a slot speaks for its earlier ones,
-[reporting](window-lease.md#reporting)). `estateRecord` is required; each lease is named once (`FAC-SEM-152`). A
-report therefore holds the machine's whole state, and the newest report alone tells the hub everything.
+as in the check-in, except on a lease a hub key revoked by the revision the report names signed, which always carries
+it, MR-5, DEC-0146; a `spent` covers the whole instance, so the newest lease of a slot speaks for its earlier ones,
+[reporting](window-lease.md#reporting)). The newest lease of a slot is the one with the highest `sequence` among the
+slot's leases one hub key signed (WL-11 orders them so); after a hub move a machine names the newest of each hub key it
+held a lease of in that instance, the old hub's too, so the new hub reads what the old hub's leases spent (DEC-0146). A
+lease of a hub key a revision the machine applied revokes is ended there, though its `expiresAt` is later: the meter
+spends nothing more under it (WL-6), and later reports keep naming it, with its `expiresAt` unchanged, until its window
+instance ends. `estateRecord` is required; each lease is named once (`FAC-SEM-152`); `at` is a relay time
+([Times](#keys): `Z`, an upper-case `T`, at most nine fraction digits; `FAC-SEM-154`, DEC-0146). A report therefore
+holds the machine's whole state, and the newest report alone tells the hub everything. A report names at most 64
+leases (the check-in's `leases`): while leases name only the `estate` scope, a machine names at most six per hub key
+whose leases it holds (one instance of each of the three windows, a held and a newest-expired lease each), so 64
+holds ten hub keys; a hub signs no `project:` or `grant:` lease until
+the revision that admits them decides the report's cap with them, and a machine never drops a lease to fit (DEC-0146).
 
 **MR-2, to whom and when.** Every machine of the estate sends a report to each **hub machine**, a machine other than
 itself whose `hubKey` one of these revisions certifies:
@@ -553,53 +570,108 @@ It sends one:
 - and at least every 24 hours (`MACHINE_REPORT_INTERVAL_SECONDS`) while it holds a lease or applies the estate's
   records.
 
+Each send is sealed to the `#kem` the newest of those revisions lists for that hub machine: when the revision it
+applied and a newer one it refused list one hub machine with two keys, the newer one's, since the hub that drafted
+it holds that key (DEC-0146). On the hub's own machine the node that applies the estate's records serves
+`machine.report`, Fabric's own node included (DEC-0146).
+
 A report is never answered. A lost one is replaced by the next, since each report carries the whole state, never a
 change. On the hub machine itself the hub reads its own node's report over the [local channel](local-channel.md),
 never the relay: it calls the node's `machine.report` (no params), which answers `{report}`, the node's whole state as
-a `machine-report/1` written at the call (its own `at`), or `null` while the node applies no estate records. The hub
+a `machine-report/1` written at the call (its own `at`), or `null` while the node applies no estate records: no report, so the hub keeps what it holds for its machine (DEC-0146). The hub
 calls it when it connects, before each division and at least every 24 hours, and reads the answer as MR-4 reads an
-opened report (`acceptMachineReport`, DEC-0139): the schema, `FAC-SEM-152` and an `at` that `strictTime` reads
-(`malformed` otherwise), `machine` equal to its own machine id (`wrong-machine` otherwise) and `at` after the report it
+opened report (`acceptMachineReport`, DEC-0139): the schema, `FAC-SEM-152` and an `at` that is a relay time
+(`FAC-SEM-154`) and not after the moment the answer arrived (`malformed` otherwise, DEC-0146), `machine` equal to its own machine id (`wrong-machine` otherwise) and `at` after the report it
 holds (`stale` otherwise); it holds it as that machine's newest report, so the hub machine's own
 leases and revision count under MR-5 like any machine's. A node that answers `unknown-method` (pinned before
 DEC-0132) has reported nothing: its leases count at their whole amounts, and it has applied no revision the hub can
 count, so the hub waits for it as for any machine that has not reported. Any other error answer, or none before a deadline the hub
-sets itself (the local channel sets none on a method), reads the same (DEC-0139).
+sets itself (the local channel sets none on a method), reads the same (DEC-0139): no new report, so the hub keeps the
+report it holds for its own machine, if any, and reads MR-5 from it; nothing is erased (DEC-0146). The hub passes the
+moment the answer arrived, by its own clock, as `notAfter`: a report whose `at` is later is `malformed`.
 
 **MR-3, how it travels.** The report is the inner `payload` of a relay message body (`fabric-relay-message/1`), sealed
-to the hub machine's `#kem`, as the revision that certifies that hub machine lists it, as `fabric-machine-report/1` `{type, kem, enc, ct}`: HPKE base mode, suite `[16, 1, 1]`
+to the hub machine's `#kem`, as the newest revision MR-2 names lists it, as `fabric-machine-report/1` `{type, kem, enc, ct}`: HPKE base mode, suite `[16, 1, 1]`
 (the [secret envelope](#the-secret-envelope)'s), `info` the ASCII `fabric-machine-report/1`, the additional data the
 RFC 8785 bytes of `{type, from, to, msgId, kem}` (the body's own `from`, `to` and `msgId`, so a sealed report copied
 into another body does not open), the plaintext the report's RFC 8785 form, at most 65 536 bytes
 (`MAX_MACHINE_REPORT_BYTES`). `sealMachineReport` seals it and refuses `malformed`, `bad-key` and `too-large`. The
-machine `send`s it to the hub machine's `#sig` with a new `msgId`; a body whose signed `exp` is up to 7 days later
+machine `send`s each new report to the hub machine's `#sig` with a new `msgId` (a resend of the same body after
+`internal`, or after no `accepted`, keeps the first `msgId`, MR-2); a body whose signed `exp` is up to 7 days later
 reaches a hub that was asleep. A hub machine with no usable `#kem` gets no report; a hub whose own `#kem` the revision
 it applied does not list, or whose private half it cannot read or does not match the listed key, names that in its own health: the `degraded` of its
 [well-known document](service.md#well-known-document) where it serves `fabric-service/0.1`, otherwise the surface on
-which it shows the operator its state, so DL-15's switch, a move's step 6 and its division do not wait on reports in silence (DEC-0139). What a hub
-not yet on DEC-0132 does with a body whose payload it does not know is not decided here (CT-172); the machine hears
-nothing back either way, since a report is never answered.
+which it shows the operator its state, so DL-15's switch, a move's step 6 and its division do not wait on reports in silence (DEC-0139). The entry's
+`source` is `machine-report`; it is a setup state (`setup: true`, its reason "sign the revision that lists this
+machine's key") while the hub's new `#kem` waits only for a revision the hub drafted and the person has not signed, and
+a failure otherwise (a private half it cannot read, or one that does not match the listed key: "replace this
+machine's key"), which a watcher reports after 5 minutes (DEC-0146). Fabric's hub, which serves no well-known document
+today, shows it on its own machine's row in My network's machines (SCR-23, a setup note while only the person's signature is missing, its error state otherwise). A recipient acknowledges
+(`ack`) and drops a body it verified whose payload type it does not know ([Messages](#messages), DEC-0146), so a hub
+not yet on DEC-0132 that does so drops a report and its mailbox does not fill with them (no Fabric reads a relay mailbox today; its 0.4.0 reader does so, Fabric's PL-12, CO-452); the machine hears nothing back either way, since a report is never answered.
 
 **MR-4, the hub's reading.** After the body is verified (`verifyMessageBody`) and is not a replay (`checkReplay`), the
 hub places the sender with `relayCallerTier`; a sender that is not T1 is ignored, its delivery acknowledged. Then
-`openMachineReport` refuses, in this order: `malformed` (the sealed object is not the schema's), `wrong-recipient`
+`readMachineReport` reads it, with the body's `from`, `to` and `msgId`, the sender `relayCallerTier` named, the report
+held for that machine and the body's signed `iat` as `notAfter` (DEC-0146): `openMachineReport` refuses, in this order: `malformed` (the sealed object is not the schema's), `wrong-recipient`
 (another `kem`), `cannot-open` (HPKE fails, another body's `from`, `to` or `msgId` included), `malformed` (a plaintext
-that is not a report in its own RFC 8785 form, that the schema refuses, or whose `at` RFC 3339 as `strictTime` reads
-does not: a leap second, a space for `T`, DEC-0139), `wrong-machine` (the report names another machine than the one
-`relayCallerTier` named) and `stale` (its `at` is not after the report the hub holds for that machine). It then reads
+that is not a report in its own RFC 8785 form, that the schema refuses, whose `at` is no relay time (a leap second, a
+space for `T`, an offset, a lower-case `t`, ten fraction digits; DEC-0139, DEC-0146), or whose `at` is after the
+body's `iat`, read to the millisecond as a clock writing `iat` reads (truncated, never rounded: `.0009996Z` is in the millisecond `.000`), so a report cannot claim to be written later than
+it was sent, DEC-0146), `wrong-machine` (the report names another machine than the one
+`relayCallerTier` named) and `stale` (its `at` is not after the report the hub holds for that machine, compared to the nanosecond, so two
+times less than a millisecond apart still order; a held report whose `at` is no relay time (an offset, a lower-case `t`, ten or more fraction digits, accepted before
+DEC-0146) is read as the last nanosecond of its millisecond, its fraction truncated to three digits, so a report within that millisecond is not after it, DEC-0146; the reference reads ten or more digits late today, CT-197). It then reads
 the opened report as `acceptMachineReport` does, so a `FAC-SEM-152` finding (a lease named twice) drops it as
 `malformed`, as the local read does (DEC-0139); a relayed report that also names another machine, or is not after the
-one held, keeps `openMachineReport`'s answer (`wrong-machine`, `stale`), and is dropped either way. The hub keeps, per machine, the newest report it accepted. A machine writes `at` from its clock at the moment
-it seals the report, never after the body's signed `iat`, so the body's 60-second bound on `iat` bounds `at` too.
+one held, keeps `openMachineReport`'s answer (`wrong-machine`, `stale`), and is dropped either way, and every dropped report's delivery is acknowledged, so a report refused (one sealed to an
+old `#kem` during a key change among them) never fills the hub's mailbox. The hub keeps, per machine, the newest report
+it accepted. A machine writes `at` from its clock at the moment
+it seals the report, never after the body's signed `iat`, which the hub checks, so the body's 60-second bound on `iat`
+bounds `at` too.
 
 **MR-5, what the hub reads in it.** The hub reads everything from the newest report it holds per machine. A machine has applied a revision when its newest report's `estateRecord.revision` is
 that revision's or above (and, when the report carries `digest` for that same revision, the digest is that revision's).
-A lease's final `spent` is the one in a report whose own `at` is at or after the lease's `expiresAt`, never one judged by
-its delivery: a relay may deliver a report written before the expiry days later, while the meter could still spend.
+A lease's final `spent` is the one in a report whose own `at` is at or after the lease's `expiresAt`, or, for a lease of
+a hub key a revision revokes, whose `estateRecord.revision` is at or above that revision (the meter spends nothing
+under it once it applied that revision, MR-1), never one judged by its delivery: a relay may deliver a report written
+before the expiry days later, while the meter could still spend.
 The time the [window lease's reporting](window-lease.md#reporting) and `windowRemainder` take for a report is its `at`;
 a holder has reported "after the revocation" of a hub move when its newest report's `estateRecord.revision` is at or
 above the revision that revokes the old hub's key (never by time: a machine that refused that revision still reports
-to the new hub, MR-2, and still spends under the old hub's leases).
+to the new hub, MR-2, and still spends under the old hub's leases). "Every holder" of the old hub's leases is, for the
+new hub, every machine an estate record listed since the window instance began, since only the old hub knew which held
+one: a machine whose report at or above that revision names no old-hub lease held none, and a machine removed before
+such a report never sends one (DEC-0146). The gate binds the new hub from its first signature, the switch of a planned
+move (before the revoking revision), at once after a lost hub; the revoking revision is the one that adds the
+`hub-key` revocation to its parent ([Move the hub](ceremonies.md#move-the-hub) step 7). The new hub's division of such an instance then counts
+each old-hub lease at the final `spent` reported for it, as an ended lease of that amount, never at nothing (a report's lease entry names no window instance, so the new hub counts each one against every instance the old hub divided for that machine whose bounds hold its `expiresAt` (after its start, at or before its end) (day, week and month alike: never less than its own instance's spend, and in an estate with several windows more than it in the smaller ones, which may then reopen with less or nothing left until they end))
+([window lease](window-lease.md#reporting); how the reference orders leases across hub keys is CT-113's). A report entry carries no amount, so a report that
+names an old-hub lease without `spent` counts as no report for the gate (the new hub has nothing to count instead), and
+the instance stays closed until a report names it or the instance ends (DEC-0146); once the new hub has counted a
+lease's final `spent` in a division, a later report naming it without `spent` changes nothing counted. The gate is a move's to another machine, never a
+re-key's on the hub's own machine ([Move the hub](ceremonies.md#move-the-hub) step 7). It
+opens this way only after a planned move, where the old hub's machine stays and reports its own leases. After a lost hub, the lost machine is removed in the move's own revision and never reports, and its own meter may have held the old hub's leases, so every window instance the old hub divided stays closed to new leases until it ends (a day, a week or a month), whatever the other machines report (DEC-0146).
+
+**MR-6, a machine that does not report** (DEC-0146). DL-15's switch, a planned move's step 6 and the gate of step 7 wait
+for every machine the revision lists (step 7's gate for every machine an estate record listed since the window instance
+began, MR-5; it ends at the latest when the window instance ends: a day, a week or
+a month). A machine that
+is off, lost or pinned before DEC-0132 (its node answers `unknown-method`, or it sends no report) keeps them waiting,
+with no timeout of their own: signing ahead of it would leave it
+refusing the new key's tokens, and an unreported lease counts at its whole amount in the issuing hub's division, while after a move step 7's gate
+stays closed, both of which are safe. Fabric shows the wait
+(SCR-23, its waiting state, for a key switch, a planned move and the window leases paused after a move): each machine
+waited on, since when, and why when known ("its software is too old to
+report"), and the person's ways out: bring the machine back, update it, or remove it
+([Remove a machine](ceremonies.md#remove-a-machine)), after which DL-15's switch and step 6 no longer wait on it.
+Step 7's gate still does: what a machine spent under the old hub's leases is known only from its reports, so a machine
+removed since a window instance began, before it reported at or above the revoking revision (before the move, between
+its revisions or after), keeps that instance closed to new leases until it ends; the wait says so, and Fabric says so
+before the person removes a machine during a move or starts a move while such an instance runs (SCR-23). After a lost hub none of these opens it (MR-5). When the machine waited on is the
+hub's own, the way out is to update it: removing it as retired means a planned move ([Move the hub](ceremonies.md#move-the-hub)),
+whose step 6 waits on the same machine's report, and declaring it lost removes it in one revision and pauses the windows
+it divided until they end (DEC-0146); declaring it lost while a planned move is under way is CT-152's, undecided.
 
 ## The pairing rendezvous
 
@@ -642,6 +714,7 @@ Every refusal of the relay family is data a port runs, not only a test in this r
 | <a id="fac-sem-070"></a>`FAC-SEM-070` | `secret-envelope` | sealed to a `#kem` key by a `#sig` key under `alg` `ES256`, with the one admitted suite, a life of more than zero and at most 24 hours between real instants, and an encapsulated key that is a valid uncompressed P-256 point |
 | <a id="fac-sem-071"></a>`FAC-SEM-071` | `relay-frame` | `auth` names a `#sig` key, `alg` `ES256` and `fabric-relay/0.1`; `send` addresses a `#sig` key, with a `ttl` of 1 s to 7 days and a body of at most 765 KiB decoded |
 | <a id="fac-sem-152"></a>`FAC-SEM-152` | `machine-report` | a machine's report names each lease once (DEC-0132) |
+| <a id="fac-sem-154"></a>`FAC-SEM-154` | `machine-report` | a report's `at` is a relay time: `Z`, an upper-case `T`, at most nine fraction digits, a day that exists (DEC-0146) |
 
 ## Not decided here
 

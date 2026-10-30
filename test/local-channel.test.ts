@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { createValidator, validateDocument } from "../src/validator.js";
-import { admitPeer, CLIENT_CAPABILITIES, CLIENT_METHODS, channelStep, consentOutcome, ERROR_CODES, lineWithinLimit, LOCAL_CHANNEL_PROTOCOL, MAX_LINE_BYTES, MAX_SECRET_DEADLINE_MS, mayPrompt, maySecretPrompt, NODE_METHODS, secretOutcome } from "../src/local-channel.js";
+import { admitPeer, CLIENT_CAPABILITIES, CLIENT_METHODS, channelStep, consentOutcome, ERROR_CODES, lineWithinLimit, LOCAL_CHANNEL_PROTOCOL, MAX_LINE_BYTES, MAX_SECRET_DEADLINE_MS, mayPrompt, maySecretPrompt, NODE_METHODS, nodeMethodAnswer, secretOutcome } from "../src/local-channel.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { VECTOR_FILE, buildLocalChannelVectors } from "../tools/vectors/local-channel.js";
 
@@ -282,7 +282,7 @@ describe("the message definitions validate what they name", () => {
 });
 
 describe("the shared vectors (local-channel.json)", () => {
-  const vectors = JSON.parse(readFileSync(path.join(projectRoot(), VECTOR_FILE), "utf8")) as { sessions: any[]; outcomes: any[]; prompts: any[] };
+  const vectors = JSON.parse(readFileSync(path.join(projectRoot(), VECTOR_FILE), "utf8")) as { sessions: any[]; outcomes: any[]; prompts: any[]; dispatch: any[] };
   it("is what its generator writes", () => {
     expect(readFileSync(path.join(projectRoot(), VECTOR_FILE), "utf8")).toBe(buildLocalChannelVectors());
   });
@@ -301,5 +301,13 @@ describe("the shared vectors (local-channel.json)", () => {
   });
   it.each(vectors.prompts)("prompt shape: $name", (c) => {
     expect(def(c.definition, c.value)).toBe(c.valid);
+  });
+  it.each(vectors.dispatch)("dispatch: $name", (c) => {
+    expect(nodeMethodAnswer(c.method, new Set(c.served))).toEqual(c.expect);
+  });
+  it("answers unknown-method for anything that is no method name, and every code it answers is a channel error code", () => {
+    expect(nodeMethodAnswer(7, new Set(["health"]))).toEqual({ ok: false, code: "unknown-method" });
+    expect(nodeMethodAnswer(undefined, NODE_METHODS)).toEqual({ ok: false, code: "unknown-method" });
+    expect(ERROR_CODES.get("unknown-method")).toBe(-32601);
   });
 });
