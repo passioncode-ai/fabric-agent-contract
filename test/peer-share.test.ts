@@ -25,7 +25,8 @@ import {
   sealPeerReport,
   sealPeerShare,
   shareLink,
-  signPeerRecord
+  signPeerRecord,
+  PEER_REPORT_DAYS
 } from "../src/peer-share.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { VECTOR_FILE, buildPeerShareVectors } from "../tools/vectors/peer-share.js";
@@ -120,7 +121,8 @@ describe("the envelope", () => {
     // The schema refuses exactly the envelopes whose own shape is wrong; a context that does not read is the node's.
     const shapeWrong = c.name === "a member more" || c.name === "a header that carries the value" || c.name === "a time with an offset, not UTC";
     expect(valid("peer-share-envelope.schema.json", c.envelope)).toBe(!shapeWrong);
-    if (c.expect.ok === true) expect(openPeerShare(c.envelope, c.context, scalar("rKem"))).toEqual({ ok: true, secret: Buffer.from(vectors.secret, "utf8"), mark: c.expect.mark });
+    if (c.open !== undefined) expect(openPeerShare(c.envelope, c.context, scalar("rKem"))).toEqual(c.open);
+    else if (c.expect.ok === true) expect(openPeerShare(c.envelope, c.context, scalar("rKem"))).toEqual({ ok: true, secret: Buffer.from(vectors.secret, "utf8"), mark: c.expect.mark });
   });
   it("seals what it checks, and refuses an envelope no recipient would open", async () => {
     const { createPrivateKey } = await import("node:crypto");
@@ -157,6 +159,7 @@ describe("the envelope", () => {
 });
 
 describe("usage reports", () => {
+  it("restates a window of 35 days (DEC-0147)", () => expect(PEER_REPORT_DAYS).toBe(35));
   it.each(vectors.reports as Json[])("$name", (c) => {
     const opened = openPeerReport(c.report, c.context, scalar("sKem"));
     expect(opened).toEqual(c.expect);

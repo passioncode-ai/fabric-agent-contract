@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for fabric-local-channel/0.1 (DEC-0075, DEC-0143, DEC-0146), written by tools/vectors/local-channel.ts, never by hand. `sessions`: from a fresh session (hello false, accepted [fabric-local-channel/0.1], signedApp as given: the node's own operating-system check of the peer, absent when it made none), channelStep over `messages` in order answers each as `answers` says ({ok, code, hello, capabilities?}: code null when nothing is answered, hello and capabilities the session after), and then mayPrompt and maySecretPrompt answer as `after` says. `outcomes`: secretOutcome(promptedAt, deadline, answers, written), times in milliseconds by the node's receipt time; a withdrawn request passes the withdrawal's time as its deadline (SP-3). `prompts`: each `value` validates against local-channel.schema.json#/$defs/<definition> exactly when `valid` is true. `dispatch`: nodeMethodAnswer(method, served) after hello, `served` the methods the node implements, for any client of the session (DEC-0139 item 4, DEC-0146).",
+  "about": "Vectors for fabric-local-channel/0.1 (DEC-0075, DEC-0143, DEC-0146), written by tools/vectors/local-channel.ts, never by hand. `sessions`: from a fresh session (hello false, accepted [fabric-local-channel/0.1], signedApp as given: the node's own operating-system check of the peer, absent when it made none), channelStep over `messages` in order answers each as `answers` says ({ok, code, hello, capabilities?}: code null when nothing is answered, hello and capabilities the session after), and then mayPrompt and maySecretPrompt answer as `after` says. `outcomes`: secretOutcome(promptedAt, deadline, answers, written), times in milliseconds by the node's receipt time; a withdrawn request passes the withdrawal's time as its deadline (SP-3); input that does not read answers no-answer, never a throw (DEC-0147). `prompts`: each `value` validates against local-channel.schema.json#/$defs/<definition> exactly when `valid` is true. `dispatch`: nodeMethodAnswer(method, served) after hello, `served` the methods the node implements, for any client of the session (DEC-0139 item 4, DEC-0146).",
   "sessions": [
     {
       "name": "a signed app declares both: admitted for consent and secrets",
@@ -683,6 +683,63 @@
       "answers": [
         {
           "at": 1761552060000,
+          "outcome": "declined"
+        }
+      ],
+      "written": false,
+      "expect": "declined"
+    },
+    {
+      "name": "the agent twin of Decline: the node records the operator's relayed decline as an answer at its own receipt time",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600000,
+      "answers": [
+        {
+          "at": 1761552240000,
+          "outcome": "declined"
+        },
+        {
+          "at": 1761552300000,
+          "outcome": "stored"
+        }
+      ],
+      "written": true,
+      "expect": "declined"
+    },
+    {
+      "name": "answers that are no list: no answer",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600000,
+      "answers": null,
+      "written": true,
+      "expect": "no-answer"
+    },
+    {
+      "name": "a prompt time that is no number: no answer",
+      "promptedAt": "1761552000000",
+      "deadline": 1761552600000,
+      "answers": [
+        {
+          "at": 1761552060000,
+          "outcome": "stored"
+        }
+      ],
+      "written": true,
+      "expect": "no-answer"
+    },
+    {
+      "name": "an entry that is no answer is skipped",
+      "promptedAt": 1761552000000,
+      "deadline": 1761552600000,
+      "answers": [
+        null,
+        7,
+        {
+          "at": "1761552060000",
+          "outcome": "stored"
+        },
+        {
+          "at": 1761552120000,
           "outcome": "declined"
         }
       ],

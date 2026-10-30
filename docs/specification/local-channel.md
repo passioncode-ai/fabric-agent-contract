@@ -145,7 +145,12 @@ the vault slot itself.
   never recorded or logged. Typing and "Store" are the person's own acts: the product declares them with `gate: human`
   and `humanStep: secret` (DEC-0121 AP-4), so an agent's tool for them answers `human-step-required`, with the link to
   the node's page that shows the pending request and names the app window that holds it, and never stores a value.
-  "Decline" is `gate: relayed`: it stores nothing.
+  "Decline" is `gate: relayed`: it stores nothing. Its agent twin is a tool on the node's own surface (SP-7) that names
+  the pending request and carries the operator's decision in `_meta.decision` (AP-2): the node records it as a
+  `declined` answer at its own receipt time, so `secretOutcome` reads it like the window's, sends `secret.cancel` so
+  the window closes, and answers the asking agent `declined`; without a decision it refuses `operator-decision-required`
+  and declines nothing. An agent that asked and changed its mind withdraws its own request with `secret.cancel` (SP-3),
+  which it learns as `no-answer`, never as the person's decline (DEC-0147).
   The value never reaches the agent through the prompt; any command the agent later runs with it can still print it.
   The person's acts in the window are theirs only while no program holds the Accessibility permission over the app,
   which can press its buttons (SP-6).

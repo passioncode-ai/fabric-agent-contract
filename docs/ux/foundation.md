@@ -730,7 +730,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given I tell my developer agent "run the research on competitors' prices", when it engages the research agent, then the research agent runs the paid research within my project's money limits without asking me and records my words, the task and the chain (`mandateCovers`, DEC-0125).
   - Given the research would cost more than an amount I named, or reach a capability, an effect or a project my words do not name, when the research agent is called, then it refuses with the part not covered and only that part is put to me.
   - Given I approve a change in one agent's chat and another of my agents holds the key, when the first relays my words verbatim with when and where I said them and the scope, from one of my own projects or sessions, then the second acts without asking me again and records my words and where I said them (DEC-0126 OA-1 to OA-7).
-  - Given a sign-in, a consent, a payment, a typed secret, spend above a limit, a passkey signature or a comparison of codes with another person or the choice to share without one, then my mandate never covers it and the step comes to me.
+  - Given a sign-in, a consent, a payment, a secret typed in or handed out, spend above a limit, a passkey signature or a comparison of codes with another person or the choice to share without one, then my mandate never covers it and the step comes to me.
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

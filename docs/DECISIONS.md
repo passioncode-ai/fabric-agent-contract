@@ -7233,6 +7233,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   people, the person's act like the others.
 - **Annotated (2026-10-27):** DEC-0140 makes one exception to AP-1: the operator's move of a board slot is offered in
   the host's controls only until a host ships its agent twin (CT-181, the twin's contract half, then CT-125).
+- **Annotated (2026-10-28):** DEC-0147 reads AP-4's `secret` as a secret typed in or handed out (a peer share's
+  export), item 4's "typed secrets" included, and names the peer share's export among the steps held in the product's
+  app window; it defines the agent twins of the secret prompt's "Decline" and of a peer share's "Open a share".
 - **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
   does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
   DL-26 already says that inside the machine boundary the operator's instruction is the authority and that a callee
@@ -8929,3 +8932,60 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/README.md`; DEC-0062, DEC-0107, DEC-0132 and DEC-0139 annotated; backlog CT-172
   (closes on merge), CT-19 (the issuer's `leaseId` and `estate`-only issuance), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty and its re-verification), CT-195, CT-196, CT-197 and CT-199 filed; `docs/ux/scenarios.md` (SCN-030); `ceremonies.md` (Remove a machine; Replace a machine's key, step 3; Move the hub, steps 3 and 4; Change a machine's profile, the kept change), `conformance.md`'s profile-drafter row and the `src/hub-move.ts` module row, `devices.md` (Not decided: the fork digest's way to the hub), `docs/ux/scenarios.md` (SCN-037), `contexts.md` (what stays linkable), `delegation.md` (DL-15's way out for the hub's own machine), `src/hub-move.ts` (the `moved` comment), `src/window-lease.ts` (the `periodOf` comment), `docs/ux/foundation.md` (ST-025, ST-032), `docs/ux/scenarios.md` (SCN-048); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
 - **Source:** CT-172; DEC-0132's and DEC-0139's readings.
+
+### DEC-0147: a peer share's risks from its readings settled (reports that restate a window, the agent twins, inputs that do not read)
+
+- **Date:** 2026-10-28
+- **Status:** Accepted (on merge of its pull request). A narrowing of a usage report's body (an export without a day and
+  slot entry in the same report is `bad-body`) and new duties for the recipient's node (each report restates a window)
+  and the sender's (reports read in ascending sequence, replaced per day and slot); none deployed yet: DEC-0142's
+  adopters (Project Observatory's nodes and apps, CT-186) have not shipped the share buttons. Additive: a constant
+  (`PEER_REPORT_DAYS`), inputs that did not read now answered instead of thrown (`secretOutcome`, `consentOutcome`,
+  `mayPrompt`, `maySecretPrompt`), the agent twins of two buttons, and vectors (`peer-share.json`: an envelope that
+  does not open, a report `enc` off the curve, three bodies; `local-channel.json`: four `outcomes`); no earlier vector's
+  answer changes.
+- **Context:** CT-178's last clean readings (rounds 12 and 13) left risks, none blocking DEC-0142 or DEC-0143 (CT-189).
+- **Decision:** [peer share](specification/peer-share.md) PS-4 and PS-8, [local channel](specification/local-channel.md)
+  SP-4, [service](specification/service.md#actions) AP-4, [delegation](specification/delegation.md) DL-26, MD-6, OA-5.
+  1. **A report restates a window.** Nothing tells the recipient which report the sender read, so a report restates the
+     UTC days from `PEER_REPORT_DAYS` (35) days before its own `iat` day, or from the claim's day when later: an entry
+     per day and slot with a use or an export (zero uses for a day with only an export), every export of those days
+     beside its day and slot entry (`peerReportBody` refuses one without, `bad-body`), and the consumer labels seen on
+     those days. The sender reads the reports it fetched in ascending `sequence` and replaces each day and slot's uses,
+     last use and exports with the report's, and adds labels as a set: a report read twice, or a later one over the
+     same day, counts nothing twice, and a lost or refused report is restated by the next while its days stay in the
+     window. A split report keeps a day and slot's entry and its exports in one part.
+  2. **What a secret covers.** AP-4's `secret` is a secret typed in or handed out (a peer share's export); DL-26, MD-6,
+     OA-5, AP-4's first sentence and ST-037 say so, and AP-4's steps held in the product's app window name the export.
+     The recipient's "Export" is on SCR-33, FLW-33 and SCN-052.
+  3. **The agent twin of the secret prompt's "Decline"** is a tool on the node's own surface that names the pending
+     request and carries the operator's decision (AP-2): the node records a `declined` answer at its receipt time,
+     closes the window with `secret.cancel` and answers the asking agent `declined`; without a decision,
+     `operator-decision-required`. An agent withdrawing its own request learns `no-answer`, never the person's decline.
+  4. **The agent twin of "Open a share"** takes the link whole and claims at once. It pins the sender's share `#sig`
+     from `k` only when the link appears unchanged in the operator's decision the call carries; a link from anywhere
+     else carries no pin and the share rests on the comparison code (PS-6). The code then in the agent's transcript is
+     spent by the claim; the tool's answer, the node's journal and its logs name the share id only.
+  5. **Inputs that do not read.** `secretOutcome` answers `no-answer`, `consentOutcome` `denied`, `mayPrompt` and
+     `maySecretPrompt` `false`, and an entry that is no answer is skipped; none throws.
+  6. **Vectors.** An envelope sealed to another key under the recipient's thumbprint passes the checks and does not
+     open (`cannot-open`); a report whose `enc` is off the curve is `bad-key`.
+- **Why:** a count that depends on which report arrived cannot be trusted by the person reading it; restating a window
+  needs no new message and no acknowledgement from the sender, which the recipient could not verify anyway; a pin
+  taken from a link an agent found would pin whatever that page said; a reader that throws on a stray value takes the
+  node down where every other reader answers.
+- **Alternatives considered:** a signed read receipt from the sender (a new record, a mailbox duty, and still a window
+  for the reports between); exports keyed by their time without a window (no bound on what a report carries); pinning
+  from any link an agent passes (the agent may have read it from the mailbox's own page or a forged mail); "Decline"
+  as the asking agent's own withdrawal (it would let an agent record the person's refusal of what it asked).
+- **Compatibility:** a narrowing for a report body with an export on a day it holds no entry for (no deployed sender
+  writes one; DEC-0142 is not adopted yet, CT-186). Additive for ports otherwise. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `src/peer-share.ts` (`PEER_REPORT_DAYS`, `peerReportBody`), `src/local-channel.ts`
+  (`secretOutcome`, `consentOutcome`, `mayPrompt`, `maySecretPrompt`), `tools/vectors/peer-share.ts` and
+  `fixtures/vectors/peer-share.json`, `tools/vectors/local-channel.ts` and `fixtures/vectors/local-channel.json`,
+  `test/peer-share.test.ts`, `test/local-channel.test.ts`, `schemas/peer-share-report.schema.json` (descriptions);
+  `peer-share.md` (PS-4, PS-6, PS-8, the reference table), `local-channel.md` (SP-4), `service.md` (AP-4),
+  `delegation.md` (DL-26, MD-6, OA-5), `conformance.md` (the sender's, recipient's and secret node's rows),
+  `docs/ux/foundation.md` (ST-037), `screens.md` (SCR-33), `flows.md` (FLW-33), `scenarios.md` (SCN-052); DEC-0121
+  annotated; backlog CT-189 (closes on merge).
+- **Source:** CT-189; CT-178's readings 12 and 13.

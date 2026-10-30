@@ -133,14 +133,14 @@ export function nodeMethodAnswer(method: unknown, served: ReadonlySet<string>): 
   return typeof method === "string" && method !== "channel.hello" && served.has(method) ? { ok: true } : { ok: false, code: "unknown-method" };
 }
 
-/** Whether the node may send `consent.prompt` on this session: only to a client that declared `consent.ui` in its hello. */
+/** Whether the node may send `consent.prompt` on this session: only to a client that declared `consent.ui` in its hello; a state that does not read answers false (DEC-0147). */
 export function mayPrompt(state: ChannelState): boolean {
-  return state.hello && (state.capabilities ?? []).includes("consent.ui");
+  return isObject(state) && state.hello === true && Array.isArray(state.capabilities) && state.capabilities.includes("consent.ui");
 }
 
-/** Whether the node may send `secret.prompt` on this session: a client that declared `secret.ui` and passed the signed-app check. */
+/** Whether the node may send `secret.prompt` on this session: a client that declared `secret.ui` and passed the signed-app check; a state that does not read answers false (DEC-0147). */
 export function maySecretPrompt(state: ChannelState): boolean {
-  return state.hello && state.signedApp === true && (state.capabilities ?? []).includes("secret.ui");
+  return isObject(state) && state.hello === true && state.signedApp === true && Array.isArray(state.capabilities) && state.capabilities.includes("secret.ui");
 }
 
 /**
@@ -155,10 +155,12 @@ export type SecretOutcome = "stored" | "declined" | "no-answer" | "unconfirmed";
  * the client's own `at`); no answer by then, or a deadline not after the prompt or more than 10 minutes after it, is
  * `no-answer`; a late answer is ignored. A `stored` answer counts only when the node confirmed the slot was written after
  * the prompt (`written`, its own vault record): otherwise it is `unconfirmed`. No outcome carries a value. Times in ms.
+ * Input that does not read is `no-answer` and an entry that is no answer is skipped, never a throw (DEC-0147).
  */
 export function secretOutcome(promptedAt: number, deadline: number, answers: ReadonlyArray<{ at: number; outcome: string }>, written: boolean): SecretOutcome {
+  if (typeof promptedAt !== "number" || typeof deadline !== "number" || !Array.isArray(answers)) return "no-answer";
   if (!Number.isFinite(promptedAt) || !Number.isFinite(deadline) || deadline <= promptedAt || deadline - promptedAt > MAX_SECRET_DEADLINE_MS) return "no-answer";
-  const first = answers.filter((answer) => Number.isFinite(answer.at) && answer.at >= promptedAt && answer.at <= deadline && (answer.outcome === "stored" || answer.outcome === "declined")).sort((a, b) => a.at - b.at)[0];
+  const first = answers.filter((answer) => isObject(answer) && typeof answer.at === "number" && Number.isFinite(answer.at) && answer.at >= promptedAt && answer.at <= deadline && (answer.outcome === "stored" || answer.outcome === "declined")).sort((a, b) => a.at - b.at)[0];
   if (first === undefined) return "no-answer";
   if (first.outcome === "declined") return "declined";
   return written === true ? "stored" : "unconfirmed";
@@ -168,11 +170,12 @@ export function secretOutcome(promptedAt: number, deadline: number, answers: Rea
  * A consent prompt's outcome (DEC-0075): the first `given` or `denied` the node received between the prompt and the
  * deadline wins; no answer by then, a deadline not after the prompt or more than 10 minutes after it is `denied`; a late
  * answer is ignored. `at` here is the node's receipt time, never the client's own `consentResult.at`, so a client cannot
- * backdate an answer. Times in ms.
+ * backdate an answer. Times in ms. Input that does not read is `denied`, never a throw (DEC-0147).
  */
 export function consentOutcome(promptedAt: number, deadline: number, answers: ReadonlyArray<{ at: number; state: string }>): "given" | "denied" {
+  if (typeof promptedAt !== "number" || typeof deadline !== "number" || !Array.isArray(answers)) return "denied";
   if (!Number.isFinite(promptedAt) || !Number.isFinite(deadline) || deadline <= promptedAt || deadline - promptedAt > MAX_CONSENT_DEADLINE_MS) return "denied";
-  const first = answers.filter((answer) => Number.isFinite(answer.at) && answer.at >= promptedAt && answer.at <= deadline && (answer.state === "given" || answer.state === "denied")).sort((a, b) => a.at - b.at)[0];
+  const first = answers.filter((answer) => isObject(answer) && typeof answer.at === "number" && Number.isFinite(answer.at) && answer.at >= promptedAt && answer.at <= deadline && (answer.state === "given" || answer.state === "denied")).sort((a, b) => a.at - b.at)[0];
   return first?.state === "given" ? "given" : "denied";
 }
 

@@ -1035,7 +1035,7 @@ Every button a person has, the person's agent has (except the operator's move of
   stated outcome is that action ("release it" names publishing the release) (DEC-0121). A subagent relays only what
   its parent passed it as the operator's, with the parent's `instruction`, `target` and `at` unchanged (DEC-0121). An
   agent that is not sure the operator decided asks them (DEC-0121).
-- **AP-4, human gates stay.** Sign-ins, consents, payments and top-ups, typed secrets and spend above a limit stay the
+- **AP-4, human gates stay.** Sign-ins, consents, payments and top-ups, a secret typed in or handed out, and spend above a limit stay the
   person's ([delegation](delegation.md#trust-tiers) DL-26), and so does a signature by the person's passkey (the
   estate's [ceremonies](ceremonies.md)), and so does a comparison of codes between two people or the choice to share without one (DEC-0142's peer share). Their
   action is still on the agent surface with `gate: human` and its `humanStep` (`sign-in`, `consent`, `payment`, `secret`,
@@ -1043,7 +1043,7 @@ Every button a person has, the person's agent has (except the operator's move of
   out, as a peer share's export does); the tool refuses
   `human-step-required` with `data.humanStep` and `data.url`, the direct link to that step (an https URL or a path on
   the service's origin; a URL-mode elicitation where the client supports it; for a step held in the product's own app
-  window, the comparison and a typed secret, the service's page that names that window), so the agent hands the person the exact
+  window, the comparison, a typed secret and a peer share's export, the service's page that names that window), so the agent hands the person the exact
   button (DEC-0121). An https URL is another party's page; a step on the service's own page is a path, which the agent
   hands over as the service's open_link ([PL-4](#page-links), DEC-0123).
 - **AP-5, approval separation.** A relayed decision is the operator's, not the agent's: an agent still MUST NOT approve

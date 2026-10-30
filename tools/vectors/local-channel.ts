@@ -62,9 +62,16 @@ function outcomes(): Json[] {
     ["a deadline more than 10 minutes after the prompt", T + 10 * MIN + 1, [{ at: T + MIN, outcome: "stored" }], true, "no-answer"],
     ["a deadline at or before the prompt", T, [{ at: T, outcome: "stored" }], true, "no-answer"],
     ["withdrawn before an answer: the cancel time is the deadline", T + 2 * MIN, [{ at: T + 3 * MIN, outcome: "stored" }], true, "no-answer"],
-    ["withdrawn after an answer: the answer stands", T + 2 * MIN, [{ at: T + MIN, outcome: "declined" }], false, "declined"]
+    ["withdrawn after an answer: the answer stands", T + 2 * MIN, [{ at: T + MIN, outcome: "declined" }], false, "declined"],
+    ["the agent twin of Decline: the node records the operator's relayed decline as an answer at its own receipt time", T + 10 * MIN, [{ at: T + 4 * MIN, outcome: "declined" }, { at: T + 5 * MIN, outcome: "stored" }], true, "declined"]
   ];
-  return list.map(([name, deadline, answers, written, expect]) => ({ name, promptedAt: T, deadline, answers, written, expect }));
+  // Input that does not read (DEC-0147): never a throw, always no-answer; an entry that is no answer is skipped.
+  const unread: Json[] = [
+    { name: "answers that are no list: no answer", promptedAt: T, deadline: T + 10 * MIN, answers: null, written: true, expect: "no-answer" },
+    { name: "a prompt time that is no number: no answer", promptedAt: String(T), deadline: T + 10 * MIN, answers: [{ at: T + MIN, outcome: "stored" }], written: true, expect: "no-answer" },
+    { name: "an entry that is no answer is skipped", promptedAt: T, deadline: T + 10 * MIN, answers: [null, 7, { at: String(T + MIN), outcome: "stored" }, { at: T + 2 * MIN, outcome: "declined" }], written: false, expect: "declined" }
+  ];
+  return [...list.map(([name, deadline, answers, written, expect]) => ({ name, promptedAt: T, deadline, answers, written, expect })), ...unread];
 }
 
 /** The shapes a node and a signed app exchange: each `secret.prompt` params and result against its definition, valid or not. */
@@ -108,7 +115,7 @@ function dispatch(): Json[] {
 
 export function localChannelVectors(): Json {
   return {
-    about: "Vectors for fabric-local-channel/0.1 (DEC-0075, DEC-0143, DEC-0146), written by tools/vectors/local-channel.ts, never by hand. `sessions`: from a fresh session (hello false, accepted [fabric-local-channel/0.1], signedApp as given: the node's own operating-system check of the peer, absent when it made none), channelStep over `messages` in order answers each as `answers` says ({ok, code, hello, capabilities?}: code null when nothing is answered, hello and capabilities the session after), and then mayPrompt and maySecretPrompt answer as `after` says. `outcomes`: secretOutcome(promptedAt, deadline, answers, written), times in milliseconds by the node's receipt time; a withdrawn request passes the withdrawal's time as its deadline (SP-3). `prompts`: each `value` validates against local-channel.schema.json#/$defs/<definition> exactly when `valid` is true. `dispatch`: nodeMethodAnswer(method, served) after hello, `served` the methods the node implements, for any client of the session (DEC-0139 item 4, DEC-0146).",
+    about: "Vectors for fabric-local-channel/0.1 (DEC-0075, DEC-0143, DEC-0146), written by tools/vectors/local-channel.ts, never by hand. `sessions`: from a fresh session (hello false, accepted [fabric-local-channel/0.1], signedApp as given: the node's own operating-system check of the peer, absent when it made none), channelStep over `messages` in order answers each as `answers` says ({ok, code, hello, capabilities?}: code null when nothing is answered, hello and capabilities the session after), and then mayPrompt and maySecretPrompt answer as `after` says. `outcomes`: secretOutcome(promptedAt, deadline, answers, written), times in milliseconds by the node's receipt time; a withdrawn request passes the withdrawal's time as its deadline (SP-3); input that does not read answers no-answer, never a throw (DEC-0147). `prompts`: each `value` validates against local-channel.schema.json#/$defs/<definition> exactly when `valid` is true. `dispatch`: nodeMethodAnswer(method, served) after hello, `served` the methods the node implements, for any client of the session (DEC-0139 item 4, DEC-0146).",
     sessions: sessions(),
     outcomes: outcomes(),
     prompts: prompts(),
