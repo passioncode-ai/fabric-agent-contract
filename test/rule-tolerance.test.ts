@@ -33,7 +33,9 @@ const KINDS = [
   // A server's draft of a key set or a member list, whose digest is its draft's (FAC-SEM-151, DEC-0131).
   "org-key-set-draft", "org-authority-draft",
   // A machine's report to its hub, each lease once (FAC-SEM-152, DEC-0132).
-  "machine-report"
+  "machine-report",
+  // An adaptation plan, each ref and request id once and every itemRef an item's (FAC-SEM-153, DEC-0138).
+  "org-adaptation"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */

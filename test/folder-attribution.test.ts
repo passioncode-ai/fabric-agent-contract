@@ -264,14 +264,20 @@ describe("totality: every function answers and never throws", () => {
   // still fails (CT-72: the old 300 ms let a quadratic copy in the per-source map pass).
   // `build(n)` makes the input outside the timer and returns the call that is timed.
   const linear = (build: (n: number) => () => void, n: number, factor = 4) => {
-    const best = (size: number) => Math.min(...[0, 1, 2, 3, 4].map(() => {
-      const run = build(size);
-      // CPU time, not wall time: preemption on a loaded machine inflates the longer run's wall time, not its CPU time.
-      const cpuMs = () => { const { user, system } = process.cpuUsage(); return (user + system) / 1000; };
+    // CPU time, not wall time: preemption on a loaded machine inflates the longer run's wall time, not its CPU time.
+    const cpuMs = () => { const { user, system } = process.cpuUsage(); return (user + system) / 1000; };
+    // The CPU clock ticks coarsely on Windows (about 15.6 ms): a sample repeats the call `reps` times, chosen so the
+    // least of three small samples takes at least 25 ms, two ticks (one sample can straddle a tick), and the large run repeats it
+    // as often, so the ratio still measures growth.
+    let reps = 1;
+    const sample = (run: () => void) => {
       const started = cpuMs();
-      run();
+      for (let r = 0; r < reps; r += 1) run();
       return cpuMs() - started;
-    }));
+    };
+    const calibrate = build(n);
+    while (reps < 4096 && Math.min(sample(calibrate), sample(calibrate), sample(calibrate)) < 25) reps *= 2;
+    const best = (size: number) => Math.min(...[0, 1, 2, 3, 4].map(() => sample(build(size))));
     const limit = (small: number) => 2 * factor * small + Math.max(factor * small, 25);
     // Up to three tries: a loaded machine (load average 440 on 2026-10-21) slows one try, while quadratic growth fails
     // every try.
@@ -282,7 +288,7 @@ describe("totality: every function answers and never throws", () => {
       large = best(factor * n);
       if (large < limit(small)) break;
     }
-    expect(large, `${n}: ${small.toFixed(1)} ms, ${factor * n}: ${large.toFixed(1)} ms`).toBeLessThan(limit(small));
+    expect(large, `${n}: ${small.toFixed(1)} ms, ${factor * n}: ${large.toFixed(1)} ms, ${reps} calls a sample`).toBeLessThan(limit(small));
   };
   it("trims slashes in linear time: sources and origins of 4096 characters, up to 10000 and 2000", () => {
     const slashes = `a${"/".repeat(4094)}b`;
@@ -290,11 +296,16 @@ describe("totality: every function answers and never throws", () => {
       const snapshot = { folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:s", folders: [], sources: Array(n).fill(slashes) }] };
       return () => attributeFolder(snapshot);
     }, 2500);
+    // CT-123: the origins half reaches the origin code only with a checkout (a folder's origin is normalized when the
+    // repository rule reads it) and with an origin within the 4096-character limit, so the snapshot is not refused first.
+    const origin = `https://github.com/${slashes.slice(0, 4096 - "https://github.com/".length)}`;
+    const git = { toplevel: "/u/ana/work/x", commonDir: "/u/ana/work/x/.git", mainCheckout: "/u/ana/work/x", origin: "https://github.com/acme/app" };
     linear((n) => {
-      const snapshot = { folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects: [{ id: "p:o", folders: Array(n).fill({ path: "/u/ana/work/o", origin: `https://github.com/${slashes}` }), sources: [] }] };
-      return () => attributeFolder(snapshot);
+      const folders = Array.from({ length: n }, () => ({ path: "/u/ana/work/o", commonDir: "/u/ana/work/o/.git", origin }));
+      const snapshot = { folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git, projects: [{ id: "p:o", folders, sources: [] }] };
+      return () => expect(attributeFolder(snapshot)).toEqual({ outcome: "new", root: "/u/ana/work/x" });
     }, 500);
-  }, 30_000);
+  }, 60_000);
   it("copies sources in linear time: 20 Projects of up to 10000 short sources each (CT-72)", () => {
     // Short sources keep trimming cheap, so a copy of the per-source list that grows with its length (a spread in a
     // reduce) is most of the cost; sixteen times the input then costs about 160 times as much, against 48 allowed.
@@ -304,7 +315,7 @@ describe("totality: every function answers and never throws", () => {
       const snapshot = { folder: "/u/ana/work/x", home: "/u/ana", tempRoots: [], git: null, projects };
       return () => expect(attributeFolder(snapshot)).toEqual({ outcome: "new", root: "/u/ana/work/x" });
     }, 625, 16);
-  }, 30_000);
+  }, 60_000);
   it("reads tombstones in linear time: up to 10000 tombstones and 10000 Project folders", () => {
     const at = (n: number) => {
       const folders = [...Array(n - 1).fill({ path: "/u/ana/work/old/other", commonDir: null }), { path: "/u/ana/work/old/keep", commonDir: null }];
@@ -312,7 +323,7 @@ describe("totality: every function answers and never throws", () => {
       return () => expect(attributeFolder(snapshot)).toEqual({ outcome: "attached", project: "p:k", rule: "folder" });
     };
     linear(at, 2500);
-  }, 30_000);
+  }, 60_000);
   it("reads work records in linear time: up to 10000 Projects and 10000 records with ids of 256 astral characters", () => {
     const id = (n: number) => `${"\u{1F600}".repeat(250)}${String(n).padStart(6, "0")}`;
     const git = { toplevel: "/u/ana/work/lib", commonDir: "/u/ana/work/lib/.git", mainCheckout: "/u/ana/work/lib", origin: null };
@@ -323,7 +334,7 @@ describe("totality: every function answers and never throws", () => {
       return () => expect(attributeFolder(snapshot)).toEqual({ outcome: "new", root: "/u/ana/work/lib" });
     };
     linear(at, 2500);
-  }, 30_000);
+  }, 60_000);
   it("never throws when any one node of any vector's snapshot is replaced by a hostile value", () => {
     const hostile: unknown[] = [null, undefined, 7, "", [], {}, "/"];
     const paths = (value: unknown, at: Array<string | number> = []): Array<Array<string | number>> => {

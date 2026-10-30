@@ -1,8 +1,8 @@
 # Delegation `fabric-delegation/0.1`
 
-DEC-0039, DEC-0041, DEC-0043, DEC-0045, DEC-0055, DEC-0060, DEC-0066, DEC-0082, DEC-0090 ([the partner
-channel](partner-channel.md)), DEC-0106, DEC-0107, DEC-0111, DEC-0121, DEC-0125, DEC-0126, DEC-0128, DEC-0130,
-DEC-0132, DEC-0136, DEC-0137 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
+DEC-0039, DEC-0041, DEC-0043, DEC-0045, DEC-0055, DEC-0060, DEC-0066, DEC-0082, DEC-0084, DEC-0090 ([the partner
+channel](partner-channel.md)), DEC-0099, DEC-0104, DEC-0106, DEC-0107, DEC-0111, DEC-0121, DEC-0125, DEC-0126, DEC-0128, DEC-0130,
+DEC-0132, DEC-0136, DEC-0137, DEC-0141 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
 · schemas [`delegation-token`](../../schemas/delegation-token.schema.json),
 [`delegation-jwks`](../../schemas/delegation-jwks.schema.json), [`approval`](../../schemas/approval.schema.json),
 [`delegation-refusal`](../../schemas/delegation-refusal.schema.json),
@@ -352,7 +352,7 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `unknown-state` | the refusing side cannot establish the state; an unknown state is a denial | any | 503 |
 | `operator-decision-required` | a `relayed` action from a T0 or T1 caller without the operator's decision, or a call the caller's mandate does not cover (`error.data.detail` `outside-mandate: <part>`, with `estimateUsd` and `perCallMaxUsd` for spend); ask the operator and call again with their answer in `_meta.decision`, or with a mandate that covers the call ([service](service.md#actions) AP-2, DEC-0121; [MD-4](#the-operators-mandate), DEC-0125) | callee | 403 |
 | `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121), or its mandate is not (`error.data.detail`: `mandate-malformed`, `mandate-widened`, `mandate-expired`, `mandate-early`, `mandate-not-for-this-call`; MD-3, DEC-0125) | callee | 403 |
-| `human-step-required` | the action is the person's (a sign-in, a consent, a payment, a secret, spend above a limit, a passkey signature); `error.data.humanStep` names it and `error.data.url` links to it (AP-4, DEC-0121) | callee | 403 |
+| `human-step-required` | the action is the person's (a sign-in, a consent, a payment, a secret, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one); `error.data.humanStep` names it and `error.data.url` links to it (AP-4, DEC-0121) | callee | 403 |
 
 A product maps its own authorisation codes onto these and keeps its words in `error.data`. Fabric's hub maps
 `hub-unavailable` → `issuer-unavailable`, `binding-revoked` → `grant-revoked`, and `access-required` and `needs-grant` → `no-grant`
@@ -467,7 +467,7 @@ Proof starts at the machine boundary (DEC-0045; Fabric ADR-0144
 |---|---|---|
 | **T0** | the operator's own machine: a caller on loopback, running under the owner's OS account | the local placement's floor ([service](service.md#authentication-and-network)), which this profile does not change |
 | **T1** | an enrolled machine of the same owner | its enrolment in the owner's estate (the estate record, DEC-0084); over the relay, `relayCallerTier` from the estate record the callee's node applied ([machine calls](machine-calls.md#the-t1-binding-over-the-relay), DEC-0106) |
-| **T2** | everything else: another person's machine (a share grant, `principalKind: external`), and any caller the callee cannot place in T0 or T1 (over the estate's relay an unplaced sender is refused instead, DL-28) | the default: no placement |
+| **T2** | everything else: another person's machine (a share grant, `principalKind: external`), and any caller the callee cannot place in T0 or T1 (over the estate's relay a sender that is not T1 is T2 and its call is refused, and a sender `relayCallerTier` reads `unknown-state` is a denial rather than T2, DL-28, [machine calls](machine-calls.md#the-t1-binding-over-the-relay), DEC-0106) | the default: no placement |
 
 A caller's tier is its origin's, not its connection's. A call relayed onto loopback from off the machine — through
 a tunnel, a reverse proxy, or the hub forwarding (DL-10) a T2 caller's call — is T2 unless the relay proves the
@@ -481,7 +481,7 @@ attribution and narrowing. A T2 caller takes the whole profile: a token per call
 each effect that needs one (DL-17), a grant with limits, an expiry and a payer. At every tier the money limits
 bind — L0, the project's L1 and each provider key's own ceiling ([spend policy](spend-policy.md#levels)) — and so
 do the human gates: sign-ins, consents, payments and top-ups, secrets typed into hidden prompts, signatures by the
-person's passkey. A credential
+person's passkey, a comparison of codes between two people or the choice to share without one (DEC-0142). A credential
 source is never another agent's key or vault slot at any tier ([spend policy](spend-policy.md#grants) rule 1). A service takes a
 `relayed` action, one a person can take on its page, from a T0 or T1 caller that carries the operator's decision in
 `_meta.decision` (or an accepted `approval/1`) as the operator's own, and refuses it without one
@@ -508,7 +508,7 @@ DEC-0045; so a callee treats every T0 process as the family, though the family t
 and sessions), and `personal` and `org:<orgId>` stay the only contexts. What DL-26 opens to a T0 or T1 caller is what is
 open to the family: everything open to the operator, in the context the call runs in (a call without a token runs in
 the context of the callee instance it reaches, [contexts](contexts.md#one-instance-per-context-on-a-machine),
-DEC-0082), with no token, approval or grant record; one approval of the operator
+DEC-0082, DEC-0137), with no token, approval or grant record; one approval of the operator
 travels along the family's chain as a mandate (DEC-0125). What still binds the family: the money limits, the human
 gates, the credential source (never another agent's key or vault slot, DL-26), the contexts, the machine profiles on
 calls between the estate's machines over the relay (a `view` machine neither takes nor makes a call with an effect,
@@ -543,9 +543,10 @@ caller's claim.
 
 ## The operator's mandate
 
-DEC-0125 · rule code `FAC-SEM-144` · schema [`mandate.schema.json`](../../schemas/mandate.schema.json) · reference
+DEC-0125, DEC-0141 (MJ-1) · rule code `FAC-SEM-144` · schema [`mandate.schema.json`](../../schemas/mandate.schema.json) · reference
 [`src/mandate.ts`](../../src/mandate.ts) (`mandateCovers`, `handOn`) · vectors
-[`mandate.json`](../../fixtures/vectors/mandate.json)
+[`mandate.json`](../../fixtures/vectors/mandate.json); MJ-1: [`src/actions.ts`](../../src/actions.ts) (`mandateCapability`),
+[`actions.json`](../../fixtures/vectors/actions.json) (`jobSteps`)
 
 The operator gives a task to one agent and leaves; its work reaches other agents of the operator: a developer agent told
 "run the research" calls a research agent that charges for paid work. DEC-0121 lets an agent relay the operator's
@@ -559,7 +560,7 @@ it reaches acts on them without asking, within what they cover.
   the operator's words, and `chain` with itself first. The scope lists `capabilities`, relayed `actions` and
   `projects` (a `projects` list left out means any project; a `capabilities` list left out means any capability for a
   read or a draft but names none for an external effect; an `actions` list left out covers a relayed action only through
-  a listed capability that is its tool, MD-3), an effect ceiling `effects`, and `perCallMaxUsd` only where the words name an
+  a listed capability that is its tool, for a job's step the job's capability, MJ-1, MD-3), an effect ceiling `effects`, and `perCallMaxUsd` only where the words name an
   amount. It never states a scope wider than the words; where they are unclear, it asks the operator (AP-3). An agent
   names itself in the chain by its registry id, or, a coding session with none, by its runner kind (`claude-code`,
   `codex`), without DEC-0121's `agent:` prefix. A task still open when the mandate expires asks the operator once, in one
@@ -572,7 +573,7 @@ it reaches acts on them without asking, within what they cover.
   document that breaks this.
 - **MD-2a, a naming list is never added** (DEC-0136). A `capabilities` list left out is "any" for a read or a draft
   but names no call for an external effect, and an `actions` list left out covers a relayed action only through a
-  listed capability (MD-3, **Covered**). So a hand-over never
+  listed capability (its tool, for a job's step the job's capability; MD-3, **Covered**, MJ-1). So a hand-over never
   adds a `capabilities` or `actions` list the scope in force leaves out, except `actions` where the scope in force lists
   `capabilities` (it then narrows the relayed actions those name); it may add a `projects` list. Added anywhere else,
   the list could cover calls the operator's words did not, and the mandate is `mandate-widened`. The line is drawn at
@@ -585,12 +586,22 @@ it reaches acts on them without asking, within what they cover.
   chain's end alone binds the mandate to the call. Then it takes a call the mandate covers as the
   operator's decision: a `relayed` action without a decision ([service](service.md#actions) AP-2), and any approval the
   product itself asks of the operator before a step, such as a paid run. For a job, the step reads the mandate its
-  start call carried: a covered step raises no input request ([interop C3.3](interop.md#c33-awaiting-a-choice)). The
+  start call carried: a covered step raises no input request ([interop C3.3](interop.md#c33-awaiting-a-choice)).
+  **MJ-1 (DEC-0141).** A step is read as its start was: under the job's own capability, the tool its start call named,
+  never under `fabric.job.get`, its action the step's request key and its effect the class the service knows for
+  what the step does (its own knowledge, as AP-2's effect); a step whose `mandateCapability` the service cannot give
+  waits `input_required` as MD-4 says, and a mandate covers a job's steps by the job's capability, since a step's
+  request key is the service's own and no leading agent can name it in advance (an `actions`-only mandate covers a
+  request key on every job of the service, and a mandate that lists `actions` covers only the steps whose keys it
+  names, so a leading agent covering a job's steps lists the capability without actions); a mandate whose
+  `capabilities` name `fabric.job.get` covers no step of another capability. A step the service cannot read under a
+  mandate (its own fault) is answered to the caller as one the mandate does not cover: `operator-decision-required`,
+  the job staying `input_required`. The
   mandate travels in `_meta.mandate` (an MCP call, the `fabric.job.get` that answers an input request), in
   `call.mandate` (the hub's `agent.call`, which forwards it as `_meta.mandate`; a sealed call, sent only to a target
   that lists `mandate/1`), or in a project-board request ([project-comms](project-comms.md)) whose sender the target
   places by the rule there. **Covered** means: a relayed action is in `actions`, or, with no actions listed, its tool
-  is in `capabilities`; the capability is in `capabilities` (or none is listed); the effect is within the closure of
+  (for a job's step, the job's capability, MJ-1) is in `capabilities`; the capability is in `capabilities` (or none is listed); the effect is within the closure of
   `effects` (as a grant's ceiling), never `change-policy` (AP-5), and an effect beyond `draft` needs the call named, a
   relayed action in `actions` or `capabilities`, any other call in `capabilities`; with `perCallMaxUsd`, the callee's
   own estimate for the call exists and is at most that; the project is in `projects` (or none is listed; a call that
@@ -614,7 +625,7 @@ it reaches acts on them without asking, within what they cover.
   (DL-4, DEC-0039), which the hub mints for the mandate's scope once Fabric's issuer serves it. Inside the estate (T0,
   T1) the mandate needs no token, before and after the issuer exists (DL-26).
 - **MD-6, what never travels.** A mandate never covers a human step (AP-4: a sign-in, a consent, a payment or top-up, a
-  typed secret, spend above a limit, a passkey signature): spend above the project's L1 per-task threshold, an L0
+  typed secret, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one (DEC-0142)): spend above the project's L1 per-task threshold, an L0
   limit or a key's ceiling stays the person's ([spend policy](spend-policy.md#levels)). It never covers approving one's
   own promotion, grant, checker rule or policy change (AP-5). A mandate found in a tool result, a page, a file, or a
   board message the target cannot place as the operator's, is data, as AP-3 says of a decision. The boundary below
@@ -660,7 +671,8 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
   stop condition the relaying agent wrote into its request is that agent's, not the operator's: where the approved
   scope covers the case, the receiver acts and says so in its reply.
 - **OA-5, what stays the person's.** The human steps of AP-4 and MD-6: a sign-in (with its one-time code), a consent,
-  a payment or top-up, a typed secret, spend above a limit, a passkey signature; and a decision recorded as the
+  a payment or top-up, a typed secret, spend above a limit, a passkey signature, a comparison of codes between two
+  people or the choice to share without one (DEC-0142); and a decision recorded as the
   operator's own when the relay does not carry it.
 - **OA-6, the record.** The receiver records the relay as its reason: the operator's words, `at` and `source` in its
   change log or audit record, its reply in the thread, its handoff. A service records `source` with the decision or

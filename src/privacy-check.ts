@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import { projectRoot } from "./contract.js";
-import { privacyPlan } from "./privacy-plan.js";
+import { privacyPlan, privacyRunFailure } from "./privacy-plan.js";
 
 // The organization's private-data check before this public repository's tracked files are pushed. Where it runs, and
 // when a missing script is a failure rather than a skip, is `privacyPlan` (src/privacy-plan.ts); any finding fails the gate.
@@ -31,8 +31,7 @@ else if (plan.action === "fail") {
     const out = execFileSync("python3", ["-I", plan.script, root], { encoding: "utf8" });
     console.log(out.trim().split("\n").pop());
   } catch (error) {
-    const out = (error as { stdout?: string }).stdout ?? "";
-    console.error(out.trim());
+    console.error(privacyRunFailure(error, plan.script, homedir()));
     process.exitCode = 1;
   }
 }

@@ -6,7 +6,9 @@ import {
   MACHINE_REPORT_INTERVAL_SECONDS,
   MACHINE_REPORT_REFUSALS,
   MACHINE_REPORT_SEAL_REFUSALS,
+  MACHINE_REPORT_ACCEPT_REFUSALS,
   MAX_MACHINE_REPORT_BYTES,
+  acceptMachineReport,
   machineReportAad,
   machineReportRules,
   openMachineReport,
@@ -54,6 +56,21 @@ describe("the machine-report vectors (DEC-0132)", () => {
     } else {
       expect(json(answer)).toEqual(c.expect);
     }
+  });
+});
+
+describe("acceptMachineReport (MR-2, MR-4)", () => {
+  it.each(vectors.accept as Json[])("accept: $name", (c) => {
+    const answer = acceptMachineReport(c.report, { ...c.context, schemaValid: reportValid });
+    expect(json(answer)).toEqual(c.expect.ok ? { ok: true, report: c.report } : c.expect);
+  });
+
+  it("refuses what is no report and a schema check that throws, and never throws itself", () => {
+    expect(MACHINE_REPORT_ACCEPT_REFUSALS).toEqual(["malformed", "wrong-machine", "stale"]);
+    for (const report of [null, 1, [], { ...REPORT, type: "x" }]) expect(acceptMachineReport(report, { machine: "m-a", schemaValid: reportValid })).toEqual({ ok: false, refusal: "malformed" });
+    expect(acceptMachineReport(REPORT, { machine: "m-a", schemaValid: () => { throw new Error("x"); } })).toEqual({ ok: false, refusal: "malformed" });
+    expect(acceptMachineReport(REPORT, { machine: "m-a", held: { at: "unreadable" }, schemaValid: reportValid })).toEqual({ ok: true, report: REPORT });
+    expect(acceptMachineReport(REPORT, { machine: "m-a", held: { at: 7 }, schemaValid: reportValid })).toEqual({ ok: true, report: REPORT });
   });
 });
 
@@ -123,13 +140,14 @@ describe("openMachineReport (MR-4)", () => {
     expect(openMachineReport(SEALED, ctx({ schemaValid: () => { throw new Error("x"); } }))).toEqual({ ok: false, refusal: "malformed" });
   });
 
-  it("keeps a held report it cannot read from refusing a newer one, and a report whose time it cannot read never replaces one it holds", () => {
+  it("keeps a held report it cannot read from refusing a newer one, and a report whose time it cannot read is malformed, held or not", () => {
     expect(openMachineReport(SEALED, ctx({ held: { at: "not a time" } }))).toEqual({ ok: true, report: REPORT });
     expect(openMachineReport(SEALED, ctx({ held: { at: 7 } }))).toEqual({ ok: true, report: REPORT });
     expect(openMachineReport(SEALED, ctx({ held: null }))).toEqual({ ok: true, report: REPORT });
     const timeless = sealMachineReport({ ...REPORT, at: 5 }, { from: vectors.seal.context.from, to: vectors.seal.context.to, msgId: vectors.seal.context.msgId, recipient: vectors.seal.context.recipient });
     const sealed = (timeless as { sealed: unknown }).sealed;
-    expect(openMachineReport(sealed, ctx({ schemaValid: () => true, held: { at: "2026-10-27T07:00:00Z" } }))).toEqual({ ok: false, refusal: "stale" });
+    expect(openMachineReport(sealed, ctx({ schemaValid: () => true, held: { at: "2026-10-27T07:00:00Z" } }))).toEqual({ ok: false, refusal: "malformed" });
+    expect(openMachineReport(sealed, ctx({ schemaValid: () => true }))).toEqual({ ok: false, refusal: "malformed" });
   });
 });
 

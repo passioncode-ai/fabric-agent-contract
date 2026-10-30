@@ -81,6 +81,7 @@ export const NOT_SWEPT: readonly string[] = [
   "memory.schema.json",
   "operator-channel-status.schema.json",
   "org-root-registration.schema.json",
+  "org-adaptation-receipt.schema.json",
   "org-root.schema.json",
   "pipeline.schema.json",
   "repair-request.schema.json",
@@ -97,6 +98,12 @@ export const NOT_SWEPT: readonly string[] = [
   // A pairing message is read by the pairing functions (src/pairing.ts, DEC-0084), against its commitment or the other
   // side's reveal, never whole by a rule kind.
   "pairing-message.schema.json",
+  // A person-to-person share (DEC-0142) is read by its functions (src/peer-share.ts) against the share's keys, marks
+  // and frames, never whole by a rule kind.
+  "peer-share-envelope.schema.json",
+  "peer-share-frame.schema.json",
+  "peer-share-record.schema.json",
+  "peer-share-report.schema.json",
   // The agent network (DEC-0104): a directory is checked against what it derives from (kind `agent-directory-view`), the
   // load extension and fabric.job.list are shapes only.
   "agent-directory.schema.json",
@@ -120,7 +127,7 @@ describe("every positive fixture passes the semantic rules", () => {
   });
 
   it("names only kinds a rule reads and schemas that exist, and sweeps a fixture of each", () => {
-    const sources = ["semantic-rules", "job-limits", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules", "node-summary", "agent-network", "credentials", "mandate", "org-membership", "org-authority", "org-exchange", "machine-report"]
+    const sources = ["semantic-rules", "job-limits", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules", "node-summary", "agent-network", "credentials", "mandate", "org-membership", "org-authority", "org-exchange", "org-adaptation", "machine-report"]
       .map((name) => readFileSync(path.join(root, "src", `${name}.ts`), "utf8"))
       .join("\n");
     for (const [schema, kind] of Object.entries(KIND_OF_SCHEMA)) {

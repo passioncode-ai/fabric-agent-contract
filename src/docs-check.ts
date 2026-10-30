@@ -60,17 +60,141 @@ export function outsideFences(text: string): string {
   return scanFences(text).outside;
 }
 
+const NAMED_ENTITIES: Readonly<Record<string, string>> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: "\u00a0", copy: "\u00a9", reg: "\u00ae", hellip: "\u2026", ndash: "\u2013", mdash: "\u2014", lsquo: "\u2018", rsquo: "\u2019", ldquo: "\u201c", rdquo: "\u201d", middot: "\u00b7", times: "\u00d7", rarr: "\u2192", larr: "\u2190" };
+
+/** A character reference as its character: a decimal or hexadecimal one, or a named one of `NAMED_ENTITIES`; any other is left as written. */
+function decodeEntity(whole: string, body: string): string {
+  const numeric = /^#(?:x([0-9a-f]{1,6})|([0-9]{1,7}))$/i.exec(body);
+  if (numeric) {
+    const code = numeric[1] !== undefined ? Number.parseInt(numeric[1], 16) : Number(numeric[2]);
+    return code > 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff) ? String.fromCodePoint(code) : "\ufffd";
+  }
+  return Object.hasOwn(NAMED_ENTITIES, body) ? (NAMED_ENTITIES[body] as string) : whole;
+}
+
+/**
+ * A heading's anchor as GitHub renders it (github-slugger 2.0): the heading's rendered text in lower case, every
+ * character that is not a letter, a mark, a digit, a space, `-` or `_` dropped, each space a `-`. Inline code, links,
+ * emphasis and HTML tags render to their text first.
+ */
+export function headingSlug(heading: string): string {
+  // A code span renders its text as written, `<id>` included; HTML outside one renders without its tags, and an entity
+  // as its character. The span's text is set aside before tags are dropped, so `<id>` in code is not read as a tag.
+  const spans: string[] = [];
+  const rendered = heading
+    .replace(/`+([^`]*)`+/g, (_whole, code: string) => `\u0000${spans.push(code) - 1}\u0000`)
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z][a-z0-9]*);/gi, (whole, body: string) => decodeEntity(whole, body))
+    .replace(/\u0000(\d+)\u0000/g, (_whole, index: string) => spans[Number(index)] ?? "")
+    .replace(/\*/g, "")
+    .replace(/(^|\s)_+|_+(?=\s|$)/g, "$1")
+    .trim()
+    .toLowerCase();
+  return rendered.replace(/[^\p{L}\p{M}\p{N} _-]/gu, "").replace(/ /g, "-");
+}
+
+/**
+ * The fragments a Markdown file answers on GitHub: each heading's slug outside fenced code (a repeated slug gains
+ * `-1`, `-2`, …), ATX (`# x`) and setext (a paragraph line underlined by `===` or `---`, CT-193), and every explicit
+ * `id` or `name` of an HTML element. A YAML front matter block at the top is no heading.
+ */
+export function markdownAnchors(text: string): Set<string> {
+  const anchors = new Set<string>();
+  const seen = new Map<string, number>();
+  const lines = outsideFences(text).split("\n");
+  // Front matter: `---` on the first line, a YAML mapping's `key:` on the next, up to a `---` or `...` closer, which is no
+  // setext underline. A leading `---` over anything else is a thematic break, and the headings after it count.
+  let start = 0;
+  if (lines[0]?.trim() === "---" && /^[A-Za-z0-9_][\w.-]*[ \t]*:/.test(lines[1] ?? "")) {
+    const end = lines.findIndex((line, index) => index > 0 && (line.trim() === "---" || line.trim() === "..."));
+    if (end > 0) start = end + 1;
+  }
+  // A GFM table: a row with `|` over a delimiter row that holds `|` or `:` (a run of `-` alone is a thematic break or an
+  // underline, micromark-extension-gfm-table), and its rows up to a blank line. Its lines are no paragraph's.
+  const table = new Set<number>();
+  const delimiter = /^ {0,3}\|?[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|?[ \t]*$/;
+  for (let index = start; index + 1 < lines.length; index += 1) {
+    const head = lines[index] as string;
+    const next = lines[index + 1] as string;
+    if (table.has(index) || !head.includes("|") || !delimiter.test(next) || !/[|:]/.test(next)) continue;
+    for (let row = index; row < lines.length && (lines[row] as string).trim() !== ""; row += 1) table.add(row);
+  }
+  const paragraphLine = (at: number) => {
+    const line = lines[at];
+    return line !== undefined && at >= start && !table.has(at) && line.trim() !== "" && !/^ {0,3}(?:#{1,6}(?:[ \t]|$)|[-*+][ \t]|\d{1,9}[.)][ \t]|>|(?:[-*_][ \t]*){3,}$|=+[ \t]*$|<)/.test(line);
+  };
+  for (let index = start; index < lines.length; index += 1) {
+    const line = lines[index] as string;
+    const atx = /^ {0,3}#{1,6}[ \t]+(.*?)(?:[ \t]+#+)?[ \t]*$/.exec(line);
+    let setext: string | undefined;
+    if (!atx && !table.has(index) && /^ {0,3}(?:=+|-+)[ \t]*$/.test(line) && paragraphLine(index - 1)) {
+      // A setext heading's text is its whole paragraph, its lines joined by a line break the slug then drops.
+      let first = index - 1;
+      while (paragraphLine(first - 1)) first -= 1;
+      setext = lines.slice(first, index).map((part) => part.trim()).join("\n");
+    }
+    const heading = atx ? (atx[1] as string) : setext;
+    if (heading !== undefined) {
+      const slug = headingSlug(heading);
+      const count = seen.get(slug) ?? 0;
+      seen.set(slug, count + 1);
+      anchors.add(count === 0 ? slug : `${slug}-${count}`);
+    }
+    for (const match of line.matchAll(/<[a-z][a-z0-9]*\b[^>]*?\b(?:id|name)=["']([^"']+)["']/gi)) anchors.add((match[1] ?? "").toLowerCase());
+  }
+  return anchors;
+}
+
+const anchorCache = new Map<string, Set<string>>();
+
+async function anchorsOf(file: string): Promise<Set<string>> {
+  const cached = anchorCache.get(file);
+  if (cached) return cached;
+  const anchors = markdownAnchors(await readFile(file, "utf8"));
+  anchorCache.set(file, anchors);
+  return anchors;
+}
+
+/** `file`'s name relative to the project, with `/` on every platform. */
+function shownName(file: string): string {
+  return path.relative(projectRoot(), file).split(path.sep).join("/");
+}
+
+/**
+ * Every relative link outside fenced code names a file that exists, and a fragment on a link to a Markdown file names
+ * one of its headings or explicit anchors as GitHub renders them (CT-167). A line fragment (`#L12`, `#L12-L20`) and a
+ * fragment on any other file are not checked.
+ */
 export async function checkLinks(file: string, text: string): Promise<string[]> {
   const findings: string[] = [];
-  const name = path.relative(projectRoot(), file);
+  const name = shownName(file);
   const { outside, unclosed } = scanFences(text);
   if (unclosed !== undefined) findings.push(`${name}:${unclosed}: code fence never closed`);
-  for (const raw of markdownLinks(outside)) {
-    const target = raw.replace(/^<|>$/g, "").split("#", 1)[0] ?? "";
-    if (!target || /^[a-z][a-z0-9+.-]*:/i.test(target)) continue;
+  // A link quoted in inline code is text, not a link. A code span closes by a run of as many backticks, within its own
+  // paragraph (CommonMark §6.1): a run that never closes is literal text, and the links after it are still read (CT-193).
+  const spanless = outside.split(/(\n[ \t]*\n)/).map((block) => block.replace(/(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/g, "")).join("");
+  for (const raw of markdownLinks(spanless)) {
+    // `<a b.md>` (CommonMark's angle destination) may hold spaces; otherwise the destination ends at the first space,
+    // and what follows is the link's title.
+    const angle = /^\s*<([^>]*)>/.exec(raw);
+    const link = angle ? (angle[1] ?? "") : (raw.trim().split(/\s+/, 1)[0] ?? "");
+    const hash = link.indexOf("#");
+    const target = hash < 0 ? link : link.slice(0, hash);
+    const fragment = hash < 0 ? undefined : link.slice(hash + 1);
+    if (/^[a-z][a-z0-9+.-]*:/i.test(target)) continue;
+    if (!target && fragment === undefined) continue;
     let decoded: string;
-    try { decoded = decodeURIComponent(target); } catch { findings.push(`${name}: malformed link ${raw}`); continue; }
-    try { await stat(path.resolve(path.dirname(file), decoded)); } catch { findings.push(`${name}: broken link ${raw}`); }
+    let decodedFragment: string | undefined;
+    try {
+      decoded = decodeURIComponent(target);
+      decodedFragment = fragment === undefined ? undefined : decodeURIComponent(fragment);
+    } catch { findings.push(`${name}: malformed link ${raw}`); continue; }
+    const resolved = decoded ? path.resolve(path.dirname(file), decoded) : file;
+    let isFile = false;
+    try { isFile = (await stat(resolved)).isFile(); } catch { findings.push(`${name}: broken link ${raw}`); continue; }
+    if (!decodedFragment || !isFile || !resolved.endsWith(".md") || /^L\d+(?:-L\d+)?$/.test(decodedFragment)) continue;
+    if (!(await anchorsOf(resolved)).has(decodedFragment.toLowerCase())) findings.push(`${name}: broken anchor ${raw}`);
   }
   return findings;
 }
@@ -87,7 +211,7 @@ export async function checkMermaid(file: string, text: string): Promise<string[]
       // Mermaid 11 parses these diagram types in Node, then its browser-only
       // sanitizer throws. Parser errors are different and remain fatal.
       if (!/DOMPurify\.(?:addHook|sanitize) is not a function/.test(message)) {
-        findings.push(`${path.relative(projectRoot(), file)}: Mermaid block ${index}: ${message}`);
+        findings.push(`${shownName(file)}: Mermaid block ${index}: ${message}`);
       }
     }
   }
@@ -111,7 +235,8 @@ export function schemaProfileKinds(manifest: unknown): string[] {
 
 /** G-13: one allocation and one definition of every semantic rule code (src/rule-codes.ts). */
 export async function checkRuleCodes(root = projectRoot()): Promise<string[]> {
-  const read = async (file: string) => ({ path: path.relative(root, file), text: await readFile(file, "utf8") });
+  // A path with `/` on every platform: the register is matched by `endsWith("/<file>")`.
+  const read = async (file: string) => ({ path: path.relative(root, file).split(path.sep).join("/"), text: await readFile(file, "utf8") });
   const specDir = path.join(root, "docs", "specification");
   const specs = await Promise.all((await readdir(specDir)).filter((name) => name.endsWith(".md")).map((name) => read(path.join(specDir, name))));
   const sourceDir = path.join(root, "src");
@@ -157,6 +282,7 @@ export function decisionPathFindings(text: string, files: readonly string[]): st
 }
 
 export async function runDocsCheck(): Promise<string[]> {
+  anchorCache.clear();
   const root = projectRoot();
   const files = (await walk(root)).filter((file) => file.endsWith(".md"));
   const findings: string[] = [];
@@ -167,7 +293,7 @@ export async function runDocsCheck(): Promise<string[]> {
   }
   const keyed = (await walk(root)).filter((file) => /\.(md|json)$/.test(file) && !file.includes(`${path.sep}test${path.sep}`));
   for (const file of keyed) {
-    for (const key of foreignExtensionKeys(await readFile(file, "utf8"))) findings.push(`${path.relative(root, file)}: extension key ${key} is not one of EXTENSION_KEYS (G-08)`);
+    for (const key of foreignExtensionKeys(await readFile(file, "utf8"))) findings.push(`${shownName(file)}: extension key ${key} is not one of EXTENSION_KEYS (G-08)`);
   }
   const context = contextProfileNames(await readFile(path.join(root, "CONTEXT.md"), "utf8"));
   const kinds = schemaProfileKinds(JSON.parse(await readFile(path.join(root, "schemas/manifest.schema.json"), "utf8")));

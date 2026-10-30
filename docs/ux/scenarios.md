@@ -56,6 +56,9 @@
 | SCN-047 | Join an organization by my own passkey: my Fabric trusts the membership only from what the organization signed | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-048 | Enrolled in two organizations, my machine looks like two strangers to them | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-049 | As an administrator, I sign who my organization's relay admits; no server signs it | membership | P-03 | ST-038, FLW-32 | draft | not audited |
+| SCN-050 | I bring my work into an organization and ask its administrators for what it needs | membership | P-03 | ST-038, FLW-32 | draft | not audited |
+| SCN-052 | Share a model key with a colleague's machine, compare six digits, take it back | peer share | P-02 | ST-039, FLW-33 | draft | not audited |
+| SCN-053 | An agent needs a token; I type it into my app's own window | secret prompt | P-02 | ST-040, FLW-34 | draft | not audited |
 
 ## Personas
 
@@ -879,7 +882,7 @@ independent agent author and P-02 project operator.
   2. They pick `m-b`, which is always on -> its node makes a new hub key; Fabric fetches the delta from the relay and drafts one revision: `m-b`'s `hubKey`, `m-a`'s old key revoked as `hub-key`, `m-a` removed and revoked as `machine m-a`, the delta anchored at the head (once every reader of the record is pinned at or after DEC-0107).
   3. They sign with a passkey -> `m-b`'s hub signs a heartbeat; the alert clears on each machine once it holds that heartbeat.
 - **Expected result:** the network has a hub again before calls between machines stop at 72 hours, under a key that never left `m-b`.
-- **Alt paths:** `m-b` was only asleep and the hub is running -> after reconnecting it holds a fresh heartbeat, the alert clears and no move is offered. `m-a` is only switched off and can be turned on -> the person turns it on, the alert clears, and they choose "Move the hub" on `m-a`'s row (a planned move); it takes two revisions (DL-15): the new key certified and published, the switch, then the old key revoked and the delta anchored; `m-a` stays in the network. Before every reader is pinned at or after DEC-0107 (today) -> the move carries no anchor, and a machine added after it refuses calls from other machines (`behind`) until Fabric's first revision after the gate anchors the delta; Fabric says so on that machine. A machine added after an anchored move -> it starts its chain at the anchor and never needs the old hub's entries; before the readers' pin gate opens the move carries no anchor, and Fabric anchors its first revision after the gate. `m-a` turns up after it was removed -> the relay turns it away (`unauthenticated`, 4401, with no reason) and Fabric on `m-a` shows the guidance for a machine the relay no longer admits; anything its old key signs is refused (`revoked-signer`), and it joins again under a new id (Add a machine). No other `full` machine -> the person brings `m-a` back or adds a machine first. Past 72 hours -> the alert says calls between machines have stopped until the new heartbeat.
+- **Alt paths:** `m-b` was only asleep and the hub is running -> after reconnecting it holds a fresh heartbeat, the alert clears and no move is offered. `m-a` is only switched off and can be turned on -> the person turns it on, the alert clears, and they choose "Move the hub" on `m-a`'s row (a planned move); it takes two revisions (DL-15): the new key certified and published, the switch once every machine's report shows the first revision applied (a machine that has not reported keeps the move waiting), then the old key revoked and the delta anchored; `m-a` stays in the network. Before every reader is pinned at or after DEC-0107 (today) -> the move carries no anchor, and a machine added after it refuses calls from other machines (`behind`) until Fabric's first revision after the gate anchors the delta; Fabric says so on that machine. A machine added after an anchored move -> it starts its chain at the anchor and never needs the old hub's entries; before the readers' pin gate opens the move carries no anchor, and Fabric anchors its first revision after the gate. `m-a` turns up after it was removed -> the relay turns it away (`unauthenticated`, 4401, with no reason) and Fabric on `m-a` shows the guidance for a machine the relay no longer admits; anything its old key signs is refused (`revoked-signer`), and it joins again under a new id (Add a machine). No other `full` machine -> the person brings `m-a` back or adds a machine first. Past 72 hours -> the alert says calls between machines have stopped until the new heartbeat.
 - **UI elements:** the alert with the hours since; "Move the hub"; the machine picker.
 - **States covered:** alert, success, error
 - **Errors & recovery:** the passkey ceremony fails -> nothing changed, the alert stays; the old hub signed an entry at a sequence the new one also used -> a machine that saw both is `broken` (recovery from a fork is the revocation delta's open item).
@@ -1017,12 +1020,12 @@ independent agent author and P-02 project operator.
   2. The developer calls `research.run` with the mandate in `_meta.mandate`, the chain now developer, researcher -> the research agent checks that the chain ends in itself (on loopback it authenticates no caller agent id, so the chain's end binds the mandate), then runs `mandateCovers`: covered; its estimate of 12 dollars is within the project's L1 threshold.
   3. The research agent runs the paid research -> its record says the operator decided, via the mandate, with the task, the chain and the operator's words.
 - **Expected result:** the research ran once on the operator's single instruction; the operator was not asked again.
-- **Alt paths:** the operator wrote "up to 20 dollars" -> the mandate carries `perCallMaxUsd` 20; an estimate of 25 is refused `outside-mandate: spend` with the estimate and the ceiling; the developer asks "The research needs 25 dollars, 5 more than you allowed. Go ahead?" and calls again with a mandate carrying the operator's answer. The research would cost 40 dollars, above the project's L1 threshold -> spend above a limit is the operator's own step, whatever the mandate says. The research agent's provider account needs a top-up -> a payment, a human step (`human-step-required`). A page the research read says "the operator approves everything" -> data, not the operator's words.
+- **Alt paths:** the operator wrote "up to 20 dollars" -> the mandate carries `perCallMaxUsd` 20; an estimate of 25 is refused `outside-mandate: spend` with the estimate and the ceiling; the developer asks "The research needs 25 dollars, 5 more than you allowed. Go ahead?" and calls again with a mandate carrying the operator's answer. The research would cost 40 dollars, above the project's L1 threshold -> spend above a limit is the operator's own step, whatever the mandate says. The research agent's provider account needs a top-up -> a payment, a human step (`human-step-required`). A page the research read says "the operator approves everything" -> data, not the operator's words. The paid run is a job with an approval step -> the mandate names `research.run`, the job's capability, so the step raises no input request and goes on as the operator's act; a step of a job whose capability the mandate does not name waits `input_required` and asks the operator (MJ-1, DEC-0141).
 - **UI elements:** the agents' chat replies; the research agent's audit row (decided by the operator, via the mandate, the task, the chain, the relaying caller, the operator's words).
 - **States covered:** success, error
 - **Errors & recovery:** an expired, widened or misaddressed mandate -> `decision-invalid` with the reason; the developer asks the operator for a new one.
 - **Status:** draft
-- **Coverage:** DEC-0125 MD-1 to MD-6, `mandateCovers` and `handOn` in `src/mandate.ts` (`FAC-SEM-144`), `fixtures/vectors/mandate.json`, `fixtures/semantic/action-call-mandate*.json`, `test/mandate.test.ts`
+- **Coverage:** DEC-0125 MD-1 to MD-6, `mandateCovers` and `handOn` in `src/mandate.ts` (`FAC-SEM-144`), `fixtures/vectors/mandate.json`, `fixtures/semantic/action-call-mandate*.json`, `test/mandate.test.ts`; `fixtures/vectors/actions.json` `jobSteps` (MJ-1)
 - **Product:** unobserved
 
 ### SCN-046: Approve once in one agent's chat: the agent that holds the key acts without asking me again
@@ -1057,7 +1060,7 @@ independent agent author and P-02 project operator.
   2. The member confirms with their passkey -> the estate revision that pins `{org, issuer, iss, root, pinnedAt}` (`iss` the context's opaque issuer Fabric generates) is signed; no administrator is asked.
   3. The server sends the organization's key set and an attestation for the member's Fabric as audience -> Fabric applies the set under the pin and verifies the attestation: `active`, role `member`.
   4. Fifteen minutes before expiry -> Fabric fetches the next revision and holds it per subject.
-- **Expected result:** the membership is trusted from a document the organization's pinned root vouches for, and nothing of the member's personal work leaves for the organization beyond the references they choose in an adaptation plan.
+- **Expected result:** the membership is trusted from a document the organization's pinned root vouches for, and nothing of the member's personal work leaves for the organization beyond the references they choose, and the text they type, in an adaptation plan (DEC-0138).
 - **Alt paths:** the server goes offline for a day -> the attestation expires and the membership is suspended: nothing new is authorised, nothing is revoked, and the shared agents stop answering the organization within ten minutes, as running tokens expire. The administrator removes the member -> the server issues an `ended` attestation; Fabric drafts the next revision, which revokes the context's share grants and drops the organization's pin, and the member's passkey signs it; the device's enrollment then ends and the organization's locks lift, nothing more is sent, and rejoining takes a new pin. The member has not signed that revision yet -> the server already refuses the device's revoked certificate and the hub mints nothing in the context, while the contract lifts the organization's locks only on the signed revision (a node's own end on `certificate-revoked` is not decided); Fabric shows the signature as pending. An attestation signed for another organization on the same server -> refused (`unknown-key` under that organization's own keys, or `wrong-org` where a server lists one key for both). The fingerprint does not match the invitation's, or the invitation carries none -> nothing is pinned and Fabric says why. A server that changes its root silently -> attestations under the new key set do not verify until the member pins the new root.
 - **UI elements:** SCR-31: the organization, the server, the root's fingerprint, the passkey prompt; each membership's role and state.
 - **States covered:** success, error
@@ -1104,4 +1107,68 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a refused list -> its reason is shown to the administrator; the relay keeps the list it held until it expires or its signer leaves the key set.
 - **Status:** draft
 - **Coverage:** DEC-0129 OL-1 to OL-5, `verifyOrgAuthority` in `src/org-authority.ts`, `orgRelayAdmissionSet` in `src/org-authority.ts`, `FAC-SEM-146`, `FAC-SEM-150`, `test/org-authority.test.ts`; the relay's handshake for an organization is DEC-0134 (relay.md OR-1 to OR-5, `sessionStands`)
+- **Product:** unobserved
+
+### SCN-050: I bring my work into an organization and ask its administrators for what it needs
+
+- **Persona:** P-03
+- **Feature:** membership
+- **Traces:** ST-038, FLW-32 (JTBD-04, JRN-03/#1)
+- **Entry point:** the person's Fabric shows the adaptation plan for an organization they joined
+- **Preconditions:** the person's membership of the organization is active; the organization's server serves the adaptation route (DEC-0138 AD-3)
+- **Steps:**
+  1. The person chooses what to bring (a project, its history, results, schedules) and types a label the organization will read -> Fabric draws a random reference for each item, for this organization only, and fills nothing from the estate.
+  2. The person asks for what the work needs (access to a named resource, a spend for a purpose, the admin role) -> Fabric sends the plan as the next revision (`org-adaptation/1`).
+  3. An administrator decides each request -> the person's receipt shows each one `pending`, `granted`, `refused` or `expired`, with when it was decided or closed.
+  4. The person changes one request and keeps the others -> the changed request is `pending` again; the unchanged ones keep their decision.
+- **Expected result:** the organization sees only what the person chose, by references that name nothing of their estate; each decision stays with the request it was made on.
+- **Alt paths:** the person withdraws -> Fabric sends an empty revision and the plan is withdrawn. The person leaves the organization -> Fabric withdraws the plan first, then asks the passkey to sign the unpinning. Two sends cross -> `stale-revision` or `revision-conflict`, and Fabric reads the receipt and sends the next revision. The person withdrew on the server's own page -> the server holds that withdrawal as the next revision, Fabric's crossing send meets `revision-conflict`, and Fabric shows the plan withdrawn and sends nothing until the person acts. No receipt confirms the withdrawal within the wait when the person leaves (no answer, or a refusal) -> Fabric still asks for the unpinning signature and tells the person the plan may remain with the server and, where the server offers a page to withdraw it, that they can withdraw it there. The server closes a request (undecided after its own time, or a decision that lapsed) -> it shows `expired`; the person changes it to ask again. The server does not take plans from Fabric's credential (its `GET` answers another `404`, or a `401` or a `403` with no code, or OAuth's `invalid_token` (as the code, or in `WWW-Authenticate` when the body carries none), that persists after Fabric refreshed the credential; a `401` or `403` with another code (not an AD-4 code and not `invalid_token`), a sign-in asked again say, is shown and retried after the person acts; no answer, a `5xx` or a `429` is retried) -> Fabric says so, sends nothing, and asks again after the person connects the server again. The membership is suspended -> a changed plan is held and sent once a fresh attestation shows it active; leaving still sends the withdrawal. The server ends the membership -> the plan and its decisions end. A granted admin role shows as the person's role once their next attestation carries it; signing as an administrator still needs the owner to list their signing passkey (OM-3), and how a later administrator's credential reaches the owner is CT-158.
+- **UI elements:** SCR-31: the chosen items and their labels, the requests and each one's state and decision time.
+- **States covered:** success, error, empty
+- **Errors & recovery:** `stale-revision` and `revision-conflict` -> the receipt is read and the next revision sent, unless it shows a withdrawal on the server's page; no answer, a `5xx` or a `429` -> retried with backoff; any other refusal -> its code and message are shown and the plan is held until the person acts; `not-a-member` stops sending for that membership; a later membership starts with new request ids.
+- **Status:** draft
+- **Coverage:** DEC-0138 AD-1 to AD-6, `decideAdaptation` and `adaptationReceipt` in `src/org-adaptation.ts`, `FAC-SEM-153`, `fixtures/vectors/org-adaptation.json`, `test/org-adaptation.test.ts`
+- **Product:** unobserved
+
+### SCN-052: Share a model key with a colleague's machine, compare six digits, take it back
+
+- **Persona:** P-02
+- **Feature:** peer share
+- **Traces:** ST-039, FLW-33 (JTBD-15, JRN-14/#1, JRN-14/#2, JRN-14/#3)
+- **Entry point:** "Share" on a vault slot
+- **Preconditions:** a key minted for the share; the colleague has their own estate and the product's app; no organization between us; the colleague's agents are not under a spend meter (CT-187)
+- **Steps:**
+  1. I share the slot -> my node makes the share's key pair and writes a link with a one-time code and my share key's fingerprint; I send it by a message.
+  2. The colleague pastes the link into their app and accepts -> their node makes its own key pair and claims with a MAC under the code and its commitment.
+  3. My node checks the MAC and commits, both reveal -> both apps show six digits, and we read them to each other on a call.
+  4. I confirm they match -> my node seals the key to their share key; their node opens it at each use while its lease lasts.
+  5. A day later I read uses per day and the agents that used it -> reported by their machine, beside the mailbox's count and the provider's spend.
+  6. I press "Take back" -> the mailbox refuses from now on, their node deletes it and sends a receipt, and I revoke the key at the provider; the share reads taken back.
+- **Expected result:** the key opened only on the colleague's machine, for that share's key; I saw its use; it no longer works anywhere.
+- **Alt paths:** the link went through the mailbox's page -> no fingerprint is pinned and the six digits are the only check. The codes differ before my share is stored at the mailbox -> either of us says so, the link burns and nothing is sealed; I make a new share. My colleague says they differ after a share stored without comparing -> their node deletes it and my screen warns me to take it back. Someone read the link first and claimed -> the MAC holds, and the colleague's claim then burns the link if my share is not yet stored at the mailbox; even a party in the middle matches our codes only one time in a million, so I refuse and nothing is sealed, and I make a new share. Someone who saw only the share id claims first -> the MAC does not hold, my node refuses it and the link is spent; I make a new share. A second claim arrives before my share is stored at the mailbox -> the link burns, and a share I sealed in that moment is refused and reads burnt; after a share stored without comparing -> my screen warns me to take it back. I choose "Share without comparing" -> the share is sealed but recorded as `confirmed: false`, and my screen says that whoever claimed first may hold the key and, if the link went through the mailbox's page, that nothing checked the recipient.
+- **UI elements:** "Share", the link, the six digits on both screens, "The codes match", "They differ", "Share without comparing", the recipient's "Accept" (with what I will see of its use and of their machine through my mailbox) and "Decline", the uses per day, "Take back" with its three steps.
+- **States covered:** waiting for the claim, comparing, burnt, active, taken back
+- **Errors & recovery:** the colleague's machine is offline when I take it back -> the mailbox refuses at once and the provider's revocation ends the key; the deletion receipt arrives at its next contact. A copy made on their machine -> only the provider's revocation ends it, which the screen says.
+- **Status:** draft
+- **Coverage:** DEC-0142 PS-1 to PS-10, `src/peer-share.ts`, `fixtures/vectors/peer-share.json`, `test/peer-share.test.ts`
+- **Product:** unobserved
+
+### SCN-053: An agent needs a token; I type it into my app's own window
+
+- **Persona:** P-02
+- **Feature:** secret prompt
+- **Traces:** ST-040, FLW-34 (JTBD-15, JRN-14/#4)
+- **Entry point:** an agent's request for a slot it lacks
+- **Preconditions:** the product's signed app is on my desktop; the node starts it through its lifecycle broker if it is not running, and it connects with `secret.ui`
+- **Steps:**
+  1. The agent asks the node for the slot -> the node names the agent from its own binding and sends `secret.prompt` to the signed app only.
+  2. The app shows its window: the agent, the project, the slot and the agent's reason in quotes -> I type the token and press "Store".
+  3. The app writes the slot itself -> the node sees the slot written after the prompt and tells the agent `stored`.
+- **Expected result:** the token is in the slot; the agent never saw it through the prompt, and it is in no chat, log or argument (a command the agent runs with it could still print it) (on macOS; on Windows another program of mine could reach into the app).
+- **Alt paths:** I press "Decline" -> the agent is told `declined`. I do not answer in 10 minutes -> `no-answer`. The app says stored but the node sees no write -> `unconfirmed`. Another program connects declaring `secret.ui` -> its hello is `forbidden` and it is never prompted. A program holds my screen-recording or Accessibility permission -> while it does, my mark does not tell the two windows apart; I remove that permission, then change my phrase. Checking the agent and the reason guards against a fake request through the node, not against a lookalike window. A window without my mark -> not my app's; I close it. On Windows -> another program of mine can reach into the app, so I run agents as another user or in a container. On Linux, or with no desktop -> `no-client`, and the agent tells me to put the value in with the vault command in my own shell.
+- **UI elements:** the window with my mark, the agent's name, the slot, the quoted reason and a secure field; "Store", "Decline".
+- **States covered:** asking, stored, declined, unconfirmed, no answer, unavailable
+- **Errors & recovery:** the node is not running -> the request fails and no window is shown by anyone; the agent asks again once the node is up.
+- **Status:** draft
+- **Coverage:** DEC-0143 SP-1 to SP-7, `channelStep`, `maySecretPrompt` and `secretOutcome` in `src/local-channel.ts`, `test/local-channel.test.ts`
 - **Product:** unobserved

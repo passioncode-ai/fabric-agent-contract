@@ -162,6 +162,16 @@ export interface SessionHandoffVerdict {
   findings: Finding[];
 }
 
+/**
+ * Two paths name the same file for SH-4 and SH-11: byte for byte on POSIX, macOS included even on a case-insensitive
+ * volume; on Windows with either separator and in either case (DEC-0032's Windows paths take `\\` or `/`; DEC-0145).
+ */
+export function samePath(a: string, b: string, platform: string = process.platform): boolean {
+  if (platform !== "win32") return a === b;
+  const fold = (value: string) => value.replace(/\//g, "\\").toLowerCase();
+  return fold(a) === fold(b);
+}
+
 const octal = (mode: number) => (mode & 0o777).toString(8).padStart(3, "0");
 
 /**
@@ -360,7 +370,7 @@ export function sessionHandoffManifestFindings(manifest: Json): Finding[] {
     if (configs.length !== 1) findings.push(sem053(at, `Claude Code is given exactly one --mcp-config=<path>/mcp.json; found ${configs.length}`));
     for (const config of configs) {
       const value = config.slice("--mcp-config=".length);
-      if (!path.isAbsolute(value) || path.basename(value) !== "mcp.json") findings.push(sem053(at, `--mcp-config names the handoff's mcp.json by its absolute path; found ${value}`));
+      if (!path.isAbsolute(value) || !samePath(path.basename(value), "mcp.json")) findings.push(sem053(at, `--mcp-config names the handoff's mcp.json by its absolute path; found ${value}`));
     }
     if (args.includes("--strict-mcp-config") !== strict) findings.push(sem053(at, strict ? "mcp.strict is true, so Claude Code is given --strict-mcp-config" : "mcp.strict is false, so Claude Code is not given --strict-mcp-config"));
     const inline = flagValues(args, "--append-system-prompt");
@@ -368,7 +378,7 @@ export function sessionHandoffManifestFindings(manifest: Json): Finding[] {
     if (brief.delivery === "inline" && (inline.length !== 1 || inline[0] !== brief.text || file.length)) findings.push(sem053(at, "an inline brief is the one value of --append-system-prompt"));
     if (brief.delivery === "file") {
       if (file.length !== 1 || inline.length) findings.push(sem053(at, "a brief file is the one value of --append-system-prompt-file"));
-      for (const value of file) if (!path.isAbsolute(value) || path.basename(value) !== "brief.md") findings.push(sem053(at, `--append-system-prompt-file names the handoff's brief.md by its absolute path; found ${value}`));
+      for (const value of file) if (!path.isAbsolute(value) || !samePath(path.basename(value), "brief.md")) findings.push(sem053(at, `--append-system-prompt-file names the handoff's brief.md by its absolute path; found ${value}`));
     }
   } else if (runtime === "codex") {
     const overrides = codexOverrides(args);
@@ -446,8 +456,8 @@ export function sessionHandoffFolderFindings(snapshot: HandoffSnapshot): Finding
   const launch = isObject(manifest.launch) ? manifest.launch : {};
   const args = strings(launch.args);
   if (launch.runtime === "claude-code") {
-    for (const value of flagValues(args, "--mcp-config")) if (value !== path.join(snapshot.path, "mcp.json")) findings.push(sem054("/launch/args", `--mcp-config names this folder's mcp.json, ${path.join(snapshot.path, "mcp.json")}; found ${value}`));
-    for (const value of flagValues(args, "--append-system-prompt-file")) if (value !== path.join(snapshot.path, "brief.md")) findings.push(sem054("/launch/args", `--append-system-prompt-file names this folder's brief.md; found ${value}`));
+    for (const value of flagValues(args, "--mcp-config")) if (!samePath(value, path.join(snapshot.path, "mcp.json"))) findings.push(sem054("/launch/args", `--mcp-config names this folder's mcp.json, ${path.join(snapshot.path, "mcp.json")}; found ${value}`));
+    for (const value of flagValues(args, "--append-system-prompt-file")) if (!samePath(value, path.join(snapshot.path, "brief.md"))) findings.push(sem054("/launch/args", `--append-system-prompt-file names this folder's brief.md; found ${value}`));
   }
   const brief = isObject(manifest.brief) ? manifest.brief : {};
   const preamble = typeof manifest.preamble === "string" ? manifest.preamble : "";

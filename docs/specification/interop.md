@@ -274,7 +274,8 @@ mode never requests a secret (MCP rule); secrets use URL mode. A job whose start
 for its task reads it at its own approval step: a step the mandate covers raises no input request and goes on as the
 operator's decision; a step it does not cover waits `input_required` as here, its message naming the part not covered,
 and its answer may carry a mandate that covers it in the `_meta.mandate` of the `fabric.job.get` call
-([delegation](delegation.md#the-operators-mandate) MD-3, MD-4, DEC-0125). A mandate that expired before the step waits
+([delegation](delegation.md#the-operators-mandate) MD-3, MD-4, DEC-0125), read under the job's capability with the
+request key as its action, as at the start (MJ-1, DEC-0141). A mandate that expired before the step waits
 there too, its message saying the operator's mandate expired. A URL-mode request on the service's own page MUST carry
 its open_link as `url`, never a raw local address (**FAC-SEM-143**, [service](service.md#page-links) PL-4,
 DEC-0123), and a tool answer that names a page for a person MUST carry it in `open_link`.
@@ -318,7 +319,7 @@ each in the `structuredContent` of an `isError` tool result:
 |---|---|---|---|
 | `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without a decision, or the caller's mandate does not cover the call (`data.detail` `outside-mandate: <part>`, DEC-0125) | the service | hands on again within its own mandate when that covers the call; otherwise asks the operator for that part and calls again with their answer in `_meta.decision` or a mandate that covers it |
 | `decision-invalid` | the decision is not valid against its schema, names another action or another object, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it; or the mandate is not valid (`data.detail` `mandate-*`, DEC-0125) | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3) |
-| `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit, a passkey signature | the service, with `error.data.humanStep` and `error.data.url`, the direct link to the step | hands the person that link |
+| `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one | the service, with `error.data.humanStep` and `error.data.url`, the direct link to the step | hands the person that link |
 
 A `relayed` action from a T2 caller keeps [delegation](delegation.md#refusal-codes)'s `approval-required` (DL-17); its
 `_meta.decision` changes nothing. `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference, with

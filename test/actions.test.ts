@@ -14,6 +14,7 @@ const read = (file: string) => readFileSync(path.join(projectRoot(), file), "utf
 const vectors = JSON.parse(read("fixtures/vectors/actions.json")) as {
   cases: Array<{ name: string; input: Json; expected: Json }>;
   declarations: Array<{ name: string; input: Json; findings: string[] }>;
+  jobSteps: Array<{ name: string; input: Json; expected: Json }>;
 };
 const ajv = await createValidator();
 const valid = (schema: string, value: unknown) => validateDocument(ajv, `${SCHEMA_PREFIX}schemas/${schema}`, value).valid;
@@ -23,6 +24,10 @@ describe("actionDecision (DEC-0121 AP-2, AP-4)", () => {
     expect(read("fixtures/vectors/actions.json")).toBe(buildActionsVectors());
   });
   it.each(vectors.cases)("$name", ({ input, expected }) => {
+    expect(actionDecision(input)).toEqual(expected);
+  });
+  // DEC-0141 MJ-1: a job's step under a mandate is read under the job's capability, not fabric.job.get.
+  it.each(vectors.jobSteps)("job step: $name", ({ input, expected }) => {
     expect(actionDecision(input)).toEqual(expected);
   });
   it("covers every answer the reference gives", () => {

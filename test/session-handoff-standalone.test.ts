@@ -5,6 +5,7 @@ import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { snapshotFromFixture } from "../src/session-handoff.js";
+import { pathToFileURL } from "node:url";
 
 // REQ-08 (contract review 2026-10-21): the header of src/session-handoff.ts promises that a consumer copies the file
 // byte for byte and runs it under `node --experimental-strip-types`. These tests hold the file to that promise.
@@ -59,7 +60,7 @@ describe("src/session-handoff.ts loads on its own", () => {
   it("is imported by plain Node with type stripping from a folder that holds nothing else", { timeout: 30000 }, () => {
     const copy = path.join(scratch, "session-handoff.ts");
     copyFileSync(source, copy);
-    const script = `const h = await import(${JSON.stringify(copy)}); process.stdout.write(JSON.stringify({ format: h.HANDOFF_FORMAT, read: typeof h.readSessionHandoff, findings: h.sessionHandoffManifestFindings({}).length >= 0 }));`;
+    const script = `const h = await import(${JSON.stringify(pathToFileURL(copy).href)}); process.stdout.write(JSON.stringify({ format: h.HANDOFF_FORMAT, read: typeof h.readSessionHandoff, findings: h.sessionHandoffManifestFindings({}).length >= 0 }));`;
     const out = execFileSync(process.execPath, ["--experimental-strip-types", "--no-warnings", "--input-type=module", "-e", script], { cwd: scratch, timeout: 20000, encoding: "utf8" });
     expect(JSON.parse(out)).toEqual({ format: "session-handoff/1", read: "function", findings: true });
   });

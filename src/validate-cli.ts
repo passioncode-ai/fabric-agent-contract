@@ -548,7 +548,8 @@ export function main(args: readonly string[]): CliResult {
     const problemsBefore = run.problems.length;
     const files = jsonFiles(target, run);
     if (files.length === 0 && run.usage.length === before) run.usage.push(`${target} holds no .json file`);
-    const checked = files.flatMap((file) => checkFile(run, file, path.relative(target, file), schemaArg, kindArg, true) ?? []);
+    // The relative path with `/` on every platform: the rules read it as a stored path (FAC-SEM-014) and pair by it.
+    const checked = files.flatMap((file) => checkFile(run, file, path.relative(target, file).split(path.sep).join("/"), schemaArg, kindArg, true) ?? []);
     // A folder in which no file was a document it could check checked nothing: that is not a clean run.
     if (files.length > 0 && checked.length === 0 && run.usage.length === before && run.problems.length === problemsBefore) run.usage.push(`${target} holds no document this checkout can tell; the files it skipped are noted`);
     checkPairs(run, checked);

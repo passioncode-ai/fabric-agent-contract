@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
-import { MAX_INLINE_BRIEF, MAX_LAUNCH_ARG, MAX_LAUNCH_ARGS, readSessionHandoff, validateSessionHandoff } from "../src/session-handoff.js";
+import { MAX_INLINE_BRIEF, MAX_LAUNCH_ARG, MAX_LAUNCH_ARGS, readSessionHandoff, samePath, validateSessionHandoff } from "../src/session-handoff.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 
 // DEC-0042 (Fabric ADR-0140, 0.4.0 REQ-06): session-handoff/1, the folder a host hands a coding-agent session.
@@ -109,21 +109,32 @@ describe("validateSessionHandoff(dir): a folder on disk", () => {
     expect((await validateSessionHandoff(writeFolder("session-handoff-folder-ok"))).valid).toBe(true);
   });
 
-  it("refuses a folder or a file readable by others, and a link in place of a file", async () => {
+  // Modes are POSIX: on Windows the profile's ACL guards the folder and the modes are not checked (`permissions: acl`).
+  it.skipIf(process.platform === "win32")("refuses a folder or a file readable by others", async () => {
     const loose = writeFolder("session-handoff-folder-ok");
     chmodSync(loose, 0o755);
     chmodSync(path.join(loose, "mcp.json"), 0o644);
     const findings = (await check(loose)).findings.map((finding) => finding.message);
     expect(findings).toContain("the folder is 0700; this one 755");
     expect(findings).toContain("mcp.json is 0600; this one 644");
+  });
+
+  // A file symlink on Windows needs a privilege an unelevated runner lacks; the test then has nothing to observe. A
+  // folder link is a junction there, which needs none.
+  it("refuses a link in place of a file, and a link to the folder", async (context) => {
     const linked = writeFolder("session-handoff-folder-ok");
     rmSync(path.join(linked, "context.md"));
     writeFileSync(path.join(scratch, "elsewhere.md"), "# elsewhere\n", { mode: 0o600 });
-    symlinkSync(path.join(scratch, "elsewhere.md"), path.join(linked, "context.md"));
+    try {
+      symlinkSync(path.join(scratch, "elsewhere.md"), path.join(linked, "context.md"));
+    } catch (error) {
+      if (process.platform === "win32" && (error as NodeJS.ErrnoException).code === "EPERM") return context.skip();
+      throw error;
+    }
     expect((await check(linked)).findings.map((finding) => finding.message)).toContain("context.md is a regular file, not a symlink");
     const target = writeFolder("session-handoff-folder-ok");
     const alias = path.join(scratch, `alias-${serial}`);
-    symlinkSync(target, alias);
+    symlinkSync(target, alias, process.platform === "win32" ? "junction" : "dir");
     expect((await check(alias)).findings.map((finding) => finding.message)).toEqual(["the handoff is a folder, not a link to one"]);
   });
 
@@ -177,5 +188,37 @@ describe("the specification", () => {
   it("names the per-runtime rows the kit checks", () => {
     for (const runtime of ["claude-code", "codex", "kilo", "hermes", "kimi-code", "cline", "pi"]) expect(spec).toMatch(new RegExp(`^\\| \`${runtime}\` \\|`, "m"));
     expect(spec).toContain("`--mcp-config=<folder>/mcp.json`");
+  });
+});
+
+describe("a launch argument names the folder's file as the host reads paths", () => {
+  // Through the call sites, not samePath alone: on Windows the folder's own path joined with `/` and the file names in
+  // another case pass SH-4 and SH-11 (DEC-0145); POSIX keeps the byte comparison, which the folder tests above cover.
+  it.runIf(process.platform === "win32")("passes a Windows folder named with `/` before an upper-case MCP.json and BRIEF.md", async () => {
+    for (const fixture of ["session-handoff-folder-ok", "session-handoff-folder-brief-file-ok"]) {
+      let rewritten: string[] = [];
+      const dir = writeFolder(fixture, (folder, manifest) => {
+        const launch = manifest.launch as { args: string[] };
+        launch.args = launch.args.map((arg) => arg
+          .replace(`${folder}\\mcp.json`, `${folder.toUpperCase()}/MCP.json`).replace(`${folder}/mcp.json`, `${folder.toUpperCase()}/MCP.json`)
+          .replace(`${folder}\\brief.md`, `${folder}/BRIEF.md`).replace(`${folder}/brief.md`, `${folder}/BRIEF.md`));
+        rewritten = launch.args.filter((arg) => arg.includes("/MCP.json") || arg.includes("/BRIEF.md"));
+      });
+      // The rewrites took effect, so the checks below go through samePath, not the byte comparison (CT-193).
+      expect(rewritten.some((arg) => arg.includes("/MCP.json")), fixture).toBe(true);
+      if (fixture.includes("brief-file")) expect(rewritten.some((arg) => arg.includes("/BRIEF.md")), fixture).toBe(true);
+      const verdict = await check(dir);
+      expect(verdict.findings.filter((finding) => finding.code === "FAC-SEM-053" || finding.code === "FAC-SEM-054"), fixture).toEqual([]);
+    }
+  });
+
+  it("compares exactly on POSIX, and with either separator and case on Windows", () => {
+    expect(samePath("/h/s1/mcp.json", "/h/s1/mcp.json", "darwin")).toBe(true);
+    expect(samePath("/h/s1/MCP.json", "/h/s1/mcp.json", "linux")).toBe(false);
+    expect(samePath("C:\\h\\s1/mcp.json", "C:\\h\\s1\\mcp.json", "win32")).toBe(true);
+    expect(samePath("c:/H/S1/mcp.json", "C:\\h\\s1\\mcp.json", "win32")).toBe(true);
+    expect(samePath("C:\\h\\s2\\mcp.json", "C:\\h\\s1\\mcp.json", "win32")).toBe(false);
+    expect(samePath("MCP.json", "mcp.json", "win32")).toBe(true);
+    expect(samePath("MCP.json", "mcp.json", "linux")).toBe(false);
   });
 });
