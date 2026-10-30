@@ -760,7 +760,7 @@ Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the 
   and key sets.
 - How a receiver behind a TLS-terminating host learns of a certificate's revocation beyond its own records (DEC-0056).
 - What a receiver does when a reported `records.estateRecord.digest` shows a fork of the estate record (DEC-0056): the hub
-  over the relay (DEC-0132), or an organization server toward a node that has not adopted DEC-0128's UE-2.
+  over the relay or through its own node's `machine.report` (DEC-0132, DEC-0146), or an organization server toward a node that has not adopted DEC-0128's UE-2.
 - RFC 9421's successor drafts and its `Accept-Signature` field (DEC-0056).
 - Clock skew: whether a device reports a `signature-stale` refusal in a later check-in, and how a receiver tells skew from
   replay (DEC-0056).

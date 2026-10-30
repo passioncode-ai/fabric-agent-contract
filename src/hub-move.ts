@@ -7,7 +7,9 @@ import { strictTime } from "./rfc3339.js";
  * DEC-0107 (CT-89): what a machine and the person's network view read to keep an estate recoverable. `hubSilence` says
  * when the hub has broken its own daily heartbeat, so the person moves it before calls between machines stop at 72
  * hours; `recoveryReady` says whether a lost passkey would lose the estate; `hubMove` names what a revision did to the
- * hub keys, so the ceremony shows a move and whether the old key was revoked. Every function answers and never throws.
+ * hub keys, so the ceremony shows a move and whether the old key was revoked. `moved` is true for a re-key on one machine
+ * too: a move is `added` and `removed` naming different machines, read across the move (ceremonies, Move the hub,
+ * step 7, DEC-0146). Every function answers and never throws.
  */
 
 const isString = (value: unknown): value is string => typeof value === "string";

@@ -318,7 +318,7 @@
                   "spent": {
                     "type": "string",
                     "pattern": "^(0|[1-9][0-9]{0,8})(\\.[0-9]{1,6})?$",
-                    "description": "An upper bound on what the meter spent in the lease's window instance: settled receipts plus open reservations, a decimal USD string (DEC-0062). Absent, the lease is unreported, and the hub counts its whole amount as spent once it expires."
+                    "description": "An upper bound on what the meter spent in the lease's window instance: settled receipts plus open reservations, a decimal USD string (DEC-0062). Absent, the lease is unreported, and the hub that signed it counts its whole amount as spent once it expires; in a machine report a lease a hub key revoked by the reported revision signed always carries it (DEC-0146 MR-1)."
                   }
                 },
                 "additionalProperties": false

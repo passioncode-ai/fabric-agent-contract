@@ -122,6 +122,7 @@ function machineReportVectors(): Json {
     ],
     read: [
       { name: "the hub reads the report of the machine that sent it", sealed, context: ctx({ notAfter: "2026-10-27T08:00:01Z" }), expect: { ok: true, report: REPORT } },
+      { name: "an iat written in whole seconds and an at with milliseconds in that second: the at is after notAfter", sealed: seal("sub-second", { ...REPORT, at: "2026-10-27T08:00:00.500Z" }), context: ctx({ notAfter: "2026-10-27T08:00:00Z" }), expect: { ok: false, refusal: "malformed" } },
       { name: "a read with no notAfter refuses rather than skips the bound", sealed, context: ctx(), expect: { ok: false, refusal: "malformed" } },
       { name: "a report after the one held replaces it", sealed, context: ctx({ held: { at: "2026-10-27T07:00:00Z" }, notAfter: "2026-10-27T08:00:01Z" }), expect: { ok: true, report: REPORT } },
       { name: "a report that opens and names a lease twice is dropped", sealed: seal("twice", TWICE), context: ctx({ notAfter: "2026-10-27T08:00:01Z" }), expect: { ok: false, refusal: "malformed" } },

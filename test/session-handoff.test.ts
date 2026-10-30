@@ -196,12 +196,17 @@ describe("a launch argument names the folder's file as the host reads paths", ()
   // another case pass SH-4 and SH-11 (DEC-0145); POSIX keeps the byte comparison, which the folder tests above cover.
   it.runIf(process.platform === "win32")("passes a Windows folder named with `/` before an upper-case MCP.json and BRIEF.md", async () => {
     for (const fixture of ["session-handoff-folder-ok", "session-handoff-folder-brief-file-ok"]) {
+      let rewritten: string[] = [];
       const dir = writeFolder(fixture, (folder, manifest) => {
         const launch = manifest.launch as { args: string[] };
         launch.args = launch.args.map((arg) => arg
           .replace(`${folder}\\mcp.json`, `${folder.toUpperCase()}/MCP.json`).replace(`${folder}/mcp.json`, `${folder.toUpperCase()}/MCP.json`)
           .replace(`${folder}\\brief.md`, `${folder}/BRIEF.md`).replace(`${folder}/brief.md`, `${folder}/BRIEF.md`));
+        rewritten = launch.args.filter((arg) => arg.includes("/MCP.json") || arg.includes("/BRIEF.md"));
       });
+      // The rewrites took effect, so the checks below go through samePath, not the byte comparison (CT-193).
+      expect(rewritten.some((arg) => arg.includes("/MCP.json")), fixture).toBe(true);
+      if (fixture.includes("brief-file")) expect(rewritten.some((arg) => arg.includes("/BRIEF.md")), fixture).toBe(true);
       const verdict = await check(dir);
       expect(verdict.findings.filter((finding) => finding.code === "FAC-SEM-053" || finding.code === "FAC-SEM-054"), fixture).toEqual([]);
     }

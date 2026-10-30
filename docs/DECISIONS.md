@@ -295,6 +295,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-04
 - **Status:** Accepted source change; consumer adoption pending
 - **Annotated (2026-10-12):** adoption measured (DEC-0065, [adoption](evidence/adoption.md)): the adapter (`b291bf0`) and the relay (`51719e4`) pin a commit that contains this decision; Project Observatory's node pins `20a818e` (2026-08-27), which does not. A pin that contains a decision is not proof the consumer implements it.
+- **Annotated (2026-10-26):** amended by DEC-0140: the board reserves `project.work`; no service serves or declares
+  it as a capability of its own (a narrowing; [interop](specification/interop.md)).
 - **Amends:** DEC-0016; C3.1/C3.6 naming in the interop specification
 - **Decision:** `common.schema.json#/$defs/capabilityName` admits
   `^[a-z][a-z0-9._-]{1,127}$`. The manifest capability name, hub argument,
@@ -371,6 +373,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-26):** amended by DEC-0135: who a message is delivered to (what counts as unread and what a
   mirror sends) is decided apart from who reads it; a reply goes to the sender it answers unless its `deliverTo` names
   the thread or a list of participants.
+- **Annotated (2026-10-26):** amended by DEC-0140: `project.work` is the reserved capability of a Project's primary
+  responder; the operator who owns a Project may move an occupied slot to another authorized session as one fenced
+  transition, after which the ordinary rules govern it; a session role is a claim, and a reported branch stays in its
+  Project (whether it may feed an activity event's `git.branch` is CT-176's).
 - **Decision:** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
   board on which messages are addressed to a Project, and through a request to a capability of
   that Project. Identity comes from the authenticated endpoint and never from the payload. A
@@ -3445,6 +3451,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   CT-19); Project Observatory's meter verifies, holds and spends them and reports `spent` (CT-20); an organization server
   hands leases of organization windows once `org-authority/1` exists. Agreed with Project Observatory's session as the
   meter's owner on 2026-10-12 (its `METER.md` M3/M4).
+- **Annotated (2026-10-27):** DEC-0146 orders a machine's reports in `windowRemainder` and `FAC-SEM-090` to the
+  nanosecond (a tie to the larger `spent`), has the issuer draw each `leaseId` unique within the estate across hub keys,
+  and keeps a hub to `estate` leases until a revision decides the report's cap for `project:` and `grant:` ones.
 - **Annotated (2026-10-26):** DEC-0129 decides `org-authority/1` as the member list only; organization windows and
   their leases wait on a later decision (`window-lease.md`).
 - **Annotated (2026-10-12):** a held lease without a whole `sequence` and a `leaseId` is `context-invalid`; the verifier's `estateRevocations` is named in window-lease.md; the check-in's `records.leases[]` was narrowed from any object to `window-lease/1`, a placeholder before, so the Compatibility line's "Additive" holds for every real check-in (the owed reading of #65; packet P6-08).
@@ -4488,6 +4497,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-13):** amended by DEC-0080: for a finding the hold check comes before dedupe, so a dedupe hit into a held thread answers `held` and stores nothing.
 - **Amends:** DEC-0022 and DEC-0073 (one refusal code, one optional member in `com.status` and in the directory; no
   tool, argument, state or transition changes).
+- **Annotated (2026-10-27):** amended by DEC-0140: the operator's move of a slot is refused `held` where
+  `com.responder_replace` is (a row of the hold table).
 - **Decision:** in [project communication](specification/project-comms.md#holds) —
   1. **The refusal.** `held` joins `comms-common.schema.json#/$defs/refusalCode`. It is always `retryable: true`
      (`comms-refusal.schema.json` refuses it with `false`). Its message is one sentence that says the operator resumes
@@ -4688,6 +4699,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   its ADR-0117 §4 and its Comms screen (CT-41); the adapter's kits read `settledBy` (CT-42).
 - **Amends:** DEC-0022 (who may call `com.reconcile`) and DEC-0073 (the receipt's `request`; the message view). No tool,
   argument, state, transition or refusal code is added.
+- **Annotated (2026-10-27):** amended by DEC-0140: the lost-result operation runs whenever the next holder takes
+  the slot: after a holder left, by a replacement (already so in the replace schema), or by the operator's move of a
+  slot (PR-2).
 - **Decision:** in [project communication → Owner settlement](specification/project-comms.md#owner-settlement) —
   1. **Who.** The settler is the operator principal that owns the request's target Project, `trusted` and verified by
      the host; in an organization estate, that member only. No Project grant makes one. Every other caller, another
@@ -6680,9 +6694,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   machine's alert and anchor (Fabric's nodes, Project Observatory's node), the relay and the first organization server's
   vendored estate-record schema, the Fabric Agent Adapter's kits (`FAC-SEM-137`, `fixtures/vectors/hub-move.json`),
   each at its next pin (CT-113).
-- **Annotated (2026-10-27):** DEC-0146 reads step 7's gate: "every holder" of the old hub's leases is every machine the
-  revision lists after a planned move, each old-hub lease then counted at its final `spent`; after a lost hub, or while a
-  removed machine has not reported after the revocation, every instance the old hub divided stays closed until it ends.
+- **Annotated (2026-10-27):** DEC-0146 reads step 7's gate: "every holder" of the old hub's leases is every machine an
+  estate record listed since the window instance began, and the gate binds the new hub from its first signature (the
+  switch of a planned move, before the revoking revision); after a planned move each old-hub lease is counted at its
+  final `spent`; after a lost hub every instance the old hub divided stays closed until it ends, and when a machine
+  removed since an instance began never reported at or above the revoking revision, that instance stays closed until it
+  ends.
 - **Context:** DEC-0084 wrote the estate ceremonies and left two out: moving the hub to another machine, and what
   happens when a passkey is lost. The ecosystem readiness review of 2026-10-22 (board thread `b2511678`, message
   `c938af7d`) asked for both, with an alert when the hub's heartbeat is a day old and two authenticators from revision
@@ -7214,6 +7231,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   job's capability (MJ-1); a decision still names the request key on `fabric.job.get`.
 - **Annotated (2026-10-27):** AP-4's `humanStep` gains `comparison` (DEC-0142): a comparison of codes between two
   people, the person's act like the others.
+- **Annotated (2026-10-27):** DEC-0140 makes one exception to AP-1: the operator's move of a board slot is offered in
+  the host's controls only until a host ships its agent twin (CT-181, the twin's contract half, then CT-125).
 - **Annotated (2026-10-28):** DEC-0147 reads AP-4's `secret` as a secret typed in or handed out (a peer share's
   export), item 4's "typed secrets" included, and names the peer share's export among the steps held in the product's
   app window; it defines the agent twins of the secret prompt's "Decline" and of a peer share's "Open a share".
@@ -8008,8 +8027,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reports and Fabric's hub reads them; on the hub's machine the node serves the local channel's `machine.report` and
   Fabric's hub calls it (CT-152). A node pinned before DEC-0132 answers `machine.report` with `unknown-method`, and its
   leases then count at their whole amounts until it reports.
-- **Annotated (2026-10-27):** DEC-0146 decides MR-5's gate after a move (counted after a planned move, closed to each
-  instance's end after a lost hub), the report's cap, sealing key and newest lease, and MR-6's wait for a machine that does
+- **Annotated (2026-10-27):** DEC-0146 decides MR-5's gate after a move (binding the new hub from its first signature;
+  counted after a planned move; closed to each instance's end after a lost hub or when a machine removed since the
+  instance began never reported), the report's cap, sealing key and newest lease, and MR-6's wait for a machine that does
   not report.
 - **Annotated (2026-10-26):** DEC-0139 settles the readings' text and test items: the hub's reading after opening (`acceptMachineReport`, a `FAC-SEM-152` finding and an `at` `strictTime` cannot read are `malformed`), refused sends, an unusable `#kem`, `machine.report`'s callers, and names a pre-DEC-0132 hub's handling as open (CT-172). A node pinned before DEC-0132 was promised no answer to `machine.report`: DEC-0139 reads any error, or none, as no report, where the Status above says `unknown-method`.
 - **Context:** DEC-0128 UE-2 keeps the estate's records (the applied revision, the heartbeat, the delta head, the
@@ -8433,6 +8453,66 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-10-26-machine-report-loose-ends.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-161; DEC-0132's readings.
 
+### DEC-0140: the primary responder, the operator's move of a slot, a session's role and branch
+
+- **Date:** 2026-10-26
+- **Status:** Accepted, merged 2026-10-30 after its objection window closed (2026-10-28 18:00 UTC) with no objection
+  on board thread `6a8d2f9c` (Fabric `f3f92905`, `94a41d8c`). Additive but for one narrowing under the compatibility
+  policy's second exception: no service may serve or declare `project.work` (PR-1). The serving parties were checked
+  on 2026-10-26 by `git grep project.work` at their released tags: Fabric `v0.3.13` (only i18n keys), the adapter
+  `v0.52.0`, Fabric Dashboards `v0.8.7`, Fabric Switchboard `v0.6.83`, Project Observatory `v0.1.0`, Fabric Inbox
+  `v0.42.0` (re-checked at `v0.45.0`), the first organization server `v0.4.0`, and every other repository on the operator's machine at its
+  latest tag, else its head (165 in all, the estate's provider agents among them), none of which serves or declares
+  it (the only matches are i18n keys and longer identifiers such as `project.workspace_ids`); fabric-workspace has no
+  tag and none at its head (a head was read only where a repository has no tag). The release notes will list it as a narrowing. No tool, argument or field of any tool's schema changes. Adoption: Fabric in 0.3.15
+  (CT-174); whether a client leaves a slot moved off it is the clients' own (CT-175).
+- **Context:** Fabric's simple Fabric shows each Project's main session and lets the operator hand a Project's work to
+  another session; its request `23ba0e97` asked for one rule for "the main one", for the operator's move of a slot, and
+  for an optional session `role` and `branch` with a privacy rule. No Project declared a capability when it asked.
+- **Decision:** [project communication](specification/project-comms.md) PR-1 to PR-3.
+  1. **PR-1.** `project.work` (`PRIMARY_CAPABILITY`) is the reserved capability a requester names to reach a Project's
+     primary responder; the board never re-routes another capability to it; otherwise a capability like any other. A
+     host shows its holder as the main session (a `stale` one as not answering), none while the slot is `absent`. No
+     service serves or declares it.
+  2. **PR-2.** The operator who owns the Project (in an organization, that member only) moves an occupied (Project,
+     capability) slot to another live, authorized session of that Project than its holder, in
+     the host's controls only (its agent twin, whose decision must bind slot, generation and receiving session and which
+     no mandate covers, is owed: CT-181, then CT-125), not by an agent until that host ships it; from the
+     generation the operator saw (`revision_conflict` otherwise); one transition as `com.responder_replace` would
+     make it for the receiving session, transferring nothing; refused `held` under a slot or Project hold. After it
+     the board's ordinary rules govern the slot: a move bars nobody, and a host keeps the operator's choice as its own
+     state, showing when the holder is no longer the chosen session and offering the move again while the chosen
+     session is live and the slot occupied, and showing the choice as ended once it has ended; an `absent` slot is
+     refused `invalid_transition`. The receiving
+     session continues accepted work by its own replacement with a transfer, or the requester cancels it.
+  3. **PR-3.** A session role is a claim, display and routing only, never authority, and not a role assignment; the
+     host never copies a session's reported branch into the board, the directory, `com.status`, a relay, an
+     organization server, an events feed read off the machine or another Project's sessions; an activity event's
+     `git.branch` keeps following `telemetry.git_branch` (DEC-0031) and is never fed from a reported branch until
+     CT-176 decides.
+- **Why:** one name lets a requester reach a Project without knowing its capabilities and lets every host show the
+  same main session; a move by the operator's act, guarded by the generation the operator saw and made as one fenced
+  transition, keeps the fences' guarantees while the person decides who works, and leaving the slot to the board's
+  ordinary rules afterwards changes no client; a branch name can carry what
+  the board must not.
+- **Alternatives considered:** an argument on `com.responder_replace` naming the receiving session (a closed schema
+  would change, and an agent could move slots by itself); transferring accepted work as part of the move (a transfer's
+  checkpoint is written by its caller, and the operator writes none; the receiving session writes its own by
+  replacing itself); a host bar on the moved-off session (a reconnect gets a new session id, and barring the binding
+  would bar the same agent's other terminals); a client rule to recover only at the generation its checkpoint recorded
+  (released clients replace at the generation `com.status` shows, which the replace schema tells them to, so it would
+  be a second narrowing no released client meets; it is the clients' own improvement, CT-175); a session role that grants a slot (a claim would become authority).
+- **Compatibility:** additive, with the one narrowing named in Status, and one relaxation confined to an action this
+  decision creates: AP-1's parity does not bind the operator's move until a host ships its twin (no released host
+  offers the move, Fabric `v0.3.13` having none, and FAC-SEM-142's readers see only declared actions). It follows
+  the operator's rule of 2026-10-24 that where an agent has no door yet, a backlog row is filed (CT-181, CT-125). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/project-comms.md` (header, C4's wording, Owner settlement's paths, PR-1 to PR-3, the hold
+  table), `conformance.md` (the host row; AP-1's row carries the exception), `interop.md` (the reserved name), `service.md` (AP-1's exception for the move), `README.md` and `DOCMAP.md` (their rows), `CONTEXT.md` (Primary responder,
+  Session role), `src/comms-hold.ts` (`PRIMARY_CAPABILITY`), `test/comms-hold.test.ts`, `docs/ux/scenarios.md`
+  (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16, FLW-29's rejected shape), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022, DEC-0079, DEC-0081 and DEC-0121 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176, CT-179, CT-181, CT-182 and CT-183 (filed); fabric-workspace `knowledge/agents-first.md` (its parity paragraph, at the merge); the handoff
+  `docs/handoffs/2026-10-26-simple-fabric-decisions.md` and its row in `docs/handoffs/README.md`.
+- **Source:** CT-174; Fabric's request `23ba0e97` (thread `6a8d2f9c`).
+
 ### DEC-0141: a job's step under a mandate is read under the job's capability
 
 - **Date:** 2026-10-26
@@ -8708,18 +8788,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0146: the machines' report, its open design questions decided
 
 - **Date:** 2026-10-27
-- **Status:** Accepted (on merge of its pull request, after its objection window: 2026-10-29 18:00 UTC, thread
-  `5d2ea917` with Fabric). A narrowing of the hub's reading of a report's `at` (one that is no relay time, which
-  DEC-0139's `strictTime` admitted with an offset, or one later than the body's `iat`); new duties for the hub
-  (counting an old hub's leases, the wait it shows, the `degraded` entry's form) and for a reporting machine (the
+- **Status:** Accepted, merged 2026-10-30 after its objection window closed (2026-10-29 18:00 UTC) with no objection
+  on threads `5d2ea917` (Fabric) and `41a9b0cb` (Project Observatory). A narrowing of the hub's reading of a report's `at` (one that is no relay time, which
+  DEC-0139's `strictTime` admitted with an offset, or one later than the body's `iat`, or, for its own node's answer on the local channel, later than the hub's clock when the answer arrived); new duties for the hub
+  (drawing each `leaseId` unique within the estate across hub keys, item 2; counting an old hub's leases, the gate binding it from its first signature, before the revoking revision, over every
+  machine listed since the window instance began, the wait it shows, the `degraded` entry's form) and for a reporting machine (the
   `#kem` it seals to, the leases of each hub key, a lease a revoked key signed) and for a meter (re-verifying its leases
-  when it applies a revision), none deployed yet (CT-152, and for Project Observatory's meter CT-20); and a duty
-  for every recipient of relay messages, deployed ones included (Fabric's hub and nodes, Project Observatory's node):
-  acknowledging a verified body whose payload type it does not know, whose compliance is unconfirmed and asked in
-  threads `5d2ea917` (Fabric) and `41a9b0cb` (Project Observatory). Additive: reference functions
+  when it applies a revision); a hub signs no `project:` or `grant:` lease until a revision admitting them decides the
+  report's cap, none deployed yet (CT-152, and for Project Observatory's meter CT-20); and a duty
+  for every recipient of relay messages: acknowledging a verified body whose payload type it does not know. Fabric's
+  record (its release plan's PL-12, commit `1145eff6`, 2026-10-27) says no Fabric reads a relay mailbox today and that
+  its reader in 0.4.0 acknowledges every verified body and drops an unknown type (CO-452); Project Observatory's node is
+  asked in thread `41a9b0cb`. Additive: reference functions
   (`readMachineReport`, `instantKey`), a context member (`notAfter`), a rule code (`FAC-SEM-154`), a node dispatch function
   (`nodeMethodAnswer`) with the vector group `dispatch`, and vectors in `machine-report.json` (`open`, `accept`, a new
-  group `read`) and the `remainder` vectors in `window-lease.json` (reports in one millisecond, ties, a held offset time); no earlier vector's answer changes. Adoption: CT-152's adopters (Fabric's hub and nodes, Project
+  group `read`) and the `remainder` vectors in `window-lease.json` (reports in one millisecond, ties, a held offset time), and three `move` cases in `hub-move.json` (a re-key with the old kid revoked, a planned move's revoking revision, a later revision that arms nothing); no earlier vector's answer changes. Adoption: CT-152's adopters (Fabric's hub and nodes, Project
   Observatory's node).
 - **Context:** DEC-0132's and DEC-0139's blind readings left design questions open (CT-172): the report's lease cap,
   which key a report is sealed to, what "newest" means, a lease a revoked hub key signed, the gate after a lost hub, the
@@ -8735,39 +8818,60 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `grant:` lease until the revision that admits them decides the report's cap with them, and a machine never drops
      a lease to fit.
   2. **Newest and the hub keys.** The newest lease of a slot is the highest `sequence` among the slot's leases one hub
-     key signed (WL-11); after a move a machine names the newest of each hub key it held in the instance.
+     key signed (WL-11); after a move a machine names the newest of each hub key it held in the instance. Since a report then carries leases
+     of several hub keys, a hub draws each `leaseId` unique within the estate across hub keys (for example 128 random
+     bits, or prefixed by its kid), so a report's entry never names another hub's lease.
   3. **A lease a revoked key signed** ends for the meter when it applies the revoking revision (WL-6), before its
      `expiresAt`: it spends nothing more, later reports keep naming it with its own `expiresAt` until the instance
      ends, and its final `spent` is a report whose `estateRecord.revision` is at or above that revision (MR-5).
-  4. **The gate after a move, and the old hub's spend.** "Every holder" of the old hub's leases is every machine the
-     revision lists, since only the old hub knew which held one; a machine whose report names none held
-     none. The new hub's first division of such an instance counts each old-hub lease at its reported final `spent`,
-     as an ended lease of that amount, never at nothing. How the reference orders leases across hub keys stays CT-113's.
+  4. **The gate after a move, and the old hub's spend.** "Every holder" of the old hub's leases is every machine an
+     estate record listed since the window instance began, since only the old hub knew which held one; a machine whose
+     report names none held none, and a machine removed before such a report never sends one. The gate binds the new
+     hub from its first signature (the switch of a planned move, before the revoking revision; at once after a lost
+     hub), and the revoking revision is the one that adds the `hub-key` revocation to its parent (later revisions keep
+     it, `FAC-SEM-072`, and do not arm the gate again). The new hub's first division of such an instance counts each old-hub lease at its reported final `spent`, against
+     every instance of that machine whose bounds hold its `expiresAt` (after its start, at or before its end) (a report's lease entry names no instance),
+     as an ended lease of that amount, never at nothing. A report entry carries no amount, so the new hub has none to fall
+     back on (the check-in's "absent `spent` counts the whole amount" cannot apply): a report at or above the revoking
+     revision names `spent` on every lease a revoked hub key signed (MR-1), and one that names such a lease without it
+     counts as no report for the gate, the instance staying closed until a report names it or the instance ends; once
+     a division has counted a lease's final `spent`, a later report naming it without `spent` changes nothing counted.
+     How the reference orders leases across hub keys stays CT-113's.
      This opens the gate only after a planned move. After a lost hub the lost machine, removed in the move's revision,
      never reports and may have held the old hub's leases itself, so every instance the old hub divided stays closed
      to new leases until it ends (item 6's rule for a removed machine that never reported). The gate is a move's to
      another machine, never a re-key's on the hub's own machine, which keeps dividing (ceremonies, Move the hub,
-     step 7; Replace a machine's key, step 3).
+     step 7; Replace a machine's key, step 3); a re-key that loses the division, and a hub certified after a period
+     with none, are CT-199's.
   5. **Which `#kem`.** A machine seals each report to the `#kem` the newest revision it verified (applied, or newer and
      refused) lists for that hub machine: the hub that drafted it holds that key.
   6. **A machine that does not report** (MR-6): DL-15's switch, step 6 and step 7's gate wait for every machine the
-     revision lists, with no timeout of their own (step 7's gate ends at the latest with the window instance); Fabric
+     revision lists (step 7's gate for every machine listed since the window instance began, item 4), with no
+     timeout of their own (step 7's gate ends at the latest with the window instance); Fabric
      shows each machine waited on, since when and why when known, and the ways out (bring it back, update it, remove
      it). A removed machine is no longer waited on by DL-15 and step 6; step 7's gate keeps an instance the old hub
-     divided closed until it ends when a removed machine never reported after the revocation, its spend being
-     unknown.
+     divided closed until it ends when a machine removed since the instance began (before the move, between its
+     revisions or after) never reported at or above the revoking revision, its spend being unknown. Fabric tells the person before it happens: before the passkey signs a lost-hub revision, that every window the hub divided stays paused until it ends, with the dates, and that running approvals and tokens the old hub kid signed must be issued again; before "Move the hub" starts a planned move, that the old hub's windows pause from the switch until the second revision is signed and reported, and that running approvals and tokens the old hub kid signed must be issued again once it is signed; before "Remove" during a move (from its first revision until every paused instance has opened or ended) for a machine that has not reported at or above the revoking revision, and before "Move the hub" while an instance runs that a machine removed since it began left, that the instance stays paused until it ends
+     (SCR-23, SCN-030, SCN-038). After a planned move's switch Fabric asks for revision 2 at once and keeps asking; while
+     it is unsigned the old hub's windows stay paused, shown with their end dates and "Finish the move" (signing its second revision) (ceremonies step
+     3, SCR-23). "Approvals and tokens the old hub kid signed" in these notices covers every hub key the move or the
+     lost-hub revision replaces, each organization context's hub key included (DEC-0128, DL-14a): tokens issued in an
+     organization's context are issued again too. A profile change for the hub's machine waits for the move: Fabric
+     keeps it and offers it once revision 2 is signed, not reported, and drops it if the move is not made (ceremonies,
+     Change a machine's profile; FLW-26).
   7. **The hub's own machine.** The node that applies the estate's records there serves `machine.report`, Fabric's own
      node included. A node answers a method it does not serve `unknown-method`, as `nodeMethodAnswer` does.
-  8. **A payload a recipient does not know.** Every recipient of relay messages acknowledges and drops a body it verified
+  8. **A payload a recipient does not know** ([relay](specification/relay.md#messages)). Every recipient of relay messages acknowledges and drops a body it verified
      whose payload type it does not know; a body it cannot verify keeps its refusal's handling, since `unknown-sender`
-     and `not-yet-valid` can pass later. A hub not yet on DEC-0132 that does so drops reports, and its mailbox does not fill with them; whether
-     Fabric's deployed hub does is asked in thread `5d2ea917`, and if it does not, its date is CT-152's.
+     and `not-yet-valid` can pass later. A hub not yet on DEC-0132 that does so drops reports, and its mailbox does not fill with them; no Fabric
+     reads a relay mailbox today, and its 0.4.0 reader acknowledges and drops an unknown type (Fabric's PL-12, CO-452).
   9. **A hub that cannot read reports.** Its `degraded` entry's `source` is `machine-report`: a setup state while its
      new `#kem` waits only for the person to sign a revision the hub drafted, a failure otherwise. A hub with no
-     `fabric-service/0.1` well-known shows it on its own machine's row in My network's machines (SCR-23, error); SCR-23
+     `fabric-service/0.1` well-known shows it on its own machine's row in My network's machines (SCR-23, a setup note while only the person's signature is missing, an error otherwise); SCR-23
      gains the waiting state of item 6.
   10. **The report's `at`.** It is a relay time (`Z`, an upper-case `T`, at most nine fraction digits; `instantKey`,
-      `FAC-SEM-154`, so `pnpm validate` flags it), ordered to the nanosecond, and not after `notAfter`, read to the millisecond: the body's
+      `FAC-SEM-154`, so `pnpm validate` flags it in a machine-report document; a `machine.report` answer on the local
+      channel is not yet checked for it, CT-152), ordered to the nanosecond, and not after `notAfter`, read to the millisecond: the body's
       signed `iat` for a relayed report, the hub's clock when its own node answered. An unreadable `notAfter` refuses.
       The hub's division orders a machine's reports the same way (`windowRemainder`): by millisecond, then the nanoseconds
       within it, a held time that is no relay time (an offset, a lower-case `t`, ten or more fraction digits, accepted before DEC-0146) read as its millisecond's last nanosecond (as acceptance reads it), a tie going to the larger
@@ -8793,27 +8897,40 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   letting the person reopen the windows a lost hub divided before they end (the unknown spend of the lost machine's
   meter could pass the limit the window keeps; whether a person may accept that is the operator's question, CT-195).
 - **Compatibility:** a narrowing for the hub's reading of an `at` that is no relay time (one with an offset was
-  accepted under DEC-0139) or later than the body's `iat`, and for a hub that issued a lease of an instance the old hub
-  divided without counting the old hub's spend; new duties for reporting machines (none deployed yet, CT-152) and for
-  relay recipients (deployed: whether they already acknowledge an unknown payload is asked in `5d2ea917` and
-  `41a9b0cb`). Additive for ports (three new functions, `readMachineReport`, `instantKey` and `nodeMethodAnswer`, a context member, a rule code, vector groups); no
+  accepted under DEC-0139) or later than the body's `iat`, or, for its own node's answer on the local channel, later than the hub's clock when the answer arrived, and for a hub that issued a lease of an instance the old hub
+  divided without counting the old hub's spend, between a planned move's switch and its revoking revision, or after a
+  machine was removed since the instance began; a narrowing of `FAC-SEM-090` and `windowRemainder` for reports of one
+  lease in one millisecond (the newer, then the larger `spent`, where the last one passed in won before), which no
+  consumer runs yet; a narrowing for a hub, which signs no `project:` or `grant:` lease until the revision admitting them
+  decides the report's cap, and draws each `leaseId` unique within the estate across hub keys where one division
+  sufficed before (none issues leases yet, CT-19); a report newer than the held one by less than a
+  millisecond, which DEC-0139's reading refused as `stale`, is now accepted (item 10; no hub is deployed, CT-152); new
+  duties for Fabric's ceremonies, none implemented (CO-412): the notices of item 6 (the paused windows and the re-issue of approvals and tokens, each organization context's included, before a move or a lost hub), the profile change kept on the hub's machine until revision 2 is signed,
+  revision 2 asked for at once and kept asked for, the re-key notice (before re-keying the machine that holds the hub key, that running approvals and
+  tokens the old kid signed must be issued again), and a re-key on the hub's own machine signing at once with the old kid's leases
+  kept in its division (never step 7's gate); a new duty for a meter, re-verifying its leases when it
+  applies a revision with its first verification's context (Project Observatory's meter, CT-20); no hub holds a report
+  from before DEC-0146 (none is deployed, CT-152), so no held `at` later than its body's `iat` needs a guard; new duties
+  for reporting machines (none deployed yet, CT-152) and for relay recipients (Fabric reads
+  no relay mailbox today and its 0.4.0 reader complies, its PL-12; Project Observatory's node is asked in `41a9b0cb`). Additive for ports (three new functions, `readMachineReport`, `instantKey` and `nodeMethodAnswer`, a context member, a rule code, vector groups); no
   earlier vector's answer changes, and a held report accepted with an offset before still guards against an older
   one.
     `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `CONTEXT.md` (Machine report), `src/machine-report.ts` (`readMachineReport`, `notAfter`, `FAC-SEM-154`, the relay time),
+- **Consequences / affects:** `CONTEXT.md` (Machine report, Revoking revision, Local channel), `schemas/window-lease.schema.json` (the `leaseId` description), `conformance.md`'s ceremony-signer row (the re-key notice) and the issuing hub's row (`leaseId`), `schemas/local-channel.schema.json` (its description), `docs/specification/membership.md` (OM-7), `src/machine-report.ts` (`readMachineReport`, `notAfter`, `FAC-SEM-154`, the relay time),
   `src/rfc3339.ts` (`instantKey`), `src/local-channel.ts` (`nodeMethodAnswer`), `fixtures/vectors/machine-report.json`
   and `tools/vectors/machine-report.ts` (`open`, `accept`, `read`), `fixtures/vectors/local-channel.json` and
-  `tools/vectors/local-channel.ts` (`dispatch`), `test/machine-report.test.ts`, `test/local-channel.test.ts`;
-  `relay.md` (MR-1 to MR-6, the rule table), `window-lease.md` (Reporting, `FAC-SEM-090`), `ceremonies.md` (step 7),
+  `tools/vectors/local-channel.ts` (`dispatch`), `fixtures/vectors/hub-move.json` and `tools/vectors/hub-move.ts` (three
+  `move` cases), `test/machine-report.test.ts`, `test/local-channel.test.ts`;
+  `relay.md` (Times; Messages, `deliver`'s acknowledgement; MR-1 to MR-6; the rule table), `window-lease.md` (the `leaseId` row, Reporting, `FAC-SEM-090`), `ceremonies.md` (step 7),
   `delegation.md` (DL-15), `local-channel.md`, `devices.md` (UE-2's wording, what stays linkable), `revocation-delta.md`
-  and `estate-record.md` (wording), `conformance.md` (the module row, the meter, hub, reporter and hub-reader rows, a
-  node row, the rule list), `schemas/machine-report.schema.json` and `schemas/device-check-in.schema.json`
+  and `estate-record.md` (wording), `conformance.md` (the machine-report and window-lease module rows, the meter, hub, reporter and hub-reader rows, a
+  node row, the network-view row, the rule list), `schemas/machine-report.schema.json` and `schemas/device-check-in.schema.json`
   (descriptions), `src/revocation-delta.ts` (comments), `src/window-lease.ts` (`heldBy`'s order of reports) and
-  `fixtures/vectors/window-lease.json` (`remainder` vectors: reports in one millisecond, ties, a held offset time), `docs/ux/screens.md` (SCR-23),
-  `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-27), `docs/specification/window-lease.md` (who adopts it),
+  `fixtures/vectors/window-lease.json` (`remainder` vectors: reports in one millisecond, ties, a held offset time), `docs/ux/screens.md` (SCR-23, SCR-31),
+  `docs/ux/scenarios.md` (SCN-038), `docs/ux/flows.md` (FLW-20, FLW-26, FLW-27), `docs/specification/window-lease.md` (who adopts it),
   `conformance.md`'s delta-applying, drafter and relay-call rows, `docs/DOCMAP.md`, `docs/specification/README.md`,
-  `docs/handoffs/README.md`; DEC-0107, DEC-0132 and DEC-0139 annotated; backlog CT-172
-  (closes on merge), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty), CT-195, CT-196 and CT-197 filed; `ceremonies.md` (Replace a machine's key, step 3); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
+  `docs/handoffs/README.md`; DEC-0062, DEC-0107, DEC-0132 and DEC-0139 annotated; backlog CT-172
+  (closes on merge), CT-19 (the issuer's `leaseId` and `estate`-only issuance), CT-152 (its adopters' reading), CT-113 (the reference's inputs), CT-20 (the meter's duty and its re-verification), CT-195, CT-196, CT-197 and CT-199 filed; `docs/ux/scenarios.md` (SCN-030); `ceremonies.md` (Remove a machine; Replace a machine's key, step 3; Move the hub, steps 3 and 4; Change a machine's profile, the kept change), `conformance.md`'s profile-drafter row and the `src/hub-move.ts` module row, `devices.md` (Not decided: the fork digest's way to the hub), `docs/ux/scenarios.md` (SCN-037), `contexts.md` (what stays linkable), `delegation.md` (DL-15's way out for the hub's own machine), `src/hub-move.ts` (the `moved` comment), `src/window-lease.ts` (the `periodOf` comment), `docs/ux/foundation.md` (ST-025, ST-032), `docs/ux/scenarios.md` (SCN-048); the handoff `docs/handoffs/2026-10-27-machine-report-design.md`.
 - **Source:** CT-172; DEC-0132's and DEC-0139's readings.
 
 ### DEC-0147: a peer share's risks from its readings settled (reports that restate a window, the agent twins, inputs that do not read)

@@ -1389,6 +1389,30 @@
       }
     },
     {
+      "name": "an iat written in whole seconds and an at with milliseconds in that second: the at is after notAfter",
+      "sealed": {
+        "type": "fabric-machine-report/1",
+        "kem": "m-hub#kem",
+        "enc": "BL-mHivwUUBMMra15agPy3KHLKMTeGUT8O4Cxx_BN6HWayZ195nUgzzBlTLrychQtY3Z4EGjAKUvScVz0Llfk98",
+        "ct": "SpMFsqkKs1bsChJjItjjAFIGoW2cMaX_5OxA0c3aq1VneCHV2L1Y-KFOboqE5LP4WpPM8n-5fgDTwQIseFTeAC8HD9gyge1xF7ZD03tCHtWAev3SyiVTRSKIWrZWJTht_oQ__jEXq2E5tPiaF7CJbBV2Xg8ufuoJxu5kma7L0crwDCc09rPlBKJ0NskxEJQGq8es-TAQ3CoVqWX9p87ql6fn3YmiNJfnFS09Nc0QyP9foMDgAKPMA3lk9BpidWCRojZUT2SIh-RlmwQ7baJwiUPYjJ1PJyasFFi0s_VORJVpJf3JmMfFkvd5E1N5AepjBjp6Ue2r2OBdtAYXXcRhMSdFwrJEtfDKCC_ORovt4hsIdsVZhXT7IdvITVKp-VgRlNDxv3-AvhxmflLJNVFKJgZLqQ9yW2xeQXisL_hsSauIOSaEqHHRqMQwysTHzVn-0D84vVQzCCEZvJcTCVBEtILBF20ppEjsBSN6BCa6ikyTSAiz6Wn0JtjBXdaMnitc3Pa_3jdU_kGWaOjTtvPuytcuezvjRmLSaYJJtSg8fn7tZYA75NPye3RH5Tvr8t2Y-Ir8XL30YsQvwcU1koUtyMvkWlrESztQnPCwXMj0aP0"
+      },
+      "context": {
+        "from": "m-a#sig",
+        "to": "m-hub#sig",
+        "msgId": "report-0001",
+        "own": {
+          "kid": "m-hub#kem",
+          "privateKey": "+qdG3y0dT7vb87+wV0LfWZxs1SI7S/yQy2ob3Df3Wwo="
+        },
+        "sender": "m-a",
+        "notAfter": "2026-10-27T08:00:00Z"
+      },
+      "expect": {
+        "ok": false,
+        "refusal": "malformed"
+      }
+    },
+    {
       "name": "a read with no notAfter refuses rather than skips the bound",
       "sealed": {
         "type": "fabric-machine-report/1",

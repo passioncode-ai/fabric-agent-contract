@@ -77,12 +77,23 @@ function moveCases(): Json[] {
       { moved: false, added: [], removed: [{ machine: "m-a", kid: "hub-a", revoked: false }] }],
     ["the hub's key replaced on the same machine, unrevoked: FAC-SEM-114 refuses it", parent, { machines: [machine("m-a", "hub-a2"), machine("m-b")] },
       { moved: true, added: [{ machine: "m-a", kid: "hub-a2" }], removed: [{ machine: "m-a", kid: "hub-a", revoked: false }] }],
+    ["the hub's key replaced on the same machine and the old kid revoked: a re-key, no move, since the machine still certifies a hub key (DEC-0146)", parent,
+      { machines: [machine("m-a", "hub-a2"), machine("m-b")], revocations: [{ kind: "hub-key", ref: "hub-a", revokedAt: NOW }] },
+      { moved: true, added: [{ machine: "m-a", kid: "hub-a2" }], removed: [{ machine: "m-a", kid: "hub-a", revoked: true }] }],
     ["nothing changed", parent, parent, { moved: false, added: [], removed: [] }],
     ["another key under the same kid: added and removed, as the record's rules read it", parent, { machines: [machine("m-a", "hub-a", X2), machine("m-b")] },
       { moved: true, added: [{ machine: "m-a", kid: "hub-a" }], removed: [{ machine: "m-a", kid: "hub-a", revoked: false }] }],
     ["a machine listed twice: its first entry only", parent, { machines: [machine("m-a"), machine("m-a", "hub-a"), machine("m-b")] },
       { moved: false, added: [], removed: [{ machine: "m-a", kid: "hub-a", revoked: false }] }],
-    ["revision 1, no parent", null, parent, { moved: false, added: [{ machine: "m-a", kid: "hub-a" }], removed: [] }]
+    ["revision 1, no parent", null, parent, { moved: false, added: [{ machine: "m-a", kid: "hub-a" }], removed: [] }],
+    ["a planned move's second revision: the old key dropped and revoked, nothing added, so the revoking revision (DEC-0146)",
+      { machines: [machine("m-a", "hub-a"), machine("m-b", "hub-b")] },
+      { machines: [machine("m-a"), machine("m-b", "hub-b")], revocations: [{ kind: "hub-key", ref: "hub-a", revokedAt: NOW }] },
+      { moved: false, added: [], removed: [{ machine: "m-a", kid: "hub-a", revoked: true }] }],
+    ["a revision after the move keeps the revocation: nothing removed, the gate not armed again (DEC-0146)",
+      { machines: [machine("m-a"), machine("m-b", "hub-b")], revocations: [{ kind: "hub-key", ref: "hub-a", revokedAt: NOW }] },
+      { machines: [machine("m-a"), machine("m-b", "hub-b"), machine("m-c")], revocations: [{ kind: "hub-key", ref: "hub-a", revokedAt: NOW }] },
+      { moved: false, added: [], removed: [] }]
   ];
   return cases.map(([name, parentRecord, next, expect]) => ({ name, parent: parentRecord, next, expect }));
 }
@@ -116,7 +127,7 @@ function anchorCases(): Json[] {
 export function hubMoveVectors(): Json {
   return {
     about:
-      "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine, kid and public x (reported by machine and kid) in the order the record lists machines, a machine listed twice read by its first entry, revoked when next lists the removed kid as a hub-key revocation; a removed key not revoked is a revision FAC-SEM-114 refuses (DEC-0084). anchor: anchorDelta(state, record) over the committed entries of fixtures/vectors/revocation-delta.json; a record that lists every dropped entry's revocation by kind and ref; missing names the dropped entries' sequences. Every case holds in every time zone.",
+      "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine, kid and public x (reported by machine and kid) in the order the record lists machines, a machine listed twice read by its first entry, revoked when next lists the removed kid as a hub-key revocation; moved is true for a re-key on one machine too, and a move (DEC-0146's gate) is added and removed naming different machines read across the move; a removed key not revoked is a revision FAC-SEM-114 refuses (DEC-0084). anchor: anchorDelta(state, record) over the committed entries of fixtures/vectors/revocation-delta.json; a record that lists every dropped entry's revocation by kind and ref; missing names the dropped entries' sequences. Every case holds in every time zone.",
     silence: silenceCases(),
     recovery: recoveryCases(),
     move: moveCases(),

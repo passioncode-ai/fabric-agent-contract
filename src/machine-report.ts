@@ -163,7 +163,7 @@ function orderReport(report: Json, machine: unknown, held: unknown, notAfter: un
  * schema refuses it, a `FAC-SEM-152` or `FAC-SEM-154` finding, or an `at` after `notAfter`), `wrong-machine` (another
  * machine than `machine`, the sender `relayCallerTier` named or the hub's own machine id) and `stale` (an `at` not after
  * the report held for that machine). The caller handles a `null` answer before it calls: that is no report (the node
- * applies no estate records, and the hub holds nothing for it), while `acceptMachineReport(null)` is `malformed`, as is
+ * applies no estate records), and the hub keeps what it holds for its machine (relay.md MR-2), while `acceptMachineReport(null)` is `malformed`, as is
  * anything else that is no report. Never throws.
  */
 export function acceptMachineReport(report: unknown, ctx: { machine: unknown; held?: { at: unknown }; notAfter?: unknown; schemaValid: (report: unknown) => boolean }): { ok: true; report: Json } | { ok: false; refusal: MachineReportAcceptRefusal } {

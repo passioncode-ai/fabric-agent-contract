@@ -35,6 +35,13 @@ export const HOLD_SCOPES: ReadonlyMap<string, readonly ("thread" | "project" | "
   ["com.effect_begin", ["thread", "project", "slot"]]
 ]);
 
+/**
+ * The reserved capability of a Project's primary responder (DEC-0140 PR-1, docs/specification/project-comms.md#the-primary-responder):
+ * the capability a requester names to reach it. The board never re-routes another capability to it; a capability like
+ * any other otherwise, and no service serves it as a tool of its own.
+ */
+export const PRIMARY_CAPABILITY = "project.work" as const;
+
 /** Never refused `held`, under any hold: they settle, report on or keep alive started work, cancel, or read. */
 export const NEVER_HELD: readonly string[] = COMMS_TOOLS.filter((tool) => !HOLD_SCOPES.has(tool));
 

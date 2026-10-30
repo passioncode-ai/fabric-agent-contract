@@ -118,6 +118,11 @@ published or adopted revision. The shared-ref and compiled-document regressions
 are [`capability-names.test.ts`](../../test/capability-names.test.ts); positive
 and negative conformance fixtures are in the [catalogue](../../fixtures/catalogue.json).
 
+**Amendment (DEC-0140).** The board reserves `project.work`, the capability of a Project's primary responder
+([project communication](project-comms.md#the-primary-responder) PR-1): no service serves it as a tool or declares it
+(`surfaces.mcp.capabilities`, an action's `tool`); a session may still be granted and enrolled for it. This narrows the names a service may declare, under the compatibility policy's second exception
+([conformance](conformance.md)); memory/0.1 reserves its own names ([memory and learning](memory-and-learning.md)).
+
 ## C3.2 Jobs
 
 A capability whose work may outlive one request declares `"job": true` in its

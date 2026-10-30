@@ -228,6 +228,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 2 | Follow | reads its request state and effect state | the board thread | 4 | "done" inferred from a delivery or a read mark | two separate facts, each set only by its operation (priority 9) |
 | 3 | Lost result | finds a request whose result was lost | the board thread | 2 | an effect reported as done or silently retried, or a request stuck forever because its responder is gone | `outcome_unknown`, left only by an observed reconciliation, which the operator gives as the estate owner when no responder holds the slot, shown as the owner's (priority 9) |
 | 4 | Unlist | keeps a Project out of other agents' lookups | the host's Project settings | 3 | every agent of the estate can find a Project the operator keeps to itself | an unlisting that hides it from discovery only, never from a sender that knows its id (priority 6) |
+| 5 | Choose who answers | makes another session the Project's main one | the host's view of a Project's sessions | 3 | the wrong session answers the Project's requests, and taking over by hand loses or doubles work | a move by the operator from the generation they saw, fenced like a replacement, and the host showing when it changes hands again (priority 7) |
 
 ### JRN-09: Operator — my machines as one network (JTBD-10)
 
@@ -512,8 +513,9 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 ### ST-020: Operator follows a request on the Project board
 
 - **Story:** As P-02, I want each request between Projects to show its request state and its effect state, so that I know what happened and what is unknown.
-- **Traces:** JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3
+- **Traces:** JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3, JRN-08/#5
 - **Acceptance criteria:**
+  - Given a Project whose main session is the holder of `project.work`, when the operator moves that slot to another authorized session, then the old session's claimed requests return to the queue, its in-progress ones show `outcome_unknown`, its accepted ones are kept until the new session takes them over or the requester cancels them, and the host shows when the slot later changes hands.
   - Given a request sent to a Project's capability, when the responder accepts and completes it, then the thread shows `accepted`, then `completed` with an observed result.
   - Given a request whose result was lost after its effect began, then the thread shows `outcome_unknown`, and only an observed reconciliation settles it.
   - Given such a request whose slot no responder holds, when the operator settles it with a summary of what they observed, then the thread shows it `completed` or `failed_known`, settled by the owner; without a summary it stays `outcome_unknown`, and it can never be closed as cancelled.
@@ -576,7 +578,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Traces:** JTBD-10, JRN-09/#3
 - **Acceptance criteria:**
   - Given a machine I remove, when I sign, then the revision revokes the machine and the relay turns it away; given the hub's machine, "Remove" moves the hub first (ST-032).
-  - Given a machine whose key I replace, when it pairs again under its id and I sign, then the revision lists the new keys and revokes the old ones by their key references, and a session or envelope under the old key is refused.
+  - Given a machine whose key I replace, when it pairs again under its id and I sign, then the revision lists the new keys and revokes the old ones by their key references, and a session or envelope under the old key is refused; given the machine that holds the hub key, before I replace its key, Fabric tells me that running approvals and tokens the old hub kid signed must be issued again (during a move, ST-032 says what Remove warns).
   - Given a network of one machine, when I replace its key, then I sign on the machine itself, with no pairing.
 - **Priority:** should
 - **Status:** draft
@@ -589,7 +591,10 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given a record that certifies a hub key and a machine whose last heartbeat is more than 24 hours old, then it tells me at once the hours since, and past 72 hours that calls between machines have stopped; given no readable heartbeat, it tells me that it has none and that calls between machines have stopped; given a clock it cannot read, it says so and offers no move.
   - Given that alert, when the machine reconnects to the estate's relay and the latest heartbeat it then holds is still more than 24 hours old (or none), then it offers to move the hub; given a hub machine I retire or replace, "Move the hub" on its row starts a planned move by DL-15; given a hub machine I declare lost, "Remove" on its row moves the hub in one revision even while it still sends heartbeats.
+  - Given a lost hub, before I sign its revision, then Fabric tells me that every spending window it divided stays paused until it ends, with the dates, and that running approvals and tokens the old hub kid signed must be issued again (as before a planned move); given a move or a key switch waiting on machines, then it names each machine, since when and why when known, and my ways out (DEC-0146).
   - Given a lost hub and an always-on `full` machine caught up with the relay, when I sign, then one revision certifies its new hub key, revokes the old one and the lost machine, and anchors the delta once every reader of the record is pinned at or after DEC-0107; given a reachable hub, two revisions follow DL-15.
+  - Given a planned move, before it starts Fabric tells me that the old hub's windows will pause and that approvals and tokens must be issued again; from the switch until I sign its second revision and every machine an estate record listed since each window began reports it, or that window ends, then new leases of the old hub's windows wait, and Fabric says so; a window a machine removed before reporting it left waits until it ends (DEC-0146).
+  - Given a move in progress and a machine that has not reported at or above the revoking revision, then before "Remove" on it, or given a running window a removed machine left, then before "Move the hub", Fabric tells me that window stays paused until it ends, with the date (DEC-0146).
   - Given two passkeys in my network and one lost, when I sign with the other, then the lost one is removed and revoked and a new one added; given one passkey, Fabric tells me before I create the network that losing it loses the network.
 - **Priority:** must
 - **Status:** draft

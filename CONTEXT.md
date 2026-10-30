@@ -131,7 +131,7 @@ always-on machine, never a machine's `#sig` key (the operator's NET-3, DEC-0084)
 **Action parity**: Every action a service's dashboard, app or page lets a person take has a tool on the service's
 agent surface with the same effect, checks and audit record, declared in its well-known document under
 `extensions/actions/0.1` with its `gate` (`none`, `relayed` or `human`); an action offered only on a page is
-nonconformant. `FAC-SEM-142` checks the declared actions (a button whose tool the MCP surface does not serve); a host
+nonconformant (except the operator's move of a board slot, a host control until a host ships its twin, DEC-0140 PR-2). `FAC-SEM-142` checks the declared actions (a button whose tool the MCP surface does not serve); a host
 reports a dashboard that declares none (CT-126) ([service](docs/specification/service.md#actions) AP-1, DEC-0121).
 
 **Relayed decision**: The operator's decision on one action an agent carries in a call's `_meta.decision`
@@ -208,6 +208,15 @@ SYSTEM or Administrators — the trust of root reading a 0600 file (DEC-0032, DE
 **Project board**: The board a Project's agents exchange information and requests through, under
 `fabric-project-comms/0.1` ([project communication](docs/specification/project-comms.md), DEC-0022).
 
+**Primary responder**: The holder of a Project's `project.work` slot, the capability a request names when it names no
+narrower one, shown by a host as the Project's main session; the operator may move that slot, or any occupied slot, to another live,
+authorized session of the Project, after which the board's ordinary rules govern it ([project communication](docs/specification/project-comms.md#the-primary-responder), DEC-0140).
+
+**Session role**: What a session says it does, in an open vocabulary of its host's (for example `coder`,
+`observer`, `monitor`), as its host records it, not through `com.enroll`:
+display and routing only, never authority, and not a role assignment of `roles.schema.json`
+([project communication](docs/specification/project-comms.md#a-sessions-role-and-branch), DEC-0140).
+
 **Delivery**: Which Projects a board message counts as unread for, and the only ones a transport mirror may send it
 to (DEC-0135): every participant but the sender for a message, request, finding or announcement; for a reply the
 sender of what it answers by default (the whole thread when that is the replier's own Project or the board no
@@ -230,9 +239,9 @@ a Project: that hides it from discovery only, and it stays addressable by id
 sequence number (DEC-0073).
 
 **Board hold**: The operator's hold, set in the host or relayed by their agent to the host's action (DEC-0121), on a thread, a Project or a (Project, capability) responder slot.
-While it lasts the board refuses new work in its scope `held` (retryable), never refuses a cancel or a read, and
+While it lasts the board refuses new work in its scope `held` (retryable), the operator's move of a slot included (DEC-0140), never refuses a cancel or a read, and
 never refuses the current responder's calls on started work; if that responder's session ends under a slot or
-Project hold, enrollment and replacement wait for the lift, and its accepted work stays held as C4 says. It is not an
+Project hold, enrollment and replacement wait for the lift, and its accepted work is kept as C4 says. It is not an
 authority change and bumps no generation
 ([project communication](docs/specification/project-comms.md#holds), DEC-0079). Not the C4 sense in which accepted
 work is *held* past its deadline.
@@ -684,6 +693,12 @@ organization's relay takes its set from the organization's member list (`org-aut
 under the organization's key set, and its handshake names the organization in `auth` and the list in `welcome`
 (DEC-0134).
 
+**Revoking revision**: In a hub move, the estate record revision that adds the old hub key's `hub-key` revocation to
+its parent while that key's machine certifies no hub key: a planned move's second revision, a lost hub's one revision.
+After a planned move, the new hub's gate on the old hub's windows opens on machines' reports at or above it; after a
+lost hub, or for an instance a machine removed since it began never reported at or above it, the gate stays closed until
+the instance ends ([ceremonies](docs/specification/ceremonies.md#move-the-hub) step 7, DEC-0146).
+
 **Revocation delta**: The estate record's fast path (`revocation-delta/1`, DEC-0054): an append-only chain of
 entries, one revocation each, signed by an **Estate key** and chained by RFC 8785 hash, so its head is
 `{sequence, sha256}`: what a machine reports to its hub and an estate's **Relay** carries in its `welcome` (an organization's relay does not, DEC-0134 OR-2). A revision issued after an entry
@@ -764,7 +779,7 @@ usage lines, joined by the runtime's `session.id` (DEC-0068, [activity](docs/spe
 (`kind: agent` without `provider`); a placement checks the roles and tools before it installs (DEC-0071,
 [package](docs/specification/package.md#a-consumer-agent)).
 
-**Local channel**: How Fabric's surfaces reach Project Observatory's node on one machine (`fabric-local-channel/0.1`):
+**Local channel**: How Fabric's surfaces reach Project Observatory's node on one machine, and Fabric's hub whichever node applies the estate's records on its machine (`machine.report`, DEC-0146) (`fabric-local-channel/0.1`):
 a socket or pipe the operating system proves is the same user's, hello first, consent prompts the other way (DEC-0075,
 [local channel](docs/specification/local-channel.md)), and secret prompts to the product's signed app only (DEC-0143).
 

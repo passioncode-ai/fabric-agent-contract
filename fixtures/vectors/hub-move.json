@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine, kid and public x (reported by machine and kid) in the order the record lists machines, a machine listed twice read by its first entry, revoked when next lists the removed kid as a hub-key revocation; a removed key not revoked is a revision FAC-SEM-114 refuses (DEC-0084). anchor: anchorDelta(state, record) over the committed entries of fixtures/vectors/revocation-delta.json; a record that lists every dropped entry's revocation by kind and ref; missing names the dropped entries' sequences. Every case holds in every time zone.",
+  "about": "Vectors for keeping an estate recoverable (DEC-0107), written by tools/vectors/hub-move.ts, never by hand. Absent values are absent members. silence: hubSilence(heartbeatAt, at), heartbeatAt the at of the heartbeat a machine holds; speaking up to 24 hours, silent past it up to 72, stale past 72; sinceSeconds floored, never below zero. recovery: recoveryReady(record), ready with two passkeys or more by distinct credentialId that the record does not revoke. move: hubMove(parent, next), added and removed by machine, kid and public x (reported by machine and kid) in the order the record lists machines, a machine listed twice read by its first entry, revoked when next lists the removed kid as a hub-key revocation; moved is true for a re-key on one machine too, and a move (DEC-0146's gate) is added and removed naming different machines read across the move; a removed key not revoked is a revision FAC-SEM-114 refuses (DEC-0084). anchor: anchorDelta(state, record) over the committed entries of fixtures/vectors/revocation-delta.json; a record that lists every dropped entry's revocation by kind and ref; missing names the dropped entries' sequences. Every case holds in every time zone.",
   "silence": [
     {
       "name": "an hour old",
@@ -659,6 +659,66 @@
       }
     },
     {
+      "name": "the hub's key replaced on the same machine and the old kid revoked: a re-key, no move, since the machine still certifies a hub key (DEC-0146)",
+      "parent": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ]
+      },
+      "next": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a2",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b"
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-a",
+            "revokedAt": "2026-10-23T12:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "moved": true,
+        "added": [
+          {
+            "machine": "m-a",
+            "kid": "hub-a2"
+          }
+        ],
+        "removed": [
+          {
+            "machine": "m-a",
+            "kid": "hub-a",
+            "revoked": true
+          }
+        ]
+      }
+    },
+    {
       "name": "nothing changed",
       "parent": {
         "machines": [
@@ -832,6 +892,127 @@
             "kid": "hub-a"
           }
         ],
+        "removed": []
+      }
+    },
+    {
+      "name": "a planned move's second revision: the old key dropped and revoked, nothing added, so the revoking revision (DEC-0146)",
+      "parent": {
+        "machines": [
+          {
+            "id": "m-a",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-a",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-b",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-b",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          }
+        ]
+      },
+      "next": {
+        "machines": [
+          {
+            "id": "m-a"
+          },
+          {
+            "id": "m-b",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-b",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-a",
+            "revokedAt": "2026-10-23T12:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "moved": false,
+        "added": [],
+        "removed": [
+          {
+            "machine": "m-a",
+            "kid": "hub-a",
+            "revoked": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "a revision after the move keeps the revocation: nothing removed, the gate not armed again (DEC-0146)",
+      "parent": {
+        "machines": [
+          {
+            "id": "m-a"
+          },
+          {
+            "id": "m-b",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-b",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-a",
+            "revokedAt": "2026-10-23T12:00:00Z"
+          }
+        ]
+      },
+      "next": {
+        "machines": [
+          {
+            "id": "m-a"
+          },
+          {
+            "id": "m-b",
+            "hubKey": {
+              "kty": "OKP",
+              "crv": "Ed25519",
+              "alg": "EdDSA",
+              "kid": "hub-b",
+              "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+            }
+          },
+          {
+            "id": "m-c"
+          }
+        ],
+        "revocations": [
+          {
+            "kind": "hub-key",
+            "ref": "hub-a",
+            "revokedAt": "2026-10-23T12:00:00Z"
+          }
+        ]
+      },
+      "expect": {
+        "moved": false,
+        "added": [],
         "removed": []
       }
     }

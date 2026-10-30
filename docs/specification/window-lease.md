@@ -27,7 +27,7 @@ meter's owner, on 2026-10-12 (its `docs/design/METER.md`, sections M3 and M4). T
 | Field | Rule |
 |---|---|
 | `type` | `window-lease/1` |
-| `leaseId` | the lease's opaque id; the machine reports it to its hub over the relay, or on the hub's own machine through the node's `machine.report` (DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2) |
+| `leaseId` | the lease's opaque id, unique within the estate across hub keys (DEC-0146 item 2); the machine reports it to its hub over the relay, or on the hub's own machine through the node's `machine.report` (DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2) |
 | `sequence` | rises with every lease the hub issues one machine for one scope, window and period ([one lease per slot](#one-lease-per-slot)) |
 | `estate` | the estate whose record certifies the signing hub key |
 | `estateRevision` | the estate-record revision the hub followed; a machine that applies an earlier one refuses the lease until it has caught up |
@@ -109,25 +109,29 @@ A meter reports each lease it holds, and the newest expired lease of each slot u
 to its hub, `records.leases[]` (in the [machines' report](relay.md#the-machines-report) over the
 relay, DEC-0132, or on the hub's own machine through the local channel's `machine.report`; never in a check-in to an
 organization server, DEC-0128 UE-2): `{leaseId, expiresAt, spent}` (DEC-0053's
-names; `spent` is this decision's, optional and additive). `spent` is an upper bound on what the meter spent in the
+names; `spent` is this decision's, optional and additive, except on a lease a hub key revoked by the reported
+revision signed, which always carries it, DEC-0146 MR-1). `spent` is an upper bound on what the meter spent in the
 lease's window instance: settled receipts plus open reservations, a decimal string.
 
 What a meter has not reported counts as spent, so a final report the relay refused (MR-2) delays the refund to the next
 report the relay accepts from that machine (the next is due within 24 hours while the machine runs), counted at the
 hub's next division after it. After a hub move to another machine (never a re-key on the hub's own machine,
 [ceremonies](ceremonies.md#move-the-hub) step 7) the new hub holds none of the old hub's division, so it
-issues no lease of a window instance the old hub divided until that instance ends or every machine the revision lists
-has reported after the revocation (DEC-0107, [ceremonies](ceremonies.md#move-the-hub); a report
+issues no lease of a window instance the old hub divided, from its first signature (the switch of a planned move,
+before the revoking revision), until that instance ends or every machine an estate record listed since the instance
+began has reported after the revocation (DEC-0107, [ceremonies](ceremonies.md#move-the-hub); a report
 whose `estateRecord.revision` is at or above the revoking revision, DEC-0132 MR-5). The new hub cannot know which
-machines held one, hence every listed machine, and its first division of such an instance counts
-each old-hub lease a report names at its final `spent`, as an ended lease of that amount (DEC-0146 MR-5; the
-reference's order across hub keys is CT-113's); a machine the person removes before its report at or above the revoking revision
+machines held one, hence every machine listed since the instance began, and its first division of such an instance counts
+each old-hub lease a report names at its final `spent`, as an ended lease of that amount, against every instance of
+that machine whose bounds hold its `expiresAt` (after its start, at or before its end) (a report names no instance; DEC-0146 MR-5; the
+reference's order across hub keys is CT-113's; a report naming an old-hub lease without `spent` counts as none for
+this gate, MR-1, and a later one without it changes nothing a division counted, MR-5); a machine removed since the instance began, before its report at or above the revoking revision,
 leaves its spend under the old hub's leases unknown, so the instance stays closed to new leases until it ends (MR-6);
 after a lost hub, removed in the move's revision, that is every instance the old hub divided (DEC-0146). A lease of a hub key a revision revokes ends for the meter when it
 applies that revision, before its `expiresAt` (WL-6): it spends nothing more under it, and its final `spent` is the
 one in a report whose `estateRecord.revision` is at or above that revision (DEC-0146). The hub
 orders a machine's reports by their `at`, to the nanosecond (a held time that is no relay time (an offset, a lower-case `t`, ten or more fraction digits, accepted before DEC-0146) as its millisecond's last nanosecond, as the hub's acceptance
-reads it), a tie
+reads it; the reference reads ten or more digits late today, CT-197), a tie
 going to the larger `spent` (DEC-0146), compares a report's `at` with a lease's `issuedAt` and `expiresAt` to the
 millisecond, truncated (the precision a hub writes them in), and counts, for each machine, the most it may have spent (`windowRemainder`):
 
@@ -188,17 +192,18 @@ reproduces every `sig`. `test/window-lease.test.ts` runs them in UTC, Asia/Tokyo
 
 ## Who adopts it
 
-- **Fabric's hub** (backlog CT-19) issues leases, `estate` ones only until the revision that admits `project:` and
+- **Fabric's hub** (backlog CT-19) issues leases, each `leaseId` unique within the estate across hub keys (DEC-0146), `estate` ones only until the revision that admits `project:` and
   `grant:` leases decides the report's cap (DEC-0146 MR-1): for each machine of the estate, one lease per slot under a hub key
   the current estate record certifies, its amount at most `windowRemainder`'s answer, its life at most 24 hours and
   inside the window instance, sequences rising per slot; it counts an expired, unreported lease as spent and credits
   a late report at its next division. After a hub move to another machine (never a re-key on its own machine,
-  ceremonies step 7) it issues no lease of a window instance the old hub divided
-  until that instance ends or every machine the revision lists has reported after the revocation (its newest report's
-  `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it), and then counts each old-hub lease a report names at its final `spent` (DEC-0107, DEC-0146, [Reporting](#reporting)); the wait is shown with each machine it waits on (MR-6); after a lost hub, or once the person removed a machine before its report at or above the revoking revision, it issues no lease of such an instance until it ends. v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
+  ceremonies step 7) it issues no lease of a window instance the old hub divided, from its first signature (the switch,
+  before the revoking revision), until that instance ends or every machine an estate record listed since the instance
+  began has reported after the revocation (its newest report's
+  `estateRecord.revision` at or above the revoking revision, DEC-0132 MR-5; a machine that refused it qualifies only once it applies a later revision, such as the one step 6 drafts for it), and then counts each old-hub lease a report names at its final `spent` (DEC-0107, DEC-0146, [Reporting](#reporting)); the wait is shown with each machine it waits on (MR-6); after a lost hub, or when a machine removed since the instance began never reported at or above the revoking revision, it issues no lease of such an instance until it ends. v4 sizes a lease at min(remainder ÷ active meters, two days at the recent rate);
   how the hub sizes it within the remainder is its own.
-- **Project Observatory's meter** (CT-20) verifies each lease with `verifyWindowLease` before it spends against it, and again on each lease it holds when it applies a revision (so a lease of a hub key that revision revokes ends, DEC-0146),
-  holds one per slot, reserves only as `mayReserve` answers (the smaller of its own remainder and the lease's, and
+- **Project Observatory's meter** (CT-20) verifies each lease with `verifyWindowLease` before it spends against it, and again on each lease it holds when it applies a revision, with the context of its first verification (the window's limit as `remainderUsd`, the lease itself as `held`), so the remainder it has spent down never ends it (so a lease of a hub key that revision revokes ends, DEC-0146),
+  holds one per slot (and keeps the old hub's newest lease of each slot for its reports until that lease's window instance ends, DEC-0146 MR-1), reserves only as `mayReserve` answers (the smaller of its own remainder and the lease's, and
   nothing after expiry), and reports `records.leases[]` with `spent` (to its hub over the relay, or through `machine.report` on the hub's own machine, DEC-0132; never in a check-in to an organization server, DEC-0128 UE-2).
 - **An organization server** hands leases of organization windows in the check-in response (v4 Path 5); the scope
   `estate` is the only one v4 uses, and organization windows wait on a decision beyond the member list `org-authority/1` (DEC-0129).
