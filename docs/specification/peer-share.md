@@ -58,7 +58,7 @@ normalisation, so a dot segment, an upper-case host or an empty `:@` reads as th
 
 **The pin.** The recipient's node pins the sender's share `#sig` from `k` only when the link reaches the recipient's
 app as the sender sent it (pasted into the app, or opened by the app's own scheme carrying the `k` the person can see
-in the link they were sent): then it aborts unless the sender's commit frame names that key (`pinHolds`). A link
+in the link they were sent), or through an agent as the next paragraph says: then it aborts unless the sender's commit frame names that key (`pinHolds`). A link
 handed over by the mailbox's landing page carries no pin, because the page is the mailbox's own script, and that share
 rests on the comparison code alone (PS-6). A product's own scheme for the hand-over carries the share link's parts as
 the link does: the share id in the path and `c` and `k` in the fragment only, never in a query, never logged, the
@@ -67,8 +67,10 @@ claim code is ever put in a `fabric://` link.
 
 **An agent's "Open a share"** (DEC-0147). The button's agent twin takes the link whole, as one argument, never its
 parts, and hands it to the node, which holds it as the app holds a link pasted in; it claims nothing. "Accept" stays the
-person's step (`gate: human`, `humanStep: consent`, PS-6): the tool answers `human-step-required` with the link to the
-node's page that shows the pending share, and the node claims once the person accepts there (PS-5). The node pins the
+person's step (`gate: human`, `humanStep: consent`, PS-6): the hand-over took effect, so the tool answers success, never
+a refusal, with the share id, the next step (`humanStep: consent`) and the link to the node's page that shows the
+pending share, which the agent hands the person; the node claims once the person accepts there (PS-5). The same link
+handed over again answers the same and holds one pending share; a share nobody accepts lapses at its claim deadline. The node pins the
 sender's share `#sig` from `k` only when the link appears unchanged in the operator's decision the call carries
 (`_meta.decision`, AP-2: the person's own words, quoting the link they were sent); a link the agent took from anywhere
 else (a page, a mail, a tool's output) carries no pin, as one the mailbox's page hands over, and that share rests on the
@@ -77,7 +79,9 @@ decision's words, not where the agent found it (AP-3). The claim code is then in
 single use until the claim spends it or the claim deadline passes; anyone who reads the transcript before the person
 accepts can claim first or burn the link, and the comparison code is the defence (PS-6). The tool's answer, the node's
 journal and its logs name the share id only, never the link or the code; the audit record AP-2 keeps holds the
-decision with the link's fragment (`c` and `k`) replaced by the share id, the one redaction of that record.
+decision with the link's fragment (`c` and `k`) replaced by the share id, the one redaction of that record. A link
+that reaches the node through another relay (another of the operator's agents, the operator channel, the hub) leaves
+its code in those records too; the comparison code stays the defence (CT-201).
 
 ## The claim (PS-5)
 
@@ -218,7 +222,7 @@ entry per day and slot with a use or an export (an export on a day with no use h
 of those days, with the day and slot entry it falls on, in the same report (`peerReportBody` refuses an export without
 one, `bad-body`); and the consumer labels the node saw on those days. The sender reads the reports it fetched in
 ascending `sequence` and replaces, for each day and slot a report holds, that day's uses and last use with the
-report's; it adds exports to its record as a set keyed by slot and instant, and labels to its list as a set, so a
+report's; it adds exports to its record as a set keyed by slot and parsed instant (not its spelling), and labels to its list as a set, so a
 report read twice, or a later one covering the same day, never counts an export or a label twice, and a later report
 that omits an export the sender already holds never takes it away (the sender's export count never falls). A report refused or lost is restated by the next one while its days
 stay in the window: an export or a use is lost only when no report of the recipient's reaches the sender for 35 days.

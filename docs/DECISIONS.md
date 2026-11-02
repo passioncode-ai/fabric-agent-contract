@@ -8976,10 +8976,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      The window cannot tell the two closings apart (`secret.cancel` carries the request id only) and says it was closed
      (SCR-34, FLW-34, SCN-053). A "Store" the person pressed in the window after the decline was recorded may still
      write the slot: the outcome reads `declined` (the first answer, SP-5) while the slot holds the value, and the next
-     request for that slot shows it as already held.
+     request for that slot shows it as already held. A decline recorded before the prompt is sent answers
+     `declined` and no prompt follows.
   4. **The agent twin of "Open a share"** takes the link whole and hands it to the node; "Accept" stays the person's
-     step (`humanStep: consent`), so the tool answers `human-step-required` with the node's page, and the node claims
-     once the person accepts (PS-5). It pins the sender's share `#sig` from `k` only when the link appears unchanged in
+     step (`humanStep: consent`), so the tool answers success with the share id and the node's page for the person, and
+     the node claims once the person accepts (PS-5); the same link handed over again answers the same. It pins the sender's share `#sig` from `k` only when the link appears unchanged in
      the operator's decision the call carries, a pin as strong as that relayed decision; a link from anywhere else
      carries no pin and the share rests on the comparison code (PS-6). The code in the agent's transcript stays live
      until the claim spends it or its deadline passes, and the comparison code is the defence against a reader who

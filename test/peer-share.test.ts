@@ -177,6 +177,8 @@ describe("usage reports", () => {
     expect(validateDocument(validator, `${SCHEMA_PREFIX}schemas/peer-share-report.schema.json#/$defs/body`, body).valid).toBe(true);
     expect(openPeerReport(rep, { at: "2026-10-27T10:00:00Z", shareId, ownKem: key("sKem").jwk, recipientSig: key("rSig").jwk, lastSequence: 6 }, scalar("sKem"))).toEqual({ ok: true, sequence: 7, body });
     expect(() => sealPeerReport({ recipientKem: key("sKem").jwk, signer: { sig: key("rSig").jwk, privateKey: priv("rSig") }, shareId, sequence: 8, iat: new Date(), body: { ...body, value: "sk" } })).toThrow(/bad-body/);
+    const slot = (body.days as Json[])[0]!.slot;
+    expect(() => sealPeerReport({ recipientKem: key("sKem").jwk, signer: { sig: key("rSig").jwk, privateKey: priv("rSig") }, shareId, sequence: 8, iat: new Date(), body: { ...body, exports: [{ slot, at: "2020-01-01T00:00:00Z" }] } })).toThrow(/bad-body/);
     expect(() => sealPeerReport({ recipientKem: key("sKem").jwk, signer: { sig: key("rSig").jwk, privateKey: priv("xSig") }, shareId, sequence: 8, iat: new Date(), body })).toThrow(/bad-key/);
   });
 });
