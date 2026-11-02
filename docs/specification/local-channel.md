@@ -150,7 +150,10 @@ the vault slot itself.
   `declined` answer at its own receipt time, so `secretOutcome` reads it like the window's, sends `secret.cancel` so
   the window closes, and answers the asking agent `declined`; without a decision it refuses `operator-decision-required`
   and declines nothing. An agent that asked and changed its mind withdraws its own request with `secret.cancel` (SP-3),
-  which it learns as `no-answer`, never as the person's decline (DEC-0147).
+  which it learns as `no-answer`, never as the person's decline (DEC-0147). The window cannot tell the two apart
+  (`secret.cancel` carries the request id only) and shows the request as closed. If the person pressed "Store" before
+  the window closed, the app may still write the slot: the outcome reads `declined` (the first answer, SP-5) while the
+  slot holds the value, and the next request for that slot says the slot already holds one (`replaces`).
   The value never reaches the agent through the prompt; any command the agent later runs with it can still print it.
   The person's acts in the window are theirs only while no program holds the Accessibility permission over the app,
   which can press its buttons (SP-6).

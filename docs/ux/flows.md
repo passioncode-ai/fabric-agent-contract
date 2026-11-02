@@ -892,7 +892,7 @@ flowchart TD
 - **Goal:** the value is in the vault slot and the agent knows it is there, without having seen it
 - **Entry points:** an agent's request to the node for a slot it lacks
 - **Success exit:** the slot holds the value the person typed, and the agent is told `stored`
-- **Task analysis:** the agent asks the node → the node names the agent from its own binding → the node finds one connected client it verified as its signed app that declared `secret.ui` → it sends `secret.prompt` → the app shows the window → the person types or declines → the app writes the slot itself and answers → the node confirms the write in its own vault record → the agent learns the outcome.
+- **Task analysis:** the agent asks the node → the node names the agent from its own binding → the node finds one connected client it verified as its signed app that declared `secret.ui` → it sends `secret.prompt` → the app shows the window → the person types or declines (or the operator declines through their agent, which closes the window, DEC-0147) → the app writes the slot itself and answers → the node confirms the write in its own vault record → the agent learns the outcome.
 - **Rejected shape:** the agent asking in a chat, or a scripted dialog any program of the user can draw, rejected because the agent would see the value or a lookalike could collect it (DEC-0143).
 - **Flow:**
 
@@ -906,6 +906,7 @@ flowchart TD
   P --> W{The person answers before the deadline?}
   W -->|no, or the agent withdrew it| Z[no-answer]
   W -->|declines| D[declined]
+  W -->|the operator declines through an agent, with their decision| D
   W -->|stores| S{The node sees the slot written after the prompt?}
   S -->|yes| O[stored]
   S -->|no| U[unconfirmed]

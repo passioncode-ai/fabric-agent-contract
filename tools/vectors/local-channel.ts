@@ -63,7 +63,7 @@ function outcomes(): Json[] {
     ["a deadline at or before the prompt", T, [{ at: T, outcome: "stored" }], true, "no-answer"],
     ["withdrawn before an answer: the cancel time is the deadline", T + 2 * MIN, [{ at: T + 3 * MIN, outcome: "stored" }], true, "no-answer"],
     ["withdrawn after an answer: the answer stands", T + 2 * MIN, [{ at: T + MIN, outcome: "declined" }], false, "declined"],
-    ["the agent twin of Decline: the node records the operator's relayed decline as an answer at its own receipt time", T + 10 * MIN, [{ at: T + 4 * MIN, outcome: "declined" }, { at: T + 5 * MIN, outcome: "stored" }], true, "declined"]
+    ["the agent twin of Decline is an ordinary first answer: the operator's relayed decline, recorded at the node's receipt time, is read like the window's", T + 10 * MIN, [{ at: T + 4 * MIN, outcome: "declined" }, { at: T + 5 * MIN, outcome: "stored" }], true, "declined"]
   ];
   // Input that does not read (DEC-0147): never a throw, always no-answer; an entry that is no answer is skipped.
   const unread: Json[] = [

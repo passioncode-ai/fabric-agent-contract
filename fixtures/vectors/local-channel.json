@@ -690,7 +690,7 @@
       "expect": "declined"
     },
     {
-      "name": "the agent twin of Decline: the node records the operator's relayed decline as an answer at its own receipt time",
+      "name": "the agent twin of Decline is an ordinary first answer: the operator's relayed decline, recorded at the node's receipt time, is read like the window's",
       "promptedAt": 1761552000000,
       "deadline": 1761552600000,
       "answers": [
