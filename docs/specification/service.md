@@ -1008,7 +1008,8 @@ Every button a person has, the person's agent has (except the operator's move of
   `inputResponses`, one call per key decided; a person's click at the host's interaction point travels the same way
   ([interop C3.3](interop.md#c33-awaiting-a-choice), DEC-0121). A `view` machine ([machine calls](machine-calls.md))
   carries no decision: a decision is an effect its profile forbids (DEC-0121). The service keeps the decision,
-  `instruction` included, in its own audit record; `instruction` may name people, so it never goes to the events feed,
+  `instruction` included, in its own audit record (a peer share link's fragment excepted, which the node replaces
+  with the share id, peer share PS-4, DEC-0147); `instruction` may name people, so it never goes to the events feed,
   a usage report or any page another party reads (DEC-0121), and neither does `source`, which names the operator's
   projects and sessions (DEC-0126). A call that carries no decision but the operator's
   mandate for its task (`_meta.mandate`) is decided by the mandate: covered, the operator's act recorded `via:

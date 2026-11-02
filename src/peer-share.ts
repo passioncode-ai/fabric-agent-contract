@@ -138,8 +138,9 @@ export function claimHolds(link: unknown, frame: unknown): boolean {
 
 /**
  * Whether the sender's commit frame names the share `#sig` the link pins: its thumbprint is the link's `k`. A
- * recipient whose link reached its app as sent aborts on a mismatch; one handed over by the mailbox's page has no pin
- * and rests on the comparison code alone.
+ * recipient whose link reached its app as sent, or reached an agent's "Open a share" unchanged in the operator's
+ * decision the call carries (DEC-0147), aborts on a mismatch; one handed over by the mailbox's page, or by an agent from
+ * anywhere else, has no pin and rests on the comparison code alone.
  */
 export function pinHolds(link: unknown, frame: unknown): boolean {
   const commit = peerFrame(frame);

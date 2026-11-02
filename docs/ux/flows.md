@@ -854,7 +854,7 @@ flowchart TD
 - **Goal:** the recipient's node holds the value sealed to its share key, the sender reads its use, and the sender can end it
 - **Entry points:** the sender's "Share" on a vault slot; the recipient's "Open a share"; the sender's "Take back"
 - **Success exit:** the value opens only on the recipient's machine for the share's key (once the codes were compared; a share sealed without comparing may be held by whoever claimed first); reports arrive; after "Take back" the mailbox refuses and the provider has revoked or rotated the key
-- **Task analysis:** the sender's node makes the share's keys and the link → the person sends the link → the recipient accepts and its node claims (keys, MAC, commitment) → the sender's node checks the MAC and commits → both reveal → both apps show the code and the people compare it → the sender confirms, or chooses to share without comparing (recorded `confirmed: false`), and its node seals the envelope → the recipient's node renews its lease and opens the value at each use, sending reports; the recipient may press "Export" in its app's window, its own step, recorded and reported before the value leaves (DEC-0147) → the sender takes it back: a signed revocation, the mailbox refusing, the recipient's deletion receipt, the provider's revocation or rotation.
+- **Task analysis:** the sender's node makes the share's keys and the link → the person sends the link → the recipient accepts and its node claims (keys, MAC, commitment) → the sender's node checks the MAC and commits → both reveal → both apps show the code and the people compare it → the sender confirms, or chooses to share without comparing (recorded `confirmed: false`), and its node seals the envelope → the recipient's node renews its lease and opens the value at each use, sending reports; the recipient may press "Export" in its app's window, its own step, recorded before the value leaves and carried in the next report (DEC-0147) → the sender takes it back: a signed revocation, the mailbox refusing, the recipient's deletion receipt, the provider's revocation or rotation.
 - **Rejected shape:** the value pasted into a chat, or held by the cloud under a key the cloud also holds, rejected because the sender could stop neither and a breach of the cloud would be a breach of the key (DEC-0142).
 - **Flow:**
 
@@ -892,7 +892,7 @@ flowchart TD
 - **Goal:** the value is in the vault slot and the agent knows it is there, without having seen it
 - **Entry points:** an agent's request to the node for a slot it lacks
 - **Success exit:** the slot holds the value the person typed, and the agent is told `stored`
-- **Task analysis:** the agent asks the node → the node names the agent from its own binding → the node finds one connected client it verified as its signed app that declared `secret.ui` → it sends `secret.prompt` → the app shows the window → the person types or declines (or the operator declines through their agent, which closes the window, DEC-0147) → the app writes the slot itself and answers → the node confirms the write in its own vault record → the agent learns the outcome.
+- **Task analysis:** the agent asks the node → the node names the agent from its own binding → the node finds one connected client it verified as its signed app that declared `secret.ui` → it sends `secret.prompt` → the app shows the window → the person types or declines (or the operator declines through their agent, which closes the window; a decline before the prompt answers `declined` and shows no window, DEC-0147) → the app writes the slot itself and answers → the node confirms the write in its own vault record → the agent learns the outcome.
 - **Rejected shape:** the agent asking in a chat, or a scripted dialog any program of the user can draw, rejected because the agent would see the value or a lookalike could collect it (DEC-0143).
 - **Flow:**
 
@@ -901,6 +901,7 @@ flowchart TD
   Q[Agent asks the node for a slot] --> C{A signed app with secret.ui connected?}
   C -->|no| L{The node starts its signed app through its broker; admitted before the deadline?}
   L -->|yes| P
+  L -->|the operator declines through an agent first, with their decision| D
   L -->|no, or no desktop| X[no-client: the person's step is to put the value in their own shell]
   C -->|yes| P[secret.prompt to that one app]
   P --> W{The person answers before the deadline?}

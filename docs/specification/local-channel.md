@@ -147,7 +147,7 @@ the vault slot itself.
   the node's page that shows the pending request and names the app window that holds it, and never stores a value.
   "Decline" is `gate: relayed`: it stores nothing. Its agent twin is a tool on the node's own surface (SP-7) that names
   the pending request and carries the operator's decision in `_meta.decision` (AP-2): the node records it as a
-  `declined` answer at its own receipt time, so `secretOutcome` reads it like the window's, sends `secret.cancel` so
+  `declined` answer at its own receipt time, so after the prompt `secretOutcome` reads it like the window's, sends `secret.cancel` so
   the window closes, and answers the asking agent `declined`; without a decision it refuses `operator-decision-required`
   and declines nothing. An agent that asked and changed its mind withdraws its own request with `secret.cancel` (SP-3),
   which it learns as `no-answer`, never as the person's decline (DEC-0147). The window cannot tell the two apart
@@ -164,8 +164,10 @@ the vault slot itself.
 - **SP-5. The outcome the agent sees** (`secretOutcome`): the first `stored` or `declined` the node received between the
   prompt and its deadline, at most 10 minutes after it (`MAX_SECRET_DEADLINE_MS`), by the node's receipt time; no answer
   by then is `no-answer`, a late answer is ignored. `stored` counts only when the node confirmed, in its own vault
-  record, that the slot was written after the prompt; otherwise `unconfirmed`. The agent learns `stored`, `declined`,
-  `no-answer`, `unconfirmed` or `no-client`, never a value.
+  record, that the slot was written after the prompt; otherwise `unconfirmed`. Before any prompt the node answers
+  `no-client` (SP-2, SP-3) or, for a decline its agent twin recorded first, `declined` with no prompt sent (SP-4,
+  DEC-0147); neither passes through `secretOutcome`. The agent learns `stored`, `declined`, `no-answer`, `unconfirmed`
+  or `no-client`, never a value.
 - **SP-6. What the prompt shows.** The agent named by the node's own binding for its caller, never words the agent
   wrote (a binding is the node's, so a same-user agent that read another agent's token file can ask under that name;
   the slot, the reason and the person's own typing still stand); the project and the slot; `reason` quoted as the agent's own words; whether the slot already holds a value

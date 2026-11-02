@@ -70,7 +70,9 @@ parts, and hands it to the node, which holds it as the app holds a link pasted i
 person's step (`gate: human`, `humanStep: consent`, PS-6): the hand-over took effect, so the tool answers success, never
 a refusal, with the share id, the next step (`humanStep: consent`) and the link to the node's page that shows the
 pending share, which the agent hands the person; the node claims once the person accepts there (PS-5). The same link
-handed over again answers the same and holds one pending share; a share nobody accepts lapses at its claim deadline. The node pins the
+handed over again answers the same and holds one pending share, and after the person accepts or declines a repeat
+answers the share's current state; a share nobody accepts lapses at the claim deadline the mailbox gives (CT-185) or,
+without one, 7 days after the hand-over. The node pins the
 sender's share `#sig` from `k` only when the link appears unchanged in the operator's decision the call carries
 (`_meta.decision`, AP-2: the person's own words, quoting the link they were sent); a link the agent took from anywhere
 else (a page, a mail, a tool's output) carries no pin, as one the mailbox's page hands over, and that share rests on the
