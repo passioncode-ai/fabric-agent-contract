@@ -649,7 +649,7 @@ function rotation(value: JsonObject): Finding[] {
  * certificate is unpresented. `{latest, at, response}`: `latest` the device's latest certificate on record,
  * `{certificate, renewed?, presented?, notAfter}` (`renewed` true when a renewal by the key on record issued it,
  * `presented` true once the server accepted a request under its serial); `at` the server's clock when the request
- * arrived; `response` the server's `{certificate}`, or no `certificate` for a refusal. While `latest` was issued by a
+ * arrived; `response` the server's `{certificate}`, or no (or a null) `certificate` for a refusal. While `latest` was issued by a
  * renewal, is unpresented and has not ended, a renewal is a repeat of it: answered with that certificate, byte for byte,
  * or refused (a revoked device, a policy); never with another certificate. Otherwise it is a new renewal (DEC-0100).
  */
@@ -657,9 +657,9 @@ function renewal(value: JsonObject): Finding[] {
   const latest = isObject(value.latest) ? value.latest : {};
   const response = isObject(value.response) ? value.response : {};
   const at = strictTime(value.at), end = strictTime(latest.notAfter);
-  const repeat = latest.renewed === true && latest.presented !== true && at < end;
-  if (!repeat || response.certificate === undefined || jsonEqual(latest.certificate, response.certificate)) return [];
-  return [{ code: "FAC-SEM-155", instancePath: "/response/certificate", message: "a renewal repeated while the certificate a renewal issued is unpresented and valid gets that certificate again, or a refusal, never another" }];
+  const repeat = latest.renewed === true && latest.presented !== true && latest.certificate !== undefined && at < end;
+  if (!repeat || response.certificate === undefined || response.certificate === null || jsonEqual(latest.certificate, response.certificate)) return [];
+  return [{ code: "FAC-SEM-155", instancePath: "/response/certificate", message: "a renewal that arrives while the device's latest certificate was issued by a renewal, is unpresented and has not ended gets that certificate again, or a refusal, never another" }];
 }
 
 export function deviceRules(kind: string, value: unknown): Finding[] | undefined {

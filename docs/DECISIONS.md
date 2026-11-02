@@ -9070,9 +9070,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   before), and once adopted, the device's re-enrollment counts (`re_enrolled`) and the audit's issuances no longer
   count a repeat. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/device-rules.ts` (`renewal`, `FAC-SEM-155`), `src/semantic-kinds.ts`
-  (`device-renewal`), `fixtures/semantic/device-renewal-*` (seven), `test/device-rules.test.ts`; `devices.md` (the
-  header, Renewal after a short absence, the semantic kinds table with the `device-enrollment` row's repeat reading,
-  the rules table), `conformance.md` (the organization server's row, the node's renewal row, the rule register, the
+  (`device-renewal`), `fixtures/semantic/device-renewal-*` (nine), `test/device-rules.test.ts`; `devices.md` (the
+  header, Renewal after a short absence, the rules table with `FAC-SEM-044`'s repeat reading and `FAC-SEM-155`,
+  the semantic kinds table, Health's `re_enrolled`), `conformance.md` (the organization server's row, the node's renewal row, the rule register, the
   next free rule code), `CONTEXT.md` (Renewal by the key on record), `docs/DOCMAP.md` (the devices row); DEC-0100 and
   DEC-0102 annotated; backlog CT-200, CT-202 filed.
 - **Source:** CT-200; the first organization server's request `38014539` (thread `1dcd7fda`) and its 0.5.0.
