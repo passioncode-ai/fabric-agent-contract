@@ -9038,7 +9038,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `1dcd7fda`, the first organization server's request `38014539`); accepted on merge after that window. A new duty for an
   organization server; the first organization server already does this in its 0.5.0 (`renewed_from`, a repeat while the
   renewed certificate is unpresented and not ended). Additive for nodes. Consumer adoption: CT-203 (the first
-  organization server's re-pin and its `FAC-SEM-155` test; Project Observatory's node already repeats a lost renewal). A new semantic kind (`device-renewal`) and rule
+  organization server's re-pin and its `FAC-SEM-155` test; Project Observatory's node already repeats a lost renewal,
+  and takes no clock sample from a repeat's answer; the pre-end lost-answer case). `device-enrollment.schema.json`'s
+  `streamEpoch` description ("greater than every epoch issued to this device before") is read with `FAC-SEM-044`'s
+  repeat reading; its bytes do not change. A new semantic kind (`device-renewal`) and rule
   code; no schema changes.
 - **Context:** DEC-0094 made a rotation idempotent. A renewal by the key on record (DEC-0100, DEC-0102) had no such rule:
   DEC-0102 item 6 reads a request before the last certificate's end as a re-enrollment with a new epoch, and a server
@@ -9078,6 +9081,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`device-renewal`), `fixtures/semantic/device-renewal-*` (twelve), `test/device-rules.test.ts`; `devices.md` (the
   header, Renewal after a short absence, the rules table with `FAC-SEM-044`'s repeat reading and `FAC-SEM-155`,
   the semantic kinds table, Health's `re_enrolled`), `conformance.md` (the organization server's row, the node's renewal row, the rule register, the
-  next free rule code), `CONTEXT.md` (Renewal by the key on record), `docs/DOCMAP.md` (the devices row); DEC-0100 and
+  next free rule code), `CONTEXT.md` (Renewal by the key on record, Stream epoch), `activity.md` (Streams), `docs/specification/README.md`
+  (the devices row), `docs/DOCMAP.md` (the devices row); DEC-0100 and
   DEC-0102 annotated; backlog CT-200, CT-202 and CT-203 filed.
 - **Source:** CT-200; the first organization server's request `38014539` (thread `1dcd7fda`) and its 0.5.0.

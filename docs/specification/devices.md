@@ -172,7 +172,10 @@ policy as it may any renewal. Two renewals that arrive at once get the one
 certificate. Once that certificate was presented, or after it ended unpresented, a renewal is a new one, as above. A
 node repeats a renewal whose answer was lost (no answer, or a 5xx) before it falls back to a token or SSO, so a lost
 answer costs a repeat, not a person's enrollment (`FAC-SEM-155`). The node repeats within its own 30-day renewal
-window; a repeat it would send later is a new enrollment by a token or SSO.
+window; a repeat it would send later is a new enrollment by a token or SSO. A repeat's certificate carries the
+renewal's `notBefore`, the server's clock at the renewal, not at the repeat, so a node takes no clock sample from a
+repeat's answer. A node that needs a new epoch (a collector lost its counter) while its renewed certificate is
+unpresented presents it first (any accepted request), so its next request by the key on record is a new renewal.
 A server MAY refuse a renewal by policy (a file-held key, which can be copied, DEC-0094; a device it wants an
 administrator to see again), with its own error. A server pinned before DEC-0100 refuses `key-on-record` at its schema;
 the node then enrolls with a token or SSO as before. No `protocols` entry tells either side the other's pin (CT-67), so a
