@@ -645,26 +645,21 @@ function rotation(value: JsonObject): Finding[] {
 }
 
 /**
- * FAC-SEM-155 (DEC-0148): a renewal by the key on record is idempotent until its certificate is presented.
- * `{answered, request, response}`: `answered` the renewals the server already answered, each `{publicKeySha256,
- * followed, certificate, presented?}` (`followed` the serial of the certificate the renewal followed, `presented` true
- * once the device has signed a request under the new certificate's serial); `request` a renewal's `{publicKeySha256,
- * followed}`; `response` the server's `{certificate}`, or no `certificate` for a refusal. A repeat before the new
- * certificate was presented gets that certificate again, byte for byte; a repeat after it is refused.
+ * FAC-SEM-155 (DEC-0148): a renewal by the key on record is answered again with the certificate it was issued while that
+ * certificate is unpresented. `{latest, at, response}`: `latest` the device's latest certificate on record,
+ * `{certificate, renewed?, presented?, notAfter}` (`renewed` true when a renewal by the key on record issued it,
+ * `presented` true once the server accepted a request under its serial); `at` the server's clock when the request
+ * arrived; `response` the server's `{certificate}`, or no `certificate` for a refusal. While `latest` was issued by a
+ * renewal, is unpresented and has not ended, a renewal is a repeat of it: answered with that certificate, byte for byte,
+ * or refused (a revoked device, a policy); never with another certificate. Otherwise it is a new renewal (DEC-0100).
  */
 function renewal(value: JsonObject): Finding[] {
-  const request = isObject(value.request) ? value.request : {};
+  const latest = isObject(value.latest) ? value.latest : {};
   const response = isObject(value.response) ? value.response : {};
-  const answered = Array.isArray(value.answered) ? value.answered.filter(isObject) : [];
-  if (typeof request.publicKeySha256 !== "string" || typeof request.followed !== "string") return [];
-  const earlier = answered.find((entry) => entry.publicKeySha256 === request.publicKeySha256 && entry.followed === request.followed);
-  if (earlier === undefined) return [];
-  if (earlier.presented === true) {
-    if (response.certificate === undefined) return [];
-    return [{ code: "FAC-SEM-155", instancePath: "/response/certificate", message: "a renewal repeated after its certificate was presented is refused, never answered with a certificate" }];
-  }
-  if (jsonEqual(earlier.certificate, response.certificate)) return [];
-  return [{ code: "FAC-SEM-155", instancePath: "/response/certificate", message: "a renewal repeated before its certificate was presented gets that certificate again, not a new one" }];
+  const at = strictTime(value.at), end = strictTime(latest.notAfter);
+  const repeat = latest.renewed === true && latest.presented !== true && at < end;
+  if (!repeat || response.certificate === undefined || jsonEqual(latest.certificate, response.certificate)) return [];
+  return [{ code: "FAC-SEM-155", instancePath: "/response/certificate", message: "a renewal repeated while the certificate a renewal issued is unpresented and valid gets that certificate again, or a refusal, never another" }];
 }
 
 export function deviceRules(kind: string, value: unknown): Finding[] | undefined {

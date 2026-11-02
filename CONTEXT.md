@@ -297,7 +297,8 @@ again within 30 days of its last certificate's `notAfter` with a CSR from its ke
 certificate keeps the user and role on record, a new epoch is issued, the renewal is audited, and a server MAY refuse
 it by policy (`FAC-SEM-044`). The 30 days are judged by the server's clock (the new certificate's `notBefore`), never
 the device's `requestedAt`; before the last certificate's end the same request is a re-enrollment by the key on record
-with a new epoch (DEC-0102) ([devices](docs/specification/devices.md#enrollment)).
+with a new epoch (DEC-0102); a renewal repeated while the certificate it issued is unpresented and valid gets that
+certificate again in its epoch, or a refusal (DEC-0148, `FAC-SEM-155`) ([devices](docs/specification/devices.md#enrollment)).
 
 **Closed organization**: An organization whose closing can no longer be cancelled. Its server MAY answer a device request of a
 node pinned at or after DEC-0103 (never an enrollment) with 410 `organization-closed` and `closedAt`, and a node ends that enrollment at once and drops what it buffered for it

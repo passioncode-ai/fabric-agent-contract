@@ -1,21 +1,16 @@
 {
-  "description": "The same renewal again before the certificate was presented, answered with another certificate: FAC-SEM-155.",
+  "description": "A repeat while the renewed certificate is unpresented and valid, answered with another certificate: FAC-SEM-155.",
   "kind": "device-renewal",
   "expect": [
     "FAC-SEM-155"
   ],
   "input": {
-    "answered": [
-      {
-        "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "followed": "01ab",
-        "certificate": "MIIB-renewed-certificate"
-      }
-    ],
-    "request": {
-      "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "followed": "01ab"
+    "latest": {
+      "certificate": "MIIB-renewed-certificate",
+      "renewed": true,
+      "notAfter": "2026-11-09T08:30:05Z"
     },
+    "at": "2026-11-02T08:31:00Z",
     "response": {
       "certificate": "MIIB-another-certificate"
     }

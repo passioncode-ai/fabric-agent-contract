@@ -6209,6 +6209,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-22
 - **Status:** Accepted source change (on merge of PR #143). Consumer adoption: board row CT-88.
   Annotated (2026-10-22): corrected by DEC-0102, items 6 (the renewal clock), 7 (SR-5a lets a withdrawal pass), 8 (resuming after `purpose`) and 11 (compatibility wording).
+- **Annotated (2026-11-02):** DEC-0148: a renewal by the key on record repeated while the certificate it was
+  issued is unpresented and valid is answered with that certificate, or refused, never another (`FAC-SEM-155`).
 - **Decision:**
   1. In [activity](specification/activity.md): a batch acknowledgement's `rejected[].reason` admits `purpose`: the
      receiver does not collect that event for that person under the notice they acknowledged. It is consumed like every
@@ -6297,6 +6299,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of PR #145). Annotated (2026-10-23): item 2's reach replaced by
   DEC-0118 (it follows `machine.mode`). Annotates DEC-0098 to DEC-0101; their bodies are not
   rewritten. Consumer adoption: the rows of the decisions it corrects (CT-81, CT-82, CT-83, CT-88).
+- **Annotated (2026-11-02):** item 6's re-enrollment with a new epoch is issued once per renewal: DEC-0148 answers a
+  repeat, while the certificate it issued is unpresented and valid, with that certificate in its epoch.
 - **Decision:**
   1. **A node summary's context** is `orgContextId`: its enrollment's own `org:<org.id>`, compared as written with the
      certificate and refused when it differs (`FAC-SEM-128`); contexts.md's "no check-in carries a context" names it as
@@ -6412,10 +6416,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-26):** item 4's "one event" amended by DEC-0127, whose OM-5 makes a membership's end, read
   from the revision that unpins the organization, a second event that ends a `server` layer's locks;
   `certificate-revoked` keeps its meaning.
-- **Annotated (2026-11-02):** DEC-0148 makes a renewal by the key on record idempotent until its certificate is
-  presented (`FAC-SEM-155`).
-- **Annotated (2026-11-02):** item 6's re-enrollment with a new epoch is issued once: DEC-0148 answers a repeat of
-  that renewal, before its certificate is presented, with the same certificate in its epoch.
 - **Context:** the first organization server closes organizations (its organization export and termination, live on
   2026-10-22): at the end of the notice period it revokes every machine certificate, then deletes the organization. Its
   machines then meet `401 certificate-revoked` and, after the deletion, `401 certificate-unknown`. Project Observatory's
@@ -9030,43 +9030,49 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   DEC-0126, DEC-0142 and DEC-0143 annotated; backlog CT-186 (DEC-0147's duties, in order), CT-201 (what its round-2 readings left) and CT-189 (closes on merge).
 - **Source:** CT-189; CT-178's readings 12 and 13.
 
-### DEC-0148: a renewal by the key on record is idempotent until its certificate is presented (`FAC-SEM-155`)
+### DEC-0148: a renewal by the key on record is repeated, not reissued, while its certificate is unpresented (`FAC-SEM-155`)
 
 - **Date:** 2026-11-02
 - **Status:** Proposed (2026-11-02), its shape posted for objections until 2026-11-05 18:00 UTC (board thread
   `1dcd7fda`, the first organization server's request `38014539`); accepted on merge after that window. A new duty for an
-  organization server; the first organization server already does this as its own policy in its 0.5.0. Additive for
-  nodes: a repeat that was refused (any 4xx but 408, 425, 429, which Project Observatory's node reads as final) now
-  gets the certificate it was issued. A new semantic kind (`device-renewal`) and rule code; no schema changes.
-- **Context:** DEC-0094 made a rotation idempotent: a repeat gets the certificate the server issued until the device
-  presents it. A renewal by the key on record (DEC-0100, DEC-0102) had no such rule: DEC-0102 item 6 reads a request
-  before the last certificate's end as a re-enrollment with a new epoch, so a renewal whose answer was lost, or two
-  sent at once, were each a new enrollment, and a node that treats a refused renewal as final for that certificate
-  left the machine for a person to enroll again (CT-200).
+  organization server; the first organization server already does this in its 0.5.0 (`renewed_from`, a repeat while the
+  renewed certificate is unpresented and valid). Additive for nodes. A new semantic kind (`device-renewal`) and rule
+  code; no schema changes.
+- **Context:** DEC-0094 made a rotation idempotent. A renewal by the key on record (DEC-0100, DEC-0102) had no such rule:
+  DEC-0102 item 6 reads a request before the last certificate's end as a re-enrollment with a new epoch, and a server
+  MAY refuse it by policy, so a renewal whose answer was lost, or two sent at once, became a second enrollment or a
+  refusal that a node reads as final, leaving the machine for a person to enroll again (CT-200).
 - **Decision:** [devices](specification/devices.md#enrollment), Renewal after a short absence.
-  1. **The server records what a renewal followed.** With each certificate a renewal by the key on record issues, the
-     server records the serial of the certificate it followed: the device's last certificate on record when the
-     renewal arrived. Nothing changes on the wire.
-  2. **A repeat before presentation gets the same certificate.** A renewal whose CSR key (`publicKeySha256`) and
-     followed certificate equal one the server already answered, while the device has not signed any request under
-     the new certificate's serial, gets that certificate again, byte for byte, in its epoch: no second epoch and no
-     second issuance in the device's audit. Two renewals that arrive at once get the one certificate (the server
-     serializes them per device).
-  3. **After presentation a repeat is refused** with the server's own error; the device holds the certificate it
-     presented, and a refused repeat costs it nothing.
-  4. **`FAC-SEM-155`** (`device-renewal`): an answered renewal repeated before presentation answered with another
-     certificate, or repeated after presentation answered with any certificate, is a finding.
+  1. **The server records which certificates a renewal issued.** A certificate a renewal by the key on record issued is
+     marked so (the first organization server records the certificate it followed). Nothing changes on the wire.
+  2. **A repeat is answered with the same certificate.** A renewal by the key on record that arrives while the device's
+     latest certificate on record was issued by a renewal, has not been presented (no request accepted under its
+     serial, signed or over mutual TLS alone) and has not ended, is a repeat of that renewal: the server answers it with
+     that certificate, byte for byte, in its epoch, with no second epoch and no second issuance in the device's audit,
+     or refuses it as it may refuse any renewal (a device revoked since, its policy). Two renewals that arrive at once
+     get the one certificate (the server serializes them per device). `FAC-SEM-044` judges the repeat's answer against
+     the record as it stood before the renewal it repeats.
+  3. **Otherwise it is a new renewal**: once the renewed certificate was presented, or after it ended unpresented, a
+     renewal by the key on record is DEC-0100's and DEC-0102 item 6's, taken with a new epoch or refused by policy.
+  4. **The node repeats a renewal whose answer was lost** (no answer, or a 5xx), as it repeats a rotation, before it
+     falls back to a token or SSO.
+  5. **`FAC-SEM-155`** (`device-renewal`): a repeat answered with a certificate other than the one the renewal issued.
 - **Why:** a lost answer is the ordinary failure of a network call, and an enrollment by a token or SSO for it needs a
-  person; DEC-0094 already settled the same case for a rotation, and a renewal differs only in its epoch, which the
-  repeat keeps.
-- **Alternatives considered:** the certificate naming the one it followed (a new certificate extension every reader
-  would have to learn, for a fact only the server needs); a node that never repeats a renewal (it cannot tell a lost
-  answer from a refused one); a repeat answered at any time (after presentation it would hand a second copy of a
-  certificate the device already uses to whoever holds a copy of a file-held key, DEC-0094).
-- **Compatibility:** additive. A server pinned before DEC-0148 answers a repeat as a new re-enrollment (a new epoch),
-  which a node reads as before. `contractVersion` stays `0.1.0`.
+  person; DEC-0094 settled the same case for a rotation. Judging a repeat from the server's own record of the latest
+  certificate (not from anything the device sends) lets a server tell a repeat from a new renewal with no wire change.
+- **Alternatives considered:** the certificate naming the one it followed (a new field every reader would learn, for a
+  fact only the server needs); a node that never repeats a renewal (it cannot tell a lost answer from a refused one); a
+  repeat answered after the certificate was presented or after it ended (it would hand a second copy of a certificate
+  in use, or one already past, to whoever holds a copy of a file-held key, DEC-0094).
+- **Compatibility:** additive. A server before DEC-0148 answers a repeat as a new re-enrollment (a new epoch) or
+  refuses it by policy, which the node reads as final and then needs a token or SSO: the case this decision removes.
+  A repeat in flight across a server's adoption is a new renewal (the server has no mark on certificates it issued
+  before), and once adopted, the device's re-enrollment counts (`re_enrolled`) and the audit's issuances no longer
+  count a repeat. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/device-rules.ts` (`renewal`, `FAC-SEM-155`), `src/semantic-kinds.ts`
   (`device-renewal`), `fixtures/semantic/device-renewal-*` (seven), `test/device-rules.test.ts`; `devices.md` (the
-  header, Renewal after a short absence, the semantic kinds and rules tables), `conformance.md` (the organization
-  server's row, the rule register, the next free rule code); DEC-0100 and DEC-0102 annotated; backlog CT-200.
-- **Source:** CT-200; the first organization server's request `38014539` (thread `1dcd7fda`).
+  header, Renewal after a short absence, the semantic kinds table with the `device-enrollment` row's repeat reading,
+  the rules table), `conformance.md` (the organization server's row, the node's renewal row, the rule register, the
+  next free rule code), `CONTEXT.md` (Renewal by the key on record), `docs/DOCMAP.md` (the devices row); DEC-0100 and
+  DEC-0102 annotated; backlog CT-200, CT-202 filed.
+- **Source:** CT-200; the first organization server's request `38014539` (thread `1dcd7fda`) and its 0.5.0.

@@ -1,19 +1,14 @@
 {
-  "description": "The same renewal again (the answer was lost, or two were sent at once) before the device presented the certificate: the same certificate, byte for byte; no finding.",
+  "description": "A renewal repeated after its answer was lost (or two sent at once): the latest certificate was issued by a renewal, is unpresented and valid, and the server answers it again, byte for byte; no finding.",
   "kind": "device-renewal",
   "expect": [],
   "input": {
-    "answered": [
-      {
-        "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "followed": "01ab",
-        "certificate": "MIIB-renewed-certificate"
-      }
-    ],
-    "request": {
-      "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "followed": "01ab"
+    "latest": {
+      "certificate": "MIIB-renewed-certificate",
+      "renewed": true,
+      "notAfter": "2026-11-09T08:30:05Z"
     },
+    "at": "2026-11-02T08:31:00Z",
     "response": {
       "certificate": "MIIB-renewed-certificate"
     }

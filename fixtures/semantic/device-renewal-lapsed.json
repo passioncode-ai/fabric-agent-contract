@@ -1,0 +1,16 @@
+{
+  "description": "The renewed certificate ended unpresented, so a renewal now is a new one: a new certificate; no finding.",
+  "kind": "device-renewal",
+  "expect": [],
+  "input": {
+    "latest": {
+      "certificate": "MIIB-renewed-certificate",
+      "renewed": true,
+      "notAfter": "2026-11-09T08:30:05Z"
+    },
+    "at": "2026-11-10T08:00:00Z",
+    "response": {
+      "certificate": "MIIB-another-certificate"
+    }
+  }
+}
