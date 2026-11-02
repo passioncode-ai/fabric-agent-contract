@@ -1,6 +1,6 @@
 # A credential shared with another person's estate: `fabric-peer-share/1`
 
-DEC-0142 · schemas [`peer-share-frame`](../../schemas/peer-share-frame.schema.json),
+DEC-0142, DEC-0147 · schemas [`peer-share-frame`](../../schemas/peer-share-frame.schema.json),
 [`peer-share-envelope`](../../schemas/peer-share-envelope.schema.json),
 [`peer-share-report`](../../schemas/peer-share-report.schema.json),
 [`peer-share-record`](../../schemas/peer-share-record.schema.json) · reference [`src/peer-share.ts`](../../src/peer-share.ts) ·

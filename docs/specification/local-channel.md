@@ -1,6 +1,6 @@
 # The local channel to the node — `fabric-local-channel/0.1`
 
-DEC-0075, DEC-0132 (`machine.report`), DEC-0139 (`unknown-method`, its callers), DEC-0143 (secret requests), DEC-0146 (`nodeMethodAnswer`) · rule code `FAC-SEM-106` · schema [`local-channel`](../../schemas/local-channel.schema.json) · code
+DEC-0075, DEC-0132 (`machine.report`), DEC-0139 (`unknown-method`, its callers), DEC-0143 (secret requests), DEC-0146 (`nodeMethodAnswer`), DEC-0147 (the Decline twin, answers before a prompt, readers that answer) · rule code `FAC-SEM-106` · schema [`local-channel`](../../schemas/local-channel.schema.json) · code
 [`src/local-channel.ts`](../../src/local-channel.ts)
 
 How Fabric, Fabric Switchboard, Fabric Dashboards and, for secret requests, the node's own signed app (DEC-0143) talk to Project Observatory's node on the same machine, and Fabric's hub to whichever node applies the estate's records on its machine (`machine.report`, DEC-0146): the

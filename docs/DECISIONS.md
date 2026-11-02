@@ -7624,6 +7624,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted (2026-10-26). Additive on the wire (an optional `source` in `mandate/1` and in
   `_meta.decision`); a behaviour rule an agent adopts at its next pin. Amends AP-3 (DEC-0121) and MD-1, MD-6
   (DEC-0125) for a relay. Adoption: CT-149.
+- **Annotated (2026-11-02):** DEC-0147 adds to OA-6 that the receiver's record of the operator's words replaces a
+  peer share link's fragment with the share id (PS-4).
 - **Context:** the operator, 2026-10-26, relayed by one of the operator's agents (request `519d7b21`, thread `3e8f706c`):
   «хочу чтобы на уровне мои агентов работающи по моей команде не было двойного апрува, я сказал одному = сказал всем,
   передай это в фабрик контракт и в фабрик агентам тоже пусть там у себы поправят». On 2026-10-25 the operator approved
@@ -8650,7 +8652,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   behind a hello a node pinned before refuses (`invalid-params`), so a client learns the node does not serve it.
   Consumer adoption: Project Observatory's node and its signed apps (CT-186).
 - **Annotated (2026-10-28):** DEC-0147 adds SP-4's agent twin of "Decline" (the operator's decision, recorded
-  `declined`, the window closed) and makes `secretOutcome`, `consentOutcome`, `mayPrompt` and `maySecretPrompt` answer
+  `declined`, the window closed; a closed request keeps its outcome), SP-3's withdrawal before the prompt (`no-answer`,
+  no prompt) and SP-5's answers before any prompt, and makes `secretOutcome`, `consentOutcome`, `mayPrompt` and `maySecretPrompt` answer
   input that does not read instead of throwing.
 - **Context:** Project Observatory asked (the same request `c50f590b`; its design D4) for a local-channel method for
   secret requests: an agent needs a value only the person can give and must never see it typed or ask for it in a chat.
@@ -8942,7 +8945,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0147: a peer share's risks from its readings settled (reports that restate a window, the agent twins, inputs that do not read)
 
 - **Date:** 2026-10-28
-- **Status:** Accepted (on merge of its pull request). A narrowing of a usage report's body (an export without a day and
+- **Status:** Accepted, merged 2026-11-02 (PR #232, after two clean rounds of readings, 5 and 6). A narrowing of a usage report's body (an export without a day and
   slot entry in the same report is `bad-body`) and new duties for the recipient's node (each report restates a window)
   and the sender's (reports read in ascending sequence, uses replaced per day and slot, exports and labels kept as
   sets). One implementation of DEC-0142 is released: Project Observatory's engine `v0.30.0` (2026-10-28) reads reports as
@@ -8955,7 +8958,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   answer changes.
 - **Context:** CT-178's last clean readings (rounds 12 and 13) left risks, none blocking DEC-0142 or DEC-0143 (CT-189).
 - **Decision:** [peer share](specification/peer-share.md) PS-4 and PS-8, [local channel](specification/local-channel.md)
-  SP-3, SP-4 and SP-5, [service](specification/service.md#actions) AP-4, [delegation](specification/delegation.md) DL-26, MD-6, OA-5.
+  SP-3, SP-4 and SP-5, [service](specification/service.md#actions) AP-2 and AP-4, [delegation](specification/delegation.md) DL-26, MD-6, OA-5, OA-6.
   1. **A report restates a window.** Nothing tells the recipient which report the sender read, so a report restates its
      `iat` day and the `PEER_REPORT_DAYS` (35) UTC days before it, or from the claim's day when later: an entry
      per day and slot with a use or an export (zero uses for a day with only an export), every export of those days
@@ -9017,8 +9020,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/vectors/peer-share.json`, `tools/vectors/local-channel.ts` and `fixtures/vectors/local-channel.json`,
   `test/peer-share.test.ts`, `test/local-channel.test.ts`, `schemas/peer-share-report.schema.json` (descriptions);
   `peer-share.md` (PS-4, PS-6, PS-8, the reference table), `local-channel.md` (SP-3, SP-4, SP-5), `service.md` (AP-2, AP-4),
-  `delegation.md` (DL-26, MD-6, OA-5), `conformance.md` (the sender's, recipient's and secret node's rows),
-  `docs/ux/foundation.md` (ST-037, ST-040), `screens.md` (SCR-33, SCR-34), `flows.md` (FLW-33, FLW-34), `scenarios.md`
+  `delegation.md` (DL-26, MD-6, OA-5, OA-6), `conformance.md` (the sender's, recipient's and secret node's rows, the service-with-a-page row),
+  `docs/ux/foundation.md` (ST-037, ST-039, ST-040), `docs/DOCMAP.md` (the peer share row), `screens.md` (SCR-33, SCR-34), `flows.md` (FLW-33, FLW-34), `scenarios.md`
   (SCN-052, SCN-053), `CONTEXT.md` (Peer share), `docs/specification/README.md` (the peer share's adoption); DEC-0121,
-  DEC-0142 and DEC-0143 annotated; backlog CT-186 (DEC-0147's duties, in order), CT-201 (what its round-2 readings left) and CT-189 (closes on merge).
+  DEC-0126, DEC-0142 and DEC-0143 annotated; backlog CT-186 (DEC-0147's duties, in order), CT-201 (what its round-2 readings left) and CT-189 (closes on merge).
 - **Source:** CT-189; CT-178's readings 12 and 13.
