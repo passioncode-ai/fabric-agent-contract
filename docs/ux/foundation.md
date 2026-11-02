@@ -771,7 +771,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given a client that declares `secret.ui`, when the node has not verified it as its product's signed app by the operating system, then its hello is `forbidden` (`channelStep`).
   - Given an agent's request, when the node prompts, then one admitted client shows the agent the node's binding names, the project, the slot and the agent's reason quoted, and no value travels on the channel (`secret.prompt`).
-  - Given the person stores the value, when the node confirmed the slot was written after the prompt, then the agent is told `stored`; otherwise `unconfirmed`, `declined` or `no-answer` (`secretOutcome`), or `no-client` when no signed app is admitted, the node's answer before it prompts (SP-3).
+  - Given the person stores the value, when the node confirmed the slot was written after the prompt, then the agent is told `stored`; otherwise `unconfirmed`, `declined` or `no-answer` (`secretOutcome`), or, before it prompts, `no-client` when no signed app is admitted (SP-3), `no-answer` for a request the agent withdrew, or `declined` for the operator's decline through an agent (SP-4, SP-5, DEC-0147).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

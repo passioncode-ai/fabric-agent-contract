@@ -467,7 +467,7 @@ export function openPeerShare(value: unknown, ctx: unknown, ownKemPrivateKey: Bu
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const AGENT_NAME = /^[A-Za-z0-9][A-Za-z0-9 ._:@/-]{0,127}$/;
 
-/** The days a usage report restates, back from its own `iat` day (DEC-0147): a report lost or refused is restated by the next. */
+/** How many UTC days before its own `iat` day a usage report restates (DEC-0147): the `iat` day and these, from the claim's day when later; a report lost or refused is restated by the next. */
 export const PEER_REPORT_DAYS = 35;
 
 /**

@@ -902,6 +902,7 @@ flowchart TD
   C -->|no| L{The node starts its signed app through its broker; admitted before the deadline?}
   L -->|yes| P
   L -->|the operator declines through an agent first, with their decision| D
+  L -->|the agent withdraws it first| Z
   L -->|no, or no desktop| X[no-client: the person's step is to put the value in their own shell]
   C -->|yes| P[secret.prompt to that one app]
   P --> W{The person answers before the deadline?}

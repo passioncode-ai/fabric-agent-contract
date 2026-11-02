@@ -137,7 +137,8 @@ the vault slot itself.
   own detail, SP-7, never as another outcome) and nothing is shown by anyone; the agent then
   tells the person to put the value in with the vault's own command in their shell. A request withdrawn with
   `secret.cancel` reads `no-answer` to the agent unless an answer came first: the node passes the cancel time to
-  `secretOutcome` as the deadline.
+  `secretOutcome` as the deadline. A request withdrawn before the node sent its prompt (while its signed app is
+  starting) reads `no-answer` with no prompt sent, and no `secretOutcome` runs for it.
 - **SP-4. No value on the channel.** The prompt and its result carry no value, in either direction. The app writes the
   value into the slot in its own process; the value never crosses the channel or another process boundary, and is in
   no argument, environment variable, log, notification or result. The node reads each answer against
@@ -146,10 +147,11 @@ the vault slot itself.
   and `humanStep: secret` (DEC-0121 AP-4), so an agent's tool for them answers `human-step-required`, with the link to
   the node's page that shows the pending request and names the app window that holds it, and never stores a value.
   "Decline" is `gate: relayed`: it stores nothing. Its agent twin is a tool on the node's own surface (SP-7) that names
-  the pending request and carries the operator's decision in `_meta.decision` (AP-2): the node records it as a
+  the pending request and carries the operator's decision in `_meta.decision` (AP-2): the node records it, on a request still unanswered, as a
   `declined` answer at its own receipt time, so after the prompt `secretOutcome` reads it like the window's, sends `secret.cancel` so
   the window closes, and answers the asking agent `declined`; without a decision it refuses `operator-decision-required`
-  and declines nothing. An agent that asked and changed its mind withdraws its own request with `secret.cancel` (SP-3),
+  and declines nothing; on a request already answered it changes nothing and answers the request's outcome. An agent
+  that asked and changed its mind withdraws its own request with `secret.cancel` (SP-3),
   which it learns as `no-answer`, never as the person's decline (DEC-0147). The window cannot tell the two apart
   (`secret.cancel` carries the request id only) and shows the request as closed. If the person pressed "Store" before
   the window closed, the app may still write the slot: the outcome reads `declined` (the first answer, SP-5) while the
@@ -165,8 +167,8 @@ the vault slot itself.
   prompt and its deadline, at most 10 minutes after it (`MAX_SECRET_DEADLINE_MS`), by the node's receipt time; no answer
   by then is `no-answer`, a late answer is ignored. `stored` counts only when the node confirmed, in its own vault
   record, that the slot was written after the prompt; otherwise `unconfirmed`. Before any prompt the node answers
-  `no-client` (SP-2, SP-3) or, for a decline its agent twin recorded first, `declined` with no prompt sent (SP-4,
-  DEC-0147); neither passes through `secretOutcome`. The agent learns `stored`, `declined`, `no-answer`, `unconfirmed`
+  `no-client` (SP-2, SP-3), `no-answer` for a request its agent withdrew first (SP-3), or `declined` for a decline its
+  agent twin recorded first (SP-4, DEC-0147), with no prompt sent; none passes through `secretOutcome`. The agent learns `stored`, `declined`, `no-answer`, `unconfirmed`
   or `no-client`, never a value.
 - **SP-6. What the prompt shows.** The agent named by the node's own binding for its caller, never words the agent
   wrote (a binding is the node's, so a same-user agent that read another agent's token file can ask under that name;

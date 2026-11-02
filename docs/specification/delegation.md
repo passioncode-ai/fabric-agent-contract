@@ -676,8 +676,8 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
   a payment or top-up, a secret typed in or handed out, spend above a limit, a passkey signature, a comparison of codes between two
   people or the choice to share without one (DEC-0142); and a decision recorded as the
   operator's own when the relay does not carry it.
-- **OA-6, the record.** The receiver records the relay as its reason: the operator's words, `at` and `source` in its
-  change log or audit record, its reply in the thread, its handoff. A service records `source` with the decision or
+- **OA-6, the record.** The receiver records the relay as its reason: the operator's words (a peer share link's fragment
+  replaced by the share id, PS-4, DEC-0147), `at` and `source` in its change log or audit record, its reply in the thread, its handoff. A service records `source` with the decision or
   the mandate (`actionDecision` and `mandateCovers` return it in `recordAs`). `source` is the relaying agent's
   statement of where the operator spoke; it never places the caller's tier or identity, which the service takes from
   its own authentication (AP-2).

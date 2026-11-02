@@ -67,8 +67,8 @@ claim code is ever put in a `fabric://` link.
 
 **An agent's "Open a share"** (DEC-0147). The button's agent twin takes the link whole, as one argument, never its
 parts, and hands it to the node, which holds it as the app holds a link pasted in; it claims nothing. "Accept" stays the
-person's step (`gate: human`, `humanStep: consent`, PS-6): the hand-over took effect, so the tool answers success, never
-a refusal, with the share id, the next step (`humanStep: consent`) and the link to the node's page that shows the
+person's step (`gate: human`, `humanStep: consent`, PS-6): the hand-over took effect, so the tool answers success rather
+than `human-step-required` (a call without the operator's decision is still refused, AP-2), with the share id, the next step (`humanStep: consent`) and the link to the node's page that shows the
 pending share, which the agent hands the person; the node claims once the person accepts there (PS-5). The same link
 handed over again answers the same and holds one pending share, and after the person accepts or declines a repeat
 answers the share's current state; a share nobody accepts lapses at the claim deadline the mailbox gives (CT-185) or,
