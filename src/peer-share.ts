@@ -138,8 +138,9 @@ export function claimHolds(link: unknown, frame: unknown): boolean {
 
 /**
  * Whether the sender's commit frame names the share `#sig` the link pins: its thumbprint is the link's `k`. A
- * recipient whose link reached its app as sent aborts on a mismatch; one handed over by the mailbox's page has no pin
- * and rests on the comparison code alone.
+ * recipient whose link reached its app as sent, or reached an agent's "Open a share" unchanged in the operator's
+ * decision the call carries (DEC-0147), aborts on a mismatch; one handed over by the mailbox's page, or by an agent from
+ * anywhere else, has no pin and rests on the comparison code alone.
  */
 export function pinHolds(link: unknown, frame: unknown): boolean {
   const commit = peerFrame(frame);
@@ -466,11 +467,14 @@ export function openPeerShare(value: unknown, ctx: unknown, ownKemPrivateKey: Bu
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const AGENT_NAME = /^[A-Za-z0-9][A-Za-z0-9 ._:@/-]{0,127}$/;
 
+/** How many UTC days before its own `iat` day a usage report restates (DEC-0147): the `iat` day and these, from the claim's day when later; a report lost or refused is restated by the next. */
+export const PEER_REPORT_DAYS = 35;
+
 /**
  * A report's body (`peer-share-report.schema.json#/$defs/body`): per slot and UTC day the uses the recipient's node
  * counted, the last use, the consumer labels (agent names from its journal) and the exports made with the export
- * button; never a value, a command, an argument or an output. At most 400 entries in each list, and one day entry per
- * date and slot.
+ * button; never a value, a command, an argument or an output. At most 400 entries in each list, one day entry per
+ * date and slot, and a day entry for the UTC day and slot of every export, which travels with it (DEC-0147).
  */
 export function peerReportBody(value: unknown): boolean {
   if (!isObject(value) || !exactly(value, ["days", "consumers", "exports"])) return false;
@@ -481,7 +485,10 @@ export function peerReportBody(value: unknown): boolean {
   const exported = (entry: JsonObject) => exactly(entry, ["slot", "at"]) && isString(entry.slot) && SLOT.test(entry.slot) && instant(entry.at) !== undefined;
   if (!list(value.days, day) || !list(value.consumers, consumer) || !list(value.exports, exported)) return false;
   const keys = (value.days as JsonObject[]).map((entry) => `${entry.date as string}\u0000${entry.slot as string}`);
-  return new Set(keys).size === keys.length;
+  const held = new Set(keys);
+  if (held.size !== keys.length) return false;
+  // An export travels with its day: the sender replaces a day and slot's uses and exports together (DEC-0147).
+  return (value.exports as JsonObject[]).every((entry) => held.has(`${(entry.at as string).slice(0, 10)}\u0000${entry.slot as string}`));
 }
 
 export type PeerReportRefusal = "malformed" | "unsupported-alg" | "wrong-share" | "wrong-recipient" | "bad-key" | "bad-signature" | "replayed" | "not-yet-valid" | "cannot-open" | "bad-body";

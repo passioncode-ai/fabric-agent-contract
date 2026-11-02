@@ -730,7 +730,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given I tell my developer agent "run the research on competitors' prices", when it engages the research agent, then the research agent runs the paid research within my project's money limits without asking me and records my words, the task and the chain (`mandateCovers`, DEC-0125).
   - Given the research would cost more than an amount I named, or reach a capability, an effect or a project my words do not name, when the research agent is called, then it refuses with the part not covered and only that part is put to me.
   - Given I approve a change in one agent's chat and another of my agents holds the key, when the first relays my words verbatim with when and where I said them and the scope, from one of my own projects or sessions, then the second acts without asking me again and records my words and where I said them (DEC-0126 OA-1 to OA-7).
-  - Given a sign-in, a consent, a payment, a typed secret, spend above a limit, a passkey signature or a comparison of codes with another person or the choice to share without one, then my mandate never covers it and the step comes to me.
+  - Given a sign-in, a consent, a payment, a secret typed in or handed out, spend above a limit, a passkey signature or a comparison of codes with another person or the choice to share without one, then my mandate never covers it and the step comes to me.
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
@@ -758,7 +758,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a share, when my node writes its link, then the link carries a one-time code and my share key's fingerprint in its fragment and no value (`shareLink`, `parseShareLink`).
   - Given a claim whose MAC holds, when we compare the codes, then my node seals nothing until the exchange completes and I confirm the codes match or choose to share without comparing (shown as not confirmed), and a second claim or a code that differs before my share is stored at the mailbox burns the link (a share I sealed in that moment is refused, never served), and a claim after a share stored without comparing warns me to take it back (`claimHolds`, `peerExchangeVerdict`, `checkedPeerCode`).
   - Given the value sealed to the recipient's share key, when their node opens it, then it opens only for that share's key, signer and sequence (`checkPeerShareEnvelope`).
-  - Given their reports, when I read them, then I see uses per day and consumer labels, never a value (`openPeerReport`), beside the mailbox's own count.
+  - Given their reports, when I read them, then I see uses per day, consumer labels and the exports made with the button, which never fall, never a value (`openPeerReport`, PS-8, DEC-0147), beside the mailbox's own count.
   - Given "Take back", when the mailbox refuses and the provider confirms the key revoked or rotated, then the share reads taken back; the recipient's deletion receipt is shown as reported by their machine.
 - **Priority:** must
 - **Status:** draft
@@ -771,7 +771,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given a client that declares `secret.ui`, when the node has not verified it as its product's signed app by the operating system, then its hello is `forbidden` (`channelStep`).
   - Given an agent's request, when the node prompts, then one admitted client shows the agent the node's binding names, the project, the slot and the agent's reason quoted, and no value travels on the channel (`secret.prompt`).
-  - Given the person stores the value, when the node confirmed the slot was written after the prompt, then the agent is told `stored`; otherwise `unconfirmed`, `declined` or `no-answer` (`secretOutcome`), or `no-client` when no signed app is admitted, the node's answer before it prompts (SP-3).
+  - Given the person stores the value, when the node confirmed the slot was written after the prompt, then the agent is told `stored`; otherwise `unconfirmed`, `declined` or `no-answer` (`secretOutcome`), or, before it prompts, `no-client` when no signed app is admitted (SP-3), `no-answer` for a request the agent withdrew, or `declined` for the operator's decline through an agent (SP-4, SP-5, DEC-0147).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

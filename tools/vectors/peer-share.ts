@@ -216,7 +216,12 @@ function envelopes(): Json[] {
     ["an envelope past its exp", env, ctx({ at: EXP }), no("expired")],
     ["a time with an offset, not UTC", envelope({ iat: "2026-10-27T10:59:00+01:00" }, "offset"), ctx(), no("malformed")]
   ];
-  return cases.map(([name, envelope, context, expect]) => ({ name, envelope, context, expect }));
+  // Sealed to another key under the recipient's thumbprint: every check passes, and opening it fails (DEC-0147).
+  const misdirected = envelope({ recipient: thumb(K.rKem) }, "misdirected", { key: K.sSig }, K.xKem);
+  return [
+    ...cases.map(([name, envelope, context, expect]) => ({ name, envelope, context, expect })),
+    { name: "sealed to another key under the recipient's thumbprint: the checks pass and it does not open", envelope: misdirected, context: ctx(), expect: ok(misdirected), open: { ok: false, refusal: "cannot-open" } }
+  ];
 }
 
 const REPORT = "fabric-peer-share-report/1";
@@ -245,10 +250,14 @@ function reports(): Json[] {
     ["issued exactly 60 s ahead of the clock", rep, ctx({ at: "2026-10-27T09:58:00Z" }), { ok: true, sequence: 1, body: BODY }],
     ["a body that carries a value", report({}, "value-body", { ...BODY, value: SECRET }), ctx(), no("bad-body")],
     ["a body with two entries for one day and slot", report({}, "twice", { ...BODY, days: [BODY.days[0], { ...BODY.days[0], uses: 0 }] }), ctx(), no("bad-body")],
+    ["a body with an export on a day it holds no entry for", report({}, "export-no-day", { ...BODY, exports: [{ slot: "OPENROUTER_API_KEY", at: "2026-10-26T23:59:00Z" }] }), ctx(), no("bad-body")],
+    ["a body with an export of a slot it holds no entry for that day", report({}, "export-no-slot", { ...BODY, exports: [{ slot: "OTHER_KEY", at: "2026-10-27T09:50:00Z" }] }), ctx(), no("bad-body")],
+    ["an export on a day with no use: an entry of zero uses carries it", report({}, "export-zero", { days: [{ date: "2026-10-26", slot: "OPENROUTER_API_KEY", uses: 0, lastUse: null }, BODY.days[0]], consumers: [], exports: [{ slot: "OPENROUTER_API_KEY", at: "2026-10-26T23:59:00Z" }] }), ctx(), { ok: true, sequence: 1, body: { days: [{ date: "2026-10-26", slot: "OPENROUTER_API_KEY", uses: 0, lastUse: null }, BODY.days[0]], consumers: [], exports: [{ slot: "OPENROUTER_API_KEY", at: "2026-10-26T23:59:00Z" }] } }],
     ["a body with a negative count", report({}, "negative", { ...BODY, days: [{ ...BODY.days[0], uses: -1 }] }), ctx(), no("bad-body")],
     ["a body that is no JSON", sealed(REPORT, { sequence: 1, iat: IAT }, { key: K.rSig }, K.sKem, "not-json", Buffer.from("uses: 3", "utf8")), ctx(), no("bad-body")],
     ["sealed to another key under the sender's thumbprint: the checks pass and it does not open", sealed(REPORT, { recipient: thumb(K.sKem), sequence: 1, iat: IAT }, { key: K.rSig }, K.xKem, "misdirected", Buffer.from(rfc8785(BODY), "utf8")), ctx(), no("cannot-open")],
-    ["a time with an offset, not UTC", report({ iat: "2026-10-27T10:59:00+01:00" }, "offset"), ctx(), no("malformed")]
+    ["a time with an offset, not UTC", report({ iat: "2026-10-27T10:59:00+01:00" }, "offset"), ctx(), no("malformed")],
+    ["an enc that is no point of the curve", { ...rep, header: { ...rep.header, enc: Buffer.alloc(65, 4).toString("base64url") } }, ctx(), no("bad-key")]
   ];
   return cases.map(([name, sealedReport, context, expect]) => ({ name, report: sealedReport, context, expect }));
 }
@@ -274,7 +283,7 @@ function records(): Json[] {
 
 function peerShareVectors(): Json {
   return {
-    about: "DEC-0142 (docs/specification/peer-share.md): a credential shared from one person's estate with another person's. keys: the share key pairs (P-256 public JWKs, their private scalars d as unpadded base64url, their RFC 7638 thumbprints); links: parseShareLink; claims: claimMac and claimHolds; pins: pinHolds; codes: checkedPeerCode; exchanges: peerExchangeVerdict(shareId, claimDeadline, frames, at); envelopes: checkPeerShareEnvelope(envelope, context), and openPeerShare with the recipient's share #kem scalar answers the secret; reports: checkPeerReport and openPeerReport with the sender's share #kem scalar (a refusal from either, or {ok, sequence, body}); records: peerRecordStands(record, type, shareId, signerSig).",
+    about: "DEC-0142 (docs/specification/peer-share.md): a credential shared from one person's estate with another person's. keys: the share key pairs (P-256 public JWKs, their private scalars d as unpadded base64url, their RFC 7638 thumbprints); links: parseShareLink; claims: claimMac and claimHolds; pins: pinHolds; codes: checkedPeerCode; exchanges: peerExchangeVerdict(shareId, claimDeadline, frames, at); envelopes: checkPeerShareEnvelope(envelope, context), and openPeerShare with the recipient's share #kem scalar answers the secret, or `open` when a case names it; reports: checkPeerReport and openPeerReport with the sender's share #kem scalar (a refusal from either, or {ok, sequence, body}); records: peerRecordStands(record, type, shareId, signerSig).",
     secret: SECRET,
     keys: keys(),
     links: links(),

@@ -137,6 +137,16 @@ describe("FAC-SEM-106: hello first", () => {
 });
 
 describe("methods, codes and consent outcomes", () => {
+  it("never throws on input that does not read (DEC-0147)", () => {
+    for (const state of [null, undefined, 7, "x", { hello: "yes", capabilities: ["secret.ui"], signedApp: true }, { hello: true, capabilities: "secret.ui", signedApp: true }]) {
+      expect(mayPrompt(state as never)).toBe(false);
+      expect(maySecretPrompt(state as never)).toBe(false);
+    }
+    expect(consentOutcome(0, 60_000, null as never)).toBe("denied");
+    expect(consentOutcome("0" as never, 60_000, [{ at: 1, state: "given" }])).toBe("denied");
+    expect(consentOutcome(0, 60_000, [null, { at: "1", state: "given" }, { at: 2, state: "given" }] as never)).toBe("given");
+    expect(secretOutcome(0, "60000" as never, [{ at: 1, outcome: "stored" }], true)).toBe("no-answer");
+  });
   it("keeps the node's methods and the client's apart", () => {
     expect([...NODE_METHODS]).toEqual(["channel.hello", "health", "enroll.status", "machine.report"]);
     expect([...CLIENT_METHODS]).toEqual([["consent.prompt", "consent.ui"], ["secret.prompt", "secret.ui"]]);

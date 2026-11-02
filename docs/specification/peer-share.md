@@ -1,6 +1,6 @@
 # A credential shared with another person's estate: `fabric-peer-share/1`
 
-DEC-0142 · schemas [`peer-share-frame`](../../schemas/peer-share-frame.schema.json),
+DEC-0142, DEC-0147 · schemas [`peer-share-frame`](../../schemas/peer-share-frame.schema.json),
 [`peer-share-envelope`](../../schemas/peer-share-envelope.schema.json),
 [`peer-share-report`](../../schemas/peer-share-report.schema.json),
 [`peer-share-record`](../../schemas/peer-share-record.schema.json) · reference [`src/peer-share.ts`](../../src/peer-share.ts) ·
@@ -58,12 +58,32 @@ normalisation, so a dot segment, an upper-case host or an empty `:@` reads as th
 
 **The pin.** The recipient's node pins the sender's share `#sig` from `k` only when the link reaches the recipient's
 app as the sender sent it (pasted into the app, or opened by the app's own scheme carrying the `k` the person can see
-in the link they were sent): then it aborts unless the sender's commit frame names that key (`pinHolds`). A link
+in the link they were sent), or through an agent as the next paragraph says: then it aborts unless the sender's commit frame names that key (`pinHolds`). A link
 handed over by the mailbox's landing page carries no pin, because the page is the mailbox's own script, and that share
 rests on the comparison code alone (PS-6). A product's own scheme for the hand-over carries the share link's parts as
 the link does: the share id in the path and `c` and `k` in the fragment only, never in a query, never logged, the
 code used once. It is not a `fabric://` link: DEC-0040's rule that a link carries ids only (FL-4) governs those, and no
 claim code is ever put in a `fabric://` link.
+
+**An agent's "Open a share"** (DEC-0147). The button's agent twin takes the link whole, as one argument, never its
+parts, and hands it to the node, which holds it as the app holds a link pasted in; it claims nothing. "Accept" stays the
+person's step (`gate: human`, `humanStep: consent`, PS-6): the hand-over took effect, so the tool answers success rather
+than `human-step-required` (a call without the operator's decision is still refused, AP-2), with the share id, the next step (`humanStep: consent`) and the link to the node's page that shows the
+pending share, which the agent hands the person; the node claims once the person accepts there (PS-5). The same link
+handed over again answers the same and holds one pending share, and after the person accepts or declines a repeat
+answers the share's current state; a share nobody accepts lapses at the claim deadline the mailbox gives (CT-185) or,
+without one, 7 days after the hand-over. The node pins the
+sender's share `#sig` from `k` only when the link appears unchanged in the operator's decision the call carries
+(`_meta.decision`, AP-2: the person's own words, quoting the link they were sent); a link the agent took from anywhere
+else (a page, a mail, a tool's output) carries no pin, as one the mailbox's page hands over, and that share rests on the
+comparison code alone (PS-6). The pin is as strong as that relayed decision: the node checks that the link is in the
+decision's words, not where the agent found it (AP-3). The claim code is then in the agent's transcript, live and
+single use until the claim spends it or the claim deadline passes; anyone who reads the transcript before the person
+accepts can claim first or burn the link, and the comparison code is the defence (PS-6). The tool's answer, the node's
+journal and its logs name the share id only, never the link or the code; the audit record AP-2 keeps holds the
+decision with the link's fragment (`c` and `k`) replaced by the share id, the one redaction of that record. A link
+that reaches the node through another relay (another of the operator's agents, the operator channel, the hub) leaves
+its code in those records too; the comparison code stays the defence (CT-201).
 
 ## The claim (PS-5)
 
@@ -110,7 +130,8 @@ before either reveals:
    DEC-0121 too: the recipient's "Accept", its consent to the reports (PS-8), is `gate: human` with `humanStep:
    consent`, and the export button, which hands the value out, is `gate: human` with `humanStep: secret`. "Share",
    "Open a share", "They differ", "Decline" and "Take back" are `gate: relayed`: each only starts, stops or withdraws
-   a share and hands no value out, so an agent presses one on the operator's relayed decision (AP-2).
+   a share and hands no value out, so an agent presses one on the operator's relayed decision (AP-2; "Open a share"
+   as PS-4 says).
 
 **One attempt per link, at both ends** (`peerExchangeVerdict`, which the sender's node, the recipient's node and the
 mailbox each run over the frames in the order received): claim, then commit, then the two reveals in either order,
@@ -196,12 +217,20 @@ recipient's share `#sig`; the header names `type` (`fabric-peer-share-report/1`)
 `recipient`, `signer`, `shareId`, `sequence`, `iat` and `enc`, as `peer-share-report.schema.json` gives them. The body
 (`peer-share-report.schema.json#/$defs/body`, `peerReportBody`) holds, per slot and UTC day, the uses the node counted
 and the last one, the consumer labels (agent names from its journal) and the exports made with the export button; never
-a value, a command, an argument or an output (the rule of `call-record/1`, DEC-0111 item 6). A report holds the UTC days
-since the last day of the previous report the sender read (the current day again, as it grows), one entry per day and
-slot; the sender adds the days into its totals, a later report's entry for a day and slot replacing an earlier one's.
-Its consumers and exports are those since the previous report the sender read: the sender adds the exports to its
-count and the consumer labels to its list. A list that would pass 400 entries is split over reports of consecutive
-sequences, sent together. The report is a condition of the share, not a disclosure DEC-0052 governs: the recipient's
+a value, a command, an argument or an output (the rule of `call-record/1`, DEC-0111 item 6). Nothing tells the recipient
+which report the sender read, so every report restates a window rather than what changed (DEC-0147): its `iat` day and
+the `PEER_REPORT_DAYS` (35) UTC days before it, or from the day of the claim when later, one
+entry per day and slot with a use or an export (an export on a day with no use has an entry of zero uses); each export
+of those days, with the day and slot entry it falls on, in the same report (`peerReportBody` refuses an export without
+one, `bad-body`); and the consumer labels the node saw on those days. The sender reads the reports it fetched in
+ascending `sequence` and replaces, for each day and slot a report holds, that day's uses and last use with the
+report's; it adds exports to its record as a set keyed by slot and parsed instant (not its spelling), and labels to its list as a set, so a
+report read twice, or a later one covering the same day, never counts an export or a label twice, and a later report
+that omits an export the sender already holds never takes it away (the sender's export count never falls). A report refused or lost is restated by the next one while its days
+stay in the window: an export or a use is lost only when no report of the recipient's reaches the sender for 35 days.
+A list that would pass 400 entries is split over reports of consecutive sequences, sent together, a day and slot's entry
+and its exports always in one part; a part the sender refuses `replayed`, read after a later part, loses nothing the
+next report does not restate. The report is a condition of the share, not a disclosure DEC-0052 governs: the recipient's
 "Accept" names what the sender will see (agent names, uses per day, the time of each day's last use and of each export, and, through the mailbox the sender runs, the recipient machine's IP address and when it claims, renews and reports), and accepting is the recipient's consent to it.
 
 `checkPeerReport` refuses, in order, `malformed`, `unsupported-alg`, `wrong-share`, `wrong-recipient`, `bad-key`,
@@ -287,7 +316,7 @@ another estate's use.
 | commit, reveal, code | `peerCommit`, `checkPeerReveal`, `peerComparisonCode`, `checkedPeerCode` | `codes` |
 | one attempt per link | `peerFrame`, `peerExchangeVerdict` | `exchanges` |
 | the envelope | `sealPeerShare`, `checkPeerShareEnvelope`, `openPeerShare` | `envelopes` |
-| usage reports | `sealPeerReport`, `peerReportBody`, `checkPeerReport`, `openPeerReport` | `reports` |
+| usage reports | `sealPeerReport`, `peerReportBody`, `checkPeerReport`, `openPeerReport`, `PEER_REPORT_DAYS` | `reports` |
 | revocation, deletion | `signPeerRecord`, `peerRecordStands` | `records` |
 | requests to the mailbox (PS-10) | none: the DEC-0056 reference reads only its own label and a certificate's serial | none until CT-185 |
 
