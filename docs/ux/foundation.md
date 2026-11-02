@@ -758,7 +758,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a share, when my node writes its link, then the link carries a one-time code and my share key's fingerprint in its fragment and no value (`shareLink`, `parseShareLink`).
   - Given a claim whose MAC holds, when we compare the codes, then my node seals nothing until the exchange completes and I confirm the codes match or choose to share without comparing (shown as not confirmed), and a second claim or a code that differs before my share is stored at the mailbox burns the link (a share I sealed in that moment is refused, never served), and a claim after a share stored without comparing warns me to take it back (`claimHolds`, `peerExchangeVerdict`, `checkedPeerCode`).
   - Given the value sealed to the recipient's share key, when their node opens it, then it opens only for that share's key, signer and sequence (`checkPeerShareEnvelope`).
-  - Given their reports, when I read them, then I see uses per day and consumer labels, never a value (`openPeerReport`), beside the mailbox's own count.
+  - Given their reports, when I read them, then I see uses per day, consumer labels and the exports made with the button, which never fall, never a value (`openPeerReport`, PS-8, DEC-0147), beside the mailbox's own count.
   - Given "Take back", when the mailbox refuses and the provider confirms the key revoked or rotated, then the share reads taken back; the recipient's deletion receipt is shown as reported by their machine.
 - **Priority:** must
 - **Status:** draft

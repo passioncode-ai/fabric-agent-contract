@@ -145,8 +145,9 @@ export function maySecretPrompt(state: ChannelState): boolean {
 
 /**
  * What `secretOutcome` answers for a prompt the node sent. Before any prompt the node itself answers `no-client`, when
- * no signed app is admitted (DEC-0143 SP-2, SP-3), or `declined`, for a decline its agent twin recorded before the
- * prompt, which sends none (DEC-0147 item 3); this function returns neither for an answer before `promptedAt`.
+ * no signed app is admitted (DEC-0143 SP-2, SP-3), `no-answer`, for a request its agent withdrew before the prompt, or
+ * `declined`, for a decline its agent twin recorded before the prompt, sending none (DEC-0147 item 3); this function
+ * returns none of these for an answer before `promptedAt`.
  */
 export type SecretOutcome = "stored" | "declined" | "no-answer" | "unconfirmed";
 

@@ -8955,7 +8955,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   answer changes.
 - **Context:** CT-178's last clean readings (rounds 12 and 13) left risks, none blocking DEC-0142 or DEC-0143 (CT-189).
 - **Decision:** [peer share](specification/peer-share.md) PS-4 and PS-8, [local channel](specification/local-channel.md)
-  SP-4, [service](specification/service.md#actions) AP-4, [delegation](specification/delegation.md) DL-26, MD-6, OA-5.
+  SP-3, SP-4 and SP-5, [service](specification/service.md#actions) AP-4, [delegation](specification/delegation.md) DL-26, MD-6, OA-5.
   1. **A report restates a window.** Nothing tells the recipient which report the sender read, so a report restates its
      `iat` day and the `PEER_REPORT_DAYS` (35) UTC days before it, or from the claim's day when later: an entry
      per day and slot with a use or an export (zero uses for a day with only an export), every export of those days
@@ -8977,7 +8977,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      (SCR-34, FLW-34, SCN-053). A "Store" the person pressed in the window after the decline was recorded may still
      write the slot: the outcome reads `declined` (the first answer, SP-5) while the slot holds the value, and the next
      request for that slot shows it as already held. A decline recorded before the prompt is sent answers
-     `declined` and no prompt follows, outside `secretOutcome` (SP-5, the secret node's conformance row, FLW-34).
+     `declined` and no prompt follows, outside `secretOutcome` (SP-5, the secret node's conformance row, FLW-34). The
+     twin declines only an open request: on a closed one (answered, withdrawn, past its deadline, or answered
+     `no-client`) it changes nothing and answers that request's outcome. A request its agent withdrew before the prompt
+     reads `no-answer`, with no prompt sent and no `secretOutcome` run (SP-3).
   4. **The agent twin of "Open a share"** takes the link whole and hands it to the node; "Accept" stays the person's
      step (`humanStep: consent`), so the tool answers success with the share id and the node's page for the person, and
      the node claims once the person accepts (PS-5); the same link handed over again answers the same, an unaccepted
@@ -9013,7 +9016,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`secretOutcome`, `consentOutcome`, `mayPrompt`, `maySecretPrompt`), `tools/vectors/peer-share.ts` and
   `fixtures/vectors/peer-share.json`, `tools/vectors/local-channel.ts` and `fixtures/vectors/local-channel.json`,
   `test/peer-share.test.ts`, `test/local-channel.test.ts`, `schemas/peer-share-report.schema.json` (descriptions);
-  `peer-share.md` (PS-4, PS-6, PS-8, the reference table), `local-channel.md` (SP-4), `service.md` (AP-4),
+  `peer-share.md` (PS-4, PS-6, PS-8, the reference table), `local-channel.md` (SP-3, SP-4, SP-5), `service.md` (AP-2, AP-4),
   `delegation.md` (DL-26, MD-6, OA-5), `conformance.md` (the sender's, recipient's and secret node's rows),
   `docs/ux/foundation.md` (ST-037, ST-040), `screens.md` (SCR-33, SCR-34), `flows.md` (FLW-33, FLW-34), `scenarios.md`
   (SCN-052, SCN-053), `CONTEXT.md` (Peer share), `docs/specification/README.md` (the peer share's adoption); DEC-0121,

@@ -147,10 +147,11 @@ the vault slot itself.
   and `humanStep: secret` (DEC-0121 AP-4), so an agent's tool for them answers `human-step-required`, with the link to
   the node's page that shows the pending request and names the app window that holds it, and never stores a value.
   "Decline" is `gate: relayed`: it stores nothing. Its agent twin is a tool on the node's own surface (SP-7) that names
-  the pending request and carries the operator's decision in `_meta.decision` (AP-2): the node records it, on a request still unanswered, as a
+  the pending request and carries the operator's decision in `_meta.decision` (AP-2): the node records it, on a request still open, as a
   `declined` answer at its own receipt time, so after the prompt `secretOutcome` reads it like the window's, sends `secret.cancel` so
   the window closes, and answers the asking agent `declined`; without a decision it refuses `operator-decision-required`
-  and declines nothing; on a request already answered it changes nothing and answers the request's outcome. An agent
+  and declines nothing; on a closed request (answered, withdrawn, past its deadline, or answered `no-client`) it changes nothing and answers
+  that request's outcome. An agent
   that asked and changed its mind withdraws its own request with `secret.cancel` (SP-3),
   which it learns as `no-answer`, never as the person's decline (DEC-0147). The window cannot tell the two apart
   (`secret.cancel` carries the request id only) and shows the request as closed. If the person pressed "Store" before
