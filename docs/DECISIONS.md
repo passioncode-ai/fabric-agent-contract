@@ -9016,5 +9016,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `delegation.md` (DL-26, MD-6, OA-5), `conformance.md` (the sender's, recipient's and secret node's rows),
   `docs/ux/foundation.md` (ST-037), `screens.md` (SCR-33, SCR-34), `flows.md` (FLW-33, FLW-34), `scenarios.md`
   (SCN-052, SCN-053), `CONTEXT.md` (Peer share), `docs/specification/README.md` (the peer share's adoption); DEC-0121,
-  DEC-0142 and DEC-0143 annotated; backlog CT-186 (DEC-0147's duties, in order) and CT-189 (closes on merge).
+  DEC-0142 and DEC-0143 annotated; backlog CT-186 (DEC-0147's duties, in order), CT-201 (what its round-2 readings left) and CT-189 (closes on merge).
 - **Source:** CT-189; CT-178's readings 12 and 13.
