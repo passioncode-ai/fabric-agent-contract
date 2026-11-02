@@ -97,7 +97,8 @@ enrollment of a machine gets keys of its own (the operator's NET-2), and nothing
      `org.id`, `device.id` and, when known, `user.id`, or `role: "org-cloud"` and no `user` for an organization's cloud
      machine (DEC-0099);
    - **`streamEpoch`**: the epoch every collector on the device uses from now on, greater than every
-     epoch issued to this device before (`FAC-SEM-044`);
+     epoch issued to this device before (`FAC-SEM-044`; a renewal repeated under DEC-0148 gets the epoch that renewal
+     issued);
    - **`policyRootKey`**: the organization's root key (`keyId`, `alg` and the public key), which signs
      [policy key sets](#key-sets) and nothing else, and optionally the current key set. Its `alg` is
      `ed25519` (the default, a raw 32-byte key) or `es256` (a raw 65-byte P-256 point), DEC-0053;
@@ -160,11 +161,12 @@ still valid rotates instead. The server
 takes it only for a device on record that is not revoked (`FAC-SEM-044`), keeps the binding it holds (the same user,
 or none, and the same `role`), issues a new epoch as every re-enrollment does, and records the renewal in the device's
 audit; it is never silent. Past the 30 days, or for a revoked device, a token or an SSO sign-in is needed as before.
-**A renewal is repeated, not reissued, while its certificate is unpresented** (DEC-0148): the server marks each
+**A renewal is repeated, not reissued, while its certificate is unpresented and not ended** (DEC-0148): the server marks each
 certificate a renewal by the key on record issued. A renewal by the key on record that arrives while the device's
 latest certificate on record was issued by a renewal, has not been presented (no request accepted under its serial,
 signed or over mutual TLS alone) and has not ended, is a repeat of that renewal: the server answers it with that
-certificate, byte for byte, in its epoch, with no second epoch and no second issuance in the device's audit, or refuses
+certificate, byte for byte, in its epoch, with no second epoch and no second issuance in the device's audit (the server MAY record the repeat
+there as a repeat, never as an issuance), or refuses
 it: a device revoked since is refused, as every renewal of a revoked device is, and the server MAY refuse a repeat by
 policy as it may any renewal. Two renewals that arrive at once get the one
 certificate. Once that certificate was presented, or after it ended unpresented, a renewal is a new one, as above. A
@@ -749,12 +751,12 @@ Each kind checks one input:
 | `device-key-set` | `{root: {keyId, alg?, publicKey}, current?, next}` |
 | `device-policy-resolution` | `{layers, effective}` |
 | `device-health-observation` | `{known: {deviceId, epochs, policyBaseline, streams[{collector, held, accounted, pending?, bufferedFrom?}]}, batch?, checkIn?, effective?, health}` |
-| `device-enrollment` | `{request, response, issuedEpochs?, enrolled?: {keySha256}, token?: {tokenId, deviceId?, userId?}, proof?: {userId?}}`; `proof` is what the `Authorization` proof names; for a renewal repeated under DEC-0148 see `FAC-SEM-044`'s row |
+| `device-enrollment` | `{request, response, issuedEpochs?, enrolled?: {keySha256, notAfter?, revoked?, userId?, role?}, token?: {tokenId, deviceId?, userId?}, proof?: {userId?}}`; `proof` is what the `Authorization` proof names; for a renewal repeated under DEC-0148 see `FAC-SEM-044`'s row |
 | `device-attribution` | `{binding, epochs: [{epoch, binding}], batch?, checkIn?}` |
 | `device-action` | `{layers, at, acknowledgedAt?, action: {kind, key?, occurred?}, decision}`; `kind` is `grant`, `remote-execution`, `personal-key-call`, `local-change` or `upload`, and `decision` is `allow` or `refuse` |
 | `device-root-certification` | `{pinned?: [{keyId, alg?, publicKey}], root, certification?, revocations?, at}`; `at` is the enrollment time |
 | `device-request-signature` | `{request: {method, target, headers, body}, publicBaseUrl, certificates: [{serial, notBefore, notAfter, revoked?, organizationClosedAt?, key: {alg, publicKey}}], at, clientCertificateSerial?, seen?: [{serial, nonce, keepUntil}], answer}`; `body` is the body as a UTF-8 string, `at` the receiver's clock, `clientCertificateSerial` a mutual-TLS session's client certificate, `seen` its nonce store before the request, `answer` `accepted` or a code (`src/device-transport-rules.ts`) |
-| `device-renewal` | `{latest: {certificate, renewed?, presented?, notAfter}, at, response: {certificate?}}`; `latest` the device's latest certificate on record when the request arrived, `renewed` the boolean true when a renewal by the key on record issued it, `presented` the boolean true once the server accepted a request under its serial (signed, or over mutual TLS alone); `at` the server's clock at the request, a repeat needing `at` before `notAfter`; `response` without `certificate`, or with `certificate: null`, is a refusal; an unreadable `at` or `notAfter`, or a `latest` whose `certificate` is absent or null, decides no repeat; a `response` that is not an object reads as a refusal |
+| `device-renewal` | `{latest: {certificate, renewed?, presented?, notAfter}, at, response: {certificate?}}`; `latest` the device's latest certificate on record when the request arrived, `renewed` the boolean true when a renewal by the key on record issued it, `presented` the boolean true once the server accepted a request under its serial (signed, or over mutual TLS alone); `at` the server's clock at the request, a repeat needing `at` before `notAfter`, compared to the millisecond; `response` without `certificate`, or with `certificate: null`, is a refusal; an unreadable `at` or `notAfter`, or a `latest` whose `certificate` is absent or null, decides no repeat; a `response` that is not an object reads as a refusal |
 | `device-rotation` | `{answered: [{publicKeySha256, serial, certificate}], request: {publicKeySha256, serial}, response: {certificate}}`; `answered` the rotations the server already answered, at most one per (`publicKeySha256`, `serial`), `request` the CSR's key and the current certificate's serial; an entry or a request whose key or serial is not a string matches nothing |
 
 Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the rule inputs are

@@ -344,7 +344,7 @@ current policy key set, within a window of at most 7 days. The node runs it only
 ([node summary](docs/specification/node-summary.md#repairs)).
 
 **Stream epoch**: The epoch a device's collectors use, issued by the server at enrollment and greater than
-every epoch issued to that device before; it attributes events, and a lost counter means re-enrolling
+every epoch issued to that device before (a renewal repeated under DEC-0148 gets the epoch that renewal issued); it attributes events, and a lost counter means re-enrolling
 (DEC-0030, DEC-0031).
 
 **Delegation grant**: A **Standing grant** that names an `audience` — the one agent its principal may
