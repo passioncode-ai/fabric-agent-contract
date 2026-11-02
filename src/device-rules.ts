@@ -657,7 +657,7 @@ function renewal(value: JsonObject): Finding[] {
   const latest = isObject(value.latest) ? value.latest : {};
   const response = isObject(value.response) ? value.response : {};
   const at = strictTime(value.at), end = strictTime(latest.notAfter);
-  const repeat = latest.renewed === true && latest.presented !== true && latest.certificate !== undefined && at < end;
+  const repeat = latest.renewed === true && latest.presented !== true && latest.certificate !== undefined && latest.certificate !== null && at < end;
   if (!repeat || response.certificate === undefined || response.certificate === null || jsonEqual(latest.certificate, response.certificate)) return [];
   return [{ code: "FAC-SEM-155", instancePath: "/response/certificate", message: "a renewal that arrives while the device's latest certificate was issued by a renewal, is unpresented and has not ended gets that certificate again, or a refusal, never another" }];
 }
