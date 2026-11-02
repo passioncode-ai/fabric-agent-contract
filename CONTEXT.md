@@ -345,7 +345,7 @@ current policy key set, within a window of at most 7 days. The node runs it only
 
 **Stream epoch**: The epoch a device's collectors use, issued by the server at enrollment and greater than
 every epoch issued to that device before (a renewal repeated under DEC-0148 gets the epoch that renewal issued); it attributes events, and a lost counter means re-enrolling
-(DEC-0030, DEC-0031).
+(DEC-0030, DEC-0031; a node whose renewed certificate is unpresented presents it first, DEC-0148).
 
 **Delegation grant**: A **Standing grant** that names an `audience` — the one agent its principal may
 call — with that agent's `capabilities` and an `effectCeiling`. The hub mints **Delegation tokens**

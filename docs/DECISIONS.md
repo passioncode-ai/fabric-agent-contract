@@ -9042,7 +9042,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (its own test) and owes taking no clock sample from a repeat's answer (its `_accept` samples every renewal's
   `notBefore` today); the pre-end lost-answer case). `device-enrollment.schema.json`'s
   `streamEpoch` description ("greater than every epoch issued to this device before") is read with `FAC-SEM-044`'s
-  repeat reading; its bytes do not change. A new semantic kind (`device-renewal`) and rule
+  repeat reading; its bytes do not change, because consumers vendor the schemas byte for byte and a description edit
+  would make every vendored copy differ from the contract until it re-pins. A new semantic kind (`device-renewal`) and rule
   code; no schema changes.
 - **Context:** DEC-0094 made a rotation idempotent. A renewal by the key on record (DEC-0100, DEC-0102) had no such rule:
   DEC-0102 item 6 reads a request before the last certificate's end as a re-enrollment with a new epoch, and a server
@@ -9064,7 +9065,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      renewal by the key on record is DEC-0100's and DEC-0102 item 6's, taken with a new epoch or refused by policy.
   4. **The node repeats a renewal whose answer was lost** (no answer, or a 5xx), as it repeats a rotation, before it
      falls back to a token or SSO, within its own 30-day renewal window; a repeat it would send later is an enrollment
-     by a token or SSO.
+     by a token or SSO. It takes no clock sample from a repeat's answer (the `notBefore` is the renewal's), and a node
+     that needs a new epoch while its renewed certificate is unpresented presents it first (any accepted request), so
+     its next request by the key on record is a new renewal.
   5. **`FAC-SEM-155`** (`device-renewal`): a repeat answered with a certificate other than the one the renewal issued.
 - **Why:** a lost answer is the ordinary failure of a network call, and an enrollment by a token or SSO for it needs a
   person; DEC-0094 settled the same case for a rotation. Judging a repeat from the server's own record of the latest
@@ -9083,7 +9086,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   renewal (the server has no mark on certificates it issued before), and once adopted, the device's re-enrollment counts
   (`re_enrolled`) and the audit's issuances no longer count a repeat. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `src/device-rules.ts` (`renewal`, `FAC-SEM-155`), `src/semantic-kinds.ts`
-  (`device-renewal`), `fixtures/semantic/device-renewal-*` (fourteen), `test/device-rules.test.ts`; `devices.md` (the
+  (`device-renewal`), `fixtures/semantic/device-renewal-*` (sixteen), `test/device-rules.test.ts`; `devices.md` (the
   header, Renewal after a short absence, the rules table with `FAC-SEM-044`'s repeat reading and `FAC-SEM-155`,
   the semantic kinds table, Health's `re_enrolled`), `conformance.md` (the organization server's row, the node's renewal row, the rule register, the
   next free rule code), `CONTEXT.md` (Renewal by the key on record, Stream epoch), `activity.md` (Streams), `docs/specification/README.md`
