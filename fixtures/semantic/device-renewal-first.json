@@ -1,0 +1,15 @@
+{
+  "description": "A first renewal by the key on record, not answered before: the server issues a certificate; no finding.",
+  "kind": "device-renewal",
+  "expect": [],
+  "input": {
+    "answered": [],
+    "request": {
+      "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "followed": "01ab"
+    },
+    "response": {
+      "certificate": "MIIB-renewed-certificate"
+    }
+  }
+}

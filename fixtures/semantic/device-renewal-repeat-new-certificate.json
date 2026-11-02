@@ -1,0 +1,23 @@
+{
+  "description": "The same renewal again before the certificate was presented, answered with another certificate: FAC-SEM-155.",
+  "kind": "device-renewal",
+  "expect": [
+    "FAC-SEM-155"
+  ],
+  "input": {
+    "answered": [
+      {
+        "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "followed": "01ab",
+        "certificate": "MIIB-renewed-certificate"
+      }
+    ],
+    "request": {
+      "publicKeySha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "followed": "01ab"
+    },
+    "response": {
+      "certificate": "MIIB-another-certificate"
+    }
+  }
+}

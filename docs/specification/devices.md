@@ -1,7 +1,7 @@
 # Devices `fabric-device/0.1`
 
-DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per organization, `org.id` for contexts) DEC-0094 (a key in a file, idempotent rotation), DEC-0099 to DEC-0102 and DEC-0103 (a closed organization) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
-`FAC-SEM-069`, `FAC-SEM-077`, `FAC-SEM-125` · schemas
+DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per organization, `org.id` for contexts) DEC-0094 (a key in a file, idempotent rotation), DEC-0099 to DEC-0102, DEC-0103 (a closed organization) and DEC-0148 (a repeated renewal) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
+`FAC-SEM-069`, `FAC-SEM-077`, `FAC-SEM-125`, `FAC-SEM-155` · schemas
 [`device-enrollment`](../../schemas/device-enrollment.schema.json),
 [`device-policy`](../../schemas/device-policy.schema.json),
 [`device-check-in`](../../schemas/device-check-in.schema.json),
@@ -160,6 +160,14 @@ still valid rotates instead. The server
 takes it only for a device on record that is not revoked (`FAC-SEM-044`), keeps the binding it holds (the same user,
 or none, and the same `role`), issues a new epoch as every re-enrollment does, and records the renewal in the device's
 audit; it is never silent. Past the 30 days, or for a revoked device, a token or an SSO sign-in is needed as before.
+**A renewal is idempotent until its certificate is presented** (DEC-0148): the server records, with each certificate a
+renewal issues, the serial of the certificate it followed (the device's last certificate on record when the renewal
+arrived). A renewal whose CSR key (`publicKeySha256`) and followed certificate equal one the server already answered,
+before the device has signed any request under the new certificate's serial, gets that certificate again, byte for
+byte, in its epoch: no second epoch, no second issuance in the device's audit. Two renewals that arrive at once get the
+one certificate. Once the device has presented the new serial, a repeat is refused with the server's own error, and
+the device holds the certificate it presented. A renewal whose answer was lost, or two sent at once, then costs a
+repeat, not an enrollment by a token or SSO (`FAC-SEM-155`).
 A server MAY refuse a renewal by policy (a file-held key, which can be copied, DEC-0094; a device it wants an
 administrator to see again), with its own error. A server pinned before DEC-0100 refuses `key-on-record` at its schema;
 the node then enrolls with a token or SSO as before. No `protocols` entry tells either side the other's pin (CT-67), so a
@@ -726,6 +734,7 @@ server MAY reach `tampered` from other evidence too, such as an attestation that
 | <a id="fac-sem-069"></a>`FAC-SEM-069` | `device-root-certification` | when the installer pinned offline root keys, the root key from enrollment is certified at enrollment time by a pinned key, or by a delegation key whose certificate of at most 30 days a pinned key signed and whose id the pinned key's revocation list does not name |
 | <a id="fac-sem-077"></a>`FAC-SEM-077` | `device-request-signature` | a receiver that requires the signature, or that sees a client certificate, answers a device request as the transport binding does: it accepts a `fabric-device` signature of the required shape whose digest, window, certificate, algorithm, key and signature all hold and whose (serial, nonce) it does not hold (naming the client certificate's serial when there is one) accepts an unsigned request only on a valid client certificate, and otherwise answers the code of the first step that fails: 401, or 410 `organization-closed` for a certificate whose record carries `organizationClosedAt` (DEC-0103) |
 | <a id="fac-sem-125"></a>`FAC-SEM-125` | `device-rotation` | a rotation request whose CSR key (`publicKeySha256`) and current certificate serial equal a rotation the server already answered gets that answer's certificate again, byte for byte, never a new one (DEC-0094) |
+| <a id="fac-sem-155"></a>`FAC-SEM-155` | `device-renewal` | a renewal by the key on record whose CSR key and followed certificate equal a renewal the server already answered gets that answer's certificate again, byte for byte, while the device has not presented it, and is refused once it has (DEC-0148) |
 | <a id="fac-sem-148"></a>`FAC-SEM-148` | `node-enrollments` | one enrollment per organization, no identifier (device id, kid, public key, telemetry key, collector id) shared by two enrollments in any field, and none equal to the machine's estate id, its device kids or its estate public keys (DEC-0128 UE-1) |
 | <a id="fac-sem-149"></a>`FAC-SEM-149` | `check-in-outbound`, `check-in-response-outbound` | a check-in a node sends an organization carries no estate record in `records` (`estateRecord`, `heartbeat`, `revocationDelta`, `leases`), and an organization's answer no estate document there; the sender's duty, never a receiver's refusal (DEC-0128 UE-2) |
 
@@ -742,6 +751,7 @@ Each kind checks one input:
 | `device-action` | `{layers, at, acknowledgedAt?, action: {kind, key?, occurred?}, decision}`; `kind` is `grant`, `remote-execution`, `personal-key-call`, `local-change` or `upload`, and `decision` is `allow` or `refuse` |
 | `device-root-certification` | `{pinned?: [{keyId, alg?, publicKey}], root, certification?, revocations?, at}`; `at` is the enrollment time |
 | `device-request-signature` | `{request: {method, target, headers, body}, publicBaseUrl, certificates: [{serial, notBefore, notAfter, revoked?, organizationClosedAt?, key: {alg, publicKey}}], at, clientCertificateSerial?, seen?: [{serial, nonce, keepUntil}], answer}`; `body` is the body as a UTF-8 string, `at` the receiver's clock, `clientCertificateSerial` a mutual-TLS session's client certificate, `seen` its nonce store before the request, `answer` `accepted` or a code (`src/device-transport-rules.ts`) |
+| `device-renewal` | `{answered: [{publicKeySha256, followed, certificate, presented?}], request: {publicKeySha256, followed}, response: {certificate?}}`; `answered` the renewals by the key on record the server already answered, at most one per (`publicKeySha256`, `followed`), `followed` the serial of the certificate the renewal followed, `presented` true once the device signed a request under the new certificate's serial; `response` without `certificate` is a refusal; an entry or a request whose key or followed serial is not a string matches nothing |
 | `device-rotation` | `{answered: [{publicKeySha256, serial, certificate}], request: {publicKeySha256, serial}, response: {certificate}}`; `answered` the rotations the server already answered, at most one per (`publicKeySha256`, `serial`), `request` the CSR's key and the current certificate's serial; an entry or a request whose key or serial is not a string matches nothing |
 
 Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the rule inputs are

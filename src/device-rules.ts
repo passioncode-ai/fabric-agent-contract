@@ -644,6 +644,29 @@ function rotation(value: JsonObject): Finding[] {
   return [{ code: "FAC-SEM-125", instancePath: "/response/certificate", message: "a repeated rotation request gets the certificate it was answered with, not a new one" }];
 }
 
+/**
+ * FAC-SEM-155 (DEC-0148): a renewal by the key on record is idempotent until its certificate is presented.
+ * `{answered, request, response}`: `answered` the renewals the server already answered, each `{publicKeySha256,
+ * followed, certificate, presented?}` (`followed` the serial of the certificate the renewal followed, `presented` true
+ * once the device has signed a request under the new certificate's serial); `request` a renewal's `{publicKeySha256,
+ * followed}`; `response` the server's `{certificate}`, or no `certificate` for a refusal. A repeat before the new
+ * certificate was presented gets that certificate again, byte for byte; a repeat after it is refused.
+ */
+function renewal(value: JsonObject): Finding[] {
+  const request = isObject(value.request) ? value.request : {};
+  const response = isObject(value.response) ? value.response : {};
+  const answered = Array.isArray(value.answered) ? value.answered.filter(isObject) : [];
+  if (typeof request.publicKeySha256 !== "string" || typeof request.followed !== "string") return [];
+  const earlier = answered.find((entry) => entry.publicKeySha256 === request.publicKeySha256 && entry.followed === request.followed);
+  if (earlier === undefined) return [];
+  if (earlier.presented === true) {
+    if (response.certificate === undefined) return [];
+    return [{ code: "FAC-SEM-155", instancePath: "/response/certificate", message: "a renewal repeated after its certificate was presented is refused, never answered with a certificate" }];
+  }
+  if (jsonEqual(earlier.certificate, response.certificate)) return [];
+  return [{ code: "FAC-SEM-155", instancePath: "/response/certificate", message: "a renewal repeated before its certificate was presented gets that certificate again, not a new one" }];
+}
+
 export function deviceRules(kind: string, value: unknown): Finding[] | undefined {
   if (!isObject(value)) return undefined;
   if (kind === "device-policy-update") return policyUpdate(value);
@@ -655,6 +678,7 @@ export function deviceRules(kind: string, value: unknown): Finding[] | undefined
   if (kind === "device-action") return deviceAction(value);
   if (kind === "device-root-certification") return rootCertification(value);
   if (kind === "device-rotation") return rotation(value);
+  if (kind === "device-renewal") return renewal(value);
   return undefined;
 }
 // #endregion device-rules
