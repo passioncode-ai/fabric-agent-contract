@@ -109,6 +109,6 @@ Whether the schemas should carry a permissive exception, so that a closed-source
 without the commercial license, was the
 operator's question CO-KB-02 in the knowledge base's
 [licensing](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/licensing.md#open-for-the-operator);
-it closed on 2026-10-19 and the schemas stay under this repository's licence.
+it closed on 2026-10-19 and the schemas stay under this repository's license.
 Contributions are accepted under [CLA.md](CLA.md).
 
