@@ -24,7 +24,7 @@ import { ruleHelp } from "./rule-codes.js";
 import { documentKindsOf, isSemanticKind } from "./semantic-kinds.js";
 import { evaluateSemanticRules } from "./semantic-rules.js";
 import { PACKAGE_FILE } from "./package-rules.js";
-import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
+import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, excludedFolderTest, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
 import { createValidatorSync, formatSchemaErrors } from "./validator.js";
 
 export interface Problem { file: string; path: string; rule: string; message: string; help?: string }
@@ -735,14 +735,15 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
   const index = includeIndex(includes);
   const isSource = sourcePathTest(manifest);
   const isNested = nestedTest(manifest);
+  const skipped = excludedFolderTest(manifest);
   // Every mode lists by path in UTF-16 code-unit order, so files[<index>] is the same on every machine and in both modes.
   const byPath = (candidates: Candidate[]) => candidates.sort((a, b) => Number(a.path > b.path) - Number(a.path < b.path));
   const walked = (why: string): Candidate[] => {
     run.notes.push({ file: ".", path: "/", rule: "note/walk", message: `${why}, so the folder's files were walked` });
-    return byPath(walk(folder, "", index, run));
+    return byPath(walk(folder, "", index, run, skipped));
   };
   // No git found: a walk with no note, as when there is no Git at all.
-  if (executable === undefined) return byPath(walk(folder, "", index, run));
+  if (executable === undefined) return byPath(walk(folder, "", index, run, skipped));
   const late = `git did not answer within ${gitLimits.timeoutMs / 1000} s`;
   const timedOut = (answer: { error?: Error }) => (answer.error as NodeJS.ErrnoException | undefined)?.code === "ETIMEDOUT";
   const listed = git(executable, folder, ["ls-files", "-z", "--cached", "--others", "--exclude-standard"]);
@@ -781,24 +782,24 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
   // Only a source path, or a nested repository in the source, is looked at: a path outside it is never reached, and
   // one that is no source path is stated only when it may be nested.
   return paths.filter((name) => isSource(name) || isNested(name)).flatMap((name): Candidate[] => {
+    // The index decides a gitlink, and nothing is read: it is a nested repository whatever sits at it or above it now
+    // (a folder, a file, a link, or nothing).
+    if (linked.has(name)) return [{ path: name, nested: true }];
     const parts = name.split("/");
     const full = path.join(folder, ...parts);
-    if (!isSource(name) && !listedAsFolder.has(name) && !linked.has(name) && !existsSync(path.join(full, ".git"))) return [];
     try {
-      // Never read through a link: a path under a symbolic link is not in the tree as it is.
+      // Never read through a link: a path under a symbolic link is not in the tree as it is. The ancestors are checked
+      // before anything at the path is.
       for (let depth = 1; depth < parts.length; depth += 1) if (lstatSync(path.join(folder, ...parts.slice(0, depth))).isSymbolicLink()) return [];
-      // A path the index records as a gitlink is a nested repository whatever sits there now (a folder, a file, a link).
-      if (linked.has(name)) return [{ path: name, nested: true }];
+      // A path that is no source path is stated only when it may be nested.
+      if (!isSource(name) && !listedAsFolder.has(name) && !existsSync(path.join(full, ".git"))) return [];
       if (!lstatSync(full).isDirectory()) return [{ path: name }];
-      // A folder is a nested repository when Git listed it with a trailing `/`, the index records a gitlink there, or
-      // it holds its own `.git`; otherwise it is a tracked path no longer in the work tree, and Git lists the untracked
-      // files under it on their own.
-      return listedAsFolder.has(name) || linked.has(name) || existsSync(path.join(full, ".git")) ? [{ path: name, nested: true }] : [];
+      // A folder is a nested repository when Git listed it with a trailing `/` or it holds its own `.git`; otherwise it
+      // is a tracked path no longer in the work tree, and Git lists the untracked files under it on their own.
+      return listedAsFolder.has(name) || existsSync(path.join(full, ".git")) ? [{ path: name, nested: true }] : [];
     } catch (error) {
-      // A tracked file deleted from the work tree, or under a path that is now a file, is not in the tree as it is; a
-      // gitlink whose folder is gone is still a nested repository, as the index records it.
+      // A tracked file deleted from the work tree, or under a path that is now a file, is not in the tree as it is.
       const code = (error as NodeJS.ErrnoException).code;
-      if (code === "ENOENT" && linked.has(name)) return [{ path: name, nested: true }];
       if (code !== "ENOENT" && code !== "ENOTDIR") run.usage.push(`cannot read ${shownPath(name)}: ${String(code)}`);
       return [];
     }
@@ -806,7 +807,7 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
 }
 
 /** The walk without Git: a folder holding its own `.git` is a nested repository, never entered. */
-function walk(dir: string, prefix: string, includes: IncludeIndex, run: Run): Candidate[] {
+function walk(dir: string, prefix: string, includes: IncludeIndex, run: Run, skipped: (folder: string) => boolean = () => false): Candidate[] {
   let entries: Dirent[];
   try {
     entries = readdirSync(dir, { withFileTypes: true });
@@ -822,10 +823,11 @@ function walk(dir: string, prefix: string, includes: IncludeIndex, run: Run): Ca
   for (const entry of entries.sort((a, b) => Number(a.name > b.name) - Number(a.name < b.name))) {
     const relative = `${prefix}${entry.name}`;
     if (!entry.isDirectory()) { found.push({ path: relative }); continue; }
-    if (entry.name === ".git" || !includes.reaches(`${relative}/`)) continue;
+    // An excluded folder holds no source and is never entered, unless an include path lies under it.
+    if (entry.name === ".git" || !includes.reaches(`${relative}/`) || skipped(relative)) continue;
     const full = path.join(dir, entry.name);
     if (existsSync(path.join(full, ".git"))) found.push({ path: relative, nested: true });
-    else found.push(...walk(full, `${relative}/`, includes, run));
+    else found.push(...walk(full, `${relative}/`, includes, run, skipped));
   }
   return found;
 }

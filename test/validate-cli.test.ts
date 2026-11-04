@@ -32,6 +32,17 @@ function folder(files: Record<string, unknown>): string {
 }
 const one = (name: string, value: unknown) => path.join(folder({ [name]: value }), name);
 const run = (...args: string[]) => main(args);
+/** This process's processor time in ms, and one call's: repeated until a trial lasts 20 ms, the best of three trials. */
+const cpuMs = (): number => { const used = process.cpuUsage(); return (used.user + used.system) / 1000; };
+const cpuOf = (call: () => unknown): number => {
+  call();
+  return Math.min(...[0, 1, 2].map(() => {
+    const started = cpuMs();
+    let calls = 0;
+    do { call(); calls += 1; } while (cpuMs() - started < 20);
+    return (cpuMs() - started) / calls;
+  }));
+};
 
 describe("every positive fixture passes", () => {
   it.each(catalogue.filter((entry) => entry.valid))("$name", (entry) => {
@@ -2152,6 +2163,34 @@ describe("an agent's source (DEC-0149)", () => {
     expect(result.out).toContain("nested-repository");
   });
 
+  it.skipIf(process.platform === "win32")("reads a gitlink as nested whatever sits above it: a file or a symbolic link", () => {
+    for (const above of ["file", "link"] as const) {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/k.ts": "x", "other/x.ts": "x" });
+      expect(gitIn(dir, "init", "-q").status).toBe(0);
+      expect(gitIn(dir, "add", "LICENSE").status).toBe(0);
+      expect(gitIn(dir, "commit", "-qm", "a").status).toBe(0);
+      const head = gitIn(dir, "rev-parse", "HEAD").stdout.trim();
+      expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${head},src/a/b/c`).status).toBe(0);
+      if (above === "file") writeFileSync(path.join(dir, "src/a"), "a file above the gitlink");
+      else symlinkSync(path.join(dir, "other"), path.join(dir, "src/a"));
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code, above).toBe(1);
+      expect(found(result.out).filter((line) => line.includes("nested-repository")).map((line) => line.split("  ")[0]), above).toEqual(["src/a/b/c"]);
+    }
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("never enters a folder an exclude folder names, so an unreadable one is no usage error", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/cache/"] }), LICENSE: "x", "src/a.ts": "x", "src/cache/x.bin": "x" });
+    chmodSync(path.join(dir, "src/cache"), 0o000);
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code).toBe(0);
+      expect(found(result.out)).toEqual([]);
+    } finally {
+      chmodSync(path.join(dir, "src/cache"), 0o755);
+    }
+  });
+
   it("reads a path the index records as a gitlink as a nested repository, even when a file sits there now", () => {
     const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
     expect(gitIn(dir, "init", "-q").status).toBe(0);
@@ -2325,15 +2364,16 @@ describe("an agent's source (DEC-0149)", () => {
     }
   });
 
-  it("checks a manifest whose one include entry runs far past the path grammar, through both routes, within the time budget", () => {
-    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["a/".repeat(64_000), "LICENSE"] }), LICENSE: "x" });
-    for (const args of [[path.join(dir, "fabric.source.json")], [dir, "--kind", "source-tree"]]) {
-      const started = performance.now();
-      const result = run(...args);
-      expect(performance.now() - started).toBeLessThan(3000);
-      expect(result.code, args.join(" ")).toBe(1);
+  it("checks a manifest whose one include entry runs far past the path grammar, through both routes, in linear time", () => {
+    const dirOf = (count: number) => folder({ "fabric.source.json": sourceManifest({ include: ["a/".repeat(count), "LICENSE"] }), LICENSE: "x" });
+    const small = dirOf(4000);
+    const large = dirOf(64_000);
+    for (const route of [(dir: string) => [path.join(dir, "fabric.source.json")], (dir: string) => [dir, "--kind", "source-tree"]]) {
+      // Sixteen times the entry, measured against the same route at a sixteenth: linear about 16, quadratic about 256.
+      expect(cpuOf(() => run(...route(large))) / Math.max(cpuOf(() => run(...route(small))), 0.01), route(large).join(" ")).toBeLessThan(64);
+      expect(run(...route(large)).code, route(large).join(" ")).toBe(1);
     }
-  });
+  }, 180_000);
 
   it("checks a folder's source files in time linear in their number", () => {
     // The files sit under an unchecked folder and carry no text, so a run reads their paths only and the per-file
@@ -2364,15 +2404,18 @@ describe("an agent's source (DEC-0149)", () => {
     expect(large / Math.max(small, 0.5)).toBeLessThan(64);
   }, 120_000);
 
-  it("checks a manifest whose slot names are a 1 MB run of brackets within the time budget", () => {
-    const long = `${")".repeat(1_000_000)}a`;
-    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], slots: [{ name: long, kind: "config", purpose: "a" }, { name: long, kind: "config", purpose: "b" }] }), LICENSE: "x", "src/a.ts": "x" });
-    const started = performance.now();
+  it("checks a manifest whose slot names are a 1 MB run of brackets in linear time", () => {
+    const fileOf = (count: number) => {
+      const long = `${")".repeat(count)}a`;
+      return path.join(folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], slots: [{ name: long, kind: "config", purpose: "a" }, { name: long, kind: "config", purpose: "b" }] }), LICENSE: "x", "src/a.ts": "x" }), "fabric.source.json");
+    };
+    const small = fileOf(62_500);
+    const large = fileOf(1_000_000);
     // The names fail the schema, so the rule is run on the document named with its kind.
-    const result = run(path.join(dir, "fabric.source.json"), "--kind", "source-manifest");
-    expect(performance.now() - started).toBeLessThan(3000);
+    expect(cpuOf(() => run(large, "--kind", "source-manifest")) / Math.max(cpuOf(() => run(small, "--kind", "source-manifest")), 0.01)).toBeLessThan(64);
+    const result = run(large, "--kind", "source-manifest");
     expect(result.out).toContain("slot slots[1] is declared twice");
-  });
+  }, 180_000);
 
   it("keeps a source check instance-free under a foreign schema, in its paths, messages and the target's name", () => {
     const home = ["/Users/", "jdoe", "/notes"].join("");

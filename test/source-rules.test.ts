@@ -42,6 +42,29 @@ import { PACKAGE_FILE, checkPackageFolder, sha256Of } from "../src/package-rules
 // DEC-0149: an agent's source (fabric.source.json, fabric-source/1) kept apart from its instance; the tree check
 // (FAC-SEM-158, FAC-SEM-159), the manifest's own rules (FAC-SEM-156, FAC-SEM-157) and the package pair (FAC-SEM-160).
 type Json = Record<string, any>;
+
+/** This process's processor time in ms: a loaded machine's other work does not inflate it as it does the wall clock. */
+const cpuMs = (): number => { const used = process.cpuUsage(); return (used.user + used.system) / 1000; };
+/** One call's processor time: repeated until a trial lasts 20 ms, the best of three trials. */
+const cpuOf = (run: () => unknown): number => {
+  run();
+  return Math.min(...[0, 1, 2].map(() => {
+    const started = cpuMs();
+    let calls = 0;
+    do { run(); calls += 1; } while (cpuMs() - started < 20);
+    return (cpuMs() - started) / calls;
+  }));
+};
+/**
+ * A text's check at full size against the same text at a sixteenth, measured in the same test: linear work grows about
+ * 16 times and quadratic work about 256, so the ratio is held under 64 instead of a fixed time, which a loaded machine
+ * can exceed.
+ */
+const growth = (make: (count: number) => string, count: number, check: (text: string) => unknown): number => {
+  const large = make(count);
+  const small = make(Math.ceil(count / 16));
+  return cpuOf(() => check(large)) / Math.max(cpuOf(() => check(small)), 0.01);
+};
 const root = projectRoot();
 const read = (relative: string) => readFileSync(path.join(root, relative), "utf8");
 const load = (relative: string) => JSON.parse(read(`fixtures/${relative}`)) as Json;
@@ -333,13 +356,12 @@ describe("FAC-SEM-158 and FAC-SEM-159: the tree check", () => {
     expect(credential(`https://a.example.org/?q=${encodeURIComponent(`https://b.example.org/?q=${encodeURIComponent(`https://c.example.org/?q=${encodeURIComponent(deep)}`)}`)}`)).toEqual([]);
   });
 
-  it("checks a one-line file of 1 MB within the time budget, with an @, a scheme, an assignment or none", () => {
-    for (const text of ["a".repeat(1_000_000), `${"a".repeat(999_990)}@mail.org`, `${"a.".repeat(500_000)}@`, `${"Ab1-".repeat(250_000)}`, "a@".repeat(500_000), "a://".repeat(250_000), "x=".repeat(500_000)]) {
-      const started = performance.now();
-      sourceTreeProblems(tree([{ path: "src/long.txt", text }]));
-      expect(performance.now() - started).toBeLessThan(3000);
+  it("checks a one-line file of 1 MB in linear time, with an @, a scheme, an assignment or none", () => {
+    const check = (text: string) => sourceTreeProblems(tree([{ path: "src/long.txt", text }]));
+    for (const [make, count] of [[(n: number) => "a".repeat(n), 1_000_000], [(n: number) => `${"a".repeat(n)}@mail.org`, 999_990], [(n: number) => `${"a.".repeat(n)}@`, 500_000], [(n: number) => "Ab1-".repeat(n), 250_000], [(n: number) => "a@".repeat(n), 500_000], [(n: number) => "a://".repeat(n), 250_000], [(n: number) => "x=".repeat(n), 500_000]] as const) {
+      expect(growth(make, count, check), make(2)).toBeLessThan(64);
     }
-  });
+  }, 180_000);
 
   it("finds JWTs in one pass, exactly where JWT_SHAPE finds them", () => {
     const alphabet = ["e", "y", "J", "eyJ", ".", "a", "B", "1", "-", "_", " ", "/", "eyJx", "ab", ".."];
@@ -356,29 +378,26 @@ describe("FAC-SEM-158 and FAC-SEM-159: the tree check", () => {
     }
   });
 
-  it("checks a 1 MB line of JWT openings or assignments within the time budget", () => {
-    for (const text of ["eyJ".repeat(333_333), `https://h/?q=${"eyJ".repeat(333_000)}`, `${"a=" + "Ab1".repeat(13) + "A "}`.repeat(46_500)]) {
-      const started = performance.now();
-      sourceTreeProblems(tree([{ path: "src/long.txt", text }]));
-      expect(performance.now() - started).toBeLessThan(3000);
+  it("checks a 1 MB line of JWT openings or assignments in linear time", () => {
+    const check = (text: string) => sourceTreeProblems(tree([{ path: "src/long.txt", text }]));
+    for (const [make, count] of [[(n: number) => "eyJ".repeat(n), 333_333], [(n: number) => `https://h/?q=${"eyJ".repeat(n)}`, 333_000], [(n: number) => `${"a=" + "Ab1".repeat(13) + "A "}`.repeat(n), 46_500]] as const) {
+      expect(growth(make, count, check), make(2)).toBeLessThan(64);
     }
-  });
+  }, 180_000);
 
-  it("checks a 1 MB line of trailing punctuation or repeated query parameters within the time budget", () => {
-    for (const text of [`http://a${".".repeat(1_000_000)}x`, `http://a/${")".repeat(1_000_000)}q`, `http://a/?${"a=b&".repeat(250_000)}`, JSON.stringify(`http://a/?${"a=b&".repeat(250_000)}`).replace(/\//g, "\\/")]) {
-      const started = performance.now();
-      sourceTreeProblems(tree([{ path: "src/long.txt", text }]));
-      expect(performance.now() - started).toBeLessThan(3000);
+  it("checks a 1 MB line of trailing punctuation or repeated query parameters in linear time", () => {
+    const check = (text: string) => sourceTreeProblems(tree([{ path: "src/long.txt", text }]));
+    for (const [make, count] of [[(n: number) => `http://a${".".repeat(n)}x`, 1_000_000], [(n: number) => `http://a/${")".repeat(n)}q`, 1_000_000], [(n: number) => `http://a/?${"a=b&".repeat(n)}`, 250_000], [(n: number) => JSON.stringify(`http://a/?${"a=b&".repeat(n)}`).replace(/\//g, "\\/"), 250_000]] as const) {
+      expect(growth(make, count, check), make(2)).toBeLessThan(64);
     }
-  });
+  }, 180_000);
 
-  it("checks a 1 MB line of key prefixes within the time budget, each prefix's run found by bisection", () => {
-    for (const text of ["sk-".repeat(350_000), `${"sk-".repeat(330_000)}${"A1b2C3d4".repeat(3)}`, "ghp_".repeat(250_000), "xoxb-".repeat(200_000), "glpat-".repeat(170_000), "AKIA".repeat(250_000), `${"Bearer ".repeat(140_000)}x`]) {
-      const started = performance.now();
-      sourceTreeProblems(tree([{ path: "src/long.txt", text }]));
-      expect(performance.now() - started).toBeLessThan(3000);
+  it("checks a 1 MB line of key prefixes in linear time, each prefix's run found by bisection", () => {
+    const check = (text: string) => sourceTreeProblems(tree([{ path: "src/long.txt", text }]));
+    for (const [make, count] of [[(n: number) => "sk-".repeat(n), 350_000], [(n: number) => `${"sk-".repeat(n)}${"A1b2C3d4".repeat(3)}`, 330_000], [(n: number) => "ghp_".repeat(n), 250_000], [(n: number) => "xoxb-".repeat(n), 200_000], [(n: number) => "glpat-".repeat(n), 170_000], [(n: number) => "AKIA".repeat(n), 250_000], [(n: number) => `${"Bearer ".repeat(n)}x`, 140_000]] as const) {
+      expect(growth(make, count, check), make(2)).toBeLessThan(64);
     }
-  });
+  }, 180_000);
 
   it("reads an AKIA key only when sixteen upper-case letters or digits follow it", () => {
     const kinds = (text: string) => sourceTreeProblems(tree([{ path: "src/k.ts", text }])).map((problem) => problem.kind);
@@ -392,20 +411,17 @@ describe("FAC-SEM-158 and FAC-SEM-159: the tree check", () => {
     expect(paths(["src/a\nb.token"])).toEqual([]);
   });
 
-  it("resolves a 1 MB line of links in a 4,000-file tree within the time budget", () => {
+  it("resolves a 1 MB line of links in a 4,000-file tree in time linear in the line", () => {
     const many = Array.from({ length: 4000 }, (_, index) => ({ path: `src/d${index % 50}/f${index}.ts`, text: "x" }));
-    const started = performance.now();
-    sourceTreeProblems(tree([...many, { path: "src/a.md", text: "](/z)".repeat(200_000) }]));
-    expect(performance.now() - started).toBeLessThan(3000);
-  });
+    expect(growth((n) => "](/z)".repeat(n), 200_000, (text) => sourceTreeProblems(tree([...many, { path: "src/a.md", text }])))).toBeLessThan(64);
+  }, 180_000);
 
-  it("scans a Markdown line of many link openings within the time budget", () => {
-    for (const text of ["](".repeat(200_000), "]( x".repeat(100_000)]) {
-      const started = performance.now();
-      sourceTreeProblems(tree([{ path: "src/a.md", text }]));
-      expect(performance.now() - started).toBeLessThan(3000);
+  it("scans a Markdown line of many link openings in linear time", () => {
+    const check = (text: string) => sourceTreeProblems(tree([{ path: "src/a.md", text }]));
+    for (const [make, count] of [[(n: number) => "](".repeat(n), 200_000], [(n: number) => "]( x".repeat(n), 100_000]] as const) {
+      expect(growth(make, count, check), make(2)).toBeLessThan(64);
     }
-  });
+  }, 180_000);
 
   it("reads the character before a key as a code point: a letter outside the BMP starts no word, a lone surrogate is none", () => {
     const keys = (text: string) => sourceTreeProblems(tree([{ path: "src/k.ts", text }])).map((problem) => problem.kind);
@@ -454,6 +470,9 @@ describe("FAC-SEM-158 and FAC-SEM-159: the tree check", () => {
     const description = (text: string) => evaluateSemanticRules("source-manifest", { ...manifest, description: text });
     // The description is prose: a sentence that starts with the word Bearer is no credential, a bearer token inside it is.
     expect(description("Bearer token for the board API")).toEqual([]);
+    // A key shape inside a word, or under a synthetic word, is no key, as the tree check reads it in a line.
+    expect(description("desk-booking-service-api")).toEqual([]);
+    expect(description("uses sk-example-key-0123456789abcdef")).toEqual([]);
     expect(description(["Bearer ", "ab12cd34ef56"].join("")).map((finding) => finding.instancePath)).toEqual(["/description"]);
     // A slot's purpose is read as FAC-SEM-065 reads a package secret's, so pack copies it unchanged and it packs cleanly.
     const packed = (text: string) => evaluateSemanticRules("package", { schema: "fabric-package/1", secrets: [{ name: "BOARD", purpose: text }] }).some((finding) => finding.code === "FAC-SEM-065");
@@ -619,11 +638,9 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
   });
 
   it("names a slot by its place when its name is long, or holds a finding once its white space is folded", () => {
-    const long = `${")".repeat(1_000_000)}a`;
-    const started = performance.now();
-    const findings = check({ ...manifest, slots: [{ name: long, kind: "config", purpose: "a" }, { name: long, kind: "config", purpose: "b" }] });
-    expect(performance.now() - started).toBeLessThan(3000);
-    expect(findings.map((finding) => finding.message)).toContain("slot slots[1] is declared twice");
+    const twice = (long: string) => check({ ...manifest, slots: [{ name: long, kind: "config", purpose: "a" }, { name: long, kind: "config", purpose: "b" }] });
+    expect(growth((n) => `${")".repeat(n)}a`, 1_000_000, twice)).toBeLessThan(64);
+    expect(twice(`${")".repeat(1_000_000)}a`).map((finding) => finding.message)).toContain("slot slots[1] is declared twice");
     const header = ["-----BEGIN RSA", "PRIVATE KEY-----"].join("\n");
     const folded = check({ ...manifest, slots: [{ name: header, kind: "config", purpose: "a" }, { name: header, kind: "config", purpose: "b" }] });
     expect(folded.map((finding) => finding.message)).toContain("slot slots[1] is declared twice");

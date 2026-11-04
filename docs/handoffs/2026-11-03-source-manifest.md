@@ -138,7 +138,11 @@ source, what never travels with it, the check before a source export, and how a 
   parent at the merge base and the gate re-run on the merge; the acceptance edit in the PR; a manifest failing its
   schema reported alone; a slot's purpose read as a package secret's and the description as prose; the second Git call
   failing as the first; a gitlink nested whatever sits there; the manifest read in Git mode whatever `.gitignore` says;
-  the fault catch by the settled schema; the merge notes) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  the fault catch by the settled schema; the merge notes) answered as decided; round 25 (the landing's first step done by the coordinator and the remaining steps
+  rewritten, with the operator's GitHub Support step and CT-211 as a merge condition; the in-call elicitation form; a
+  gitlink decided by the index whatever sits at it or above it; the description's keys read as the tree check reads
+  them; an excluded folder never walked; the timing tests as ratios to the same text at a sixteenth; the glossary's
+  Source hand-over) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -155,16 +159,10 @@ source, what never travels with it, the check before a source export, and how a 
   `/dev/stdin` is read, `/dev/null` is "not JSON"), and a folder entry that links to a folder is an `EISDIR` usage
   error. A source check never opens a file that is not a regular file.
 - CT-211: the fabric-workspace amendment owed in the merge session (see **Next task**).
-- The landing. The round 22 product reading checked the branch's history, not only its tree: two earlier commits on
-  this branch, named in the coordinator's private notes, carried private data the tree no longer has. The branch is not
-  rewritten. The landing: the fresh commit's tree is HEAD's tree and its only parent is
-  `git merge-base HEAD origin/main` at landing (`d1b905ee` today), never a newer `origin/main`; that commit goes on a
-  fresh branch, the current `origin/main` is then merged into the fresh branch as the merge notes below say, and the
-  full gate is re-run on that merge, whose commit the handoff then cites; the CI workflow is dispatched once on the
-  fresh branch (`gh workflow run ci.yml --ref <fresh branch>`) and its ubuntu and windows jobs read, for the
-  platform-only tests; the PR is opened from the fresh branch, this branch's ref deleted, and the readings run on that
-  merge. After landing, the coordinator checks that neither withdrawn commit is an
-  ancestor of `origin/main`.
+- The landing's first step is done: the reviewed tree is one commit on the merge base `d1b905ee`, on
+  `agent/ct194-source-manifest-v2-20261104`, and the review branch's remote ref is deleted. GitHub may still keep
+  unreachable commits and cached views of the review branch; asking GitHub to remove them is the operator's step
+  (GitHub Support), a human gate. The remaining steps are under **Next task**.
 - CT-214 is done in round 23: `service.md`'s watcher sentence restated from Fabric Dashboards' FD-76 (15 minutes,
   unavailability only, setup entries left out).
 - CT-212: `src/session-handoff.ts` and `src/connections.ts` keep the quadratic `JWT_SHAPE` regex on inputs that are
@@ -226,36 +224,37 @@ path, a gitlink under a folder that is gone and a folder run's fault, and lowers
 
 ## Next task
 
-Never open a PR from `agent/ct194-source-manifest-20261103`: it would pin this branch's history, and the two withdrawn
-commits with it, in the pull request's refs. The landing, step by step:
+The landing continues on `agent/ct194-source-manifest-v2-20261104` (step 1 is done: one commit with the reviewed tree
+on the merge base `d1b905ee`, the review branch's remote ref deleted; never push the review branch again). The
+remaining steps, in order:
 
-1. Make one new commit whose tree is HEAD's tree and whose only parent is `git merge-base HEAD origin/main` at landing
-   (`d1b905ee` today), never a newer `origin/main` (`git commit-tree HEAD^{tree} -p "$(git merge-base HEAD
-   origin/main)"`), and push it as a fresh branch.
-2. Merge the current `origin/main` into the fresh branch as the merge notes below say, refreshing the sibling heads.
-3. Re-run the full gate on that merge and cite its commit in this handoff; dispatch the CI workflow once on the fresh
-   branch (`gh workflow run ci.yml --ref <fresh branch>`) and read its ubuntu and windows jobs, for the platform-only
-   tests.
-4. Open the PR from the fresh branch, delete this branch's ref, and run the next rounds of the readings (unit, seam,
-   product) on that merge until two clean rounds.
-5. Make the acceptance edit in the PR before it merges, as DEC-0147 did: DEC-0149's status line, CT-194 done, this
+1. Merge the current `origin/main` (`7f6bc647` now, with #236, CT-215 and CT-216) into the fresh branch as the merge
+   notes below say, refreshing the sibling heads.
+2. Re-run the full gate on that merge and cite its commit in this handoff.
+3. Open the PR from the fresh branch and dispatch the CI workflow once on it (`gh workflow run ci.yml --ref
+   agent/ct194-source-manifest-v2-20261104`); read its ubuntu and windows jobs, for the platform-only tests.
+4. Run the next rounds of the readings (unit, seam, product) on that merge until two clean rounds.
+5. A merge condition: CT-211's knowledge-base amendment (fabric-workspace `knowledge/agents-first.md` items 5 and 7,
+   `knowledge/principles.md` section 7) lands in fabric-workspace before or together with this merge, never after;
+   check with `git show origin/main:knowledge/agents-first.md | grep -n 'source hand-over'` there.
+6. Make the acceptance edit in the PR before it merges, as DEC-0147 did: DEC-0149's status line, CT-194 done, this
    handoff's status and the `docs/handoffs/README.md` row.
+7. A human gate: asking GitHub to remove the review branch's unreachable commits and their cached views is the
+   operator's (GitHub Support).
 
 Right after the merge: update fabric-workspace's RM-36 row and its knowledge page for the agent source (`knowledge/`),
 publish with `node scripts/workspace.mjs sync` from a Fabric checkout, post DEC-0149 to threads `21ac4057` and
-`0a8776f2` with CT-207 and CT-208, and send Fabric Dashboards the board request on its attention and degraded counts of
-agents whose entries are all setup states (CT-208).
-
-In the merge session, amend fabric-workspace `knowledge/agents-first.md` items 5 and 7 and `knowledge/principles.md`
-section 7 (CT-211); check with `git show origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`.
+`0a8776f2` with CT-207 and CT-208, and file the Fabric Dashboards request on its attention and degraded counts of agents
+whose entries are all setup states as a tracked row on their side, recording its id in CT-208.
 
 At their next re-pin, the consumers that vendor a protocol table (a
 private product's `src/contract/vendor/protocol-revisions.ts`, a deployment template's
 `src/fabric/fabric-protocols.mjs`, another server's `src/fabric/fabric-protocols.mjs`) add `fabric-source`.
 
-Merge order with the other branches that touch the same registers: PR #235 (DEC-0148), then
-`origin/agent/channel-agent-ext-v3-20261104` (DEC-0150, head `cd350f47` now; earlier names without `-v3` are gone) and
-`origin/agent/sqd-fields-20261104` (DEC-0151, head `628877b5` now). Refresh both heads at landing. These two reserved DEC-0150, DEC-0151 and FAC-SEM-162 to FAC-SEM-165.
+PR #236 is merged (main `3bd332ed`, then `7f6bc647`). The chain of the open branches that touch the same registers is
+PR #235 (DEC-0148), DEC-0149 (this branch), then `origin/agent/channel-agent-ext-v3-20261104` (DEC-0150, head
+`5978ebec` now; earlier names without `-v3` are gone) and `origin/agent/sqd-fields-20261104` (DEC-0151, head `c3b900b8`
+now). Refresh the sibling heads at landing. These two reserved DEC-0150, DEC-0151 and FAC-SEM-162 to FAC-SEM-165.
 The channel-agent branch adds `schemas/service-channel-agent-extension.schema.json` and edits `src/semantic-rules.ts`,
 `src/protocol-revisions.ts`, `vitest.config.ts`, `fixtures/catalogue.json` and `src/secret-shape.ts` (`rawValues` only);
 the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds no schema, and edits
@@ -263,8 +262,8 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
 
 - The schema count in `test/schema-compilation.test.ts` merges silently to 147: set it to 148.
 - `docs/backlog.md` (against all four siblings) and `docs/handoffs/README.md` (against DEC-0150 and DEC-0151)
-  conflict as appends at the tail: keep both sides; the merged backlog tail is kept in id order (CT-205, CT-207,
-  CT-208, CT-209, CT-210, CT-211, CT-212, CT-213, CT-214), the handoffs index in the merge order. DEC-0150's small edits to `src/validate-cli.ts`
+  conflict as appends at the tail: keep both sides; the merged backlog tail is kept in id order, CT-204 to CT-216, the
+  handoffs index in the merge order. DEC-0150's small edits to `src/validate-cli.ts`
   and `test/validate-cli.test.ts` merge cleanly beside this branch's.
 - `vitest.config.ts`: `include` takes the union of both lists, and `thresholds` keeps `src/validator.ts`,
   `src/source-rules.ts` and `src/channel-agent.ts` at 100 (a threshold key that matches no included file passes
@@ -281,10 +280,10 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   from the CAS refs at merge time, never from a fixed value: `git ls-remote origin 'refs/agent-sync/ids/*'`, then
   `git cat-file -p <sha>` for each (on 2026-11-04 they read DEC next 152 and SEM next 166, so DEC-0152 and
   FAC-SEM-166).
-- `AGENTS.md` against PR #236 (`agent/template-parity-20261103`): keep this branch's Check row and #236's MCP row,
-  which removes an em dash. The second of DEC-0149 and #236 to land adds to CT-205's row that a source hand-over is
-  never covered by a task-wide mandate ([source](../specification/source.md#handing-over)); check with `grep -n
-  'source hand-over' docs/backlog.md | grep CT-205`. CT-211 carries the same line for the knowledge base.
+- `AGENTS.md` against main (PR #236 merged): keep this branch's Check row and #236's MCP row, which removes an em dash.
+  #236 landed first, so this branch adds to CT-205's row, when main is merged in, that a source hand-over is never
+  covered by a task-wide mandate ([source](../specification/source.md#handing-over)); check with `grep -n 'source
+  hand-over' docs/backlog.md | grep CT-205`. CT-211 carries the same line for the knowledge base.
 - `src/secret-shape.ts` conflicts textually with DEC-0151 (`origin/agent/sqd-fields-20261104`). The resolution: this
   branch's JWT helpers (`jwtSpans`, `hasJwt`), then DEC-0151's doc comment and `SECRET_VALUE` line as pushed (being
   rewritten as a portable consuming-group boundary plus a strength rule for `sk-`). Its copy in `src/session-handoff.ts`
@@ -296,6 +295,6 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   `secretValue`, so DEC-0151 moves `FAC-SEM-156`'s slot reading exactly as it moves `FAC-SEM-065`, and the test holding
   them equal compares the two rules, not fixed verdicts. DEC-0151's instruction to bound the tree check's key shapes is
   withdrawn; the coordinator tells that branch.
-- The chain #235, DEC-0149, DEC-0150, DEC-0151, #236 was gated green at heads `93f8f2e0` (this branch), `fcdb7ccb`
-  (channel-agent) and `97632bed` (sqd-fields), and again at `801c5cd3`; re-check it at the merged heads before
-  landing, since each branch has moved since (the siblings to `cd350f47` and `628877b5`, this one by round 24).
+- The chain #235, DEC-0149, DEC-0150, DEC-0151 (with #236, now merged) was gated green at review-branch heads in
+  rounds 19 and 21; re-check it at the merged heads before landing, since each branch has moved since (the siblings to
+  `5978ebec` and `c3b900b8`, this one to the fresh branch).

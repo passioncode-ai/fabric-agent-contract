@@ -143,7 +143,8 @@ for 24 hours. A service takes a
 `relayed` action from a T0 or T1 caller that carries a valid one as the operator's act, records the caller it
 authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
 `decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1` (`actionDecision`,
-[service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121).
+[service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121). A **Source hand-over** takes a decision only
+with its exact target ([source](docs/specification/source.md#handing-over), DEC-0149).
 
 **Mandate**: The operator's instruction for one task, carried with the task down a chain of the operator's agents
 (`mandate/1`): the task, the operator's words verbatim, when they were given, an expiry within 7 days, a scope
@@ -153,6 +154,7 @@ from T0 or T1 (by the agent before it, where it authenticated its caller's agent
 not cover, so the operator is asked again for that alone; a T2 caller's mandate changes nothing, beyond the estate a
 delegation token carries the authority. A job's step is read under the job's capability (MJ-1, DEC-0141; `actionDecision`'s
 `mandateCapability`) (`mandateCovers`, [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
+A mandate never covers a **Source hand-over** ([source](docs/specification/source.md#handing-over), DEC-0149).
 
 **Relayed approval**: The operator's approval, given in one agent's session, carried to another of their agents by a
 relay: the words verbatim, when and where they were said (`source`: the project, and the session or the board thread)
@@ -444,6 +446,11 @@ no test as a condition, never a gitlink. Handing it to anyone is effect class `p
 the operator's word for that act, never by a mandate, as [source](docs/specification/source.md#handing-over) specifies
 (DEC-0149). Not the peer share's Export (DEC-0147) and not
 a proposal's `export` destination (`FAC-SEM-103`).
+
+**Source hand-over**: Handing a **Source export** to anyone (a repository created, a push, a file sent, a visibility
+changed): one synchronous call of effect class `publish`, taken only on the operator's word for that act (a decision
+with its exact target, or the service's in-call elicitation), never by a mandate or an `approval/1` before CT-181, as
+[source](docs/specification/source.md#handing-over) specifies (DEC-0149). *Avoid*: a bare "hand-over" for this meaning.
 
 **Package digest**: SHA-256 over the RFC 8785 form of a **Package** without its digest and signatures; through the
 listed files it covers the whole folder, and a countersignature does not change it (DEC-0050).
@@ -828,7 +835,7 @@ value (DEC-0142 PS-10).
 **Proposal**: A change proposed to a project's manager or the CEO (`fabric-proposal/1`): a rule, an agent, a skill, a
 listing or a fix, with evidence by reference; a rule is approved by a person, nothing applies itself, and nothing
 about a private agent leaves as a proposal (DEC-0072, [proposals](docs/specification/proposals.md)); its source goes
-only by a hand-over (DEC-0149).
+only by a **Source hand-over** (DEC-0149).
 
 **Protocol revision**: `<name>/<revision>`, the version every document names (DEC-0009); a receiver accepts N and N−1
 of the contract's register, lists them in `protocols`, and refuses another with `schema-unsupported` (DEC-0067,

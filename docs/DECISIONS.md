@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 24 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 25 of
   the readings (round 16 read clean), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
@@ -9223,12 +9223,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `package.md` (secrets and state from the source's slots, a copy without state), `proposals.md` (a private agent's
   source), `delegation.md` (MD-5, MD-6, DL-18's order of checks, DL-26's exception, OA-5), `governance-and-roles.md` (external effects), `conformance.md` (the register,
   the reference module, the readers' rows), `docs/specification/README.md`, `README.md` (Build an agent),
-  `docs/DOCMAP.md`, `CONTEXT.md` (Source, Instance, Source slot, Installation string, Source export), `AGENTS.md`
+  `docs/DOCMAP.md`, `CONTEXT.md` (Source, Instance, Source slot, Installation string, Source export, Source hand-over), `AGENTS.md`
   (`pnpm --silent validate`), `docs/evidence/sources.md` (RFC 2606), `docs/ux/foundation.md` (ST-037),
   `docs/ux/scenarios.md` (SCN-054), `docs/ux/screens.md` (SCR-03), `service.md` (the setup state, the AP-2 note, the actions-table note), `docs/ux/` SCN-045, SCN-046 and FLW-31, `connections.md` (the id grammar's guarantee), `interop.md` (the refusal table's pointer), `delegation.md`'s refusal table (the hand-over cases), the research report's header; backlog CT-181 (the
   hand-over's target and MD-6 entry), CT-194 (done at merge), CT-207 (the adapter's
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 24 of the readings, cited by round number (their heads were on the review branch, not kept at landing),
+  board message `565b20f3`); rounds 1 to 25 of the readings, cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

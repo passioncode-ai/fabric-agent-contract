@@ -88,6 +88,17 @@ export function sourcePathTest(manifest: unknown): (path: unknown) => boolean {
 }
 
 /**
+ * Whether a walk skips a folder (`src/cache`, no trailing `/`): an `exclude` folder is it or holds it, and no `include`
+ * path lies under it. Nothing in it is source, so it is never entered (an unreadable excluded folder is no usage error).
+ */
+export function excludedFolderTest(manifest: unknown): (folder: string) => boolean {
+  const source = isObject(manifest) ? manifest : {};
+  const exclude = pathList(source.exclude);
+  const includes = strings(source.include).map(([path]) => path);
+  return (folder) => folderPrefixes(`${folder}/`).some((prefix) => exclude.folders.has(prefix)) && !includes.some((path) => path.startsWith(`${folder}/`));
+}
+
+/**
  * Whether a folder (`src/vendor`, no trailing `/`) lies in the source as a whole: an `include` folder is it or holds it,
  * and no `exclude` folder is it or holds it. What a name that cannot be read may be is judged by its folder alone.
  */
@@ -559,14 +570,13 @@ function credentialAt(line: string): number {
  * after a letter (`xsk-…`) stays held whatever bound the shared detector takes.
  */
 export const ownSecretValue = (text: string): boolean => hasJwt(text) || URL_SECRET_VALUE.test(text) || longRunSecret(text);
-/** The tree check's own provider-key shapes, unbounded, with no bearer branch. */
-const KEY_SHAPE_VALUE = new RegExp(KEY_SHAPE_SOURCES.join("|"), "i");
 /**
- * A manifest's prose (a slot's name or purpose, the description) shaped like a credential (FAC-SEM-156): the tree
- * check's own key shapes, a JWT, a long run, or a bearer token inside it (`BEARER_INSIDE`: 12 or more token characters
- * with a digit), never the whole-value `^bearer` branch, so "Bearer token for the board API" is prose.
+ * A manifest's description shaped like a credential (FAC-SEM-156): a provider key read as the tree check reads one in a
+ * line (`providerKeys`: its own shapes, starting a word, no synthetic word), a JWT, a long run, or a bearer token inside
+ * it (`BEARER_INSIDE`: 12 or more token characters with a digit), never the whole-value `^bearer` branch, so "Bearer
+ * token for the board API" and "desk-booking-service-api" are prose.
  */
-export const proseSecretValue = (text: string): boolean => hasJwt(text) || KEY_SHAPE_VALUE.test(text) || BEARER_INSIDE.test(text) || longRunSecret(text);
+export const proseSecretValue = (text: string): boolean => hasJwt(text) || providerKeys(text).length > 0 || BEARER_INSIDE.test(text) || longRunSecret(text);
 /** Whether a text shows a credential in any form the tree check reads, as a line or as a value. */
 export const credentialShaped = (text: string): boolean => credentialAt(text) >= 0 || ownSecretValue(text);
 

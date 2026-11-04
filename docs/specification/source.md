@@ -91,9 +91,10 @@ agent starts and works without it.
 The schema gives a store slot its `path` and refuses one on any other kind. `FAC-SEM-156` refuses a slot named twice,
 a name or purpose shaped like a credential (read as `FAC-SEM-065` reads a package secret's, the shared detector's
 `secretValue`, whole-value `Bearer` included, so a slot's purpose packs cleanly), a manifest `description` shaped like
-one (read as prose: the tree check's own provider-key shapes, `KEY_SHAPE_SOURCES`, a JWT, a long run, or a bearer token
-inside the text, 12 or more token characters with a digit, never a whole-value `Bearer` branch, so "Bearer token for the
-board API" is prose there; the description and the tree check agree whatever the shared detector's key shapes become)
+one (read as prose: a provider key as the tree check reads one in a line, its own shapes `KEY_SHAPE_SOURCES` starting a
+word and holding no synthetic word, a JWT, a long run, or a bearer token inside the text, 12 or more token characters
+with a digit, never a whole-value `Bearer` branch, so "Bearer token for the board API" and "desk-booking-service-api"
+are prose there; the description and the tree check agree whatever the shared detector's key shapes become)
 (at `/description`) and a store path declared twice. A message
 of `FAC-SEM-156` or `FAC-SEM-160` names a slot, a secret or a path that holds what the tree check reports (a
 credential, a home folder with a name, an e-mail address) by its place (`slots[<index>]`, `slots[<index>].path`,
@@ -205,7 +206,8 @@ by its basename, never by its path.
   (mode 160000, read by a separate `git ls-files -z --stage`, so an untracked name is never read as an index entry), or
   it holds its own `.git`; otherwise it is a tracked path no longer in the work tree (a file replaced by a folder), and
   Git lists the untracked files under it, which are read. A path the index records as a gitlink is a nested
-  repository whatever sits there now (a folder, a file, a link, or nothing). A listed path that is no source path is
+  repository whatever sits at it or above it now (a folder, a file, a link, or nothing): the index decides, and
+  nothing is read. A listed path that is no source path is
   stated only when it may be nested. `fabric.source.json` is read whenever it is a regular file, even when
   `.gitignore` lists it: the manifest is source whatever `include` says. An `include` path Git ignores, beside
   others it lists, reads as `missing`: a source export reads the committed tree, where it is absent too. A staged change that differs from the work tree, or anything
@@ -216,7 +218,9 @@ by its basename, never by its path.
   `.gitignore` that is a FIFO stalls Git until then, and the run then walks with a note) or
   could not run (the note gives the error's code only, such as `ENOBUFS`), and when no `git` is found, it walks the folder: never into `.git`, into a folder (a dot-folder and
   `node_modules` included) only when an `include` path reaches into it (names it, with or without its trailing `/`, or
-  something in it) or covers it, never into a folder outside the path grammar, a folder holding its own `.git` a nested
+  something in it) or covers it, never into a folder outside the path grammar, never into a folder an `exclude` folder
+  is or holds unless an `include` path lies under it (so an unreadable excluded folder is no usage error), a folder
+  holding its own `.git` a nested
   repository. When Git was there and did not list the folder, a `note/walk` line says why, naming no folder. In Git
   mode a listed path outside the grammar is dropped before any look at the file system, so neither mode reads it or
   stops on it. In Git mode a path Git cannot list (an untracked folder Git cannot open) is not seen, as a source export
@@ -336,8 +340,10 @@ revision carrying CT-181. In it the word comes from a T0 or T1 caller ([DL-25](d
 two forms, and in no other:
 
 - a valid decision (DEC-0121 AP-2) whose `target` is the one exact string below; or
-- the service's own elicitation in the call's form ([C3.3](interop.md#c33-awaiting-a-choice)), answered by a person
-  and accepted, whose message names the agent, the source commit and the recipient.
+- the service's own elicitation in the call's form: an MCP `elicitation/create` sent within the hand-over's `tools/call`,
+  in form mode, under [C3.3](interop.md#c33-awaiting-a-choice)'s form constraints (`FAC-SEM-018`), never
+  `input_required` on a Task or a job, answered by a person and accepted, whose message names the agent, the source
+  commit and the recipient.
 
 Everything else, except an invalid decision (below), is refused `operator-decision-required`: no word, a mandate (which
 counts as nothing, [MD-6](delegation.md#the-operators-mandate)), an `approval/1`, a declined elicitation, anything
@@ -361,7 +367,8 @@ token needs none ([DL-26](delegation.md#trust-tiers)).
   `decision-consumed`.
 - **No word.** A T0 or T1 caller with neither form and no decision gets `operator-decision-required` with the detail
   `handover-needs-operator`; a service that can elicit from that caller's client asks the operator instead, once per
-  call, and a declined elicitation is refused the same way and not asked again within that call. A T2 caller gets
+  call, and a declined, cancelled or unanswered elicitation is refused the same way
+  (`handover-needs-operator`) and not asked again within that call. A T2 caller gets
   `operator-decision-required` with the detail `handover-needs-estate-route` whatever it carries, and is not asked: its decision is no decision (AP-2), and its remedy is that the operator acts through a T0
   or T1 route. A T2 caller that reaches the action has passed DL-13 with a delegation token (a caller no rule places is
   T2 by default, and one the relay cannot place is refused before the action, [DL-28](delegation.md#trust-tiers),
