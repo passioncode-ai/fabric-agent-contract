@@ -9050,7 +9050,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2. CA-2. The shape is `service-channel-agent-extension.schema.json`, one file with no reference to another:
      `{standard: "channel-agent-standard/1", projects[]}`, each project with the members of section 13.6. `project` is
      `project:<slug>`, the project registry's id, with the registry alias pattern unchanged
-     (`^project:[a-z0-9][a-z0-9._-]{0,127}$`, as DEC-0151's `projectAlias` and the memory capability's): the registry's
+     (`^project:[a-z0-9][a-z0-9._-]{0,127}$`, the memory capability's pattern; DEC-0151, in progress on CT-210, proposes the
+     same `projectAlias`): the registry's
      name, not an id the agent invents, so the run-of-digits rule does not bind it; an alias of the Fabric Project
      compared as written (identifiers.md),
      where `question_route.target` is the canonical Fabric Project id. `side` is `^[a-z0-9-]{1,32}$`; a channel's id, the
@@ -9061,7 +9062,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      usage-report limit `spend_record` names (DEC-0027); `token_slot` is `<project>/<env>/<NAME>`, `<project>` the vault
      project's name `^[a-z0-9][a-z0-9._-]{0,127}$` (not `project:<slug>`), `<env>` `^[a-z][a-z0-9-]{0,31}$` and `NAME`
      `^[A-Z][A-Z0-9_]{0,63}$`; durations are ISO 8601 in days, hours, minutes and seconds, above zero, except a source's
-     `cadence` and `max_age`, where zero means the source is read on every question; ids admit no `@`,
+     `cadence`, where zero means the source is read on every question (its `max_age` stays above zero, since the signal
+     server reports a source's age against it); `question_route.daily_cap` is the agent's declared per-project cap,
+     below the desk's side-wide cap of section 6.4, which still binds; ids admit no `@`,
      slash, space or run of 7 or more digits (section 13.2's `id_looks_personal`), and the two paths (`evals.suite`,
      `tickets.outbox`) are relative to the agent's repository, so sources and queues carry ids and ages only; a queue's
      `recommendation` is the board's opaque thread id (`^[A-Za-z0-9_-]{8,128}$`); a text is 1 to 4096 code points and
@@ -9086,14 +9089,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and 11).
   5. CA-5. `FAC-SEM-165`: no member name and no string of the declaration is shaped like a credential, by shape, with
      `FAC-SEM-101`'s detector on a string's first 4097 code points (an ordinary name such as `sk-` and 16 more name
-     characters is found too; the shared detector stays as it is); a token slot of the slot's grammar is read segment by segment,
-     the eval suite's and outbox's paths by the detector's path-aware reading (`secretArgument`, `secretUrl`), and a
-     queue's recommendation, a board thread's id, by a
-     provider key's and a JWT's shapes only. No finding's message carries a declared value: the instance path places it,
-     and a member whose name is not plain (letters, digits, `_` and `-`, at most 64, no run of 7 digits once `-` and `_`
-     are left out) or is shaped like a credential is placed at
-     its nearest plain ancestor, by `FAC-SEM-164` as by `FAC-SEM-165`; a member more than 64 levels down is placed at
-     its ancestor 64 levels down, and `FAC-SEM-165` names at most 64 places and counts the rest. The walk keeps an
+     characters is found too; the shared detector stays as it is). Three places read narrower, each only when the value
+     matches its own grammar, keyed on the place and not on a holder's name: a project's token slot of the slot's
+     grammar segment by segment, its eval suite and outbox of the relative path grammar by the detector's path-aware
+     reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a
+     provider key's and a JWT's shapes only; anything else is read whole. The rule reads at most 1 000 000 code points in
+     all, counting what the detector reads (a string once, and again after each `eyJ` to the end of its run), then one
+     finding says the rest was not read. No finding's message carries a declared value and no rule's place echoes
+     instance data: a place writes a declared name, an index of a declared array, else `*` (an undeclared name, a
+     numeric object key, a text's language), in `FAC-SEM-162`, `FAC-SEM-164` and `FAC-SEM-165` alike; a member whose
+     name is not plain (letters, digits, `_` and `-`, at most 64, no run of 7 digits once `-` and `_` are left out) or
+     is shaped like a credential collapses its place, so it and every member below it are placed at its nearest plain
+     ancestor, and so does a member more than 64 levels down; `FAC-SEM-165` names at most 64 places and counts the rest. The walk keeps an
      explicit stack of one frame per container and builds a place only when it reports one, so its time grows with the
      value's size. A text is blank when nothing is left after white space, `\p{Cf}`, `\p{Cc}`, `\p{Z}`,
      `\p{Default_Ignorable_Code_Point}`, the fillers U+115F, U+1160, U+3164, U+FFA0 and U+2800, and U+FFFC.
@@ -9128,9 +9135,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   publishes `support-quality-daily/1` per project, where `/1` keeps one channel of four per event, with members `/1`
   does not have, and defers them itself until every reader of the feed takes that schema;
   that is DEC-0151 (CT-210), in progress: until it lands, an agent following section 5.1 emits payloads this contract
-  refuses, and the mapping of the seven channel kinds to `/1`'s four channels is DEC-0151's; until then an agent declaring
+  refuses, and the mapping of the seven channel kinds to `/1`'s four channels is what the in-progress DEC-0151 proposes
+  to decide; until then an agent declaring
   several projects publishes no per-project `support.quality_daily` on a shared channel, since a `/1` reader keeps one
-  event per service, channel and day.
+  event per service, channel and day, so the standard's observed per-project quality check reads missing for a shared
+  channel. Declarations published before this revision are read under these grammars, narrower than section 13.6 (no
+  weeks, months or years; zero only for a source's cadence; no 7-digit runs in ids; an owner with no space; a
+  recommendation that is a board `opaqueId`; a lower-case `spend_record`; a `null` in a required place or a missing
+  required member makes the whole declaration not declared); `pnpm validate` shows what a declaration fails.
 - **Consequences / affects:** `src/extensions.ts`, `src/channel-agent.ts`, `src/semantic-rules.ts`,
   `src/protocol-revisions.ts`, `schemas/service-channel-agent-extension.schema.json`, `tools/vectors/channel-agent.ts`,
   `tools/vectors/run.ts`, `fixtures/vectors/channel-agent.json`, `fixtures/positive/service-channel-agent-extension.json`,
@@ -9142,14 +9154,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`rawValues`), `fixtures/semantic/manifest-channel-agent-nulls.json`, `src/validate-cli.ts` and
   `test/validate-cli.test.ts` (`hint/declaration-only`), `docs/specification/service.md` (the well-known answer's
   extensions), `docs/specification/identifiers.md` (compared as written), `docs/ux/scenarios.md` (SCN-002);
-  `docs/specification/channel-agent.md`, `README.md`, `interop.md` (the extension keys), `support-quality.md` (the
+  `docs/specification/channel-agent.md`, `docs/specification/README.md`, `interop.md` (the extension keys), `support-quality.md` (the
   pointer), `conformance.md` (the register, the reference modules, the channel agent's row), `docs/DOCMAP.md`,
   `CONTEXT.md` (Channel agent), `docs/evidence/sources.md`,
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04; rounds 1 to 4 of the readings. `DEC-0150` was reserved by the coordinator with
+  published it on 2026-11-04, with the examples made neutral here; rounds 1 to 5 of the readings. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`; the counter's history on origin
   (`refs/agent-sync/ids/DEC`) shows no commit for it: the counter moves from next 149 (`d3da4336`) to next 152 in one
-  commit (`ee67e35e`, key `support-quality-v2-dec`), so DEC-0149 to DEC-0151 have no counter commit of their own.
+  commit (`ee67e35e`, key `support-quality-v2-dec`), so DEC-0149, DEC-0150 and DEC-0151 (in progress) have no counter commit of their own.
   `FAC-SEM-162` to `FAC-SEM-165` were reserved under `channel-agent-sem-a` to `-d` (SEM-0162 to SEM-0165).

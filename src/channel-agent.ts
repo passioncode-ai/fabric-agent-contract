@@ -80,7 +80,14 @@ function schemaNames(): Set<string> {
 }
 
 /** A container the walk is reading: its members, the next one, its place, its depth, its own name and its holder's. */
-interface Frame { container: unknown[] | JsonObject; keys: string[] | undefined; next: number; at: string; depth: number; name: string | undefined; parent: string | undefined }
+interface Frame { container: unknown[] | JsonObject; keys: string[] | undefined; next: number; at: string; depth: number; name: string | undefined; parent: string | undefined; collapsed: boolean; role: Role }
+/** The place a container holds in the declaration, from the root down, or none: the narrow readings are keyed on it. */
+type Role = "root" | "projects" | "project" | "evals" | "tickets" | "queues" | "queue" | undefined;
+const ROLES: Readonly<Record<string, Readonly<Record<string, Role>>>> = { root: { projects: "projects" }, project: { evals: "evals", tickets: "tickets", handoff_queues: "queues" } };
+const roleOf = (holder: Role, key: string, index: boolean): Role => {
+  if (index) return holder === "projects" ? "project" : holder === "queues" ? "queue" : undefined;
+  return holder === undefined ? undefined : ROLES[holder]?.[key];
+};
 /** Where a name or a string the walk shows sits: its holder's frame (none for the walked value itself) and its key. */
 interface Spot { frame: Frame | undefined; key: string; isName: boolean }
 /** What the walk shows each name and string: the text, where it sits, and the function that places it (called only when needed). */
@@ -93,17 +100,19 @@ type Visit = (text: string, spot: Spot, place: (spot: Spot) => string) => void;
  * the visit asks for it (a container's, when it is entered).
  */
 function walk(value: unknown, root: string, tokenOf: (frame: Frame, key: string, index: boolean) => string | undefined, visit: Visit): void {
-  // A name is placed at its holder; a value at its own token, or at its holder when it has none or sits too deep.
+  // A name is placed at its holder. A member is placed at its own token, or, when its key is not written (no token, or
+  // past PATH_DEPTH), its frame is collapsed: it and every descendant are placed at its holder's place.
+  const token = (frame: Frame, key: string): string | undefined => (frame.collapsed || frame.depth >= PATH_DEPTH ? undefined : tokenOf(frame, key, frame.keys === undefined));
   const place = (spot: Spot): string => {
     const frame = spot.frame;
     if (frame === undefined) return root;
-    const token = spot.isName || frame.depth >= PATH_DEPTH ? undefined : tokenOf(frame, spot.key, frame.keys === undefined);
-    return token === undefined ? frame.at : `${frame.at}/${token}`;
+    const written = spot.isName ? undefined : token(frame, spot.key);
+    return written === undefined ? frame.at : `${frame.at}/${written}`;
   };
   if (typeof value === "string") visit(value, { frame: undefined, key: "", isName: false }, place);
   if (!Array.isArray(value) && !isObject(value)) return;
-  const enter = (container: unknown[] | JsonObject, at: string, depth: number, name: string | undefined, parent: string | undefined): Frame => ({ container, keys: Array.isArray(container) ? undefined : Object.keys(container), next: 0, at, depth, name, parent });
-  const stack: Frame[] = [enter(value, root, 0, undefined, undefined)];
+  const enter = (container: unknown[] | JsonObject, at: string, depth: number, name: string | undefined, parent: string | undefined, collapsed: boolean, role: Role): Frame => ({ container, keys: Array.isArray(container) ? undefined : Object.keys(container), next: 0, at, depth, name, parent, collapsed, role });
+  const stack: Frame[] = [enter(value, root, 0, undefined, undefined, false, "root")];
   while (stack.length > 0) {
     const frame = stack[stack.length - 1] as Frame;
     const length = frame.keys === undefined ? (frame.container as unknown[]).length : frame.keys.length;
@@ -113,11 +122,15 @@ function walk(value: unknown, root: string, tokenOf: (frame: Frame, key: string,
     }
     const i = frame.next;
     frame.next += 1;
-    const key = frame.keys === undefined ? String(i) : (frame.keys[i] as string);
-    const child = frame.keys === undefined ? (frame.container as unknown[])[i] : (frame.container as JsonObject)[key];
-    if (frame.keys !== undefined) visit(key, { frame, key, isName: true }, place);
+    const index = frame.keys === undefined;
+    const key = index ? String(i) : (frame.keys?.[i] as string);
+    const child = index ? (frame.container as unknown[])[i] : (frame.container as JsonObject)[key];
+    if (!index) visit(key, { frame, key, isName: true }, place);
     if (typeof child === "string") visit(child, { frame, key, isName: false }, place);
-    else if (Array.isArray(child) || isObject(child)) stack.push(enter(child, place({ frame, key, isName: false }), frame.depth + 1, key, frame.name));
+    else if (Array.isArray(child) || isObject(child)) {
+      const written = token(frame, key);
+      stack.push(enter(child, written === undefined ? frame.at : `${frame.at}/${written}`, frame.depth + 1, key, frame.name, written === undefined, roleOf(frame.role, key, index)));
+    }
   }
 }
 
@@ -251,35 +264,78 @@ const keyShaped = (text: string): boolean => {
 /** Whether a member name may stand in a path as written (CA-5). */
 const plainName = (name: string): boolean => NAME_CHARACTERS.test(name) && !/[0-9]{7}/.test(name.replace(/[-_]/g, "")) && !shaped(name);
 
+/** The grammars a narrow reading needs the value to match first (the schema's `relativeRef`, the board's `opaqueId`). */
+const RELATIVE_REF = /^(?![/~])(?![A-Za-z]:)(?!(?:[^/]*\/)*\.\.(?:\/|$))[A-Za-z0-9._:/-]+$/;
+const OPAQUE_ID = /^[A-Za-z0-9_-]{8,128}$/;
+const relativeRef = (text: string): boolean => text.length >= 1 && text.length <= 256 && RELATIVE_REF.test(text);
+/** FAC-SEM-165 reads at most this many code points in all; a declaration past it is not read further. */
+export const SECRET_BUDGET = 1_000_000;
+
+const BASE64URL = /[A-Za-z0-9_-]/;
+/**
+ * The code points the detector reads in a string: the string once, and, after each `eyJ`, again up to the end of the
+ * base64url run it starts, which `JWT_SHAPE` reads back from every `eyJ` before it fails. Counted in one pass.
+ */
+export function detectorCost(text: string): number {
+  let cost = text.length;
+  let runEnd = 0;
+  for (let at = text.indexOf("eyJ"); at >= 0; at = text.indexOf("eyJ", at + 1)) {
+    if (runEnd <= at) {
+      runEnd = at;
+      while (runEnd < text.length && BASE64URL.test(text[runEnd] as string)) runEnd += 1;
+    }
+    cost += runEnd - at;
+  }
+  return cost;
+}
+
 /**
  * FAC-SEM-165: no member name and no string of the declaration is shaped like a credential, by FAC-SEM-101's detector
- * (by shape). A token slot of the slot's grammar, the eval suite's and the outbox's paths are read segment by segment, and
- * a queue's recommendation (a board thread's id) by a provider key's and a JWT's shapes only. A member whose name is not
- * plain is placed at its nearest plain ancestor, so no path carries the name, and a member deeper than PATH_DEPTH at its
- * ancestor at that depth. At most SECRET_FINDINGS places are named; one more finding counts the rest.
+ * (by shape). Three places read narrower, and only when the value matches its own grammar: a project's token slot
+ * segment by segment, its eval suite and outbox (relative paths) by the detector's path-aware reading, and a queue's
+ * recommendation (a board opaque id) by a provider key's and a JWT's shapes only; anything else is read whole. A place
+ * writes a declared name, an index of a declared array, else `*`, as FAC-SEM-162 does; a member whose name is not plain
+ * collapses its place, so it and its descendants are placed at its nearest plain ancestor, and so does a member past
+ * PATH_DEPTH. At most SECRET_FINDINGS places are named; one more finding counts the rest, and one more says when
+ * SECRET_BUDGET code points were read and the rest was not.
  */
 function secrets(value: unknown, root: string): Finding[] {
   const findings: Finding[] = [];
+  const names = schemaNames();
   let more = 0;
+  let budget = SECRET_BUDGET;
+  let unread = false;
   const flag = (at: string, what: string) => {
     if (findings.length < SECRET_FINDINGS) findings.push({ code: "FAC-SEM-165", instancePath: at, message: `${what} is shaped like a credential: a token is named by its vault slot, never written (DEC-0150 CA-5)` });
     else more += 1;
   };
-  walk(value, root, (_frame, key, index) => (index || plainName(key) ? key : undefined), (text, spot, place) => {
+  const afford = (text: string): boolean => {
+    const cost = detectorCost(head(text));
+    if (cost > budget) {
+      unread = true;
+      return false;
+    }
+    budget -= cost;
+    return true;
+  };
+  const tokenOf = (frame: Frame, key: string, index: boolean) => (index || plainName(key) ? placedToken(frame.name, frame.parent, key, index, names) : undefined);
+  walk(value, root, tokenOf, (text, spot, place) => {
+    if (unread || !afford(text)) return;
     if (spot.isName) {
       if (shaped(text)) flag(place(spot), "a member's name");
       return;
     }
-    const { frame, key } = spot;
-    const holder = frame?.name;
+    const role = spot.frame?.role;
+    const key = spot.key;
     let found: boolean;
-    if (key === "token_slot" && holder === "tickets" && TOKEN_SLOT.test(text)) found = text.split("/").some((segment) => secretValue(segment));
-    else if ((key === "suite" && holder === "evals") || (key === "outbox" && holder === "tickets")) found = secretArgument(head(text)) || secretUrl(head(text));
-    else if (key === "recommendation" && frame?.parent === "handoff_queues") found = keyShaped(text);
+    if (role === "tickets" && key === "token_slot" && TOKEN_SLOT.test(text)) found = text.split("/").some((segment) => secretValue(segment));
+    else if (((role === "evals" && key === "suite") || (role === "tickets" && key === "outbox")) && relativeRef(text)) found = secretArgument(text) || secretUrl(text);
+    else if (role === "queue" && key === "recommendation" && OPAQUE_ID.test(text)) found = keyShaped(text);
     else found = shaped(text);
     if (found) flag(place(spot), "a value");
   });
   if (more > 0) findings.push({ code: "FAC-SEM-165", instancePath: root, message: `and ${more} more names or values shaped like a credential (DEC-0150 CA-5)` });
+  if (unread) findings.push({ code: "FAC-SEM-165", instancePath: root, message: `the declaration holds more than ${SECRET_BUDGET} code points of names and values; the rest was not read for credentials (DEC-0150 CA-5)` });
   return findings;
 }
 
@@ -335,8 +391,9 @@ function obligations(project: JsonObject, at: string): Finding[] {
     if (channel.kind === "store_review" && channel.clarifying_question === true) flag(`/channels/${i}/clarifying_question`, "a store review gets one public reply and no clarifying question");
     for (const which of ["holding", "final"] as const) {
       for (const [language, text] of Object.entries((texts[which] ?? {}) as Record<string, string>)) {
-        // A language that is not a plain name, or is shaped like a credential, is placed at its map, as FAC-SEM-165 does.
-        const place = `/channels/${i}/texts/${which}${plainName(language) ? `/${language}` : ""}`;
+        // A plain language is written `*`, as FAC-SEM-162 and FAC-SEM-165 write it; one that is not plain, or is shaped
+        // like a credential, is placed at its map: no place echoes the declaration's own words.
+        const place = `/channels/${i}/texts/${which}${plainName(language) ? "/*" : ""}`;
         if (text.replace(BLANK, "") === "") flag(place, "a declared text is blank, and nothing empty is sent");
         else if (text.includes(EM_DASH)) flag(place, "a declared text carries U+2014, which a send's checks refuse");
       }

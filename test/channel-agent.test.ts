@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ValidateFunction } from "ajv/dist/2020.js";
-import { CHANNEL_AGENT_PATHS, MESSAGE_ERRORS, PATH_DEPTH, SECRET_FINDINGS, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, placed, schemaErrors } from "../src/channel-agent.js";
+import { CHANNEL_AGENT_PATHS, MESSAGE_ERRORS, PATH_DEPTH, SECRET_BUDGET, SECRET_FINDINGS, detectorCost, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, placed, schemaErrors } from "../src/channel-agent.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -131,7 +131,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   it("finds a member name shaped like a credential and keeps it out of the path", () => {
     const name = ["sk", "-", "C3".repeat(12)].join("");
     const found = channelAgentRules({ extensions: { [KEY]: { ...value, [name]: { note: ["Bearer", "y".repeat(24)].join(" ") } } } }, "well-known");
-    expect(found.map((finding) => `${finding.code} ${finding.instancePath}`)).toEqual([`FAC-SEM-165 ${CHANNEL_AGENT_PATHS["well-known"]}`, `FAC-SEM-165 ${CHANNEL_AGENT_PATHS["well-known"]}/note`, `FAC-SEM-162 ${CHANNEL_AGENT_PATHS["well-known"]}`]);
+    expect(found.map((finding) => `${finding.code} ${finding.instancePath}`)).toEqual([`FAC-SEM-165 ${CHANNEL_AGENT_PATHS["well-known"]}`, `FAC-SEM-165 ${CHANNEL_AGENT_PATHS["well-known"]}`, `FAC-SEM-162 ${CHANNEL_AGENT_PATHS["well-known"]}`]);
     expect(JSON.stringify(found)).not.toContain(name);
   });
   it("places a text whose language is not a plain name, or is shaped like a credential, at its map (each built at run time)", () => {
@@ -172,7 +172,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const bearer = ["Bearer", "z".repeat(24)].join(" ");
     const name = ["n", "1234567"].join("");
     const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: { [name]: bearer } } } }, "well-known");
-    expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.instancePath)).toEqual([`${CHANNEL_AGENT_PATHS["well-known"]}/extra`]);
+    expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.instancePath)).toEqual([`${CHANNEL_AGENT_PATHS["well-known"]}/*`]);
     const key = ["sk", "-", "D4".repeat(12)].join("");
     const late = channelAgentRules({ extensions: { [KEY]: { ...value, extra: `${"a ".repeat(2100)}${key}` } } }, "well-known");
     expect(late.filter((f) => f.code === "FAC-SEM-165")).toEqual([]);
@@ -218,8 +218,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       const small = total(smallChain);
       const large = total(largeChain);
       const secret = large.found.filter((f) => f.code === "FAC-SEM-165");
-      expect(secret.length).toBe(SECRET_FINDINGS + 1);
-      expect(secret.at(-1)?.message).toMatch(/^and [0-9]+ more /);
+      // The places, the count of the rest, and, past SECRET_BUDGET code points, the finding that the rest was not read.
+      expect(secret.slice(0, SECRET_FINDINGS + 1).at(-1)?.message).toMatch(/^and [0-9]+ more /);
+      expect(secret.length - SECRET_FINDINGS - 1).toBe(secret.at(-1)?.message.includes("was not read") ? 1 : 0);
       const characters = large.found.reduce((sum, f) => sum + f.instancePath.length, 0);
       expect(characters).toBeLessThan((SECRET_FINDINGS + 2) * (CHANNEL_AGENT_PATHS["well-known"].length + 2 * PATH_DEPTH + 16));
       expect(Math.max(...large.found.map((f) => f.instancePath.split("/").length))).toBeLessThanOrEqual(CHANNEL_AGENT_PATHS["well-known"].split("/").length + PATH_DEPTH);
@@ -285,6 +286,34 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       expect(channelAgentView({ extensions: { [KEY]: declared } }, "well-known"), place).toEqual({ declared: true, valid: false, errors: [`maxProperties at ${place}`] });
     }
   });
+  it("reads at most SECRET_BUDGET code points for credentials, then says the rest was not read, in little time", () => {
+    const opening = ["e", "y", "J"].join("");
+    const strings = Array.from({ length: 488 }, () => opening.repeat(1366).slice(0, 4096));
+    const started = performance.now();
+    const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: strings } } }, "well-known");
+    expect(performance.now() - started).toBeLessThan(500);
+    expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => [f.instancePath, f.message.includes(`more than ${SECRET_BUDGET}`)])).toEqual([[CHANNEL_AGENT_PATHS["well-known"], true]]);
+  });
+  it("counts what the detector reads: a string once, and again after each eyJ to the end of its run", () => {
+    expect(detectorCost("")).toBe(0);
+    expect(detectorCost("plain text")).toBe(10);
+    expect(detectorCost("eyJab.cd")).toBe(8 + 5);
+    expect(detectorCost("x eyJeyJ y")).toBe(10 + 6 + 3);
+    expect(detectorCost("eyJ".repeat(1000))).toBeGreaterThan(SECRET_BUDGET);
+  });
+  it("places every descendant of a member that is not plain at the nearest plain ancestor, declared names and all", () => {
+    const name = ["sk", "-", "Zx9Q".repeat(5)].join("");
+    const bearer = ["Bearer", "q".repeat(24)].join(" ");
+    const found = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [{ ...value.projects[0], [name]: { standard: bearer, side: { lead_agent: bearer } } }] } } }, "well-known");
+    expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.instancePath)).toEqual(Array(3).fill(`${CHANNEL_AGENT_PATHS["well-known"]}/projects/0`));
+  });
+  it("reads a recommendation outside its grammar whole (a password built at run time)", () => {
+    const url = ["postgres://app:", "Pw7q".repeat(4), "@db.example/support"].join("");
+    const queue = { id: "support-mail", owner: "support-team", limit: "P2D", answered_signal: "none", recommendation: url };
+    const found = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [{ ...value.projects[0], handoff_queues: [queue] }] } } }, "well-known");
+    expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.instancePath)).toEqual([`${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/handoff_queues/0/recommendation`]);
+    expect(JSON.stringify(found)).not.toContain("Pw7q");
+  });
   it("answers a schema that cannot run on a value with one fixed error, and lets any other failure through", () => {
     const throwing = (error: Error) => (() => { throw error; }) as unknown as ValidateFunction;
     expect(schemaErrors({}, throwing(new RangeError("Maximum call stack size exceeded")))).toEqual([TOO_LARGE]);
@@ -302,7 +331,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const bearer = ["Bearer", "v".repeat(24)].join(" ");
     const name = ["491", "511", "234", "5678"].join("-");
     const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: { [name]: bearer } } } }, "well-known");
-    expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.instancePath)).toEqual([`${CHANNEL_AGENT_PATHS["well-known"]}/extra`]);
+    expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.instancePath)).toEqual([`${CHANNEL_AGENT_PATHS["well-known"]}/*`]);
   });
   it("reads a time zone of one segment or Area/Location", () => {
     const zone = createValidatorSync().getSchema(`${SCHEMA_PREFIX}schemas/service-channel-agent-extension.schema.json#/$defs/project/properties/question_route/properties/tz`);

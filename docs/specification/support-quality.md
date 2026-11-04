@@ -51,8 +51,8 @@ It fits `data.value`'s two levels (`test/support-quality.test.ts` carries it ins
 
 - The payload `channel-agent-standard/1` section 5.1 publishes per project, where `/1` keeps one channel of four per
   event, with ticket counts, outcomes and open counts that `/1` does not have: DEC-0151 (CT-210), in progress. The
-  section defers those fields itself ("publish them once every reader of the feed takes that schema"); until DEC-0151
-  lands, an agent following it emits payloads `/1` refuses. The agent's declaration is
+  section defers those fields itself ("publish them once every reader of the feed takes that schema"); until
+  DEC-0151 (in progress) lands, an agent following it emits payloads `/1` refuses. The agent's declaration is
   [channel agent](channel-agent.md#compatibility).
 - The thresholds (reply coverage 100 %, helped yes at least 60 %, each check at least 90 %): the standard's, not the shape's.
 - How a reader aggregates channels or alerts: the voice-of-the-customer agent's.

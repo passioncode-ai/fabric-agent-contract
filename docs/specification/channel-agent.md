@@ -33,7 +33,8 @@ and nowhere else (DEC-0150 CA-1):
   ([service](service.md#well-known-document)), where the actions and load keys also sit.
 
 A service with a manifest declares only in its manifest: a reader of such a service reads the manifest's declaration and
-ignores one in its well-known answer. A well-known answer lists `channel-agent-standard/1` in its `protocols` only once
+ignores one in its well-known answer. The checker still checks a well-known declaration beside a manifest, so its author
+sees the findings and removes it. A well-known answer lists `channel-agent-standard/1` in its `protocols` only once
 its readers have re-pinned to this revision of the contract.
 
 The same rules run in both places: kind `manifest` reads the first, kind `service-well-known` the second. No other
@@ -66,7 +67,8 @@ serves (at most 64), each project once (DEC-0150 CA-2, the standard's section 13
 | `recorded_decisions` (optional) | `{id, date, effect}` | an id, each once; `YYYY-MM-DD`; a word (`replies_off`) |
 
 `project` is the project's id in the project registry, `project:<slug>`, with the registry alias pattern unchanged,
-`^project:[a-z0-9][a-z0-9._-]{0,127}$` (the same as DEC-0151's `projectAlias` and the memory capability's): a registry
+`^project:[a-z0-9][a-z0-9._-]{0,127}$` (the memory capability's pattern; DEC-0151, in progress on CT-210, proposes the
+same `projectAlias`): a registry
 alias is the registry's name, not an id the agent invents, so the run-of-digits rule of an id does not bind it. It is an
 alias of the Fabric Project, compared as written ([identifiers](identifiers.md)), while `question_route.target` is the canonical Fabric Project id the board
 addresses. DEC-0151 (CT-210, in progress) gives `support-quality-daily` payloads the same alias; once it lands, a reader
@@ -89,10 +91,14 @@ own pattern. Three members keep another owner's grammar: `question_route.target`
 (`^[a-z0-9][a-z0-9._:-]{0,63}$`) and a queue's `recommendation` the board's `opaqueId`. A path (`suite`, `outbox`) is relative to the agent's repository: never `/`, `~` or a drive letter first, and
 no `..` segment. A duration is ISO 8601 in days, hours, minutes and seconds (`P7D`, `PT1H`, `P1DT12H`), above zero:
 years, months and weeks, whose length depends on the calendar, are refused, and so is an all-zero duration (`P0D`,
-`PT0S`), except a source's `cadence` and `max_age`, where zero means the source is read on every question. A time zone
+`PT0S`), except a source's `cadence`, where zero means the source is read on every question. A source's `max_age`
+stays above zero: the standard's signal server reports a source's age against it, so zero would read as always stale. A time zone
 is an IANA name of one segment (`UTC`, `GMT`, `CET`) or of two or three (`Etc/UTC`, `Europe/Warsaw`,
 `America/Argentina/Buenos_Aires`). A text's length is counted in Unicode code points, as JSON Schema's `maxLength`
 counts it, and a text's language is at most 35 characters.
+
+`question_route.daily_cap` is the agent's declared cap for this project's questions; the desk's own cap across its
+side (the standard's section 6.4) still binds, so a project's questions may wait for the desk's next slot below it.
 
 ## What is checked
 
@@ -124,22 +130,27 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    answered signal is `none` names its recommendation; a budget above 0 names the usage report's limit it is spent
    under, since without one it reads 0.
 4. No member name and no string of the value is shaped like a credential (`FAC-SEM-165`, CA-5), by shape, with the
-   detector of `FAC-SEM-101`, on a valid or an invalid value and on a misplaced one where it stands; a token slot of the
-   slot's grammar is read segment by segment, so a provider key in any of its three segments is found; the eval
-   suite's and the outbox's paths are read by the detector's path-aware reading (`secretArgument` and `secretUrl` on
-   the whole path), so a long path of ordinary segments is not taken for one secret and a long base64 segment is; a
-   queue's
-   `recommendation`, a board thread's id, is read by a provider key's and a JWT's shapes only, since a long mixed run is
-   its shape by design. The detector reads the first 4097 code points of a string. Being by shape, it also finds an
+   detector of `FAC-SEM-101`, on a valid or an invalid value and on a misplaced one where it stands. Three places read
+   narrower, each only when the value matches its own grammar, and anything else is read whole: a project's
+   `tickets.token_slot` of the slot's grammar is read segment by segment, so a provider key in any of its three segments
+   is found; a project's `evals.suite` and `tickets.outbox` of the relative path grammar are read by the detector's
+   path-aware reading (`secretArgument` and `secretUrl` on the whole path), so a long path of ordinary segments is not
+   taken for one secret and a long base64 segment is; a queue's `recommendation` of the board's `opaqueId` grammar is
+   read by a provider key's and a JWT's shapes only, since a long mixed run is its shape by design (a recommendation
+   that is a URL with a password is read whole, and found). The detector reads the first 4097 code points of a string,
+   and the rule reads at most 1 000 000 code points of names and values in all, counting what the detector reads (a
+   string once, and again after each `eyJ` to the end of its run, which the JWT shape reads back): past that, one
+   finding at the declaration says the rest was not read for credentials. Being by shape, it also finds an
    ordinary hyphenated name that starts with `sk-` and runs 16 more letters, digits, `_` or `-`
    (`sk-support-desk-faq-v2`): do not start an id with `sk-`.
 
-No finding's message carries a declared value: its `instancePath` places it. A member whose name is not plain (letters,
-digits, `_` and `-`, at most 64, with no run of 7 or more digits once `-` and `_` are left out) or is itself shaped like a
-credential is placed at its
-nearest plain ancestor, by `FAC-SEM-165` and `FAC-SEM-164` alike (a text whose language is not plain is placed at its
-`texts/holding` or `texts/final` map), and a member more than 64 levels below the declaration at its ancestor 64 levels
-down. `FAC-SEM-165` names at most 64 places, then one more finding at the declaration counts the rest. The walk keeps
+No finding's message carries a declared value, and no rule's place echoes instance data: a place writes a member name
+the schema declares and an index of an array the schema declares, and `*` for any other member name, for a numeric key
+of an object and for a text's language, in `FAC-SEM-162`, `FAC-SEM-164` and `FAC-SEM-165` alike. A member whose name
+is not plain (letters, digits, `_` and `-`, at most 64, with no run of 7 or more digits once `-` and `_` are left out)
+or is itself shaped like a credential collapses its place: it and every member below it are placed at its nearest
+plain ancestor (a text whose language is not plain is placed at its `texts/holding` or `texts/final` map), and so is a
+member more than 64 levels below the declaration, at its ancestor 64 levels down. `FAC-SEM-165` names at most 64 places, then one more finding at the declaration counts the rest. The walk keeps
 an explicit stack of one frame per container, not per member, and builds a member's place only when it reports one, so
 no depth or size of a value throws and the time grows with the value's size, not its square. A text counts as blank
 when nothing is left after removing white space, format characters (`\p{Cf}`, such as U+200B), control characters
@@ -164,6 +175,8 @@ Section 11 also asks for these; none can be decided from the declaration alone (
   exist: a checker that reads the estate, the board or the usage report checks them there;
 - the reference values (a 7-day final limit, a 1-hour first reply, the operator desk's cap of 10 and a team desk's 15):
   the standard's references, which an agent may declare otherwise;
+- the meaning of `daily_cap`: the agent's declared per-project cap, below the desk's side-wide cap of section 6.4,
+  which still binds; this reading is confirmed with the standard's owner on the board thread;
 - sides across projects: a declaration may hold projects on several sides, which the standard's rule that nothing is
   composed across sides may not intend; its owner is asked on the board thread;
 - working time: a limit the standard counts in working hours or days (a desk's 2 working days, a team chat's first reply
@@ -196,11 +209,19 @@ existing fixture validates and checks as before. `contractVersion` stays `0.1.0`
   per project, where `/1` keeps one channel of four per event, with members `/1` does not have (`arrived`, `ended`,
   `open.*`, the outcomes, `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets`,
   `notATicket`). Section 5.1 defers its new
-  fields itself: "publish them once every reader of the feed takes that schema". That schema is DEC-0151 (CT-210), in
-  progress: until DEC-0151 lands, an agent following section 5.1 emits payloads this contract refuses, and how the seven
-  channel kinds here map to `/1`'s four channels (`chat`, `mail`, `reviews`, `community`) is DEC-0151's to decide. Until
-  then, an agent declaring several projects publishes no per-project `support.quality_daily` on a channel they share,
-  because a `/1` reader keeps one event per service, channel and day.
+  fields itself: "publish them once every reader of the feed takes that schema". That schema is what
+  DEC-0151, in progress on CT-210, proposes. Until it lands, an agent following section 5.1 emits payloads this contract refuses,
+  and how the seven channel kinds here map to `/1`'s four channels (`chat`, `mail`, `reviews`, `community`) is what
+  DEC-0151, in progress, proposes to decide. Until then, an agent declaring several projects publishes no per-project
+  `support.quality_daily` on a channel they share, because a `/1` reader keeps one event per service, channel and day,
+  so the standard's observed per-project quality check reads missing for a shared channel.
+- **Declarations published before this revision.** A declaration an agent published before this revision is read under
+  these grammars, which are narrower than the standard's section 13.6: durations in days, hours, minutes and seconds
+  only, no weeks, months or years; zero only for a source's `cadence`; no run of 7 or more digits in an id, a channel's
+  id, the side, a category code or a tier code; an owner with no space; a recommendation that is a board `opaqueId`, so
+  no colon; a `spend_record` that is a lower-case usage-report limit id; and a `null` in a required place, or a missing
+  required member, makes the whole declaration not declared. `pnpm validate` on the manifest or the well-known answer
+  shows which members a declaration fails.
 
 The first consumer is owed by the Fabric Agent Adapter: its service check validates the declaration against this schema
 and these vectors. The adapter's row is to be filed (the coordinator files it on the board); CT-209 here.

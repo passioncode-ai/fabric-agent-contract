@@ -301,8 +301,8 @@
                 "description": "How often it is read or rebuilt; zero means on every question."
               },
               "max_age": {
-                "$ref": "#/$defs/durationOrZero",
-                "description": "The age past which the source opens an alert episode; zero means it is read on every question."
+                "$ref": "#/$defs/duration",
+                "description": "The age past which the source opens an alert episode, above zero: the signal server reports a source's age against it, so zero would read as always stale."
               }
             }
           },
@@ -577,7 +577,7 @@
     "durationOrZero": {
       "type": "string",
       "pattern": "^P(?=[0-9T])([0-9]{1,5}D)?(T(?=[0-9])([0-9]{1,5}H)?([0-9]{1,5}M)?([0-9]{1,5}S)?)?$",
-      "description": "An ISO 8601 duration in days, hours, minutes and seconds, as duration, where zero (P0D, PT0S) is allowed: a source read on every question."
+      "description": "An ISO 8601 duration in days, hours, minutes and seconds, as duration, where zero (P0D, PT0S) is allowed: a source's cadence, read on every question."
     }
   }
 }

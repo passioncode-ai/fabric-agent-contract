@@ -35,6 +35,13 @@ filed; the coordinator files it on the board).
   documents the boundary) and the product break (the history below), all fixed; FAC-SEM-165 now names at most 64
   places and a path at most 64 levels deep, the detector reads 4097 code points, a blank text strips `\p{Cf}` and
   `\p{Z}`, a misplaced declaration is read for credentials, and `rawValues` appends in place (CT-194's lines).
+- Round 5 of the readings: one unit break (a finding below a member that is not plain placed at an innocent declared
+  member) and one product break (DEC-0151, in progress, presented as fact), fixed: a member that is not plain, or past
+  64 levels, collapses its place for every member below it; every place writes `*` for an undeclared name, a numeric
+  object key and a text's language, in all three rules; the narrow readings apply only at their place and only to a
+  value of their own grammar; FAC-SEM-165 reads at most 1 000 000 code points, counting the JWT shape's rereads after
+  each `eyJ`; a source's `max_age` is above zero again; `daily_cap`'s meaning, the reading of earlier declarations and
+  the shared-channel quality check are stated. `src/secret-shape.ts` keeps only CT-194's `rawValues` lines.
 - Round 4 of the readings: two unit breaks (a numeric object key echoed in a place, the width guard on three objects
   only) and two product breaks (the project grammar, the history), fixed: a numeric key of an object is `*`; every
   closed object's width, every array's `maxItems` and every map's `maxProperties` are read from the schema before it
@@ -42,7 +49,7 @@ filed; the coordinator files it on the board).
   a blank text also strips default-ignorable code points and U+FFFC; FAC-SEM-162 points to the grammars and to
   `pnpm validate --schema`; service.md, identifiers.md and SCN-002 name the declaration; the branch is one commit.
 - Round 3 of the readings: one unit break (Ajv's patterns throwing on strings of several megabytes) and two product
-  breaks (a present-tense claim about DEC-0151, a withdrawn commit named here), all fixed. Before the schema runs, a
+  breaks (a present-tense claim about DEC-0151, in progress, and a withdrawn commit named here), all fixed. Before the schema runs, a
   string or a name over 4096 code points (`maxLength`) and a declaration, project or channel with more members than
   the schema declares (`maxProperties`) are refused, and a schema that still throws is one fixed finding; the walk keeps
   one frame per container and builds a place only for a finding; the suite's and outbox's paths are read segment by
@@ -80,8 +87,9 @@ four rounds of readings; the earlier branches were deleted, and the pull request
 
 ## Open
 
-- Section 5.1's daily payload: until DEC-0151 (CT-210, branch `agent/sqd-fields-20261104`) lands, an agent following it
-  emits `support-quality-daily/1` payloads this contract refuses; DEC-0151 maps the seven channel kinds to `/1`'s four.
+- Section 5.1's daily payload: until DEC-0151 (in progress on CT-210, branch `agent/sqd-fields-20261104`) lands, an
+  agent following it emits `support-quality-daily/1` payloads this contract refuses; DEC-0151, in progress, proposes
+  how the seven channel kinds map to `/1`'s four.
 - What section 11 asks and no declaration can show (DEC-0150 CA-6): the side among the standard's sides, the route's
   capability for the side's kind, a tier's fact among the customer facts, the existence of the named agents,
   capabilities, desk and limit, a working-time limit's calendar, and everything the signal server observes.
@@ -106,13 +114,21 @@ With `origin/agent/ct194-source-manifest-20261103`, whichever lands second:
   `pnpm vectors:check` and `test/channel-agent.test.ts` against CT-194's `secret-shape.ts`;
 - keeps both branches' rows in `docs/backlog.md` and in `docs/handoffs/README.md`.
 
+The conformance.md sentence "`FAC-SEM-155` to `FAC-SEM-161` are reserved by open branches (CT-194 and PR #235)" merges
+silently. Whichever of PR #235 and CT-194 lands before this branch, the lander of this branch rewrites it to name only
+the codes still held by an open branch (none once both are on main), and keeps CT-194's own sentence that
+`FAC-SEM-161` is unused.
+
+The conflict between CT-194 and DEC-0151 (in progress) in `src/secret-shape.ts`, and the source-rules tests, are those
+two branches' to settle; DEC-0150 is not party to them: this branch changes only `rawValues` there, in CT-194's lines.
+
 One line per sibling and per file it shares with this branch:
 
-- DEC-0151 (branch `agent/sqd-fields-20261104`): `docs/DECISIONS.md`; `docs/DOCMAP.md`, where DEC-0151's support quality
+- DEC-0151 (in progress, branch `agent/sqd-fields-20261104`): `docs/DECISIONS.md`; `docs/DOCMAP.md`, where DEC-0151's support quality
   row comes first and this branch's channel agent row after it; `docs/backlog.md`; `docs/handoffs/README.md`;
   `docs/specification/support-quality.md`; `docs/specification/identifiers.md`, where both add a bullet under "Compared
   as written" for `project:<slug>` and the second lander merges them into one. On the merged tree, run
-  `pnpm vectors:check` and `test/channel-agent.test.ts` against DEC-0151's final `src/secret-shape.ts` (no `/i`,
+  `pnpm vectors:check` and `test/channel-agent.test.ts` against the in-progress DEC-0151's final `src/secret-shape.ts` (no `/i`,
   provider prefixes in their canonical case, a strength rule for `sk-`).
 - PR #235: `docs/DECISIONS.md`; `docs/backlog.md`; conformance.md's next-free line; conformance.md's register, the
   `FAC-SEM-155` row before `156`.
@@ -121,17 +137,20 @@ One line per sibling and per file it shares with this branch:
   order after the bodies already on main: `grep -c '^\*\*Next free ID' docs/DECISIONS.md` prints 1. (On main, the
   heading order already holds one exception, DEC-0047 after DEC-0055; a merge adds none.)
 
-## When DEC-0150 and DEC-0151 land
+## When DEC-0150 and DEC-0151 (in progress) land
 
-The second of the two to land rewrites, in its own change:
+DEC-0151 is in progress. The second of the two to land rewrites, in its own change:
 
 - "DEC-0151 (CT-210), in progress" in `docs/specification/support-quality.md` (Not decided here) and in
-  `channel-agent.md#compatibility` (the daily quality payload), and DEC-0150's Compatibility sentence on section 5.1;
+  `channel-agent.md#compatibility` (the daily quality payload, with the shared-channel quality check), and DEC-0150's
+  Compatibility sentence on section 5.1;
+- "(the memory capability's pattern; DEC-0151, in progress on CT-210, proposes the same `projectAlias`)" in
+  `channel-agent.md` (the declaration) and DEC-0150 CA-2, which becomes a statement that the two patterns are one;
 - "DEC-0151 (CT-210, in progress) gives `support-quality-daily` payloads the same alias; once it lands, a reader joins
   a declaration to a project's payloads on `project:<slug>`" in `channel-agent.md` (the declaration), which becomes a
   statement that the reader joins them;
 - the note in `channel-agent.md` (What is checked, item 4) and DEC-0150 CA-5 that the shared detector finds an ordinary
-  hyphenated name starting with `sk-`: DEC-0151 anchors the detector with a boundary before provider prefixes, so the
+  hyphenated name starting with `sk-`: the in-progress DEC-0151 anchors the detector with a boundary before provider prefixes, so the
   note becomes stale; the advice not to start an id with `sk-` stays;
 - the two "Compared as written" bullets for `project:<slug>` in `docs/specification/identifiers.md`, merged into one;
 - an assertion in `test/channel-agent.test.ts` that the declaration's `project` pattern equals
@@ -140,20 +159,21 @@ The second of the two to land rewrites, in its own change:
 
 ## Checks actually run
 
-On the change after round 4's fixes, each exit code read separately, the 15-minute load average below 45 at each test
-run: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9935 tests passed and 1 skipped,
-branches 98.86 %, 11930 of 12067; `src/channel-agent.ts` 219 of 219, `src/secret-shape.ts` 47 of 47);
+On the change after round 5's fixes, each exit code read separately, the 15-minute load average below 45 at each test
+run: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9944 tests passed and 1 skipped,
+branches 98.86 %, 11959 of 12096; `src/channel-agent.ts` 248 of 248, `src/secret-shape.ts` 47 of 47);
 `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm privacy:check` with the
 organization index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (29 vector files match their generators).
 
-FAC-SEM-165's growth on the thread's processor time (five runs summed after a warm run), depth 8000 to 32000: 4.05 to
-4.12 for a chain of credential-shaped values and 3.76 to 5.10 for a chain of credential-shaped names (the test asserts
-below 6). Under `NODE_OPTIONS=--max-old-space-size=256`: a question route with 800 000 members gives one `FAC-SEM-162`
-(`maxProperties at /projects/0/question_route`) in 2289 ms; `extra: Array(2_000_000).fill(1)` and 1 000 000 unknown
-root members give one `FAC-SEM-162` each (162 ms and 2872 ms); chains of depth 20000 finish with 66 findings each; heap
-at most 202 MB, the inputs included. The organization's privacy check over the standard's copy alone: 0 findings. A
-`git grep` of the change for the three terms of the product described before neutralisation prints nothing. No U+2014
-in the added text.
+FAC-SEM-165's growth on the thread's processor time, depth 8000 to 32000: 3.87 for a chain of credential-shaped values
+and 4.16 for a chain of credential-shaped names (the test asserts below 6). The probe of 488 strings of 4096 characters
+of `eyJ` runs in under 500 ms (the test's bound), the budget stopping the reading. Under
+`NODE_OPTIONS=--max-old-space-size=256`: a question route with 800 000 members gives `FAC-SEM-162` (`maxProperties at
+/projects/0/question_route`) and one `FAC-SEM-165` saying the rest was not read, in 720 ms; 1 000 000 unknown root
+members give the same pair in 791 ms; `extra: Array(2_000_000).fill(1)` gives one `FAC-SEM-162` in 159 ms; chains of
+depth 20000 finish with 66 findings each; heap at most 202 MB, the inputs included. The organization's privacy check
+over the standard's copy alone: 0 findings. A `git grep` of the change for the three terms of the product described
+before neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
@@ -163,12 +183,16 @@ thread `b6820b97` (the coordinator posts it), listing the narrowings versus the 
 `FAC-SEM-162` members:
 
 - durations in days, hours, minutes and seconds only: no weeks, months or years;
-- a zero duration only for a source's `cadence` and `max_age`;
+- a zero duration only for a source's `cadence`; its `max_age` is above zero;
 - the time zone's grammar: an IANA name of one to three segments;
 - no run of 7 or more digits in an id, a channel's id, the side, a category code or a tier code (the project's
   `project:<slug>` keeps the registry alias pattern unchanged);
 - an owner is an id, so it holds no space; a recommendation is the board's opaque id, so it holds no colon;
   `spend_record` is a lower-case usage-report limit id;
-- a missing required member makes the whole declaration invalid, so a reader treats it as not declared;
+- a missing required member makes the whole declaration invalid, so a reader treats it as not declared, and a `null`
+  is refused wherever section 13.6 lists a member;
+- the coordinator asks the standard's owner to hold the observed per-project quality check for shared channels until
+  DEC-0151 (in progress) lands, since it reads missing there;
 - for each live producer, the members its current declaration fails (`FAC-SEM-162`'s places), read with
-  `pnpm validate` on its manifest or well-known answer.
+  `pnpm validate` on its manifest or well-known answer, and one adoption row per live producer, in its own backlog,
+  listing those places; the coordinator files them on the board at merge.

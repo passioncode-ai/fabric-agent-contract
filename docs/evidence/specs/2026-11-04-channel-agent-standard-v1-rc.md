@@ -6,7 +6,7 @@ product (its business, a customer fact and a tier's name) read as a product with
 premium customer and tier. Nothing else is changed. The standard's sections 0 and 14 and the texts of its decisions (D-1, D-2 and the rest) are
 the owner's and are not in the neutral copy. In the review log,
 "this repository" means the standard's owner, not this contract. The standard is owned outside this repository; this
-copy is not edited, and a later revision is a new copy beside it.
+copy is not edited further here, and a later revision is a new copy beside it.
 -->
 
 # Standard: an agent on a channel people write to
