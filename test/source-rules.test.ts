@@ -116,6 +116,20 @@ describe("the source-tree vectors (DEC-0149)", () => {
   });
 });
 
+describe("the hand-over's refusal details (DEC-0149)", () => {
+  it("each fit a delegation refusal's error.data.detail under the code source.md gives it", () => {
+    const page = readFileSync(path.join(root, "docs/specification/source.md"), "utf8");
+    const section = page.slice(page.indexOf("## Handing over"), page.indexOf("## Import"));
+    const details = [...new Set([...section.matchAll(/`((?:handover|decision|idempotency)-[a-z0-9-]+)`/g)].map((match) => match[1] as string))].filter((detail) => detail !== "decision-invalid");
+    expect(details).toEqual(expect.arrayContaining(["handover-needs-operator", "handover-needs-estate-route", "handover-declined", "handover-in-flight", "decision-ap2", "decision-without-target", "decision-target-unbound", "decision-consumed", "idempotency-conflict"]));
+    const codeOf = (detail: string) => (detail.startsWith("handover-in-flight") ? "unknown-state" : detail.startsWith("handover-") ? "operator-decision-required" : "decision-invalid");
+    for (const detail of details) {
+      const refusal = { error: { code: codeOf(detail), message: "refused", data: { detail } } };
+      expect(validateDocument(validator, `${SCHEMA_PREFIX}schemas/delegation-refusal.schema.json`, refusal).valid, detail).toBe(true);
+    }
+  });
+});
+
 describe("the semantic fixtures", () => {
   it("hold a positive and a negative case of each rule", () => {
     expect(semantic).toHaveLength(27);
@@ -719,7 +733,6 @@ describe("the rules over long lists (DEC-0149)", () => {
   ] as const)("reads %s with one entry far longer than the path grammar in time linear in its length", (_kind, check) => {
     const small = timed(() => check(2000));
     const large = timed(() => check(32_000));
-    expect(large).toBeLessThan(3000);
     expect(large / small).toBeLessThan(64);
   });
 
@@ -728,7 +741,6 @@ describe("the rules over long lists (DEC-0149)", () => {
     const paths = (size: number) => Array.from({ length: size }, (_, index) => `src/d${index % 97}/p${index}.ts`);
     const small = timed(() => patchPathsAllowed(manifestValue, paths(500)));
     const large = timed(() => patchPathsAllowed(manifestValue, paths(8000)));
-    expect(large).toBeLessThan(3000);
     expect(large / small).toBeLessThan(64);
   });
 
@@ -740,7 +752,6 @@ describe("the rules over long lists (DEC-0149)", () => {
     const small = timed(() => evaluateSemanticRules("source-tree", treeOf(4000)));
     const large = timed(() => evaluateSemanticRules("source-tree", treeOf(64_000)));
     expect(large / small).toBeLessThan(64);
-    expect(large).toBeLessThan(3000);
   }, 180_000);
 
   // At 1k to 16k entries the real manifest read about 9, an `include.filter` scan planted per include entry about 210.
@@ -750,7 +761,6 @@ describe("the rules over long lists (DEC-0149)", () => {
   ] as const)("reads %s in time linear in its lists", (_kind, check) => {
     const small = timed(() => check(1000));
     const large = timed(() => check(16_000));
-    expect(large).toBeLessThan(3000);
     expect(large / small).toBeLessThan(64);
   });
 });

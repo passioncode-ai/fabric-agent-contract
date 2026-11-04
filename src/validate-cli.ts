@@ -575,7 +575,15 @@ function checkPairs(run: Run, checked: Checked[], kindArg?: string): void {
     }
     // The pair was checked, so neither file keeps the note that it holds none.
     run.notes = run.notes.filter((note) => note.rule !== "note/pair" || (note.file !== source.file && note.file !== beside.file));
-    addFindings(run, source.file, evaluateSemanticRules("source-package", { source: source.value, package: beside.value }));
+    // The pair is a source check too: a fault in it adds nothing but one usage error naming the error only.
+    let findings: Finding[];
+    try {
+      findings = evaluateSemanticRules("source-package", { source: source.value, package: beside.value });
+    } catch (error) {
+      run.usage.push(`cannot check ${SOURCE_FILE}: ${errorName(error)}`);
+      continue;
+    }
+    addFindings(run, source.file, findings);
   }
 }
 
@@ -758,10 +766,9 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
   const { names, unreadable, folders } = gitNames(listed.stdout);
   // A name that is not UTF-8 is a usage error only where its leading folders that decode lie in the source as a whole
   // (an include folder holds them, no exclude folder does); any other is outside the source, never reached.
+  // They are collected here and said only once Git mode is kept: a walk that follows reads the folder instead.
   const inSourceFolder = sourceFolderTest(manifest);
-  for (const [at, position] of unreadable.entries()) {
-    if (inSourceFolder(folders[at] as string)) run.usage.push(`cannot read the name Git listed at position ${position}: it is not UTF-8`);
-  }
+  const unreadableLines = unreadable.flatMap((position, at) => (inSourceFolder(folders[at] as string) ? [`cannot read the name Git listed at position ${position}: it is not UTF-8`] : []));
   // The gitlinks the index records, in a call of their own: an untracked name never reads as an index entry.
   const staged = git(executable, folder, ["ls-files", "-z", "--stage"]);
   if (timedOut(staged)) return walked(late);
@@ -775,6 +782,7 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
   if (!paths.some((name) => isNested(name) || index.covers(name))) {
     return walked("Git lists no file under an include path here");
   }
+  run.usage.push(...unreadableLines);
   // The manifest is source whatever include says, and read whatever .gitignore says: a regular file Git leaves out is
   // added (DEC-0149).
   if (!paths.includes(SOURCE_FILE) && regularFile(path.join(folder, SOURCE_FILE)) && existsSync(path.join(folder, SOURCE_FILE))) paths.push(SOURCE_FILE);

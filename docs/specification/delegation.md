@@ -490,8 +490,8 @@ source is never another agent's key or vault slot at any tier ([spend policy](sp
 `_meta.decision` (or an accepted `approval/1`) as the operator's own, and refuses it without one
 `operator-decision-required`: inside the boundary the instruction is the authority, and the decision is how it travels
 ([service](service.md#actions) AP-2, DEC-0121). A call that carries the operator's mandate for its task instead is
-decided by it ([below](#the-operators-mandate), DEC-0125); a source hand-over takes neither an `approval/1` nor a
-decision without its exact target, as [source](source.md#handing-over) specifies (DEC-0149).
+decided by it ([below](#the-operators-mandate), DEC-0125); a source hand-over takes neither a mandate, an `approval/1` nor
+a decision without its exact target, as [source](source.md#handing-over) specifies (DEC-0149).
 
 ## The family and the agent network
 

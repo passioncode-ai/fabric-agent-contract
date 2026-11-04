@@ -92,7 +92,7 @@ The schema gives a store slot its `path` and refuses one on any other kind. `FAC
 a name or purpose shaped like a credential (read as `FAC-SEM-065` reads a package secret's, the shared detector's
 `secretValue`, whole-value `Bearer` included, so a slot's purpose packs cleanly), a manifest `description` shaped like
 one (read as prose: a provider key as the tree check reads one in a line, its own shapes `KEY_SHAPE_SOURCES` starting a
-word and holding no synthetic word, a JWT, a long run, or a bearer token inside the text, 12 or more token characters
+word and holding no synthetic word, a JWT (with no synthetic-word exception), a long run, or a bearer token inside the text, 12 or more token characters
 with a digit, never a whole-value `Bearer` branch, so "Bearer token for the board API" and "desk-booking-service-api"
 are prose there; the description and the tree check agree whatever the shared detector's key shapes become)
 (at `/description`) and a store path declared twice. A message
@@ -298,7 +298,8 @@ reads it.
 
 A package may carry `fabric.source.json` as an ordinary file, listed in `files[]` like any other: a packer that packs
 in place lists it and reads it for `secrets[]` and `state[]`. `pnpm validate <dir>` pairs a source manifest with a
-package only when both sit in the same folder, and checks them as the pair (`FAC-SEM-160`); `--kind source-package` on
+package only when both sit in the same folder, and checks them as the pair (`FAC-SEM-160`) whatever the manifest's
+schema answer, as the validator's other pairs do; `--kind source-package` on
 a folder checks that same pair too, and a folder with no `fabric.package.json` beside its manifest prints "the folder
 holds no fabric.package.json beside fabric.source.json, so no pair was checked (FAC-SEM-160)". A document, or another
 file of a folder, that holds no `{source, package}` prints a note that no pair was checked. Under `--kind
@@ -343,7 +344,10 @@ two forms, and in no other:
 - the service's own elicitation in the call's form: an MCP `elicitation/create` sent within the hand-over's `tools/call`,
   in form mode, under [C3.3](interop.md#c33-awaiting-a-choice)'s form constraints (`FAC-SEM-018`), never
   `input_required` on a Task or a job, answered by a person and accepted, whose message names the agent, the source
-  commit and the recipient.
+  commit and the recipient. A client that answers elicitations without showing them to a person (an SDK handler, a
+  headless session) declines a hand-over elicitation, or does not declare the elicitation capability for that call; the
+  service records the message it sent and the accept as the operator's word (the record of
+  [OA-6](delegation.md#one-approval-binds-all-the-operators-agents)).
 
 Everything else, except an invalid decision (below), is refused `operator-decision-required`: no word, a mandate (which
 counts as nothing, [MD-6](delegation.md#the-operators-mandate)), an `approval/1`, a declined elicitation, anything
@@ -367,12 +371,14 @@ token needs none ([DL-26](delegation.md#trust-tiers)).
   `decision-consumed`.
 - **No word.** A T0 or T1 caller with neither form and no decision gets `operator-decision-required` with the detail
   `handover-needs-operator`; a service that can elicit from that caller's client asks the operator instead, once per
-  call, and a declined, cancelled or unanswered elicitation is refused the same way
-  (`handover-needs-operator`) and not asked again within that call. A T2 caller gets
+  call; a cancelled or unanswered elicitation is refused the same way (`handover-needs-operator`) and not asked again
+  within that call. A person who declines gives the operator's no, refused `operator-decision-required` with its own
+  detail, `handover-declined`: the caller does not ask again within this task and reports to the coordinator. A T2 caller gets
   `operator-decision-required` with the detail `handover-needs-estate-route` whatever it carries, and is not asked: its decision is no decision (AP-2), and its remedy is that the operator acts through a T0
   or T1 route. A T2 caller that reaches the action has passed DL-13 with a delegation token (a caller no rule places is
   T2 by default, and one the relay cannot place is refused before the action, [DL-28](delegation.md#trust-tiers),
-  [machine calls](machine-calls.md#the-t1-binding-over-the-relay)), so the T2 case has this one code. The action checks these refusals before `mandateCovers`, so a mandate gets this rule's detail rather than
+  [machine calls](machine-calls.md#the-t1-binding-over-the-relay)), so the T2 case has this one code for the word; the
+  idempotency lookup still runs first, and its in-flight and conflict answers stand. The action checks these refusals before `mandateCovers`, so a mandate gets this rule's detail rather than
   one of MD-4's. The checks run in this order: for a caller that presents a delegation token, the token and the grant
   check (DL-13, DL-21); then the idempotency lookup; then the word.
 - **Consumption.** A word is consumed when the hand-over's effect begins, by one atomic check-and-record, never on a

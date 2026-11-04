@@ -142,7 +142,11 @@ source, what never travels with it, the check before a source export, and how a 
   rewritten, with the operator's GitHub Support step and CT-211 as a merge condition; the in-call elicitation form; a
   gitlink decided by the index whatever sits at it or above it; the description's keys read as the tree check reads
   them; an excluded folder never walked; the timing tests as ratios to the same text at a sixteenth; the glossary's
-  Source hand-over) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  Source hand-over) answered as decided; round 26 (CT-211's second check on `knowledge/principles.md`; CT-215's pointer in the merge
+  notes; a client that cannot show an elicitation to a person declines it; the in-call elicitation scoped to the source
+  hand-over; `handover-declined` for the person's no; one T2 code for the word; DL-26 naming the mandate; unreadable
+  names said only once Git mode is kept; the pair's fault caught; the folder pair whatever the schema answer; no-hang
+  bounds widened and absolute CPU bounds dropped) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -150,7 +154,8 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Open
 
-- CT-205 on PR #236 must name the hand-over exclusion beside MD-6 and OA-5 when it widens task-wide mandates.
+- CT-205 (from PR #236, merged) gets the hand-over exclusion when main is merged in: see the CT-205 row edit and its
+  grep in the merge notes below.
 - Two changes outside source checks. First, a plain folder run (`pnpm validate <dir>`) skips a `.json` entry that
   is a FIFO, a socket or a device with a note naming it, `not a file` (before, a FIFO hung the run). Second, the help
   text: the USAGE block gains the source kinds (`--kind source-tree`, `--kind source-package`) and its exit line is
@@ -236,7 +241,9 @@ remaining steps, in order:
 4. Run the next rounds of the readings (unit, seam, product) on that merge until two clean rounds.
 5. A merge condition: CT-211's knowledge-base amendment (fabric-workspace `knowledge/agents-first.md` items 5 and 7,
    `knowledge/principles.md` section 7) lands in fabric-workspace before or together with this merge, never after;
-   check with `git show origin/main:knowledge/agents-first.md | grep -n 'source hand-over'` there.
+   check there with `git show origin/main:knowledge/agents-first.md | grep -n 'source hand-over'` and `git show
+   origin/main:knowledge/principles.md | grep -n 'source hand-over'`, each printing at least one line before the
+   merge.
 6. Make the acceptance edit in the PR before it merges, as DEC-0147 did: DEC-0149's status line, CT-194 done, this
    handoff's status and the `docs/handoffs/README.md` row.
 7. A human gate: asking GitHub to remove the review branch's unreachable commits and their cached views is the
@@ -287,7 +294,10 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   #236 landed first, so this branch adds to CT-205's row, when main is merged in, that a source hand-over is never
   covered by a task-wide mandate ([source](../specification/source.md#handing-over)); check with `grep '^| CT-205 '
   docs/backlog.md | grep -c 'source hand-over'`, which prints 1 after that edit. CT-211 carries the same line for the
-  knowledge base.
+  knowledge base. CT-215 (on main) gets the same pointer in its part (c): a source hand-over is never covered by a
+  relayed mandate and needs the operator's word per act ([source](../specification/source.md#handing-over)), so a
+  launched session with no person at its client takes it only as a decision with the exact target; check with `grep
+  '^| CT-215 ' docs/backlog.md | grep -c 'source hand-over'`, which prints 1 after the merge.
 - `src/secret-shape.ts` conflicts textually with DEC-0151 (`origin/agent/sqd-fields-20261104`). The resolution: this
   branch's JWT helpers (`jwtSpans`, `hasJwt`), then DEC-0151's doc comment and `SECRET_VALUE` line as pushed (being
   rewritten as a portable consuming-group boundary plus a strength rule for `sk-`). Its copy in `src/session-handoff.ts`

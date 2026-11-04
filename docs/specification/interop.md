@@ -273,9 +273,10 @@ A job or call that needs a person returns `input_required` with MCP
 elicitation `inputRequests` in **form mode**; a choice is a single-select enum with titles
 (`oneOf: [{const, title}]`). Fabric maps it to an interaction point (ADR-0017) and answers with
 `tasks/update` (Task) or `fabric.job.get` + `inputResponses` (job handle). **FAC-SEM-018** form
-mode never requests a secret (MCP rule); secrets use URL mode. A synchronous call may instead elicit in-call: an MCP
-`elicitation/create` sent within its own `tools/call`, in form mode under these constraints, as a source hand-over
-does ([source](source.md#handing-over), DEC-0149). A job whose start call carried the operator's mandate
+mode never requests a secret (MCP rule); secrets use URL mode. A source hand-over, one synchronous call, elicits in-call instead:
+an MCP `elicitation/create` sent within its own `tools/call`, in form mode under these constraints
+([source](source.md#handing-over), DEC-0149). Every other relayed action keeps the input-request route, and an in-call
+answer to any other relayed action carries no decision. A job whose start call carried the operator's mandate
 for its task reads it at its own approval step: a step the mandate covers raises no input request and goes on as the
 operator's decision; a step it does not cover waits `input_required` as here, its message naming the part not covered,
 and its answer may carry a mandate that covers it in the `_meta.mandate` of the `fabric.job.get` call
