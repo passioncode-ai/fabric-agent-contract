@@ -231,11 +231,12 @@ The landing continues on `agent/ct194-source-manifest-v2-20261104` (step 1 is do
 on the merge base `d1b905ee`, the review branch's remote ref deleted; never push the review branch again). The
 remaining steps, in order:
 
-1. Merge the current `origin/main` (`7f6bc647` now, with #236, CT-215 and CT-216) into the fresh branch as the merge
-   notes below say, refreshing the sibling heads.
+1. Merge the current `origin/main` (with #236, CT-215 and CT-216; re-measure its head at landing) into the fresh branch
+   as the merge notes below say, refreshing the sibling heads.
 2. Re-run the full gate on that merge and cite its commit in this handoff.
 3. Open the PR from the fresh branch and dispatch the CI workflow once on it (`gh workflow run ci.yml --ref
-   agent/ct194-source-manifest-v2-20261104`); read its ubuntu and windows jobs, for the platform-only tests.
+   agent/ct194-source-manifest-v2-20261104`); read every matrix job (ubuntu 22 and 24, windows, and macos since
+   #238): the Linux-only non-UTF-8 test and the Windows-only `git.exe` test have never run.
 4. Run the next rounds of the readings (unit, seam, product) on that merge until two clean rounds.
 5. A merge condition: CT-211's knowledge-base amendment (fabric-workspace `knowledge/agents-first.md` items 5 and 7,
    `knowledge/principles.md` section 7) lands in fabric-workspace before or together with this merge, never after;
@@ -256,10 +257,10 @@ At their next re-pin, the consumers that vendor a protocol table (a
 private product's `src/contract/vendor/protocol-revisions.ts`, a deployment template's
 `src/fabric/fabric-protocols.mjs`, another server's `src/fabric/fabric-protocols.mjs`) add `fabric-source`.
 
-PR #236 is merged (main `3bd332ed`, then `7f6bc647`). The chain of the open branches that touch the same registers is
-PR #235 (DEC-0148), DEC-0149 (this branch), then `origin/agent/channel-agent-ext-v3-20261104` (DEC-0150, head
-`5978ebec` now; earlier names without `-v3` are gone) and `origin/agent/sqd-fields-20261104` (DEC-0151, head `c3b900b8`
-now). Refresh the sibling heads at landing. These two reserved DEC-0150, DEC-0151 and FAC-SEM-162 to FAC-SEM-165.
+PR #236 is merged (main has moved since; its Test row in `AGENTS.md` now says Linux, Windows and macOS). The chain of
+the open branches that touch the same registers is PR #235 (DEC-0148), DEC-0149 (this branch), then
+`origin/agent/channel-agent-ext-v3-20261104` (DEC-0150; earlier names without `-v3` are gone) and
+`origin/agent/sqd-fields-20261104` (DEC-0151). Every head here is re-measured at landing. These two reserved DEC-0150, DEC-0151 and FAC-SEM-162 to FAC-SEM-165.
 The channel-agent branch adds `schemas/service-channel-agent-extension.schema.json` and edits `src/semantic-rules.ts`,
 `src/protocol-revisions.ts`, `vitest.config.ts`, `fixtures/catalogue.json` and `src/secret-shape.ts` (`rawValues` only);
 the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds no schema, and edits
@@ -267,8 +268,10 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
 
 - The schema count in `test/schema-compilation.test.ts` merges silently to 147: set it to 148.
 - Where DEC-0150 and DEC-0151 meet each other, `docs/DOCMAP.md` and `docs/specification/support-quality.md` conflict:
-  keep DEC-0151's support-quality row and its thresholds bullet, and DEC-0150's channel-agent row and its
-  compatibility bullet. The file lists in these notes are refreshed at landing against the siblings' heads then.
+  follow DEC-0151's meeting list. Keep DEC-0151's thresholds line and drop the "Not decided here" bullet; in DOCMAP,
+  DEC-0151's support-quality row first, then DEC-0150's channel-agent row. Check: `grep -c 'DEC-0151 (in progress)
+  lands' docs/specification/support-quality.md` prints 0 on the merged tree. The file lists in these notes are
+  refreshed at landing against the siblings' heads then.
 - `docs/backlog.md` (against all four siblings) and `docs/handoffs/README.md` (against DEC-0150 and DEC-0151)
   conflict as appends at the tail: keep both sides; the merged backlog tail is kept in id order, CT-204 to CT-216, the
   handoffs index in the merge order. DEC-0150's small edits to `src/validate-cli.ts`
@@ -296,6 +299,11 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   relayed mandate and needs the operator's word per act ([source](../specification/source.md#handing-over)), so a
   launched session with no person at its client takes it only as a decision with the exact target; check with `grep
   '^| CT-215 ' docs/backlog.md | grep -c 'source hand-over'`, which prints 1 after the merge.
+- CT-212 (this branch's row): when DEC-0150 is merged in, add `src/channel-agent.ts` `keyShaped` to the bounded callers
+  of `JWT_SHAPE` the row names.
+- The adapter re-vendors the shared detector before or with its `pack` writing `secrets[]` from slots (CT-207); until
+  then a slot purpose `FAC-SEM-156` accepts, such as `sk-learn-experiments-2026`, is refused by its pack, which fails
+  safe.
 - `src/secret-shape.ts` conflicts textually with DEC-0151 (`origin/agent/sqd-fields-20261104`). The resolution: this
   branch's JWT helpers (`jwtSpans`, `hasJwt`), then DEC-0151's doc comment and `SECRET_VALUE` line as pushed (being
   rewritten as a portable consuming-group boundary plus a strength rule for `sk-`). Its copy in `src/session-handoff.ts`
@@ -308,5 +316,5 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   them equal compares the two rules, not fixed verdicts. DEC-0151's instruction to bound the tree check's key shapes is
   withdrawn; the coordinator tells that branch.
 - The chain #235, DEC-0149, DEC-0150, DEC-0151 (with #236, now merged) was gated green at review-branch heads in
-  rounds 19 and 21; re-check it at the merged heads before landing, since each branch has moved since (the siblings to
-  `5978ebec` and `c3b900b8`, this one to the fresh branch).
+  rounds 19 and 21, and the round 26 seam reading merged it again green; re-check it at the merged heads before
+  landing, re-measured then.

@@ -9215,12 +9215,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adds the MD-6 entry once the hand-over has an action id).
 - **Compatibility:** additive. `contractVersion` stays `0.1.0`; `fabric-source/1` joins the protocol register; no
   existing schema, kind, code or vector changes. A repository without `fabric.source.json` is untouched.
-- **Consequences / affects:** `schemas/fabric-source.schema.json`; `src/source-rules.ts`, `src/semantic-rules.ts`,
+- **Consequences / affects:** `schemas/fabric-source.schema.json`; `src/source-rules.ts`, `src/secret-shape.ts` (`jwtSpans`,
+  `hasJwt`, `rawValues` appending in place; no verdict changed; Fabric vendors it under a sha256 pin, the adapter ports
+  it), `src/semantic-rules.ts`,
   `src/semantic-kinds.ts`, `src/protocol-revisions.ts`, `src/validator.ts` (instance-free schema messages), `src/validate-cli.ts` (`--kind source-tree`, Git and walk
   modes, relative output, the pair, the name rule); `tools/vectors/source-tree.ts` and
   `fixtures/vectors/source-tree.json`; `fixtures/positive/fabric-source-*.json`, `fixtures/negative/fabric-source-*.json`,
   `fixtures/semantic/source-*.json`, `fixtures/catalogue.json`; `test/source-rules.test.ts`,
-  `test/validate-cli.test.ts`, `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
+  `test/validate-cli.test.ts`, `test/validate-cli-faults.test.ts`, `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
   `test/schema-compilation.test.ts`, `test/protocol-revisions.test.ts`, `test/validator.test.ts`; `vitest.config.ts` (the floors, `src/validator.ts` added); `docs/specification/source.md` (new), `docs/guides/connecting-compatible-agents.md` (the inference row and the pair),
   `package.md` (secrets and state from the source's slots, a copy without state), `proposals.md` (a private agent's
   source), `delegation.md` (MD-5, MD-6, DL-18's order of checks, DL-26's exception, OA-5), `governance-and-roles.md` (external effects), `conformance.md` (the register,
