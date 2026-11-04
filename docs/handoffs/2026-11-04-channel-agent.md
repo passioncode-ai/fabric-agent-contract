@@ -337,13 +337,16 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
-On the change after round 13's fixes, each exit code read separately, the 15-minute load average below 45 at the
-coverage run (37.74): `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 10145 tests passed
-and 1 skipped, branches 98.88 %, 12193 of 12330; `src/channel-agent.ts` 482 of 482, `src/secret-shape.ts` 47 of 47);
+On the change after round 14's fixes, each exit code read separately, the 15-minute load average below 45 at the
+coverage run (21.36): `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 10153 tests passed
+and 1 skipped, branches 98.89 %, 12218 of 12355; `src/channel-agent.ts` 507 of 507, `src/secret-shape.ts` 47 of 47);
 `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm privacy:check` with the
 organization index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (29 vector files match their generators);
-`perl -0ne 'print scalar(() = /row to be\s+filed;/g), "\n"' docs/handoffs/2026-11-04-channel-agent.md` prints 0.
-The timing tests hold the test thread's processor time against prose read to the budget in the same run. The URL-shaped strings (a tab, a carriage return or a line feed inside `eyJ`, `-%73k-` in a query) and a query of many
+`perl -0ne 'print scalar(() = /row to be\s+filed;/g), "\n"' docs/handoffs/2026-11-04-channel-agent.md` prints 0; the
+`git grep` checks for the nullable wording, the detector-bound wording and the prefix sentence print nothing. On the
+tree `git merge-tree` writes for this branch and `origin/agent/sqd-fields-20261104` (conflicts only in docs: DECISIONS,
+DOCMAP, backlog, the handoffs README, support-quality.md), `vitest run test/channel-agent.test.ts -t rename` passes
+(3 tests) and `test/channel-agent.test.ts` with `test/secret-shape.test.ts` passes (354 tests). The timing tests hold the test thread's processor time against prose read to the budget in the same run. The URL-shaped strings (a tab, a carriage return or a line feed inside `eyJ`, `-%73k-` in a query) and a query of many
 pieces each run within twice prose's thread time plus 20 ms; 300 strings of 2000 astral code points are read whole;
 the budget's edge falls where the count says, in plain and in astral names. The organization's privacy check over the
 standard's copy alone: 0 findings. A `git grep` of the change for the three terms of the product described before
