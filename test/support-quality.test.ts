@@ -176,10 +176,10 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
     value.arrived = null;
     value.open.awaitingApproval = null;
     value.outcomes.expired = null;
-    value.autonomy.answered = null;
+    value.autonomy.answeredTickets = null;
     value.stability.fallbackTickets = null;
-    expect(paths(value).sort()).toEqual(["FAC-SEM-126 /arrived", "FAC-SEM-126 /autonomy/answered", "FAC-SEM-126 /open/awaitingApproval", "FAC-SEM-126 /outcomes/expired", "FAC-SEM-126 /stability/fallbackTickets"]);
-    value.notMeasured = [...value.notMeasured, "arrived", "open.awaitingApproval", "outcomes.expired", "autonomy.answered", "stability.fallbackTickets"];
+    expect(paths(value).sort()).toEqual(["FAC-SEM-126 /arrived", "FAC-SEM-126 /autonomy/answeredTickets", "FAC-SEM-126 /open/awaitingApproval", "FAC-SEM-126 /outcomes/expired", "FAC-SEM-126 /stability/fallbackTickets"]);
+    value.notMeasured = [...value.notMeasured, "arrived", "open.awaitingApproval", "outcomes.expired", "autonomy.answeredTickets", "stability.fallbackTickets"];
     expect(paths(value)).toEqual([]);
     const zero = tickets();
     zero.notMeasured = [...zero.notMeasured, "notATicket", "outcomes.promotions", "stability.fallbackTurns"];

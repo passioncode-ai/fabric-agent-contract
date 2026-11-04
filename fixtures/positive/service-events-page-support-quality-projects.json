@@ -78,7 +78,7 @@
             "toPersonInability": 7,
             "queueOldestMinutes": 45,
             "queueSlaMinutes": 240,
-            "answered": 20
+            "answeredTickets": 20
           }
         }
       }
@@ -161,7 +161,7 @@
             "toPersonInability": 7,
             "queueOldestMinutes": 45,
             "queueSlaMinutes": 240,
-            "answered": 7
+            "answeredTickets": 7
           }
         }
       }

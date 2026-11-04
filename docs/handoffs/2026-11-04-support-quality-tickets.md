@@ -11,7 +11,7 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 - DEC-0151 (proposed), [support quality](../specification/support-quality.md#the-ticket-counts-dec-0151): the optional
   `arrived`, `ended`, `notATicket`, `project` (`project:<slug>`), `open {handedOpen, questionOpen, awaitingCustomer,
   awaitingApproval}`, `outcomes {handoffsClosedByPerson, referred, answeredElsewhere, noReplyOwed, customerSilent,
-  expiredByDecision, expired, unanswered, firstReplyLate, promotions}`, `autonomy.answered`, `stability.fallbackTurns`
+  expiredByDecision, expired, unanswered, firstReplyLate, promotions}`, `autonomy.answeredTickets`, `stability.fallbackTurns`
   and `fallbackTickets`; the `notMeasured` pattern admits digits in the metric part only; the channel agent standard's
   seven channel kinds mapped onto `/1`'s four channels.
 - `src/support-quality-rules.ts`: FAC-SEM-126's not-measured rule over the new members (one helper serves the families,
@@ -45,7 +45,7 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   `fixtures/positive/service-events-page-support-quality-sk-slug.json`); "no ids" names the registry alias as its one
   exception in the schema, the producer row and DEC-0095's annotation (which also says DEC-0151 narrows its items 1 and
   2); FAC-SEM-126's autonomy message names the three members. The coordinator's risk decisions R1 to R10 applied: no
-  "to a person" ticket share from the turn counts; `autonomy.answered` from the predecessor only when its `answered`
+  "to a person" ticket share from the turn counts; `autonomy.answeredTickets` from the predecessor only when its `answered`
   already holds the answered-after-question tickets; the interim first-reply day (`null`, unnamed,
   `fixtures/semantic/support-quality-daily-first-reply-interim.json`); a single-project producer omits `project`, a
   merged day reruns as first published; a day's calibration identical per project, never summed; identifiers.md's
@@ -171,7 +171,7 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   day, channel and, once adopted, project, and DEC-0095's annotation adds that a channel holding two projects' tickets
   publishes nothing before adoption; rule 1 counts only projects whose tickets enter `/1` (reversing round 10's
   choice for a left-out kind); adoption is one-way, and a producer with no registry alias never names `project`;
-  CT-210 (d) asks the owner to mark `autonomy.answered` and `stability.fallbackTurns` deferred and says the withholding
+  CT-210 (d) asks the owner to mark `autonomy.answeredTickets` and `stability.fallbackTurns` deferred and says the withholding
   starts at the merge; CT-210 (f) gives the DEC-0095 confirmation an owner; a day without `project` stays out of side
   summaries; the example aliases use neutral slugs; an alias read as a credential leaves its entry out of the
   declaration until the registry changes it (the agent never invents an alias).
@@ -219,7 +219,32 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   DEC-0144 is annotated with rule 6; the reader's side rule moves from "Not decided here" into rule 5; the DOCMAP row
   names the project.
 
+- Before round 15 (the coordinator's decision on a producer's board message `5a1334d1`, thread `b6820b97`): the
+  optional ticket count `autonomy.answered` is renamed `autonomy.answeredTickets` in the schema (its member and the
+  `outcomes` description), the support quality page, DEC-0151 (item 1, Alternatives, Compatibility, Source), the
+  conformance producer row, `src/support-quality-rules.ts`'s comment, the tests, the fixtures that carry it (two
+  positive, five negative, four semantic, two events pages) and CT-210, because the asker's v2 shape already has
+  `autonomy.answered` counting turns. DEC-0151's Compatibility states: `/1` never reuses a v2 field name with another
+  unit; a ticket count is named for tickets. The v2-move bullet of "Not decided here" says v2's `autonomy.answered`
+  has no `/1` member of that name.
+- The collision check, by name, of every other new DEC-0151 member against the v2 fields: the evidence is the
+  channel agent standard's section 5.1 table (DEC-0150's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`
+  at `388f2b42`), which marks every member new except `autonomy.answered` and
+  `stability.fallbackTurns`, the two it treats as present in the producer's v2 shape. Checked: `arrived`, `ended`,
+  `notATicket`, `open` (`handedOpen`, `questionOpen`, `awaitingCustomer`, `awaitingApproval`), `outcomes`
+  (`handoffsClosedByPerson`, `referred`, `answeredElsewhere`, `noReplyOwed`, `customerSilent`, `expiredByDecision`,
+  `expired`, `unanswered`, `firstReplyLate`, `promotions`) and `stability.fallbackTickets`: all marked new, no v2 name.
+  `stability.fallbackTurns` is a v2 name: a turn count in both by its name, but its v2 meaning differs (round 1's D10,
+  on the page's v2-move bullet), and v2's own definition is not in this repository, so whether its unit is the same
+  is not proven here: an open item below. `project` is not in the table (v2 is under its own URN; CT-103 names no v2
+  `project`). `/1`'s existing `autonomy` and `stability` members were not renamed.
+
 ## Open
+
+- `stability.fallbackTurns` shares its name with a v2 field whose meaning differs (above): the coordinator decides
+  whether `/1` keeps the name (a turn count, as the channel agent standard's table names it) or renames it as it did
+  `autonomy.answered`; the board thread `b6820b97` can confirm v2's unit. Until then the page tells a reader to map it
+  explicitly, never by name.
 
 - Two clean rounds of blind readings, then merge (the branch is pushed, no pull request yet).
 - On DEC-0151's merge: close CT-129 (fixed by item 3) with its receipt.
@@ -228,7 +253,8 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   `project` and a withheld channel; from adoption on a project withheld for its alias until the registry renames it, and
   then its kept days published late under the new alias); the withholding starts at DEC-0151's merge whatever the
   counts, so that acceptance is owed before any producer on the standard has a shared channel; section 5.1 says `/1`
-  takes the escalation counts in turns and the ticket counts travel by the signal server, and marks `autonomy.answered`
+  takes the escalation counts in turns and the ticket counts travel by the signal server, names the ticket count
+  `autonomy.answeredTickets` (its `autonomy.answered` row is v2's turn count, which `/1` does not reuse) and marks it
   and `stability.fallbackTurns` deferred like its '(new)' fields; and the team-chat note. It adds: the period is the
   event's day, and a producer's adoption is marked by its first published day that names `project` (a rule-9 project
   never names one), so the check accepts both lists by that marker; section 5.1 carries `project` with rules 1 and 2;
@@ -353,6 +379,9 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these, at the DEC-015
 move and are reworded between its rounds, so this list names each by its subject and place, and DEC-0150's own list
 (its handoff's section on meeting DEC-0151) locates the exact sentence at that head; last read at `388f2b42`:
 
+- `docs/specification/channel-agent.md`, the daily-payload bullet's member list (it names `autonomy.answered` among the
+  members `/1` lacks): the rewritten bullet names `autonomy.answeredTickets`, and says section 5.1's `autonomy.answered`
+  row is v2's turn count, which `/1` does not reuse.
 - `docs/specification/channel-agent.md`, the daily-payload bullet ("**The daily quality payload.**", in the compatibility
   section): it becomes a pointer to DEC-0151 and to [support quality](../specification/support-quality.md)'s channel
   kinds table and project rules, and says that the escalation counts (`autonomy.toPersonPolicy`, `toPersonInability`)
@@ -457,6 +486,9 @@ as history and are not edited.
 
 ## Decisions taken here
 
+- The ticket count of answered tickets is `autonomy.answeredTickets`, not `autonomy.answered` (the coordinator's
+  decision before round 15): `/1` never reuses a v2 field name with another unit.
+
 - New members are optional one by one (a producer from before DEC-0151 carries none of them); `open` and `outcomes`
   are never empty objects, as `checks` and `calibrationChecks` are not; `project` is never `null` (absent before every
   reader has adopted DEC-0151, named on every event after; a day without it is never attributed to a project).
@@ -465,6 +497,14 @@ as history and are not edited.
   left to the channel agent standard (support-quality.md, "Not decided here").
 
 ## Checks actually run
+
+After the `autonomy.answeredTickets` rename (the commit that carries this entry), each exit code read separately:
+`pnpm exec tsc --noEmit -p .` 0; `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0; `pnpm privacy:check` with the
+organization's index 0; `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files match); `vitest run` on the 16 touched
+or dependent test files (support quality, fixtures, semantic rules and kinds, validate CLI, the service and events
+tests, the session-handoff and secret-shape tests, folder attribution, the docs check) 0 (3303 passed, 1 skipped).
+The full run with coverage is owed: the 15-minute load was 90.89, above the 45 the heavy-run rule allows (18 GB free).
+No U+2014 in the lines added since `d1b905ee`, and no look-behind in either copy.
 
 On the round-14 head (the commit that carries this entry), each exit code read separately: `pnpm exec tsc --noEmit -p .`
 0; `pnpm vitest run --coverage` 0 (109 files, 9844 tests passed, 1 skipped, 24.91 s; under the shared heavy-run lock,
