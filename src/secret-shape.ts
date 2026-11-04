@@ -55,11 +55,14 @@ export function credentialName(name: string): boolean {
 export const JWT_SHAPE = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]*/;
 /**
  * A value that says it is a credential, or a provider key's shape (OpenAI, GitHub, Slack, AWS, GitLab). A prefix
- * counts only where no ASCII letter or digit stands right before it, or right after a percent-escape (`%22`) or a
- * backslash escape (`\n`, `\"`, `\u0022`) (DEC-0151): `project:helpdesk-customer-support` holds `sk-` inside a word
- * and is no key; a key glued right after a letter or digit is knowingly not found.
+ * counts only at the start, after a character that is no ASCII letter or digit, or after a percent-escape (`%22`) or a
+ * backslash escape (`\n`, `\"`, `\u0022`), matched as a consuming group so a port without look-behind reads it the
+ * same (DEC-0151); a key glued right after a letter or digit is knowingly not found. An `sk-` key holds a digit and
+ * either an upper-case letter or 32 or more characters, as `src/connections.ts` asks; under this pattern's `i` flag the
+ * upper-case test admits any letter. So `project:helpdesk-customer-support` and `project:sk-learn-experiments` are no
+ * keys, and `sk-or-v1-` with 64 hex digits is one.
  */
-export const SECRET_VALUE = /(^bearer\s.+|(?:(?<![A-Za-z0-9])|(?<=%[0-9A-Fa-f]{2})|(?<=\\[nrt"'])|(?<=\\u[0-9A-Fa-f]{4}))(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}))/i;
+export const SECRET_VALUE = /(^bearer\s.+|(?:^|[^A-Za-z0-9]|%[0-9A-Fa-f]{2}|\\[nrt"']|\\u[0-9A-Fa-f]{4})(?:sk-(?=[A-Za-z0-9_-]*\d)(?:(?=[A-Za-z0-9_-]*[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}))/i;
 /**
  * A long secret: 40 or more characters of base64 or base64url (`+`, `/`, `=`, `-`, `_` included), mixing upper case,
  * lower case and digits. A hex digest is lower case and passes.

@@ -9101,22 +9101,26 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      calibrated judge and rubric; a project's event judged by another judge, or not judged, carries none, and a reader
      reads calibration per project's event, never summing or copying it across projects. The top level then holds 19
      members, inside DEC-0070's 32.
-  7. The shared credential detector (`SECRET_VALUE` in `src/secret-shape.ts`, and its copy in `src/session-handoff.ts`)
-     takes a provider key's prefix (`sk-`, `gh?_`, `xox?-`, `AKIA`, `glpat-`) only where no ASCII letter or digit
-     stands right before it, or right after a percent-escape (`%22`) or a backslash escape (`\n`, `\t`, `\r`, a
-     backslash and a quote, `\u0022`): `project:helpdesk-customer-support` holds `sk-` inside a word and is no key. A
-     key at the start of a value, after a space, a quote, `=`, `:`, a `Bearer` and its space, or such an escape is found
-     as before; a key glued directly after an ASCII letter or digit is knowingly no longer found. The detector stays
-     strict for an alias: one whose slug holds a provider prefix at a word start (after `-`, `_`, `.`, `:` or at its
-     start) followed by enough key characters, such as `project:sk-learn-experiments`, is read as a credential, since a
-     lower-case `sk-or-v1-` hex key fits the alias grammar. The registry does not issue such an alias, and a producer
-     whose alias is read so publishes nothing for that channel until its alias changes.
+  7. The shared credential detector (`SECRET_VALUE` in `src/secret-shape.ts`, and its identical copy in
+     `src/session-handoff.ts`) takes a provider key's prefix (`sk-`, `gh?_`, `xox?-`, `AKIA`, `glpat-`) only at the
+     start of a value, after a character that is no ASCII letter or digit, or after a percent-escape (`%22`) or a
+     backslash escape (`\n`, `\t`, `\r`, a backslash and a quote, `\u0022`). The boundary is a consuming group, not a
+     look-behind, so a port without look-behind (a Rust port, an older browser) reads it the same; `RegExp.test`
+     answers as a look-behind would. A key glued directly after an ASCII letter or digit is knowingly no longer found.
+     An `sk-` key also needs what `src/connections.ts` asks of one: a digit, and either an upper-case letter or 32 or
+     more characters (under the pattern's `i` flag the upper-case test admits any letter), so
+     `project:helpdesk-customer-support`, `project:sk-learn-experiments` and `project:sk-hynix-customer-care` are no
+     keys, while a mixed-case key, an `sk-proj-` key and `sk-or-v1-` with 64 lower-case hex digits still are, in every
+     position. The residual: an alias whose slug word starts with another provider prefix followed by enough key
+     characters (`project:ghp_customerservicedeskabcdef`) is read as a credential; the registry does not issue one, and
+     a producer whose alias is read so publishes nothing for that channel until its alias changes.
 - **Why:** the channel agent standard's daily report counts tickets on its signal server and checks each agent's feed
   against it; one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that
   home before any producer may send them. The digit fixes a rule the schema made impossible to keep. The registry
   alias, not the board's server-issued id, is how the channel agent declaration names a project, so one name joins the
   declaration to the days; its pattern also refuses a long mixed-case id, which FAC-SEM-101 reads as a credential,
-  though an alias holding a provider prefix at a word start is still read as one (item 7).
+  and item 7 lets an `sk-` slug word pass, though a slug word that starts with another provider prefix is still read
+  as one.
 - **Alternatives considered:** the outcome counts at the top level, as the channel agent standard's field table lists
   them (19 top members would become 28, the `outcomes` object giving way to its ten members, inside DEC-0070's 32, but outcomes mixed with the payload's own facts leave
   little room for a later revision; one `outcomes` object keeps them together and the top level at 19); a sum rule
@@ -9140,11 +9144,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `notMeasured` is reported as not a metric, and the autonomy sum now reads "the autonomy outcomes
   (resolvedWithoutPerson, toPersonPolicy, toPersonInability) are more than the turns". Item 7 makes every rule that
   uses the shared detector, `FAC-SEM-101` and DEC-0150's `FAC-SEM-165` among them, accept strictly more: a value it
-  finds is one the earlier pattern found too (`test/secret-shape.test.ts`), and no vector file changes. Fabric, which
+  finds is one the earlier pattern found too (`test/secret-shape.test.ts`). One vector input changes:
+  `fixtures/vectors/folder-attribution.json`'s case "AT-15: a remote whose kept part still has a secret's shape records
+  no origin" held a digit-free `sk-` user, which the `sk-` strength no longer reads as a key; its user now holds a digit
+  and an upper-case letter, so the case keeps testing what it names, and a port re-vendors that file. Fabric, which
   vendors `src/session-handoff.ts`, re-vendors it to find the same. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/support-quality-daily.schema.json` (also the `calibration` description DEC-0144
   left to correct), `src/support-quality-rules.ts`, `test/support-quality.test.ts`; `src/secret-shape.ts`,
   `src/session-handoff.ts`, `src/connections.ts` (a comment), `test/secret-shape.test.ts`,
+  `test/session-handoff-review.test.ts` (its SH-9 key now holds a digit and an upper-case letter),
+  `tools/vectors/folder-attribution.ts` and `fixtures/vectors/folder-attribution.json` (one AT-15 input),
   `fixtures/positive/service-events-page-support-quality-sk-slug.json`;
   `fixtures/positive/support-quality-daily-tickets.json`, `-first-reply-unmeasured.json` and `-project.json`,
   `fixtures/positive/service-events-page-support-quality-projects.json`, six `fixtures/negative/support-quality-daily-*`

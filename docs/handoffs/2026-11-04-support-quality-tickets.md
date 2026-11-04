@@ -55,8 +55,15 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   coordinator's decisions applied: the boundary also lets a prefix follow a percent-escape or a backslash escape (a key
   glued after an ASCII letter or digit is knowingly not found); an absent `project` names the service's only project
   at the time of the day, never re-attributed; CT-210 (d) asks the channel agent standard's owner to write the turn unit
-  and the signal server's ticket counts into section 5.1. A sweep of 200000 generated values found 0 that the new
-  pattern finds and the earlier did not (29078 both, 64439 only the earlier).
+  and the signal server's ticket counts into section 5.1. The seam reading of round 3 then replaced the boundary: a
+  consuming group instead of a look-behind (portable to a port without look-behind), and an `sk-` key needs a digit
+  and an upper-case letter or 32 characters, as `src/connections.ts` asks, so an `sk-` slug word passes and only a
+  slug word starting with another provider prefix is read as a credential (the residual the page documents). Under
+  the pattern's `i` flag the upper-case test admits any letter; a regex port that is case-sensitive there (or one
+  without look-ahead, such as Rust's `regex` crate, which needs the `sk-` strength checked outside the regex) reads
+  the strength as `src/connections.ts` does. The SH-9 case of `test/session-handoff-review.test.ts` used a digit-free
+  `sk-` value as its credential; it now holds a digit and an upper-case letter. A sweep of 200000 generated values
+  found 0 that the new pattern finds and the earlier did not (29078 both, 64439 only the earlier).
 
 ## Open
 
@@ -90,20 +97,23 @@ was written; the source-manifest branch was at `19bab6fd`). DEC-0151 merges afte
   is" in its CA-5, in `channel-agent.md`'s check of a declaration, and in its handoff's note on the detector). Whichever
   lands second keeps DEC-0151's boundary and drops that note; the advice to rename an id that starts with `sk-` stays
   true, since a prefix at the start of a value is still found.
-- `src/secret-shape.ts`: the source-manifest branch (DEC-0149) adds `jwtSpans`, `hasJwt` and `rawValues` and changes
-  the JWT checks; DEC-0151 changes only the `SECRET_VALUE` line and its comment, so the two hunks merge apart. That
-  branch's `test/source-rules.test.ts` ("read the provider keys SECRET_VALUE names, without its whole-value bearer
-  branch") holds `SECRET_VALUE.source` equal to `(^bearer\s.+|` and `KEY_SHAPE_SOURCES` joined by `|`; with DEC-0151's
-  boundary it fails until the second to merge writes the expected source with DEC-0151's boundary group before the
-  joined shapes (the group as `src/secret-shape.ts` writes it). Checked again on a scratch copy of that branch at
-  `19bab6fd` with DEC-0151's line: its vectors match (29 files), and of `test/session-handoff-review.test.ts`,
-  `test/source-rules.test.ts` and `test/sources-ledger.test.ts` only that test fails (258 passed, 1 failed). Its source rules already need a boundary of their own
-  (`LETTER_OR_DIGIT`, any script); DEC-0151's is ASCII, because the detector reads without the `u` flag, so a
-  non-ASCII letter before a prefix still counts as a boundary here: stricter than that branch there, never stricter
-  than before.
-- DEC-0150's branch at `1c41f8b4` with DEC-0151's detector line, on a scratch copy: its vectors match (29 files) and
-  `test/channel-agent.test.ts`, `test/service-hygiene.test.ts` and `test/session-handoff-review.test.ts` pass (212
-  tests).
+- `src/secret-shape.ts` CONFLICTS with the source-manifest branch (DEC-0149): its `jwtSpans` and `hasJwt` block (with
+  `rawValues`) sits right above DEC-0151's rewritten comment. The resolution: keep DEC-0149's JWT helpers, then
+  DEC-0151's comment and `SECRET_VALUE` line, then rewrite the expected source in that branch's
+  `test/source-rules.test.ts` (line 77, "read the provider keys SECRET_VALUE names, without its whole-value bearer
+  branch") to the new pattern: `(^bearer\s.+|`, DEC-0151's boundary group, then the alternatives with the `sk-`
+  strength, as `src/secret-shape.ts` writes them. That branch's `KEY_SHAPES` and `KEY_SHAPE_SOURCES` then take the
+  same boundary and `sk-` strength. Its source rules already need a boundary of their own (`LETTER_OR_DIGIT`, any
+  script); DEC-0151's is ASCII, because the detector reads without the `u` flag, so a non-ASCII letter before a prefix
+  still counts as a boundary here. Checked on a scratch copy of that branch at `19bab6fd` with DEC-0151's final line
+  (and its SH-9 case updated as here): its 29 vector files match their generators, and of its whole suite (10088
+  tests) two fail: that `test/source-rules.test.ts` case, and the folder-attribution vector case "AT-15: a remote whose
+  kept part still has a secret's shape records no origin", whose digit-free `sk-` input DEC-0151 changes in
+  `tools/vectors/folder-attribution.ts`; the second to merge takes DEC-0151's vector file.
+- DEC-0150's branch at `1c41f8b4` with DEC-0151's final detector line and SH-9 case, on a scratch copy: its 29 vector
+  files match their generators, and of its whole suite (9912 tests) only the same AT-15 folder-attribution case fails,
+  which DEC-0151's vector file fixes. DEC-0150's `FAC-SEM-165` reads with the same detector, so its declarations
+  accept strictly more as well.
 - DEC-0150's join sentence in `channel-agent.md` ("so a reader joins a declaration to a project's payloads on
   `project:<slug>`"): once both land it reads "on `project:<slug>`, or, for a payload with no project, on the
   declaration's one project".
@@ -126,8 +136,8 @@ was written; the source-manifest branch was at `19bab6fd`). DEC-0151 merges afte
 ## Checks actually run
 
 On `03c0328f` the coordinator ran `pnpm vitest run --coverage`: exit 0, 108 files, 9799 tests passed, 1 skipped. On
-the round-3 head, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage`
-0 (109 files, 9819 tests passed, 1 skipped; on `e1191560` it was 9816); `python3 docs/ux/lint.py` 0;
+the round-3 head with the seam additions, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage`
+0 (109 files, 9820 tests passed, 1 skipped; 9816 on `e1191560`, 9819 on `82aa26eb`); `python3 docs/ux/lint.py` 0;
 `pnpm run docs:check` 0; `pnpm privacy:check` with the organization's index 0 (0 findings);
 `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files match; support quality has no vector generator). No U+2014 in
 the added lines.

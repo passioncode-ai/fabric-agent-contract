@@ -49,12 +49,13 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 | `calibrationChecks` | optional, only beside `calibration`: each rubric check's share of the labelled verdicts the judge matched, named as in `checks`; a check a person did not label is left out, and with none labelled the member is absent. A member of its own, so the payload stays two levels deep |
 
 Counts and rates only: no person's words, no ids (the project's registry alias excepted) and no judge notes, so `FAC-SEM-101` (a credential detector) finds nothing in it; keeping a
-person's words out is the producer's duty (service.md). The one exception is an alias whose slug holds a provider key's
-prefix at a word start (after `-`, `_`, `.`, `:` or at the slug's start) followed by enough key characters
-(`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`): the detector reads it as a credential and the
-events page fails `FAC-SEM-101`. The detector stays strict, since a lower-case key (`sk-or-v1-` and hex) fits the alias
-grammar; the registry does not issue such an alias, and a producer whose alias is read so publishes nothing for that
-channel until its alias changes (`test/secret-shape.test.ts`).
+person's words out is the producer's duty (service.md). An alias with an `sk-` slug word passes
+(`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`): the detector takes an `sk-` key only with a
+digit and either an upper-case letter or 32 or more characters (DEC-0151). The residual exception is a slug word that
+starts with another provider prefix (`ghp_` and its kin, `xoxb-` and its kin, `AKIA`, `glpat-`) followed by enough key
+characters, such as `project:ghp_customerservicedeskabcdef`: the detector reads it as a credential and the events page
+fails `FAC-SEM-101`. The detector stays strict there; the registry does not issue such an alias, and a producer whose
+alias is read so publishes nothing for that channel until its alias changes (`test/secret-shape.test.ts`).
 The feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries `calibration` and
 `calibrationChecks` once every reader of its feed it knows of has adopted DEC-0144. A reader that validates against an
 older copy of the schema (closed) refuses that day's `value` whole and keeps the event's `text`, so the day's numbers

@@ -43,7 +43,7 @@ function shape(): ValidateFunction {
 const none = (): ConnectionsView => ({ declared: false, reported: false, connections: [], errors: [] });
 const STRING_MEMBERS = ["id", "target", "capability", "label", "purpose", "reason"] as const;
 // A provider key's shape where it starts a word: a name such as `flask-server` or `risk-assessment` holds `sk-` inside
-// a word and is not a key (the shared SECRET_VALUE has the same boundary since DEC-0151). An `sk-` key holds a digit and either an
+// a word and is not a key (the shared SECRET_VALUE takes a like boundary and `sk-` strength since DEC-0151, case-insensitively). An `sk-` key holds a digit and either an
 // upper-case letter or 32 or more characters (an OpenRouter key is lower-case hex), and a Telegram bot token
 // (`<bot id>:<secret>`, also inside a URL path, `/bot123456789:AA…/getUpdates`) has a secret of 34 or 35 characters
 // that mixes cases, so names such as `sk-learn-classifier-v2`, `20261021:connections-reader-v2` or a ticket

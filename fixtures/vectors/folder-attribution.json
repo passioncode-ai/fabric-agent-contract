@@ -7262,7 +7262,7 @@
           "toplevel": "/u/ana/work/app",
           "commonDir": "/u/ana/work/app/.git",
           "mainCheckout": "/u/ana/work/app",
-          "origin": "ssh://sk-testtesttesttest@gitlab.example.com/someone/app.git"
+          "origin": "ssh://sk-test0Test1test2Test3@gitlab.example.com/someone/app.git"
         },
         "projects": [
           {

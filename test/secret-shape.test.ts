@@ -35,7 +35,7 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
   });
   it("finds a key right after a percent-escape or a backslash escape, after a letter as well (DEC-0151)", () => {
     const hex = tail(64, "0123456789abcdef");
-    const escaped = [`AKIA${tail(16, "0123456789ABCDEFGHJ")}`, `glpat-${tail(20, "aB3cD4eF5gH6jK7mN8")}`, `sk-or-v1-${hex}`];
+    const escaped = [`AKIA${tail(16, "0123456789ABCDEFGHJ")}`, `glpat-${tail(20, "aB3cD4eF5gH6jK7mN8")}`, `sk-or-v1-${hex}`, keys.openai, `sk-proj-${tail(48, "aB3cD4eF5gH6jK7mN8_-")}`];
     // A literal backslash and n, as an escaped JSON or log line holds it, and a real newline too.
     for (const key of escaped) {
       for (const value of ["a\\n" + key, `a\n${key}`, `a%20${key}`, `%22${key}`, `"${key}`, "x\\u0022" + key, "x\\\"" + key, "x\\t" + key]) {
@@ -60,11 +60,25 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
     expect(newOnly).toBe(0);
     expect(found).toBeGreaterThan(0);
   });
-  it("reads an alias whose slug holds a provider prefix at a word start as a credential: the registry issues none (DEC-0151)", () => {
-    const page = (project: string) => ({ events: [{ id: "1", at: "2026-10-19T00:20:00Z", kind: "support.quality_daily", level: "info", text: "Support quality for chat on 2026-10-18.", data: { schema: "https://support.example.com/schemas/support-quality-daily.schema.json", value: { kind: "support-quality-daily/1", project } } }], cursor: "1" });
-    for (const project of ["project:sk-learn-experiments", "project:acme-sk-customer-support-eu"]) {
-      expect(evaluateSemanticRules("service-events-page", page(project)).map((finding) => finding.code), project).toContain("FAC-SEM-101");
+  it("takes an sk- key only with a digit and an upper-case letter or 32 characters, so a lower-case slug word is none (DEC-0151)", () => {
+    const hex = tail(64, "0123456789abcdef");
+    for (const key of [keys.openai, `sk-proj-${tail(48, "aB3cD4eF5gH6jK7mN8_-")}`, `sk-or-v1-${hex}`]) {
+      for (const value of [key, ` ${key}`, `"${key}`, `=${key}`, `:${key}`, `Bearer ${key}`, "a\\n" + key, `a%20${key}`, `%22${key}`, "x\\u0022" + key]) {
+        expect(SECRET_VALUE.test(value), JSON.stringify(value)).toBe(true);
+      }
     }
+    for (const value of ["sk-learn-experiments", "sk-hynix-customer-care", "acme-sk-customer-support-eu", "sk-telecom-customer-care", `sk-${tail(20, "abcdefgh")}`]) {
+      expect(SECRET_VALUE.test(value), value).toBe(false);
+    }
+  });
+  it("accepts an alias with an sk- slug word, and still reads one whose slug word starts with another prefix as a credential (DEC-0151)", () => {
+    const page = (project: string) => ({ events: [{ id: "1", at: "2026-10-19T00:20:00Z", kind: "support.quality_daily", level: "info", text: "Support quality for chat on 2026-10-18.", data: { schema: "https://support.example.com/schemas/support-quality-daily.schema.json", value: { kind: "support-quality-daily/1", project } } }], cursor: "1" });
+    const codes = (project: string) => evaluateSemanticRules("service-events-page", page(project)).map((finding) => finding.code);
+    for (const project of ["project:sk-learn-experiments", "project:acme-sk-customer-support-eu", "project:sk-hynix-customer-care"]) {
+      expect(codes(project), project).not.toContain("FAC-SEM-101");
+    }
+    // The residual: a slug word that starts with ghp_ and 20 or more letters or digits is read as a GitHub key.
+    expect(codes("project:ghp_customerservicedeskabcdef")).toContain("FAC-SEM-101");
   });
   it("lets a support-quality day name a project whose slug holds -sk- (FAC-SEM-101 on the events page)", () => {
     const page = { events: [{ id: "1", at: "2026-10-19T00:20:00Z", kind: "support.quality_daily", level: "info", text: "Support quality for chat on 2026-10-18.", data: { schema: "https://support.example.com/schemas/support-quality-daily.schema.json", value: { kind: "support-quality-daily/1", project: "project:helpdesk-customer-support" } } }], cursor: "1" };
