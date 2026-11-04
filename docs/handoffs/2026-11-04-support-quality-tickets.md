@@ -17,8 +17,9 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   families, the top-level counts and `calibration.helped`, with the same messages); no sum rule, since section 5 states
   none (`fixtures/semantic/support-quality-daily-tickets-no-sum.json` pins that).
 - The schema's `calibration` description corrected ("an ISO week that starts no later than day"), as CT-188 noted.
-- Fixtures: two positive, five negative (with catalogue rows), four semantic; eight tests in
-  `test/support-quality.test.ts`, among them DEC-0070's bounds (18 top-level members, 10 in `outcomes`).
+- Fixtures: three positive (one an events page with two projects' days), six negative (with catalogue rows), four
+  semantic; nine tests in
+  `test/support-quality.test.ts`, among them DEC-0070's bounds (19 top-level members, 10 in `outcomes`) and two projects' days on one channel.
 - `pnpm validate --schema support-quality-daily --kind support-quality-daily` prints the same for every support-quality
   fixture on origin/main before and after the change (19 files compared).
 - conformance.md's producer and reader rows, DOCMAP, CONTEXT, DEC-0095 and DEC-0144 annotated, CT-210 filed.
@@ -39,16 +40,16 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   alternatives).
 - The standard's seven channel kinds map onto `/1`'s four channels, no new enum value (DEC-0151 item 5,
   support-quality.md "The standard's channel kinds"); a test holds the table to the schema's enum.
-- The standard publishes per project, a `/1` reader keys by service, channel and day: an agent serving two projects
-  on one channel would lose one; recorded under "Not decided here", for the coordinator to decide (a `project` member
-  or the event's `subject`).
+- The standard publishes per project, a `/1` reader kept one event per service, channel and day: the coordinator
+  decided an optional top-level `project` (DEC-0151 item 6, comms-common's `projectId` pattern copied); a reader that
+  adopted keys by service, channel, day and project.
 - `promotions` counts the promotions made on the day; whether a promotion also restates the day the ticket ended is
   left to the standard (support-quality.md, "Not decided here").
 
 ## Checks actually run
 
 On the branch, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (108
-files, 9784 tests passed, 1 skipped; `src/support-quality-rules.ts` at 100 % of its branches); `python3 docs/ux/lint.py`
+files, 9791 tests passed, 1 skipped; `src/support-quality-rules.ts` at 100 % of its branches); `python3 docs/ux/lint.py`
 0; `pnpm run docs:check` 0; `pnpm privacy:check` with the organization's index 0 (0 findings);
 `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files match; support quality has no vector generator). No U+2014 in
 the added lines.

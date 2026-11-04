@@ -5963,8 +5963,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-27):** DEC-0144 adds the optional `calibration` and `calibrationChecks` members at the same
   revision; a producer carries them once every reader of its feed it knows of has adopted DEC-0144, and a reader
   validating against an older copy refuses that day's `value` (DEC-0070).
-- **Annotated (2026-11-04):** DEC-0151 (proposed) adds the optional ticket counts of the channel agent standard
-  (`arrived`, `ended`, `notATicket`, `open`, `outcomes`, `autonomy.answered`, `stability.fallbackTurns` and
+- **Annotated (2026-11-04):** DEC-0151 (proposed) adds the optional `project` and the ticket counts of the channel
+  agent standard (`arrived`, `ended`, `notATicket`, `open`, `outcomes`, `autonomy.answered`, `stability.fallbackTurns` and
   `fallbackTickets`) at the same revision, under DEC-0144's producer rule, and lets a metric name in `notMeasured` carry
   digits.
 - **Decision:** in [support quality](specification/support-quality.md):
@@ -9044,7 +9044,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   fallbacks. `/1` has no member for them, and its schema is closed. The coordinator decided the amendment on the board
   (request `74105ca1`, thread `b6820b97`); a later copy of the standard on the same thread already names the outcome
   counts as `outcomes.<metric>` and defers to this decision. The declaration names seven channel kinds where `/1` has
-  four channels. Separately, FAC-SEM-126 asks a producer to name an unmeasured
+  four channels, and it publishes per project where a `/1` reader keeps one event per service, channel and day, so an
+  agent serving two projects on one channel would have one day replace the other; the coordinator decided the
+  project member on the same thread. Separately, FAC-SEM-126 asks a producer to name an unmeasured
   `nobodyDropped.firstReplyP50Ms`, which the `notMeasured` pattern refused (no digits in a metric name; finding X-4).
 - **Decision:** [support quality](specification/support-quality.md#the-ticket-counts-dec-0151):
   1. Optional members, each a count (a non-negative integer) or `null`: at the top level `arrived` (the tickets that
@@ -9070,6 +9072,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      under the closest one: `telegram_dm` and `account` as `chat`, `mail` as `mail`, `store_review` as `reviews`,
      `telegram_group`, `public_comment` and `team_chat` as `community`; kinds that meet in one channel make one event
      per day, as two surfaces of one channel do.
+  6. An optional top-level `project`: the Fabric Project whose tickets the day counts, in the pattern of
+     `comms-common`'s `projectId`, copied into the schema's `$defs` so it stays one file. A reader that adopted DEC-0151
+     keys an event by service, channel, day and project, an absent `project` being the service's one project, as
+     before; a producer that serves several projects on one channel publishes one event per project and day, each
+     naming its `project`, under item 4's rule. The top level then holds 19 members, inside DEC-0070's 32.
 - **Why:** the standard's daily report counts tickets on the signal server and checks each agent's feed against it;
   one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that home before any
   producer may send them. The digit fixes a rule the schema made impossible to keep.
@@ -9080,9 +9087,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   promotion falls on its own day, so the rule would refuse true payloads); a new revision `support-quality-daily/2`
   (every producer and reader would move, where a widening leaves every `/1` payload valid, DEC-0144's reasoning); a `0`
   for an unmeasured count (FAC-SEM-126); new channel values for the seven kinds (a reader on an older copy would refuse
-  every day of such a channel, and the reader's per-channel targets are set for the four); a project member for the
-  standard's per-project publication (a reader keys by service, channel and day; left to a later revision, see
-  [support quality](specification/support-quality.md#not-decided-here)).
+  every day of such a channel, and the reader's per-channel targets are set for the four); the project in the event's
+  `subject` instead of the payload (the subject is the event's, outside the schema a reader validates the counts
+  against, and a reader that keeps only `data.value` would lose it); one service per project (an agent's deployment
+  would follow the reader's key).
 - **Compatibility:** a widening of a closed object: a `/1` payload without the new members validates and reads as
   before, and `pnpm validate` reports the same for every existing support-quality fixture. A reader that validates
   against an older copy refuses a day that carries a new member or a metric name with a digit, and keeps the event's
@@ -9090,8 +9098,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   validates against its own pinned copy. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/support-quality-daily.schema.json` (also the `calibration` description DEC-0144
   left to correct), `src/support-quality-rules.ts`, `test/support-quality.test.ts`,
-  `fixtures/positive/support-quality-daily-tickets.json` and `-first-reply-unmeasured.json`, five
-  `fixtures/negative/support-quality-daily-*` with their `fixtures/catalogue.json` rows, four
+  `fixtures/positive/support-quality-daily-tickets.json` and `-first-reply-unmeasured.json`,
+  `fixtures/positive/service-events-page-support-quality-projects.json`, six `fixtures/negative/support-quality-daily-*`
+  with their `fixtures/catalogue.json` rows, four
   `fixtures/semantic/support-quality-daily-*`; `docs/specification/support-quality.md`, `docs/specification/conformance.md`
   (the producer and reader rows), `docs/DOCMAP.md`, `CONTEXT.md`; DEC-0095 and DEC-0144 annotated; `docs/backlog.md`
   (CT-210, CT-188's note); `docs/handoffs/2026-11-04-support-quality-tickets.md`.

@@ -12,8 +12,11 @@ on its events feed, one event of kind
 this payload: `data.value` the payload, and `data.schema` the URI of the copy of this schema the service publishes, as
 service.md asks. A reader recognises the payload by `data.value.kind` (`support-quality-daily/1`), never by
 `data.schema`. A rerun for a day replaces that day's event for the channel: a reader keeps, per service, channel and day, the
-latest event (the greatest id in that service's feed). An agent with two surfaces of one channel merges them into one
-event per day. A voice-of-the-customer reader then reads every agent the same way. The
+latest event (the greatest id in that service's feed). A reader that adopted DEC-0151 keys by service, channel, day
+and `project`, an absent `project` being the service's one project, as before; an agent that serves several projects
+on one channel publishes one event per project and day, each naming its `project`, under DEC-0151's producer rule
+below (`fixtures/positive/service-events-page-support-quality-projects.json`). An agent with two surfaces of one channel
+merges them into one event per day. A voice-of-the-customer reader then reads every agent the same way. The
 standard behind it (what is measured, the rubric, the judge) is the asker's, issue #125; the contract owns the shape.
 
 ## The payload
@@ -22,6 +25,7 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 |---|---|
 | `kind` | `support-quality-daily/1` |
 | `day`, `channel` | the closed UTC day, and `chat` (one person's chat), `mail`, `reviews` (store review replies) or `community` (group chats and forums) |
+| `project` | optional (DEC-0151): the Fabric Project whose tickets these are, its id in the pattern of [`comms-common`](../../schemas/comms-common.schema.json)'s `projectId` (copied, so the schema stays one file); absent, the service's one project |
 | `rubricVersion`, `judgeModel` | the rubric's version and the judge's `<vendor>/<model>`, or `null` when nothing was judged and no calibration is carried |
 | `notMeasured` | each metric not computed that day, as `family.metric` (a metric name may carry digits: `nobodyDropped.firstReplyP50Ms`, DEC-0151), a top-level count by its own name (`arrived`, `ended`, `notATicket`), or `checks` when nothing was judged; at most 32 names (DEC-0070's list), so a producer that would name more leaves out the optional members it did not measure |
 | `arrived`, `ended`, `notATicket` | optional (DEC-0151): the tickets that arrived on the day; the tickets that ended on the day, whatever day they arrived (the **ending cohort**, which every outcome count below is of); the day's automated notices, which are not tickets |
@@ -35,7 +39,7 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 | `calibration` | optional (DEC-0144): how well the day's judge, under the day's rubric, agreed with people: `week` (the latest ISO week a person labelled answers, `YYYY-Www`, starting no later than `day`), `labelled` (how many, at least 1) and `helped` (the share of those whose helped verdict the judge matched, `null` when helped was not labelled); absent means no calibration, and a reader never carries one forward, so a producer carries its latest calibration on every day it still holds for. A producer whose judge or rubric changed after the labelled week leaves it out |
 | `calibrationChecks` | optional, only beside `calibration`: each rubric check's share of the labelled verdicts the judge matched, named as in `checks`; a check a person did not label is left out, and with none labelled the member is absent. A member of its own, so the payload stays two levels deep |
 
-Counts and rates only: no person's words, no ids and no judge notes, so `FAC-SEM-101` (a credential detector) finds nothing in it; keeping a
+Counts and rates only: no person's words, no ids (the Fabric Project's id excepted) and no judge notes, so `FAC-SEM-101` (a credential detector) finds nothing in it; keeping a
 person's words out is the producer's duty (service.md).
 The feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries `calibration` and
 `calibrationChecks` once every reader of its feed it knows of has adopted DEC-0144. A reader that validates against an
@@ -50,12 +54,12 @@ It fits `data.value`'s two levels (`test/support-quality.test.ts` carries it ins
 The channel agent standard's daily loop (its release candidate received on the board, thread `b6820b97`, section 5;
 the copy DEC-0150 adds, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`) counts **tickets**, a
 customer's request from arrival to its one outcome, beside the turns the families above count. DEC-0151 gives those
-counts a `/1` home: `arrived`, `ended` and `notATicket` at the top level, `open` and `outcomes` as members of their
+counts a `/1` home: `arrived`, `ended`, `notATicket` and the `project` they are of at the top level, `open` and `outcomes` as members of their
 own, and `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets` in the families they belong to.
-Each is a count or `null`, and FAC-SEM-126 reads it as it reads every metric: `null` and named in `notMeasured` when
+Each count is a count or `null` (`project` is an id, not a metric, and is never named in `notMeasured`), and FAC-SEM-126 reads it as it reads every metric: `null` and named in `notMeasured` when
 not measured, never `0`. A member absent is one the producer does not carry: a reader reads it as unknown, as it
 reads `null`, never as `0`. `open` and `outcomes` are never empty objects: with none of their members carried they
-are absent. The payload's top level has 18 members, its largest family object 10 (`outcomes`) and `checks` and
+are absent. The payload's top level has 19 members, its largest family object 10 (`outcomes`) and `checks` and
 `calibrationChecks` at most 16, inside DEC-0070's 32 (`test/support-quality.test.ts`).
 
 The schema is closed, so a producer carries these members only once every reader of its feed it knows of has adopted
@@ -108,10 +112,6 @@ channel, where a mapping costs nothing.
   the standard's section 5 states none, and two of the counts are not of the ending cohort (`promotions` falls on
   the day of the promotion; `open` holds tickets of earlier days), so DEC-0151 checks no sum
   (`fixtures/semantic/support-quality-daily-tickets-no-sum.json`); a later revision may, once the standard states one.
-- Which project a day's counts are of: the standard publishes `support.quality_daily` per project, while a `/1`
-  reader keeps one event per service, channel and day, so an agent that serves two projects on one channel would have
-  the second replace the first. Until a revision names the project (a member, or the event's `subject`), such an agent
-  publishes each project from its own service, or not at all; a single-project agent is unaffected.
 - `received` (a ticket that arrived and that the agent has not acted on yet) has no `open` member: section 5 counts
   only the four open outcomes. Whether a promotion also restates the day the ticket ended is the standard's.
 - The standard reads `autonomy.toPersonPolicy` and `toPersonInability` as tickets ever handed to a person (`referred`

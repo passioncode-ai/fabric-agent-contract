@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/support-quality-daily.schema.json",
   "title": "support-quality-daily/1 (DEC-0095): one support channel's quality for one closed UTC day, as an event's data.value",
-  "description": "Counts and rates only: no person's words, no ids, no judge notes. A metric not computed is null and is named in notMeasured, never 0 (FAC-SEM-126). Fits DEC-0070's data.value: two levels, at most 32 members each; a reader recognises it by data.value.kind. DEC-0151 adds the optional ticket counts (arrived, ended, notATicket, open, outcomes, autonomy.answered, stability.fallbackTurns and fallbackTickets); a member absent is one the producer does not carry, never 0.",
+  "description": "Counts and rates only: no person's words, no ids, no judge notes. A metric not computed is null and is named in notMeasured, never 0 (FAC-SEM-126). Fits DEC-0070's data.value: two levels, at most 32 members each; a reader recognises it by data.value.kind. DEC-0151 adds the optional project and ticket counts (arrived, ended, notATicket, open, outcomes, autonomy.answered, stability.fallbackTurns and fallbackTickets); a member absent is one the producer does not carry, never 0.",
   "type": "object",
   "required": [
     "kind",
@@ -33,6 +33,10 @@
         "reviews",
         "community"
       ]
+    },
+    "project": {
+      "$ref": "#/$defs/projectId",
+      "description": "Optional (DEC-0151): the Fabric Project whose tickets these are, for an agent that serves several projects on one channel. A reader that adopted DEC-0151 keeps one event per service, channel, day and project; absent, the service's one project. Carried under the same producer rule as the other DEC-0151 members."
     },
     "rubricVersion": {
       "type": [
@@ -350,6 +354,11 @@
       ],
       "minimum": 0,
       "maximum": 1
+    },
+    "projectId": {
+      "description": "A Fabric Project's server-issued id, the pattern of comms-common.schema.json's projectId, copied so this schema stays one file. Data, not authority.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,191}$"
     }
   }
 }

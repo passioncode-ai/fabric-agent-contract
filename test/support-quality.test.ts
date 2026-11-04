@@ -219,9 +219,32 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
     expect(rows.map(([kind]) => kind).sort()).toEqual(["account", "mail", "public_comment", "store_review", "team_chat", "telegram_dm", "telegram_group"]);
     for (const [, channel] of rows) expect(schema.properties.channel.enum).toContain(channel);
   });
+  it("keys two projects' days on one channel apart by project, the id in comms-common's pattern (DEC-0151)", async () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
+    const common = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/comms-common.schema.json"), "utf8")) as Json;
+    expect(schema.$defs.projectId.pattern).toBe(common.$defs.projectId.pattern);
+    expect(schema.required).not.toContain("project");
+    const ajv = await createValidator();
+    const page = positive("service-events-page-support-quality-projects.json");
+    const pageResult = validateDocument(ajv, `${SCHEMA_PREFIX}schemas/service-events-page.schema.json`, page);
+    expect(pageResult.valid, JSON.stringify(pageResult.errors)).toBe(true);
+    expect(evaluateSemanticRules("service-events-page", page)).toEqual([]);
+    const values = (page.events as Json[]).map((event) => event.data.value as Json);
+    for (const value of values) {
+      const result = validateDocument(ajv, schemaId, value);
+      expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+      expect(paths(value)).toEqual([]);
+    }
+    // A reader that adopted DEC-0151 keys by service, channel, day and project: the two days stand side by side.
+    const key = (value: Json) => [value.channel, value.day, value.project ?? ""].join(" ");
+    expect(values.map((value) => [value.channel, value.day].join(" "))).toEqual(["chat 2026-10-18", "chat 2026-10-18"]);
+    expect(new Set(values.map(key)).size).toBe(2);
+    const refused = Object.assign(tickets(), { project: "alpha support" });
+    expect(validateDocument(ajv, schemaId, refused).valid).toBe(false);
+  });
   it("keeps DEC-0070's bounds: every object of the schema at most 32 members, and the whole payload inside an events page", async () => {
     const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
-    expect(Object.keys(schema.properties)).toHaveLength(18);
+    expect(Object.keys(schema.properties)).toHaveLength(19);
     for (const member of Object.values(schema.properties) as Json[]) {
       if (member.properties) expect(Object.keys(member.properties).length).toBeLessThanOrEqual(10);
       if (member.maxProperties !== undefined) expect(member.maxProperties).toBeLessThanOrEqual(16);
