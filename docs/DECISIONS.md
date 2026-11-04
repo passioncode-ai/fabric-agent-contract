@@ -9126,7 +9126,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      its base64url run and, when it ends at a `.`, the dot and the run after it; from each `sk-`, in any case, at a
      boundary (the start, a non-alphanumeric character, `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal
      escape, a backslash escape, or a colour sequence with any number of parameter characters (digits, `;`, `:`) whose
-     ESC is raw or escaped in either case, `\33` included), its three characters included, up to 255 code points; after every other provider prefix of the shared detector, anywhere
+     ESC is raw or escaped in either case, `\33` included), its three characters included, up to 255 code points (these
+     forms only: any other, such as `\E`, `\x{1b}`, U+009B, a CSI with a private parameter or another final,
+     `\U00000041` or `%u0041`, is charged as a non-boundary, and a port that decodes it before a boundary-bound reading
+     is outside the bound); after every other provider prefix of the shared detector, anywhere
      and in any case (`gh?_`, `xox?-`, `AKIA`, `glpat-`), up to its floor (20, 10, 16 and 20 code points), what a near
      miss is reread before it fails; after every `sk-` away from a boundary, up to 16 code points after it (the run the shape needs) (each a bound
      any detector may need, whatever boundary or case its own shapes take); and, for a
@@ -9223,7 +9226,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 15 of the readings. `DEC-0150` was reserved by the coordinator with
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 16 of the readings. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation

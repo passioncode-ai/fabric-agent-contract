@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-11-04 an agent that answers people on a channel](2026-11-04-channel-agent.md) | DEC-0150, proposed (CT-209) | not merged: branch `agent/channel-agent-ext-v3-20261104`, rounds 1 to 15 fixed, two consecutive clean rounds next |
+| [2026-11-04 an agent that answers people on a channel](2026-11-04-channel-agent.md) | DEC-0150, proposed (CT-209) | not merged: branch `agent/channel-agent-ext-v3-20261104`, rounds 1 to 16 fixed, two consecutive clean rounds next |
 | [2026-11-02 a peer share's risks settled](2026-11-02-peer-share-risks.md) | DEC-0147 (CT-189; CT-201 filed) | merged 2026-11-02, #232; released `v0.1.0+2026-11-02.1` |
 | [2026-10-27 the machines' report, its open design questions](2026-10-27-machine-report-design.md) | DEC-0146 (CT-172) | merged 2026-10-30, #230; released `v0.1.0+2026-10-30.2` |
 | [2026-10-26 three decisions for the simple Fabric](2026-10-26-simple-fabric-decisions.md) | DEC-0140 (CT-174) | merged 2026-10-30, #217 `86f3ebad`; released `v0.1.0+2026-10-30.1` |

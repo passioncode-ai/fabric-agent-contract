@@ -192,6 +192,12 @@ FAA-197, on the adapter's main).
   (`ESC[38:5:1m`) and the escaped ESC `\33`, as DEC-0151's detector does, so the full 255 is charged after those heads;
   the boundary-forms test holds them, and an exact test pins the 255 for `ESC[38:5:1m`, `\x1b[38:5:1m`, `\33[1m` and
   `\033[1m`.
+- Round 16 of the readings (on `004ee025`): one unit break, fixed: the page quoted the budget line from before round
+  15; it now quotes it exactly as the view prints it, and a test holds the quote to the view's error on the vector "a
+  read declaration whose own read runs out". The page and CA-5 scope the 255 charge to the boundary forms they list:
+  any other form before an `sk-` (`\E`, `\x{1b}`, U+009B, a CSI with a private parameter or another final,
+  `\U00000041`, `%u0041`) is charged as a non-boundary, and a port that decodes one before a boundary-bound reading is
+  outside the bound (DEC-0151 lists them as knowingly not found).
 
 ## The branch and its history
 

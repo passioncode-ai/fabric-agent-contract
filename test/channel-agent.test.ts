@@ -740,6 +740,14 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     for (const ok of ["UTC", "GMT", "CET", "Etc/UTC", "Europe/Warsaw", "America/Argentina/Buenos_Aires", "Etc/GMT+3"]) expect(zone?.(ok), ok).toBe(true);
     for (const bad of ["", "Europe/", "/UTC", "a/b/c/d", "Europe Warsaw", "+03:00"]) expect(zone?.(bad), bad).toBe(false);
   });
+  it("quotes the budget line on the page exactly as the view prints it", () => {
+    const page = read("docs/specification/channel-agent.md");
+    const quoted = /`(FAC-SEM-165 at \/: reading the declarations for credentials[^`]*)`/.exec(page)?.[1];
+    const runsOut = vectors.declarations.find((v) => v.name === "a read declaration whose own read runs out: not declared");
+    expect(quoted).toBeDefined();
+    expect(runsOut?.view?.errors).toEqual([quoted]);
+    expect(channelAgentView(runsOut?.input, runsOut?.site).errors).toEqual([quoted]);
+  });
   it("points the narrowings at the grammar, whose every line is this contract's", () => {
     const page = read("docs/specification/channel-agent.md");
     const section = page.slice(page.indexOf("### Narrowings against the standard"), page.indexOf("The first consumer is owed"));

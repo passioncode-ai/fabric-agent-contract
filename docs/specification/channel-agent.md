@@ -290,12 +290,16 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    right before the `sk-`: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a backslash escape of
    one character, or a colour sequence `ESC[...m` with any number of parameter characters (digits, `;` and `:`, as in
    `ESC[38:5:1m`) whose ESC is raw or escaped (`\x1b`, `\033`, `\33`, `\u001b` in either case of the hex digits, or
-   `\e`). For a string read as a URL that parses, the URL
+   `\e`). The 255 covers these boundary forms only. Any other form before an `sk-` (`\E`, `\x{1b}`, U+009B, a CSI with a
+   private parameter or another final, `\U00000041`, `%u0041`) is charged as a non-boundary, up to 16, so a port that
+   decodes such a form before a boundary-bound `sk-` reading is outside this bound (DEC-0151 lists them as knowingly
+   not found). For a string read as a URL that parses, the URL
    terms are counted on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed,
    percent-decoded), not on the raw text: for every query or fragment piece, 128, its name's and its value's code
    points, the value's `eyJ` and `sk-` terms and, when the value is not empty and the name holds an upper-case letter,
    the square of the name's length over two. A member's name is read before its place is written; once the budget is spent nothing more is read and every further member collapses its place. Past the
-   budget, one finding says, once per document, that the rest was not read for credentials; it stands at the copy where
+   budget, one finding says, once per document, that reading the declarations for credentials takes more than 1 000 000
+   code points of reading; it stands at the copy where
    the budget ran out (the read declaration's key, or a misplaced copy's), never at a read declaration that was read
    whole. The 64 places are a cap per document: a copy names a place only while the document's total is under 64.
    Past it, each copy counts its own places and closes them at that copy: the read declaration's "and N more" at its key
@@ -351,10 +355,11 @@ vectors carry the view's answer (`view`): a sentence that holds a URL with a pas
 read declaration beside a heavy misplaced copy, beside a misplaced copy holding a credential, more than 64 credential
 places in the read declaration beside a misplaced copy with more (each closes its own count), a channel with replies
 off and a holding reply with no texts (declared, nothing owed), and a read declaration whose own read runs out. Every line of `errors` and `obligations` is `<code> at <place>: <reason>`, the reason the
-finding's message without the decision it cites (it holds no declared value: `FAC-SEM-165 at /: the document holds more
-than 1000000 code points ...; the rest was not read for credentials, so a reader treats the declaration as not
-declared; declare fewer or shorter texts or names` and `FAC-SEM-165 at /: and N more names or values
-shaped like a credential` read apart), and identical lines (one code, place and reason) are one line. In short: an invalid declaration gives one
+finding's message without the decision it cites (it holds no declared value), so the budget line,
+
+`FAC-SEM-165 at /: reading the declarations for credentials takes more than 1000000 code points of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names`
+
+and `FAC-SEM-165 at /: and N more names or values shaped like a credential` read apart, and identical lines (one code, place and reason) are one line. In short: an invalid declaration gives one
 `FAC-SEM-162 at <place>: <keyword> (<limit>)` line for each place the schema fails and one `FAC-SEM-165 at <place>:
 <reason>` line for each credential place (and the closing ones, at `/`); a manifest whose only copy is misplaced answers
 `declared: false, reported: true` with `FAC-SEM-162 at <place>: <reason>` for each copy, where it stands in the
