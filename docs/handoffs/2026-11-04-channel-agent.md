@@ -297,13 +297,14 @@ reader joins on `project:<slug>` once the feed's readers have adopted it):
 
 ## Checks actually run
 
-On the change after round 11's fixes and the round 4 addendum, each exit code read separately, the 15-minute load
-average below 45 at the coverage run (44.26): `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109
-files, 10001 tests passed and 1 skipped, branches 98.88 %, 12135 of 12272; `src/channel-agent.ts` 424 of 424,
-`src/secret-shape.ts` 47 of 47); `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0 (markdownlint 0 errors);
-`pnpm privacy:check` with the organization index 0 (0 findings, the round 4 copy in place); `pnpm exec tsx
-tools/vectors/run.ts` 0 (29 vector files match their generators). The timing tests hold the test thread's processor
-time against prose read to the budget in the same run. The URL-shaped strings (a tab, a carriage return or a line feed inside `eyJ`, `-%73k-` in a query) and a query of many
+On the change after round 12's fixes, each exit code read separately, the 15-minute load average below 45 at the
+coverage run (44.59): `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 10141 tests passed
+and 1 skipped, branches 98.88 %, 12179 of 12316; `src/channel-agent.ts` 468 of 468, `src/secret-shape.ts` 47 of 47;
+an earlier run timed out once in the two-million-empty-strings test at the default 5 s, so the ratio timing tests now
+take 60 s); `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm privacy:check` with
+the organization index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (29 vector files match their
+generators). The timing tests hold the test thread's processor time against prose read to the budget in the same
+run. The URL-shaped strings (a tab, a carriage return or a line feed inside `eyJ`, `-%73k-` in a query) and a query of many
 pieces each run within twice prose's thread time plus 20 ms; 300 strings of 2000 astral code points are read whole;
 the budget's edge falls where the count says, in plain and in astral names. The organization's privacy check over the
 standard's copy alone: 0 findings. A `git grep` of the change for the three terms of the product described before
