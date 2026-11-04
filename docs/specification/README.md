@@ -83,6 +83,7 @@ defined in [CONTEXT.md](../../CONTEXT.md).
 |---|---|---|
 | [activity](activity.md) | `fabric-activity/0.1`: sessions, usage, summaries, access logs | not measured |
 | [support quality](support-quality.md) | `support-quality-daily/1` (DEC-0095) | the review found three emitters, each shipping its own copy of the schema instead of this one |
+| [operations digests](ops-digest.md) | `ops.digest.hourly@1` and `ops.digest.daily@1`, a product's own log folded every hour and every day, and the host obligation `retro-after-work` (DEC-0153) | written by Fabric at its commit `e1eecec0`, which the shape follows; owed by the other products that keep a log and by the Fabric Agent Adapter for the obligation (CT-219) |
 | [OpenRouter attribution](openrouter-attribution.md) | the headers that name a product on OpenRouter | not measured |
 
 The usage report of a service is part of [services](service.md#usage-report).

@@ -9025,3 +9025,78 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (SCN-052, SCN-053), `CONTEXT.md` (Peer share), `docs/specification/README.md` (the peer share's adoption); DEC-0121,
   DEC-0126, DEC-0142 and DEC-0143 annotated; backlog CT-186 (DEC-0147's duties, in order), CT-201 (what its round-2 readings left) and CT-189 (closes on merge).
 - **Source:** CT-189; CT-178's readings 12 and 13.
+
+### DEC-0153: operations digests, `ops.digest.hourly@1` and `ops.digest.daily@1`, and the retro after work
+
+- **Date:** 2026-11-04
+- **Status:** Proposed (draft on branch `agent/ct219-ops-digest-20261104`; accepted on merge of its pull request after
+  the coordinator's blind readings). New schemas, rule codes `FAC-SEM-166` and `FAC-SEM-167`, a reference module and
+  vectors, and a host obligation. Additive: nothing that validated before changes.
+- **Context:** the operator asked on 2026-11-04 that every product's log be read every hour and every day, and that
+  every agent close its work with a retro whose lessons are kept centrally; Fabric recorded the split in its ADR-0188
+  (commit `0d0e5922`) and relayed the contract's part on board thread `f7758225` (message `516761e1`, item 2 of its
+  split). Fabric writes the two digests since commit `e1eecec0` (`apps/desktop/src/shared/opsDigest.ts`,
+  `apps/desktop/src/main/opsDigestRun.ts`) and serves the obligation; the other products waiting on the shape
+  (Switchboard, Inbox) need it pinned so one reader reads them all. ADR-0188 left open the format of `from`, `to` and
+  `day`, the grammar of `op` and `total` as the sum of `ops`.
+- **Decision:** [operations digests](specification/ops-digest.md):
+  1. **The shapes, as ADR-0188 names them.** `ops.digest.hourly@1` {`schema`, `from`, `to`, `ops`[{`op`, `ok`,
+     `failed`, `unknown`}], `total`{`ok`, `failed`, `unknown`}, `risen`[{`op`, `failed`, `previous`}]} and
+     `ops.digest.daily@1` {`schema`, `day`, `hours`, `ops`, `total`, `risen`[{`op`, `hours`, `failed`}]}, both closed,
+     every count an integer from 0 to 2^53 − 1, at most 4096 operations and rises.
+  2. **The window (OD-1).** `from` and `to` are whole UTC hours in RFC 3339 with `Z`, with or without the `.000` that
+     `Date.prototype.toISOString` writes (Fabric writes it), `to` one hour after `from`; `day` is `YYYY-MM-DD` UTC;
+     `hours` 1 to 24. An hour the product ran through is written even when empty; an hour it did not run is a gap.
+  3. **An operation's name (OD-2).** `^[a-z][A-Za-z0-9_]*(?:[.:-][A-Za-z0-9_]+)*$`, at most 64 characters: every
+     operation name written literally in Fabric's sources at `e1eecec0`, and every `ipc.<channel>` of its channel
+     table, fits (the longest 53 characters), and no path, URL, space or home folder can.
+     `FAC-SEM-167` refuses a name shaped like a credential (`secretValue`, DEC-0044).
+  4. **Counting and the rise (OD-3, OD-4).** Every record counted by `op` and outcome in its hour before any sampling;
+     an outcome other than `ok` and `failed` is `unknown`; `total` is each counter's sum. A rise is at least 10
+     failures in the hour and at least twice the hour before's, an hour before with none (or not closed) counting as
+     one. `FAC-SEM-166` checks the window, each `op` once, the sums, and every rise against its own digest: an hourly
+     rise names the hour's failures of its op and passes OD-4 against its `previous`; a daily rise is in at most
+     `hours` hours, with at least 10 failures an hour and at most the day's failures of its op.
+  5. **The daily fold and the files (OD-5, OD-6).** The day's hourly digests are folded once each (the first line of
+     an hour); each digest is one JSON line appended to `hourly-YYYY-MM.jsonl` or `daily-YYYY-MM.jsonl` in the
+     product's own folder on its own machine; a reader skips a line it cannot read or of another revision and never
+     stops. The `@1` names stay as Fabric writes them and are not entered in the protocol revision register (DEC-0067):
+     nothing negotiates them, and a reader skips a revision it does not read.
+  6. **Nothing but counts (OD-7), and the operator told (OD-8).** No log line, path, identifier or text; a product
+     that shows findings shows each rise of its newest hour.
+  7. **`retro-after-work` (RW-1 to RW-4).** It arises when a session releases a claim `done` and when the session
+     ends; the host serves it with its other obligations (Fabric: `fabric_whoami`) as advice that holds nothing back;
+     it is fulfilled in the same turn by a lesson in Project Observatory (`observatory_lesson`, one class key each), by
+     `insight/1` lines, or by one line saying there is nothing to say; the host counts each time it arose as one record
+     of the operation `retro-after-work` in its digests (`ok` written, `failed` refused, `unknown` none observed), so
+     retros asked are the sum and retros written `ok`.
+  8. **Reference and vectors.** `foldHour`, `foldDay`, `isRise` and the rules in `src/ops-digest.ts`; vectors in
+     `fixtures/vectors/ops-digest.json`; `pnpm validate` tells the two digests apart by `schema` (kinds
+     `ops-digest-hourly`, `ops-digest-daily`).
+- **Why:** one shape lets one reader (Fabric's review queue, Project Observatory's daily reading) read every product's
+  digests; the shape is the one already written, so the first producer moves nothing. A name grammar that cannot hold
+  a separator keeps paths and URLs out by construction, which a detector applied afterwards cannot promise. Counting the
+  retro as an operation puts "asked" and "written" in the digest the host already writes, without a member the closed
+  shape lacks.
+- **Alternatives considered:** `<name>/<revision>` names (`ops-digest-hourly/1`, as DEC-0067 spells every protocol:
+  Fabric's files already say `@1`, and a rename would leave its written months unreadable for nothing negotiated);
+  `from` and `to` without the fraction only (Fabric writes `.000`, so its every line would fail); a `total` as one
+  number (ADR-0188 and Fabric give it per counter); open schemas, so a product may add members (a log line or a path
+  could ride in one, which OD-7 forbids; a member is added by a decision); retro counts as two new members of the
+  daily digest (the shape ADR-0188 names has none, and a closed `@1` cannot grow without a widening every reader must
+  take); a grammar of only `.` and `-` (Fabric's IPC operations are named `ipc.<channel>` with a `:`, as
+  `ipc.work:home`).
+- **Compatibility:** additive: two new schemas, two new kinds and two new rule codes. Fabric's digests at `e1eecec0`
+  validate as written (its test's names, `x` and `y` included); its daily fold sorts rises by failures then name and
+  keeps the first line of an hour, as `foldDay` does. A product that names an operation outside OD-2's grammar
+  (another separator, an upper-case first letter) renames it before it writes digests. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/ops-digest-hourly.schema.json`, `schemas/ops-digest-daily.schema.json`,
+  `src/ops-digest.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `tools/vectors/ops-digest.ts`,
+  `tools/vectors/run.ts`, `fixtures/vectors/ops-digest.json`, `fixtures/positive/ops-digest-*.json`,
+  `fixtures/negative/ops-digest-*.json` with their catalogue rows, `fixtures/semantic/ops-digest-*.json`,
+  `test/ops-digest.test.ts`, `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
+  `test/schema-compilation.test.ts`, `vitest.config.ts`; `docs/specification/ops-digest.md`, `conformance.md` (the
+  reference module, the producer, reader and host rows, the register), `docs/specification/README.md`,
+  `docs/DOCMAP.md`, `CONTEXT.md`; backlog CT-219; handoff `docs/handoffs/2026-11-04-ops-digest.md`.
+- **Source:** the operator's word of 2026-11-04, relayed by Fabric on board thread `f7758225` (message `516761e1`);
+  Fabric ADR-0188 at commit `0d0e5922`; the reference implementation at Fabric commit `e1eecec0`; backlog CT-219.

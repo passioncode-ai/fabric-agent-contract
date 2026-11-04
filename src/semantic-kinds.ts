@@ -100,6 +100,8 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "node-summary": wrap("summary", "baseline", "org"),
   "node-summary-document": doc("node-summary.schema.json"),
   "openrouter-attribution": doc("openrouter-attribution.schema.json"),
+  "ops-digest-daily": doc("ops-digest-daily.schema.json"),
+  "ops-digest-hourly": doc("ops-digest-hourly.schema.json"),
   "org-share-grants": wrap("record", "parent"),
   package: doc("fabric-package.schema.json"),
   "profile-resolution": wrap("catalogue", "profiles", "choices", "resolved", "policy"),

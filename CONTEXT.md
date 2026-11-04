@@ -558,6 +558,15 @@ stable id (the runner kind where the runners page lists one, else a new name); m
 event's data an agent that answers people publishes: counts and rates in four families, a metric not computed `null`
 and named, never `0`.
 
+**Operations digest**: A product's own operations log counted by operation and outcome, one `ops.digest.hourly@1` line
+per closed hour and one `ops.digest.daily@1` line per closed UTC day (DEC-0153): counts only, no log line, path or
+identifier. A **rise** is an operation's failures in an hour at least 10 and at least twice the hour before's (none
+counting as one), told to the operator. ([operations digests](docs/specification/ops-digest.md))
+
+**Retro after work**: The host obligation `retro-after-work` (DEC-0153): when a session releases a claim `done` or ends,
+it writes in the same turn a lesson in Project Observatory, `insight/1` lines, or one line saying there is nothing to
+say; the host counts each one asked as the operation `retro-after-work` in its digests.
+
 **Runner**: An installed coding-agent CLI a host can drive (Claude Code, Codex, …),
 known from a catalogue entry that names its binaries, its version command and the
 modes (drives) it can be run in. A binary no entry names is never executed.
