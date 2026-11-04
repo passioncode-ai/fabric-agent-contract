@@ -20,8 +20,9 @@ permissions:
 jobs:
   contract:
     runs-on: ${{ matrix.os }}
-    # Node 22 and 24 on Linux (the package admits `engines: >=22.13`), and Node 24 on Windows, where consumers run the
-    # Windows rules (service paths, the token reader, the local channel's pipe) and the gate must pass too. Node 22
+    # Node 22 and 24 on Linux (the package admits `engines: >=22.13`), Node 24 on Windows, where consumers run the
+    # Windows rules (service paths, the token reader, the local channel's pipe) and the gate must pass too, and Node 24
+    # on macOS, where the operator's and most authors' machines run (operator, 2026-11-04: all three systems). Node 22
     # accepts an Ed25519 signature under a small-order key, so only it proves the small-order guard of CT-29 (DEC-0045).
     strategy:
       fail-fast: false
@@ -30,6 +31,7 @@ jobs:
           - { os: ubuntu-latest, node: 22 }
           - { os: ubuntu-latest, node: 24 }
           - { os: windows-latest, node: 24 }
+          - { os: macos-latest, node: 24 }
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v6
@@ -47,8 +49,9 @@ jobs:
       # The gate, `pnpm run check`, one step per part so a failure in one does not hide the next.
       - run: pnpm typecheck
       # On Windows the tests that need POSIX modes, root or `:` in a file name are skipped (CT-191), so the branches they
-      # reach are not covered there: the coverage floors are measured on Linux, and Windows runs the same tests without them.
-      - run: pnpm ${{ runner.os == 'Windows' && 'test:fast' || 'test' }}
+      # reach are not covered there: the coverage floors are measured on Linux, and Windows and macOS run the same tests
+      # without them.
+      - run: pnpm ${{ runner.os == 'Linux' && 'test' || 'test:fast' }}
         if: ${{ !cancelled() }}
       - run: pnpm ux:lint
         if: ${{ !cancelled() }}
