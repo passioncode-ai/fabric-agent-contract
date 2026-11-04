@@ -83,6 +83,16 @@ describe("FAC-SEM-166 and FAC-SEM-167: the operations digests", () => {
     expect(found("ops-digest-daily", value)).toEqual(["FAC-SEM-167 /ops/3/op", "FAC-SEM-167 /risen/1/op"]);
   });
 
+  it("refuses a home folder the slash would let into an operation's name, in ops and in risen", () => {
+    const value = hourlyOk();
+    const op = "home/jdoe/x";
+    expect(OP_NAME.test(op)).toBe(true);
+    value.ops.push({ op, ok: 0, failed: 10, unknown: 0 }, { op: "mcp.tools/list", ok: 1, failed: 0, unknown: 0 });
+    value.total = { ok: 49, failed: 24, unknown: 1 };
+    value.risen.push({ op, failed: 10, previous: 0 });
+    expect(found("ops-digest-hourly", value)).toEqual(["FAC-SEM-167 /ops/4/op", "FAC-SEM-167 /risen/1/op"]);
+  });
+
   it("is not the rule of any other kind", () => {
     expect(opsDigestRules("support-quality-daily", {})).toBeUndefined();
     expect(found("ops-digest-hourly", {})).toEqual(["FAC-SEM-166 /from", "FAC-SEM-166 /to"]);
@@ -91,8 +101,8 @@ describe("FAC-SEM-166 and FAC-SEM-167: the operations digests", () => {
 
 describe("OD-2: an operation's name", () => {
   it("takes the names a product's log writes and refuses a path, a URL, a space or a home folder", () => {
-    for (const op of ["board.tick", "ipc.work:home", "agentSurface.budgetExhausted", "work.sweep-done-review", "retro-after-work", "x", "mcp.tool_call"]) expect(OP_NAME.test(op), op).toBe(true);
-    for (const op of ["logs/ops.jsonl", "https://example.com/a", "~/x", "a b", "C:\\x", "Board.tick", "board..tick", ".tick", "tick.", "1st"]) expect(OP_NAME.test(op), op).toBe(false);
+    for (const op of ["board.tick", "ipc.work:home", "agentSurface.budgetExhausted", "work.sweep-done-review", "retro-after-work", "x", "mcp.tool_call", "mcp.tools/list", "mcp.notifications/initialized"]) expect(OP_NAME.test(op), op).toBe(true);
+    for (const op of ["/logs/ops.jsonl", "https://example.com/a", "~/x", "a b", "C:\\x", "Board.tick", "board..tick", ".tick", "tick.", "1st", "a//b", "a/./b", "a/../b", "a/"]) expect(OP_NAME.test(op), op).toBe(false);
     expect(valid("ops-digest-hourly.schema.json", { ...hourlyOk(), ops: [{ op: "a".repeat(OP_NAME_MAX + 1), ok: 0, failed: 0, unknown: 0 }], total: { ok: 0, failed: 0, unknown: 0 }, risen: [] })).toBe(false);
   });
 });
@@ -107,13 +117,14 @@ describe("the reference folds", () => {
   it.each(vectors.day.map((c) => [c.name, c] as const))("day: %s", (_name, c) => {
     const digest = foldDay(c.input.day, c.input.hourly);
     expect(digest).toEqual(c.expected);
+    if (digest === null) return;
     expect(valid("ops-digest-daily.schema.json", digest)).toBe(true);
     expect(evaluateSemanticRules("ops-digest-daily", digest)).toEqual([]);
   });
   it("refuses an hour that is not whole and skips an hour it cannot read", () => {
     expect(() => foldHour([], "2026-11-04T17:30:00Z", null)).toThrow(/whole UTC hour/);
     const broken = { ...foldHour([], "2026-11-04T01:00:00Z", null), from: "soon" } as unknown as HourlyDigest;
-    expect(foldDay("2026-11-04", [broken]).hours).toBe(0);
+    expect(foldDay("2026-11-04", [broken])).toBeNull();
   });
   it("keeps the committed vector file equal to its generator", () => {
     expect(readFileSync(path.join(root, VECTOR_FILE), "utf8")).toBe(buildOpsDigestVectors());

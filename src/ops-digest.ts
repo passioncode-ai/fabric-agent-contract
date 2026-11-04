@@ -1,4 +1,5 @@
 import { type Finding, type JsonObject, indexed, isObject } from "./findings.js";
+import { hasHomePath } from "./activity-rules.js";
 import { secretValue } from "./secret-shape.js";
 
 // #region ops-digest, docs: docs/specification/ops-digest.md
@@ -7,7 +8,7 @@ import { secretValue } from "./secret-shape.js";
  * hour it happened, one `ops.digest.hourly@1` line per closed hour and one `ops.digest.daily@1` line per closed UTC day.
  * Counts only: no log line, no path, no identifier. A failure count that rose against the hour before is a rise (OD-4).
  * `foldHour` and `foldDay` are the reference folds; `opsDigestRules` is `FAC-SEM-166` (the window and the arithmetic) and
- * `FAC-SEM-167` (no credential shape in an operation's name).
+ * `FAC-SEM-167` (no credential and no home folder in an operation's name).
  */
 export const OPS_DIGEST_HOURLY = "ops.digest.hourly@1";
 export const OPS_DIGEST_DAILY = "ops.digest.daily@1";
@@ -15,8 +16,11 @@ export const OPS_DIGEST_DAILY = "ops.digest.daily@1";
 export const RISE_MIN_FAILED = 10;
 /** …and at least this many times the hour before's (an hour before with none, or none recorded, counts as one). */
 export const RISE_FACTOR = 2;
-/** An operation's name (OD-2): a short dotted, colon or kebab identifier, so no path, URL, space or home folder fits. */
-export const OP_NAME = /^[a-z][A-Za-z0-9_]*(?:[.:-][A-Za-z0-9_]+)*$/;
+/**
+ * An operation's name (OD-2): segments of letters, digits and `_` joined by `.`, `:`, `/` or `-` (`mcp.tools/list`), so
+ * no absolute path, URL, space, empty segment, `.` or `..` fits; `FAC-SEM-167` refuses a home folder the `/` would let in.
+ */
+export const OP_NAME = /^[a-z][A-Za-z0-9_]*(?:[.:\/-][A-Za-z0-9_]+)*$/;
 export const OP_NAME_MAX = 64;
 
 const HOUR_MS = 3_600_000;
@@ -94,9 +98,9 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
 /**
  * The day's hourly digests (those whose hour starts on `day`, one per hour, the first of a repeated hour kept) folded
  * into one: the operations summed, the hours counted, and each operation that rose in some hour with the hours it rose
- * in and the failures of those hours, the most failures first.
+ * in and the failures of those hours, the most failures first. A day with no hour of its own has no digest: null (OD-5).
  */
-export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDigest {
+export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDigest | null {
   const seen = new Set<number>();
   const mine = hourly.filter((h) => {
     const at = wholeHour(h.from);
@@ -104,6 +108,7 @@ export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDige
     seen.add(at);
     return true;
   });
+  if (mine.length === 0) return null;
   const merged = new Map<string, OpCount>();
   const rose = new Map<string, { hours: number; failed: number }>();
   for (const h of mine) {
@@ -131,7 +136,10 @@ export function opsDigestRules(kind: string, value: JsonObject): Finding[] | und
   if (!(kind === "ops-digest-hourly" || kind === "ops-digest-daily")) return undefined;
   const findings: Finding[] = [];
   const window = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-166", instancePath, message });
-  const secret = (instancePath: string) => findings.push({ code: "FAC-SEM-167", instancePath, message: "an operation's name is shaped like a credential; it names an operation, never a value" });
+  const named = (instancePath: string, op: string) => {
+    if (secretValue(op)) findings.push({ code: "FAC-SEM-167", instancePath, message: "an operation's name is shaped like a credential; it names an operation, never a value" });
+    else if (hasHomePath(op)) findings.push({ code: "FAC-SEM-167", instancePath, message: "an operation's name holds a home folder; it names an operation, never a path" });
+  };
 
   // The window: an hour of one hour, or a real day.
   if (kind === "ops-digest-hourly") {
@@ -152,7 +160,7 @@ export function opsDigestRules(kind: string, value: JsonObject): Finding[] | und
     if (typeof op === "string") {
       if (byOp.has(op)) window(`/ops/${index}/op`, `${op} is counted once`);
       else byOp.set(op, entry);
-      if (secretValue(op)) secret(`/ops/${index}/op`);
+      named(`/ops/${index}/op`, op);
     }
     for (const counter of COUNTERS) {
       const n = count(entry[counter]);
@@ -174,7 +182,7 @@ export function opsDigestRules(kind: string, value: JsonObject): Finding[] | und
     const op = entry.op;
     if (typeof op !== "string") continue;
     const at = `/risen/${index}`;
-    if (secretValue(op)) secret(`${at}/op`);
+    named(`${at}/op`, op);
     if (rose.has(op)) window(`${at}/op`, `${op} is named once among the rises`);
     rose.add(op);
     const counted = byOp.get(op);

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/ops-digest-hourly.schema.json",
   "title": "ops.digest.hourly@1 (DEC-0153): one closed hour of a product's operations log, counted by operation and outcome",
-  "description": "One line of hourly-YYYY-MM.jsonl. Counts only: no log line, no path, no identifier, no free text. FAC-SEM-166: from and to are whole UTC hours one hour apart, each op once, total each counter's sum over ops, every rise an op of ops with the hour's failures and a rise by OD-4. FAC-SEM-167: no op shaped like a credential.",
+  "description": "One line of hourly-YYYY-MM.jsonl. Counts only: no log line, no path, no identifier, no free text. FAC-SEM-166: from and to are whole UTC hours one hour apart, each op once, total each counter's sum over ops, every rise an op of ops with the hour's failures and a rise by OD-4. FAC-SEM-167: no op shaped like a credential or holding a home folder.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -75,8 +75,8 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 64,
-      "pattern": "^[a-z][A-Za-z0-9_]*(?:[.:-][A-Za-z0-9_]+)*$",
-      "description": "An operation's name (OD-2): a letter, then letters, digits and underscores in segments joined by '.', ':' or '-', at most 64 characters. No path, URL, space or home folder fits; a credential's shape is FAC-SEM-167."
+      "pattern": "^[a-z][A-Za-z0-9_]*(?:[.:/-][A-Za-z0-9_]+)*$",
+      "description": "An operation's name (OD-2): a lower-case letter, then letters, digits and underscores in segments joined by '.', ':', '/' or '-' (mcp.tools/list), at most 64 characters. No absolute path, URL, space, empty segment, '.' or '..' fits; a credential's shape or a home folder is FAC-SEM-167."
     },
     "counters": {
       "type": "object",
@@ -118,8 +118,8 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 64,
-          "pattern": "^[a-z][A-Za-z0-9_]*(?:[.:-][A-Za-z0-9_]+)*$",
-          "description": "An operation's name (OD-2): a letter, then letters, digits and underscores in segments joined by '.', ':' or '-', at most 64 characters. No path, URL, space or home folder fits; a credential's shape is FAC-SEM-167."
+          "pattern": "^[a-z][A-Za-z0-9_]*(?:[.:/-][A-Za-z0-9_]+)*$",
+          "description": "An operation's name (OD-2): a lower-case letter, then letters, digits and underscores in segments joined by '.', ':', '/' or '-' (mcp.tools/list), at most 64 characters. No absolute path, URL, space, empty segment, '.' or '..' fits; a credential's shape or a home folder is FAC-SEM-167."
         },
         "ok": {
           "type": "integer",

@@ -53,6 +53,9 @@ function hourCases(): Json[] {
     ["after a gap the earlier hour is no baseline",
       { counts: [c("x", 0, 20, 0)], from: H17, previous: hour(H14, H15, [c("x", 0, 40, 0)], t(0, 40, 0), [{ op: "x", failed: 40, previous: 0 }]) },
       hour(H17, H18, [c("x", 0, 20, 0)], t(0, 20, 0), [{ op: "x", failed: 20, previous: 0 }])],
+    ["an MCP method's name, with a slash, is an operation",
+      { counts: [c("mcp.tools/list", 4, 0, 0), c("mcp.notifications/cancelled", 0, 0, 1)], from: H17, previous: null },
+      hour(H17, H18, [c("mcp.notifications/cancelled", 0, 0, 1), c("mcp.tools/list", 4, 0, 0)], t(4, 0, 1), [])],
     ["a from written without a fraction is the same hour",
       { counts: [c("x", 1, 0, 0)], from: "2026-11-04T17:00:00Z", previous: null },
       hour(H17, H18, [c("x", 1, 0, 0)], t(1, 0, 0), [])]
@@ -75,13 +78,16 @@ function dayCases(): Json[] {
       { day: "2026-11-05", hourly: [hour("2026-11-05T00:00:00.000Z", "2026-11-05T01:00:00.000Z", [c("b", 0, 10, 0), c("a", 0, 10, 0)], t(0, 20, 0), [{ op: "a", failed: 10, previous: 0 }, { op: "b", failed: 10, previous: 0 }])] },
       { schema: "ops.digest.daily@1", day: "2026-11-05", hours: 1, ops: [c("a", 0, 10, 0), c("b", 0, 10, 0)], total: t(0, 20, 0), risen: [{ op: "a", hours: 1, failed: 10 }, { op: "b", hours: 1, failed: 10 }] }]
   ];
-  return list.map(([name, input, expected]) => ({ name, input, expected }));
+  const none: Array<[string, Json, null]> = [
+    ["a day with no hour of its own has no digest", { day: "2026-11-06", hourly: [h1, other] }, null]
+  ];
+  return [...list, ...none].map(([name, input, expected]) => ({ name, input, expected }));
 }
 
 /** The vectors as an object. */
 export function opsDigestVectors(): Json {
   return {
-    about: "Vectors for the operations digests (DEC-0153), written by tools/vectors/ops-digest.ts, never by hand. hour: foldHour(input.counts, input.from, input.previous), counts a list of {op, ok, failed, unknown} (an op may repeat and is summed), from a whole UTC hour, previous the hour before's digest or null; the answer is the ops.digest.hourly@1 digest, from and to as Date.prototype.toISOString writes them. day: foldDay(input.day, input.hourly); the answer is the ops.digest.daily@1 digest. A rise is at least 10 failures in the hour and at least twice the hour before's, an hour before with none (or not closed) counting as one (OD-4).",
+    about: "Vectors for the operations digests (DEC-0153), written by tools/vectors/ops-digest.ts, never by hand. hour: foldHour(input.counts, input.from, input.previous), counts a list of {op, ok, failed, unknown} (an op may repeat and is summed), from a whole UTC hour, previous the hour before's digest or null; the answer is the ops.digest.hourly@1 digest, from and to as Date.prototype.toISOString writes them. day: foldDay(input.day, input.hourly); the answer is the ops.digest.daily@1 digest, or null for a day with no hour of its own, which has no digest (OD-5). A rise is at least 10 failures in the hour and at least twice the hour before's, an hour before with none (or not closed) counting as one (OD-4).",
     hour: hourCases(),
     day: dayCases()
   };

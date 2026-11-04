@@ -4,7 +4,7 @@
   "to": "2026-11-04T18:00:00.000Z",
   "ops": [
     {
-      "op": "logs/ops.jsonl",
+      "op": "/logs/ops.jsonl",
       "ok": 1,
       "failed": 0,
       "unknown": 0

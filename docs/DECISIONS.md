@@ -9047,18 +9047,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2. **The window (OD-1).** `from` and `to` are whole UTC hours in RFC 3339 with `Z`, with or without the `.000` that
      `Date.prototype.toISOString` writes (Fabric writes it), `to` one hour after `from`; `day` is `YYYY-MM-DD` UTC;
      `hours` 1 to 24. An hour the product ran through is written even when empty; an hour it did not run is a gap.
-  3. **An operation's name (OD-2).** `^[a-z][A-Za-z0-9_]*(?:[.:-][A-Za-z0-9_]+)*$`, at most 64 characters: every
-     operation name written literally in Fabric's sources at `e1eecec0`, and every `ipc.<channel>` of its channel
-     table, fits (the longest 53 characters), and no path, URL, space or home folder can.
-     `FAC-SEM-167` refuses a name shaped like a credential (`secretValue`, DEC-0044).
+  3. **An operation's name (OD-2).** `^[a-z][A-Za-z0-9_]*(?:[.:/-][A-Za-z0-9_]+)*$`, at most 64 characters. `/` is
+     a separator because Fabric logs an MCP method as `mcp.<method>` (`mcp.tools/list`,
+     `mcp.notifications/initialized`, `mcp.notifications/cancelled`; board thread `f7758225`, message `1c191cf7`), and
+     the 175 operation names Fabric checked in a week of its own log all fit. No absolute path, URL, space, empty
+     segment, `.` or `..` can; `FAC-SEM-167` refuses a name shaped like a credential (`secretValue`, DEC-0044) or
+     holding a home folder (`hasHomePath`, the detector other rules use), so the `/` lets no home path through.
   4. **Counting and the rise (OD-3, OD-4).** Every record counted by `op` and outcome in its hour before any sampling;
-     an outcome other than `ok` and `failed` is `unknown`; `total` is each counter's sum. A rise is at least 10
+     an outcome other than `ok` and `failed` is `unknown`, and so is a call refused because a source slot is missing
+     (DEC-0149's setup state, in progress), never `failed`, so it never makes a rise; `total` is each counter's sum. A rise is at least 10
      failures in the hour and at least twice the hour before's, an hour before with none (or not closed) counting as
      one. `FAC-SEM-166` checks the window, each `op` once, the sums, and every rise against its own digest: an hourly
      rise names the hour's failures of its op and passes OD-4 against its `previous`; a daily rise is in at most
      `hours` hours, with at least 10 failures an hour and at most the day's failures of its op.
   5. **The daily fold and the files (OD-5, OD-6).** The day's hourly digests are folded once each (the first line of
-     an hour); each digest is one JSON line appended to `hourly-YYYY-MM.jsonl` or `daily-YYYY-MM.jsonl` in the
+     an hour), and a day with no hour of its own has no daily digest: a producer writes none, and one that answers
+     for a day answers that it has none (Fabric Inbox answers `404`, board message `f74763e1`); each digest is one JSON line appended to `hourly-YYYY-MM.jsonl` or `daily-YYYY-MM.jsonl` in the
      product's own folder on its own machine; a reader skips a line it cannot read or of another revision and never
      stops. The `@1` names stay as Fabric writes them and are not entered in the protocol revision register (DEC-0067):
      nothing negotiates them, and a reader skips a revision it does not read.
@@ -9074,8 +9078,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `fixtures/vectors/ops-digest.json`; `pnpm validate` tells the two digests apart by `schema` (kinds
      `ops-digest-hourly`, `ops-digest-daily`).
 - **Why:** one shape lets one reader (Fabric's review queue, Project Observatory's daily reading) read every product's
-  digests; the shape is the one already written, so the first producer moves nothing. A name grammar that cannot hold
-  a separator keeps paths and URLs out by construction, which a detector applied afterwards cannot promise. Counting the
+  digests; the shape is the one already written, so the first producer moves nothing. A name grammar that holds no empty
+  segment, `.`, `..` or leading `/` keeps absolute paths and URLs out by construction, and the home-folder detector the
+  relative home paths `/` would let in. Counting the
   retro as an operation puts "asked" and "written" in the digest the host already writes, without a member the closed
   shape lacks.
 - **Alternatives considered:** `<name>/<revision>` names (`ops-digest-hourly/1`, as DEC-0067 spells every protocol:
@@ -9085,7 +9090,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   could ride in one, which OD-7 forbids; a member is added by a decision); retro counts as two new members of the
   daily digest (the shape ADR-0188 names has none, and a closed `@1` cannot grow without a widening every reader must
   take); a grammar of only `.` and `-` (Fabric's IPC operations are named `ipc.<channel>` with a `:`, as
-  `ipc.work:home`).
+  `ipc.work:home`, and its MCP methods `mcp.<method>` with a `/`); a grammar without `/` with MCP methods renamed
+  (Fabric's written months would fail, and the home-folder detector closes what `/` opens); a daily digest of zero
+  hours for an empty day (a reader could not tell a day the product did not run from a day it ran and counted
+  nothing in no hour, which OD-1 makes impossible); a refused call for a missing slot counted `failed` (a person's
+  unfinished setup would read as an outage and make rises).
 - **Compatibility:** additive: two new schemas, two new kinds and two new rule codes. Fabric's digests at `e1eecec0`
   validate as written (its test's names, `x` and `y` included); its daily fold sorts rises by failures then name and
   keeps the first line of an hour, as `foldDay` does. A product that names an operation outside OD-2's grammar
@@ -9093,10 +9102,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `schemas/ops-digest-hourly.schema.json`, `schemas/ops-digest-daily.schema.json`,
   `src/ops-digest.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `tools/vectors/ops-digest.ts`,
   `tools/vectors/run.ts`, `fixtures/vectors/ops-digest.json`, `fixtures/positive/ops-digest-*.json`,
-  `fixtures/negative/ops-digest-*.json` with their catalogue rows, `fixtures/semantic/ops-digest-*.json`,
+  `fixtures/negative/ops-digest-*.json` with their catalogue rows, `fixtures/semantic/ops-digest-*.json`, `src/activity-rules.ts` (its `hasHomePath`, read),
   `test/ops-digest.test.ts`, `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
   `test/schema-compilation.test.ts`, `vitest.config.ts`; `docs/specification/ops-digest.md`, `conformance.md` (the
   reference module, the producer, reader and host rows, the register), `docs/specification/README.md`,
   `docs/DOCMAP.md`, `CONTEXT.md`; backlog CT-219; handoff `docs/handoffs/2026-11-04-ops-digest.md`.
-- **Source:** the operator's word of 2026-11-04, relayed by Fabric on board thread `f7758225` (message `516761e1`);
+- **Source:** the operator's word of 2026-11-04, relayed by Fabric on board thread `f7758225` (message `516761e1`),
+  and the thread's answers on the draft (messages `1c191cf7`, the `/` in MCP method names, and `f74763e1`, the day with
+  no hour), decided by the coordinator;
   Fabric ADR-0188 at commit `0d0e5922`; the reference implementation at Fabric commit `e1eecec0`; backlog CT-219.

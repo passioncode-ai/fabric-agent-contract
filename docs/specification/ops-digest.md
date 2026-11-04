@@ -46,20 +46,27 @@ text among them, fails it.
   total 0), so the next hour compares with zero; an hour the product did not run is not written (a gap), and the hour
   after a gap compares with none. A daily digest folds the hourly digests whose hour starts on its day.
 - **OD-2, an operation's name.** `op` is a short identifier: a lower-case letter, then letters, digits and `_` in
-  segments joined by `.`, `:` or `-` (`board.tick`, `ipc.work:home`, `work.sweep-done-review`), at most 64
-  characters. So no path, URL, space or home folder fits it. It names the operation, never a value of it: no
-  identifier, count or credential (`FAC-SEM-167` refuses one shaped like a credential).
+  segments joined by `.`, `:`, `/` or `-` (`board.tick`, `ipc.work:home`, `work.sweep-done-review`, and an MCP
+  method as `mcp.<method>`: `mcp.tools/list`, `mcp.notifications/initialized`), at most 64 characters. So no absolute
+  path, URL, space, empty segment, `.` or `..` fits it; a home folder the `/` would let through (`home/<name>/…`) is
+  refused by `FAC-SEM-167`, with the home-folder detector other rules use (`hasHomePath`, `src/activity-rules.ts`). It
+  names the operation, never a value of it: no identifier, count or credential (`FAC-SEM-167` also refuses one shaped
+  like a credential).
 - **OD-3, counting.** Every record the product's log takes is counted, by `op` and outcome, in the hour it happened,
   before the log decides whether to write or only count it (a sampled success is counted too). The outcome `ok` counts
-  as `ok`, `failed` as `failed`, any other as `unknown`. `total` is each counter's sum over `ops`. Each `op` is named
-  once in `ops` and once in `risen`.
+  as `ok`, `failed` as `failed`, any other as `unknown`. A call refused because a source slot is missing (DEC-0149,
+  in progress: its item 14, the setup state of DEC-0044) is a setup answer, not a failure: it counts as `unknown`,
+  never `failed`, so a person's unfinished setup never makes a rise. `total` is each counter's sum over `ops`. Each
+  `op` is named once in `ops` and once in `risen`.
 - **OD-4, a rise.** An operation rose in an hour when its failures in the hour are at least 10 and at least twice its
   failures in the hour just before; an hour before with no failure, or none recorded, counts as one. So 10 failures
   after 0 or 5 is a rise, 10 after 6 is not, 9 is never one. Every operation that rose is in `risen`, and each one
   there rose. A daily digest's rise sums the failures of the hours it rose in, so it is at least 10 an hour and at
   most the day's failures of that operation.
 - **OD-5, the daily fold.** The day's hourly digests are folded once each: a product that finds two lines for one hour
-  (a restart that read its own file back) folds the first. `hours` is how many were folded.
+  (a restart that read its own file back) folds the first. `hours` is how many were folded. A day with no hourly
+  digest of its own has no daily digest: a product writes none for it, and one that answers for a day (Fabric Inbox,
+  over HTTP) answers that it has none (`404`) rather than a digest of zero hours (`foldDay` returns null).
 - **OD-6, the files.** A product appends each digest as one line of JSON, ended by a line feed, to
   `hourly-YYYY-MM.jsonl` (the month of `from`) and `daily-YYYY-MM.jsonl` (the month of `day`), in a folder of its own
   on its own machine that only its user reads (Fabric's: `digests` in its data folder, files mode `0600`). A digest
@@ -99,7 +106,7 @@ its own `.json` file) and tells the two apart by `schema`.
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-166"></a>`FAC-SEM-166` | `ops-digest-hourly`, `ops-digest-daily` | an hourly digest's `from` and `to` are whole UTC hours of real days, one hour apart, and a daily digest's `day` a real UTC day; each `op` once in `ops` and once in `risen`; `total` each counter's sum over `ops`; every `risen` op counted in `ops`; an hourly rise names the hour's failures of its op and is a rise by OD-4 against its `previous`; a daily rise is in at most the day's `hours`, with at least 10 failures an hour it rose and at most the day's failures of its op (DEC-0153) |
-| <a id="fac-sem-167"></a>`FAC-SEM-167` | `ops-digest-hourly`, `ops-digest-daily` | no `op`, in `ops` or in `risen`, is shaped like a credential (`secretValue` of [`src/secret-shape.ts`](../../src/secret-shape.ts)) (DEC-0153) |
+| <a id="fac-sem-167"></a>`FAC-SEM-167` | `ops-digest-hourly`, `ops-digest-daily` | no `op`, in `ops` or in `risen`, is shaped like a credential (`secretValue` of [`src/secret-shape.ts`](../../src/secret-shape.ts)) or holds a home folder (`hasHomePath` of [`src/activity-rules.ts`](../../src/activity-rules.ts)) (DEC-0153) |
 
 ## Not decided here
 
