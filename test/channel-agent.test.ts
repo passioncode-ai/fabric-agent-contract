@@ -319,10 +319,13 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(performance.now() - started).toBeLessThan(2000);
     expect(found.filter((f) => f.code === "FAC-SEM-162").length).toBe(4);
   });
-  it("finds an id that starts with sk- and holds a mixed run, as the page warns", () => {
-    const channel = { ...value.projects[0].channels[0], id: "sk-Support-Desk-2026-v2" };
+  it("finds a valid channel id that starts with sk- and holds a digit and 32 name characters, as the page warns", () => {
+    const id = "sk-support-desk-faq-answers-2026-v2";
+    expect(id.length - "sk-".length).toBeGreaterThanOrEqual(32);
+    const channel = { ...value.projects[0].channels[0], id };
     const found = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [{ ...value.projects[0], channels: [channel, value.projects[0].channels[1]] }] } } }, "well-known");
-    expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.instancePath)).toEqual([`${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/channels/0/id`]);
+    // A valid id: exactly one finding, FAC-SEM-165 at the channel id, and no FAC-SEM-162.
+    expect(found.map((f) => `${f.code} ${f.instancePath}`)).toEqual([`FAC-SEM-165 ${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/channels/0/id`]);
   });
   it("names the schema's allowed values beside an enum, a const or a pattern place, never the instance's", () => {
     const route = { ...value.projects[0].question_route, capability: "support.ask" };

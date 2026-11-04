@@ -98,7 +98,7 @@ the pull request comes from the v3 branch only.
 - Credential shapes for the slot cases a provider might scan for (an AWS or Slack key) are built at run time in
   `test/channel-agent.test.ts`; the vector file carries only `sk-` shapes of repeated or made-up characters.
 - The detector stays shared and by shape: an ordinary hyphenated id that starts with `sk-` and holds a mixed run
-  (`sk-Support-Desk-2026-v2`) is a `FAC-SEM-165` finding; the page says not to start an id with `sk-`.
+  (the valid channel id `sk-support-desk-faq-answers-2026-v2`) is a `FAC-SEM-165` finding; the page says not to start an id with `sk-`.
 
 ## Open
 
@@ -165,7 +165,7 @@ DEC-0151 is in progress. The second of the two to land rewrites, in its own chan
   a declaration to a project's payloads on `project:<slug>`" in `channel-agent.md` (the declaration), which becomes a
   statement that the reader joins them;
 - the note in `channel-agent.md` (What is checked, item 4) and DEC-0150 CA-5 that the shared detector finds an ordinary
-  hyphenated name starting with `sk-`: re-check that `sk-Support-Desk-2026-v2` is still found under the detector
+  hyphenated name starting with `sk-`: re-check that `sk-support-desk-faq-answers-2026-v2` is still found under the detector
   of DEC-0151, in progress (the test in `test/channel-agent.test.ts` pins it); the advice not to start an id with `sk-`
   stays;
 - the two "Compared as written" bullets for `project:<slug>` in `docs/specification/identifiers.md`, merged into one;

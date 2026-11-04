@@ -9090,7 +9090,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and 11).
   5. CA-5. `FAC-SEM-165`: no member name and no string of the declaration is shaped like a credential, by shape, with
      `FAC-SEM-101`'s detector on a string's first 4097 code points (an ordinary name that starts with `sk-` and holds
-     a mixed run, such as `sk-Support-Desk-2026-v2`, is found too; the shared detector stays as it is). Three places read narrower, each only when the value
+     a digit and 32 or more name characters after the prefix, such as the valid channel id
+     `sk-support-desk-faq-answers-2026-v2`, is found too; the shared detector stays as it is). Three places read narrower, each only when the value
      matches its own grammar, keyed on the place and not on a holder's name: a project's token slot of the slot's
      grammar segment by segment, its eval suite and outbox of the relative path grammar by the detector's path-aware
      reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a

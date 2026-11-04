@@ -145,7 +145,8 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    each `eyJ` to the end of its run (which the JWT shape reads back), and the square of an upper-case run after `?`,
    `&` or `#` over two (a query name the detector splits by backtracking). Past that, one finding at the declaration
    says the rest was not read for credentials. Being by shape, it also finds an ordinary hyphenated name that starts
-   with `sk-` and holds a mixed run (`sk-Support-Desk-2026-v2`, a test pins it): do not start an id with `sk-`.
+   with `sk-` and holds a digit and 32 or more name characters after it, such as the valid channel id
+   `sk-support-desk-faq-answers-2026-v2` (a test pins it): do not start an id with `sk-`.
 
 No finding's message carries a declared value, and no rule's place echoes instance data: a place writes a member name
 the schema declares and an index of an array the schema declares, and `*` for any other member name, for a numeric key
