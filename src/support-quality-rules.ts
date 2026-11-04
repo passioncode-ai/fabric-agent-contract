@@ -11,11 +11,14 @@ import { type Finding, type JsonObject, isObject } from "./findings.js";
  * `calibrationChecks` stands only beside it. DEC-0151's ticket counts follow the not-measured rule: the top-level
  * `arrived`, `ended` and `notATicket` each under its own name, the `open` and `outcomes` objects as families, and
  * `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets` as their families' members; an absent
- * one is not carried, so naming it is a finding. DEC-0151 adds no sum among them: the standard states none.
+ * one is not carried, so naming it is a finding, and naming a top-level member that is no metric (`project`, `day`) says
+ * so. DEC-0151 adds no sum among them: the channel agent standard states none.
  */
 const FAMILIES = ["nobodyDropped", "quality", "stability", "autonomy", "open", "outcomes"] as const;
 /** DEC-0151: the ticket counts at the top level, each named in `notMeasured` by its own name. */
 const TOP_COUNTS = ["arrived", "ended", "notATicket"] as const;
+/** The payload's other top-level members: none is a metric, so naming one in `notMeasured` says so (DEC-0151). */
+const NOT_METRICS: ReadonlySet<string> = new Set(["kind", "day", "channel", "project", "rubricVersion", "judgeModel", "notMeasured", ...FAMILIES, "calibration", "calibrationChecks"]);
 
 /** The Monday of ISO week `YYYY-Www` as `YYYY-MM-DD`, or null when the year has no such week (W53 of a 52-week year). */
 export function isoWeekMonday(week: string): string | null {
@@ -74,7 +77,10 @@ export function supportQualityRules(value: JsonObject): Finding[] {
   } else if (value.calibrationChecks !== undefined) {
     flag("/calibrationChecks", "calibrationChecks stands only beside a calibration");
   }
-  for (const name of named) if (!seen.has(name)) flag("/notMeasured", `notMeasured names ${name}, which the payload does not carry`);
+  for (const name of named) {
+    if (seen.has(name)) continue;
+    flag("/notMeasured", NOT_METRICS.has(name) ? `notMeasured names ${name}, which is not a metric` : `notMeasured names ${name}, which the payload does not carry`);
+  }
   const num = (family: string, metric: string): number | null => {
     const members = isObject(value[family]) ? value[family] : {};
     return typeof members[metric] === "number" ? (members[metric] as number) : null;

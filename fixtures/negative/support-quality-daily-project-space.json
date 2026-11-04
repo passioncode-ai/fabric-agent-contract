@@ -2,7 +2,7 @@
   "kind": "support-quality-daily/1",
   "day": "2026-10-18",
   "channel": "chat",
-  "project": "alpha support",
+  "project": "project:alpha support",
   "rubricVersion": "v1",
   "judgeModel": "qwen/qwen3.8-flash",
   "notMeasured": [

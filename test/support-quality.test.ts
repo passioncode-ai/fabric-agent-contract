@@ -192,7 +192,17 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
     const malformed = Object.assign(ok(), { open: "x", outcomes: [1], notMeasured: [...ok().notMeasured, "open.handedOpen"] });
     expect(paths(malformed)).toEqual(["FAC-SEM-126 /notMeasured"]);
   });
-  it("adds no sum the standard does not state: an outcome count above ended, or an open count above arrived, is no finding", () => {
+  it("says a top-level name that is no metric is not one, and an unknown name is not carried (DEC-0151)", () => {
+    const messages = (value: unknown) => evaluateSemanticRules("support-quality-daily", value).map((f) => `${f.instancePath} ${f.message}`);
+    for (const name of ["project", "day", "kind", "outcomes", "calibration"]) {
+      expect(messages(Object.assign(tickets(), { notMeasured: [...tickets().notMeasured, name] }))).toEqual([`/notMeasured notMeasured names ${name}, which is not a metric`]);
+    }
+    expect(messages(Object.assign(ok(), { notMeasured: [...ok().notMeasured, "arrived", "lostTickets"] }))).toEqual([
+      "/notMeasured notMeasured names arrived, which the payload does not carry",
+      "/notMeasured notMeasured names lostTickets, which the payload does not carry"
+    ]);
+  });
+  it("adds no sum the channel agent standard does not state: an outcome count above ended, or an open count above arrived, is no finding", () => {
     const value = tickets();
     value.outcomes.referred = value.ended + 1;
     value.open.handedOpen = value.arrived + 1;
@@ -210,19 +220,24 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
       expect(validateDocument(ajv, schemaId, refused).valid, name).toBe(false);
     }
   });
-  it("maps each of the standard's seven channel kinds onto one of /1's four channels, adding none", () => {
+  it("maps each of the channel agent standard's seven channel kinds onto one of /1's four channels, adding none", () => {
     const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
     expect(schema.properties.channel.enum).toEqual(["chat", "mail", "reviews", "community"]);
     const page = readFileSync(path.join(projectRoot(), "docs/specification/support-quality.md"), "utf8");
-    const section = page.slice(page.indexOf("### The standard's channel kinds"), page.indexOf("## Semantic rules"));
+    const start = page.indexOf("### The channel agent standard's channel kinds");
+    expect(start).toBeGreaterThan(0);
+    const section = page.slice(start, page.indexOf("## Semantic rules"));
     const rows = [...section.matchAll(/^\| `([a-z_]+)` \| `([a-z]+)` \|/gm)].map((match) => [match[1], match[2]]);
     expect(rows.map(([kind]) => kind).sort()).toEqual(["account", "mail", "public_comment", "store_review", "team_chat", "telegram_dm", "telegram_group"]);
     for (const [, channel] of rows) expect(schema.properties.channel.enum).toContain(channel);
   });
-  it("keys two projects' days on one channel apart by project, the id in comms-common's pattern (DEC-0151)", async () => {
+  it("keys two projects' days on one channel apart by project, the registry's project:<slug> (DEC-0151)", async () => {
     const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
     const common = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/comms-common.schema.json"), "utf8")) as Json;
-    expect(schema.$defs.projectId.pattern).toBe(common.$defs.projectId.pattern);
+    // The project registry's alias, project:<slug>, as the channel agent declaration names a project (DEC-0150).
+    expect(schema.$defs.projectAlias.pattern).toBe("^project:[a-z0-9][a-z0-9._-]{0,127}$");
+    expect(schema.$defs.projectId).toBeUndefined();
+    expect(common.$defs.projectId.pattern).not.toBe(schema.$defs.projectAlias.pattern);
     expect(schema.required).not.toContain("project");
     const ajv = await createValidator();
     const page = positive("service-events-page-support-quality-projects.json");
@@ -239,8 +254,21 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
     const key = (value: Json) => [value.channel, value.day, value.project ?? ""].join(" ");
     expect(values.map((value) => [value.channel, value.day].join(" "))).toEqual(["chat 2026-10-18", "chat 2026-10-18"]);
     expect(new Set(values.map(key)).size).toBe(2);
-    const refused = Object.assign(tickets(), { project: "alpha support" });
-    expect(validateDocument(ajv, schemaId, refused).valid).toBe(false);
+    for (const project of ["project:alpha support", "alpha", "project:Alpha", "project:", `project:${"a".repeat(129)}`]) {
+      expect(validateDocument(ajv, schemaId, Object.assign(tickets(), { project })).valid, project).toBe(false);
+    }
+    expect(validateDocument(ajv, schemaId, positive("support-quality-daily-project.json")).valid).toBe(true);
+    expect(validateDocument(ajv, schemaId, Object.assign(tickets(), { project: `project:${"a".repeat(128)}` })).valid).toBe(true);
+  });
+  it("refuses a 40-character mixed-case id as a project, the shape FAC-SEM-101 would read as a credential (DEC-0151)", async () => {
+    const ajv = await createValidator();
+    // Built at run time from a fixed alphabet, so no credential-shaped literal sits in the repository.
+    const alphabet = "aB3cD4eF5gH6jK7mN8pQ9rS2tU";
+    const id = Array.from({ length: 40 }, (_, index) => alphabet[(index * 7) % alphabet.length]).join("");
+    expect(id).toHaveLength(40);
+    expect(/[a-z]/.test(id) && /[A-Z]/.test(id)).toBe(true);
+    expect(validateDocument(ajv, schemaId, Object.assign(tickets(), { project: id })).valid).toBe(false);
+    expect(validateDocument(ajv, schemaId, Object.assign(tickets(), { project: `project:${id}` })).valid).toBe(false);
   });
   it("keeps DEC-0070's bounds: every object of the schema at most 32 members, and the whole payload inside an events page", async () => {
     const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
@@ -250,6 +278,8 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
       if (member.maxProperties !== undefined) expect(member.maxProperties).toBeLessThanOrEqual(16);
     }
     expect(Object.keys(schema.properties.outcomes.properties)).toHaveLength(10);
+    // DEC-0151's refused alternative, the outcomes at the top level: 28 members, inside 32 too.
+    expect(Object.keys(schema.properties).length - 1 + Object.keys(schema.properties.outcomes.properties).length).toBe(28);
     expect(schema.properties.notMeasured.maxItems).toBe(32);
     const ajv = await createValidator();
     const page = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/service-events-page-data.json"), "utf8")) as Json;

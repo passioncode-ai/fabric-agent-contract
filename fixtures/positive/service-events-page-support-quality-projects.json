@@ -5,14 +5,14 @@
       "at": "2026-10-19T00:20:00Z",
       "kind": "support.quality_daily",
       "level": "info",
-      "text": "Support quality for chat on 2026-10-18, project alpha-support: 35 tickets ended.",
+      "text": "Support quality for chat on 2026-10-18, alpha: 35 tickets ended.",
       "data": {
         "schema": "https://support.example.com/schemas/support-quality-daily.schema.json",
         "value": {
           "kind": "support-quality-daily/1",
           "day": "2026-10-18",
           "channel": "chat",
-          "project": "alpha-support",
+          "project": "project:alpha",
           "rubricVersion": "v1",
           "judgeModel": "qwen/qwen3.8-flash",
           "notMeasured": [
@@ -88,14 +88,14 @@
       "at": "2026-10-19T00:20:01Z",
       "kind": "support.quality_daily",
       "level": "info",
-      "text": "Support quality for chat on 2026-10-18, project beta-support: 11 tickets ended.",
+      "text": "Support quality for chat on 2026-10-18, beta: 11 tickets ended.",
       "data": {
         "schema": "https://support.example.com/schemas/support-quality-daily.schema.json",
         "value": {
           "kind": "support-quality-daily/1",
           "day": "2026-10-18",
           "channel": "chat",
-          "project": "beta-support",
+          "project": "project:beta",
           "rubricVersion": "v1",
           "judgeModel": "qwen/qwen3.8-flash",
           "notMeasured": [

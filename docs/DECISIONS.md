@@ -9036,18 +9036,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-04
 - **Status:** Proposed: accepted at merge after two clean rounds of readings. A widening of DEC-0095's closed schema
-  at the same revision, by the path DEC-0144 took. Consumer adoption: CT-210.
+  at the same revision, by the path DEC-0144 took. Consumer adoption: CT-210. Closes CT-129 (item 3) on merge.
 - **Context:** the channel agent standard's v1 release candidate, received on the board (thread `b6820b97`; the copy
   DEC-0150 adds, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`), asks every agent that answers
   people to publish `support.quality_daily` as `support-quality-daily/1` over the day's tickets (its section 5): what
-  arrived and ended, what is open at the cutoff, each outcome and two marks, the answered tickets and the checker's
-  fallbacks. `/1` has no member for them, and its schema is closed. The coordinator decided the amendment on the board
-  (request `74105ca1`, thread `b6820b97`); a later copy of the standard on the same thread already names the outcome
-  counts as `outcomes.<metric>` and defers to this decision. The declaration names seven channel kinds where `/1` has
-  four channels, and it publishes per project where a `/1` reader keeps one event per service, channel and day, so an
-  agent serving two projects on one channel would have one day replace the other; the coordinator decided the
-  project member on the same thread. Separately, FAC-SEM-126 asks a producer to name an unmeasured
-  `nobodyDropped.firstReplyP50Ms`, which the `notMeasured` pattern refused (no digits in a metric name; finding X-4).
+  arrived and ended, what is open at the cutoff, each outcome and two marks, the answered tickets and the fallbacks of
+  the checker (the model that gates an answer before it is sent). `/1` has no member for them, and its schema is
+  closed. The coordinator decided the amendment on the board (request `74105ca1`, thread `b6820b97`); a later copy of
+  the channel agent standard on the same thread already names the outcome counts as `outcomes.<metric>` and defers to
+  this decision. The channel agent standard's declaration names seven channel kinds where `/1` has four channels, and
+  the channel agent standard publishes per project where a `/1` reader keeps one event per service, channel and day,
+  so an agent serving two projects on one channel would have one day replace the other; the coordinator decided the
+  project member and its form on the same thread. Separately, FAC-SEM-126 asks a producer to name an unmeasured
+  `nobodyDropped.firstReplyP50Ms`, which the `notMeasured` pattern refused (no digits in a metric name; CT-129, the
+  finding X-4).
 - **Decision:** [support quality](specification/support-quality.md#the-ticket-counts-dec-0151):
   1. Optional members, each a count (a non-negative integer) or `null`: at the top level `arrived` (the tickets that
      arrived on the day), `ended` (the tickets that ended on it, the ending cohort) and `notATicket` (the day's
@@ -9057,52 +9059,70 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      outcome, `firstReplyLate` and `promotions` being marks, `promotions` those of the day); `autonomy.answered` (the
      ending cohort's tickets that ended answered or answered after a question); `stability.fallbackTurns` (the day's
      turns the checker refused twice in a row) and `stability.fallbackTickets` (the ending cohort's tickets with at
-     least one). `open` and `outcomes` are never empty objects.
+     least one), neither of which is `recoveredByFallback`, the model-call fallback. `open` and `outcomes` are never
+     empty objects. `/1` keeps `autonomy.toPersonPolicy` and `toPersonInability` in turns, as FAC-SEM-126 bounds
+     them: a producer on the channel agent standard, which counts them in tickets, writes them in turns, or `null` and
+     named in `notMeasured`, until `/1` names a ticket unit.
   2. FAC-SEM-126 reads each as it reads every metric: `null` and named in `notMeasured` when not measured, never `0`;
      a top-level count is named by its own name (`arrived`), the others as `open.<metric>`, `outcomes.<metric>`,
      `autonomy.answered`, `stability.fallbackTurns`, `stability.fallbackTickets`; naming one the payload does not carry
-     is a finding. An absent member is one the producer does not carry, read as unknown, never as `0`. No sum among
-     the counts is checked: the standard's section 5 states none.
+     is a finding, and naming a top-level member that is no metric (`project`, `day`, `kind`, a family) is a finding
+     whose message says it is not a metric. An absent member is one the producer does not carry, read as unknown,
+     never as `0`. No sum among the counts is checked: the channel agent standard's section 5 states none.
   3. A metric name in `notMeasured` may carry digits (`^[a-z][A-Za-z]{0,63}(\.[a-z][A-Za-z0-9_]{0,63})?$`); the
-     family part and everything else of the pattern stay as they were.
-  4. A producer carries the new members, and names a metric with a digit in `notMeasured`, only once every reader of
-     its feed it knows of has adopted DEC-0151, as DEC-0144 asks of the calibration: a reader on an older copy refuses
-     either.
-  5. `/1` keeps its four channels. An agent on the standard publishes each of the declaration's seven channel kinds
-     under the closest one: `telegram_dm` and `account` as `chat`, `mail` as `mail`, `store_review` as `reviews`,
-     `telegram_group`, `public_comment` and `team_chat` as `community`; kinds that meet in one channel make one event
-     per day, as two surfaces of one channel do.
-  6. An optional top-level `project`: the Fabric Project whose tickets the day counts, in the pattern of
-     `comms-common`'s `projectId`, copied into the schema's `$defs` so it stays one file. A reader that adopted DEC-0151
-     keys an event by service, channel, day and project, an absent `project` being the service's one project, as
-     before; a producer that serves several projects on one channel publishes one event per project and day, each
-     naming its `project`, under item 4's rule. The top level then holds 19 members, inside DEC-0070's 32.
-- **Why:** the standard's daily report counts tickets on the signal server and checks each agent's feed against it;
-  one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that home before any
-  producer may send them. The digit fixes a rule the schema made impossible to keep.
-- **Alternatives considered:** the outcome counts at the top level, as the standard's field table lists them (18 top
-  members would become 26, inside DEC-0070's 32, but outcomes mixed with the payload's own facts leave little room for a
-  later revision; one `outcomes` object keeps them together and the top level at 18); a sum rule (each outcome at most
-  `ended`, the open counts at most `arrived`: the standard states none, `open` holds tickets of earlier days and a
-  promotion falls on its own day, so the rule would refuse true payloads); a new revision `support-quality-daily/2`
-  (every producer and reader would move, where a widening leaves every `/1` payload valid, DEC-0144's reasoning); a `0`
-  for an unmeasured count (FAC-SEM-126); new channel values for the seven kinds (a reader on an older copy would refuse
-  every day of such a channel, and the reader's per-channel targets are set for the four); the project in the event's
-  `subject` instead of the payload (the subject is the event's, outside the schema a reader validates the counts
-  against, and a reader that keeps only `data.value` would lose it); one service per project (an agent's deployment
-  would follow the reader's key).
+     family part and everything else of the pattern stay as they were (CT-129).
+  4. A producer carries the new members, `project` among them, and names a metric with a digit in `notMeasured`, only
+     once every reader of its feed it knows of has adopted DEC-0151, as DEC-0144 asks of the calibration: a reader on
+     an older copy refuses either.
+  5. `/1` keeps its four channels. An agent on the channel agent standard publishes each of the declaration's seven
+     channel kinds under the closest one: `telegram_dm` and `account` as `chat`, `mail` as `mail`, `store_review` as
+     `reviews`, `telegram_group`, `public_comment` and `team_chat` as `community`; kinds that meet in one channel make
+     one event per day, as two surfaces of one channel do. `community`'s latency and coverage figures then mix three
+     kinds with different limits, and a producer MAY leave `team_chat` out of `/1`, since a team's internal chat is not
+     customer support.
+  6. An optional top-level `project`: the project registry's alias `project:<slug>`
+     (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written, the form DEC-0150's CA-2 gives the channel agent
+     declaration's `project`. A reader that adopted DEC-0151 keeps, per service, channel, day and project (an absent
+     `project` being the service's one project, as before), the latest event; a producer that serves several projects
+     on one channel publishes one event per project and day, each naming its `project`, under item 4's rule. Before
+     every reader has adopted DEC-0151, such a producer publishes no event for that channel: it keeps each project's
+     days, publishes them one event per project and day once every reader has adopted, and never merges projects into
+     one event. A producer never changes the project form of a day it has already published: a day first published
+     without `project` is rerun without it. The top level then holds 19 members, inside DEC-0070's 32.
+- **Why:** the channel agent standard's daily report counts tickets on its signal server and checks each agent's feed
+  against it; one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that
+  home before any producer may send them. The digit fixes a rule the schema made impossible to keep. The registry
+  alias, not the board's server-issued id, is how the channel agent declaration names a project, so one name joins the
+  declaration to the days; its narrow pattern also keeps a long mixed-case id, which FAC-SEM-101 reads as a
+  credential, out of the payload.
+- **Alternatives considered:** the outcome counts at the top level, as the channel agent standard's field table lists
+  them (19 top members would become 28, the `outcomes` object giving way to its ten members, inside DEC-0070's 32, but outcomes mixed with the payload's own facts leave
+  little room for a later revision; one `outcomes` object keeps them together and the top level at 19); a sum rule
+  (each outcome at most `ended`, the open counts at most `arrived`: the channel agent standard states none, `open`
+  holds tickets of earlier days and a promotion falls on its own day, so the rule would refuse true payloads); a new
+  revision `support-quality-daily/2` (every producer and reader would move, where a widening leaves every `/1` payload
+  valid, DEC-0144's reasoning); a `0` for an unmeasured count (FAC-SEM-126); new channel values for the seven kinds (a
+  reader on an older copy would refuse every day of such a channel, and the reader's per-channel targets are set for
+  the four); the project in the event's `subject` instead of the payload (the subject is the event's, outside the
+  schema a reader validates the counts against, and a reader that keeps only `data.value` would lose it); one service
+  per project (an agent's deployment would follow the reader's key); the Fabric Project's server-issued id in
+  `comms-common`'s `projectId` pattern (the declaration names the registry alias, and that pattern admits the long
+  mixed-case ids FAC-SEM-101 flags).
 - **Compatibility:** a widening of a closed object: a `/1` payload without the new members validates and reads as
   before, and `pnpm validate` reports the same for every existing support-quality fixture. A reader that validates
   against an older copy refuses a day that carries a new member or a metric name with a digit, and keeps the event's
-  `text` (DEC-0070); a reader that only parses ignores them. The bytes under the unchanged `$id` widen, so a reader
-  validates against its own pinned copy. `contractVersion` stays `0.1.0`.
+  `text` (DEC-0070); a reader that only parses ignores the counts, but if it keys by channel and day it keeps one
+  project's day and drops the other's, so per-project publishing waits for every reader, parse-only ones included
+  (item 6 holds the producer to that). The bytes under the unchanged `$id` widen, so a reader validates against its own
+  pinned copy. FAC-SEM-126's message for a non-metric name in `notMeasured` changes; its code and its findings do not.
+  `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/support-quality-daily.schema.json` (also the `calibration` description DEC-0144
   left to correct), `src/support-quality-rules.ts`, `test/support-quality.test.ts`,
-  `fixtures/positive/support-quality-daily-tickets.json` and `-first-reply-unmeasured.json`,
+  `fixtures/positive/support-quality-daily-tickets.json`, `-first-reply-unmeasured.json` and `-project.json`,
   `fixtures/positive/service-events-page-support-quality-projects.json`, six `fixtures/negative/support-quality-daily-*`
-  with their `fixtures/catalogue.json` rows, four
+  with their `fixtures/catalogue.json` rows, five
   `fixtures/semantic/support-quality-daily-*`; `docs/specification/support-quality.md`, `docs/specification/conformance.md`
   (the producer and reader rows), `docs/DOCMAP.md`, `CONTEXT.md`; DEC-0095 and DEC-0144 annotated; `docs/backlog.md`
-  (CT-210, CT-188's note); `docs/handoffs/2026-11-04-support-quality-tickets.md`.
-- **Source:** CT-210; the board request `74105ca1` (thread `b6820b97`); DEC-0151 reserved by git CAS (key
+  (CT-210, CT-129, CT-103, CT-188's note); `docs/handoffs/2026-11-04-support-quality-tickets.md`.
+- **Source:** CT-210, CT-129; the board request `74105ca1` (thread `b6820b97`); DEC-0151 reserved by git CAS (key
   `support-quality-v2-dec`, counter commit `ee67e35`).

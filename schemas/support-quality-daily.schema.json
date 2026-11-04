@@ -35,8 +35,8 @@
       ]
     },
     "project": {
-      "$ref": "#/$defs/projectId",
-      "description": "Optional (DEC-0151): the Fabric Project whose tickets these are, for an agent that serves several projects on one channel. A reader that adopted DEC-0151 keeps one event per service, channel, day and project; absent, the service's one project. Carried under the same producer rule as the other DEC-0151 members."
+      "$ref": "#/$defs/projectAlias",
+      "description": "Optional (DEC-0151): the project whose tickets these are, as the project registry's alias project:<slug>, compared as written (docs/specification/identifiers.md), the same form as the channel agent declaration's project (DEC-0150). A reader that adopted DEC-0151 keeps one event per service, channel, day and project; absent, the service's one project. Carried under the same producer rule as the other DEC-0151 members: before every reader of the feed adopted DEC-0151, a producer serving several projects on one channel publishes no event for that channel, and it never merges projects into one event."
     },
     "rubricVersion": {
       "type": [
@@ -258,7 +258,7 @@
         },
         "fallbackTurns": {
           "$ref": "#/$defs/count",
-          "description": "Optional (DEC-0151): the day's turns the checker refused twice in a row."
+          "description": "Optional (DEC-0151): the day's turns the checker (the model that gates an answer before it is sent) refused twice in a row. Not recoveredByFallback, which counts the model-call fallback."
         },
         "fallbackTickets": {
           "$ref": "#/$defs/count",
@@ -355,10 +355,10 @@
       "minimum": 0,
       "maximum": 1
     },
-    "projectId": {
-      "description": "A Fabric Project's server-issued id, the pattern of comms-common.schema.json's projectId, copied so this schema stays one file. Data, not authority.",
+    "projectAlias": {
+      "description": "The project registry's alias of a Fabric Project, project:<slug>.",
       "type": "string",
-      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,191}$"
+      "pattern": "^project:[a-z0-9][a-z0-9._-]{0,127}$"
     }
   }
 }

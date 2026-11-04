@@ -194,6 +194,7 @@
   {"name": "support-quality-daily-null-check", "schema": "support-quality-daily.schema.json", "path": "negative/support-quality-daily-null-check.json", "valid": false, "keyword": "type"},
   {"name": "support-quality-daily-tickets", "schema": "support-quality-daily.schema.json", "path": "positive/support-quality-daily-tickets.json", "valid": true},
   {"name": "support-quality-daily-first-reply-unmeasured", "schema": "support-quality-daily.schema.json", "path": "positive/support-quality-daily-first-reply-unmeasured.json", "valid": true},
+  {"name": "support-quality-daily-project", "schema": "support-quality-daily.schema.json", "path": "positive/support-quality-daily-project.json", "valid": true},
   {"name": "support-quality-daily-outcomes-unknown", "schema": "support-quality-daily.schema.json", "path": "negative/support-quality-daily-outcomes-unknown.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "support-quality-daily-open-empty", "schema": "support-quality-daily.schema.json", "path": "negative/support-quality-daily-open-empty.json", "valid": false, "keyword": "minProperties"},
   {"name": "support-quality-daily-outcomes-nested", "schema": "support-quality-daily.schema.json", "path": "negative/support-quality-daily-outcomes-nested.json", "valid": false, "keyword": "type"},
