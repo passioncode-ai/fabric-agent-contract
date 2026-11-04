@@ -9180,10 +9180,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   fixtures change for the canonical case: `fixtures/semantic/package-secret-shaped-name.json` and
   `fixtures/semantic/estate-secret-value-as-slot.json` held an upper-case `GHP_` value as their credential-shaped slot
   name, which is no longer a key; they now hold an `AKIA` value (an upper-case name that still is one), with their
-  digests recomputed, and their tests (`test/package.test.ts`, `test/estate-record.test.ts`) name the new value. Fabric,
-  which vendors `src/session-handoff.ts`, re-vendors it to find the same, and every port of the detector takes the same
+  digests recomputed, and their tests (`test/package.test.ts`, `test/estate-record.test.ts`) name the new value. Fabric
+  Dashboards, which vendors `src/session-handoff.ts`, re-vendors it to find the same, and every port of the detector takes the same
   boundary, `sk-` strength (bounded look-aheads) and canonical-case prefixes (no `i` flag). The vendors that re-sync
-  include: the Fabric Agent Adapter kit's detector ports (its Python and JS secrets modules, its dashboard-link
+  include: the Fabric Agent Adapter kit's dashboard-link test sample (its lower-case `sk-` sample stops being a key
+  and is rebuilt from pieces as one DEC-0151 reads), the Fabric Agent Adapter kit's detector ports (its Python and JS secrets modules, its dashboard-link
   checkers, its connection ports and its dashboard button), its vendored vector files that change answer
   (`connections-extra` and `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`, re-vendored from the
   two changed semantic fixtures), Fabric Switchboard's folder-attribution port (it has neither look-ahead nor

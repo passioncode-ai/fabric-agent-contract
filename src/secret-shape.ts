@@ -10,7 +10,8 @@
  * change answer (`connections-extra`, `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`, re-vendored
  * from the two changed semantic fixtures), Fabric Switchboard's folder-attribution port (it has neither look-ahead nor
  * look-behind, so it checks the `sk-` strength outside its regex and re-syncs `folder-attribution.json` at the merge
- * commit) and any template or agent that copies the kit; a port that copies
+ * commit), the adapter's dashboard-link test sample (its lower-case `sk-` sample stops being a key under DEC-0151 and
+ * becomes one DEC-0151 reads, built from pieces) and any template or agent that copies the kit; a port that copies
  * `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
  * otherwise. Project Observatory's folder-attribution port (with its attribution-vectors pin) and its estate-record
  * port (FAC-SEM-075) re-sync together with that file. Whole-file vendors that pin this file by hash take DEC-0151 at

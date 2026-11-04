@@ -207,7 +207,7 @@ describe("the review's fixes", () => {
     for (const arg of args) expect(secretArgument(arg), arg).toBe(shape.secretArgument(arg));
   });
 
-  it("holds the shared detector's patterns character for character (Fabric vendors this file alone)", () => {
+  it("holds the shared detector's patterns character for character (its vendors take this file alone)", () => {
     const literal = (text: string, name: string) => new RegExp(`const ${name}(?:: [^=]+)? = (/.+/[a-z]*);`).exec(text)?.[1];
     const copy = readFileSync(path.join(root, "src/session-handoff.ts"), "utf8");
     const original = readFileSync(path.join(root, "src/secret-shape.ts"), "utf8");

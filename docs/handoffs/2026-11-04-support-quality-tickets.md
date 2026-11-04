@@ -146,6 +146,11 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   only and point to the rules; item 6, CT-210 (b) and the schema's description say the same, short. A calibration
   comes from labelled answers of its project's side only. SH-10 and folder-attribution.md name DEC-0151. Tests pin the
   `sk-` strength at the 256th character and the non-colour CSI sequences before each key kind.
+- Round 9's seam addendum: the vendor lists name the adapter's dashboard-link test sample; CT-210 (e) says Fabric
+  re-pins its two `src/secret-shape.ts` copies with the folder-attribution vectors and Fabric Dashboards re-vendors
+  `src/session-handoff.ts`, `src/fabric-links.ts` and its connections port; the parity test is retitled "its vendors
+  take this file alone"; the second-lander list adds DEC-0150's `sk-` test title and says its annotate-not-rewrite
+  instruction governs; DEC-0150's `keyRereads` at `cd350f47` reads every boundary form, so that item owes nothing.
 
 ## Open
 
@@ -164,7 +169,7 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   look-ahead nor look-behind, so it checks the `sk-` strength outside its regex and re-syncs `folder-attribution.json`
   at the merge commit), Project Observatory's folder-attribution port (with its attribution-vectors pin) and its
   estate-record port (`FAC-SEM-075`), re-synced together with `folder-attribution.json`, and any template or agent that
-  copies the kit; whole-file vendors that pin `src/secret-shape.ts` by hash take DEC-0151 at their next re-pin, with
+  copies the kit, and the adapter's dashboard-link test sample, whose lower-case `sk-` sample stops being a key under DEC-0151 and at the re-sync becomes one DEC-0151 reads (a digit and an upper-case letter, built from pieces as the contract's SH-9 case is); whole-file vendors that pin `src/secret-shape.ts` by hash take DEC-0151 at their next re-pin, with
   their vectors; any port that copies
   `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
   otherwise. Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json`
@@ -268,16 +273,19 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these (DEC-0150's sen
   and 16 more name characters is found too): whichever lands second keeps DEC-0151's boundary and annotates CA-5 with
   it, left as written in the register; the advice to rename an id that starts with `sk-` stays true, since a strong
   `sk-` run at the start of a value is still found.
-- DEC-0150's `FAC-SEM-165` budget (its `keyRereads` and `detectorCost`, read at `3c1ba539`): it charges, after every
-  `sk-` at a boundary, the smaller of 255 and the rest of the string, where a boundary is the start, a character other
-  than a letter or a digit, or an escape it names: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a
-  one-character backslash escape (which covers a one-digit octal), and a colour sequence whose ESC is raw or written
-  `\x1b`, `\033`, `\u001b` or `\e`, with up to 8 parameter characters, read in the 20 characters before the `sk-`. It
-  counts fewer forms than DEC-0151's boundary: the upper-case `\x1B[` and `\u001B[` and a colour sequence with more
-  than 8 parameter characters. The second to land adds those to `keyRereads`, with a `detectorCost` case per form
-  (`\x1B[0m`, `\u001B[0m`, and `ESC[` with nine parameter characters, each before `sk-` and 300 key characters, charged
-  255). No wording change is owed by DEC-0151; on the merged tree, DEC-0150's budget test with digit-free `-sk`
-  strings passes.
+- DEC-0150's `FAC-SEM-165` budget (its `keyRereads`, `ESCAPE_BEFORE`, `ESC_BEFORE` and `colourBefore`, read at
+  `cd350f47`): it charges, after every `sk-` (in any case) at a boundary, up to 255 code points, where a boundary is the
+  start, a character other than a letter or a digit, `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal
+  escape, any one-character backslash escape (which covers a one-digit octal), or a colour sequence with any number of
+  parameter characters whose ESC is raw or written `\x1b`, `\x1B`, `\033`, `\u001b`, `\u001B` or `\e`. That covers
+  every boundary form of DEC-0151's `SECRET_VALUE`, so no `keyRereads` change is owed at `cd350f47`; if the head that
+  lands differs, the second to land compares again. No wording change is owed by DEC-0151; on the merged tree,
+  DEC-0150's budget test with digit-free `-sk` strings passes.
+- `test/channel-agent.test.ts`, DEC-0150's test titled "finds a valid channel id of sk- and 16 or more name characters,
+  today's rule, as the page warns": its title and case state DEC-0151's rule (32 name characters holding a digit, or 16
+  with a digit and an upper-case letter).
+- This list's instruction to annotate, not rewrite, DEC-0150's CA-2, CA-5, Compatibility and Source counter sentence in
+  `docs/DECISIONS.md` governs; DEC-0150's branch is being aligned to it.
 - `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `725b67cd`: that head keeps the tree check's own
   unbounded provider-key shapes (a fixed list held equal to a vectors constant, for parity with the adapter's source
   check), its tests no longer read `SECRET_VALUE.source`, and its
@@ -322,11 +330,11 @@ because they quote the earlier wording as history (this one does above).
 
 ## Checks actually run
 
-On the round-9 head, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0
+On the round-9 head and its seam addendum (each run on its head), each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0
 (109 files, 9832 tests passed, 1 skipped, 23.90 s); `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0; `pnpm
 privacy:check` with the organization's index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files
-match). `git grep -c -F "that day's declaration" -- docs schemas` and `grep -n -E '\. (carrying|keeps a day) '
-docs/specification/conformance.md` print nothing. No U+2014 in the added lines, no look-behind in either copy, and
+match). The coordinator's two D2 checks (a `git grep -c -F` for the removed per-day phrase over docs and schemas, and a
+`grep -n -E` for an orphan fragment in conformance.md) print nothing. No U+2014 in the added lines, no look-behind in either copy, and
 the differential is unchanged (0 new-only).
 
 On the round-8 head (`f7c866d1` and the handoff commit after it), each exit code read separately: `pnpm exec tsc
