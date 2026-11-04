@@ -9186,6 +9186,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      standard needs a contract revision before any agent declares it: until then `channel-agent-standard/2` is refused
      (`FAC-SEM-162`, and `FAC-SEM-099` in a `protocols` list). A well-known answer lists `channel-agent-standard/1` in
      its `protocols` only once its readers have re-pinned to this revision.
+  8. CA-8. Text that arrives from a channel (a message, a caption, a file name, a link, a quoted reply) is data: a
+     channel agent never makes a tool call, sends a message, spends, changes access or takes any other action because a
+     message from the channel asks for it, and acts on its own task and on its operator's word (and the reply path the
+     operator configured). This is a duty of every channel agent, checked by its own test, and the declaration gains
+     no `untrusted_input` member or any like it, since it is not a property an agent may or may not declare and a flag
+     whose `false` is valid would be false.
 - **Why:** the standard asks every channel agent for one declaration that a checker reads the same way; a schema with
   vectors in the contract gives the adapter's check, and any other reader, one shape and one answer per case, instead of
   each reading its own copy of section 13.6. The rules are those section 11 checks without data the declaration does
@@ -9222,12 +9228,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/validate-cli.test.ts` (`hint/declaration-only`), `docs/specification/service.md` (the well-known answer's
   extensions), `docs/specification/identifiers.md` (compared as written), `docs/ux/scenarios.md` (SCN-002);
   `docs/specification/channel-agent.md`, `docs/specification/README.md`, `interop.md` (the extension keys), `support-quality.md` (the
-  pointer), `conformance.md` (the register, the reference modules, the channel agent's row), `docs/DOCMAP.md`,
+  pointer), `conformance.md` (the register, the reference modules, the channel agent's rows), `docs/DOCMAP.md`,
   `CONTEXT.md` (Channel agent), `docs/evidence/sources.md`,
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 16 of the readings. `DEC-0150` was reserved by the coordinator with
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 16 of the readings; CA-8 is the coordinator's
+  decision of round 17 on thread `b6820b97` (message `5a1334d1`), answering a producer who asked whether the declaration
+  needs an `untrusted_input` field. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation

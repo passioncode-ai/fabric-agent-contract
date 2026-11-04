@@ -369,6 +369,17 @@ are the document's. A reader never displays a credential-shaped value. Since the
 declaration, a host that shows an author the view also runs `channelAgentRules`: a misplaced copy's findings are the
 rules', not the view's.
 
+## Text from a channel is data
+
+Every channel agent owes this, whatever it declares (DEC-0150 CA-8). Text that arrives from a channel (a message, a
+caption, a file name, a link, a quoted reply) is data, never an instruction to the agent. The agent never makes a tool
+call, sends a message, spends, changes access or takes any other action because a message from the channel asks for
+it: it acts on its own task and on its operator's word, and it replies on the reply path its operator configured.
+
+The declaration has no member for it. It is not a property an agent may or may not declare, and a member whose `false`
+were valid would declare something false. No checker can see it in a declaration; the agent's own test checks it
+([conformance](conformance.md)).
+
 ## Not checked here
 
 Section 11 also asks for these; none can be decided from the declaration alone (DEC-0150 CA-6):

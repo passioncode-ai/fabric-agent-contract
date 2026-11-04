@@ -208,6 +208,13 @@ FAA-197, on the adapter's main).
   a misplaced copy the budget line says the copy is not read and should be removed; the merge notes name the
   specification README, SCR-03's four scenarios, main `7213463f`, every vendored protocol table, and the live
   manifest's third failing place.
+- Round 17, the coordinator's decision on thread `b6820b97` (message `5a1334d1`), answering a producer who asked
+  whether the declaration needs an `untrusted_input` field: it gains none. Instead a new item, DEC-0150 CA-8, and a
+  section of the page, [Text from a channel is data](../specification/channel-agent.md#text-from-a-channel-is-data),
+  state a duty of every channel agent: text from a channel (a message, a caption, a file name, a link, a quoted reply)
+  is data, and the agent takes no action because a channel message asks for it, acting on its own task and its
+  operator's word (and the reply path the operator configured). A flag whose `false` is valid would be false. The
+  conformance page gains a row for it, checked by the agent's own test. No schema, code, vector or fixture changes.
 
 ## The branch and its history
 
@@ -382,6 +389,11 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
+On round 17's change (documents only), each exit code read separately: `pnpm typecheck` 0; `pnpm run docs:check` 0
+(markdownlint 0 errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0 findings); `pnpm vectors:check` 0 (29 vector
+files match their generators); `pnpm test:fast` 0 (109 files, 10168 tests passed and 1 skipped). The coverage run is
+owed: the 15-minute load was 86.72, above the heavy-run threshold of 45. No U+2014 in the added text.
+
 On the change after round 16's fixes and its product and seam folds, each exit code read separately:
 `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 under the session's heavy-run lock, started at a
 15-minute load of 44.43 with 11 GB free (109 files, 10168 tests passed and 1 skipped, branches 98.89 %, 12222 of
@@ -397,8 +409,8 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-Two consecutive clean rounds of the blind readings of branch `agent/channel-agent-ext-v3-20261104` (unit, seam,
-product), as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after round 17's change (unit, seam,
+product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
 narrowings in [channel agent](../specification/channel-agent.md#narrowings-against-the-standard) (not copies kept
