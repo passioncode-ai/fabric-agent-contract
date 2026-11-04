@@ -9166,7 +9166,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   finds is one the earlier pattern found too (`test/secret-shape.test.ts`). One vector input changes:
   `fixtures/vectors/folder-attribution.json`'s case "AT-15: a remote whose kept part still has a secret's shape records
   no origin" held a digit-free `sk-` user, which the `sk-` strength no longer reads as a key; its user now holds a digit
-  and an upper-case letter, so the case keeps testing what it names, and a port re-vendors that file. Two semantic
+  and an upper-case letter, so the case keeps testing what it names. Three AT-15 cases are added that tell this
+  detector from the earlier one: a remote holding `-sk-` inside a word and one holding a weak `sk-` slug now record
+  their origin, and a strong key after a percent-escape records none. A port re-syncs that file together with the
+  detector. Two semantic
   fixtures change for the canonical case: `fixtures/semantic/package-secret-shaped-name.json` and
   `fixtures/semantic/estate-secret-value-as-slot.json` held an upper-case `GHP_` value as their credential-shaped slot
   name, which is no longer a key; they now hold an `AKIA` value (an upper-case name that still is one), with their
@@ -9178,7 +9181,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   left to correct), `src/support-quality-rules.ts`, `test/support-quality.test.ts`; `src/secret-shape.ts`,
   `src/session-handoff.ts`, `src/connections.ts` (a comment), `test/secret-shape.test.ts`,
   `test/session-handoff-review.test.ts` (its SH-9 key now holds a digit and an upper-case letter),
-  `tools/vectors/folder-attribution.ts` and `fixtures/vectors/folder-attribution.json` (one AT-15 input),
+  `tools/vectors/folder-attribution.ts` and `fixtures/vectors/folder-attribution.json` (one AT-15 input, three AT-15 cases),
   `fixtures/semantic/package-secret-shaped-name.json`, `fixtures/semantic/estate-secret-value-as-slot.json`,
   `test/package.test.ts`, `test/estate-record.test.ts`,
   `fixtures/positive/service-events-page-support-quality-sk-slug.json`;

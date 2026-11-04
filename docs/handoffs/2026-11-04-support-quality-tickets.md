@@ -95,13 +95,44 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 - The coordinator tells the channel agent standard's owner, on thread `b6820b97`, that its observed check must accept a
   channel a producer withholds during the wait (CT-210 step (d)); the coordinator files the adapter's row (step (e)).
 - Fabric vendors `src/session-handoff.ts` alone: its copy of `SECRET_VALUE` changed with item 7, so Fabric re-vendors it.
+- `fixtures/vectors/folder-attribution.json` changes with the detector: one AT-15 input (a strong `sk-` user) and three
+  new AT-15 cases that tell DEC-0151's detector from the earlier one (a remote holding `-sk-` inside a word and one
+  holding a weak `sk-` slug now record their origin; a strong key after a percent-escape records none). Every port
+  re-syncs that vector file together with the detector, and checks the `sk-` strength outside its regex where the
+  regex has no look-ahead.
 - Adoption, CT-210, in its order: `support.tickets_daily` mapped into each reader's ticket view first, readers re-pin and
   key by project, producers re-vendor the schema and carry the members once every reader has adopted.
 
 ## When DEC-0150 and DEC-0151 meet on main
 
-DEC-0150's current branch is `origin/agent/channel-agent-ext-v2-20261104` (`967669f3` or later; `1c41f8b4` when this
-was written; the source-manifest branch was at `19bab6fd`). DEC-0151 merges after DEC-0150, or rebases over it. The second of the two to merge rewrites these:
+DEC-0150's current branch is `origin/agent/channel-agent-ext-v3-20261104` (`fcdb7ccb` when this was written; the
+source-manifest branch was at `c68690c7`). DEC-0151 merges after DEC-0150, or rebases over it.
+
+The files each open branch shares with this one, from `git merge-tree` against `6c8ec0d4` on 2026-11-04 (a textual
+conflict unless the line says it auto-merges), with the resolution:
+
+- **Against DEC-0150** (`origin/agent/channel-agent-ext-v3-20261104`):
+  - `docs/DECISIONS.md`: both append a decision at the end (DEC-0150, DEC-0151) and both change the next-free line; keep
+    both decisions in number order and the larger next-free value.
+  - `docs/DOCMAP.md`: keep DEC-0151's rewritten support-quality row and DEC-0150's new channel-agent row; never both
+    support-quality rows.
+  - `docs/backlog.md`: both append rows at the tail (CT-209; CT-210, CT-213); keep every row in id order.
+  - `docs/handoffs/README.md`: both add a row at the top; keep both, newest first.
+  - `docs/specification/support-quality.md`: the thresholds line and DEC-0150's "Not decided here" bullet on the
+    per-project payload; drop that bullet (DEC-0151 answers it) and keep the thresholds line as this branch writes it.
+  - `docs/specification/identifiers.md` (auto-merges, but says one thing twice): merge DEC-0150's channel-agent
+    `project` bullet and DEC-0151's registry-alias bullet into one compared-as-written bullet.
+  - `src/secret-shape.ts` (auto-merges): DEC-0150's `rawValues` change and DEC-0151's `SECRET_VALUE` touch different
+    lines; keep both.
+- **Against DEC-0149** (`origin/agent/ct194-source-manifest-20261103`): `docs/DECISIONS.md` and `docs/backlog.md` (tail
+  appends; keep both, in order), `docs/handoffs/README.md` (keep both rows) and `src/secret-shape.ts` (the bullet
+  below). Its `URL_SECRET_VALUE` in `src/source-rules.ts` deliberately stays the tree check's own earlier unbounded
+  pattern, with the `i` flag, for parity with the adapter's source check: it is NOT changed at the merge.
+- **Against PR #235** (`agent/ct200-renewal-repeat-20261102`, DEC-0148): `docs/DECISIONS.md` and `docs/backlog.md`
+  (tail appends; keep both, in order).
+- **Against PR #236** (`agent/template-parity-20261103`): `docs/backlog.md` (tail appends; keep both, in order).
+
+The second of DEC-0150 and DEC-0151 to merge also rewrites these:
 
 - `docs/specification/channel-agent.md`, the "daily quality payload" bullet: "That is DEC-0151 (CT-210), in progress:
   until DEC-0151 lands, an agent following section 5.1 emits payloads this contract refuses, and how the seven channel
