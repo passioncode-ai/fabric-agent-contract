@@ -198,10 +198,12 @@ origin), whichever lands second:
 - sets the schema count in `test/schema-compilation.test.ts` to 148: the count merges silently at 147 and must be set
   by hand;
 - puts the register in code order: `FAC-SEM-155`, `156` to `160`, then `162` to `165`;
-- reads the next-free markers (DEC and SEM) from the CAS refs at the merge, not from either branch;
+- reads the next-free markers (DEC and SEM) from the CAS refs at the merge, not from either branch, and keeps one
+  "Next free ID" line in `docs/DECISIONS.md` and one "Next free rule code" line in conformance.md;
 - adds the comma at the end of the catalogue's last row before the other branch's rows;
-- takes the union of the two `vitest.config.ts` include lines, and keeps `src/channel-agent.ts`, `src/source-rules.ts`
-  and `src/validator.ts` at a branch floor of 100;
+- keeps one coverage `include` line in `vitest.config.ts` holding both branches' lists (a textual union leaves two
+  `include` keys, and the later one silently drops `src/validator.ts`), and keeps `src/channel-agent.ts`,
+  `src/source-rules.ts` and `src/validator.ts` at a branch floor of 100;
 - on conformance.md's clients table keeps CT-194's text for the actions row and appends this branch's row;
 - finds `rawValues` in `src/secret-shape.ts` already the same lines on both branches, and on the merged tree runs
   `pnpm vectors:check` and `test/channel-agent.test.ts` against CT-194's `secret-shape.ts`;
@@ -241,7 +243,11 @@ One line per sibling and per file it shares with this branch:
 
 The gate of DEC-0151 (in progress) puts DEC-0150 on main first. Once DEC-0150 is on main, that change annotates DEC-0150's CA-2, CA-5,
 Compatibility and Source sentences that name DEC-0151 as in progress (an annotation under DEC-0150, never a rewrite of
-its body: `docs/DECISIONS.md` is append-only), and rewrites these sentences outside the register:
+its body: `docs/DECISIONS.md` is append-only), and rewrites these sentences outside the register. Where this list and
+DEC-0151's meeting list (its handoff, "When DEC-0150 and DEC-0151 meet on main") differ, DEC-0151's governs: its
+annotate-not-rewrite instruction, the alias entry (a project whose registry alias reads as a credential stays out until
+the registry changes the alias, AS-01), and the join sentence, worded in both lists with the adoption condition (a
+reader joins on `project:<slug>` once the feed's readers have adopted it):
 
 - the "Not decided here" bullet in `docs/specification/support-quality.md` that names DEC-0151 (CT-210) in progress:
   removed, since DEC-0151's section answers it;
