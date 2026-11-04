@@ -116,6 +116,17 @@ filed; the coordinator files it on the board).
   1 000 000 code points; "Not checked here" names only references the agent declares, the desk caps of 10 and 15 move
   to the `daily_cap` bullet; the finding on an id that starts with `sk-` asks for a rename; Compatibility says `/1`
   names no ticket unit.
+- The standard's owner answered on thread `b6820b97` (round 4 of section 13.6; the coordinator accepted it there), in a
+  second commit on the round 11 branch: the schema takes the standard's none form, `{"none": "not_yet", "until":
+  "YYYY-MM-DD"}` or `{"none": "not_used"}`, closed, `until` a full date with `not_yet` only, at four members only (the
+  question route, the gap registry, `tickets.pd_check` and a channel's `texts.final`), through `if`/`then`/`else` so
+  an author reads only the branch the value takes; `null` stays exactly at `decision`, `quiet_window`,
+  `late_answer_window` and `spend_record`; a text's language is never named `none`, so the form cannot pass for a
+  holding text; a final text in the none form owes nothing, while an absent one is still found; a recommendation on a
+  queue with an answered signal other than `none` is a non-blocking `FAC-SEM-164`; "Not checked here" names a past
+  `until` (the check does not read today's date) and the question route's agreement with the side (FAA-197).
+  Fixtures `service-channel-agent-extension-none-form` (positive), `-none-without-until` and `-none-at-decision`
+  (negative), and vectors pin it.
 
 ## The branch and its history
 
@@ -159,6 +170,8 @@ the pull request comes from the v3 branch only.
 
 ## Open
 
+- The standard's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`, is the release candidate before
+  the owner's round 4; it is refreshed, neutralised, when the owner posts round 4, and not edited before.
 - Section 5.1's daily payload: until DEC-0151 (in progress on CT-210, branch `agent/sqd-fields-20261104`) lands, an
   agent following it emits `support-quality-daily/1` payloads this contract refuses; DEC-0151, in progress, proposes
   how the seven channel kinds map to `/1`'s four.
@@ -173,7 +186,8 @@ the pull request comes from the v3 branch only.
 
 ## Merging beside the branch of CT-194 and the other open branches
 
-With `origin/agent/ct194-source-manifest-20261103`, whichever lands second:
+With DEC-0149's branch, now `origin/agent/ct194-source-manifest-v2-20261104` (the earlier name is deleted from
+origin), whichever lands second:
 
 - sets the schema count in `test/schema-compilation.test.ts` to 148: the count merges silently at 147 and must be set
   by hand;
@@ -209,8 +223,10 @@ One line per sibling and per file it shares with this branch:
   provider prefixes in their canonical case, a strength rule for `sk-`).
 - PR #235: `docs/DECISIONS.md`; `docs/backlog.md`; conformance.md's next-free line; conformance.md's register, the
   `FAC-SEM-155` row before `156`.
-- PR #236 merged into main at `3bd332ed`: its `docs/backlog.md` rows are history; this branch rebases or merges over
-  `3bd332ed` at landing.
+- Main is now `7f6bc647` (PR #236 merged, CT-215 and CT-216 at the backlog's tail): this branch merges or rebases over
+  it at landing; `docs/backlog.md` conflicts only at the tail, where the rows stay in id order through CT-216
+  (`CT-204`, `CT-205`, `CT-206`, then this branch's `CT-209`, then `CT-215`, `CT-216`), and any row an open branch adds
+  takes its place by id.
 - `docs/DECISIONS.md` keeps one "Next free ID" line, equal to the CAS counter at the merge, and each DEC body in id
   order after the bodies already on main: `grep -c '^\*\*Next free ID' docs/DECISIONS.md` prints 1. (On main, the
   heading order already holds one exception, DEC-0047 after DEC-0055; a merge adds none.)
@@ -272,6 +288,9 @@ quotes, at posting time, the page's [grammar](../specification/channel-agent.md#
 narrowings in [channel agent](../specification/channel-agent.md#narrowings-against-the-standard) (not copies kept
 here), and adds:
 
+- the owner's round 4 of section 13.6 (the none form at four members) is taken; the neutral copy in
+  `docs/evidence/specs/` is refreshed to round 4 when the owner posts it (not edited before);
+
 - only a manifest's `provider.extensions` is read: a declaration under the manifest's top-level `extensions` is
   `FAC-SEM-162` and not read;
 - `channel-agent-standard/2` is refused until a contract revision;
@@ -292,6 +311,7 @@ At merge, one adoption row per live producer is filed in that producer's own bac
 (the coordinator files them on the board), with the places read again at posting time. Three live producers' current
 declarations fail today: one manifest at `sources/4/max_age` and `handoff_queues/0/owner`; one well-known builder with no
 `question_route` and a recommendation holding a colon; one well-known builder with `null` for `question_route`,
-`gap_registry`, a channel's texts, a queue's recommendation and `pd_check`. The adapter's row names the update of both
+`gap_registry`, a channel's texts, a queue's recommendation and `pd_check` (the question route, the gap registry and
+`pd_check` may now take the none form instead; a `null` there is still refused). The adapter's row names the update of both
 `PROTOCOL_REVISIONS` twins (`channel-agent-standard` `['1']`) with the feed-protocols vectors vendored again, and the
 Fabric Dashboards sample service's copy of the protocol table (or records that it is not held equal to the register).

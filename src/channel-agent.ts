@@ -148,12 +148,22 @@ function placedToken(previous: string | undefined, before: string | undefined, t
   return names.has(token) ? token : "*";
 }
 
-/** A schema node with its `$ref` followed, within the schema's own `$defs` (every node of this schema is an object). */
-function resolved(node: unknown, defs: JsonObject): JsonObject {
+/**
+ * A schema node with its `$ref` followed, within the schema's own `$defs` (every node of this schema is an object), and
+ * a member that also takes the none form (`if` an object with `none`, `then` the form, `else` the member) resolved to
+ * the branch the value takes.
+ */
+function resolved(node: unknown, defs: JsonObject, value?: unknown): JsonObject {
   let at = node;
-  while (isObject(at) && typeof at.$ref === "string") at = defs[at.$ref.slice("#/$defs/".length)];
-  return at as JsonObject;
+  for (;;) {
+    if (isObject(at) && typeof at.$ref === "string") at = defs[at.$ref.slice("#/$defs/".length)];
+    else if (isObject(at) && at.if !== undefined && at.then !== undefined && at.else !== undefined && at.properties === undefined) at = isNone(value) ? at.then : at.else;
+    else return at as JsonObject;
+  }
 }
+
+/** The standard's form for a required member a project does not have: an object with a `none` member (CA-2). */
+export const isNone = (value: unknown): boolean => isObject(value) && Object.hasOwn(value, "none");
 
 /**
  * The places, from the schema itself, of every array longer than its `maxItems`, every map wider than its
@@ -168,7 +178,7 @@ function widths(value: unknown): string[] {
   const stack: Array<{ value: unknown; node: unknown; at: string }> = [{ value, node: schema, at: "" }];
   while (stack.length > 0) {
     const { value: item, node, at } = stack.pop() as { value: unknown; node: unknown; at: string };
-    const rule = resolved(node, defs);
+    const rule = resolved(node, defs, item);
     if (Array.isArray(item)) {
       if (typeof rule.maxItems === "number" && item.length > rule.maxItems) found.push(`maxItems at ${at} (at most ${rule.maxItems} items)`);
       else if (rule.items !== undefined) for (let i = item.length - 1; i >= 0; i -= 1) stack.push({ value: item[i], node: rule.items, at: `${at}/${i}` });
@@ -225,6 +235,8 @@ function allowed(error: { keyword: string; schema?: unknown; params?: Record<str
     if (error.keyword === "minimum" || error.keyword === "maximum") return ` (${String(params.comparison)} ${limit})`;
   }
   if (error.keyword === "format" && typeof params.format === "string") return ` (format ${params.format})`;
+  // The none form's `until` goes with `not_yet` only.
+  if (error.keyword === "not" && isObject(error.schema) && Array.isArray(error.schema.required)) return ` (no ${error.schema.required.join(", ")} here)`;
   // A failed type names the type the schema wants; a nullable member's `oneOf` names its types and null.
   if (error.keyword === "type" && typeof params.type === "string") return ` (${params.type})`;
   if (error.keyword === "oneOf") {
@@ -291,7 +303,8 @@ export function schemaErrors(value: unknown, validate: ValidateFunction): string
   try {
     if (validate(value) === true) return [];
     // A nullable member's null branch fails `type` (null) for every non-null value; its `oneOf` line names null instead.
-    const errors = (validate.errors as ErrorObject[]).filter((error) => !(error.keyword === "type" && error.params.type === "null"));
+    // An `if` line only says which branch of a member that takes the none form failed; that branch's own lines say how.
+    const errors = (validate.errors as ErrorObject[]).filter((error) => !(error.keyword === "type" && error.params.type === "null") && error.keyword !== "if");
     return [...new Set(errors.map(placed))];
   } catch (error) {
     if (error instanceof RangeError) return [TOO_LARGE];
@@ -667,9 +680,11 @@ function obligations(project: JsonObject, at: string): Finding[] {
   for (const [channel, i] of indexed(project.channels)) {
     const texts = channel.texts as JsonObject;
     if (channel.holding_reply === true && texts.holding === undefined) flag(`/channels/${i}/texts/holding`, "a channel that sends a holding reply declares the holding text");
+    // A final text in the none form owes nothing; only an absent one does.
     if (channel.replies_enabled === true && texts.final === undefined) flag(`/channels/${i}/texts/final`, "a channel that replies declares the final text");
     if (channel.kind === "store_review" && channel.clarifying_question === true) flag(`/channels/${i}/clarifying_question`, "a store review gets one public reply and no clarifying question");
     for (const which of ["holding", "final"] as const) {
+      if (which === "final" && isNone(texts.final)) continue;
       for (const [language, text] of Object.entries((texts[which] ?? {}) as Record<string, string>)) {
         // A plain language is written `*`, as FAC-SEM-162 and FAC-SEM-165 write it; one that is not plain, or is shaped
         // like a credential, is placed at its map: no place echoes the declaration's own words.
@@ -686,6 +701,7 @@ function obligations(project: JsonObject, at: string): Finding[] {
   }
   for (const [queue, i] of indexed(project.handoff_queues)) {
     if (queue.answered_signal === "none" && queue.recommendation === undefined) flag(`/handoff_queues/${i}/recommendation`, "a hand-off queue with no answered signal names the recommendation to its owner");
+    if (queue.answered_signal !== "none" && queue.recommendation !== undefined) flag(`/handoff_queues/${i}/recommendation`, "a hand-off queue with an answered signal needs no recommendation, and a reader does not read this one");
   }
   const evals = project.evals as JsonObject;
   if (((evals.judge_budget_usd as number) > 0 || (evals.replay_budget_usd as number) > 0) && (evals.spend_record === undefined || evals.spend_record === null)) {

@@ -19,6 +19,30 @@ const KEY = EXTENSION_KEYS.channelAgent;
 const valid = vectors.declarations.find((v) => v.name === "one project, every member")?.input as Json;
 const value = valid.provider.extensions[KEY] as Json;
 
+// Time is the test thread's own processor time (process.threadCpuUsage, Node 23.9 and later; process.cpuUsage where it
+// is not available), the least of three runs after a warm one, held against prose read to the budget in the same run: a
+// ratio, so a loaded machine or the coverage run slows both sides alike.
+const threadClock = (previous?: NodeJS.CpuUsage): NodeJS.CpuUsage => {
+  const threaded = (process as unknown as { threadCpuUsage?: (previous?: NodeJS.CpuUsage) => NodeJS.CpuUsage }).threadCpuUsage;
+  return threaded === undefined ? process.cpuUsage(previous) : threaded.call(process, previous);
+};
+const cpuMs = (work: () => unknown): number => {
+  const started = threadClock();
+  work();
+  const spent = threadClock(started);
+  return (spent.user + spent.system) / 1000;
+};
+const least = (work: () => unknown): number => {
+  work();
+  return Math.min(cpuMs(work), cpuMs(work), cpuMs(work));
+};
+const PROSE = "the quick brown fox jumps over the lazy dog ".repeat(100).slice(0, 4096);
+/** 245 strings of prose, about SECRET_BUDGET code points: a document read to the budget. */
+const proseBaseline = (): number => {
+  const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => PROSE) } } };
+  return least(() => channelAgentRules(doc, "well-known"));
+};
+
 describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   it("the vector file is the generator's output", () => {
     expect(read("fixtures/vectors/channel-agent.json")).toBe(buildChannelAgentVectors());
@@ -98,16 +122,13 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   });
   it("refuses an array longer than its schema allows before the schema runs, with a short message", () => {
     const many = (n: number) => ({ provider: { extensions: { [KEY]: { standard: "channel-agent-standard/1", projects: Array.from({ length: n }, (_, i) => i) } } } });
-    const started = performance.now();
-    const found = channelAgentRules(many(200_000));
-    const huge = performance.now() - started;
+    const doc = many(200_000);
+    const found = channelAgentRules(doc);
     expect(found.map(({ code, instancePath }) => ({ code, instancePath }))).toEqual([{ code: "FAC-SEM-162", instancePath: CHANNEL_AGENT_PATHS.manifest }]);
     expect(found[0]?.message).toMatch(/^the channel-agent declaration fails its schema: maxItems at \/projects \(at most 64 items\); a reader treats it as not declared/);
     expect(found[0]?.message).toContain("channel-agent.md#the-declaration");
-    const small = performance.now();
-    channelAgentRules(many(65));
-    // The probe: 200000 items cost about what 65 do, plus the walk, never the schema's errors per item.
-    expect(huge).toBeLessThan(Math.max(2000, (performance.now() - small) * 2000));
+    // The probe: 200000 items cost the walk, never the schema's errors per item.
+    expect(least(() => channelAgentRules(doc))).toBeLessThan(2 * proseBaseline() + 20);
     const inner = { ...value.projects[0], channels: Array.from({ length: 33 }, () => value.projects[0].channels[0]), sources: Array.from({ length: 65 }, () => value.projects[0].sources[0]) };
     const [finding] = channelAgentRules({ provider: { extensions: { [KEY]: { ...value, projects: [inner] } } } });
     expect(finding?.message).toContain("maxItems at /projects/0/channels");
@@ -289,9 +310,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   it("reads at most SECRET_BUDGET code points for credentials, then says the rest was not read, in little time", () => {
     const opening = ["e", "y", "J"].join("");
     const strings = Array.from({ length: 488 }, () => opening.repeat(1366).slice(0, 4096));
-    const started = performance.now();
-    const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: strings } } }, "well-known");
-    expect(performance.now() - started).toBeLessThan(500);
+    const timed = () => channelAgentRules({ extensions: { [KEY]: { ...value, extra: strings } } }, "well-known");
+    expect(least(timed)).toBeLessThan(2 * proseBaseline() + 20);
+    const found = timed();
     expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => [f.instancePath, f.message.includes(`more than ${SECRET_BUDGET}`)])).toEqual([[CHANNEL_AGENT_PATHS["well-known"], true]]);
   });
   it("counts what the detector reads: a string once, and again after each eyJ to the end of its run", () => {
@@ -307,18 +328,18 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(detectorCost("https://a.example/?aBC=x")).toBe(24 + PIECE_COST + 3 + 1 + 6);
     expect(detectorCost("https://a.example/#&?")).toBe(20 + PIECE_COST + 1);
     const strings = Array.from({ length: 245 }, () => `https://a.example/?${"Q".repeat(4060)}=x`);
-    const started = performance.now();
-    const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: strings } } }, "well-known");
-    expect(performance.now() - started).toBeLessThan(500);
+    const timed = () => channelAgentRules({ extensions: { [KEY]: { ...value, extra: strings } } }, "well-known");
+    expect(least(timed)).toBeLessThan(2 * proseBaseline() + 20);
+    const found = timed();
     expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.message.includes("was not read"))).toEqual([true]);
   });
   it("shares one reading budget across every copy of the declaration in a manifest", () => {
     const opening = ["e", "y", "J"].join("");
     const heavy = { ...value, extra: Array.from({ length: 300 }, () => opening.repeat(1366).slice(0, 4096)) };
     const manifest = { provider: { extensions: { [KEY]: value } }, extensions: { [KEY]: heavy }, capabilities: [0, 1, 2].map(() => ({ extensions: { [KEY]: heavy } })) };
-    const started = performance.now();
-    const found = channelAgentRules(manifest);
-    expect(performance.now() - started).toBeLessThan(2000);
+    const timed = () => channelAgentRules(manifest);
+    expect(least(timed)).toBeLessThan(2 * proseBaseline() + 20);
+    const found = timed();
     expect(found.filter((f) => f.code === "FAC-SEM-162").length).toBe(4);
   });
   it("finds a channel id the shared detector reads as a credential", () => {
@@ -346,9 +367,8 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(detectorCost("https://a.example/?q=a%zz")).toBe(25 + PIECE_COST + 1 + 4);
     const shapes = [`https://a.example/?a${"Q".repeat(4000)}=x`, `https://a.example/?${"%41".repeat(1350)}=x`, `https://a.example/#a${"Q".repeat(4000)}=x`];
     const extra = shapes.flatMap((shape) => Array.from({ length: 300 }, () => shape));
-    const started = performance.now();
-    channelAgentRules({ provider: { extensions: { [KEY]: { ...value, extra } } } });
-    expect(performance.now() - started).toBeLessThan(500);
+    const timed = () => channelAgentRules({ provider: { extensions: { [KEY]: { ...value, extra } } } });
+    expect(least(timed)).toBeLessThan(2 * proseBaseline() + 20);
   });
   it("charges up to 255 after every sk- at a boundary, so a run of them is not read past the budget", () => {
     const text = "-sk".repeat(1366).slice(0, 4096);
@@ -357,16 +377,18 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(detectorCost("xsk-a")).toBe(5);
     expect(detectorCost("%2Fsk-a")).toBe(7 + 4);
     expect(detectorCost("\\nsk-a")).toBe(6 + 4);
-    const started = performance.now();
-    const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array.from({ length: 246 }, () => text) } } }, "well-known");
-    expect(performance.now() - started).toBeLessThan(500);
+    const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 246 }, () => text) } } };
+    const timed = () => channelAgentRules(doc, "well-known");
+    expect(least(timed)).toBeLessThan(2 * proseBaseline() + 20);
+    const found = timed();
     expect(found.some((f) => f.message.includes("was not read"))).toBe(true);
   });
   it("charges each name or string its call, so two million empty strings are not read past the budget", () => {
     expect(VISIT_COST).toBe(16);
-    const started = performance.now();
-    const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array(2_000_000).fill("") } } }, "well-known");
-    expect(performance.now() - started).toBeLessThan(2000);
+    const doc = { extensions: { [KEY]: { ...value, extra: Array(2_000_000).fill("") } } };
+    const timed = () => channelAgentRules(doc, "well-known");
+    expect(least(timed)).toBeLessThan(5 * proseBaseline() + 20);
+    const found = timed();
     expect(found.filter((f) => f.message.includes("was not read")).length).toBe(1);
   });
   it("says the rest was not read once per document, however many copies of the declaration it holds", () => {
@@ -575,7 +597,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.instancePath)).toEqual([`${CHANNEL_AGENT_PATHS["well-known"]}/*`]);
   });
   it("reads a time zone of one segment or Area/Location", () => {
-    const zone = createValidatorSync().getSchema(`${SCHEMA_PREFIX}schemas/service-channel-agent-extension.schema.json#/$defs/project/properties/question_route/properties/tz`);
+    const zone = createValidatorSync().getSchema(`${SCHEMA_PREFIX}schemas/service-channel-agent-extension.schema.json#/$defs/questionRoute/properties/tz`);
     for (const ok of ["UTC", "GMT", "CET", "Etc/UTC", "Europe/Warsaw", "America/Argentina/Buenos_Aires", "Etc/GMT+3"]) expect(zone?.(ok), ok).toBe(true);
     for (const bad of ["", "Europe/", "/UTC", "a/b/c/d", "Europe Warsaw", "+03:00"]) expect(zone?.(bad), bad).toBe(false);
   });
@@ -633,6 +655,19 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(view.declared && view.obligations).toHaveLength(SECRET_FINDINGS + 1);
     expect(view.declared && view.obligations.at(-1)).toBe("FAC-SEM-164 at /");
   });
+  it("takes the standard's none form at its four members, read and named as the schema says", () => {
+    const p0 = value.projects[0];
+    const replying = p0.channels.find((channel: Json) => channel.replies_enabled === true);
+    const formed = { ...p0, question_route: { none: "not_yet", until: "2027-01-15" }, gap_registry: { none: "not_used" }, tickets: { ...p0.tickets, pd_check: { none: "not_used" } }, channels: p0.channels.map((channel: Json) => (channel === replying ? { ...channel, texts: { ...channel.texts, final: { none: "not_used" } } } : channel)) };
+    const view = channelAgentView({ extensions: { [KEY]: { ...value, projects: [formed] } } }, "well-known");
+    expect(view.declared && view.obligations).toEqual([]);
+    const late = channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...p0, gap_registry: { none: "not_used", until: "2027-01-15" } }] } } }, "well-known");
+    expect(late).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /projects/0/gap_registry: not (no until here)"] });
+    const wide = channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...p0, gap_registry: { none: "not_used", until: "2027-01-15", a: 1 } }] } } }, "well-known");
+    expect(wide).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /projects/0/gap_registry: maxProperties (more members than the schema declares)"] });
+    const missing = channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...p0, question_route: { none: "not_yet" } }] } } }, "well-known");
+    expect(missing).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /projects/0/question_route: required (until)"] });
+  });
   it("tells the author of an id that starts with sk- to rename it", () => {
     const id = "sk-support-desk-faq-answers-2026-v2";
     const channel = { ...value.projects[0].channels[0], id };
@@ -645,7 +680,8 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const section = page.slice(page.indexOf("## The declaration"), page.indexOf("## What is checked"));
     const lines = new Map(section.split("\n").filter((line) => line.startsWith("- `")).map((line) => [line.slice(3, line.indexOf("`", 3)), line]));
     const defs = schema.$defs as Json;
-    const resolve = (node: Json): Json => (typeof node.$ref === "string" ? resolve(defs[node.$ref.split("/").pop() as string] as Json) : node);
+    // A member that also takes the none form is read through its `else`, the member itself; the form has its own line.
+    const resolve = (node: Json): Json => (typeof node.$ref === "string" ? resolve(defs[node.$ref.split("/").pop() as string] as Json) : node.else !== undefined && node.properties === undefined ? resolve(node.else as Json) : node);
     let checked = 0;
     const walk = (node: Json, at: string) => {
       const here = resolve(node);
@@ -671,13 +707,17 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     };
     walk(schema, "");
     expect(checked).toBeGreaterThan(60);
+    const none = lines.get("none");
+    expect(none).toBeDefined();
+    for (const allowed of (defs.none as Json).properties.none.enum as string[]) expect(none).toContain(`\`${allowed}\``);
+    for (const member of ["projects[].question_route", "projects[].gap_registry", "projects[].tickets.pd_check", "projects[].channels[].texts.final"]) expect(lines.get(member), member).toContain("none form");
   });
   it("keeps the patterns it repeats from the schemas they come from", () => {
     const other = (file: string) => JSON.parse(read(`schemas/${file}`)) as Json;
     const defs = schema.$defs as Json;
     expect(defs.project.properties.evals.properties.spend_record.oneOf[0].pattern).toBe(other("service-usage.schema.json").$defs.limit.properties.id.pattern);
-    expect(defs.project.properties.question_route.properties.target.pattern).toBe(other("comms-common.schema.json").$defs.projectId.pattern);
-    expect(defs.project.properties.gap_registry.properties.capability.pattern).toBe(other("common.schema.json").$defs.capabilityName.pattern);
+    expect(defs.questionRoute.properties.target.pattern).toBe(other("comms-common.schema.json").$defs.projectId.pattern);
+    expect(defs.gapRegistry.properties.capability.pattern).toBe(other("common.schema.json").$defs.capabilityName.pattern);
     expect(defs.project.properties.handoff_queues.items.properties.recommendation.pattern).toBe(other("comms-common.schema.json").$defs.opaqueId.pattern);
     // The standard's patterns, each with an id's lookahead for a run of 7 digits (CA-2).
     const digits = "(?![a-z0-9_-]*[0-9]{7})";

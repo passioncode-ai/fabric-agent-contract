@@ -1058,6 +1058,7 @@
   {"name": "peer-share-revocation", "schema": "peer-share-record.schema.json", "path": "positive/peer-share-revocation.json", "valid": true},
   {"name": "peer-share-deletion-no-revocation", "schema": "peer-share-record.schema.json", "path": "negative/peer-share-deletion-no-revocation.json", "valid": false, "keyword": "oneOf"},
   {"name": "service-channel-agent-extension", "schema": "service-channel-agent-extension.schema.json", "path": "positive/service-channel-agent-extension.json", "valid": true},
+  {"name": "service-channel-agent-extension-none-form", "schema": "service-channel-agent-extension.schema.json", "path": "positive/service-channel-agent-extension-none-form.json", "valid": true},
   {"name": "manifest-channel-agent", "schema": "manifest.schema.json", "path": "positive/manifest-channel-agent.json", "valid": true},
   {"name": "service-channel-agent-extension-tier-rule", "schema": "service-channel-agent-extension.schema.json", "path": "negative/service-channel-agent-extension-tier-rule.json", "valid": false, "keyword": "pattern"},
   {"name": "service-channel-agent-extension-token-value", "schema": "service-channel-agent-extension.schema.json", "path": "negative/service-channel-agent-extension-token-value.json", "valid": false, "keyword": "pattern"},
@@ -1075,5 +1076,7 @@
   {"name": "service-channel-agent-extension-duration-zero", "schema": "service-channel-agent-extension.schema.json", "path": "negative/service-channel-agent-extension-duration-zero.json", "valid": false, "keyword": "pattern"},
   {"name": "service-channel-agent-extension-digit-run", "schema": "service-channel-agent-extension.schema.json", "path": "negative/service-channel-agent-extension-digit-run.json", "valid": false, "keyword": "pattern"},
   {"name": "service-channel-agent-extension-slot-project-id", "schema": "service-channel-agent-extension.schema.json", "path": "negative/service-channel-agent-extension-slot-project-id.json", "valid": false, "keyword": "pattern"},
-  {"name": "service-channel-agent-extension-channel-digit-run", "schema": "service-channel-agent-extension.schema.json", "path": "negative/service-channel-agent-extension-channel-digit-run.json", "valid": false, "keyword": "pattern"}
+  {"name": "service-channel-agent-extension-channel-digit-run", "schema": "service-channel-agent-extension.schema.json", "path": "negative/service-channel-agent-extension-channel-digit-run.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-channel-agent-extension-none-without-until", "schema": "service-channel-agent-extension.schema.json", "path": "negative/service-channel-agent-extension-none-without-until.json", "valid": false, "keyword": "required"},
+  {"name": "service-channel-agent-extension-none-at-decision", "schema": "service-channel-agent-extension.schema.json", "path": "negative/service-channel-agent-extension-none-at-decision.json", "valid": false, "keyword": "oneOf"}
 ]

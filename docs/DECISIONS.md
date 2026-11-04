@@ -9074,9 +9074,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and no `..` segment), so sources and queues carry ids and ages only; a queue's
      `recommendation` is the board's opaque thread id (`^[A-Za-z0-9_-]{8,128}$`); a text is 1 to 4096 code points and
      its language at most 35 characters. Every
-     member section 13.6 shows is required where the standard says present: a `null` is refused for the question
-     route, the gap registry, a channel's texts, the personal-data check and a queue's recommendation, while a
-     channel's `decision`, `quiet_window` and `late_answer_window` and `evals.spend_record` take `null`. A
+     member section 13.6 shows is required where the standard says present: `null` is taken only by a channel's
+     `decision`, `quiet_window` and `late_answer_window` and by `evals.spend_record`, and refused everywhere else. A
+     required member a project does not have takes the standard's none form (its owner's round 4 of section 13.6,
+     accepted on thread `b6820b97`), `{"none": "not_yet", "until": "YYYY-MM-DD"}` or `{"none": "not_used"}`, at four
+     members only: the question route, the gap registry, `tickets.pd_check` (a string or the form) and a channel's
+     `texts.final`; the form is closed, `until` a full date that goes with `not_yet` only, and a text's language is
+     never named `none`, so the form cannot pass for a text elsewhere. A
      checker refuses, before the schema runs and with each limit read from the schema, an array longer than its
      `maxItems`, a map wider than its `maxProperties`, any closed object with more members than the schema declares,
      and a string value or a member name over 4096 code points;
@@ -9095,7 +9099,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      text and no tier's label is blank or carries U+2014 (section 2.4's send checks); a queue whose answered signal is
      `none` names its
      recommendation (section 7.5); a budget above 0 names its spend record, since without one it reads 0 (sections 5
-     and 11). It names at most 64 places per document and then one finding at the key counting the rest.
+     and 11). A final text in the none form owes nothing (only an absent one is found); a recommendation on a queue
+     whose answered signal is not `none` is found too, non-blocking (a reader does not read it). It names at most 64
+     places per document and then one finding at the key counting the rest.
   5. CA-5. `FAC-SEM-165`: no member name and no string of the declaration is shaped like a credential, by shape, with
      `FAC-SEM-101`'s detector on a string's first 4097 code points (today an ordinary name of `sk-` and 16 or more
      letters, digits, `_` or `-`, in any case, such as the valid channel id `sk-support-desk-faq-answers-2026-v2`, is
@@ -9138,7 +9144,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `\p{Default_Ignorable_Code_Point}`, the fillers U+115F, U+1160, U+3164, U+FFA0 and U+2800, and U+FFFC.
   6. CA-6. Not checked statically: that the side is one of the standard's sides and the route's capability the one for
      its kind (side codes and kinds live only in the signal server's data), that a tier's fact is a declared customer
-     fact (the declaration lists none), that the named agents, capabilities, desk and limit exist, the standard's
+     fact (the declaration lists none), that a none form's `until` is still ahead (the check does not depend on today's
+     date), that the question route is agreed with the side (FAA-197), that the named agents, capabilities, desk and
+     limit exist, the standard's
      reference values, the working calendar of a limit counted in working time (declared as a wall-clock duration),
      whether one declaration may hold projects on several sides (to be asked of the standard's owner on thread
      `b6820b97` at merge), a valid declaration in both a manifest and its well-known answer (no finding; readers read

@@ -74,6 +74,7 @@ or members, its bounds. `test/channel-agent.test.ts` walks the schema and holds 
 schema cannot drift apart.
 
 - `standard`: exactly `channel-agent-standard/1`
+- `none`: the none form, an object with only `none` (one of `not_yet`, `not_used`) and `until` (a date `YYYY-MM-DD`, `^[0-9]{4}-[0-9]{2}-[0-9]{2}$`, format date, required with `not_yet` and refused with `not_used`): the standard's form for a required member a project does not have, taken at four members only, `question_route`, `gap_registry`, `tickets.pd_check` and a channel's `texts.final`
 - `projects`: an array of 1 to 64 items
 - `projects[]`: an object with only the members listed under it; required: `project`, `side`, `lead_agent`, `adopted_at`, `taxonomy`, `question_route`, `gap_registry`, `channels`, `sources`, `handoff_queues`, `evals`, `tickets`
 - `projects[].project`: a string matching `^project:[a-z0-9][a-z0-9._-]{0,127}$`
@@ -92,7 +93,7 @@ schema cannot drift apart.
 - `projects[].tiers[].label`: a string of 1 to 40 code points
 - `projects[].tiers[].rule`: a string matching `^[a-z][a-z0-9_]{0,63} >=? (0|[1-9][0-9]{0,14})$`
 - `projects[].tiers[].escalate`: one of `at_once`, `ladder`
-- `projects[].question_route`: an object with only the members listed under it; required: `capability`, `target`, `daily_cap`, `days`, `tz`, `send_at`, `expires`
+- `projects[].question_route`: an object with only the members listed under it; required: `capability`, `target`, `daily_cap`, `days`, `tz`, `send_at`, `expires`; or the none form
 - `projects[].question_route.capability`: one of `team.ask`, `operator.ask`
 - `projects[].question_route.target`: a string matching `^[A-Za-z0-9][A-Za-z0-9._:-]{0,191}$`
 - `projects[].question_route.daily_cap`: an integer from 1 to 1000
@@ -100,7 +101,7 @@ schema cannot drift apart.
 - `projects[].question_route.tz`: a string matching `^[A-Za-z][A-Za-z0-9_+-]{0,30}(/[A-Za-z0-9_+-]{1,30}){0,2}$`
 - `projects[].question_route.send_at`: a string matching `^([01][0-9]|2[0-3]):[0-5][0-9]$`
 - `projects[].question_route.expires`: a string matching `^P(?=[0-9T])(?!(0+D)?(T(0+H)?(0+M)?(0+S)?)?$)([0-9]{1,5}D)?(T(?=[0-9])([0-9]{1,5}H)?([0-9]{1,5}M)?([0-9]{1,5}S)?)?$`
-- `projects[].gap_registry`: an object with only the members listed under it; required: `owner`, `capability`
+- `projects[].gap_registry`: an object with only the members listed under it; required: `owner`, `capability`; or the none form
 - `projects[].gap_registry.owner`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`
 - `projects[].gap_registry.capability`: a string matching `^[a-z][a-z0-9._-]{1,127}$`
 - `projects[].channels`: an array of 1 to 32 items
@@ -117,8 +118,8 @@ schema cannot drift apart.
 - `projects[].channels[].late_answer_window`: a string matching `^P(?=[0-9T])(?!(0+D)?(T(0+H)?(0+M)?(0+S)?)?$)([0-9]{1,5}D)?(T(?=[0-9])([0-9]{1,5}H)?([0-9]{1,5}M)?([0-9]{1,5}S)?)?$` or `null`
 - `projects[].channels[].items_seen_unit`: one of `mails`, `updates`, `messages`, `reviews`
 - `projects[].channels[].texts`: an object with only the members listed under it
-- `projects[].channels[].texts.holding`: a map of 1 to 64 members, each name a language tag of at most 35 characters matching `^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*$`, each value a text of 1 to 4096 code points
-- `projects[].channels[].texts.final`: a map of 1 to 64 members, each name a language tag of at most 35 characters matching `^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*$`, each value a text of 1 to 4096 code points
+- `projects[].channels[].texts.holding`: a map of 1 to 64 members, each name a language tag other than `none` of at most 35 characters matching `^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*$`, each value a text of 1 to 4096 code points
+- `projects[].channels[].texts.final`: a map of 1 to 64 members, each name a language tag other than `none` of at most 35 characters matching `^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*$`, each value a text of 1 to 4096 code points; or the none form
 - `projects[].sources`: an array of 1 to 64 items
 - `projects[].sources[]`: an object with only the members listed under it; required: `id`, `owner`, `read`, `cadence`, `max_age`
 - `projects[].sources[].id`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`
@@ -145,7 +146,7 @@ schema cannot drift apart.
 - `projects[].tickets`: an object with only the members listed under it; required: `outbox`, `token_slot`, `pd_check`
 - `projects[].tickets.outbox`: a string of 1 to 256 code points matching `^(?![/~])(?![A-Za-z][A-Za-z0-9+.-]*:)(?!(?:[^/]*/)*\.\.(?:/|$))[A-Za-z0-9._:/-]+$`
 - `projects[].tickets.token_slot`: a string matching `^[a-z0-9][a-z0-9._-]{0,127}/[a-z][a-z0-9-]{0,31}/[A-Z][A-Z0-9_]{0,63}$`
-- `projects[].tickets.pd_check`: a string matching `^[a-z0-9][a-z0-9._-]{0,63}@[0-9A-Za-z][0-9A-Za-z.+-]{0,31}$`
+- `projects[].tickets.pd_check`: a string matching `^[a-z0-9][a-z0-9._-]{0,63}@[0-9A-Za-z][0-9A-Za-z.+-]{0,31}$`; or the none form
 - `projects[].recorded_decisions`: an array of 0 to 64 items
 - `projects[].recorded_decisions[]`: an object with only the members listed under it; required: `id`, `date`, `effect`
 - `projects[].recorded_decisions[].id`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`
@@ -199,10 +200,12 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
 
 1. The value is the schema's, where a reader reads it (`FAC-SEM-162`, DEC-0150 CA-1, CA-2): present members,
    patterns, the side's and the codes' patterns, durations, the tier rule's grammar, the budgets' type, the slot's
-   grammar; an empty text is refused here, and so is a `null` for the question route, the gap registry, a channel's
-   texts, the personal-data check or a queue's recommendation (one finding,
-   `fixtures/semantic/manifest-channel-agent-nulls.json`), while a channel's `decision`, `quiet_window` and
-   `late_answer_window` and `evals.spend_record` take `null`. Refused before the schema runs, so the schema never runs on
+   grammar; an empty text is refused here, and so is a `null` anywhere but a channel's `decision`, `quiet_window` and
+   `late_answer_window` and `evals.spend_record`, which take it (one finding,
+   `fixtures/semantic/manifest-channel-agent-nulls.json`). A required member a project does not have is written in the
+   standard's none form, `{"none": "not_yet", "until": "YYYY-MM-DD"}` or `{"none": "not_used"}`, at four members only:
+   the question route, the gap registry, `tickets.pd_check` and a channel's `texts.final`; the form is closed, and
+   `until` is a full date that goes with `not_yet` only. Refused before the schema runs, so the schema never runs on
    a huge value, each limit read from the schema itself: an array longer than its `maxItems` and a map wider than its
    `maxProperties`; any closed object (the declaration, a project, its taxonomy, a code, a tier, the question route,
    the gap registry, a source, a declined source, a queue, the evals, the tickets, a recorded decision, a channel and
@@ -229,7 +232,9 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    holding text and one with replies on its final text; a store review asks no clarifying question; no declared text is
    blank or carries an em dash (U+2014), which the standard's send checks refuse (its section 2.4), and no tier's label
    either, since the customer may be told it; a queue whose
-   answered signal is `none` names its recommendation; a budget above 0 names the usage report's limit it is spent
+   answered signal is `none` names its recommendation, and a recommendation on a queue with another answered signal is
+   found too (non-blocking, like every `FAC-SEM-164`: a reader does not read it); a final text in the none form owes
+   nothing, since only an absent final text is found; a budget above 0 names the usage report's limit it is spent
    under, since without one it reads 0.
 4. No member name and no string of the value is shaped like a credential (`FAC-SEM-165`, CA-5), by shape, with the
    detector of `FAC-SEM-101`, on a valid or an invalid value and on a misplaced one where it stands. A string is read as
@@ -311,6 +316,10 @@ Section 11 also asks for these; none can be decided from the declaration alone (
   `operator.ask` for the operator's: side codes live only in the signal server's data, which also says which side is
   whose;
 - that a tier's fact is a customer fact the project declares: the declaration lists no facts;
+- that a none form's `until` is still ahead: the check does not depend on today's date, so a date in the past draws no
+  finding here;
+- that the question route is agreed with the side (FAA-197): the agreement lives with the side, not in the
+  declaration;
 - that what the agent declares by reference exists (the lead agent, the queues' owners, the gap registry's
   capability, the question route's target and the usage report's limit id): a checker that reads the estate, the board
   or the usage report checks them there;
@@ -334,7 +343,7 @@ Section 11 also asks for these; none can be decided from the declaration alone (
 |---|---|---|
 | <a id="fac-sem-162"></a>`FAC-SEM-162` | `manifest`, `service-well-known` | a value under the channel-agent extension key sits under a manifest's `provider.extensions` (not its own `extensions` or a capability's) or a well-known answer's `extensions`, has no array, map or object longer than its schema allows nor a string or name over 4096 code points, and is valid against `service-channel-agent-extension.schema.json`; a reader treats an invalid one as not declared and reports it, naming failed keywords and places, never a declared value, with the schema's own limit beside each place, and pointing to the declaration's grammar (DEC-0150 CA-1, CA-2) |
 | <a id="fac-sem-163"></a>`FAC-SEM-163` | `manifest`, `service-well-known` | in a valid channel-agent declaration a project, a category code, a tier code, a channel id, a source id (read or declined), a hand-off queue id and a recorded decision id appear once; a channel with replies off names a decision, and every channel's decision is one `recorded_decisions` lists (DEC-0150 CA-3) |
-| <a id="fac-sem-164"></a>`FAC-SEM-164` | `manifest`, `service-well-known` | in a valid channel-agent declaration a channel with a holding reply declares its holding text and one that replies its final text; a store review asks no clarifying question; no text is blank or carries U+2014; no tier's label is blank or carries U+2014; a queue whose answered signal is `none` names its recommendation; a budget above 0 names its spend record (DEC-0150 CA-4) |
+| <a id="fac-sem-164"></a>`FAC-SEM-164` | `manifest`, `service-well-known` | in a valid channel-agent declaration a channel with a holding reply declares its holding text and one that replies its final text; a store review asks no clarifying question; no text is blank or carries U+2014; no tier's label is blank or carries U+2014; a final text in the none form owes nothing (only an absent one is found); a queue whose answered signal is `none` names its recommendation, and one with another answered signal that carries a recommendation is found too (a reader does not read it); a budget above 0 names its spend record; at most 64 places per document, then one counting the rest (DEC-0150 CA-4) |
 | <a id="fac-sem-165"></a>`FAC-SEM-165` | `manifest`, `service-well-known` | no member name and no string of a channel-agent declaration is shaped like a credential, by shape (`FAC-SEM-101`'s detector), a misplaced one included, a token slot of its grammar read segment by segment, a suite's and an outbox's relative path by the path-aware reading, a queue's opaque recommendation by key shapes only; a string is read as a URL only when its head is ASCII with no non-ASCII percent-escape and opens with a scheme, so in any other string (text outside ASCII, a non-ASCII percent-escape) only key shapes are found and a password or a credential-named query parameter is not; at most 1 000 000 code points read per document and 64 places named, each once per document (DEC-0150 CA-5) |
 
 ## Compatibility
@@ -409,9 +418,11 @@ and this list.
   points.
 - Counts: at most 64 projects, 512 category codes, 16 tiers, 32 channels, 64 sources, 64 declined sources, 32
   hand-off queues and 64 recorded decisions; 1 to 64 texts per map.
-- `null`: refused for the question route, the gap registry, a channel's texts, the personal-data check and a queue's
-  recommendation; taken by a channel's `decision`, `quiet_window` and `late_answer_window` and by `spend_record`. A
-  missing required member, or a refused `null`, makes the whole declaration not declared.
+- `null`: taken only by a channel's `decision`, `quiet_window` and `late_answer_window` and by `spend_record`, and refused
+  everywhere else. A required member a project does not have takes the standard's none form (`{"none": "not_yet",
+  "until": "YYYY-MM-DD"}` or `{"none": "not_used"}`, closed, `until` a full date) at four members only: the question
+  route, the gap registry, `tickets.pd_check` and a channel's `texts.final`. A missing required member, a refused
+  `null` or a none form elsewhere makes the whole declaration not declared.
 - Size read for credentials: at most 1 000 000 code points of names and values per document, every copy of the
   declaration in it sharing them, each name or string charged 16 more than its code points; past that the rest is not
   read, and the declaration is not declared (`FAC-SEM-165`).
