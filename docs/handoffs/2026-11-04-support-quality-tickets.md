@@ -177,7 +177,7 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   look-ahead nor look-behind, so it checks the `sk-` strength outside its regex and re-syncs `folder-attribution.json`
   at the merge commit), Project Observatory's folder-attribution port (with its attribution-vectors pin) and its
   estate-record port (`FAC-SEM-075`), re-synced together with `folder-attribution.json`, and any template or agent that
-  copies the kit, and the adapter's dashboard-link test sample, whose lower-case `sk-` sample stops being a key under DEC-0151 and at the re-sync becomes one DEC-0151 reads (a digit and an upper-case letter, built from pieces as the contract's SH-9 case is); whole-file vendors that pin `src/secret-shape.ts` by hash take DEC-0151 at their next re-pin, with
+  copies the kit, and the adapter's dashboard-link test sample, whose lower-case `sk-` sample stops being a key under DEC-0151 and at the re-sync becomes one DEC-0151 reads (a digit and an upper-case letter, built from pieces as the contract's SH-9 case is), and the adapter's profiles test case whose query holds `%zz`, a raw control character and `KIA` with 16 more characters stops being found under DEC-0151 (its `AKIA` borrowed the `A` of the encoded `%1A`) and is rebuilt at the re-sync with a boundary before `AKIA`, built from pieces; whole-file vendors that pin `src/secret-shape.ts` by hash take DEC-0151 at their next re-pin, with
   their vectors; any port that copies
   `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
   otherwise. Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json`
@@ -239,7 +239,8 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these (DEC-0150's sen
   "That schema is what DEC-0151, in progress on CT-210, proposes. Until it lands, an agent following section 5.1 emits
   payloads this contract refuses, and how the seven channel kinds here map to `/1`'s four channels ... is what
   DEC-0151, in progress, proposes to decide": it becomes a pointer to DEC-0151 and to
-  [support quality](../specification/support-quality.md)'s channel kinds table and per-project keying.
+  [support quality](../specification/support-quality.md)'s channel kinds table and project rules, and says that the
+  escalation counts (`autonomy.toPersonPolicy`, `toPersonInability`) stay in turns.
 - `docs/specification/channel-agent.md`, the parenthetical "the memory capability's pattern; DEC-0151, in progress on
   CT-210, proposes the same `projectAlias`" after the alias pattern: it says that `support-quality-daily/1` uses the same
   `projectAlias`.
@@ -312,8 +313,6 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these (DEC-0150's sen
   `ee67e35e` (key `support-quality-v2-dec`, `"next": 152`) is DEC-0151's reservation, and `d3da4336` (`"next": 149`) the
   value before it, as DEC-0150's Source cites; DEC-0149's own reservation is `e27a5441` (key `ct194-source-manifest`,
   `"next": 150`), each read with `git cat-file -p`.
-- DEC-0150's handoff Open bullet on section 5.1 ("until DEC-0151 ... lands, an agent following it emits
-  `support-quality-daily/1` payloads this contract refuses"): dropped once DEC-0151 is on main.
 - The organization's roadmap row AS-01 ("one event per channel and closed day", fabric-workspace
   `knowledge/roadmap.md`): owed at merge, to say one event per channel, project and closed day.
 - The schema count: 148 after the source-manifest branch and DEC-0150's land (146 on origin/main today); a test or
@@ -322,10 +321,11 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these (DEC-0150's sen
 The check that closes this list, after both land, in two parts:
 `git grep -n -E 'DEC-0151[^.]*in progress|in-progress DEC-0151' -- docs src test ':!docs/handoffs' ':!docs/DECISIONS.md'`
 prints nothing; and in `docs/DECISIONS.md`, `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -n -E
-'DEC-0151[^.]*in progress|in-progress DEC-0151'` prints only the lines of DEC-0150's CA-2, its CA-5, its Compatibility
-and its Source counter sentence, which stay as written, while `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -c
+'DEC-0151[^.]*in progress|in-progress DEC-0151' | grep -v 'Annotated'` prints only the lines of DEC-0150's CA-2, its
+CA-5, its Compatibility and its Source counter sentence, which stay as written, while `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -c
 '^- \*\*Annotated'` prints at least 1, an annotation naming DEC-0151's merge for all four. The handoffs are left out
-because they quote the earlier wording as history (this one does above).
+because they quote the earlier wording as history (this one does above); other handoffs, DEC-0150's included, are left
+as history and are not edited.
 
 ## Decisions taken here
 

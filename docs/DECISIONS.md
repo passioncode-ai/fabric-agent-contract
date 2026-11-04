@@ -9188,7 +9188,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Dashboards, which vendors `src/session-handoff.ts`, re-vendors it to find the same, and every port of the detector takes the same
   boundary, `sk-` strength (bounded look-aheads) and canonical-case prefixes (no `i` flag). The vendors that re-sync
   include: the Fabric Agent Adapter kit's dashboard-link test sample (its lower-case `sk-` sample stops being a key
-  and is rebuilt from pieces as one DEC-0151 reads), the Fabric Agent Adapter kit's detector ports (its Python and JS secrets modules, its dashboard-link
+  and is rebuilt from pieces as one DEC-0151 reads), its profiles test case (its query of `%zz`, a raw control
+  character and `KIA` with 16 more characters stops being found, since its `AKIA` borrowed the `A` of the encoded
+  `%1A`; it is rebuilt with a boundary before `AKIA`, from pieces), the Fabric Agent Adapter kit's detector ports (its Python and JS secrets modules, its dashboard-link
   checkers, its connection ports and its dashboard button), its vendored vector files that change answer
   (`connections-extra` and `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`, re-vendored from the
   two changed semantic fixtures), Fabric Switchboard's folder-attribution port (it has neither look-ahead nor
