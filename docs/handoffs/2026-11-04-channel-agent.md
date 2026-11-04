@@ -139,7 +139,7 @@ filed; the coordinator files it on the board).
   credential gap is stated in full (every string not read as a URL, a sentence that holds a URL included, is read for
   key shapes only; a vector pins `Please write to https://u:p@help.example/` as not found); the read declaration is
   judged only by the findings under its own path, and the closing "rest not read" finding stands at the copy where the
-  budget ran out, with three vectors carrying the view's answer and a test deriving the view from the findings for
+  budget ran out, with three vectors (four from round 13, the gap's included) carrying the view's answer and a test deriving the view from the findings for
   every vector; every keyword the schema can fail on names its limit (`additionalProperties`, `propertyNames`, `not`,
   any `oneOf`), with a pointer for the none form at a holding text or a `texts` object, held by a test over the
   schema's keywords; `holding_reply` with a final text `{"none": "not_used"}` is a non-blocking `FAC-SEM-164`; a
@@ -149,6 +149,16 @@ filed; the coordinator files it on the board).
   after leading C0 controls and spaces, as the parser does; every provider prefix's near miss is charged up to its
   floor; `FAC-SEM-163` and the view's `FAC-SEM-162` are capped at 64 with a closing count, and `FAC-SEM-164` builds no
   place past 64.
+- Round 13 of the readings (on `9a953847`): unit pass, one product break and its risks, fixed: the pointer "only
+  texts.final takes the none form" is added only at a channel's `texts` or `texts/holding` (a test shows none at the
+  evals); at the four none-form members a failed type, a `null` included, names the none form beside the type; every
+  line of the view is `<code> at <place>: <reason>`, the reason the finding's message without the decision it cites,
+  identical lines once, and the derivation test holds the view to the rules' findings with reasons; a nullable
+  member's failure is one line, its value branch's, ending in ", or null"; `sk-` away from a boundary is charged up to
+  15 code points; the advice to rename an `sk-` id is given only at member names and id members; the Narrowings'
+  looser bullet adds the members that may be absent; the page tells a host that shows the view to run the rules too;
+  CONTEXT.md lists every channel kind; the conformance row names the holding-reply obligation and the tier-label check;
+  an `additionalProperties` line says "only declared members are taken".
 
 ## The branch and its history
 
@@ -198,7 +208,7 @@ the pull request comes from the v3 branch only.
 - What section 11 asks and no declaration can show (DEC-0150 CA-6): the side among the standard's sides, the route's
   capability for the side's kind, a tier's fact among the customer facts, the existence of the named agents,
   capabilities, desk and limit, a working-time limit's calendar, and everything the signal server observes.
-- The adoption, owed by the Fabric Agent Adapter, its row to be filed (the coordinator files it on the board): its
+- The adoption, owed by the Fabric Agent Adapter, its row FAA-197 on its main: its
   `check_service.py` vendors the schema and the vectors and reports, never fails, a declaration it reads as not
   declared while live producers still publish declarations written before this revision (each producer's own row is
   filed before the adapter re-pins); at its re-pin both register twins, `fabric_protocols.py` and
@@ -249,10 +259,11 @@ One line per sibling and per file it shares with this branch:
   provider prefixes in their canonical case, a strength rule for `sk-`).
 - PR #235: `docs/DECISIONS.md`; `docs/backlog.md`; conformance.md's next-free line; conformance.md's register, the
   `FAC-SEM-155` row before `156`.
-- Main is now `7f6bc647` (PR #236 merged, CT-215 and CT-216 at the backlog's tail): this branch merges or rebases over
-  it at landing; `docs/backlog.md` conflicts only at the tail, where the rows stay in id order through CT-216
+- Main moves while this branch waits (it was `bf50c9fc` after #238 when this was written): the lander re-measures
+  main at landing and merges or rebases over it; `docs/backlog.md` conflicts only at the tail, where the rows stay in id order through CT-216
   (`CT-204`, `CT-205`, `CT-206`, then this branch's `CT-209`, then `CT-215`, `CT-216`), and any row an open branch adds
   takes its place by id.
+- `docs/DECISIONS.md` keeps a blank line before each DEC heading (markdownlint MD022);
 - `docs/DECISIONS.md` keeps one "Next free ID" line, equal to the CAS counter at the merge, and each DEC body in id
   order after the bodies already on main: `grep -c '^\*\*Next free ID' docs/DECISIONS.md` prints 1. (On main, the
   heading order already holds one exception, DEC-0047 after DEC-0055; a merge adds none.)
@@ -265,8 +276,12 @@ its body: `docs/DECISIONS.md` is append-only), and rewrites these sentences outs
 DEC-0151's meeting list (its handoff, "When DEC-0150 and DEC-0151 meet on main") differ, DEC-0151's governs: its
 annotate-not-rewrite instruction, the alias entry (an agent whose project's registry alias the detector reads as a
 credential leaves that project's entry out until the registry changes the alias; it never renames the alias itself),
-and the join sentence, worded in both lists with the adoption condition (a
-reader joins on `project:<slug>` once the feed's readers have adopted it):
+and the join sentence, worded in both lists with the adoption condition. Where DEC-0151's list quotes DEC-0150's
+sentences from an older head, this list locates them on the landing head: CA-5's annotation (its `sk-` parenthesis,
+"DEC-0151, in progress, proposes to narrow that ...") in `docs/DECISIONS.md`, and item 4's in-progress `sk-`
+sentence on the page ("DEC-0151, in progress, proposes to narrow that to a digit with an upper-case letter and 16, or
+a digit and 32"); the lander re-quotes them from the landing head. The join sentence keeps its condition (a
+reader joins on `project:<slug>` once the feed's readers have adopted it). The list:
 
 - the "Not decided here" bullet in `docs/specification/support-quality.md` that names DEC-0151 (CT-210) in progress:
   removed, since DEC-0151's section answers it;
@@ -330,6 +345,16 @@ here), and adds:
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;
 - to be asked of the standard's owner: whether one declaration may hold projects on several sides;
+- posted on the board at landing, for FAA-197 (the adapter's adoption row, on its main), what that row lacks: both
+  `PROTOCOL_REVISIONS` twins with `channel-agent-standard` `['1']` and the feed-protocols vectors vendored again; the
+  check reports, never fails, a declaration it reads as not declared while live producers still fail; and the
+  well-known site (`extensions` of a well-known answer) beside `fabric-agent.json`'s `provider.extensions`;
+- for Fabric Dashboards, an adoption item: its sample service's `fabric_protocols.py` register gains the
+  `channel-agent-standard` row at its next pin;
+- to be asked of the standard's owner: the page's "Not checked here" list names section 11 checks no declaration can
+  show (the side among section 14's sides, `team.ask` against `operator.ask` as the route's capability for the side, a
+  tier's fact among the customer facts, an `until` date already past); would the owner move them to the signal
+  server's data or to the adapter's read-token check, quoting that list at posting time;
 - to be asked of the standard's owner: a string is read as a URL only when its head opens with a scheme and passes the
   ASCII and percent rules; every other string, a sentence that holds a URL included ("Please write to
   https://u:p@help.example/"), is read for key shapes only, so a password there is not found: is that gap acceptable

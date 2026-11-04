@@ -9032,7 +9032,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Proposed: accepted at merge after two clean rounds of readings.
 - **Context:** a project on the board asked (request `437c404b`, thread `b6820b97`, 2026-11-04) for an extension key
   under which an agent that answers people on a channel (mail, Telegram, store reviews) declares what
-  `channel-agent-standard/1` asks, checked statically by the Fabric Agent Adapter's service check (its row to be filed),
+  `channel-agent-standard/1` asks, checked statically by the Fabric Agent Adapter's service check (its row FAA-197),
   with the schema in this contract. The standard is owned outside this repository; its section 13.6 gives the declaration's
   fields and section 11 where it is declared and what is checked of it. Its v1 release candidate, round 4, the standard
   owner's neutral copy received on board thread `b6820b97`, is kept byte for byte in
@@ -9088,9 +9088,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      place, a member name the schema does not declare, a text's language and a number that is no index of a declared
      array, and any numeric key of an object, are written `*`; beside each failed keyword the place names the schema's
      own limit (values, pattern, length in code points, count, bound, format, the type alone for a failed type, and for
-     a nullable member its type and null on its `oneOf` line, one line only, `additionalProperties` the members the
-     schema declares, `propertyNames` the names a map takes, `not` what the member takes instead, any other `oneOf` its
-     forms; a holding text or a `texts` object in the none form points to the one member that takes it). The finding
+     a nullable member one line, its value branch's, ending in ", or null", `additionalProperties` that only declared
+     members are taken, `propertyNames` the names a map takes, `not` what the member takes instead, any other `oneOf`
+     its forms; at the four members that take the none form a failed type, a `null` included, names the form beside the
+     type; only at a channel's `texts` or `texts/holding` does a member named `none` add that only `texts.final` takes
+     the none form). The finding
      points to the declaration's grammars.
   3. CA-3. `FAC-SEM-163`: a project, a category code, a tier code, a channel, a source (read or declined), a hand-off
      queue and a recorded decision appear once; a channel with replies off names a decision, and a channel's decision
@@ -9109,8 +9111,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `FAC-SEM-101`'s detector on a string's first 4097 code points (today an ordinary name of `sk-` and 16 or more
      letters, digits, `_` or `-`, in any case, such as the valid channel id `sk-support-desk-faq-answers-2026-v2`, is
      found too; DEC-0151, in progress, proposes to narrow that to a digit with an upper-case letter and 16, or a digit and 32; the
-     shared detector stays as it is, and an id does not start with `sk-`; the finding on such an id says it is read as a
-     key and asks for a rename). Three places read narrower, each only when the value
+     shared detector stays as it is, and an id does not start with `sk-`; the finding on a member name or on a value of
+     an id's member that starts with `sk-` says it is read as a key and asks for a rename, and on a text or a label it
+     does not). Three places read narrower, each only when the value
      matches its own grammar, keyed on the place and not on a holder's name: a project's token slot of the slot's
      grammar segment by segment, its eval suite and outbox of the relative path grammar by the detector's path-aware
      reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a
@@ -9122,19 +9125,23 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      escape, a backslash escape, or a colour sequence with any number of parameter characters whose ESC is raw or
      escaped in either case), up to 255 code points; after every other provider prefix of the shared detector, anywhere
      and in any case (`gh?_`, `xox?-`, `AKIA`, `glpat-`), up to its floor (20, 10, 16 and 20 code points), what a near
-     miss is reread before it fails; and, for a string read as a URL, on the names and values a
+     miss is reread before it fails; after every `sk-` away from a boundary, up to 15 code points after it; and, for a
+     string read as a URL, on the names and values a
      WHATWG URL parse yields: 128 per query or fragment piece, its name's and value's code points, the value's `eyJ`
      and `sk-` terms, and the square over two of a name holding an upper-case letter when its value is not empty. Once it is spent, nothing more is read and every further member collapses; one finding per
      document then says the rest was not read, at the copy where the budget ran out (never at a read declaration read
-     whole), and the 64 places are counted per document, their count at the copy where the 65th was found. The read
+     whole), and the 64 places are counted per document, their count at the copy where the 65th was found (at the read
+     declaration's key it counts every place in the document past 64, later copies included). The read
      declaration is judged only by the findings under its own path: a misplaced copy's credential, or the budget
      running out in a copy, is found at that copy and leaves the read declaration's answer as it is. A reader treats a
      declaration with `FAC-SEM-165` or `FAC-SEM-163` as not declared, as it does one with `FAC-SEM-162`, keeps one with
      only `FAC-SEM-164` declared and shows those findings to its author, and never displays a credential-shaped value
      (`channelAgentView`, shaped as `connectionsView`, `errors` always present: `declared: false, reported: false,
      errors: []` with no key,
-     `declared: false, reported: true` with the findings, `declared: true` with the obligations; every line names the
-     rule and the place: `FAC-SEM-162 at <place>: <keyword> (<limit>)` for each schema place of an invalid
+     `declared: false, reported: true` with the findings, `declared: true` with the obligations; every line is
+     `<code> at <place>: <reason>`, the reason the finding's message without the decision it cites, identical lines
+     once; a host that shows the view to an author also runs the rules, since the view judges only the read
+     declaration: `FAC-SEM-162 at <place>: <keyword> (<limit>)` for each schema place of an invalid
      declaration, `FAC-SEM-165 at <place>` for each credential place, and, for a manifest whose only copy is
      misplaced, `FAC-SEM-162 at <place>` where that copy stands; at most 64 schema places, then
      `FAC-SEM-162 at /: and N more`). No finding's message carries a declared value and no rule's place echoes
@@ -9210,7 +9217,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 12 of the readings. `DEC-0150` was reserved by the coordinator with
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 13 of the readings. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation

@@ -213,12 +213,13 @@ function oversize(value: unknown): string[] {
  * What the schema allows at a failed place, from the schema alone, never the instance: the missing member's name for
  * `required` (when the schema declares it), the values for `enum` and `const`, the pattern for `pattern`.
  */
-function allowed(error: { keyword: string; schema?: unknown; params?: Record<string, unknown> }, names: Set<string>): string {
+function allowed(error: { keyword: string; schema?: unknown; params?: Record<string, unknown> }, names: Set<string>, at = ""): string {
   const params = error.params ?? {};
-  // A member named `none` where the schema does not take the none form: the pointer says where it is taken.
-  const elsewhere = params.additionalProperty === "none" || params.propertyName === "none" ? "; only texts.final takes the none form (Narrowings)" : "";
+  // The none form written at a channel's texts or its holding text: the pointer says the one member that takes it.
+  const texts = /(^|\/)channels\/[0-9]+\/texts(\/holding)?$/.test(at);
+  const elsewhere = texts && (params.additionalProperty === "none" || params.propertyName === "none") ? "; only texts.final takes the none form (Narrowings)" : "";
   if (error.keyword === "required" && typeof params.missingProperty === "string" && names.has(params.missingProperty)) return ` (${params.missingProperty})`;
-  if (error.keyword === "additionalProperties") return ` (no member the schema does not declare${elsewhere})`;
+  if (error.keyword === "additionalProperties") return ` (only declared members are taken${elsewhere})`;
   if (error.keyword === "propertyNames" && isObject(error.schema)) return ` (${nameRule(error.schema)}${elsewhere})`;
   if (error.keyword === "enum" && Array.isArray(params.allowedValues)) {
     const values = params.allowedValues.map(String);
@@ -243,7 +244,11 @@ function allowed(error: { keyword: string; schema?: unknown; params?: Record<str
   if (error.keyword === "not" && isObject(error.schema) && Array.isArray(error.schema.required)) return ` (${error.schema.required.join(", ")} only with not_yet)`;
   if (error.keyword === "not" && isObject(error.schema) && error.schema.const !== undefined) return ` (a value other than ${String(error.schema.const)})`;
   // A failed type names the type the schema wants; a nullable member's `oneOf` names its types and null.
-  if (error.keyword === "type" && (typeof params.type === "string" || Array.isArray(params.type))) return ` (${[params.type].flat().join(" or ")})`;
+  if (error.keyword === "type" && (typeof params.type === "string" || Array.isArray(params.type))) {
+    // At the four members that take the none form, a value of the wrong type (a null included) is told of it.
+    const form = NONE_FORM_AT.test(at) ? ", or the none form {none: not_yet, until} / {none: not_used}" : "";
+    return ` (${[params.type].flat().join(" or ")}${form})`;
+  }
   if (error.keyword === "oneOf") {
     const branches = error.schema;
     if (Array.isArray(branches)) {
@@ -255,6 +260,9 @@ function allowed(error: { keyword: string; schema?: unknown; params?: Record<str
   }
   return "";
 }
+
+/** The four members that take the standard's none form, as a place writes them (CA-2). */
+const NONE_FORM_AT = /(^|\/)projects\/[0-9]+\/(question_route|gap_registry|tickets\/pd_check|channels\/[0-9]+\/texts\/final)$/;
 
 /** What a `propertyNames` schema takes, from the schema alone: its pattern, its length, the name it refuses. */
 function nameRule(rule: JsonObject): string {
@@ -296,12 +304,12 @@ export function messagePlaces(places: readonly string[]): string[] {
 }
 
 /** An Ajv error as its keyword and its place, every free member name replaced by `*`, never a declared value. */
-export function placed(error: { keyword: string; instancePath: string; schema?: unknown; params?: Record<string, unknown> }): string {
+export function placed(error: { keyword: string; instancePath: string; schema?: unknown; params?: Record<string, unknown> }, orNull = false): string {
   const names = schemaNames();
   const tokens = error.instancePath.split("/").slice(1).map((token) => token.replace(/~1/g, "/").replace(/~0/g, "~"));
   // The schema enters arrays only where it declares them, so a number after a declared array's name is an index.
   const at = tokens.map((token, i) => placedToken(tokens[i - 1], tokens[i - 2], token, /^(0|[1-9][0-9]{0,8})$/.test(token), names)).join("/");
-  return `${error.keyword} at /${at}${allowed(error, names)}`;
+  return `${error.keyword} at /${at}${allowed(error, names, at)}${orNull ? ", or null" : ""}`;
 }
 
 /** The schema's errors on a value, as places; a schema that cannot run on it (a RangeError) is TOO_LARGE. */
@@ -310,11 +318,12 @@ export function schemaErrors(value: unknown, validate: ValidateFunction): string
     if (validate(value) === true) return [];
     // A nullable member's null branch fails `type` (null) for every non-null value; its `oneOf` line names null instead.
     // An `if` line only says which branch of a member that takes the none form failed; that branch's own lines say how.
-    // A nullable member of the wrong type gets one line, its `oneOf`: the inner branch's `type` line is dropped.
+    // A nullable member (a `oneOf` with a null branch) fails as its value branch does: that branch's line says
+    // ", or null", and the `oneOf` line is dropped, so no line repeats another.
     const all = validate.errors as ErrorObject[];
-    const nullable = new Set(all.filter((error) => error.keyword === "oneOf").map((error) => error.instancePath));
-    const errors = all.filter((error) => error.keyword !== "if" && !(error.keyword === "type" && (error.params.type === "null" || nullable.has(error.instancePath))));
-    return [...new Set(errors.map(placed))];
+    const nullable = new Set(all.filter((error) => error.keyword === "oneOf" && Array.isArray(error.schema) && error.schema.some((branch) => typeOf(branch) === "null")).map((error) => error.instancePath));
+    const errors = all.filter((error) => error.keyword !== "if" && !(error.keyword === "type" && error.params.type === "null") && !(error.keyword === "oneOf" && nullable.has(error.instancePath)));
+    return [...new Set(errors.map((error) => placed(error, nullable.has(error.instancePath))))];
   } catch (error) {
     if (error instanceof RangeError) return [TOO_LARGE];
     throw error;
@@ -343,11 +352,11 @@ function schemaView(doc: unknown, site: ChannelAgentSite): { declared: false } |
 export function channelAgentView(doc: unknown, site: ChannelAgentSite = "manifest"): ChannelAgentView {
   const view = schemaView(doc, site);
   const budget = newBudget();
-  const named = (finding: Finding) => `${finding.code} at ${finding.instancePath || "/"}`;
+  const named = viewLine;
   if (!view.declared) {
     // Only misplaced copies: each is reported where it stands in the document, with what it holds.
     const copies = site === "manifest" && isObject(doc) ? [...misplaced(doc, budget), ...summary(budget)] : [];
-    return copies.length > 0 ? { declared: false, reported: true, errors: copies.map(named) } : { declared: false, reported: false, errors: [] };
+    return copies.length > 0 ? { declared: false, reported: true, errors: once(copies.map(named)) } : { declared: false, reported: false, errors: [] };
   }
   // The read declaration alone, walked first and with the whole budget, as `channelAgentRules` walks it: its answer
   // rests only on the findings under its own path.
@@ -356,7 +365,7 @@ export function channelAgentView(doc: unknown, site: ChannelAgentSite = "manifes
   if (!view.valid) {
     const lines = view.errors.slice(0, SECRET_FINDINGS).map(schemaLine);
     if (view.errors.length > SECRET_FINDINGS) lines.push(`FAC-SEM-162 at /: and ${view.errors.length - SECRET_FINDINGS} more`);
-    return { declared: false, reported: true, errors: [...lines, ...credentials] };
+    return { declared: false, reported: true, errors: once([...lines, ...credentials]) };
   }
   const repeated = newCap();
   const owing = newCap();
@@ -372,9 +381,17 @@ export function channelAgentView(doc: unknown, site: ChannelAgentSite = "manifes
   });
   blocking.push(...closing("FAC-SEM-163", repeated, ""));
   const errors = [...credentials, ...blocking.map(named)];
-  if (errors.length > 0) return { declared: false, reported: true, errors };
-  return { declared: true, reported: false, errors: [], standard: view.standard, projects: view.projects, obligations: [...owed, ...closing("FAC-SEM-164", owing, "")].map(named) };
+  if (errors.length > 0) return { declared: false, reported: true, errors: once(errors) };
+  return { declared: true, reported: false, errors: [], standard: view.standard, projects: view.projects, obligations: once([...owed, ...closing("FAC-SEM-164", owing, "")].map(named)) };
 }
+
+/** A view's line: the rule, the place and the finding's reason, its message without the decision it cites. */
+export function viewLine(finding: Finding): string {
+  return `${finding.code} at ${finding.instancePath || "/"}: ${finding.message.replace(/ \(DEC-0150 CA-[0-9]\)$/, "")}`;
+}
+
+/** Identical lines (one code, place and reason) once, in their order. */
+const once = (lines: string[]): string[] => [...new Set(lines)];
 
 /** FAC-SEM-163 at a project that repeats an earlier entry's, within the cap. */
 function repeat(at: string, cap: Cap): Finding[] {
@@ -557,7 +574,8 @@ function keyRereads(text: string): number {
     const at = match.index;
     pattern.lastIndex = at + 1;
     const boundary = at === 0 || !/[A-Za-z0-9]/.test(text[at - 1] as string) || ESCAPE_BEFORE.test(text.slice(Math.max(0, at - 6), at)) || colourBefore(text, at);
-    if (boundary) cost += codePoints(text, KEY_REREAD, at);
+    // At a boundary the shape may read a long key; anywhere else the detector's `sk-` run is still tried, up to its floor.
+    cost += boundary ? codePoints(text, KEY_REREAD, at) : codePoints(text, SK_FLOOR, at + 3);
   }
   // Every other provider prefix, anywhere and in any case as the shared detector reads it: a near miss is reread up to
   // the run its shape needs (its floor) before it fails.
@@ -571,6 +589,8 @@ function keyRereads(text: string): number {
   return cost;
 }
 const KEY_REREAD = 255;
+/** What a near miss of `sk-` away from a boundary is reread: the run before SECRET_VALUE's 16 fails. */
+export const SK_FLOOR = 15;
 /** The shared detector's other provider prefixes, each with the run its shape needs after it (SECRET_VALUE). */
 export const PREFIX_FLOORS: ReadonlyArray<readonly [RegExp, number]> = [[/gh[pousr]_/gi, 20], [/xox[abposr]-/gi, 10], [/akia/gi, 16], [/glpat-/gi, 20]];
 
@@ -619,10 +639,11 @@ export function detectorCost(text: string): number {
 function secrets(value: unknown, root: string, budget: Budget = newBudget()): Finding[] {
   const findings: Finding[] = [];
   const names = schemaNames();
-  const flag = (at: string, what: string, text: string) => {
+  // `id`: a member name, or a value whose member takes an id's grammar; a text or a label gets no advice to rename.
+  const flag = (at: string, what: string, text: string, id: boolean) => {
     if (budget.named < SECRET_FINDINGS) {
       budget.named += 1;
-      const rename = /^sk-/i.test(text) ? "; an id that starts with sk- is read as a key; rename it" : "";
+      const rename = id && /^sk-/i.test(text) ? "; an id that starts with sk- is read as a key; rename it" : "";
       findings.push({ code: "FAC-SEM-165", instancePath: at, message: `${what} is shaped like a credential: a token is named by its vault slot, never written${rename} (DEC-0150 CA-5)` });
     } else {
       budget.more += 1;
@@ -656,7 +677,7 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
       if (!afford(text)) return;
       const isShaped = shaped(text);
       last.plain = !isShaped && NAME_CHARACTERS.test(text) && !/[0-9]{7}/.test(text.replace(/[-_]/g, ""));
-      if (isShaped) flag(place(spot), "a member's name", text);
+      if (isShaped) flag(place(spot), "a member's name", text, true);
       return;
     }
     if (!afford(text)) return;
@@ -667,10 +688,13 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
     else if (((role === "evals" && key === "suite") || (role === "tickets" && key === "outbox")) && relativeRef(text)) found = urlReading(text);
     else if (role === "queue" && key === "recommendation" && OPAQUE_ID.test(text)) found = keyShaped(text);
     else found = shaped(text);
-    if (found) flag(place(spot), "a value", text);
+    if (found) flag(place(spot), "a value", text, ID_MEMBERS.has(key));
   }, () => budget.unread);
   return findings;
 }
+
+/** The members whose value takes an id's grammar: a value there that starts with `sk-` is told to be renamed. */
+const ID_MEMBERS = new Set(["id", "code", "lead_agent", "owner", "decision", "answered_signal", "target", "spend_record", "project", "side"]);
 
 /** The document's closing FAC-SEM-165 findings, once: the count past SECRET_FINDINGS, and that the rest was not read. */
 function summary(budget: Budget): Finding[] {
