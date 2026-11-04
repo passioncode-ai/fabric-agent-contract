@@ -10,7 +10,7 @@ code [`src/support-quality-rules.ts`](../../src/support-quality-rules.ts) · tes
 
 An agent that answers people (chat, mail, reviews, community) MAY publish its support quality; one that does publishes,
 on its events feed, one event of kind
-`support.quality_daily` per closed UTC day and channel whose `data` ([service](service.md#event-data), DEC-0070) is
+`support.quality_daily` per closed UTC day, channel and, once adopted, project (DEC-0151), whose `data` ([service](service.md#event-data), DEC-0070) is
 this payload: `data.value` the payload, and `data.schema` the URI of the copy of this schema the service publishes, as
 service.md asks. A reader recognises the payload by `data.value.kind` (`support-quality-daily/1`), never by
 `data.schema`. A rerun for a day replaces that day's event for the channel and republishes it as first published: a
@@ -101,21 +101,26 @@ reader of its feed has adopted DEC-0151.
 
 No producer carries the ticket counts until two prerequisites outside this contract hold (CT-210 step (d)): the
 channel agent standard's section 5.1 says that `/1` takes `autonomy.toPersonPolicy` and `toPersonInability` in turns,
-and its observed check accepts what the wait withholds. Until the feed's readers adopt DEC-0151, the channel agent standard's per-project daily check must accept a day published without `project` (never attributed, rule 3 of the project section), a withheld channel and a project withheld for its alias.
+and the observed check below holds.
+
+Its observed check accepts what the wait withholds (support quality, the ticket counts), by period: until the feed's readers adopt DEC-0151, a day without `project` and a withheld channel; from adoption on, a project withheld because its alias is read as a credential, until the registry renames it, and then that project's kept days, published late under the new alias. Rule 3 of [the project](#the-project-dec-0151) says how a reader keeps a
+day without `project`.
 
 ### The project (DEC-0151)
 
 `project` names the project whose tickets a day counts, as the registry alias `project:<slug>`. Each rule is stated
 here once; the conformance rows and DEC-0151 point to it.
 
-1. **Before adoption.** Until every reader of its feed it knows of has adopted DEC-0151, a producer publishes no `project` and withholds every channel whose day holds tickets of two projects (by its channel agent declaration, or by its own project mapping when it has none, counting a project whose kind there is left out of `/1`); the switch day of a channel moving from one project to another is one of them, and a withheld day is dropped, never published later.
+1. **Before adoption.** Until every reader of its feed it knows of has adopted DEC-0151, a producer publishes no `project` and withholds every channel whose day holds tickets of two projects that enter `/1` (by its channel agent declaration, or by its own project mapping when it has none; a project whose kind there is left out of `/1`, such as `team_chat`, does not count); the switch day of a channel moving from one project to another is one of them, and a withheld day is dropped, never published later.
 2. **After adoption.** Once every reader of its feed it knows of has adopted DEC-0151, a producer names `project` on
    every day it first publishes, whatever the number of projects on the channel: one event per project, channel and day
    (`fixtures/positive/service-events-page-support-quality-projects.json`).
 3. **A day without `project`** (published before adoption, a day merged across projects under DEC-0095, or a rerun of
    either) is never attributed to a project: a reader keeps it per service, channel and day, unattributed. Per-project
-   history starts at adoption, the same for every reader. Until the feed's readers adopt DEC-0151, the channel agent standard's per-project daily check must accept a day published without `project` (never attributed, rule 3 of the project section), a withheld channel and a project withheld for its alias.
-4. **A rerun** republishes a day as first published, with the `project` it had or without one.
+   history starts at adoption, the same for every reader. The channel agent standard's observed check accepts, by period, what the wait withholds (the observed-check paragraph under [the ticket counts](#the-ticket-counts-dec-0151) of support quality).
+4. **A rerun** republishes a day as first published, with the `project` it had or without one. A day merged across
+   projects under DEC-0095 is never rerun while rule 1 holds (before adoption); after adoption it may be rerun only
+   unchanged, and it stays unattributed (rule 3).
 5. **A reader that adopted DEC-0151** keeps, per service, channel, day and `project`, the latest event, and keeps a day
    without `project` as rule 3 says.
 6. **Calibration** (DEC-0144), per side: each side's calibration (its labels, the day's judge and rubric) is carried
@@ -123,6 +128,11 @@ here once; the conformance rows and DEC-0151 point to it.
    no calibration, or an event judged by another judge or not judged, carries none. A reader reads calibration per
    project's event, never summing or copying it across projects.
 7. **An alias read as a credential**: the paragraph on credentials under [the payload](#the-payload) holds the rule.
+8. **Adoption is one-way** per producer: once every reader of its feed it knows of has adopted, it names `project`
+   from then on; a reader that appears later on an older copy is that reader's to update, and the producer does not
+   fall back.
+9. **A producer with no registry alias** never names `project`: its days stay unattributed (rule 3), and a channel
+   holding two of its projects' tickets stays withheld (rule 1).
 
 Days withheld under rule 1 are dropped, never published later, so per-project history starts at adoption. A project
 withheld for its alias is withheld after adoption: its kept days are post-adoption days, published naming the new
@@ -151,8 +161,8 @@ applies are `/1`'s four. `community`'s latency and coverage figures therefore mi
 and `team_chat`, whose limits differ (the channel agent standard's section 10: a group 6 hours, a public comment 7
 days, a team's chat 2 working days). A producer MAY leave `team_chat` out of `/1`: a team's internal chat is not
 customer support. When it does, the feed's `community` counts differ from the signal server's by the team-chat
-tickets, and a project whose only kind is `team_chat` has no daily. A channel whose day holds tickets of two projects is
-withheld before adoption, counting a project whose kind there is left out (rule 1 under [the project](#the-project-dec-0151)). A new enum value was refused: a reader on an older copy would refuse every day of that channel, where
+tickets, and a project whose only kind is `team_chat` has no daily. A project whose kind is left out of `/1` does not
+make a channel withheld before adoption (rule 1 under [the project](#the-project-dec-0151)). A new enum value was refused: a reader on an older copy would refuse every day of that channel, where
 a mapping costs nothing.
 
 ## Semantic rules
@@ -189,7 +199,7 @@ a mapping costs nothing.
   standard's signal server or leaves it out.
 - How a reader combines one channel's per-project days: the reader's choice; rates and percentiles are never summed.
 - Which projects a reader on the channel agent standard combines: only projects of one side, the side taken from the
-  channel agent declaration or from the signal server.
+  channel agent declaration or from the signal server. A day without `project` is never combined with other days across services or channels under the channel agent standard's side rule, and is kept out of side summaries.
 - The four summary numbers the channel agent standard derives (answered, to a person, fallback, unanswered), as
   shares of `ended`: the reader's.
 - The move from the asker's first implementation (its v2 shape, under its own URN): its producers move to

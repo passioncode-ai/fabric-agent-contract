@@ -5971,7 +5971,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   agent standard (`arrived`, `ended`, `notATicket`, `open`, `outcomes`, `autonomy.answered`, `stability.fallbackTurns` and
   `fallbackTickets`) at the same revision, under DEC-0144's producer rule, and lets a metric name in `notMeasured` carry
   digits. It narrows item 2: the payload carries one id, the project's registry alias `project:<slug>`. It narrows
-  item 1: a channel serving several projects publishes one event per project and day, each naming its `project`.
+  item 1: a channel serving several projects publishes one event per project and day, each naming its `project`,
+  and before adoption a channel holding two projects' tickets publishes no event.
 - **Decision:** in [support quality](specification/support-quality.md):
   1. An agent that answers people MAY publish, on its events feed, one event per closed UTC day and channel (`chat`,
      `mail`, `reviews`, `community`), of kind `support.quality_daily`, whose `data.value` (DEC-0070) is a
@@ -9083,7 +9084,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      finding per unmeasured first-reply metric, a producer's gate accepts exactly those findings at those metrics and no
      other, and the producer names the metrics once every reader has adopted. No producer carries
      the counts until the channel agent standard's section 5.1 says that `/1` takes the escalation counts in turns and
-     its observed check accepts what the wait withholds (CT-210 step (d)). Until the feed's readers adopt DEC-0151, the channel agent standard's per-project daily check must accept a day published without `project` (never attributed, rule 3 of the project section), a withheld channel and a project withheld for its alias. Until `/1` names a ticket unit, a reader computes no "to a person" ticket share from
+     its observed check accepts what the wait withholds (CT-210 step (d)). The channel agent standard's observed check accepts, by period, what the wait withholds (the observed-check paragraph of support quality, under its ticket counts). Until `/1` names a ticket unit, a reader computes no "to a person" ticket share from
      `autonomy.toPersonPolicy` and `toPersonInability`: it takes it from the channel agent standard's signal server or
      leaves it out.
   5. `/1` keeps its four channels. An agent on the channel agent standard publishes each of the declaration's seven
@@ -9096,9 +9097,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   6. An optional top-level `project`: the project registry's alias `project:<slug>`
      (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written, the form DEC-0150's CA-2 gives the channel agent
      declaration's `project`. Until every reader of its feed it knows of has adopted DEC-0151, a producer publishes no
-     `project` and withholds every channel whose day holds tickets of two projects (by its channel agent declaration, or
-     by its own project mapping when it has none, counting a project whose kind there is left out of `/1`); the switch
-     day of a channel moving from one project to another is one of them, and a withheld day is dropped, never published
+     `project` and withholds every channel whose day holds tickets of two projects that enter `/1` (by its channel
+     agent declaration, or by its own project mapping when it has none; a project whose kind there is left out of
+     `/1`, such as `team_chat`, does not count); the switch day of a channel moving from one project to another is
+     one of them, and a withheld day is dropped, never published
      later. Once every reader has adopted, it names `project` on every day it first publishes, whatever the number of
      projects on the channel.
      A reader never attributes a day without `project` to a project: it keeps such a day (published before adoption, a
@@ -9126,7 +9128,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      granularity) and under a 500 ms ceiling, where the unbounded form took seconds; a digit or an upper-case letter beyond the
      first 256 characters of a run no longer counts. A port whose regex has no look-ahead (Rust's `regex` crate) checks
      that strength outside the regex. So `project:helpdesk-customer-support`,
-     `project:sk-learn-experiments`, `sk-learn-experiments-2026` and `project:sk-hynix-customer-care` are no keys,
+     `project:sk-learn-experiments`, `sk-learn-experiments-2026` and `project:sk-harbor-customer-care` are no keys,
      while a mixed-case key, an `sk-proj-` key and `sk-or-v1-` with 64 lower-case hex digits still are, at the start of
      a value, after a boundary character or after a listed escape. The residual: an alias with a slug word (a word
      starts after `-`, `_`, `.` or `:`) that starts with a provider prefix and holds enough key characters is read as a
@@ -9207,8 +9209,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adapter's source check (`fabric_source_check.py`) derives its provider-key shapes from
   `fabric_secrets.SECRET_VALUE.pattern` and raises `ImportError` on DEC-0151's pattern, so it keeps the earlier
   unbounded shapes as its own fixed list, for parity with DEC-0149's tree check, before or together with the detector's
-  port. Until every reader of its feed it knows of has adopted DEC-0151, a producer publishes no `project` and withholds every channel whose day holds tickets of two projects (by its channel agent declaration, or by its own project mapping when it has none, counting a project whose kind there is left out of `/1`); the switch day of a channel moving from one project to another is one of them, and a withheld day is dropped, never published later. A producer that merged projects into one event under DEC-0095 thus stops publishing that channel
-  from DEC-0151 until every reader adopts, so its readers see no days for that channel meanwhile, and reruns a merged day only as first published; whether any `/1` producer does so
+  port. Until every reader of its feed it knows of has adopted DEC-0151, a producer publishes no `project` and withholds every channel whose day holds tickets of two projects that enter `/1` (by its channel agent declaration, or by its own project mapping when it has none; a project whose kind there is left out of `/1`, such as `team_chat`, does not count); the switch day of a channel moving from one project to another is one of them, and a withheld day is dropped, never published later. A producer that merged projects into one event under DEC-0095 thus stops publishing that channel
+  from DEC-0151 until every reader adopts, so its readers see no days for that channel meanwhile, never reruns a merged day before adoption, and after adoption reruns one only unchanged; whether any `/1` producer does so
   today is the producers' to confirm (CT-103 suggests multi-product producers are still on their v2 shape).
   `contractVersion` stays
   `0.1.0`.
@@ -9233,5 +9235,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (round 8: the per-day attribution of an absent `project`, the rerun across the switch to two projects, the
   team-chat counts, the withheld alias's kept days, the residual's prose, and the vendor list); two consecutive clean
   rounds are still owed. Round 10 widened the observed-check prerequisite to days without `project`, made rule 1's
-  trigger the day's tickets of two projects, and stated calibration per side. Round 9 replaced the inference of an absent `project` with one rule: no `project` before
+  trigger the day's tickets of two projects, and stated calibration per side. Round 11 split the observed check by
+  period, counted only projects whose tickets enter `/1`, kept a merged legacy day from reruns before adoption, and
+  made adoption one-way. Round 9 replaced the inference of an absent `project` with one rule: no `project` before
   adoption, `project` on every event after, and a day without it never attributed.

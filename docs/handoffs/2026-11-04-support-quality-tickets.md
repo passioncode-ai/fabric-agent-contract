@@ -169,12 +169,16 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 
 - Two clean rounds of blind readings, then merge (the branch is pushed, no pull request yet).
 - On DEC-0151's merge: close CT-129 (fixed by item 3) with its receipt.
-- The coordinator tells the channel agent standard's owner, on thread `b6820b97`, that its observed check (section 11)
-  must accept, until the feed's readers adopt DEC-0151, a day published without `project` (never attributed, rule 3 of
-  the project section), a withheld channel and a project withheld because its alias is read as a credential, and asks for the two prerequisites of section 5.1 (turns for the escalation counts, the ticket counts by
-  the signal server) and the team-chat note (CT-210 step (d)); the coordinator files the adapter's row (step (e)). A
-  project withheld for its alias keeps its days, and after the registry changes the alias the producer publishes the
-  kept days under the new alias.
+- The coordinator tells the channel agent standard's owner, on thread `b6820b97` (CT-210 step (d)): its observed check
+  (section 11) accepts, by period, what support quality's observed-check paragraph lists (before adoption a day without
+  `project` and a withheld channel; from adoption on a project withheld for its alias until the registry renames it, and
+  then its kept days published late under the new alias); the withholding starts at DEC-0151's merge whatever the
+  counts, so that acceptance is owed before any producer on the standard has a shared channel; section 5.1 says `/1`
+  takes the escalation counts in turns and the ticket counts travel by the signal server, and marks `autonomy.answered`
+  and `stability.fallbackTurns` deferred like its '(new)' fields; and the team-chat note. The coordinator files the
+  adapter's row (step (e)).
+- Before the merge, the coordinator asks each multi-project `/1` producer on the board whether it merges projects into
+  one event (DEC-0095) and records the answers in CT-210 (step (f)).
 - The vendors re-sync with item 7, including: the Fabric Agent Adapter kit's detector ports (its Python and JS secrets
   modules, its dashboard-link checkers, its connection ports and its dashboard button), its vendored vector files that
   change answer (`connections-extra` and `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`,
@@ -301,9 +305,9 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these (DEC-0150's sen
   every boundary form of DEC-0151's `SECRET_VALUE`, so no `keyRereads` change is owed at `cd350f47`; if the head that
   lands differs, the second to land compares again. No wording change is owed by DEC-0151; on the merged tree,
   DEC-0150's budget test with digit-free `-sk` strings passes.
-- `test/channel-agent.test.ts`, DEC-0150's test titled "finds a valid channel id of sk- and 16 or more name characters,
-  today's rule, as the page warns": its title and case state DEC-0151's rule (32 name characters holding a digit, or 16
-  with a digit and an upper-case letter).
+- `test/channel-agent.test.ts`, DEC-0150's `sk-` test, titled "finds a channel id the shared detector reads as a
+  credential" at `08fd8ccf`: its case states DEC-0151's rule (32 name characters holding a digit, or 16 with a digit and
+  an upper-case letter); its title already holds for both rules.
 - This list's instruction to annotate, not rewrite, DEC-0150's CA-2, CA-5, Compatibility and Source counter sentence in
   `docs/DECISIONS.md` governs; DEC-0150's branch is being aligned to it.
 - `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `44e2296a`: that head keeps the tree check's own
