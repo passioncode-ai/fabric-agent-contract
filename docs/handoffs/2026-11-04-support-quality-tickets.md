@@ -159,6 +159,11 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   and its channels still count for rule 1; calibration is per side; rule 2 names `project` on every day first
   published; the rerun key adds `project` once adopted; joining a renamed alias is the reader's; the escalation counts
   are in turns, bounded by `nobodyDropped.turns`; the `AKIA` body is read in upper case only.
+- Round 10's seam addendum (on `628877b5`, the detector unchanged at `c3b900b8`): the vendor lists name the adapter's
+  profiles test case whose `AKIA` borrowed the `A` of an encoded `%1A`; the closing check's second part leaves out the
+  annotation line; other handoffs, DEC-0150's included, stay as history; the daily-payload pointer says the escalation
+  counts stay in turns; the merge list is re-measured at DEC-0150 `5978ebec`, DEC-0149 `44e2296a` (its new branch) and
+  main `7f6bc647`.
 
 ## Open
 
@@ -198,14 +203,15 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 
 ## When DEC-0150 and DEC-0151 meet on main
 
-DEC-0150's current branch is `origin/agent/channel-agent-ext-v3-20261104` (`3c1ba539` when this was written; the
-source-manifest branch was at `725b67cd`). The scratch measurements below are of those heads; they are measured again
+DEC-0150's current branch is `origin/agent/channel-agent-ext-v3-20261104` (`5978ebec` when this was written); DEC-0149
+now lives on `origin/agent/ct194-source-manifest-v2-20261104` (`44e2296a`; the old branch name is deleted); main is at
+`7f6bc647` (#236 merged, CT-215 and CT-216 added at the backlog tail). The scratch measurements below are of those heads; they are measured again
 at merge, against the heads then current. **Merge gate:** DEC-0150 must be on main before DEC-0151 merges. At
 DEC-0151's merge, `git ls-tree origin/main docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md` prints the
 file and `grep '^### DEC-0150' docs/DECISIONS.md` prints one line; if either prints nothing, DEC-0151 waits (or rebases
 over DEC-0150 once it lands).
 
-The files each open branch shares with this one, from `git merge-tree` against `f7c866d1` on 2026-11-04 (a textual
+The files each open branch shares with this one, from `git merge-tree` against `707d3301` on 2026-11-04 (a textual
 conflict unless the line says it auto-merges), with the resolution:
 
 - **Against DEC-0150** (`origin/agent/channel-agent-ext-v3-20261104`):
@@ -221,7 +227,7 @@ conflict unless the line says it auto-merges), with the resolution:
     `project` bullet and DEC-0151's registry-alias bullet into one compared-as-written bullet.
   - `src/secret-shape.ts` (auto-merges): DEC-0150's `rawValues` change and DEC-0151's `SECRET_VALUE` touch different
     lines; keep both.
-- **Against DEC-0149** (`origin/agent/ct194-source-manifest-20261103`, `725b67cd`): `docs/DECISIONS.md` and
+- **Against DEC-0149** (`origin/agent/ct194-source-manifest-v2-20261104`, `44e2296a`): `docs/DECISIONS.md` and
   `docs/backlog.md` (tail appends; keep both, in order), `docs/handoffs/README.md` (keep both rows) and
   `src/secret-shape.ts` (the bullet below). Its `URL_SECRET_VALUE` in `src/source-rules.ts` deliberately stays the tree
   check's own earlier unbounded pattern, with the `i` flag, for parity with the adapter's source check: it is NOT
@@ -230,7 +236,9 @@ conflict unless the line says it auto-merges), with the resolution:
   into a path is still held; the DEC-0149 branch makes that change itself.
 - **Against PR #235** (`agent/ct200-renewal-repeat-20261102`, DEC-0148): `docs/DECISIONS.md` and `docs/backlog.md`
   (tail appends; keep both, in order).
-- **Against PR #236** (`agent/template-parity-20261103`): `docs/backlog.md` (tail appends; keep both, in order).
+- **Against main at `7f6bc647`** (PR #236 merged): `docs/backlog.md`, the tail; keep every row, in id order through
+  CT-216 (CT-210, CT-213, CT-215, CT-216). The scratch merge with `707d3301`, so resolved, passes: `tsc` exit 0, 28 vector
+  files match, the whole suite passes (109 files, 9833 tests, 1 skipped).
 
 The second of DEC-0150 and DEC-0151 to merge also rewrites these (DEC-0150's sentences quoted from its branch at
 `3c1ba539`, cited by their text, since its lines move):
@@ -248,8 +256,11 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these (DEC-0150's sen
   append-only) and annotated with DEC-0151's merge.
 - DEC-0150's join sentence in `channel-agent.md` ("DEC-0151 (CT-210, in progress) gives `support-quality-daily` payloads
   the same alias; once it lands, a reader joins a declaration to a project's payloads on `project:<slug>`"): once both
-  land it reads "DEC-0151 gives `support-quality-daily` payloads the same alias, and a reader joins a declaration to a
-  project's payloads on `project`, and a payload with no project is not attributed to any project".
+  land it reads, as DEC-0150's list has it: "once DEC-0151 has landed and a feed's readers have adopted it, a reader
+  joins a declaration to the payloads that carry `project:<slug>`; a payload with no project is not attributed to any
+  project".
+- `vitest.config.ts`: DEC-0150 and DEC-0149 each widen the coverage `include` line (DEC-0151 does not touch it); the
+  merge step is one coverage include line holding both lists.
 - `test/channel-agent.test.ts`: an assertion that the declaration's `project` pattern equals
   `support-quality-daily.schema.json`'s `$defs/projectAlias.pattern` (none at `3c1ba539`; the second to land adds
   it if it is still absent).
@@ -283,7 +294,7 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these (DEC-0150's sen
   it, left as written in the register; the advice to rename an id that starts with `sk-` stays true, since a strong
   `sk-` run at the start of a value is still found.
 - DEC-0150's `FAC-SEM-165` budget (its `keyRereads`, `ESCAPE_BEFORE`, `ESC_BEFORE` and `colourBefore`, read at
-  `cd350f47`): it charges, after every `sk-` (in any case) at a boundary, up to 255 code points, where a boundary is the
+  `cd350f47` and unchanged at `5978ebec`): it charges, after every `sk-` (in any case) at a boundary, up to 255 code points, where a boundary is the
   start, a character other than a letter or a digit, `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal
   escape, any one-character backslash escape (which covers a one-digit octal), or a colour sequence with any number of
   parameter characters whose ESC is raw or written `\x1b`, `\x1B`, `\033`, `\u001b`, `\u001B` or `\e`. That covers
@@ -295,17 +306,17 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these (DEC-0150's sen
   with a digit and an upper-case letter).
 - This list's instruction to annotate, not rewrite, DEC-0150's CA-2, CA-5, Compatibility and Source counter sentence in
   `docs/DECISIONS.md` governs; DEC-0150's branch is being aligned to it.
-- `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `725b67cd`: that head keeps the tree check's own
+- `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `44e2296a`: that head keeps the tree check's own
   unbounded provider-key shapes (a fixed list held equal to a vectors constant, for parity with the adapter's source
   check), its tests no longer read `SECRET_VALUE.source`, and its
   `fixtures/semantic/source-manifest-secret-in-purpose.json` holds a key both patterns find. The only conflict is the
   textual one in `src/secret-shape.ts`: keep DEC-0149's JWT helpers (`isUrlBase64`, `runEnd`, `jwtSpans`, `hasJwt`),
-  then DEC-0151's comment and `SECRET_VALUE` line. Measured on a scratch merge of `725b67cd` with `f7c866d1` (round 8's fixes), resolved
-  so: `tsc` exit 0; 29 vector files match their generators; the whole suite passes (112 files, 10193 tests, 3 skipped).
+  then DEC-0151's comment and `SECRET_VALUE` line. Measured on a scratch merge of `44e2296a` with `707d3301`, resolved
+  so: `tsc` exit 0; 29 vector files match their generators; the whole suite passes (112 files, 10209 tests, 3 skipped).
   No test fails.
-- DEC-0150's branch at `3c1ba539`, on a scratch merge with `f7c866d1` (the five conflicting documents taken from this
+- DEC-0150's branch at `5978ebec`, on a scratch merge with `707d3301` (the five conflicting documents taken from this
   branch for the measurement only): `tsc` exit 0, 29 vector files match their generators, and the whole suite passes
-  (110 files, 10042 tests, 1 skipped), DEC-0150's `FAC-SEM-165` budget test with digit-free `-sk` strings among them. No test fails. DEC-0150's `FAC-SEM-165` reads with the same detector, so its
+  (110 files, 10059 tests, 1 skipped), DEC-0150's `FAC-SEM-165` budget test with digit-free `-sk` strings among them. No test fails. DEC-0150's `FAC-SEM-165` reads with the same detector, so its
   declarations accept strictly more.
 - When one project's alias is read as a credential, DEC-0150's `FAC-SEM-165` also flags that project's entry in the
   declaration; the lander states in `channel-agent.md` that the agent removes or renames that project's entry.
@@ -337,6 +348,13 @@ as history and are not edited.
   left to the channel agent standard (support-quality.md, "Not decided here").
 
 ## Checks actually run
+
+On the round-10 seam addendum's head (`707d3301` and the handoff commit after it), each exit code read separately:
+`pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9833 tests passed, 1 skipped, 32.25 s,
+started at a 15-minute load of 44.91 after a wait); `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0; `pnpm
+privacy:check` with the organization's index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files
+match). No U+2014 in the lines added since the merge base `d1b905ee`, no look-behind in either copy, and the
+differential is unchanged (0 new-only).
 
 On the round-10 head, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `python3 docs/ux/lint.py` 0;
 `pnpm run docs:check` 0; `pnpm privacy:check` with the organization's index 0 (0 findings); `pnpm exec tsx
