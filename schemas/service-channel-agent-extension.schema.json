@@ -481,7 +481,7 @@
         "id": {
           "type": "string",
           "pattern": "^(?![a-z0-9_-]*[0-9]{7})[a-z0-9][a-z0-9_-]{0,63}$",
-          "description": "The channel's id, as support-ticket/1's channel, with no run of 7 or more digits; once in the project (FAC-SEM-163)."
+          "description": "The channel's id, as support-ticket/1's channel: this contract's grammar (the standard gives none), lower case, with no run of 7 or more digits; once in the project (FAC-SEM-163)."
         },
         "kind": {
           "enum": [

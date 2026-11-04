@@ -59,7 +59,7 @@ serves (at most 64), each project once (DEC-0150 CA-2, the standard's section 13
 | `tiers` (optional) | `{code, label, rule, escalate}` | `^[a-z0-9_]{1,32}$`, each once; `rule` is `<fact> > <integer>` or `<fact> >= <integer>` with one space each side and an integer of at most 15 digits; `escalate` is `at_once` or `ladder` |
 | `question_route` | `{capability, target, daily_cap, days, tz, send_at, expires}` | `team.ask` or `operator.ask`; the desk's Fabric Project id as `com.submit` addresses it; 1 to 1000; days and ranges (`mon-fri`); `UTC` or an IANA name; `HH:MM`; a duration |
 | `gap_registry` | `{owner, capability}` | an id; a capability name |
-| `channels` | at least one `{id, kind, replies_enabled, decision, final_limit, first_reply_limit, holding_reply, clarifying_question, quiet_window?, late_answer_window?, items_seen_unit, texts}` | `^[a-z0-9][a-z0-9_-]{0,63}$`, each once; `telegram_dm`, `telegram_group`, `mail`, `store_review`, `public_comment`, `team_chat` or `account`; a decision id or `null`; durations; `mails`, `updates`, `messages` or `reviews`; `texts` is `{holding?, final?}`, each a map from a BCP 47 tag to a text of 1 to 4096 characters |
+| `channels` | at least one `{id, kind, replies_enabled, decision, final_limit, first_reply_limit, holding_reply, clarifying_question, quiet_window?, late_answer_window?, items_seen_unit, texts}` | `^[a-z0-9][a-z0-9_-]{0,63}$`, each once; `telegram_dm`, `telegram_group`, `mail`, `store_review`, `public_comment`, `team_chat` or `account`; a decision id or `null`; durations; `mails`, `updates`, `messages` or `reviews`; `texts` is `{holding?, final?}`, each a map from a BCP 47 tag to a text of 1 to 4096 code points |
 | `sources` | at least one `{id, owner, read, cadence, max_age}` | ids; `read` a word (`url`, `api`, `export`), not an address; durations |
 | `declined_sources` (optional) | `{id, decision}` | ids; a source id is not both read and declined |
 | `handoff_queues` | `{id, owner, limit, answered_signal, recommendation?}` | ids, each queue once; a duration; a signal name or `none`; the board thread of the recommendation |
@@ -67,13 +67,102 @@ serves (at most 64), each project once (DEC-0150 CA-2, the standard's section 13
 | `tickets` | `{outbox, token_slot, pd_check}` | a table name or a path in the agent's repository; the slot `<project>/<env>/<NAME>`; `<name>@<version>` |
 | `recorded_decisions` (optional) | `{id, date, effect}` | an id, each once; `YYYY-MM-DD`; a word (`replies_off`) |
 
+### Grammar
+
+Every member, with the schema's own limit on it: the pattern it matches, its length in code points, its count of items
+or members, its bounds. `test/channel-agent.test.ts` walks the schema and holds each line to it, so this list and the
+schema cannot drift apart.
+
+- `standard`: exactly `channel-agent-standard/1`
+- `projects`: an array of 1 to 64 items
+- `projects[]`: an object with only the members listed under it; required: `project`, `side`, `lead_agent`, `adopted_at`, `taxonomy`, `question_route`, `gap_registry`, `channels`, `sources`, `handoff_queues`, `evals`, `tickets`
+- `projects[].project`: a string matching `^project:[a-z0-9][a-z0-9._-]{0,127}$`
+- `projects[].side`: a string matching `^(?![a-z0-9-]*[0-9]{7})[a-z0-9-]{1,32}$`
+- `projects[].lead_agent`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`
+- `projects[].adopted_at`: a string matching `^[0-9]{4}-[0-9]{2}-[0-9]{2}$`, a real calendar date (format `date`)
+- `projects[].taxonomy`: an object with only the members listed under it; required: `version`, `codes`
+- `projects[].taxonomy.version`: a string matching `^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`
+- `projects[].taxonomy.codes`: an array of 1 to 512 items
+- `projects[].taxonomy.codes[]`: an object with only the members listed under it; required: `code`, `label`
+- `projects[].taxonomy.codes[].code`: a string matching `^(?![a-z0-9_.]*[0-9]{7})[a-z0-9_.]{1,64}$`
+- `projects[].taxonomy.codes[].label`: a string of 1 to 120 code points
+- `projects[].tiers`: an array of 0 to 16 items
+- `projects[].tiers[]`: an object with only the members listed under it; required: `code`, `label`, `rule`, `escalate`
+- `projects[].tiers[].code`: a string matching `^(?![a-z0-9_]*[0-9]{7})[a-z0-9_]{1,32}$`
+- `projects[].tiers[].label`: a string of 1 to 40 code points
+- `projects[].tiers[].rule`: a string matching `^[a-z][a-z0-9_]{0,63} >=? (0|[1-9][0-9]{0,14})$`
+- `projects[].tiers[].escalate`: one of `at_once`, `ladder`
+- `projects[].question_route`: an object with only the members listed under it; required: `capability`, `target`, `daily_cap`, `days`, `tz`, `send_at`, `expires`
+- `projects[].question_route.capability`: one of `team.ask`, `operator.ask`
+- `projects[].question_route.target`: a string matching `^[A-Za-z0-9][A-Za-z0-9._:-]{0,191}$`
+- `projects[].question_route.daily_cap`: an integer from 1 to 1000
+- `projects[].question_route.days`: a string matching `^(mon|tue|wed|thu|fri|sat|sun)(-(mon|tue|wed|thu|fri|sat|sun))?(,(mon|tue|wed|thu|fri|sat|sun)(-(mon|tue|wed|thu|fri|sat|sun))?)*$`
+- `projects[].question_route.tz`: a string matching `^[A-Za-z][A-Za-z0-9_+-]{0,30}(/[A-Za-z0-9_+-]{1,30}){0,2}$`
+- `projects[].question_route.send_at`: a string matching `^([01][0-9]|2[0-3]):[0-5][0-9]$`
+- `projects[].question_route.expires`: a string matching `^P(?=[0-9T])(?!(0+D)?(T(0+H)?(0+M)?(0+S)?)?$)([0-9]{1,5}D)?(T(?=[0-9])([0-9]{1,5}H)?([0-9]{1,5}M)?([0-9]{1,5}S)?)?$`
+- `projects[].gap_registry`: an object with only the members listed under it; required: `owner`, `capability`
+- `projects[].gap_registry.owner`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`
+- `projects[].gap_registry.capability`: a string matching `^[a-z][a-z0-9._-]{1,127}$`
+- `projects[].channels`: an array of 1 to 32 items
+- `projects[].channels[]`: an object with only the members listed under it; required: `id`, `kind`, `replies_enabled`, `decision`, `final_limit`, `first_reply_limit`, `holding_reply`, `clarifying_question`, `items_seen_unit`, `texts`
+- `projects[].channels[].id`: a string matching `^(?![a-z0-9_-]*[0-9]{7})[a-z0-9][a-z0-9_-]{0,63}$`
+- `projects[].channels[].kind`: one of `telegram_dm`, `telegram_group`, `mail`, `store_review`, `public_comment`, `team_chat`, `account`
+- `projects[].channels[].replies_enabled`: `true` or `false`
+- `projects[].channels[].decision`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$` or `null`
+- `projects[].channels[].final_limit`: a string matching `^P(?=[0-9T])(?!(0+D)?(T(0+H)?(0+M)?(0+S)?)?$)([0-9]{1,5}D)?(T(?=[0-9])([0-9]{1,5}H)?([0-9]{1,5}M)?([0-9]{1,5}S)?)?$`
+- `projects[].channels[].first_reply_limit`: a string matching `^P(?=[0-9T])(?!(0+D)?(T(0+H)?(0+M)?(0+S)?)?$)([0-9]{1,5}D)?(T(?=[0-9])([0-9]{1,5}H)?([0-9]{1,5}M)?([0-9]{1,5}S)?)?$`
+- `projects[].channels[].holding_reply`: `true` or `false`
+- `projects[].channels[].clarifying_question`: `true` or `false`
+- `projects[].channels[].quiet_window`: a string matching `^P(?=[0-9T])(?!(0+D)?(T(0+H)?(0+M)?(0+S)?)?$)([0-9]{1,5}D)?(T(?=[0-9])([0-9]{1,5}H)?([0-9]{1,5}M)?([0-9]{1,5}S)?)?$` or `null`
+- `projects[].channels[].late_answer_window`: a string matching `^P(?=[0-9T])(?!(0+D)?(T(0+H)?(0+M)?(0+S)?)?$)([0-9]{1,5}D)?(T(?=[0-9])([0-9]{1,5}H)?([0-9]{1,5}M)?([0-9]{1,5}S)?)?$` or `null`
+- `projects[].channels[].items_seen_unit`: one of `mails`, `updates`, `messages`, `reviews`
+- `projects[].channels[].texts`: an object with only the members listed under it
+- `projects[].channels[].texts.holding`: a map of 1 to 64 members, each name a language tag of at most 35 characters matching `^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*$`, each value a text of 1 to 4096 code points
+- `projects[].channels[].texts.final`: a map of 1 to 64 members, each name a language tag of at most 35 characters matching `^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*$`, each value a text of 1 to 4096 code points
+- `projects[].sources`: an array of 1 to 64 items
+- `projects[].sources[]`: an object with only the members listed under it; required: `id`, `owner`, `read`, `cadence`, `max_age`
+- `projects[].sources[].id`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`
+- `projects[].sources[].owner`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`
+- `projects[].sources[].read`: a string matching `^[a-z][a-z0-9_-]{0,31}$`
+- `projects[].sources[].cadence`: a string matching `^P(?=[0-9T])([0-9]{1,5}D)?(T(?=[0-9])([0-9]{1,5}H)?([0-9]{1,5}M)?([0-9]{1,5}S)?)?$`
+- `projects[].sources[].max_age`: a string matching `^P(?=[0-9T])(?!(0+D)?(T(0+H)?(0+M)?(0+S)?)?$)([0-9]{1,5}D)?(T(?=[0-9])([0-9]{1,5}H)?([0-9]{1,5}M)?([0-9]{1,5}S)?)?$`
+- `projects[].declined_sources`: an array of 0 to 64 items
+- `projects[].declined_sources[]`: an object with only the members listed under it; required: `id`, `decision`
+- `projects[].declined_sources[].id`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`
+- `projects[].declined_sources[].decision`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`
+- `projects[].handoff_queues`: an array of 0 to 32 items
+- `projects[].handoff_queues[]`: an object with only the members listed under it; required: `id`, `owner`, `limit`, `answered_signal`
+- `projects[].handoff_queues[].id`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`
+- `projects[].handoff_queues[].owner`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`
+- `projects[].handoff_queues[].limit`: a string matching `^P(?=[0-9T])(?!(0+D)?(T(0+H)?(0+M)?(0+S)?)?$)([0-9]{1,5}D)?(T(?=[0-9])([0-9]{1,5}H)?([0-9]{1,5}M)?([0-9]{1,5}S)?)?$`
+- `projects[].handoff_queues[].answered_signal`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`
+- `projects[].handoff_queues[].recommendation`: a string matching `^[A-Za-z0-9_-]{8,128}$`
+- `projects[].evals`: an object with only the members listed under it; required: `suite`, `judge_budget_usd`, `replay_budget_usd`
+- `projects[].evals.suite`: a string of 1 to 256 code points matching `^(?![/~])(?![A-Za-z]:)(?!(?:[^/]*/)*\.\.(?:/|$))[A-Za-z0-9._:/-]+$`
+- `projects[].evals.judge_budget_usd`: a number of at least 0 (minimum 0)
+- `projects[].evals.replay_budget_usd`: a number of at least 0 (minimum 0)
+- `projects[].evals.spend_record`: a string matching `^[a-z0-9][a-z0-9._:-]{0,63}$` or `null`
+- `projects[].tickets`: an object with only the members listed under it; required: `outbox`, `token_slot`, `pd_check`
+- `projects[].tickets.outbox`: a string of 1 to 256 code points matching `^(?![/~])(?![A-Za-z]:)(?!(?:[^/]*/)*\.\.(?:/|$))[A-Za-z0-9._:/-]+$`
+- `projects[].tickets.token_slot`: a string matching `^[a-z0-9][a-z0-9._-]{0,127}/[a-z][a-z0-9-]{0,31}/[A-Z][A-Z0-9_]{0,63}$`
+- `projects[].tickets.pd_check`: a string matching `^[a-z0-9][a-z0-9._-]{0,63}@[0-9A-Za-z][0-9A-Za-z.+-]{0,31}$`
+- `projects[].recorded_decisions`: an array of 0 to 64 items
+- `projects[].recorded_decisions[]`: an object with only the members listed under it; required: `id`, `date`, `effect`
+- `projects[].recorded_decisions[].id`: a string matching `^(?![A-Za-z0-9._:-]*[0-9]{7})[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`
+- `projects[].recorded_decisions[].date`: a string matching `^[0-9]{4}-[0-9]{2}-[0-9]{2}$`, a real calendar date (format `date`)
+- `projects[].recorded_decisions[].effect`: a string matching `^[a-z][a-z0-9_]{0,63}$`
+
+### What the members mean
+
 `project` is the project's id in the project registry, `project:<slug>`, with the registry alias pattern unchanged,
 `^project:[a-z0-9][a-z0-9._-]{0,127}$` (the memory capability's pattern; DEC-0151, in progress on CT-210, proposes the
 same `projectAlias`): a registry
 alias is the registry's name, not an id the agent invents, so the run-of-digits rule of an id does not bind it. It is an
 alias of the Fabric Project, compared as written ([identifiers](identifiers.md)), while `question_route.target` is the canonical Fabric Project id the board
-addresses. DEC-0151 (CT-210, in progress) gives `support-quality-daily` payloads the same alias; once it lands, a reader
-joins a declaration to a project's payloads on `project:<slug>`. A queue's `recommendation` is the board thread's id, an opaque id as the board
+addresses. DEC-0151 (CT-210, in progress) proposes the same alias for `support-quality-daily` payloads; once it lands,
+a reader joins a declaration to a project's payloads on `project:<slug>`. A project whose registry alias the detector
+reads as a credential (`FAC-SEM-165`) cannot be declared until the registry changes the alias; meanwhile the agent
+leaves that project's entry out. A queue's `recommendation` is the board thread's id, an opaque id as the board
 writes it (`^[A-Za-z0-9_-]{8,128}$`, the board's `opaqueId`), which the run-of-digits rule of an id does not bind.
 
 `token_slot` names the vault slot of the (agent, project) token: `<project>` is the vault project's name,
@@ -116,15 +205,18 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    a huge value, each limit read from the schema itself: an array longer than its `maxItems` and a map wider than its
    `maxProperties`; any closed object (the declaration, a project, its taxonomy, a code, a tier, the question route,
    the gap registry, a source, a declined source, a queue, the evals, the tickets, a recorded decision, a channel and
-   its texts) with more members than the schema declares (`maxProperties`); a string value or a member name longer
-   than 4096 code points (`maxLength`). A value the schema still cannot run on is one finding, "the value is too
+   its texts) with more members than the schema declares (`maxProperties`, named "more members than the schema
+   declares"); a string value or a member name longer than 4096 code points (`maxLength`). A value the schema still cannot run on is one finding, "the value is too
    large to check". The finding names at most ten failed keywords with their places and counts the rest; a missing
    member the schema declares is named beside its place (`required at /projects/0 (question_route)`); in a place, a
    member name the schema does not declare (an unknown member), a text's language and a number that is no index of an
-   array the schema declares are written `*`, and so is a numeric key of an object. Beside a failed `enum`, `const` or
-   `pattern`, the place names what the schema allows, from the schema alone (`enum at
-   /projects/0/question_route/capability (one of team.ask, operator.ask)`). The message points to the grammars in
-   [the declaration](#the-declaration).
+   array the schema declares are written `*`, and so is a numeric key of an object. Beside each failed limit the place
+   names what the schema allows, from the schema alone: for `enum` its values (at most 8, the rest counted), `const`
+   its value, `pattern` its pattern (cut to 80 characters, each distinct pattern spelled once per message), `maxLength`
+   and `minLength` the length, `maxItems`, `minItems`, `maxProperties` and `minProperties` the count, `minimum` and
+   `maximum` the bound, `format` the format (`enum at /projects/0/question_route/capability (one of team.ask,
+   operator.ask)`, `maximum at /projects/0/question_route/daily_cap (<= 1000)`). The message points to
+   [the declaration's grammar](#grammar), which states every limit the schema enforces.
 2. Every id once and every decision named (`FAC-SEM-163`, CA-3): a project, a category code, a tier code, a channel, a
    source (a declined one counted with the read ones), a hand-off queue and a recorded decision appear once; a channel
    with replies off names the decision that holds it, and a channel's decision is one `recorded_decisions` lists.
@@ -145,21 +237,23 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    that is a URL with a password is read whole, and found). The detector reads the first 4097 code points of a string,
    and the rule reads at most 1 000 000 code points of names and values in all for one document, every copy of the
    declaration in it (read or misplaced) sharing them. The count, `detectorCost`, is a bound any port's detector may
-   need, not a description of one detector: each name or string costs 16 plus its code points, once (a name is not
-   charged again when its member is entered or placed); after each `eyJ`, the rest of the base64url run it starts and,
-   when that run ends at a `.`, the dot and the base64url run after it (the JWT shape's second segment); 128 for each
-   query or fragment piece (after `?`, `&` or `#`, up to the next `=`, `&` or `#`), and for each such name that holds
-   an upper-case letter or a `%`, the square of its raw length over two; for each value (after `=`, up to the next `&`
-   or `#`) that holds a `%`, its raw length and the `eyJ` term of its decoded form; and after each `sk-` that follows a
-   boundary, up to 255 code points to the end of the string. A boundary is the start, a character other than a letter
-   or a digit, or an escape that ends right before the `sk-`: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit
-   octal escape, a backslash escape of one character, or a colour sequence `ESC[...m` whose ESC is raw or escaped
-   (`\x1b`, `\033`, `\u001b`, `\e`). A member's name is read before its place is written; once the budget is spent nothing more is read and every further member collapses its place. Past the
+   need, not a description of one detector, counted in code points (an astral character is one): each name or string
+   costs 16 plus its code points, once (a name is not charged again when its member is entered or placed); after each
+   `eyJ`, the rest of the base64url run it starts and, when that run ends at a `.`, the dot and the base64url run after
+   it (the JWT shape's second segment); after each `sk-`, in any case, that follows a boundary, up to 255 code points to
+   the end of the string. A boundary is the start, a character other than a letter or a digit, or an escape that ends
+   right before the `sk-`: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a backslash escape of
+   one character, or a colour sequence `ESC[...m` with any number of parameter characters whose ESC is raw or escaped
+   (`\x1b`, `\033`, `\u001b` in either case of the hex digits, or `\e`). For a string that parses as a URL, the URL
+   terms are counted on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed,
+   percent-decoded), not on the raw text: for every query or fragment piece, 128, its name's and its value's code
+   points, the value's `eyJ` and `sk-` terms and, when the value is not empty and the name holds an upper-case letter,
+   the square of the name's length over two. A member's name is read before its place is written; once the budget is spent nothing more is read and every further member collapses its place. Past the
    budget, one finding at the first copy walked says, once per document, that the rest was not read for credentials,
    and the 64 places are counted per document too. Being by shape, the detector also finds an ordinary hyphenated name
    that starts with `sk-`: today any `sk-` followed by 16 or more letters, digits, `_` or `-`, in any case, such as the
-   valid channel id `sk-support-desk-faq-answers-2026-v2` (a test pins it). DEC-0151, in progress, narrows that to a
-   digit with an upper-case letter and 16, or a digit and 32; either way, do not start an id with `sk-`.
+   valid channel id `sk-support-desk-faq-answers-2026-v2` (a test pins it). DEC-0151, in progress, proposes to narrow
+   that to a digit with an upper-case letter and 16, or a digit and 32; either way, do not start an id with `sk-`.
 
 No finding's message carries a declared value, and no rule's place echoes instance data: a place writes a member name
 the schema declares and an index of an array the schema declares, and `*` for any other member name, for a numeric key
@@ -169,7 +263,9 @@ or is itself shaped like a credential collapses its place: it and every member b
 plain ancestor (a text whose language is not plain is placed at its `texts/holding` or `texts/final` map), and so is a
 member more than 64 levels below the declaration, at its ancestor 64 levels down. `FAC-SEM-165` names at most 64 places, then one more finding at the declaration counts the rest. The walk keeps
 an explicit stack of one frame per container, not per member, and builds a member's place only when it reports one, so
-no depth or size of a value throws and the time grows with the value's size, not its square. A text counts as blank
+no depth or size of a value throws and the time grows with the value's size, not its square. Memory grows linearly too:
+measured on chains of 50 000 and 200 000 nested members, a run allocates about 2.5 to 3.6 times the input's own heap
+before collection, and four times the input takes about four times the memory. A text counts as blank
 when nothing is left after removing white space, format characters (`\p{Cf}`, such as U+200B), control characters
 (`\p{Cc}`), separators (`\p{Z}`), default-ignorable code points (`\p{Default_Ignorable_Code_Point}`), the filler
 characters U+115F, U+1160, U+3164, U+FFA0 and U+2800, and the object replacement character U+FFFC.
@@ -179,6 +275,12 @@ The vectors list each case with the findings a checker reports, `{code, instance
 findings, then the read declaration's `FAC-SEM-165`, then
 `FAC-SEM-162` for an invalid value (and nothing after it), then per project `FAC-SEM-163` and `FAC-SEM-164`. A port may
 compare them as a set.
+
+A reader acts on the findings as `channelAgentView` does (DEC-0150 CA-5): a declaration with `FAC-SEM-162`, with
+`FAC-SEM-165` (a credential-shaped name or value, or a part left unread for credentials) or with `FAC-SEM-163` (a
+repeated project or id, a channel with replies off and no decision, a decision not recorded) is not declared, as with
+the [connections](connections.md) key; a declaration with only `FAC-SEM-164` stays declared, and the reader shows those
+findings to its author. A reader never displays a credential-shaped value: its errors name the rule and the place only.
 
 ## Not checked here
 
@@ -208,10 +310,10 @@ Section 11 also asks for these; none can be decided from the declaration alone (
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-162"></a>`FAC-SEM-162` | `manifest`, `service-well-known` | a value under the channel-agent extension key sits under a manifest's `provider.extensions` (not its own `extensions` or a capability's) or a well-known answer's `extensions`, has no array, map or object longer than its schema allows nor a string or name over 4096 code points, and is valid against `service-channel-agent-extension.schema.json`; a reader treats an invalid one as not declared and reports it, naming failed keywords and places, never a declared value, with the schema's own allowed values beside an `enum`, `const` or `pattern` place, and pointing to the declaration's grammars (DEC-0150 CA-1, CA-2) |
+| <a id="fac-sem-162"></a>`FAC-SEM-162` | `manifest`, `service-well-known` | a value under the channel-agent extension key sits under a manifest's `provider.extensions` (not its own `extensions` or a capability's) or a well-known answer's `extensions`, has no array, map or object longer than its schema allows nor a string or name over 4096 code points, and is valid against `service-channel-agent-extension.schema.json`; a reader treats an invalid one as not declared and reports it, naming failed keywords and places, never a declared value, with the schema's own limit beside each place, and pointing to the declaration's grammar (DEC-0150 CA-1, CA-2) |
 | <a id="fac-sem-163"></a>`FAC-SEM-163` | `manifest`, `service-well-known` | in a valid channel-agent declaration a project, a category code, a tier code, a channel id, a source id (read or declined), a hand-off queue id and a recorded decision id appear once; a channel with replies off names a decision, and every channel's decision is one `recorded_decisions` lists (DEC-0150 CA-3) |
 | <a id="fac-sem-164"></a>`FAC-SEM-164` | `manifest`, `service-well-known` | in a valid channel-agent declaration a channel with a holding reply declares its holding text and one that replies its final text; a store review asks no clarifying question; no text is blank or carries U+2014; no tier's label is blank or carries U+2014; a queue whose answered signal is `none` names its recommendation; a budget above 0 names its spend record (DEC-0150 CA-4) |
-| <a id="fac-sem-165"></a>`FAC-SEM-165` | `manifest`, `service-well-known` | no member name and no string of a channel-agent declaration is shaped like a credential, by shape (`FAC-SEM-101`'s detector), a misplaced one included, a token slot of its grammar and the suite's and outbox's paths read segment by segment and a queue's recommendation by key shapes only; at most 64 places and a count (DEC-0150 CA-5) |
+| <a id="fac-sem-165"></a>`FAC-SEM-165` | `manifest`, `service-well-known` | no member name and no string of a channel-agent declaration is shaped like a credential, by shape (`FAC-SEM-101`'s detector), a misplaced one included, a token slot of its grammar read segment by segment, a suite's and an outbox's relative path by the path-aware reading, a queue's opaque recommendation by key shapes only; at most 1 000 000 code points read per document and 64 places named, each once per document (DEC-0150 CA-5) |
 
 ## Compatibility
 
@@ -230,21 +332,47 @@ existing fixture validates and checks as before. `contractVersion` stays `0.1.0`
   `open.*`, the outcomes, `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets`,
   `notATicket`). Section 5.1 defers only the fields it marks new: "publish them once every reader of the feed takes
   that schema"; `autonomy.answered` and `stability.fallbackTurns`, which it treats as present, are not in `/1`
-  either. That schema is what
-  DEC-0151, in progress on CT-210, proposes. Until it lands, an agent following section 5.1 emits payloads this contract refuses,
-  and how the seven channel kinds here map to `/1`'s four channels (`chat`, `mail`, `reviews`, `community`) is what
-  DEC-0151, in progress, proposes to decide. Until then, an agent declaring several projects publishes no per-project
+  either, and it counts `toPersonPolicy` and `toPersonInability` in tickets where `/1` counts turns. That schema, the
+  unit of those counts and how the seven channel kinds here map to `/1`'s four channels (`chat`, `mail`, `reviews`,
+  `community`) are what DEC-0151, in progress on CT-210, proposes. Until it lands, an agent following section 5.1 emits
+  payloads this contract refuses, and an agent declaring several projects publishes no per-project
   `support.quality_daily` on a channel they share, because a `/1` reader keeps one event per service, channel and day,
   so the standard's observed per-project quality check reads missing for a shared channel.
 - **Declarations published before this revision.** A declaration an agent published before this revision is read under
-  these grammars, which are narrower than the standard's section 13.6: durations in days, hours, minutes and seconds
-  only, no weeks, months or years; zero only for a source's `cadence`; no run of 7 or more digits in an id, a channel's
-  id, the side, a category code or a tier code; an owner with no space; a recommendation that is a board `opaqueId`, so
-  no colon; a `spend_record` that is a lower-case usage-report limit id; and a missing required member, or a `null` for
-  the question route, the gap registry, a channel's texts, the personal-data check or a queue's recommendation, makes
-  the whole declaration not declared (a channel's `decision`, `quiet_window` and `late_answer_window` and
-  `evals.spend_record` take `null`); a channel's id is this contract's `^[a-z0-9][a-z0-9_-]{0,63}$` and a tier code its `^[a-z0-9_]{1,32}$`, where the standard gives none (lower case only, no dot in either, no hyphen in a tier code, at most 64 and 32 characters); durations take whole numbers of at most 5 digits per component; `days` is lower case; a text's language is a language tag (no tag of private use only) of at most 35 characters; a text is at most 4096 code points; a declaration holds at most 64 projects. `pnpm validate` on the manifest or the well-known answer
-  shows which members a declaration fails.
+  these grammars; `pnpm validate` on its manifest or well-known answer shows which members it fails.
+
+### Narrowings against the standard
+
+This is the one list of what this contract refuses that the standard's section 13.6 admits or leaves open, held to the
+schema ([grammar](#grammar)); DEC-0150's Compatibility and the merge post point here.
+
+- Durations: days, hours, minutes and seconds only, no weeks, months or years; whole numbers of at most 5 digits per
+  component; above zero, except a source's `cadence`, which may be zero.
+- Ids (`lead_agent`, every `owner`, the ids of sources, declined sources, queues and recorded decisions, a `decision`,
+  `answered_signal`): a letter or a digit first, then letters, digits and `. _ : -` only, at most 128 characters, no run
+  of 7 or more digits; so an owner holds no space, no `@` and no slash.
+- A channel's id: this contract's `^[a-z0-9][a-z0-9_-]{0,63}$` (the standard gives none), lower case, no dot, at most
+  64 characters, no run of 7 or more digits.
+- A tier code: this contract's `^[a-z0-9_]{1,32}$` (the standard gives none), lower case, no dot, no hyphen, at most 32
+  characters, no run of 7 or more digits.
+- The side and a category code: the standard's patterns, with no run of 7 or more digits.
+- A tier's label: 1 to 40 code points; a category's label: 1 to 120 code points.
+- A source's `read`: one lower-case word with no dot (`^[a-z][a-z0-9_-]{0,31}$`), which narrows the standard's section
+  7.1 ("how it is read").
+- The time zone: an IANA name of one to three segments (`UTC`, `Europe/Warsaw`, `America/Argentina/Buenos_Aires`).
+- `days`: lower-case day names and ranges.
+- `daily_cap`: an integer from 1 to 1000.
+- A queue's `recommendation`: the board's `opaqueId`, at least 8 characters, no colon.
+- `spend_record`: a lower-case usage-report limit id.
+- `token_slot`: `<project>/<env>/<NAME>` with a lower-case `<env>`.
+- `pd_check`: a lower-case name, then `@` and a version.
+- A text's language: a language tag (no tag of private use only) of at most 35 characters; a text: 1 to 4096 code
+  points.
+- Counts: at most 64 projects, 512 category codes, 16 tiers, 32 channels, 64 sources, 64 declined sources, 32
+  hand-off queues and 64 recorded decisions; 1 to 64 texts per map.
+- `null`: refused for the question route, the gap registry, a channel's texts, the personal-data check and a queue's
+  recommendation; taken by a channel's `decision`, `quiet_window` and `late_answer_window` and by `spend_record`. A
+  missing required member, or a refused `null`, makes the whole declaration not declared.
 
 The first consumer is owed by the Fabric Agent Adapter: its service check validates the declaration against this schema
 and these vectors. The adapter's row is to be filed (the coordinator files it on the board); CT-209 here.

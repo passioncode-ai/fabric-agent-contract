@@ -84,6 +84,13 @@ filed; the coordinator files it on the board).
   under the coverage run) and the escapes the in-progress DEC-0151 takes for a boundary before `sk-` are
   counted; a channel's id and a tier code are this contract's grammars, and those and the other narrowings are listed
   for the standard's owner; vectors at the budget's edge.
+- Round 9 of the readings: one unit break (the URL terms counted on the raw text where the detector reads a URL parse's
+  names and values) and three product breaks (FAC-SEM-162's pointer to a grammar that lacked limits, three narrowing
+  lists that disagreed, a merge plan that rewrote DEC-0150's body), fixed: the URL terms are counted on what a WHATWG
+  URL parse yields; the budget counts code points; `sk-` is found in any case and colour sequences of any length;
+  FAC-SEM-162 names the schema's limit beside each keyword, and the page's grammar lists every limit, held to the
+  schema by a test; one narrowing list, on the page; the change of DEC-0151 (in progress) annotates DEC-0150; `channelAgentView` answers
+  as a reader does (FAC-SEM-165 and FAC-SEM-163 not declared, FAC-SEM-164 shown).
 
 ## The branch and its history
 
@@ -170,71 +177,64 @@ One line per sibling and per file it shares with this branch:
 
 ## When DEC-0150 and DEC-0151 (in progress) land
 
-DEC-0151 is in progress. The second of the two to land rewrites, in its own change:
+The gate of DEC-0151 (in progress) puts DEC-0150 on main first. Once DEC-0150 is on main, that change annotates DEC-0150's CA-2, CA-5,
+Compatibility and Source sentences that name DEC-0151 as in progress (an annotation under DEC-0150, never a rewrite of
+its body: `docs/DECISIONS.md` is append-only), and rewrites these sentences outside the register:
 
-- "DEC-0151 (CT-210), in progress" in `docs/specification/support-quality.md` (Not decided here) and in
-  `channel-agent.md#compatibility` (the daily quality payload, with the shared-channel quality check), and DEC-0150's
-  Compatibility sentence on section 5.1;
+- "DEC-0151 (CT-210), in progress" in `docs/specification/support-quality.md` (Not decided here), and the daily quality
+  payload bullet in `channel-agent.md#compatibility` (with the shared-channel quality check and the unit of
+  `toPerson*`);
 - "(the memory capability's pattern; DEC-0151, in progress on CT-210, proposes the same `projectAlias`)" in
-  `channel-agent.md` (the declaration) and DEC-0150 CA-2, which becomes a statement that the two patterns are one;
-- "DEC-0151 (CT-210, in progress) gives `support-quality-daily` payloads the same alias; once it lands, a reader joins
-  a declaration to a project's payloads on `project:<slug>`" in `channel-agent.md` (the declaration), which becomes a
-  statement that the reader joins them;
-- the sentence in `channel-agent.md` (What is checked, item 4), DEC-0150 CA-5, the comment on `shaped` in
-  `src/channel-agent.ts` and the title of the `sk-` test in `test/channel-agent.test.ts` that state today's `sk-` rule
-  (16 or more letters, digits, `_` or `-`, any case) and that DEC-0151, in progress, narrows it: once DEC-0151 lands,
-  state its rule as current, and re-check that `sk-support-desk-faq-answers-2026-v2` is still found (the test pins
-  it); the advice not to start an id with `sk-` stays;
+  `channel-agent.md` (what the members mean), which becomes a statement that the two patterns are one;
+- "DEC-0151 (CT-210, in progress) proposes the same alias for `support-quality-daily` payloads; once it lands, a reader
+  joins a declaration to a project's payloads on `project:<slug>`" in `channel-agent.md`, which becomes a statement
+  that the reader joins them;
+- the sentence in `channel-agent.md` (What is checked, item 4), the comment on `shaped` in `src/channel-agent.ts` and
+  the title of the `sk-` test in `test/channel-agent.test.ts` that state today's `sk-` rule (16 or more letters,
+  digits, `_` or `-`, any case) and what DEC-0151, in progress, proposes: they state its rule as current, and the test
+  re-checks that `sk-support-desk-faq-answers-2026-v2` is still found; the advice not to start an id with `sk-` stays;
+- the "(DEC-0151, in progress)" text in the channel agent standard's row of `docs/evidence/sources.md`, and the copy's
+  path there, which becomes a link;
+- CT-209's sentences that name DEC-0151 as in progress, and its Source cell's "DEC-0151 (in progress)", in
+  `docs/backlog.md`;
 - the two "Compared as written" bullets for `project:<slug>` in `docs/specification/identifiers.md`, merged into one;
 - once DEC-0149 is on main, `keyShaped` in `src/channel-agent.ts` uses `hasJwt` instead of `JWT_SHAPE.test` (DEC-0149's
   CT-212 names `channel-agent.ts`), and the page's and CA-5's `eyJ` term stays as a bound;
 - an assertion in `test/channel-agent.test.ts` that the declaration's `project` pattern equals
-  `support-quality-daily.schema.json` `$defs/projectAlias` (S3);
-- the standard copy's path in the sources ledger, which becomes a link.
+  `support-quality-daily.schema.json` `$defs/projectAlias` (S3).
 
 ## Checks actually run
 
-On the change after round 8's fixes, each exit code read separately, the 15-minute load average below 45 at each test
-run: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9959 tests passed and 1 skipped,
-branches 98.87 %, 12014 of 12151; `src/channel-agent.ts` 303 of 303, `src/secret-shape.ts` 47 of 47);
+On the change after round 9's fixes, each exit code read separately, the 15-minute load average below 45 at each test
+run: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9967 tests passed and 1 skipped,
+branches 98.87 %, 12059 of 12196; `src/channel-agent.ts` 348 of 348, `src/secret-shape.ts` 47 of 47);
 `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm privacy:check` with the
 organization index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (29 vector files match their generators).
-The reading-budget tests run within their bounds, a query of many pieces within twice prose's time, and the budget's
-edge falls where the count says (in the vectors and with 45 451 short names in the test). The organization's privacy
-check over the standard's copy alone: 0 findings. A `git grep` of the change for the three terms of the product
-described before neutralisation prints nothing. No U+2014 in the added text.
+The URL-shaped strings (a tab, a carriage return or a line feed inside `eyJ`, `-%73k-` in a query) and a query of many
+pieces each run within twice prose's thread time plus 20 ms; 300 strings of 2000 astral code points are read whole;
+the budget's edge falls where the count says, in plain and in astral names. The organization's privacy check over the
+standard's copy alone: 0 findings. A `git grep` of the change for the three terms of the product described before
+neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
 Two consecutive clean rounds of the blind readings of branch `agent/channel-agent-ext-v3-20261104` (unit, seam,
-product), as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request and merge it, which accepts DEC-0150, and post the merge on
-thread `b6820b97` (the coordinator posts it), listing the narrowings versus the standard and each live producer's
-`FAC-SEM-162` members:
+product), as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
+and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
+quotes, at posting time, the one list of narrowings in
+[channel agent](../specification/channel-agent.md#narrowings-against-the-standard) (not a copy kept here), and adds:
 
-- durations in days, hours, minutes and seconds only: no weeks, months or years;
-- a zero duration only for a source's `cadence`; its `max_age` is above zero;
-- the time zone's grammar: an IANA name of one to three segments;
-- no run of 7 or more digits in an id, a channel's id, the side, a category code or a tier code (the project's
-  `project:<slug>` keeps the registry alias pattern unchanged);
-- an owner is an id, so it holds no space; a recommendation is the board's opaque id, so it holds no colon;
-  `spend_record` is a lower-case usage-report limit id;
-- a missing required member makes the whole declaration invalid, so a reader treats it as not declared; a `null` is
-  refused for the question route, the gap registry, a channel's texts, the personal-data check and a queue's
-  recommendation, while a channel's `decision`, `quiet_window` and `late_answer_window` and `spend_record` take `null`;
 - only a manifest's `provider.extensions` is read: a declaration under the manifest's top-level `extensions` is
   `FAC-SEM-162` and not read;
 - `channel-agent-standard/2` is refused until a contract revision;
-- a channel's id and a tier code are this contract's grammars where the standard gives none: `^[a-z0-9][a-z0-9_-]{0,63}$`
-  and `^[a-z0-9_]{1,32}$` (lower case only, no dot in either, no hyphen in a tier code, at most 64 and 32 characters);
-- durations take whole numbers of at most 5 digits per component; `days` is lower case; a text's language is a
-  language tag (no tag of private use only) of at most 35 characters; a text is at most 4096 code points; a
-  declaration holds at most 64 projects;
 - a budget above 0 without a spend record is `FAC-SEM-164`;
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;
 - to be asked of the standard's owner: whether one declaration may hold projects on several sides;
 - to be asked of the standard's owner: that section 5.1's table mark `autonomy.answered` and
   `stability.fallbackTurns` new too (they are not in `/1` either), and keep `toPerson*` under `autonomy`;
+- to be asked of the standard's owner: section 5.1 counts `toPersonPolicy` and `toPersonInability` in tickets where
+  `/1` counts turns; which unit it means (DEC-0151, in progress, proposes one);
 - the coordinator asks the standard's owner to hold the observed per-project quality check for shared channels until
   DEC-0151 (in progress) lands, since it reads missing there;
 - for each live producer, the members its current declaration fails (`FAC-SEM-162`'s places), read with
@@ -245,4 +245,5 @@ At merge, one adoption row per live producer is filed in that producer's own bac
 `sources/4/max_age`, `handoff_queues/0/owner` and `evals/spend_record`; one well-known builder with no
 `question_route` and a recommendation holding a colon; one well-known builder with `null` for `question_route`,
 `gap_registry`, a channel's texts, a queue's recommendation and `pd_check`. The adapter's row names the update of both
-`PROTOCOL_REVISIONS` twins (`channel-agent-standard` `['1']`) with the feed-protocols vectors vendored again.
+`PROTOCOL_REVISIONS` twins (`channel-agent-standard` `['1']`) with the feed-protocols vectors vendored again, and the
+Fabric Dashboards sample service's copy of the protocol table (or records that it is not held equal to the register).

@@ -9094,20 +9094,24 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   5. CA-5. `FAC-SEM-165`: no member name and no string of the declaration is shaped like a credential, by shape, with
      `FAC-SEM-101`'s detector on a string's first 4097 code points (today an ordinary name of `sk-` and 16 or more
      letters, digits, `_` or `-`, in any case, such as the valid channel id `sk-support-desk-faq-answers-2026-v2`, is
-     found too; DEC-0151, in progress, narrows that to a digit with an upper-case letter and 16, or a digit and 32; the
+     found too; DEC-0151, in progress, proposes to narrow that to a digit with an upper-case letter and 16, or a digit and 32; the
      shared detector stays as it is, and an id does not start with `sk-`). Three places read narrower, each only when the value
      matches its own grammar, keyed on the place and not on a holder's name: a project's token slot of the slot's
      grammar segment by segment, its eval suite and outbox of the relative path grammar by the detector's path-aware
      reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a
      provider key's and a JWT's shapes only; anything else is read whole. The rule reads at most 1 000 000 code points for
      one document, every copy of the declaration in it sharing them, counted by `detectorCost`, a bound any port's
-     detector may need: each name or string 16 plus its code points, once; after each `eyJ`, the rest of its base64url
-     run and, when it ends at a `.`, the dot and the run after it; 128 per query or fragment piece and, for a name
-     holding an upper-case letter or a `%`, the square of its raw length over two; for each value holding a `%`, its raw
-     length and the `eyJ` term of its decoded form; after each `sk-` at a boundary (the start, a non-alphanumeric
-     character, `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a backslash escape, or a raw or
-     escaped ESC colour sequence), up to 255 code points. Once it is spent, nothing more is read and every further member collapses; one finding per
-     document then says the rest was not read, and the 64 places are counted per document. No finding's message carries a declared value and no rule's place echoes
+     detector may need, in code points: each name or string 16 plus its code points, once; after each `eyJ`, the rest of
+     its base64url run and, when it ends at a `.`, the dot and the run after it; after each `sk-`, in any case, at a
+     boundary (the start, a non-alphanumeric character, `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal
+     escape, a backslash escape, or a colour sequence with any number of parameter characters whose ESC is raw or
+     escaped in either case), up to 255 code points; and, for a string that parses as a URL, on the names and values a
+     WHATWG URL parse yields: 128 per query or fragment piece, its name's and value's code points, the value's `eyJ`
+     and `sk-` terms, and the square over two of a name holding an upper-case letter when its value is not empty. Once it is spent, nothing more is read and every further member collapses; one finding per
+     document then says the rest was not read, and the 64 places are counted per document. A reader treats a
+     declaration with `FAC-SEM-165` or `FAC-SEM-163` as not declared, as it does one with `FAC-SEM-162`, keeps one with
+     only `FAC-SEM-164` declared and shows those findings to its author, and never displays a credential-shaped value
+     (`channelAgentView`). No finding's message carries a declared value and no rule's place echoes
      instance data: a place writes a declared name, an index of a declared array, else `*` (an undeclared name, a
      numeric object key, a text's language), in `FAC-SEM-162`, `FAC-SEM-164` and `FAC-SEM-165` alike; a member whose
      name is not plain (letters, digits, `_` and `-`, at most 64, no run of 7 digits once `-` and `_` are left out) or
@@ -9143,21 +9147,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   so two members read the same).
 - **Compatibility:** additive: a new extension key, which a reader that does not know it ignores, and four rules that
   read only a manifest or a well-known answer that carries it. No existing schema changes; `rawValues` in
-  `src/secret-shape.ts` appends in place (the same lines as CT-194's branch), which changes no answer; `channel-agent-standard/1`
-  joins the protocol register as a schema `const`. `contractVersion` stays `0.1.0`. The standard's section 5.1
-  publishes `support-quality-daily/1` per project, where `/1` keeps one channel of four per event, with members `/1`
-  does not have, and defers them itself until every reader of the feed takes that schema;
-  that is DEC-0151 (CT-210), in progress: until it lands, an agent following section 5.1 emits payloads this contract
-  refuses, and the mapping of the seven channel kinds to `/1`'s four channels is what the in-progress DEC-0151 proposes
-  to decide; until then an agent declaring
-  several projects publishes no per-project `support.quality_daily` on a shared channel, since a `/1` reader keeps one
-  event per service, channel and day, so the standard's observed per-project quality check reads missing for a shared
-  channel. Declarations published before this revision are read under these grammars, narrower than section 13.6 (no
-  weeks, months or years; zero only for a source's cadence; no 7-digit runs in ids; an owner with no space; a
-  recommendation that is a board `opaqueId`; a lower-case `spend_record`; a missing required member, or a `null` for the
-  question route, the gap registry, a channel's texts, the personal-data check or a queue's recommendation, makes the
-  whole declaration not declared, while `decision`, `quiet_window`, `late_answer_window` and `spend_record` take
-  `null`; a channel's id is this contract's `^[a-z0-9][a-z0-9_-]{0,63}$` and a tier code its `^[a-z0-9_]{1,32}$`, where the standard gives none (lower case only, no dot in either, no hyphen in a tier code, at most 64 and 32 characters); durations take whole numbers of at most 5 digits per component; `days` is lower case; a text's language is a language tag (no tag of private use only) of at most 35 characters; a text is at most 4096 code points; a declaration holds at most 64 projects); `pnpm validate` shows what a declaration fails.
+  `src/secret-shape.ts` appends in place (the same lines as CT-194's branch), which changes no answer;
+  `channel-agent-standard/1` joins the protocol register as a schema `const`. `contractVersion` stays `0.1.0`. The
+  standard's section 5.1 publishes `support-quality-daily/1` per project, where `/1` keeps one channel of four per event,
+  with members `/1` does not have, and defers them itself until every reader of the feed takes that schema, which
+  DEC-0151 (CT-210, in progress) proposes, with the unit of `toPerson*` and the mapping of the seven channel kinds to
+  `/1`'s four channels; until it lands an agent following section 5.1 emits payloads this contract refuses, and an
+  agent declaring several projects publishes no per-project `support.quality_daily` on a shared channel, so the
+  standard's observed per-project quality check reads missing there. Declarations published before this revision are
+  read under these grammars; what they narrow against the standard's section 13.6 is the one list in
+  [channel agent](specification/channel-agent.md#narrowings-against-the-standard), held to the schema.
 - **Consequences / affects:** `src/extensions.ts`, `src/channel-agent.ts`, `src/semantic-rules.ts`,
   `src/protocol-revisions.ts`, `schemas/service-channel-agent-extension.schema.json`, `tools/vectors/channel-agent.ts`,
   `tools/vectors/run.ts`, `fixtures/vectors/channel-agent.json`, `fixtures/positive/service-channel-agent-extension.json`,
@@ -9175,7 +9174,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, with the examples made neutral here; rounds 1 to 8 of the readings. `DEC-0150` was reserved by the coordinator with
+  published it on 2026-11-04, with the examples made neutral here; rounds 1 to 9 of the readings. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation

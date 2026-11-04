@@ -2,7 +2,7 @@ import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, indexed, isObject } from "./findings.js";
-import { JWT_SHAPE, SECRET_VALUE, secretArgument, secretUrl, secretValue } from "./secret-shape.js";
+import { JWT_SHAPE, SECRET_VALUE, rawValues, secretArgument, secretUrl, secretValue } from "./secret-shape.js";
 import { createValidatorSync } from "./validator.js";
 
 // #region channel-agent (docs: docs/specification/channel-agent.md)
@@ -21,7 +21,7 @@ export type ChannelAgentSite = "manifest" | "well-known";
 export type ChannelAgentView =
   | { declared: false }
   | { declared: true; valid: false; errors: string[] }
-  | { declared: true; valid: true; standard: string; projects: ChannelAgentProject[] };
+  | { declared: true; valid: true; standard: string; projects: ChannelAgentProject[]; obligations: string[] };
 
 let shape: ValidateFunction | undefined;
 const KEY = EXTENSION_KEYS.channelAgent;
@@ -169,13 +169,13 @@ function widths(value: unknown): string[] {
     const { value: item, node, at } = stack.pop() as { value: unknown; node: unknown; at: string };
     const rule = resolved(node, defs);
     if (Array.isArray(item)) {
-      if (typeof rule.maxItems === "number" && item.length > rule.maxItems) found.push(`maxItems at ${at}`);
+      if (typeof rule.maxItems === "number" && item.length > rule.maxItems) found.push(`maxItems at ${at} (at most ${rule.maxItems} items)`);
       else if (rule.items !== undefined) for (let i = item.length - 1; i >= 0; i -= 1) stack.push({ value: item[i], node: rule.items, at: `${at}/${i}` });
     } else if (isObject(item)) {
       const count = Object.keys(item).length;
       const declared = isObject(rule.properties) ? rule.properties : undefined;
-      if (declared !== undefined && rule.additionalProperties === false && count > Object.keys(declared).length) found.push(`maxProperties at ${at || "/"}`);
-      else if (typeof rule.maxProperties === "number" && count > rule.maxProperties) found.push(`maxProperties at ${at}`);
+      if (declared !== undefined && rule.additionalProperties === false && count > Object.keys(declared).length) found.push(`maxProperties at ${at || "/"} (more members than the schema declares)`);
+      else if (typeof rule.maxProperties === "number" && count > rule.maxProperties) found.push(`maxProperties at ${at} (at most ${rule.maxProperties} members)`);
       else if (declared !== undefined) {
         const names = Object.keys(declared).filter((name) => Object.hasOwn(item, name));
         for (let i = names.length - 1; i >= 0; i -= 1) stack.push({ value: item[names[i] as string], node: declared[names[i] as string], at: `${at}/${names[i] as string}` });
@@ -193,7 +193,7 @@ function oversize(value: unknown): string[] {
   const names = schemaNames();
   const long = new Set<string>();
   walk(value, "", (frame, key, index) => placedToken(frame.name, frame.parent, key, index, names), (text, spot, place) => {
-    if (tooLong(text)) long.add(`maxLength at ${place(spot) || "/"}`);
+    if (tooLong(text)) long.add(`maxLength at ${place(spot) || "/"} (at most ${LONGEST_STRING} code points)`);
   });
   return [...widths(value), ...long];
 }
@@ -212,6 +212,18 @@ function allowed(error: { keyword: string; params?: Record<string, unknown> }, n
   }
   if (error.keyword === "const" && params.allowedValue !== undefined) return ` (${String(params.allowedValue)})`;
   if (error.keyword === "pattern" && typeof params.pattern === "string") return ` (pattern ${params.pattern.length > PATTERN_CHARACTERS ? `${params.pattern.slice(0, PATTERN_CHARACTERS)}\u2026` : params.pattern})`;
+  const limit = typeof params.limit === "number" ? params.limit : undefined;
+  if (limit !== undefined) {
+    const count = (word: string) => `${limit} ${word}${limit === 1 ? "" : "s"}`;
+    if (error.keyword === "maxLength") return ` (at most ${count("character")})`;
+    if (error.keyword === "minLength") return ` (at least ${count("character")})`;
+    if (error.keyword === "maxItems") return ` (at most ${count("item")})`;
+    if (error.keyword === "minItems") return ` (at least ${count("item")})`;
+    if (error.keyword === "maxProperties") return ` (at most ${count("member")})`;
+    if (error.keyword === "minProperties") return ` (at least ${count("member")})`;
+    if (error.keyword === "minimum" || error.keyword === "maximum") return ` (${String(params.comparison)} ${limit})`;
+  }
+  if (error.keyword === "format" && typeof params.format === "string") return ` (format ${params.format})`;
   return "";
 }
 
@@ -254,8 +266,8 @@ export function schemaErrors(value: unknown, validate: ValidateFunction): string
   }
 }
 
-/** The reader of extensions/channel-agent/0.1 at one site (DEC-0150 CA-1, CA-2). */
-export function channelAgentView(doc: unknown, site: ChannelAgentSite = "manifest"): ChannelAgentView {
+/** The schema's verdict on the declaration at one site (DEC-0150 CA-1, CA-2), before the reader's rules. */
+function schemaView(doc: unknown, site: ChannelAgentSite): { declared: false } | { declared: true; valid: false; errors: string[] } | { declared: true; valid: true; standard: string; projects: ChannelAgentProject[] } {
   const extensions = isObject(doc) ? extensionsAt(doc, site) : undefined;
   if (extensions === undefined || !Object.hasOwn(extensions, KEY)) return { declared: false };
   const value = extensions[KEY];
@@ -264,6 +276,33 @@ export function channelAgentView(doc: unknown, site: ChannelAgentSite = "manifes
   if (errors.length > 0) return { declared: true, valid: false, errors };
   const declared = value as { standard: string; projects: ChannelAgentProject[] };
   return { declared: true, valid: true, standard: declared.standard, projects: declared.projects };
+}
+
+/**
+ * The reader of extensions/channel-agent/0.1 at one site (DEC-0150 CA-1, CA-2, CA-5): an invalid declaration is not
+ * declared; a valid one with a credential-shaped name or value, a part left unread for credentials (FAC-SEM-165) or a
+ * repeated id or an unnamed decision (FAC-SEM-163) is not declared either, its errors naming the rule and the place, never
+ * the value; a valid one with FAC-SEM-164's findings stays declared, with those findings as `obligations`, which the
+ * reader shows to its author.
+ */
+export function channelAgentView(doc: unknown, site: ChannelAgentSite = "manifest"): ChannelAgentView {
+  const view = schemaView(doc, site);
+  if (!view.declared || !view.valid) return view;
+  const value = (extensionsAt(doc as JsonObject, site) as JsonObject)[KEY];
+  const budget = newBudget();
+  const named = (finding: Finding) => `${finding.code} at ${finding.instancePath || "/"}`;
+  const blocking = [...secrets(value, "", budget), ...summary(budget)].map(named);
+  const owed: string[] = [];
+  const projects = new Set<unknown>();
+  view.projects.forEach((project, i) => {
+    const at = `/projects/${i}`;
+    if (projects.has(project.project)) blocking.push(`FAC-SEM-163 at ${at}/project`);
+    projects.add(project.project);
+    blocking.push(...references(project, at).map(named));
+    owed.push(...obligations(project, at).map(named));
+  });
+  if (blocking.length > 0) return { declared: true, valid: false, errors: blocking };
+  return { ...view, obligations: owed };
 }
 
 /** FAC-SEM-162 on a manifest: the key where a reader does not read it (the manifest's own extensions, a capability's). */
@@ -360,60 +399,78 @@ function jwtRereads(text: string): number {
   return cost;
 }
 
-/**
- * An escape that ends right before an `sk-` and so stands as a boundary for it: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a
- * two- or three-digit octal escape, a backslash escape of one character, or a colour sequence (`ESC[...m`) whose ESC is
- * raw or escaped (`\x1b`, `\033`, `\u001b`, `\e`).
- */
-const ESCAPE_BEFORE = /(?:%25[0-9A-Fa-f]{2}|%[0-9A-Fa-f]{2}|\\x[0-9A-Fa-f]{2}|\\u[0-9A-Fa-f]{4}|\\[0-7]{2,3}|\\.|(?:\u001b|\\x1b|\\033|\\u001b|\\e)\[[0-9;]{0,8}m)$/;
+/** The number of code points in a text (a surrogate pair is one). */
+export function codePoints(text: string, limit = Number.POSITIVE_INFINITY, from = 0): number {
+  let count = 0;
+  for (let at = from; at < text.length && count < limit; at += 1) {
+    const unit = text.charCodeAt(at);
+    if (unit >= 0xd800 && unit <= 0xdbff && at + 1 < text.length) {
+      const next = text.charCodeAt(at + 1);
+      if (next >= 0xdc00 && next <= 0xdfff) at += 1;
+    }
+    count += 1;
+  }
+  return count;
+}
 
-/** What a provider-key reading may reread after each `sk-` that follows a boundary: up to 255 code points each. */
+/**
+ * An escape that ends right before an `sk-` and so stands as a boundary for it, read on the few characters before it:
+ * `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal escape or a backslash escape of one character. A colour
+ * sequence is read by `colourBefore`.
+ */
+const ESCAPE_BEFORE = /(?:%25[0-9A-Fa-f]{2}|%[0-9A-Fa-f]{2}|\\x[0-9A-Fa-f]{2}|\\u[0-9A-Fa-f]{4}|\\[0-7]{2,3}|\\.)$/;
+/** An ESC, raw or escaped: `\x1b`, `\033`, `\u001b` (either case of the hex digits) or `\e`. */
+const ESC_BEFORE = /(?:\u001b|\\x1[bB]|\\033|\\u001[bB]|\\e)$/;
+
+/** Whether a colour sequence `ESC[...m`, with any number of parameter characters, ends right before `at`. */
+function colourBefore(text: string, at: number): boolean {
+  if (text[at - 1] !== "m") return false;
+  let start = at - 2;
+  while (start >= 0 && /[0-9;]/.test(text[start] as string)) start -= 1;
+  return text[start] === "[" && ESC_BEFORE.test(text.slice(Math.max(0, start - 6), start));
+}
+
+/** What a provider-key reading may reread after each `sk-`, in any case, that follows a boundary: up to 255 code points each. */
 function keyRereads(text: string): number {
   let cost = 0;
-  for (let at = text.indexOf("sk-"); at >= 0; at = text.indexOf("sk-", at + 1)) {
-    const boundary = at === 0 || !/[A-Za-z0-9]/.test(text[at - 1] as string) || ESCAPE_BEFORE.test(text.slice(Math.max(0, at - 20), at));
-    if (boundary) cost += Math.min(KEY_REREAD, text.length - at);
+  const pattern = /sk-/gi;
+  for (let match = pattern.exec(text); match !== null; match = pattern.exec(text)) {
+    const at = match.index;
+    pattern.lastIndex = at + 1;
+    const boundary = at === 0 || !/[A-Za-z0-9]/.test(text[at - 1] as string) || ESCAPE_BEFORE.test(text.slice(Math.max(0, at - 6), at)) || colourBefore(text, at);
+    if (boundary) cost += codePoints(text, KEY_REREAD, at);
   }
   return cost;
 }
 const KEY_REREAD = 255;
 
-/** A query or fragment value as the detector decodes it, or the raw value when it does not decode. */
-function decoded(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
-
 /**
  * The code points the detector reads in a string, counted in one pass, a bound any port's detector may need: the string
- * once; the JWT shape's rereading, after each `eyJ`, of the rest of the base64url run it starts; for every query or
- * fragment name (after `?`, `&` or `#`, up to the next `=`, `&` or `#`) that holds an upper-case letter or a `%`, the
- * square of its raw length over two (splitting a name into words may backtrack over it), and PIECE_COST for every such
- * piece; for every value (after `=`, up to the next `&` or `#`) that holds a `%`, its raw length and the JWT rereading
- * of its decoded form; and, after every `sk-` that follows a boundary (the start, a character other than a letter or a
- * digit, or an escape ESCAPE_BEFORE names), up to 255 code points to the end of the string (a provider-key reading
- * anchored at a boundary may read that far after each one).
+ * once; the JWT shape's rereading, after each `eyJ`, of the rest of the base64url run it starts (and of the dot and the
+ * run after it); after every `sk-`, in any case, that follows a boundary (the start, a character other than a letter or
+ * a digit, an escape ESCAPE_BEFORE names or a colour sequence), up to 255 code points to the end of the string. For a
+ * string that parses as a URL, on the names and values a WHATWG URL parse yields (tab, line feed and carriage return
+ * removed, percent-decoded, as `rawValues` hands them over), for every query or fragment piece: PIECE_COST, its name's
+ * and value's code points, the value's JWT and `sk-` terms, and, when the value is not empty and the name holds an
+ * upper-case letter, the square of the name's length over two (splitting a name into words may backtrack over it).
  */
 export function detectorCost(text: string): number {
-  let cost = text.length + jwtRereads(text) + keyRereads(text);
-  let at = text.search(/[?#]/);
-  while (at >= 0 && at < text.length) {
-    let end = at + 1;
-    while (end < text.length && text[end] !== "=" && text[end] !== "&" && text[end] !== "#") end += 1;
-    const name = text.slice(at + 1, end);
-    cost += PIECE_COST;
-    if (/[A-Z%]/.test(name)) cost += (name.length * (name.length + 1)) / 2;
-    if (text[end] === "=") {
-      let stop = end + 1;
-      while (stop < text.length && text[stop] !== "&" && text[stop] !== "#") stop += 1;
-      const value = text.slice(end + 1, stop);
-      if (value.includes("%")) cost += value.length + jwtRereads(decoded(value));
-      end = stop;
+  let cost = codePoints(text) + jwtRereads(text) + keyRereads(text);
+  let url: URL;
+  try {
+    url = new URL(text);
+  } catch {
+    return cost;
+  }
+  for (const part of [url.search, url.hash]) {
+    for (const [name, values] of rawValues(part.slice(1))) {
+      const length = codePoints(name);
+      const upper = /[A-Z]/.test(name);
+      for (const value of values) {
+        cost += PIECE_COST + length + codePoints(value) + jwtRereads(value) + keyRereads(value);
+        if (value !== "" && upper) cost += (length * (length + 1)) / 2;
+      }
     }
-    at = end;
   }
   return cost;
 }
@@ -573,7 +630,7 @@ export function channelAgentRules(doc: unknown, site: ChannelAgentSite = "manife
   // One budget for the whole document: every copy of the declaration, read or misplaced, draws on it.
   const budget = newBudget();
   const findings = site === "manifest" ? misplaced(doc, budget) : [];
-  const view = channelAgentView(doc, site);
+  const view = schemaView(doc, site);
   if (!view.declared) return [...findings, ...summary(budget)];
   const root = CHANNEL_AGENT_PATHS[site];
   findings.push(...secrets((extensionsAt(doc, site) as JsonObject)[KEY], root, budget), ...summary(budget));
