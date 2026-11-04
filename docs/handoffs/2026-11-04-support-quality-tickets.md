@@ -77,7 +77,7 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   times, with and without an `-a` tail (about 45 to 55 ms each when measured here); the same construct in
   `src/connections.ts` `KEY_SHAPE` is CT-213. The residual is stated right everywhere: a slug word that starts with a
   provider prefix and holds enough key characters (for `sk-`, a run of 32 or more holding a digit; `AKIA` dropped, a
-  lower-case alias never holds it), pinned by `project:sk-customer-support-team-europe-2026`. connections.md and CT-73
+  lower-case alias never holds it), pinned by a test alias of `sk-` and 32 such characters. connections.md and CT-73
   now say what the shared detector has since DEC-0151 (CT-73's examples re-measured), DEC-0044 is annotated, and
   profiles.md and fabric-button.md take the exact strength wording and point to item 7's escapes. The coordinator's
   decisions applied: the boundary also takes `\x` with two hex digits, `\b`, `\f`, `\v`, `\0`, `\a`, `\e`, a raw ESC
@@ -132,14 +132,21 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 
 - Two clean rounds of blind readings, then merge (the branch is pushed, no pull request yet).
 - On DEC-0151's merge: close CT-129 (fixed by item 3) with its receipt.
-- The coordinator tells the channel agent standard's owner, on thread `b6820b97`, that its observed check must accept a
-  channel a producer withholds during the wait (CT-210 step (d)); the coordinator files the adapter's row (step (e)).
+- The coordinator tells the channel agent standard's owner, on thread `b6820b97`, that its observed check (section 11)
+  must accept a channel a producer withholds during the wait and a project withheld because its alias is read as a
+  credential, and asks for the two prerequisites of section 5.1 (turns for the escalation counts, the ticket counts by
+  the signal server) and the team-chat note (CT-210 step (d)); the coordinator files the adapter's row (step (e)). A
+  project withheld for its alias keeps its days, and after the registry changes the alias the producer publishes the
+  kept days under the new alias.
 - The vendors re-sync with item 7, including: the Fabric Agent Adapter kit's detector ports (its Python and JS secrets
   modules, its dashboard-link checkers, its connection ports and its dashboard button), its vendored vector files that
   change answer (`connections-extra` and `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`,
   re-vendored from the two changed semantic fixtures), Fabric Switchboard's folder-attribution port (it has neither
   look-ahead nor look-behind, so it checks the `sk-` strength outside its regex and re-syncs `folder-attribution.json`
-  at the merge commit), and any template that copies the kit; any port that copies
+  at the merge commit), Project Observatory's folder-attribution port (with its attribution-vectors pin) and its
+  estate-record port (`FAC-SEM-075`), re-synced together with `folder-attribution.json`, and any template or agent that
+  copies the kit; whole-file vendors that pin `src/secret-shape.ts` by hash take DEC-0151 at their next re-pin, with
+  their vectors; any port that copies
   `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
   otherwise. Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json`
   together with `fixtures/vectors/folder-attribution.json`, so both are re-pinned together; Fabric Dashboards vendors
@@ -234,13 +241,24 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these (DEC-0150's sen
   in DEC-0151's Context and on the support quality page: made a link once both are on main.
 - `docs/DECISIONS.md`'s next-free line: DEC-0152 here; at merge take the maximum of the branches' values and the CAS
   counter.
+- `docs/specification/channel-agent.md`, the sentence that begins "Being by shape, the detector also finds an ordinary
+  hyphenated name that starts with `sk-`: today any `sk-` followed by 16 or more letters, digits, `_` or `-`, in any
+  case ...": it states DEC-0151's rule (a word-start boundary, the `sk-` strength, canonical case) and drops "in any
+  case"; the advice not to start an id with `sk-` stays.
 - The detector, as DEC-0150's CA-5 states it ("the shared detector stays as it is", and an ordinary name such as `sk-`
   and 16 more name characters is found too): whichever lands second keeps DEC-0151's boundary and annotates CA-5 with
-  it; the advice to rename an id that starts with `sk-` stays true, since a strong `sk-` run at the start of a value is
-  still found.
-- DEC-0150's `FAC-SEM-165` budget: DEC-0150's branch now counts DEC-0151's look-aheads itself (for each `sk-` after a
-  boundary, the smaller of 255 and the rest of the string) with a test. No wording change is owed by DEC-0151; on the
-  merged tree, DEC-0150's budget test with digit-free `-sk` strings passes.
+  it, left as written in the register; the advice to rename an id that starts with `sk-` stays true, since a strong
+  `sk-` run at the start of a value is still found.
+- DEC-0150's `FAC-SEM-165` budget (its `keyRereads` and `detectorCost`, read at `3c1ba539`): it charges, after every
+  `sk-` at a boundary, the smaller of 255 and the rest of the string, where a boundary is the start, a character other
+  than a letter or a digit, or an escape it names: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a
+  one-character backslash escape (which covers a one-digit octal), and a colour sequence whose ESC is raw or written
+  `\x1b`, `\033`, `\u001b` or `\e`, with up to 8 parameter characters, read in the 20 characters before the `sk-`. It
+  counts fewer forms than DEC-0151's boundary: the upper-case `\x1B[` and `\u001B[` and a colour sequence with more
+  than 8 parameter characters. The second to land adds those to `keyRereads`, with a `detectorCost` case per form
+  (`\x1B[0m`, `\u001B[0m`, and `ESC[` with nine parameter characters, each before `sk-` and 300 key characters, charged
+  255). No wording change is owed by DEC-0151; on the merged tree, DEC-0150's budget test with digit-free `-sk`
+  strings passes.
 - `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `426d5daa`: that head keeps the tree check's own
   unbounded provider-key shapes (a fixed list held equal to a vectors constant, for parity with the adapter's source
   check), its tests no longer read `SECRET_VALUE.source`, and its
@@ -269,9 +287,9 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these (DEC-0150's sen
 The check that closes this list, after both land, in two parts:
 `git grep -n -E 'DEC-0151[^.]*in progress|in-progress DEC-0151' -- docs src test ':!docs/handoffs' ':!docs/DECISIONS.md'`
 prints nothing; and in `docs/DECISIONS.md`, `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -n -E
-'DEC-0151[^.]*in progress|in-progress DEC-0151'` prints only the lines of DEC-0150's CA-2, its Compatibility and its
-Source counter sentence, which stay as written, while `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -c
-'^- \*\*Annotated'` prints at least 1, an annotation naming DEC-0151's merge for all three. The handoffs are left out
+'DEC-0151[^.]*in progress|in-progress DEC-0151'` prints only the lines of DEC-0150's CA-2, its CA-5, its Compatibility
+and its Source counter sentence, which stay as written, while `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -c
+'^- \*\*Annotated'` prints at least 1, an annotation naming DEC-0151's merge for all four. The handoffs are left out
 because they quote the earlier wording as history (this one does above).
 
 ## Decisions taken here

@@ -10,9 +10,11 @@
  * change answer (`connections-extra`, `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`, re-vendored
  * from the two changed semantic fixtures), Fabric Switchboard's folder-attribution port (it has neither look-ahead nor
  * look-behind, so it checks the `sk-` strength outside its regex and re-syncs `folder-attribution.json` at the merge
- * commit) and any template that copies the kit; a port that copies
+ * commit) and any template or agent that copies the kit; a port that copies
  * `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
- * otherwise. Fabric vendors this file twice, one copy under a sha256 `pin.json` together with
+ * otherwise. Project Observatory's folder-attribution port (with its attribution-vectors pin) and its estate-record
+ * port (FAC-SEM-075) re-sync together with that file. Whole-file vendors that pin this file by hash take DEC-0151 at
+ * their next re-pin, with their vectors. Fabric vendors this file twice, one copy under a sha256 `pin.json` together with
  * `fixtures/vectors/folder-attribution.json`; Fabric Dashboards vendors `src/session-handoff.ts` and
  * `src/fabric-links.ts`, and its service host's connections hold a port; Fabric Dashboards' sample-service kit copies
  * hold the earlier pattern.
@@ -77,6 +79,8 @@ export const JWT_SHAPE = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]
  * read lazily, so a long run of `sk-` prefixes is read in linear time. So `project:helpdesk-customer-support`,
  * `project:sk-learn-experiments` and `sk-learn-experiments-2026` are no keys, and `sk-or-v1-` with 64 lower-case hex
  * digits is one. A port whose regex has no look-ahead (Rust's `regex` crate) checks that strength outside the regex.
+ * Knowingly not found: a key after a triple percent-escape (`%252522`), an eight-digit `\U00000022` escape, or a CSI
+ * sequence that is not a colour sequence (`ESC[K`, `ESC[2J`).
  * A match includes its boundary character, so a caller uses `.test` only, never the matched text or its index.
  */
 export const SECRET_VALUE = /(^[Bb][Ee][Aa][Rr][Ee][Rr]\s.+|(?:^|[^A-Za-z0-9]|%[0-9A-Fa-f]{2}|\\[nrt"']|\\u[0-9A-Fa-f]{4}|\\x[0-9A-Fa-f]{2}|\\[bfv0ae]|\\[0-7]{1,3}|%25[0-9A-Fa-f]{2}|\x1b\[[0-9;]*m|(?:\\u001[bB]|\\x1[bB]|\\e|\\033)\[[0-9;]*m)(?:sk-(?=[A-Za-z0-9_-]{0,255}?\d)(?:(?=[A-Za-z0-9_-]{0,255}?[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}))/;

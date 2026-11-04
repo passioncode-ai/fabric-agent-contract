@@ -157,8 +157,9 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
   day by it and the declaration names the project by it, both as written; the pattern
   `^project:[a-z0-9][a-z0-9._-]{0,127}$` admits only its normal form (lower case, no `%`), so comparing it as written
   agrees with a comparison by normal form; an alias with a slug word (a word starts after `-`, `_`, `.` or `:`) that
-  starts with a provider prefix and holds enough key characters (for `sk-`, 32 or more characters after `sk-`, holding
-  a digit; for `ghp_` and its kin 20 or more, for `xox?-` 10 or more, for `glpat-` 20 or more) is read as a credential by `FAC-SEM-101` (DEC-0151 item 7), and the operator's
+  starts with a provider prefix and holds enough key characters (for `sk-`, 32 or more letters, digits, `-` and `_` after
+  it, holding a digit; for `ghp_` and its kin, 20 or more letters and digits; for `xox?-`, 10 or more letters, digits
+  and `-`; for `glpat-`, 20 or more letters, digits, `-` and `_`) is read as a credential by `FAC-SEM-101` (DEC-0151 item 7), and the operator's
   registry rule is to issue none;
 - `agentRef` (`urn:fabric:agent:<publisher>:<id>`): its schema pattern admits only lower case and no `%`, so every valid
   value is already its normal form;

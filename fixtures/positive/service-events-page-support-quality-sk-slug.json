@@ -5,7 +5,7 @@
       "at": "2026-10-19T00:20:00Z",
       "kind": "support.quality_daily",
       "level": "info",
-      "text": "Support quality for chat on 2026-10-18, alpha: 35 tickets ended.",
+      "text": "Support quality for chat on 2026-10-18, project:helpdesk-customer-support: 35 tickets ended.",
       "data": {
         "schema": "https://support.example.com/schemas/support-quality-daily.schema.json",
         "value": {

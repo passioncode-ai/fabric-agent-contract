@@ -9101,7 +9101,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      channel), and a day published before the service served a second project on that channel is not re-attributed. A
      day without `project` from a service that served several projects on that channel that day names no single
      project and is kept as a merged day: a reader keeps it per service, channel and day and never attributes it to one
-     project. A producer that serves
+     project. An absent `project` names the channel's only project on that day, so the declaration that counts is that day's. A reader that did not read that day's declaration keeps the day per service, channel and day, unattributed, as it keeps a merged day. A producer whose channel moves to another project names `project` from that day on. A producer that serves
      several projects on one channel publishes one event per project and day, each naming its `project`, under item 4's rule. Before
      every reader has adopted DEC-0151, such a producer publishes no event for that channel: it keeps each project's
      days, publishes them one event per project and day once every reader has adopted, and never merges projects into
@@ -9110,7 +9110,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      before DEC-0151 is never rerun. A single-project producer, one project on that channel, keeps leaving `project` out
      on that channel and names it only once the channel serves a second project. A producer whose declaration maps two
      projects to one `/1` channel names `project` on every event of that channel, even when one project's kind there is
-     left out of `/1` (a `team_chat`, item 5). A day's calibration is carried, unchanged, on each project's event judged that day by the
+     left out of `/1` (a `team_chat`, item 5). The rule to name `project` on every event of a channel the declaration maps to two projects applies from the first day the declaration maps two projects to that channel; a rerun of an earlier single-project day keeps no `project`, and a reader keeps it under its own day's attribution, never as a breach. A day's calibration is carried, unchanged, on each project's event judged that day by the
      calibrated judge and rubric; a project's event judged by another judge, or not judged, carries none, and a reader
      reads calibration per project's event, never summing or copying it across projects. The top level then holds 19
      members, inside DEC-0070's 32.
@@ -9137,17 +9137,19 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      while a mixed-case key, an `sk-proj-` key and `sk-or-v1-` with 64 lower-case hex digits still are, at the start of
      a value, after a boundary character or after a listed escape. The residual: an alias with a slug word (a word
      starts after `-`, `_`, `.` or `:`) that starts with a provider prefix and holds enough key characters is read as a
-     credential: for `sk-`, 32 or more characters after `sk-` (letters, digits, `-` and `_`), holding a digit, as a
-     lower-case `sk-or-v1-` key does (`project:sk-customer-support-team-europe-2026`); for `ghp_` and its kin 20 or
-     more (`project:ghp_customerservicedeskabcdef`), for `xox?-` 10 or more (`project:xoxb-support-team`), for `glpat-`
-     20 or more (`project:glpat-` and 20 such characters is read, 19 pass). Knowingly not found either: a key after a
-     triple percent-escape (`%252522`) or after an eight-digit `\U00000022` escape, whose last character before the
-     prefix is a digit. The operator's registry rule is to issue no such
+     credential: for `sk-`, 32 or more letters, digits, `-` and `_` after it, holding a digit, as a lower-case
+     `sk-or-v1-` key does; for `ghp_` and its kin, 20 or more letters and digits; for `xox?-`, 10 or more letters,
+     digits and `-`; for `glpat-`, 20 or more letters, digits, `-` and `_` (19 pass). Prose writes such an alias as a
+     prefix and a count of characters, never whole; `test/secret-shape.test.ts` builds them. Knowingly not found
+     either: a key after a triple percent-escape (`%252522`), after an eight-digit `\U00000022` escape, whose last
+     character before the prefix is a digit, or after a CSI sequence that is not a colour sequence (`ESC[K`,
+     `ESC[2J`), whose last character is a letter. The operator's registry rule is to issue no such
      alias, which this contract does not prove; the rule binds only a producer that carries `project` on a channel,
      which checks its alias against the shared detector before publishing (the payload's own check does not run
      `FAC-SEM-101`): one whose alias is read so publishes no event for that project, on any channel, until the
      registry changes its alias, neither events naming it nor the days it publishes without `project` as some channel's
-     only project; the other projects' events are unaffected.
+     only project; the other projects' events are unaffected. It keeps that project's days while it withholds them,
+     and after the registry changes the alias it publishes the kept days under the new alias.
 - **Why:** the channel agent standard's daily report counts tickets on its signal server and checks each agent's feed
   against it; one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that
   home before any producer may send them. The digit fixes a rule the schema made impossible to keep. The registry
@@ -9196,7 +9198,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`connections-extra` and `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`, re-vendored from the
   two changed semantic fixtures), Fabric Switchboard's folder-attribution port (it has neither look-ahead nor
   look-behind, so it checks the `sk-` strength outside its regex and re-syncs `folder-attribution.json` at the merge
-  commit), and any template that copies the kit; any port that copies
+  commit), Project Observatory's folder-attribution port (with its attribution-vectors pin) and its estate-record port
+  (`FAC-SEM-075`), re-synced together with `folder-attribution.json`, and any template or agent that copies the kit;
+  whole-file vendors that pin `src/secret-shape.ts` by hash take DEC-0151 at their next re-pin, with their vectors;
+  any port that copies
   `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
   otherwise. Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json` together with
   `fixtures/vectors/folder-attribution.json`, so both are re-pinned together; Fabric Dashboards vendors
@@ -9227,4 +9232,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   DEC-0144 and DEC-0044 annotated; `docs/backlog.md` (CT-210, CT-129, CT-103, CT-73, CT-213, CT-188's note);
   `docs/handoffs/2026-11-04-support-quality-tickets.md`.
 - **Source:** CT-210, CT-129; the board request `74105ca1` (thread `b6820b97`); DEC-0151 reserved by git CAS (key
-  `support-quality-v2-dec`, counter commit `ee67e35`).
+  `support-quality-v2-dec`, counter commit `ee67e35`). Readings: rounds 1 to 8 found breaks, each fixed on the branch
+  (round 8: the per-day attribution of an absent `project`, the rerun across the switch to two projects, the
+  team-chat counts, the withheld alias's kept days, the residual's prose, and the vendor list); two consecutive clean
+  rounds are still owed.
