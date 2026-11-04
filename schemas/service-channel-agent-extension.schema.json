@@ -314,7 +314,7 @@
               },
               "max_age": {
                 "$ref": "#/$defs/duration",
-                "description": "The age past which the source opens an alert episode, above zero: the signal server reports a source's age against it, so zero would read as always stale."
+                "description": "The age past which the source opens an alert episode, above zero: the signal server reports a source's age against it, so zero would read as always stale. The age runs from the source's last successful read (a sync that finished), not from the last change of its content (the standard's section 7.1)."
               }
             }
           },

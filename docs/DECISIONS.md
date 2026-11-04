@@ -9034,10 +9034,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   under which an agent that answers people on a channel (mail, Telegram, store reviews) declares what
   `channel-agent-standard/1` asks, checked statically by the Fabric Agent Adapter's service check (its row to be filed),
   with the schema in this contract. The standard is owned outside this repository; its section 13.6 gives the declaration's
-  fields and section 11 where it is declared and what is checked of it. Its v1 release candidate, as its owner
-  published it, is kept in
-  [`docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`](evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md),
-  with the examples that described one product made neutral.
+  fields and section 11 where it is declared and what is checked of it. Its v1 release candidate, round 4, the standard
+  owner's neutral copy received on board thread `b6820b97`, is kept byte for byte in
+  [`docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`](evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md).
 - **Decision:** [channel agent](specification/channel-agent.md):
   1. CA-1. The key is `https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1`
      (`EXTENSION_KEYS.channelAgent`, G-08). A reader reads it under `provider.extensions` of the agent's manifest, or,
@@ -9198,7 +9197,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, with the examples made neutral here; rounds 1 to 11 of the readings. `DEC-0150` was reserved by the coordinator with
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 11 of the readings. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation

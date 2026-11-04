@@ -26,7 +26,7 @@ filed; the coordinator files it on the board).
   (interop.md), support-quality.md's pointer, conformance.md (register, reference modules, the channel agent's row),
   DOCMAP, CONTEXT (Channel agent); DEC-0150 (Proposed); CT-209; the standard's copy
   [`docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`](../evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md)
-  (its owner's neutral copy, with the examples that described one product made neutral) and its row in
+  (the standard owner's neutral copy, round 4, kept byte for byte) and its row in
   `docs/evidence/sources.md`.
 - Round 1 of the readings: four unit breaks (the slot exception, values in messages, recursion depth, the schema on huge
   arrays), one product break (section 5.1's payload) and the seam's and product's risks, all fixed.
@@ -127,6 +127,14 @@ filed; the coordinator files it on the board).
   `until` (the check does not read today's date) and the question route's agreement with the side (FAA-197).
   Fixtures `service-channel-agent-extension-none-form` (positive), `-none-without-until` and `-none-at-decision`
   (negative), and vectors pin it.
+- The owner posted round 4's neutral copy on thread `b6820b97` (44 662 bytes, SHA-256 `f854a8fc...8c791`, the
+  coordinator verified it): it replaces the copy at the same path byte for byte, with no header of ours, and its row in
+  `docs/evidence/sources.md` says so. Re-read against it: the none form (section 13.6 names "a text of
+  `channels[].texts`"; here only the final text takes it, a holding text being optional, a narrowing the page names),
+  `recommendation` only with `answered_signal: "none"` (the non-blocking finding), and section 7.1's age from the last
+  successful read, now in `max_age`'s description and on the page.
+- The timing tests measure the test thread's processor time against prose read to the budget in the same run (a
+  ratio), never a fixed number of milliseconds, so a loaded machine slows both sides alike.
 
 ## The branch and its history
 
@@ -170,8 +178,6 @@ the pull request comes from the v3 branch only.
 
 ## Open
 
-- The standard's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`, is the release candidate before
-  the owner's round 4; it is refreshed, neutralised, when the owner posts round 4, and not edited before.
 - Section 5.1's daily payload: until DEC-0151 (in progress on CT-210, branch `agent/sqd-fields-20261104`) lands, an
   agent following it emits `support-quality-daily/1` payloads this contract refuses; DEC-0151, in progress, proposes
   how the seven channel kinds map to `/1`'s four.
@@ -288,8 +294,9 @@ quotes, at posting time, the page's [grammar](../specification/channel-agent.md#
 narrowings in [channel agent](../specification/channel-agent.md#narrowings-against-the-standard) (not copies kept
 here), and adds:
 
-- the owner's round 4 of section 13.6 (the none form at four members) is taken; the neutral copy in
-  `docs/evidence/specs/` is refreshed to round 4 when the owner posts it (not edited before);
+- the owner's round 4 (the none form at four members in section 13.6, a source's age from its last successful read in
+  section 7.1) is taken, and its neutral copy is kept byte for byte at
+  `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`;
 
 - only a manifest's `provider.extensions` is read: a declaration under the manifest's top-level `extensions` is
   `FAC-SEM-162` and not read;

@@ -9,7 +9,7 @@ DEC-0150 (CT-209) · rule codes `FAC-SEM-162` to `FAC-SEM-165` · schema
 `fixtures/positive/service-channel-agent-extension.json`, `fixtures/positive/manifest-channel-agent.json`,
 `fixtures/positive/service-well-known-channel-agent.json`, `fixtures/negative/service-channel-agent-extension-*`,
 `fixtures/semantic/manifest-channel-agent-*`, `fixtures/semantic/service-well-known-channel-agent-*` · source
-[the standard, v1 release candidate](../evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md)
+[the standard, v1 release candidate, round 4](../evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md)
 
 An agent that answers people on a channel (mail, a Telegram chat or group, store reviews, public comments, a team's
 chat, a person's own account) follows `channel-agent-standard/1`. The standard is owned outside this repository: it
@@ -185,7 +185,9 @@ board's `opaqueId`. A path (`suite`, `outbox`) is relative to the agent's reposi
 no `..` segment. A duration is ISO 8601 in days, hours, minutes and seconds (`P7D`, `PT1H`, `P1DT12H`), above zero:
 years, months and weeks, whose length depends on the calendar, are refused, and so is an all-zero duration (`P0D`,
 `PT0S`), except a source's `cadence`, where zero means the source is read on every question. A source's `max_age`
-stays above zero: the standard's signal server reports a source's age against it, so zero would read as always stale. A time zone
+stays above zero: the standard's signal server reports a source's age against it, so zero would read as always stale;
+the age runs from the source's last successful read (a sync that finished), not from the last change of its content
+(the standard's section 7.1). A time zone
 is an IANA name of one segment (`UTC`, `GMT`, `CET`) or of two or three (`Etc/UTC`, `Europe/Warsaw`,
 `America/Argentina/Buenos_Aires`). A text's length is counted in Unicode code points, as JSON Schema's `maxLength`
 counts it, and a text's language is at most 35 characters.
@@ -421,8 +423,10 @@ and this list.
 - `null`: taken only by a channel's `decision`, `quiet_window` and `late_answer_window` and by `spend_record`, and refused
   everywhere else. A required member a project does not have takes the standard's none form (`{"none": "not_yet",
   "until": "YYYY-MM-DD"}` or `{"none": "not_used"}`, closed, `until` a full date) at four members only: the question
-  route, the gap registry, `tickets.pd_check` and a channel's `texts.final`. A missing required member, a refused
-  `null` or a none form elsewhere makes the whole declaration not declared.
+  route, the gap registry, `tickets.pd_check` and a channel's `texts.final`. The standard's round 4 names "a text of
+  `channels[].texts`": here only the final text takes the form, since a holding text is optional and is left out
+  instead. A missing required member, a refused `null` or a none form elsewhere makes the whole declaration not
+  declared.
 - Size read for credentials: at most 1 000 000 code points of names and values per document, every copy of the
   declaration in it sharing them, each name or string charged 16 more than its code points; past that the rest is not
   read, and the declaration is not declared (`FAC-SEM-165`).

@@ -1,14 +1,3 @@
-<!--
-A neutralised copy of the channel agent standard, `channel-agent-standard/1`, v1 release candidate: the neutral copy its
-owner published on 2026-11-04, received through the Fabric project board (request 437c404b, thread b6820b97). Kept as
-the evidence behind DEC-0150 and docs/specification/channel-agent.md. Neutralised here: the examples that described one
-product (its business, a customer fact and a tier's name) read as a product with orders, the fact `open_orders` and a
-premium customer and tier. Nothing else is changed. The standard's sections 0 and 14 and the texts of its decisions (D-1, D-2 and the rest) are
-the owner's and are not in the neutral copy. In the review log,
-"this repository" means the standard's owner, not this contract. The standard is owned outside this repository; this
-copy is not edited further here, and a later revision is a new copy beside it.
--->
-
 # Standard: an agent on a channel people write to
 
 `channel-agent-standard/1`, the neutral copy, made from the master by its owner. Do not edit the copy: send changes on the Fabric-board thread the copy came with.
@@ -52,9 +41,9 @@ copy is not edited further here, and a later revision is a new copy beside it.
    the outcome is section 3's. Every ticket shows its age, the step it waits on, what the agent did and the customer's
    **tier** (2.3). No message a person wrote is handled outside a ticket.
 3. **Customer context.** The ticket board shows who the customer is (the identity the channel gives, joined to the
-   product's account where one is linked) and the facts that matter for helping (for a product with orders:
-   how many open orders the customer has). A project may declare **tiers** (a code, a label, a rule over those facts, such as the
-   open order count). A tier sets the badge on the card and the order of work: the ladder (section 6) and the board sort
+   product's account where one is linked) and the facts that matter for helping (for a product with orders: how many
+   orders the customer has open). A project may declare **tiers** (a code, a label, a rule over those facts, such as
+   the open order count). A tier sets the badge on the card and the order of work: the ladder (section 6) and the board sort
    by tier, then by waiting time. Under D-5 a tier also changes two things the customer sees: the agent tells the
    customer their status (for example "as a premium customer"), and when the agent cannot resolve the question, it calls
    a person **at once and with priority** (`handed_open`, the hand-off marked with the tier, ahead of the queue)
@@ -104,7 +93,7 @@ ticket ended, the outcome stays, except that within 30 days a late signal from a
 | `answered` | the agent answered from its knowledge and the checks passed (also: an approved draft was sent) | closed |
 | `answered_after_question` | held, then answered by the agent once the missing fact arrived (section 6) | closed |
 | `closed_by_person` | a person answered or acted (a reply from the ticket board, a hand-off queue's signal) | closed |
-| `answered_elsewhere` | someone answered before the agent acted (a team reply in the store console, staff in the group) | closed |
+| `answered_elsewhere` | someone answered before the agent acted (a team reply in the store console, staff or another member in the group) | closed |
 | `no_reply_owed` | written by a person, needs nothing: a seller of services, the owner's own comment, small talk | closed |
 | `customer_silent` | the agent asked the customer one question and no answer came within 7 days | closed |
 | `referred` | the customer was told where to write and no signal from there reaches the agent; counts as a hand-off with signal "none" | ended, not closed |
@@ -276,7 +265,9 @@ window.
 1. Each source the agent reads is **declared** with its owner, how it is read, its cadence and its **maximum age**
    (where a source's own freshness contract names the job that reads it, that job stands for "how it is read"). The
    ticket board and the daily report show each source's age; a source older than its limit opens an alert episode
-   (6.7), never a silent stale answer.
+   (6.7), never a silent stale answer. The age runs from the last successful read of the whole source (a sync that
+   finished), not from the last change of its content: a source that did not change is not old, one that could not be
+   read is.
 2. **Knowledge comes from production**, rebuilt on a schedule (reference hourly for docs), never copied by hand; numbers
    only from the source that owns them.
 3. **A missing source is a recommendation, not a guess**: the data that is missing, who owns it, how to connect it
@@ -423,6 +414,7 @@ personal data.
 | `question_id`, `gap_id` | no | opaque ids |
 | `board_url` | no | https or `fabric-dashboards://`, carrying only the opaque id |
 | `revised` | no | boolean |
+| `fallback` | no | `true` when the checker refused the agent's draft twice in a row on this ticket and the safe reply went (section 5's `fallbackTickets`); absent otherwise |
 
 Answers: `201` created; `200` same `rev` and body; `200 {stale: true, rev}` for a lower `rev`; `409 rev_conflict` same
 `rev`, another body; `403 project_mismatch`, `403 not_owner`, `403 side_mismatch`, `403 project_unknown` (a project the operator removed;
@@ -454,6 +446,8 @@ no}, fixes: [{kind: "instruction" | "policy" | "knowledge" | "code", ref}], eval
 [{id, age_s, max_age_s, status}], recommendations: [{id, thread}], notMeasured: [...]}`
 
 `events_flushed_through` is the time T such that every ticket write changed at or before T has a 2xx from the server.
+`items_seen` is what the channel's own API reports; where it reports only what it delivered (the Bot API in a group), it
+counts the delivered items and `notMeasured` names `items_seen.api`.
 
 ### 13.5 Deletion
 
@@ -490,6 +484,13 @@ the usage report's spend limits (DEC-0027) and `spend_record` is that report's l
 `<project>/<env>/<NAME>` with `NAME` matching `^[A-Z][A-Z0-9_]{0,63}$`. Sources and hand-off queues carry ids and ages
 only: no person's address, no private path.
 
+A required member is never null: a reader takes a null as undeclared. A project that does not have it yet declares
+`{"none": "not_yet", "until": "<date>"}`, one that does not use it `{"none": "not_used"}`; this applies to
+`question_route`, `gap_registry`, a text of `channels[].texts` (for example no final text where the channel sends none)
+and `tickets.pd_check` (no paraphrase travels). Null stays only where nothing is decided: `decision` (replies on),
+`quiet_window`, `late_answer_window`, and `spend_record` with budgets 0. `recommendation` is present only with
+`answered_signal: "none"`.
+
 Channel kinds: `telegram_dm`, `telegram_group`, `mail`, `store_review`, `public_comment`, `team_chat`, `account`.
 
 ## Review log
@@ -501,3 +502,4 @@ Channel kinds: `telegram_dm`, `telegram_group`, `mail`, `store_review`, `public_
 | 1 | 2026-11-04 | two blind reviewers (fidelity; operability) | 18 and 25 findings, 13 blocking. Fixed: the ticket as the unit; outcomes `customer_silent`, `referred`, `expired` and precedence rules; the field map of `support.quality_daily`; UTC days with arrival and ending cohorts; rung ages; the whole loop on request; replays on real changes under a budget; asking people the same day in parallel with the gap; one question path; safe late answers; sides and per-(agent, project) tokens; tickets as a server resource; metadata with a personal-data check; daily notes and completeness; one report per side; alerts once per episode; recorded decisions stand; transports; declared and observed checks |
 | 2 | 2026-11-04 | two blind reviewers (consistency; implementers: the signal server, the desks, channel agents, the adapter's check) | 24 and 36 findings, 9 blocking. Fixed: the master and neutral copies (sections 14, 15); the ticket split per channel and reopening as a linked ticket; outcomes `awaiting_customer`, `awaiting_approval`, `expired_by_decision` and `firstReplyLate`; immutable ended outcomes with a 30-day promotion; overlapping shares and `fallbackTickets`; open counts; the group's 6-hour final limit; the board's columns; one writer per ticket; per-project isolation at the desks; "not mine" routed, only `unknown` declines, expiry asked once more; a data agent per side; budgets 0 without a record, the judge at 20 a day; the wire contracts (project table, `support-ticket/1`, `support-question/1` and `support-answer/1`, `support-daily-note/1`, deletion with tombstones, `extensions/channel-agent/1`); `rev` that survives a lost counter; per-side digests and alerts; report parts within 4096 characters with https links; answers only on the desk's message; desk-wide caps; the personal-data check inside its side; times truncated on small channels; reminders capped at four; one addendum a day; retention. D-4 added: statuses, customer context and tiers, a person's reply from the ticket board into the thread's channel |
 | 3 | 2026-11-04 | the roles: the signal server, the operator desk, the team desk, the agent contract, the adapter, the Telegram transport | edits applied: report links as `fabric-dashboards://` text; the server checks `paraphrase` (`paraphrase_looks_personal`), `project_unknown`, side codes only in data with `sides(code, chat)`; the desk takes the side from the project record, refuses personal data, keeps answers verbatim with `by`, answers with `com.reply` until it holds `board.respond`, people's reminders 2 and 4 working hours; the declaration's key is the contract's full URL at 0.1, slot names, typed budgets with a limit id, a grammar for tier rules, ids and ages only. D-6: adopt now |
+| 4 | 2026-11-04 | the agent contract's first reading of DEC-0150; the signal server at 0.12.0 | the examples made neutral (a product with orders, `open_orders`, a premium customer) and the copies refuse a recognisable example; a required member of the declaration is never null (`{"none": "not_yet" or "not_used"}`); `fallback` on a ticket, so the server counts section 5's fallback share over the same ended tickets; a source's age runs from its last successful read (7.1, the mail runtime's question) |
