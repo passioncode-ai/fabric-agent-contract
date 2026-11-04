@@ -38,6 +38,12 @@ describe("every positive fixture passes", () => {
     expect(result.code).toBe(0);
   });
 
+  it("a bare channel-agent declaration gets the declaration-only hint and still passes (DEC-0150)", () => {
+    const result = run(fixture("positive/service-channel-agent-extension.json"), "--schema", "service-channel-agent-extension.schema.json");
+    expect(result.code).toBe(0);
+    expect(result.out).toContain("hint/declaration-only");
+  });
+
   it("a provider entry with run.mcp.stdio.scope gets the reader-pending hint and still passes (CT-27)", () => {
     const result = run(fixture("positive/provider-entry-stdio-on-demand.json"), "--schema", "provider.schema.json");
     expect(result.code).toBe(0);

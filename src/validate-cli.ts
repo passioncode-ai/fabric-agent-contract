@@ -245,12 +245,15 @@ const HINT_HELP = {
   "hint/extension-key": "docs/specification/interop.md#extension-key",
   "hint/profile-version": "docs/specification/profiles.md",
   "hint/reader-pending": "docs/specification/provider.md",
+  "hint/declaration-only": "docs/specification/channel-agent.md#what-is-checked",
 } as const;
 /** A hint: where it is, which hint, what it says. */
 type Hint = [string, keyof typeof HINT_HELP, string];
 
 /** A member the schema allows but a reader the contract names does not accept yet (CT-27 for `run.mcp.stdio.scope`). */
 function readerHints(schema: string | undefined, value: unknown, out: Hint[]): void {
+  // DEC-0150: a bare channel-agent declaration checks its shape only; its other rules read it inside its document.
+  if (schema === "service-channel-agent-extension.schema.json") out.push(["", "hint/declaration-only", "FAC-SEM-163 to FAC-SEM-165 run only on a declaration inside a manifest's provider.extensions or a well-known answer's extensions; check that document to run them"]);
   if (schema !== "provider.schema.json" || !isObject(value) || !isObject(value.run) || !isObject(value.run.mcp) || !isObject(value.run.mcp.stdio)) return;
   if (Object.hasOwn(value.run.mcp.stdio, "scope")) out.push(["/run/mcp/stdio/scope", "hint/reader-pending", "Fabric's registry does not accept run.mcp.stdio.scope yet (CT-27); leave it out and readers take on-demand"]);
 }

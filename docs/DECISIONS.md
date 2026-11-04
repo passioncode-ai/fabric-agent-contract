@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0148` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0152` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -9025,3 +9025,131 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (SCN-052, SCN-053), `CONTEXT.md` (Peer share), `docs/specification/README.md` (the peer share's adoption); DEC-0121,
   DEC-0126, DEC-0142 and DEC-0143 annotated; backlog CT-186 (DEC-0147's duties, in order), CT-201 (what its round-2 readings left) and CT-189 (closes on merge).
 - **Source:** CT-189; CT-178's readings 12 and 13.
+
+### DEC-0150: an agent that answers people on a channel declares `extensions/channel-agent/0.1`
+
+- **Date:** 2026-11-04
+- **Status:** Proposed: accepted at merge after two clean rounds of readings.
+- **Context:** a project on the board asked (request `437c404b`, thread `b6820b97`, 2026-11-04) for an extension key
+  under which an agent that answers people on a channel (mail, Telegram, store reviews) declares what
+  `channel-agent-standard/1` asks, checked statically by the Fabric Agent Adapter's service check (its row to be filed),
+  with the schema in this contract. The standard is owned outside this repository; its section 13.6 gives the declaration's
+  fields and section 11 where it is declared and what is checked of it. Its v1 release candidate, as its owner
+  published it, is kept in
+  [`docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`](evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md),
+  with the examples that described one product made neutral.
+- **Decision:** [channel agent](specification/channel-agent.md):
+  1. CA-1. The key is `https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1`
+     (`EXTENSION_KEYS.channelAgent`, G-08). A reader reads it under `provider.extensions` of the agent's manifest, or,
+     for a service with no manifest, under `extensions` of its `/.well-known/fabric-service` answer (section 11), and
+     nowhere else; the key under a manifest's own `extensions` or a capability's is reported, and its value is still
+     read for credentials where it stands. A service with a manifest declares only in its manifest, and a reader of
+     such a service ignores a declaration in its well-known answer. The same rules run on kind `manifest` and kind
+     `service-well-known`, and on no other kind. A reader treats an invalid value as not declared
+     and reports it (`FAC-SEM-162`).
+  2. CA-2. The shape is `service-channel-agent-extension.schema.json`, one file with no reference to another:
+     `{standard: "channel-agent-standard/1", projects[]}`, each project with the members of section 13.6. `project` is
+     `project:<slug>`, the project registry's id, with the registry alias pattern unchanged
+     (`^project:[a-z0-9][a-z0-9._-]{0,127}$`, as DEC-0151's `projectAlias` and the memory capability's): the registry's
+     name, not an id the agent invents, so the run-of-digits rule does not bind it; an alias of the Fabric Project
+     compared as written (identifiers.md),
+     where `question_route.target` is the canonical Fabric Project id. `side` is `^[a-z0-9-]{1,32}$`; a channel's id, the
+     side, a category code and a tier code take the standard's patterns with no run of 7 or more digits; a time zone is an IANA name of one to three segments; a tier's `rule`
+     is `<fact> > <integer>` or `<fact> >= <integer>`, the integer at most 15 digits, and `escalate` is `at_once` or
+     `ladder`; the question route's capability is `team.ask` or `operator.ask`; budgets are numbers in USD as the usage
+     report's limits, except that 0 is allowed here and means no budget, and a budget above 0 is spent under the
+     usage-report limit `spend_record` names (DEC-0027); `token_slot` is `<project>/<env>/<NAME>`, `<project>` the vault
+     project's name `^[a-z0-9][a-z0-9._-]{0,127}$` (not `project:<slug>`), `<env>` `^[a-z][a-z0-9-]{0,31}$` and `NAME`
+     `^[A-Z][A-Z0-9_]{0,63}$`; durations are ISO 8601 in days, hours, minutes and seconds, above zero, except a source's
+     `cadence` and `max_age`, where zero means the source is read on every question; ids admit no `@`,
+     slash, space or run of 7 or more digits (section 13.2's `id_looks_personal`), and the two paths (`evals.suite`,
+     `tickets.outbox`) are relative to the agent's repository, so sources and queues carry ids and ages only; a queue's
+     `recommendation` is the board's opaque thread id (`^[A-Za-z0-9_-]{8,128}$`); a text is 1 to 4096 code points and
+     its language at most 35 characters. Every
+     member section 13.6 shows is required where the standard says present, so a `null` in its place is invalid. A
+     checker refuses, before the schema runs and with each limit read from the schema, an array longer than its
+     `maxItems`, a map wider than its `maxProperties`, any closed object with more members than the schema declares,
+     and a string value or a member name over 4096 code points;
+     a value the schema still cannot run on is one finding, "the value is too large to check". Its finding names at most
+     ten failed keywords with their places and counts the rest, a missing declared member named beside its place; in a
+     place, a member name the schema does not declare, a text's language and a number that is no index of a declared
+     array, and any numeric key of an object, are written `*`. The finding points to the declaration's grammars and to
+     `pnpm validate --schema service-channel-agent-extension.schema.json` on the value alone.
+  3. CA-3. `FAC-SEM-163`: a project, a category code, a tier code, a channel, a source (read or declined), a hand-off
+     queue and a recorded decision appear once; a channel with replies off names a decision, and a channel's decision
+     is one `recorded_decisions` lists (section 11: recorded decisions present for every channel held by one).
+  4. CA-4. `FAC-SEM-164`: a channel with a holding reply declares its holding text and one that replies its final text
+     (section 11: holding and final texts present); a store review asks no clarifying question (sections 4.7, 10); no
+     text and no tier's label is blank or carries U+2014 (section 2.4's send checks); a queue whose answered signal is
+     `none` names its
+     recommendation (section 7.5); a budget above 0 names its spend record, since without one it reads 0 (sections 5
+     and 11).
+  5. CA-5. `FAC-SEM-165`: no member name and no string of the declaration is shaped like a credential, by shape, with
+     `FAC-SEM-101`'s detector on a string's first 4097 code points (an ordinary name such as `sk-` and 16 more name
+     characters is found too; the shared detector stays as it is); a token slot of the slot's grammar is read segment by segment,
+     the eval suite's and outbox's paths by the detector's path-aware reading (`secretArgument`, `secretUrl`), and a
+     queue's recommendation, a board thread's id, by a
+     provider key's and a JWT's shapes only. No finding's message carries a declared value: the instance path places it,
+     and a member whose name is not plain (letters, digits, `_` and `-`, at most 64, no run of 7 digits once `-` and `_`
+     are left out) or is shaped like a credential is placed at
+     its nearest plain ancestor, by `FAC-SEM-164` as by `FAC-SEM-165`; a member more than 64 levels down is placed at
+     its ancestor 64 levels down, and `FAC-SEM-165` names at most 64 places and counts the rest. The walk keeps an
+     explicit stack of one frame per container and builds a place only when it reports one, so its time grows with the
+     value's size. A text is blank when nothing is left after white space, `\p{Cf}`, `\p{Cc}`, `\p{Z}`,
+     `\p{Default_Ignorable_Code_Point}`, the fillers U+115F, U+1160, U+3164, U+FFA0 and U+2800, and U+FFFC.
+  6. CA-6. Not checked statically: that the side is one of the standard's sides and the route's capability the one for
+     its kind (side codes and kinds live only in the signal server's data), that a tier's fact is a declared customer
+     fact (the declaration lists none), that the named agents, capabilities, desk and limit exist, the standard's
+     reference values, the working calendar of a limit counted in working time (declared as a wall-clock duration),
+     whether one declaration may hold projects on several sides (asked of the standard's owner), and everything the
+     signal server observes.
+  7. CA-7. The key stays at `0.1` until a consumer passes the vectors (`fixtures/vectors/channel-agent.json`, written by
+     `tools/vectors/channel-agent.ts`); the standard then names version 1, which a later decision records. Until then
+     readers read `/0.1` only, and that decision names the window in which readers read both keys. A new version of the
+     standard needs a contract revision before any agent declares it: until then `channel-agent-standard/2` is refused
+     (`FAC-SEM-162`, and `FAC-SEM-099` in a `protocols` list). A well-known answer lists `channel-agent-standard/1` in
+     its `protocols` only once its readers have re-pinned to this revision.
+- **Why:** the standard asks every channel agent for one declaration that a checker reads the same way; a schema with
+  vectors in the contract gives the adapter's check, and any other reader, one shape and one answer per case, instead of
+  each reading its own copy of section 13.6. The rules are those section 11 checks without data the declaration does
+  not hold. A finding that quoted a declared value would carry what the declaration is meant to keep out.
+- **Alternatives considered:** a property of `manifest.schema.json`'s `provider.extensions` (an invalid declaration
+  would then refuse the whole manifest, where the actions and load keys are reported and treated as not declared); the
+  manifest only (section 11 also names the well-known answer of a service with no manifest); `$ref`s to the usage
+  report's limit id, the board's project id and the capability name (a kit would vendor three more schemas and their
+  closures; the patterns are repeated and `test/channel-agent.test.ts` holds them equal); a check that the route's
+  capability matches the side (the contract cannot know which side is whose); flagging an address in a declared text (a
+  final reply may name where to write, section 6.6); Ajv's schema paths in the finding (relative to a `$ref`'s target,
+  so two members read the same).
+- **Compatibility:** additive: a new extension key, which a reader that does not know it ignores, and four rules that
+  read only a manifest or a well-known answer that carries it. No existing schema changes; `rawValues` in
+  `src/secret-shape.ts` appends in place (the same lines as CT-194's branch), which changes no answer; `channel-agent-standard/1`
+  joins the protocol register as a schema `const`. `contractVersion` stays `0.1.0`. The standard's section 5.1
+  publishes `support-quality-daily/1` per project, where `/1` keeps one channel of four per event, with members `/1`
+  does not have, and defers them itself until every reader of the feed takes that schema;
+  that is DEC-0151 (CT-210), in progress: until it lands, an agent following section 5.1 emits payloads this contract
+  refuses, and the mapping of the seven channel kinds to `/1`'s four channels is DEC-0151's; until then an agent declaring
+  several projects publishes no per-project `support.quality_daily` on a shared channel, since a `/1` reader keeps one
+  event per service, channel and day.
+- **Consequences / affects:** `src/extensions.ts`, `src/channel-agent.ts`, `src/semantic-rules.ts`,
+  `src/protocol-revisions.ts`, `schemas/service-channel-agent-extension.schema.json`, `tools/vectors/channel-agent.ts`,
+  `tools/vectors/run.ts`, `fixtures/vectors/channel-agent.json`, `fixtures/positive/service-channel-agent-extension.json`,
+  `fixtures/positive/manifest-channel-agent.json`, `fixtures/positive/service-well-known-channel-agent.json`,
+  `fixtures/negative/service-channel-agent-extension-*` and their catalogue rows,
+  `fixtures/semantic/manifest-channel-agent-*`, `fixtures/semantic/service-well-known-channel-agent-*`,
+  `test/channel-agent.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`,
+  `test/consistency.test.ts` (G-08's key list), `vitest.config.ts` (the module's floor), `src/secret-shape.ts`
+  (`rawValues`), `fixtures/semantic/manifest-channel-agent-nulls.json`, `src/validate-cli.ts` and
+  `test/validate-cli.test.ts` (`hint/declaration-only`), `docs/specification/service.md` (the well-known answer's
+  extensions), `docs/specification/identifiers.md` (compared as written), `docs/ux/scenarios.md` (SCN-002);
+  `docs/specification/channel-agent.md`, `README.md`, `interop.md` (the extension keys), `support-quality.md` (the
+  pointer), `conformance.md` (the register, the reference modules, the channel agent's row), `docs/DOCMAP.md`,
+  `CONTEXT.md` (Channel agent), `docs/evidence/sources.md`,
+  `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
+  `docs/handoffs/2026-11-04-channel-agent.md`.
+- **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
+  published it on 2026-11-04; rounds 1 to 4 of the readings. `DEC-0150` was reserved by the coordinator with
+  `agent_sync.py reserve DEC` under the key `channel-agent-dec`; the counter's history on origin
+  (`refs/agent-sync/ids/DEC`) shows no commit for it: the counter moves from next 149 (`d3da4336`) to next 152 in one
+  commit (`ee67e35e`, key `support-quality-v2-dec`), so DEC-0149 to DEC-0151 have no counter commit of their own.
+  `FAC-SEM-162` to `FAC-SEM-165` were reserved under `channel-agent-sem-a` to `-d` (SEM-0162 to SEM-0165).

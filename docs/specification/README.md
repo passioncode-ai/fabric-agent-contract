@@ -83,6 +83,7 @@ defined in [CONTEXT.md](../../CONTEXT.md).
 |---|---|---|
 | [activity](activity.md) | `fabric-activity/0.1`: sessions, usage, summaries, access logs | not measured |
 | [support quality](support-quality.md) | `support-quality-daily/1` (DEC-0095) | the review found three emitters, each shipping its own copy of the schema instead of this one |
+| [channel agent](channel-agent.md) | `extensions/channel-agent/0.1`: what an agent that answers people on a channel declares in its manifest or well-known answer under `channel-agent-standard/1`, and its static checks (DEC-0150) | specified, no consumer yet; owed by the Fabric Agent Adapter's service check, its row to be filed (the coordinator files it on the board; CT-209) |
 | [OpenRouter attribution](openrouter-attribution.md) | the headers that name a product on OpenRouter | not measured |
 
 The usage report of a service is part of [services](service.md#usage-report).

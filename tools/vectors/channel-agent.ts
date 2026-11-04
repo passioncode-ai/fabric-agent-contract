@@ -1,0 +1,214 @@
+/**
+ * The generator of the channel-agent vectors (DEC-0150): `fixtures/vectors/channel-agent.json`, shared by every checker
+ * of a manifest's `extensions/channel-agent/0.1` (the contract's `channelAgentRules`, the adapter's check_service.py).
+ *
+ *   tsx tools/vectors/channel-agent.ts --check   compare the committed file with what this writes (exit 1 on a difference)
+ *   tsx tools/vectors/channel-agent.ts --write   write it
+ *
+ * Every vector change is made here and written by `--write`, never by hand. Each expected finding is written below by
+ * hand from DEC-0150 (CA-1 to CA-5) and channel-agent-standard/1 sections 11 and 13.6; nothing here imports
+ * `src/channel-agent.ts`, so the gate checks that the reference agrees.
+ */
+import { readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { projectRoot } from "../../src/contract.js";
+
+type Json = Record<string, any>;
+export const VECTOR_FILE = "fixtures/vectors/channel-agent.json";
+const KEY = "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1";
+const TOKEN = "https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1";
+const KEY_PATH = `/provider/extensions/${TOKEN}`;
+const P0 = `${KEY_PATH}/projects/0`;
+
+const dm = {
+  id: "tg-dm",
+  kind: "telegram_dm",
+  replies_enabled: true,
+  decision: null,
+  final_limit: "P7D",
+  first_reply_limit: "PT1H",
+  holding_reply: true,
+  clarifying_question: true,
+  quiet_window: null,
+  late_answer_window: null,
+  items_seen_unit: "updates",
+  texts: { holding: { en: "I am checking this and will write back." }, final: { en: "We could not confirm this; please write to our support." } }
+};
+const reviews = {
+  id: "reviews",
+  kind: "store_review",
+  replies_enabled: false,
+  decision: "replies-off-reviews",
+  final_limit: "P7D",
+  first_reply_limit: "PT24H",
+  holding_reply: false,
+  clarifying_question: false,
+  items_seen_unit: "reviews",
+  texts: {}
+};
+const project = (extra: Json = {}): Json => ({
+  project: "project:example-support",
+  side: "example-side",
+  lead_agent: "support-bot",
+  adopted_at: "2026-11-10",
+  taxonomy: { version: "2026-11-04", codes: [{ code: "payments.refund", label: "A refund" }, { code: "account.access", label: "Access to an account" }] },
+  tiers: [{ code: "premium", label: "Premium", rule: "open_orders > 10", escalate: "at_once" }],
+  question_route: { capability: "operator.ask", target: "operator-desk", daily_cap: 10, days: "mon-fri", tz: "Europe/Warsaw", send_at: "09:00", expires: "P7D" },
+  gap_registry: { owner: "support-bot", capability: "gaps.record" },
+  channels: [dm, reviews],
+  sources: [{ id: "docs", owner: "docs-team", read: "url", cadence: "PT1H", max_age: "PT2H" }],
+  declined_sources: [{ id: "billing-export", decision: "no-billing-export" }],
+  handoff_queues: [{ id: "support-mail", owner: "support-team", limit: "P2D", answered_signal: "none", recommendation: "thread-0001" }],
+  evals: { suite: "evals/support", judge_budget_usd: 2.5, replay_budget_usd: 20, spend_record: "support-evals" },
+  tickets: { outbox: "ticket_outbox", token_slot: "example-support/prod/SIGNAL_TICKETS_TOKEN", pd_check: "pd-rules@1.2.0" },
+  recorded_decisions: [{ id: "replies-off-reviews", date: "2026-11-01", effect: "replies_off" }],
+  ...extra
+});
+const declaration = (...projects: Json[]) => ({ standard: "channel-agent-standard/1", projects: projects.length ? projects : [project()] });
+const manifest = (value: unknown) => ({ provider: { extensions: { [KEY]: value } } });
+const wellKnown = (value: unknown) => ({ protocol: "fabric-service/0.1", extensions: { [KEY]: value } });
+const WK_PATH = `/extensions/${TOKEN}`;
+const withChannel = (channel: Json, at = 0) => {
+  const channels: Json[] = [dm, reviews];
+  channels[at] = channel;
+  return manifest(declaration(project({ channels })));
+};
+const f = (code: string, instancePath: string) => ({ code, instancePath });
+const sem = (n: number) => `FAC-SEM-${n}`;
+
+function declarations(): Json[] {
+  const invalid = [f(sem(162), KEY_PATH)];
+  const list: Array<[string, unknown, Json[]]> = [
+    // Nothing declared: nothing to check.
+    ["no provider extensions", { provider: {} }, []],
+    ["no key", { provider: { extensions: {} } }, []],
+    ["not an object", null, []],
+    // A valid declaration.
+    ["one project, every member", manifest(declaration()), []],
+    ["two projects of two sides", manifest(declaration(project(), project({ project: "project:example-mail", side: "other-side" }))), []],
+    ["no tiers, no declined sources, no recorded decisions, no queue, only a channel that replies", manifest(declaration(project({ channels: [dm], tiers: undefined, declined_sources: undefined, recorded_decisions: undefined, handoff_queues: [] }))), []],
+    ["budgets of 0 need no spend record", manifest(declaration(project({ evals: { suite: "evals/support", judge_budget_usd: 0, replay_budget_usd: 0 } }))), []],
+    ["a tier at or above, escalated by the ladder", manifest(declaration(project({ tiers: [{ code: "vip", label: "VIP", rule: "paid_total_usd >= 500", escalate: "ladder" }] }))), []],
+    ["a token slot whose name mixes case and digits is a name, not a value", manifest(declaration(project({ tickets: { outbox: "ticket_outbox", token_slot: "example-support-project/prod/SUPPORT_TOKEN_V2", pd_check: "pd-rules@1.2.0" } }))), []],
+    ["a holding reply in two languages", withChannel({ ...dm, texts: { holding: { en: "Checking.", "pt-BR": "Verificando." }, final: { en: "Please write to our support." } } }), []],
+    // FAC-SEM-162: where a reader reads it, and its shape.
+    ["the key in the manifest's own extensions is not read", { provider: {}, extensions: { [KEY]: declaration() } }, [f(sem(162), `/extensions/${TOKEN}`)]],
+    ["the key in a capability's extensions is not read", { provider: {}, capabilities: [{ extensions: { [KEY]: declaration() } }] }, [f(sem(162), `/capabilities/0/extensions/${TOKEN}`)]],
+    ["read under provider.extensions, and also misplaced", { provider: { extensions: { [KEY]: declaration() } }, extensions: { [KEY]: declaration() } }, [f(sem(162), `/extensions/${TOKEN}`)]],
+    ["a value that is not an object", manifest([project()]), invalid],
+    ["another standard", manifest({ ...declaration(), standard: "channel-agent-standard/2" }), invalid],
+    ["no projects", manifest({ standard: "channel-agent-standard/1", projects: [] }), invalid],
+    ["a member the schema does not name", manifest({ ...declaration(), note: "x" }), invalid],
+    ["a side in upper case", manifest(declaration(project({ side: "Example" }))), invalid],
+    ["a project id that is not project:<slug>", manifest(declaration(project({ project: "example-support" }))), invalid],
+    ["a tier rule with no spaces", manifest(declaration(project({ tiers: [{ code: "premium", label: "Premium", rule: "open_orders>10", escalate: "at_once" }] }))), invalid],
+    ["a tier rule with another operator", manifest(declaration(project({ tiers: [{ code: "premium", label: "Premium", rule: "open_orders < 10", escalate: "at_once" }] }))), invalid],
+    ["a tier rule over a decimal", manifest(declaration(project({ tiers: [{ code: "premium", label: "Premium", rule: "paid_total_usd > 9.5", escalate: "at_once" }] }))), invalid],
+    ["an escalation the standard does not name", manifest(declaration(project({ tiers: [{ code: "premium", label: "Premium", rule: "open_orders > 10", escalate: "later" }] }))), invalid],
+    ["a question route to another capability", manifest(declaration(project({ question_route: { ...project().question_route, capability: "support.ask" } }))), invalid],
+    ["a token slot whose name is in lower case", manifest(declaration(project({ tickets: { ...project().tickets, token_slot: "example-support/prod/token" } }))), invalid],
+    ["a token slot with no environment", manifest(declaration(project({ tickets: { ...project().tickets, token_slot: "example-support/TOKEN" } }))), invalid],
+    ["a source owner that is a person's address", manifest(declaration(project({ sources: [{ id: "docs", owner: "someone@example.com", read: "url", cadence: "PT1H", max_age: "PT2H" }] }))), invalid],
+    ["a source read by its address", manifest(declaration(project({ sources: [{ id: "docs", owner: "docs-team", read: "https://docs.example/faq", cadence: "PT1H", max_age: "PT2H" }] }))), invalid],
+    ["an outbox at an absolute path", manifest(declaration(project({ tickets: { ...project().tickets, outbox: "/srv/agent/outbox.db" } }))), invalid],
+    ["an outbox in a home folder", manifest(declaration(project({ tickets: { ...project().tickets, outbox: "~/outbox.db" } }))), invalid],
+    ["an eval suite outside the repository", manifest(declaration(project({ evals: { ...project().evals, suite: "evals/../../private/suite" } }))), invalid],
+    ["a duration in words", withChannel({ ...dm, final_limit: "7 days" }), invalid],
+    ["a duration in months", withChannel({ ...dm, final_limit: "P1M" }), invalid],
+    ["a channel kind the standard does not name", withChannel({ ...dm, kind: "sms" }), invalid],
+    ["a budget below 0", manifest(declaration(project({ evals: { ...project().evals, judge_budget_usd: -1 } }))), invalid],
+    ["a budget as a string", manifest(declaration(project({ evals: { ...project().evals, replay_budget_usd: "20" } }))), invalid],
+    ["a spend record that is not a limit id", manifest(declaration(project({ evals: { ...project().evals, spend_record: "Support Evals" } }))), invalid],
+    ["a text keyed by something that is not a language tag", withChannel({ ...dm, texts: { holding: { "en_US!": "Checking." }, final: dm.texts.final } }), invalid],
+    ["a duration of zero days", withChannel({ ...dm, final_limit: "P0D" }), invalid],
+    ["a source read on every question: cadence and maximum age of zero", manifest(declaration(project({ sources: [{ id: "docs", owner: "docs-team", read: "api", cadence: "PT0S", max_age: "P0D" }] }))), []],
+    ["a channel id with a run of 7 digits", withChannel({ ...dm, id: "dm-4915112" }), invalid],
+    ["a time zone of one segment", manifest(declaration(project({ question_route: { ...project().question_route, tz: "GMT" } }))), []],
+    ["a time zone of three segments", manifest(declaration(project({ question_route: { ...project().question_route, tz: "America/Argentina/Buenos_Aires" } }))), []],
+    ["a duration of zero seconds", withChannel({ ...dm, first_reply_limit: "PT0S" }), invalid],
+    ["a duration of zero hours and minutes", withChannel({ ...dm, first_reply_limit: "PT0H0M" }), invalid],
+    ["a tier rule over an integer of 16 digits", manifest(declaration(project({ tiers: [{ code: "premium", label: "Premium", rule: `open_orders > 1${"0".repeat(15)}`, escalate: "at_once" }] }))), invalid],
+    ["a tier rule over an integer of 15 digits", manifest(declaration(project({ tiers: [{ code: "premium", label: "Premium", rule: `open_orders > 1${"0".repeat(14)}`, escalate: "at_once" }] }))), []],
+    ["an id with a run of 7 digits, as a phone number", manifest(declaration(project({ lead_agent: "agent-4915112345" }))), invalid],
+    ["an id with a run of 6 digits", manifest(declaration(project({ lead_agent: "agent-491511" }))), []],
+    ["a token slot named by the project:<slug> id", manifest(declaration(project({ tickets: { ...project().tickets, token_slot: "project:example-support/prod/SIGNAL_TICKETS_TOKEN" } }))), invalid],
+    ["a declared text that is empty", withChannel({ ...dm, texts: { holding: { en: "" }, final: dm.texts.final } }), invalid],
+    // In a well-known answer (a service with no manifest), the key is read under its extensions.
+    ["a well-known answer's declaration, valid", wellKnown(declaration()), []],
+    ["a well-known answer's declaration, invalid", wellKnown({ ...declaration(), standard: "channel-agent-standard/2" }), [f(sem(162), WK_PATH)]],
+    ["a well-known answer reads no provider member", { protocol: "fabric-service/0.1", provider: { extensions: { [KEY]: { standard: "x" } } } }, []],
+    ["a well-known answer's declaration with a channel declared twice", wellKnown(declaration(project({ channels: [dm, reviews, dm] }))), [f(sem(163), `${WK_PATH}/projects/0/channels/2/id`)]],
+    // FAC-SEM-163: ids once, and decisions named.
+    ["a project declared twice", manifest(declaration(project(), project())), [f(sem(163), `${KEY_PATH}/projects/1/project`)]],
+    ["a category code declared twice", manifest(declaration(project({ taxonomy: { version: "1", codes: [{ code: "a", label: "A" }, { code: "a", label: "A again" }] } }))), [f(sem(163), `${P0}/taxonomy/codes/1/code`)]],
+    ["a tier code declared twice", manifest(declaration(project({ tiers: [{ code: "premium", label: "Premium", rule: "open_orders > 10", escalate: "at_once" }, { code: "premium", label: "Premium+", rule: "open_orders > 50", escalate: "at_once" }] }))), [f(sem(163), `${P0}/tiers/1/code`)]],
+    ["a channel declared twice", manifest(declaration(project({ channels: [dm, reviews, dm] }))), [f(sem(163), `${P0}/channels/2/id`)]],
+    ["a source declared twice", manifest(declaration(project({ sources: [project().sources[0], project().sources[0]] }))), [f(sem(163), `${P0}/sources/1/id`)]],
+    ["a source both read and declined", manifest(declaration(project({ declined_sources: [{ id: "docs", decision: "no-docs" }] }))), [f(sem(163), `${P0}/declined_sources/0/id`)]],
+    ["a hand-off queue declared twice", manifest(declaration(project({ handoff_queues: [project().handoff_queues[0], project().handoff_queues[0]] }))), [f(sem(163), `${P0}/handoff_queues/1/id`)]],
+    ["a decision recorded twice", manifest(declaration(project({ recorded_decisions: [project().recorded_decisions[0], project().recorded_decisions[0]] }))), [f(sem(163), `${P0}/recorded_decisions/1/id`)]],
+    ["replies off with no decision", withChannel({ ...reviews, decision: null }, 1), [f(sem(163), `${P0}/channels/1/decision`)]],
+    ["a decision recorded_decisions does not list", withChannel({ ...reviews, decision: "replies-off-forever" }, 1), [f(sem(163), `${P0}/channels/1/decision`)]],
+    ["a channel that replies and is held by a decision that is not recorded", withChannel({ ...dm, decision: "approval-held" }), [f(sem(163), `${P0}/channels/0/decision`)]],
+    ["replies off and no recorded decisions at all", manifest(declaration(project({ recorded_decisions: undefined }))), [f(sem(163), `${P0}/channels/1/decision`)]],
+    // FAC-SEM-164: what a channel, a queue and the budgets owe.
+    ["a holding reply with no holding text", withChannel({ ...dm, texts: { final: dm.texts.final } }), [f(sem(164), `${P0}/channels/0/texts/holding`)]],
+    ["a channel that replies with no final text", withChannel({ ...dm, texts: { holding: dm.texts.holding } }), [f(sem(164), `${P0}/channels/0/texts/final`)]],
+    ["a store review that asks a clarifying question", withChannel({ ...reviews, clarifying_question: true }, 1), [f(sem(164), `${P0}/channels/1/clarifying_question`)]],
+    ["a final text with an em dash", withChannel({ ...dm, texts: { holding: dm.texts.holding, final: { en: "We could not confirm this \u2014 please write to us." } } }), [f(sem(164), `${P0}/channels/0/texts/final/en`)]],
+    ["a blank holding text", withChannel({ ...dm, texts: { holding: { en: "   " }, final: dm.texts.final } }), [f(sem(164), `${P0}/channels/0/texts/holding/en`)]],
+    ["a queue with no answered signal and no recommendation", manifest(declaration(project({ handoff_queues: [{ id: "owner-dm", owner: "owner", limit: "P2D", answered_signal: "none" }] }))), [f(sem(164), `${P0}/handoff_queues/0/recommendation`)]],
+    ["a queue with an answered signal needs no recommendation", manifest(declaration(project({ handoff_queues: [{ id: "support-mail", owner: "support-team", limit: "P2D", answered_signal: "mail.replied" }] }))), []],
+    ["a judge budget with no spend record", manifest(declaration(project({ evals: { suite: "evals/support", judge_budget_usd: 2.5, replay_budget_usd: 0 } }))), [f(sem(164), `${P0}/evals/spend_record`)]],
+    ["both budgets with a null spend record: one finding", manifest(declaration(project({ evals: { suite: "evals/support", judge_budget_usd: 2.5, replay_budget_usd: 20, spend_record: null } }))), [f(sem(164), `${P0}/evals/spend_record`)]],
+    // FAC-SEM-165: no value shaped like a credential, in a valid or an invalid declaration.
+    ["a holding text that carries a bearer token", withChannel({ ...dm, texts: { holding: { en: `Bearer ${"x".repeat(24)}` }, final: dm.texts.final } }), [f(sem(165), `${P0}/channels/0/texts/holding/en`)]],
+    ["a final text with a key in a link", withChannel({ ...dm, texts: { holding: dm.texts.holding, final: { en: "https://help.example/?api_key=abc123" } } }), [f(sem(165), `${P0}/channels/0/texts/final/en`)]],
+    ["a credential in an invalid declaration: both found", manifest({ ...declaration(), note: `Bearer ${"x".repeat(24)}` }), [f(sem(165), `${KEY_PATH}/note`), f(sem(162), KEY_PATH)]],
+    ["a token slot that is a provider key, outside the slot's grammar", manifest(declaration(project({ tickets: { ...project().tickets, token_slot: `sk-${"Q7r2".repeat(5)}/prod/SIGNAL_TICKETS_TOKEN` } }))), [f(sem(165), `${P0}/tickets/token_slot`), f(sem(162), KEY_PATH)]],
+    ["a texts key shaped like a credential: placed at its map", withChannel({ ...dm, texts: { holding: { [`sk-${"B2c4".repeat(5)}`]: "Checking." }, final: dm.texts.final } }), [f(sem(165), `${P0}/channels/0/texts/holding`), f(sem(162), KEY_PATH)]],
+    ["a language shaped like a credential, its text with an em dash: both placed at the map", withChannel({ ...dm, texts: { holding: { [["sk", "-Ab12Cd34", "-Ef56Gh78", "-Ij90Kl12"].join("")]: "a \u2014 b" }, final: dm.texts.final } }), [f(sem(165), `${P0}/channels/0/texts/holding`), f(sem(164), `${P0}/channels/0/texts/holding`)]],
+    ["a recommendation thread id of the board's shape, digits and all", manifest(declaration(project({ handoff_queues: [{ id: "support-mail", owner: "support-team", limit: "P2D", answered_signal: "none", recommendation: "1234567f" }] }))), []],
+    ["a misplaced declaration with a credential: not read, still walked", { provider: {}, extensions: { [KEY]: { ...declaration(), note: `Bearer ${"x".repeat(24)}` } } }, [f(sem(162), `/extensions/${TOKEN}`), f(sem(165), `/extensions/${TOKEN}/note`)]],
+    ["an eval suite path whose whole is a long mixed run, each segment ordinary", manifest(declaration(project({ evals: { ...project().evals, suite: "evals/SupportSuite2026/regression_cases_v2" } }))), []],
+    ["a recommendation of 42 mixed characters, the board's opaque id", manifest(declaration(project({ handoff_queues: [{ id: "support-mail", owner: "support-team", limit: "P2D", answered_signal: "none", recommendation: "Thread9aBc4XyZ2qWeRt7YuIo1PaSdF3gHjK5lZx8C" }] }))), []],
+    ["a tier label that is blank", manifest(declaration(project({ tiers: [{ code: "premium", label: "   ", rule: "open_orders > 10", escalate: "at_once" }] }))), [f(sem(164), `${P0}/tiers/0/label`)]],
+    ["a tier label with an em dash", manifest(declaration(project({ tiers: [{ code: "premium", label: "Premium \u2014 gold", rule: "open_orders > 10", escalate: "at_once" }] }))), [f(sem(164), `${P0}/tiers/0/label`)]],
+    ["a declaration that is a credential-shaped string", manifest(`Bearer ${"x".repeat(24)}`), [f(sem(165), KEY_PATH), f(sem(162), KEY_PATH)]],
+    ["an eval suite path with a long mixed base64 segment", manifest(declaration(project({ evals: { ...project().evals, suite: `evals/${["aB3d", "E5fG", "7hI9", "jK1l", "M3nO", "5pQ7", "rS9t", "U1vW", "3xY5", "zA7b"].join("")}` } }))), [f(sem(165), `${P0}/evals/suite`)]],
+    ["a holding text of a Hangul filler only", withChannel({ ...dm, texts: { holding: { en: "\u3164" }, final: dm.texts.final } }), [f(sem(164), `${P0}/channels/0/texts/holding/en`)]],
+    ["a holding text of a bell character only", withChannel({ ...dm, texts: { holding: { en: "\u0007" }, final: dm.texts.final } }), [f(sem(164), `${P0}/channels/0/texts/holding/en`)]],
+    ["a project slug with a run of 7 digits: the registry's name, read as written", manifest(declaration(project({ project: "project:shop-4915112" }))), []],
+    // Several findings in one project, in the reference's order: FAC-SEM-163 then FAC-SEM-164.
+    ["a duplicated channel that also owes its final text", manifest(declaration(project({ channels: [dm, { ...dm, texts: { holding: dm.texts.holding } }] }))), [f(sem(163), `${P0}/channels/1/id`), f(sem(164), `${P0}/channels/1/texts/final`)]]
+  ];
+  return list.map(([name, input, findings]) => ({ name, site: (input as Json | null)?.protocol === "fabric-service/0.1" ? "well-known" : "manifest", input, findings }));
+}
+
+export function channelAgentVectors(): Json {
+  return {
+    about: `Vectors for extensions/channel-agent/0.1 (DEC-0150), written by tools/vectors/channel-agent.ts, never by hand. \`key\`: the extension key. \`declarations\`: a document and the findings {code, instancePath} a checker reports on it, in the reference's order (a port may compare them as a set). \`site\` says where the key is read: \`manifest\` (kind manifest) under provider.extensions, at ${KEY_PATH}, or \`well-known\` (kind service-well-known, a service with no manifest) under extensions, at ${"/extensions/"}${TOKEN} (CA-1). FAC-SEM-162, in a manifest only, at the key under /extensions or /capabilities/<i>/extensions, where a reader does not read it, each followed by the FAC-SEM-165 findings of that value where it stands; then FAC-SEM-165 at each member name and each string of the value shaped like a credential, by shape (FAC-SEM-101's detector on the first 4097 code points), a name at the object that holds it, a value under a name that is not plain (letters, digits, _ and -, at most 64, no run of 7 digits) at its nearest plain ancestor, a member more than 64 levels down at its ancestor 64 levels down, at most 64 places and then one finding at the key counting the rest, a token slot of the slot's grammar read segment by segment, the eval suite's and outbox's paths by the detector's path-aware reading (secretArgument, secretUrl), and a queue's recommendation by a provider key's and a JWT's shapes only, before the schema check, in a valid or an invalid value (CA-5); then FAC-SEM-162 at the key for a value invalid against service-channel-agent-extension.schema.json, or with an array longer than its schema's maxItems, a map wider than its maxProperties, a closed object with more members than the schema declares, or a string or member name over 4096 code points (each checked before the schema, the limits read from the schema), which a reader treats as not declared (CA-2); for a valid value, per project in order, FAC-SEM-163 at a repeated project, category code, tier code, channel id, source id (a declined source counted with the sources), queue id or recorded decision id (the second occurrence), and at a channel's decision when replies are off and it is null or when it names a decision recorded_decisions does not list (CA-3); then FAC-SEM-164 at texts/holding when holding_reply is true and it is absent, at texts/final when replies_enabled is true and it is absent, at clarifying_question when true on a store_review, at a tier's label that is blank or carries U+2014, at a text that is blank (nothing left after white space, \\p{Cf}, \\p{Cc}, \\p{Z}, \\p{Default_Ignorable_Code_Point}, U+115F, U+1160, U+3164, U+FFA0, U+2800 and U+FFFC) or carries U+2014, a text whose language is not plain placed at its texts/holding or texts/final map, at a queue's recommendation when answered_signal is none and it is absent, and once at evals/spend_record when a budget is above 0 and it is absent or null (CA-4). No message carries a declared value.`,
+    key: KEY,
+    declarations: declarations()
+  };
+}
+
+export function buildChannelAgentVectors(): string {
+  // U+2014 is written as its JSON escape, so the file carries no em dash character and reads the same.
+  return `${JSON.stringify(channelAgentVectors(), null, 2).replace(/\u2014/g, "\\u2014")}\n`;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const target = path.join(projectRoot(), VECTOR_FILE);
+  const built = buildChannelAgentVectors();
+  if (process.argv.includes("--write")) {
+    writeFileSync(target, built);
+    console.log(`wrote ${VECTOR_FILE}`);
+  } else if (readFileSync(target, "utf8") !== built) {
+    console.error(`stale vector file (run with --write): ${VECTOR_FILE}`);
+    process.exitCode = 1;
+  } else {
+    console.log("vector file matches the generator");
+  }
+}

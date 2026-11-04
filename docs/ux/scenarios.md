@@ -101,9 +101,9 @@ independent agent author and P-02 project operator.
 - **Alt paths:** author keeps an older protocol revision -> the line names the revision the contract supports rather than translating it; a misspelt extension key, which the schema accepts -> a `hint/extension-key` line names the nearest key the contract defines (the same name and version under another host or path, or one within three edits), else points at the list of keys.
 - **UI elements:** problem line, instance path, rule, recovery message, help link, `--json` report.
 - **States covered:** error, success
-- **Errors & recovery:** a file that is not JSON -> a `json` line with the parser's message; an unknown `--schema` or `--kind` -> exit 2 with the usage; an unreadable file -> exit 2 naming the file and the error.
+- **Errors & recovery:** a file that is not JSON -> a `json` line with the parser's message; an unknown `--schema` or `--kind` -> exit 2 with the usage; an unreadable file -> exit 2 naming the file and the error; a channel-agent declaration refused as `FAC-SEM-162` (DEC-0150) -> the line names failed keywords and their places, never a declared value, and points to the grammars in `docs/specification/channel-agent.md#the-declaration`; the author reruns `pnpm validate --schema service-channel-agent-extension.schema.json` on the declaration's value alone to see each failed member's allowed values, then checks the manifest or well-known answer again (a bare declaration draws `hint/declaration-only`).
 - **Status:** validated
-- **Coverage:** `test/validate-cli.test.ts` (negative fixtures exit 1 with their keyword; semantic fixtures report their codes; one line per planted mistake; usage errors exit 2), `test/schema-errors.test.ts`, `test/profile-branches.test.ts`
+- **Coverage:** `test/validate-cli.test.ts` (negative fixtures exit 1 with their keyword; semantic fixtures report their codes; one line per planted mistake; usage errors exit 2; the declaration-only hint), `test/schema-errors.test.ts`, `test/profile-branches.test.ts`, `test/channel-agent.test.ts` (FAC-SEM-162's places and pointer)
 - **Product:** unobserved
 
 ## Admission and binding
