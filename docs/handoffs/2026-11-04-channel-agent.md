@@ -364,11 +364,10 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
-On the change after round 15's fixes, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0;
-`pnpm vitest run --coverage` 0 under the session's heavy-run lock, started at a 15-minute load of 40.00 with 12 GB
-free (109 files, 10158 tests passed and 1 skipped, branches 98.89 %, 12220 of 12357; `src/channel-agent.ts` 509 of
-509, `src/secret-shape.ts` 47 of 47; an earlier run on the same tree, started at 50.12 after waiting for the lock, also
-exited 0 with the same counts and is not counted); `python3 docs/ux/lint.py` 0 (54 scenarios); `pnpm run docs:check`
+On the change after round 15's fixes and the colour-sequence boundary, each exit code read separately:
+`pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 under the session's heavy-run lock, started at a
+15-minute load of 38.62 with 14 GB free (109 files, 10158 tests passed and 1 skipped, branches 98.89 %, 12220 of 12357;
+`src/channel-agent.ts` 509 of 509, `src/secret-shape.ts` 47 of 47); `python3 docs/ux/lint.py` 0; `pnpm run docs:check`
 0 (markdownlint 0 errors); `pnpm privacy:check` with the organization index 0 (0 findings); `pnpm exec tsx
 tools/vectors/run.ts` 0 (29 vector files match their generators). The timing tests hold the test thread's processor time against prose read to the budget in the same run. The URL-shaped strings (a tab, a carriage return or a line feed inside `eyJ`, `-%73k-` in a query) and a query of many
 pieces each run within twice prose's thread time plus 20 ms; 300 strings of 2000 astral code points are read whole;
