@@ -183,8 +183,9 @@ which reads `~/` and every name: a portable source holds both.
 
 `pnpm --silent validate <dir> --kind source-tree` reads `<dir>/fabric.source.json` (a folder without one is a usage
 error), validates it and runs its rules, then lists the folder's files. Given a file named `fabric.source.json`, it
-checks that file's folder the same way; given any other file, it checks the file as a source-tree JSON document, named
-by its basename, never by its path.
+checks that file's folder the same way; a file that is a JSON object with neither a `manifest` nor a `files` member (a source manifest under another name,
+its `format` `fabric-source/1`, valid or not, or any other such object) is a usage error (exit 2) that says to name a
+source manifest `fabric.source.json` or pass its folder; any other file is a source-tree document named by its basename, never by its path.
 
 - **Which `git`.** Only a `git` (`git.exe` on Windows, never a `.cmd` or `.bat`) found in an absolute folder of PATH,
   never the current folder, an empty or a relative PATH element; with PATH unset, POSIX's `/bin` and `/usr/bin`, and on
@@ -260,7 +261,8 @@ whole), reads text as UTF-8 and reports each
 finding on the file it names. A manifest that fails its schema is reported alone: its rules and the tree check run once
 it validates. Exit 0: no blocking finding; 1: a blocking finding or a problem in the manifest; 2: a usage error (no `fabric.source.json`, a
 source check's named target that is not there, named by its basename such as `cannot read gone.json: ENOENT`, a file
-or folder it cannot read, a name Git lists that is not UTF-8 under a folder an `include` path reaches). A usage error names the
+or folder it cannot read, a name Git lists that is not UTF-8 under a folder an `include` path reaches, a file under
+`--kind source-tree` with neither a `manifest` nor a `files` member). A usage error names the
 checked folder itself as `.`, and tells a folder or manifest it cannot read (`cannot read .: EACCES`, `cannot read
 fabric.source.json: EACCES`) from a folder that holds no manifest; a manifest that is not a regular file (a FIFO, a
 socket, a device) or that is a symbolic link, a dangling one included, is never opened or read through (`cannot read
@@ -452,8 +454,9 @@ service pins it, the action's owner enforces them. The departures:
 The line between the two is this. Moving an agent's mechanics into a product, by rewriting or copying them file by
 file into that product's own source through the product's own change with the agent's private data stripped, is the
 operator's standing permission of 2026-10-12 (recorded in the knowledge base's
-[roadmap](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/roadmap.md)) and needs no word per act. Handing over the agent's source as such (a source export, pushing the agent's tree or
-a copy of it to another repository, a transfer, a visibility change, a file sent) needs the operator's word for each act.
+[roadmap](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/roadmap.md)) and needs no word per act. Handing over the agent's source as such (handing a source export to
+anyone, pushing the agent's tree or a copy of it to another repository, a transfer, a visibility change, a file sent)
+needs the operator's word for each act; a local source export needs none.
 
 Every agent follows the same rule, private or not, and a private agent is never handed over on anything less. Under
 [one approval for all the operator's agents](delegation.md#one-approval-binds-all-the-operators-agents) (DEC-0126) a
@@ -480,7 +483,8 @@ a failure, an entry without `setup`. A missing slot is always reported by the sl
 `endpoint` included, so a host never reads a setup state as a failing connection. Only a filled `endpoint` that fails,
 when the agent's own code knows it backs a declared [connection](connections.md), is reported under that connection's
 id, without `setup`: a real failure of that connection. The agent's code owns that mapping from slot to connection;
-no schema member declares it and nothing checks it.
+no schema member declares it and nothing checks it. A call refused because a slot is missing is a setup answer, not a
+failure: an operations count (DEC-0153) records it as `unknown`, never `failed`, so it never makes a rise.
 
 `degraded[]` holds at most 64 entries. Every failure entry, from a slot or not, comes before every setup entry, and
 truncation drops setup entries first: an agent with more entries than fit keeps its failures, then its missing-slot setup

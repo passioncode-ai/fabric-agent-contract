@@ -1927,14 +1927,24 @@ describe("an agent's source (DEC-0149)", () => {
     expect(absent.code).toBe(2);
     expect(absent.out).toContain("cannot read .: ENOENT");
     expect(absent.out).not.toContain(dir);
+    // A folder that is a dangling link (`ln -s nowhere d`) is never a folder holding no manifest.
+    symlinkSync("nowhere", path.join(dir, "d"));
+    const dangling = run(path.join(dir, "d", "fabric.source.json"), "--kind", "source-tree");
+    expect(dangling.code).toBe(2);
+    expect(dangling.out).toContain("cannot read .: ENOENT");
+    expect(dangling.out).not.toContain("holds none");
   });
 
-  it("refuses a source manifest under another name passed as a tree document, naming the fix", () => {
-    const target = one("agent.json", sourceManifest({ include: ["LICENSE"] }));
-    const result = run(target, "--kind", "source-tree");
-    expect(result.code).toBe(2);
-    expect(result.out).toContain("cannot check agent.json as a tree: a source manifest: name it fabric.source.json or pass its folder");
-    expect(result.out).not.toContain(path.dirname(target));
+  it("refuses, by the discriminator, a JSON object with neither manifest nor files passed as a tree document", () => {
+    const message = "as a tree: it holds neither manifest nor files; a source manifest is named fabric.source.json, or pass its folder";
+    // A valid manifest, an invalid one (no include) and any other such object, each under another name.
+    for (const [name, value] of [["agent.json", sourceManifest({ include: ["LICENSE"] })], ["broken.json", { format: "fabric-source/1" }], ["other.json", { hello: "world" }]] as const) {
+      const target = one(name, value);
+      const result = run(target, "--kind", "source-tree");
+      expect(result.code, name).toBe(2);
+      expect(result.out, name).toContain(`cannot check ${name} ${message}`);
+      expect(result.out, name).not.toContain(path.dirname(target));
+    }
   });
 
   it.skipIf(process.platform === "win32")("reads a dangling link named on a source route as not a file, never as absent", () => {

@@ -772,6 +772,15 @@ describe("the rules over long lists (DEC-0149)", () => {
     expect(large / small).toBeLessThan(64);
   }, 180_000);
 
+  // Every file a symbolic link with an absolute target: each says link-outside once, never scanning what was found. A
+  // 32 times step: a scan of the problems found so far reads about 110 against the bound of 64, the real check about 16.
+  it("reads a tree of absolute links in time linear in its files", () => {
+    const linksOf = (count: number) => ({ manifest: { include: ["src/", "LICENSE"] }, files: Array.from({ length: count }, (_, index) => ({ path: `src/d${index % 97}/l${index}`, text: "/srv/x", link: true })) });
+    const small = timed(() => evaluateSemanticRules("source-tree", linksOf(4000)));
+    const large = timed(() => evaluateSemanticRules("source-tree", linksOf(128_000)));
+    expect(large / small).toBeLessThan(64);
+  }, 180_000);
+
   // At 1k to 16k entries the real manifest read about 9, an `include.filter` scan planted per include entry about 210.
   it.each([
     ["source-manifest", (size: number) => evaluateSemanticRules("source-manifest", manifestOf(size))],

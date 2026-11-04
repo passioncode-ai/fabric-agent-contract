@@ -166,7 +166,10 @@ source, what never travels with it, the check before a source export, and how a 
   message; the line between moving mechanics and handing over source; the three greps closing CT-211; the
   DEC-0150-first merge steps; `decision-consumed` as an effect that may have begun; a source manifest passed as a tree
   document refused; a dangling link named on every route not a file; the register leases renewed each round; C3.3's
-  cancel scoped to the hand-over) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  cancel scoped to the hand-over) answered as decided; round 31 (the act, not the artefact, needs the word, a local export none; a file with neither
+  `manifest` nor `files` refused under `--kind source-tree` by the discriminator; a missing slot's refusal counted
+  `unknown`; the chain through DEC-0153; link targets with `?` and `%2e` read literally; one `link-outside` on line 1
+  without a scan; a dangling-link folder never "holds none") answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -293,13 +296,19 @@ register.
 PR #236 is merged (main has moved since; its Test row in `AGENTS.md` now says Linux, Windows and macOS). The chain of
 the open branches that touch the same registers is PR #235 (DEC-0148), DEC-0149 (this branch), then
 `origin/agent/channel-agent-ext-v3-20261104` (DEC-0150; earlier names without `-v3` are gone) and
-`origin/agent/sqd-fields-20261104` (DEC-0151). Every head here is re-measured at landing. These two reserved DEC-0150, DEC-0151 and FAC-SEM-162 to FAC-SEM-165.
+`origin/agent/sqd-fields-20261104` (DEC-0151), then DEC-0152 (head `d760f756` when written: `docs/DECISIONS.md`,
+`docs/specification/conformance.md`, `docs/DOCMAP.md`, `docs/backlog.md`, the handoffs index) and DEC-0153 (head
+`a0e7b53d` when written: `FAC-SEM-166` and `FAC-SEM-167`, two schemas, `src/semantic-kinds.ts`, the rule-tolerance and
+positive-sweep tests, the `vitest.config.ts` include and floor, the vectors runner). Every head here is re-measured at
+landing. DEC-0150 and DEC-0151 reserved DEC-0150, DEC-0151 and FAC-SEM-162 to FAC-SEM-165.
 The channel-agent branch adds `schemas/service-channel-agent-extension.schema.json` and edits `src/semantic-rules.ts`,
 `src/protocol-revisions.ts`, `vitest.config.ts`, `fixtures/catalogue.json` and `src/secret-shape.ts` (`rawValues` only);
 the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds no schema, and edits
 `fixtures/catalogue.json`, `src/secret-shape.ts` and `src/session-handoff.ts`. What a textual merge gets wrong, or gets wrong silently:
 
-- The schema count in `test/schema-compilation.test.ts` merges silently to 147: set it to 148.
+- The schema count in `test/schema-compilation.test.ts`: each side writes its own count (148 on more than one branch),
+  so a merge reads wrong silently; whichever lands last sets it by hand to the full count, 150 with DEC-0149, DEC-0150
+  and DEC-0153 each adding schemas (re-count the files under `schemas/` then).
 - Where DEC-0150 and DEC-0151 meet each other, `docs/DOCMAP.md` and `docs/specification/support-quality.md` conflict:
   follow DEC-0151's meeting list. Keep DEC-0151's thresholds line and drop the "Not decided here" bullet; in DOCMAP,
   DEC-0151's support-quality row first, then DEC-0150's channel-agent row. Check: `grep -c 'DEC-0151 (in progress)
@@ -319,13 +328,12 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   reserved-codes paragraph keep this branch's `FAC-SEM-161` sentence, add DEC-0150's sentence on `FAC-SEM-162` to
   `FAC-SEM-165` (receipts SEM-0162 to SEM-0165), and drop the sentence saying codes are reserved by open branches;
   check: `grep -n 'reserved by open branches' docs/specification/conformance.md` prints nothing.
-- `docs/DECISIONS.md`: DEC-0148, DEC-0149, DEC-0150, DEC-0151 in that order, a blank line before each heading
-  (markdownlint MD022). The rule register: `FAC-SEM-155`, then `FAC-SEM-156` to `FAC-SEM-160`, then the `FAC-SEM-161`
-  note, then `FAC-SEM-162` to `FAC-SEM-165` (docs-check G-13).
+- `docs/DECISIONS.md`: DEC-0148 through DEC-0153 in id order, a blank line before each heading (markdownlint MD022).
+  The rule register: `FAC-SEM-155`, then `FAC-SEM-156` to `FAC-SEM-160`, then the `FAC-SEM-161` note, then
+  `FAC-SEM-162` to `FAC-SEM-167` (docs-check G-13).
 - The next-free markers (`docs/DECISIONS.md`, the register in `conformance.md`) are written by whichever lands later
   from the CAS refs at merge time, never from a fixed value: `git ls-remote origin 'refs/agent-sync/ids/*'`, then
-  `git cat-file -p <sha>` for each (on 2026-11-04 they read DEC next 152 and SEM next 166, so DEC-0152 and
-  FAC-SEM-166).
+  `git cat-file -p <sha>` for each.
 - `AGENTS.md` against main (PR #236 merged): keep this branch's Check row and #236's MCP row, which removes an em dash.
   #236 landed first, so this branch adds to CT-205's row, when main is merged in, that a source hand-over is never
   covered by a task-wide mandate (written in the backlog row as `[source](specification/source.md#handing-over)`, the

@@ -1022,8 +1022,8 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   } catch (error) {
     // No manifest is one usage error; a folder or a manifest it cannot reach is another, named by its place.
     const code = String((error as NodeJS.ErrnoException).code);
-    // A folder that is itself absent is named as ".", never as a folder holding no manifest.
-    if (code === "ENOENT" && !lstatExists(folder)) run.usage.push("cannot read .: ENOENT");
+    // Only a real folder (by lstat) can hold no manifest: an absent one, a dangling link or a file is named as ".".
+    if (code === "ENOENT" && !lstatIsDirectory(folder)) run.usage.push("cannot read .: ENOENT");
     else if (code === "ENOENT") run.usage.push(`--kind source-tree reads a folder's ${SOURCE_FILE}; the folder holds none`);
     // lstat needs no permission on the file itself, so any other failure is the folder's: it is named as ".".
     else run.usage.push(`cannot read .: ${code}`);
@@ -1149,13 +1149,16 @@ export function regularFile(file: string): boolean {
   }
 }
 
-/** Whether a regular file holds a document with no `manifest` member that validates as a source manifest. */
-function manifestNotTree(file: string): boolean {
+/**
+ * Whether a regular file holds a JSON object that is no source-tree document, by the discriminator: neither a
+ * `manifest` nor a `files` member (a source manifest under another name, `format: "fabric-source/1"`, valid or not, or
+ * any other such object). Schema validity is not asked.
+ */
+function notTreeDocument(file: string): boolean {
   if (!sourceRegularFile(file)) return false;
   let value: unknown;
   try { value = JSON.parse(readFileSync(file, "utf8")); } catch { return false; }
-  if (!isObject(value) || "manifest" in value) return false;
-  return (contract().validator.getSchema(`${SCHEMA_PREFIX}schemas/fabric-source.schema.json`) as ValidateFunction)(value) === true;
+  return isObject(value) && !("manifest" in value) && !("files" in value);
 }
 
 /** Whether lstat finds an entry at a path (a dangling link included). */
@@ -1245,7 +1248,7 @@ export function main(args: readonly string[]): CliResult {
     }
     if (!folder && kindArg === "source-tree") {
       // A source manifest under another name is not a tree document: it is refused, naming the fix, never checked as one.
-      if (manifestNotTree(target)) { run.usage.push(`cannot check ${shownPath(path.basename(target))} as a tree: a source manifest: name it ${SOURCE_FILE} or pass its folder`); continue; }
+      if (notTreeDocument(target)) { run.usage.push(`cannot check ${shownPath(path.basename(target))} as a tree: it holds neither manifest nor files; a source manifest is named ${SOURCE_FILE}, or pass its folder`); continue; }
       // Any other file is the document form, named by its basename, never by its path.
       // checkFile makes a source check instance-free and names the document by its basename.
       checkFile(run, target, target, schemaArg, kindArg);

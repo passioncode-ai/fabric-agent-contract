@@ -818,8 +818,9 @@ const LICENSE_FILE = /^(?:LICENSE|LICENCE|COPYING)(?:\..+)?$/i;
 
 /**
  * DEC-0149 item 8, the reference tree check (kind `source-tree`): `{manifest, files: [{path, text?, binary?,
- * nestedRepository?}], instanceStrings?}`, `nestedRepository: true` marking a folder that holds another repository (a
- * submodule's gitlink, its own `.git`), read by its path only. The caller restricts `files` to the source; a file this check does not read as source is ignored.
+ * nestedRepository?, link?}], instanceStrings?}`, `nestedRepository: true` marking a folder that holds another
+ * repository (a submodule's gitlink, its own `.git`), read by its path only, and `link: true` a symbolic link whose
+ * `text` is its target, read with link-outside's rule (literally) and never a licence. The caller restricts `files` to the source; a file this check does not read as source is ignored.
  * Every problem names a place and a kind, never the text it found.
  */
 export function sourceTreeProblems(value: unknown): SourceProblem[] {
@@ -901,9 +902,13 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
           const resolved = resolveLink(path, target);
           return resolved === undefined || !linkInside(resolved);
         });
-        if (outside) place("link-outside", outside.index);
+        if (outside) {
+          place("link-outside", outside.index);
+          // Line 1's link-outside is said once: the link's own verdict below is then already said.
+          if (at === 0) linkOutside = false;
+        }
       }
-      if (at === 0 && linkOutside && !problems.some((problem) => problem.kind === "link-outside" && problem.file === index && problem.line === 1)) place("link-outside", 0);
+      if (at === 0 && linkOutside) place("link-outside", 0);
     });
   }
   // An include path names a file of the tree, or a folder one lies in: looked up, never compared with every path.
