@@ -212,15 +212,15 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Checks actually run
 
-Round 24's fixes were gated on head `68c8f2a8` of the review branch (the commit before this note), each exit code read
-on its own (the 15-minute load 44.47 when the gate started): `tsc --noEmit -p .` (exit 0); `pnpm vitest run
---coverage` (exit 0: 111 files, 10124 passed, 3 skipped, the whole suite; branches 98.92 % over the set, every per-file
-floor met, `src/validate-cli.ts` at 710 of 712 branches); `python3 docs/ux/lint.py` (exit 0); `pnpm run docs:check`
-(exit 0, 0 errors); `ORG_INDEX=... pnpm privacy:check` (exit 0, 0 findings); `pnpm exec tsx tools/vectors/run.ts`
-(exit 0, 29 files match); no U+2014 in the added lines. An earlier run on `0b1b81e0` failed one wall-clock budget
-under a 1-minute load near 70 (its processor time was about 0.3 s) and then the `src/validate-cli.ts` floor (98.73 %);
-`68c8f2a8` adds in-process tests for the gitlink listing that times out or cannot run, a listed path that is no source
-path, a gitlink under a folder that is gone and a folder run's fault, and lowers no floor.
+Round 25's fixes were gated on head `7ae434b4` of `agent/ct194-source-manifest-v2-20261104` (the commit before this
+note), each exit code read on its own (the 15-minute load 44.74 when the gate started): `tsc --noEmit -p .` (exit 0);
+`pnpm vitest run --coverage` (exit 0: 111 files, 10127 passed, 3 skipped, the whole suite; branches 98.91 % over the
+set, every per-file floor met); `python3 docs/ux/lint.py` (exit 0); `pnpm run docs:check` (exit 0, 0 errors);
+`ORG_INDEX=... pnpm privacy:check` (exit 0, 0 findings); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files
+match); no U+2014 in the added lines. A run on `39d6f0d6` failed only the `src/source-rules.ts` floor (99.82 %);
+`7ae434b4` adds an in-process test for the walk's excluded-folder predicate and lowers no floor. The tree-check timing
+tests now compare each text with itself at a sixteenth (a planted quadratic scan read about 135 against the bound of
+64), and the gitlink and excluded-folder tests fail when their fixes are taken out.
 
 ## Next task
 
