@@ -9107,7 +9107,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `none` names its
      recommendation (section 7.5); a budget above 0 names its spend record, since without one it reads 0 (sections 5
      and 11). A final text in the none form owes nothing (only an absent one is found), except `{"none": "not_used"}`
-     beside a holding reply, which is found (a holding reply obliges a final reply, section 6); a recommendation on a
+     beside a holding reply when its replies are on, which is found (a holding reply obliges a final reply, section 6); a recommendation on a
      queue whose answered signal is not `none` is found too, non-blocking (a reader does not read it). It names at most
      64 places per document and then one finding at the key counting the rest; past 64 a place is counted, never built.
   5. CA-5. `FAC-SEM-165`: no member name and no string of the declaration is shaped like a credential, by shape, with
@@ -9121,23 +9121,24 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      grammar segment by segment, its eval suite and outbox of the relative path grammar by the detector's path-aware
      reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a
      provider key's and a JWT's shapes only; anything else is read whole. The rule reads at most 1 000 000 code points for
-     one document, every copy of the declaration in it sharing them, counted by `detectorCost`, a bound any port's
-     detector may need, in code points: each name or string 16 plus its code points, once; after each `eyJ`, the rest of
-     its base64url run and, when it ends at a `.`, the dot and the run after it; from each `sk-`, in any case, at a
-     boundary (the start, a non-alphanumeric character, `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal
-     escape, a backslash escape, or a colour sequence with any number of parameter characters (digits, `;`, `:`) whose
-     ESC is raw or escaped in either case, `\33` included), its three characters included, up to 255 code points (these
-     forms only: any other, such as `\E`, `\x{1b}`, U+009B, a CSI with a private parameter or another final,
-     `\U00000041` or `%u0041`, is charged as a non-boundary, and a port that decodes it before a boundary-bound reading
-     is outside the bound); after every other provider prefix of the shared detector, anywhere
-     and in any case (`gh?_`, `xox?-`, `AKIA`, `glpat-`), up to its floor (20, 10, 16 and 20 code points), what a near
-     miss is reread before it fails; after every `sk-` away from a boundary, up to 16 code points after it (the run the shape needs) (each a bound
-     any detector may need, whatever boundary or case its own shapes take); and, for a
-     string read as a URL, on the names and values a
-     WHATWG URL parse yields: 128 per query or fragment piece, its name's and value's code points, the value's `eyJ`
-     and `sk-` terms, and the square over two of a name holding an upper-case letter when its value is not empty. Once it is spent, nothing more is read and every further member collapses; one finding per
+     one document, every copy of the declaration in it sharing them: the walk charges each name or string 16, once,
+     beside what `detectorCost` counts, a bound any port's detector may need, in code points: the string's code points;
+     from each `eyJ`, its base64url run, `eyJ` included, and when it ends at a `.`, the dot and the run after it; from
+     each `sk-`, in any case, at a boundary (the start, a character other than a letter or a digit, `%XX`, `%25XX`,
+     `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a backslash escape, or a colour sequence with any number of
+     parameter characters (digits, `;`, `:`) whose ESC is raw or escaped in either case, `\33` included), its three
+     characters included, up to 255 code points (these forms only: a form ending in a letter or a digit, such as a CSI
+     with a private parameter or another final, `\U00000041` or `%u0041`, is charged as a non-boundary, and a port that
+     decodes it before a boundary-bound reading is outside the bound); after every `sk-` away from a boundary, up to 16
+     code points after it (the run the shape needs); after every other provider prefix, anywhere and in any case
+     (`gh?_`, `xox?-`, `AKIA`, `glpat-`), up to its floor (20, 10, 16 and 20 code points), what a near miss is reread
+     before it fails (each a bound any detector may need, whatever boundary or case its own shapes take); and, for a
+     string read as a URL, on the names and values a WHATWG URL parse yields: 128 per query or fragment piece, its
+     name's and value's code points, the value's `eyJ` and `sk-` terms, and the triangular number n(n+1)/2 of the
+     length of a name holding an upper-case letter when its value is not empty. Once it is spent, nothing more is read and every further member collapses; one finding per
      document then says that reading the declarations for credentials takes more than 1000000 code points of reading,
-     that a reader treats the declaration as not declared and that fewer or shorter texts or names fix it, at the copy where the budget ran out (never at a read declaration read
+     that a reader treats the declaration as not declared and that fewer or shorter texts or names fix it (at a
+     misplaced copy, that the copy is not read and should be removed), at the copy where the budget ran out (never at a read declaration read
      whole); the 64 places are a cap per document (a copy names a place only while the document's total is under 64),
      and past it each copy counts its own places and closes them at that copy: the read declaration's count at its key
      holds only its own places, and a misplaced copy's overflow is closed at that copy. The read

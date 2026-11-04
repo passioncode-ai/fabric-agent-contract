@@ -198,6 +198,16 @@ FAA-197, on the adapter's main).
   any other form before an `sk-` (`\E`, `\x{1b}`, U+009B, a CSI with a private parameter or another final,
   `\U00000041`, `%u0041`) is charged as a non-boundary, and a port that decodes one before a boundary-bound reading is
   outside the bound (DEC-0151 lists them as knowingly not found).
+- Round 16's product and seam readings, folded into the same batch: SCN-055's recovery drops moving the declaration
+  to the manifest (the budget counts names and strings wherever it stands; the 2 MiB answer size is its own line,
+  cited in `docs/evidence/sources.md` from Fabric Dashboards' `health.ts` at `8062869`); item 4 writes DEC-0149's tree
+  check as in progress; the budget paragraph and CA-5 reproduce `detectorCost` term by term (the walk's 16 beside it,
+  from each `eyJ` its run with `eyJ`, a query name's triangular number), held by an exact test and a URL vector at the
+  budget's edge; `\E`, `\x{1b}` and U+009B are boundaries, and the non-boundary examples end in a letter or a digit,
+  each list pinned by exact tests; the `not_used` exception holds when replies are on (a vector pins replies off); at
+  a misplaced copy the budget line says the copy is not read and should be removed; the merge notes name the
+  specification README, SCR-03's four scenarios, main `7213463f`, every vendored protocol table, and the live
+  manifest's third failing place.
 
 ## The branch and its history
 
@@ -276,8 +286,10 @@ origin), whichever lands second:
   `pnpm vectors:check` and `test/channel-agent.test.ts` against CT-194's `secret-shape.ts`;
 - keeps both branches' rows in `docs/backlog.md` and in `docs/handoffs/README.md`;
 - DEC-0149 holds SCN-054 ("Check an agent's source before handing it over"); this branch's reader scenario is SCN-055
-  (mapped to SCR-03); check: `grep -c '^### SCN-05[45]' docs/ux/scenarios.md` prints 2 on the
+  (SCR-03 then lists "SCN-001, SCN-002, SCN-054, SCN-055"); check: `grep -c '^### SCN-05[45]' docs/ux/scenarios.md` prints 2 on the
   merged tree;
+- whichever of DEC-0149 and DEC-0150 lands second states DEC-0149's source tree check as current where this branch
+  writes it in progress (item 4's `sk-` sentence, `FAC-SEM-158`);
 - at this branch's landing, if main then holds DEC-0149's one-pass `hasJwt`, the landing step switches `keyShaped` in
   `src/channel-agent.ts` from `JWT_SHAPE.test` to `hasJwt`; if DEC-0149 lands after this branch, its lander does;
   CT-212 is left unchanged (once switched, `keyShaped` is no `JWT_SHAPE` caller);
@@ -299,16 +311,16 @@ One line per sibling and per file it shares with this branch:
 
 - DEC-0151 (in progress, branch `agent/sqd-fields-20261104`): `docs/DECISIONS.md`; `docs/DOCMAP.md`, where DEC-0151's support quality
   row comes first and this branch's channel agent row after it; `docs/backlog.md`; `docs/handoffs/README.md`;
-  `docs/specification/support-quality.md`; `docs/specification/identifiers.md`, where both add a bullet under "Compared
+  `docs/specification/support-quality.md`; `docs/specification/README.md`; `docs/specification/identifiers.md`, where both add a bullet under "Compared
   as written" for `project:<slug>` and the second lander merges them into one. On the merged tree, run
   `pnpm vectors:check` and `test/channel-agent.test.ts` against the in-progress DEC-0151's final `src/secret-shape.ts` (no `/i`,
   provider prefixes in their canonical case, a strength rule for `sk-`).
 - PR #235: `docs/DECISIONS.md`; `docs/backlog.md`; conformance.md's next-free line; conformance.md's register, the
   `FAC-SEM-155` row before `156`.
-- Main moves while this branch waits (it was `bf50c9fc` after #238 when this was written): the lander re-measures
-  main at landing and merges or rebases over it; `docs/backlog.md` conflicts only at the tail, where the rows stay in id order through CT-216
-  (`CT-204`, `CT-205`, `CT-206`, then this branch's `CT-209`, then `CT-215`, `CT-216`), and any row an open branch adds
-  takes its place by id.
+- Main moves while this branch waits (it was `7213463f` after PR #239, with CT-217 and CT-218 at the backlog's tail,
+  when this was written): the lander re-measures main at landing and merges or rebases over it; `docs/backlog.md`
+  conflicts only at the tail, where the rows stay in id order (`CT-204`, `CT-205`, `CT-206`, then this branch's
+  `CT-209`, then `CT-215` to `CT-218`), and any row an open branch adds takes its place by id.
 - `docs/DECISIONS.md` keeps a blank line before each DEC heading (markdownlint MD022);
 - `docs/DECISIONS.md` keeps one "Next free ID" line, equal to the CAS counter at the merge, and each DEC body in id
   order after the bodies already on main: `grep -c '^\*\*Next free ID' docs/DECISIONS.md` prints 1. (On main, the
@@ -410,7 +422,7 @@ here), and adds:
 - for Fabric Dashboards, an adoption item: its sample service's `fabric_protocols.py` register gains the
   `channel-agent-standard` row at its next pin;
 - to be asked of the standard's owner: the page's "Not checked here" list names section 11 checks no declaration can
-  show (the side among section 14's sides, `team.ask` against `operator.ask` as the route's capability for the side, a
+  show (the side among the standard's sides (section 14 of its master), `team.ask` against `operator.ask` as the route's capability for the side, a
   tier's fact among the customer facts, an `until` date already past); would the owner move them to the signal
   server's data or to the adapter's read-token check, quoting that list at posting time;
 - to be asked of the standard's owner: a string is read as a URL only when its head opens with a scheme and passes the
@@ -428,9 +440,14 @@ here), and adds:
 
 At merge, one adoption row per live producer is filed in that producer's own backlog with its `FAC-SEM-162` places
 (the coordinator files them on the board), with the places read again at posting time. Three live producers' current
-declarations fail today: one manifest at `sources/4/max_age` and `handoff_queues/0/owner`; one well-known builder with no
+declarations fail today, the places to be read again at posting time: one manifest at `sources/4/max_age`,
+`handoff_queues/0/owner` and `evals/spend_record` (pattern, or null); one well-known builder with no
 `question_route` and a recommendation holding a colon; one well-known builder with `null` for `question_route`,
 `gap_registry`, a channel's texts, a queue's recommendation and `pd_check` (the question route, the gap registry and
 `pd_check` may now take the none form instead; a `null` there is still refused). The adapter's row names the update of both
 `PROTOCOL_REVISIONS` twins (`channel-agent-standard` `['1']`) with the feed-protocols vectors vendored again, and the
 Fabric Dashboards sample service's copy of the protocol table (or records that it is not held equal to the register).
+The merge post asks every vendored protocol table that re-pins to add `channel-agent-standard` `['1']` together with
+`fabric-source`: the adapter's two twins, the Fabric Dashboards sample service's table, a product's vendored
+`protocol-revisions.ts`, deployment templates' `fabric-protocols.mjs` and kit copies of `fabric_protocols.py` in agent
+repositories.

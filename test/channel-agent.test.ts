@@ -740,6 +740,35 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     for (const ok of ["UTC", "GMT", "CET", "Etc/UTC", "Europe/Warsaw", "America/Argentina/Buenos_Aires", "Etc/GMT+3"]) expect(zone?.(ok), ok).toBe(true);
     for (const bad of ["", "Europe/", "/UTC", "a/b/c/d", "Europe Warsaw", "+03:00"]) expect(zone?.(bad), bad).toBe(false);
   });
+  it("holds each of the page's cost terms to detectorCost, exactly", () => {
+    const page = read("docs/specification/channel-agent.md");
+    const terms: Array<[string, number, string]> = [
+      ["eyJab.cd", 8 + 8, "`eyJab.cd` costs 8 and 8"],
+      ["sk-a", 8, "`sk-a` costs 4 and 4: 8"],
+      ["xsk-a", 5 + 1, "`xsk-a` costs 5 and 1"],
+      ["https://a.example/?aBC=x", 24 + PIECE_COST + 3 + 1 + 6, "`https://a.example/?aBC=x` costs 24, 128, 3, 1 and 6"]
+    ];
+    for (const [text, cost, quoted] of terms) {
+      expect(page.replace(/\s+/g, " "), quoted).toContain(quoted);
+      expect(detectorCost(text), text).toBe(cost);
+    }
+    expect(detectorCost("https://a.example/?aBC=x&api_key=abc123")).toBe(318);
+    expect(VISIT_COST).toBe(16);
+    expect(page.replace(/\s+/g, " ")).toContain("The walk charges each name or string 16 (`VISIT_COST`)");
+  });
+  it("charges 255 after the boundary forms the page lists, and 16 after a form that ends in a letter or a digit", () => {
+    const diff = (head: string) => detectorCost(`${head}sk-${"a".repeat(300)}`) - detectorCost(`${head}xx-${"a".repeat(300)}`);
+    for (const head of ["\\E", "\\x{1b}", "\u009b"]) expect(diff(head), JSON.stringify(head)).toBe(255);
+    for (const head of ["\u001b[?25h", "\u001b[1K", "\\U00000041", "%u0041"]) expect(diff(head), JSON.stringify(head)).toBe(SK_FLOOR);
+  });
+  it("tells a misplaced copy where the budget ran out to be removed, not shortened", () => {
+    const opening = ["e", "y", "J"].join("");
+    const doc = { provider: { extensions: { [KEY]: value } }, extensions: { [KEY]: { ...value, extra: opening.repeat(1365) } } };
+    const line = channelAgentRules(doc).find((f) => f.message.includes("code points of reading"));
+    expect(line?.instancePath).toBe(`/extensions/${KEY.replace(/\//g, "~1")}`);
+    expect(line?.message).toContain("this copy is not read by a reader and should be removed");
+    expect(line?.message).not.toContain("declare fewer");
+  });
   it("quotes the budget line on the page exactly as the view prints it", () => {
     const page = read("docs/specification/channel-agent.md");
     const quoted = /`(FAC-SEM-165 at \/: reading the declarations for credentials[^`]*)`/.exec(page)?.[1];

@@ -37,7 +37,7 @@ ignores one in its well-known answer. A reader knows a service has a manifest fr
 the registry's provider entry); with only a well-known answer in hand it reads that answer's declaration. The checker
 still checks a well-known declaration beside a manifest: its author sees any findings, and a reader ignores the copy
 whether or not it is valid. A well-known declaration shares the answer's size with its host's readers (Fabric
-Dashboards' probe caps a well-known answer at 2 MiB), so a large declaration belongs in the manifest. A well-known answer lists `channel-agent-standard/1` in its `protocols` only once
+Dashboards' probe caps a well-known answer at 2 MiB, [sources](../evidence/sources.md)), so a large declaration belongs in the manifest. A well-known answer lists `channel-agent-standard/1` in its `protocols` only once
 its readers have re-pinned to this revision of the contract.
 
 The same rules run in both places: kind `manifest` reads the first, kind `service-well-known` the second. No other
@@ -251,8 +251,8 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    either, since the customer may be told it; a queue whose
    answered signal is `none` names its recommendation, and a recommendation on a queue with another answered signal is
    found too (non-blocking, like every `FAC-SEM-164`: a reader does not read it); a final text in the none form owes
-   nothing, since only an absent final text is found, except that a channel with `holding_reply` whose final text is
-   `{"none": "not_used"}` is found (non-blocking): a holding reply obliges a final reply (the standard's section 6); a
+   nothing, since only an absent final text is found, except that a channel with `holding_reply`, when its replies are
+   on, whose final text is `{"none": "not_used"}` is found (non-blocking): a holding reply obliges a final reply (the standard's section 6); a
    budget above 0 names the usage report's limit it is spent
    under, since without one it reads 0.
 4. No member name and no string of the value is shaped like a credential (`FAC-SEM-165`, CA-5), by shape, with the
@@ -275,42 +275,43 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    read by a provider key's and a JWT's shapes only, since a long mixed run is its shape by design (a recommendation
    that is a URL with a password is read whole, and found). The detector reads the first 4097 code points of a string,
    and the rule reads at most 1 000 000 code points of names and values in all for one document, every copy of the
-   declaration in it (read or misplaced) sharing them. The count, `detectorCost`, is a bound any port's detector may
-   need, not a description of one detector, counted in code points (an astral character is one): each name or string
-   costs 16 plus its code points, once (a name is not charged again when its member is entered or placed); after each
-   `eyJ`, the rest of the base64url run it starts and, when that run ends at a `.`, the dot and the base64url run after
-   it (the JWT shape's second segment); from each `sk-`, in any case, that follows a boundary, its three characters
-   included, up to 255 code points to the end of the string (`sk-a` costs 4 and 4: 8); after every other provider prefix, anywhere and in any case (a bound any detector may need,
-   whatever boundary or case its own shapes take)
-   (`gh` and one of `pousr` then `_`, `xox` and one of `abposr` then `-`, `AKIA`, `glpat-`), up to its floor, the run
-   its shape needs (20, 10, 16 and 20 code points), which is what a near miss is reread before it fails (a floor counts
-   the run the shape needs, not the character that ends it); and after
-   every `sk-` away from a boundary, up to 16 code points after it (the run the shape needs) (a bound too: a detector may try an `sk-` run there,
-   and one that requires a boundary reads less). A boundary is the start, a character other than a letter or a digit, or an escape that ends
-   right before the `sk-`: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a backslash escape of
-   one character, or a colour sequence `ESC[...m` with any number of parameter characters (digits, `;` and `:`, as in
-   `ESC[38:5:1m`) whose ESC is raw or escaped (`\x1b`, `\033`, `\33`, `\u001b` in either case of the hex digits, or
-   `\e`). The 255 covers these boundary forms only. Any other form before an `sk-` (`\E`, `\x{1b}`, U+009B, a CSI with a
-   private parameter or another final, `\U00000041`, `%u0041`) is charged as a non-boundary, up to 16, so a port that
-   decodes such a form before a boundary-bound `sk-` reading is outside this bound (DEC-0151 lists them as knowingly
-   not found). For a string read as a URL that parses, the URL
-   terms are counted on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed,
-   percent-decoded), not on the raw text: for every query or fragment piece, 128, its name's and its value's code
-   points, the value's `eyJ` and `sk-` terms and, when the value is not empty and the name holds an upper-case letter,
-   the square of the name's length over two. A member's name is read before its place is written; once the budget is spent nothing more is read and every further member collapses its place. Past the
+   declaration in it (read or misplaced) sharing them. The walk charges each name or string 16 (`VISIT_COST`), once (a name is not
+   charged again when its member is entered or placed), beside what `detectorCost` counts. `detectorCost` is a bound any
+   port's detector may need, not a description of one detector, counted in code points (an astral character is one):
+   the string's code points; from each `eyJ`, its base64url run, `eyJ` included, and when that run ends at a `.`, the
+   dot and the base64url run after it (the JWT shape's second segment: `eyJab.cd` costs 8 and 8); from each `sk-`, in
+   any case, that follows a boundary, its three characters included, up to 255 code points to the end of the string
+   (`sk-a` costs 4 and 4: 8); after every `sk-` away from a boundary, up to 16 code points after it, the run the shape
+   needs (`xsk-a` costs 5 and 1); after every other provider prefix, anywhere and in any case (`gh` and one of `pousr`
+   then `_`, `xox` and one of `abposr` then `-`, `AKIA`, `glpat-`), up to its floor, the run its shape needs (20, 10, 16
+   and 20 code points; a floor counts the run the shape needs, not the character that ends it). Each of these is a bound
+   any detector may need, whatever boundary or case its own shapes take. A boundary is the start, a character other
+   than a letter or a digit, or an escape that ends right before the `sk-`: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or
+   three-digit octal escape, a backslash escape of one character, or a colour sequence `ESC[...m` with any number of
+   parameter characters (digits, `;` and `:`, as in `ESC[38:5:1m`) whose ESC is raw or escaped (`\x1b`, `\033`, `\33`,
+   `\u001b` in either case of the hex digits, or `\e`); so `\E` (a backslash escape), `\x{1b}` and U+009B (characters
+   other than a letter or a digit) are boundaries too. The 255 covers these forms only. A form that ends in a letter or a
+   digit (`ESC[?25h`, a CSI with a private parameter; `ESC[1K`, another final; `\U00000041`; `%u0041`) is charged as a
+   non-boundary, up to 16, so a port that decodes such a form before a boundary-bound `sk-` reading is outside this
+   bound (DEC-0151 lists them as knowingly not found). For a string read as a URL that parses, the URL terms are counted
+   on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed, percent-decoded), not on
+   the raw text: for every query or fragment piece, 128, its name's and its value's code points, the value's `eyJ` and
+   `sk-` terms and, when the value is not empty and the name holds an upper-case letter, the triangular number of the
+   name's length, n(n+1)/2 (`https://a.example/?aBC=x` costs 24, 128, 3, 1 and 6). A member's name is read before its place is written; once the budget is spent nothing more is read and every further member collapses its place. Past the
    budget, one finding says, once per document, that reading the declarations for credentials takes more than 1 000 000
    code points of reading; it stands at the copy where
    the budget ran out (the read declaration's key, or a misplaced copy's), never at a read declaration that was read
-   whole. The 64 places are a cap per document: a copy names a place only while the document's total is under 64.
+   whole. At the read declaration it says a reader treats the declaration as not declared and that fewer or shorter
+   texts or names fix it; at a misplaced copy it says the copy is not read by a reader and should be removed. The 64 places are a cap per document: a copy names a place only while the document's total is under 64.
    Past it, each copy counts its own places and closes them at that copy: the read declaration's "and N more" at its key
    counts only its own places past 64, and a misplaced copy's overflow gets its own closing finding at that copy, so the
    view (which reads the read declaration alone) and the rules agree, and a vector pins both. The read declaration is walked first, with the whole budget, so its own reading never depends on a copy. Being by shape, the detector also finds an ordinary hyphenated name
    that starts with `sk-`: today any `sk-` followed by 16 or more letters, digits, `_` or `-`, in any case, such as the
    valid channel id `sk-support-desk-faq-answers-2026-v2` (a test pins it). DEC-0151, in progress, proposes to narrow
    that to a digit with an upper-case letter and 16, or a digit and 32; either way, do not start an id with `sk-`, for a
-   second reason too: a source export's tree check (`FAC-SEM-158`, DEC-0149) still reads any `sk-` followed by 16 or
-   more name characters in any case, so a weak `sk-` id that `FAC-SEM-165` would accept under DEC-0151 still blocks a
-   source export. The
+   second reason too: DEC-0149's source tree check, in progress,
+   reads any `sk-` followed by 16 or more name characters in any case (`FAC-SEM-158`, DEC-0149 in progress), so a weak
+   `sk-` id that `FAC-SEM-165` would accept under DEC-0151 would still block a source export. The
    finding on a member name, or on a value whose member takes an id (`id`, `code`, `lead_agent`, `owner`, `decision`,
    `answered_signal`, `target`, `spend_record`, `project`, `side`), that starts with `sk-` says so: an id that starts
    with `sk-` is read as a key; rename it. The advice goes by role, not by key: never under a channel's `texts` or its
@@ -403,7 +404,7 @@ Section 11 also asks for these; none can be decided from the declaration alone (
 |---|---|---|
 | <a id="fac-sem-162"></a>`FAC-SEM-162` | `manifest`, `service-well-known` | a value under the channel-agent extension key sits under a manifest's `provider.extensions` (not its own `extensions` or a capability's) or a well-known answer's `extensions`, has no array, map or object longer than its schema allows nor a string or name over 4096 code points, and is valid against `service-channel-agent-extension.schema.json`; a reader treats an invalid one as not declared and reports it, naming failed keywords and places, never a declared value, with the schema's own limit beside each place, and pointing to the declaration's grammar (DEC-0150 CA-1, CA-2) |
 | <a id="fac-sem-163"></a>`FAC-SEM-163` | `manifest`, `service-well-known` | in a valid channel-agent declaration a project, a category code, a tier code, a channel id, a source id (read or declined), a hand-off queue id and a recorded decision id appear once; a channel with replies off names a decision, and every channel's decision is one `recorded_decisions` lists (DEC-0150 CA-3) |
-| <a id="fac-sem-164"></a>`FAC-SEM-164` | `manifest`, `service-well-known` | in a valid channel-agent declaration a channel with a holding reply declares its holding text and one that replies its final text, when its replies are on; a store review asks no clarifying question; no text is blank or carries U+2014; no tier's label is blank or carries U+2014; a final text in the none form owes nothing (only an absent one is found), except `not_used` beside a holding reply; a queue whose answered signal is `none` names its recommendation, and one with another answered signal that carries a recommendation is found too (a reader does not read it); a budget above 0 names its spend record; at most 64 places per document, then one counting the rest (DEC-0150 CA-4) |
+| <a id="fac-sem-164"></a>`FAC-SEM-164` | `manifest`, `service-well-known` | in a valid channel-agent declaration a channel with a holding reply declares its holding text and one that replies its final text, when its replies are on; a store review asks no clarifying question; no text is blank or carries U+2014; no tier's label is blank or carries U+2014; a final text in the none form owes nothing (only an absent one is found), except `not_used` beside a holding reply when its replies are on; a queue whose answered signal is `none` names its recommendation, and one with another answered signal that carries a recommendation is found too (a reader does not read it); a budget above 0 names its spend record; at most 64 places per document, then one counting the rest (DEC-0150 CA-4) |
 | <a id="fac-sem-165"></a>`FAC-SEM-165` | `manifest`, `service-well-known` | no member name and no string of a channel-agent declaration is shaped like a credential, by shape (`FAC-SEM-101`'s detector), a misplaced one included, a token slot of its grammar read segment by segment, a suite's and an outbox's relative path by the path-aware reading, a queue's opaque recommendation by key shapes only; a string is read as a URL only when its head, leading C0 controls and spaces stripped, opens with a scheme, is ASCII only and holds no non-ASCII percent-escape, so every other string, a sentence that holds a URL included, is read for key shapes only and a password or a credential-named query parameter in it is not found; the rest not read stands at the copy where the budget ran out; at most 1 000 000 code points read per document and 64 places named, each once per document (DEC-0150 CA-5) |
 
 ## Compatibility
@@ -495,8 +496,9 @@ and this list.
   accepted by the schema and found by `FAC-SEM-164`, so the declaration stays declared; and a channel's
   `quiet_window` and `late_answer_window` and `evals.spend_record` may be absent, read as `null`, where the standard
   shows them. Also looser, and declared: `texts.final` may be absent (replies on: a non-blocking `FAC-SEM-164`;
-  replies off: no finding); `texts.holding` may be absent beside `holding_reply: true` (a non-blocking `FAC-SEM-164`);
-  and `holding_reply: true` with a final text `{"none": "not_used"}` stays declared (a non-blocking `FAC-SEM-164`).
+  replies off: no finding); `texts.holding` may be absent beside `holding_reply: true` (a non-blocking `FAC-SEM-164`
+  when its replies are on); and `holding_reply: true` with a final text `{"none": "not_used"}` stays declared (a
+  non-blocking `FAC-SEM-164` when its replies are on; nothing when they are off).
   And `tiers` may be absent, read as no tiers, where section 11 lists them as present.
 
 The first consumer is owed by the Fabric Agent Adapter: its service check validates the declaration against this schema

@@ -438,6 +438,7 @@ function misplaced(doc: JsonObject, budget: Budget): Finding[] {
     const root = `${at}/${KEY_TOKEN}`;
     findings.push({ code: "FAC-SEM-162", instancePath: root, message: "a reader reads a manifest's channel-agent declaration under provider.extensions only, so it is not read here (DEC-0150 CA-1)" });
     // Not read, still published: a credential in it is found where it stands.
+    budget.copies.add(root);
     findings.push(...secrets(extensions[KEY], root, budget));
   };
   if (isObject(doc.extensions) && Object.hasOwn(doc.extensions, KEY)) flag(doc.extensions, "/extensions");
@@ -507,10 +508,12 @@ interface Budget {
   more: number;
   /** Where the closing finding that the rest was not read stands: the copy where the budget ran out. */
   unreadAt: string | undefined;
+  /** The misplaced copies' places: a copy the budget ran out in is one no reader reads. */
+  copies: Set<string>;
 }
 
 /** A fresh budget for one document. */
-const newBudget = (): Budget => ({ left: SECRET_BUDGET, unread: false, named: 0, more: 0, unreadAt: undefined });
+const newBudget = (): Budget => ({ left: SECRET_BUDGET, unread: false, named: 0, more: 0, unreadAt: undefined, copies: new Set() });
 
 /** What each name or string costs beyond its code points: the call itself. */
 export const VISIT_COST = 16;
@@ -528,7 +531,7 @@ function runFrom(text: string, from: number): number {
 }
 
 /**
- * The cost of the JWT shape's reading of a text: after each `eyJ`, the rest of the base64url run it starts and, when
+ * The cost of the JWT shape's reading of a text: from each `eyJ`, its base64url run, `eyJ` included, and, when
  * that run ends at a `.`, the dot and the base64url run after it (the shape's second segment).
  */
 function jwtRereads(text: string): number {
@@ -605,15 +608,15 @@ export const SK_FLOOR = 16;
 export const PREFIX_FLOORS: ReadonlyArray<readonly [RegExp, number]> = [[/gh[pousr]_/gi, 20], [/xox[abposr]-/gi, 10], [/akia/gi, 16], [/glpat-/gi, 20]];
 
 /**
- * The code points the detector reads in a string, counted in one pass, a bound any port's detector may need: the string
- * once; the JWT shape's rereading, after each `eyJ`, of the rest of the base64url run it starts (and of the dot and the
- * run after it); from each `sk-`, in any case, that follows a boundary (the start, a character other than a letter or
+ * The code points the detector reads in a string, counted in one pass, a bound any port's detector may need (the walk
+ * adds VISIT_COST per name or string beside it): the string's code points; the JWT shape's rereading, from each `eyJ`,
+ * of its base64url run, `eyJ` included (and of the dot and the run after it); from each `sk-`, in any case, that follows a boundary (the start, a character other than a letter or
  * a digit, an escape ESCAPE_BEFORE names or a colour sequence), its three characters included, up to 255 code points to
  * the end of the string; after an `sk-` away from a boundary, up to SK_FLOOR; after another provider prefix, its floor. For a
  * string `readAsUrl` admits and that parses as a URL, on the names and values a WHATWG URL parse yields (tab, line feed and carriage return
  * removed, percent-decoded, as `rawValues` hands them over), for every query or fragment piece: PIECE_COST, its name's
  * and value's code points, the value's JWT and `sk-` terms, and, when the value is not empty and the name holds an
- * upper-case letter, the square of the name's length over two (splitting a name into words may backtrack over it).
+ * upper-case letter, the triangular number n(n+1)/2 of the name's length (splitting a name into words may backtrack over it).
  */
 export function detectorCost(text: string): number {
   let cost = codePoints(text) + jwtRereads(text) + keyRereads(text);
@@ -717,7 +720,12 @@ const ID_MEMBERS = new Set(["id", "code", "lead_agent", "owner", "decision", "an
 /** The document's closing FAC-SEM-165 findings, once: the count past SECRET_FINDINGS, and that the rest was not read. */
 function summary(budget: Budget): Finding[] {
   const findings: Finding[] = [];
-  if (budget.unread) findings.push({ code: "FAC-SEM-165", instancePath: budget.unreadAt as string, message: `reading the declarations for credentials takes more than ${SECRET_BUDGET} code points of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names (DEC-0150 CA-5)` });
+  if (budget.unread) {
+    const at = budget.unreadAt as string;
+    // At a misplaced copy, which no reader reads, the fix is to remove it; at the read declaration, to shorten it.
+    const fix = budget.copies.has(at) ? "this copy is not read by a reader and should be removed" : "a reader treats the declaration as not declared; declare fewer or shorter texts or names";
+    findings.push({ code: "FAC-SEM-165", instancePath: at, message: `reading the declarations for credentials takes more than ${SECRET_BUDGET} code points of reading; ${fix} (DEC-0150 CA-5)` });
+  }
   return findings;
 }
 

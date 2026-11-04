@@ -1190,7 +1190,7 @@ independent agent author and P-02 project operator.
 - **Alt paths:** no key -> `declared: false, reported: false, errors: []`, nothing to show. A service whose live declaration was written before this revision -> the adapter reports it, never fails, while live producers still publish one.
 - **UI elements:** the reader's lines, one per place and reason; the obligations list.
 - **States covered:** declared, declared with obligations, not read, not declared
-- **Errors & recovery:** the declaration is too large to read for credentials -> one line says reading takes more than 1000000 code points of reading and that fewer or shorter texts or names fix it; the author shortens the declaration or moves it to the manifest.
+- **Errors & recovery:** the declaration is too large to read for credentials -> one line says reading takes more than 1000000 code points of reading and that fewer or shorter texts or names fix it; the author shortens the declaration (the budget counts names and strings wherever the declaration stands). A well-known declaration also shares its answer's size with its host's readers (the 2 MiB probe cap): a large one belongs in the manifest.
 - **Status:** draft
 - **Coverage:** DEC-0150 CA-1 to CA-5, `channelAgentView` and `channelAgentRules` in `src/channel-agent.ts`, `fixtures/vectors/channel-agent.json` (the `view` answers), `test/channel-agent.test.ts`; the reader's adoption FAA-197
 - **Product:** unobserved
