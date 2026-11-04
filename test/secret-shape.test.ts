@@ -45,7 +45,7 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
   });
   it("finds nothing the earlier pattern did not, over a sweep of prefixes, joins and tails", () => {
     const earlier = /(^bearer\s.+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,})/i;
-    const heads = ["", "a", "Z", "9", "_", "-", ".", ":", " ", "%2", "%20", "%2g", "\\", "\\n", "\\x", "\\u002", "\\u0022", "\\uZZZZ", "\\x41", "\\b", "\\e", "\\0", "\u001b[0m", "\\u001b[1;31m", "\u001b[0", "\\042", "\\1234", "%2522", "%252", "\\x1B[0m", "\\033[1m", "\\e[0m", "\"", "'", "=", "/", "é", "bearer "];
+    const heads = ["", "a", "Z", "9", "_", "-", ".", ":", " ", "%2", "%20", "%2g", "\\", "\\n", "\\x", "\\u002", "\\u0022", "\\uZZZZ", "\\x41", "\\b", "\\e", "\\0", "\u001b[0m", "\\u001b[1;31m", "\u001b[0", "\\042", "\\1234", "%2522", "%252", "\\x1B[0m", "\\033[1m", "\\e[0m", "\\33[0m", "\u001b[38:5:1m", "\\x{1b}[0m", "\u009b0m", "\"", "'", "=", "/", "é", "bearer "];
     const prefixes = ["sk-", "SK-", "ghp_", "gho_", "xoxb-", "xoxq-", "AKIA", "akia", "glpat-", "s k-"];
     const tails = [tail(8, "aB3cD4"), tail(24, "aB3cD4eF5gH6jK7mN8"), tail(16, "0123456789ABCDEF"), tail(40, "abc-def_")];
     let newOnly = 0;
@@ -186,6 +186,27 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
         expect(SECRET_VALUE.test(value), value.slice(0, 8)).toBe(true);
         expect(composed.test(value), value.slice(0, 8)).toBe(false);
       }
+    }
+    // And the i flag undoes the canonical case and the sk- strength: it finds what SECRET_VALUE does not.
+    const upper = keys.github.replace("ghp_", "GHP_");
+    expect(SECRET_VALUE.test(upper)).toBe(false);
+    expect(composed.test(upper)).toBe(true);
+    for (const length of [16, 31]) {
+      const weak = `sk-${"abcdefghijklmnopqrstuvwxyz".repeat(2).slice(0, length - 1)}7`;
+      expect(SECRET_VALUE.test(weak), weak).toBe(false);
+      expect(composed.test(weak), weak).toBe(true);
+    }
+  });
+  it("takes the colon form of a colour sequence and an escaped \\33, and not the 8-bit CSI, brace escapes, \\E or ^[ (DEC-0151)", () => {
+    const esc = String.fromCharCode(27);
+    const csi8 = String.fromCharCode(0x9b);
+    const hex = tail(64, "0123456789abcdef");
+    const kinds = [keys.openai, `sk-or-v1-${hex}`, keys.github, keys.slack, keys.aws, keys.gitlab];
+    const found = [`a${esc}[38:5:1m`, `a${esc}[38:2:1:2:3m`, "a\\x1b[38:5:1m", "a\\33[0m", "a\\33[1;31m", "a\\u001b[1:4m"];
+    const unfound = [`a${csi8}0m`, `a${csi8}[0m`, "a\\x{1b}[0m", "a\\u{1b}[0m", "a\\E[0m", "a^[[0m"];
+    for (const key of kinds) {
+      for (const head of found) expect(SECRET_VALUE.test(head + key), JSON.stringify(head) + " " + key.slice(0, 5)).toBe(true);
+      for (const head of unfound) expect(SECRET_VALUE.test(head + key), JSON.stringify(head) + " " + key.slice(0, 5)).toBe(false);
     }
   });
 });

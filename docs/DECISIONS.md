@@ -9114,8 +9114,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      start of a value, after a character that is no ASCII letter or digit, or after an escape: a percent-escape (`%22`)
      or a double one (`%2522`), a backslash escape (`\n`, `\t`, `\r`, a backslash and a double or single quote, `\b`,
      `\f`, `\v`, `\0`, `\a`, `\e`), an octal escape of one to three digits (`\042`), a `\x` escape with two hex
-     digits, a `\u` escape with four, a raw ESC colour sequence (ESC, `[`, digits and `;`, `m`) or an escaped one
-     (`\u001b[`, `\u001B[`, `\x1b[`, `\x1B[`, `\e[` or `\033[`, then digits and `;`, `m`). The boundary is a consuming group, not a
+     digits, a `\u` escape with four, a raw ESC colour sequence (ESC, `[`, digits, `;` and `:` (ITU T.416), `m`) or an escaped one
+     (`\u001b[`, `\u001B[`, `\x1b[`, `\x1B[`, `\e[`, `\033[` or `\33[`, then digits, `;` and `:`, `m`). The boundary is a consuming group, not a
      look-behind, so a port without look-behind (a Rust port, an older browser) reads it the same; `RegExp.test`
      answers as a look-behind would. A key glued directly after an ASCII letter or digit is knowingly no longer found.
      The pattern has no `i` flag: `Bearer` is spelled in any case by hand (`^[Bb][Ee][Aa][Rr][Ee][Rr]\s.+`), and the
@@ -9137,8 +9137,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      digits and `-`; for `glpat-`, 20 or more letters, digits, `-` and `_` (19 pass). Prose writes such an alias as a
      prefix and a count of characters, never whole; `test/secret-shape.test.ts` builds them. Knowingly not found
      either: a key after a triple percent-escape (`%252522`), after an eight-digit `\U00000022` escape, whose last
-     character before the prefix is a digit, or after a CSI sequence that is not a colour sequence (`ESC[K`,
-     `ESC[2J`), whose last character is a letter. The operator's registry rule is to issue no such
+     character before the prefix is a digit, after a CSI sequence that is not a colour sequence (`ESC[K`,
+     `ESC[2J`), whose last character is a letter, or after a colour sequence opened by the 8-bit CSI (U+009B), brace escapes (`\x{1b}`, `\u{1b}`), `\E` and the caret `^[` form. The operator's registry rule is to issue no such
      alias, which this contract does not prove; the rule binds only a producer that carries `project` on a channel,
      which checks its alias against the shared detector before publishing (the payload's own check does not run
      `FAC-SEM-101`): one whose alias is read so publishes no event for that project, on any channel, until the
@@ -9238,5 +9238,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   rounds are still owed. Round 10 widened the observed-check prerequisite to days without `project`, made rule 1's
   trigger the day's tickets of two projects, and stated calibration per side. Round 11 split the observed check by
   period, counted only projects whose tickets enter `/1`, kept a merged legacy day from reruns before adoption, and
-  made adoption one-way. Round 9 replaced the inference of an absent `project` with one rule: no `project` before
+  made adoption one-way. Round 12 marked adoption by the first day that names `project`, put rule 9 per project, and
+  widened the colour boundary to `:` and `\33`. Round 9 replaced the inference of an absent `project` with one rule: no `project` before
   adoption, `project` on every event after, and a day without it never attributed.

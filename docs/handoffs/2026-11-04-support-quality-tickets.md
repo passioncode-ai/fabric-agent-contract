@@ -193,7 +193,11 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   then its kept days published late under the new alias); the withholding starts at DEC-0151's merge whatever the
   counts, so that acceptance is owed before any producer on the standard has a shared channel; section 5.1 says `/1`
   takes the escalation counts in turns and the ticket counts travel by the signal server, and marks `autonomy.answered`
-  and `stability.fallbackTurns` deferred like its '(new)' fields; and the team-chat note. The coordinator files the
+  and `stability.fallbackTurns` deferred like its '(new)' fields; and the team-chat note. It adds: the period is the
+  event's day, and a producer's adoption is marked by its first published day that names `project` (a rule-9 project
+  never names one), so the check accepts both lists by that marker; section 5.1 carries `project` with rules 1 and 2;
+  section 11's observed check accepts the `team_chat` MAY (a `team_chat`-only project has no daily); and the deferred
+  questions (whether a promotion restates the ticket's end day, `received`, a sum rule). The coordinator files the
   adapter's row (step (e)).
 - Before the merge, the coordinator asks each multi-project `/1` producer on the board whether it merges projects into
   one event (DEC-0095) and records the answers in CT-210 (step (f)).
@@ -296,7 +300,7 @@ conflict unless the line says it auto-merges), with the resolution:
 
 The second of DEC-0150 and DEC-0151 to merge also rewrites these, at the DEC-0150 landing head. DEC-0150's sentences
 move and are reworded between its rounds, so this list names each by its subject and place, and DEC-0150's own list
-(its handoff's section on meeting DEC-0151) locates the exact sentence at that head; last read at `9a953847`:
+(its handoff's section on meeting DEC-0151) locates the exact sentence at that head; last read at `1ccfbf87`:
 
 - `docs/specification/channel-agent.md`, the daily-payload bullet ("**The daily quality payload.**", in the compatibility
   section): it becomes a pointer to DEC-0151 and to [support quality](../specification/support-quality.md)'s channel
@@ -335,6 +339,10 @@ move and are reworded between its rounds, so this list names each by its subject
   `support-quality-daily.schema.json`'s `$defs/projectAlias.pattern` (absent at `9a953847`; the second to land adds it if
   it is still absent). DEC-0150's `sk-` test is already satisfied: it is titled "finds a channel id the shared detector
   reads as a credential" and holds 32 or more characters, a key under DEC-0151 too.
+- DEC-0150's budget sentences in `channel-agent.md` ("SECRET_VALUE's sk- run has no boundary today, so it is tried there
+  too", "anywhere and in any case as the shared detector reads it") and its `keyRereads` comments in `src/channel-agent.ts`
+  ("SECRET_VALUE's 16"): DEC-0150 is rewording them as a bound any detector may need, not as how `SECRET_VALUE`
+  reads; the second to land confirms it.
 - `vitest.config.ts`: DEC-0150 and DEC-0149 each widen the coverage `include` line (DEC-0151 does not touch it); the
   merge step is one coverage include line holding both lists.
 - DEC-0150's `FAC-SEM-165` budget: its budget functions (`keyRereads`, `ESCAPE_BEFORE`, `ESC_BEFORE`, `colourBefore`)
@@ -344,7 +352,7 @@ move and are reworded between its rounds, so this list names each by its subject
 - The merged-tree gate: DEC-0150's channel-agent timing tests timed out twice under load spikes on a scratch merge; the
   lander runs the merged gate at low load (no change owed by DEC-0151).
 - The channel agent standard's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`, named as text
-  in DEC-0151's Context and on the support quality page: made a link once both are on main.
+  in DEC-0151's Context and on the support quality page (its section 1 in rule 6): made a link once both are on main.
 - `docs/DECISIONS.md`'s next-free line: DEC-0152 here; at merge take the maximum of the branches' values and the CAS
   counter.
 - `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `c37fac93`: that head keeps the tree check's own
@@ -376,7 +384,8 @@ The check that closes this list, after both land, in two parts:
 prints nothing; and in `docs/DECISIONS.md`, `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -n -E
 'DEC-0151[^.]*in progress|in-progress DEC-0151' | grep -v 'Annotated'` prints only the lines of DEC-0150's CA-2, its
 CA-5, its Compatibility and its Source counter sentence, which stay as written, while `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -c
-'^- \*\*Annotated'` prints at least 1, an annotation naming DEC-0151's merge for all four. The handoffs are left out
+'^- \*\*Annotated'` prints at least 1, an annotation naming DEC-0151's merge for all four. A third check: `git grep -n -E 'no boundary today|in any case as the shared detector reads|SECRET_VALUE.s 16' --
+docs/specification src` prints nothing after both land. The handoffs are left out
 because they quote the earlier wording as history (this one does above); other handoffs, DEC-0150's included, are left
 as history and are not edited.
 

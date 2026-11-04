@@ -50,7 +50,7 @@ holding a digit, as a lower-case `sk-or-v1-` key does; for `ghp_` and its kin, 2
 `xoxb-` and its kin, 10 or more letters, digits and `-`; for `glpat-`, 20 or more letters, digits, `-` and `_` (19
 pass). This page writes such an alias as a prefix and a count of characters, never whole; the tests build them.
 Knowingly not found: a key after a triple percent-escape (`%252522`), after an eight-digit `\U00000022` escape, or
-after a CSI sequence that is not a colour sequence (`ESC[K`, `ESC[2J`). The detector reads such an alias as a credential and
+after a CSI sequence that is not a colour sequence (`ESC[K`, `ESC[2J`), or after a colour sequence opened by the 8-bit CSI (U+009B), brace escapes (`\x{1b}`, `\u{1b}`), `\E` and the caret `^[` form. The detector reads such an alias as a credential and
 the events page fails `FAC-SEM-101`; it stays strict there (`test/secret-shape.test.ts`). The operator's registry rule
 is to issue no such alias, a rule of the registry this contract does not prove; the rule here binds a producer that
 names `project`: one whose alias is read so publishes no event for that project, on any channel, until the
@@ -104,7 +104,9 @@ No producer carries the ticket counts until two prerequisites outside this contr
 channel agent standard's section 5.1 says that `/1` takes `autonomy.toPersonPolicy` and `toPersonInability` in turns,
 and the observed check below holds.
 
-Its observed check accepts what the wait withholds (support quality, the ticket counts), by period: until the feed's readers adopt DEC-0151, a day without `project` and a withheld channel; from adoption on, a project withheld because its alias is read as a credential, until the registry renames it, and then that project's kept days, published late under the new alias. Rule 3 of [the project](#the-project-dec-0151) says how a reader keeps a
+The channel agent standard's observed check (its section 11) accepts what the wait withholds (support quality, the
+ticket counts), by period, the period being the event's day: a producer's adoption is marked by its first published day
+that names `project` (a project under rule 9 never names one and stays in the pre-adoption form). Until that day, a day without `project` and a withheld channel; from adoption on, a project withheld because its alias is read as a credential, until the registry renames it, and then that project's kept days, published late under the new alias. Rule 3 of [the project](#the-project-dec-0151) says how a reader keeps a
 day without `project`.
 
 ### The project (DEC-0151)
@@ -121,19 +123,21 @@ here once; the conformance rows and DEC-0151 point to it.
    history starts at adoption, the same for every reader. The channel agent standard's observed check accepts, by period, what the wait withholds (the observed-check paragraph under [the ticket counts](#the-ticket-counts-dec-0151) of support quality).
 4. **A rerun** republishes a day as first published, with the `project` it had or without one. A day merged across
    projects under DEC-0095 is never rerun while rule 1 holds (before adoption); after adoption it may be rerun only
-   unchanged, and it stays unattributed (rule 3).
+   unchanged, and it stays unattributed (rule 3). Unchanged is the same form, members and values, not the same bytes.
 5. **A reader that adopted DEC-0151** keeps, per service, channel, day and `project`, the latest event, and keeps a day
    without `project` as rule 3 says.
-6. **Calibration** (DEC-0144), per side: each side's calibration (its labels, the day's judge and rubric) is carried
+6. **Calibration** (DEC-0144), per side (a side as the channel agent standard's section 1 defines it, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md` (added by DEC-0150)):
+   each side's calibration (its labels, the day's judge and rubric) is carried
    unchanged on the events of that side's projects judged that day by that judge and rubric; a project of a side with
    no calibration, or an event judged by another judge or not judged, carries none. A reader reads calibration per
-   project's event, never summing or copying it across projects.
+   project's event, never summing or copying it across projects. A producer with no declaration carries its
+   calibration on each project's event judged that day by that judge and rubric.
 7. **An alias read as a credential**: the paragraph on credentials under [the payload](#the-payload) holds the rule.
 8. **Adoption is one-way** per producer: once every reader of its feed it knows of has adopted, it names `project`
    from then on; a reader that appears later on an older copy is that reader's to update, and the producer does not
    fall back.
-9. **A producer with no registry alias** never names `project`: its days stay unattributed (rule 3), and a channel
-   holding two of its projects' tickets stays withheld (rule 1).
+9. **A project with no registry alias** is never named, rule 2 aside: its days stay unattributed (rule 3), and a
+   channel holding its tickets beside another unnamed project's tickets that enter `/1` stays withheld (rule 1).
 
 Days withheld under rule 1 are dropped, never published later, so per-project history starts at adoption. A project
 withheld for its alias is withheld after adoption: its kept days are post-adoption days, published naming the new
@@ -170,7 +174,7 @@ a mapping costs nothing.
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-126"></a>`FAC-SEM-126` | `support-quality-daily` | a metric not computed is `null` and named in `notMeasured`, and a named one is `null`, never a `0` standing for it; the helped verdicts are at most the sample, the fallback's recoveries at most the failures, the autonomy outcomes (`resolvedWithoutPerson`, `toPersonPolicy`, `toPersonInability`) at most the turns; p50 is at most p90; a judged sample (any sample, helped verdict or check rate) names its rubric version and its judge; a calibration names them too, its `helped` follows the not-measured rule as `calibration.helped`, its week is a real ISO week that starts no later than `day`, and `calibrationChecks` stands only beside a `calibration` (DEC-0144); the ticket counts follow the not-measured rule, each top-level one by its own name and the rest as `open.<metric>`, `outcomes.<metric>`, `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets`; naming one the payload does not carry is a finding, and naming a top-level member that is no metric (`project`, `day`, a family) is a finding that says so (DEC-0151) |
+| <a id="fac-sem-126"></a>`FAC-SEM-126` | `support-quality-daily` | a metric not computed is `null` and named in `notMeasured`, and a named one is `null`, never a `0` standing for it; the helped verdicts are at most the sample, the fallback's recoveries at most the failures, the autonomy outcomes (`resolvedWithoutPerson`, `toPersonPolicy`, `toPersonInability`) at most the turns; p50 is at most p90; a judged sample (any sample, helped verdict or check rate) names its rubric version and its judge; a calibration names them too, its `helped` follows the not-measured rule as `calibration.helped`, its week is a real ISO week that starts no later than `day`, and `calibrationChecks` stands only beside a `calibration` (DEC-0144); during DEC-0151's interim a producer's gate accepts the first-reply findings the interim paragraph under [the ticket counts](#the-ticket-counts-dec-0151) names; the ticket counts follow the not-measured rule, each top-level one by its own name and the rest as `open.<metric>`, `outcomes.<metric>`, `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets`; naming one the payload does not carry is a finding, and naming a top-level member that is no metric (`project`, `day`, a family) is a finding that says so (DEC-0151) |
 
 ## Not decided here
 

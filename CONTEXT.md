@@ -554,7 +554,7 @@ declared under its well-known document's `extensions/connections/0.1` so a host 
 **Coding-agent catalogue**: The contract's one list of coding agents every product reads
 (`catalogue/coding-agents.json`, DEC-0093): install, launch, permission evidence and recipes per agent, keyed by the
 stable id (the runner kind where the runners page lists one, else a new name); machine state stays with each product.
-**Support quality**: One support channel's quality for a closed UTC day (`support-quality-daily/1`, DEC-0095), as an
+**Support quality**: One support channel's quality for a closed UTC day and, once adopted, project (`support-quality-daily/1`, DEC-0095), as an
 event's data an agent that answers people publishes: counts and rates in four families, a metric not computed `null`
 and named, never `0`; optionally the ticket counts of the channel agent standard (DEC-0151): arrived, ended, open at
 the cutoff and by outcome, and the project they are of.

@@ -87,11 +87,13 @@ export const JWT_SHAPE = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]
  * read lazily, so a long run of `sk-` prefixes is read in linear time. So `project:helpdesk-customer-support`,
  * `project:sk-learn-experiments` and `sk-learn-experiments-2026` are no keys, and `sk-or-v1-` with 64 lower-case hex
  * digits is one. A port whose regex has no look-ahead (Rust's `regex` crate) checks that strength outside the regex.
- * Knowingly not found: a key after a triple percent-escape (`%252522`), an eight-digit `\U00000022` escape, or a CSI
- * sequence that is not a colour sequence (`ESC[K`, `ESC[2J`).
+ * Knowingly not found: a key after a triple percent-escape (`%252522`), an eight-digit `\U00000022` escape, a CSI
+ * sequence that is not a colour sequence (`ESC[K`, `ESC[2J`), or a colour sequence opened by the 8-bit CSI (U+009B), a
+ * brace escape (`\x{1b}`, `\u{1b}`), `\E` or the caret `^[`. A colour sequence's parameters may hold `:` (ITU T.416),
+ * and `\33` is an escaped ESC too.
  * A match includes its boundary character, so a caller uses `.test` only, never the matched text or its index.
  */
-export const SECRET_VALUE = /(^[Bb][Ee][Aa][Rr][Ee][Rr]\s.+|(?:^|[^A-Za-z0-9]|%[0-9A-Fa-f]{2}|\\[nrt"']|\\u[0-9A-Fa-f]{4}|\\x[0-9A-Fa-f]{2}|\\[bfv0ae]|\\[0-7]{1,3}|%25[0-9A-Fa-f]{2}|\x1b\[[0-9;]*m|(?:\\u001[bB]|\\x1[bB]|\\e|\\033)\[[0-9;]*m)(?:sk-(?=[A-Za-z0-9_-]{0,255}?\d)(?:(?=[A-Za-z0-9_-]{0,255}?[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}))/;
+export const SECRET_VALUE = /(^[Bb][Ee][Aa][Rr][Ee][Rr]\s.+|(?:^|[^A-Za-z0-9]|%[0-9A-Fa-f]{2}|\\[nrt"']|\\u[0-9A-Fa-f]{4}|\\x[0-9A-Fa-f]{2}|\\[bfv0ae]|\\[0-7]{1,3}|%25[0-9A-Fa-f]{2}|\x1b\[[0-9;:]*m|(?:\\u001[bB]|\\x1[bB]|\\e|\\033|\\33)\[[0-9;:]*m)(?:sk-(?=[A-Za-z0-9_-]{0,255}?\d)(?:(?=[A-Za-z0-9_-]{0,255}?[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}))/;
 /**
  * A long secret: 40 or more characters of base64 or base64url (`+`, `/`, `=`, `-`, `_` included), mixing upper case,
  * lower case and digits. A hex digest is lower case and passes.
