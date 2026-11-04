@@ -237,14 +237,14 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Checks actually run
 
-Round 29's fixes were gated on head `1eb416ce` of `agent/ct194-source-manifest-v2-20261104` (the commit before this
-note), each exit code read on its own (the 15-minute load 38.31 when the gate started, under the session's lock for
-heavy runs): `tsc --noEmit -p .` (exit 0); `pnpm vitest run --coverage` (exit 0: 113 files, 10144 passed, 3 skipped,
-the whole suite; branches 98.93 % over the set, every per-file floor met); `python3 docs/ux/lint.py` (exit 0); `pnpm run
-docs:check` (exit 0, 0 errors); `ORG_INDEX=... pnpm privacy:check` (exit 0, 0 findings); `pnpm exec tsx
-tools/vectors/run.ts` (exit 0, 29 files match); no U+2014 in the added lines. A link at a listed path is tested with
-`existsSync` traced (`test/validate-cli-git-links.test.ts`), and that test fails when the link check follows the
-`.git` probe.
+Round 30's fixes were gated on head `9f5e73db` of `agent/ct194-source-manifest-v2-20261104` (the commit before this
+note), each exit code read on its own, under the session's lock for heavy runs (the 15-minute load was under 45 when
+the wait ended and 58.93 when the lock came free): `tsc --noEmit -p .` (exit 0); `pnpm vitest run --coverage` (exit 0:
+113 files, 10151 passed, 3 skipped, the whole suite; branches 98.93 % over the set, every per-file floor met); `python3
+docs/ux/lint.py` (exit 0); `pnpm run docs:check` (exit 0, 0 errors); `ORG_INDEX=... pnpm privacy:check` (exit 0, 0
+findings); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match); no U+2014 in the added lines. A run on
+`458c930d` failed only the `src/source-rules.ts` floor (99.83 %); `9f5e73db` adds a link vector with `.` and empty
+segments and lowers no floor.
 
 ## Next task
 
