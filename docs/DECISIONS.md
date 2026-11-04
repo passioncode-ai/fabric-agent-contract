@@ -9177,7 +9177,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   no origin" held a digit-free `sk-` user, which the `sk-` strength no longer reads as a key; its user now holds a digit
   and an upper-case letter, so the case keeps testing what it names. Three AT-15 cases are added that tell this
   detector from the earlier one: a remote holding `-sk-` inside a word and one holding a weak `sk-` slug now record
-  their origin, and a strong key after a percent-escape records none. A port re-syncs that file together with the
+  their origin, and a strong key after a percent-escape records none. Three more pin a look-ahead-free port's reading:
+  a strong key at an inner boundary of a rejected `sk-` run records no origin, an `sk-` run whose only digit lies past
+  256 characters records it, and one whose digit and capital lie there is still a long mixed run. A port re-syncs that file together with the
   detector. Two semantic
   fixtures change for the canonical case: `fixtures/semantic/package-secret-shaped-name.json` and
   `fixtures/semantic/estate-secret-value-as-slot.json` held an upper-case `GHP_` value as their credential-shaped slot
@@ -9192,8 +9194,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   checkers, its connection ports and its dashboard button), its vendored vector files that change answer
   (`connections-extra` and `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`, re-vendored from the
   two changed semantic fixtures), Fabric Switchboard's folder-attribution port (it has neither look-ahead nor
-  look-behind, so it checks the `sk-` strength outside its regex and re-syncs `folder-attribution.json` at the merge
-  commit), Project Observatory's folder-attribution port (with its attribution-vectors pin) and its estate-record port
+  look-behind, so it checks the `sk-` strength outside its regex, and on a rejected run it retries at every inner `-` or `_` boundary inside it, the strength checked within 256 characters from that `sk-`, and re-syncs
+  `folder-attribution.json` at the merge commit), Project Observatory's folder-attribution port (with its attribution-vectors pin) and its estate-record port
   (`FAC-SEM-075`), re-synced together with `folder-attribution.json`, and any template or agent that copies the kit;
   whole-file vendors that pin `src/secret-shape.ts` by hash take DEC-0151 at their next re-pin, with their vectors;
   any port that copies
@@ -9214,7 +9216,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   left to correct), `src/support-quality-rules.ts`, `test/support-quality.test.ts`; `src/secret-shape.ts`,
   `src/session-handoff.ts`, `src/connections.ts` (a comment), `test/secret-shape.test.ts`,
   `test/session-handoff-review.test.ts` (its SH-9 key now holds a digit and an upper-case letter),
-  `tools/vectors/folder-attribution.ts` and `fixtures/vectors/folder-attribution.json` (one AT-15 input, three AT-15 cases),
+  `tools/vectors/folder-attribution.ts` and `fixtures/vectors/folder-attribution.json` (one AT-15 input, six AT-15 cases),
   `fixtures/semantic/package-secret-shaped-name.json`, `fixtures/semantic/estate-secret-value-as-slot.json`,
   `test/package.test.ts`, `test/estate-record.test.ts`,
   `fixtures/positive/service-events-page-support-quality-sk-slug.json`;

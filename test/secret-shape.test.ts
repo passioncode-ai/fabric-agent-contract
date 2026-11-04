@@ -209,4 +209,10 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
       for (const head of unfound) expect(SECRET_VALUE.test(head + key), JSON.stringify(head) + " " + key.slice(0, 5)).toBe(false);
     }
   });
+  it("finds a strong key at an inner boundary of a rejected sk- run, and no digit or capital past 256 characters (DEC-0151)", () => {
+    const low = "abcdefghijklmnopqrstuvwxyz".repeat(12).slice(0, 300);
+    expect(SECRET_VALUE.test(`sk-${low}-${keys.openai}`)).toBe(true);
+    expect(SECRET_VALUE.test(`sk-${low}_${keys.openai}`)).toBe(true);
+    expect(SECRET_VALUE.test(`sk-${low}1A`)).toBe(false);
+  });
 });

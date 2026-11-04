@@ -13,6 +13,8 @@ import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { projectRoot } from "../../src/contract.js";
+/** 300 lower-case letters, "a" to "z" repeated: a run that holds no digit and no capital. */
+const LOW300 = "abcdefghijklmnopqrstuvwxyz".repeat(12).slice(0, 300);
 
 type Json = Record<string, any>;
 export const VECTOR_FILE = "fixtures/vectors/folder-attribution.json";
@@ -237,6 +239,11 @@ function recordCases(): Json[] {
     ["AT-15: a remote holding -sk- inside a word records it (DEC-0151's word start)", snap({ folder: `${DATA}/app`, git: repoGit(`${DATA}/app`, "https://gitlab.example.com/someone/helpdesk-customer-support.git") }), rec(`${DATA}/app`, `${DATA}/app/.git`, "https://gitlab.example.com/someone/helpdesk-customer-support.git", `${DATA}/app`)],
     ["AT-15: a remote holding a weak sk- slug records it (DEC-0151's sk- strength)", snap({ folder: `${DATA}/app`, git: repoGit(`${DATA}/app`, "https://gitlab.example.com/someone/sk-learn-experiments-app.git") }), rec(`${DATA}/app`, `${DATA}/app/.git`, "https://gitlab.example.com/someone/sk-learn-experiments-app.git", `${DATA}/app`)],
     ["AT-15: a remote holding a strong key after a percent-escape records no origin (DEC-0151's escapes)", snap({ folder: `${DATA}/app`, git: repoGit(`${DATA}/app`, "https://gitlab.example.com/someone/app%22sk-Test0Example1Key2Value3.git") }), rec(`${DATA}/app`, `${DATA}/app/.git`, null, `${DATA}/app`)],
+    // DEC-0151, for a port without look-ahead: a rejected sk- run is retried at its inner boundaries, and the strength is
+    // read within 256 characters of an sk-. Keys built from parts; a 300-letter run is "a".."z" repeated.
+    ["AT-15: an sk- run rejected, then a strong key at an inner boundary, records no origin (DEC-0151)", snap({ folder: `${DATA}/app`, git: repoGit(`${DATA}/app`, `https://gitlab.example.com/someone/sk-${LOW300}-${["sk-", "aB3cD4eF5gH6", "jK7mN8pQ9rS2"].join("")}.git`) }), rec(`${DATA}/app`, `${DATA}/app/.git`, null, `${DATA}/app`)],
+    ["AT-15: an sk- run whose only digit lies past 256 characters records the origin (DEC-0151)", snap({ folder: `${DATA}/app`, git: repoGit(`${DATA}/app`, `https://gitlab.example.com/someone/sk-${LOW300}1.git`) }), rec(`${DATA}/app`, `${DATA}/app/.git`, `https://gitlab.example.com/someone/sk-${LOW300}1.git`, `${DATA}/app`)],
+    ["AT-15: an sk- run whose digit and capital lie past 256 characters is still a long mixed run: no origin (DEC-0151)", snap({ folder: `${DATA}/app`, git: repoGit(`${DATA}/app`, `https://gitlab.example.com/someone/sk-${LOW300}1A.git`) }), rec(`${DATA}/app`, `${DATA}/app/.git`, null, `${DATA}/app`)],
     ["AT-15: a URL with no repository identity records no origin", snap({ folder: `${DATA}/app`, git: repoGit(`${DATA}/app`, "https://u:p?x@gitlab.example.com/someone/app.git") }), rec(`${DATA}/app`, `${DATA}/app/.git`, null, `${DATA}/app`)],
     ["AT-6: a place that is a declared container records nothing", snap({ folder: `${DATA}/mono-wt/pkg/x`, git: repoGit(`${DATA}/mono-wt`, null, `${DATA}/mono`), containers: [`${DATA}/mono-wt/pkg`], projects: [MONO, PKG] }), null],
     ["AT-15: an scp-like remote the form cannot read records no origin", snap({ folder: `${DATA}/app`, git: repoGit(`${DATA}/app`, "git:not-a-real-secret@gitlab.example.com:") }), rec(`${DATA}/app`, `${DATA}/app/.git`, null, `${DATA}/app`)],

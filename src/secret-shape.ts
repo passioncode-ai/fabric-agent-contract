@@ -9,8 +9,8 @@
  * modules, its dashboard-link checkers, its connection ports and its dashboard button), its vendored vector files that
  * change answer (`connections-extra`, `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`, re-vendored
  * from the two changed semantic fixtures), Fabric Switchboard's folder-attribution port (it has neither look-ahead nor
- * look-behind, so it checks the `sk-` strength outside its regex and re-syncs `folder-attribution.json` at the merge
- * commit), the adapter's dashboard-link test sample (its lower-case `sk-` sample stops being a key under DEC-0151 and
+ * look-behind, so it checks the `sk-` strength outside its regex, and on a rejected run it retries at every inner - or _ boundary inside it, the strength checked within 256 characters from that sk-, and re-syncs
+ * `folder-attribution.json` at the merge commit), the adapter's dashboard-link test sample (its lower-case `sk-` sample stops being a key under DEC-0151 and
  * becomes one DEC-0151 reads, built from pieces), the adapter's profiles test case (its query of `%zz`, a raw
  * control character and `KIA` with 16 more characters stops being found, since its `AKIA` borrowed the `A` of the
  * encoded `%1A`; it is rebuilt with a boundary before `AKIA`, from pieces) and any template or agent that copies the kit; a port that copies

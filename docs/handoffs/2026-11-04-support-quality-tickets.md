@@ -200,6 +200,11 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   post asks about the interim day and the kinds grouping; CT-210 (f) records answers as they arrive; the round history
   reads in one order; the connections wording names a backslash escape ending in a letter or digit; a worst-case test
   validates 24 names in `notMeasured` with no finding.
+- Round 13's seam reading (on `e85bd11b`): the merge list adds `docs/specification/README.md` against DEC-0150 (one
+  support-quality row, one channel-agent row) and the `keyRereads` confirmation for every boundary form; the
+  look-ahead-free port's instruction says to retry at every inner `-` or `_` boundary of a rejected run, with the
+  strength checked within 256 characters from that `sk-`; three AT-15 vectors and three detector tests pin it; DEC-0149
+  is cited as its landing head, `82bed5bd`.
 
 ## Open
 
@@ -228,8 +233,8 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   modules, its dashboard-link checkers, its connection ports and its dashboard button), its vendored vector files that
   change answer (`connections-extra` and `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`,
   re-vendored from the two changed semantic fixtures), Fabric Switchboard's folder-attribution port (it has neither
-  look-ahead nor look-behind, so it checks the `sk-` strength outside its regex and re-syncs `folder-attribution.json`
-  at the merge commit), Project Observatory's folder-attribution port (with its attribution-vectors pin) and its
+  look-ahead nor look-behind, so it checks the `sk-` strength outside its regex, and on a rejected run it retries at every inner `-` or `_` boundary inside it, the strength checked within 256 characters from that `sk-`, and
+  re-syncs `folder-attribution.json` at the merge commit), Project Observatory's folder-attribution port (with its attribution-vectors pin) and its
   estate-record port (`FAC-SEM-075`), re-synced together with `folder-attribution.json`, and any template or agent that
   copies the kit, and the adapter's dashboard-link test sample, whose lower-case `sk-` sample stops being a key under DEC-0151 and at the re-sync becomes one DEC-0151 reads (a digit and an upper-case letter, built from pieces as the contract's SH-9 case is), and the adapter's profiles test case whose query holds `%zz`, a raw control character and `KIA` with 16 more characters stops being found under DEC-0151 (its `AKIA` borrowed the `A` of the encoded `%1A`) and is rebuilt at the re-sync with a boundary before `AKIA`, built from pieces; whole-file vendors that pin `src/secret-shape.ts` by hash take DEC-0151 at their next re-pin, with
   their vectors; any port that copies
@@ -284,7 +289,7 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 ## When DEC-0150 and DEC-0151 meet on main
 
 DEC-0150's current branch is `origin/agent/channel-agent-ext-v3-20261104` (`b57df67a` when this was written); DEC-0149
-now lives on `origin/agent/ct194-source-manifest-v2-20261104` (cited as the DEC-0149 landing head; `e1262368` on
+now lives on `origin/agent/ct194-source-manifest-v2-20261104` (cited as the DEC-0149 landing head; `82bed5bd` on
 2026-11-04, measured below at it and measured again at merge; the old branch name is deleted); main is at
 `bf50c9fc` (#236 merged, CT-215 and CT-216 added at the backlog tail; #238 changed CI only). The scratch measurements below are of those heads; they are measured again
 at merge, against the heads then current. **Merge gate:** DEC-0150 must be on main before DEC-0151 merges. At
@@ -306,6 +311,9 @@ conflict unless the line says it auto-merges), with the resolution:
     per-project payload; drop that bullet (DEC-0151 answers it) and keep the thresholds line as this branch writes it.
   - `docs/specification/identifiers.md` (auto-merges, but says one thing twice): merge DEC-0150's channel-agent
     `project` bullet and DEC-0151's registry-alias bullet into one compared-as-written bullet.
+  - `docs/specification/README.md`: keep this branch's support-quality row (DEC-0095, DEC-0144, DEC-0151) and
+    DEC-0150's channel-agent row, one of each. `git merge-tree --write-tree --name-only` of this head with
+    `origin/agent/channel-agent-ext-v3-20261104` prints only the files this list names.
   - `src/secret-shape.ts` (auto-merges): DEC-0150's `rawValues` change and DEC-0151's `SECRET_VALUE` touch different
     lines; keep both.
 - **Against DEC-0149** (`origin/agent/ct194-source-manifest-v2-20261104`, `e1262368`): `docs/DECISIONS.md` and
@@ -368,6 +376,9 @@ move and are reworded between its rounds, so this list names each by its subject
   too", "anywhere and in any case as the shared detector reads it") and its `keyRereads` comments in `src/channel-agent.ts`
   ("SECRET_VALUE's 16"): DEC-0150 is rewording them as a bound any detector may need, not as how `SECRET_VALUE`
   reads; the second to land confirms it.
+- DEC-0150's `keyRereads` against this detector's boundary: the second to land confirms that it counts `KEY_REREAD`
+  after every boundary form `SECRET_VALUE` lists, the `:` colour parameters and `\33` included (DEC-0150 is fixing
+  `colourBefore` and `ESC_BEFORE` now), by DEC-0150's boundary-forms test extended with this detector's forms.
 - `vitest.config.ts`: DEC-0150 and DEC-0149 each widen the coverage `include` line (DEC-0151 does not touch it); the
   merge step is one coverage include line holding both lists.
 - DEC-0150's `FAC-SEM-165` budget: its `keyRereads` has changed (`fc78b510`, `c201208a`, a floor `SK_FLOOR` for an
