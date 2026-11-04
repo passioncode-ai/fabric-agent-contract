@@ -59,6 +59,7 @@
 | SCN-050 | I bring my work into an organization and ask its administrators for what it needs | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-052 | Share a model key with a colleague's machine, compare six digits, take it back | peer share | P-02 | ST-039, FLW-33 | draft | not audited |
 | SCN-053 | An agent needs a token; I type it into my app's own window | secret prompt | P-02 | ST-040, FLW-34 | draft | not audited |
+| SCN-054 | An agent author learns that a channel-agent declaration is not read and why, or what it still owes | authoring | P-01 | ST-001, FLW-01 | draft | not audited |
 
 ## Personas
 
@@ -1171,4 +1172,25 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** the node is not running -> the request fails and no window is shown by anyone; the agent asks again once the node is up.
 - **Status:** draft
 - **Coverage:** DEC-0143 SP-1 to SP-7, DEC-0147 (the agent twin of "Decline"), `channelStep`, `maySecretPrompt` and `secretOutcome` in `src/local-channel.ts`, `test/local-channel.test.ts`
+- **Product:** unobserved
+
+### SCN-054: An agent author learns that a channel-agent declaration is not read and why, or what it still owes
+
+- **Persona:** P-01
+- **Feature:** authoring
+- **Traces:** ST-001, FLW-01 (JTBD-01, JRN-01/#3); the reader is the Fabric Agent Adapter's service check, FAA-197
+- **Entry point:** a reader's answer on the author's service (the adapter's check, or a host that shows the view)
+- **Preconditions:** the service publishes `extensions/channel-agent/0.1` in its manifest's `provider.extensions` or, with no manifest, in its well-known answer
+- **Steps:**
+  1. The reader reads the declaration -> it answers as `channelAgentView` does: `declared`, `reported` and `errors`, each line `<code> at <place>: <reason>`, with no declared value.
+  2. The declaration is not read (`FAC-SEM-162`, `FAC-SEM-165` or `FAC-SEM-163`) -> the author sees each place and its reason (a schema limit, a credential-shaped name or value, a repeated id, the rest not read) and fixes the declaration.
+  3. The declaration is read with obligations (`FAC-SEM-164`) -> the reader keeps it declared and shows each owed text, recommendation or spend record to the author.
+  4. A copy stands where a reader does not read it -> the reader ignores it; the host also runs `channelAgentRules`, so the author sees the copy's findings there.
+- **Expected result:** the author knows whether the declaration is read, why it is not, or what it still owes, and can fix it without a declared value ever being shown.
+- **Alt paths:** no key -> `declared: false, reported: false, errors: []`, nothing to show. A service whose live declaration was written before this revision -> the adapter reports it, never fails, while live producers still publish one.
+- **UI elements:** the reader's lines, one per place and reason; the obligations list.
+- **States covered:** declared, declared with obligations, not read, not declared
+- **Errors & recovery:** the declaration is too large to read for credentials -> one line says reading takes more than 1000000 code points of reading and that fewer or shorter texts or names fix it; the author shortens the declaration or moves it to the manifest.
+- **Status:** draft
+- **Coverage:** DEC-0150 CA-1 to CA-5, `channelAgentView` and `channelAgentRules` in `src/channel-agent.ts`, `fixtures/vectors/channel-agent.json` (the `view` answers), `test/channel-agent.test.ts`; the reader's adoption FAA-197
 - **Product:** unobserved

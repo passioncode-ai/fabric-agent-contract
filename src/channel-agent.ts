@@ -83,10 +83,12 @@ function schemaNames(): Set<string> {
 /** A container the walk is reading: its members, the next one, its place, its depth, its own name and its holder's. */
 interface Frame { container: unknown[] | JsonObject; keys: string[] | undefined; next: number; at: string; depth: number; name: string | undefined; parent: string | undefined; collapsed: boolean; role: Role }
 /** The place a container holds in the declaration, from the root down, or none: the narrow readings are keyed on it. */
-type Role = "root" | "projects" | "project" | "evals" | "tickets" | "queues" | "queue" | undefined;
-const ROLES: Readonly<Record<string, Readonly<Record<string, Role>>>> = { root: { projects: "projects" }, project: { evals: "evals", tickets: "tickets", handoff_queues: "queues" } };
+type Role = "root" | "projects" | "project" | "evals" | "tickets" | "queues" | "queue" | "channels" | "channel" | "texts" | undefined;
+const ROLES: Readonly<Record<string, Readonly<Record<string, Role>>>> = { root: { projects: "projects" }, project: { evals: "evals", tickets: "tickets", handoff_queues: "queues", channels: "channels" }, channel: { texts: "texts" } };
 const roleOf = (holder: Role, key: string, index: boolean): Role => {
-  if (index) return holder === "projects" ? "project" : holder === "queues" ? "queue" : undefined;
+  // A channel's texts and everything below them (its maps, and anything put inside a text's place) keep the role.
+  if (holder === "texts") return "texts";
+  if (index) return holder === "projects" ? "project" : holder === "queues" ? "queue" : holder === "channels" ? "channel" : undefined;
   return holder === undefined ? undefined : ROLES[holder]?.[key];
 };
 /** Where a name or a string the walk shows sits: its holder's frame (none for the walked value itself) and its key. */
@@ -329,7 +331,8 @@ export function schemaErrors(value: unknown, validate: ValidateFunction): string
     // ", or null", and the `oneOf` line is dropped, so no line repeats another.
     const all = validate.errors as ErrorObject[];
     const nullable = new Set(all.filter((error) => error.keyword === "oneOf" && Array.isArray(error.schema) && error.schema.some((branch) => typeOf(branch) === "null")).map((error) => error.instancePath));
-    const errors = all.filter((error) => error.keyword !== "if" && !(error.keyword === "type" && error.params.type === "null") && !(error.keyword === "oneOf" && nullable.has(error.instancePath)));
+    // A member name's own failures (pattern, length, not) are stated by its `propertyNames` line.
+    const errors = all.filter((error) => error.keyword !== "if" && !(error.keyword !== "propertyNames" && error.propertyName !== undefined) && !(error.keyword === "type" && error.params.type === "null") && !(error.keyword === "oneOf" && nullable.has(error.instancePath)));
     return [...new Set(errors.map((error) => placed(error, nullable.has(error.instancePath))))];
   } catch (error) {
     if (error instanceof RangeError) return [TOO_LARGE];
@@ -573,7 +576,7 @@ function colourBefore(text: string, at: number): boolean {
   return text[start] === "[" && ESC_BEFORE.test(text.slice(Math.max(0, start - 6), start));
 }
 
-/** What a provider-key reading may reread after each `sk-`, in any case, that follows a boundary: up to 255 code points each. */
+/** What a provider-key reading may reread from each `sk-`, in any case, that follows a boundary, its three characters included: up to 255 code points. */
 function keyRereads(text: string): number {
   let cost = 0;
   const pattern = /sk-/gi;
@@ -596,16 +599,17 @@ function keyRereads(text: string): number {
   return cost;
 }
 const KEY_REREAD = 255;
-/** A bound for an `sk-` away from a boundary, which a detector may still try: up to 15 code points after it. */
-export const SK_FLOOR = 15;
+/** A bound for an `sk-` away from a boundary, which a detector may still try: up to the 16 code points its run needs. */
+export const SK_FLOOR = 16;
 /** The shared detector's other provider prefixes, each with the run its shape needs after it (SECRET_VALUE). */
 export const PREFIX_FLOORS: ReadonlyArray<readonly [RegExp, number]> = [[/gh[pousr]_/gi, 20], [/xox[abposr]-/gi, 10], [/akia/gi, 16], [/glpat-/gi, 20]];
 
 /**
  * The code points the detector reads in a string, counted in one pass, a bound any port's detector may need: the string
  * once; the JWT shape's rereading, after each `eyJ`, of the rest of the base64url run it starts (and of the dot and the
- * run after it); after every `sk-`, in any case, that follows a boundary (the start, a character other than a letter or
- * a digit, an escape ESCAPE_BEFORE names or a colour sequence), up to 255 code points to the end of the string. For a
+ * run after it); from each `sk-`, in any case, that follows a boundary (the start, a character other than a letter or
+ * a digit, an escape ESCAPE_BEFORE names or a colour sequence), its three characters included, up to 255 code points to
+ * the end of the string; after an `sk-` away from a boundary, up to SK_FLOOR; after another provider prefix, its floor. For a
  * string `readAsUrl` admits and that parses as a URL, on the names and values a WHATWG URL parse yields (tab, line feed and carriage return
  * removed, percent-decoded, as `rawValues` hands them over), for every query or fragment piece: PIECE_COST, its name's
  * and value's code points, the value's JWT and `sk-` terms, and, when the value is not empty and the name holds an
@@ -704,8 +708,8 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
   return findings;
 }
 
-/** Whether a frame is a channel's `texts` or one of its language-keyed maps, where no member takes an id's grammar. */
-const inTexts = (frame: Frame | undefined): boolean => frame !== undefined && (frame.name === "texts" || (frame.parent === "texts" && (frame.name === "holding" || frame.name === "final")));
+/** Whether a frame is a channel's `texts` or any frame below them, where no member takes an id's grammar. */
+const inTexts = (frame: Frame | undefined): boolean => frame?.role === "texts";
 
 /** The members whose value takes an id's grammar: a value there that starts with `sk-` is told to be renamed. */
 const ID_MEMBERS = new Set(["id", "code", "lead_agent", "owner", "decision", "answered_signal", "target", "spend_record", "project", "side"]);
@@ -713,7 +717,7 @@ const ID_MEMBERS = new Set(["id", "code", "lead_agent", "owner", "decision", "an
 /** The document's closing FAC-SEM-165 findings, once: the count past SECRET_FINDINGS, and that the rest was not read. */
 function summary(budget: Budget): Finding[] {
   const findings: Finding[] = [];
-  if (budget.unread) findings.push({ code: "FAC-SEM-165", instancePath: budget.unreadAt as string, message: `the document holds more than ${SECRET_BUDGET} code points of names and values in its declarations; the rest was not read for credentials, so a reader treats the declaration as not declared; declare fewer or shorter texts or names (DEC-0150 CA-5)` });
+  if (budget.unread) findings.push({ code: "FAC-SEM-165", instancePath: budget.unreadAt as string, message: `reading the declarations for credentials takes more than ${SECRET_BUDGET} code points of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names (DEC-0150 CA-5)` });
   return findings;
 }
 

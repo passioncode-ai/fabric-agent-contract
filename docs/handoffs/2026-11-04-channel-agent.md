@@ -122,7 +122,9 @@ FAA-197, on the adapter's main).
   question route, the gap registry, `tickets.pd_check` and a channel's `texts.final`), through `if`/`then`/`else` so
   an author reads only the branch the value takes; `null` stays exactly at `decision`, `quiet_window`,
   `late_answer_window` and `spend_record`; a text's language is never named `none`, so the form cannot pass for a
-  holding text; a final text in the none form owes nothing, while an absent one is still found; a recommendation on a
+  holding text: a holding text in the none form is refused (`FAC-SEM-162`, not declared), a narrowing of round 4's
+  "a text of `channels[].texts`" that the merge post sends, while leaving the holding text out is accepted, which is
+  looser; a final text in the none form owes nothing, while an absent one is still found; a recommendation on a
   queue with an answered signal other than `none` is a non-blocking `FAC-SEM-164`; "Not checked here" names a past
   `until` (the check does not read today's date) and the question route's agreement with the side (FAA-197).
   Fixtures `service-channel-agent-extension-none-form` (positive), `-none-without-until` and `-none-at-decision`
@@ -177,6 +179,15 @@ FAA-197, on the adapter's main).
   pointer to `texts.final`; SCN-002 says a `FAC-SEM-164` line makes `pnpm validate` exit 1 while a reader keeps the
   declaration declared; the budget's prefix terms are worded as bounds any detector may need; the `sk-` keys of the
   rename tests are ones both detectors find.
+- Round 15 of the readings (on `b57df67a`): unit pass, seam pass, two product breaks (docs) and unit risks, fixed:
+  the Narrowings' `null` bullet states both halves of the none form at a holding text (refused, a narrowing the merge
+  post sends; leaving it out accepted, looser); item 1's pointer comes on the `additionalProperties`, `propertyNames`
+  and width lines only; `tiers` may be absent (looser); a draft scenario, SCN-054, follows the reader path, traced to
+  FAA-197; the page and CA-1 say how a reader knows a service has a manifest; a member name's own failures are stated
+  by its `propertyNames` line alone; the budget line says reading takes more than 1000000 code points of reading; the
+  rename advice follows the role down the walk (any frame at or below a channel's `texts`); `SK_FLOOR` is 16; the
+  boundary `sk-` charge is described from its `s`, with an exact test and a vector at the budget's edge; a test checks
+  the boundary forms both ways; a well-known declaration shares the answer's size with its host's readers.
 
 ## The branch and its history
 
@@ -256,6 +267,10 @@ origin), whichever lands second:
 - keeps both branches' rows in `docs/backlog.md` and in `docs/handoffs/README.md`;
 - at this branch's landing, if main then holds DEC-0149's one-pass `hasJwt`, the landing step switches `keyShaped` in
   `src/channel-agent.ts` from `JWT_SHAPE.test` to `hasJwt`; if DEC-0149 lands after this branch, its lander does;
+  CT-212 is left unchanged (once switched, `keyShaped` is no `JWT_SHAPE` caller);
+- at landing, files the backlog row DEC-0149 owes at the DEC-0150 step, at the next free CT id then: a source export's
+  installation-valued members of a channel-agent declaration (`tickets.token_slot`'s vault project and env,
+  `evals.spend_record`, the per-project entries), checked against the source slots;
 - leaves `detectorCost` normative: once DEC-0149's one-pass `hasJwt` lands, the `eyJ` term no longer describes this
   repository's detector, and stays as a bound any port's detector may need (the page and CA-5 already say so).
 
@@ -302,7 +317,12 @@ a digit and 32"); the lander re-quotes them from the landing head. The page's bu
 provider prefix "anywhere and in any case", and after an `sk-` away from a boundary) are worded as a bound any detector
 may need, so they stay true under DEC-0151's word-start boundary and canonical case; `keyRereads` changed after
 `cd350f47`, in `fc78b510` (the other prefixes' floors) and `c201208a` (`sk-` away from a boundary), so DEC-0151's
-lander compares against the landing head, not `cd350f47`. Beside the `sk-` test named above, the tests "asks for a
+lander compares against the landing head, not `cd350f47`. The budget comparison is the exception where DEC-0150's
+landing-head reading holds over DEC-0151's quotation. The `sk-` sentence the DEC-0151 lander rewrites (item 4) keeps
+the advice not to start an id with `sk-` and its second reason: a source export's tree check (`FAC-SEM-158`,
+DEC-0149) still reads any `sk-` followed by 16 or more name characters in any case. The test "charges a boundary sk-
+after every form the cost model recognises, and the detector finds a key after each" lists the boundary forms both
+ways; the DEC-0151 lander adds every boundary form its detector's comment lists and runs it against that detector. Beside the `sk-` test named above, the tests "asks for a
 rename only at a member name or an id, never at a text" and "asks for a rename by role: a text keyed id gets none, a
 channel id keeps it" build their key as `sk-` and `support-desk-faq-answers-2026-v2` (32 name characters with a
 digit), so both detectors find it. The join sentence keeps its condition (a
@@ -363,7 +383,8 @@ here), and adds:
 
 - the owner's round 4 (the none form at four members in section 13.6, a source's age from its last successful read in
   section 7.1) is taken, and its neutral copy is kept byte for byte at
-  `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`;
+  `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; one narrowing of round 4 is sent with it: a
+  holding text in the none form is refused (`FAC-SEM-162`); leave the holding text out instead, which is accepted;
 
 - only a manifest's `provider.extensions` is read: a declaration under the manifest's top-level `extensions` is
   `FAC-SEM-162` and not read;

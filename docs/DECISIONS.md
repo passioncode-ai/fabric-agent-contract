@@ -9043,7 +9043,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      for a service with no manifest, under `extensions` of its `/.well-known/fabric-service` answer (section 11), and
      nowhere else; the key under a manifest's own `extensions` or a capability's is reported, and its value is still
      read for credentials where it stands. A service with a manifest declares only in its manifest, and a reader of
-     such a service ignores a declaration in its well-known answer. The same rules run on kind `manifest` and kind
+     such a service ignores a declaration in its well-known answer; a reader knows a service has a manifest from its
+     descriptor's `fabricManifest` (or the registry's provider entry), and with only a well-known answer in hand it
+     reads that answer's declaration. The same rules run on kind `manifest` and kind
      `service-well-known`, and on no other kind. A reader treats an invalid value as not declared
      and reports it (`FAC-SEM-162`).
   2. CA-2. The shape is `service-channel-agent-extension.schema.json`, one file with no reference to another:
@@ -9121,18 +9123,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      provider key's and a JWT's shapes only; anything else is read whole. The rule reads at most 1 000 000 code points for
      one document, every copy of the declaration in it sharing them, counted by `detectorCost`, a bound any port's
      detector may need, in code points: each name or string 16 plus its code points, once; after each `eyJ`, the rest of
-     its base64url run and, when it ends at a `.`, the dot and the run after it; after each `sk-`, in any case, at a
+     its base64url run and, when it ends at a `.`, the dot and the run after it; from each `sk-`, in any case, at a
      boundary (the start, a non-alphanumeric character, `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal
      escape, a backslash escape, or a colour sequence with any number of parameter characters whose ESC is raw or
-     escaped in either case), up to 255 code points; after every other provider prefix of the shared detector, anywhere
+     escaped in either case), its three characters included, up to 255 code points; after every other provider prefix of the shared detector, anywhere
      and in any case (`gh?_`, `xox?-`, `AKIA`, `glpat-`), up to its floor (20, 10, 16 and 20 code points), what a near
-     miss is reread before it fails; after every `sk-` away from a boundary, up to 15 code points after it (each a bound
+     miss is reread before it fails; after every `sk-` away from a boundary, up to 16 code points after it (the run the shape needs) (each a bound
      any detector may need, whatever boundary or case its own shapes take); and, for a
      string read as a URL, on the names and values a
      WHATWG URL parse yields: 128 per query or fragment piece, its name's and value's code points, the value's `eyJ`
      and `sk-` terms, and the square over two of a name holding an upper-case letter when its value is not empty. Once it is spent, nothing more is read and every further member collapses; one finding per
-     document then says the rest was not read, that a reader treats the declaration as not declared and that fewer or
-     shorter texts or names fix it, at the copy where the budget ran out (never at a read declaration read
+     document then says that reading the declarations for credentials takes more than 1000000 code points of reading,
+     that a reader treats the declaration as not declared and that fewer or shorter texts or names fix it, at the copy where the budget ran out (never at a read declaration read
      whole); the 64 places are a cap per document (a copy names a place only while the document's total is under 64),
      and past it each copy counts its own places and closes them at that copy: the read declaration's count at its key
      holds only its own places, and a misplaced copy's overflow is closed at that copy. The read
@@ -9221,7 +9223,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 14 of the readings. `DEC-0150` was reserved by the coordinator with
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 15 of the readings. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation
