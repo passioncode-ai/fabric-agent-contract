@@ -240,14 +240,14 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Checks actually run
 
-Round 30's fixes were gated on head `9f5e73db` of `agent/ct194-source-manifest-v2-20261104` (the commit before this
-note), each exit code read on its own, under the session's lock for heavy runs (the 15-minute load was under 45 when
-the wait ended and 58.93 when the lock came free): `tsc --noEmit -p .` (exit 0); `pnpm vitest run --coverage` (exit 0:
-113 files, 10151 passed, 3 skipped, the whole suite; branches 98.93 % over the set, every per-file floor met); `python3
-docs/ux/lint.py` (exit 0); `pnpm run docs:check` (exit 0, 0 errors); `ORG_INDEX=... pnpm privacy:check` (exit 0, 0
-findings); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match); no U+2014 in the added lines. A run on
-`458c930d` failed only the `src/source-rules.ts` floor (99.83 %); `9f5e73db` adds a link vector with `.` and empty
-segments and lowers no floor.
+Round 31's fixes were gated on head `fc47ed94` of `agent/ct194-source-manifest-v2-20261104` (the commit before this
+note), each exit code read on its own, under the session's lock for heavy runs, the 15-minute load checked again once
+the lock was held (31.95): `tsc --noEmit -p .` (exit 0); `pnpm vitest run --coverage` (exit 0: 113 files, 10153 passed,
+3 skipped, the whole suite; branches 98.93 % over the set, every per-file floor met); `python3 docs/ux/lint.py` (exit
+0); `pnpm run docs:check` (exit 0, 0 errors); `ORG_INDEX=... pnpm privacy:check` (exit 0, 0 findings); `pnpm exec tsx
+tools/vectors/run.ts` (exit 0, 29 files match); no U+2014 in the added lines. The test over a tree of absolute links
+fails on a planted scan of the problems found (about 132 against the bound of 64, at a 32 times step); a planted `?`
+strip fails the literal-target vector; a planted orphan coverage floor fails "the coverage floors".
 
 ## Next task
 
