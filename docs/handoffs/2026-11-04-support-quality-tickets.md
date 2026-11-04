@@ -292,7 +292,7 @@ DEC-0151's merge, `git ls-tree origin/main docs/evidence/specs/2026-11-04-channe
 file and `grep '^### DEC-0150' docs/DECISIONS.md` prints one line; if either prints nothing, DEC-0151 waits (or rebases
 over DEC-0150 once it lands).
 
-The files each open branch shares with this one, from `git merge-tree` against `6027e1e2` on 2026-11-04 (a textual
+The files each open branch shares with this one, from `git merge-tree` against `60a22ba1` on 2026-11-04 (a textual
 conflict unless the line says it auto-merges), with the resolution:
 
 - **Against DEC-0150** (`origin/agent/channel-agent-ext-v3-20261104`):
@@ -308,7 +308,7 @@ conflict unless the line says it auto-merges), with the resolution:
     `project` bullet and DEC-0151's registry-alias bullet into one compared-as-written bullet.
   - `src/secret-shape.ts` (auto-merges): DEC-0150's `rawValues` change and DEC-0151's `SECRET_VALUE` touch different
     lines; keep both.
-- **Against DEC-0149** (`origin/agent/ct194-source-manifest-v2-20261104`, `29189f94`): `docs/DECISIONS.md` and
+- **Against DEC-0149** (`origin/agent/ct194-source-manifest-v2-20261104`, `e1262368`): `docs/DECISIONS.md` and
   `docs/backlog.md` (tail appends; keep both, in order), `docs/handoffs/README.md` (keep both rows) and
   `src/secret-shape.ts` (the bullet below). Its `URL_SECRET_VALUE` in `src/source-rules.ts` deliberately stays the tree
   check's own earlier unbounded pattern, with the `i` flag, for parity with the adapter's source check: it is NOT
@@ -318,8 +318,8 @@ conflict unless the line says it auto-merges), with the resolution:
 - **Against PR #235** (`agent/ct200-renewal-repeat-20261102`, DEC-0148): `docs/DECISIONS.md` and `docs/backlog.md`
   (tail appends; keep both, in order).
 - **Against main at `bf50c9fc`** (PR #236 merged): `docs/backlog.md`, the tail; keep every row, in id order through
-  CT-216 (CT-210, CT-213, CT-215, CT-216). The scratch merge with `6027e1e2`, so resolved, passes: `tsc` exit 0, 28 vector
-  files match, the whole suite passes (109 files, 9835 tests, 1 skipped).
+  CT-216 (CT-210, CT-213, CT-215, CT-216). The scratch merge with `60a22ba1`, so resolved, passes: `tsc` exit 0, 28 vector
+  files match, the whole suite passes (109 files, 9836 tests, 1 skipped).
 
 The second of DEC-0150 and DEC-0151 to merge also rewrites these, at the DEC-0150 landing head. DEC-0150's sentences
 move and are reworded between its rounds, so this list names each by its subject and place, and DEC-0150's own list
@@ -380,7 +380,7 @@ move and are reworded between its rounds, so this list names each by its subject
   in DEC-0151's Context and on the support quality page (its section 1 in rule 6): made a link once both are on main.
 - `docs/DECISIONS.md`'s next-free line: DEC-0152 here; at merge take the maximum of the branches' values and the CAS
   counter.
-- `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `29189f94`: that head keeps the tree check's own
+- `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `e1262368`: that head keeps the tree check's own
   unbounded provider-key shapes (a fixed list held equal to a vectors constant, for parity with the adapter's source
   check), its tests no longer read `SECRET_VALUE.source`, and its
   `fixtures/semantic/source-manifest-secret-in-purpose.json` holds a key both patterns find. The only conflict is the
@@ -389,12 +389,12 @@ move and are reworded between its rounds, so this list names each by its subject
   `fabric-agent.json` (`project:sk-learn-experiments` and the like) is a `FAC-SEM-158` credential in a source tree,
   since its tree check keeps its own unbounded, case-insensitive key shapes, so such an agent cannot export its source
   until the registry issues another alias (checked with `checkSourceTree` at `e1262368`: each such alias gives one
-  FAC-SEM-158 finding at `fabric-agent.json`, and `project:helpdesk-customer-support` none). Measured on a scratch merge of `29189f94` with `6027e1e2`, resolved
-  so: `tsc` exit 0; 29 vector files match their generators; the whole suite passes (113 files, 10223 tests, 3 skipped).
+  FAC-SEM-158 finding at `fabric-agent.json`, and `project:helpdesk-customer-support` none). Measured on a scratch merge of `e1262368` with `60a22ba1`, resolved
+  so: `tsc` exit 0; 29 vector files match their generators; the whole suite passes (113 files, 10227 tests, 3 skipped).
   No test fails.
 - DEC-0150's branch at `b57df67a`, on a scratch merge with this branch (the conflicting documents taken from this
-  branch for the measurement only): `test/channel-agent.test.ts` passes whole (334 tests); at `1ccfbf87` the whole suite
-  had one failure, the rename test's 29-character sample, which DEC-0150 has since lengthened. DEC-0150's `FAC-SEM-165`
+  branch for the measurement only): `tsc` exit 0, 29 vector files match, and the whole suite passes on a scratch merge
+  with `60a22ba1` (110 files, 10241 tests, 1 skipped); at `1ccfbf87` the whole suite had one failure, the rename test's 29-character sample, which DEC-0150 has since lengthened. DEC-0150's `FAC-SEM-165`
   reads with the same detector, so its declarations accept strictly more.
 - When one project's alias is read as a credential, DEC-0150's `FAC-SEM-165` also flags that project's entry in the
   declaration; the lander states in `channel-agent.md` that the agent leaves that project's entry out until the registry changes the
@@ -428,6 +428,14 @@ as history and are not edited.
   left to the channel agent standard (support-quality.md, "Not decided here").
 
 ## Checks actually run
+
+On the round-13 head (`60a22ba1` and the handoff commit after it), each exit code read separately: `pnpm exec tsc
+--noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9836 tests passed, 1 skipped, 36.49 s), run under the
+shared heavy-run lock after the scratch merges; its wait began at a 15-minute load of 44.87, which rose to 47.99 by the
+coverage run itself; `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0; `pnpm privacy:check` with the
+organization's index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files match). No U+2014 in the
+lines added since `d1b905ee`, no look-behind in either copy, and every copy of rules 1 and 6 reads the same
+(`git grep -c -F` on each rule's key clause).
 
 On the round-12 head (`6027e1e2` and the handoff commit after it), each exit code read separately: `pnpm exec tsc
 --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9835 tests passed, 1 skipped, 29.81 s; started at a
