@@ -169,6 +169,12 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const invalid = channelAgentView({ extensions: { [KEY]: { ...value, projects: broken } } }, "well-known");
     expect(invalid.errors.filter((line) => line.startsWith("FAC-SEM-162"))).toHaveLength(SECRET_FINDINGS + 1);
     expect(invalid.errors).toContain("FAC-SEM-162 at /: and 2 more");
+    // A repeated project past the cap is counted too.
+    const many = { ...p0, taxonomy: { ...p0.taxonomy, codes: Array.from({ length: 65 }, () => p0.taxonomy.codes[0]) } };
+    const twice = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [many, many] } } }, "well-known").filter((f) => f.code === "FAC-SEM-163");
+    expect(twice).toHaveLength(SECRET_FINDINGS + 1);
+    expect(twice.at(-1)?.message).toContain("and 65 more");
+    expect(placed({ keyword: "propertyNames", instancePath: "/projects/0", schema: {} })).toBe("propertyNames at /projects/0 (a member name the schema takes)");
   });
   it("covers every code it allocates, and a valid declaration", () => {
     const codes = new Set(vectors.declarations.flatMap((v) => v.findings.map((finding) => finding.code)));

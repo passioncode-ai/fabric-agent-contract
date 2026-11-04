@@ -262,7 +262,7 @@ function nameRule(rule: JsonObject): string {
   if (typeof rule.pattern === "string") parts.push(`matching ${rule.pattern}`);
   if (typeof rule.maxLength === "number") parts.push(`at most ${rule.maxLength} code points`);
   if (isObject(rule.not) && rule.not.const !== undefined) parts.push(`other than ${String(rule.not.const)}`);
-  return `a member name ${parts.join(", ")}`;
+  return parts.length === 0 ? "a member name the schema takes" : `a member name ${parts.join(", ")}`;
 }
 
 /** A branch's type, through its `$ref`s into the schema's own `$defs` (the only references this schema makes). */
@@ -675,8 +675,8 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
 /** The document's closing FAC-SEM-165 findings, once: the count past SECRET_FINDINGS, and that the rest was not read. */
 function summary(budget: Budget): Finding[] {
   const findings: Finding[] = [];
-  if (budget.more > 0) findings.push({ code: "FAC-SEM-165", instancePath: budget.moreAt ?? "", message: `and ${budget.more} more names or values shaped like a credential (DEC-0150 CA-5)` });
-  if (budget.unread) findings.push({ code: "FAC-SEM-165", instancePath: budget.unreadAt ?? "", message: `the document holds more than ${SECRET_BUDGET} code points of names and values in its declarations; the rest was not read for credentials (DEC-0150 CA-5)` });
+  if (budget.more > 0) findings.push({ code: "FAC-SEM-165", instancePath: budget.moreAt as string, message: `and ${budget.more} more names or values shaped like a credential (DEC-0150 CA-5)` });
+  if (budget.unread) findings.push({ code: "FAC-SEM-165", instancePath: budget.unreadAt as string, message: `the document holds more than ${SECRET_BUDGET} code points of names and values in its declarations; the rest was not read for credentials (DEC-0150 CA-5)` });
   return findings;
 }
 
