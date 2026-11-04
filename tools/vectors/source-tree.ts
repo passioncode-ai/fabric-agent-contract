@@ -215,8 +215,8 @@ const cases: Array<[string, Json, Json[]]> = [
     [{ kind: "link-outside", file: 4, line: 1, column: 1 }]
   ],
   [
-    "a link's target is resolved literally: # is a path character, so #/../../../x climbs above the root",
-    tree([{ path: "src/#/f.txt", text: "x" }, { path: "src/l", text: "#/../../../x", link: true }]),
+    "a link's target is resolved literally: # is a path character, so #/../../../x climbs above the root; . and // stay inside",
+    tree([{ path: "src/#/f.txt", text: "x" }, { path: "src/l", text: "#/../../../x", link: true }, { path: "src/n", text: ".//../README.md", link: true }]),
     [{ kind: "link-outside", file: 5, line: 1, column: 1 }]
   ],
   [

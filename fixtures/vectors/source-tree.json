@@ -2305,7 +2305,7 @@
       ]
     },
     {
-      "name": "a link's target is resolved literally: # is a path character, so #/../../../x climbs above the root",
+      "name": "a link's target is resolved literally: # is a path character, so #/../../../x climbs above the root; . and // stay inside",
       "input": {
         "manifest": {
           "format": "fabric-source/1",
@@ -2349,6 +2349,11 @@
           {
             "path": "src/l",
             "text": "#/../../../x",
+            "link": true
+          },
+          {
+            "path": "src/n",
+            "text": ".//../README.md",
             "link": true
           }
         ]
