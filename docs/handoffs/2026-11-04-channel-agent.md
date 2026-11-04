@@ -182,7 +182,7 @@ FAA-197, on the adapter's main).
 - Round 15 of the readings (on `b57df67a`): unit pass, seam pass, two product breaks (docs) and unit risks, fixed:
   the Narrowings' `null` bullet states both halves of the none form at a holding text (refused, a narrowing the merge
   post sends; leaving it out accepted, looser); item 1's pointer comes on the `additionalProperties`, `propertyNames`
-  and width lines only; `tiers` may be absent (looser); a draft scenario, SCN-054, follows the reader path, traced to
+  and width lines only; `tiers` may be absent (looser); a draft scenario, SCN-055, follows the reader path, traced to
   FAA-197; the page and CA-1 say how a reader knows a service has a manifest; a member name's own failures are stated
   by its `propertyNames` line alone; the budget line says reading takes more than 1000000 code points of reading; the
   rename advice follows the role down the walk (any frame at or below a channel's `texts`); `SK_FLOOR` is 16; the
@@ -265,6 +265,9 @@ origin), whichever lands second:
 - finds `rawValues` in `src/secret-shape.ts` already the same lines on both branches, and on the merged tree runs
   `pnpm vectors:check` and `test/channel-agent.test.ts` against CT-194's `secret-shape.ts`;
 - keeps both branches' rows in `docs/backlog.md` and in `docs/handoffs/README.md`;
+- DEC-0149 holds SCN-054 ("Check an agent's source before handing it over"); this branch's reader scenario is SCN-055
+  (mapped to SCR-03); check: `grep -c '^### SCN-05[45]' docs/ux/scenarios.md` prints 2 on the
+  merged tree;
 - at this branch's landing, if main then holds DEC-0149's one-pass `hasJwt`, the landing step switches `keyShaped` in
   `src/channel-agent.ts` from `JWT_SHAPE.test` to `hasJwt`; if DEC-0149 lands after this branch, its lander does;
   CT-212 is left unchanged (once switched, `keyShaped` is no `JWT_SHAPE` caller);

@@ -82,7 +82,7 @@
 - **Elements:** gate list, instance path, evidence URI, recovery action (primary action: address first failure).
 - **States:** loading — current gate named; error — failed gate and recovery shown; success — all local gates and report hash shown.
 - **Coverage:** none yet
-- **Scenarios:** SCN-001, SCN-002, SCN-054
+- **Scenarios:** SCN-001, SCN-002, SCN-055
 - **Resources:** conformance-report schema
 - **Status:** designed
 

@@ -59,7 +59,7 @@
 | SCN-050 | I bring my work into an organization and ask its administrators for what it needs | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 | SCN-052 | Share a model key with a colleague's machine, compare six digits, take it back | peer share | P-02 | ST-039, FLW-33 | draft | not audited |
 | SCN-053 | An agent needs a token; I type it into my app's own window | secret prompt | P-02 | ST-040, FLW-34 | draft | not audited |
-| SCN-054 | An agent author learns that a channel-agent declaration is not read and why, or what it still owes | authoring | P-01 | ST-001, FLW-01 | draft | not audited |
+| SCN-055 | An agent author learns that a channel-agent declaration is not read and why, or what it still owes | authoring | P-01 | ST-001, FLW-01 | draft | not audited |
 
 ## Personas
 
@@ -1174,7 +1174,7 @@ independent agent author and P-02 project operator.
 - **Coverage:** DEC-0143 SP-1 to SP-7, DEC-0147 (the agent twin of "Decline"), `channelStep`, `maySecretPrompt` and `secretOutcome` in `src/local-channel.ts`, `test/local-channel.test.ts`
 - **Product:** unobserved
 
-### SCN-054: An agent author learns that a channel-agent declaration is not read and why, or what it still owes
+### SCN-055: An agent author learns that a channel-agent declaration is not read and why, or what it still owes
 
 - **Persona:** P-01
 - **Feature:** authoring
