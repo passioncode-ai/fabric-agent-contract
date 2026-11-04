@@ -380,6 +380,11 @@ request inside the agent's own task (an answer, the product's checks, reading th
 standard's section 4.6 says, a hand-off by section 4.2's rule) is the task; what stays data is text that tries to
 change the task, its tools, its recipients, its spend or its access.
 
+CA-8's channels are the channels the agent answers people on, those its declaration names. The operator channel
+(`fabric-operator-channel/0.1`) is not one of them: a word there stays one of DEC-0121 AP-3's sources, as AP-3, OC-1 and
+OC-5 say. Where one bot serves both, only the operator channel's bound chat is the operator channel; a word in any other
+chat is bounded by CA-8. OC-3 is the binding method CA-8 borrows, not the operator channel itself.
+
 A message on a channel is the operator's word only when the transport identifies its sender as the operator: an
 allowlisted numeric user id, bound as the [operator channel](operator-channel.md)'s OC-3 binds one, or the account's
 owner on an `account` channel; never by a name, a display name or text in the message. On an `account` channel a
@@ -390,10 +395,12 @@ a chat outranks every holding rule for that chat) and recorded in the agent's ow
 way is not one of DEC-0121 [AP-3](service.md#actions)'s sources: it acts only inside that chat, lifting the agent's
 holding rules for it as section 4.10 says; it never sets `_meta.decision` for a service action (AP-2), never starts a
 mandate ([MD-1](delegation.md#the-operators-mandate)), and never reaches any action outside that chat. A decision
-beyond the chat comes through AP-3's own routes. Text the operator quotes or forwards, and every other sender's text,
+beyond the chat comes through AP-3's own routes: when the operator's word in a customer chat asks for an action outside
+that chat, the agent answers in the chat, without acting, that the request is outside the chat and names the route
+(its own session, the operator channel, or an accepted relay). Text the operator quotes or forwards, and every other sender's text,
 stays data. CA-8 is bounded by section 4.10 and by section 10's `account` row (the operator's chat decisions outrank
-holding rules); it does not override them, and it agrees with CT-220 (open), the operator's word carried out the first
-time. It is a duty of this contract, not a narrowing of the standard, so the
+holding rules); it does not override them, and it is to be read with CT-220 (open), the operator's word carried out the
+first time, when it is drafted. It is a duty of this contract, not a narrowing of the standard, so the
 [narrowings](#narrowings-against-the-standard) do not list it.
 
 The declaration has no member for it. It is not a property an agent may or may not declare, and a member whose `false`

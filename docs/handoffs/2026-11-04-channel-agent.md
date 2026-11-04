@@ -248,6 +248,15 @@ FAA-197, on the adapter's main).
   audit, quoting the message and its sender id, since it sets no AP-3 decision record. The merge notes add DEC-0149's
   exit contract, the schema counts (147, 147, 148; 150 set by hand by the last lander), CAS at landing for the next
   free ids, and `test/support-quality.test.ts` reading the channel kinds from the schema's enum.
+- Round 19 of the readings (on `b3f14717`: unit pass with one risk and one note, product one break), with the
+  coordinator's decisions applied: CA-8's channels are those the agent answers people on, the ones its declaration
+  names; the operator channel is not one of them, a word there stays one of DEC-0121 AP-3's sources (AP-3, OC-1,
+  OC-5), and where one bot serves both only the operator channel's bound chat is the operator channel; OC-3 is the
+  binding method CA-8 borrows. The page states the response to the operator's out-of-chat word (answered in the chat,
+  without acting, naming the route), SCN-043 gains it and a customer's injected request as alternative paths, and the
+  merge post asks the standard's owner to fold it in. CT-220 is "to be read with" CA-8 when it is drafted. DEC-0150's
+  Source names rounds 1 to 19 and round 18's decision. The vectors' text says a reader does not read the
+  recommendation, and the renamed vector pins its view (declared, with its `FAC-SEM-164` obligation).
 
 ## The branch and its history
 
@@ -468,7 +477,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after round 17's change (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 19 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -488,6 +497,9 @@ here), and adds:
   its sender as the operator, that word carried out as section 4.10 says inside that chat only, never as one of
   DEC-0121 AP-3's sources (quoting
   [the section](../specification/channel-agent.md#text-from-a-channel-is-data) at posting time);
+- to be asked of the standard's owner: when the operator's word in a customer chat asks for an action outside that
+  chat, the agent answers in the chat, without acting, that the request is outside the chat and names the route (its
+  own session, the operator channel, or an accepted relay); would the owner fold that response into section 4;
 - to be asked of the standard's owner: on an `account` channel, is a message the owner's word only when the account's
   owner is the operator and the send record of section 9's one session owner shows it was neither sent by an agent nor
   relayed from the ticket board, and data otherwise;
