@@ -38,7 +38,9 @@ The schema holds the shapes. The rules:
   `PROPOSAL_TRANSITIONS`).
 - **What leaves the estate** (`FAC-SEM-103`, kind `proposal-submit`, `{proposal, to}`). A proposal leaves only `to` an
   organization server or an `export`; filing a proposal to its own project's manager on the Board is not leaving. A
-  proposal about a private agent never leaves, by construction. An organization server receives a proposal whose
+  proposal about a private agent never leaves, by construction. That is a proposal's rule: the private agent's own
+  source may still be exported locally, and handing it over is a person's act each time
+  ([source](source.md#handing-over), DEC-0149). An organization server receives a proposal whose
   `sourceClass` is `organization` and that is an approved or applied rule, or a live listing (proposed, approved or
   applied). Nothing leaving carries a credential-shaped value or URL (the shared detector) or a home-folder path, in its
   URIs (`id`, `target.project`, `mergedInto`, `supersededBy`, `appliedIn`), its goal's id and text, its change, its

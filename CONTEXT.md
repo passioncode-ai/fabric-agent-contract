@@ -416,6 +416,35 @@ requires, cost presets, the **Result signal**, the state that moves, the evals r
 **agentRef**: `urn:fabric:agent:<publisher>:<id>`, the name of one agent across its versions, derived from its
 package and never chosen. A placement names an agent by it and keeps it when it moves (`FAC-SEM-066`, DEC-0050).
 
+**Source**: What of an agent can be handed to someone else: its code, skills, prompts, schemas, tests and the
+documents it ships, as its `fabric.source.json` (`fabric-source/1`) names them; default deny, `.git` never, its
+`unchecked` paths travelling unread (DEC-0149, [source](docs/specification/source.md)).
+
+**Instance**: What belongs to one installation of an agent and never travels with its **Source**: its records, logs,
+keys, the names of the people and clients it works for, private paths and its configuration, reached through its
+**Source slots**.
+
+**Source slot**: A named place an installation fills, declared in the source manifest without a value (not a board's
+responder slot, DEC-0140): `secret` (a key read
+by name), `config` (a non-secret setting, the operator's or publisher's identity included), `store` (a data store under
+the data folder) or `endpoint` (the operator's infrastructure by role). A required slot left empty is a setup state
+(`setup: true`) of the agent, reported by the slot's name (an `endpoint` too; only a filled endpoint that fails may
+be reported under the connection it backs); a `store` slot is never a setup state: a store absent at the first start is created, and
+one the agent cannot create under its data folder is a failure. A package's `secrets[]` are its secret slots and its `state[]` its store slots
+(`FAC-SEM-160`), except that an absent or empty `state[]` is a copy packed without state (a colleague's copy) and
+passes.
+
+**Installation string**: One of the operator's own strings (an account, a person, a private project, a host) the tree
+check looks for before a **Source export**, kept on the operator's machine outside the source tree and never exported
+(`FAC-SEM-158`).
+
+**Source export**: An agent's **Source** at a named commit written as a new Git repository with one commit by
+`Fabric source export` and no history, after the tree check finds nothing blocking; local, publishing nothing, running
+no test as a condition, never a gitlink. Handing it to anyone is effect class `publish`, a person's act each time, on
+the operator's word for that act, never by a mandate, as [source](docs/specification/source.md#handing-over) specifies
+(DEC-0149). Not the peer share's Export (DEC-0147) and not
+a proposal's `export` destination (`FAC-SEM-103`).
+
 **Package digest**: SHA-256 over the RFC 8785 form of a **Package** without its digest and signatures; through the
 listed files it covers the whole folder, and a countersignature does not change it (DEC-0050).
 
@@ -798,7 +827,8 @@ value (DEC-0142 PS-10).
 
 **Proposal**: A change proposed to a project's manager or the CEO (`fabric-proposal/1`): a rule, an agent, a skill, a
 listing or a fix, with evidence by reference; a rule is approved by a person, nothing applies itself, and nothing
-about a private agent leaves (DEC-0072, [proposals](docs/specification/proposals.md)).
+about a private agent leaves as a proposal (DEC-0072, [proposals](docs/specification/proposals.md)); its source goes
+only by a hand-over (DEC-0149).
 
 **Protocol revision**: `<name>/<revision>`, the version every document names (DEC-0009); a receiver accepts N and N−1
 of the contract's register, lists them in `protocols`, and refuses another with `schema-unsupported` (DEC-0067,

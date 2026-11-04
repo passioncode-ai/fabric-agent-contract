@@ -5,12 +5,14 @@
  * the semantic kinds that read it whole (or the `--kind` named), and adds hints the rules do not give (a near-miss
  * extension key, a profile version member on the wrong profile). A folder is also checked as pairs: a service
  * descriptor with its well-known document, the descriptors together, a descriptor with the manifest it names, a
- * provider entry with its manifest, and the entries with the services.
+ * provider entry with its manifest, the entries with the services, and a source manifest with the package beside it
+ * (DEC-0149). `--kind source-tree` on a folder reads its `fabric.source.json` and checks the source files under it.
  *
  * Each problem is one line, `file  path  rule  message  help`. Exit 0: no problem; 1: a problem; 2: a usage error
  * (an unreadable file, an unknown `--schema` or `--kind`, a schema that cannot be inferred).
  */
-import { type Dirent, existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { type Dirent, accessSync, closeSync, constants as fsConstants, existsSync, lstatSync, openSync, readFileSync, readSync, readdirSync, readlinkSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -21,6 +23,8 @@ import { type Finding, type JsonObject, isObject, withHelp } from "./findings.js
 import { ruleHelp } from "./rule-codes.js";
 import { documentKindsOf, isSemanticKind } from "./semantic-kinds.js";
 import { evaluateSemanticRules } from "./semantic-rules.js";
+import { PACKAGE_FILE } from "./package-rules.js";
+import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
 import { createValidatorSync, formatSchemaErrors } from "./validator.js";
 
 export interface Problem { file: string; path: string; rule: string; message: string; help?: string }
@@ -30,8 +34,20 @@ const USAGE = [
   "usage: pnpm validate <file|dir> [--schema <name>] [--kind <kind>] [--json]",
   "  --schema <name>  validate against schemas/<name>.schema.json instead of the inferred schema",
   "  --kind <kind>    run this semantic kind (src/semantic-kinds.ts) instead of the inferred ones; add --schema to validate too",
+  "  --kind source-tree <dir, fabric.source.json or a source-tree document>",
+  "                   check an agent's source (DEC-0149): a folder holding fabric.source.json, the folder of a",
+  "                   fabric.source.json named, or a source-tree document. In a Git work tree that lists the source it",
+  "                   reads what Git would commit, otherwise the folder's files; it prints paths relative to the folder.",
+  "                   No list of installation strings is read from a file or configuration here: a source-tree document",
+  "                   is checked with the instanceStrings it carries, and the operator's own list is checked in the",
+  "                   operator's tool. One target per run.",
+  "  --kind source-package <dir or a {source, package} document>",
+  "                   check a source manifest against its package (FAC-SEM-160): on a folder, fabric.source.json with",
+  "                   the fabric.package.json beside it, and a note, exit 0, when the folder holds no fabric.package.json",
+  "                   there; a document that holds no {source, package} prints a note. A folder is the only target",
+  "                   of its run; documents may be several.",
   "  --json           print one JSON document: files, problems, notes, usage",
-  "exit 0: no problem; 1: a problem; 2: a usage error"
+  "exit 0: no blocking problem (accepted lines may print); 1: a problem; 2: a usage error"
 ].join("\n");
 const root = projectRoot();
 
@@ -117,6 +133,7 @@ export function inferSchema(value: unknown, file: string): string | undefined {
   }
   const name = path.basename(file);
   if (name === "fabric-agent.json") return "manifest.schema.json";
+  if (name === SOURCE_FILE) return "fabric-source.schema.json";
   // A file by the lock's name is a pin, damaged or not, unless it carries no pin member (`contract`, `commit`) and the
   // members another tool's lock has (the observatory engine's profile lock: `schemas`, `releases`, `schemaRelease`).
   if (name === "fabric-contract.lock.json" && !(isObject(value) && !carries(value, ["contract", "commit"]) && (Object.hasOwn(value, "schemas") || Object.hasOwn(value, "releases") || Object.hasOwn(value, "schemaRelease")))) return "contract-pin.schema.json";
@@ -268,7 +285,58 @@ function addFindings(run: Run, file: string, findings: Finding[]): void {
   }
 }
 
+/**
+ * `checkFileAs`, and for a source check (DEC-0149) whatever it added made instance-free whatever schema or rule spoke:
+ * every path through `shownPointer`, every message through `masked`, and, outside a folder run, the file named by its
+ * basename (or its place when that holds a finding) in files, problems, notes and usage errors alike.
+ */
 function checkFile(run: Run, file: string, relative: string, schemaArg: string | undefined, kindArg: string | undefined, inFolder = false): Checked | undefined {
+  const before = { problems: run.problems.length, notes: run.notes.length, usage: run.usage.length, files: run.files.length };
+  let checked: Checked | undefined;
+  // The schema checkFileAs settles on, inferred from the content too: a fault after it is a source check's by that.
+  const settled: { schema?: string } = {};
+  try {
+    checked = checkFileAs(run, file, relative, schemaArg, kindArg, inFolder, settled);
+  } catch (error) {
+    // A source check never ends without its report: what threw is a usage error naming the file by its shown name and
+    // the error by its name only, never its message, which may quote the input.
+    if (!sourceCheck(file, settled.schema ?? schemaArg, kindArg)) throw error;
+    // Nothing half-written stays: it names the file by its path before the source check made it instance-free.
+    run.problems.length = before.problems;
+    run.notes.length = before.notes;
+    run.usage.length = before.usage;
+    run.files.length = before.files;
+    run.usage.push(`cannot check ${inFolder ? relative : shownPath(path.basename(file))}: ${errorName(error)}`);
+    return undefined;
+  }
+  if (!sourceCheck(file, checked?.schema ?? schemaArg, kindArg)) return checked;
+  const own = (text: string) => (inFolder ? text : text.split(file).join(shownPath(path.basename(file))));
+  // The tree check's document form names a file by its path when that path holds nothing: that lead is not masked
+  // again, as in a folder run (a path of ordinary names is no run, read per segment).
+  const treeFiles = isObject(checked?.value) && Array.isArray((checked?.value as JsonObject).files) ? ((checked?.value as JsonObject).files as unknown[]) : [];
+  const leadOf = (item: Problem): string => {
+    const at = /^\/files\/(\d+)/.exec(item.path);
+    const entry = at === null ? undefined : treeFiles[Number(at[1])];
+    return messageLead(item.message, isObject(entry) ? entry.path : undefined);
+  };
+  for (const item of [...run.problems.slice(before.problems), ...run.notes.slice(before.notes)]) {
+    const lead = leadOf(item);
+    item.file = own(item.file);
+    item.path = shownPointer(item.path);
+    item.message = `${lead}${masked(own(item.message.slice(lead.length)), item.path)}`;
+  }
+  for (const item of run.files.slice(before.files)) item.file = own(item.file);
+  for (let index = before.usage; index < run.usage.length; index += 1) run.usage[index] = masked(own(run.usage[index] as string), "/");
+  return checked;
+}
+
+function checkFileAs(run: Run, file: string, relative: string, schemaArg: string | undefined, kindArg: string | undefined, inFolder = false, settled: { schema?: string } = {}): Checked | undefined {
+  // A source check states a file before it reads it (DEC-0149): a source document named on its own, a folder's manifest,
+  // the document form of `--kind source-tree`. Any other file is read as before (a piped `/dev/stdin` is read).
+  if (sourceCheck(file, schemaArg, kindArg) && !regularFile(file)) {
+    run.usage.push(`cannot read ${file}: not a file`);
+    return undefined;
+  }
   let text: string;
   try {
     text = readFileSync(file, "utf8");
@@ -282,7 +350,8 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
   } catch (error) {
     // A file that does not parse is a problem even in a folder: by its name alone a broken descriptor
     // (`example-agent.default.json`) and a JSONC config (`tsconfig.base.json`) cannot be told apart.
-    run.problems.push({ file, path: "/", rule: "json", message: `the file is not JSON: ${(error as Error).message}`, help: "docs/specification/conformance.md" });
+    // A source check (DEC-0149) prints the position only: the parser's own message may quote the input.
+    run.problems.push({ file, path: "/", rule: "json", message: sourceCheck(file, schemaArg, kindArg) ? parsePosition(text) : `the file is not JSON: ${(error as Error).message}`, help: "docs/specification/conformance.md" });
     return undefined;
   }
   // `--kind` runs that rule instead of the inferred ones, and validates only with `--schema`: a rule's input is often
@@ -327,7 +396,10 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
     else if (byProtocol.length === 1) schema = (byProtocol[0] as Discriminated).file;
     else {
       const near = closest.map((candidate) => `${candidate.file} (missing ${missing(candidate).join(", ")})`);
-      const text = `cannot tell which schema ${file} follows${near.length > 0 ? `: its members match ${near.join(" or ")}` : ""}; pass --schema <name> (a file under schemas/) or --kind <kind>`;
+      // A document whose closest schema is the source manifest's is a source check for naming (DEC-0149): named on
+      // its own, it is named by its basename (or its place), never by its path.
+      const sourceNear = !inFolder && closest.some((candidate) => candidate.file === "fabric-source.schema.json");
+      const text = `cannot tell which schema ${sourceNear ? shownPath(path.basename(file)) : file} follows${near.length > 0 ? `: its members match ${near.join(" or ")}` : ""}; pass --schema <name> (a file under schemas/) or --kind <kind>`;
       // In a folder, a file that names a contract protocol shared by several schemas is the author's to fix; any other
       // file the checker cannot tell (a test fixture, a JSON Schema, a probe receipt) is noted and not checked. A file
       // named on its own is a usage error.
@@ -337,12 +409,14 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
       return undefined;
     }
   }
+  if (schema !== undefined) settled.schema = schema;
   const kinds = kindArg !== undefined ? [kindArg] : documentKindsOf(schema as string);
   run.files.push({ file, schema: schema ?? null, kinds });
+  let schemaFailed = false;
   if (schema !== undefined) {
     const validate = contract().validator.getSchema(`${SCHEMA_PREFIX}schemas/${schema}`) as ValidateFunction;
-    validate(value);
-    for (const line of formatSchemaErrors(validate.errors ?? [])) {
+    schemaFailed = validate(value) !== true;
+    for (const line of formatSchemaErrors(validate.errors ?? [], { instanceFree: sourceCheck(file, schema, kindArg) })) {
       const problem = { file, path: line.instancePath || "/", rule: `schema/${line.keyword}`, message: line.message, help: `schemas/${schema.replace(/#.*$/, "")}` };
       // A lock member the pin schema does not define is a note, as `pnpm pin:check` reads it (kit-written locks carry
       // `adapter` and `kit`).
@@ -350,7 +424,16 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
       else run.problems.push(problem);
     }
   }
-  for (const kind of kinds) addFindings(run, file, evaluateSemanticRules(kind, value));
+  // A source manifest that fails its schema is reported alone: its rules run once it validates (DEC-0149).
+  const sourceFailed = schemaFailed && schema === "fabric-source.schema.json";
+  for (const kind of kinds) if (!sourceFailed) addFindings(run, file, evaluateSemanticRules(kind, value));
+  // The pair rule reads `{source, package}`; a document without both is not a pair, and saying nothing would read as one
+  // that passed.
+  if (kinds.includes("source-package") && !(isObject(value) && isObject(value.source) && isObject(value.package))) {
+    run.notes.push({ file, path: "/", rule: "note/pair", message: "the document holds no {source, package} pair, so no pair was checked (FAC-SEM-160)" });
+  }
+  // A source check prints no hint of any kind: a hint quotes the document's own keys and values.
+  if (sourceCheck(file, schema, kindArg)) return { file, relative, value, schema };
   const hints: Hint[] = [];
   extensionHints(value, "", hints);
   profileHints(schema, value, hints);
@@ -396,6 +479,11 @@ function pairedManifest(run: Run, item: Checked, named: string, manifests: reado
       run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `${installed} is a folder, not a manifest file (${rule})` });
       return { located: true, value: undefined };
     }
+    // A FIFO, a socket or a device is never read: reading a FIFO waits for a writer forever.
+    if (!regularFile(installed)) {
+      run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `${installed} is not a file, so no manifest was read (${rule})` });
+      return { located: true, value: undefined };
+    }
     const value = readJson(installed);
     if (value === undefined) run.notes.push({ file: item.file, path: at, rule: "note/pair", message: `the installed ${installed} does not parse as JSON (${rule})` });
     // The folder's own copy is not paired once a manifest is installed: say so, and how to check the copy.
@@ -417,7 +505,7 @@ function pairFindings(run: Run, item: Checked, quiet: string | undefined, at: st
 }
 
 /** The folder's pairs: services with their well-known documents and manifests, providers with theirs. */
-function checkPairs(run: Run, checked: Checked[]): void {
+function checkPairs(run: Run, checked: Checked[], kindArg?: string): void {
   const of = (schema: string) => checked.filter((item) => item.schema === schema && isObject(item.value));
   const descriptors = of("service-descriptor.schema.json");
   const manifests = of("manifest.schema.json");
@@ -472,7 +560,506 @@ function checkPairs(run: Run, checked: Checked[]): void {
     pairFindings(run, item, quiet, "/manifest", evaluateSemanticRules("provider-observation", { file: item.relative, entry, manifest }));
   }
   if (entries.length > 0) addFindings(run, path.dirname(entries[0]?.file as string), evaluateSemanticRules("provider-directory", { services: descriptors.map((item) => item.value), providers: entries.map((item) => item.value) }));
+  // DEC-0149: a source manifest and the package beside it, by their file names (FAC-SEM-160); with `--kind
+  // source-package` too, which checks each file without a schema, so the pair is the one that kind names.
+  const pairOf = (schema: string, name: string) => checked.filter((item) => path.basename(item.relative) === name && isObject(item.value) && (item.schema === schema || (kindArg === "source-package" && item.schema === undefined)));
+  for (const source of pairOf("fabric-source.schema.json", SOURCE_FILE)) {
+    const beside = pairOf("fabric-package.schema.json", PACKAGE_FILE).find((item) => path.dirname(item.relative) === path.dirname(source.relative));
+    if (beside === undefined) {
+      // Asked for the pair, a folder without the package says so of the folder, not of the manifest as a document.
+      if (kindArg === "source-package") {
+        run.notes = run.notes.filter((note) => note.rule !== "note/pair" || note.file !== source.file);
+        run.notes.push({ file: source.file, path: "/", rule: "note/pair", message: `the folder holds no ${PACKAGE_FILE} beside ${SOURCE_FILE}, so no pair was checked (FAC-SEM-160)` });
+      }
+      continue;
+    }
+    // The pair was checked, so neither file keeps the note that it holds none.
+    run.notes = run.notes.filter((note) => note.rule !== "note/pair" || (note.file !== source.file && note.file !== beside.file));
+    addFindings(run, source.file, evaluateSemanticRules("source-package", { source: source.value, package: beside.value }));
+  }
 }
+
+/** Whether a file's first BINARY_PROBE bytes hold a NUL, reading only those bytes. */
+function probeHoldsNul(file: string): boolean {
+  const descriptor = openSync(file, "r");
+  try {
+    const probe = Buffer.alloc(BINARY_PROBE);
+    const read = readSync(descriptor, probe, 0, BINARY_PROBE, 0);
+    return probe.subarray(0, read).includes(0);
+  } finally {
+    closeSync(descriptor);
+  }
+}
+
+/** A file is binary when its first 8 KiB hold a NUL byte (DEC-0149), as Git and the adapter's check read it. */
+const BINARY_PROBE = 8192;
+
+/**
+ * The variables that point Git at another repository, index or configuration than the folder's own (every hook in a
+ * linked worktree gets `GIT_DIR` and `GIT_INDEX_FILE`); Git runs without them, as the adapter's `_git_files` does, and
+ * also without `GIT_CONFIG*`. `GIT_CEILING_DIRECTORIES` is kept: it is the caller's fence, which the adapter keeps too.
+ */
+const GIT_LOCATION = /^(?:GIT_DIR|GIT_WORK_TREE|GIT_INDEX_FILE|GIT_OBJECT_DIRECTORY|GIT_COMMON_DIR|GIT_ALTERNATE_OBJECT_DIRECTORIES|GIT_NAMESPACE|GIT_PREFIX|GIT_CONFIG.*)$/i;
+
+/**
+ * `git` from PATH's absolute folders only (the adapter's `_git()`): an empty or relative PATH element is the current
+ * folder, and on Windows the process launcher looks in the current folder first, so a checked tree could run its own
+ * `git`. With PATH unset, POSIX's default folders `/bin` and `/usr/bin`; on Windows none, so no git and a walk. Never a
+ * `.cmd` or `.bat`.
+ */
+export function gitExecutable(environment: NodeJS.ProcessEnv = process.env, platform: NodeJS.Platform = process.platform): string | undefined {
+  const name = platform === "win32" ? "git.exe" : "git";
+  const raw = environment.PATH ?? environment.Path;
+  const folders = raw === undefined ? (platform === "win32" ? [] : ["/bin", "/usr/bin"]) : raw.split(platform === "win32" ? ";" : ":");
+  for (const folder of folders) {
+    if (folder === "" || !(platform === "win32" ? path.win32.isAbsolute(folder) : path.posix.isAbsolute(folder))) continue;
+    const candidate = path.join(folder, name);
+    try {
+      if (!statSync(candidate).isFile()) continue;
+      if (platform !== "win32") accessSync(candidate, fsConstants.X_OK);
+      return candidate;
+    } catch {
+      continue;
+    }
+  }
+  return undefined;
+}
+
+/** Git in the folder, its own configuration's file-system monitor off (`--others` would run a command it names). */
+/** How long `--kind source-tree` waits for one Git command before it walks the folder instead; a test may shorten it. */
+export const gitLimits = { timeoutMs: 60_000, maxBuffer: 256 * 1024 * 1024 };
+const git = (executable: string, folder: string, args: readonly string[]) => spawnSync(executable, ["-c", "core.fsmonitor=", ...args], {
+  cwd: folder,
+  maxBuffer: gitLimits.maxBuffer,
+  timeout: gitLimits.timeoutMs,
+  env: Object.fromEntries(Object.entries(process.env).filter(([name]) => !GIT_LOCATION.test(name)))
+});
+
+interface Candidate { path: string; nested?: true }
+
+/**
+ * A path in the folder as a message may print it: as written, or, when it holds a finding (a home folder, a credential,
+ * a credential file by its name), as its longest leading folder that holds none.
+ */
+export function shownPath(relative: string): string {
+  if (relative === "") return ".";
+  // A name longer than any source path (`PATH_READ_LIMIT` UTF-16 units) is never printed nor read whole.
+  if (relative.length > PATH_READ_LIMIT) return "<a path that may hold a finding, under .>";
+  // A path is placed when it holds a finding or an e-mail address: an address in a path is no finding, never printed.
+  // A long run across segments (`/` included) places a name too, so a value split at `/` never shows a part of it.
+  const placed = (text: string) => pathHoldsFinding(text) || labelledByIndex(text) || longRunAt(text) >= 0;
+  if (!placed(relative)) return relative;
+  const parts = relative.split("/");
+  // The clean prefix stops before the segment where a finding, an address or a long run of the whole path starts, so a
+  // value that runs across a `/` never shows its first part, and before the first prefix that holds one of its own.
+  const starts = [findingAt(relative, true), longRunAt(relative)].filter((index) => index >= 0);
+  const at = starts.length === 0 ? -1 : Math.min(...starts);
+  const touched = at < 0 ? parts.length - 1 : relative.slice(0, at).split("/").length - 1;
+  let clean = 0;
+  while (clean < Math.min(parts.length - 1, touched) && !placed(parts.slice(0, clean + 1).join("/"))) clean += 1;
+  // A finding is "may hold": a long run across segments is read conservatively, never confirmed.
+  const what = labelledByIndex(relative) && !pathHoldsFinding(relative) && longRunAt(relative) < 0 ? "whose name holds an e-mail address" : "that may hold a finding";
+  return `<a path ${what}, under ${clean === 0 ? "." : `${parts.slice(0, clean).join("/")}/`}>`;
+}
+
+/**
+ * Git's NUL-separated names as bytes. A name that does not round-trip as UTF-8 is named by its position in Git's list,
+ * never by its bytes.
+ */
+/** A name as UTF-8 when it round-trips, else undefined: a name that does not is never decoded into another. */
+const decodedName = (raw: Buffer): string | undefined => {
+  const text = raw.toString("utf8");
+  return Buffer.from(text, "utf8").equals(raw) ? text : undefined;
+};
+
+/**
+ * The names the index records as gitlinks (mode 160000), from `git ls-files -z --stage` (cached entries only, each
+ * `<mode> <object> <stage>` and a tab before its name): a submodule, whatever the work tree holds there.
+ */
+export function gitlinkNames(stdout: Buffer): string[] {
+  const links: string[] = [];
+  for (let start = 0, end = stdout.indexOf(0); start < stdout.length; start = end + 1, end = stdout.indexOf(0, start)) {
+    const record = stdout.subarray(start, end < 0 ? stdout.length : end);
+    if (end < 0) end = stdout.length;
+    const tab = record.indexOf(9);
+    if (tab < 0 || !record.subarray(0, tab).toString("latin1").startsWith("160000 ")) continue;
+    const name = decodedName(record.subarray(tab + 1));
+    if (name !== undefined) links.push(name);
+  }
+  return links;
+}
+
+export function gitNames(stdout: Buffer): { names: string[]; unreadable: number[]; folders: string[] } {
+  const names: string[] = [];
+  const unreadable: number[] = [];
+  // For each unreadable name, its leading folders that decode (`src` for `src/<bytes>.txt`), "" when none does.
+  const folders: string[] = [];
+  const decoded = decodedName;
+  let start = 0;
+  let position = 0;
+  for (let end = stdout.indexOf(0); end >= 0 || start < stdout.length; end = stdout.indexOf(0, start)) {
+    const stop = end < 0 ? stdout.length : end;
+    const raw = stdout.subarray(start, stop);
+    start = stop + 1;
+    if (raw.length === 0) continue;
+    const name = decoded(raw);
+    if (name !== undefined) names.push(name);
+    else {
+      unreadable.push(position);
+      const parts: string[] = [];
+      for (let from = 0, slash = raw.indexOf(0x2f); slash >= 0; from = slash + 1, slash = raw.indexOf(0x2f, from)) {
+        const part = decoded(raw.subarray(from, slash));
+        if (part === undefined) break;
+        parts.push(part);
+      }
+      folders.push(parts.join("/"));
+    }
+    position += 1;
+  }
+  return { names, unreadable, folders };
+}
+
+/**
+ * The files `--kind source-tree` reads, relative to the folder. In a Git work tree that does not ignore the folder:
+ * what Git would commit (tracked files and untracked ones not ignored, `git ls-files -z --cached --others
+ * --exclude-standard`, gitlinks from `git ls-files -z --stage`), as they are in the work tree, a path under a symbolic link left unread and a folder
+ * on disk a nested repository only when Git listed it with a trailing `/`, the index records a gitlink there or it
+ * holds its own `.git`. Otherwise every file under the folder, entering a folder only when an
+ * include path reaches into it or covers it and never `.git`, a folder holding its own `.git` a nested repository; a
+ * note says why the folder was walked when Git was there and did not list it. No note names the folder. Either way
+ * the list is in UTF-16 code-unit order of the paths: `files[<index>]` counts from 0 in that order.
+ */
+function sourceCandidates(run: Run, folder: string, manifest: unknown, includes: readonly string[]): Candidate[] {
+  const executable = gitExecutable();
+  // The manifest's lists are indexed once: each path is looked up, never compared with every entry.
+  const index = includeIndex(includes);
+  const isSource = sourcePathTest(manifest);
+  const isNested = nestedTest(manifest);
+  // Every mode lists by path in UTF-16 code-unit order, so files[<index>] is the same on every machine and in both modes.
+  const byPath = (candidates: Candidate[]) => candidates.sort((a, b) => Number(a.path > b.path) - Number(a.path < b.path));
+  const walked = (why: string): Candidate[] => {
+    run.notes.push({ file: ".", path: "/", rule: "note/walk", message: `${why}, so the folder's files were walked` });
+    return byPath(walk(folder, "", index, run));
+  };
+  // No git found: a walk with no note, as when there is no Git at all.
+  if (executable === undefined) return byPath(walk(folder, "", index, run));
+  const late = `git did not answer within ${gitLimits.timeoutMs / 1000} s`;
+  const timedOut = (answer: { error?: Error }) => (answer.error as NodeJS.ErrnoException | undefined)?.code === "ETIMEDOUT";
+  const listed = git(executable, folder, ["ls-files", "-z", "--cached", "--others", "--exclude-standard"]);
+  if (timedOut(listed)) return walked(late);
+  // A git that could not run or answer in full (by its error code only) is told from one that refused the folder.
+  if (listed.error !== undefined) return walked(`git ls-files could not run (${String((listed.error as NodeJS.ErrnoException).code)})`);
+  if (listed.status !== 0) return walked(`git ls-files refused the folder (exit ${String(listed.status)})`);
+  const ignored = git(executable, folder, ["check-ignore", "-q", "."]);
+  if (timedOut(ignored)) return walked(late);
+  if (ignored.status === 0) return walked("Git ignores this folder");
+  // An untracked repository is listed with a trailing `/`: it is named without it, a nested repository.
+  const { names, unreadable, folders } = gitNames(listed.stdout);
+  // A name that is not UTF-8 is a usage error only where its leading folders that decode lie in the source as a whole
+  // (an include folder holds them, no exclude folder does); any other is outside the source, never reached.
+  const inSourceFolder = sourceFolderTest(manifest);
+  for (const [at, position] of unreadable.entries()) {
+    if (inSourceFolder(folders[at] as string)) run.usage.push(`cannot read the name Git listed at position ${position}: it is not UTF-8`);
+  }
+  // The gitlinks the index records, in a call of their own: an untracked name never reads as an index entry.
+  const staged = git(executable, folder, ["ls-files", "-z", "--stage"]);
+  if (timedOut(staged)) return walked(late);
+  // The second call fails as the first does: a walk with a note, never an empty set of gitlinks.
+  if (staged.error !== undefined) return walked(`git ls-files --stage could not run (${String((staged.error as NodeJS.ErrnoException).code)})`);
+  if (staged.status !== 0) return walked(`git ls-files --stage refused the folder (exit ${String(staged.status)})`);
+  const linked = new Set(gitlinkNames(staged.stdout));
+  const listedAsFolder = new Set(names.filter((name) => name.endsWith("/")).map((name) => name.slice(0, -1)));
+  const paths = [...new Set(names.map((name) => (name.endsWith("/") ? name.slice(0, -1) : name)))].sort();
+  // Walked only when Git lists nothing under any include path: a file under one, or a nested repository in the source.
+  if (!paths.some((name) => isNested(name) || index.covers(name))) {
+    return walked("Git lists no file under an include path here");
+  }
+  // The manifest is source whatever include says, and read whatever .gitignore says: a regular file Git leaves out is
+  // added (DEC-0149).
+  if (!paths.includes(SOURCE_FILE) && regularFile(path.join(folder, SOURCE_FILE)) && existsSync(path.join(folder, SOURCE_FILE))) paths.push(SOURCE_FILE);
+  paths.sort();
+  // Only a source path, or a nested repository in the source, is looked at: a path outside it is never reached, and
+  // one that is no source path is stated only when it may be nested.
+  return paths.filter((name) => isSource(name) || isNested(name)).flatMap((name): Candidate[] => {
+    const parts = name.split("/");
+    const full = path.join(folder, ...parts);
+    if (!isSource(name) && !listedAsFolder.has(name) && !linked.has(name) && !existsSync(path.join(full, ".git"))) return [];
+    try {
+      // Never read through a link: a path under a symbolic link is not in the tree as it is.
+      for (let depth = 1; depth < parts.length; depth += 1) if (lstatSync(path.join(folder, ...parts.slice(0, depth))).isSymbolicLink()) return [];
+      // A path the index records as a gitlink is a nested repository whatever sits there now (a folder, a file, a link).
+      if (linked.has(name)) return [{ path: name, nested: true }];
+      if (!lstatSync(full).isDirectory()) return [{ path: name }];
+      // A folder is a nested repository when Git listed it with a trailing `/`, the index records a gitlink there, or
+      // it holds its own `.git`; otherwise it is a tracked path no longer in the work tree, and Git lists the untracked
+      // files under it on their own.
+      return listedAsFolder.has(name) || linked.has(name) || existsSync(path.join(full, ".git")) ? [{ path: name, nested: true }] : [];
+    } catch (error) {
+      // A tracked file deleted from the work tree, or under a path that is now a file, is not in the tree as it is; a
+      // gitlink whose folder is gone is still a nested repository, as the index records it.
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code === "ENOENT" && linked.has(name)) return [{ path: name, nested: true }];
+      if (code !== "ENOENT" && code !== "ENOTDIR") run.usage.push(`cannot read ${shownPath(name)}: ${String(code)}`);
+      return [];
+    }
+  });
+}
+
+/** The walk without Git: a folder holding its own `.git` is a nested repository, never entered. */
+function walk(dir: string, prefix: string, includes: IncludeIndex, run: Run): Candidate[] {
+  let entries: Dirent[];
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch (error) {
+    // The folder by its path with a trailing slash, the root as ".", one whose name holds a finding by its place.
+    const relative = prefix.replace(/\/$/, "");
+    const shown = shownPath(relative);
+    run.usage.push(`cannot read ${shown}${shown === relative && relative !== "" ? "/" : ""}: ${String((error as NodeJS.ErrnoException).code)}`);
+    return [];
+  }
+  const found: Candidate[] = [];
+  // Names in one folder differ, so the order by code unit is total and the same on every machine.
+  for (const entry of entries.sort((a, b) => Number(a.name > b.name) - Number(a.name < b.name))) {
+    const relative = `${prefix}${entry.name}`;
+    if (!entry.isDirectory()) { found.push({ path: relative }); continue; }
+    if (entry.name === ".git" || !includes.reaches(`${relative}/`)) continue;
+    const full = path.join(dir, entry.name);
+    if (existsSync(path.join(full, ".git"))) found.push({ path: relative, nested: true });
+    else found.push(...walk(full, `${relative}/`, includes, run));
+  }
+  return found;
+}
+
+/**
+ * A JSON pointer as a message may print it: as written, or, when a member name in it holds what the tree check reports,
+ * its longest leading part that holds none and a mark in place of the rest.
+ */
+export function shownPointer(pointer: string): string {
+  const segments = pointer.split("/").slice(1);
+  const decoded = segments.map((segment) => segment.replace(/~1/g, "/").replace(/~0/g, "~"));
+  const at = findingAt(decoded.join("/"));
+  const across = at < 0 ? decoded.length : decoded.join("/").slice(0, at).split("/").length - 1;
+  // Each member is read as a message's word is (its quotes and trailing punctuation stripped as well) and as a path
+  // value is (an address before a `:` is still one).
+  const own = decoded.findIndex((segment) => wordHoldsFinding(segment) || findingAt(segment, true) >= 0);
+  const first = Math.min(across, own < 0 ? decoded.length : own);
+  if (first >= decoded.length) return pointer;
+  return `${segments.slice(0, first).map((segment) => `/${segment}`).join("")}/<a member whose name holds a finding>`;
+}
+
+/**
+ * A source check (DEC-0149), whose messages carry nothing of the document: a `source-` kind, the source manifest's
+ * schema (named or inferred), or a file named `fabric.source.json` whatever schema reads it. One predicate for the parse
+ * error, the schema messages and the hints.
+ */
+export const sourceCheck = (file: string, schema: string | undefined, kindArg: string | undefined): boolean =>
+  (kindArg !== undefined && SOURCE_KINDS.includes(kindArg)) || schema === "fabric-source.schema.json" || path.basename(file) === SOURCE_FILE;
+/** The three source kinds (DEC-0149), named one by one. */
+const SOURCE_KINDS: readonly string[] = ["source-manifest", "source-tree", "source-package"];
+
+/** Whether a folder can be listed and entered. */
+function readable(folder: string): boolean {
+  try { accessSync(folder, fsConstants.R_OK | fsConstants.X_OK); return true; } catch { return false; }
+}
+
+/**
+ * A JSON parse error by its line and column only: the position is found by reading the text again, never taken from the
+ * parser's message, which names it only for some inputs and may quote them.
+ */
+function parsePosition(text: string): string {
+  const at = jsonErrorAt(text);
+  if (at === undefined) return "the file is not JSON";
+  const before = text.slice(0, at).split("\n");
+  return `the file is not JSON: it stops reading at line ${before.length}, column ${(before.at(-1) as string).length + 1}`;
+}
+
+/**
+ * The UTF-16 index where strict JSON (RFC 8259) stops reading a text, the text's length when it ends too soon, or
+ * undefined when the text is JSON or nests too deep to read.
+ */
+export function jsonErrorAt(text: string): number | undefined {
+  let at = 0;
+  const space = () => { while (at < text.length && " \t\n\r".includes(text[at] as string)) at += 1; };
+  const fail = (): never => { throw new JsonStop(at); };
+  const word = (literal: string) => { for (const char of literal) { if (text[at] !== char) fail(); at += 1; } };
+  const string = () => {
+    at += 1;
+    for (;;) {
+      if (at >= text.length) fail();
+      const code = text.charCodeAt(at);
+      if (code === 0x22) { at += 1; return; }
+      if (code < 0x20) fail();
+      if (code === 0x5c) {
+        at += 1;
+        const escape = text[at];
+        if (escape === "u") { for (let digit = 1; digit <= 4; digit += 1) if (!/[0-9A-Fa-f]/.test(text[at + digit] ?? "")) { at += digit; fail(); } at += 5; }
+        else if (escape !== undefined && "\"\\/bfnrt".includes(escape)) at += 1;
+        else fail();
+      } else at += 1;
+    }
+  };
+  const number = () => {
+    const match = /-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/y;
+    match.lastIndex = at;
+    const found = match.exec(text);
+    if (found === null) fail();
+    at += (found as RegExpExecArray)[0].length;
+  };
+  const value = (): void => {
+    space();
+    const char = text[at];
+    if (char === "{") {
+      at += 1; space();
+      if (text[at] === "}") { at += 1; return; }
+      for (;;) {
+        space();
+        if (text[at] !== "\"") fail();
+        string(); space();
+        if (text[at] !== ":") fail();
+        at += 1; value(); space();
+        if (text[at] === ",") { at += 1; continue; }
+        if (text[at] === "}") { at += 1; return; }
+        fail();
+      }
+    }
+    if (char === "[") {
+      at += 1; space();
+      if (text[at] === "]") { at += 1; return; }
+      for (;;) {
+        value(); space();
+        if (text[at] === ",") { at += 1; continue; }
+        if (text[at] === "]") { at += 1; return; }
+        fail();
+      }
+    }
+    if (char === "\"") return string();
+    if (char === "t") return word("true");
+    if (char === "f") return word("false");
+    if (char === "n") return word("null");
+    if (char === "-" || (char !== undefined && char >= "0" && char <= "9")) return number();
+    fail();
+  };
+  try {
+    value(); space();
+    return at < text.length ? at : undefined;
+  } catch (error) {
+    if (error instanceof JsonStop) return Math.min(error.at, text.length);
+    return undefined;
+  }
+}
+class JsonStop { constructor(readonly at: number) {} }
+
+/**
+ * `--kind source-tree` on a folder (DEC-0149): the folder's `fabric.source.json` is validated and checked, and every
+ * source file `sourceCandidates` lists goes to the tree check; an `unchecked` file by its path only, a symbolic link as
+ * the path it names, never followed, a nested repository by its path. No list of installation strings is read: that
+ * part runs in the operator's tool. Nothing the checker prints names the folder or repeats a value found: a file is
+ * named by its path in the folder, or as `files[<index>]` when a finding is in that path.
+ */
+function checkSourceFolder(run: Run, folder: string): void {
+  const before = { problems: run.problems.length, notes: run.notes.length, usage: run.usage.length, files: run.files.length };
+  try {
+    checkSourceFolderAs(run, folder);
+  } catch (error) {
+    // Nothing half-written stays (it could name the folder before its paths were made relative): the run says the
+    // folder could not be checked, naming the error only, so `--json` still prints one document.
+    run.problems.length = before.problems;
+    run.notes.length = before.notes;
+    run.usage.length = before.usage;
+    run.files.length = before.files;
+    run.usage.push(`cannot check .: ${errorName(error)}`);
+  }
+}
+
+function checkSourceFolderAs(run: Run, folder: string): void {
+  const manifestFile = path.join(folder, SOURCE_FILE);
+  const before = { problems: run.problems.length, notes: run.notes.length, usage: run.usage.length, files: run.files.length };
+  // What checkFile reports names the folder's own path; it is rewritten relative to the folder: the manifest's own
+  // path and a path under the folder, never another text that happens to hold the folder's name.
+  const relativeTo = (text: string) => text.split(manifestFile).join(SOURCE_FILE).split(`${folder}${path.sep}`).join("");
+  const finish = () => {
+    for (const item of [...run.problems.slice(before.problems), ...run.notes.slice(before.notes)]) {
+      item.file = relativeTo(item.file);
+      item.message = relativeTo(item.message);
+    }
+    for (const item of run.files.slice(before.files)) item.file = relativeTo(item.file);
+    for (let index = before.usage; index < run.usage.length; index += 1) run.usage[index] = relativeTo(run.usage[index] as string);
+  };
+  try {
+    // A manifest that is not a regular file (a FIFO, a socket, a device, a folder) is never opened: reading a FIFO waits.
+    statSync(manifestFile);
+    if (!regularFile(manifestFile)) {
+      run.usage.push(`cannot read ${SOURCE_FILE}: not a file`);
+      return;
+    }
+  } catch (error) {
+    // No manifest is one usage error; a folder or a manifest it cannot reach is another, named by its place.
+    const code = String((error as NodeJS.ErrnoException).code);
+    if (code === "ENOENT") run.usage.push(`--kind source-tree reads a folder's ${SOURCE_FILE}; the folder holds none`);
+    else run.usage.push(`cannot read ${readable(folder) ? SOURCE_FILE : "."}: ${code}`);
+    return;
+  }
+  const checked = checkFile(run, manifestFile, SOURCE_FILE, "fabric-source.schema.json", undefined);
+  // What checkFile says of the manifest never quotes it: a parse error by its position only, a schema error with each
+  // word that holds a finding (a credential, a home folder, an address) named by its place. A schema error's path
+  // names members the closed schema defines and indexes, so only its message can quote one.
+  for (const problem of [...run.problems.slice(before.problems), ...run.notes.slice(before.notes)]) {
+    // checkFile already gives a parse error by its position only and a schema error from the schema's side; the
+    // masks are the second line of defence.
+    problem.path = shownPointer(problem.path);
+    problem.message = masked(problem.message, problem.path);
+  }
+  // A manifest that fails its schema is reported alone: the tree runs once it validates.
+  if (checked === undefined || run.problems.slice(before.problems).some((problem) => problem.rule.startsWith("schema/"))) { finish(); return; }
+  const manifest = checked.value;
+  const includes = isObject(manifest) && Array.isArray(manifest.include) ? manifest.include.filter((include): include is string => typeof include === "string") : [];
+  const files: Array<{ path: string; text?: string; binary?: true; nestedRepository?: true }> = [];
+  const isSource = sourcePathTest(manifest);
+  const isNested = nestedTest(manifest);
+  const isUnchecked = uncheckedTest(manifest);
+  for (const candidate of sourceCandidates(run, folder, manifest, includes)) {
+    const relative = candidate.path;
+    // A nested repository in the source goes by its path; one outside it is not counted, in either mode.
+    if (candidate.nested) { if (isNested(relative)) files.push({ path: relative, nestedRepository: true }); continue; }
+    if (!isSource(relative)) continue;
+    const full = path.join(folder, ...relative.split("/"));
+    try {
+      const stat = lstatSync(full);
+      // What is neither a file nor a link (a FIFO, a socket, a device) is no source file, unchecked or not.
+      if (!stat.isFile() && !stat.isSymbolicLink()) continue;
+      // An unchecked path is read by its path only, never opened.
+      if (isUnchecked(relative)) { files.push({ path: relative }); continue; }
+      if (stat.isSymbolicLink()) { files.push({ path: relative, text: readlinkSync(full) }); continue; }
+      // The first BINARY_PROBE bytes decide: a binary file (a large asset, a sparse image) is never read whole.
+      if (probeHoldsNul(full)) files.push({ path: relative, binary: true });
+      else files.push({ path: relative, text: readFileSync(full).toString("utf8") });
+    } catch (error) {
+      run.usage.push(`cannot read ${shownPath(relative)}: ${String((error as NodeJS.ErrnoException).code)}`);
+    }
+  }
+  run.files.push({ file: ".", schema: null, kinds: ["source-tree"] });
+  const findings = evaluateSemanticRules("source-tree", { manifest, files });
+  const inPath = new Set(findings.flatMap((finding) => {
+    const at = /^\/files\/(\d+)\/path$/.exec(finding.instancePath);
+    return at === null ? [] : [Number(at[1])];
+  }));
+  for (const finding of findings) {
+    // A finding in a file names that file, as files[<index>] when its path holds one; one about the manifest names it.
+    const at = /^\/files\/(\d+)/.exec(finding.instancePath);
+    const index = at === null ? undefined : Number(at[1]);
+    const filePath = index === undefined ? SOURCE_FILE : (files[index] as { path: string }).path;
+    // One path policy, as checkSourceTree's: a path that holds a finding (a long run read per segment) or an address is
+    // labelled by its index. A path printed whole leads its message and is not masked again: the second defence reads
+    // what follows it.
+    const file = index === undefined ? SOURCE_FILE : inPath.has(index) || labelledByIndex(filePath) || pathHoldsFinding(filePath) ? `files[${index}]` : filePath;
+    const lead = file === filePath && index !== undefined ? messageLead(finding.message, filePath) : "";
+    addFindings(run, file, [{ ...finding, message: `${lead}${masked(finding.message.slice(lead.length), finding.instancePath)}` }]);
+  }
+  finish();
+}
+
+/** An error's name (`RangeError`), never its message. */
+export const errorName = (error: unknown): string => (error instanceof Error ? error.name : "Error");
 
 /** The folder's `.json` files, dot-folders and `node_modules` left out; a folder it cannot read is a usage error. */
 function jsonFiles(dir: string, run: Run): string[] {
@@ -489,8 +1076,38 @@ function jsonFiles(dir: string, run: Run): string[] {
     .flatMap((entry) => {
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) return jsonFiles(full, run);
-      return entry.name.endsWith(".json") ? [full] : [];
+      if (!entry.name.endsWith(".json")) return [];
+      // A FIFO, a socket or a device is skipped with a note: reading a FIFO waits for a writer forever (a hang before
+      // DEC-0149). Anything else (a link to a folder included) is read as before, and its error reported.
+      if (special(full)) {
+        run.notes.push({ file: full, path: "/", rule: "note/skipped", message: "not a file: a FIFO, a socket or a device is never read" });
+        return [];
+      }
+      return [full];
     });
+}
+
+/** Whether a path names a FIFO, a socket or a device, a link to one included; a path that cannot be stated is not. */
+function special(file: string): boolean {
+  try {
+    const stat = statSync(file);
+    return stat.isFIFO() || stat.isSocket() || stat.isCharacterDevice() || stat.isBlockDevice();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Whether a path names a regular file, a link to one included. A source check (DEC-0149) never opens anything else (a
+ * FIFO, a socket, a device, a folder): reading a FIFO waits for a writer. A path that cannot be stated is left to the
+ * read that reports it.
+ */
+export function regularFile(file: string): boolean {
+  try {
+    return statSync(file).isFile();
+  } catch {
+    return true;
+  }
 }
 
 function schemaName(raw: string): string | undefined {
@@ -533,17 +1150,39 @@ export function main(args: readonly string[]): CliResult {
     else targets.push(arg);
   }
   if (targets.length === 0) return usage("name a file or a folder");
+  // A source tree is one folder's, and a folder's pair is that folder's: a second target would mix two sources in one
+  // report, so it is refused rather than read (DEC-0149).
+  const resolvedBase = process.env.npm_lifecycle_event === "validate" && process.env.INIT_CWD !== undefined ? process.env.INIT_CWD : process.cwd();
+  const isFolder = (named: string) => { try { return statSync(path.resolve(resolvedBase, named)).isDirectory(); } catch { return false; } };
+  if (targets.length > 1 && (kindArg === "source-tree" || (kindArg === "source-package" && targets.some(isFolder)))) return usage(`--kind ${kindArg} takes one target${kindArg === "source-package" ? " when a target is a folder" : ""}; run it once for each`);
 
   const run: Run = { problems: [], notes: [], usage: [], files: [] };
   // `pnpm --dir <checkout> validate ./x` runs in the checkout; a relative path is the author's, from where pnpm was
   // run (INIT_CWD), not the checkout's. Only when this script is the entry: another script that pnpm started may run
   // the command from a folder of its own.
-  const base = process.env.npm_lifecycle_event === "validate" && process.env.INIT_CWD !== undefined ? process.env.INIT_CWD : process.cwd();
+  const base = resolvedBase;
   for (const named of targets) {
     const target = path.resolve(base, named);
     let folder = false;
     try { folder = statSync(target).isDirectory(); } catch { /* a missing file is reported when it is read */ }
+    if (!folder && !existsSync(target) && sourceCheck(target, schemaArg, kindArg)) {
+      // A source check's target that is not there is named by its basename (or its place), never by its path; any
+      // other missing target is read below and named by its path, as before DEC-0149.
+      let code = "ENOENT";
+      try { statSync(target); } catch (error) { code = String((error as NodeJS.ErrnoException).code); }
+      run.usage.push(`cannot read ${shownPath(path.basename(target))}: ${code}`);
+      continue;
+    }
+    if (!folder && kindArg === "source-tree") {
+      // A source manifest named on its own checks its folder; any other file is the document form, named by its
+      // basename, never by its path.
+      if (path.basename(target) === SOURCE_FILE) { checkSourceFolder(run, path.dirname(target)); continue; }
+      // checkFile makes a source check instance-free and names the document by its basename.
+      checkFile(run, target, target, schemaArg, kindArg);
+      continue;
+    }
     if (!folder) { checkFile(run, target, target, schemaArg, kindArg); continue; }
+    if (kindArg === "source-tree") { checkSourceFolder(run, target); continue; }
     const before = run.usage.length;
     const problemsBefore = run.problems.length;
     const files = jsonFiles(target, run);
@@ -552,7 +1191,7 @@ export function main(args: readonly string[]): CliResult {
     const checked = files.flatMap((file) => checkFile(run, file, path.relative(target, file).split(path.sep).join("/"), schemaArg, kindArg, true) ?? []);
     // A folder in which no file was a document it could check checked nothing: that is not a clean run.
     if (files.length > 0 && checked.length === 0 && run.usage.length === before && run.problems.length === problemsBefore) run.usage.push(`${target} holds no document this checkout can tell; the files it skipped are noted`);
-    checkPairs(run, checked);
+    checkPairs(run, checked, kindArg);
   }
   return { code: run.usage.length > 0 ? 2 : run.problems.length > 0 ? 1 : 0, out: render(run, asJson) };
 }

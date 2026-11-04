@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0148` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0150` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -9025,3 +9025,210 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (SCN-052, SCN-053), `CONTEXT.md` (Peer share), `docs/specification/README.md` (the peer share's adoption); DEC-0121,
   DEC-0126, DEC-0142 and DEC-0143 annotated; backlog CT-186 (DEC-0147's duties, in order), CT-201 (what its round-2 readings left) and CT-189 (closes on merge).
 - **Source:** CT-189; CT-178's readings 12 and 13.
+
+### DEC-0149: an agent's source and its instance (`fabric-source/1`)
+
+- **Date:** 2026-11-03
+- **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 24 of
+  the readings (round 16 read clean), cited by round number because their heads were on the review branch, which is not
+  kept at landing, are answered here as the coordinator
+  decided them. Additive: a new schema
+  (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
+  (`FAC-SEM-156` to `FAC-SEM-160`; `FAC-SEM-161`, reserved with them, is not used) and a new vector file; no existing
+  schema, kind, code or vector changes.
+- **Context:** the operator asked that agents can be handed over as source and that a transfer happens only by their
+  wish (CT-194, relayed by Fabric `2af39c53` and a personal agent's request `99221f81`). The research report
+  [agent portability](reports/2026-10-27-agent-portability/README.md) set out the options (§5) and twelve questions (§6);
+  its window for objections passed with none. fabric-workspace answered (`f29499cf`) that the operator's words (agents
+  handed over as sources; a transfer only by wish, in translation) rule out never exporting a private agent and fit the
+  other two options; the Fabric Agent Adapter shipped the check's first part in its tag `v0.58.0` (commit `e311d308`,
+  announced in board message `565b20f3`: `fabric_source_check.py`, home paths, credential shapes, the operator's list
+  kept outside the tree, never a value repeated) and waits on this decision for the manifest, `export` and `import`;
+  another estate's interim scheme (board message `4cd56e3f`: an `<id>-data` instance folder, `<AGENT>_DATA_DIR`) found
+  no agent ready and an export that is in practice a fresh history. Here "the operator" is the person who owns the
+  agent and decides for it, the contract's term.
+- **Decision:** [source](specification/source.md).
+  1. **Where (Q1, option B).** A separate source manifest, `fabric.source.json` at the root of the agent's source
+     repository, `format: "fabric-source/1"`, schema `schemas/fabric-source.schema.json`, closed. It travels with the
+     source; it is not a member of `fabric-agent.json`, not the package and never the descriptor.
+  2. **Every kind (Q11):** serving agents, consumer agents and skill sets.
+  3. **Opt-in (Q10):** a repository with `fabric.source.json` is held to this decision, one without is not; the
+     adapter's templates are to write one for every new agent (owed by CT-207). Requiring it of every agent is a later
+     decision.
+  4. **Default deny (Q2):** `include` (at least one path) names the source, `exclude` carves holes in it. A path is the
+     package's path grammar; one ending in `/` names a folder and everything under it; no globs. `.git` is never source
+     (a path with a `.git` segment); the manifest itself always is. A file outside `include` is simply not source.
+  5. **Members:** `format`, `include`, `exclude`, `slots`, `binaries` (binary files that are source, each inside it,
+     Q12), `unchecked` (at most 64 `{path, reason}`: source paths, files or folders, that travel with the source and
+     that the tree check reads by their path only, such as synthetic test vectors or a licence whose copyright line
+     names a holder on the operator's list; a credential file by its name is never source, unchecked or not; the
+     adapter's `.fabric-source-ignore` is retired into it: plain source to `unchecked` with its reason, a credential file
+     by its name to `exclude` or the instance, a glob to explicit paths or a folder entry, a nested repository to
+     `exclude` and checked in its own tree under its own manifest),
+     `publicAddresses` (at most 32 addresses the source may carry) and `description` (at most 200 characters).
+  6. **Slots:** `{name, kind, purpose, optional?, path?}`, `name` in the package's slot grammar, `kind` one of
+     `secret`, `config` (a non-secret setting, the operator's or publisher's identity included), `store` (a data store
+     relative to the data folder, with `path`, which no other kind has) and `endpoint` (the operator's infrastructure by
+     role). A store slot's `path` is written without a trailing slash and names the file or folder the agent keeps its
+     store in. No member ever holds a value.
+  7. **Installation strings (Q3):** the operator's own strings live on the operator's machine outside the source tree,
+     as plain text, never in the source and never exported; keyed digests are not adopted. The contract ships the
+     reference check with the list as an input; where a tool keeps the list is the tool's. `pnpm validate` reads none.
+  8. **The check** (`checkSourceTree`, kind `source-tree`, pure): `{manifest, files: [{path, text?, binary?,
+     nestedRepository?}], instanceStrings?}`; it ignores a file that is not source and reads an `unchecked` file and a
+     nested repository by their path only. Blocking, `FAC-SEM-158`:
+     - `home-path`, on each line and a file's path: a home folder with a name in the forms the Fabric Agent Adapter's
+       `v0.58.0` check reads, listed in source.md; a one-character name and the adapter's neutral names, kept equal as
+       `NEUTRAL_HOMES`, are not a finding, and `~` never is: a path written relative to the user's home is portable; an
+       operator who wants a neutral-looking name caught lists it among the installation strings, and the adapter's
+       `home: <name>` declaration is a tool's addition;
+     - `credential`, on each line and a file's path, the forms the adapter's `v0.58.0` check reads (`_secret_in`),
+       listed in source.md: a private key block (PEM, OpenSSH, PGP); a JWK's private `d`; a JWT; a provider key
+       matched under ASCII case only, with no letter or digit of any script before it, read at every start; a bearer token inside a line; an absolute URL with a password
+       of 8 or more mixed characters, or a query or fragment value that is a credential (the URL ended by Python's white
+       space, an escape that is not UTF-8 decoded to U+FFFD), an inner URL starting with a
+       scheme read two levels deep; a long mixed run assigned to a name that can only carry a credential,
+       percent-decoded; a line with a JSON escape of `&`, `=` or `/` read again unescaped. A token holding one of the
+       adapter's synthetic words (`SYNTHETIC`, kept equal) is no finding, a private key block always is; a whole Ed25519
+       signature under a quoted `sig`, `signature` or `signatures` member is public. Or a file that is a credential by its name (pack's list plus
+       `*.token` and `*.credential`), unchecked or not;
+     - `binary` (marked binary and not in `binaries`, Q12); `nested-repository` (a submodule's gitlink or a folder
+       holding its own `.git` in the source: it would export as a link to another repository, or not at all; `exclude`
+       names it, and it is checked in its own tree); `instance-string` (an entry found under Unicode simple case
+       folding, the entry and the text also in NFC, as written, percent-encoded, form-encoded with `+`, JSON-escaped,
+       with `\/`, or with `\uXXXX`); `short-instance-string` (an entry that is not a well-formed string of at least 3
+       characters, refused as input); `missing` (an `include` path with no file); `no-include`.
+
+     Warnings, `FAC-SEM-159`, accepted: `email` (the local part at most 64 characters, not in `publicAddresses`, not at
+     an RFC 2606 name, not followed by `:`, not ending in an image's extension, not inside a URL the credential kind
+     reports), `link-outside` (a relative Markdown link whose target is not source), `no-license` (no licence file at the
+     root: the contract chooses no licence, Q7). A finding names the file, line (split at LF, a trailing CR dropped, as
+     the adapter reads it) and column (from 1, in UTF-16 code units) and kind, never the text found; a finding in a
+     file's own path has no line and no column. `pnpm --silent validate <dir> --kind source-tree` reads what Git would
+     commit in a work tree that does not ignore the folder (a `git` from PATH's absolute folders only, `-c
+     core.fsmonitor= ls-files --cached --others --exclude-standard`, gitlinks from `ls-files --stage`, the work tree's contents, Git's location variables
+     and `GIT_CONFIG*` removed, `GIT_CEILING_DIRECTORIES` kept as the caller's fence, never through a symbolic link, no path outside the source reached, an untracked repository a nested
+     one, a path it cannot reach a usage error, a Git command unanswered after 60 seconds a walk with a note, an
+     `include` path Git ignores read as `missing`) and otherwise walks the folder, which it does only when Git lists
+     nothing under any include path (a nested repository in the source counts) (never `.git`, a folder only when an include path reaches into it or covers it),
+     with a note saying why when Git was there; it never prints the checked folder or a found value: a file by its path
+     in the folder, or `files[<index>]` when a finding or an e-mail address is in that path (an address in a path is no
+     finding and is never printed), counted from 0 in the code-unit order of the paths read (a nested repository
+     outside the source takes no index); a path it cannot read that holds a finding or an address by the folder it is
+     under, a name Git lists that is not UTF-8 by its position in Git's list (only where its leading folders that decode
+     lie in the source as a whole; any other is outside the source and skipped). A source check (the
+     folder, a source-tree document, any `fabric.source.json`) prints no instance data in a schema or parse message: a
+     parse error by its line and column, found by reading the text again; a schema error built from its keyword and
+     the schema's own values (an extra member "has a member the schema does not define", without its name; a bad
+     member name at its object); no hint of any kind; and, as a second line of defence, each value of a message the
+     tree check would report and each member name of a problem's path that holds one named by its place; the checked folder itself as `.` in every usage error, a path's
+     finding read as the tree check reads one (an e-mail address in a path is no finding, and is read as in a line,
+     RFC 2606 and image names being none, except that one followed by `:` is still an address); a file whose own path
+     is outside the grammar is not source: never read and never exported, in either mode.
+     Given a file named `fabric.source.json`
+     it checks that file's folder; any other file is a source-tree document named by its basename.
+     The vectors carry a `constants` block (the neutral home names, the synthetic words, the home-folder and
+     credential-file patterns) written from `src/source-rules.ts`, which a port holds equal.
+  9. **The manifest's rules** (kind `source-manifest`): `FAC-SEM-156`, a slot named twice, a name or purpose shaped like
+     a credential (read as `FAC-SEM-065` reads a package secret's, so a purpose packs unchanged), a manifest
+     `description` shaped like one (read as prose), a store path twice; `FAC-SEM-157`, a path twice in its list (`unchecked` included), a path in
+     `.git`, an `include` path inside an `exclude` folder, an `exclude` path inside no `include` folder or equal to an
+     `include` path, a `binaries` path that is not a file of the source, an `unchecked` path outside the source. A
+     message names a credential-shaped name or path by its place (`slots[<i>]`, `secrets[<i>]`), never by its value; so
+     does `FAC-SEM-160`.
+  10. **The package pair** (kind `source-package`, `{source, package}`): `FAC-SEM-160`, the package's `secrets[]`
+      (name and `optional`) are the source's `secret` slots, always; its `state[]` paths are the `store` slots' paths,
+      as sets, when `state[]` holds any entry: an absent or empty `state[]` is a copy packed without state (a
+      colleague's copy, package.md) and passes. `pack` writes them from the manifest. A package may carry
+      `fabric.source.json` as an ordinary file listed in `files[]` (a packer that packs in place lists it), and
+      `pnpm validate <dir>` checks a folder holding both files as that pair.
+  11. **Source export (Q4, Q5, Q6, Q9):** it reads a committed tree at a named commit, takes only the source paths and
+      never a gitlink, runs the check with the operator's list and refuses on any blocking finding; it writes a
+      directory holding a new Git repository with one commit and no history, author and committer `Fabric source export
+      <source-export@fabric.invalid>`, the source commit's committer date, the message `Source export`; it rewrites no
+      file (so the source's identity fields name the publisher, never a person or the operator's account), carries no
+      link to the original, publishes nothing, and writes a receipt in the instance (source commit, the manifest's
+      SHA-256, counts by kind, the new commit), never a value found. It does not run the source's tests and does not
+      refuse on them (Q9); a tool may offer a test run beside it. The adapter's `export`, owed by CT-207, is to be the
+      implementation; this repository ships the check.
+  12. **Handing over (Q8, option P3):** a local source export is not a transfer and is always allowed. Handing it to
+      anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
+      declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
+      source commit and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
+      `actionDecision` table apply except where source.md gives another answer; CT-181 owns bringing the departures
+      [source](specification/source.md#handing-over) lists into the reference gate and defines the approval route;
+      until a service pins a revision carrying it, an `approval/1` is not read for a hand-over and the action's owner
+      enforces the departures. The two forms of the word, the `target` form, the order of checks, consumption,
+      idempotency and the refusal codes are in source.md. Every agent
+      follows the same rule, private or not, and a private agent is never handed over on anything less; under DEC-0126 a
+      relay carries the operator's words verbatim and an approval for one hand-over covers that act only (OA-5,
+      governance-and-roles' external effects). `src/mandate.ts` is unchanged: the contract names no hand-over action id,
+      so the rule binds the action's owner (Fabric, CT-208; the adapter, CT-207). The adapter's export, owed by CT-207,
+      never creates a repository and never pushes; Fabric's "give as source" action is to be the hand-over's twin under DEC-0121 (CT-208), and the
+      hand-over's screens are Fabric's (CT-208).
+  13. **Import:** a patch applies only when every path it touches is source, else it is refused whole; it applies at the
+      source, never at an exported copy (`patchPathsAllowed`).
+  14. **Starting without the instance (§5.8):** an agent started with an empty data folder and no slot filled starts;
+      a service answers `status: degraded` with one `degraded[]` entry per missing required slot, its `source` the
+      slot's name, each `setup: true` (DEC-0044's setup state), an `endpoint` included; a `store` slot is never a setup
+      state (a store absent at the first start is created, one the agent cannot create under its data folder is a failure
+      entry); a missing slot is always reported by its name with `setup: true`, an `endpoint` included, never under a
+      connection's id, so a host never reads a setup state as a failing connection; only a filled endpoint that fails,
+      when the agent's own code knows it backs a declared connection, is reported under that connection's id, without
+      `setup` (the agent's code owns that mapping; no schema member declares it and nothing checks it). Every failure entry, from a slot or not, comes before every setup entry, and truncation past
+      `degraded[]`'s 64 entries drops setup entries first: failures, then missing slots in the manifest's order, up to
+      63 entries in all, then one `setup: true` entry with `source` `fabric.source.json#slots` counting the rest (a `#`
+      is outside both the slot and the connection id grammar); when failures alone exceed 63, 63 of them and that entry. A capability that needs a missing slot answers, after the gate
+      (AP-2) admitted the call, with its tool's own error (an MCP tool result with `isError: true`, or the surface's
+      ordinary error) whose text names the slot by its name, says a person must finish the agent's setup and points at
+      the well-known document's setup entry, never carrying a value; this decision adds no refusal code for it (a later
+      decision may). The rest work. A conformance row for the agent's own test; no vector.
+- **Why:** the source must travel with the source code and serve every kind of agent, which only a file of its own does;
+  default deny keeps a forgotten file at home, where default allow would publish it; a list of private strings is
+  itself private, so it stays with the operator; a source export that rewrites nothing keeps one truth, the source, and
+  a hand-over gated as `publish` on the operator's own decision keeps the operator's "only by wish" without forbidding
+  the handing over they asked for. The knowledge base's agents-first item 7 (one approval holds for the whole task,
+  carried as `mandate/1`) was read: the hand-over stays per act under it, because a hand-over publishes the agent to a
+  recipient, possibly outside the estate, and the operator's standing rule asks an explicit instruction for each
+  outward act; the merge is to amend agents-first items 5 and 7 to name the exception. A source check prints no instance
+  data in a schema or parse message by construction, since masking each leaking message after the fact missed one
+  shape after another. The contract's check gives the adapter's answers on the same shapes, so one vector file holds
+  both to one reading.
+- **Alternatives considered:** A, a `portability` member of `fabric-agent.json` (its top level is closed and a consumer
+  agent has none); A', the same under `extensions` (still absent for consumer agents and skill sets); C, members of
+  `fabric-package/1` (written at pack time, after `include` must be known; a repository never packed has none); D, the
+  descriptor (an installation's file, which never travels); default allow (a new file leaks); keyed digests for the
+  operator's list (substring and encoded-form matching would need their own tokenization rules and vectors); P1, a
+  private agent is never exported (contradicts the operator's ask); P2, export itself gated on the operator's word (a
+  local export publishes nothing, so the gate belongs on the hand-over); for `home-path`, the value scanner
+  `hasHomePath`, refused for a source tree because it flags `~/` and neutral homes, which every portable source holds;
+  for `credential`, the value detectors alone (`secretArgument`, `secretUrl`), refused because their `?token=` and
+  bare long-run readings block every documented placeholder and integrity hash; a separate `.fabric-source-ignore`
+  file beside the manifest (two files to keep in step; `unchecked` carries each path's reason); a new `humanStep`
+  value `setup` for a missing slot, decided in round 1 and reversed in round 2: a new step value ripples into
+  hand-written step lists in the adapter's kits, Fabric Dashboards' service host and a template, a pinned reader drops
+  a whole actions declaration holding it, and it leaves the order against the gate's refusals undefined; adding the
+  hand-over to `src/mandate.ts` now (the contract names no action id for it yet, so its owner refuses a mandate; CT-181
+  adds the MD-6 entry once the hand-over has an action id).
+- **Compatibility:** additive. `contractVersion` stays `0.1.0`; `fabric-source/1` joins the protocol register; no
+  existing schema, kind, code or vector changes. A repository without `fabric.source.json` is untouched.
+- **Consequences / affects:** `schemas/fabric-source.schema.json`; `src/source-rules.ts`, `src/semantic-rules.ts`,
+  `src/semantic-kinds.ts`, `src/protocol-revisions.ts`, `src/validator.ts` (instance-free schema messages), `src/validate-cli.ts` (`--kind source-tree`, Git and walk
+  modes, relative output, the pair, the name rule); `tools/vectors/source-tree.ts` and
+  `fixtures/vectors/source-tree.json`; `fixtures/positive/fabric-source-*.json`, `fixtures/negative/fabric-source-*.json`,
+  `fixtures/semantic/source-*.json`, `fixtures/catalogue.json`; `test/source-rules.test.ts`,
+  `test/validate-cli.test.ts`, `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
+  `test/schema-compilation.test.ts`, `test/protocol-revisions.test.ts`, `test/validator.test.ts`; `vitest.config.ts` (the floors, `src/validator.ts` added); `docs/specification/source.md` (new), `docs/guides/connecting-compatible-agents.md` (the inference row and the pair),
+  `package.md` (secrets and state from the source's slots, a copy without state), `proposals.md` (a private agent's
+  source), `delegation.md` (MD-5, MD-6, DL-18's order of checks, DL-26's exception, OA-5), `governance-and-roles.md` (external effects), `conformance.md` (the register,
+  the reference module, the readers' rows), `docs/specification/README.md`, `README.md` (Build an agent),
+  `docs/DOCMAP.md`, `CONTEXT.md` (Source, Instance, Source slot, Installation string, Source export), `AGENTS.md`
+  (`pnpm --silent validate`), `docs/evidence/sources.md` (RFC 2606), `docs/ux/foundation.md` (ST-037),
+  `docs/ux/scenarios.md` (SCN-054), `docs/ux/screens.md` (SCR-03), `service.md` (the setup state, the AP-2 note, the actions-table note), `docs/ux/` SCN-045, SCN-046 and FLW-31, `connections.md` (the id grammar's guarantee), `interop.md` (the refusal table's pointer), `delegation.md`'s refusal table (the hand-over cases), the research report's header; backlog CT-181 (the
+  hand-over's target and MD-6 entry), CT-194 (done at merge), CT-207 (the adapter's
+  adoption), CT-208 (Fabric's "give as source").
+- **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
+  threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
+  board message `565b20f3`); rounds 1 to 24 of the readings, cited by round number (their heads were on the review branch, not kept at landing),
+  decided by the coordinator.

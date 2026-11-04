@@ -38,6 +38,7 @@ import * as peerShare from "./peer-share.js";
 import * as relayCrypto from "./relay-crypto.js";
 import * as repairDecision from "./repair-decision.js";
 import * as shareRegistration from "./share-registration.js";
+import * as sourceTree from "./source-tree.js";
 
 /** One generator: its source in `tools/vectors/`, and the exact text of each file it writes, by repository path. */
 export interface Generator { source: string; build: () => Record<string, string> }
@@ -69,7 +70,8 @@ export const GENERATORS: readonly Generator[] = [
   { source: "peer-share.ts", build: one(peerShare.VECTOR_FILE, peerShare.buildPeerShareVectors) },
   { source: "relay-crypto.ts", build: () => relayCrypto.buildVectorFiles() },
   { source: "repair-decision.ts", build: one(repairDecision.VECTOR_FILE, repairDecision.buildRepairDecisionVectors) },
-  { source: "share-registration.ts", build: one(shareRegistration.VECTOR_FILE, shareRegistration.buildShareRegistrationVectors) }
+  { source: "share-registration.ts", build: one(shareRegistration.VECTOR_FILE, shareRegistration.buildShareRegistrationVectors) },
+  { source: "source-tree.ts", build: one(sourceTree.VECTOR_FILE, sourceTree.buildSourceTreeVectors) }
 ];
 
 /**

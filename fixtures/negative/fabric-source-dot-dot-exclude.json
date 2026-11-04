@@ -1,0 +1,10 @@
+{
+  "format": "fabric-source/1",
+  "include": [
+    "src/",
+    "README.md"
+  ],
+  "exclude": [
+    "src/../secrets/"
+  ]
+}

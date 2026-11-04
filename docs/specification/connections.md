@@ -24,7 +24,7 @@ entries:
 
 | Member | What |
 |---|---|
-| `id` | `^[a-z0-9][a-z0-9._-]{0,63}$`, once in the list; a `degraded[].source` equal to it is this connection failing |
+| `id` | `^[a-z0-9][a-z0-9._-]{0,63}$`, once in the list; a `degraded[].source` equal to it is this connection failing. A slot's setup entry and the overflow entry never read as a failing connection: a slot's name (`^[A-Z][A-Z0-9_]{0,63}$`) and the overflow source `fabric.source.json#slots` fall outside this grammar ([source](source.md#starting-without-the-instance)), and a change to the grammar must keep that |
 | `kind` | `service` (another agent), `model`, `connector`, `store` or `channel` |
 | `target` | what it reaches, 1 to 200 characters, no space: for a `service` an `id.instance` key or a product id (lower case, `^[a-z0-9][a-z0-9-]{0,63}(\.[a-z0-9][a-z0-9-]{0,63})?$`), `provider/model` for a `model`, otherwise a name |
 | `capability` | only on a `service`: the capability it calls, a [capability name](interop.md#capability-names) (DEC-0020) |

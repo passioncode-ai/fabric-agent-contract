@@ -44,7 +44,7 @@ const under = (path: string, parent: string) => path === parent || path.startsWi
 /** True for a oneOf that failed because more than one branch matched: a problem of its own, never collapsed. */
 const ambiguous = (error: ErrorObject) => error.keyword === "oneOf" && Array.isArray(error.params.passingSchemas);
 
-function message(error: ErrorObject): string {
+function message(error: ErrorObject, instanceFree = false): string {
   const params = error.params as Record<string, unknown>;
   switch (error.keyword) {
     case "enum": return `must be one of ${(params.allowedValues as unknown[]).map(quoted).join(", ")}`;
@@ -55,12 +55,37 @@ function message(error: ErrorObject): string {
       break;
     case "additionalProperties": {
       const parent = error.parentSchema as { properties?: Record<string, unknown> } | undefined;
-      const text = `has the member ${quoted(params.additionalProperty)}, which the schema does not define`;
+      const text = instanceFree ? "has a member the schema does not define" : `has the member ${quoted(params.additionalProperty)}, which the schema does not define`;
       return parent?.properties !== undefined && Object.hasOwn(parent.properties, "extensions") ? `${text}; vendor data goes under "extensions", keyed by an absolute URI` : text;
     }
   }
+  // Instance-free: only a message built from the keyword and the schema's own values, never Ajv's text, which a keyword
+  // added later might fill from the document.
+  if (instanceFree) return INSTANCE_FREE[error.keyword]?.(params) ?? `is not valid (${error.keyword})`;
   return error.message ?? `is not valid (${error.keyword})`;
 }
+
+/** The messages an instance-free reading builds from the schema's side of an error: limits, patterns, types, formats. */
+export const INSTANCE_FREE: Readonly<Record<string, (params: Record<string, unknown>) => string>> = {
+  type: (params) => `must be ${String(params.type)}`,
+  pattern: (params) => `must match pattern ${quoted(params.pattern)}`,
+  format: (params) => `must match format ${quoted(params.format)}`,
+  minLength: (params) => `must NOT have fewer than ${String(params.limit)} characters`,
+  maxLength: (params) => `must NOT have more than ${String(params.limit)} characters`,
+  minItems: (params) => `must NOT have fewer than ${String(params.limit)} items`,
+  maxItems: (params) => `must NOT have more than ${String(params.limit)} items`,
+  minProperties: (params) => `must NOT have fewer than ${String(params.limit)} properties`,
+  maxProperties: (params) => `must NOT have more than ${String(params.limit)} properties`,
+  minimum: (params) => `must be >= ${String(params.limit)}`,
+  maximum: (params) => `must be <= ${String(params.limit)}`,
+  uniqueItems: () => "must NOT have duplicate items",
+  not: () => "must NOT be valid against the schema it negates",
+  propertyNames: () => "has a member name the schema refuses",
+  unevaluatedProperties: () => "has a member the schema does not evaluate",
+  oneOf: () => "must match exactly one branch",
+  anyOf: () => "must match a branch",
+  if: () => "must match the branch its condition chose"
+};
 
 /**
  * REQ-04 (contract review 2026-10-21): Ajv's errors as an author reads them. An `anyOf`, `oneOf` or `if` wrapper is
@@ -68,9 +93,12 @@ function message(error: ErrorObject): string {
  * that some branch failed), except a `oneOf` that matched more than one branch. `enum` and `const` name their allowed
  * values, `required` the missing member, `additionalProperties` the extra member and, where the object's schema has
  * an `extensions` member (errors from a validator built with `verbose`), where vendor data goes. A bad member name is
- * one line at that member's path. Order is kept.
+ * one line at that member's path. Order is kept. With `instanceFree` (DEC-0149's source checks) no message carries
+ * anything of the document: each is built from the keyword and the schema's own values, an extra member and a bad
+ * member name are reported at their object without the name.
  */
-export function formatSchemaErrors(errors: readonly ErrorObject[]): SchemaProblem[] {
+export function formatSchemaErrors(errors: readonly ErrorObject[], options: { instanceFree?: boolean } = {}): SchemaProblem[] {
+  const free = options.instanceFree === true;
   const leaves = errors.filter((error) => !WRAPPERS.has(error.keyword));
   // A bad member name is one problem: Ajv reports the inner keyword (it carries `propertyName`) and then the
   // `propertyNames` wrapper, both at the object. Keep the inner one, at the member's own path, naming the member.
@@ -79,7 +107,10 @@ export function formatSchemaErrors(errors: readonly ErrorObject[]): SchemaProble
     .filter((error) => !(error.keyword === "propertyNames" && named.has(`${error.instancePath}\u0000${String(error.params.propertyName)}`)))
     .filter((error) => !WRAPPERS.has(error.keyword) || ambiguous(error) || !leaves.some((leaf) => under(leaf.instancePath, error.instancePath)))
     .map((error) => typeof error.propertyName === "string"
-      ? { instancePath: `${error.instancePath}/${error.propertyName.replace(/~/g, "~0").replace(/\//g, "~1")}`, keyword: error.keyword, message: `the member name ${quoted(error.propertyName)} ${message(error)}` }
-      : { instancePath: error.instancePath, keyword: error.keyword, message: message(error) });
+      ? free
+        // Instance-free: a bad member name is reported at its object, never by the name.
+        ? { instancePath: error.instancePath, keyword: error.keyword, message: `a member name ${message(error, true)}` }
+        : { instancePath: `${error.instancePath}/${error.propertyName.replace(/~/g, "~0").replace(/\//g, "~1")}`, keyword: error.keyword, message: `the member name ${quoted(error.propertyName)} ${message(error)}` }
+      : { instancePath: error.instancePath, keyword: error.keyword, message: message(error, free) });
 }
 // #endregion schema-errors

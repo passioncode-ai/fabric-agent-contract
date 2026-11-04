@@ -241,7 +241,10 @@ the same input never share a job (a node that queues keys its callers with `jobC
 network](agent-network.md#call-queue)). A key whose job ended `quota-exhausted` admits the same intent again once the limit no
 longer holds (the reset passed, or the person acted), and so does a key whose job ended `limit-reached` once its
 approval is granted: the provider runs it, once. A key whose job ended `outcome-unknown` is answered with that job
-again and never runs a second time. Any other key whose job ended is answered with that job.
+again and never runs a second time. Any other key whose job ended is answered with that job. A source hand-over is
+one synchronous call, never a job: a repeated key while the call is in flight is refused `unknown-state`
+(`handover-in-flight`), the same key with other arguments `idempotency-conflict`, and its key never stores a refusal or
+a failure before any effect, as [source](source.md#handing-over) specifies (DEC-0149).
 
 **Unknown is `null`.** In a job's or a result's `usage` ([`common.schema.json#/$defs/usage`](../../schemas/common.schema.json)),
 `inputTokens`, `outputTokens`, `cacheReadTokens`, `cacheWriteTokens`, `costUsd` and `wallMs` are `null` when nobody
@@ -317,12 +320,13 @@ each in the `structuredContent` of an `isError` tool result:
 
 | Code | Meaning | Who answers | What the caller does |
 |---|---|---|---|
-| `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without a decision, or the caller's mandate does not cover the call (`data.detail` `outside-mandate: <part>`, DEC-0125) | the service | hands on again within its own mandate when that covers the call; otherwise asks the operator for that part and calls again with their answer in `_meta.decision` or a mandate that covers it |
-| `decision-invalid` | the decision is not valid against its schema, names another action or another object, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it; or the mandate is not valid (`data.detail` `mandate-*`, DEC-0125) | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3) |
+| `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without a decision, or the caller's mandate does not cover the call (`data.detail` `outside-mandate: <part>`, DEC-0125); a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149) | the service | hands on again within its own mandate when that covers the call; otherwise asks the operator for that part and calls again with their answer in `_meta.decision` or a mandate that covers it; for a source hand-over, as [source](source.md#handing-over) specifies |
+| `decision-invalid` | the decision is not valid against its schema, names another action or another object, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it; or the mandate is not valid (`data.detail` `mandate-*`, DEC-0125); a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149) | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3); for a source hand-over, as [source](source.md#handing-over) specifies |
 | `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one | the service, with `error.data.humanStep` and `error.data.url`, the direct link to the step | hands the person that link |
 
 A `relayed` action from a T2 caller keeps [delegation](delegation.md#refusal-codes)'s `approval-required` (DL-17); its
-`_meta.decision` changes nothing. `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference, with
+`_meta.decision` changes nothing; a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149).
+`actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference, with
 the vectors [`actions.json`](../../fixtures/vectors/actions.json) (DEC-0121).
 
 ## C3.4 Trace

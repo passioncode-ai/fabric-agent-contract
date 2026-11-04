@@ -121,6 +121,11 @@ supervisor, the paths, `installedAt` and `installedBy`. The entry passes no cred
 slot from the vault, where the estate record places it (v4 §6 Path 2: a placed package's secrets go only where it
 declares them; a credential an agent asks for, and one moved between one person's machines outside a placement, arrive in
 a [credential envelope](credentials.md#the-envelope), DEC-0111). `FAC-SEM-065` refuses a slot named twice and a name or purpose shaped like a credential.
+When the agent's source carries a [source manifest](source.md) (`fabric.source.json`, DEC-0149), a packer writes
+`secrets[]` from its `secret` slots (the adapter's `pack` is to, CT-207), by name and `optional`, each purpose copied
+unchanged (the source's `FAC-SEM-156` reads it as `FAC-SEM-065` does, so it packs cleanly), and `FAC-SEM-160` refuses a package whose secrets differ. A
+package may carry `fabric.source.json` as an ordinary file, listed in `files[]` like any other (a packer that packs in
+place lists it), and the [folder check](#the-folder-check) treats it as one ([source](source.md#the-package)).
 
 ## Cost presets
 
@@ -141,6 +146,9 @@ receipts' `run` are DEC-0030's amendment (board item V4-RUN-RESULT); the signal'
 
 `state[]` lists what moves when a placement moves, as paths relative to the service's data folder, each with its
 purpose. Absent or empty, nothing moves (v4 §6, Move). A copy for a colleague is packed without state (v4 §6 Path 3).
+With a [source manifest](source.md), a packer writes the `state[]` paths from its `store` slots' paths, and
+`FAC-SEM-160` refuses a package whose state paths differ; an absent or empty `state[]` is a copy packed without state
+and passes (DEC-0149).
 
 ## The evals receipt
 

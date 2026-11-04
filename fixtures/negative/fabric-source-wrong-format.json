@@ -1,0 +1,7 @@
+{
+  "format": "fabric-source/2",
+  "include": [
+    "src/",
+    "README.md"
+  ]
+}

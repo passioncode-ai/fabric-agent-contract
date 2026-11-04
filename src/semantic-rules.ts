@@ -23,6 +23,7 @@ import { pageLinkRules } from "./page-link-rules.js";
 import { sessionHandoffRules } from "./session-handoff.js";
 import { profileRules } from "./profile-rules.js";
 import { packageRules } from "./package-rules.js";
+import { sourceRules } from "./source-rules.js";
 import { estateRecordRules } from "./estate-record-rules.js";
 import { enrollTokenRules } from "./enroll-token.js";
 import { contextRules } from "./context-rules.js";
@@ -88,6 +89,9 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (profiles) return profiles;
   const packaged = packageRules(kind, value);
   if (packaged) return packaged;
+  // DEC-0149: an agent's source manifest, its tree and its package (FAC-SEM-156 to FAC-SEM-160).
+  const source = sourceRules(kind, value);
+  if (source) return source;
   const estate = estateRecordRules(kind, value);
   if (estate) return estate;
   const enroll = enrollTokenRules(kind, value);

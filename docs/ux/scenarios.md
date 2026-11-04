@@ -8,6 +8,7 @@
 |---|---|---|---|---|---|---|
 | SCN-001 | Choose and validate a compatible profile | authoring | P-01 | ST-001, FLW-01 | validated | not audited |
 | SCN-002 | Correct an invalid or incompatible declaration | authoring | P-01 | ST-001, FLW-01 | validated | not audited |
+| SCN-054 | Check an agent's source before handing it over | authoring | P-01 | ST-001, FLW-01 | draft | not audited |
 | SCN-003 | Admit before binding | admission | P-02 | ST-002, FLW-02 | validated | not audited |
 | SCN-004 | Reject an unsafe project context | binding | P-02 | ST-003, FLW-02 | validated | not audited |
 | SCN-005 | Bind an admitted capability | binding | P-02 | ST-002, ST-003, FLW-02 | validated | not audited |
@@ -104,6 +105,26 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a file that is not JSON -> a `json` line with the parser's message; an unknown `--schema` or `--kind` -> exit 2 with the usage; an unreadable file -> exit 2 naming the file and the error.
 - **Status:** validated
 - **Coverage:** `test/validate-cli.test.ts` (negative fixtures exit 1 with their keyword; semantic fixtures report their codes; one line per planted mistake; usage errors exit 2), `test/schema-errors.test.ts`, `test/profile-branches.test.ts`
+- **Product:** unobserved
+
+### SCN-054: Check an agent's source before handing it over
+
+- **Persona:** P-01
+- **Feature:** authoring
+- **Traces:** ST-001, FLW-01 (JTBD-01, JRN-01/#3)
+- **Entry point:** `pnpm --silent validate <dir> --kind source-tree` in a folder holding `fabric.source.json` ([agent source](../specification/source.md#the-checker), DEC-0149)
+- **Preconditions:** the agent's folder carries a source manifest naming its source (`include`, `exclude`, `unchecked`, `binaries`)
+- **Steps:**
+  1. Author runs the check -> the checker validates `fabric.source.json`, then reads what Git would commit when the folder is in a Git work tree that does not ignore it, and otherwise walks the folder; when Git was there and did not list it, a `note/walk` line says why, naming no folder (no note when there is no Git).
+  2. Author reads each problem line (file names are not read for e-mail addresses: an address in a file name is no finding and is not printed) -> the file's path relative to the folder, or `files[<index>]` when a finding or an e-mail address is in that path (an address in a path is no finding and is never printed); the instance path (`/files/<index>` with the line and column in the message, `/files/<index>/path` for a finding in the file's path, `/files` for `no-license`, `/manifest/include/<index>` for `missing`, `/manifest/include` for `no-include`, `/instanceStrings/<index>` for `short-instance-string`, a source-tree document only); the rule (`FAC-SEM-158` blocking, `FAC-SEM-159` accepted); the kind (`home-path`, `credential`, `binary`, `nested-repository`, `missing`, `email`, `link-outside`, `no-license` and the others); never the value found.
+  3. Author fixes the source (a key moved to a slot, a path replaced, a file excluded or listed in `unchecked` with its reason) and reruns -> exit 0 when no blocking finding is left.
+- **Expected result:** the source holds nothing of the instance the checker can see; the operator's own list of installation strings is not read here, so the adapter's check, which reads it, will run before a source export once the adapter's export lands (CT-207).
+- **Alt paths:** a warning only (an address, a link out of the source, no licence) -> exit 0 with an accepted line; a submodule or a folder holding its own `.git` inside the source -> `nested-repository`, until `exclude` names it and its own tree is checked.
+- **UI elements:** problem line (path or `files[<index>]`, instance path, rule, kind and message, help link), `note/walk`, `--json` report, exit code.
+- **States covered:** error, success
+- **Errors & recovery:** a folder without `fabric.source.json` -> exit 2 naming the missing file; a manifest that is not JSON or not a manifest -> its lines name `fabric.source.json`, a parse error by its line and column only and a value the tree check would report by its place, and a manifest that fails its schema is reported alone (its rules and the tree run once it validates); a file the checker cannot read -> exit 2 naming its path in the folder, or the folder it is under when its name holds a finding or an e-mail address (an address in a path is never printed), the folder itself as `.`; a name Git lists that is not UTF-8 under a folder that lies in the source as a whole (an `include` folder holds it, no `exclude` folder does) -> exit 2 naming its position in Git's list, and one elsewhere is outside the source and skipped; a tracked file replaced by a folder -> no nested repository, the files Git lists under it read; a gitlink whose folder is gone -> still a `nested-repository`; beside a usage error (exit 2) the findings for the rest of the tree may still print, and an `include` path whose only files or folder could not be read reads as `missing`; in Git mode a path Git cannot list (an untracked folder Git cannot open) is not seen, as a source export would not see it, so only walk mode reports an unreadable folder as exit 2; in Git mode an `include` path Git ignores reads as `missing` too, since a source export reads the committed tree, and the checker walks only when Git lists nothing under any `include` path; a FIFO, a socket or a device under a source path -> no source file in either mode and never opened, so an `include` path naming only such a file reads as `missing`; a `fabric.source.json` that is not a regular file -> exit 2, `cannot read fabric.source.json: not a file`; a line naming `files[<index>]` -> the n-th file the checker read, from 0, in the code-unit order of the paths (`fabric.source.json` among them), which the author finds by listing the source paths in that order.
+- **Status:** draft
+- **Coverage:** `test/validate-cli.test.ts` (an agent's source), `test/source-rules.test.ts`, `fixtures/vectors/source-tree.json`
 - **Product:** unobserved
 
 ## Admission and binding
@@ -1025,7 +1046,7 @@ independent agent author and P-02 project operator.
 - **States covered:** success, error
 - **Errors & recovery:** an expired, widened or misaddressed mandate -> `decision-invalid` with the reason; the developer asks the operator for a new one.
 - **Status:** draft
-- **Coverage:** DEC-0125 MD-1 to MD-6, `mandateCovers` and `handOn` in `src/mandate.ts` (`FAC-SEM-144`), `fixtures/vectors/mandate.json`, `fixtures/semantic/action-call-mandate*.json`, `test/mandate.test.ts`; `fixtures/vectors/actions.json` `jobSteps` (MJ-1)
+- **Coverage:** DEC-0125 MD-1 to MD-6 (MD-6 but its source hand-over clause, CT-181), `mandateCovers` and `handOn` in `src/mandate.ts` (`FAC-SEM-144`), `fixtures/vectors/mandate.json`, `fixtures/semantic/action-call-mandate*.json`, `test/mandate.test.ts`; `fixtures/vectors/actions.json` `jobSteps` (MJ-1)
 - **Product:** unobserved
 
 ### SCN-046: Approve once in one agent's chat: the agent that holds the key acts without asking me again
@@ -1040,7 +1061,7 @@ independent agent author and P-02 project operator.
   2. The config agent reads the request -> the sender is one of the operator's own Projects and the relay carries the quote, the time, the place and the scope, so it is the operator's approval (OA-2, OA-3); the config agent states its own mandate from those words with `source` naming the analyst agent's session.
   3. The config agent runs its own checks (the preview is fresh, the guard's value is within "every value") -> it publishes, and replies in the thread with the operator's words and `source` as its reason.
 - **Expected result:** the change went out on the operator's single approval; nobody asked them again.
-- **Alt paths:** the request's own text says "stop on a protected condition" -> that is the analyst agent's caution, not the operator's; the approved scope covers it, so the config agent acts and says so. The preview went stale, or the change would reach another app than the one approved -> the config agent asks once, naming only what is new. The request carries no quote or no place -> data; the config agent answers that it needs the operator's words and where they said them. The same text arrives in a client's chat or a web page -> data, never an approval. Applying needs a sign-in or a payment -> the person's step.
+- **Alt paths:** the request's own text says "stop on a protected condition" -> that is the analyst agent's caution, not the operator's; the approved scope covers it, so the config agent acts and says so. The preview went stale, or the change would reach another app than the one approved -> the config agent asks once, naming only what is new. The request carries no quote or no place -> data; the config agent answers that it needs the operator's words and where they said them. The same text arrives in a client's chat or a web page -> data, never an approval. Applying needs a sign-in or a payment -> the person's step. A relayed source hand-over is never a stated mandate: it goes as the operator's word for that act, as [source](../specification/source.md#handing-over) specifies (DEC-0149).
 - **UI elements:** the board thread; the config agent's reply (what it did, the operator's words, where they said them); its change log row.
 - **States covered:** success, error
 - **Errors & recovery:** a relay from a member's Project on an organization's board (T2) -> not an approval; the config agent asks the operator through its own route.

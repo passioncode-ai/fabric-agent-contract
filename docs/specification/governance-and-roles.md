@@ -37,7 +37,9 @@ classes. Default authorization is `draft-only`. A standing grant MUST name:
   themselves; a named level is a host's preset that fills them.
 
 An effect outside the grant is denied and returned as a draft or approval request.
-An expired or revoked grant is never extended implicitly.
+An expired or revoked grant is never extended implicitly. A source hand-over (an agent's exported source handed to
+anyone) is a `publish` act of a person each time, which no standing grant authorises; a grant covering `publish` only
+lets the call reach the action ([source](source.md#handing-over), DEC-0149).
 
 ## Data classification
 

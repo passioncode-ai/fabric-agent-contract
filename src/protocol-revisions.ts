@@ -52,6 +52,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["fabric-secret-envelope", ["1"]],
   ["fabric-service", ["0.1"]],
   ["fabric-settings-backup", ["1"]],
+  ["fabric-source", ["1"]],
   ["heartbeat", ["1"]],
   ["learning-note", ["1"]],
   ["machine-report", ["1"]],

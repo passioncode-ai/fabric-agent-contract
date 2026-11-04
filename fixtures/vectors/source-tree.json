@@ -1,0 +1,3494 @@
+{
+  "about": "Vectors for an agent's source tree (DEC-0149), written by tools/vectors/source-tree.ts, never by hand. `tree`: sourceTreeProblems({manifest, files, instanceStrings?}) answers each place the instance shows through as {kind, file?, line?, column?, entry?, include?} (a file marked nestedRepository: true is a folder holding another repository, a submodule's gitlink or its own .git, read by its path only): file is the index in files; a finding in a file's path has no line; line and column count from 1, the column in UTF-16 code units where the match begins (for a home path, where its name begins). Blocking kinds (FAC-SEM-158): home-path (a home folder with a name, in the forms and with the neutral names of the Fabric Agent Adapter's check; ~ never), credential (a value shaped like one, or a file that is one by its name), binary (not listed in binaries), nested-repository (a nested repository no exclude path names), instance-string (an entry of the operator's list, without regard to case under Unicode simple case folding, the entry and the text each also in NFC: as written, percent-encoded, form-encoded with + for a space, JSON-escaped, JSON-escaped with \\/ for /, or JSON-escaped with every character outside ASCII as \\uXXXX), missing (an include path with no file), short-instance-string, no-include. Warnings (FAC-SEM-159): email (not in publicAddresses, not at an RFC 2606 name), link-outside (a relative Markdown link whose target is not source), no-license. Problems come in the order: the list's refused entries, then no-include, then each file in order (its path, then each line: home-path, credential, instance-string, email, link-outside), then missing, then no-license. A file that is not source (outside include, inside exclude, in .git) is not read. `patches`: patchPathsAllowed(manifest, paths) answers the paths that are not source, in the order given.",
+  "constants": {
+    "about": "The constants a port of the tree check holds equal to the reference's, written from src/source-rules.ts's exports (test/source-rules.test.ts holds the block to them): the neutral home names, the synthetic words, the home-folder patterns, the credential-file name patterns, the tree check's own provider-key shapes (KEY_SHAPE_SOURCES, unbounded, kept apart from the shared detector) and the URL rule's pattern (URL_SECRET_VALUE), each pattern as its source and flags.",
+    "NEUTRAL_HOMES": [
+      "example",
+      "examples",
+      "user",
+      "username",
+      "you",
+      "me",
+      "name",
+      "someone",
+      "runner",
+      "shared",
+      "public",
+      "default",
+      "guest",
+      "linuxbrew",
+      "alice",
+      "bob",
+      "operator",
+      "owner",
+      "person",
+      "your-name",
+      "yourname",
+      "node",
+      "ubuntu",
+      "ec2-user",
+      "runneradmin",
+      "admin",
+      "vagrant",
+      "debian",
+      "centos",
+      "app",
+      "builder",
+      "vscode",
+      "codespace",
+      "circleci",
+      "gitpod",
+      "jovyan",
+      "coder",
+      "example-agent"
+    ],
+    "SYNTHETIC": [
+      "example",
+      "not-a-key",
+      "notakey",
+      "fake",
+      "dummy",
+      "placeholder",
+      "redacted"
+    ],
+    "SOURCE_HOME_PATHS": [
+      {
+        "source": "(?<![A-Za-z0-9_.-])(?:\\/var)?\\/home\\/([A-Za-z0-9][A-Za-z0-9._-]*)",
+        "flags": "g"
+      },
+      {
+        "source": "(?<![A-Za-z0-9_.-])\\/Users\\/([A-Za-z0-9][A-Za-z0-9._-]*)",
+        "flags": "g"
+      },
+      {
+        "source": "(?<![A-Za-z0-9_.-])(?:\\/mnt)?\\/[A-Za-z]\\/Users\\/([A-Za-z0-9][A-Za-z0-9._-]*)",
+        "flags": "g"
+      },
+      {
+        "source": "(?<![A-Za-z0-9_.-])[A-Za-z]:(?:\\\\|\\/)+Users(?:\\\\|\\/)+([A-Za-z0-9][A-Za-z0-9._-]*)",
+        "flags": "gi"
+      },
+      {
+        "source": "(?:^|[^A-Za-z0-9-])(?:-Users|-home|-var-home|(?:-mnt)?-[A-Za-z]-Users)-([A-Za-z0-9][A-Za-z0-9._]*)",
+        "flags": "g"
+      },
+      {
+        "source": "(?<![A-Za-z0-9])[A-Za-z]--Users-([A-Za-z0-9][A-Za-z0-9._]*)",
+        "flags": "gi"
+      },
+      {
+        "source": "%2[Ff](?:Users|home)%2[Ff]([A-Za-z0-9][A-Za-z0-9._-]*)",
+        "flags": "g"
+      },
+      {
+        "source": "%5CUsers%5C([A-Za-z0-9][A-Za-z0-9._-]*)",
+        "flags": "gi"
+      }
+    ],
+    "CREDENTIAL_FILE": {
+      "source": "^(?:\\.env(?:\\.[^\\n\\r\\u2028\\u2029]+)?|[^\\n\\r\\u2028\\u2029]*\\.(?:pem|key|p12|pfx|jks|keystore)|id_(?:rsa|dsa|ecdsa|ed25519)|\\.(?:npmrc|netrc|pypirc))$",
+      "flags": ""
+    },
+    "CREDENTIAL_FILE_OK": {
+      "source": "^\\.env\\.(?:example|sample|template)$",
+      "flags": ""
+    },
+    "TOKEN_FILE": {
+      "source": "^[^\\n]+\\.(?:token|credential)$",
+      "flags": ""
+    },
+    "KEY_SHAPE_SOURCES": [
+      "sk-[A-Za-z0-9_-]{16,}",
+      "gh[pousr]_[A-Za-z0-9]{20,}",
+      "xox[abposr]-[A-Za-z0-9-]{10,}",
+      "AKIA[0-9A-Z]{16}",
+      "glpat-[A-Za-z0-9_-]{20,}"
+    ],
+    "URL_SECRET_VALUE": {
+      "source": "(^bearer\\s.+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,})",
+      "flags": "i"
+    }
+  },
+  "manifest": {
+    "format": "fabric-source/1",
+    "include": [
+      "src/",
+      "docs/",
+      "README.md",
+      "LICENSE"
+    ],
+    "exclude": [
+      "src/generated/"
+    ],
+    "binaries": [
+      "docs/icon.png"
+    ],
+    "publicAddresses": [
+      "support@inbox-digest.example"
+    ]
+  },
+  "tree": [
+    {
+      "name": "a clean tree",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "the manifest is source whatever include says",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "fabric.source.json",
+            "text": "{\"format\": \"fabric-source/1\"}"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "a named home folder in each form the adapter reads blocks, at the name's first character",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/homes.txt",
+            "text": "a = \"/Users/jdoe\"\n/home/jdoe\n/var/home/jdoe\n/c/Users/jdoe\n/mnt/c/Users/jdoe\nC:\\Users\\jdoe\nd:/users/jdoe\n{\"home\": \"C:\\\\Users\\\\jdoe\"}\n -Users-jdoe-inbox\n/x/-home-jdoe-inbox\n_-var-home-jdoe\n\"-mnt-c-Users-jdoe-x\"\n\"-c-Users-jdoe\"\nC--Users-jdoe-inbox\n?p=%2FUsers%2Fjdoe\n?p=%2Fhome%2Fjdoe\n?p=%5Cusers%5Cjdoe"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 1,
+          "column": 13
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 2,
+          "column": 7
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 3,
+          "column": 11
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 4,
+          "column": 10
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 5,
+          "column": 14
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 6,
+          "column": 10
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 7,
+          "column": 10
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 8,
+          "column": 22
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 9,
+          "column": 9
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 10,
+          "column": 10
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 11,
+          "column": 12
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 12,
+          "column": 15
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 13,
+          "column": 11
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 14,
+          "column": 10
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 15,
+          "column": 15
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 16,
+          "column": 14
+        },
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 17,
+          "column": 15
+        }
+      ]
+    },
+    {
+      "name": "a named home folder in the dashed form a tool makes of it, in a file's path",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/-Users-jdoe-session.json",
+            "text": "{}"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "home-path",
+          "file": 4
+        }
+      ]
+    },
+    {
+      "name": "a neutral or one-letter home, ~, a web route and a flag are not home folders",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/neutral.txt",
+            "text": "/Users/example/inbox\n/home/runner/work\n/Users/a\ncp agent.json ~/x\ncd ~\nGET /users/123\n--home-dir /tmp\n/Users/Example-Agent\nC:\\Users\\Public\n-Users-example-session\nls /home/"
+          },
+          {
+            "path": "src/-Users-example-session.json",
+            "text": "{}"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "a provider key's shape",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/keys.ts",
+            "text": "const key = \"sk-A1A1A1A1A1A1A1A1A1A1A1A1\";"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 14
+        }
+      ]
+    },
+    {
+      "name": "a JWT",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/token.ts",
+            "text": "export const sample = \"eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiJleGFtcGxlIn0.c2lnbmF0dXJl\";"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 24
+        }
+      ]
+    },
+    {
+      "name": "a bearer token inside a header line",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/call.md",
+            "text": "Send Authorization: Bearer abc123def456ghi789 with the call."
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 21
+        }
+      ]
+    },
+    {
+      "name": "a private key block",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/key.txt",
+            "text": "-----BEGIN PRIVATE KEY-----\nAAAA"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "name": "a long run under a credential's name",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/config.ts",
+            "text": "API_TOKEN = \"Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1\""
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 14
+        }
+      ]
+    },
+    {
+      "name": "a long run under another name (an integrity hash) is not a credential",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/lock.json",
+            "text": "{\"integrity\": \"sha512-Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1\"}"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "a whole Ed25519 signature under sig is public",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/package.json",
+            "text": "{\"sig\": \"Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab\"}"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "prose that starts with the word Bearer is not a credential",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/auth.md",
+            "text": "Bearer tokens expire after an hour."
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "a word holding sk- is not a provider key",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/jobs.ts",
+            "text": "export const queue = \"task-processing-pipeline-v2\";"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "a self-labelled synthetic value passes, and the same shape without the word blocks",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/keys.ts",
+            "text": "const a = \"sk-test-not-a-key-0000000\";\nconst b = \"sk-A1A1A1A1A1A1A1A1A1A1A1A1\";"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 2,
+          "column": 12
+        }
+      ]
+    },
+    {
+      "name": "a synthetic key's run never hides a real key that starts inside it",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/keys.ts",
+            "text": "a = \"sk-A1b2A1b2A1b2A1b2_ghp_A1b2C3d4E5f6A1b2C3d4E5f6A1b2C3d4E5f6_fake\"\nb = \"sk-fakefakefakefake1234_sk-A1b2C3d4A1b2C3d4A1b2C3d4\""
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 26
+        },
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 2,
+          "column": 30
+        }
+      ]
+    },
+    {
+      "name": "a value shaped like a credential in a file's path",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/sk-A1b2C3d4A1b2C3d4A1b2C3d4.md",
+            "text": "notes"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4
+        }
+      ]
+    },
+    {
+      "name": "a whole Ed25519 signature under a quoted sig member passes even with no closing quote; under another name (sigs) or unquoted it blocks",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/sig.txt",
+            "text": "\"sig\": \"Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab\n\"sigs\": \"Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab\"\nsig = \"Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab\""
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 2,
+          "column": 10
+        },
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 3,
+          "column": 8
+        }
+      ]
+    },
+    {
+      "name": "a parameter holding :// after other text is a value, not a URL read again",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/next.md",
+            "text": "https://a.example.org/?next=%20https%3A%2F%2Fb.example.org%2F%3Ftoken%3DAb1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "lines split at LF with a trailing CR dropped: a lone CR does not end a line",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/cr.txt",
+            "text": "a\r\nb\r/home/jdoe\nc"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 2,
+          "column": 9
+        }
+      ]
+    },
+    {
+      "name": "a key's prefix and the character before it are read without Unicode case folding: U+017F and the Kelvin sign are no s or k, a letter in any script before a key starts no word",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/folding.ts",
+            "text": "a = \"ſk-A1b2C3d4A1b2C3d4A1b2C3d4\"\nb = \"sK-A1b2C3d4A1b2C3d4A1b2C3d4\"\nc = \"ésk-A1b2C3d4A1b2C3d4A1b2C3d4\"\nd = \"·sk-A1b2C3d4A1b2C3d4A1b2C3d4\""
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 4,
+          "column": 7
+        }
+      ]
+    },
+    {
+      "name": "a URL ends where Python's \\s ends it: U+FEFF continues it, U+001C cuts it",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/urls.md",
+            "text": "https://app:Ab3dE5gH7k﻿@db.example.internal/x\nhttps://app:Ab3d\u001cE5gH7k@db.example.internal/x"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 1
+        },
+        {
+          "kind": "email",
+          "file": 4,
+          "line": 2,
+          "column": 18
+        }
+      ]
+    },
+    {
+      "name": "an escape that is not UTF-8 decodes to U+FFFD, as Python's unquote reads it",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/env.txt",
+            "text": "TOKEN=%FFaB3xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "a byte-order mark an escape decodes stays a character, as Python's unquote keeps it",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/bom.txt",
+            "text": "API_KEY=fa%EF%BB%BFkeAbcdefGhijk1234567890Abcdefghij1234567890\nAPI_KEY=Abcdefghij1234567890Klmnop%EF%BB%BFqrstuvwxyz0123456789ABCDEFG"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 9
+        }
+      ]
+    },
+    {
+      "name": "a bearer word with a line separator in a URL's parameter is no bearer token",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/q.md",
+            "text": "https://h.io/?q=bearer%20%E2%80%A8x"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "a token or credential file's name may hold a line or paragraph separator, as Python's . reads it",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/a b.token",
+            "text": "x"
+          },
+          {
+            "path": "src/a b.credential",
+            "text": "x"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4
+        },
+        {
+          "kind": "credential",
+          "file": 5
+        }
+      ]
+    },
+    {
+      "name": "AWS's documented example key id is synthetic",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/aws.md",
+            "text": "AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "a bearer token that says it is an example passes",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/call.md",
+            "text": "Authorization: Bearer example-token-123456"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "a PGP private key block",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/key.asc",
+            "text": "-----BEGIN PGP PRIVATE KEY BLOCK-----"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "name": "a JWK's private d in JSON, escaped JSON and a Python dict",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/jwk.json",
+            "text": "{\"kty\": \"OKP\", \"crv\": \"Ed25519\", \"d\": \"Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2E\"}\n\"{\\\"d\\\": \\\"Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2E\\\"}\"\nkey = {'d': 'Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2E'}"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 34
+        },
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 2,
+          "column": 3
+        },
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 3,
+          "column": 8
+        }
+      ]
+    },
+    {
+      "name": "a URL with a password blocks and is no e-mail address",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/db.md",
+            "text": "DATABASE_URL=postgres://app:Ab3dE5gH7k@db.example.internal/app"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 14
+        }
+      ]
+    },
+    {
+      "name": "a URL whose query holds a long value under a credential's name blocks; a placeholder and EXAMPLE pass",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/api.md",
+            "text": "https://api.example.org/v1?token=<your-token>\nhttps://api.example.org/v1?token=EXAMPLE\nGET https://api.example.org/v1?token=Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 3,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "name": "a URL inside another URL's parameter is read too",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/login.md",
+            "text": "https://app.example.org/login?next=https%3A%2F%2Fapi.example.org%2F%3Ftoken%3DAb1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "name": "a line read again with its JSON escapes undone",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/config.json",
+            "text": "{\"url\": \"https:\\/\\/api.example.org\\/v1?token\\u003dAb1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1Ab1\"}"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 10
+        }
+      ]
+    },
+    {
+      "name": "a URL parameter holding a provider key right after a letter blocks: the URL rule reads the key shapes unbounded",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/search.md",
+            "text": "https://api.example.org/find?q=xsk-A1A1A1A1A1A1A1A1A1A1A1A1"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "name": "each provider-key shape one short of its least length passes, and at it blocks",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/k0.txt",
+            "text": "value sk-A1A1A1A1A1A1A1A\nvalue sk-A1A1A1A1A1A1A1A1"
+          },
+          {
+            "path": "src/k1.txt",
+            "text": "value ghp_A1A1A1A1A1A1A1A1A1A\nvalue ghp_A1A1A1A1A1A1A1A1A1A1"
+          },
+          {
+            "path": "src/k2.txt",
+            "text": "value xoxb-A1A1A1A1A\nvalue xoxb-A1A1A1A1A1"
+          },
+          {
+            "path": "src/k3.txt",
+            "text": "value AKIAA1A1A1A1A1A1A1A\nvalue AKIAA1A1A1A1A1A1A1A1"
+          },
+          {
+            "path": "src/k4.txt",
+            "text": "value glpat-A1A1A1A1A1A1A1A1A1A\nvalue glpat-A1A1A1A1A1A1A1A1A1A1"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 2,
+          "column": 7
+        },
+        {
+          "kind": "credential",
+          "file": 5,
+          "line": 2,
+          "column": 7
+        },
+        {
+          "kind": "credential",
+          "file": 6,
+          "line": 2,
+          "column": 7
+        },
+        {
+          "kind": "credential",
+          "file": 7,
+          "line": 2,
+          "column": 7
+        },
+        {
+          "kind": "credential",
+          "file": 8,
+          "line": 2,
+          "column": 7
+        }
+      ]
+    },
+    {
+      "name": "files that are credentials by their name",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/.env",
+            "text": "MAILBOX=inbox"
+          },
+          {
+            "path": "src/.env.example",
+            "text": "MAILBOX="
+          },
+          {
+            "path": "src/certs/agent.pem",
+            "text": "certificate"
+          },
+          {
+            "path": "src/service.token",
+            "text": "x"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4
+        },
+        {
+          "kind": "credential",
+          "file": 6
+        },
+        {
+          "kind": "credential",
+          "file": 7
+        }
+      ]
+    },
+    {
+      "name": "a nested repository in the source blocks; one an exclude path names, or one outside include, is left out",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/",
+            "src/vendor/other/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/vendor/lib",
+            "nestedRepository": true
+          },
+          {
+            "path": "src/vendor/other",
+            "nestedRepository": true
+          },
+          {
+            "path": "tests/sub",
+            "nestedRepository": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "nested-repository",
+          "file": 4
+        }
+      ]
+    },
+    {
+      "name": "a .gitmodules file is ordinary text",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE",
+            ".gitmodules"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": ".gitmodules",
+            "text": "[submodule \"lib\"]\n\tpath = src/vendor/lib\n\turl = https://git.example.org/lib.git"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "a binary file binaries lists, and one it does not",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/icon.png",
+            "binary": true
+          },
+          {
+            "path": "docs/diagram.png",
+            "binary": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "binary",
+          "file": 5
+        }
+      ]
+    },
+    {
+      "name": "an instance string as written, in upper case, percent-encoded and JSON-escaped",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/team.md",
+            "text": "Run by example holding."
+          },
+          {
+            "path": "docs/board.md",
+            "text": "BOARD: EXAMPLE HOLDING"
+          },
+          {
+            "path": "src/links.ts",
+            "text": "export const board = \"https://board.example/p/Example%20Holding\";"
+          },
+          {
+            "path": "src/folders.json",
+            "text": "{\"root\": \"example-team\\\\board\"}"
+          }
+        ],
+        "instanceStrings": [
+          "example holding",
+          "example-team\\board"
+        ]
+      },
+      "expected": [
+        {
+          "kind": "instance-string",
+          "file": 4,
+          "line": 1,
+          "column": 8,
+          "entry": 0
+        },
+        {
+          "kind": "instance-string",
+          "file": 5,
+          "line": 1,
+          "column": 8,
+          "entry": 0
+        },
+        {
+          "kind": "instance-string",
+          "file": 6,
+          "line": 1,
+          "column": 47,
+          "entry": 0
+        },
+        {
+          "kind": "instance-string",
+          "file": 7,
+          "line": 1,
+          "column": 11,
+          "entry": 1
+        }
+      ]
+    },
+    {
+      "name": "an instance string in NFC, with \\/ for /, and form-encoded with + for a space",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/cafe.md",
+            "text": "Run by café holding."
+          },
+          {
+            "path": "docs/team.json",
+            "text": "{\"team\": \"example\\/holding\"}"
+          },
+          {
+            "path": "docs/search.md",
+            "text": "?q=north+yard"
+          }
+        ],
+        "instanceStrings": [
+          "café holding",
+          "example/holding",
+          "north yard"
+        ]
+      },
+      "expected": [
+        {
+          "kind": "instance-string",
+          "file": 4,
+          "line": 1,
+          "column": 8,
+          "entry": 0
+        },
+        {
+          "kind": "instance-string",
+          "file": 5,
+          "line": 1,
+          "column": 11,
+          "entry": 1
+        },
+        {
+          "kind": "instance-string",
+          "file": 6,
+          "line": 1,
+          "column": 4,
+          "entry": 2
+        }
+      ]
+    },
+    {
+      "name": "a licence naming a holder on the operator's list blocks, unless unchecked",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Copyright Example Holding"
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          }
+        ],
+        "instanceStrings": [
+          "example holding"
+        ]
+      },
+      "expected": [
+        {
+          "kind": "instance-string",
+          "file": 0,
+          "line": 1,
+          "column": 11,
+          "entry": 0
+        }
+      ]
+    },
+    {
+      "name": "an unchecked licence travels and is not read",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ],
+          "unchecked": [
+            {
+              "path": "LICENSE",
+              "reason": "the copyright line names the holder"
+            }
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Copyright Example Holding"
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          }
+        ],
+        "instanceStrings": [
+          "example holding"
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "an unchecked folder's file holding a provider key is not read, and a credential file by its name in it still blocks",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ],
+          "unchecked": [
+            {
+              "path": "src/vectors/",
+              "reason": "synthetic test vectors"
+            }
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/vectors/keys.json",
+            "text": "{\"key\": \"sk-A1A1A1A1A1A1A1A1A1A1A1A1\"}"
+          },
+          {
+            "path": "src/vectors/.env",
+            "text": "MAILBOX=inbox"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 5
+        }
+      ]
+    },
+    {
+      "name": "an instance string in a file's path",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/example-holding/notes.md",
+            "text": "notes"
+          }
+        ],
+        "instanceStrings": [
+          "example-holding"
+        ]
+      },
+      "expected": [
+        {
+          "kind": "instance-string",
+          "file": 4,
+          "entry": 0
+        }
+      ]
+    },
+    {
+      "name": "an instance string shorter than 3 characters is refused as input",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          }
+        ],
+        "instanceStrings": [
+          "ex",
+          "example holding"
+        ]
+      },
+      "expected": [
+        {
+          "kind": "short-instance-string",
+          "entry": 0
+        }
+      ]
+    },
+    {
+      "name": "an instance string that is not well formed (a lone surrogate) is refused as input",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          }
+        ],
+        "instanceStrings": [
+          "holding\ud800",
+          "example holding"
+        ]
+      },
+      "expected": [
+        {
+          "kind": "short-instance-string",
+          "entry": 0
+        }
+      ]
+    },
+    {
+      "name": "an excluded file holding a credential is not read",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/generated/keys.ts",
+            "text": "const key = \"sk-A1A1A1A1A1A1A1A1A1A1A1A1\";"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "a file outside include is not read",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "tests/recorded/run.log",
+            "text": "/Users/jdoe"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "a file in .git is never source",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/.git/config",
+            "text": "/Users/jdoe"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "an include path with no file",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "missing",
+          "include": 2
+        }
+      ]
+    },
+    {
+      "name": "an include path outside the path grammar reaches nothing: a nested repository it would lie in is not in the source",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "lib/a/a\\b",
+            "LICENSE"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "terms"
+          },
+          {
+            "path": "lib",
+            "nestedRepository": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "missing",
+          "include": 0
+        }
+      ]
+    },
+    {
+      "name": "a file whose own path is outside the path grammar under an include folder is not source and is never read",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "LICENSE"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "terms"
+          },
+          {
+            "path": "src/a.ts",
+            "text": "x"
+          },
+          {
+            "path": "src/a:b",
+            "text": "/home/jdoe"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "an exclude path outside the path grammar removes nothing: the file it would name stays source",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/a\\"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "terms"
+          },
+          {
+            "path": "src/a",
+            "text": "/home/jdoe"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "home-path",
+          "file": 1,
+          "line": 1,
+          "column": 7
+        }
+      ]
+    },
+    {
+      "name": "a manifest with no include",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1"
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "no-include"
+        },
+        {
+          "kind": "no-license"
+        }
+      ]
+    },
+    {
+      "name": "e-mail addresses: one not listed warns; a listed one, RFC 2606 names, an image's name and an SSH remote pass",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/contact.md",
+            "text": "Write to support@inbox-digest.example or someone@mail.org.\nTry a@example.com, b@host.test or c@sub.example.net.\nAn asset user@2x.png and a remote git@github.com:o/r."
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "email",
+          "file": 4,
+          "line": 1,
+          "column": 42
+        }
+      ]
+    },
+    {
+      "name": "relative links: one leaving the source warns; a URL, an anchor and a link inside pass",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/notes.md",
+            "text": "See [run](../tests/recorded/run.md), [site](https://inbox-digest.example), [top](#top) and [main](../src/main.ts).\n[up](../../outside.md)"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "link-outside",
+          "file": 4,
+          "line": 1,
+          "column": 9
+        },
+        {
+          "kind": "link-outside",
+          "file": 4,
+          "line": 2,
+          "column": 4
+        }
+      ]
+    },
+    {
+      "name": "a link outside the source in a file that is not Markdown is not followed",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/doc.ts",
+            "text": "// see [run](../tests/recorded/run.md)"
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "no licence file at the root",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "no-license"
+        }
+      ]
+    },
+    {
+      "name": "a licence file in another letter case and with an extension",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "License.md"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "License.md",
+            "text": "terms"
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          }
+        ]
+      },
+      "expected": []
+    }
+  ],
+  "patches": [
+    {
+      "name": "every path is source",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "paths": [
+          "src/main.ts",
+          "docs/guide.md",
+          "README.md",
+          "fabric.source.json"
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "an excluded path, a path outside include and a path in .git",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "paths": [
+          "src/main.ts",
+          "src/generated/keys.ts",
+          "tests/run.ts",
+          ".git/config"
+        ]
+      },
+      "expected": [
+        "src/generated/keys.ts",
+        "tests/run.ts",
+        ".git/config"
+      ]
+    },
+    {
+      "name": "a path that climbs out, an absolute path and a folder",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "paths": [
+          "src/../../etc/hosts",
+          "/srv/agent/src/main.ts",
+          "src/"
+        ]
+      },
+      "expected": [
+        "src/../../etc/hosts",
+        "/srv/agent/src/main.ts",
+        "src/"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "format": "fabric-source/1",
+  "include": [
+    "src\\main.ts"
+  ]
+}
