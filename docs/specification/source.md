@@ -92,7 +92,7 @@ The schema gives a store slot its `path` and refuses one on any other kind. `FAC
 a name or purpose shaped like a credential (read both as `FAC-SEM-065` reads a package secret's, the shared detector's
 `secretValue`, whole-value `Bearer` included, so a slot's purpose packs cleanly, and as the tree check reads a line, so
 whatever `FAC-SEM-158` blocks in `fabric.source.json` this blocks too; once the shared detector's key shapes are bounded
-(DEC-0151), `FAC-SEM-156` is stricter than `FAC-SEM-065`, because it keeps the tree check's unbounded shapes and
+(DEC-0151, in progress), `FAC-SEM-156` is stricter than `FAC-SEM-065`, because it keeps the tree check's unbounded shapes and
 the adapter's check reads the manifest as part of the tree), a manifest `description` shaped like
 one (read as prose: a provider key as the tree check reads one in a line, its own shapes `KEY_SHAPE_SOURCES` starting a
 word and holding no synthetic word, a JWT (with no synthetic-word exception), a long run, or a bearer token inside the text, 12 or more token characters
@@ -184,7 +184,7 @@ which reads `~/` and every name: a portable source holds both.
 `pnpm --silent validate <dir> --kind source-tree` reads `<dir>/fabric.source.json` (a folder without one is a usage
 error), validates it and runs its rules, then lists the folder's files. Given a file named `fabric.source.json`, it
 checks that file's folder the same way; a file that is a JSON object with neither a `manifest` nor a `files` member (a source manifest under another name,
-its `format` `fabric-source/1`, valid or not, or any other such object) is a usage error (exit 2) that says to name a
+whatever its `format`, which is not checked, or any other such object) is a usage error (exit 2) that says to name a
 source manifest `fabric.source.json` or pass its folder; any other file is a source-tree document named by its basename, never by its path.
 
 - **Which `git`.** Only a `git` (`git.exe` on Windows, never a `.cmd` or `.bat`) found in an absolute folder of PATH,
@@ -262,11 +262,16 @@ finding on the file it names. A manifest that fails its schema is reported alone
 it validates. Exit 0: no blocking finding; 1: a blocking finding or a problem in the manifest; 2: a usage error (no `fabric.source.json`, a
 source check's named target that is not there, named by its basename such as `cannot read gone.json: ENOENT`, a file
 or folder it cannot read, a name Git lists that is not UTF-8 under a folder an `include` path reaches, a file under
-`--kind source-tree` with neither a `manifest` nor a `files` member). A usage error names the
+`--kind source-tree` that is a JSON object with neither a `manifest` nor a `files` member; a JSON value that is no
+object stays a schema finding, `FAC-SEM-000`, exit 1). A usage error names the
 checked folder itself as `.`, and tells a folder or manifest it cannot read (`cannot read .: EACCES`, `cannot read
 fabric.source.json: EACCES`) from a folder that holds no manifest; a manifest that is not a regular file (a FIFO, a
 socket, a device) or that is a symbolic link, a dangling one included, is never opened or read through (`cannot read
-fabric.source.json: not a file`; `lstat` is asked first, and only an absent entry is "the folder holds none"), and neither is any source document
+fabric.source.json: not a file`; `lstat` is asked first, and only an absent entry is "the folder holds none"; the folder of a
+named `fabric.source.json` that does not resolve to a directory, links followed, such as an absent one or a dangling
+link, is `cannot read .: ENOENT`, while a link to a real folder that holds no manifest holds none, named directly or
+through its manifest's name; a folder named directly that is absent keeps its basename, `cannot read gone: ENOENT`,
+and a dangling link named directly reads "not a file"), and neither is any source document
 named on its own that is not one. A FIFO, a socket or a device under a source path is not a source file, in Git mode and
 in a walk alike, and is never opened; an `include` path naming only such a file reads as `missing`. A source check that
 throws anyway (a fault in the checker) ends in a usage error naming the file, or the folder as `.`, and the error's name
@@ -456,7 +461,9 @@ file into that product's own source through the product's own change with the ag
 operator's standing permission of 2026-10-12 (recorded in the knowledge base's
 [roadmap](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/roadmap.md)) and needs no word per act. Handing over the agent's source as such (handing a source export to
 anyone, pushing the agent's tree or a copy of it to another repository, a transfer, a visibility change, a file sent)
-needs the operator's word for each act; a local source export needs none.
+needs the operator's word for each act; a local source export needs none. A copy moved within the operator's own estate
+to a place that is not public (a deploy to the operator's own placement, a private mirror the operator owns) has no
+recipient and is not a source hand-over; a push or copy that is public, or that another owner holds, is one.
 
 Every agent follows the same rule, private or not, and a private agent is never handed over on anything less. Under
 [one approval for all the operator's agents](delegation.md#one-approval-binds-all-the-operators-agents) (DEC-0126) a
@@ -484,7 +491,9 @@ a failure, an entry without `setup`. A missing slot is always reported by the sl
 when the agent's own code knows it backs a declared [connection](connections.md), is reported under that connection's
 id, without `setup`: a real failure of that connection. The agent's code owns that mapping from slot to connection;
 no schema member declares it and nothing checks it. A call refused because a slot is missing is a setup answer, not a
-failure: an operations count (DEC-0153) records it as `unknown`, never `failed`, so it never makes a rise.
+failure: the agent's own operations count (DEC-0153, in progress) records it as `unknown`, never `failed`, so it never
+makes a rise. A caller or a host that sees only the tool's error cannot tell a setup answer from a failure: by
+DEC-0149's choice the refusal carries no machine marker, and a structured one is left open.
 
 `degraded[]` holds at most 64 entries. Every failure entry, from a slot or not, comes before every setup entry, and
 truncation drops setup entries first: an agent with more entries than fit keeps its failures, then its missing-slot setup

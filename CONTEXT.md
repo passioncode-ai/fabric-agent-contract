@@ -447,8 +447,10 @@ the operator's word for that act, never by a mandate, as [source](docs/specifica
 (DEC-0149). Not the peer share's Export (DEC-0147) and not
 a proposal's `export` destination (`FAC-SEM-103`).
 
-**Source hand-over**: Handing a **Source export** to anyone (a repository created, a push, a file sent, a visibility
-changed): one synchronous call of effect class `publish`, taken only on the operator's word for that act (a decision
+**Source hand-over**: Handing a **Source export** to anyone, or the agent's tree itself (a repository created, a push to
+another repository, a transfer, a visibility changed, a file sent); a copy moved within the operator's own estate to a
+place that is not public (a deploy to the operator's own placement, a private mirror the operator owns) has no
+recipient and is not one, while a push or copy that is public, or that another owner holds, is one: one synchronous call of effect class `publish`, taken only on the operator's word for that act (a decision
 with its exact target, or the service's in-call elicitation), never by a mandate or an `approval/1` before CT-181, as
 [source](docs/specification/source.md#handing-over) specifies (DEC-0149). *Avoid*: a bare "hand-over" for this meaning.
 

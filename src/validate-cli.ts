@@ -1022,8 +1022,9 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   } catch (error) {
     // No manifest is one usage error; a folder or a manifest it cannot reach is another, named by its place.
     const code = String((error as NodeJS.ErrnoException).code);
-    // Only a real folder (by lstat) can hold no manifest: an absent one, a dangling link or a file is named as ".".
-    if (code === "ENOENT" && !lstatIsDirectory(folder)) run.usage.push("cannot read .: ENOENT");
+    // A folder that resolves to a directory, links followed, can hold no manifest; an absent one or a dangling link
+    // is named as "." (a file already failed with ENOTDIR).
+    if (code === "ENOENT" && !statIsDirectory(folder)) run.usage.push("cannot read .: ENOENT");
     else if (code === "ENOENT") run.usage.push(`--kind source-tree reads a folder's ${SOURCE_FILE}; the folder holds none`);
     // lstat needs no permission on the file itself, so any other failure is the folder's: it is named as ".".
     else run.usage.push(`cannot read .: ${code}`);
@@ -1163,6 +1164,8 @@ function notTreeDocument(file: string): boolean {
 
 /** Whether lstat finds an entry at a path (a dangling link included). */
 const lstatExists = (file: string): boolean => { try { lstatSync(file); return true; } catch { return false; } };
+/** Whether a path resolves to a folder, links followed. */
+const statIsDirectory = (file: string): boolean => { try { return statSync(file).isDirectory(); } catch { return false; } };
 /** Whether lstat finds a real folder at a path (never a link to one). */
 const lstatIsDirectory = (file: string): boolean => { try { return lstatSync(file).isDirectory(); } catch { return false; } };
 

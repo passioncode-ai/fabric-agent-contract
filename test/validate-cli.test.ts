@@ -1933,6 +1933,14 @@ describe("an agent's source (DEC-0149)", () => {
     expect(dangling.code).toBe(2);
     expect(dangling.out).toContain("cannot read .: ENOENT");
     expect(dangling.out).not.toContain("holds none");
+    // A link to a real folder with no manifest holds none, named as a folder or by the manifest's name in it.
+    mkdirSync(path.join(dir, "empty"));
+    symlinkSync("empty", path.join(dir, "link"));
+    for (const target of [path.join(dir, "link"), path.join(dir, "link", "fabric.source.json")]) {
+      const result = run(target, "--kind", "source-tree");
+      expect(result.code, target).toBe(2);
+      expect(result.out, target).toContain("the folder holds none");
+    }
   });
 
   it("refuses, by the discriminator, a JSON object with neither manifest nor files passed as a tree document", () => {

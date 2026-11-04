@@ -169,7 +169,15 @@ source, what never travels with it, the check before a source export, and how a 
   cancel scoped to the hand-over) answered as decided; round 31 (the act, not the artefact, needs the word, a local export none; a file with neither
   `manifest` nor `files` refused under `--kind source-tree` by the discriminator; a missing slot's refusal counted
   `unknown`; the chain through DEC-0153; link targets with `?` and `%2e` read literally; one `link-outside` on line 1
-  without a scan; a dangling-link folder never "holds none"); round 31's seam notes (a test that fails on a coverage floor no include reaches; the task lease CT-194 for the register commits; the CAS values and schema count as written) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  without a scan; a dangling-link folder never "holds none"); round 31's seam notes (a test that fails on a coverage floor no include reaches; the task lease CT-194 for the register commits; the CAS values and schema count as written) answered as decided; round 32 (a folder named through a
+  link to a real folder holds none again, decided by `stat` with links followed, while an absent folder or a dangling
+  link reads `cannot read .: ENOENT`; the usage error is a JSON object with neither member, a JSON value that is no
+  object staying `FAC-SEM-000`, exit 1) answered as decided; round 32's seam note (step 2 closes with the next-free
+  markers checked against the counters; the backlog tail re-measured to CT-220) answered as decided; round 32's product reading (DEC-0151 and DEC-0153 marked
+  in progress with a merge note; the setup answer scoped to the agent's own count, its missing machine marker left
+  open; the estate boundary of a source hand-over in the line paragraph and `CONTEXT.md`; SCN-054's refused tree
+  document; CT-211's amendment scoped to a source hand-over; no format check; the `.: ENOENT` sentence scoped to a
+  named manifest's folder) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -177,6 +185,9 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Open
 
+- A structured marker for a refusal that is a setup answer (a missing slot) is left open: by DEC-0149's choice the tool
+  error carries none, so a caller or host that sees only the error cannot tell a setup answer from a failure. It is for
+  CT-208 (Fabric) and CT-219 (not on this branch; on main or its own branch at landing) to take up.
 - CT-205 (from PR #236, merged) gets the hand-over exclusion when main is merged in: see the CT-205 row edit and its
   grep in the merge notes below.
 - Two changes outside source checks. First, a plain folder run (`pnpm validate <dir>`) skips a `.json` entry that
@@ -240,14 +251,17 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Checks actually run
 
-Round 31's fixes were gated on head `fc47ed94` of `agent/ct194-source-manifest-v2-20261104` (the commit before this
-note), each exit code read on its own, under the session's lock for heavy runs, the 15-minute load checked again once
-the lock was held (31.95): `tsc --noEmit -p .` (exit 0); `pnpm vitest run --coverage` (exit 0: 113 files, 10153 passed,
-3 skipped, the whole suite; branches 98.93 % over the set, every per-file floor met); `python3 docs/ux/lint.py` (exit
-0); `pnpm run docs:check` (exit 0, 0 errors); `ORG_INDEX=... pnpm privacy:check` (exit 0, 0 findings); `pnpm exec tsx
-tools/vectors/run.ts` (exit 0, 29 files match); no U+2014 in the added lines. The test over a tree of absolute links
-fails on a planted scan of the problems found (about 132 against the bound of 64, at a 32 times step); a planted `?`
-strip fails the literal-target vector; a planted orphan coverage floor fails "the coverage floors".
+Round 32's fixes were gated on the working tree over head `f714edaf` of `agent/ct194-source-manifest-v2-20261104` (this
+note's commit holds the same tree), each exit code read on its own, under the session's lock for heavy runs, the
+15-minute load checked again once the lock was held (30.12, 12 GB free): `tsc --noEmit -p .` (exit 0); `pnpm vitest
+run --coverage` (exit 0: 113 files, 10153 passed, 3 skipped, the whole suite; branches 98.93 % over the set, every
+per-file floor met); `python3 docs/ux/lint.py` (exit 0); `pnpm run docs:check` (exit 0, 0 errors); `ORG_INDEX=...
+pnpm privacy:check` (exit 0, 0 findings); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match); no U+2014 in
+the added lines. Probes of the folder routes under `--kind source-tree`: an absent folder named directly reads `cannot
+read gone: ENOENT`, a dangling link named directly `cannot read dang: not a file`, the folder of a named
+`fabric.source.json` that is absent or a dangling link `cannot read .: ENOENT`, and a link to an empty folder or the
+empty folder itself, named either way, "the folder holds none" (all exit 2); a JSON array under `--kind source-tree`
+reads `FAC-SEM-000` (exit 1).
 
 ## Next task
 
@@ -261,7 +275,11 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Merge the current `origin/main` (with #236, CT-215 and CT-216; re-measure its head at landing) into the fresh branch
-   as the merge notes below say, refreshing the sibling heads.
+   as the merge notes below say, refreshing the sibling heads. Close it with the merge notes' greps and with
+   `grep -n '^\*\*Next free' docs/DECISIONS.md docs/specification/conformance.md`, whose DEC and `FAC-SEM` markers
+   must equal the next free ids the CAS counters hold (`refs/agent-sync/ids/` on `origin`): a merge keeps a stale
+   marker without a conflict (after the chain the registers read DEC-0152 and `FAC-SEM-162` while the counters read
+   154 and 168).
 3. Re-run the full gate on that merge and cite its commit in this handoff. Open the PR from the fresh branch and
    dispatch the CI workflow once on it (`gh workflow run ci.yml --ref agent/ct194-source-manifest-v2-20261104`); read
    every matrix job (ubuntu-latest on Node 22 and 24, windows-latest and macos-latest on Node 24, macos since #238):
@@ -317,7 +335,7 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   refreshed at landing against the siblings' heads then.
 - `docs/backlog.md` (against all four siblings) and `docs/handoffs/README.md` (against DEC-0150 and DEC-0151)
   conflict as appends at the tail: keep both sides; the merged backlog tail is kept in id order, whatever main holds at the merge
-  (re-measure at landing; CT-200 to CT-218 on main's head when this was written, #235 bringing CT-202 and CT-203); the handoffs index is newest first, so at each merge the later-landing branch's row goes above.
+  (re-measure at landing; CT-200 to CT-220 on main's head when this was written, #235 bringing CT-202 and CT-203); the handoffs index is newest first, so at each merge the later-landing branch's row goes above.
   DEC-0151's edited files also include `src/connections.ts` (a comment) and `docs/specification/conformance.md` (the
   secret-shape reference row). DEC-0150's small edits to `src/validate-cli.ts`
   and `test/validate-cli.test.ts` merge cleanly beside this branch's.
@@ -356,8 +374,13 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   from `JWT_SHAPE.test` to `hasJwt` (this branch brings `hasJwt`); CT-212 stays unchanged. If DEC-0150 is on main at
   step 2, do what its handoff gives the second lander: `keyShaped` to `hasJwt`, rewrite DEC-0150's "in progress"
   sentence about DEC-0149's `sk-` sentence, and keep SCN-054 and SCN-055 with its grep.
+- `source.md` says "(DEC-0151, in progress)" and "(DEC-0153, in progress)". Whichever of DEC-0149 and DEC-0153 lands
+  second drops "in progress" from both pages (`source.md`, and `ops-digest.md` OD-3 with DEC-0153's decision text and
+  its conformance row); the same for DEC-0149 and DEC-0151.
 - At landing, add to CT-218's row: deploying an agent's tree to the operator's own placement (the local or the cloud
-  form) is not a source hand-over, since there is no recipient outside the estate.
+  form) is not a source hand-over, since there is no recipient outside the estate, as
+  [handing over](../specification/source.md#handing-over)'s line paragraph states (a copy moved within the operator's
+  own estate to a place that is not public).
 - `AGENTS.md`: the Check row's exit wording follows the README ("exit 0 when there is no blocking problem (accepted
   lines may print)"); keep it when main's rows are merged in.
 - At the DEC-0150 step, `docs/ux/screens.md` SCR-03 keeps "SCN-001, SCN-002, SCN-054, SCN-055", and `CONTEXT.md` and
