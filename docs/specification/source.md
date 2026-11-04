@@ -259,13 +259,16 @@ source check's named target that is not there, named by its basename such as `ca
 or folder it cannot read, a name Git lists that is not UTF-8 under a folder an `include` path reaches). A usage error names the
 checked folder itself as `.`, and tells a folder or manifest it cannot read (`cannot read .: EACCES`, `cannot read
 fabric.source.json: EACCES`) from a folder that holds no manifest; a manifest that is not a regular file (a FIFO, a
-socket, a device) or that is a symbolic link is never opened or read through (`cannot read fabric.source.json: not a
-file`), and neither is any source document
+socket, a device) or that is a symbolic link, a dangling one included, is never opened or read through (`cannot read
+fabric.source.json: not a file`; `lstat` is asked first, and only an absent entry is "the folder holds none"), and neither is any source document
 named on its own that is not one. A FIFO, a socket or a device under a source path is not a source file, in Git mode and
 in a walk alike, and is never opened; an `include` path naming only such a file reads as `missing`. A source check that
 throws anyway (a fault in the checker) ends in a usage error naming the file, or the folder as `.`, and the error's name
 only (`cannot check .: RangeError`), so `--json` always prints one document. A folder run under `--kind source-package` or `--kind source-manifest` lists the folder
-as the ordinary validator does, and skips a manifest that is not a regular file with a note. Outside a source check a
+as the ordinary validator does, and refuses a manifest that is not a regular file (a symbolic link, a FIFO) with that
+usage error, exit 2; a plain folder run, which may walk many agents, skips such a manifest with a note and checks the
+rest. A document named on its own and recognised as a source manifest only by its content is read as the ordinary
+validator reads a named file: its schema is known only after the read. Outside a source check a
 target that is not there, or one it cannot read, is named by its path, as the ordinary validator names it, and a named
 file that is not a regular file is read as before.
 
@@ -302,10 +305,13 @@ reads it.
 A package may carry `fabric.source.json` as an ordinary file, listed in `files[]` like any other: a packer that packs
 in place lists it and reads it for `secrets[]` and `state[]`. `pnpm validate <dir>` pairs a source manifest with a
 package only when both sit in the same folder, and checks them as the pair (`FAC-SEM-160`) whatever the manifest's
-schema answer, as the validator's other pairs do. It pairs only a package it can read: a `fabric.package.json` beside
-the manifest that the run skipped (`note/skipped`) or could not read prints "the fabric.package.json beside
-fabric.source.json was not read as a package, so no pair was checked (FAC-SEM-160)". `--kind source-package` on
-a folder checks that same pair too, and a folder with no `fabric.package.json` beside its manifest prints "the folder
+schema answer, as the validator's other pairs do. It pairs only a package it can read, and tests the entry beside the manifest with
+`lstat`: any `fabric.package.json` entry there that was not read as a package (skipped, unreadable, a symbolic link, a
+dangling link, not a regular file) prints "the fabric.package.json beside fabric.source.json was not read as a package,
+so no pair was checked (FAC-SEM-160)", in a plain folder run and under `--kind source-package` alike. A source kind's run
+never reads a package through a link; a plain run follows one, as the ordinary validator does. `--kind source-package` on
+a folder checks that same pair too, and a folder with no `fabric.package.json` entry beside its manifest (`lstat`
+answers it is absent) prints "the folder
 holds no fabric.package.json beside fabric.source.json, so no pair was checked (FAC-SEM-160)". A document, or another
 file of a folder, that holds no `{source, package}` prints a note that no pair was checked. Under `--kind
 source-package`, exit 0 with such a note does not mean a pair passed: none was checked. `--kind source-tree` takes one
@@ -351,7 +357,7 @@ two forms, and in no other:
   `input_required` on a Task or a job, answered by a person and accepted, whose message names the agent, the source
   commit and the recipient. A client that cannot show an elicitation to a person (an SDK handler, a headless session)
   cancels a hand-over elicitation (MCP's dismissal, no choice made) or does not declare the elicitation capability for
-  that call, and never answers it with a decline, which is a person's no only; its outcome is
+  that call, and never accepts or declines it (a decline is a person's no only); its outcome is
   `handover-needs-operator`, after which a decision with the exact target may follow in the same task. The service
   records the message it sent and the accept as the operator's word (the record of
   [OA-6](delegation.md#one-approval-binds-all-the-operators-agents)).

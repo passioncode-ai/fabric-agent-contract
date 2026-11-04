@@ -150,7 +150,11 @@ source, what never travels with it, the check before a source export, and how a 
   leaves AP-2's elicitation for other relayed actions unchanged; a backlog row at the DEC-0150 step for a channel
   declaration's installation values; PR #628 landing back to back with this merge; a package the folder run did not
   read noted; a symlinked manifest refused; walked names read as bytes; a pair's fault named by its path; the walk's
-  exclude test indexed) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  exclude test indexed) answered as decided; round 28 (the landing order: leases first, the acceptance edit and the merge gate on the head
+  that merges, then PR #628 and the contract PR back to back; a package entry beside the manifest tested by `lstat` in
+  both folder runs; a source kind never reading a package or a manifest through a link, a plain run skipping a linked
+  manifest; a dangling manifest link not a file; a link at a listed path never followed; CT-215's note; agents-first
+  item 8 as the rule's home) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -236,24 +240,25 @@ The landing continues on `agent/ct194-source-manifest-v2-20261104` (step 1 is do
 on the merge base `d1b905ee`, the review branch's remote ref deleted; never push the review branch again). The
 remaining steps, in order:
 
-1. Merge the current `origin/main` (with #236, CT-215 and CT-216; re-measure its head at landing) into the fresh branch
+1. Take fresh agent-sync leases for these files before anything else: `docs/DECISIONS.md`,
+   `docs/specification/conformance.md` and `docs/backlog.md` (origin holds none on them now).
+2. Merge the current `origin/main` (with #236, CT-215 and CT-216; re-measure its head at landing) into the fresh branch
    as the merge notes below say, refreshing the sibling heads.
-2. Re-run the full gate on that merge and cite its commit in this handoff.
-3. Open the PR from the fresh branch and dispatch the CI workflow once on it (`gh workflow run ci.yml --ref
-   agent/ct194-source-manifest-v2-20261104`); read every matrix job (ubuntu-latest on Node 22 and 24, windows-latest
-   and macos-latest on Node 24, macos since #238): the Linux-only non-UTF-8 test and the Windows-only `git.exe` test
-   have never run.
-4. Run the next rounds of the readings (unit, seam, product) on that merge until two clean rounds.
-5. A merge condition: CT-211's knowledge-base amendment (fabric-workspace `knowledge/agents-first.md` items 5 and 7,
-   `knowledge/principles.md` section 7), the knowledge base's PR #628, lands back to back with this merge in one
-   landing session: merge PR #628 immediately before the contract's DEC-0149 PR, run the two greps below on the
-   knowledge base's main, then merge the contract PR (PR #628's links point at `source.md#handing-over` on main);
-   the greps are `git show origin/main:knowledge/agents-first.md | grep -n 'source hand-over'` and `git show
-   origin/main:knowledge/principles.md | grep -n 'source hand-over'`, each printing at least one line. The landing
-   session takes a fresh agent-sync lease for `docs/DECISIONS.md` and `docs/specification/conformance.md` before the
-   merge commit (origin's leases on them are stale).
-6. Make the acceptance edit in the PR before it merges, as DEC-0147 did: DEC-0149's status line, CT-194 done, this
-   handoff's status and the `docs/handoffs/README.md` row.
+3. Re-run the full gate on that merge and cite its commit in this handoff. Open the PR from the fresh branch and
+   dispatch the CI workflow once on it (`gh workflow run ci.yml --ref agent/ct194-source-manifest-v2-20261104`); read
+   every matrix job (ubuntu-latest on Node 22 and 24, windows-latest and macos-latest on Node 24, macos since #238):
+   the Linux-only non-UTF-8 test and the Windows-only `git.exe` test have never run, and the ubuntu job's coverage line
+   for `src/validate-cli.ts` (99.44 % against its 99.4 floor on macOS) must be read too.
+4. Run the next rounds of the readings (unit, seam, product) on that merge until two clean rounds; the chain with
+   DEC-0150 and DEC-0151 is re-gated after they refresh (DEC-0151 now reads their `sk-` test keys).
+5. Make the acceptance edit on the PR branch, as DEC-0147 did (DEC-0149's status line, CT-194 done, this handoff's
+   status and the `docs/handoffs/README.md` row); then run the merge gate (`pnpm run check`, each part's exit code
+   read) on that head, with its output in the PR. That head is the one that merges; nothing merges before this step.
+6. Merge the knowledge base's PR #628 (CT-211's amendment), run its two greps on the knowledge base's main (`git show
+   origin/main:knowledge/agents-first.md | grep -n 'source hand-over'` and `git show
+   origin/main:knowledge/principles.md | grep -n 'source hand-over'`, each printing at least one line), then merge
+   the contract PR straight after, in the same landing session (PR #628's links point at `source.md#handing-over` on
+   main).
 7. A human gate: asking GitHub to remove the review branch's unreachable commits and their cached views is the
    operator's (GitHub Support).
 
@@ -305,20 +310,21 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   FAC-SEM-166).
 - `AGENTS.md` against main (PR #236 merged): keep this branch's Check row and #236's MCP row, which removes an em dash.
   #236 landed first, so this branch adds to CT-205's row, when main is merged in, that a source hand-over is never
-  covered by a task-wide mandate ([source](../specification/source.md#handing-over)); check with `grep '^| CT-205 '
+  covered by a task-wide mandate (written in the backlog row as `[source](specification/source.md#handing-over)`, the
+  backlog's own link form); check with `grep '^| CT-205 '
   docs/backlog.md | grep -c 'source hand-over'`, which prints 1 after that edit. CT-211 carries the same line for the
   knowledge base. CT-215 (on main) gets the same pointer in its part (c): a source hand-over is never covered by a
-  relayed mandate and needs the operator's word per act ([source](../specification/source.md#handing-over)), so a
-  launched session with no person at its client cancels any hand-over elicitation (or declares no elicitation
-  capability), never declines it, and takes the hand-over only as a decision with the exact target; check with `grep
-  '^| CT-215 ' docs/backlog.md | grep -c 'source hand-over'`, which prints 1 after the merge.
+  relayed mandate and needs the operator's word per act (linked as `specification/source.md#handing-over` in the row).
+  A client with no person at it cancels a hand-over elicitation (or declares no elicitation capability) and never
+  accepts or declines it, so a launched session takes the hand-over only as a decision with the exact target; it leaves
+  a job's input request unanswered (C3.3 reads a cancel there as the person's no). What a cancelled in-call elicitation
+  under AP-2 means for an ordinary relayed action is left open in CT-215's own decision; AP-2 is not changed here.
+  Check with `grep '^| CT-215 ' docs/backlog.md | grep -c 'source hand-over'`, which prints 1 after the merge.
 - At the DEC-0150 step, file a backlog row (the next free CT id in the backlog at that merge) on how a channel
   declaration's installation-valued members (`tickets.token_slot`'s vault project and env, `evals.spend_record`, the
   per-project entries) relate to source slots: the token slot's name is a `secret` slot; the vault project, the env and
   the spend record are `config` slots or live in the descriptor or the well-known answer; or the declaration is
   instance data kept out of the source.
-- CT-212 (this branch's row): when DEC-0150 is merged in, add `src/channel-agent.ts` `keyShaped` to the bounded callers
-  of `JWT_SHAPE` the row names.
 - The adapter re-vendors the shared detector before or with its `pack` writing `secrets[]` from slots (CT-207); until
   then a slot purpose `FAC-SEM-156` accepts, such as `sk-learn-experiments-2026`, is refused by its pack, which fails
   safe.

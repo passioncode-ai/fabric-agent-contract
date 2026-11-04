@@ -566,14 +566,14 @@ function checkPairs(run: Run, checked: Checked[], kindArg?: string): void {
   for (const source of pairOf("fabric-source.schema.json", SOURCE_FILE)) {
     const beside = pairOf("fabric-package.schema.json", PACKAGE_FILE).find((item) => path.dirname(item.relative) === path.dirname(source.relative));
     if (beside === undefined) {
-      // Asked for the pair, a folder without the package says so of the folder, not of the manifest as a document.
-      if (kindArg === "source-package") {
-        run.notes = run.notes.filter((note) => note.rule !== "note/pair" || note.file !== source.file);
-        run.notes.push({ file: source.file, path: "/", rule: "note/pair", message: `the folder holds no ${PACKAGE_FILE} beside ${SOURCE_FILE}, so no pair was checked (FAC-SEM-160)` });
-      } else if (existsSync(path.join(path.dirname(source.file), PACKAGE_FILE))) {
-        // A package beside the manifest that the run skipped or could not read is no pair: say so, never pass silently.
-        run.notes.push({ file: source.file, path: "/", rule: "note/pair", message: `the ${PACKAGE_FILE} beside ${SOURCE_FILE} was not read as a package, so no pair was checked (FAC-SEM-160)` });
-      }
+      // The entry beside the manifest by lstat: any entry there (skipped, unreadable, a link, a dangling link, not a
+      // regular file) that was not read as a package is said so, never passed silently; "holds no" only when there is
+      // no entry at all.
+      let entry = true;
+      try { lstatSync(path.join(path.dirname(source.file), PACKAGE_FILE)); } catch (error) { entry = (error as NodeJS.ErrnoException).code !== "ENOENT"; }
+      if (kindArg === "source-package") run.notes = run.notes.filter((note) => note.rule !== "note/pair" || note.file !== source.file);
+      if (entry) run.notes.push({ file: source.file, path: "/", rule: "note/pair", message: `the ${PACKAGE_FILE} beside ${SOURCE_FILE} was not read as a package, so no pair was checked (FAC-SEM-160)` });
+      else if (kindArg === "source-package") run.notes.push({ file: source.file, path: "/", rule: "note/pair", message: `the folder holds no ${PACKAGE_FILE} beside ${SOURCE_FILE}, so no pair was checked (FAC-SEM-160)` });
       continue;
     }
     // The pair was checked, so neither file keeps the note that it holds none.
@@ -803,8 +803,11 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
       // Never read through a link: a path under a symbolic link is not in the tree as it is. The ancestors are checked
       // before anything at the path is.
       for (let depth = 1; depth < parts.length; depth += 1) if (lstatSync(path.join(folder, ...parts.slice(0, depth))).isSymbolicLink()) return [];
-      // A path that is no source path is stated only when it may be nested.
-      if (!isSource(name) && !listedAsFolder.has(name) && !existsSync(path.join(full, ".git"))) return [];
+      // A path that is no source path is stated only when it may be nested, and a link there is never followed.
+      if (!isSource(name)) {
+        if (!listedAsFolder.has(name) && !existsSync(path.join(full, ".git"))) return [];
+        if (lstatSync(full).isSymbolicLink()) return [];
+      }
       if (!lstatSync(full).isDirectory()) return [{ path: name }];
       // A folder is a nested repository when Git listed it with a trailing `/` or it holds its own `.git`; otherwise it
       // is a tracked path no longer in the work tree, and Git lists the untracked files under it on their own.
@@ -1012,7 +1015,9 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   };
   try {
     // A manifest that is not a regular file (a FIFO, a socket, a device, a folder) is never opened: reading a FIFO waits.
-    statSync(manifestFile);
+    // lstat first: any entry that is not a regular file (a link, a dangling link included, a FIFO) is "not a file";
+    // only an absent entry is "the folder holds none".
+    lstatSync(manifestFile);
     if (!sourceRegularFile(manifestFile)) {
       run.usage.push(`cannot read ${SOURCE_FILE}: not a file`);
       return;
@@ -1087,7 +1092,7 @@ function checkSourceFolderAs(run: Run, folder: string): void {
 export const errorName = (error: unknown): string => (error instanceof Error ? error.name : "Error");
 
 /** The folder's `.json` files, dot-folders and `node_modules` left out; a folder it cannot read is a usage error. */
-function jsonFiles(dir: string, run: Run): string[] {
+function jsonFiles(dir: string, run: Run, sourceKind = false): string[] {
   let entries: Dirent[];
   try {
     entries = readdirSync(dir, { withFileTypes: true });
@@ -1100,8 +1105,15 @@ function jsonFiles(dir: string, run: Run): string[] {
     .sort((a, b) => a.name.localeCompare(b.name))
     .flatMap((entry) => {
       const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) return jsonFiles(full, run);
+      if (entry.isDirectory()) return jsonFiles(full, run, sourceKind);
       if (!entry.name.endsWith(".json")) return [];
+      // A source manifest that is no regular file (a symbolic link, a FIFO, a socket, a device): a source kind's run
+      // refuses it (the read refuses, exit 2); a plain run, which may walk many agents, skips it with a note.
+      if (entry.name === SOURCE_FILE && !sourceRegularFile(full)) {
+        if (sourceKind) return [full];
+        run.notes.push({ file: full, path: "/", rule: "note/skipped", message: "not a file: a source manifest that is a symbolic link, a FIFO, a socket or a device is never read" });
+        return [];
+      }
       // A FIFO, a socket or a device is skipped with a note: reading a FIFO waits for a writer forever (a hang before
       // DEC-0149). Anything else (a link to a folder included) is read as before, and its error reported.
       if (special(full)) {
@@ -1222,7 +1234,7 @@ export function main(args: readonly string[]): CliResult {
     if (kindArg === "source-tree") { checkSourceFolder(run, target); continue; }
     const before = run.usage.length;
     const problemsBefore = run.problems.length;
-    const files = jsonFiles(target, run);
+    const files = jsonFiles(target, run, kindArg !== undefined && SOURCE_KINDS.includes(kindArg));
     if (files.length === 0 && run.usage.length === before) run.usage.push(`${target} holds no .json file`);
     // The relative path with `/` on every platform: the rules read it as a stored path (FAC-SEM-014) and pair by it.
     const checked = files.flatMap((file) => checkFile(run, file, path.relative(target, file).split(path.sep).join("/"), schemaArg, kindArg, true) ?? []);

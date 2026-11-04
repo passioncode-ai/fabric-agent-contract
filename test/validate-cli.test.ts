@@ -1772,7 +1772,8 @@ describe("an agent's source (DEC-0149)", () => {
     symlinkSync("fabric.source.json", path.join(dir, "fabric.source.json"));
     const result = run(dir, "--kind", "source-tree");
     expect(result.code).toBe(2);
-    expect(result.out).toContain("usage error: cannot read fabric.source.json: ELOOP");
+    // An entry that lstat finds but that is no regular file (a link looping on itself) is "not a file".
+    expect(result.out).toContain("usage error: cannot read fabric.source.json: not a file");
     expect(result.out).not.toContain("holds none");
     expect(result.out).not.toContain(dir);
   });
@@ -1828,6 +1829,49 @@ describe("an agent's source (DEC-0149)", () => {
     const result = run(dir);
     expect(result.out).toContain("note/skipped");
     expect(result.out).toContain("the fabric.package.json beside fabric.source.json was not read as a package, so no pair was checked (FAC-SEM-160)");
+  });
+
+  it.skipIf(process.platform === "win32")("notes a package entry beside the manifest that was not read, by lstat, in both folder runs", () => {
+    const manifest = sourceManifest({ include: ["LICENSE"] });
+    const notRead = "the fabric.package.json beside fabric.source.json was not read as a package, so no pair was checked (FAC-SEM-160)";
+    // A dangling link, in a plain run.
+    const dangling = folder({ "fabric.source.json": manifest });
+    symlinkSync(path.join(dangling, "gone.json"), path.join(dangling, "fabric.package.json"));
+    expect(run(dangling).out).toContain(notRead);
+    // A link to a real package, under --kind source-package: never read through it.
+    const target = folder({ "p.json": json("positive/fabric-package-agent.json") });
+    const linked = folder({ "fabric.source.json": manifest });
+    symlinkSync(path.join(target, "p.json"), path.join(linked, "fabric.package.json"));
+    const linkedOut = run(linked, "--kind", "source-package").out;
+    expect(linkedOut).toContain(notRead);
+    expect(linkedOut).not.toContain("holds no");
+    // A FIFO and an unparseable file, under --kind source-package.
+    const fifo = folder({ "fabric.source.json": manifest });
+    expect(spawnSync("mkfifo", [path.join(fifo, "fabric.package.json")]).status).toBe(0);
+    const unparseable = folder({ "fabric.source.json": manifest, "fabric.package.json": "{ not json" });
+    for (const dir of [fifo, unparseable]) {
+      const out = run(dir, "--kind", "source-package").out;
+      expect(out, dir).toContain(notRead);
+      expect(out, dir).not.toContain("holds no");
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("reads a dangling manifest link under --kind source-tree as not a file, never as none", () => {
+    const dir = folder({ LICENSE: "x" });
+    symlinkSync(path.join(dir, "gone.json"), path.join(dir, "fabric.source.json"));
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(2);
+    expect(result.out).toContain("cannot read fabric.source.json: not a file");
+    expect(result.out).not.toContain("holds none");
+  });
+
+  it.skipIf(process.platform === "win32")("never follows a link at a listed path that is no source path, in Git mode", () => {
+    const outside = folder({ ".git/HEAD": "ref: refs/heads/main", "x.ts": "x" });
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE", "vendor/lib/"] }), LICENSE: "x", "src/a.ts": "x", "vendor/x.txt": "x" });
+    symlinkSync(outside, path.join(dir, "vendor/lib"));
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.out).not.toContain("nested-repository");
   });
 
   it("refuses a second target under --kind source-tree, and under --kind source-package when a target is a folder", () => {
@@ -1890,11 +1934,17 @@ describe("an agent's source (DEC-0149)", () => {
     const dir = folder({ LICENSE: "x" });
     symlinkSync(path.join(real, "real.json"), path.join(dir, "fabric.source.json"));
     const manifest = path.join(dir, "fabric.source.json");
-    for (const args of [[dir, "--kind", "source-tree"], [manifest, "--kind", "source-tree"], [manifest], [manifest, "--kind", "source-manifest"], [dir, "--kind", "source-package"], [dir]]) {
+    for (const args of [[dir, "--kind", "source-tree"], [manifest, "--kind", "source-tree"], [manifest], [manifest, "--kind", "source-manifest"], [dir, "--kind", "source-package"], [dir, "--kind", "source-manifest"]]) {
       const result = run(...args);
       expect(result.code, args.join(" ")).toBe(2);
       expect(result.out, args.join(" ")).toMatch(/cannot read (\S*\/)?fabric\.source\.json: not a file/);
     }
+    // A plain folder run walks many agents (a monorepo): it skips the linked manifest with a note and checks the rest.
+    const monorepo = folder({ "linked/LICENSE": "x", "real/fabric.source.json": sourceManifest({ include: ["LICENSE"] }) });
+    symlinkSync(path.join(real, "real.json"), path.join(monorepo, "linked/fabric.source.json"));
+    const plain = run(monorepo);
+    expect(plain.code).toBe(0);
+    expect(plain.out).toContain("note/skipped  not a file: a source manifest that is a symbolic link");
     expect(gitIn(dir, "init", "-q").status).toBe(0);
     expect(run(dir, "--kind", "source-tree").out).toContain("cannot read fabric.source.json: not a file");
   });
@@ -1934,8 +1984,13 @@ describe("an agent's source (DEC-0149)", () => {
     const results = JSON.parse(child.stdout) as Array<{ code: number; out: string; ms: number }>;
     expect(results).toHaveLength(routes.length);
     for (const [index, result] of results.entries()) expect(result.ms, routes[index]?.join(" ")).toBeLessThan(20_000);
-    // A folder run skips a FIFO with a note naming it; a FIFO named on a source route is a usage error.
-    for (const index of [0, 1, 2]) expect(results[index]?.out).toContain("fabric.source.json  /  note/skipped  not a file");
+    // A source kind's folder run refuses a FIFO manifest (exit 2); a plain folder run skips it with a note; a FIFO
+    // named on a source route is a usage error.
+    for (const index of [0, 1]) {
+      expect(results[index]).toMatchObject({ code: 2 });
+      expect(results[index]?.out).toContain("cannot read fabric.source.json: not a file");
+    }
+    expect(results[2]?.out).toContain("fabric.source.json  /  note/skipped  not a file");
     expect(results[2]?.code).toBe(0);
     expect(results[3]).toMatchObject({ code: 2 });
     expect(results[3]?.out).toContain("cannot read piped.json: not a file");
