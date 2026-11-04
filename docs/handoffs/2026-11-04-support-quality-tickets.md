@@ -122,7 +122,10 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   channel a producer withholds during the wait (CT-210 step (d)); the coordinator files the adapter's row (step (e)).
 - The vendors re-sync with item 7, including: the Fabric Agent Adapter kit's detector ports (its Python and JS secrets
   modules, its dashboard-link checkers, its connection ports and its dashboard button), its vendored vector files that
-  change answer (`connections-extra` and `feed-protocols`), and any template that copies the kit; any port that copies
+  change answer (`connections-extra` and `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`,
+  re-vendored from the two changed semantic fixtures), Fabric Switchboard's folder-attribution port (it has neither
+  look-ahead nor look-behind, so it checks the `sk-` strength outside its regex and re-syncs `folder-attribution.json`
+  at the merge commit), and any template that copies the kit; any port that copies
   `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
   otherwise. Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json`
   together with `fixtures/vectors/folder-attribution.json`, so both are re-pinned together; Fabric Dashboards vendors
@@ -176,39 +179,54 @@ conflict unless the line says it auto-merges), with the resolution:
   (tail appends; keep both, in order).
 - **Against PR #236** (`agent/template-parity-20261103`): `docs/backlog.md` (tail appends; keep both, in order).
 
-The second of DEC-0150 and DEC-0151 to merge also rewrites these:
+The second of DEC-0150 and DEC-0151 to merge also rewrites these (DEC-0150's sentences quoted from its branch at
+`0bda2352`, cited by their text, since its lines move):
 
-- `docs/specification/channel-agent.md` (DEC-0150 at `8d40067d`), the daily-payload bullet (its lines 209 to 215): "That
-  schema is what DEC-0151, in progress on CT-210, proposes. Until it lands, an agent following section 5.1 emits payloads
-  this contract refuses, and how the seven channel kinds here map to `/1`'s four channels ... is what DEC-0151, in
-  progress, proposes to decide. Until then, an agent declaring several projects publishes no per-project
-  `support.quality_daily` on a channel they share ...". It becomes a pointer to DEC-0151 and to
+- `docs/specification/channel-agent.md`, the daily-payload bullet that begins "**The daily quality payload.**" and says
+  "That schema is what DEC-0151, in progress on CT-210, proposes. Until it lands, an agent following section 5.1 emits
+  payloads this contract refuses, and how the seven channel kinds here map to `/1`'s four channels ... is what
+  DEC-0151, in progress, proposes to decide": it becomes a pointer to DEC-0151 and to
   [support quality](../specification/support-quality.md)'s channel kinds table and per-project keying.
-- `docs/specification/channel-agent.md` line 70 and DEC-0150's CA-2: the parenthetical "the memory capability's pattern;
-  DEC-0151, in progress on CT-210, proposes the same `projectAlias`" says that `support-quality-daily/1` uses the same
+- `docs/specification/channel-agent.md`, the parenthetical "the memory capability's pattern; DEC-0151, in progress on
+  CT-210, proposes the same `projectAlias`" after the alias pattern: it says that `support-quality-daily/1` uses the same
   `projectAlias`.
+- DEC-0150's CA-2 in `docs/DECISIONS.md`, which carries the same parenthetical: left as written (the register is
+  append-only) and annotated with DEC-0151's merge.
+- DEC-0150's join sentence in `channel-agent.md` ("DEC-0151 (CT-210, in progress) gives `support-quality-daily` payloads
+  the same alias; once it lands, a reader joins a declaration to a project's payloads on `project:<slug>`"): once both
+  land it reads "DEC-0151 gives `support-quality-daily` payloads the same alias, and a reader joins a declaration to a
+  project's payloads on `project:<slug>`, or, for a payload with no project, on that channel's one project".
 - `test/channel-agent.test.ts`: an assertion that the declaration's `project` pattern equals
-  `support-quality-daily.schema.json`'s `$defs/projectAlias.pattern` (none at `8d40067d`; the second to land adds it
-  if it is still absent).
+  `support-quality-daily.schema.json`'s `$defs/projectAlias.pattern` (none at `0bda2352`; the second to land adds
+  it if it is still absent).
 - `docs/evidence/sources.md`, DEC-0150's row for the channel agent standard: "section 5.1 the daily
   `support-quality-daily/1` per project (DEC-0151, in progress)" names DEC-0151 as decided and links it.
+- `docs/backlog.md`, row CT-209: its "Until DEC-0151 (CT-210, in progress) lands ..." and "DEC-0151, in progress,
+  proposes how the seven channel kinds map ..." and its Source cell "DEC-0151 (in progress), CT-210" say DEC-0151 is
+  merged.
+- `src/channel-agent.ts`, the comment on `shaped` ("Whether a string is shaped like a credential, by FAC-SEM-101's
+  detector ..."): DEC-0150 is rewording it for the present rule now; the second to land checks it states DEC-0151's
+  detector (a word-start boundary, the `sk-` strength) and no longer says an ordinary `sk-` name is found.
 - `docs/specification/support-quality.md`, DEC-0150's "Not decided here" bullet on the per-project payload ("...:
   DEC-0151 (CT-210), in progress"): removed, since DEC-0151's section answers it.
 - DEC-0150's Compatibility sentence ("that is DEC-0151 (CT-210), in progress: until it lands, an agent following section
   5.1 emits payloads this contract refuses, and the mapping of the seven channel kinds to `/1`'s four channels is what
-  the in-progress DEC-0151 proposes"): left as written (the register is append-only) and annotated with DEC-0151's merge.
-- DEC-0150's counter sentence in its Source ("the counter moves from next 149 (`d3da4336`) to next 152 in one commit
-  (`ee67e35e`, key `support-quality-v2-dec`), so DEC-0149, DEC-0150 and DEC-0151 (in progress) have no counter commit of
-  their own"): annotated so that it agrees with DEC-0151's Source and with DEC-0149's reservation `e27a5441` (key
+  the in-progress DEC-0151 proposes"): left as written and annotated with DEC-0151's merge.
+- DEC-0150's counter sentence in its Source ("That chain moves from next 149 (`d3da4336`) to next 152 in one commit,
+  `ee67e35e` (key `support-quality-v2-dec`), the reservation of DEC-0151 (in progress) ..."): left as written and
+  annotated so that it agrees with DEC-0151's Source and with DEC-0149's reservation `e27a5441` (key
   `ct194-source-manifest`, `"next": 150` by `git cat-file -p e27a5441`).
 - The channel agent standard's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`, named as text
   in DEC-0151's Context and on the support quality page: made a link once both are on main.
 - `docs/DECISIONS.md`'s next-free line: DEC-0152 here; at merge take the maximum of the branches' values and the CAS
   counter.
-- The detector: DEC-0150's branch documents the earlier false positive as standing ("the shared detector stays as it
-  is" in its CA-5, in `channel-agent.md`'s check of a declaration, and in its handoff's note on the detector). Whichever
-  lands second keeps DEC-0151's boundary and drops that note; the advice to rename an id that starts with `sk-` stays
-  true, since a prefix at the start of a value is still found.
+- The detector, as DEC-0150's CA-5 states it ("the shared detector stays as it is", and an ordinary name such as `sk-`
+  and 16 more name characters is found too): whichever lands second keeps DEC-0151's boundary and annotates CA-5 with
+  it; the advice to rename an id that starts with `sk-` stays true, since a strong `sk-` run at the start of a value is
+  still found.
+- DEC-0150's `FAC-SEM-165` budget: DEC-0150's branch now counts DEC-0151's look-aheads itself (for each `sk-` after a
+  boundary, the smaller of 255 and the rest of the string) with a test. No wording change is owed by DEC-0151; on the
+  merged tree, DEC-0150's budget test with digit-free `-sk` strings passes.
 - `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `801c5cd3`: that head keeps the tree check's own
   unbounded provider-key shapes (a fixed list held equal to a vectors constant, for parity with the adapter's source
   check), its tests no longer read `SECRET_VALUE.source`, and its
@@ -227,11 +245,6 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these:
   `ee67e35e` (key `support-quality-v2-dec`, `"next": 152`) is DEC-0151's reservation, and `d3da4336` (`"next": 149`) the
   value before it, as DEC-0150's Source cites; DEC-0149's own reservation is `e27a5441` (key `ct194-source-manifest`,
   `"next": 150`), each read with `git cat-file -p`.
-- DEC-0150's join sentence in `channel-agent.md` (line 74 at `8d40067d`: "DEC-0151 (CT-210, in progress) gives
-  `support-quality-daily` payloads the same alias; once it lands, a reader joins a declaration to a project's payloads
-  on `project:<slug>`"): once both land it reads "DEC-0151 gives `support-quality-daily` payloads the same alias, and a
-  reader joins a declaration to a project's payloads on `project:<slug>`, or, for a payload with no project, on that
-  channel's one project".
 - DEC-0150's handoff Open bullet on section 5.1 ("until DEC-0151 ... lands, an agent following it emits
   `support-quality-daily/1` payloads this contract refuses"): dropped once DEC-0151 is on main.
 - The organization's roadmap row AS-01 ("one event per channel and closed day", fabric-workspace
@@ -239,15 +252,19 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these:
 - The schema count: 148 after the source-manifest branch and DEC-0150's land (146 on origin/main today); a test or
   document that counts the schemas follows that number.
 
-The check that closes this list, after both land:
-`git grep -n -E 'DEC-0151[^.]*in progress|in-progress DEC-0151' -- docs src test ':!docs/handoffs'` prints nothing.
-The handoffs are left out because they quote the earlier wording as history (this one does above).
+The check that closes this list, after both land, in two parts:
+`git grep -n -E 'DEC-0151[^.]*in progress|in-progress DEC-0151' -- docs src test ':!docs/handoffs' ':!docs/DECISIONS.md'`
+prints nothing; and in `docs/DECISIONS.md`, `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -n -E
+'DEC-0151[^.]*in progress|in-progress DEC-0151'` prints only the lines of DEC-0150's CA-2, its Compatibility and its
+Source counter sentence, which stay as written, while `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -c
+'^- \*\*Annotated'` prints at least 1, an annotation naming DEC-0151's merge for all three. The handoffs are left out
+because they quote the earlier wording as history (this one does above).
 
 ## Decisions taken here
 
 - New members are optional one by one (a producer from before DEC-0151 carries none of them); `open` and `outcomes`
-  are never empty objects, as `checks` and `calibrationChecks` are not; `project` is never `null` (absent is the
-  service's one project).
+  are never empty objects, as `checks` and `calibrationChecks` are not; `project` is never `null` (absent names that
+  channel's only project, except a merged day from a service that served several projects on that channel that day).
 - The outcome counts sit in one `outcomes` object, not at the top level the channel agent standard's table suggests.
 - `promotions` counts the promotions made on the day; whether a promotion also restates the day the ticket ended is
   left to the channel agent standard (support-quality.md, "Not decided here").

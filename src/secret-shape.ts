@@ -7,7 +7,10 @@
  * without this kit; `test/session-handoff-review.test.ts` checks that the copy agrees with this module. Vendors that
  * re-sync on a change (DEC-0151) include: the Fabric Agent Adapter kit's detector ports (its Python and JS secrets
  * modules, its dashboard-link checkers, its connection ports and its dashboard button), its vendored vector files that
- * change answer (`connections-extra`, `feed-protocols`) and any template that copies the kit; a port that copies
+ * change answer (`connections-extra`, `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`, re-vendored
+ * from the two changed semantic fixtures), Fabric Switchboard's folder-attribution port (it has neither look-ahead nor
+ * look-behind, so it checks the `sk-` strength outside its regex and re-syncs `folder-attribution.json` at the merge
+ * commit) and any template that copies the kit; a port that copies
  * `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
  * otherwise. Fabric vendors this file twice, one copy under a sha256 `pin.json` together with
  * `fixtures/vectors/folder-attribution.json`; Fabric Dashboards vendors `src/session-handoff.ts` and
@@ -74,6 +77,7 @@ export const JWT_SHAPE = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]
  * read lazily, so a long run of `sk-` prefixes is read in linear time. So `project:helpdesk-customer-support`,
  * `project:sk-learn-experiments` and `sk-learn-experiments-2026` are no keys, and `sk-or-v1-` with 64 lower-case hex
  * digits is one. A port whose regex has no look-ahead (Rust's `regex` crate) checks that strength outside the regex.
+ * A match includes its boundary character, so a caller uses `.test` only, never the matched text or its index.
  */
 export const SECRET_VALUE = /(^[Bb][Ee][Aa][Rr][Ee][Rr]\s.+|(?:^|[^A-Za-z0-9]|%[0-9A-Fa-f]{2}|\\[nrt"']|\\u[0-9A-Fa-f]{4}|\\x[0-9A-Fa-f]{2}|\\[bfv0ae]|\\[0-7]{1,3}|%25[0-9A-Fa-f]{2}|\x1b\[[0-9;]*m|(?:\\u001[bB]|\\x1[bB]|\\e|\\033)\[[0-9;]*m)(?:sk-(?=[A-Za-z0-9_-]{0,255}?\d)(?:(?=[A-Za-z0-9_-]{0,255}?[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}))/;
 /**

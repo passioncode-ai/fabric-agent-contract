@@ -9088,8 +9088,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      leaves it out.
   5. `/1` keeps its four channels. An agent on the channel agent standard publishes each of the declaration's seven
      channel kinds under the closest one: `telegram_dm` and `account` as `chat`, `mail` as `mail`, `store_review` as
-     `reviews`, `telegram_group`, `public_comment` and `team_chat` as `community`; kinds that meet in one channel make
-     one event per day, as two surfaces of one channel do. `community`'s latency and coverage figures then mix three
+     `reviews`, `telegram_group`, `public_comment` and `team_chat` as `community`; the kinds of one project that meet in
+     one `/1` channel make one event per day, channel and project, as two surfaces of one channel do; kinds of different
+     projects never merge (item 6 governs them). `community`'s latency and coverage figures then mix three
      kinds with different limits, and a producer MAY leave `team_chat` out of `/1`, since a team's internal chat is not
      customer support.
   6. An optional top-level `project`: the project registry's alias `project:<slug>`
@@ -9107,7 +9108,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      one event. A producer never changes the project form of a day it has already published: a single-project day,
      first published without `project`, is rerun as first published, without `project`; a day merged across projects
      before DEC-0151 is never rerun. A single-project producer, one project on that channel, keeps leaving `project` out
-     on that channel and names it only once the channel serves a second project. A day's calibration is carried, unchanged, on each project's event judged that day by the
+     on that channel and names it only once the channel serves a second project. A producer whose declaration maps two
+     projects to one `/1` channel names `project` on every event of that channel, even when one project's kind there is
+     left out of `/1` (a `team_chat`, item 5). A day's calibration is carried, unchanged, on each project's event judged that day by the
      calibrated judge and rubric; a project's event judged by another judge, or not judged, carries none, and a reader
      reads calibration per project's event, never summing or copying it across projects. The top level then holds 19
      members, inside DEC-0070's 32.
@@ -9125,8 +9128,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      found. An `sk-` key also needs exactly what `src/connections.ts` asks of one: a digit and an upper-case letter with
      16 or more characters, or a digit with 32 or more. Its two look-aheads are bounded to 255 characters, read lazily
      (`(?=[A-Za-z0-9_-]{0,255}?\d)`, `(?=[A-Za-z0-9_-]{0,255}?[A-Z])`), so a long run of `sk-` prefixes is read in
-     linear time (`-sk` repeated 100000 times, with or without a tail, stays under a 150 ms CPU budget in
-     `test/secret-shape.test.ts`, where the unbounded form took seconds); a digit or an upper-case letter beyond the
+     linear time: `test/secret-shape.test.ts` reads `-sk` repeated 25000 and 100000 times, with or without a tail, and
+     asserts that 4 times the input takes under 8 times the CPU time (best of three runs, with a 40 ms floor for timer
+     granularity) and under a 500 ms ceiling, where the unbounded form took seconds; a digit or an upper-case letter beyond the
      first 256 characters of a run no longer counts. A port whose regex has no look-ahead (Rust's `regex` crate) checks
      that strength outside the regex. So `project:helpdesk-customer-support`,
      `project:sk-learn-experiments`, `sk-learn-experiments-2026` and `project:sk-hynix-customer-care` are no keys,
@@ -9135,11 +9139,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      starts after `-`, `_`, `.` or `:`) that starts with a provider prefix and holds enough key characters is read as a
      credential: for `sk-`, 32 or more characters after `sk-` (letters, digits, `-` and `_`), holding a digit, as a
      lower-case `sk-or-v1-` key does (`project:sk-customer-support-team-europe-2026`); for `ghp_` and its kin 20 or
-     more, for `xox?-` 10 or more (`project:xoxb-support-team`), for `glpat-` 20 or more
-     (`project:ghp_customerservicedeskabcdef`). The operator's registry rule is to issue no such
+     more (`project:ghp_customerservicedeskabcdef`), for `xox?-` 10 or more (`project:xoxb-support-team`), for `glpat-`
+     20 or more (`project:glpat-` and 20 such characters is read, 19 pass). Knowingly not found either: a key after a
+     triple percent-escape (`%252522`) or after an eight-digit `\U00000022` escape, whose last character before the
+     prefix is a digit. The operator's registry rule is to issue no such
      alias, which this contract does not prove; the rule binds only a producer that carries `project` on a channel,
      which checks its alias against the shared detector before publishing (the payload's own check does not run
-     `FAC-SEM-101`): one whose alias is read so publishes no event naming that project, on any channel, until the registry changes its alias; the other projects' events are unaffected.
+     `FAC-SEM-101`): one whose alias is read so publishes no event for that project, on any channel, until the
+     registry changes its alias, neither events naming it nor the days it publishes without `project` as some channel's
+     only project; the other projects' events are unaffected.
 - **Why:** the channel agent standard's daily report counts tickets on its signal server and checks each agent's feed
   against it; one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that
   home before any producer may send them. The digit fixes a rule the schema made impossible to keep. The registry
@@ -9185,7 +9193,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   boundary, `sk-` strength (bounded look-aheads) and canonical-case prefixes (no `i` flag). The vendors that re-sync
   include: the Fabric Agent Adapter kit's detector ports (its Python and JS secrets modules, its dashboard-link
   checkers, its connection ports and its dashboard button), its vendored vector files that change answer
-  (`connections-extra` and `feed-protocols`), and any template that copies the kit; any port that copies
+  (`connections-extra` and `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`, re-vendored from the
+  two changed semantic fixtures), Fabric Switchboard's folder-attribution port (it has neither look-ahead nor
+  look-behind, so it checks the `sk-` strength outside its regex and re-syncs `folder-attribution.json` at the merge
+  commit), and any template that copies the kit; any port that copies
   `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
   otherwise. Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json` together with
   `fixtures/vectors/folder-attribution.json`, so both are re-pinned together; Fabric Dashboards vendors

@@ -30,8 +30,8 @@ on that channel, keeps leaving `project` out on that channel and names it only o
 project. A day's calibration (DEC-0144) is
 carried, unchanged, on each project's event judged that day by the calibrated judge and rubric; a project's event
 judged by another judge, or not judged, carries none, and a reader reads calibration per project's event, never
-summing or copying it across projects. An agent with two
-surfaces of one channel merges them into one event per day. A voice-of-the-customer reader then reads every agent the same way. The
+summing or copying it across projects. An agent with two surfaces of one channel for one project merges them into one
+event per day and project; surfaces of different projects never merge. A voice-of-the-customer reader then reads every agent the same way. The
 standard behind it (what is measured, the rubric, the judge) is the asker's, issue #125; the contract owns the shape.
 
 ## The payload
@@ -61,12 +61,15 @@ digit and an upper-case letter with 16 or more characters, or a digit with 32 or
 in its canonical case only (DEC-0151). The residual exception is a slug word (a word starts after `-`, `_`, `.` or
 `:`) that starts with a provider prefix and holds enough key characters: for `sk-`, 32 or more characters after `sk-`
 (letters, digits, `-` and `_`), holding a digit, as a lower-case `sk-or-v1-` key does
-(`project:sk-customer-support-team-europe-2026`); for `ghp_` and its kin 20 or more, for `xoxb-` and its kin 10 or more
-(`project:xoxb-support-team`), for `glpat-` 20 or more (`project:ghp_customerservicedeskabcdef`). The detector reads such an alias as a credential and
+(`project:sk-customer-support-team-europe-2026`); for `ghp_` and its kin 20 or more
+(`project:ghp_customerservicedeskabcdef`), for `xoxb-` and its kin 10 or more (`project:xoxb-support-team`), for `glpat-` 20
+or more. Knowingly not found: a key after a triple percent-escape (`%252522`) or after an eight-digit `\U00000022`
+escape. The detector reads such an alias as a credential and
 the events page fails `FAC-SEM-101`; it stays strict there (`test/secret-shape.test.ts`). The operator's registry rule
 is to issue no such alias, a rule of the registry this contract does not prove; the rule here binds a producer that
-carries `project` on a channel: one whose alias is read so publishes no event naming that project, on any channel,
-until the registry changes its alias; the other projects' events are unaffected. Such a producer checks its alias
+carries `project` on a channel: one whose alias is read so publishes no event for that project, on any channel, until
+the registry changes its alias, neither events naming it nor the days it publishes without `project` as some channel's
+only project; the other projects' events are unaffected. Such a producer checks its alias
 against the shared detector (or validates its events page) before publishing, because the payload's own check
 (FAC-SEM-126) does not run `FAC-SEM-101`.
 The feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries `calibration` and
@@ -118,8 +121,9 @@ and its observed check accepts a channel a producer withholds during the wait.
 ### The channel agent standard's channel kinds (DEC-0151)
 
 The channel agent standard's declaration (DEC-0150's `extensions/channel-agent/0.1`) names seven channel kinds; `/1`
-keeps its four channels and adds none. An agent on the channel agent standard publishes each kind under the `/1` channel it is closest to, and
-merges the kinds that meet in one channel into one event per day and channel, as it merges two surfaces of one channel:
+keeps its four channels and adds none. An agent on the channel agent standard publishes each kind under the `/1` channel
+it is closest to. The kinds of one project that meet in one `/1` channel make one event per day, channel and project,
+as two surfaces of one channel do; kinds of different projects never merge (the per-project rule above governs them):
 
 | Channel kind | `/1` channel | Why |
 |---|---|---|
@@ -136,7 +140,8 @@ The counts stay true under the merge: each ticket's first-reply and final limits
 applies are `/1`'s four. `community`'s latency and coverage figures therefore mix `telegram_group`, `public_comment`
 and `team_chat`, whose limits differ (the channel agent standard's section 10: a group 6 hours, a public comment 7
 days, a team's chat 2 working days). A producer MAY leave `team_chat` out of `/1`: a team's internal chat is not
-customer support. A new enum value was refused: a reader on an older copy would refuse every day of that channel, where
+customer support. A producer whose declaration maps two projects to one `/1` channel names `project` on every event of that
+channel, even when one project's kind there is left out. A new enum value was refused: a reader on an older copy would refuse every day of that channel, where
 a mapping costs nothing.
 
 ## Semantic rules

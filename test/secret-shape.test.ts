@@ -97,6 +97,13 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
     expect(run(31)).toHaveLength(31);
     expect(codes(`project:sk-${run(31)}`)).not.toContain("FAC-SEM-101");
     expect(codes(`project:sk-${run(32)}`)).toContain("FAC-SEM-101");
+    // GitLab's prefix: 19 key characters pass, 20 are read. Built from parts.
+    const gl = (n: number) => ["project:", "glpat", "-", "supportdeskeuropeteamx".slice(0, n)].join("");
+    expect(codes(gl(19))).not.toContain("FAC-SEM-101");
+    expect(codes(gl(20))).toContain("FAC-SEM-101");
+  });
+  it("knowingly does not find a key after a triple percent-escape or an eight-digit \\U escape (DEC-0151)", () => {
+    for (const head of ["a%252522", "a\\U00000022"]) expect(SECRET_VALUE.test(head + keys.github), head).toBe(false);
   });
   it("lets a support-quality day name a project whose slug holds -sk- (FAC-SEM-101 on the events page)", () => {
     const page = { events: [{ id: "1", at: "2026-10-19T00:20:00Z", kind: "support.quality_daily", level: "info", text: "Support quality for chat on 2026-10-18.", data: { schema: "https://support.example.com/schemas/support-quality-daily.schema.json", value: { kind: "support-quality-daily/1", project: "project:helpdesk-customer-support" } } }], cursor: "1" };
@@ -140,7 +147,9 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
         expect(large, `${name}: 4 times the input, ${small} ms then ${large} ms`).toBeLessThan(Math.max(8 * small, 40));
       }
     }
-  });
+    // Twenty-four timed reads of up to 300000 characters: an explicit timeout, since a loaded machine can pass vitest's
+    // 5000 ms default while every assertion above holds.
+  }, 30000);
 
   it("finds every key kind after an octal escape, a double percent-escape and the escaped ESC colour forms (DEC-0151)", () => {
     const hex = tail(64, "0123456789abcdef");
