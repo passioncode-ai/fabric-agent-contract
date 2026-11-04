@@ -138,6 +138,14 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   knowingly not found. The sk-slug fixture's text names its project. The merge list adds channel-agent.md's "Being by
   shape" sentence and CA-5, states what DEC-0150's `keyRereads` counts at `3c1ba539` and the forms it still misses,
   and the vendor lists add Project Observatory's two ports and whole-file vendors that pin by hash.
+- Round 9 of the readings (on `31d04acd`): the inference of a project for a day without `project` kept producing cases
+  with no single behaviour, so the coordinator replaced it with one rule, written once under support quality's "The
+  project" section: before every reader has adopted DEC-0151, no `project` and no event for a channel the declaration
+  maps to two projects; after, `project` on every event; a day without `project` is never attributed, so per-project
+  history starts at adoption; a rerun republishes a day as first published. The conformance rows now list obligations
+  only and point to the rules; item 6, CT-210 (b) and the schema's description say the same, short. A calibration
+  comes from labelled answers of its project's side only. SH-10 and folder-attribution.md name DEC-0151. Tests pin the
+  `sk-` strength at the 256th character and the non-colour CSI sequences before each key kind.
 
 ## Open
 
@@ -227,7 +235,7 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these (DEC-0150's sen
 - DEC-0150's join sentence in `channel-agent.md` ("DEC-0151 (CT-210, in progress) gives `support-quality-daily` payloads
   the same alias; once it lands, a reader joins a declaration to a project's payloads on `project:<slug>`"): once both
   land it reads "DEC-0151 gives `support-quality-daily` payloads the same alias, and a reader joins a declaration to a
-  project's payloads on `project:<slug>`, or, for a payload with no project, on that channel's one project".
+  project's payloads on `project`, and a payload with no project is not attributed to any project".
 - `test/channel-agent.test.ts`: an assertion that the declaration's `project` pattern equals
   `support-quality-daily.schema.json`'s `$defs/projectAlias.pattern` (none at `3c1ba539`; the second to land adds
   it if it is still absent).
@@ -306,13 +314,20 @@ because they quote the earlier wording as history (this one does above).
 ## Decisions taken here
 
 - New members are optional one by one (a producer from before DEC-0151 carries none of them); `open` and `outcomes`
-  are never empty objects, as `checks` and `calibrationChecks` are not; `project` is never `null` (absent names that
-  channel's only project, except a merged day from a service that served several projects on that channel that day).
+  are never empty objects, as `checks` and `calibrationChecks` are not; `project` is never `null` (absent before every
+  reader has adopted DEC-0151, named on every event after; a day without it is never attributed to a project).
 - The outcome counts sit in one `outcomes` object, not at the top level the channel agent standard's table suggests.
 - `promotions` counts the promotions made on the day; whether a promotion also restates the day the ticket ended is
   left to the channel agent standard (support-quality.md, "Not decided here").
 
 ## Checks actually run
+
+On the round-9 head, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0
+(109 files, 9832 tests passed, 1 skipped, 23.90 s); `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0; `pnpm
+privacy:check` with the organization's index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files
+match). `git grep -c -F "that day's declaration" -- docs schemas` and `grep -n -E '\. (carrying|keeps a day) '
+docs/specification/conformance.md` print nothing. No U+2014 in the added lines, no look-behind in either copy, and
+the differential is unchanged (0 new-only).
 
 On the round-8 head (`f7c866d1` and the handoff commit after it), each exit code read separately: `pnpm exec tsc
 --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9831 tests passed, 1 skipped, 19.77 s); `python3
@@ -352,6 +367,6 @@ the added lines.
 
 ## Next task
 
-Round 9 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers, until two consecutive rounds
+Round 10 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers, until two consecutive rounds
 are clean; open the pull request; merge only once DEC-0150 is on main (the merge gate above), applying the merge list;
 mark DEC-0151 accepted, close CT-129, mark CT-210's first step done, release, and answer thread `b6820b97` with the tag.

@@ -159,4 +159,16 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
     // Not escapes: an octal run longer than three digits, or a double percent-escape cut short.
     for (const head of ["a\\1234", "a%252", "a\\x1b[0"]) expect(SECRET_VALUE.test(head + keys.github), JSON.stringify(head)).toBe(false);
   });
+  it("reads the sk- strength within 256 characters, and finds no key after a CSI sequence that is not a colour one (DEC-0151)", () => {
+    const lower = "abcdefghijklmnopqrstuvwxyz".repeat(10).slice(0, 255);
+    // A digit at the 256th character still counts (the 32-or-more branch); upper-case letters past it do not matter.
+    expect(SECRET_VALUE.test(`sk-${lower}7ABCDE`)).toBe(true);
+    // An upper-case letter first, then the digit past the 256th character: neither look-ahead reaches it.
+    expect(SECRET_VALUE.test(`sk-A${lower}7`)).toBe(false);
+    const esc = String.fromCharCode(27);
+    const hex = tail(64, "0123456789abcdef");
+    for (const key of [keys.openai, `sk-or-v1-${hex}`, keys.github, keys.slack, keys.aws, keys.gitlab]) {
+      for (const head of [`a${esc}[K`, `a${esc}[2J`]) expect(SECRET_VALUE.test(head + key), JSON.stringify(head) + " " + key.slice(0, 5)).toBe(false);
+    }
+  });
 });

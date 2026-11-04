@@ -9095,25 +9095,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      customer support.
   6. An optional top-level `project`: the project registry's alias `project:<slug>`
      (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written, the form DEC-0150's CA-2 gives the channel agent
-     declaration's `project`. Everything about `project` is per channel, the scope of the producer rules and of
-     DEC-0150. A reader that adopted DEC-0151 keeps, per service, channel, day and project, the latest event: an absent
-     `project` names that channel's only project (the declaration's entry whose channel kinds map to that `/1`
-     channel), and a day published before the service served a second project on that channel is not re-attributed. A
-     day without `project` from a service that served several projects on that channel that day names no single
-     project and is kept as a merged day: a reader keeps it per service, channel and day and never attributes it to one
-     project. An absent `project` names the channel's only project on that day, so the declaration that counts is that day's. A reader that did not read that day's declaration keeps the day per service, channel and day, unattributed, as it keeps a merged day. A producer whose channel moves to another project names `project` from that day on. A producer that serves
-     several projects on one channel publishes one event per project and day, each naming its `project`, under item 4's rule. Before
-     every reader has adopted DEC-0151, such a producer publishes no event for that channel: it keeps each project's
-     days, publishes them one event per project and day once every reader has adopted, and never merges projects into
-     one event. A producer never changes the project form of a day it has already published: a single-project day,
-     first published without `project`, is rerun as first published, without `project`; a day merged across projects
-     before DEC-0151 is never rerun. A single-project producer, one project on that channel, keeps leaving `project` out
-     on that channel and names it only once the channel serves a second project. A producer whose declaration maps two
-     projects to one `/1` channel names `project` on every event of that channel, even when one project's kind there is
-     left out of `/1` (a `team_chat`, item 5). The rule to name `project` on every event of a channel the declaration maps to two projects applies from the first day the declaration maps two projects to that channel; a rerun of an earlier single-project day keeps no `project`, and a reader keeps it under its own day's attribution, never as a breach. A day's calibration is carried, unchanged, on each project's event judged that day by the
-     calibrated judge and rubric; a project's event judged by another judge, or not judged, carries none, and a reader
-     reads calibration per project's event, never summing or copying it across projects. The top level then holds 19
-     members, inside DEC-0070's 32.
+     declaration's `project`. Before every reader of a feed has adopted DEC-0151, a producer publishes no `project` and
+     withholds a channel the declaration maps to two projects, even when one project's kind there is left out of `/1`;
+     once every reader has adopted, it names `project` on every event, whatever the number of projects on the channel.
+     A reader never attributes a day without `project` to a project: it keeps such a day (published before adoption, a
+     merged legacy day, or a rerun of one) per service, channel and day, and per-project history starts at adoption,
+     the same for every reader. A rerun republishes a day as first published. A day's calibration is carried, unchanged,
+     on each project's event judged that day by the calibrated judge and rubric, and comes from labelled answers of
+     that project's side only. The rules are written once in
+     [support quality](specification/support-quality.md#the-project-dec-0151). The top level then holds 19 members,
+     inside DEC-0070's 32.
   7. The shared credential detector (`SECRET_VALUE` in `src/secret-shape.ts`, and its identical copy in
      `src/session-handoff.ts`) takes a provider key's prefix (`sk-`, `gh?_`, `xox?-`, `AKIA`, `glpat-`) only at the
      start of a value, after a character that is no ASCII letter or digit, or after an escape: a percent-escape (`%22`)
@@ -9147,9 +9138,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      alias, which this contract does not prove; the rule binds only a producer that carries `project` on a channel,
      which checks its alias against the shared detector before publishing (the payload's own check does not run
      `FAC-SEM-101`): one whose alias is read so publishes no event for that project, on any channel, until the
-     registry changes its alias, neither events naming it nor the days it publishes without `project` as some channel's
-     only project; the other projects' events are unaffected. It keeps that project's days while it withholds them,
-     and after the registry changes the alias it publishes the kept days under the new alias.
+     registry changes its alias; the other projects' events are unaffected. It keeps that project's days and, once the
+     registry changes the alias, publishes them naming the new alias.
 - **Why:** the channel agent standard's daily report counts tickets on its signal server and checks each agent's feed
   against it; one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that
   home before any producer may send them. The digit fixes a rule the schema made impossible to keep. The registry
@@ -9211,7 +9201,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fabric_secrets.SECRET_VALUE.pattern` and raises `ImportError` on DEC-0151's pattern, so it keeps the earlier
   unbounded shapes as its own fixed list, for parity with DEC-0149's tree check, before or together with the detector's
   port. A producer that merged projects into one event under DEC-0095 stops publishing that channel from DEC-0151
-  until every reader adopts, so its readers see no days for that channel meanwhile, and never reruns a merged day; whether any `/1` producer does so
+  until every reader adopts, so its readers see no days for that channel meanwhile, and reruns a merged day only as first published; whether any `/1` producer does so
   today is the producers' to confirm (CT-103 suggests multi-product producers are still on their v2 shape).
   `contractVersion` stays
   `0.1.0`.
@@ -9235,4 +9225,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `support-quality-v2-dec`, counter commit `ee67e35`). Readings: rounds 1 to 8 found breaks, each fixed on the branch
   (round 8: the per-day attribution of an absent `project`, the rerun across the switch to two projects, the
   team-chat counts, the withheld alias's kept days, the residual's prose, and the vendor list); two consecutive clean
-  rounds are still owed.
+  rounds are still owed. Round 9 replaced the inference of an absent `project` with one rule: no `project` before
+  adoption, `project` on every event after, and a day without it never attributed.

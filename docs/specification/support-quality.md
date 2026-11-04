@@ -13,25 +13,10 @@ on its events feed, one event of kind
 `support.quality_daily` per closed UTC day and channel whose `data` ([service](service.md#event-data), DEC-0070) is
 this payload: `data.value` the payload, and `data.schema` the URI of the copy of this schema the service publishes, as
 service.md asks. A reader recognises the payload by `data.value.kind` (`support-quality-daily/1`), never by
-`data.schema`. A rerun for a day replaces that day's event for the channel: a reader keeps, per service, channel and day, the
-latest event (the greatest id in that service's feed). A reader that adopted DEC-0151 keeps, per service, channel, day
-and project, the latest event. Everything about `project` is per channel, the scope of the producer rules and of
-DEC-0150's declaration. The channel's only project is the channel agent declaration's entry whose channel kinds map to
-that `/1` channel. An absent `project` names the channel's only project on that day, so the declaration that counts is that day's. A reader that did not read that day's declaration keeps the day per service, channel and day, unattributed, as it keeps a merged day. A producer whose channel moves to another project names `project` from that day on. A day without `project` from a service that
-served several projects on that channel that day names no single project, and is kept as a merged day: a reader keeps
-it per service, channel and day and never attributes it to one project. A day published before the service served a
-second project on that channel is not re-attributed. So a service with project A on `telegram_dm` and project B on
-`mail` publishes its `chat` days without `project`, and they name A. An agent that serves several projects on one
-channel publishes one event per project and day, each naming its `project`, under DEC-0151's producer rule below
-(`fixtures/positive/service-events-page-support-quality-projects.json`). A producer never changes the project form of a
-day it has already published: a single-project day, first published without `project`, is rerun as first published,
-without `project`; a day merged across projects before DEC-0151 is never rerun. A single-project producer, one project
-on that channel, keeps leaving `project` out on that channel and names it only once the channel serves a second
-project. The rule to name `project` on every event of a channel the declaration maps to two projects applies from the first day the declaration maps two projects to that channel; a rerun of an earlier single-project day keeps no `project`, and a reader keeps it under its own day's attribution, never as a breach. A day's calibration (DEC-0144) is
-carried, unchanged, on each project's event judged that day by the calibrated judge and rubric; a project's event
-judged by another judge, or not judged, carries none, and a reader reads calibration per project's event, never
-summing or copying it across projects. An agent with two surfaces of one channel for one project merges them into one
-event per day and project; surfaces of different projects never merge. A voice-of-the-customer reader then reads every agent the same way. The
+`data.schema`. A rerun for a day replaces that day's event for the channel and republishes it as first published: a
+reader keeps, per service, channel and day, the latest event (the greatest id in that service's feed). An agent
+with two surfaces of one channel for one project merges them into one event per day; surfaces of different projects
+never merge. The optional `project` (DEC-0151) and its rules are under [the project](#the-project-dec-0151). A voice-of-the-customer reader then reads every agent the same way. The
 standard behind it (what is measured, the rubric, the judge) is the asker's, issue #125; the contract owns the shape.
 
 ## The payload
@@ -40,7 +25,7 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 |---|---|
 | `kind` | `support-quality-daily/1` |
 | `day`, `channel` | the closed UTC day, and `chat` (one person's chat), `mail`, `reviews` (store review replies) or `community` (group chats and forums) |
-| `project` | optional (DEC-0151): the project whose tickets these are, as the project registry's alias `project:<slug>` (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written ([identifiers](identifiers.md)), the form the channel agent declaration of DEC-0150 names a project in; absent, that channel's only project (the declaration entry whose channel kinds map to that `/1` channel), except a merged day: a day without `project` from a service that served several projects on that channel that day names no single project, and is kept as a merged day. An absent `project` names the channel's only project on that day, so the declaration that counts is that day's. A reader that did not read that day's declaration keeps the day per service, channel and day, unattributed, as it keeps a merged day. A producer whose channel moves to another project names `project` from that day on. A reader tells them apart by the first event of that service and channel that names a project: the days before it are single-project days, unless the service published merged days under DEC-0095, which only the producer knows; that residual ambiguity is the reader's to resolve |
+| `project` | optional (DEC-0151): the project whose tickets these are, as the project registry's alias `project:<slug>` (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written ([identifiers](identifiers.md)), the form the channel agent declaration of DEC-0150 names a project in; absent before every reader of the feed has adopted DEC-0151, named on every event after; a day without it is never attributed to a project ([the project](#the-project-dec-0151)) |
 | `rubricVersion`, `judgeModel` | the rubric's version and the judge's `<vendor>/<model>`, or `null` when nothing was judged and no calibration is carried |
 | `notMeasured` | each metric not computed that day, as `family.metric` (a metric name may carry digits: `nobodyDropped.firstReplyP50Ms`, DEC-0151), a top-level count by its own name (`arrived`, `ended`, `notATicket`), or `checks` when nothing was judged; at most 32 names (DEC-0070's list), so a producer that would name more leaves out the optional members it did not measure |
 | `arrived`, `ended`, `notATicket` | optional (DEC-0151): the tickets that arrived on the day; the tickets that ended on the day, whatever day they arrived (the **ending cohort**, which every outcome count below is of); the day's automated notices, which are not tickets |
@@ -67,10 +52,9 @@ Knowingly not found: a key after a triple percent-escape (`%252522`), after an e
 after a CSI sequence that is not a colour sequence (`ESC[K`, `ESC[2J`). The detector reads such an alias as a credential and
 the events page fails `FAC-SEM-101`; it stays strict there (`test/secret-shape.test.ts`). The operator's registry rule
 is to issue no such alias, a rule of the registry this contract does not prove; the rule here binds a producer that
-carries `project` on a channel: one whose alias is read so publishes no event for that project, on any channel, until
-the registry changes its alias, neither events naming it nor the days it publishes without `project` as some channel's
-only project; the other projects' events are unaffected. It keeps that project's days while it withholds them, and
-after the registry changes the alias it publishes the kept days under the new alias. Such a producer checks its alias
+names `project`: one whose alias is read so publishes no event for that project, on any channel, until the
+registry changes its alias, and the other projects' events are unaffected; it keeps that project's days and then
+publishes them naming the new alias. Such a producer checks its alias
 against the shared detector (or validates its events page) before publishing, because the payload's own check
 (FAC-SEM-126) does not run `FAC-SEM-101`.
 The feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries `calibration` and
@@ -102,10 +86,8 @@ standard's signal server or leaves it out, and never maps those turn counts into
 
 The schema is closed, so a producer carries these members, `project` among them, only once every reader of its feed it
 knows of has adopted DEC-0151, as it does the calibration (DEC-0144): a reader validating against an older copy
-refuses that day's `value` whole. A reader that only parses and keys by channel and day keeps one project's day and
-drops the other's, so per-project publishing waits for every reader, parse-only ones included: before then, a producer
-serving several projects on one channel publishes no event for that channel, keeps each project's days, publishes them
-one event per project and day once every reader has adopted DEC-0151, and never merges projects into one event. DEC-0151 also lets a metric name in `notMeasured` carry digits, which FAC-SEM-126 needed for
+refuses that day's `value` whole. A reader that only parses and keys by channel and day would keep one project's day
+and drop the other's, so `project` waits for every reader, parse-only ones included (rule 1 under [the project](#the-project-dec-0151)). DEC-0151 also lets a metric name in `notMeasured` carry digits, which FAC-SEM-126 needed for
 `nobodyDropped.firstReplyP50Ms` and `firstReplyP90Ms` (the earlier pattern refused them, so a producer could not name
 an unmeasured first-reply time and stay valid); an older copy refuses such a name too, so a producer writes one under
 the same rule. In the meantime a producer leaves each unmeasured first-reply metric (`firstReplyP50Ms`, `firstReplyP90Ms`
@@ -118,6 +100,29 @@ reader of its feed has adopted DEC-0151.
 No producer carries the ticket counts until two prerequisites outside this contract hold (CT-210 step (d)): the
 channel agent standard's section 5.1 says that `/1` takes `autonomy.toPersonPolicy` and `toPersonInability` in turns,
 and its observed check accepts a channel a producer withholds during the wait.
+
+### The project (DEC-0151)
+
+`project` names the project whose tickets a day counts, as the registry alias `project:<slug>`. Each rule is stated
+here once; the conformance rows and DEC-0151 point to it.
+
+1. **Before adoption.** Until every reader of its feed has adopted DEC-0151, a producer publishes no `project`, as `/1`
+   does today, and withholds every channel the channel agent declaration maps to two projects, even when one
+   project's kind there is left out of `/1`.
+2. **After adoption.** Once every reader of its feed has adopted DEC-0151, a producer names `project` on every event it
+   publishes, whatever the number of projects on the channel: one event per project, channel and day
+   (`fixtures/positive/service-events-page-support-quality-projects.json`).
+3. **A day without `project`** (published before adoption, a day merged across projects under DEC-0095, or a rerun of
+   either) is never attributed to a project: a reader keeps it per service, channel and day, unattributed. Per-project
+   history starts at adoption, the same for every reader.
+4. **A rerun** republishes a day as first published, with the `project` it had or without one.
+5. **A reader that adopted DEC-0151** keeps, per service, channel, day and `project`, the latest event, and keeps a day
+   without `project` as rule 3 says.
+6. **Calibration** (DEC-0144): a day's calibration is carried, unchanged, on each project's event judged that day by the
+   calibrated judge and rubric, and comes from labelled answers of that project's side only; a project's event judged
+   by another judge, or not judged, carries none. A reader reads calibration per project's event, never summing or
+   copying it across projects.
+7. **An alias read as a credential**: the paragraph on credentials under [the payload](#the-payload) holds the rule.
 
 ### The channel agent standard's channel kinds (DEC-0151)
 
@@ -142,9 +147,8 @@ applies are `/1`'s four. `community`'s latency and coverage figures therefore mi
 and `team_chat`, whose limits differ (the channel agent standard's section 10: a group 6 hours, a public comment 7
 days, a team's chat 2 working days). A producer MAY leave `team_chat` out of `/1`: a team's internal chat is not
 customer support. When it does, the feed's `community` counts differ from the signal server's by the team-chat
-tickets, and a project whose only kind is `team_chat` has no daily. A producer whose declaration maps two projects
-to one `/1` channel names `project` on every event of that channel, even when one project's kind there is left out.
-The rule to name `project` on every event of a channel the declaration maps to two projects applies from the first day the declaration maps two projects to that channel; a rerun of an earlier single-project day keeps no `project`, and a reader keeps it under its own day's attribution, never as a breach. A new enum value was refused: a reader on an older copy would refuse every day of that channel, where
+tickets, and a project whose only kind is `team_chat` has no daily. A channel the declaration maps to two projects is
+withheld before adoption even when one project's kind there is left out (rule 1 under [the project](#the-project-dec-0151)). A new enum value was refused: a reader on an older copy would refuse every day of that channel, where
 a mapping costs nothing.
 
 ## Semantic rules
