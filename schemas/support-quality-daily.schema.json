@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/support-quality-daily.schema.json",
   "title": "support-quality-daily/1 (DEC-0095): one support channel's quality for one closed UTC day, as an event's data.value",
-  "description": "Counts and rates only: no person's words, no ids, no judge notes. A metric not computed is null and is named in notMeasured, never 0 (FAC-SEM-126). Fits DEC-0070's data.value: two levels, at most 32 members each; a reader recognises it by data.value.kind.",
+  "description": "Counts and rates only: no person's words, no ids, no judge notes. A metric not computed is null and is named in notMeasured, never 0 (FAC-SEM-126). Fits DEC-0070's data.value: two levels, at most 32 members each; a reader recognises it by data.value.kind. DEC-0151 adds the optional ticket counts (arrived, ended, notATicket, open, outcomes, autonomy.answered, stability.fallbackTurns and fallbackTickets); a member absent is one the producer does not carry, never 0.",
   "type": "object",
   "required": [
     "kind",
@@ -57,9 +57,93 @@
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "pattern": "^[a-z][A-Za-z]{0,63}(\\.[a-z][A-Za-z_]{0,63})?$"
+        "pattern": "^[a-z][A-Za-z]{0,63}(\\.[a-z][A-Za-z0-9_]{0,63})?$"
       },
-      "description": "Each metric not computed, as family.metric, or checks when no check was judged."
+      "description": "Each metric not computed, as family.metric (a metric name may carry digits, as nobodyDropped.firstReplyP50Ms does), a top-level count by its own name (arrived, ended, notATicket), or checks when no check was judged. At most 32 names (DEC-0070): a producer that would name more leaves out the optional members it did not measure."
+    },
+    "arrived": {
+      "$ref": "#/$defs/count",
+      "description": "Optional (DEC-0151): the tickets that arrived on the day."
+    },
+    "ended": {
+      "$ref": "#/$defs/count",
+      "description": "Optional (DEC-0151): the tickets that ended on the day, whatever day they arrived: the ending cohort the outcome counts are of."
+    },
+    "notATicket": {
+      "$ref": "#/$defs/count",
+      "description": "Optional (DEC-0151): the automated notices of the day, which are not tickets."
+    },
+    "open": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "description": "Optional (DEC-0151): the open tickets at the day's cutoff, by open outcome. Never empty: with none carried the member is absent.",
+      "properties": {
+        "handedOpen": {
+          "$ref": "#/$defs/count",
+          "description": "handed to a person through a queue, not answered yet (handed_open)"
+        },
+        "questionOpen": {
+          "$ref": "#/$defs/count",
+          "description": "held while the agent climbs the question ladder (question_open)"
+        },
+        "awaitingCustomer": {
+          "$ref": "#/$defs/count",
+          "description": "the agent asked the customer one question and waits (awaiting_customer)"
+        },
+        "awaitingApproval": {
+          "$ref": "#/$defs/count",
+          "description": "a draft waits for a person's or a transport's approval before it is sent (awaiting_approval)"
+        }
+      }
+    },
+    "outcomes": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "description": "Optional (DEC-0151): the ending cohort's tickets by outcome and mark (answered is autonomy.answered). Never empty: with none carried the member is absent.",
+      "properties": {
+        "handoffsClosedByPerson": {
+          "$ref": "#/$defs/count",
+          "description": "hand-offs that ended closed_by_person"
+        },
+        "referred": {
+          "$ref": "#/$defs/count",
+          "description": "ended referred: told where to write, with no signal from there"
+        },
+        "answeredElsewhere": {
+          "$ref": "#/$defs/count",
+          "description": "ended answered_elsewhere: someone answered before the agent acted"
+        },
+        "noReplyOwed": {
+          "$ref": "#/$defs/count",
+          "description": "ended no_reply_owed: written by a person, needs nothing"
+        },
+        "customerSilent": {
+          "$ref": "#/$defs/count",
+          "description": "ended customer_silent: the customer did not answer the agent's one question within 7 days"
+        },
+        "expiredByDecision": {
+          "$ref": "#/$defs/count",
+          "description": "ended expired_by_decision: a channel held by a recorded decision passed its limit without a person's answer"
+        },
+        "expired": {
+          "$ref": "#/$defs/count",
+          "description": "ended expired: the customer got a holding reply but no final answer by the final limit"
+        },
+        "unanswered": {
+          "$ref": "#/$defs/count",
+          "description": "ended unanswered: the final limit passed with nothing the customer saw"
+        },
+        "firstReplyLate": {
+          "$ref": "#/$defs/count",
+          "description": "a mark, not an outcome: tickets whose first reply did not come within the channel's first-reply limit"
+        },
+        "promotions": {
+          "$ref": "#/$defs/count",
+          "description": "a mark, not an outcome: the promotions of the day, a referred or expired ticket of the last 30 days turned closed_by_person by a late signal from a hand-off queue"
+        }
+      }
     },
     "nobodyDropped": {
       "type": "object",
@@ -167,6 +251,14 @@
         },
         "knowledgeAgeHours": {
           "$ref": "#/$defs/count"
+        },
+        "fallbackTurns": {
+          "$ref": "#/$defs/count",
+          "description": "Optional (DEC-0151): the day's turns the checker refused twice in a row."
+        },
+        "fallbackTickets": {
+          "$ref": "#/$defs/count",
+          "description": "Optional (DEC-0151): the ending cohort's tickets with at least one such turn."
         }
       }
     },
@@ -195,6 +287,10 @@
         },
         "queueSlaMinutes": {
           "$ref": "#/$defs/count"
+        },
+        "answered": {
+          "$ref": "#/$defs/count",
+          "description": "Optional (DEC-0151): the ending cohort's tickets that ended answered or answered_after_question."
         }
       }
     },
@@ -206,7 +302,7 @@
         "labelled",
         "helped"
       ],
-      "description": "Optional (DEC-0144): how well the judge agreed with people on the latest ISO week a person labelled answers, starting no later than day, carried on every day it still holds for (a reader never carries it forward). Absent means no calibration. week is that ISO week, labelled the answers a person labelled, helped the share of those whose helped verdict the judge matched (null when helped was not labelled, named calibration.helped in notMeasured). Each check's agreement is calibrationChecks, at the top level so data.value stays two levels deep (DEC-0070). It is of the day's judge and rubric, and a week no later than day. A producer carries it once every reader of its feed it knows of has adopted DEC-0144: the schema is closed, so a reader validating against an older copy refuses that day's value.",
+      "description": "Optional (DEC-0144): how well the judge agreed with people on the latest ISO week a person labelled answers, starting no later than day, carried on every day it still holds for (a reader never carries it forward). Absent means no calibration. week is that ISO week, labelled the answers a person labelled, helped the share of those whose helped verdict the judge matched (null when helped was not labelled, named calibration.helped in notMeasured). Each check's agreement is calibrationChecks, at the top level so data.value stays two levels deep (DEC-0070). It is of the day's judge and rubric, and of an ISO week that starts no later than day. A producer carries it once every reader of its feed it knows of has adopted DEC-0144: the schema is closed, so a reader validating against an older copy refuses that day's value.",
       "properties": {
         "week": {
           "type": "string",

@@ -556,7 +556,8 @@ declared under its well-known document's `extensions/connections/0.1` so a host 
 stable id (the runner kind where the runners page lists one, else a new name); machine state stays with each product.
 **Support quality**: One support channel's quality for a closed UTC day (`support-quality-daily/1`, DEC-0095), as an
 event's data an agent that answers people publishes: counts and rates in four families, a metric not computed `null`
-and named, never `0`.
+and named, never `0`; optionally the ticket counts of the channel agent standard (DEC-0151): arrived, ended, open at
+the cutoff and by outcome.
 
 **Runner**: An installed coding-agent CLI a host can drive (Claude Code, Codex, …),
 known from a catalogue entry that names its binaries, its version command and the

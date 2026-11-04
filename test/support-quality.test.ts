@@ -151,3 +151,88 @@ describe("FAC-SEM-126: support-quality-daily/1", () => {
     expect(paths(load("support-quality-daily-calibration-week-after-day.json").input as Json)).toEqual(["FAC-SEM-126 /calibration/week"]);
   });
 });
+
+describe("DEC-0151: the ticket counts of the channel agent standard in support-quality-daily/1", () => {
+  const positive = (name: string) => JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive", name), "utf8")) as Json;
+  const tickets = () => positive("support-quality-daily-tickets.json");
+  const schemaId = `${SCHEMA_PREFIX}schemas/support-quality-daily.schema.json`;
+  it("accepts every new member, measured, and finds nothing in them", async () => {
+    const ajv = await createValidator();
+    const value = tickets();
+    const result = validateDocument(ajv, schemaId, value);
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+    expect(paths(value)).toEqual([]);
+    expect(Object.keys(value.open).sort()).toEqual(["awaitingApproval", "awaitingCustomer", "handedOpen", "questionOpen"]);
+    expect(Object.keys(value.outcomes).sort()).toEqual(["answeredElsewhere", "customerSilent", "expired", "expiredByDecision", "firstReplyLate", "handoffsClosedByPerson", "noReplyOwed", "promotions", "referred", "unanswered"]);
+  });
+  it("leaves a payload without them valid and unread, as before DEC-0151", async () => {
+    const ajv = await createValidator();
+    const result = validateDocument(ajv, schemaId, positive("support-quality-daily.json"));
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+    expect(paths(ok())).toEqual([]);
+  });
+  it("applies the not-measured rule to each new member, at the top level and in each object", () => {
+    const value = tickets();
+    value.arrived = null;
+    value.open.awaitingApproval = null;
+    value.outcomes.expired = null;
+    value.autonomy.answered = null;
+    value.stability.fallbackTickets = null;
+    expect(paths(value).sort()).toEqual(["FAC-SEM-126 /arrived", "FAC-SEM-126 /autonomy/answered", "FAC-SEM-126 /open/awaitingApproval", "FAC-SEM-126 /outcomes/expired", "FAC-SEM-126 /stability/fallbackTickets"]);
+    value.notMeasured = [...value.notMeasured, "arrived", "open.awaitingApproval", "outcomes.expired", "autonomy.answered", "stability.fallbackTickets"];
+    expect(paths(value)).toEqual([]);
+    const zero = tickets();
+    zero.notMeasured = [...zero.notMeasured, "notATicket", "outcomes.promotions", "stability.fallbackTurns"];
+    expect(paths(zero).sort()).toEqual(["FAC-SEM-126 /notATicket", "FAC-SEM-126 /outcomes/promotions", "FAC-SEM-126 /stability/fallbackTurns"]);
+  });
+  it("names only what the payload carries: an absent member named not measured is a finding", () => {
+    const value = ok();
+    value.notMeasured = [...value.notMeasured, "ended", "outcomes.unanswered"];
+    expect(paths(value)).toEqual(["FAC-SEM-126 /notMeasured", "FAC-SEM-126 /notMeasured"]);
+    const malformed = Object.assign(ok(), { open: "x", outcomes: [1], notMeasured: [...ok().notMeasured, "open.handedOpen"] });
+    expect(paths(malformed)).toEqual(["FAC-SEM-126 /notMeasured"]);
+  });
+  it("adds no sum the standard does not state: an outcome count above ended, or an open count above arrived, is no finding", () => {
+    const value = tickets();
+    value.outcomes.referred = value.ended + 1;
+    value.open.handedOpen = value.arrived + 1;
+    expect(paths(value)).toEqual([]);
+  });
+  it("lets notMeasured name a metric with a digit, as FAC-SEM-126 asks of nobodyDropped.firstReplyP50Ms (X-4)", async () => {
+    const ajv = await createValidator();
+    const value = positive("support-quality-daily-first-reply-unmeasured.json");
+    expect(value.notMeasured).toContain("nobodyDropped.firstReplyP50Ms");
+    const result = validateDocument(ajv, schemaId, value);
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+    expect(paths(value)).toEqual([]);
+    for (const name of ["nobody2Dropped.turns", "outcomes.9expired", "outcomes.expired-", "Outcomes.expired", "outcomes."]) {
+      const refused = Object.assign(ok(), { notMeasured: [name] });
+      expect(validateDocument(ajv, schemaId, refused).valid, name).toBe(false);
+    }
+  });
+  it("maps each of the standard's seven channel kinds onto one of /1's four channels, adding none", () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
+    expect(schema.properties.channel.enum).toEqual(["chat", "mail", "reviews", "community"]);
+    const page = readFileSync(path.join(projectRoot(), "docs/specification/support-quality.md"), "utf8");
+    const section = page.slice(page.indexOf("### The standard's channel kinds"), page.indexOf("## Semantic rules"));
+    const rows = [...section.matchAll(/^\| `([a-z_]+)` \| `([a-z]+)` \|/gm)].map((match) => [match[1], match[2]]);
+    expect(rows.map(([kind]) => kind).sort()).toEqual(["account", "mail", "public_comment", "store_review", "team_chat", "telegram_dm", "telegram_group"]);
+    for (const [, channel] of rows) expect(schema.properties.channel.enum).toContain(channel);
+  });
+  it("keeps DEC-0070's bounds: every object of the schema at most 32 members, and the whole payload inside an events page", async () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
+    expect(Object.keys(schema.properties)).toHaveLength(18);
+    for (const member of Object.values(schema.properties) as Json[]) {
+      if (member.properties) expect(Object.keys(member.properties).length).toBeLessThanOrEqual(10);
+      if (member.maxProperties !== undefined) expect(member.maxProperties).toBeLessThanOrEqual(16);
+    }
+    expect(Object.keys(schema.properties.outcomes.properties)).toHaveLength(10);
+    expect(schema.properties.notMeasured.maxItems).toBe(32);
+    const ajv = await createValidator();
+    const page = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/service-events-page-data.json"), "utf8")) as Json;
+    const event = (page.events as Json[]).find((entry) => entry.data) as Json;
+    event.data = { schema: "https://support.example.com/schemas/support-quality-daily.schema.json", value: tickets() };
+    const result = validateDocument(ajv, `${SCHEMA_PREFIX}schemas/service-events-page.schema.json`, page);
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+  });
+});

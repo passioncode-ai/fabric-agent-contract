@@ -8,9 +8,14 @@ import { type Finding, type JsonObject, isObject } from "./findings.js";
  * judged sample names its rubric and its judge. `checks` is the fifth member a not-measured name may address: `checks`
  * when nothing was judged. A calibration (DEC-0144) is the judge's: it names the rubric and the judge, its `helped`
  * follows the not-measured rule as `calibration.helped`, its week is a real ISO week no later than the day, and
- * `calibrationChecks` stands only beside it.
+ * `calibrationChecks` stands only beside it. DEC-0151's ticket counts follow the not-measured rule: the top-level
+ * `arrived`, `ended` and `notATicket` each under its own name, the `open` and `outcomes` objects as families, and
+ * `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets` as their families' members; an absent
+ * one is not carried, so naming it is a finding. DEC-0151 adds no sum among them: the standard states none.
  */
-const FAMILIES = ["nobodyDropped", "quality", "stability", "autonomy"] as const;
+const FAMILIES = ["nobodyDropped", "quality", "stability", "autonomy", "open", "outcomes"] as const;
+/** DEC-0151: the ticket counts at the top level, each named in `notMeasured` by its own name. */
+const TOP_COUNTS = ["arrived", "ended", "notATicket"] as const;
 
 /** The Monday of ISO week `YYYY-Www` as `YYYY-MM-DD`, or null when the year has no such week (W53 of a 52-week year). */
 export function isoWeekMonday(week: string): string | null {
@@ -38,6 +43,12 @@ export function supportQualityRules(value: JsonObject): Finding[] {
   const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-126", instancePath, message });
   const named = new Set(Array.isArray(value.notMeasured) ? value.notMeasured.filter((name): name is string => typeof name === "string") : []);
   const seen = new Set<string>();
+  // A metric not computed is null and named; a named one is null. Every name it reads is one the payload carries.
+  const notMeasuredRule = (name: string, at: string, measured: unknown) => {
+    seen.add(name);
+    if (measured === null && !named.has(name)) flag(at, `${name} is null, so notMeasured names it`);
+    if (measured !== null && named.has(name)) flag(at, `${name} is named not measured, so it is null, not a value`);
+  };
   for (const family of [...FAMILIES, "checks"]) {
     if (family === "checks" && value.checks === null) {
       seen.add("checks");
@@ -49,18 +60,11 @@ export function supportQualityRules(value: JsonObject): Finding[] {
       if (named.has("checks")) flag("/checks", "checks is named not measured, so it is null");
     }
     const members = isObject(value[family]) ? value[family] : {};
-    for (const [metric, measured] of Object.entries(members)) {
-      const name = `${family}.${metric}`;
-      seen.add(name);
-      if (measured === null && !named.has(name)) flag(`/${family}/${metric}`, `${name} is null, so notMeasured names it`);
-      if (measured !== null && named.has(name)) flag(`/${family}/${metric}`, `${name} is named not measured, so it is null, not a value`);
-    }
+    for (const [metric, measured] of Object.entries(members)) notMeasuredRule(`${family}.${metric}`, `/${family}/${metric}`, measured);
   }
+  for (const count of TOP_COUNTS) if (value[count] !== undefined) notMeasuredRule(count, `/${count}`, value[count]);
   if (isObject(value.calibration)) {
-    const helped = value.calibration.helped;
-    seen.add("calibration.helped");
-    if (helped === null && !named.has("calibration.helped")) flag("/calibration/helped", "calibration.helped is null, so notMeasured names it");
-    if (helped !== null && named.has("calibration.helped")) flag("/calibration/helped", "calibration.helped is named not measured, so it is null, not a value");
+    notMeasuredRule("calibration.helped", "/calibration/helped", value.calibration.helped);
     const week = value.calibration.week;
     if (typeof week === "string") {
       const monday = isoWeekMonday(week);

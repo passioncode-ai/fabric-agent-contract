@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0148` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0152` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -5963,6 +5963,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-27):** DEC-0144 adds the optional `calibration` and `calibrationChecks` members at the same
   revision; a producer carries them once every reader of its feed it knows of has adopted DEC-0144, and a reader
   validating against an older copy refuses that day's `value` (DEC-0070).
+- **Annotated (2026-11-04):** DEC-0151 (proposed) adds the optional ticket counts of the channel agent standard
+  (`arrived`, `ended`, `notATicket`, `open`, `outcomes`, `autonomy.answered`, `stability.fallbackTurns` and
+  `fallbackTickets`) at the same revision, under DEC-0144's producer rule, and lets a metric name in `notMeasured` carry
+  digits.
 - **Decision:** in [support quality](specification/support-quality.md):
   1. An agent that answers people MAY publish, on its events feed, one event per closed UTC day and channel (`chat`,
      `mail`, `reviews`, `community`), of kind `support.quality_daily`, whose `data.value` (DEC-0070) is a
@@ -8706,6 +8710,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-27
 - **Status:** Accepted (on merge of its pull request). A widening of DEC-0095's closed schema at the same revision: two
   optional members, which a reader validating against an older copy refuses. Consumer adoption: CT-188.
+- **Annotated (2026-11-04):** the schema's `calibration` description said "a week no later than day"; DEC-0151's
+  change of the schema corrects it to an ISO week that starts no later than `day`, as item 3 and FAC-SEM-126 read it.
 - **Context:** a project on the board asked (request `b05d8bc9`, thread `afd3dc71`, 2026-10-27) for a way to say on
   what share of the answers a person labelled the judge agreed with the person: without it a reader treats every
   judge as uncalibrated and never ranks or alerts on its checks, even when the producer calibrated it. One producer on the
@@ -9025,3 +9031,69 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (SCN-052, SCN-053), `CONTEXT.md` (Peer share), `docs/specification/README.md` (the peer share's adoption); DEC-0121,
   DEC-0126, DEC-0142 and DEC-0143 annotated; backlog CT-186 (DEC-0147's duties, in order), CT-201 (what its round-2 readings left) and CT-189 (closes on merge).
 - **Source:** CT-189; CT-178's readings 12 and 13.
+
+### DEC-0151: the channel agent standard's ticket counts in `support-quality-daily/1`
+
+- **Date:** 2026-11-04
+- **Status:** Proposed: accepted at merge after two clean rounds of readings. A widening of DEC-0095's closed schema
+  at the same revision, by the path DEC-0144 took. Consumer adoption: CT-210.
+- **Context:** the channel agent standard's v1 release candidate, received on the board (thread `b6820b97`; the copy
+  DEC-0150 adds, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`), asks every agent that answers
+  people to publish `support.quality_daily` as `support-quality-daily/1` over the day's tickets (its section 5): what
+  arrived and ended, what is open at the cutoff, each outcome and two marks, the answered tickets and the checker's
+  fallbacks. `/1` has no member for them, and its schema is closed. The coordinator decided the amendment on the board
+  (request `74105ca1`, thread `b6820b97`); a later copy of the standard on the same thread already names the outcome
+  counts as `outcomes.<metric>` and defers to this decision. The declaration names seven channel kinds where `/1` has
+  four channels. Separately, FAC-SEM-126 asks a producer to name an unmeasured
+  `nobodyDropped.firstReplyP50Ms`, which the `notMeasured` pattern refused (no digits in a metric name; finding X-4).
+- **Decision:** [support quality](specification/support-quality.md#the-ticket-counts-dec-0151):
+  1. Optional members, each a count (a non-negative integer) or `null`: at the top level `arrived` (the tickets that
+     arrived on the day), `ended` (the tickets that ended on it, the ending cohort) and `notATicket` (the day's
+     automated notices); `open {handedOpen, questionOpen, awaitingCustomer, awaitingApproval}` (the open tickets at the
+     cutoff by open outcome); `outcomes {handoffsClosedByPerson, referred, answeredElsewhere, noReplyOwed,
+     customerSilent, expiredByDecision, expired, unanswered, firstReplyLate, promotions}` (the ending cohort by
+     outcome, `firstReplyLate` and `promotions` being marks, `promotions` those of the day); `autonomy.answered` (the
+     ending cohort's tickets that ended answered or answered after a question); `stability.fallbackTurns` (the day's
+     turns the checker refused twice in a row) and `stability.fallbackTickets` (the ending cohort's tickets with at
+     least one). `open` and `outcomes` are never empty objects.
+  2. FAC-SEM-126 reads each as it reads every metric: `null` and named in `notMeasured` when not measured, never `0`;
+     a top-level count is named by its own name (`arrived`), the others as `open.<metric>`, `outcomes.<metric>`,
+     `autonomy.answered`, `stability.fallbackTurns`, `stability.fallbackTickets`; naming one the payload does not carry
+     is a finding. An absent member is one the producer does not carry, read as unknown, never as `0`. No sum among
+     the counts is checked: the standard's section 5 states none.
+  3. A metric name in `notMeasured` may carry digits (`^[a-z][A-Za-z]{0,63}(\.[a-z][A-Za-z0-9_]{0,63})?$`); the
+     family part and everything else of the pattern stay as they were.
+  4. A producer carries the new members, and names a metric with a digit in `notMeasured`, only once every reader of
+     its feed it knows of has adopted DEC-0151, as DEC-0144 asks of the calibration: a reader on an older copy refuses
+     either.
+  5. `/1` keeps its four channels. An agent on the standard publishes each of the declaration's seven channel kinds
+     under the closest one: `telegram_dm` and `account` as `chat`, `mail` as `mail`, `store_review` as `reviews`,
+     `telegram_group`, `public_comment` and `team_chat` as `community`; kinds that meet in one channel make one event
+     per day, as two surfaces of one channel do.
+- **Why:** the standard's daily report counts tickets on the signal server and checks each agent's feed against it;
+  one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that home before any
+  producer may send them. The digit fixes a rule the schema made impossible to keep.
+- **Alternatives considered:** the outcome counts at the top level, as the standard's field table lists them (18 top
+  members would become 26, inside DEC-0070's 32, but outcomes mixed with the payload's own facts leave little room for a
+  later revision; one `outcomes` object keeps them together and the top level at 18); a sum rule (each outcome at most
+  `ended`, the open counts at most `arrived`: the standard states none, `open` holds tickets of earlier days and a
+  promotion falls on its own day, so the rule would refuse true payloads); a new revision `support-quality-daily/2`
+  (every producer and reader would move, where a widening leaves every `/1` payload valid, DEC-0144's reasoning); a `0`
+  for an unmeasured count (FAC-SEM-126); new channel values for the seven kinds (a reader on an older copy would refuse
+  every day of such a channel, and the reader's per-channel targets are set for the four); a project member for the
+  standard's per-project publication (a reader keys by service, channel and day; left to a later revision, see
+  [support quality](specification/support-quality.md#not-decided-here)).
+- **Compatibility:** a widening of a closed object: a `/1` payload without the new members validates and reads as
+  before, and `pnpm validate` reports the same for every existing support-quality fixture. A reader that validates
+  against an older copy refuses a day that carries a new member or a metric name with a digit, and keeps the event's
+  `text` (DEC-0070); a reader that only parses ignores them. The bytes under the unchanged `$id` widen, so a reader
+  validates against its own pinned copy. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/support-quality-daily.schema.json` (also the `calibration` description DEC-0144
+  left to correct), `src/support-quality-rules.ts`, `test/support-quality.test.ts`,
+  `fixtures/positive/support-quality-daily-tickets.json` and `-first-reply-unmeasured.json`, five
+  `fixtures/negative/support-quality-daily-*` with their `fixtures/catalogue.json` rows, four
+  `fixtures/semantic/support-quality-daily-*`; `docs/specification/support-quality.md`, `docs/specification/conformance.md`
+  (the producer and reader rows), `docs/DOCMAP.md`, `CONTEXT.md`; DEC-0095 and DEC-0144 annotated; `docs/backlog.md`
+  (CT-210, CT-188's note); `docs/handoffs/2026-11-04-support-quality-tickets.md`.
+- **Source:** CT-210; the board request `74105ca1` (thread `b6820b97`); DEC-0151 reserved by git CAS (key
+  `support-quality-v2-dec`, counter commit `ee67e35`).
