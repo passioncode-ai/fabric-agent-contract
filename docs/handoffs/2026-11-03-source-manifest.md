@@ -169,7 +169,7 @@ source, what never travels with it, the check before a source export, and how a 
   cancel scoped to the hand-over) answered as decided; round 31 (the act, not the artefact, needs the word, a local export none; a file with neither
   `manifest` nor `files` refused under `--kind source-tree` by the discriminator; a missing slot's refusal counted
   `unknown`; the chain through DEC-0153; link targets with `?` and `%2e` read literally; one `link-outside` on line 1
-  without a scan; a dangling-link folder never "holds none") answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  without a scan; a dangling-link folder never "holds none"); round 31's seam notes (a test that fails on a coverage floor no include reaches; the task lease CT-194 for the register commits; the CAS values and schema count as written) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -255,10 +255,11 @@ The landing continues on `agent/ct194-source-manifest-v2-20261104` (step 1 is do
 on the merge base `d1b905ee`, the review branch's remote ref deleted; never push the review branch again). The
 remaining steps, in order:
 
-1. Take fresh agent-sync leases for these files before anything else: `docs/DECISIONS.md`,
-   `docs/specification/conformance.md` and `docs/backlog.md` (re-measure at landing whether origin holds any). Renew
-   them at each reading round and immediately before steps 5 and 6, re-acquiring any that lapsed; before the step 5
-   commit, `git ls-remote origin 'refs/agent-sync/leases/*'` must list this run's leases on the three files.
+1. Acquire the task lease CT-194 first, and renew it at each reading round and immediately before steps 5 and 6; the
+   register commits go under it, which the guard accepts. This run's path leases on `docs/DECISIONS.md`,
+   `docs/specification/conformance.md` and `docs/backlog.md` expired and cannot be reaped by this session; re-take
+   them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
+   the step 5 commit.
 2. Merge the current `origin/main` (with #236, CT-215 and CT-216; re-measure its head at landing) into the fresh branch
    as the merge notes below say, refreshing the sibling heads.
 3. Re-run the full gate on that merge and cite its commit in this handoff. Open the PR from the fresh branch and
@@ -306,9 +307,9 @@ The channel-agent branch adds `schemas/service-channel-agent-extension.schema.js
 the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds no schema, and edits
 `fixtures/catalogue.json`, `src/secret-shape.ts` and `src/session-handoff.ts`. What a textual merge gets wrong, or gets wrong silently:
 
-- The schema count in `test/schema-compilation.test.ts`: each side writes its own count (148 on more than one branch),
-  so a merge reads wrong silently; whichever lands last sets it by hand to the full count, 150 with DEC-0149, DEC-0150
-  and DEC-0153 each adding schemas (re-count the files under `schemas/` then).
+- The schema count in `test/schema-compilation.test.ts`: each side writes its own count, so a merge reads wrong
+  silently; whichever lands last sets it by hand to the full count (at the time of writing 148 after DEC-0149 and
+  DEC-0150, 150 once DEC-0153 lands; re-count the files under `schemas/` then).
 - Where DEC-0150 and DEC-0151 meet each other, `docs/DOCMAP.md` and `docs/specification/support-quality.md` conflict:
   follow DEC-0151's meeting list. Keep DEC-0151's thresholds line and drop the "Not decided here" bullet; in DOCMAP,
   DEC-0151's support-quality row first, then DEC-0150's channel-agent row. Check: `grep -c 'DEC-0151 (in progress)
@@ -320,9 +321,11 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   DEC-0151's edited files also include `src/connections.ts` (a comment) and `docs/specification/conformance.md` (the
   secret-shape reference row). DEC-0150's small edits to `src/validate-cli.ts`
   and `test/validate-cli.test.ts` merge cleanly beside this branch's.
-- `vitest.config.ts`: `include` takes the union of both lists, and `thresholds` keeps `src/validator.ts`,
-  `src/source-rules.ts` and `src/channel-agent.ts` at 100 (a threshold key that matches no included file passes
-  silently).
+- `vitest.config.ts`: `include` takes the union of every branch's list, and `thresholds` keeps `src/validator.ts`,
+  `src/source-rules.ts` and `src/channel-agent.ts` at 100; DEC-0153's lander keeps the union include line plus
+  `src/ops-digest.ts`'s floor (DEC-0153's own handoff carries its sibling notes, at `21bb0246` when written). A
+  threshold key that matches no included file used to pass silently; `test/consistency.test.ts` ("the coverage
+  floors") now fails on one.
 - `fixtures/catalogue.json`: all three branches add entries; add the comma where they meet.
 - `docs/specification/conformance.md`: keep this branch's actions row and append the channel row after it. In the
   reserved-codes paragraph keep this branch's `FAC-SEM-161` sentence, add DEC-0150's sentence on `FAC-SEM-162` to
@@ -333,7 +336,7 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   `FAC-SEM-162` to `FAC-SEM-167` (docs-check G-13).
 - The next-free markers (`docs/DECISIONS.md`, the register in `conformance.md`) are written by whichever lands later
   from the CAS refs at merge time, never from a fixed value: `git ls-remote origin 'refs/agent-sync/ids/*'`, then
-  `git cat-file -p <sha>` for each.
+  `git cat-file -p <sha>` for each (at the time of writing, DEC next 154 and SEM next 168; read the CAS refs at merge).
 - `AGENTS.md` against main (PR #236 merged): keep this branch's Check row and #236's MCP row, which removes an em dash.
   #236 landed first, so this branch adds to CT-205's row, when main is merged in, that a source hand-over is never
   covered by a task-wide mandate (written in the backlog row as `[source](specification/source.md#handing-over)`, the
