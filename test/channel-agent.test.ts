@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ValidateFunction } from "ajv/dist/2020.js";
-import { CHANNEL_AGENT_PATHS, MESSAGE_ERRORS, PATH_DEPTH, SECRET_BUDGET, SECRET_FINDINGS, VISIT_COST, detectorCost, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, placed, schemaErrors } from "../src/channel-agent.js";
+import { CHANNEL_AGENT_PATHS, MESSAGE_ERRORS, PATH_DEPTH, PIECE_COST, SECRET_BUDGET, SECRET_FINDINGS, VISIT_COST, detectorCost, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, placed, schemaErrors } from "../src/channel-agent.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -297,13 +297,13 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   it("counts what the detector reads: a string once, and again after each eyJ to the end of its run", () => {
     expect(detectorCost("")).toBe(0);
     expect(detectorCost("plain text")).toBe(10);
-    expect(detectorCost("eyJab.cd")).toBe(8 + 5);
+    expect(detectorCost("eyJab.cd")).toBe(8 + 8);
     expect(detectorCost("x eyJeyJ y")).toBe(10 + 6 + 3);
     expect(detectorCost("eyJ".repeat(1000))).toBeGreaterThan(SECRET_BUDGET);
   });
   it("counts the square of an upper-case run after ?, & or # as read, so a query name cannot slow the detector", () => {
-    expect(detectorCost("a?BC=x")).toBe(6 + 3);
-    expect(detectorCost("#&?")).toBe(3);
+    expect(detectorCost("a?BC=x")).toBe(6 + 3 + PIECE_COST);
+    expect(detectorCost("#&?")).toBe(3 + 2 * PIECE_COST);
     const strings = Array.from({ length: 245 }, () => `https://a.example/?${"Q".repeat(4060)}=x`);
     const started = performance.now();
     const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: strings } } }, "well-known");
@@ -339,9 +339,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(detectorCost(`https://a.example/?a${"Q".repeat(n)}=x`)).toBeGreaterThanOrEqual(square);
     expect(detectorCost(`https://a.example/?${"%41".repeat(n)}=x`)).toBeGreaterThanOrEqual(square);
     expect(detectorCost(`https://a.example/#a${"Q".repeat(n)}=x`)).toBeGreaterThanOrEqual(square);
-    expect(detectorCost("https://a.example/?q=a%20b")).toBe(26 + 5);
+    expect(detectorCost("https://a.example/?q=a%20b")).toBe(26 + 5 + PIECE_COST);
     // A value that does not decode (a lone %) is read raw.
-    expect(detectorCost("https://a.example/?q=a%zz")).toBe(25 + 4);
+    expect(detectorCost("https://a.example/?q=a%zz")).toBe(25 + 4 + PIECE_COST);
     const shapes = [`https://a.example/?a${"Q".repeat(4000)}=x`, `https://a.example/?${"%41".repeat(1350)}=x`, `https://a.example/#a${"Q".repeat(4000)}=x`];
     const extra = shapes.flatMap((shape) => Array.from({ length: 300 }, () => shape));
     const started = performance.now();
@@ -383,6 +383,50 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     // At most eight enum values are named, the rest counted; a pattern is cut to 80 characters.
     expect(placed({ keyword: "enum", instancePath: "/projects/0/channels/0/kind", params: { allowedValues: Array.from({ length: 10 }, (_, i) => `k${i}`) } })).toBe("enum at /projects/0/channels/0/kind (one of k0, k1, k2, k3, k4, k5, k6, k7 and 2 more)");
     expect(placed({ keyword: "pattern", instancePath: "/projects/0/side", params: { pattern: "x".repeat(100) } })).toBe(`pattern at /projects/0/side (pattern ${"x".repeat(80)}\u2026)`);
+  });
+  it("counts the JWT shape's second segment after a dot", () => {
+    expect(detectorCost(`${"eyJ".repeat(52)}.${"a".repeat(3940)}`)).toBeGreaterThanOrEqual(52 * 3940);
+    expect(detectorCost("https://a.example/?q=%65yJ%2Eab")).toBeGreaterThanOrEqual(29 + PIECE_COST + 7 + 6);
+  });
+  it("counts an sk- after each escape a provider-key reading takes for a boundary", () => {
+    const kinds = ["%41", "%2541", "\\x41", "\\u0041", "\\12", "\\123", "\\n", "\u001b[31m", "\\x1b[31m", "\\033[1;31m", "\\u001b[0m", "\\e[31m"];
+    for (const escape of kinds) {
+      const text = `${escape}sk-${"a".repeat(260)}`.repeat(5);
+      expect(detectorCost(text), escape).toBeGreaterThanOrEqual(text.length + 5 * 255);
+    }
+    expect(detectorCost(`a1sk-${"a".repeat(300)}`)).toBe(305);
+  });
+  it("reads a query of many pieces about as fast as prose of the same size", () => {
+    const query = `https://a.example/?${"a=b&".repeat(1100)}`.slice(0, 4096);
+    const prose = "the quick brown fox jumps over the lazy dog ".repeat(100).slice(0, 4096);
+    // The test thread's own processor time, so another file's work does not count.
+    const thread = (process as unknown as { threadCpuUsage?: (previous?: NodeJS.CpuUsage) => NodeJS.CpuUsage }).threadCpuUsage;
+    const clock = (previous?: NodeJS.CpuUsage): NodeJS.CpuUsage => (thread === undefined ? process.cpuUsage(previous) : thread.call(process, previous));
+    const time = (text: string) => {
+      const started = clock();
+      channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array.from({ length: 300 }, () => text) } } }, "well-known");
+      const spent = clock(started);
+      return (spent.user + spent.system) / 1000;
+    };
+    time(prose);
+    time(query);
+    const baseline = Math.min(time(prose), time(prose), time(prose));
+    expect(Math.min(time(query), time(query), time(query))).toBeLessThan(2 * baseline + 20);
+  });
+  it("charges a member's name once, so the budget's edge falls where the count says", () => {
+    const bearer = ["Bearer", "z".repeat(24)].join(" ");
+    const fixed = VISIT_COST + "last".length + VISIT_COST + bearer.length;
+    const each = VISIT_COST + 6;
+    const under = Math.floor((SECRET_BUDGET - fixed) / each);
+    const declaration = (n: number) => {
+      const members: Json = {};
+      for (let i = 0; i < n; i += 1) members[`n${String(i).padStart(5, "0")}`] = [];
+      members.last = [bearer];
+      return members;
+    };
+    const at = (n: number) => channelAgentRules({ extensions: { [KEY]: declaration(n) } }, "well-known").filter((f) => f.code === "FAC-SEM-165");
+    expect(at(under).map((f) => [f.instancePath, f.message.includes("was not read")])).toEqual([[`${CHANNEL_AGENT_PATHS["well-known"]}/*/*`, false]]);
+    expect(at(under + 1).map((f) => f.message.includes("was not read"))).toEqual([true]);
   });
   it("places every descendant of a member that is not plain at the nearest plain ancestor, declared names and all", () => {
     const name = ["sk", "-", "Zx9Q".repeat(5)].join("");

@@ -77,6 +77,13 @@ filed; the coordinator files it on the board).
   budget collapses every further member; the "not read" finding and the 64 places are once per document; FAC-SEM-162
   names at most 8 enum values and cuts a pattern to 80 characters, each spelled once; the null rule names its members;
   the bare `--schema` check is described as the generic one.
+- Round 8 of the readings: one unit break (a name charged two or three times when its value is an object or array)
+  and one product break (a channel's id and a tier code called the standard's own patterns), fixed: a name is charged
+  once, by its visit, which keeps whether it is plain for the member's place; the JWT shape's second segment after a
+  dot, 128 per query or fragment piece (a piece costs the detector about what 100 code points of prose do, measured
+  under the coverage run) and the escapes the in-progress DEC-0151 takes for a boundary before `sk-` are
+  counted; a channel's id and a tier code are this contract's grammars, and those and the other narrowings are listed
+  for the standard's owner; vectors at the budget's edge.
 
 ## The branch and its history
 
@@ -179,22 +186,23 @@ DEC-0151 is in progress. The second of the two to land rewrites, in its own chan
   state its rule as current, and re-check that `sk-support-desk-faq-answers-2026-v2` is still found (the test pins
   it); the advice not to start an id with `sk-` stays;
 - the two "Compared as written" bullets for `project:<slug>` in `docs/specification/identifiers.md`, merged into one;
+- once DEC-0149 is on main, `keyShaped` in `src/channel-agent.ts` uses `hasJwt` instead of `JWT_SHAPE.test` (DEC-0149's
+  CT-212 names `channel-agent.ts`), and the page's and CA-5's `eyJ` term stays as a bound;
 - an assertion in `test/channel-agent.test.ts` that the declaration's `project` pattern equals
   `support-quality-daily.schema.json` `$defs/projectAlias` (S3);
 - the standard copy's path in the sources ledger, which becomes a link.
 
 ## Checks actually run
 
-On the change after round 7's fixes, each exit code read separately, the 15-minute load average below 45 at each test
-run: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9953 tests passed and 1 skipped,
-branches 98.87 %, 12007 of 12144; `src/channel-agent.ts` 296 of 296, `src/secret-shape.ts` 47 of 47);
+On the change after round 8's fixes, each exit code read separately, the 15-minute load average below 45 at each test
+run: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9959 tests passed and 1 skipped,
+branches 98.87 %, 12014 of 12151; `src/channel-agent.ts` 303 of 303, `src/secret-shape.ts` 47 of 47);
 `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm privacy:check` with the
 organization index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (29 vector files match their generators).
-The reading-budget tests run within their bounds: 488 `eyJ` strings, 245 query strings, 300 copies each of three query
-and fragment name shapes and 246 strings of `-sk` under 500 ms, two million empty strings and four misplaced heavy
-copies under 2000 ms, 1000 misplaced copies giving one "not read" finding. The organization's privacy check over the
-standard's copy alone: 0 findings. A `git grep` of the change for the three terms of the product described before
-neutralisation prints nothing. No U+2014 in the added text.
+The reading-budget tests run within their bounds, a query of many pieces within twice prose's time, and the budget's
+edge falls where the count says (in the vectors and with 45 451 short names in the test). The organization's privacy
+check over the standard's copy alone: 0 findings. A `git grep` of the change for the three terms of the product
+described before neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
@@ -216,6 +224,11 @@ thread `b6820b97` (the coordinator posts it), listing the narrowings versus the 
 - only a manifest's `provider.extensions` is read: a declaration under the manifest's top-level `extensions` is
   `FAC-SEM-162` and not read;
 - `channel-agent-standard/2` is refused until a contract revision;
+- a channel's id and a tier code are this contract's grammars where the standard gives none: `^[a-z0-9][a-z0-9_-]{0,63}$`
+  and `^[a-z0-9_]{1,32}$` (lower case only, no dot in either, no hyphen in a tier code, at most 64 and 32 characters);
+- durations take whole numbers of at most 5 digits per component; `days` is lower case; a text's language is a
+  language tag (no tag of private use only) of at most 35 characters; a text is at most 4096 code points; a
+  declaration holds at most 64 projects;
 - a budget above 0 without a spend record is `FAC-SEM-164`;
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;

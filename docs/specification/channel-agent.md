@@ -86,8 +86,9 @@ or an account number, as the standard's `id_looks_personal` refuses, its section
 space, so no person's address and no path fits where the standard asks for ids only. The id grammar covers
 `lead_agent`, every `owner` (the gap registry's, a source's and a queue's), the ids of sources, declined sources,
 queues and recorded decisions, a declined source's and a channel's `decision`, and a queue's `answered_signal`. The same
-run of digits is refused in a channel's id, the side, a category code and a tier code, each otherwise the standard's
-own pattern. Three members keep another owner's grammar: `question_route.target` the board's project id
+run of digits is refused in the side and a category code, each otherwise the standard's own pattern, and in a channel's
+id and a tier code, whose grammars are this contract's where the standard gives none: a channel's id
+`^[a-z0-9][a-z0-9_-]{0,63}$`, a tier code `^[a-z0-9_]{1,32}$`. Three members keep another owner's grammar: `question_route.target` the board's project id
 (`^[A-Za-z0-9][A-Za-z0-9._:-]{0,191}$`), `evals.spend_record` the usage report's limit id
 (`^[a-z0-9][a-z0-9._:-]{0,63}$`) and a queue's `recommendation` the board's `opaqueId`. A path (`suite`, `outbox`) is relative to the agent's repository: never `/`, `~` or a drive letter first, and
 no `..` segment. A duration is ISO 8601 in days, hours, minutes and seconds (`P7D`, `PT1H`, `P1DT12H`), above zero:
@@ -144,13 +145,16 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    that is a URL with a password is read whole, and found). The detector reads the first 4097 code points of a string,
    and the rule reads at most 1 000 000 code points of names and values in all for one document, every copy of the
    declaration in it (read or misplaced) sharing them. The count, `detectorCost`, is a bound any port's detector may
-   need, not a description of one detector: each name or string costs 16 plus its code points; after each `eyJ`, the
-   rest of the base64url run it starts; for each query or fragment name (after `?`, `&` or `#`, up to the next `=`, `&`
-   or `#`) that holds an upper-case letter or a `%`, the square of its raw length over two; for each value (after `=`,
-   up to the next `&` or `#`) that holds a `%`, its raw length and the `eyJ` term of its decoded form; and after each
-   `sk-` that follows a boundary (the start, a character other than a letter or a digit, a `%XX` escape or a
-   backslash escape), up to 255 code points to the end of the string. A member's name is read before its place is
-   written; once the budget is spent nothing more is read and every further member collapses its place. Past the
+   need, not a description of one detector: each name or string costs 16 plus its code points, once (a name is not
+   charged again when its member is entered or placed); after each `eyJ`, the rest of the base64url run it starts and,
+   when that run ends at a `.`, the dot and the base64url run after it (the JWT shape's second segment); 128 for each
+   query or fragment piece (after `?`, `&` or `#`, up to the next `=`, `&` or `#`), and for each such name that holds
+   an upper-case letter or a `%`, the square of its raw length over two; for each value (after `=`, up to the next `&`
+   or `#`) that holds a `%`, its raw length and the `eyJ` term of its decoded form; and after each `sk-` that follows a
+   boundary, up to 255 code points to the end of the string. A boundary is the start, a character other than a letter
+   or a digit, or an escape that ends right before the `sk-`: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit
+   octal escape, a backslash escape of one character, or a colour sequence `ESC[...m` whose ESC is raw or escaped
+   (`\x1b`, `\033`, `\u001b`, `\e`). A member's name is read before its place is written; once the budget is spent nothing more is read and every further member collapses its place. Past the
    budget, one finding at the first copy walked says, once per document, that the rest was not read for credentials,
    and the 64 places are counted per document too. Being by shape, the detector also finds an ordinary hyphenated name
    that starts with `sk-`: today any `sk-` followed by 16 or more letters, digits, `_` or `-`, in any case, such as the
@@ -239,7 +243,7 @@ existing fixture validates and checks as before. `contractVersion` stays `0.1.0`
   no colon; a `spend_record` that is a lower-case usage-report limit id; and a missing required member, or a `null` for
   the question route, the gap registry, a channel's texts, the personal-data check or a queue's recommendation, makes
   the whole declaration not declared (a channel's `decision`, `quiet_window` and `late_answer_window` and
-  `evals.spend_record` take `null`). `pnpm validate` on the manifest or the well-known answer
+  `evals.spend_record` take `null`); a channel's id is this contract's `^[a-z0-9][a-z0-9_-]{0,63}$` and a tier code its `^[a-z0-9_]{1,32}$`, where the standard gives none (lower case only, no dot in either, no hyphen in a tier code, at most 64 and 32 characters); durations take whole numbers of at most 5 digits per component; `days` is lower case; a text's language is a language tag (no tag of private use only) of at most 35 characters; a text is at most 4096 code points; a declaration holds at most 64 projects. `pnpm validate` on the manifest or the well-known answer
   shows which members a declaration fails.
 
 The first consumer is owed by the Fabric Agent Adapter: its service check validates the declaration against this schema

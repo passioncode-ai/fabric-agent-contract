@@ -9054,8 +9054,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      same `projectAlias`): the registry's
      name, not an id the agent invents, so the run-of-digits rule does not bind it; an alias of the Fabric Project
      compared as written (identifiers.md),
-     where `question_route.target` is the canonical Fabric Project id. `side` is `^[a-z0-9-]{1,32}$`; a channel's id, the
-     side, a category code and a tier code take the standard's patterns with no run of 7 or more digits; a time zone is an IANA name of one to three segments; a tier's `rule`
+     where `question_route.target` is the canonical Fabric Project id. `side` is `^[a-z0-9-]{1,32}$`; the side and a category code take the standard's patterns, and a channel's id
+     (`^[a-z0-9][a-z0-9_-]{0,63}$`) and a tier code (`^[a-z0-9_]{1,32}$`) this contract's, where the standard gives none,
+     each with no run of 7 or more digits; a time zone is an IANA name of one to three segments; a tier's `rule`
      is `<fact> > <integer>` or `<fact> >= <integer>`, the integer at most 15 digits, and `escalate` is `at_once` or
      `ladder`; the question route's capability is `team.ask` or `operator.ask`; budgets are numbers in USD as the usage
      report's limits, except that 0 is allowed here and means no budget, and a budget above 0 is spent under the
@@ -9100,10 +9101,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a
      provider key's and a JWT's shapes only; anything else is read whole. The rule reads at most 1 000 000 code points for
      one document, every copy of the declaration in it sharing them, counted by `detectorCost`, a bound any port's
-     detector may need: each name or string 16 plus its code points; after each `eyJ`, the rest of its base64url run;
-     for each query or fragment name holding an upper-case letter or a `%`, the square of its raw length over two; for
-     each value holding a `%`, its raw length and the `eyJ` term of its decoded form; after each `sk-` at a boundary, up
-     to 255 code points. Once it is spent, nothing more is read and every further member collapses; one finding per
+     detector may need: each name or string 16 plus its code points, once; after each `eyJ`, the rest of its base64url
+     run and, when it ends at a `.`, the dot and the run after it; 128 per query or fragment piece and, for a name
+     holding an upper-case letter or a `%`, the square of its raw length over two; for each value holding a `%`, its raw
+     length and the `eyJ` term of its decoded form; after each `sk-` at a boundary (the start, a non-alphanumeric
+     character, `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a backslash escape, or a raw or
+     escaped ESC colour sequence), up to 255 code points. Once it is spent, nothing more is read and every further member collapses; one finding per
      document then says the rest was not read, and the 64 places are counted per document. No finding's message carries a declared value and no rule's place echoes
      instance data: a place writes a declared name, an index of a declared array, else `*` (an undeclared name, a
      numeric object key, a text's language), in `FAC-SEM-162`, `FAC-SEM-164` and `FAC-SEM-165` alike; a member whose
@@ -9154,7 +9157,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   recommendation that is a board `opaqueId`; a lower-case `spend_record`; a missing required member, or a `null` for the
   question route, the gap registry, a channel's texts, the personal-data check or a queue's recommendation, makes the
   whole declaration not declared, while `decision`, `quiet_window`, `late_answer_window` and `spend_record` take
-  `null`); `pnpm validate` shows what a declaration fails.
+  `null`; a channel's id is this contract's `^[a-z0-9][a-z0-9_-]{0,63}$` and a tier code its `^[a-z0-9_]{1,32}$`, where the standard gives none (lower case only, no dot in either, no hyphen in a tier code, at most 64 and 32 characters); durations take whole numbers of at most 5 digits per component; `days` is lower case; a text's language is a language tag (no tag of private use only) of at most 35 characters; a text is at most 4096 code points; a declaration holds at most 64 projects); `pnpm validate` shows what a declaration fails.
 - **Consequences / affects:** `src/extensions.ts`, `src/channel-agent.ts`, `src/semantic-rules.ts`,
   `src/protocol-revisions.ts`, `schemas/service-channel-agent-extension.schema.json`, `tools/vectors/channel-agent.ts`,
   `tools/vectors/run.ts`, `fixtures/vectors/channel-agent.json`, `fixtures/positive/service-channel-agent-extension.json`,
@@ -9172,7 +9175,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, with the examples made neutral here; rounds 1 to 7 of the readings. `DEC-0150` was reserved by the coordinator with
+  published it on 2026-11-04, with the examples made neutral here; rounds 1 to 8 of the readings. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation

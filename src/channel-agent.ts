@@ -329,27 +329,49 @@ const newBudget = (): Budget => ({ left: SECRET_BUDGET, unread: false, named: 0,
 
 /** What each name or string costs beyond its code points: the call itself. */
 export const VISIT_COST = 16;
+/**
+ * What each query or fragment piece costs: the detector decodes and splits every piece, which, measured under the
+ * gate's coverage run, costs about as much as reading 100 code points of prose.
+ */
+export const PIECE_COST = 8 * VISIT_COST;
 
-/** The cost of the JWT shape's reading of a text: after each `eyJ`, the rest of the base64url run it starts. */
+/** The end of the base64url run that starts at `from`. */
+function runFrom(text: string, from: number): number {
+  let end = from;
+  while (end < text.length && BASE64URL.test(text[end] as string)) end += 1;
+  return end;
+}
+
+/**
+ * The cost of the JWT shape's reading of a text: after each `eyJ`, the rest of the base64url run it starts and, when
+ * that run ends at a `.`, the dot and the base64url run after it (the shape's second segment).
+ */
 function jwtRereads(text: string): number {
   let cost = 0;
+  let reach = 0;
   let runEnd = 0;
   for (let at = text.indexOf("eyJ"); at >= 0; at = text.indexOf("eyJ", at + 1)) {
     if (runEnd <= at) {
-      runEnd = at;
-      while (runEnd < text.length && BASE64URL.test(text[runEnd] as string)) runEnd += 1;
+      runEnd = runFrom(text, at);
+      reach = text[runEnd] === "." ? runFrom(text, runEnd + 1) : runEnd;
     }
-    cost += runEnd - at;
+    cost += reach - at;
   }
   return cost;
 }
+
+/**
+ * An escape that ends right before an `sk-` and so stands as a boundary for it: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a
+ * two- or three-digit octal escape, a backslash escape of one character, or a colour sequence (`ESC[...m`) whose ESC is
+ * raw or escaped (`\x1b`, `\033`, `\u001b`, `\e`).
+ */
+const ESCAPE_BEFORE = /(?:%25[0-9A-Fa-f]{2}|%[0-9A-Fa-f]{2}|\\x[0-9A-Fa-f]{2}|\\u[0-9A-Fa-f]{4}|\\[0-7]{2,3}|\\.|(?:\u001b|\\x1b|\\033|\\u001b|\\e)\[[0-9;]{0,8}m)$/;
 
 /** What a provider-key reading may reread after each `sk-` that follows a boundary: up to 255 code points each. */
 function keyRereads(text: string): number {
   let cost = 0;
   for (let at = text.indexOf("sk-"); at >= 0; at = text.indexOf("sk-", at + 1)) {
-    const before = text[at - 1];
-    const boundary = at === 0 || !/[A-Za-z0-9]/.test(before as string) || /%[0-9A-Fa-f]{2}$/.test(text.slice(Math.max(0, at - 3), at)) || text[at - 2] === "\\";
+    const boundary = at === 0 || !/[A-Za-z0-9]/.test(text[at - 1] as string) || ESCAPE_BEFORE.test(text.slice(Math.max(0, at - 20), at));
     if (boundary) cost += Math.min(KEY_REREAD, text.length - at);
   }
   return cost;
@@ -369,11 +391,11 @@ function decoded(value: string): string {
  * The code points the detector reads in a string, counted in one pass, a bound any port's detector may need: the string
  * once; the JWT shape's rereading, after each `eyJ`, of the rest of the base64url run it starts; for every query or
  * fragment name (after `?`, `&` or `#`, up to the next `=`, `&` or `#`) that holds an upper-case letter or a `%`, the
- * square of its raw length over two (splitting a name into words may backtrack over it); for every value (after
- * `=`, up to the next `&` or `#`) that holds a `%`, its raw length and the JWT rereading of its decoded form; and, after
- * every `sk-` that follows a boundary (the start, a character other than a letter or a digit, a `%XX` escape or a
- * backslash escape), up to 255 code points to the end of the string (a provider-key reading anchored at a boundary may
- * read that far after each one).
+ * square of its raw length over two (splitting a name into words may backtrack over it), and PIECE_COST for every such
+ * piece; for every value (after `=`, up to the next `&` or `#`) that holds a `%`, its raw length and the JWT rereading
+ * of its decoded form; and, after every `sk-` that follows a boundary (the start, a character other than a letter or a
+ * digit, or an escape ESCAPE_BEFORE names), up to 255 code points to the end of the string (a provider-key reading
+ * anchored at a boundary may read that far after each one).
  */
 export function detectorCost(text: string): number {
   let cost = text.length + jwtRereads(text) + keyRereads(text);
@@ -382,6 +404,7 @@ export function detectorCost(text: string): number {
     let end = at + 1;
     while (end < text.length && text[end] !== "=" && text[end] !== "&" && text[end] !== "#") end += 1;
     const name = text.slice(at + 1, end);
+    cost += PIECE_COST;
     if (/[A-Z%]/.test(name)) cost += (name.length * (name.length + 1)) / 2;
     if (text[end] === "=") {
       let stop = end + 1;
@@ -425,17 +448,25 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
     budget.left -= cost;
     return true;
   };
-  // A member's name is read for a plain place only while the budget lasts; once it is spent, the member collapses.
+  // A member's name is read once, by its visit, which the walk makes before it enters or reads the member; the visit
+  // keeps whether the name is plain for that frame and key, so placing the member reads nothing again. A name left
+  // unread (the budget spent) is not plain: the member collapses.
+  let last: { frame: Frame | undefined; key: string; plain: boolean } = { frame: undefined, key: "", plain: false };
   const tokenOf = (frame: Frame, key: string, index: boolean) => {
     if (index) return placedToken(frame.name, frame.parent, key, index, names);
-    return afford(key) && plainName(key) ? placedToken(frame.name, frame.parent, key, index, names) : undefined;
+    const plain = last.frame === frame && last.key === key && last.plain;
+    return plain ? placedToken(frame.name, frame.parent, key, index, names) : undefined;
   };
   walk(value, root, tokenOf, (text, spot, place) => {
-    if (!afford(text)) return;
     if (spot.isName) {
-      if (shaped(text)) flag(place(spot), "a member's name");
+      last = { frame: spot.frame, key: text, plain: false };
+      if (!afford(text)) return;
+      const isShaped = shaped(text);
+      last.plain = !isShaped && NAME_CHARACTERS.test(text) && !/[0-9]{7}/.test(text.replace(/[-_]/g, ""));
+      if (isShaped) flag(place(spot), "a member's name");
       return;
     }
+    if (!afford(text)) return;
     const role = spot.frame?.role;
     const key = spot.key;
     let found: boolean;
