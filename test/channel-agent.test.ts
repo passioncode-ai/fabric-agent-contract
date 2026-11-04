@@ -41,7 +41,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const view = channelAgentView(valid);
     expect(view).toMatchObject({ declared: true, standard: "channel-agent-standard/1" });
     expect(view.declared && view.projects[0]?.project).toBe("project:example-support");
-    expect(channelAgentView({ provider: { extensions: { [KEY]: {} } } })).toEqual({ declared: false, reported: true, errors: ["required at / (standard)", "required at / (projects)"] });
+    expect(channelAgentView({ provider: { extensions: { [KEY]: {} } } })).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /: required (standard)", "FAC-SEM-162 at /: required (projects)"] });
     expect(channelAgentView({ provider: { extensions: null } })).toEqual({ declared: false, reported: false });
     expect(channelAgentView("x")).toEqual({ declared: false, reported: false });
   });
@@ -122,11 +122,11 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(Number(named?.[3])).toBeGreaterThan(0);
     const map = Object.fromEntries(Array.from({ length: 65 }, (_, i) => [`l${i}`, "x"]));
     const texts = { ...value.projects[0], channels: [{ ...value.projects[0].channels[0], texts: { holding: map, final: map } }] };
-    expect(channelAgentView({ provider: { extensions: { [KEY]: { ...value, projects: [texts] } } } })).toEqual({ declared: false, reported: true, errors: ["maxProperties at /projects/0/channels/0/texts/holding (at most 64 members)", "maxProperties at /projects/0/channels/0/texts/final (at most 64 members)"] });
+    expect(channelAgentView({ provider: { extensions: { [KEY]: { ...value, projects: [texts] } } } })).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /projects/0/channels/0/texts/holding: maxProperties (at most 64 members)", "FAC-SEM-162 at /projects/0/channels/0/texts/final: maxProperties (at most 64 members)"] });
     const codes = { ...value.projects[0], taxonomy: { version: "1", codes: Array.from({ length: 513 }, (_, i) => ({ code: `c${i}`, label: "C" })) } };
-    expect(channelAgentView({ provider: { extensions: { [KEY]: { ...value, projects: [codes] } } } })).toEqual({ declared: false, reported: true, errors: ["maxItems at /projects/0/taxonomy/codes (at most 512 items)"] });
+    expect(channelAgentView({ provider: { extensions: { [KEY]: { ...value, projects: [codes] } } } })).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /projects/0/taxonomy/codes: maxItems (at most 512 items)"] });
     const noTexts = { ...value.projects[0], channels: [{ ...value.projects[0].channels[0], texts: 5 }] };
-    expect(channelAgentView({ provider: { extensions: { [KEY]: { ...value, projects: [noTexts] } } } })).toEqual({ declared: false, reported: true, errors: ["type at /projects/0/channels/0/texts (object)"] });
+    expect(channelAgentView({ provider: { extensions: { [KEY]: { ...value, projects: [noTexts] } } } })).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /projects/0/channels/0/texts: type (object)"] });
   });
   it("finds a member name shaped like a credential and keeps it out of the path", () => {
     const name = ["sk", "-", "C3".repeat(12)].join("");
@@ -152,20 +152,20 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     for (const [text, keyword] of [["", "minLength"], [5, "type"]] as const) {
       const channel = { ...p0.channels[0], texts: { holding: { [digits]: text }, final: p0.channels[0].texts.final } };
       const view = channelAgentView({ provider: { extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [channel, p0.channels[1]] }] } } } });
-      expect(view.reported && view.errors.some((error) => error.startsWith(`${keyword} at /projects/0/channels/0/texts/holding/* `) || error === `${keyword} at /projects/0/channels/0/texts/holding/*`)).toBe(true);
+      expect(view.reported && view.errors.some((error) => error.startsWith(`FAC-SEM-162 at /projects/0/channels/0/texts/holding/*: ${keyword}`))).toBe(true);
       expect(JSON.stringify(view)).not.toMatch(/[0-9]{7}/);
     }
     const final = { ...p0.channels[0], texts: { holding: p0.channels[0].texts.holding, final: { [digits]: "" } } };
     const late = channelAgentView({ provider: { extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [final, p0.channels[1]] }] } } } });
-    expect(late.reported && late.errors).toContain("minLength at /projects/0/channels/0/texts/final/* (at least 1 code point)");
+    expect(late.reported && late.errors).toContain("FAC-SEM-162 at /projects/0/channels/0/texts/final/*: minLength (at least 1 code point)");
     // Places the schema never reports today, read the same way: a number after no declared array, an undeclared name.
     expect(placed({ keyword: "type", instancePath: `/projects/0/sources/0/${digits}/x~1y/3` })).toBe("type at /projects/0/sources/0/*/*/*");
     const extra = channelAgentView({ provider: { extensions: { [KEY]: { ...value, projects: [{ ...p0, [digits]: { [digits]: 1 } }] } } } });
-    expect(extra.reported && extra.errors).toEqual(["maxProperties at /projects/0 (more members than the schema declares)"]);
+    expect(extra.reported && extra.errors).toEqual(["FAC-SEM-162 at /projects/0: maxProperties (more members than the schema declares)"]);
     const long = `en${"-abcdefgh".repeat(9)}`;
     const longChannel = { ...p0.channels[0], texts: { holding: { [long]: "Checking." }, final: p0.channels[0].texts.final } };
     const longView = channelAgentView({ provider: { extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [longChannel, p0.channels[1]] }] } } } });
-    expect(longView.reported && longView.errors).toEqual(["maxLength at /projects/0/channels/0/texts/holding (at most 35 code points)", "propertyNames at /projects/0/channels/0/texts/holding"]);
+    expect(longView.reported && longView.errors).toEqual(["FAC-SEM-162 at /projects/0/channels/0/texts/holding: maxLength (at most 35 code points)", "FAC-SEM-162 at /projects/0/channels/0/texts/holding: propertyNames"]);
     expect(JSON.stringify(longView)).not.toContain("abcdefgh");
   });
   it("places a member whose name holds a run of 7 digits at its parent, and reads only the first 4097 code points", () => {
@@ -244,7 +244,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     }
   });
   it("refuses a declaration that is itself a string over 4096 code points at its root", () => {
-    expect(channelAgentView({ extensions: { [KEY]: "x".repeat(5000) } }, "well-known")).toEqual({ declared: false, reported: true, errors: ["maxLength at / (at most 4096 code points)"] });
+    expect(channelAgentView({ extensions: { [KEY]: "x".repeat(5000) } }, "well-known")).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /: maxLength (at most 4096 code points)"] });
   });
   it("writes * for a numeric key of an object, whether the object is unknown or stands where an array is declared", () => {
     const digits = ["491", "511", "234"].join("");
@@ -283,7 +283,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       ["/projects/0/channels/0/texts", { ...value, projects: [{ ...p0, channels: [{ ...ch, texts: { ...ch.texts, ...wide } }] }] }]
     ];
     for (const [place, declared] of places) {
-      expect(channelAgentView({ extensions: { [KEY]: declared } }, "well-known"), place).toEqual({ declared: false, reported: true, errors: [`maxProperties at ${place} (more members than the schema declares)`] });
+      expect(channelAgentView({ extensions: { [KEY]: declared } }, "well-known"), place).toEqual({ declared: false, reported: true, errors: [`FAC-SEM-162 at ${place}: maxProperties (more members than the schema declares)`, "FAC-SEM-165 at /"] });
     }
   });
   it("reads at most SECRET_BUDGET code points for credentials, then says the rest was not read, in little time", () => {
@@ -332,7 +332,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   it("names the schema's allowed values beside an enum, a const or a pattern place, never the instance's", () => {
     const route = { ...value.projects[0].question_route, capability: "support.ask" };
     const view = channelAgentView({ extensions: { [KEY]: { ...value, standard: "channel-agent-standard/2", projects: [{ ...value.projects[0], side: "Side", question_route: route }] } } }, "well-known");
-    expect(view.reported && view.errors).toEqual(expect.arrayContaining(["const at /standard (channel-agent-standard/1)", "enum at /projects/0/question_route/capability (one of team.ask, operator.ask)", "pattern at /projects/0/side (pattern ^(?![a-z0-9-]*[0-9]{7})[a-z0-9-]{1,32}$)"]));
+    expect(view.reported && view.errors).toEqual(expect.arrayContaining(["FAC-SEM-162 at /standard: const (channel-agent-standard/1)", "FAC-SEM-162 at /projects/0/question_route/capability: enum (one of team.ask, operator.ask)", "FAC-SEM-162 at /projects/0/side: pattern (pattern ^(?![a-z0-9-]*[0-9]{7})[a-z0-9-]{1,32}$)"]));
     expect(JSON.stringify(view)).not.toMatch(/support\.ask|Side"|\/2/);
   });
   it("counts every query or fragment name with an upper-case letter or a %, wherever the run starts", () => {
@@ -474,9 +474,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const p0 = value.projects[0];
     const broken = { ...p0, adopted_at: "2026-13-45", taxonomy: { version: "1", codes: [{ code: "a", label: "x".repeat(121) }] }, question_route: { ...p0.question_route, daily_cap: 0 }, sources: [] };
     const view = channelAgentView({ extensions: { [KEY]: { ...value, projects: [broken] } } }, "well-known");
-    expect(view.reported && view.errors).toEqual(expect.arrayContaining(["maxLength at /projects/0/taxonomy/codes/0/label (at most 120 code points)", "minimum at /projects/0/question_route/daily_cap (>= 1)", "minItems at /projects/0/sources (at least 1 item)", "format at /projects/0/adopted_at (format date)"]));
+    expect(view.reported && view.errors).toEqual(expect.arrayContaining(["FAC-SEM-162 at /projects/0/taxonomy/codes/0/label: maxLength (at most 120 code points)", "FAC-SEM-162 at /projects/0/question_route/daily_cap: minimum (>= 1)", "FAC-SEM-162 at /projects/0/sources: minItems (at least 1 item)", "FAC-SEM-162 at /projects/0/adopted_at: format (format date)"]));
     const high = channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...p0, question_route: { ...p0.question_route, daily_cap: 1001 } }] } } }, "well-known");
-    expect(high.reported && high.errors).toEqual(["maximum at /projects/0/question_route/daily_cap (<= 1000)"]);
+    expect(high.reported && high.errors).toEqual(["FAC-SEM-162 at /projects/0/question_route/daily_cap: maximum (<= 1000)"]);
   });
   it("reads a valid declaration as a reader does: a credential or a repeated id is not declared, an obligation is shown", () => {
     const p0 = value.projects[0];
@@ -497,15 +497,20 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const unread = channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [heavy, p0.channels[1]] }] } } }, "well-known");
     expect(unread).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-165 at /"] });
   });
-  it("reads a string as a URL only when it opens with a scheme and its authority is ASCII", () => {
+  it("reads a string as a URL only when its head, tab and line breaks removed, is ASCII with no high escape and opens with a scheme", () => {
     expect(readAsUrl("https://a.example/?q=1")).toBe(true);
     expect(readAsUrl("mailto:someone")).toBe(true);
     expect(readAsUrl("https://a.example")).toBe(true);
     expect(readAsUrl("https://h\u00e9.example/x")).toBe(false);
-    expect(readAsUrl("https://a.example/\u00e9")).toBe(true);
+    expect(readAsUrl("https://a.example/\u00e9")).toBe(false);
     expect(readAsUrl("a.example/?q=1")).toBe(false);
     expect(readAsUrl(" https://a.example/")).toBe(false);
     expect(readAsUrl("x")).toBe(false);
+    expect(readAsUrl("ht\ttps://a.example/")).toBe(true);
+    expect(readAsUrl("https://a.example/%41")).toBe(true);
+    expect(readAsUrl("https://a.example/%c3%a9")).toBe(false);
+    expect(readAsUrl("https://a.example/%7f%80")).toBe(false);
+    expect(readAsUrl(`https://a.example/${"a".repeat(4100)}\u00e9`)).toBe(true);
     const cjk = Array.from({ length: 4080 }, (_, i) => String.fromCodePoint(0x4e00 + i)).join("");
     const host = `http://${cjk}/`;
     expect(readAsUrl(host)).toBe(false);
@@ -523,7 +528,12 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const prose = "the quick brown fox jumps over the lazy dog ".repeat(100).slice(0, 4096);
     time(prose);
     const baseline = Math.min(time(prose), time(prose), time(prose));
-    for (const text of [host, "x"]) {
+    // A special scheme takes a host without `//`, and a percent-escaped host is decoded before host processing: none is parsed.
+    const wide = Array.from({ length: 4091 }, (_, i) => String.fromCodePoint(0x4e00 + i)).join("");
+    const special = ["http:", "http:/", "http:\\\\", "https:/\t/", "HTTP:", "ws:"].map((scheme) => `${scheme}${wide}`);
+    const escaped = `http://a.${Array.from({ length: 453 }, (_, i) => encodeURIComponent(String.fromCodePoint(0x4e00 + i))).join("")}`;
+    for (const text of [...special, escaped]) expect(readAsUrl(text), text.slice(0, 9)).toBe(false);
+    for (const text of [host, "x", ...special, escaped]) {
       time(text);
       expect(Math.min(time(text), time(text), time(text)), text.slice(0, 12)).toBeLessThan(2 * baseline + 20);
     }
@@ -552,11 +562,11 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   });
   it("refuses a declaration with more members than its schema declares before the schema runs", () => {
     const wide = Object.fromEntries(Array.from({ length: 100_000 }, (_, i) => [`m${i}`, 1]));
-    expect(channelAgentView({ extensions: { [KEY]: { ...value, ...wide } } }, "well-known")).toEqual({ declared: false, reported: true, errors: ["maxProperties at / (more members than the schema declares)"] });
+    expect(channelAgentView({ extensions: { [KEY]: { ...value, ...wide } } }, "well-known")).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /: maxProperties (more members than the schema declares)", "FAC-SEM-165 at /"] });
     const long = channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array(200_000).fill(1) } } }, "well-known");
     expect(long.map((f) => f.code)).toEqual(["FAC-SEM-162"]);
     const channel = { ...value.projects[0].channels[0], extra: 1 };
-    expect(channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...value.projects[0], channels: [channel] }] } } }, "well-known")).toEqual({ declared: false, reported: true, errors: ["maxProperties at /projects/0/channels/0 (more members than the schema declares)"] });
+    expect(channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...value.projects[0], channels: [channel] }] } } }, "well-known")).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /projects/0/channels/0: maxProperties (more members than the schema declares)"] });
   });
   it("counts the digits of a name with its hyphens and underscores left out", () => {
     const bearer = ["Bearer", "v".repeat(24)].join(" ");
@@ -574,6 +584,61 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const section = page.slice(page.indexOf("### Narrowings against the standard"), page.indexOf("The first consumer is owed"));
     expect(section).toContain("](#grammar)");
     expect(page).toContain("### Grammar");
+    expect(section).toContain("1 000 000");
+  });
+  it("names the expected type alone, and a nullable member's types and null on its oneOf line", () => {
+    const p0 = value.projects[0];
+    const broken = { ...p0, evals: { ...p0.evals, spend_record: "Support" }, channels: [{ ...p0.channels[0], holding_reply: "yes" }, p0.channels[1]] };
+    const view = channelAgentView({ extensions: { [KEY]: { ...value, projects: [broken] } } }, "well-known");
+    expect(view).toEqual({ declared: false, reported: true, errors: [
+      "FAC-SEM-162 at /projects/0/channels/0/holding_reply: type (boolean)",
+      "FAC-SEM-162 at /projects/0/evals/spend_record: pattern (pattern ^[a-z0-9][a-z0-9._:-]{0,63}$)",
+      "FAC-SEM-162 at /projects/0/evals/spend_record: oneOf (a string or null)"
+    ] });
+    expect(JSON.stringify(view)).not.toContain("not null");
+    expect(JSON.stringify(view)).not.toContain("(null)");
+    const message = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [broken] } } }, "well-known")[0]?.message ?? "";
+    expect(message).toContain("type at /projects/0/channels/0/holding_reply (boolean)");
+    expect(message).not.toContain("null, not null");
+    expect(placed({ keyword: "oneOf", instancePath: "/projects/0/evals/spend_record", schema: [{ type: "object" }, { type: "null" }] })).toBe("oneOf at /projects/0/evals/spend_record (an object or null)");
+    expect(placed({ keyword: "oneOf", instancePath: "/projects/0/evals/spend_record", schema: [{ type: "string" }, { type: "integer" }] })).toBe("oneOf at /projects/0/evals/spend_record");
+    expect(placed({ keyword: "oneOf", instancePath: "/projects/0/evals/spend_record", schema: [{ $ref: "#/$defs/nowhere" }, { type: "null" }] })).toBe("oneOf at /projects/0/evals/spend_record");
+    expect(placed({ keyword: "oneOf", instancePath: "/projects/0/evals/spend_record", schema: [1, { type: "null" }] })).toBe("oneOf at /projects/0/evals/spend_record");
+    expect(placed({ keyword: "oneOf", instancePath: "/projects/0/evals/spend_record" })).toBe("oneOf at /projects/0/evals/spend_record");
+  });
+  it("names the rule and the place on every line of the view: an invalid declaration's schema and credential places, and a misplaced copy", () => {
+    const opening = ["e", "y", "J"].join("");
+    const label = `${opening}${"a".repeat(20)}.${opening}${"b".repeat(20)}.${"c".repeat(20)}`;
+    const p0 = value.projects[0];
+    const broken = { ...p0, side: "Side", taxonomy: { ...p0.taxonomy, codes: [{ ...p0.taxonomy.codes[0], label }] } };
+    expect(channelAgentView({ extensions: { [KEY]: { ...value, projects: [broken] } } }, "well-known")).toEqual({ declared: false, reported: true, errors: [
+      "FAC-SEM-162 at /projects/0/side: pattern (pattern ^(?![a-z0-9-]*[0-9]{7})[a-z0-9-]{1,32}$)",
+      "FAC-SEM-165 at /projects/0/taxonomy/codes/0/label"
+    ] });
+    const misplaced = channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...p0, taxonomy: { ...p0.taxonomy, codes: [{ ...p0.taxonomy.codes[0], label }] } }] } } });
+    expect(misplaced).toEqual({ declared: false, reported: true, errors: [`FAC-SEM-162 at /extensions/${KEY.replace(/\//g, "~1")}`, `FAC-SEM-165 at /extensions/${KEY.replace(/\//g, "~1")}/projects/0/taxonomy/codes/0/label`] });
+    expect(channelAgentView({ extensions: {} })).toEqual({ declared: false, reported: false });
+    expect(channelAgentView("x")).toEqual({ declared: false, reported: false });
+    expect(channelAgentView({ extensions: { [KEY]: "x".repeat(5000) } }, "well-known")).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /: maxLength (at most 4096 code points)"] });
+  });
+  it("names at most SECRET_FINDINGS places for FAC-SEM-164 and counts the rest, in the rules and the view", () => {
+    const p0 = value.projects[0];
+    const blank = (count: number) => Object.fromEntries(Array.from({ length: count }, (_, i) => [`en-x${i}`, " "]));
+    const channel = { ...p0.channels[0], texts: { holding: blank(40), final: blank(30) } };
+    const doc = { extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [channel, p0.channels[1]] }] } } };
+    const found = channelAgentRules(doc, "well-known").filter((f) => f.code === "FAC-SEM-164");
+    expect(found).toHaveLength(SECRET_FINDINGS + 1);
+    expect(found[SECRET_FINDINGS]).toMatchObject({ instancePath: CHANNEL_AGENT_PATHS["well-known"], message: expect.stringContaining("and 6 more places") });
+    const view = channelAgentView(doc, "well-known");
+    expect(view.declared && view.obligations).toHaveLength(SECRET_FINDINGS + 1);
+    expect(view.declared && view.obligations.at(-1)).toBe("FAC-SEM-164 at /");
+  });
+  it("tells the author of an id that starts with sk- to rename it", () => {
+    const id = "sk-support-desk-faq-answers-2026-v2";
+    const channel = { ...value.projects[0].channels[0], id };
+    const found = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [{ ...value.projects[0], channels: [channel, value.projects[0].channels[1]] }] } } }, "well-known");
+    expect(found[0]?.message).toContain("an id that starts with sk- is read as a key; rename it");
+    expect(found[0]?.message).not.toContain(id);
   });
   it("states every limit of the schema in the page's grammar, so the two cannot drift", () => {
     const page = read("docs/specification/channel-agent.md");
@@ -629,8 +694,8 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const relative = createValidatorSync().getSchema(`${SCHEMA_PREFIX}schemas/service-channel-agent-extension.schema.json#/$defs/relativeRef`);
     for (const ok of ["P7D", "PT1H", "PT10M", "P1DT12H", "PT30S", "P2D", "P0DT1H", "PT0H1M", "P01D"]) expect(check?.(ok), ok).toBe(true);
     for (const bad of ["P", "PT", "P1M", "P1W", "P1Y", "7D", "PT1.5H", "P1DT", "pt1h", "P0D", "PT0S", "PT0H0M", "P00DT0H", "P0DT0H0M0S"]) expect(check?.(bad), bad).toBe(false);
-    for (const ok of ["evals/support", "ticket_outbox", "a..b/c", "db:tickets"]) expect(relative?.(ok), ok).toBe(true);
-    for (const bad of ["/abs", "~/x", "C:/x", "../x", "a/../b", "a/..", "a b", "a\\b", ""]) expect(relative?.(bad), bad).toBe(false);
+    for (const ok of ["evals/support", "ticket_outbox", "a..b/c", "tickets/db:main"]) expect(relative?.(ok), ok).toBe(true);
+    for (const bad of ["/abs", "~/x", "C:/x", "file:///srv/outbox", "db:/srv/tickets", "db:tickets", "a+b.c-d:x", "../x", "a/../b", "a/..", "a b", "a\\b", ""]) expect(relative?.(bad), bad).toBe(false);
   });
   it("runs inside kind manifest and kind service-well-known, beside their other rules", () => {
     const dir = path.join(root, "fixtures/semantic");

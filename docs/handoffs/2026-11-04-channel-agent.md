@@ -101,6 +101,21 @@ filed; the coordinator files it on the board).
   links, four members keep another owner's grammar (`gap_registry.capability` added), and the join and alias
   sentences say when a reader joins and what an agent leaves out; the adapter reports, never fails, a declaration
   written before this revision while live producers still publish one.
+- Round 11 of the readings: one unit break (a special scheme takes a host without `//`, and a non-ASCII
+  percent-escape in an ASCII authority goes through host processing) and three product breaks (a path behind a scheme
+  passed `relativeRef`, the view's errors did not name the rule, the type wording read `null, not null`), fixed: a
+  string is read as a URL only when its head, ASCII tab, line feed and carriage return removed, is ASCII, holds no
+  percent-escape of a byte at or above 0x80 and opens with a scheme (300 strings of each of `http:`, `http:/`,
+  `http:\\`, a tab-split `https:/`, `HTTP:` and `ws:` before 4091 CJK code points, and `http://a.` before 453
+  percent-encoded CJK characters, run within twice prose's thread time plus 20 ms; vectors at the edge); the gap this
+  leaves is named on the page, in CA-5 and in the conformance row; `afford` refuses at once once the budget is spent;
+  FAC-SEM-164 names at most 64 places and counts the rest; `relativeRef` refuses any leading scheme (`file:///...`,
+  `db:/...`, with negative vectors); every line of the view names the rule and the place (`FAC-SEM-162 at <place>:
+  <keyword> (<limit>)`, `FAC-SEM-165 at <place>`, a misplaced-only manifest reported where its copy stands); a failed
+  type names the type alone and a nullable member's `oneOf` its type and null; a Narrowings bullet states the
+  1 000 000 code points; "Not checked here" names only references the agent declares, the desk caps of 10 and 15 move
+  to the `daily_cap` bullet; the finding on an id that starts with `sk-` asks for a rename; Compatibility says `/1`
+  names no ticket unit.
 
 ## The branch and its history
 
@@ -123,14 +138,19 @@ the pull request comes from the v3 branch only.
 - A final text is owed by a channel that replies, and an em dash or a blank text in a declared text is a finding, from
   section 2.4's send checks.
 - FAC-SEM-162 names failed keywords with their places (member names the schema does not declare written `*`) and,
-  beside each failed keyword, the schema's limit (values, pattern, length in code points, count, bound, format,
-  `(object)` or `not null` for a type), not Ajv's schema paths, which are relative to a `$ref`'s target.
+  beside each failed keyword, the schema's limit (values, pattern, length in code points, count, bound, format, the
+  type alone for a failed type, and a nullable member's type and null on its `oneOf` line, with no line for the
+  `null` branch), not Ajv's schema paths, which are relative to a `$ref`'s target.
 - Four members keep another owner's grammar, repeated in the schema: `question_route.target` (the board's project id),
   `gap_registry.capability` (a capability name), `evals.spend_record` (the usage report's limit id) and a queue's
   `recommendation` (the board's `opaqueId`).
 - `channelAgentView` answers as `connectionsView` does: `declared: false, reported: false` with no key,
   `declared: false, reported: true` with the findings (FAC-SEM-162, FAC-SEM-165, FAC-SEM-163, or the rest not read),
-  `declared: true` with the obligations FAC-SEM-164 found.
+  `declared: true` with the obligations FAC-SEM-164 found; every line names the rule and the place
+  (`FAC-SEM-162 at <place>: <keyword> (<limit>)`, `FAC-SEM-165 at <place>`), and a manifest whose only copy is
+  misplaced is reported where that copy stands, with document places.
+- An oversize or schema-invalid declaration is still walked for credentials within the budget, in the view as in the
+  rules, so a 100 000-member object reports `FAC-SEM-165 at /` (the rest not read) beside its `FAC-SEM-162` line.
 - `channel-agent-standard/1` joins the protocol register (`src/protocol-revisions.ts`), since the schema pins it.
 - Credential shapes for the slot cases a provider might scan for (an AWS or Slack key) are built at run time in
   `test/channel-agent.test.ts`; the vector file carries only `sk-` shapes of repeated or made-up characters.
@@ -189,7 +209,8 @@ One line per sibling and per file it shares with this branch:
   provider prefixes in their canonical case, a strength rule for `sk-`).
 - PR #235: `docs/DECISIONS.md`; `docs/backlog.md`; conformance.md's next-free line; conformance.md's register, the
   `FAC-SEM-155` row before `156`.
-- PR #236: `docs/backlog.md`.
+- PR #236 merged into main at `3bd332ed`: its `docs/backlog.md` rows are history; this branch rebases or merges over
+  `3bd332ed` at landing.
 - `docs/DECISIONS.md` keeps one "Next free ID" line, equal to the CAS counter at the merge, and each DEC body in id
   order after the bodies already on main: `grep -c '^\*\*Next free ID' docs/DECISIONS.md` prints 1. (On main, the
   heading order already holds one exception, DEC-0047 after DEC-0055; a merge adds none.)
@@ -261,7 +282,7 @@ here), and adds:
 - to be asked of the standard's owner: that section 5.1's table mark `autonomy.answered` and
   `stability.fallbackTurns` new too (they are not in `/1` either), and keep `toPerson*` under `autonomy`;
 - to be asked of the standard's owner: section 5.1 counts `toPersonPolicy` and `toPersonInability` in tickets where
-  `/1` counts turns; which unit it means (DEC-0151, in progress, proposes one);
+  `/1` names no ticket unit (its autonomy counts are bounded by turns); which unit it means (DEC-0151, in progress, proposes one);
 - the coordinator asks the standard's owner to hold the observed per-project quality check for shared channels until
   DEC-0151 (in progress) lands, since it reads missing there;
 - for each live producer, the members its current declaration fails (`FAC-SEM-162`'s places), read again with

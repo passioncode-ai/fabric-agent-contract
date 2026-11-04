@@ -34,8 +34,8 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 256,
-      "pattern": "^(?![/~])(?![A-Za-z]:)(?!(?:[^/]*/)*\\.\\.(?:/|$))[A-Za-z0-9._:/-]+$",
-      "description": "A table name or a path relative to the agent's repository: letters, digits and . _ : / -, never starting with / or ~ or a drive letter, and no .. segment, so no private path fits."
+      "pattern": "^(?![/~])(?![A-Za-z][A-Za-z0-9+.-]*:)(?!(?:[^/]*/)*\\.\\.(?:/|$))[A-Za-z0-9._:/-]+$",
+      "description": "A table name or a path relative to the agent's repository: letters, digits and . _ : / -, never starting with / or ~ or a scheme (a drive letter is one), and no .. segment, so no private path fits."
     },
     "duration": {
       "type": "string",

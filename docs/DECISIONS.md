@@ -9070,7 +9070,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      per-project cap, below the desk's side-wide cap of section 6.4, which still binds (to be confirmed with the
      standard's owner on thread `b6820b97` at merge); ids admit no `@`,
      slash, space or run of 7 or more digits (section 13.2's `id_looks_personal`), and the two paths (`evals.suite`,
-     `tickets.outbox`) are relative to the agent's repository, so sources and queues carry ids and ages only; a queue's
+     `tickets.outbox`) are relative to the agent's repository (no leading `/`, `~` or scheme, a drive letter included,
+     and no `..` segment), so sources and queues carry ids and ages only; a queue's
      `recommendation` is the board's opaque thread id (`^[A-Za-z0-9_-]{8,128}$`); a text is 1 to 4096 code points and
      its language at most 35 characters. Every
      member section 13.6 shows is required where the standard says present: a `null` is refused for the question
@@ -9083,7 +9084,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      ten failed keywords with their places and counts the rest, a missing declared member named beside its place; in a
      place, a member name the schema does not declare, a text's language and a number that is no index of a declared
      array, and any numeric key of an object, are written `*`; beside each failed keyword the place names the schema's
-     own limit (values, pattern, length in code points, count, bound, format, `(object)` or `not null` for a type). The finding points to the declaration's grammars.
+     own limit (values, pattern, length in code points, count, bound, format, the type alone for a failed type, and for
+     a nullable member its type and null on its `oneOf` line, with no line for the `null` branch). The finding points to
+     the declaration's grammars.
   3. CA-3. `FAC-SEM-163`: a project, a category code, a tier code, a channel, a source (read or declined), a hand-off
      queue and a recorded decision appear once; a channel with replies off names a decision, and a channel's decision
      is one `recorded_decisions` lists (section 11: recorded decisions present for every channel held by one).
@@ -9092,12 +9095,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      text and no tier's label is blank or carries U+2014 (section 2.4's send checks); a queue whose answered signal is
      `none` names its
      recommendation (section 7.5); a budget above 0 names its spend record, since without one it reads 0 (sections 5
-     and 11).
+     and 11). It names at most 64 places per document and then one finding at the key counting the rest.
   5. CA-5. `FAC-SEM-165`: no member name and no string of the declaration is shaped like a credential, by shape, with
      `FAC-SEM-101`'s detector on a string's first 4097 code points (today an ordinary name of `sk-` and 16 or more
      letters, digits, `_` or `-`, in any case, such as the valid channel id `sk-support-desk-faq-answers-2026-v2`, is
      found too; DEC-0151, in progress, proposes to narrow that to a digit with an upper-case letter and 16, or a digit and 32; the
-     shared detector stays as it is, and an id does not start with `sk-`). Three places read narrower, each only when the value
+     shared detector stays as it is, and an id does not start with `sk-`; the finding on such an id says it is read as a
+     key and asks for a rename). Three places read narrower, each only when the value
      matches its own grammar, keyed on the place and not on a holder's name: a project's token slot of the slot's
      grammar segment by segment, its eval suite and outbox of the relative path grammar by the detector's path-aware
      reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a
@@ -9114,16 +9118,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      declaration with `FAC-SEM-165` or `FAC-SEM-163` as not declared, as it does one with `FAC-SEM-162`, keeps one with
      only `FAC-SEM-164` declared and shows those findings to its author, and never displays a credential-shaped value
      (`channelAgentView`, shaped as `connectionsView`: `declared: false, reported: false` with no key,
-     `declared: false, reported: true` with the findings, `declared: true` with the obligations). No finding's message carries a declared value and no rule's place echoes
+     `declared: false, reported: true` with the findings, `declared: true` with the obligations; every line names the
+     rule and the place: `FAC-SEM-162 at <place>: <keyword> (<limit>)` for each schema place of an invalid
+     declaration, `FAC-SEM-165 at <place>` for each credential place, and, for a manifest whose only copy is
+     misplaced, `FAC-SEM-162 at <place>` where that copy stands). No finding's message carries a declared value and no rule's place echoes
      instance data: a place writes a declared name, an index of a declared array, else `*` (an undeclared name, a
      numeric object key, a text's language), in `FAC-SEM-162`, `FAC-SEM-164` and `FAC-SEM-165` alike; a member whose
      name is not plain (letters, digits, `_` and `-`, at most 64, no run of 7 digits once `-` and `_` are left out) or
      is shaped like a credential collapses its place, so it and every member below it are placed at its nearest plain
      ancestor, and so does a member more than 64 levels down; `FAC-SEM-165` names at most 64 places and counts the rest. The walk keeps an
      explicit stack of one frame per container and builds a place only when it reports one, so its time grows with the
-     value's size. A string is read as a URL (`secretUrl` and `detectorCost`'s URL terms) only when it opens with a scheme
-     and its authority is ASCII only; any other string is read by the value and argument shapes only, with no URL parse,
-     since host processing of a long label outside ASCII grows with its square. The declaration a reader reads is walked
+     value's size. A string is read as a URL (`secretUrl` and `detectorCost`'s URL terms) only when its head, once ASCII
+     tab, line feed and carriage return are removed, is ASCII only, holds no percent-escape of a byte at or above 0x80
+     and opens with a scheme; any other string is read by the value and argument shapes only, with no URL parse, since
+     host processing of a long label outside ASCII, written or escaped, grows with its square (a special scheme takes a
+     host even without `//`). The gap this leaves is named: in such a string only key shapes are found, so a password
+     or a credential-named query parameter there is not. The declaration a reader reads is walked
      first and its misplaced copies after it, so a copy cannot spend the budget before the read one. A text is blank when nothing is left after white space, `\p{Cf}`, `\p{Cc}`, `\p{Z}`,
      `\p{Default_Ignorable_Code_Point}`, the fillers U+115F, U+1160, U+3164, U+FFA0 and U+2800, and U+FFFC.
   6. CA-6. Not checked statically: that the side is one of the standard's sides and the route's capability the one for
@@ -9180,7 +9190,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, with the examples made neutral here; rounds 1 to 10 of the readings. `DEC-0150` was reserved by the coordinator with
+  published it on 2026-11-04, with the examples made neutral here; rounds 1 to 11 of the readings. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation

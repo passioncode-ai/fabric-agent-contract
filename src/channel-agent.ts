@@ -57,7 +57,8 @@ function extensionsAt(doc: JsonObject, site: ChannelAgentSite): JsonObject | und
 }
 
 const schemaShape = (): ValidateFunction => {
-  shape ??= createValidatorSync().getSchema(`${SCHEMA_PREFIX}schemas/service-channel-agent-extension.schema.json`) as ValidateFunction;
+  // Verbose: a failed `oneOf` carries its branches, so a nullable member's line names its types and null.
+  shape ??= createValidatorSync({ verbose: true }).getSchema(`${SCHEMA_PREFIX}schemas/service-channel-agent-extension.schema.json`) as ValidateFunction;
   return shape;
 };
 
@@ -202,7 +203,7 @@ function oversize(value: unknown): string[] {
  * What the schema allows at a failed place, from the schema alone, never the instance: the missing member's name for
  * `required` (when the schema declares it), the values for `enum` and `const`, the pattern for `pattern`.
  */
-function allowed(error: { keyword: string; params?: Record<string, unknown> }, names: Set<string>): string {
+function allowed(error: { keyword: string; schema?: unknown; params?: Record<string, unknown> }, names: Set<string>): string {
   const params = error.params ?? {};
   if (error.keyword === "required" && typeof params.missingProperty === "string" && names.has(params.missingProperty)) return ` (${params.missingProperty})`;
   if (error.keyword === "enum" && Array.isArray(params.allowedValues)) {
@@ -224,10 +225,37 @@ function allowed(error: { keyword: string; params?: Record<string, unknown> }, n
     if (error.keyword === "minimum" || error.keyword === "maximum") return ` (${String(params.comparison)} ${limit})`;
   }
   if (error.keyword === "format" && typeof params.format === "string") return ` (format ${params.format})`;
-  // A member the schema wants as an object is named so; any other type, most often a `null` where a value is required.
-  if (error.keyword === "type" && typeof params.type === "string") return params.type === "object" ? " (object)" : ` (${params.type}, not null)`;
+  // A failed type names the type the schema wants; a nullable member's `oneOf` names its types and null.
+  if (error.keyword === "type" && typeof params.type === "string") return ` (${params.type})`;
+  if (error.keyword === "oneOf") {
+    const branches = error.schema;
+    if (Array.isArray(branches)) {
+      const types = branches.map((branch) => typeOf(branch)).filter((type) => type !== undefined && type !== "null");
+      const nullable = branches.some((branch) => typeOf(branch) === "null");
+      if (nullable && types.length > 0) return ` (${article(types[0] as string)} ${types.join(" or ")} or null)`;
+    }
+  }
   return "";
 }
+
+/** The schema object at a pointer (`#/...`) from the declaration's schema's root, as its `$ref`s are written. */
+function pointerAt(schemaPath: string): unknown {
+  let node: unknown = schemaShape().schema;
+  for (const token of schemaPath.replace(/^#\/?/, "").split("/").filter((t) => t !== "")) {
+    const key = token.replace(/~1/g, "/").replace(/~0/g, "~");
+    node = Array.isArray(node) ? node[Number(key)] : isObject(node) ? node[key] : undefined;
+  }
+  return node;
+}
+
+/** A branch's type, through one `$ref` into the schema's `$defs`. */
+function typeOf(branch: unknown): string | undefined {
+  if (!isObject(branch)) return undefined;
+  if (typeof branch.type === "string") return branch.type;
+  return typeof branch.$ref === "string" && branch.$ref.startsWith("#") ? typeOf(pointerAt(branch.$ref)) : undefined;
+}
+
+const article = (word: string): string => (/^[aeiou]/.test(word) ? "an" : "a");
 
 /** At most this many enum values are named beside a place, and a pattern is cut to this many characters. */
 const ENUM_VALUES = 8;
@@ -250,7 +278,7 @@ export function messagePlaces(places: readonly string[]): string[] {
 }
 
 /** An Ajv error as its keyword and its place, every free member name replaced by `*`, never a declared value. */
-export function placed(error: { keyword: string; instancePath: string; params?: Record<string, unknown> }): string {
+export function placed(error: { keyword: string; instancePath: string; schema?: unknown; params?: Record<string, unknown> }): string {
   const names = schemaNames();
   const tokens = error.instancePath.split("/").slice(1).map((token) => token.replace(/~1/g, "/").replace(/~0/g, "~"));
   // The schema enters arrays only where it declares them, so a number after a declared array's name is an index.
@@ -261,7 +289,10 @@ export function placed(error: { keyword: string; instancePath: string; params?: 
 /** The schema's errors on a value, as places; a schema that cannot run on it (a RangeError) is TOO_LARGE. */
 export function schemaErrors(value: unknown, validate: ValidateFunction): string[] {
   try {
-    return validate(value) === true ? [] : [...new Set((validate.errors as ErrorObject[]).map(placed))];
+    if (validate(value) === true) return [];
+    // A nullable member's null branch fails `type` (null) for every non-null value; its `oneOf` line names null instead.
+    const errors = (validate.errors as ErrorObject[]).filter((error) => !(error.keyword === "type" && error.params.type === "null"));
+    return [...new Set(errors.map(placed))];
   } catch (error) {
     if (error instanceof RangeError) return [TOO_LARGE];
     throw error;
@@ -289,23 +320,41 @@ function schemaView(doc: unknown, site: ChannelAgentSite): { declared: false } |
  */
 export function channelAgentView(doc: unknown, site: ChannelAgentSite = "manifest"): ChannelAgentView {
   const view = schemaView(doc, site);
-  if (!view.declared) return { declared: false, reported: false };
-  if (!view.valid) return { declared: false, reported: true, errors: view.errors };
-  const value = (extensionsAt(doc as JsonObject, site) as JsonObject)[KEY];
   const budget = newBudget();
   const named = (finding: Finding) => `${finding.code} at ${finding.instancePath || "/"}`;
-  const blocking = [...secrets(value, "", budget), ...summary(budget)].map(named);
-  const owed: string[] = [];
+  if (!view.declared) {
+    // Only misplaced copies: each is reported where it stands in the document, with what it holds.
+    const copies = site === "manifest" && isObject(doc) ? [...misplaced(doc, budget), ...summary(budget)] : [];
+    return copies.length > 0 ? { declared: false, reported: true, errors: copies.map(named) } : { declared: false, reported: false };
+  }
+  const value = (extensionsAt(doc as JsonObject, site) as JsonObject)[KEY];
+  const credentials = [...secrets(value, "", budget), ...summary(budget)].map(named);
+  if (!view.valid) return { declared: false, reported: true, errors: [...view.errors.map(schemaLine), ...credentials] };
+  const blocking = credentials;
+  const owed: Finding[] = [];
   const projects = new Set<unknown>();
   view.projects.forEach((project, i) => {
     const at = `/projects/${i}`;
     if (projects.has(project.project)) blocking.push(`FAC-SEM-163 at ${at}/project`);
     projects.add(project.project);
     blocking.push(...references(project, at).map(named));
-    owed.push(...obligations(project, at).map(named));
+    owed.push(...obligations(project, at));
   });
   if (blocking.length > 0) return { declared: false, reported: true, errors: blocking };
-  return { declared: true, reported: false, standard: view.standard, projects: view.projects, obligations: owed };
+  return { declared: true, reported: false, standard: view.standard, projects: view.projects, obligations: capped(owed, "").map(named) };
+}
+
+/** A schema place as a reader's error line: the rule, the place, then the failed keyword and the schema's limit. */
+function schemaLine(error: string): string {
+  const parts = /^(\S+) at (\/\S*)(.*)$/.exec(error);
+  return parts === null ? `FAC-SEM-162 at /: ${error}` : `FAC-SEM-162 at ${parts[2]}: ${parts[1]}${parts[3]}`;
+}
+
+/** FAC-SEM-164's findings, at most SECRET_FINDINGS places for the document and one closing count, as FAC-SEM-165 does. */
+function capped(findings: Finding[], root: string): Finding[] {
+  if (findings.length <= SECRET_FINDINGS) return findings;
+  const more = findings.length - SECRET_FINDINGS;
+  return [...findings.slice(0, SECRET_FINDINGS), { code: "FAC-SEM-164", instancePath: root, message: `and ${more} more places that owe a text, a recommendation or a spend record, or carry a blank or refused text (DEC-0150 CA-4)` }];
 }
 
 /** FAC-SEM-162 on a manifest: the key where a reader does not read it (the manifest's own extensions, a capability's). */
@@ -340,19 +389,18 @@ const shaped = (text: string): boolean => {
 
 /** A scheme at the start of a string: what a string must open with to be read as a URL. */
 const SCHEME = /^[A-Za-z][A-Za-z0-9+.-]*:/;
+/** A percent-escape of a byte at or above 0x80, which a URL parse decodes and may hand to host processing. */
+const HIGH_ESCAPE = /%[89A-Fa-f][0-9A-Fa-f]/;
 /**
- * Whether a string is read as a URL (CA-5): it starts with a scheme, and its authority, between `//` and the next `/`,
- * `?` or `#` when it has one, is ASCII only. A host name outside ASCII would send the URL parser through host processing
- * whose cost grows with the square of a long label; such a string is read by the detector's other shapes only.
+ * Whether a string is read as a URL (CA-5): its head (the first code points the detector reads), once ASCII tab, line
+ * feed and carriage return are removed, is ASCII only, holds no percent-escape of a byte at or above 0x80, and opens
+ * with a scheme. Anything outside ASCII, written or escaped, could reach the URL parser's host processing (a special
+ * scheme takes a host even without `//`), whose cost grows with the square of a long label; such a string is read by
+ * the detector's value and argument shapes only, so a password or a credential-named parameter in it is not found.
  */
 export function readAsUrl(text: string): boolean {
-  const scheme = SCHEME.exec(text);
-  if (scheme === null) return false;
-  const rest = text.slice(scheme[0].length);
-  if (!rest.startsWith("//")) return true;
-  const end = rest.slice(2).search(/[/?#]/);
-  const authority = end < 0 ? rest.slice(2) : rest.slice(2, 2 + end);
-  return /^[\x00-\x7f]*$/.test(authority);
+  const read = head(text).replace(/[\t\n\r]/g, "");
+  return /^[\x00-\x7f]*$/.test(read) && !HIGH_ESCAPE.test(read) && SCHEME.test(read);
 }
 
 /** The detector's URL reading where `readAsUrl` admits the string, its argument reading otherwise (no URL parse). */
@@ -366,7 +414,7 @@ const keyShaped = (text: string): boolean => {
 const plainName = (name: string): boolean => NAME_CHARACTERS.test(name) && !/[0-9]{7}/.test(name.replace(/[-_]/g, "")) && !shaped(name);
 
 /** The grammars a narrow reading needs the value to match first (the schema's `relativeRef`, the board's `opaqueId`). */
-const RELATIVE_REF = /^(?![/~])(?![A-Za-z]:)(?!(?:[^/]*\/)*\.\.(?:\/|$))[A-Za-z0-9._:/-]+$/;
+const RELATIVE_REF = /^(?![/~])(?![A-Za-z][A-Za-z0-9+.-]*:)(?!(?:[^/]*\/)*\.\.(?:\/|$))[A-Za-z0-9._:/-]+$/;
 const OPAQUE_ID = /^[A-Za-z0-9_-]{8,128}$/;
 const relativeRef = (text: string): boolean => text.length >= 1 && text.length <= 256 && RELATIVE_REF.test(text);
 /** FAC-SEM-165 reads at most this many code points in all; a declaration past it is not read further. */
@@ -513,14 +561,16 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
   const findings: Finding[] = [];
   const names = schemaNames();
   budget.root ??= root;
-  const flag = (at: string, what: string) => {
+  const flag = (at: string, what: string, text: string) => {
     if (budget.named < SECRET_FINDINGS) {
       budget.named += 1;
-      findings.push({ code: "FAC-SEM-165", instancePath: at, message: `${what} is shaped like a credential: a token is named by its vault slot, never written (DEC-0150 CA-5)` });
+      const rename = /^sk-/i.test(text) ? "; an id that starts with sk- is read as a key; rename it" : "";
+      findings.push({ code: "FAC-SEM-165", instancePath: at, message: `${what} is shaped like a credential: a token is named by its vault slot, never written${rename} (DEC-0150 CA-5)` });
     } else budget.more += 1;
   };
   // The walk stops once the budget is spent, so nothing is read after it.
   const afford = (text: string): boolean => {
+    if (budget.unread) return false;
     const cost = detectorCost(head(text)) + VISIT_COST;
     if (cost > budget.left) {
       budget.unread = true;
@@ -544,7 +594,7 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
       if (!afford(text)) return;
       const isShaped = shaped(text);
       last.plain = !isShaped && NAME_CHARACTERS.test(text) && !/[0-9]{7}/.test(text.replace(/[-_]/g, ""));
-      if (isShaped) flag(place(spot), "a member's name");
+      if (isShaped) flag(place(spot), "a member's name", text);
       return;
     }
     if (!afford(text)) return;
@@ -555,7 +605,7 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
     else if (((role === "evals" && key === "suite") || (role === "tickets" && key === "outbox")) && relativeRef(text)) found = urlReading(text);
     else if (role === "queue" && key === "recommendation" && OPAQUE_ID.test(text)) found = keyShaped(text);
     else found = shaped(text);
-    if (found) flag(place(spot), "a value");
+    if (found) flag(place(spot), "a value", text);
   }, () => budget.unread);
   return findings;
 }
@@ -668,12 +718,14 @@ export function channelAgentRules(doc: unknown, site: ChannelAgentSite = "manife
     return findings;
   }
   const projects = new Set<unknown>();
+  const owed: Finding[] = [];
   view.projects.forEach((project, i) => {
     const at = `${root}/projects/${i}`;
     if (projects.has(project.project)) findings.push({ code: "FAC-SEM-163", instancePath: `${at}/project`, message: "this project repeats an earlier entry's (DEC-0150 CA-3)" });
     projects.add(project.project);
-    findings.push(...references(project, at), ...obligations(project, at));
+    findings.push(...references(project, at));
+    owed.push(...obligations(project, at));
   });
-  return findings;
+  return [...findings, ...capped(owed, root)];
 }
 // #endregion channel-agent
