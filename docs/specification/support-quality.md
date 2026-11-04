@@ -14,13 +14,17 @@ this payload: `data.value` the payload, and `data.schema` the URI of the copy of
 service.md asks. A reader recognises the payload by `data.value.kind` (`support-quality-daily/1`), never by
 `data.schema`. A rerun for a day replaces that day's event for the channel: a reader keeps, per service, channel and day, the
 latest event (the greatest id in that service's feed). A reader that adopted DEC-0151 keeps, per service, channel, day
-and project (an absent `project` being the service's one project), the latest event; an agent that serves several
+and project, the latest event: an absent `project` names the service's only project at the time of the day (the
+channel agent declaration's single entry, where one exists), and a day published before the service served a second
+project is not re-attributed. An agent that serves several
 projects on one channel publishes one event per project and day, each naming its `project`, under DEC-0151's producer
 rule below (`fixtures/positive/service-events-page-support-quality-projects.json`). A producer never changes the project
 form of a day it has already published: a day first published without `project` is rerun without it, and a day a
 producer merged across projects before DEC-0151 is rerun as first published, or not rerun. A single-project producer
-keeps leaving `project` out, and names it only once it serves a second project. A day's calibration (DEC-0144) is the
-judge's, so it is identical on each project's event of that day, and a reader never sums it across projects. An agent with two
+keeps leaving `project` out, and names it only once it serves a second project. A day's calibration (DEC-0144) is
+carried, unchanged, on each project's event judged that day by the calibrated judge and rubric; a project's event
+judged by another judge, or not judged, carries none, and a reader reads calibration per project's event, never
+summing or copying it across projects. An agent with two
 surfaces of one channel merges them into one event per day. A voice-of-the-customer reader then reads every agent the same way. The
 standard behind it (what is measured, the rubric, the judge) is the asker's, issue #125; the contract owns the shape.
 
@@ -45,7 +49,12 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 | `calibrationChecks` | optional, only beside `calibration`: each rubric check's share of the labelled verdicts the judge matched, named as in `checks`; a check a person did not label is left out, and with none labelled the member is absent. A member of its own, so the payload stays two levels deep |
 
 Counts and rates only: no person's words, no ids (the project's registry alias excepted) and no judge notes, so `FAC-SEM-101` (a credential detector) finds nothing in it; keeping a
-person's words out is the producer's duty (service.md).
+person's words out is the producer's duty (service.md). The one exception is an alias whose slug holds a provider key's
+prefix at a word start (after `-`, `_`, `.`, `:` or at the slug's start) followed by enough key characters
+(`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`): the detector reads it as a credential and the
+events page fails `FAC-SEM-101`. The detector stays strict, since a lower-case key (`sk-or-v1-` and hex) fits the alias
+grammar; the registry does not issue such an alias, and a producer whose alias is read so publishes nothing for that
+channel until its alias changes (`test/secret-shape.test.ts`).
 The feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries `calibration` and
 `calibrationChecks` once every reader of its feed it knows of has adopted DEC-0144. A reader that validates against an
 older copy of the schema (closed) refuses that day's `value` whole and keeps the event's `text`, so the day's numbers

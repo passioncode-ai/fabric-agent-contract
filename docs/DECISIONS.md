@@ -9087,26 +9087,36 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      customer support.
   6. An optional top-level `project`: the project registry's alias `project:<slug>`
      (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written, the form DEC-0150's CA-2 gives the channel agent
-     declaration's `project`. A reader that adopted DEC-0151 keeps, per service, channel, day and project (an absent
-     `project` being the service's one project, as before), the latest event; a producer that serves several projects
+     declaration's `project`. A reader that adopted DEC-0151 keeps, per service, channel, day and project, the latest
+     event: an absent `project` names the service's only project at the time of the day (the declaration's single
+     entry, where one exists), and a day published before the service served a second project is not re-attributed. A
+     producer that serves several projects
      on one channel publishes one event per project and day, each naming its `project`, under item 4's rule. Before
      every reader has adopted DEC-0151, such a producer publishes no event for that channel: it keeps each project's
      days, publishes them one event per project and day once every reader has adopted, and never merges projects into
      one event. A producer never changes the project form of a day it has already published: a day first published
      without `project` is rerun without it, and a day merged across projects before DEC-0151 is rerun as first
      published, or not rerun. A single-project producer keeps leaving `project` out and names it only once it serves a
-     second project. A day's calibration is identical on each project's event of that day and is never summed. The top
-     level then holds 19 members, inside DEC-0070's 32.
+     second project. A day's calibration is carried, unchanged, on each project's event judged that day by the
+     calibrated judge and rubric; a project's event judged by another judge, or not judged, carries none, and a reader
+     reads calibration per project's event, never summing or copying it across projects. The top level then holds 19
+     members, inside DEC-0070's 32.
   7. The shared credential detector (`SECRET_VALUE` in `src/secret-shape.ts`, and its copy in `src/session-handoff.ts`)
-     takes a provider key's prefix (`sk-`, `gh?_`, `xox?-`, `AKIA`, `glpat-`) only where no letter or digit stands
-     right before it: `project:helpdesk-customer-support` holds `sk-` inside a word and is no key. A key at the start
-     of a value, after a space, a quote, `=`, `:` or a `Bearer` and its space is found as before.
+     takes a provider key's prefix (`sk-`, `gh?_`, `xox?-`, `AKIA`, `glpat-`) only where no ASCII letter or digit
+     stands right before it, or right after a percent-escape (`%22`) or a backslash escape (`\n`, `\t`, `\r`, a
+     backslash and a quote, `\u0022`): `project:helpdesk-customer-support` holds `sk-` inside a word and is no key. A
+     key at the start of a value, after a space, a quote, `=`, `:`, a `Bearer` and its space, or such an escape is found
+     as before; a key glued directly after an ASCII letter or digit is knowingly no longer found. The detector stays
+     strict for an alias: one whose slug holds a provider prefix at a word start (after `-`, `_`, `.`, `:` or at its
+     start) followed by enough key characters, such as `project:sk-learn-experiments`, is read as a credential, since a
+     lower-case `sk-or-v1-` hex key fits the alias grammar. The registry does not issue such an alias, and a producer
+     whose alias is read so publishes nothing for that channel until its alias changes.
 - **Why:** the channel agent standard's daily report counts tickets on its signal server and checks each agent's feed
   against it; one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that
   home before any producer may send them. The digit fixes a rule the schema made impossible to keep. The registry
   alias, not the board's server-issued id, is how the channel agent declaration names a project, so one name joins the
-  declaration to the days; its narrow pattern also keeps a long mixed-case id, which FAC-SEM-101 reads as a
-  credential, out of the payload.
+  declaration to the days; its pattern also refuses a long mixed-case id, which FAC-SEM-101 reads as a credential,
+  though an alias holding a provider prefix at a word start is still read as one (item 7).
 - **Alternatives considered:** the outcome counts at the top level, as the channel agent standard's field table lists
   them (19 top members would become 28, the `outcomes` object giving way to its ten members, inside DEC-0070's 32, but outcomes mixed with the payload's own facts leave
   little room for a later revision; one `outcomes` object keeps them together and the top level at 19); a sum rule

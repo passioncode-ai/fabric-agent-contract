@@ -47,6 +47,16 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   `fixtures/semantic/support-quality-daily-first-reply-interim.json`); a single-project producer omits `project`, a
   merged day reruns as first published; a day's calibration identical per project, never summed; identifiers.md's
   compared-as-written bullet; CT-210's steps (d) and (e); the top-level partition test.
+- Round 3 of the readings (on `e1191560`): two breaks fixed. An alias whose slug holds a provider prefix at a word
+  start is read as a credential; the detector stays strict (a lower-case `sk-or-v1-` hex key fits the alias grammar),
+  and the page and DEC-0151 item 7 say the registry issues no such alias and a producer whose alias is read so
+  publishes nothing for that channel until it changes; a test pins `FAC-SEM-101` for two such aliases. A day's
+  calibration is carried, unchanged, only on the project events judged by the calibrated judge and rubric. The
+  coordinator's decisions applied: the boundary also lets a prefix follow a percent-escape or a backslash escape (a key
+  glued after an ASCII letter or digit is knowingly not found); an absent `project` names the service's only project
+  at the time of the day, never re-attributed; CT-210 (d) asks the channel agent standard's owner to write the turn unit
+  and the signal server's ticket counts into section 5.1. A sweep of 200000 generated values found 0 that the new
+  pattern finds and the earlier did not (29078 both, 64439 only the earlier).
 
 ## Open
 
@@ -61,7 +71,7 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 ## When DEC-0150 and DEC-0151 meet on main
 
 DEC-0150's current branch is `origin/agent/channel-agent-ext-v2-20261104` (`967669f3` or later; `1c41f8b4` when this
-was written). DEC-0151 merges after DEC-0150, or rebases over it. The second of the two to merge rewrites these:
+was written; the source-manifest branch was at `19bab6fd`). DEC-0151 merges after DEC-0150, or rebases over it. The second of the two to merge rewrites these:
 
 - `docs/specification/channel-agent.md`, the "daily quality payload" bullet: "That is DEC-0151 (CT-210), in progress:
   until DEC-0151 lands, an agent following section 5.1 emits payloads this contract refuses, and how the seven channel
@@ -84,15 +94,19 @@ was written). DEC-0151 merges after DEC-0150, or rebases over it. The second of 
   the JWT checks; DEC-0151 changes only the `SECRET_VALUE` line and its comment, so the two hunks merge apart. That
   branch's `test/source-rules.test.ts` ("read the provider keys SECRET_VALUE names, without its whole-value bearer
   branch") holds `SECRET_VALUE.source` equal to `(^bearer\s.+|` and `KEY_SHAPE_SOURCES` joined by `|`; with DEC-0151's
-  boundary it fails until the second to merge writes the expected source as
-  `(^bearer\s.+|(?<![A-Za-z0-9])(?:` ... `))`. Checked on a scratch copy of that branch with DEC-0151's line: its
-  vectors match (29 files) and only that test fails. Its source rules already need a boundary of their own
+  boundary it fails until the second to merge writes the expected source with DEC-0151's boundary group before the
+  joined shapes (the group as `src/secret-shape.ts` writes it). Checked again on a scratch copy of that branch at
+  `19bab6fd` with DEC-0151's line: its vectors match (29 files), and of `test/session-handoff-review.test.ts`,
+  `test/source-rules.test.ts` and `test/sources-ledger.test.ts` only that test fails (258 passed, 1 failed). Its source rules already need a boundary of their own
   (`LETTER_OR_DIGIT`, any script); DEC-0151's is ASCII, because the detector reads without the `u` flag, so a
   non-ASCII letter before a prefix still counts as a boundary here: stricter than that branch there, never stricter
   than before.
-- DEC-0150's branch with DEC-0151's detector line, on a scratch copy: its vectors match (29 files) and
-  `test/channel-agent.test.ts`, `test/service-hygiene.test.ts` and `test/session-handoff-review.test.ts` pass (209
+- DEC-0150's branch at `1c41f8b4` with DEC-0151's detector line, on a scratch copy: its vectors match (29 files) and
+  `test/channel-agent.test.ts`, `test/service-hygiene.test.ts` and `test/session-handoff-review.test.ts` pass (212
   tests).
+- DEC-0150's join sentence in `channel-agent.md` ("so a reader joins a declaration to a project's payloads on
+  `project:<slug>`"): once both land it reads "on `project:<slug>`, or, for a payload with no project, on the
+  declaration's one project".
 - DEC-0150's handoff Open bullet on section 5.1 ("until DEC-0151 ... lands, an agent following it emits
   `support-quality-daily/1` payloads this contract refuses"): dropped once DEC-0151 is on main.
 - The organization's roadmap row AS-01 ("one event per channel and closed day", fabric-workspace
@@ -112,14 +126,14 @@ was written). DEC-0151 merges after DEC-0150, or rebases over it. The second of 
 ## Checks actually run
 
 On `03c0328f` the coordinator ran `pnpm vitest run --coverage`: exit 0, 108 files, 9799 tests passed, 1 skipped. On
-the round-2 head, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage`
-0 (109 files, 9816 tests passed, 1 skipped); `python3 docs/ux/lint.py` 0;
+the round-3 head, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage`
+0 (109 files, 9819 tests passed, 1 skipped; on `e1191560` it was 9816); `python3 docs/ux/lint.py` 0;
 `pnpm run docs:check` 0; `pnpm privacy:check` with the organization's index 0 (0 findings);
 `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files match; support quality has no vector generator). No U+2014 in
 the added lines.
 
 ## Next task
 
-Round 3 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by two blind readers; fix, re-read until two
+Round 4 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by two blind readers; fix, re-read until two
 rounds are clean; open the pull request, merge after DEC-0150's branch or rebase over it (the list above), mark DEC-0151
 accepted, close CT-129, mark CT-210's first step done, release, and answer thread `b6820b97` with the tag.
