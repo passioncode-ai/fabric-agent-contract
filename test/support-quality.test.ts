@@ -270,6 +270,22 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
     expect(validateDocument(ajv, schemaId, Object.assign(tickets(), { project: id })).valid).toBe(false);
     expect(validateDocument(ajv, schemaId, Object.assign(tickets(), { project: `project:${id}` })).valid).toBe(false);
   });
+  it("partitions every top-level member: the counts, checks and the members that are no metric (DEC-0151)", () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
+    const source = readFileSync(path.join(projectRoot(), "src/support-quality-rules.ts"), "utf8");
+    const list = (name: string) => [...(new RegExp(`const ${name}[^=]*= (?:new Set\\()?\\[([^\\]]*)\\]`).exec(source)?.[1] ?? "").matchAll(/"([A-Za-z]+)"/g)].map((match) => match[1]);
+    const families = list("FAMILIES");
+    const counts = list("TOP_COUNTS");
+    const notMetrics = [...list("NOT_METRICS"), ...families];
+    expect(families).toEqual(["nobodyDropped", "quality", "stability", "autonomy", "open", "outcomes"]);
+    expect(counts).toEqual(["arrived", "ended", "notATicket"]);
+    const parts = [...counts, "checks", ...notMetrics];
+    expect(new Set(parts).size).toBe(parts.length);
+    expect([...parts].sort()).toEqual(Object.keys(schema.properties).sort());
+  });
+  it("finds the interim first-reply day: null and unnamed, the one finding a producer gives up before adoption (DEC-0151)", () => {
+    expect(paths(load("support-quality-daily-first-reply-interim.json").input as Json)).toEqual(["FAC-SEM-126 /nobodyDropped/firstReplyP50Ms"]);
+  });
   it("keeps DEC-0070's bounds: every object of the schema at most 32 members, and the whole payload inside an events page", async () => {
     const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
     expect(Object.keys(schema.properties)).toHaveLength(19);

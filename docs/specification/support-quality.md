@@ -17,7 +17,10 @@ latest event (the greatest id in that service's feed). A reader that adopted DEC
 and project (an absent `project` being the service's one project), the latest event; an agent that serves several
 projects on one channel publishes one event per project and day, each naming its `project`, under DEC-0151's producer
 rule below (`fixtures/positive/service-events-page-support-quality-projects.json`). A producer never changes the project
-form of a day it has already published: a day first published without `project` is rerun without it. An agent with two
+form of a day it has already published: a day first published without `project` is rerun without it, and a day a
+producer merged across projects before DEC-0151 is rerun as first published, or not rerun. A single-project producer
+keeps leaving `project` out, and names it only once it serves a second project. A day's calibration (DEC-0144) is the
+judge's, so it is identical on each project's event of that day, and a reader never sums it across projects. An agent with two
 surfaces of one channel merges them into one event per day. A voice-of-the-customer reader then reads every agent the same way. The
 standard behind it (what is measured, the rubric, the judge) is the asker's, issue #125; the contract owns the shape.
 
@@ -66,7 +69,9 @@ are absent. The payload's top level has 19 members, its largest family object 10
 
 `/1` takes `autonomy.toPersonPolicy` and `toPersonInability` in turns, as FAC-SEM-126 bounds them within
 `nobodyDropped.turns`; the channel agent standard counts them in tickets, so a producer on it writes them in turns, or
-`null` and named in `notMeasured`, until `/1` names a ticket unit.
+`null` and named in `notMeasured`, until `/1` names a ticket unit. Until then a reader computes no "to a person" share
+of the tickets from `autonomy.toPersonPolicy` and `toPersonInability`: it takes that share from the channel agent
+standard's signal server or leaves it out, and never maps those turn counts into a ticket share.
 
 The schema is closed, so a producer carries these members, `project` among them, only once every reader of its feed it
 knows of has adopted DEC-0151, as it does the calibration (DEC-0144): a reader validating against an older copy
@@ -76,7 +81,10 @@ serving several projects on one channel publishes no event for that channel, kee
 one event per project and day once every reader has adopted DEC-0151, and never merges projects into one event. DEC-0151 also lets a metric name in `notMeasured` carry digits, which FAC-SEM-126 needed for
 `nobodyDropped.firstReplyP50Ms` and `firstReplyP90Ms` (the earlier pattern refused them, so a producer could not name
 an unmeasured first-reply time and stay valid); an older copy refuses such a name too, so a producer writes one under
-the same rule.
+the same rule. In the meantime a producer with an unmeasured first-reply time leaves it `null` and unnamed, so a reader
+on an older copy still accepts the day: it gives up FAC-SEM-126 for that metric only
+(`fixtures/semantic/support-quality-daily-first-reply-interim.json`), and names it once every reader of its feed has
+adopted DEC-0151.
 
 ### The channel agent standard's channel kinds (DEC-0151)
 
@@ -106,7 +114,7 @@ a mapping costs nothing.
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-126"></a>`FAC-SEM-126` | `support-quality-daily` | a metric not computed is `null` and named in `notMeasured`, and a named one is `null`, never a `0` standing for it; the helped verdicts are at most the sample, the fallback's recoveries at most the failures, the outcomes at most the turns; p50 is at most p90; a judged sample (any sample, helped verdict or check rate) names its rubric version and its judge; a calibration names them too, its `helped` follows the not-measured rule as `calibration.helped`, its week is a real ISO week that starts no later than `day`, and `calibrationChecks` stands only beside a `calibration` (DEC-0144); the ticket counts follow the not-measured rule, each top-level one by its own name and the rest as `open.<metric>`, `outcomes.<metric>`, `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets`; naming one the payload does not carry is a finding, and naming a top-level member that is no metric (`project`, `day`, a family) is a finding that says so (DEC-0151) |
+| <a id="fac-sem-126"></a>`FAC-SEM-126` | `support-quality-daily` | a metric not computed is `null` and named in `notMeasured`, and a named one is `null`, never a `0` standing for it; the helped verdicts are at most the sample, the fallback's recoveries at most the failures, the autonomy outcomes (`resolvedWithoutPerson`, `toPersonPolicy`, `toPersonInability`) at most the turns; p50 is at most p90; a judged sample (any sample, helped verdict or check rate) names its rubric version and its judge; a calibration names them too, its `helped` follows the not-measured rule as `calibration.helped`, its week is a real ISO week that starts no later than `day`, and `calibrationChecks` stands only beside a `calibration` (DEC-0144); the ticket counts follow the not-measured rule, each top-level one by its own name and the rest as `open.<metric>`, `outcomes.<metric>`, `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets`; naming one the payload does not carry is a finding, and naming a top-level member that is no metric (`project`, `day`, a family) is a finding that says so (DEC-0151) |
 
 ## Not decided here
 
@@ -131,7 +139,8 @@ a mapping costs nothing.
 - A ticket unit for `autonomy.toPersonPolicy` and `toPersonInability`: the channel agent standard counts tickets ever
   handed to a person (`referred` included, approval-held sends excluded), `/1` takes turns, as FAC-SEM-126 bounds them;
   until `/1` names a ticket unit, a producer on the channel agent standard writes them in turns, or `null` and named in
-  `notMeasured`.
+  `notMeasured`, and a reader computes no "to a person" ticket share from them: it takes it from the channel agent
+  standard's signal server or leaves it out.
 - The four summary numbers the channel agent standard derives (answered, to a person, fallback, unanswered), as
   shares of `ended`: the reader's.
 - The move from the asker's first implementation (its v2 shape, under its own URN): its producers move to

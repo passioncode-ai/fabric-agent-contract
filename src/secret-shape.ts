@@ -53,8 +53,12 @@ export function credentialName(name: string): boolean {
 
 /** A JWT or JWS anywhere in a value: three base64url segments, the first a JSON object's `eyJ`. */
 export const JWT_SHAPE = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]*/;
-/** A value that says it is a credential, or a provider key's shape (OpenAI, GitHub, Slack, AWS, GitLab). */
-export const SECRET_VALUE = /(^bearer\s.+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,})/i;
+/**
+ * A value that says it is a credential, or a provider key's shape (OpenAI, GitHub, Slack, AWS, GitLab). A prefix
+ * counts only where no letter or digit stands right before it (DEC-0151): `project:helpdesk-customer-support` holds
+ * `sk-` inside a word and is no key.
+ */
+export const SECRET_VALUE = /(^bearer\s.+|(?<![A-Za-z0-9])(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}))/i;
 /**
  * A long secret: 40 or more characters of base64 or base64url (`+`, `/`, `=`, `-`, `_` included), mixing upper case,
  * lower case and digits. A hex digest is lower case and passes.

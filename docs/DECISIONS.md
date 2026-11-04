@@ -5966,7 +5966,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-11-04):** DEC-0151 (proposed) adds the optional `project` and the ticket counts of the channel
   agent standard (`arrived`, `ended`, `notATicket`, `open`, `outcomes`, `autonomy.answered`, `stability.fallbackTurns` and
   `fallbackTickets`) at the same revision, under DEC-0144's producer rule, and lets a metric name in `notMeasured` carry
-  digits.
+  digits. It narrows item 2: the payload carries one id, the project's registry alias `project:<slug>`. It narrows
+  item 1: a channel serving several projects publishes one event per project and day, each naming its `project`.
 - **Decision:** in [support quality](specification/support-quality.md):
   1. An agent that answers people MAY publish, on its events feed, one event per closed UTC day and channel (`chat`,
      `mail`, `reviews`, `community`), of kind `support.quality_daily`, whose `data.value` (DEC-0070) is a
@@ -9073,7 +9074,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      family part and everything else of the pattern stay as they were (CT-129).
   4. A producer carries the new members, `project` among them, and names a metric with a digit in `notMeasured`, only
      once every reader of its feed it knows of has adopted DEC-0151, as DEC-0144 asks of the calibration: a reader on
-     an older copy refuses either.
+     an older copy refuses either. In the meantime an unmeasured first-reply time is `null` and unnamed, so an older
+     copy accepts the day; the producer gives up FAC-SEM-126 for that metric only and names it once every reader has
+     adopted. Until `/1` names a ticket unit, a reader computes no "to a person" ticket share from
+     `autonomy.toPersonPolicy` and `toPersonInability`: it takes it from the channel agent standard's signal server or
+     leaves it out.
   5. `/1` keeps its four channels. An agent on the channel agent standard publishes each of the declaration's seven
      channel kinds under the closest one: `telegram_dm` and `account` as `chat`, `mail` as `mail`, `store_review` as
      `reviews`, `telegram_group`, `public_comment` and `team_chat` as `community`; kinds that meet in one channel make
@@ -9088,7 +9093,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      every reader has adopted DEC-0151, such a producer publishes no event for that channel: it keeps each project's
      days, publishes them one event per project and day once every reader has adopted, and never merges projects into
      one event. A producer never changes the project form of a day it has already published: a day first published
-     without `project` is rerun without it. The top level then holds 19 members, inside DEC-0070's 32.
+     without `project` is rerun without it, and a day merged across projects before DEC-0151 is rerun as first
+     published, or not rerun. A single-project producer keeps leaving `project` out and names it only once it serves a
+     second project. A day's calibration is identical on each project's event of that day and is never summed. The top
+     level then holds 19 members, inside DEC-0070's 32.
+  7. The shared credential detector (`SECRET_VALUE` in `src/secret-shape.ts`, and its copy in `src/session-handoff.ts`)
+     takes a provider key's prefix (`sk-`, `gh?_`, `xox?-`, `AKIA`, `glpat-`) only where no letter or digit stands
+     right before it: `project:helpdesk-customer-support` holds `sk-` inside a word and is no key. A key at the start
+     of a value, after a space, a quote, `=`, `:` or a `Bearer` and its space is found as before.
 - **Why:** the channel agent standard's daily report counts tickets on its signal server and checks each agent's feed
   against it; one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that
   home before any producer may send them. The digit fixes a rule the schema made impossible to keep. The registry
@@ -9114,15 +9126,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `text` (DEC-0070); a reader that only parses ignores the counts, but if it keys by channel and day it keeps one
   project's day and drops the other's, so per-project publishing waits for every reader, parse-only ones included
   (item 6 holds the producer to that). The bytes under the unchanged `$id` widen, so a reader validates against its own
-  pinned copy. FAC-SEM-126's message for a non-metric name in `notMeasured` changes; its code and its findings do not.
-  `contractVersion` stays `0.1.0`.
+  pinned copy. FAC-SEM-126's messages change, never its code or which payloads it finds: a non-metric name in
+  `notMeasured` is reported as not a metric, and the autonomy sum now reads "the autonomy outcomes
+  (resolvedWithoutPerson, toPersonPolicy, toPersonInability) are more than the turns". Item 7 makes every rule that
+  uses the shared detector, `FAC-SEM-101` and DEC-0150's `FAC-SEM-165` among them, accept strictly more: a value it
+  finds is one the earlier pattern found too (`test/secret-shape.test.ts`), and no vector file changes. Fabric, which
+  vendors `src/session-handoff.ts`, re-vendors it to find the same. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/support-quality-daily.schema.json` (also the `calibration` description DEC-0144
-  left to correct), `src/support-quality-rules.ts`, `test/support-quality.test.ts`,
+  left to correct), `src/support-quality-rules.ts`, `test/support-quality.test.ts`; `src/secret-shape.ts`,
+  `src/session-handoff.ts`, `src/connections.ts` (a comment), `test/secret-shape.test.ts`,
+  `fixtures/positive/service-events-page-support-quality-sk-slug.json`;
   `fixtures/positive/support-quality-daily-tickets.json`, `-first-reply-unmeasured.json` and `-project.json`,
   `fixtures/positive/service-events-page-support-quality-projects.json`, six `fixtures/negative/support-quality-daily-*`
-  with their `fixtures/catalogue.json` rows, five
+  with their `fixtures/catalogue.json` rows, six
   `fixtures/semantic/support-quality-daily-*`; `docs/specification/support-quality.md`, `docs/specification/conformance.md`
-  (the producer and reader rows), `docs/DOCMAP.md`, `CONTEXT.md`; DEC-0095 and DEC-0144 annotated; `docs/backlog.md`
+  (the producer and reader rows), `docs/specification/identifiers.md`, `docs/specification/profiles.md`,
+  `docs/specification/fabric-button.md`, `docs/DOCMAP.md`, `CONTEXT.md`; DEC-0095 and DEC-0144 annotated; `docs/backlog.md`
   (CT-210, CT-129, CT-103, CT-188's note); `docs/handoffs/2026-11-04-support-quality-tickets.md`.
 - **Source:** CT-210, CT-129; the board request `74105ca1` (thread `b6820b97`); DEC-0151 reserved by git CAS (key
   `support-quality-v2-dec`, counter commit `ee67e35`).

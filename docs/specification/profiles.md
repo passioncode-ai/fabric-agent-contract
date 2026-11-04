@@ -119,7 +119,8 @@ the two become one):
 | [runner catalogue](runners.md) | each runner's `version.argv`, `auth.argv` and every drive's `argv` |
 | [service descriptor](service.md#descriptor) | every `commands` entry |
 
-An argument is refused when it holds a JWT, a provider key's shape, `Bearer <token>` anywhere in it, or a run of 40
+An argument is refused when it holds a JWT, a provider key's shape (its prefix with no letter or digit right before it,
+DEC-0151), `Bearer <token>` anywhere in it, or a run of 40
 or more base64 characters mixing upper case, lower case and digits; a path's separators split such a run, so a folder
 named by a session id passes. A URL is refused for the same, for a password in its user information, and for a query
 or fragment parameter whose name can only carry a credential (DEC-0041's whole-word names: `api_key`, `token`) and

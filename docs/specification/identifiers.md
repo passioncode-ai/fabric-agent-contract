@@ -152,6 +152,11 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
 - a revision's revocations against its parent's (`FAC-SEM-072`, `revocationKey` in `src/estate-record-rules.ts`): a
   `grant` revocation re-spelled in the next revision reads as dropped, and the revision is refused — fail closed, so a
   writer keeps each revocation exactly as it was first written;
+- the project registry's alias `project:<slug>` in `support-quality-daily/1`'s `project` ([support
+  quality](support-quality.md), DEC-0151) and in the channel agent declaration's `project` (DEC-0150): a reader keys a
+  day by it and the declaration names the project by it, both as written; the pattern
+  `^project:[a-z0-9][a-z0-9._-]{0,127}$` admits only its normal form (lower case, no `%`), so comparing it as written
+  agrees with a comparison by normal form;
 - `agentRef` (`urn:fabric:agent:<publisher>:<id>`): its schema pattern admits only lower case and no `%`, so every valid
   value is already its normal form;
 - opaque ids (`activity-common.schema.json#/$defs/opaqueId`: estates, machines, devices, users, sessions, leases),

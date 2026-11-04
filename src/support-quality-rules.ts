@@ -4,7 +4,8 @@ import { type Finding, type JsonObject, isObject } from "./findings.js";
 /**
  * FAC-SEM-126 (DEC-0095) on one `support-quality-daily/1` payload: a metric not computed is `null` and is named in
  * `notMeasured`, and a named one is `null` (never a `0` standing for it); the parts never exceed their whole: the
- * helped verdicts the sample, the fallback's recoveries the failures, the outcomes the turns; p50 is at most p90; a
+ * helped verdicts the sample, the fallback's recoveries the failures, the autonomy outcomes (resolvedWithoutPerson,
+ * toPersonPolicy, toPersonInability) the turns; p50 is at most p90; a
  * judged sample names its rubric and its judge. `checks` is the fifth member a not-measured name may address: `checks`
  * when nothing was judged. A calibration (DEC-0144) is the judge's: it names the rubric and the judge, its `helped`
  * follows the not-measured rule as `calibration.helped`, its week is a real ISO week no later than the day, and
@@ -91,7 +92,7 @@ export function supportQualityRules(value: JsonObject): Finding[] {
   };
   atMost([num("quality", "helpedYes"), num("quality", "helpedPartly"), num("quality", "helpedNo")], num("quality", "sampled"), "/quality", "the helped verdicts are more than the sample");
   atMost([num("stability", "recoveredByFallback")], num("stability", "modelCallFailures"), "/stability/recoveredByFallback", "more recoveries than model-call failures");
-  atMost([num("autonomy", "resolvedWithoutPerson"), num("autonomy", "toPersonPolicy"), num("autonomy", "toPersonInability")], num("nobodyDropped", "turns"), "/autonomy", "the outcomes are more than the turns");
+  atMost([num("autonomy", "resolvedWithoutPerson"), num("autonomy", "toPersonPolicy"), num("autonomy", "toPersonInability")], num("nobodyDropped", "turns"), "/autonomy", "the autonomy outcomes (resolvedWithoutPerson, toPersonPolicy, toPersonInability) are more than the turns");
   const p50 = num("nobodyDropped", "firstReplyP50Ms");
   const p90 = num("nobodyDropped", "firstReplyP90Ms");
   if (p50 !== null && p90 !== null && p50 > p90) flag("/nobodyDropped/firstReplyP50Ms", "the median first reply is slower than the 90th percentile");

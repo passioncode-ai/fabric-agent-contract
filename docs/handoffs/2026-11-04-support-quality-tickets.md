@@ -36,16 +36,32 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   CT-103 and CT-210's adoption steps. The coordinator's count of the alternative's members (27) is 28 by the schema
   (19 top-level members, `outcomes` replaced by its 10); DEC-0151 says 28 and a test holds it.
 
+- Round 2 of the readings (on `03c0328f`): three breaks fixed. The shared credential detector's provider prefixes now
+  need a boundary (no letter or digit right before them), so `project:helpdesk-customer-support` no longer fails
+  `FAC-SEM-101` (DEC-0151 item 7; `src/secret-shape.ts`, its copy in `src/session-handoff.ts`, `test/secret-shape.test.ts`,
+  `fixtures/positive/service-events-page-support-quality-sk-slug.json`); "no ids" names the registry alias as its one
+  exception in the schema, the producer row and DEC-0095's annotation (which also says DEC-0151 narrows its items 1 and
+  2); FAC-SEM-126's autonomy message names the three members. The coordinator's risk decisions R1 to R10 applied: no
+  "to a person" ticket share from the turn counts; `autonomy.answered` from the predecessor only when its `answered`
+  already holds the answered-after-question tickets; the interim first-reply day (`null`, unnamed,
+  `fixtures/semantic/support-quality-daily-first-reply-interim.json`); a single-project producer omits `project`, a
+  merged day reruns as first published; a day's calibration identical per project, never summed; identifiers.md's
+  compared-as-written bullet; CT-210's steps (d) and (e); the top-level partition test.
+
 ## Open
 
 - Two clean rounds of blind readings, then merge (the branch is pushed, no pull request yet).
 - On DEC-0151's merge: close CT-129 (fixed by item 3) with its receipt.
+- The coordinator tells the channel agent standard's owner, on thread `b6820b97`, that its observed check must accept a
+  channel a producer withholds during the wait (CT-210 step (d)); the coordinator files the adapter's row (step (e)).
+- Fabric vendors `src/session-handoff.ts` alone: its copy of `SECRET_VALUE` changed with item 7, so Fabric re-vendors it.
 - Adoption, CT-210, in its order: `support.tickets_daily` mapped into each reader's ticket view first, readers re-pin and
   key by project, producers re-vendor the schema and carry the members once every reader has adopted.
 
 ## When DEC-0150 and DEC-0151 meet on main
 
-The second of the two to merge rewrites these (DEC-0150's text as of `016a77e8`):
+DEC-0150's current branch is `origin/agent/channel-agent-ext-v2-20261104` (`967669f3` or later; `1c41f8b4` when this
+was written). DEC-0151 merges after DEC-0150, or rebases over it. The second of the two to merge rewrites these:
 
 - `docs/specification/channel-agent.md`, the "daily quality payload" bullet: "That is DEC-0151 (CT-210), in progress:
   until DEC-0151 lands, an agent following section 5.1 emits payloads this contract refuses, and how the seven channel
@@ -60,6 +76,27 @@ The second of the two to merge rewrites these (DEC-0150's text as of `016a77e8`)
   in DEC-0151's Context and on the support quality page: made a link once both are on main.
 - `docs/DECISIONS.md`'s next-free line: DEC-0152 here; at merge take the maximum of the branches' values and the CAS
   counter.
+- The detector: DEC-0150's branch documents the earlier false positive as standing ("the shared detector stays as it
+  is" in its CA-5, in `channel-agent.md`'s check of a declaration, and in its handoff's note on the detector). Whichever
+  lands second keeps DEC-0151's boundary and drops that note; the advice to rename an id that starts with `sk-` stays
+  true, since a prefix at the start of a value is still found.
+- `src/secret-shape.ts`: the source-manifest branch (DEC-0149) adds `jwtSpans`, `hasJwt` and `rawValues` and changes
+  the JWT checks; DEC-0151 changes only the `SECRET_VALUE` line and its comment, so the two hunks merge apart. That
+  branch's `test/source-rules.test.ts` ("read the provider keys SECRET_VALUE names, without its whole-value bearer
+  branch") holds `SECRET_VALUE.source` equal to `(^bearer\s.+|` and `KEY_SHAPE_SOURCES` joined by `|`; with DEC-0151's
+  boundary it fails until the second to merge writes the expected source as
+  `(^bearer\s.+|(?<![A-Za-z0-9])(?:` ... `))`. Checked on a scratch copy of that branch with DEC-0151's line: its
+  vectors match (29 files) and only that test fails. Its source rules already need a boundary of their own
+  (`LETTER_OR_DIGIT`, any script); DEC-0151's is ASCII, because the detector reads without the `u` flag, so a
+  non-ASCII letter before a prefix still counts as a boundary here: stricter than that branch there, never stricter
+  than before.
+- DEC-0150's branch with DEC-0151's detector line, on a scratch copy: its vectors match (29 files) and
+  `test/channel-agent.test.ts`, `test/service-hygiene.test.ts` and `test/session-handoff-review.test.ts` pass (209
+  tests).
+- DEC-0150's handoff Open bullet on section 5.1 ("until DEC-0151 ... lands, an agent following it emits
+  `support-quality-daily/1` payloads this contract refuses"): dropped once DEC-0151 is on main.
+- The organization's roadmap row AS-01 ("one event per channel and closed day", fabric-workspace
+  `knowledge/roadmap.md`): owed at merge, to say one event per channel, project and closed day.
 - The schema count: 148 after the source-manifest branch and DEC-0150's land (146 on origin/main today); a test or
   document that counts the schemas follows that number.
 
@@ -74,15 +111,15 @@ The second of the two to merge rewrites these (DEC-0150's text as of `016a77e8`)
 
 ## Checks actually run
 
-On the branch, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; the full `pnpm vitest run --coverage` not
-run on these bytes (the 15-minute load stayed at 46.77, above 45); `pnpm vitest run test/support-quality.test.ts
-test/fixtures.test.ts test/positive-sweep.test.ts` 0 (1286 tests); `python3 docs/ux/lint.py` 0;
+On `03c0328f` the coordinator ran `pnpm vitest run --coverage`: exit 0, 108 files, 9799 tests passed, 1 skipped. On
+the round-2 head, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage`
+0 (109 files, 9816 tests passed, 1 skipped); `python3 docs/ux/lint.py` 0;
 `pnpm run docs:check` 0; `pnpm privacy:check` with the organization's index 0 (0 findings);
 `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files match; support quality has no vector generator). No U+2014 in
 the added lines.
 
 ## Next task
 
-Round 2 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by two blind readers; fix, re-read until two
+Round 3 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by two blind readers; fix, re-read until two
 rounds are clean; open the pull request, merge after DEC-0150's branch or rebase over it (the list above), mark DEC-0151
 accepted, close CT-129, mark CT-210's first step done, release, and answer thread `b6820b97` with the tag.

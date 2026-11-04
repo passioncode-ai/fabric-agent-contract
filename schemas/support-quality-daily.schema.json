@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/support-quality-daily.schema.json",
   "title": "support-quality-daily/1 (DEC-0095): one support channel's quality for one closed UTC day, as an event's data.value",
-  "description": "Counts and rates only: no person's words, no ids, no judge notes. A metric not computed is null and is named in notMeasured, never 0 (FAC-SEM-126). Fits DEC-0070's data.value: two levels, at most 32 members each; a reader recognises it by data.value.kind. DEC-0151 adds the optional project and ticket counts (arrived, ended, notATicket, open, outcomes, autonomy.answered, stability.fallbackTurns and fallbackTickets); a member absent is one the producer does not carry, never 0.",
+  "description": "Counts and rates only: no person's words, no ids (the project's registry alias excepted), no judge notes. A metric not computed is null and is named in notMeasured, never 0 (FAC-SEM-126). Fits DEC-0070's data.value: two levels, at most 32 members each; a reader recognises it by data.value.kind. DEC-0151 adds the optional project and ticket counts (arrived, ended, notATicket, open, outcomes, autonomy.answered, stability.fallbackTurns and fallbackTickets); a member absent is one the producer does not carry, never 0.",
   "type": "object",
   "required": [
     "kind",
