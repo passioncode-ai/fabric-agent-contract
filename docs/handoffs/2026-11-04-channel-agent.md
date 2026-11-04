@@ -159,6 +159,14 @@ filed; the coordinator files it on the board).
   looser bullet adds the members that may be absent; the page tells a host that shows the view to run the rules too;
   CONTEXT.md lists every channel kind; the conformance row names the holding-reply obligation and the tier-label check;
   an `additionalProperties` line says "only declared members are taken".
+- Round 14 of the readings (on `1ccfbf87`): one unit break, fixed: `FAC-SEM-165`'s closing count is per copy (the 64
+  named places stay a cap per document; past it the read declaration's "and N more" at its key counts only its own
+  places, and a misplaced copy's overflow is closed at that copy), reversing round 13's sentence that the read
+  declaration's count held later copies' places; a vector with 70 places in the read declaration and 80 in a misplaced
+  copy carries the view's answer, and the derivation test passes on it. The advice to rename an `sk-` id goes by role:
+  never under a channel's `texts` or a language-keyed map. A message spells a pattern once even across a nullable
+  place's ", or null". A final text's none form writes `none` and `until` in places. The page says a floor counts the
+  run a shape needs, not the character that ends it.
 
 ## The branch and its history
 

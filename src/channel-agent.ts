@@ -142,7 +142,9 @@ const tooLong = (text: string): boolean => text.length > LONGEST_STRING && (text
  * A member's token in a FAC-SEM-162 place: a declared name, or an index of a declared array, else `*`. A text's language
  * is always `*`, and so is a numeric key of an object: a number is kept only as a real array index (`index`).
  */
-function placedToken(previous: string | undefined, before: string | undefined, token: string, index: boolean, names: Set<string>): string {
+function placedToken(previous: string | undefined, before: string | undefined, token: string, index: boolean, names: Set<string>, noneForm = false): string {
+  // A final text in the none form is no language map: its `none` and `until` are the schema's names.
+  if (noneForm && before === "texts" && previous === "final" && (token === "none" || token === "until")) return token;
   if (before === "texts" && (previous === "holding" || previous === "final")) return "*";
   if (index) return previous !== undefined && ARRAYS.has(previous) && /^(0|[1-9][0-9]{0,8})$/.test(token) ? token : "*";
   return names.has(token) ? token : "*";
@@ -203,7 +205,7 @@ function widths(value: unknown): string[] {
 function oversize(value: unknown): string[] {
   const names = schemaNames();
   const long = new Set<string>();
-  walk(value, "", (frame, key, index) => placedToken(frame.name, frame.parent, key, index, names), (text, spot, place) => {
+  walk(value, "", (frame, key, index) => placedToken(frame.name, frame.parent, key, index, names, isNone(frame.container)), (text, spot, place) => {
     if (tooLong(text)) long.add(`maxLength at ${place(spot) || "/"} (at most ${LONGEST_STRING} code points)`);
   });
   return [...widths(value), ...long];
@@ -293,22 +295,27 @@ const PATTERN_CHARACTERS = 80;
  */
 export function messagePlaces(places: readonly string[]): string[] {
   const seen = new Set<string>();
-  return places.map((place) => {
+  return places.map((written) => {
+    // A nullable member's ", or null" is kept apart, so its pattern reads as any other place's.
+    const orNull = written.endsWith(", or null") ? ", or null" : "";
+    const place = written.slice(0, written.length - orNull.length);
     const at = place.indexOf(" (pattern ");
-    if (at < 0) return place;
+    if (at < 0) return written;
     const pattern = place.slice(at);
-    if (seen.has(pattern)) return `${place.slice(0, at)} (pattern as above)`;
+    if (seen.has(pattern)) return `${place.slice(0, at)} (pattern as above)${orNull}`;
     seen.add(pattern);
-    return place;
+    return written;
   });
 }
 
 /** An Ajv error as its keyword and its place, every free member name replaced by `*`, never a declared value. */
-export function placed(error: { keyword: string; instancePath: string; schema?: unknown; params?: Record<string, unknown> }, orNull = false): string {
+export function placed(error: { keyword: string; instancePath: string; schemaPath?: string; schema?: unknown; params?: Record<string, unknown> }, orNull = false): string {
   const names = schemaNames();
   const tokens = error.instancePath.split("/").slice(1).map((token) => token.replace(/~1/g, "/").replace(/~0/g, "~"));
   // The schema enters arrays only where it declares them, so a number after a declared array's name is an index.
-  const at = tokens.map((token, i) => placedToken(tokens[i - 1], tokens[i - 2], token, /^(0|[1-9][0-9]{0,8})$/.test(token), names)).join("/");
+  // An error from the none form (any schema but the language map's) writes `none` and `until` under a final text.
+  const noneForm = typeof error.schemaPath === "string" && !error.schemaPath.startsWith("#/$defs/texts");
+  const at = tokens.map((token, i) => placedToken(tokens[i - 1], tokens[i - 2], token, /^(0|[1-9][0-9]{0,8})$/.test(token), names, noneForm)).join("/");
   return `${error.keyword} at /${at}${allowed(error, names, at)}${orNull ? ", or null" : ""}`;
 }
 
@@ -491,16 +498,15 @@ interface Budget {
   left: number;
   /** Whether a name or a string was left unread because the budget was spent. */
   unread: boolean;
-  /** Places named so far, and credential-shaped names or values found past SECRET_FINDINGS. */
+  /** Places named so far in the document (SECRET_FINDINGS at most), and those counted past it, in all copies. */
   named: number;
   more: number;
-  /** Where the closing findings stand: the copy whose places passed SECRET_FINDINGS, and the copy where the budget ran out. */
-  moreAt: string | undefined;
+  /** Where the closing finding that the rest was not read stands: the copy where the budget ran out. */
   unreadAt: string | undefined;
 }
 
 /** A fresh budget for one document. */
-const newBudget = (): Budget => ({ left: SECRET_BUDGET, unread: false, named: 0, more: 0, moreAt: undefined, unreadAt: undefined });
+const newBudget = (): Budget => ({ left: SECRET_BUDGET, unread: false, named: 0, more: 0, unreadAt: undefined });
 
 /** What each name or string costs beyond its code points: the call itself. */
 export const VISIT_COST = 16;
@@ -639,6 +645,9 @@ export function detectorCost(text: string): number {
 function secrets(value: unknown, root: string, budget: Budget = newBudget()): Finding[] {
   const findings: Finding[] = [];
   const names = schemaNames();
+  // This copy's places past the document's SECRET_FINDINGS: counted here, closed at this copy, so the read declaration's
+  // count never holds another copy's places.
+  let more = 0;
   // `id`: a member name, or a value whose member takes an id's grammar; a text or a label gets no advice to rename.
   const flag = (at: string, what: string, text: string, id: boolean) => {
     if (budget.named < SECRET_FINDINGS) {
@@ -647,7 +656,7 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
       findings.push({ code: "FAC-SEM-165", instancePath: at, message: `${what} is shaped like a credential: a token is named by its vault slot, never written${rename} (DEC-0150 CA-5)` });
     } else {
       budget.more += 1;
-      budget.moreAt ??= root;
+      more += 1;
     }
   };
   // The walk stops once the budget is spent, so nothing is read after it.
@@ -669,7 +678,7 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
   const tokenOf = (frame: Frame, key: string, index: boolean) => {
     if (index) return placedToken(frame.name, frame.parent, key, index, names);
     const plain = last.frame === frame && last.key === key && last.plain;
-    return plain ? placedToken(frame.name, frame.parent, key, index, names) : undefined;
+    return plain ? placedToken(frame.name, frame.parent, key, index, names, isNone(frame.container)) : undefined;
   };
   walk(value, root, tokenOf, (text, spot, place) => {
     if (spot.isName) {
@@ -677,7 +686,7 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
       if (!afford(text)) return;
       const isShaped = shaped(text);
       last.plain = !isShaped && NAME_CHARACTERS.test(text) && !/[0-9]{7}/.test(text.replace(/[-_]/g, ""));
-      if (isShaped) flag(place(spot), "a member's name", text, true);
+      if (isShaped) flag(place(spot), "a member's name", text, !inTexts(spot.frame));
       return;
     }
     if (!afford(text)) return;
@@ -688,10 +697,14 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
     else if (((role === "evals" && key === "suite") || (role === "tickets" && key === "outbox")) && relativeRef(text)) found = urlReading(text);
     else if (role === "queue" && key === "recommendation" && OPAQUE_ID.test(text)) found = keyShaped(text);
     else found = shaped(text);
-    if (found) flag(place(spot), "a value", text, ID_MEMBERS.has(key));
+    if (found) flag(place(spot), "a value", text, ID_MEMBERS.has(key) && !inTexts(spot.frame));
   }, () => budget.unread);
+  if (more > 0) findings.push({ code: "FAC-SEM-165", instancePath: root, message: `and ${more} more names or values shaped like a credential (DEC-0150 CA-5)` });
   return findings;
 }
+
+/** Whether a frame is a channel's `texts` or one of its language-keyed maps, where no member takes an id's grammar. */
+const inTexts = (frame: Frame | undefined): boolean => frame !== undefined && (frame.name === "texts" || (frame.parent === "texts" && (frame.name === "holding" || frame.name === "final")));
 
 /** The members whose value takes an id's grammar: a value there that starts with `sk-` is told to be renamed. */
 const ID_MEMBERS = new Set(["id", "code", "lead_agent", "owner", "decision", "answered_signal", "target", "spend_record", "project", "side"]);
@@ -699,7 +712,6 @@ const ID_MEMBERS = new Set(["id", "code", "lead_agent", "owner", "decision", "an
 /** The document's closing FAC-SEM-165 findings, once: the count past SECRET_FINDINGS, and that the rest was not read. */
 function summary(budget: Budget): Finding[] {
   const findings: Finding[] = [];
-  if (budget.more > 0) findings.push({ code: "FAC-SEM-165", instancePath: budget.moreAt as string, message: `and ${budget.more} more names or values shaped like a credential (DEC-0150 CA-5)` });
   if (budget.unread) findings.push({ code: "FAC-SEM-165", instancePath: budget.unreadAt as string, message: `the document holds more than ${SECRET_BUDGET} code points of names and values in its declarations; the rest was not read for credentials (DEC-0150 CA-5)` });
   return findings;
 }

@@ -9112,8 +9112,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      letters, digits, `_` or `-`, in any case, such as the valid channel id `sk-support-desk-faq-answers-2026-v2`, is
      found too; DEC-0151, in progress, proposes to narrow that to a digit with an upper-case letter and 16, or a digit and 32; the
      shared detector stays as it is, and an id does not start with `sk-`; the finding on a member name or on a value of
-     an id's member that starts with `sk-` says it is read as a key and asks for a rename, and on a text or a label it
-     does not). Three places read narrower, each only when the value
+     an id's member that starts with `sk-` says it is read as a key and asks for a rename, by role: never under a
+     channel's `texts` or its language-keyed maps, nor at a label). Three places read narrower, each only when the value
      matches its own grammar, keyed on the place and not on a holder's name: a project's token slot of the slot's
      grammar segment by segment, its eval suite and outbox of the relative path grammar by the detector's path-aware
      reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a
@@ -9130,8 +9130,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      WHATWG URL parse yields: 128 per query or fragment piece, its name's and value's code points, the value's `eyJ`
      and `sk-` terms, and the square over two of a name holding an upper-case letter when its value is not empty. Once it is spent, nothing more is read and every further member collapses; one finding per
      document then says the rest was not read, at the copy where the budget ran out (never at a read declaration read
-     whole), and the 64 places are counted per document, their count at the copy where the 65th was found (at the read
-     declaration's key it counts every place in the document past 64, later copies included). The read
+     whole); the 64 places are a cap per document (a copy names a place only while the document's total is under 64),
+     and past it each copy counts its own places and closes them at that copy: the read declaration's count at its key
+     holds only its own places, and a misplaced copy's overflow is closed at that copy. The read
      declaration is judged only by the findings under its own path: a misplaced copy's credential, or the budget
      running out in a copy, is found at that copy and leaves the read declaration's answer as it is. A reader treats a
      declaration with `FAC-SEM-165` or `FAC-SEM-163` as not declared, as it does one with `FAC-SEM-162`, keeps one with
@@ -9217,7 +9218,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 13 of the readings. `DEC-0150` was reserved by the coordinator with
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 14 of the readings. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation

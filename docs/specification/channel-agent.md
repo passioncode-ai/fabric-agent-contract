@@ -278,7 +278,8 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    it (the JWT shape's second segment); after each `sk-`, in any case, that follows a boundary, up to 255 code points to
    the end of the string; after every other provider prefix the shared detector knows, anywhere and in any case
    (`gh` and one of `pousr` then `_`, `xox` and one of `abposr` then `-`, `AKIA`, `glpat-`), up to its floor, the run
-   its shape needs (20, 10, 16 and 20 code points), which is what a near miss is reread before it fails; and after
+   its shape needs (20, 10, 16 and 20 code points), which is what a near miss is reread before it fails (a floor counts
+   the run the shape needs, not the character that ends it); and after
    every `sk-` away from a boundary, up to 15 code points after it (`SECRET_VALUE`'s `sk-` run has no boundary today,
    so it is tried there too). A boundary is the start, a character other than a letter or a digit, or an escape that ends
    right before the `sk-`: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a backslash escape of
@@ -290,15 +291,19 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    the square of the name's length over two. A member's name is read before its place is written; once the budget is spent nothing more is read and every further member collapses its place. Past the
    budget, one finding says, once per document, that the rest was not read for credentials; it stands at the copy where
    the budget ran out (the read declaration's key, or a misplaced copy's), never at a read declaration that was read
-   whole. The 64 places are counted per document too, and their closing count stands at the copy where the 65th was
-   found: when that is the read declaration, the closing "and N more" at its key counts every place in the document
-   past 64, later copies included. The read declaration is walked first, with the whole budget, so its own reading never depends on a copy. Being by shape, the detector also finds an ordinary hyphenated name
+   whole. The 64 places are a cap per document: a copy names a place only while the document's total is under 64.
+   Past it, each copy counts its own places and closes them at that copy: the read declaration's "and N more" at its key
+   counts only its own places past 64, and a misplaced copy's overflow gets its own closing finding at that copy, so the
+   view (which reads the read declaration alone) and the rules agree, and a vector pins both. The read declaration is walked first, with the whole budget, so its own reading never depends on a copy. Being by shape, the detector also finds an ordinary hyphenated name
    that starts with `sk-`: today any `sk-` followed by 16 or more letters, digits, `_` or `-`, in any case, such as the
    valid channel id `sk-support-desk-faq-answers-2026-v2` (a test pins it). DEC-0151, in progress, proposes to narrow
    that to a digit with an upper-case letter and 16, or a digit and 32; either way, do not start an id with `sk-`. The
    finding on a member name, or on a value whose member takes an id (`id`, `code`, `lead_agent`, `owner`, `decision`,
    `answered_signal`, `target`, `spend_record`, `project`, `side`), that starts with `sk-` says so: an id that starts
-   with `sk-` is read as a key; rename it. A text or a label gets the vault-slot sentence alone.
+   with `sk-` is read as a key; rename it. The advice goes by role, not by key: never under a channel's `texts` or its
+   language-keyed maps (`holding`, `final`), so a text keyed `id`, `code`, `owner`, `target`, `project` or `side` (a
+   language tag) gets the vault-slot sentence alone, and so does a label. In a final text's none form, a place writes
+   `none` and `until` as the schema's names; in a language map a language is still `*`.
 
 No finding's message carries a declared value, and no rule's place echoes instance data: a place writes a member name
 the schema declares and an index of an array the schema declares, and `*` for any other member name, for a numeric key

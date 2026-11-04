@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for extensions/channel-agent/0.1 (DEC-0150), written by tools/vectors/channel-agent.ts, never by hand. `key`: the extension key. `declarations`: a document and the findings {code, instancePath} a checker reports on it, in the reference's order (a port may compare them as a set). `site` says where the key is read: `manifest` (kind manifest) under provider.extensions, at /provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1, or `well-known` (kind service-well-known, a service with no manifest) under extensions, at /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1 (CA-1). FAC-SEM-162, in a manifest only, at the key under /extensions or /capabilities/<i>/extensions, where a reader does not read it, each followed by the FAC-SEM-165 findings of that value where it stands; then FAC-SEM-165 at each member name and each string of the value shaped like a credential (at most 1 000 000 code points read in all for one document, every copy of the declaration in it sharing them, counted as detectorCost counts them, in code points (an astral character is one): each name or string 16 plus its code points, read once (a name is not charged again when its member is entered or placed), the JWT shape's rereading after each eyJ (its base64url run and, when that run ends at a dot, the dot and the run after it), for a string read as a URL (its head, once its leading C0 controls and spaces are stripped and ASCII tab, line feed and carriage return removed, opens with a scheme, ^[A-Za-z][A-Za-z0-9+.-]*:, is ASCII only and holds no percent-escape of a byte at or above 0x80, %[89A-Fa-f][0-9A-Fa-f]; every other string, a sentence that holds a URL included, is read by the detector's value and argument shapes only, with no URL parse, so a password or a credential-named query parameter in it is not found: the gap a vector pins), on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed, percent-decoded): 128 per query or fragment piece, the piece's name and value, the value's JWT and sk- terms, and the square over two of a name holding an upper-case letter when the value is not empty, and up to 255 after each sk-, in any case, at a boundary (the start, a character other than a letter or a digit, %XX, %25XX, \\xHH, \\uHHHH, a two- or three-digit octal escape, a backslash escape, or a colour sequence ESC[...m with any number of parameter characters whose ESC is raw or escaped in either case of its hex digits), and up to its floor after every other provider prefix, anywhere and in any case (gh[pousr]_ 20, xox[abposr]- 10, AKIA 16, glpat- 20); once spent, nothing more is read and every further member collapses; one finding then says, once per document, that the rest was not read, at the copy where the budget ran out (the read declaration is walked first, with the whole budget, and never carries it when read whole)), by shape (FAC-SEM-101's detector on the first 4097 code points), a name at the object that holds it, a value under a name that is not plain (letters, digits, _ and -, at most 64, no run of 7 digits once - and _ are left out) at its nearest plain ancestor with every descendant, a member more than 64 levels down at its ancestor 64 levels down, at most 64 places per document and then one finding at the copy where the 65th was found counting the rest, the narrow readings only at their place and only for a value of their own grammar (a project's token slot segment by segment, its suite and outbox of the relativeRef grammar (no leading /, ~ or scheme, no .. segment) by the path-aware reading, secretArgument and secretUrl, and a queue's recommendation of the opaqueId grammar by a provider key's and a JWT's shapes only), anything else read whole, a place writing a declared name, an index of a declared array or *, a member whose name is not plain collapsing its place for itself and every descendant, before the schema check, in a valid or an invalid value (CA-5); then FAC-SEM-162 at the key for a value invalid against service-channel-agent-extension.schema.json, or with an array longer than its schema's maxItems, a map wider than its maxProperties, a closed object with more members than the schema declares, or a string or member name over 4096 code points (each checked before the schema, the limits read from the schema), which a reader treats as not declared, its message naming each failed keyword's place with the schema's own limit: the member for required, the values for enum (at most 8, the rest counted) and const, the pattern (cut to 80 characters, each distinct pattern spelled once), a length in code points, a count, a bound, a format, the type alone for type, and for a nullable member's oneOf its type and null (no line for the null branch), never a declared value (CA-2); for a valid value, per project in order, FAC-SEM-163 at a repeated project, category code, tier code, channel id, source id (a declined source counted with the sources), queue id or recorded decision id (the second occurrence), and at a channel's decision when replies are off and it is null or when it names a decision recorded_decisions does not list, at most 64 places and then one finding at the key counting the rest (CA-3); then FAC-SEM-164 at texts/holding when holding_reply is true and it is absent, at texts/final when replies_enabled is true and it is absent, at clarifying_question when true on a store_review, at a tier's label that is blank or carries U+2014, at a text that is blank (nothing left after white space, \\p{Cf}, \\p{Cc}, \\p{Z}, \\p{Default_Ignorable_Code_Point}, U+115F, U+1160, U+3164, U+FFA0, U+2800 and U+FFFC) or carries U+2014, a text's language written * when plain and placed at its texts/holding or texts/final map when not, at a queue's recommendation when answered_signal is none and it is absent, and when it is present with another answered_signal (non-blocking, a reader does not read it), at texts/final when it is {none: not_used} and holding_reply is true (a holding reply obliges a final reply), not at texts/final otherwise in the none form ({none: not_yet, until} or {none: not_used}, which the schema takes at question_route, gap_registry, tickets.pd_check and a channel's texts.final only, closed, until a full date with not_yet only), and once at evals/spend_record when a budget is above 0 and it is absent or null, at most 64 places per document and then one finding at the key counting the rest (CA-4). No message carries a declared value. `view`, on some cases: what channelAgentView answers, {declared, reported, errors, obligations when declared}, each line `<code> at <place>: <reason>`, the reason the finding's message without the decision it cites, identical lines once; the read declaration is judged only by the findings under its own path, so a misplaced copy's credential or the budget running out in a copy leaves it declared.",
+  "about": "Vectors for extensions/channel-agent/0.1 (DEC-0150), written by tools/vectors/channel-agent.ts, never by hand. `key`: the extension key. `declarations`: a document and the findings {code, instancePath} a checker reports on it, in the reference's order (a port may compare them as a set). `site` says where the key is read: `manifest` (kind manifest) under provider.extensions, at /provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1, or `well-known` (kind service-well-known, a service with no manifest) under extensions, at /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1 (CA-1). FAC-SEM-162, in a manifest only, at the key under /extensions or /capabilities/<i>/extensions, where a reader does not read it, each followed by the FAC-SEM-165 findings of that value where it stands; then FAC-SEM-165 at each member name and each string of the value shaped like a credential (at most 1 000 000 code points read in all for one document, every copy of the declaration in it sharing them, counted as detectorCost counts them, in code points (an astral character is one): each name or string 16 plus its code points, read once (a name is not charged again when its member is entered or placed), the JWT shape's rereading after each eyJ (its base64url run and, when that run ends at a dot, the dot and the run after it), for a string read as a URL (its head, once its leading C0 controls and spaces are stripped and ASCII tab, line feed and carriage return removed, opens with a scheme, ^[A-Za-z][A-Za-z0-9+.-]*:, is ASCII only and holds no percent-escape of a byte at or above 0x80, %[89A-Fa-f][0-9A-Fa-f]; every other string, a sentence that holds a URL included, is read by the detector's value and argument shapes only, with no URL parse, so a password or a credential-named query parameter in it is not found: the gap a vector pins), on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed, percent-decoded): 128 per query or fragment piece, the piece's name and value, the value's JWT and sk- terms, and the square over two of a name holding an upper-case letter when the value is not empty, and up to 255 after each sk-, in any case, at a boundary (the start, a character other than a letter or a digit, %XX, %25XX, \\xHH, \\uHHHH, a two- or three-digit octal escape, a backslash escape, or a colour sequence ESC[...m with any number of parameter characters whose ESC is raw or escaped in either case of its hex digits), and up to its floor after every other provider prefix, anywhere and in any case (gh[pousr]_ 20, xox[abposr]- 10, AKIA 16, glpat- 20); once spent, nothing more is read and every further member collapses; one finding then says, once per document, that the rest was not read, at the copy where the budget ran out (the read declaration is walked first, with the whole budget, and never carries it when read whole)), by shape (FAC-SEM-101's detector on the first 4097 code points), a name at the object that holds it, a value under a name that is not plain (letters, digits, _ and -, at most 64, no run of 7 digits once - and _ are left out) at its nearest plain ancestor with every descendant, a member more than 64 levels down at its ancestor 64 levels down, at most 64 places per document, named in a copy only while the document's total is under 64, and then one finding at each copy (the read declaration's key, or a misplaced copy) counting that copy's own places past it, the narrow readings only at their place and only for a value of their own grammar (a project's token slot segment by segment, its suite and outbox of the relativeRef grammar (no leading /, ~ or scheme, no .. segment) by the path-aware reading, secretArgument and secretUrl, and a queue's recommendation of the opaqueId grammar by a provider key's and a JWT's shapes only), anything else read whole, a place writing a declared name, an index of a declared array or *, a member whose name is not plain collapsing its place for itself and every descendant, before the schema check, in a valid or an invalid value (CA-5); then FAC-SEM-162 at the key for a value invalid against service-channel-agent-extension.schema.json, or with an array longer than its schema's maxItems, a map wider than its maxProperties, a closed object with more members than the schema declares, or a string or member name over 4096 code points (each checked before the schema, the limits read from the schema), which a reader treats as not declared, its message naming each failed keyword's place with the schema's own limit: the member for required, the values for enum (at most 8, the rest counted) and const, the pattern (cut to 80 characters, each distinct pattern spelled once), a length in code points, a count, a bound, a format, the type alone for type, and for a nullable member's oneOf its type and null (no line for the null branch), never a declared value (CA-2); for a valid value, per project in order, FAC-SEM-163 at a repeated project, category code, tier code, channel id, source id (a declined source counted with the sources), queue id or recorded decision id (the second occurrence), and at a channel's decision when replies are off and it is null or when it names a decision recorded_decisions does not list, at most 64 places and then one finding at the key counting the rest (CA-3); then FAC-SEM-164 at texts/holding when holding_reply is true and it is absent, at texts/final when replies_enabled is true and it is absent, at clarifying_question when true on a store_review, at a tier's label that is blank or carries U+2014, at a text that is blank (nothing left after white space, \\p{Cf}, \\p{Cc}, \\p{Z}, \\p{Default_Ignorable_Code_Point}, U+115F, U+1160, U+3164, U+FFA0, U+2800 and U+FFFC) or carries U+2014, a text's language written * when plain and placed at its texts/holding or texts/final map when not, at a queue's recommendation when answered_signal is none and it is absent, and when it is present with another answered_signal (non-blocking, a reader does not read it), at texts/final when it is {none: not_used} and holding_reply is true (a holding reply obliges a final reply), not at texts/final otherwise in the none form ({none: not_yet, until} or {none: not_used}, which the schema takes at question_route, gap_registry, tickets.pd_check and a channel's texts.final only, closed, until a full date with not_yet only), and once at evals/spend_record when a budget is above 0 and it is absent or null, at most 64 places per document and then one finding at the key counting the rest (CA-4). No message carries a declared value. `view`, on some cases: what channelAgentView answers, {declared, reported, errors, obligations when declared}, each line `<code> at <place>: <reason>`, the reason the finding's message without the decision it cites, identical lines once; the read declaration is judged only by the findings under its own path, so a misplaced copy's credential or the budget running out in a copy leaves it declared.",
   "key": "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1",
   "declarations": [
     {
@@ -15087,6 +15087,1187 @@
         "reported": false,
         "errors": [],
         "obligations": []
+      }
+    },
+    {
+      "name": "more than 64 credential places in the read declaration and more in a misplaced copy: each closes its own count",
+      "site": "manifest",
+      "input": {
+        "provider": {
+          "extensions": {
+            "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1": {
+              "standard": "channel-agent-standard/1",
+              "projects": [
+                {
+                  "project": "project:example-support",
+                  "side": "example-side",
+                  "lead_agent": "support-bot",
+                  "adopted_at": "2026-11-10",
+                  "taxonomy": {
+                    "version": "1",
+                    "codes": [
+                      {
+                        "code": "c0",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c1",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c2",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c3",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c4",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c5",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c6",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c7",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c8",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c9",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c10",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c11",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c12",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c13",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c14",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c15",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c16",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c17",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c18",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c19",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c20",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c21",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c22",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c23",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c24",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c25",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c26",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c27",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c28",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c29",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c30",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c31",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c32",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c33",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c34",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c35",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c36",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c37",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c38",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c39",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c40",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c41",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c42",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c43",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c44",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c45",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c46",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c47",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c48",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c49",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c50",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c51",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c52",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c53",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c54",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c55",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c56",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c57",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c58",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c59",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c60",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c61",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c62",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c63",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c64",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c65",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c66",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c67",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c68",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      },
+                      {
+                        "code": "c69",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      }
+                    ]
+                  },
+                  "tiers": [
+                    {
+                      "code": "premium",
+                      "label": "Premium",
+                      "rule": "open_orders > 10",
+                      "escalate": "at_once"
+                    }
+                  ],
+                  "question_route": {
+                    "capability": "operator.ask",
+                    "target": "operator-desk",
+                    "daily_cap": 10,
+                    "days": "mon-fri",
+                    "tz": "Europe/Warsaw",
+                    "send_at": "09:00",
+                    "expires": "P7D"
+                  },
+                  "gap_registry": {
+                    "owner": "support-bot",
+                    "capability": "gaps.record"
+                  },
+                  "channels": [
+                    {
+                      "id": "tg-dm",
+                      "kind": "telegram_dm",
+                      "replies_enabled": true,
+                      "decision": null,
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT1H",
+                      "holding_reply": true,
+                      "clarifying_question": true,
+                      "quiet_window": null,
+                      "late_answer_window": null,
+                      "items_seen_unit": "updates",
+                      "texts": {
+                        "holding": {
+                          "en": "I am checking this and will write back."
+                        },
+                        "final": {
+                          "en": "We could not confirm this; please write to our support."
+                        }
+                      }
+                    },
+                    {
+                      "id": "reviews",
+                      "kind": "store_review",
+                      "replies_enabled": false,
+                      "decision": "replies-off-reviews",
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT24H",
+                      "holding_reply": false,
+                      "clarifying_question": false,
+                      "items_seen_unit": "reviews",
+                      "texts": {}
+                    }
+                  ],
+                  "sources": [
+                    {
+                      "id": "docs",
+                      "owner": "docs-team",
+                      "read": "url",
+                      "cadence": "PT1H",
+                      "max_age": "PT2H"
+                    }
+                  ],
+                  "declined_sources": [
+                    {
+                      "id": "billing-export",
+                      "decision": "no-billing-export"
+                    }
+                  ],
+                  "handoff_queues": [
+                    {
+                      "id": "support-mail",
+                      "owner": "support-team",
+                      "limit": "P2D",
+                      "answered_signal": "none",
+                      "recommendation": "thread-0001"
+                    }
+                  ],
+                  "evals": {
+                    "suite": "evals/support",
+                    "judge_budget_usd": 2.5,
+                    "replay_budget_usd": 20,
+                    "spend_record": "support-evals"
+                  },
+                  "tickets": {
+                    "outbox": "ticket_outbox",
+                    "token_slot": "example-support/prod/SIGNAL_TICKETS_TOKEN",
+                    "pd_check": "pd-rules@1.2.0"
+                  },
+                  "recorded_decisions": [
+                    {
+                      "id": "replies-off-reviews",
+                      "date": "2026-11-01",
+                      "effect": "replies_off"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1": {
+            "standard": "channel-agent-standard/1",
+            "projects": [
+              {
+                "project": "project:example-support",
+                "side": "example-side",
+                "lead_agent": "support-bot",
+                "adopted_at": "2026-11-10",
+                "taxonomy": {
+                  "version": "1",
+                  "codes": [
+                    {
+                      "code": "c0",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c1",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c2",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c3",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c4",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c5",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c6",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c7",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c8",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c9",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c10",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c11",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c12",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c13",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c14",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c15",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c16",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c17",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c18",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c19",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c20",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c21",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c22",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c23",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c24",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c25",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c26",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c27",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c28",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c29",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c30",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c31",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c32",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c33",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c34",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c35",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c36",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c37",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c38",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c39",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c40",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c41",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c42",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c43",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c44",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c45",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c46",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c47",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c48",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c49",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c50",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c51",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c52",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c53",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c54",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c55",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c56",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c57",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c58",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c59",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c60",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c61",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c62",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c63",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c64",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c65",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c66",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c67",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c68",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c69",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c70",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c71",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c72",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c73",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c74",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c75",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c76",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c77",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c78",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    },
+                    {
+                      "code": "c79",
+                      "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                    }
+                  ]
+                },
+                "tiers": [
+                  {
+                    "code": "premium",
+                    "label": "Premium",
+                    "rule": "open_orders > 10",
+                    "escalate": "at_once"
+                  }
+                ],
+                "question_route": {
+                  "capability": "operator.ask",
+                  "target": "operator-desk",
+                  "daily_cap": 10,
+                  "days": "mon-fri",
+                  "tz": "Europe/Warsaw",
+                  "send_at": "09:00",
+                  "expires": "P7D"
+                },
+                "gap_registry": {
+                  "owner": "support-bot",
+                  "capability": "gaps.record"
+                },
+                "channels": [
+                  {
+                    "id": "tg-dm",
+                    "kind": "telegram_dm",
+                    "replies_enabled": true,
+                    "decision": null,
+                    "final_limit": "P7D",
+                    "first_reply_limit": "PT1H",
+                    "holding_reply": true,
+                    "clarifying_question": true,
+                    "quiet_window": null,
+                    "late_answer_window": null,
+                    "items_seen_unit": "updates",
+                    "texts": {
+                      "holding": {
+                        "en": "I am checking this and will write back."
+                      },
+                      "final": {
+                        "en": "We could not confirm this; please write to our support."
+                      }
+                    }
+                  },
+                  {
+                    "id": "reviews",
+                    "kind": "store_review",
+                    "replies_enabled": false,
+                    "decision": "replies-off-reviews",
+                    "final_limit": "P7D",
+                    "first_reply_limit": "PT24H",
+                    "holding_reply": false,
+                    "clarifying_question": false,
+                    "items_seen_unit": "reviews",
+                    "texts": {}
+                  }
+                ],
+                "sources": [
+                  {
+                    "id": "docs",
+                    "owner": "docs-team",
+                    "read": "url",
+                    "cadence": "PT1H",
+                    "max_age": "PT2H"
+                  }
+                ],
+                "declined_sources": [
+                  {
+                    "id": "billing-export",
+                    "decision": "no-billing-export"
+                  }
+                ],
+                "handoff_queues": [
+                  {
+                    "id": "support-mail",
+                    "owner": "support-team",
+                    "limit": "P2D",
+                    "answered_signal": "none",
+                    "recommendation": "thread-0001"
+                  }
+                ],
+                "evals": {
+                  "suite": "evals/support",
+                  "judge_budget_usd": 2.5,
+                  "replay_budget_usd": 20,
+                  "spend_record": "support-evals"
+                },
+                "tickets": {
+                  "outbox": "ticket_outbox",
+                  "token_slot": "example-support/prod/SIGNAL_TICKETS_TOKEN",
+                  "pd_check": "pd-rules@1.2.0"
+                },
+                "recorded_decisions": [
+                  {
+                    "id": "replies-off-reviews",
+                    "date": "2026-11-01",
+                    "effect": "replies_off"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "findings": [
+        {
+          "code": "FAC-SEM-162",
+          "instancePath": "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/0/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/1/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/2/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/3/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/4/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/5/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/6/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/7/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/8/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/9/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/10/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/11/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/12/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/13/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/14/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/15/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/16/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/17/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/18/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/19/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/20/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/21/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/22/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/23/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/24/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/25/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/26/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/27/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/28/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/29/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/30/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/31/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/32/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/33/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/34/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/35/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/36/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/37/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/38/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/39/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/40/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/41/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/42/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/43/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/44/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/45/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/46/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/47/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/48/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/49/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/50/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/51/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/52/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/53/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/54/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/55/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/56/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/57/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/58/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/59/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/60/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/61/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/62/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/63/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1"
+        }
+      ],
+      "view": {
+        "declared": false,
+        "reported": true,
+        "errors": [
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/0/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/1/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/2/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/3/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/4/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/5/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/6/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/7/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/8/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/9/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/10/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/11/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/12/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/13/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/14/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/15/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/16/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/17/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/18/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/19/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/20/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/21/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/22/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/23/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/24/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/25/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/26/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/27/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/28/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/29/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/30/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/31/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/32/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/33/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/34/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/35/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/36/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/37/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/38/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/39/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/40/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/41/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/42/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/43/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/44/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/45/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/46/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/47/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/48/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/49/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/50/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/51/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/52/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/53/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/54/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/55/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/56/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/57/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/58/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/59/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/60/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/61/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/62/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /projects/0/taxonomy/codes/63/label: a value is shaped like a credential: a token is named by its vault slot, never written",
+          "FAC-SEM-165 at /: and 6 more names or values shaped like a credential"
+        ]
       }
     },
     {

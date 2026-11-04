@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ValidateFunction } from "ajv/dist/2020.js";
-import { CHANNEL_AGENT_PATHS, MESSAGE_ERRORS, PREFIX_FLOORS, SK_FLOOR, readAsUrl, schemaLine, PATH_DEPTH, PIECE_COST, SECRET_BUDGET, SECRET_FINDINGS, VISIT_COST, codePoints, detectorCost, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, placed, schemaErrors } from "../src/channel-agent.js";
+import { CHANNEL_AGENT_PATHS, MESSAGE_ERRORS, PREFIX_FLOORS, SK_FLOOR, readAsUrl, schemaLine, PATH_DEPTH, PIECE_COST, SECRET_BUDGET, SECRET_FINDINGS, VISIT_COST, codePoints, detectorCost, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, messagePlaces, placed, schemaErrors } from "../src/channel-agent.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -84,7 +84,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       for (const line of schemaLines.slice(0, MESSAGE_ERRORS)) {
         const [, place, keyword, limit] = /^FAC-SEM-162 at (\S+): (\S+)(.*)$/.exec(line) as RegExpExecArray;
         const written = `${keyword} at ${place}${limit}`;
-        const asAbove = written.replace(/ \(pattern .*$/, " (pattern as above)");
+        const asAbove = written.replace(/ \(pattern .*?\)(, or null)?$/, (_, orNull: string | undefined) => ` (pattern as above)${orNull ?? ""}`);
         expect(invalid?.message.includes(written) || invalid?.message.includes(asAbove), line).toBe(true);
       }
       if (answer.declared) expect(answer.obligations).toEqual([...new Set(own.filter((f) => f.code === "FAC-SEM-164").map(relative))]);
@@ -848,6 +848,38 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(found.map((f) => f.message)).toEqual(["a value is shaped like a credential: a token is named by its vault slot, never written (DEC-0150 CA-5)"]);
     const named = channelAgentRules({ extensions: { [KEY]: { ...value, extra: { [key]: 1 } } } }, "well-known");
     expect(named.some((f) => f.message.includes("rename it"))).toBe(true);
+  });
+  it("asks for a rename by role: a text keyed id gets none, a channel id keeps it", () => {
+    const p0 = value.projects[0];
+    const key = ["sk", "-", "support-desk-faq-answers-2026"].join("");
+    const rules = (proj: Json) => channelAgentRules({ extensions: { [KEY]: { ...value, projects: [proj] } } }, "well-known").map((f) => f.message);
+    const keyed = { ...p0.channels[0], texts: { holding: { id: key }, final: p0.channels[0].texts.final } };
+    expect(rules({ ...p0, channels: [keyed, p0.channels[1]] })).toEqual(["a value is shaped like a credential: a token is named by its vault slot, never written (DEC-0150 CA-5)"]);
+    const finalKeyed = { ...p0.channels[0], texts: { holding: p0.channels[0].texts.holding, final: { id: key } } };
+    expect(rules({ ...p0, channels: [finalKeyed, p0.channels[1]] }).join(" ")).not.toContain("rename it");
+    const named = { ...p0.channels[0], id: key };
+    expect(rules({ ...p0, channels: [named, p0.channels[1]] })[0]).toContain("rename it");
+  });
+  it("spells a pattern once in the message, a nullable place's or null kept after as above", () => {
+    const p0 = value.projects[0];
+    const broken = { ...p0, lead_agent: "a b", channels: [{ ...p0.channels[0], decision: "a b" }, { ...p0.channels[1], decision: "a b" }] };
+    const message = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [broken] } } }, "well-known")[0]?.message ?? "";
+    expect(message.match(/\(pattern \^/g)).toHaveLength(1);
+    expect(message).toContain("pattern at /projects/0/channels/0/decision (pattern as above), or null");
+    expect(message).toContain("pattern at /projects/0/channels/1/decision (pattern as above), or null");
+    expect(messagePlaces(["pattern at /a (pattern x)", "pattern at /b (pattern x), or null"])).toEqual(["pattern at /a (pattern x)", "pattern at /b (pattern as above), or null"]);
+  });
+  it("names none and until in a final text's none form, and still writes a language as *", () => {
+    const p0 = value.projects[0];
+    const replying = p0.channels.findIndex((channel: Json) => channel.replies_enabled === true);
+    const formed = (final: Json) => ({ ...p0, channels: p0.channels.map((channel: Json, i: number) => (i === replying ? { ...channel, holding_reply: false, texts: { ...channel.texts, final } } : channel)) });
+    const view = channelAgentView({ extensions: { [KEY]: { ...value, projects: [formed({ none: "not_yet", until: "2027-13-45" })] } } }, "well-known");
+    expect(view.errors).toContain(`FAC-SEM-162 at /projects/0/channels/${replying}/texts/final/until: format (format date)`);
+    const language = channelAgentView({ extensions: { [KEY]: { ...value, projects: [formed({ until: "" })] } } }, "well-known");
+    expect(language.errors).toContain(`FAC-SEM-162 at /projects/0/channels/${replying}/texts/final/*: minLength (at least 1 code point)`);
+    const key = ["sk", "-", "Q7r2".repeat(5)].join("");
+    const found = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [formed({ none: "not_yet", until: key })] } } }, "well-known").filter((f) => f.code === "FAC-SEM-165");
+    expect(found.map((f) => f.instancePath)).toEqual([`${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/channels/${replying}/texts/final/until`]);
   });
   it("tells the author of an id that starts with sk- to rename it", () => {
     const id = "sk-support-desk-faq-answers-2026-v2";
