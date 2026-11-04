@@ -285,6 +285,8 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
   });
   it("finds the interim first-reply day: null and unnamed, the one finding a producer gives up before adoption (DEC-0151)", () => {
     expect(paths(load("support-quality-daily-first-reply-interim.json").input as Json)).toEqual(["FAC-SEM-126 /nobodyDropped/firstReplyP50Ms"]);
+    // With no first-reply time measured, one finding per percentile, and nothing else.
+    expect(paths(load("support-quality-daily-first-reply-interim-both.json").input as Json)).toEqual(["FAC-SEM-126 /nobodyDropped/firstReplyP50Ms", "FAC-SEM-126 /nobodyDropped/firstReplyP90Ms"]);
   });
   it("keeps DEC-0070's bounds: every object of the schema at most 32 members, and the whole payload inside an events page", async () => {
     const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;

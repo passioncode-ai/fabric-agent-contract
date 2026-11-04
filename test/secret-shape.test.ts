@@ -45,7 +45,7 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
   });
   it("finds nothing the earlier pattern did not, over a sweep of prefixes, joins and tails", () => {
     const earlier = /(^bearer\s.+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,})/i;
-    const heads = ["", "a", "Z", "9", "_", "-", ".", ":", " ", "%2", "%20", "%2g", "\\", "\\n", "\\x", "\\u002", "\\u0022", "\\uZZZZ", "\\x41", "\\b", "\\e", "\\0", "\u001b[0m", "\\u001b[1;31m", "\u001b[0", "\"", "'", "=", "/", "é", "bearer "];
+    const heads = ["", "a", "Z", "9", "_", "-", ".", ":", " ", "%2", "%20", "%2g", "\\", "\\n", "\\x", "\\u002", "\\u0022", "\\uZZZZ", "\\x41", "\\b", "\\e", "\\0", "\u001b[0m", "\\u001b[1;31m", "\u001b[0", "\\042", "\\1234", "%2522", "%252", "\\x1B[0m", "\\033[1m", "\\e[0m", "\"", "'", "=", "/", "é", "bearer "];
     const prefixes = ["sk-", "SK-", "ghp_", "gho_", "xoxb-", "xoxq-", "AKIA", "akia", "glpat-", "s k-"];
     const tails = [tail(8, "aB3cD4"), tail(24, "aB3cD4eF5gH6jK7mN8"), tail(16, "0123456789ABCDEF"), tail(40, "abc-def_")];
     let newOnly = 0;
@@ -123,5 +123,13 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
         expect(ms, `${name} on ${value.length} characters`).toBeLessThan(150);
       }
     }
+  });
+  it("finds every key kind after an octal escape, a double percent-escape and the escaped ESC colour forms (DEC-0151)", () => {
+    const hex = tail(64, "0123456789abcdef");
+    const kinds = [keys.openai, `sk-or-v1-${hex}`, keys.github, keys.slack, keys.aws, keys.gitlab];
+    const heads = ["a\\042", "a\\7", "a\\177", "a%2522", "a%253D", "a\\u001B[0m", "a\\x1b[1;31m", "a\\x1B[0m", "a\\e[32m", "a\\033[0m"];
+    for (const key of kinds) for (const head of heads) expect(SECRET_VALUE.test(head + key), JSON.stringify(head) + " " + key.slice(0, 5)).toBe(true);
+    // Not escapes: an octal run longer than three digits, or a double percent-escape cut short.
+    for (const head of ["a\\1234", "a%252", "a\\x1b[0"]) expect(SECRET_VALUE.test(head + keys.github), JSON.stringify(head)).toBe(false);
   });
 });

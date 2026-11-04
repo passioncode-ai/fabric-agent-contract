@@ -36,7 +36,7 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 |---|---|
 | `kind` | `support-quality-daily/1` |
 | `day`, `channel` | the closed UTC day, and `chat` (one person's chat), `mail`, `reviews` (store review replies) or `community` (group chats and forums) |
-| `project` | optional (DEC-0151): the project whose tickets these are, as the project registry's alias `project:<slug>` (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written ([identifiers](identifiers.md)), the form the channel agent declaration of DEC-0150 names a project in; absent, the service's one project |
+| `project` | optional (DEC-0151): the project whose tickets these are, as the project registry's alias `project:<slug>` (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written ([identifiers](identifiers.md)), the form the channel agent declaration of DEC-0150 names a project in; absent, the service's one project, except a merged day: a day without `project` from a service that served several projects that day names no single project. A reader tells them apart by the first event of that service and channel that names a project: the days before it are single-project days, unless the service published merged days under DEC-0095, which only the producer knows; that residual ambiguity is the reader's to resolve |
 | `rubricVersion`, `judgeModel` | the rubric's version and the judge's `<vendor>/<model>`, or `null` when nothing was judged and no calibration is carried |
 | `notMeasured` | each metric not computed that day, as `family.metric` (a metric name may carry digits: `nobodyDropped.firstReplyP50Ms`, DEC-0151), a top-level count by its own name (`arrived`, `ended`, `notATicket`), or `checks` when nothing was judged; at most 32 names (DEC-0070's list), so a producer that would name more leaves out the optional members it did not measure |
 | `arrived`, `ended`, `notATicket` | optional (DEC-0151): the tickets that arrived on the day; the tickets that ended on the day, whatever day they arrived (the **ending cohort**, which every outcome count below is of); the day's automated notices, which are not tickets |
@@ -60,7 +60,7 @@ lower-case `sk-or-v1-` key does (`project:sk-customer-support-team-europe-2026`)
 its kin, and `glpat-` (`project:ghp_customerservicedeskabcdef`). The detector reads such an alias as a credential and
 the events page fails `FAC-SEM-101`; it stays strict there (`test/secret-shape.test.ts`). The operator's registry rule
 is to issue no such alias, a rule of the registry this contract does not prove; the rule here binds a producer that
-must carry `project`: one whose alias is read so publishes nothing for that channel until its alias changes.
+must carry `project`: one whose alias is read so publishes no event for that project, on any channel, until the registry changes its alias; the other projects' events are unaffected.
 The feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries `calibration` and
 `calibrationChecks` once every reader of its feed it knows of has adopted DEC-0144. A reader that validates against an
 older copy of the schema (closed) refuses that day's `value` whole and keeps the event's `text`, so the day's numbers
@@ -96,10 +96,12 @@ serving several projects on one channel publishes no event for that channel, kee
 one event per project and day once every reader has adopted DEC-0151, and never merges projects into one event. DEC-0151 also lets a metric name in `notMeasured` carry digits, which FAC-SEM-126 needed for
 `nobodyDropped.firstReplyP50Ms` and `firstReplyP90Ms` (the earlier pattern refused them, so a producer could not name
 an unmeasured first-reply time and stay valid); an older copy refuses such a name too, so a producer writes one under
-the same rule. In the meantime a producer with an unmeasured first-reply time leaves it `null` and unnamed, so a reader
-on an older copy still accepts the day: the validator then reports exactly one FAC-SEM-126 finding, at that metric
-(`fixtures/semantic/support-quality-daily-first-reply-interim.json`), and a producer's gate accepts exactly that finding
-for that metric and no other; the producer names the metric once every reader of its feed has adopted DEC-0151.
+the same rule. In the meantime a producer leaves each unmeasured first-reply metric (`firstReplyP50Ms`, `firstReplyP90Ms`
+or both) `null` and unnamed, so a reader on an older copy still accepts the day: the validator then reports one
+FAC-SEM-126 finding per unmeasured first-reply metric, at that metric
+(`fixtures/semantic/support-quality-daily-first-reply-interim.json`, and `-interim-both.json` with two), and a
+producer's gate accepts exactly those findings at those metrics and no other; the producer names the metrics once every
+reader of its feed has adopted DEC-0151.
 
 No producer carries the ticket counts until two prerequisites outside this contract hold (CT-210 step (d)): the
 channel agent standard's section 5.1 says that `/1` takes `autonomy.toPersonPolicy` and `toPersonInability` in turns,
@@ -161,6 +163,8 @@ a mapping costs nothing.
   `notMeasured`, and a reader computes no "to a person" ticket share from them: it takes it from the channel agent
   standard's signal server or leaves it out.
 - How a reader combines one channel's per-project days: the reader's choice; rates and percentiles are never summed.
+- Which projects a reader on the channel agent standard combines: only projects of one side, the side taken from the
+  channel agent declaration or from the signal server.
 - The four summary numbers the channel agent standard derives (answered, to a person, fallback, unanswered), as
   shares of `ended`: the reader's.
 - The move from the asker's first implementation (its v2 shape, under its own URN): its producers move to

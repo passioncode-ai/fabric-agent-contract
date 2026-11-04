@@ -36,7 +36,7 @@
     },
     "project": {
       "$ref": "#/$defs/projectAlias",
-      "description": "Optional (DEC-0151): the project whose tickets these are, as the project registry's alias project:<slug>, compared as written (docs/specification/identifiers.md), the same form as the channel agent declaration's project (DEC-0150). A reader that adopted DEC-0151 keeps one event per service, channel, day and project; absent, the service's one project. Carried under the same producer rule as the other DEC-0151 members: before every reader of the feed adopted DEC-0151, a producer serving several projects on one channel publishes no event for that channel, and it never merges projects into one event."
+      "description": "Optional (DEC-0151): the project whose tickets these are, as the project registry's alias project:<slug>, compared as written (docs/specification/identifiers.md), the same form as the channel agent declaration's project (DEC-0150). A reader that adopted DEC-0151 keeps one event per service, channel, day and project; absent, the service's one project, except a merged day: a day without project from a service that served several projects that day names no single project. A reader tells them apart by the first event of that service and channel that names a project: the days before it are single-project days, unless the service published merged days under DEC-0095, which only the producer knows; that residual ambiguity is the reader's to resolve. Carried under the same producer rule as the other DEC-0151 members: before every reader of the feed adopted DEC-0151, a producer serving several projects on one channel publishes no event for that channel, and it never merges projects into one event."
     },
     "rubricVersion": {
       "type": [

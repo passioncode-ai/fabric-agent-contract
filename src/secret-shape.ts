@@ -3,8 +3,12 @@
  * The one credential detector of this kit (DEC-0044): a name that can only carry a credential (DEC-0041, FL-4), a
  * value shaped like one, a launch argument that carries one (session-handoff/1 SH-10) and a URL that does (LC-21).
  * `fabric://` links (`src/fabric-links.ts`, FAC-SEM-052) and declared command lines (`src/semantic-rules.ts`,
- * FAC-SEM-057) use it. `src/session-handoff.ts` keeps a copy, because Fabric vendors that file alone and runs it
- * without this kit; `test/session-handoff-review.test.ts` checks that the copy agrees with this module.
+ * FAC-SEM-057) use it. `src/session-handoff.ts` keeps a copy, because its vendors take that file alone and run it
+ * without this kit; `test/session-handoff-review.test.ts` checks that the copy agrees with this module. Vendors that
+ * re-sync on a change (DEC-0151): Fabric vendors this file twice, one copy under a sha256 `pin.json` together with
+ * `fixtures/vectors/folder-attribution.json`; Fabric Dashboards vendors `src/session-handoff.ts` and
+ * `src/fabric-links.ts`, and its service host's connections hold a port; Fabric Dashboards' sample-service kit copies
+ * hold the earlier pattern.
  */
 
 /**
@@ -55,16 +59,19 @@ export function credentialName(name: string): boolean {
 export const JWT_SHAPE = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]*/;
 /**
  * A value that says it is a credential (`Bearer ` at its start, in any case), or a provider key's shape (OpenAI,
- * GitHub, Slack, AWS, GitLab) with its prefix in its canonical case only: `SK-` or `GHP_` is no key (DEC-0151). A
- * prefix counts only at the start, after a character that is no ASCII letter or digit, or after a percent-escape
- * (`%22`) or a backslash escape (`\n`, `\"`, `\u0022`), matched as a consuming group so a port without look-behind
- * reads it the same; a key glued right after a letter or digit is knowingly not found. An `sk-` key holds what
- * `src/connections.ts` asks of one: a digit and an upper-case letter with 16 or more characters, or a digit with 32 or
- * more. So `project:helpdesk-customer-support`, `project:sk-learn-experiments` and `sk-learn-experiments-2026` are no
- * keys, and `sk-or-v1-` with 64 lower-case hex digits is one. The `sk-` test uses look-ahead: a port whose regex has
- * none (Rust's `regex` crate) checks that strength outside the regex.
+ * GitHub, Slack, AWS, GitLab) with its prefix in its canonical case only: `SK-` or `GHP_` is no key (DEC-0151 item 7).
+ * A prefix counts only at the start of a value, after a character that is no ASCII letter or digit, or after an
+ * escape: a percent-escape (`%22`) or a double one (`%2522`), a backslash escape (`\n`, `\t`, `\r`, `\"`, `\'`, `\b`,
+ * `\f`, `\v`, `\0`, `\a`, `\e`), an octal (`\042`), `\x` with two hex digits, `\u` with four, or an ESC colour
+ * sequence, raw or escaped (`\u001b[`, `\x1b[`, `\e[`, `\033[`, digits and `;`, `m`). It is matched as a consuming
+ * group so a port without look-behind reads it the same; a key glued right after a letter or digit is knowingly not
+ * found. An `sk-` key holds what `src/connections.ts` asks of one, within 256 characters: a digit and an upper-case
+ * letter with 16 or more characters, or a digit with 32 or more. Its two look-aheads are bounded to 255 characters,
+ * read lazily, so a long run of `sk-` prefixes is read in linear time. So `project:helpdesk-customer-support`,
+ * `project:sk-learn-experiments` and `sk-learn-experiments-2026` are no keys, and `sk-or-v1-` with 64 lower-case hex
+ * digits is one. A port whose regex has no look-ahead (Rust's `regex` crate) checks that strength outside the regex.
  */
-export const SECRET_VALUE = /(^[Bb][Ee][Aa][Rr][Ee][Rr]\s.+|(?:^|[^A-Za-z0-9]|%[0-9A-Fa-f]{2}|\\[nrt"']|\\u[0-9A-Fa-f]{4}|\\x[0-9A-Fa-f]{2}|\\[bfv0ae]|\x1b\[[0-9;]*m|\\u001b\[[0-9;]*m)(?:sk-(?=[A-Za-z0-9_-]{0,255}?\d)(?:(?=[A-Za-z0-9_-]{0,255}?[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}))/;
+export const SECRET_VALUE = /(^[Bb][Ee][Aa][Rr][Ee][Rr]\s.+|(?:^|[^A-Za-z0-9]|%[0-9A-Fa-f]{2}|\\[nrt"']|\\u[0-9A-Fa-f]{4}|\\x[0-9A-Fa-f]{2}|\\[bfv0ae]|\\[0-7]{1,3}|%25[0-9A-Fa-f]{2}|\x1b\[[0-9;]*m|(?:\\u001[bB]|\\x1[bB]|\\e|\\033)\[[0-9;]*m)(?:sk-(?=[A-Za-z0-9_-]{0,255}?\d)(?:(?=[A-Za-z0-9_-]{0,255}?[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}))/;
 /**
  * A long secret: 40 or more characters of base64 or base64url (`+`, `/`, `=`, `-`, `_` included), mixing upper case,
  * lower case and digits. A hex digest is lower case and passes.

@@ -9078,9 +9078,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      family part and everything else of the pattern stay as they were (CT-129).
   4. A producer carries the new members, `project` among them, and names a metric with a digit in `notMeasured`, only
      once every reader of its feed it knows of has adopted DEC-0151, as DEC-0144 asks of the calibration: a reader on
-     an older copy refuses either. In the meantime an unmeasured first-reply time is `null` and unnamed, so an older
-     copy accepts the day; the validator reports exactly that one FAC-SEM-126 finding, a producer's gate accepts exactly
-     that finding for that metric, and the producer names the metric once every reader has adopted. No producer carries
+     an older copy refuses either. In the meantime each unmeasured first-reply metric (`firstReplyP50Ms` and/or
+     `firstReplyP90Ms`) is `null` and unnamed, so an older copy accepts the day; the validator reports one FAC-SEM-126
+     finding per unmeasured first-reply metric, a producer's gate accepts exactly those findings at those metrics and no
+     other, and the producer names the metrics once every reader has adopted. No producer carries
      the counts until the channel agent standard's section 5.1 says that `/1` takes the escalation counts in turns and
      its observed check accepts a channel withheld during the wait (CT-210 step (d)). Until `/1` names a ticket unit, a reader computes no "to a person" ticket share from
      `autonomy.toPersonPolicy` and `toPersonInability`: it takes it from the channel agent standard's signal server or
@@ -9110,10 +9111,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      members, inside DEC-0070's 32.
   7. The shared credential detector (`SECRET_VALUE` in `src/secret-shape.ts`, and its identical copy in
      `src/session-handoff.ts`) takes a provider key's prefix (`sk-`, `gh?_`, `xox?-`, `AKIA`, `glpat-`) only at the
-     start of a value, after a character that is no ASCII letter or digit, or after an escape: a percent-escape (`%22`),
-     a backslash escape (`\n`, `\t`, `\r`, a backslash and a double or single quote, `\b`, `\f`, `\v`, `\0`, `\a`,
-     `\e`), a `\x` escape with two hex digits, a `\u` escape with four, a raw ESC colour sequence (ESC, `[`, digits
-     and `;`, `m`) or an escaped one (`\u001b[`, digits and `;`, `m`). The boundary is a consuming group, not a
+     start of a value, after a character that is no ASCII letter or digit, or after an escape: a percent-escape (`%22`)
+     or a double one (`%2522`), a backslash escape (`\n`, `\t`, `\r`, a backslash and a double or single quote, `\b`,
+     `\f`, `\v`, `\0`, `\a`, `\e`), an octal escape of one to three digits (`\042`), a `\x` escape with two hex
+     digits, a `\u` escape with four, a raw ESC colour sequence (ESC, `[`, digits and `;`, `m`) or an escaped one
+     (`\u001b[`, `\u001B[`, `\x1b[`, `\x1B[`, `\e[` or `\033[`, then digits and `;`, `m`). The boundary is a consuming group, not a
      look-behind, so a port without look-behind (a Rust port, an older browser) reads it the same; `RegExp.test`
      answers as a look-behind would. A key glued directly after an ASCII letter or digit is knowingly no longer found.
      The pattern has no `i` flag: `Bearer` is spelled in any case by hand (`^[Bb][Ee][Aa][Rr][Ee][Rr]\s.+`), and the
@@ -9126,13 +9128,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      first 256 characters of a run no longer counts. A port whose regex has no look-ahead (Rust's `regex` crate) checks
      that strength outside the regex. So `project:helpdesk-customer-support`,
      `project:sk-learn-experiments`, `sk-learn-experiments-2026` and `project:sk-hynix-customer-care` are no keys,
-     while a mixed-case key, an `sk-proj-` key and `sk-or-v1-` with 64 lower-case hex digits still are, in every
-     position. The residual: an alias with a slug word that starts with a provider prefix and holds enough key
+     while a mixed-case key, an `sk-proj-` key and `sk-or-v1-` with 64 lower-case hex digits still are, at the start of
+     a value, after a boundary character or after a listed escape. The residual: an alias with a slug word that starts with a provider prefix and holds enough key
      characters is read as a credential: for `sk-`, a run (letters, digits, `-` and `_`) of 32 or more holding a digit,
      as a lower-case `sk-or-v1-` key does (`project:sk-customer-support-team-europe-2026`); then `ghp_` and its kin,
      `xox?-` and `glpat-` (`project:ghp_customerservicedeskabcdef`). The operator's registry rule is to issue no such
      alias, which this contract does not prove; the rule binds only a producer that must carry `project`: one whose
-     alias is read so publishes nothing for that channel until its alias changes.
+     alias is read so publishes no event for that project, on any channel, until the registry changes its alias; the other projects' events are unaffected.
 - **Why:** the channel agent standard's daily report counts tickets on its signal server and checks each agent's feed
   against it; one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that
   home before any producer may send them. The digit fixes a rule the schema made impossible to keep. The registry
@@ -9175,7 +9177,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   name, which is no longer a key; they now hold an `AKIA` value (an upper-case name that still is one), with their
   digests recomputed, and their tests (`test/package.test.ts`, `test/estate-record.test.ts`) name the new value. Fabric,
   which vendors `src/session-handoff.ts`, re-vendors it to find the same, and every port of the detector takes the same
-  boundary, `sk-` strength (bounded look-aheads) and canonical-case prefixes (no `i` flag). `contractVersion` stays
+  boundary, `sk-` strength (bounded look-aheads) and canonical-case prefixes (no `i` flag). The vendors that re-sync:
+  Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json` together with
+  `fixtures/vectors/folder-attribution.json`, so both are re-pinned together; Fabric Dashboards vendors
+  `src/session-handoff.ts` and `src/fabric-links.ts`, and its service host's connections hold a port; Fabric
+  Dashboards' sample-service kit copies hold the earlier pattern. One port is exempt from that instruction: the
+  adapter's source check (`fabric_source_check.py`) derives its provider-key shapes from
+  `fabric_secrets.SECRET_VALUE.pattern` and raises `ImportError` on DEC-0151's pattern, so it keeps the earlier
+  unbounded shapes as its own fixed list, for parity with DEC-0149's tree check, before or together with the detector's
+  port. A producer that merged projects into one event under DEC-0095 stops publishing that channel from DEC-0151
+  until every reader adopts, so its readers see no days for that channel meanwhile; whether any `/1` producer does so
+  today is the producers' to confirm (CT-103 suggests multi-product producers are still on their v2 shape).
+  `contractVersion` stays
   `0.1.0`.
 - **Consequences / affects:** `schemas/support-quality-daily.schema.json` (also the `calibration` description DEC-0144
   left to correct), `src/support-quality-rules.ts`, `test/support-quality.test.ts`; `src/secret-shape.ts`,

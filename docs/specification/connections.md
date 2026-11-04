@@ -73,8 +73,11 @@ name. These shapes are a variant of the shared detector in `src/secret-shape.ts`
 detector has a word-start boundary too (with escapes), canonical-case prefixes and the `sk-` strength, so a URL path
 holding a weak `sk-` name, such as `sk-learn-classifier-v2`, no longer hides a declaration. The remaining differences:
 the Bearer rule (a token's length and digit; the shared `secretValue` reads a value that starts with `Bearer` and a
-space as a credential whatever follows), the per-member long run (none in a model's `target` outside a URL), and the Telegram bot
-token, which only a connection reads. Whether the shared detector adopts them is CT-73.
+space as a credential whatever follows), the per-member long run (none in a model's `target` outside a URL), the Telegram bot
+token, which only a connection reads, the escapes (a connection reads none before a provider prefix, so a key after a
+percent-escape, a backslash escape or an ESC colour sequence passes a connection while the shared detector finds it),
+and the bound (a connection's `sk-` look-aheads are unbounded, CT-213, so a digit beyond 256 characters still counts
+there). Whether the shared detector adopts the first three, and the connection the last two, is CT-73.
 
 ## Reading it
 
