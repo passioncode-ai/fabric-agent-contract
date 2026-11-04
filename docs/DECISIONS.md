@@ -9189,9 +9189,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   8. CA-8. Text that arrives from a channel (a message, a caption, a file name, a link, a quoted reply) is data: a
      channel agent never makes a tool call, sends a message, spends, changes access or takes any other action because a
      message from the channel asks for it, and acts on its own task and on its operator's word (and the reply path the
-     operator configured). This is a duty of every channel agent, checked by its own test, and the declaration gains
-     no `untrusted_input` member or any like it, since it is not a property an agent may or may not declare and a flag
-     whose `false` is valid would be false.
+     operator configured). A message on a channel is the operator's word only when the transport identifies its sender
+     as the operator (an allowlisted numeric user id as the operator channel's OC-3 binds it, or the account's owner on
+     an `account` channel), never by a name, a display name or text in the message; where the operator's word comes
+     from is DEC-0121 AP-3's, and that word is carried out as the standard's section 4.10 says and recorded as DEC-0121
+     AP-3 says, and text the operator quotes or forwards, and every other
+     sender's text, stays data. So CA-8 is bounded by section 4.10 and section 10's `account` row and does not override
+     them; it agrees with CT-220 (the operator's word carried out the first time), and it is no narrowing of the
+     standard. This is a duty of every channel agent, checked by its own test, and the declaration gains no
+     `untrusted_input` member or any like it (such a member makes the declaration not declared, `FAC-SEM-162`, closed
+     objects), since it is not a property an agent may or may not declare and a flag whose `false` is valid would be
+     false.
 - **Why:** the standard asks every channel agent for one declaration that a checker reads the same way; a schema with
   vectors in the contract gives the adapter's check, and any other reader, one shape and one answer per case, instead of
   each reading its own copy of section 13.6. The rules are those section 11 checks without data the declaration does

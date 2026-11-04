@@ -214,7 +214,22 @@ FAA-197, on the adapter's main).
   state a duty of every channel agent: text from a channel (a message, a caption, a file name, a link, a quoted reply)
   is data, and the agent takes no action because a channel message asks for it, acting on its own task and its
   operator's word (and the reply path the operator configured). A flag whose `false` is valid would be false. The
-  conformance page gains a row for it, checked by the agent's own test. No schema, code, vector or fixture changes.
+  conformance page gains a row for it, checked by the agent's own test.
+- Round 17's readings (on `45d741b5`: unit pass with one risk and one note, product two breaks), with the
+  coordinator's decisions applied: CA-8 is bounded, not an override of the standard's section 4.10 and section 10's
+  `account` row: a channel message is the operator's word only when the transport identifies its sender as the
+  operator (an allowlisted numeric user id as OC-3 binds it, or the account's owner on an `account` channel), never by
+  a name, a display name or text in the message; that word is carried out as section 4.10 says and recorded as AP-3
+  says, and quoted or forwarded text stays data; it agrees with CT-220 and is no narrowing. The page adds that a member
+  such as `untrusted_input` makes the declaration not declared (`FAC-SEM-162`, closed objects). The page's intro, the
+  specification README row, the DOCMAP row, CONTEXT.md's "Channel agent" and CT-209 name CA-8; the merge post below
+  carries CA-8 and the `autonomy.answeredTickets` ask; the adoption paragraph names each producer's own test of CA-8;
+  the merge notes name both conformance rows and DEC-0152 and DEC-0153. A new vector, a manifest with no
+  `provider.extensions` and only a heavy misplaced copy, pins its view: not declared, the copy's `FAC-SEM-162` line and
+  the `FAC-SEM-165` line asking for its removal. The seam reading of round 17 failed on the same CA-8 and section 4.10 break, already bounded: CA-8, item 8 and the
+  conformance row now name section 4.10 and cite DEC-0121 AP-3 for where the operator's word comes from; the merge
+  post asks the owner to fold CA-8 and its bound into section 4; the sibling notes give the schema count with
+  DEC-0149, DEC-0150 and DEC-0153 (150) and the merge steps for DEC-0153 and DEC-0152; main is `ed4d6aa7`.
 
 ## The branch and its history
 
@@ -288,7 +303,9 @@ origin), whichever lands second:
   `src/channel-agent.ts`, `src/source-rules.ts` and `src/validator.ts` at a branch floor of 100; check:
   `grep -c 'include: \["src/' vitest.config.ts` prints 1 and `grep -c '^\*\*Next free rule code'
   docs/specification/conformance.md` prints 1;
-- on conformance.md's clients table keeps CT-194's text for the actions row and appends this branch's row;
+- on conformance.md's clients table keeps CT-194's text for the actions row and appends this branch's two rows (the
+  channel agent's declaration and CA-8); check: `grep -c '^| an agent that answers people on a channel'
+  docs/specification/conformance.md` prints 2;
 - finds `rawValues` in `src/secret-shape.ts` already the same lines on both branches, and on the merged tree runs
   `pnpm vectors:check` and `test/channel-agent.test.ts` against CT-194's `secret-shape.ts`;
 - keeps both branches' rows in `docs/backlog.md` and in `docs/handoffs/README.md`;
@@ -322,12 +339,25 @@ One line per sibling and per file it shares with this branch:
   as written" for `project:<slug>` and the second lander merges them into one. On the merged tree, run
   `pnpm vectors:check` and `test/channel-agent.test.ts` against the in-progress DEC-0151's final `src/secret-shape.ts` (no `/i`,
   provider prefixes in their canonical case, a strength rule for `sk-`).
+- DEC-0152 (branch `agent/ct217-board-same-turn-20261104`): the registers only (`docs/DECISIONS.md`,
+  `docs/DOCMAP.md`, `docs/backlog.md` with its row CT-217, a different row of `docs/specification/conformance.md`) and
+  `docs/handoffs/README.md`, where both branches add a top row and both are kept.
+- DEC-0153 (branch `agent/ct219-ops-digest-20261104`): `docs/DECISIONS.md`; `docs/DOCMAP.md`; `docs/backlog.md`;
+  `docs/handoffs/README.md`; `docs/specification/conformance.md`; `docs/specification/README.md`; `CONTEXT.md`;
+  `fixtures/catalogue.json`; `src/semantic-rules.ts`; `test/positive-sweep.test.ts`; `test/rule-tolerance.test.ts`;
+  `tools/vectors/run.ts`; `vitest.config.ts`; `test/schema-compilation.test.ts`. With DEC-0149, DEC-0150 and DEC-0153
+  all on main the schema count is 150: each side writes 148 and git merges it silently, so whichever lands last sets it
+  by hand in `test/schema-compilation.test.ts`. The merged tree keeps one coverage `include` line holding every
+  branch's list, with `src/ops-digest.ts`'s floor beside the others; `test/positive-sweep.test.ts`'s `sources` holds
+  both `source-rules` and `ops-digest`; `test/rule-tolerance.test.ts` holds both kinds, with a comma between them; the
+  catalogue's last row before the other branch's rows gains its comma; and conformance.md's register adds
+  `FAC-SEM-166` and `FAC-SEM-167` after `165`.
 - PR #235: `docs/DECISIONS.md`; `docs/backlog.md`; conformance.md's next-free line; conformance.md's register, the
   `FAC-SEM-155` row before `156`.
-- Main moves while this branch waits (it was `7213463f` after PR #239, with CT-217 and CT-218 at the backlog's tail,
+- Main moves while this branch waits (it is `ed4d6aa7` after PR #241, with CT-219 and CT-220 at the backlog's tail,
   when this was written): the lander re-measures main at landing and merges or rebases over it; `docs/backlog.md`
   conflicts only at the tail, where the rows stay in id order (`CT-204`, `CT-205`, `CT-206`, then this branch's
-  `CT-209`, then `CT-215` to `CT-218`), and any row an open branch adds takes its place by id.
+  `CT-209`, then `CT-215` to `CT-220`), and any row an open branch adds takes its place by id.
 - `docs/DECISIONS.md` keeps a blank line before each DEC heading (markdownlint MD022);
 - `docs/DECISIONS.md` keeps one "Next free ID" line, equal to the CAS counter at the merge, and each DEC body in id
   order after the bodies already on main: `grep -c '^\*\*Next free ID' docs/DECISIONS.md` prints 1. (On main, the
@@ -424,6 +454,10 @@ here), and adds:
 - only a manifest's `provider.extensions` is read: a declaration under the manifest's top-level `extensions` is
   `FAC-SEM-162` and not read;
 - `channel-agent-standard/2` is refused until a contract revision;
+- CA-8, the contract's own duty, with its section-4.10 bound, for the standard's owner to fold into section 4 or
+  reject: text from a channel is data, and a channel message is the operator's word only when the transport identifies
+  its sender as the operator, that word carried out as section 4.10 says (quoting
+  [the section](../specification/channel-agent.md#text-from-a-channel-is-data) at posting time);
 - a budget above 0 without a spend record is `FAC-SEM-164`;
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;
@@ -442,8 +476,9 @@ here), and adds:
   ASCII and percent rules; every other string, a sentence that holds a URL included ("Please write to
   https://u:p@help.example/"), is read for key shapes only, so a password there is not found: is that gap acceptable
   for the standard's section 11 check;
-- to be asked of the standard's owner: that section 5.1's table mark `autonomy.answered` and
-  `stability.fallbackTurns` new too (they are not in `/1` either), and keep `toPerson*` under `autonomy`;
+- to be asked of the standard's owner: that section 5.1 name its answered-ticket row `autonomy.answeredTickets`
+  (v2's `autonomy.answered` counts turns, message `5a1334d1`) and mark it and `stability.fallbackTurns` deferred, as
+  DEC-0151's CT-210 (d) asks; DEC-0151's ask and this one are the same request; and keep `toPerson*` under `autonomy`;
 - to be asked of the standard's owner: section 5.1 counts `toPersonPolicy` and `toPersonInability` in tickets where
   `/1` names no ticket unit (its autonomy counts are bounded by turns); which unit it means (DEC-0151, in progress, proposes one);
 - the coordinator asks the standard's owner to hold the observed per-project quality check for shared channels until
@@ -452,7 +487,9 @@ here), and adds:
   `pnpm validate` on its manifest or well-known answer at posting time.
 
 At merge, one adoption row per live producer is filed in that producer's own backlog with its `FAC-SEM-162` places
-(the coordinator files them on the board), with the places read again at posting time. Three live producers' current
+(the coordinator files them on the board), with the places read again at posting time. Each row also names the
+producer's own test of CA-8: a channel message asking for an action causes none, and the operator's word, as CA-8
+bounds it, is carried out. Three live producers' current
 declarations fail today, the places to be read again at posting time: one manifest at `sources/4/max_age`,
 `handoff_queues/0/owner` and `evals/spend_record` (pattern, or null); one well-known builder with no
 `question_route` and a recommendation holding a colon; one well-known builder with `null` for `question_route`,
