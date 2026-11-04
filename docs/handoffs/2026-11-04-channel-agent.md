@@ -188,6 +188,10 @@ FAA-197, on the adapter's main).
   rename advice follows the role down the walk (any frame at or below a channel's `texts`); `SK_FLOOR` is 16; the
   boundary `sk-` charge is described from its `s`, with an exact test and a vector at the budget's edge; a test checks
   the boundary forms both ways; a well-known declaration shares the answer's size with its host's readers.
+- From DEC-0151's round 13 seam: the cost model's boundary now takes a colour sequence with `:` parameters
+  (`ESC[38:5:1m`) and the escaped ESC `\33`, as DEC-0151's detector does, so the full 255 is charged after those heads;
+  the boundary-forms test holds them, and an exact test pins the 255 for `ESC[38:5:1m`, `\x1b[38:5:1m`, `\33[1m` and
+  `\033[1m`.
 
 ## The branch and its history
 

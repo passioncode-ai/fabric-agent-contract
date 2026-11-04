@@ -288,8 +288,9 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    every `sk-` away from a boundary, up to 16 code points after it (the run the shape needs) (a bound too: a detector may try an `sk-` run there,
    and one that requires a boundary reads less). A boundary is the start, a character other than a letter or a digit, or an escape that ends
    right before the `sk-`: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a backslash escape of
-   one character, or a colour sequence `ESC[...m` with any number of parameter characters whose ESC is raw or escaped
-   (`\x1b`, `\033`, `\u001b` in either case of the hex digits, or `\e`). For a string read as a URL that parses, the URL
+   one character, or a colour sequence `ESC[...m` with any number of parameter characters (digits, `;` and `:`, as in
+   `ESC[38:5:1m`) whose ESC is raw or escaped (`\x1b`, `\033`, `\33`, `\u001b` in either case of the hex digits, or
+   `\e`). For a string read as a URL that parses, the URL
    terms are counted on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed,
    percent-decoded), not on the raw text: for every query or fragment piece, 128, its name's and its value's code
    points, the value's `eyJ` and `sk-` terms and, when the value is not empty and the name holds an upper-case letter,

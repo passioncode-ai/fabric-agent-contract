@@ -900,13 +900,17 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   // The boundary forms the cost model recognises before an `sk-` (ESCAPE_BEFORE, ESC_BEFORE, colourBefore), checked
   // both ways: the cost charges a boundary `sk-` after each, and the shared detector finds a key after each. Once DEC-0151
   // lands, its lander adds every boundary form its detector's comment lists, so the two cannot drift.
-  const BOUNDARY_FORMS = ["", " ", "/", "%2F", "%252F", "\\x2F", "\\u002F", "\\057", "\\57", "\\n", "\u001b[31m", "\u001b[m", "\\x1b[0m", "\\x1B[1;31m", "\\033[0m", "\\u001b[0m", "\\u001B[0m", "\\e[0m"];
+  const BOUNDARY_FORMS = ["", " ", "/", "%2F", "%252F", "\\x2F", "\\u002F", "\\057", "\\57", "\\n", "\u001b[31m", "\u001b[m", "\\x1b[0m", "\\x1B[1;31m", "\\033[0m", "\\u001b[0m", "\\u001B[0m", "\\e[0m", "\u001b[38:5:1m", "\\x1b[38:5:1m", "\\33[1m"];
   it("charges a boundary sk- after every form the cost model recognises, and the detector finds a key after each", () => {
     const key = ["sk", "-", "Q7r2".repeat(5)].join("");
     for (const form of BOUNDARY_FORMS) {
       const text = `${form}${key}`;
       expect(detectorCost(text), JSON.stringify(form)).toBe(codePoints(text) + key.length);
       expect(SECRET_VALUE.test(text), JSON.stringify(form)).toBe(true);
+    }
+    // A colour sequence with `:` parameters and the escaped ESC `\33` are boundaries too: the full 255 is charged.
+    for (const head of ["\u001b[38:5:1m", "\\x1b[38:5:1m", "\\33[1m", "\\033[1m"]) {
+      expect(detectorCost(`${head}sk-${"a".repeat(300)}`) - detectorCost(`${head}xx-${"a".repeat(300)}`), JSON.stringify(head)).toBe(255);
     }
     // Away from a boundary the run is charged up to SK_FLOOR after the `sk-`.
     expect(detectorCost(`a${key}`)).toBe(1 + key.length + SK_FLOOR);

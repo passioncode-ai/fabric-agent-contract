@@ -9125,8 +9125,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      detector may need, in code points: each name or string 16 plus its code points, once; after each `eyJ`, the rest of
      its base64url run and, when it ends at a `.`, the dot and the run after it; from each `sk-`, in any case, at a
      boundary (the start, a non-alphanumeric character, `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal
-     escape, a backslash escape, or a colour sequence with any number of parameter characters whose ESC is raw or
-     escaped in either case), its three characters included, up to 255 code points; after every other provider prefix of the shared detector, anywhere
+     escape, a backslash escape, or a colour sequence with any number of parameter characters (digits, `;`, `:`) whose
+     ESC is raw or escaped in either case, `\33` included), its three characters included, up to 255 code points; after every other provider prefix of the shared detector, anywhere
      and in any case (`gh?_`, `xox?-`, `AKIA`, `glpat-`), up to its floor (20, 10, 16 and 20 code points), what a near
      miss is reread before it fails; after every `sk-` away from a boundary, up to 16 code points after it (the run the shape needs) (each a bound
      any detector may need, whatever boundary or case its own shapes take); and, for a

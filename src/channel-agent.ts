@@ -565,14 +565,14 @@ export function codePoints(text: string, limit = Number.POSITIVE_INFINITY, from 
  * sequence is read by `colourBefore`.
  */
 const ESCAPE_BEFORE = /(?:%25[0-9A-Fa-f]{2}|%[0-9A-Fa-f]{2}|\\x[0-9A-Fa-f]{2}|\\u[0-9A-Fa-f]{4}|\\[0-7]{2,3}|\\.)$/;
-/** An ESC, raw or escaped: `\x1b`, `\033`, `\u001b` (either case of the hex digits) or `\e`. */
-const ESC_BEFORE = /(?:\u001b|\\x1[bB]|\\033|\\u001[bB]|\\e)$/;
+/** An ESC, raw or escaped: `\x1b`, `\033`, `\33`, `\u001b` (either case of the hex digits) or `\e`. */
+const ESC_BEFORE = /(?:\u001b|\\x1[bB]|\\0?33|\\u001[bB]|\\e)$/;
 
-/** Whether a colour sequence `ESC[...m`, with any number of parameter characters, ends right before `at`. */
+/** Whether a colour sequence `ESC[...m`, with any number of parameter characters (digits, `;` and `:`), ends right before `at`. */
 function colourBefore(text: string, at: number): boolean {
   if (text[at - 1] !== "m") return false;
   let start = at - 2;
-  while (start >= 0 && /[0-9;]/.test(text[start] as string)) start -= 1;
+  while (start >= 0 && /[0-9;:]/.test(text[start] as string)) start -= 1;
   return text[start] === "[" && ESC_BEFORE.test(text.slice(Math.max(0, start - 6), start));
 }
 
