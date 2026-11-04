@@ -88,9 +88,19 @@ filed; the coordinator files it on the board).
   names and values) and three product breaks (FAC-SEM-162's pointer to a grammar that lacked limits, three narrowing
   lists that disagreed, a merge plan that rewrote DEC-0150's body), fixed: the URL terms are counted on what a WHATWG
   URL parse yields; the budget counts code points; `sk-` is found in any case and colour sequences of any length;
-  FAC-SEM-162 names the schema's limit beside each keyword, and the page's grammar lists every limit, held to the
+  FAC-SEM-162 names the schema's limit beside each failed keyword, and the page's grammar lists every limit, held to the
   schema by a test; one narrowing list, on the page; the change of DEC-0151 (in progress) annotates DEC-0150; `channelAgentView` answers
   as a reader does (FAC-SEM-165 and FAC-SEM-163 not declared, FAC-SEM-164 shown).
+- Round 10 of the readings: unit, seam and product findings, fixed: a string is read as a URL only when it opens with a
+  scheme and its authority is ASCII only (a long host outside ASCII made the WHATWG parse grow with its square; 300
+  such strings now run within twice prose's thread time plus 20 ms, and edge vectors pin the rule); a place's member
+  name is built only when a finding is reported; the read declaration is walked before its misplaced copies, so a heavy
+  copy cannot spend the budget first (a vector pins it), and the walk stops descending once the budget is spent;
+  `channelAgentView` is shaped as `connectionsView` (`declared`, `reported`, `errors`); FAC-SEM-162 says `code points`
+  for a length and `(object)` or `not null` for a type; the page's Narrowings list is rewritten against the grammar it
+  links, four members keep another owner's grammar (`gap_registry.capability` added), and the join and alias
+  sentences say when a reader joins and what an agent leaves out; the adapter reports, never fails, a declaration
+  written before this revision while live producers still publish one.
 
 ## The branch and its history
 
@@ -113,8 +123,14 @@ the pull request comes from the v3 branch only.
 - A final text is owed by a channel that replies, and an em dash or a blank text in a declared text is a finding, from
   section 2.4's send checks.
 - FAC-SEM-162 names failed keywords with their places (member names the schema does not declare written `*`) and,
-  beside a failed `enum`, `const` or `pattern`, the schema's allowed values, not Ajv's schema paths, which are relative
-  to a `$ref`'s target.
+  beside each failed keyword, the schema's limit (values, pattern, length in code points, count, bound, format,
+  `(object)` or `not null` for a type), not Ajv's schema paths, which are relative to a `$ref`'s target.
+- Four members keep another owner's grammar, repeated in the schema: `question_route.target` (the board's project id),
+  `gap_registry.capability` (a capability name), `evals.spend_record` (the usage report's limit id) and a queue's
+  `recommendation` (the board's `opaqueId`).
+- `channelAgentView` answers as `connectionsView` does: `declared: false, reported: false` with no key,
+  `declared: false, reported: true` with the findings (FAC-SEM-162, FAC-SEM-165, FAC-SEM-163, or the rest not read),
+  `declared: true` with the obligations FAC-SEM-164 found.
 - `channel-agent-standard/1` joins the protocol register (`src/protocol-revisions.ts`), since the schema pins it.
 - Credential shapes for the slot cases a provider might scan for (an AWS or Slack key) are built at run time in
   `test/channel-agent.test.ts`; the vector file carries only `sk-` shapes of repeated or made-up characters.
@@ -130,8 +146,9 @@ the pull request comes from the v3 branch only.
   capability for the side's kind, a tier's fact among the customer facts, the existence of the named agents,
   capabilities, desk and limit, a working-time limit's calendar, and everything the signal server observes.
 - The adoption, owed by the Fabric Agent Adapter, its row to be filed (the coordinator files it on the board): its
-  `check_service.py` vendors the schema and the vectors; at its
-  re-pin both `PROTOCOL_REVISIONS` twins (`fabric_protocols.py`, `fabric-protocols.mjs`) gain `channel-agent-standard`
+  `check_service.py` vendors the schema and the vectors and reports, never fails, a declaration it reads as not
+  declared while live producers still publish declarations written before this revision (each producer's own row is
+  filed before the adapter re-pins); at its re-pin both `PROTOCOL_REVISIONS` twins (`fabric_protocols.py`, `fabric-protocols.mjs`) gain `channel-agent-standard`
   `['1']` and the feed-protocols vectors are vendored again. Then a later decision moves the key to version 1 (CA-7).
 
 ## Merging beside the branch of CT-194 and the other open branches
@@ -149,6 +166,8 @@ With `origin/agent/ct194-source-manifest-20261103`, whichever lands second:
 - finds `rawValues` in `src/secret-shape.ts` already the same lines on both branches, and on the merged tree runs
   `pnpm vectors:check` and `test/channel-agent.test.ts` against CT-194's `secret-shape.ts`;
 - keeps both branches' rows in `docs/backlog.md` and in `docs/handoffs/README.md`;
+- at this branch's landing, if main then holds DEC-0149's one-pass `hasJwt`, the landing step switches `keyShaped` in
+  `src/channel-agent.ts` from `JWT_SHAPE.test` to `hasJwt`; if DEC-0149 lands after this branch, its lander does;
 - leaves `detectorCost` normative: once DEC-0149's one-pass `hasJwt` lands, the `eyJ` term no longer describes this
   repository's detector, and stays as a bound any port's detector may need (the page and CA-5 already say so).
 
@@ -181,36 +200,43 @@ The gate of DEC-0151 (in progress) puts DEC-0150 on main first. Once DEC-0150 is
 Compatibility and Source sentences that name DEC-0151 as in progress (an annotation under DEC-0150, never a rewrite of
 its body: `docs/DECISIONS.md` is append-only), and rewrites these sentences outside the register:
 
-- "DEC-0151 (CT-210), in progress" in `docs/specification/support-quality.md` (Not decided here), and the daily quality
-  payload bullet in `channel-agent.md#compatibility` (with the shared-channel quality check and the unit of
-  `toPerson*`);
+- the "Not decided here" bullet in `docs/specification/support-quality.md` that names DEC-0151 (CT-210) in progress:
+  removed, since DEC-0151's section answers it;
+- the daily quality payload bullet in `channel-agent.md#compatibility` (with the shared-channel quality check and the
+  unit of `toPerson*`): a pointer to DEC-0151 and to the support quality page's channel kinds table and per-project
+  keying;
 - "(the memory capability's pattern; DEC-0151, in progress on CT-210, proposes the same `projectAlias`)" in
   `channel-agent.md` (what the members mean), which becomes a statement that the two patterns are one;
-- "DEC-0151 (CT-210, in progress) proposes the same alias for `support-quality-daily` payloads; once it lands, a reader
-  joins a declaration to a project's payloads on `project:<slug>`" in `channel-agent.md`, which becomes a statement
-  that the reader joins them;
-- the sentence in `channel-agent.md` (What is checked, item 4), the comment on `shaped` in `src/channel-agent.ts` and
-  the title of the `sk-` test in `test/channel-agent.test.ts` that state today's `sk-` rule (16 or more letters,
-  digits, `_` or `-`, any case) and what DEC-0151, in progress, proposes: they state its rule as current, and the test
-  re-checks that `sk-support-desk-faq-answers-2026-v2` is still found; the advice not to start an id with `sk-` stays;
+- the sentence in `channel-agent.md` (what the members mean) that names DEC-0151 in progress and says when a reader
+  joins a declaration to the payloads that carry `project:<slug>`: it states that `support-quality-daily` payloads
+  carry the same alias, that a reader joins on it once the feed's readers have adopted it, and that a payload with no
+  project is attributed to none;
+- the sentence in `channel-agent.md` (What is checked, item 4) and the comment on `shaped` in `src/channel-agent.ts`
+  that state today's `sk-` rule (16 or more letters, digits, `_` or `-`, any case) and what DEC-0151, in progress,
+  proposes: they state its rule as current (a word-start boundary, the `sk-` strength, canonical case), and the `sk-`
+  test re-checks whether `sk-support-desk-faq-answers-2026-v2` is still found; the advice not to start an id with
+  `sk-` stays;
 - the "(DEC-0151, in progress)" text in the channel agent standard's row of `docs/evidence/sources.md`, and the copy's
-  path there, which becomes a link;
+  path there and in DEC-0151's Context and the support quality page, which becomes a link;
+- DEC-0150's Source counter sentence: annotated, so that it agrees with DEC-0151's Source and with DEC-0149's
+  reservation `e27a5441` (key `ct194-source-manifest`);
+- `docs/DECISIONS.md`'s next-free line: the maximum of the branches' values and the CAS counter at the merge;
 - CT-209's sentences that name DEC-0151 as in progress, and its Source cell's "DEC-0151 (in progress)", in
   `docs/backlog.md`;
 - the two "Compared as written" bullets for `project:<slug>` in `docs/specification/identifiers.md`, merged into one;
-- once DEC-0149 is on main, `keyShaped` in `src/channel-agent.ts` uses `hasJwt` instead of `JWT_SHAPE.test` (DEC-0149's
-  CT-212 names `channel-agent.ts`), and the page's and CA-5's `eyJ` term stays as a bound;
 - an assertion in `test/channel-agent.test.ts` that the declaration's `project` pattern equals
   `support-quality-daily.schema.json` `$defs/projectAlias` (S3).
 
 ## Checks actually run
 
-On the change after round 9's fixes, each exit code read separately, the 15-minute load average below 45 at each test
-run: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9967 tests passed and 1 skipped,
-branches 98.87 %, 12059 of 12196; `src/channel-agent.ts` 348 of 348, `src/secret-shape.ts` 47 of 47);
-`python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm privacy:check` with the
-organization index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (29 vector files match their generators).
-The URL-shaped strings (a tab, a carriage return or a line feed inside `eyJ`, `-%73k-` in a query) and a query of many
+On the change after round 10's fixes, each exit code read separately, the 15-minute load average below 45 at each test
+run: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9974 tests passed and 1 skipped,
+branches 98.87 %, 12078 of 12215; `src/channel-agent.ts` 367 of 367, `src/secret-shape.ts` 47 of 47; an earlier run
+under a load spike timed out once in `test/mandate.test.ts`, which this branch does not touch and which passes alone in
+under 2 s); `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm privacy:check` with
+the organization index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0. Strings opening with a scheme and a
+host of 4080 CJK code points, and plain strings of the same length, each run within twice prose's thread time plus
+20 ms. The URL-shaped strings (a tab, a carriage return or a line feed inside `eyJ`, `-%73k-` in a query) and a query of many
 pieces each run within twice prose's thread time plus 20 ms; 300 strings of 2000 astral code points are read whole;
 the budget's edge falls where the count says, in plain and in astral names. The organization's privacy check over the
 standard's copy alone: 0 findings. A `git grep` of the change for the three terms of the product described before
@@ -221,8 +247,9 @@ neutralisation prints nothing. No U+2014 in the added text.
 Two consecutive clean rounds of the blind readings of branch `agent/channel-agent-ext-v3-20261104` (unit, seam,
 product), as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
-quotes, at posting time, the one list of narrowings in
-[channel agent](../specification/channel-agent.md#narrowings-against-the-standard) (not a copy kept here), and adds:
+quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
+narrowings in [channel agent](../specification/channel-agent.md#narrowings-against-the-standard) (not copies kept
+here), and adds:
 
 - only a manifest's `provider.extensions` is read: a declaration under the manifest's top-level `extensions` is
   `FAC-SEM-162` and not read;
@@ -237,12 +264,12 @@ quotes, at posting time, the one list of narrowings in
   `/1` counts turns; which unit it means (DEC-0151, in progress, proposes one);
 - the coordinator asks the standard's owner to hold the observed per-project quality check for shared channels until
   DEC-0151 (in progress) lands, since it reads missing there;
-- for each live producer, the members its current declaration fails (`FAC-SEM-162`'s places), read with
-  `pnpm validate` on its manifest or well-known answer.
+- for each live producer, the members its current declaration fails (`FAC-SEM-162`'s places), read again with
+  `pnpm validate` on its manifest or well-known answer at posting time.
 
 At merge, one adoption row per live producer is filed in that producer's own backlog with its `FAC-SEM-162` places
-(the coordinator files them on the board). Three live producers' current declarations fail today: one manifest at
-`sources/4/max_age`, `handoff_queues/0/owner` and `evals/spend_record`; one well-known builder with no
+(the coordinator files them on the board), with the places read again at posting time. Three live producers' current
+declarations fail today: one manifest at `sources/4/max_age` and `handoff_queues/0/owner`; one well-known builder with no
 `question_route` and a recommendation holding a colon; one well-known builder with `null` for `question_route`,
 `gap_registry`, a channel's texts, a queue's recommendation and `pd_check`. The adapter's row names the update of both
 `PROTOCOL_REVISIONS` twins (`channel-agent-standard` `['1']`) with the feed-protocols vectors vendored again, and the

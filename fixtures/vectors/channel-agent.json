@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for extensions/channel-agent/0.1 (DEC-0150), written by tools/vectors/channel-agent.ts, never by hand. `key`: the extension key. `declarations`: a document and the findings {code, instancePath} a checker reports on it, in the reference's order (a port may compare them as a set). `site` says where the key is read: `manifest` (kind manifest) under provider.extensions, at /provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1, or `well-known` (kind service-well-known, a service with no manifest) under extensions, at /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1 (CA-1). FAC-SEM-162, in a manifest only, at the key under /extensions or /capabilities/<i>/extensions, where a reader does not read it, each followed by the FAC-SEM-165 findings of that value where it stands; then FAC-SEM-165 at each member name and each string of the value shaped like a credential (at most 1 000 000 code points read in all for one document, every copy of the declaration in it sharing them, counted as detectorCost counts them, in code points (an astral character is one): each name or string 16 plus its code points, read once (a name is not charged again when its member is entered or placed), the JWT shape's rereading after each eyJ (its base64url run and, when that run ends at a dot, the dot and the run after it), for a string that parses as a URL, on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed, percent-decoded): 128 per query or fragment piece, the piece's name and value, the value's JWT and sk- terms, and the square over two of a name holding an upper-case letter when the value is not empty, and up to 255 after each sk-, in any case, at a boundary (the start, a character other than a letter or a digit, %XX, %25XX, \\xHH, \\uHHHH, a two- or three-digit octal escape, a backslash escape, or a colour sequence ESC[...m with any number of parameter characters whose ESC is raw or escaped in either case of its hex digits); once spent, nothing more is read and every further member collapses; one finding at the first copy's key then says, once per document, that the rest was not read), by shape (FAC-SEM-101's detector on the first 4097 code points), a name at the object that holds it, a value under a name that is not plain (letters, digits, _ and -, at most 64, no run of 7 digits once - and _ are left out) at its nearest plain ancestor with every descendant, a member more than 64 levels down at its ancestor 64 levels down, at most 64 places per document and then one finding at the first copy's key counting the rest, the narrow readings only at their place and only for a value of their own grammar (a project's token slot segment by segment, its suite and outbox of the relativeRef grammar by the path-aware reading, secretArgument and secretUrl, and a queue's recommendation of the opaqueId grammar by a provider key's and a JWT's shapes only), anything else read whole, a place writing a declared name, an index of a declared array or *, a member whose name is not plain collapsing its place for itself and every descendant, before the schema check, in a valid or an invalid value (CA-5); then FAC-SEM-162 at the key for a value invalid against service-channel-agent-extension.schema.json, or with an array longer than its schema's maxItems, a map wider than its maxProperties, a closed object with more members than the schema declares, or a string or member name over 4096 code points (each checked before the schema, the limits read from the schema), which a reader treats as not declared, its message naming each failed keyword's place with the schema's own allowed values for required, enum (at most 8, the rest counted), const and pattern (cut to 80 characters, each distinct pattern spelled once) and never a declared value (CA-2); for a valid value, per project in order, FAC-SEM-163 at a repeated project, category code, tier code, channel id, source id (a declined source counted with the sources), queue id or recorded decision id (the second occurrence), and at a channel's decision when replies are off and it is null or when it names a decision recorded_decisions does not list (CA-3); then FAC-SEM-164 at texts/holding when holding_reply is true and it is absent, at texts/final when replies_enabled is true and it is absent, at clarifying_question when true on a store_review, at a tier's label that is blank or carries U+2014, at a text that is blank (nothing left after white space, \\p{Cf}, \\p{Cc}, \\p{Z}, \\p{Default_Ignorable_Code_Point}, U+115F, U+1160, U+3164, U+FFA0, U+2800 and U+FFFC) or carries U+2014, a text's language written * when plain and placed at its texts/holding or texts/final map when not, at a queue's recommendation when answered_signal is none and it is absent, and once at evals/spend_record when a budget is above 0 and it is absent or null (CA-4). No message carries a declared value.",
+  "about": "Vectors for extensions/channel-agent/0.1 (DEC-0150), written by tools/vectors/channel-agent.ts, never by hand. `key`: the extension key. `declarations`: a document and the findings {code, instancePath} a checker reports on it, in the reference's order (a port may compare them as a set). `site` says where the key is read: `manifest` (kind manifest) under provider.extensions, at /provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1, or `well-known` (kind service-well-known, a service with no manifest) under extensions, at /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1 (CA-1). FAC-SEM-162, in a manifest only, at the key under /extensions or /capabilities/<i>/extensions, where a reader does not read it, each followed by the FAC-SEM-165 findings of that value where it stands; then FAC-SEM-165 at each member name and each string of the value shaped like a credential (at most 1 000 000 code points read in all for one document, every copy of the declaration in it sharing them, counted as detectorCost counts them, in code points (an astral character is one): each name or string 16 plus its code points, read once (a name is not charged again when its member is entered or placed), the JWT shape's rereading after each eyJ (its base64url run and, when that run ends at a dot, the dot and the run after it), for a string read as a URL (it opens with a scheme, ^[A-Za-z][A-Za-z0-9+.-]*:, and its authority, between // and the next /, ? or #, is ASCII; any other string is read by the detector's value and argument shapes only, with no URL parse), on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed, percent-decoded): 128 per query or fragment piece, the piece's name and value, the value's JWT and sk- terms, and the square over two of a name holding an upper-case letter when the value is not empty, and up to 255 after each sk-, in any case, at a boundary (the start, a character other than a letter or a digit, %XX, %25XX, \\xHH, \\uHHHH, a two- or three-digit octal escape, a backslash escape, or a colour sequence ESC[...m with any number of parameter characters whose ESC is raw or escaped in either case of its hex digits); once spent, nothing more is read and every further member collapses; one finding at the first copy walked (the read declaration first, then the misplaced copies) then says, once per document, that the rest was not read), by shape (FAC-SEM-101's detector on the first 4097 code points), a name at the object that holds it, a value under a name that is not plain (letters, digits, _ and -, at most 64, no run of 7 digits once - and _ are left out) at its nearest plain ancestor with every descendant, a member more than 64 levels down at its ancestor 64 levels down, at most 64 places per document and then one finding at the first copy walked (the read declaration first, then the misplaced copies) counting the rest, the narrow readings only at their place and only for a value of their own grammar (a project's token slot segment by segment, its suite and outbox of the relativeRef grammar by the path-aware reading, secretArgument and secretUrl, and a queue's recommendation of the opaqueId grammar by a provider key's and a JWT's shapes only), anything else read whole, a place writing a declared name, an index of a declared array or *, a member whose name is not plain collapsing its place for itself and every descendant, before the schema check, in a valid or an invalid value (CA-5); then FAC-SEM-162 at the key for a value invalid against service-channel-agent-extension.schema.json, or with an array longer than its schema's maxItems, a map wider than its maxProperties, a closed object with more members than the schema declares, or a string or member name over 4096 code points (each checked before the schema, the limits read from the schema), which a reader treats as not declared, its message naming each failed keyword's place with the schema's own allowed values for required, enum (at most 8, the rest counted), const and pattern (cut to 80 characters, each distinct pattern spelled once) and never a declared value (CA-2); for a valid value, per project in order, FAC-SEM-163 at a repeated project, category code, tier code, channel id, source id (a declined source counted with the sources), queue id or recorded decision id (the second occurrence), and at a channel's decision when replies are off and it is null or when it names a decision recorded_decisions does not list (CA-3); then FAC-SEM-164 at texts/holding when holding_reply is true and it is absent, at texts/final when replies_enabled is true and it is absent, at clarifying_question when true on a store_review, at a tier's label that is blank or carries U+2014, at a text that is blank (nothing left after white space, \\p{Cf}, \\p{Cc}, \\p{Z}, \\p{Default_Ignorable_Code_Point}, U+115F, U+1160, U+3164, U+FFA0, U+2800 and U+FFFC) or carries U+2014, a text's language written * when plain and placed at its texts/holding or texts/final map when not, at a queue's recommendation when answered_signal is none and it is absent, and once at evals/spend_record when a budget is above 0 and it is absent or null (CA-4). No message carries a declared value.",
   "key": "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1",
   "declarations": [
     {
@@ -13216,6 +13216,665 @@
         {
           "code": "FAC-SEM-162",
           "instancePath": "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1"
+        }
+      ]
+    },
+    {
+      "name": "a URL with an ASCII authority and a credential-named query parameter: read as a URL, found",
+      "site": "manifest",
+      "input": {
+        "provider": {
+          "extensions": {
+            "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1": {
+              "standard": "channel-agent-standard/1",
+              "projects": [
+                {
+                  "project": "project:example-support",
+                  "side": "example-side",
+                  "lead_agent": "support-bot",
+                  "adopted_at": "2026-11-10",
+                  "taxonomy": {
+                    "version": "1",
+                    "codes": [
+                      {
+                        "code": "a",
+                        "label": "https://help.example/?api_key=abc123"
+                      }
+                    ]
+                  },
+                  "tiers": [
+                    {
+                      "code": "premium",
+                      "label": "Premium",
+                      "rule": "open_orders > 10",
+                      "escalate": "at_once"
+                    }
+                  ],
+                  "question_route": {
+                    "capability": "operator.ask",
+                    "target": "operator-desk",
+                    "daily_cap": 10,
+                    "days": "mon-fri",
+                    "tz": "Europe/Warsaw",
+                    "send_at": "09:00",
+                    "expires": "P7D"
+                  },
+                  "gap_registry": {
+                    "owner": "support-bot",
+                    "capability": "gaps.record"
+                  },
+                  "channels": [
+                    {
+                      "id": "tg-dm",
+                      "kind": "telegram_dm",
+                      "replies_enabled": true,
+                      "decision": null,
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT1H",
+                      "holding_reply": true,
+                      "clarifying_question": true,
+                      "quiet_window": null,
+                      "late_answer_window": null,
+                      "items_seen_unit": "updates",
+                      "texts": {
+                        "holding": {
+                          "en": "I am checking this and will write back."
+                        },
+                        "final": {
+                          "en": "We could not confirm this; please write to our support."
+                        }
+                      }
+                    },
+                    {
+                      "id": "reviews",
+                      "kind": "store_review",
+                      "replies_enabled": false,
+                      "decision": "replies-off-reviews",
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT24H",
+                      "holding_reply": false,
+                      "clarifying_question": false,
+                      "items_seen_unit": "reviews",
+                      "texts": {}
+                    }
+                  ],
+                  "sources": [
+                    {
+                      "id": "docs",
+                      "owner": "docs-team",
+                      "read": "url",
+                      "cadence": "PT1H",
+                      "max_age": "PT2H"
+                    }
+                  ],
+                  "declined_sources": [
+                    {
+                      "id": "billing-export",
+                      "decision": "no-billing-export"
+                    }
+                  ],
+                  "handoff_queues": [
+                    {
+                      "id": "support-mail",
+                      "owner": "support-team",
+                      "limit": "P2D",
+                      "answered_signal": "none",
+                      "recommendation": "thread-0001"
+                    }
+                  ],
+                  "evals": {
+                    "suite": "evals/support",
+                    "judge_budget_usd": 2.5,
+                    "replay_budget_usd": 20,
+                    "spend_record": "support-evals"
+                  },
+                  "tickets": {
+                    "outbox": "ticket_outbox",
+                    "token_slot": "example-support/prod/SIGNAL_TICKETS_TOKEN",
+                    "pd_check": "pd-rules@1.2.0"
+                  },
+                  "recorded_decisions": [
+                    {
+                      "id": "replies-off-reviews",
+                      "date": "2026-11-01",
+                      "effect": "replies_off"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "findings": [
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/0/label"
+        }
+      ]
+    },
+    {
+      "name": "the same URL with an authority outside ASCII: not read as a URL, the other shapes find nothing",
+      "site": "manifest",
+      "input": {
+        "provider": {
+          "extensions": {
+            "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1": {
+              "standard": "channel-agent-standard/1",
+              "projects": [
+                {
+                  "project": "project:example-support",
+                  "side": "example-side",
+                  "lead_agent": "support-bot",
+                  "adopted_at": "2026-11-10",
+                  "taxonomy": {
+                    "version": "1",
+                    "codes": [
+                      {
+                        "code": "a",
+                        "label": "https://hélp.example/?api_key=abc123"
+                      }
+                    ]
+                  },
+                  "tiers": [
+                    {
+                      "code": "premium",
+                      "label": "Premium",
+                      "rule": "open_orders > 10",
+                      "escalate": "at_once"
+                    }
+                  ],
+                  "question_route": {
+                    "capability": "operator.ask",
+                    "target": "operator-desk",
+                    "daily_cap": 10,
+                    "days": "mon-fri",
+                    "tz": "Europe/Warsaw",
+                    "send_at": "09:00",
+                    "expires": "P7D"
+                  },
+                  "gap_registry": {
+                    "owner": "support-bot",
+                    "capability": "gaps.record"
+                  },
+                  "channels": [
+                    {
+                      "id": "tg-dm",
+                      "kind": "telegram_dm",
+                      "replies_enabled": true,
+                      "decision": null,
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT1H",
+                      "holding_reply": true,
+                      "clarifying_question": true,
+                      "quiet_window": null,
+                      "late_answer_window": null,
+                      "items_seen_unit": "updates",
+                      "texts": {
+                        "holding": {
+                          "en": "I am checking this and will write back."
+                        },
+                        "final": {
+                          "en": "We could not confirm this; please write to our support."
+                        }
+                      }
+                    },
+                    {
+                      "id": "reviews",
+                      "kind": "store_review",
+                      "replies_enabled": false,
+                      "decision": "replies-off-reviews",
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT24H",
+                      "holding_reply": false,
+                      "clarifying_question": false,
+                      "items_seen_unit": "reviews",
+                      "texts": {}
+                    }
+                  ],
+                  "sources": [
+                    {
+                      "id": "docs",
+                      "owner": "docs-team",
+                      "read": "url",
+                      "cadence": "PT1H",
+                      "max_age": "PT2H"
+                    }
+                  ],
+                  "declined_sources": [
+                    {
+                      "id": "billing-export",
+                      "decision": "no-billing-export"
+                    }
+                  ],
+                  "handoff_queues": [
+                    {
+                      "id": "support-mail",
+                      "owner": "support-team",
+                      "limit": "P2D",
+                      "answered_signal": "none",
+                      "recommendation": "thread-0001"
+                    }
+                  ],
+                  "evals": {
+                    "suite": "evals/support",
+                    "judge_budget_usd": 2.5,
+                    "replay_budget_usd": 20,
+                    "spend_record": "support-evals"
+                  },
+                  "tickets": {
+                    "outbox": "ticket_outbox",
+                    "token_slot": "example-support/prod/SIGNAL_TICKETS_TOKEN",
+                    "pd_check": "pd-rules@1.2.0"
+                  },
+                  "recorded_decisions": [
+                    {
+                      "id": "replies-off-reviews",
+                      "date": "2026-11-01",
+                      "effect": "replies_off"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "the same query with no scheme: not read as a URL",
+      "site": "manifest",
+      "input": {
+        "provider": {
+          "extensions": {
+            "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1": {
+              "standard": "channel-agent-standard/1",
+              "projects": [
+                {
+                  "project": "project:example-support",
+                  "side": "example-side",
+                  "lead_agent": "support-bot",
+                  "adopted_at": "2026-11-10",
+                  "taxonomy": {
+                    "version": "1",
+                    "codes": [
+                      {
+                        "code": "a",
+                        "label": "help.example/?api_key=abc123"
+                      }
+                    ]
+                  },
+                  "tiers": [
+                    {
+                      "code": "premium",
+                      "label": "Premium",
+                      "rule": "open_orders > 10",
+                      "escalate": "at_once"
+                    }
+                  ],
+                  "question_route": {
+                    "capability": "operator.ask",
+                    "target": "operator-desk",
+                    "daily_cap": 10,
+                    "days": "mon-fri",
+                    "tz": "Europe/Warsaw",
+                    "send_at": "09:00",
+                    "expires": "P7D"
+                  },
+                  "gap_registry": {
+                    "owner": "support-bot",
+                    "capability": "gaps.record"
+                  },
+                  "channels": [
+                    {
+                      "id": "tg-dm",
+                      "kind": "telegram_dm",
+                      "replies_enabled": true,
+                      "decision": null,
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT1H",
+                      "holding_reply": true,
+                      "clarifying_question": true,
+                      "quiet_window": null,
+                      "late_answer_window": null,
+                      "items_seen_unit": "updates",
+                      "texts": {
+                        "holding": {
+                          "en": "I am checking this and will write back."
+                        },
+                        "final": {
+                          "en": "We could not confirm this; please write to our support."
+                        }
+                      }
+                    },
+                    {
+                      "id": "reviews",
+                      "kind": "store_review",
+                      "replies_enabled": false,
+                      "decision": "replies-off-reviews",
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT24H",
+                      "holding_reply": false,
+                      "clarifying_question": false,
+                      "items_seen_unit": "reviews",
+                      "texts": {}
+                    }
+                  ],
+                  "sources": [
+                    {
+                      "id": "docs",
+                      "owner": "docs-team",
+                      "read": "url",
+                      "cadence": "PT1H",
+                      "max_age": "PT2H"
+                    }
+                  ],
+                  "declined_sources": [
+                    {
+                      "id": "billing-export",
+                      "decision": "no-billing-export"
+                    }
+                  ],
+                  "handoff_queues": [
+                    {
+                      "id": "support-mail",
+                      "owner": "support-team",
+                      "limit": "P2D",
+                      "answered_signal": "none",
+                      "recommendation": "thread-0001"
+                    }
+                  ],
+                  "evals": {
+                    "suite": "evals/support",
+                    "judge_budget_usd": 2.5,
+                    "replay_budget_usd": 20,
+                    "spend_record": "support-evals"
+                  },
+                  "tickets": {
+                    "outbox": "ticket_outbox",
+                    "token_slot": "example-support/prod/SIGNAL_TICKETS_TOKEN",
+                    "pd_check": "pd-rules@1.2.0"
+                  },
+                  "recorded_decisions": [
+                    {
+                      "id": "replies-off-reviews",
+                      "date": "2026-11-01",
+                      "effect": "replies_off"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "a heavy misplaced copy and a read declaration with a credential-shaped label: the label is found",
+      "site": "manifest",
+      "input": {
+        "provider": {
+          "extensions": {
+            "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1": {
+              "standard": "channel-agent-standard/1",
+              "projects": [
+                {
+                  "project": "project:example-support",
+                  "side": "example-side",
+                  "lead_agent": "support-bot",
+                  "adopted_at": "2026-11-10",
+                  "taxonomy": {
+                    "version": "1",
+                    "codes": [
+                      {
+                        "code": "a",
+                        "label": "Bearer kkkkkkkkkkkkkkkkkkkkkkkk"
+                      }
+                    ]
+                  },
+                  "tiers": [
+                    {
+                      "code": "premium",
+                      "label": "Premium",
+                      "rule": "open_orders > 10",
+                      "escalate": "at_once"
+                    }
+                  ],
+                  "question_route": {
+                    "capability": "operator.ask",
+                    "target": "operator-desk",
+                    "daily_cap": 10,
+                    "days": "mon-fri",
+                    "tz": "Europe/Warsaw",
+                    "send_at": "09:00",
+                    "expires": "P7D"
+                  },
+                  "gap_registry": {
+                    "owner": "support-bot",
+                    "capability": "gaps.record"
+                  },
+                  "channels": [
+                    {
+                      "id": "tg-dm",
+                      "kind": "telegram_dm",
+                      "replies_enabled": true,
+                      "decision": null,
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT1H",
+                      "holding_reply": true,
+                      "clarifying_question": true,
+                      "quiet_window": null,
+                      "late_answer_window": null,
+                      "items_seen_unit": "updates",
+                      "texts": {
+                        "holding": {
+                          "en": "I am checking this and will write back."
+                        },
+                        "final": {
+                          "en": "We could not confirm this; please write to our support."
+                        }
+                      }
+                    },
+                    {
+                      "id": "reviews",
+                      "kind": "store_review",
+                      "replies_enabled": false,
+                      "decision": "replies-off-reviews",
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT24H",
+                      "holding_reply": false,
+                      "clarifying_question": false,
+                      "items_seen_unit": "reviews",
+                      "texts": {}
+                    }
+                  ],
+                  "sources": [
+                    {
+                      "id": "docs",
+                      "owner": "docs-team",
+                      "read": "url",
+                      "cadence": "PT1H",
+                      "max_age": "PT2H"
+                    }
+                  ],
+                  "declined_sources": [
+                    {
+                      "id": "billing-export",
+                      "decision": "no-billing-export"
+                    }
+                  ],
+                  "handoff_queues": [
+                    {
+                      "id": "support-mail",
+                      "owner": "support-team",
+                      "limit": "P2D",
+                      "answered_signal": "none",
+                      "recommendation": "thread-0001"
+                    }
+                  ],
+                  "evals": {
+                    "suite": "evals/support",
+                    "judge_budget_usd": 2.5,
+                    "replay_budget_usd": 20,
+                    "spend_record": "support-evals"
+                  },
+                  "tickets": {
+                    "outbox": "ticket_outbox",
+                    "token_slot": "example-support/prod/SIGNAL_TICKETS_TOKEN",
+                    "pd_check": "pd-rules@1.2.0"
+                  },
+                  "recorded_decisions": [
+                    {
+                      "id": "replies-off-reviews",
+                      "date": "2026-11-01",
+                      "effect": "replies_off"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1": {
+            "standard": "channel-agent-standard/1",
+            "projects": [
+              {
+                "project": "project:example-support",
+                "side": "example-side",
+                "lead_agent": "support-bot",
+                "adopted_at": "2026-11-10",
+                "taxonomy": {
+                  "version": "2026-11-04",
+                  "codes": [
+                    {
+                      "code": "payments.refund",
+                      "label": "A refund"
+                    },
+                    {
+                      "code": "account.access",
+                      "label": "Access to an account"
+                    }
+                  ]
+                },
+                "tiers": [
+                  {
+                    "code": "premium",
+                    "label": "Premium",
+                    "rule": "open_orders > 10",
+                    "escalate": "at_once"
+                  }
+                ],
+                "question_route": {
+                  "capability": "operator.ask",
+                  "target": "operator-desk",
+                  "daily_cap": 10,
+                  "days": "mon-fri",
+                  "tz": "Europe/Warsaw",
+                  "send_at": "09:00",
+                  "expires": "P7D"
+                },
+                "gap_registry": {
+                  "owner": "support-bot",
+                  "capability": "gaps.record"
+                },
+                "channels": [
+                  {
+                    "id": "tg-dm",
+                    "kind": "telegram_dm",
+                    "replies_enabled": true,
+                    "decision": null,
+                    "final_limit": "P7D",
+                    "first_reply_limit": "PT1H",
+                    "holding_reply": true,
+                    "clarifying_question": true,
+                    "quiet_window": null,
+                    "late_answer_window": null,
+                    "items_seen_unit": "updates",
+                    "texts": {
+                      "holding": {
+                        "en": "I am checking this and will write back."
+                      },
+                      "final": {
+                        "en": "We could not confirm this; please write to our support."
+                      }
+                    }
+                  },
+                  {
+                    "id": "reviews",
+                    "kind": "store_review",
+                    "replies_enabled": false,
+                    "decision": "replies-off-reviews",
+                    "final_limit": "P7D",
+                    "first_reply_limit": "PT24H",
+                    "holding_reply": false,
+                    "clarifying_question": false,
+                    "items_seen_unit": "reviews",
+                    "texts": {}
+                  }
+                ],
+                "sources": [
+                  {
+                    "id": "docs",
+                    "owner": "docs-team",
+                    "read": "url",
+                    "cadence": "PT1H",
+                    "max_age": "PT2H"
+                  }
+                ],
+                "declined_sources": [
+                  {
+                    "id": "billing-export",
+                    "decision": "no-billing-export"
+                  }
+                ],
+                "handoff_queues": [
+                  {
+                    "id": "support-mail",
+                    "owner": "support-team",
+                    "limit": "P2D",
+                    "answered_signal": "none",
+                    "recommendation": "thread-0001"
+                  }
+                ],
+                "evals": {
+                  "suite": "evals/support",
+                  "judge_budget_usd": 2.5,
+                  "replay_budget_usd": 20,
+                  "spend_record": "support-evals"
+                },
+                "tickets": {
+                  "outbox": "ticket_outbox",
+                  "token_slot": "example-support/prod/SIGNAL_TICKETS_TOKEN",
+                  "pd_check": "pd-rules@1.2.0"
+                },
+                "recorded_decisions": [
+                  {
+                    "id": "replies-off-reviews",
+                    "date": "2026-11-01",
+                    "effect": "replies_off"
+                  }
+                ]
+              }
+            ],
+            "extra": "eyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJ"
+          }
+        }
+      },
+      "findings": [
+        {
+          "code": "FAC-SEM-162",
+          "instancePath": "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/projects/0/taxonomy/codes/0/label"
+        },
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1"
         }
       ]
     },

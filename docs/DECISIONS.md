@@ -9054,7 +9054,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      same `projectAlias`): the registry's
      name, not an id the agent invents, so the run-of-digits rule does not bind it; an alias of the Fabric Project
      compared as written (identifiers.md),
-     where `question_route.target` is the canonical Fabric Project id. `side` is `^[a-z0-9-]{1,32}$`; the side and a category code take the standard's patterns, and a channel's id
+     where `question_route.target` is the canonical Fabric Project id. Four members keep another owner's grammar:
+     `question_route.target` the board's project id, `gap_registry.capability` a capability name, `evals.spend_record`
+     the usage report's limit id and a queue's `recommendation` the board's `opaqueId`. `side` is `^[a-z0-9-]{1,32}$`; the side and a category code take the standard's patterns, and a channel's id
      (`^[a-z0-9][a-z0-9_-]{0,63}$`) and a tier code (`^[a-z0-9_]{1,32}$`) this contract's, where the standard gives none,
      each with no run of 7 or more digits; a time zone is an IANA name of one to three segments; a tier's `rule`
      is `<fact> > <integer>` or `<fact> >= <integer>`, the integer at most 15 digits, and `escalate` is `at_once` or
@@ -9080,8 +9082,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      a value the schema still cannot run on is one finding, "the value is too large to check". Its finding names at most
      ten failed keywords with their places and counts the rest, a missing declared member named beside its place; in a
      place, a member name the schema does not declare, a text's language and a number that is no index of a declared
-     array, and any numeric key of an object, are written `*`; beside a failed `enum`, `const` or `pattern` the place
-     names the schema's own allowed values. The finding points to the declaration's grammars.
+     array, and any numeric key of an object, are written `*`; beside each failed keyword the place names the schema's
+     own limit (values, pattern, length in code points, count, bound, format, `(object)` or `not null` for a type). The finding points to the declaration's grammars.
   3. CA-3. `FAC-SEM-163`: a project, a category code, a tier code, a channel, a source (read or declined), a hand-off
      queue and a recorded decision appear once; a channel with replies off names a decision, and a channel's decision
      is one `recorded_decisions` lists (section 11: recorded decisions present for every channel held by one).
@@ -9105,20 +9107,24 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      its base64url run and, when it ends at a `.`, the dot and the run after it; after each `sk-`, in any case, at a
      boundary (the start, a non-alphanumeric character, `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal
      escape, a backslash escape, or a colour sequence with any number of parameter characters whose ESC is raw or
-     escaped in either case), up to 255 code points; and, for a string that parses as a URL, on the names and values a
+     escaped in either case), up to 255 code points; and, for a string read as a URL, on the names and values a
      WHATWG URL parse yields: 128 per query or fragment piece, its name's and value's code points, the value's `eyJ`
      and `sk-` terms, and the square over two of a name holding an upper-case letter when its value is not empty. Once it is spent, nothing more is read and every further member collapses; one finding per
      document then says the rest was not read, and the 64 places are counted per document. A reader treats a
      declaration with `FAC-SEM-165` or `FAC-SEM-163` as not declared, as it does one with `FAC-SEM-162`, keeps one with
      only `FAC-SEM-164` declared and shows those findings to its author, and never displays a credential-shaped value
-     (`channelAgentView`). No finding's message carries a declared value and no rule's place echoes
+     (`channelAgentView`, shaped as `connectionsView`: `declared: false, reported: false` with no key,
+     `declared: false, reported: true` with the findings, `declared: true` with the obligations). No finding's message carries a declared value and no rule's place echoes
      instance data: a place writes a declared name, an index of a declared array, else `*` (an undeclared name, a
      numeric object key, a text's language), in `FAC-SEM-162`, `FAC-SEM-164` and `FAC-SEM-165` alike; a member whose
      name is not plain (letters, digits, `_` and `-`, at most 64, no run of 7 digits once `-` and `_` are left out) or
      is shaped like a credential collapses its place, so it and every member below it are placed at its nearest plain
      ancestor, and so does a member more than 64 levels down; `FAC-SEM-165` names at most 64 places and counts the rest. The walk keeps an
      explicit stack of one frame per container and builds a place only when it reports one, so its time grows with the
-     value's size. A text is blank when nothing is left after white space, `\p{Cf}`, `\p{Cc}`, `\p{Z}`,
+     value's size. A string is read as a URL (`secretUrl` and `detectorCost`'s URL terms) only when it opens with a scheme
+     and its authority is ASCII only; any other string is read by the value and argument shapes only, with no URL parse,
+     since host processing of a long label outside ASCII grows with its square. The declaration a reader reads is walked
+     first and its misplaced copies after it, so a copy cannot spend the budget before the read one. A text is blank when nothing is left after white space, `\p{Cf}`, `\p{Cc}`, `\p{Z}`,
      `\p{Default_Ignorable_Code_Point}`, the fillers U+115F, U+1160, U+3164, U+FFA0 and U+2800, and U+FFFC.
   6. CA-6. Not checked statically: that the side is one of the standard's sides and the route's capability the one for
      its kind (side codes and kinds live only in the signal server's data), that a tier's fact is a declared customer
@@ -9174,7 +9180,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, with the examples made neutral here; rounds 1 to 9 of the readings. `DEC-0150` was reserved by the coordinator with
+  published it on 2026-11-04, with the examples made neutral here; rounds 1 to 10 of the readings. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation

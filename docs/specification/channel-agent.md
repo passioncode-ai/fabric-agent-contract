@@ -159,10 +159,10 @@ schema cannot drift apart.
 same `projectAlias`): a registry
 alias is the registry's name, not an id the agent invents, so the run-of-digits rule of an id does not bind it. It is an
 alias of the Fabric Project, compared as written ([identifiers](identifiers.md)), while `question_route.target` is the canonical Fabric Project id the board
-addresses. DEC-0151 (CT-210, in progress) proposes the same alias for `support-quality-daily` payloads; once it lands,
-a reader joins a declaration to a project's payloads on `project:<slug>`. A project whose registry alias the detector
-reads as a credential (`FAC-SEM-165`) cannot be declared until the registry changes the alias; meanwhile the agent
-leaves that project's entry out. A queue's `recommendation` is the board thread's id, an opaque id as the board
+addresses. DEC-0151 (CT-210, in progress) proposes the same alias for `support-quality-daily` payloads; once it lands
+and a feed's readers have adopted it, a reader joins a declaration to the payloads that carry `project:<slug>`. A project
+whose registry alias the detector reads as a credential (`FAC-SEM-165`) cannot be declared: the agent leaves that
+project's entry out until the registry changes the alias. A queue's `recommendation` is the board thread's id, an opaque id as the board
 writes it (`^[A-Za-z0-9_-]{8,128}$`, the board's `opaqueId`), which the run-of-digits rule of an id does not bind.
 
 `token_slot` names the vault slot of the (agent, project) token: `<project>` is the vault project's name,
@@ -177,9 +177,10 @@ space, so no person's address and no path fits where the standard asks for ids o
 queues and recorded decisions, a declined source's and a channel's `decision`, and a queue's `answered_signal`. The same
 run of digits is refused in the side and a category code, each otherwise the standard's own pattern, and in a channel's
 id and a tier code, whose grammars are this contract's where the standard gives none: a channel's id
-`^[a-z0-9][a-z0-9_-]{0,63}$`, a tier code `^[a-z0-9_]{1,32}$`. Three members keep another owner's grammar: `question_route.target` the board's project id
-(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,191}$`), `evals.spend_record` the usage report's limit id
-(`^[a-z0-9][a-z0-9._:-]{0,63}$`) and a queue's `recommendation` the board's `opaqueId`. A path (`suite`, `outbox`) is relative to the agent's repository: never `/`, `~` or a drive letter first, and
+`^[a-z0-9][a-z0-9_-]{0,63}$`, a tier code `^[a-z0-9_]{1,32}$`. Four members keep another owner's grammar: `question_route.target` the board's project id
+(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,191}$`), `gap_registry.capability` a capability name (`^[a-z][a-z0-9._-]{1,127}$`),
+`evals.spend_record` the usage report's limit id (`^[a-z0-9][a-z0-9._:-]{0,63}$`) and a queue's `recommendation` the
+board's `opaqueId`. A path (`suite`, `outbox`) is relative to the agent's repository: never `/`, `~` or a drive letter first, and
 no `..` segment. A duration is ISO 8601 in days, hours, minutes and seconds (`P7D`, `PT1H`, `P1DT12H`), above zero:
 years, months and weeks, whose length depends on the calendar, are refused, and so is an all-zero duration (`P0D`,
 `PT0S`), except a source's `cadence`, where zero means the source is read on every question. A source's `max_age`
@@ -216,7 +217,9 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    and `minLength` the length, `maxItems`, `minItems`, `maxProperties` and `minProperties` the count, `minimum` and
    `maximum` the bound, `format` the format (`enum at /projects/0/question_route/capability (one of team.ask,
    operator.ask)`, `maximum at /projects/0/question_route/daily_cap (<= 1000)`). The message points to
-   [the declaration's grammar](#grammar), which states every limit the schema enforces.
+   [the declaration](#the-declaration), whose grammar states every limit the schema enforces. In the message, a
+   length is counted in code points, and a failed `type` is named `(object)`, or the type with `not null` (a `null`
+   where a value is required).
 2. Every id once and every decision named (`FAC-SEM-163`, CA-3): a project, a category code, a tier code, a channel, a
    source (a declined one counted with the read ones), a hand-off queue and a recorded decision appear once; a channel
    with replies off names the decision that holds it, and a channel's decision is one `recorded_decisions` lists.
@@ -227,11 +230,15 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    answered signal is `none` names its recommendation; a budget above 0 names the usage report's limit it is spent
    under, since without one it reads 0.
 4. No member name and no string of the value is shaped like a credential (`FAC-SEM-165`, CA-5), by shape, with the
-   detector of `FAC-SEM-101`, on a valid or an invalid value and on a misplaced one where it stands. Three places read
+   detector of `FAC-SEM-101`, on a valid or an invalid value and on a misplaced one where it stands. A string is read as
+   a URL only when it opens with a scheme (`^[A-Za-z][A-Za-z0-9+.-]*:`) and its authority, between `//` and the next
+   `/`, `?` or `#` when it has one, is ASCII only; any other string is read by the detector's value and argument shapes
+   only, with no URL parse (a host name outside ASCII would send the parser through host processing whose cost grows
+   with the square of a long label). Three places read
    narrower, each only when the value matches its own grammar, and anything else is read whole: a project's
    `tickets.token_slot` of the slot's grammar is read segment by segment, so a provider key in any of its three segments
    is found; a project's `evals.suite` and `tickets.outbox` of the relative path grammar are read by the detector's
-   path-aware reading (`secretArgument` and `secretUrl` on the whole path), so a long path of ordinary segments is not
+   path-aware reading (`secretArgument` on the whole path, and `secretUrl` when it is read as a URL), so a long path of ordinary segments is not
    taken for one secret and a long base64 segment is; a queue's `recommendation` of the board's `opaqueId` grammar is
    read by a provider key's and a JWT's shapes only, since a long mixed run is its shape by design (a recommendation
    that is a URL with a password is read whole, and found). The detector reads the first 4097 code points of a string,
@@ -244,7 +251,7 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    the end of the string. A boundary is the start, a character other than a letter or a digit, or an escape that ends
    right before the `sk-`: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a backslash escape of
    one character, or a colour sequence `ESC[...m` with any number of parameter characters whose ESC is raw or escaped
-   (`\x1b`, `\033`, `\u001b` in either case of the hex digits, or `\e`). For a string that parses as a URL, the URL
+   (`\x1b`, `\033`, `\u001b` in either case of the hex digits, or `\e`). For a string read as a URL that parses, the URL
    terms are counted on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed,
    percent-decoded), not on the raw text: for every query or fragment piece, 128, its name's and its value's code
    points, the value's `eyJ` and `sk-` terms and, when the value is not empty and the name holds an upper-case letter,
@@ -276,11 +283,12 @@ findings, then the read declaration's `FAC-SEM-165`, then
 `FAC-SEM-162` for an invalid value (and nothing after it), then per project `FAC-SEM-163` and `FAC-SEM-164`. A port may
 compare them as a set.
 
-A reader acts on the findings as `channelAgentView` does (DEC-0150 CA-5): a declaration with `FAC-SEM-162`, with
-`FAC-SEM-165` (a credential-shaped name or value, or a part left unread for credentials) or with `FAC-SEM-163` (a
-repeated project or id, a channel with replies off and no decision, a decision not recorded) is not declared, as with
-the [connections](connections.md) key; a declaration with only `FAC-SEM-164` stays declared, and the reader shows those
-findings to its author. A reader never displays a credential-shaped value: its errors name the rule and the place only.
+A reader acts on the findings as `channelAgentView` does (DEC-0150 CA-5), shaped as `connectionsView` answers for the
+[connections](connections.md) key: with no key it answers `declared: false, reported: false`; a declaration with
+`FAC-SEM-162`, with `FAC-SEM-165` (a credential-shaped name or value, or a part left unread for credentials) or with
+`FAC-SEM-163` (a repeated project or id, a channel with replies off and no decision, a decision not recorded) answers
+`declared: false, reported: true` with the findings as `errors`; only a declaration read and valid answers
+`declared: true`, with `FAC-SEM-164`'s findings as `obligations`, which the reader shows to its author. A reader never displays a credential-shaped value: its errors name the rule and the place only.
 
 ## Not checked here
 
@@ -343,8 +351,26 @@ existing fixture validates and checks as before. `contractVersion` stays `0.1.0`
 
 ### Narrowings against the standard
 
-This is the one list of what this contract refuses that the standard's section 13.6 admits or leaves open, held to the
-schema ([grammar](#grammar)); DEC-0150's Compatibility and the merge post point here.
+Every line of the [grammar](#grammar) is this contract's grammar. Where the standard's section 13.6 shows only a
+placeholder or leaves a member open, that line is a narrowing of the standard; the bullets below name those a producer
+is most likely to meet. DEC-0150's Compatibility points here, and the merge post sends the standard's owner the grammar
+and this list.
+
+- Closed objects: the declaration, a project and every object in it take only the members section 13.6 shows; a member
+  it does not show makes the declaration not declared, so a field the standard adds in its final v1 needs a contract
+  revision before an agent declares it.
+- `taxonomy.version`: `^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`.
+- A tier's `rule`: `<fact> > <integer>` or `<fact> >= <integer>`, the fact a lower-case word
+  (`^[a-z][a-z0-9_]{0,63}`), one space on each side of the operator, the integer at most 15 digits with no leading
+  zero.
+- `evals.suite` and `tickets.outbox`: a path relative to the agent's repository, letters, digits and `. _ : / -`, never
+  `/`, `~` or a drive letter first, no `..` segment, 1 to 256 code points.
+- `recorded_decisions[].effect`: one lower-case word (`^[a-z][a-z0-9_]{0,63}$`).
+- `send_at`: `HH:MM`, 24-hour.
+- `token_slot`: a lower-case `<project>` (the vault project's name, not `project:<slug>`) and a lower-case `<env>`.
+- `gap_registry.capability`: a capability name (`^[a-z][a-z0-9._-]{1,127}$`); `question_route.target`: the board's
+  project id (`^[A-Za-z0-9][A-Za-z0-9._:-]{0,191}$`).
+- At least one item: `projects`, `taxonomy.codes`, `channels` and `sources`.
 
 - Durations: days, hours, minutes and seconds only, no weeks, months or years; whole numbers of at most 5 digits per
   component; above zero, except a source's `cadence`, which may be zero.
@@ -364,7 +390,6 @@ schema ([grammar](#grammar)); DEC-0150's Compatibility and the merge post point 
 - `daily_cap`: an integer from 1 to 1000.
 - A queue's `recommendation`: the board's `opaqueId`, at least 8 characters, no colon.
 - `spend_record`: a lower-case usage-report limit id.
-- `token_slot`: `<project>/<env>/<NAME>` with a lower-case `<env>`.
 - `pd_check`: a lower-case name, then `@` and a version.
 - A text's language: a language tag (no tag of private use only) of at most 35 characters; a text: 1 to 4096 code
   points.

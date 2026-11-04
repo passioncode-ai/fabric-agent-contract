@@ -19,9 +19,9 @@ export type ChannelAgentSite = "manifest" | "well-known";
 
 /** What a reader takes from a declaration: the value, or the keywords it fails and their places (never a declared value). */
 export type ChannelAgentView =
-  | { declared: false }
-  | { declared: true; valid: false; errors: string[] }
-  | { declared: true; valid: true; standard: string; projects: ChannelAgentProject[]; obligations: string[] };
+  | { declared: false; reported: false }
+  | { declared: false; reported: true; errors: string[] }
+  | { declared: true; reported: false; standard: string; projects: ChannelAgentProject[]; obligations: string[] };
 
 let shape: ValidateFunction | undefined;
 const KEY = EXTENSION_KEYS.channelAgent;
@@ -99,7 +99,7 @@ type Visit = (text: string, spot: Spot, place: (spot: Spot) => string) => void;
  * its holder; below PATH_DEPTH every member is placed at its ancestor at that depth. A member's path is built only when
  * the visit asks for it (a container's, when it is entered).
  */
-function walk(value: unknown, root: string, tokenOf: (frame: Frame, key: string, index: boolean) => string | undefined, visit: Visit): void {
+function walk(value: unknown, root: string, tokenOf: (frame: Frame, key: string, index: boolean) => string | undefined, visit: Visit, stop: () => boolean = () => false): void {
   // A name is placed at its holder. A member is placed at its own token, or, when its key is not written (no token, or
   // past PATH_DEPTH), its frame is collapsed: it and every descendant are placed at its holder's place.
   const token = (frame: Frame, key: string): string | undefined => (frame.collapsed || frame.depth >= PATH_DEPTH ? undefined : tokenOf(frame, key, frame.keys === undefined));
@@ -109,11 +109,11 @@ function walk(value: unknown, root: string, tokenOf: (frame: Frame, key: string,
     const written = spot.isName ? undefined : token(frame, spot.key);
     return written === undefined ? frame.at : `${frame.at}/${written}`;
   };
-  if (typeof value === "string") visit(value, { frame: undefined, key: "", isName: false }, place);
+  if (typeof value === "string" && !stop()) visit(value, { frame: undefined, key: "", isName: false }, place);
   if (!Array.isArray(value) && !isObject(value)) return;
   const enter = (container: unknown[] | JsonObject, at: string, depth: number, name: string | undefined, parent: string | undefined, collapsed: boolean, role: Role): Frame => ({ container, keys: Array.isArray(container) ? undefined : Object.keys(container), next: 0, at, depth, name, parent, collapsed, role });
   const stack: Frame[] = [enter(value, root, 0, undefined, undefined, false, "root")];
-  while (stack.length > 0) {
+  while (stack.length > 0 && !stop()) {
     const frame = stack[stack.length - 1] as Frame;
     const length = frame.keys === undefined ? (frame.container as unknown[]).length : frame.keys.length;
     if (frame.next >= length) {
@@ -215,8 +215,8 @@ function allowed(error: { keyword: string; params?: Record<string, unknown> }, n
   const limit = typeof params.limit === "number" ? params.limit : undefined;
   if (limit !== undefined) {
     const count = (word: string) => `${limit} ${word}${limit === 1 ? "" : "s"}`;
-    if (error.keyword === "maxLength") return ` (at most ${count("character")})`;
-    if (error.keyword === "minLength") return ` (at least ${count("character")})`;
+    if (error.keyword === "maxLength") return ` (at most ${count("code point")})`;
+    if (error.keyword === "minLength") return ` (at least ${count("code point")})`;
     if (error.keyword === "maxItems") return ` (at most ${count("item")})`;
     if (error.keyword === "minItems") return ` (at least ${count("item")})`;
     if (error.keyword === "maxProperties") return ` (at most ${count("member")})`;
@@ -224,6 +224,8 @@ function allowed(error: { keyword: string; params?: Record<string, unknown> }, n
     if (error.keyword === "minimum" || error.keyword === "maximum") return ` (${String(params.comparison)} ${limit})`;
   }
   if (error.keyword === "format" && typeof params.format === "string") return ` (format ${params.format})`;
+  // A member the schema wants as an object is named so; any other type, most often a `null` where a value is required.
+  if (error.keyword === "type" && typeof params.type === "string") return params.type === "object" ? " (object)" : ` (${params.type}, not null)`;
   return "";
 }
 
@@ -279,15 +281,16 @@ function schemaView(doc: unknown, site: ChannelAgentSite): { declared: false } |
 }
 
 /**
- * The reader of extensions/channel-agent/0.1 at one site (DEC-0150 CA-1, CA-2, CA-5): an invalid declaration is not
- * declared; a valid one with a credential-shaped name or value, a part left unread for credentials (FAC-SEM-165) or a
- * repeated id or an unnamed decision (FAC-SEM-163) is not declared either, its errors naming the rule and the place, never
- * the value; a valid one with FAC-SEM-164's findings stays declared, with those findings as `obligations`, which the
- * reader shows to its author.
+ * The reader of extensions/channel-agent/0.1 at one site (DEC-0150 CA-1, CA-2, CA-5), shaped as `connectionsView`: no
+ * key is `declared: false, reported: false`; an invalid declaration (FAC-SEM-162), one with a credential-shaped name or
+ * value or a part left unread for credentials (FAC-SEM-165), or one with a repeated id or an unnamed decision
+ * (FAC-SEM-163) is `declared: false, reported: true`, its errors naming the rule and the place, never the value; a read
+ * and valid one is `declared: true`, with FAC-SEM-164's findings as `obligations`, which the reader shows to its author.
  */
 export function channelAgentView(doc: unknown, site: ChannelAgentSite = "manifest"): ChannelAgentView {
   const view = schemaView(doc, site);
-  if (!view.declared || !view.valid) return view;
+  if (!view.declared) return { declared: false, reported: false };
+  if (!view.valid) return { declared: false, reported: true, errors: view.errors };
   const value = (extensionsAt(doc as JsonObject, site) as JsonObject)[KEY];
   const budget = newBudget();
   const named = (finding: Finding) => `${finding.code} at ${finding.instancePath || "/"}`;
@@ -301,8 +304,8 @@ export function channelAgentView(doc: unknown, site: ChannelAgentSite = "manifes
     blocking.push(...references(project, at).map(named));
     owed.push(...obligations(project, at).map(named));
   });
-  if (blocking.length > 0) return { declared: true, valid: false, errors: blocking };
-  return { ...view, obligations: owed };
+  if (blocking.length > 0) return { declared: false, reported: true, errors: blocking };
+  return { declared: true, reported: false, standard: view.standard, projects: view.projects, obligations: owed };
 }
 
 /** FAC-SEM-162 on a manifest: the key where a reader does not read it (the manifest's own extensions, a capability's). */
@@ -332,8 +335,28 @@ function head(text: string): string {
  */
 const shaped = (text: string): boolean => {
   const read = head(text);
-  return secretValue(read) || secretUrl(read);
+  return secretValue(read) || urlReading(read);
 };
+
+/** A scheme at the start of a string: what a string must open with to be read as a URL. */
+const SCHEME = /^[A-Za-z][A-Za-z0-9+.-]*:/;
+/**
+ * Whether a string is read as a URL (CA-5): it starts with a scheme, and its authority, between `//` and the next `/`,
+ * `?` or `#` when it has one, is ASCII only. A host name outside ASCII would send the URL parser through host processing
+ * whose cost grows with the square of a long label; such a string is read by the detector's other shapes only.
+ */
+export function readAsUrl(text: string): boolean {
+  const scheme = SCHEME.exec(text);
+  if (scheme === null) return false;
+  const rest = text.slice(scheme[0].length);
+  if (!rest.startsWith("//")) return true;
+  const end = rest.slice(2).search(/[/?#]/);
+  const authority = end < 0 ? rest.slice(2) : rest.slice(2, 2 + end);
+  return /^[\x00-\x7f]*$/.test(authority);
+}
+
+/** The detector's URL reading where `readAsUrl` admits the string, its argument reading otherwise (no URL parse). */
+const urlReading = (text: string): boolean => (readAsUrl(text) ? secretUrl(text) : secretArgument(text));
 /** Only a provider key's or a JWT's shape: a board thread's id is a long mixed run by design. */
 const keyShaped = (text: string): boolean => {
   const read = head(text);
@@ -449,13 +472,14 @@ const KEY_REREAD = 255;
  * once; the JWT shape's rereading, after each `eyJ`, of the rest of the base64url run it starts (and of the dot and the
  * run after it); after every `sk-`, in any case, that follows a boundary (the start, a character other than a letter or
  * a digit, an escape ESCAPE_BEFORE names or a colour sequence), up to 255 code points to the end of the string. For a
- * string that parses as a URL, on the names and values a WHATWG URL parse yields (tab, line feed and carriage return
+ * string `readAsUrl` admits and that parses as a URL, on the names and values a WHATWG URL parse yields (tab, line feed and carriage return
  * removed, percent-decoded, as `rawValues` hands them over), for every query or fragment piece: PIECE_COST, its name's
  * and value's code points, the value's JWT and `sk-` terms, and, when the value is not empty and the name holds an
  * upper-case letter, the square of the name's length over two (splitting a name into words may backtrack over it).
  */
 export function detectorCost(text: string): number {
   let cost = codePoints(text) + jwtRereads(text) + keyRereads(text);
+  if (!readAsUrl(text)) return cost;
   let url: URL;
   try {
     url = new URL(text);
@@ -495,8 +519,8 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
       findings.push({ code: "FAC-SEM-165", instancePath: at, message: `${what} is shaped like a credential: a token is named by its vault slot, never written (DEC-0150 CA-5)` });
     } else budget.more += 1;
   };
+  // The walk stops once the budget is spent, so nothing is read after it.
   const afford = (text: string): boolean => {
-    if (budget.unread) return false;
     const cost = detectorCost(head(text)) + VISIT_COST;
     if (cost > budget.left) {
       budget.unread = true;
@@ -528,11 +552,11 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
     const key = spot.key;
     let found: boolean;
     if (role === "tickets" && key === "token_slot" && TOKEN_SLOT.test(text)) found = text.split("/").some((segment) => secretValue(segment));
-    else if (((role === "evals" && key === "suite") || (role === "tickets" && key === "outbox")) && relativeRef(text)) found = secretArgument(text) || secretUrl(text);
+    else if (((role === "evals" && key === "suite") || (role === "tickets" && key === "outbox")) && relativeRef(text)) found = urlReading(text);
     else if (role === "queue" && key === "recommendation" && OPAQUE_ID.test(text)) found = keyShaped(text);
     else found = shaped(text);
     if (found) flag(place(spot), "a value");
-  });
+  }, () => budget.unread);
   return findings;
 }
 
@@ -599,9 +623,9 @@ function obligations(project: JsonObject, at: string): Finding[] {
       for (const [language, text] of Object.entries((texts[which] ?? {}) as Record<string, string>)) {
         // A plain language is written `*`, as FAC-SEM-162 and FAC-SEM-165 write it; one that is not plain, or is shaped
         // like a credential, is placed at its map: no place echoes the declaration's own words.
-        const place = `/channels/${i}/texts/${which}${plainName(language) ? "/*" : ""}`;
-        if (text.replace(BLANK, "") === "") flag(place, "a declared text is blank, and nothing empty is sent");
-        else if (text.includes(EM_DASH)) flag(place, "a declared text carries U+2014, which a send's checks refuse");
+        const place = () => `/channels/${i}/texts/${which}${plainName(language) ? "/*" : ""}`;
+        if (text.replace(BLANK, "") === "") flag(place(), "a declared text is blank, and nothing empty is sent");
+        else if (text.includes(EM_DASH)) flag(place(), "a declared text carries U+2014, which a send's checks refuse");
       }
     }
   }
@@ -628,12 +652,15 @@ function obligations(project: JsonObject, at: string): Finding[] {
 export function channelAgentRules(doc: unknown, site: ChannelAgentSite = "manifest"): Finding[] {
   if (!isObject(doc)) return [];
   // One budget for the whole document: every copy of the declaration, read or misplaced, draws on it.
+  // The read declaration is walked first, so the rules and `channelAgentView` read it with the same budget; the
+  // misplaced copies draw on what is left. The findings keep their order: the misplaced copies' first.
   const budget = newBudget();
-  const findings = site === "manifest" ? misplaced(doc, budget) : [];
   const view = schemaView(doc, site);
-  if (!view.declared) return [...findings, ...summary(budget)];
   const root = CHANNEL_AGENT_PATHS[site];
-  findings.push(...secrets((extensionsAt(doc, site) as JsonObject)[KEY], root, budget), ...summary(budget));
+  const read = view.declared ? secrets((extensionsAt(doc, site) as JsonObject)[KEY], root, budget) : [];
+  const findings = site === "manifest" ? misplaced(doc, budget) : [];
+  if (!view.declared) return [...findings, ...summary(budget)];
+  findings.push(...read, ...summary(budget));
   if (!view.valid) {
     const named = messagePlaces(view.errors.slice(0, MESSAGE_ERRORS)).join(", ");
     const more = view.errors.length > MESSAGE_ERRORS ? ` and ${view.errors.length - MESSAGE_ERRORS} more` : "";
