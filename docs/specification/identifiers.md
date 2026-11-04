@@ -130,6 +130,9 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
   even when one is shaped like a URI such as `project:<slug>`; the canonical id is Fabric's, the others its
   aliases (the run's D3 as the operator corrected it, Fabric ADR-0166's amendment);
 
+- a source hand-over's decision `target` (`<agent>@<commit>-><recipient>`, or `sha256:` and its lowercase hex digest past
+  200 characters; [source](source.md#handing-over), DEC-0149): the action computes the same string and compares it
+  exactly, never case-folded or normalised;
 - board Project ids (`comms-common.schema.json#/$defs/projectId`, opaque) and capability names on a directory page
   (`FAC-SEM-107`, DEC-0077): neither is a URI;
 - context ids (`common.schema.json#/$defs/contextId`: `personal`, `org:<orgId>`; [contexts](contexts.md), DEC-0082) — a

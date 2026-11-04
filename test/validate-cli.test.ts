@@ -387,7 +387,7 @@ describe("a folder is checked file by file and as pairs", () => {
     const result = run(folder({ "notes.json": { hello: "world" } }));
     expect(result.code).toBe(2);
     expect(result.out).toContain("cannot tell which schema");
-    expect(run(folder({ "readme.txt": "x" }))).toEqual({ code: 2, out: expect.stringContaining("no .json file") });
+    expect(run(folder({ "readme.txt": "x" }))).toEqual({ code: 2, out: expect.stringContaining("no readable .json file") });
   });
 });
 
@@ -608,11 +608,11 @@ describe("the second unit and product readings' cases (contract review 2026-10-2
     expect(version.problems).toEqual([expect.objectContaining({ help: "docs/specification/versioning.md" })]);
   });
 
-  it("an empty folder after a target that failed still says it holds no .json file", () => {
+  it("an empty folder after a target that failed still says it holds no readable .json file", () => {
     const empty = folder({});
     const result = run(path.join(empty, "missing.json"), empty);
     expect(result.code).toBe(2);
-    expect(result.out).toContain("holds no .json file");
+    expect(result.out).toContain("holds no readable .json file");
   });
 });
 
@@ -1104,7 +1104,8 @@ describe("an agent's source (DEC-0149)", () => {
     symlinkSync("/Users/jdoe", path.join(dir, "src/data"));
     expect(spawnSync("mkfifo", [path.join(dir, "src/pipe")]).status).toBe(0);
     const result = run(dir, "--kind", "source-tree");
-    expect(cells(result.out)).toEqual([["src/data", "/files/2", "FAC-SEM-158"]]);
+    // The link's target is read as text (a home path) and with link-outside's rule (an absolute target).
+    expect(cells(result.out)).toEqual([["src/data", "/files/2", "FAC-SEM-158"], ["src/data", "/files/2", "FAC-SEM-159 (accepted)"]]);
     expect(result.out).toContain("src/data line 1, column 8: home-path: ");
   });
 
@@ -1785,14 +1786,18 @@ describe("an agent's source (DEC-0149)", () => {
       [path.join(parent, "gone.json"), ["--kind", "source-manifest"], "gone.json"],
       [path.join(parent, "gone.json"), ["--kind", "source-package"], "gone.json"],
       [path.join(parent, "gone.json"), ["--schema", "fabric-source"], "gone.json"],
-      [path.join(parent, "fabric.source.json"), [], "fabric.source.json"],
-      [path.join(parent, "fabric.source.json"), ["--kind", "source-tree"], "fabric.source.json"]
+      [path.join(parent, "fabric.source.json"), [], "fabric.source.json"]
     ] as const) {
       const result = run(target, ...args);
       expect(result.code).toBe(2);
       expect(result.out).toContain(`usage error: cannot read ${name}: ENOENT`);
       expect(result.out).not.toContain(parent);
     }
+    // A manifest named under --kind source-tree checks its folder, as the folder route does.
+    const named = run(path.join(parent, "fabric.source.json"), "--kind", "source-tree");
+    expect(named.code).toBe(2);
+    expect(named.out).toContain("the folder holds none");
+    expect(named.out).not.toContain(parent);
     // Outside a source check the full path, byte for byte as before DEC-0149.
     const gone = path.join(parent, "gone.json");
     expect(run(gone)).toEqual({ code: 2, out: `usage error: cannot read ${gone}: ENOENT\n` });
@@ -1842,17 +1847,62 @@ describe("an agent's source (DEC-0149)", () => {
     const target = folder({ "p.json": json("positive/fabric-package-agent.json") });
     const linked = folder({ "fabric.source.json": manifest });
     symlinkSync(path.join(target, "p.json"), path.join(linked, "fabric.package.json"));
-    const linkedOut = run(linked, "--kind", "source-package").out;
+    const linkedRun = run(linked, "--kind", "source-package");
+    const linkedOut = linkedRun.out;
+    expect(linkedRun.code).toBe(2);
     expect(linkedOut).toContain(notRead);
     expect(linkedOut).not.toContain("holds no");
     // A FIFO and an unparseable file, under --kind source-package.
     const fifo = folder({ "fabric.source.json": manifest });
     expect(spawnSync("mkfifo", [path.join(fifo, "fabric.package.json")]).status).toBe(0);
     const unparseable = folder({ "fabric.source.json": manifest, "fabric.package.json": "{ not json" });
-    for (const dir of [fifo, unparseable]) {
-      const out = run(dir, "--kind", "source-package").out;
+    for (const [dir, code] of [[fifo, 0], [unparseable, 1]] as const) {
+      const result = run(dir, "--kind", "source-package");
+      const out = result.out;
+      expect(result.code, dir).toBe(code);
       expect(out, dir).toContain(notRead);
       expect(out, dir).not.toContain("holds no");
+    }
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("names an unreadable source document in a folder run by its path in the folder", () => {
+    const parent = folder({ "-Users-jdoe-x/fabric.source.json": sourceManifest({ include: ["LICENSE"] }), "-Users-jdoe-x/fabric.package.json": json("positive/fabric-package-agent.json") });
+    const dir = path.join(parent, "-Users-jdoe-x");
+    chmodSync(path.join(dir, "fabric.package.json"), 0o000);
+    try {
+      const out = run(dir, "--kind", "source-package").out;
+      expect(out).toContain("cannot read fabric.package.json: EACCES");
+      expect(out).toContain("the fabric.package.json beside fabric.source.json was not read as a package");
+      // The usage line names the file by its path in the folder; a folder run with another source kind still echoes
+      // the folder as given in its file column, as the ordinary validator does.
+      const usage = out.split("\n").filter((line) => line.startsWith("usage error:"));
+      expect(usage).toEqual(["usage error: cannot read fabric.package.json: EACCES"]);
+      expect(out).not.toContain("<a value the tree check reads");
+    } finally {
+      chmodSync(path.join(dir, "fabric.package.json"), 0o644);
+    }
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("routes a named manifest under --kind source-tree as its folder: a dangling link, a loop, an unenterable folder", () => {
+    const dangling = folder({ LICENSE: "x" });
+    symlinkSync(path.join(dangling, "gone.json"), path.join(dangling, "fabric.source.json"));
+    const loop = folder({ LICENSE: "x" });
+    symlinkSync("fabric.source.json", path.join(loop, "fabric.source.json"));
+    for (const dir of [dangling, loop]) {
+      const result = run(path.join(dir, "fabric.source.json"), "--kind", "source-tree");
+      expect(result.code).toBe(2);
+      expect(result.out).toContain("cannot read fabric.source.json: not a file");
+      expect(result.out).not.toContain(dir);
+    }
+    const locked = folder({ "fabric.source.json": sourceManifest({ include: ["LICENSE"] }), LICENSE: "x" });
+    chmodSync(locked, 0o000);
+    try {
+      const result = run(path.join(locked, "fabric.source.json"), "--kind", "source-tree");
+      expect(result.code).toBe(2);
+      expect(result.out).toContain("cannot read .: EACCES");
+      expect(result.out).not.toContain(locked);
+    } finally {
+      chmodSync(locked, 0o755);
     }
   });
 

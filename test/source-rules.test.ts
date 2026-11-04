@@ -489,12 +489,15 @@ describe("FAC-SEM-158 and FAC-SEM-159: the tree check", () => {
     expect(description("desk-booking-service-api")).toEqual([]);
     expect(description("uses sk-example-key-0123456789abcdef")).toEqual([]);
     expect(description(["Bearer ", "ab12cd34ef56"].join("")).map((finding) => finding.instancePath)).toEqual(["/description"]);
-    // A slot's purpose is read as FAC-SEM-065 reads a package secret's, so pack copies it unchanged and it packs cleanly.
+    // A slot's purpose is read as FAC-SEM-065 reads a package secret's (so pack copies it unchanged and it packs
+    // cleanly) and as the tree check reads a line: FAC-SEM-156 blocks every purpose either blocks.
     const packed = (text: string) => evaluateSemanticRules("package", { schema: "fabric-package/1", secrets: [{ name: "BOARD", purpose: text }] }).some((finding) => finding.code === "FAC-SEM-065");
-    for (const text of ["Bearer token for the board API", ["Bearer ", "ab12cd34ef56"].join(""), "sk-learn-experiments-2026", "reads the board", ["SK", "-", "Ab1Cd2Ef3Gh4Ij5Kl6Mn"].join("")]) {
-      expect(purpose(text).length > 0, text).toBe(packed(text));
+    const treeBlocks = (text: string) => sourceTreeProblems({ manifest: { include: ["a.txt", "LICENSE"] }, files: [{ path: "LICENSE", text: "x" }, { path: "a.txt", text }] }).some((problem) => problem.kind === "credential");
+    const cases = ["Bearer token for the board API", ["Bearer ", "ab12cd34ef56"].join(""), "sk-learn-experiments-2026", ["the key for ", "sk", "-learn-experiments-2026", " runs"].join(""), "reads the board", ["SK", "-", "Ab1Cd2Ef3Gh4Ij5Kl6Mn"].join(""), ["token = ", "Ab1Cd2Ef3Gh4".repeat(4)].join("")];
+    for (const text of cases) {
+      if (packed(text) || treeBlocks(text)) expect(purpose(text).length > 0, text).toBe(true);
     }
-    expect(packed("reads the board")).toBe(false);
+    expect(purpose("reads the board")).toEqual([]);
   });
 
   it("skip a folder in a walk when an exclude folder is it or holds it, unless an include path lies under it", () => {

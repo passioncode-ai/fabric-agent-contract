@@ -89,8 +89,11 @@ agent starts and works without it.
 | `endpoint` | the operator's infrastructure by role: a knowledge base, an analytics service, a board | none |
 
 The schema gives a store slot its `path` and refuses one on any other kind. `FAC-SEM-156` refuses a slot named twice,
-a name or purpose shaped like a credential (read as `FAC-SEM-065` reads a package secret's, the shared detector's
-`secretValue`, whole-value `Bearer` included, so a slot's purpose packs cleanly), a manifest `description` shaped like
+a name or purpose shaped like a credential (read both as `FAC-SEM-065` reads a package secret's, the shared detector's
+`secretValue`, whole-value `Bearer` included, so a slot's purpose packs cleanly, and as the tree check reads a line, so
+whatever `FAC-SEM-158` blocks in `fabric.source.json` this blocks too; once the shared detector's key shapes are bounded
+(DEC-0151), `FAC-SEM-156` is stricter than `FAC-SEM-065`, because it keeps the tree check's unbounded shapes and
+the adapter's check reads the manifest as part of the tree), a manifest `description` shaped like
 one (read as prose: a provider key as the tree check reads one in a line, its own shapes `KEY_SHAPE_SOURCES` starting a
 word and holding no synthetic word, a JWT (with no synthetic-word exception), a long run, or a bearer token inside the text, 12 or more token characters
 with a digit, never a whole-value `Bearer` branch, so "Bearer token for the board API" and "desk-booking-service-api"
@@ -133,8 +136,8 @@ to the source; the check also ignores any file that `isSourcePath` does not read
 | `short-instance-string` | `FAC-SEM-158` | an entry of `instanceStrings` that is not a well-formed string (no lone surrogate) of at least 3 characters: refused as input, not looked for |
 | `no-include` | `FAC-SEM-158` | a manifest with no `include` path |
 | `email` | `FAC-SEM-159` | an address matching the e-mail pattern of `src/node-summary.ts` with its local part bounded to 64 characters, read from each `@`, not in `publicAddresses` (compared without regard to case), not at an RFC 2606 name (`example.com`, `example.org`, `example.net` and names under them, or a domain ending `.invalid`, `.test` or `.example`), not followed by `:` (an SSH remote, `git@host:owner/repo`), not ending in an image's extension (`png`, `jpg`, `jpeg`, `gif`, `svg`, `webp`, `ico`: `user@2x.png` is an asset's name) and not inside a URL the `credential` kind reports, as written or once the line's JSON escapes are undone |
-| `link-outside` | `FAC-SEM-159` | in a Markdown file (`.md`, `.mdx`, `.markdown`), a relative link `](target)` (a target and a title hold no `]`, and at most 2048 characters each) (no scheme, not `#…`, not `//…`) whose target, resolved against the file's folder (from the root when it starts with `/`, without its `#` or `?` part), is above the root or is neither a source path nor a folder holding a source file |
-| `no-license` | `FAC-SEM-159` | no source file at the root named `LICENSE`, `LICENCE` or `COPYING`, with an extension or none, in any letter case |
+| `link-outside` | `FAC-SEM-159` | in a Markdown file (`.md`, `.mdx`, `.markdown`), a relative link `](target)` (a target and a title hold no `]`, and at most 2048 characters each) (no scheme, not `#…`, not `//…`) whose target, resolved against the file's folder (from the root when it starts with `/`, without its `#` or `?` part), is above the root or is neither a source path nor a folder holding a source file; and a symbolic link in the source whose target (its text) is absolute, climbs above the root or is no source path, read at line 1, column 1 |
+| `no-license` | `FAC-SEM-159` | no source file at the root named `LICENSE`, `LICENCE` or `COPYING`, with an extension or none, in any letter case; a licence that is a symbolic link does not count, since a source export carries the link, not the terms |
 
 The blocking kinds are `FAC-SEM-158`: a source export refuses on any of them. The warnings are `FAC-SEM-159`,
 `accepted`: a note beside the result, never a failure. The contract chooses no licence for an exported agent: a source
@@ -308,7 +311,10 @@ package only when both sit in the same folder, and checks them as the pair (`FAC
 schema answer, as the validator's other pairs do. It pairs only a package it can read, and tests the entry beside the manifest with
 `lstat`: any `fabric.package.json` entry there that was not read as a package (skipped, unreadable, a symbolic link, a
 dangling link, not a regular file) prints "the fabric.package.json beside fabric.source.json was not read as a package,
-so no pair was checked (FAC-SEM-160)", in a plain folder run and under `--kind source-package` alike. A source kind's run
+so no pair was checked (FAC-SEM-160)", in a plain folder run and under `--kind source-package` alike. Under `--kind
+source-package` the run's exit code follows the entry: a FIFO is skipped with a note (exit 0 with the notes); a
+symbolic link or a dangling link is refused by the read as not a file (exit 2); a file that does not parse is a
+problem (exit 1); an unreadable file is a usage error naming it by its path in the folder (exit 2). A source kind's run
 never reads a package through a link; a plain run follows one, as the ordinary validator does. `--kind source-package` on
 a folder checks that same pair too, and a folder with no `fabric.package.json` entry beside its manifest (`lstat`
 answers it is absent) prints "the folder
@@ -356,8 +362,8 @@ two forms, and in no other:
   in form mode, under [C3.3](interop.md#c33-awaiting-a-choice)'s form constraints (`FAC-SEM-018`), never
   `input_required` on a Task or a job, answered by a person and accepted, whose message names the agent, the source
   commit and the recipient. A client that cannot show an elicitation to a person (an SDK handler, a headless session)
-  cancels a hand-over elicitation (MCP's dismissal, no choice made) or does not declare the elicitation capability for
-  that call, and never accepts or declines it (a decline is a person's no only); its outcome is
+  cancels a hand-over elicitation (MCP's dismissal, no choice made) or did not declare the elicitation capability for
+  its session (MCP negotiates capabilities per session at `initialize`, [MCP `2026-07-28`](../evidence/sources.md)), and never accepts or declines it (a decline is a person's no only); its outcome is
   `handover-needs-operator`, after which a decision with the exact target may follow in the same task. The service
   records the message it sent and the accept as the operator's word (the record of
   [OA-6](delegation.md#one-approval-binds-all-the-operators-agents)).

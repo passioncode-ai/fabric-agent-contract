@@ -341,7 +341,8 @@ function checkFileAs(run: Run, file: string, relative: string, schemaArg: string
   try {
     text = readFileSync(file, "utf8");
   } catch (error) {
-    run.usage.push(`cannot read ${file}: ${String((error as NodeJS.ErrnoException).code)}`);
+    // A source document in a folder run is named by its path in the folder, never by an absolute path the masks would hide.
+    run.usage.push(`cannot read ${inFolder && sourceCheck(file, schemaArg, kindArg) ? relative : file}: ${String((error as NodeJS.ErrnoException).code)}`);
     return undefined;
   }
   let value: unknown;
@@ -805,8 +806,9 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
       for (let depth = 1; depth < parts.length; depth += 1) if (lstatSync(path.join(folder, ...parts.slice(0, depth))).isSymbolicLink()) return [];
       // A path that is no source path is stated only when it may be nested, and a link there is never followed.
       if (!isSource(name)) {
-        if (!listedAsFolder.has(name) && !existsSync(path.join(full, ".git"))) return [];
+        // The link is caught before anything under it is asked: `<path>/.git` is never stated through a link.
         if (lstatSync(full).isSymbolicLink()) return [];
+        if (!listedAsFolder.has(name) && !existsSync(path.join(full, ".git"))) return [];
       }
       if (!lstatSync(full).isDirectory()) return [{ path: name }];
       // A folder is a nested repository when Git listed it with a trailing `/` or it holds its own `.git`; otherwise it
@@ -1040,7 +1042,7 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   const manifest = checked.value;
   // The manifest validated, so `include` is a list of paths.
   const includes = (manifest as JsonObject).include as string[];
-  const files: Array<{ path: string; text?: string; binary?: true; nestedRepository?: true }> = [];
+  const files: Array<{ path: string; text?: string; binary?: true; nestedRepository?: true; link?: true }> = [];
   const isSource = sourcePathTest(manifest);
   const isNested = nestedTest(manifest);
   const isUnchecked = uncheckedTest(manifest);
@@ -1056,7 +1058,7 @@ function checkSourceFolderAs(run: Run, folder: string): void {
       if (!stat.isFile() && !stat.isSymbolicLink()) continue;
       // An unchecked path is read by its path only, never opened.
       if (isUnchecked(relative)) { files.push({ path: relative }); continue; }
-      if (stat.isSymbolicLink()) { files.push({ path: relative, text: readlinkSync(full) }); continue; }
+      if (stat.isSymbolicLink()) { files.push({ path: relative, text: readlinkSync(full), link: true }); continue; }
       // The first BINARY_PROBE bytes decide: a binary file (a large asset, a sparse image) is never read whole.
       if (probeHoldsNul(full)) files.push({ path: relative, binary: true });
       else files.push({ path: relative, text: readFileSync(full).toString("utf8") });
@@ -1211,6 +1213,9 @@ export function main(args: readonly string[]): CliResult {
     const target = path.resolve(base, named);
     let folder = false;
     try { folder = statSync(target).isDirectory(); } catch { /* a missing file is reported when it is read */ }
+    // A manifest named under --kind source-tree checks its folder, as the folder route does, before anything else is
+    // asked of it: a dangling link reads "not a file", an unenterable folder "cannot read .".
+    if (!folder && kindArg === "source-tree" && path.basename(target) === SOURCE_FILE) { checkSourceFolder(run, path.dirname(target)); continue; }
     if (!folder && !existsSync(target) && sourceCheck(target, schemaArg, kindArg)) {
       // A source check's target that is not there is named by its basename (or its place), never by its path; any
       // other missing target is read below and named by its path, as before DEC-0149.
@@ -1222,7 +1227,6 @@ export function main(args: readonly string[]): CliResult {
     if (!folder && kindArg === "source-tree") {
       // A source manifest named on its own checks its folder; any other file is the document form, named by its
       // basename, never by its path.
-      if (path.basename(target) === SOURCE_FILE) { checkSourceFolder(run, path.dirname(target)); continue; }
       // checkFile makes a source check instance-free and names the document by its basename.
       checkFile(run, target, target, schemaArg, kindArg);
       continue;
@@ -1232,7 +1236,7 @@ export function main(args: readonly string[]): CliResult {
     const before = run.usage.length;
     const problemsBefore = run.problems.length;
     const files = jsonFiles(target, run, kindArg !== undefined && SOURCE_KINDS.includes(kindArg));
-    if (files.length === 0 && run.usage.length === before) run.usage.push(`${target} holds no .json file`);
+    if (files.length === 0 && run.usage.length === before) run.usage.push(`${target} holds no readable .json file`);
     // The relative path with `/` on every platform: the rules read it as a stored path (FAC-SEM-014) and pair by it.
     const checked = files.flatMap((file) => checkFile(run, file, path.relative(target, file).split(path.sep).join("/"), schemaArg, kindArg, true) ?? []);
     // A folder in which no file was a document it could check checked nothing: that is not a clean run.

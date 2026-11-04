@@ -154,7 +154,12 @@ source, what never travels with it, the check before a source export, and how a 
   that merges, then PR #628 and the contract PR back to back; a package entry beside the manifest tested by `lstat` in
   both folder runs; a source kind never reading a package or a manifest through a link, a plain run skipping a linked
   manifest; a dangling manifest link not a file; a link at a listed path never followed; CT-215's note; agents-first
-  item 8 as the rule's home) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  item 8 as the rule's home) answered as decided; round 29 (three knowledge-base greps, `rules.md` section 9 included; the step 6 fallback; the
+  standing permission for mechanics kept in CONTEXT.md; a source document in a folder run named by its path in the
+  folder; a symbolic link read with link-outside's rule and never a licence; the exit code per package entry; the
+  elicitation capability negotiated per session; the hand-over target compared as written; `FAC-SEM-156` reading with
+  both detectors; a link at a listed path caught before `.git` is asked; a named manifest under `--kind source-tree`
+  routed as its folder) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -253,11 +258,12 @@ remaining steps, in order:
 5. Make the acceptance edit on the PR branch, as DEC-0147 did (DEC-0149's status line, CT-194 done, this handoff's
    status and the `docs/handoffs/README.md` row); then run the merge gate (`pnpm run check`, each part's exit code
    read) on that head, with its output in the PR. That head is the one that merges; nothing merges before this step.
-6. Merge the knowledge base's PR #628 (CT-211's amendment), run its two greps on the knowledge base's main (`git show
-   origin/main:knowledge/agents-first.md | grep -n 'source hand-over'` and `git show
-   origin/main:knowledge/principles.md | grep -n 'source hand-over'`, each printing at least one line), then merge
-   the contract PR straight after, in the same landing session (PR #628's links point at `source.md#handing-over` on
-   main).
+6. Merge the knowledge base's PR #628 (CT-211's amendment), run its three greps on the knowledge base's main (`git show
+   origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
+   `knowledge/rules.md`, each printing at least one line), then merge the contract PR straight after, in the same
+   landing session (PR #628's links point at `source.md#handing-over` on main). If main moved after step 5, merge it and
+   re-run the merge gate before merging PR #628. If the contract PR cannot merge in that session, do not merge PR #628
+   (or revert it at once) and record the wait.
 7. A human gate: asking GitHub to remove the review branch's unreachable commits and their cached views is the
    operator's (GitHub Support).
 
@@ -314,11 +320,14 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   docs/backlog.md | grep -c 'source hand-over'`, which prints 1 after that edit. CT-211 carries the same line for the
   knowledge base. CT-215 (on main) gets the same pointer in its part (c): a source hand-over is never covered by a
   relayed mandate and needs the operator's word per act (linked as `specification/source.md#handing-over` in the row).
-  A client with no person at it cancels a hand-over elicitation (or declares no elicitation capability) and never
+  A client with no person at it cancels a hand-over elicitation (or did not declare the elicitation capability for its
+  session, which MCP negotiates at `initialize`) and never
   accepts or declines it, so a launched session takes the hand-over only as a decision with the exact target; it leaves
   a job's input request unanswered (C3.3 reads a cancel there as the person's no). What a cancelled in-call elicitation
   under AP-2 means for an ordinary relayed action is left open in CT-215's own decision; AP-2 is not changed here.
   Check with `grep '^| CT-215 ' docs/backlog.md | grep -c 'source hand-over'`, which prints 1 after the merge.
+- At the DEC-0150 step, `docs/ux/screens.md` SCR-03 keeps "SCN-001, SCN-002, SCN-054, SCN-055", and `CONTEXT.md` and
+  `docs/ux/scenarios.md` change on both sides: keep both.
 - At the DEC-0150 step, file a backlog row (the next free CT id in the backlog at that merge) on how a channel
   declaration's installation-valued members (`tickets.token_slot`'s vault project and env, `evals.spend_record`, the
   per-project entries) relate to source slots: the token slot's name is a `secret` slot; the vault project, the env and

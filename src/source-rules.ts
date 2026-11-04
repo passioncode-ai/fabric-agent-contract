@@ -853,6 +853,12 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
       continue;
     }
     const text = typeof file.text === "string" ? file.text : "";
+    // A symbolic link (`link: true`, its target as `text`) is read with link-outside's rule: a target above the root,
+    // absolute, or not a source path is a warning, since a source export does not carry what it points at.
+    if (file.link === true) {
+      const resolved = text.startsWith("/") ? undefined : resolveLink(path, text);
+      if (resolved === undefined || !linkInside(resolved)) problems.push({ kind: "link-outside", file: index, line: 1, column: 1 });
+    }
     const markdown = MARKDOWN.test(path);
     // Lines as an editor numbers them and the adapter reads them: split at LF, a trailing CR dropped.
     text.split("\n").map((raw) => (raw.endsWith("\r") ? raw.slice(0, -1) : raw)).forEach((line, at) => {
@@ -887,7 +893,9 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
   strings(manifest.include).forEach(([entry, at]) => {
     if (!(entry.endsWith("/") ? presentFolders.has(entry) : present.has(entry))) problems.push({ kind: "missing", include: at });
   });
-  if (!sourcePaths.some((path) => !path.includes("/") && LICENSE_FILE.test(path))) problems.push({ kind: "no-license" });
+  // A licence that is a symbolic link is no licence: the export carries the link, not the terms.
+  const linked = new Set(files.filter(([file]) => file.link === true).map(([file]) => file.path as string));
+  if (!sourcePaths.some((path) => !path.includes("/") && LICENSE_FILE.test(path) && !linked.has(path))) problems.push({ kind: "no-license" });
   return problems;
 }
 
@@ -947,7 +955,8 @@ export function checkSourceTree(value: unknown): Finding[] {
 
 /**
  * FAC-SEM-156: a slot is named once, and neither its name nor its purpose is shaped like a credential (read as a
- * package secret's are, FAC-SEM-065's `secretValue`, so a slot packs cleanly); the manifest's description is not shaped
+ * package secret's are, FAC-SEM-065's `secretValue`, so a slot packs cleanly, and as the tree check reads a line,
+ * `credentialShaped`, so what FAC-SEM-158 blocks in fabric.source.json this blocks too); the manifest's description is not shaped
  * like one (read as prose, `proseSecretValue`); a store path is declared once. That a store slot has a path and no other slot has
  * one is the schema's.
  */
@@ -980,7 +989,7 @@ function slotFindings(value: JsonObject): Finding[] {
     // The message never repeats the value.
     for (const field of ["name", "purpose"] as const) {
       const text = slot[field];
-      if (typeof text === "string" && secretValue(text)) flag(`/slots/${index}/${field}`, "a slot is named, never filled: this looks like a credential");
+      if (typeof text === "string" && (secretValue(text) || credentialShaped(text))) flag(`/slots/${index}/${field}`, "a slot is named, never filled: this looks like a credential");
     }
     if (slot.kind === "store" && typeof slot.path === "string") {
       if (stores.has(slot.path)) flag(`/slots/${index}/path`, `store path ${named(slot.path, `slots[${index}].path`, true)} is declared twice`);

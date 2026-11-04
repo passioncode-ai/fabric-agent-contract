@@ -243,7 +243,8 @@ longer holds (the reset passed, or the person acted), and so does a key whose jo
 approval is granted: the provider runs it, once. A key whose job ended `outcome-unknown` is answered with that job
 again and never runs a second time. Any other key whose job ended is answered with that job. A source hand-over is
 one synchronous call, never a job: a repeated key while the call is in flight is refused `unknown-state`
-(`handover-in-flight`), the same key with other arguments `idempotency-conflict`, and its key never stores a refusal or
+(`handover-in-flight`), the same key with other arguments is refused `decision-invalid` (`idempotency-conflict`), and its
+key never stores a refusal or
 a failure before any effect, as [source](source.md#handing-over) specifies (DEC-0149).
 
 **Unknown is `null`.** In a job's or a result's `usage` ([`common.schema.json#/$defs/usage`](../../schemas/common.schema.json)),
@@ -276,7 +277,9 @@ elicitation `inputRequests` in **form mode**; a choice is a single-select enum w
 mode never requests a secret (MCP rule); secrets use URL mode. A source hand-over, one synchronous call, elicits in-call instead:
 an MCP `elicitation/create` sent within its own `tools/call`, in form mode under these constraints
 ([source](source.md#handing-over), DEC-0149). AP-2's elicitation for other relayed actions (DEC-0121) is unchanged; the
-source hand-over's in-call elicitation adds no route for them and removes none. A job whose start call carried the operator's mandate
+source hand-over's in-call elicitation adds no route for them and removes none. A client with no person at it never
+answers an input request, a cancel included, since this section reads a cancel as the person's no; the in-call
+hand-over elicitation is [source](source.md#handing-over)'s exception, where a cancel means no choice was made. A job whose start call carried the operator's mandate
 for its task reads it at its own approval step: a step the mandate covers raises no input request and goes on as the
 operator's decision; a step it does not cover waits `input_required` as here, its message naming the part not covered,
 and its answer may carry a mandate that covers it in the `_meta.mandate` of the `fabric.job.get` call
