@@ -9094,18 +9094,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      customer support.
   6. An optional top-level `project`: the project registry's alias `project:<slug>`
      (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written, the form DEC-0150's CA-2 gives the channel agent
-     declaration's `project`. A reader that adopted DEC-0151 keeps, per service, channel, day and project, the latest
-     event: an absent `project` names the service's only project at the time of the day (the declaration's single
-     entry, where one exists), and a day published before the service served a second project is not re-attributed. A
-     day without `project` from a service that served several projects that day names no single project: a reader keeps
-     it per service, channel and day as a merged day and never attributes it to one project. A producer that serves
+     declaration's `project`. Everything about `project` is per channel, the scope of the producer rules and of
+     DEC-0150. A reader that adopted DEC-0151 keeps, per service, channel, day and project, the latest event: an absent
+     `project` names that channel's only project (the declaration's entry whose channel kinds map to that `/1`
+     channel), and a day published before the service served a second project on that channel is not re-attributed. A
+     day without `project` from a service that served several projects on that channel that day names no single
+     project and is kept as a merged day: a reader keeps it per service, channel and day and never attributes it to one
+     project. A producer that serves
      several projects on one channel publishes one event per project and day, each naming its `project`, under item 4's rule. Before
      every reader has adopted DEC-0151, such a producer publishes no event for that channel: it keeps each project's
      days, publishes them one event per project and day once every reader has adopted, and never merges projects into
-     one event. A producer never changes the project form of a day it has already published: a day first published
-     without `project` is rerun without it, and a day merged across projects before DEC-0151 is rerun as first
-     published, or not rerun. A single-project producer keeps leaving `project` out and names it only once it serves a
-     second project. A day's calibration is carried, unchanged, on each project's event judged that day by the
+     one event. A producer never changes the project form of a day it has already published: a single-project day,
+     first published without `project`, is rerun as first published, without `project`; a day merged across projects
+     before DEC-0151 is never rerun. A single-project producer, one project on that channel, keeps leaving `project` out
+     on that channel and names it only once the channel serves a second project. A day's calibration is carried, unchanged, on each project's event judged that day by the
      calibrated judge and rubric; a project's event judged by another judge, or not judged, carries none, and a reader
      reads calibration per project's event, never summing or copying it across projects. The top level then holds 19
      members, inside DEC-0070's 32.
@@ -9129,12 +9131,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      that strength outside the regex. So `project:helpdesk-customer-support`,
      `project:sk-learn-experiments`, `sk-learn-experiments-2026` and `project:sk-hynix-customer-care` are no keys,
      while a mixed-case key, an `sk-proj-` key and `sk-or-v1-` with 64 lower-case hex digits still are, at the start of
-     a value, after a boundary character or after a listed escape. The residual: an alias with a slug word that starts with a provider prefix and holds enough key
-     characters is read as a credential: for `sk-`, a run (letters, digits, `-` and `_`) of 32 or more holding a digit,
-     as a lower-case `sk-or-v1-` key does (`project:sk-customer-support-team-europe-2026`); then `ghp_` and its kin,
-     `xox?-` and `glpat-` (`project:ghp_customerservicedeskabcdef`). The operator's registry rule is to issue no such
-     alias, which this contract does not prove; the rule binds only a producer that must carry `project`: one whose
-     alias is read so publishes no event for that project, on any channel, until the registry changes its alias; the other projects' events are unaffected.
+     a value, after a boundary character or after a listed escape. The residual: an alias with a slug word (a word
+     starts after `-`, `_`, `.` or `:`) that starts with a provider prefix and holds enough key characters is read as a
+     credential: for `sk-`, 32 or more characters after `sk-` (letters, digits, `-` and `_`), holding a digit, as a
+     lower-case `sk-or-v1-` key does (`project:sk-customer-support-team-europe-2026`); for `ghp_` and its kin 20 or
+     more, for `xox?-` 10 or more (`project:xoxb-support-team`), for `glpat-` 20 or more
+     (`project:ghp_customerservicedeskabcdef`). The operator's registry rule is to issue no such
+     alias, which this contract does not prove; the rule binds only a producer that carries `project` on a channel,
+     which checks its alias against the shared detector before publishing (the payload's own check does not run
+     `FAC-SEM-101`): one whose alias is read so publishes no event naming that project, on any channel, until the registry changes its alias; the other projects' events are unaffected.
 - **Why:** the channel agent standard's daily report counts tickets on its signal server and checks each agent's feed
   against it; one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that
   home before any producer may send them. The digit fixes a rule the schema made impossible to keep. The registry
@@ -9186,7 +9191,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fabric_secrets.SECRET_VALUE.pattern` and raises `ImportError` on DEC-0151's pattern, so it keeps the earlier
   unbounded shapes as its own fixed list, for parity with DEC-0149's tree check, before or together with the detector's
   port. A producer that merged projects into one event under DEC-0095 stops publishing that channel from DEC-0151
-  until every reader adopts, so its readers see no days for that channel meanwhile; whether any `/1` producer does so
+  until every reader adopts, so its readers see no days for that channel meanwhile, and never reruns a merged day; whether any `/1` producer does so
   today is the producers' to confirm (CT-103 suggests multi-product producers are still on their v2 shape).
   `contractVersion` stays
   `0.1.0`.
@@ -9200,7 +9205,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/positive/service-events-page-support-quality-sk-slug.json`;
   `fixtures/positive/support-quality-daily-tickets.json`, `-first-reply-unmeasured.json` and `-project.json`,
   `fixtures/positive/service-events-page-support-quality-projects.json`, six `fixtures/negative/support-quality-daily-*`
-  with their `fixtures/catalogue.json` rows, six
+  with their `fixtures/catalogue.json` rows, seven
   `fixtures/semantic/support-quality-daily-*`; `docs/specification/support-quality.md`, `docs/specification/conformance.md`
   (the producer and reader rows), `docs/specification/identifiers.md`, `docs/specification/profiles.md`,
   `docs/specification/fabric-button.md`, `docs/specification/connections.md`, `docs/DOCMAP.md`, `CONTEXT.md`; DEC-0095,

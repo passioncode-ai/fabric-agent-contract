@@ -15,15 +15,19 @@ this payload: `data.value` the payload, and `data.schema` the URI of the copy of
 service.md asks. A reader recognises the payload by `data.value.kind` (`support-quality-daily/1`), never by
 `data.schema`. A rerun for a day replaces that day's event for the channel: a reader keeps, per service, channel and day, the
 latest event (the greatest id in that service's feed). A reader that adopted DEC-0151 keeps, per service, channel, day
-and project, the latest event: an absent `project` names the service's only project at the time of the day (the
-channel agent declaration's single entry, where one exists), and a day published before the service served a second
-project is not re-attributed. A day without `project` from a service that served several projects that day names no single
-project: a reader keeps it per service, channel and day as a merged day and never attributes it to one project. An agent that serves several
-projects on one channel publishes one event per project and day, each naming its `project`, under DEC-0151's producer
-rule below (`fixtures/positive/service-events-page-support-quality-projects.json`). A producer never changes the project
-form of a day it has already published: a day first published without `project` is rerun without it, and a day a
-producer merged across projects before DEC-0151 is rerun as first published, or not rerun. A single-project producer
-keeps leaving `project` out, and names it only once it serves a second project. A day's calibration (DEC-0144) is
+and project, the latest event. Everything about `project` is per channel, the scope of the producer rules and of
+DEC-0150's declaration. An absent `project` names that channel's only project: the channel agent declaration's entry
+whose channel kinds map to that `/1` channel, where a declaration exists. A day without `project` from a service that
+served several projects on that channel that day names no single project, and is kept as a merged day: a reader keeps
+it per service, channel and day and never attributes it to one project. A day published before the service served a
+second project on that channel is not re-attributed. So a service with project A on `telegram_dm` and project B on
+`mail` publishes its `chat` days without `project`, and they name A. An agent that serves several projects on one
+channel publishes one event per project and day, each naming its `project`, under DEC-0151's producer rule below
+(`fixtures/positive/service-events-page-support-quality-projects.json`). A producer never changes the project form of a
+day it has already published: a single-project day, first published without `project`, is rerun as first published,
+without `project`; a day merged across projects before DEC-0151 is never rerun. A single-project producer, one project
+on that channel, keeps leaving `project` out on that channel and names it only once the channel serves a second
+project. A day's calibration (DEC-0144) is
 carried, unchanged, on each project's event judged that day by the calibrated judge and rubric; a project's event
 judged by another judge, or not judged, carries none, and a reader reads calibration per project's event, never
 summing or copying it across projects. An agent with two
@@ -36,7 +40,7 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 |---|---|
 | `kind` | `support-quality-daily/1` |
 | `day`, `channel` | the closed UTC day, and `chat` (one person's chat), `mail`, `reviews` (store review replies) or `community` (group chats and forums) |
-| `project` | optional (DEC-0151): the project whose tickets these are, as the project registry's alias `project:<slug>` (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written ([identifiers](identifiers.md)), the form the channel agent declaration of DEC-0150 names a project in; absent, the service's one project, except a merged day: a day without `project` from a service that served several projects that day names no single project. A reader tells them apart by the first event of that service and channel that names a project: the days before it are single-project days, unless the service published merged days under DEC-0095, which only the producer knows; that residual ambiguity is the reader's to resolve |
+| `project` | optional (DEC-0151): the project whose tickets these are, as the project registry's alias `project:<slug>` (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written ([identifiers](identifiers.md)), the form the channel agent declaration of DEC-0150 names a project in; absent, that channel's only project (the declaration entry whose channel kinds map to that `/1` channel), except a merged day: a day without `project` from a service that served several projects on that channel that day names no single project, and is kept as a merged day. A reader tells them apart by the first event of that service and channel that names a project: the days before it are single-project days, unless the service published merged days under DEC-0095, which only the producer knows; that residual ambiguity is the reader's to resolve |
 | `rubricVersion`, `judgeModel` | the rubric's version and the judge's `<vendor>/<model>`, or `null` when nothing was judged and no calibration is carried |
 | `notMeasured` | each metric not computed that day, as `family.metric` (a metric name may carry digits: `nobodyDropped.firstReplyP50Ms`, DEC-0151), a top-level count by its own name (`arrived`, `ended`, `notATicket`), or `checks` when nothing was judged; at most 32 names (DEC-0070's list), so a producer that would name more leaves out the optional members it did not measure |
 | `arrived`, `ended`, `notATicket` | optional (DEC-0151): the tickets that arrived on the day; the tickets that ended on the day, whatever day they arrived (the **ending cohort**, which every outcome count below is of); the day's automated notices, which are not tickets |
@@ -54,13 +58,17 @@ Counts and rates only: no person's words, no ids (the project's registry alias e
 person's words out is the producer's duty (service.md). An alias with a weak `sk-` slug word passes
 (`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`): the detector takes an `sk-` key only with a
 digit and an upper-case letter with 16 or more characters, or a digit with 32 or more, and reads every provider prefix
-in its canonical case only (DEC-0151). The residual exception is a slug word that starts with a provider prefix and
-holds enough key characters: for `sk-`, a run of letters, digits, `-` and `_` of 32 or more holding a digit, as a
-lower-case `sk-or-v1-` key does (`project:sk-customer-support-team-europe-2026`); then `ghp_` and its kin, `xoxb-` and
-its kin, and `glpat-` (`project:ghp_customerservicedeskabcdef`). The detector reads such an alias as a credential and
+in its canonical case only (DEC-0151). The residual exception is a slug word (a word starts after `-`, `_`, `.` or
+`:`) that starts with a provider prefix and holds enough key characters: for `sk-`, 32 or more characters after `sk-`
+(letters, digits, `-` and `_`), holding a digit, as a lower-case `sk-or-v1-` key does
+(`project:sk-customer-support-team-europe-2026`); for `ghp_` and its kin 20 or more, for `xoxb-` and its kin 10 or more
+(`project:xoxb-support-team`), for `glpat-` 20 or more (`project:ghp_customerservicedeskabcdef`). The detector reads such an alias as a credential and
 the events page fails `FAC-SEM-101`; it stays strict there (`test/secret-shape.test.ts`). The operator's registry rule
 is to issue no such alias, a rule of the registry this contract does not prove; the rule here binds a producer that
-must carry `project`: one whose alias is read so publishes no event for that project, on any channel, until the registry changes its alias; the other projects' events are unaffected.
+carries `project` on a channel: one whose alias is read so publishes no event naming that project, on any channel,
+until the registry changes its alias; the other projects' events are unaffected. Such a producer checks its alias
+against the shared detector (or validates its events page) before publishing, because the payload's own check
+(FAC-SEM-126) does not run `FAC-SEM-101`.
 The feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries `calibration` and
 `calibrationChecks` once every reader of its feed it knows of has adopted DEC-0144. A reader that validates against an
 older copy of the schema (closed) refuses that day's `value` whole and keeps the event's `text`, so the day's numbers

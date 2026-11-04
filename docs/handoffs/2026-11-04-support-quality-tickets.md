@@ -21,7 +21,7 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 - The schema's `calibration` description corrected ("an ISO week that starts no later than day"), as CT-188 noted.
 - Fixtures: five positive (`support-quality-daily-tickets`, `-first-reply-unmeasured` and `-project`, and two events
   pages, `service-events-page-support-quality-projects` with two projects' days and `-sk-slug`), six negative (with
-  catalogue rows), six semantic. Tests: in `test/support-quality.test.ts`, DEC-0070's bounds (19 top-level members, 10
+  catalogue rows), seven semantic. Tests: in `test/support-quality.test.ts`, DEC-0070's bounds (19 top-level members, 10
   in `outcomes`, 28 had the outcomes stood at the top level), the top-level partition, two projects' days on one
   channel, a 40-character mixed-case id refused as a project and the interim first-reply day; in
   `test/secret-shape.test.ts`, the detector's boundary, escapes, `sk-` strength, canonical case, the residual aliases,
@@ -101,6 +101,18 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   connections comment say "the same strength within 256 characters". The round-5 seam additions applied: the vendors
   named (below and in DEC-0151's Compatibility and the `src/secret-shape.ts` comment); the adapter's source check is
   exempt from the ports' instruction; the merge list re-measured against the current heads.
+- Round 6 of the readings (on `87771d82`): three breaks fixed. Everything about `project` is per channel: an absent
+  `project` names that channel's only project, a merged day is one from a service that served several projects on that
+  channel that day, a single-project producer has one project on that channel, and the alias rule binds a producer
+  that carries `project` on a channel (a service with project A on `telegram_dm` and B on `mail` publishes `chat` days
+  naming A). A day merged across projects before DEC-0151 is never rerun; a single-project day is rerun as first
+  published. The semantic fixture count is seven. The coordinator's decisions applied: the residual alias wording (32
+  or more characters after `sk-`, word starts after `-`, `_`, `.` or `:`, each prefix's minimum) with tests for 31 and 32
+  characters and a Slack-prefixed alias; a producer carrying `project` checks its alias against the shared detector
+  before publishing; the conformance module row names DEC-0151, `test/secret-shape.test.ts` and the AT-15 vectors; CT-210
+  (b) asks multi-project producers whether they ever published merged days; "a backslash escape other than an escaped
+  quote" in the connections comment, connections.md and CT-73; the timing test asserts both a growth ratio (4 times
+  the input, under 8 times the time, best of three, with a 40 ms floor for timer granularity) and a 500 ms ceiling.
 
 ## Open
 
@@ -190,6 +202,12 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these:
   measurement only): its two channel-agent vectors already use keys with a digit and an upper-case letter, `tsc` exit 0,
   29 vector files match their generators, and the whole suite passes (110 files, 10017 tests, 1 skipped). No test
   fails. DEC-0150's `FAC-SEM-165` reads with the same detector, so its declarations accept strictly more.
+- When one project's alias is read as a credential, DEC-0150's `FAC-SEM-165` also flags that project's entry in the
+  declaration; the lander states in `channel-agent.md` that the agent removes or renames that project's entry.
+- The Source lines of DEC-0150 and DEC-0151 must agree after the merge; whichever lands second annotates its own:
+  `ee67e35e` (key `support-quality-v2-dec`) moved the DEC counter from 149 to 152 and is DEC-0151's reservation;
+  DEC-0149's own reservation is `e27a5441` (key `ct194-source-manifest`); both as the coordinator read the counter's
+  chain, and `git cat-file -p ee67e35e` shows `"next": 152` under that key.
 - DEC-0150's join sentence in `channel-agent.md` ("so a reader joins a declaration to a project's payloads on
   `project:<slug>`"): once both land it reads "on `project:<slug>`, or, for a payload with no project, on the
   declaration's one project".
@@ -211,6 +229,12 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these:
 
 ## Checks actually run
 
+On the round-6 head, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0
+(109 files, 9830 tests passed, 1 skipped); `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0; `pnpm privacy:check`
+with the organization's index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files match). No
+U+2014 in the added lines, no look-behind in either copy of `SECRET_VALUE`, and the differential against origin/main's
+pattern still finds 0 new-only matches (32147 both, 115485 only the earlier).
+
 On the round-5 head (`19ab1f56` and the handoff commit after it, which changes only this file), each exit code read
 separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9830 tests passed, 1 skipped);
 `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0; `pnpm privacy:check` with the organization's index 0 (0
@@ -229,6 +253,6 @@ the added lines.
 
 ## Next task
 
-Round 6 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers, until two consecutive rounds
+Round 7 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers, until two consecutive rounds
 are clean; open the pull request; merge only once DEC-0150 is on main (the merge gate above), applying the merge list;
 mark DEC-0151 accepted, close CT-129, mark CT-210's first step done, release, and answer thread `b6820b97` with the tag.

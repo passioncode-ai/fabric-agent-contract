@@ -90,6 +90,13 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
     // 32 or more letters, digits, - and _ holding a digit (as a lower-case sk-or-v1- key does); for ghp_, 20 or more.
     expect(codes("project:sk-customer-support-team-europe-2026")).toContain("FAC-SEM-101");
     expect(codes("project:ghp_customerservicedeskabcdef")).toContain("FAC-SEM-101");
+    // Slack's prefix with 10 or more characters; the alias is built from parts so no key-shaped literal sits here.
+    expect(codes(["project:xox", "b-support-team"].join(""))).toContain("FAC-SEM-101");
+    // 31 characters after sk-, holding a digit and no upper-case letter: no key; 32: a key.
+    const run = (n: number) => `${"customer-support-team-europe-".repeat(3).slice(0, n - 1)}7`;
+    expect(run(31)).toHaveLength(31);
+    expect(codes(`project:sk-${run(31)}`)).not.toContain("FAC-SEM-101");
+    expect(codes(`project:sk-${run(32)}`)).toContain("FAC-SEM-101");
   });
   it("lets a support-quality day name a project whose slug holds -sk- (FAC-SEM-101 on the events page)", () => {
     const page = { events: [{ id: "1", at: "2026-10-19T00:20:00Z", kind: "support.quality_daily", level: "info", text: "Support quality for chat on 2026-10-18.", data: { schema: "https://support.example.com/schemas/support-quality-daily.schema.json", value: { kind: "support-quality-daily/1", project: "project:helpdesk-customer-support" } } }], cursor: "1" };
@@ -107,7 +114,8 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
     for (const head of ["a\\x4", "a\\q", `a${esc}[0`, "ab"]) expect(SECRET_VALUE.test(head + keys.github), JSON.stringify(head)).toBe(false);
   });
   it("reads a long run of sk- prefixes in linear time: the look-aheads are bounded to 255 characters (DEC-0151)", () => {
-    // CPU time of this thread where the runtime offers it, else of the process: a fixed budget, far above the bound.
+    // CPU time of this thread where the runtime offers it, else of the process. Two checks: the time grows less than
+    // 8 times when the input grows 4 times (a quadratic read grows 16 times), and stays under a generous 500 ms.
     const usage = (): NodeJS.CpuUsage => ((process as unknown as { threadCpuUsage?: () => NodeJS.CpuUsage }).threadCpuUsage ?? process.cpuUsage)();
     const cpuMs = (run: () => unknown): number => {
       const start = usage();
@@ -115,15 +123,25 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
       const end = usage();
       return (end.user - start.user + end.system - start.system) / 1000;
     };
-    for (const value of ["-sk".repeat(100000), `${"-sk".repeat(100000)}-a`]) {
-      for (const [name, check] of [["SECRET_VALUE.test", (v: string) => SECRET_VALUE.test(v)], ["secretValue", secretValue], ["secretArgument", secretArgument], ["secretUrl", secretUrl]] as const) {
-        let found = true;
-        const ms = cpuMs(() => { found = check(value); });
-        expect(found, name).toBe(false);
-        expect(ms, `${name} on ${value.length} characters`).toBeLessThan(150);
+    const checks = [["SECRET_VALUE.test", (v: string) => SECRET_VALUE.test(v)], ["secretValue", secretValue], ["secretArgument", secretArgument], ["secretUrl", secretUrl]] as const;
+    for (const suffix of ["", "-a"]) {
+      for (const [name, check] of checks) {
+        const timed = (n: number): number => {
+          const value = `${"-sk".repeat(n)}${suffix}`;
+          let found = true;
+          // The best of three, so one scheduling hiccup does not decide the ratio.
+          const best = Math.min(...[0, 1, 2].map(() => cpuMs(() => { found = check(value); })));
+          expect(found, name).toBe(false);
+          return best;
+        };
+        const small = timed(25000);
+        const large = timed(100000);
+        expect(large, `${name} on 300000 characters`).toBeLessThan(500);
+        expect(large, `${name}: 4 times the input, ${small} ms then ${large} ms`).toBeLessThan(Math.max(8 * small, 40));
       }
     }
   });
+
   it("finds every key kind after an octal escape, a double percent-escape and the escaped ESC colour forms (DEC-0151)", () => {
     const hex = tail(64, "0123456789abcdef");
     const kinds = [keys.openai, `sk-or-v1-${hex}`, keys.github, keys.slack, keys.aws, keys.gitlab];
