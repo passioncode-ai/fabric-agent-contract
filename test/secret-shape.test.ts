@@ -102,8 +102,8 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
     expect(codes(gl(19))).not.toContain("FAC-SEM-101");
     expect(codes(gl(20))).toContain("FAC-SEM-101");
   });
-  it("knowingly does not find a key after a triple percent-escape or an eight-digit \\U escape (DEC-0151)", () => {
-    for (const head of ["a%252522", "a\\U00000022"]) expect(SECRET_VALUE.test(head + keys.github), head).toBe(false);
+  it("knowingly does not find a key after a triple percent-escape, an eight-digit \\U escape or a %u escape (DEC-0151)", () => {
+    for (const head of ["a%252522", "a\\U00000022", "a%u0022"]) expect(SECRET_VALUE.test(head + keys.github), head).toBe(false);
   });
   it("lets a support-quality day name a project whose slug holds -sk- (FAC-SEM-101 on the events page)", () => {
     const page = { events: [{ id: "1", at: "2026-10-19T00:20:00Z", kind: "support.quality_daily", level: "info", text: "Support quality for chat on 2026-10-18.", data: { schema: "https://support.example.com/schemas/support-quality-daily.schema.json", value: { kind: "support-quality-daily/1", project: "project:helpdesk-customer-support" } } }], cursor: "1" };

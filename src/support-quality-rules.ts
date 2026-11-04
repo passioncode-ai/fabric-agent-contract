@@ -42,6 +42,11 @@ export function isoWeekMonday(week: string): string | null {
   return `${pad(monday.getUTCFullYear(), 4)}-${pad(monday.getUTCMonth() + 1, 2)}-${pad(monday.getUTCDate(), 2)}`;
 }
 
+// DEC-0151's interim: until every reader of the feed has adopted it, a producer leaves an unmeasured first-reply time
+// null and unnamed, since an older copy refuses a metric name with a digit; the message points there.
+const FIRST_REPLY = new Set(["nobodyDropped.firstReplyP50Ms", "nobodyDropped.firstReplyP90Ms"]);
+const INTERIM = "; until every reader of the feed has adopted DEC-0151, leave it null and unnamed: support quality, the interim";
+
 export function supportQualityRules(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const flag = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-126", instancePath, message });
@@ -50,7 +55,7 @@ export function supportQualityRules(value: JsonObject): Finding[] {
   // A metric not computed is null and named; a named one is null. Every name it reads is one the payload carries.
   const notMeasuredRule = (name: string, at: string, measured: unknown) => {
     seen.add(name);
-    if (measured === null && !named.has(name)) flag(at, `${name} is null, so notMeasured names it`);
+    if (measured === null && !named.has(name)) flag(at, `${name} is null, so notMeasured names it${FIRST_REPLY.has(name) ? INTERIM : ""}`);
     if (measured !== null && named.has(name)) flag(at, `${name} is named not measured, so it is null, not a value`);
   };
   for (const family of [...FAMILIES, "checks"]) {

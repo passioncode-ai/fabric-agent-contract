@@ -14,13 +14,12 @@
  * becomes one DEC-0151 reads, built from pieces), the adapter's profiles test case (its query of `%zz`, a raw
  * control character and `KIA` with 16 more characters stops being found, since its `AKIA` borrowed the `A` of the
  * encoded `%1A`; it is rebuilt with a boundary before `AKIA`, from pieces) and any template or agent that copies the kit; a port that copies
- * `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
- * otherwise. Project Observatory's folder-attribution port (with its attribution-vectors pin) and its estate-record
+ * `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since six of its nine new AT-15 cases fail under the earlier detector (three did before DEC-0151's round 14), and the percent-escape case fails under a port that takes the boundary without its escapes. Project Observatory's folder-attribution port (with its attribution-vectors pin) and its estate-record
  * port (FAC-SEM-075) re-sync together with that file. Whole-file vendors that pin this file by hash take DEC-0151 at
  * their next re-pin, with their vectors. Fabric vendors this file twice, one copy under a sha256 `pin.json` together with
  * `fixtures/vectors/folder-attribution.json`; Fabric Dashboards vendors `src/session-handoff.ts` and
  * `src/fabric-links.ts`, and its service host's connections hold a port; Fabric Dashboards' sample-service kit copies
- * hold the earlier pattern. A port derives the files whose answers change by patching SECRET_VALUE in its twins and
+ * hold the earlier pattern. Every port drops its case-insensitive flag (`re.I`, `(?i)`) and reads digits as ASCII (`re.ASCII`, `[0-9]` or `(?-u:\d)`): Project Observatory's folder-attribution and estate-record ports and Fabric Switchboard's folder-attribution port compile it case-insensitively today. A port derives the files whose answers change by patching SECRET_VALUE in its twins and
  * running its suite, never by scanning literals (the CT-210 handoff names every adapter test such a run failed). A repository-name check must not compose this source after a
  * separator look-behind with an `i` flag: the boundary group consumes one character, so a key right after `-`, `.`
  * or `_` goes unfound and `i` undoes the canonical case and the `sk-` strength; it keeps its own boundary-free key
@@ -87,7 +86,7 @@ export const JWT_SHAPE = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]
  * read lazily, so a long run of `sk-` prefixes is read in linear time. So `project:helpdesk-customer-support`,
  * `project:sk-learn-experiments` and `sk-learn-experiments-2026` are no keys, and `sk-or-v1-` with 64 lower-case hex
  * digits is one. A port whose regex has no look-ahead (Rust's `regex` crate) checks that strength outside the regex.
- * Knowingly not found: a key after a triple percent-escape (`%252522`), an eight-digit `\U00000022` escape, a CSI
+ * Knowingly not found: a key after a triple percent-escape (`%252522`), an eight-digit `\U00000022` escape, a `%u0022` escape, a CSI
  * sequence that is not a colour sequence (`ESC[K`, `ESC[2J`), or a colour sequence opened by the 8-bit CSI (U+009B), a
  * brace escape (`\x{1b}`, `\u{1b}`), `\E` or the caret `^[`. A colour sequence's parameters may hold `:` (ITU T.416),
  * and `\33` is an escaped ESC too.

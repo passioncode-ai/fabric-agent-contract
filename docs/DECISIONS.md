@@ -8718,6 +8718,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   optional members, which a reader validating against an older copy refuses. Consumer adoption: CT-188.
 - **Annotated (2026-11-04):** the schema's `calibration` description said "a week no later than day"; DEC-0151's
   change of the schema corrects it to an ISO week that starts no later than `day`, as item 3 and FAC-SEM-126 read it.
+- **Annotated (2026-11-04):** with `project` (DEC-0151), the carry-forward holds per project's event and side: rule 6 of
+  support quality's project section.
 - **Context:** a project on the board asked (request `b05d8bc9`, thread `afd3dc71`, 2026-10-27) for a way to say on
   what share of the answers a person labelled the judge agreed with the person: without it a reader treats every
   judge as uncalibrated and never ranks or alerts on its checks, even when the producer calibrated it. One producer on the
@@ -9098,7 +9100,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written, the form DEC-0150's CA-2 gives the channel agent
      declaration's `project`. Until every reader of its feed it knows of has adopted DEC-0151, a producer publishes no `project` and withholds every channel whose day holds tickets of two projects that enter `/1`, counting every project whose tickets the channel holds: by its channel agent declaration where the declaration names the project, by its own project mapping otherwise (no declaration, no alias, or an alias read as a credential); a project whose kind there is left out of `/1`, such as `team_chat`, does not count. The switch day of a channel moving from one project to another is one of them, and a withheld day is dropped, never published later.
      Once every reader has adopted, it names `project` on every day it first publishes, whatever the number of
-     projects on the channel.
+     projects on the channel, except a project with no registry alias (rule 9).
      A reader never attributes a day without `project` to a project: it keeps such a day (published before adoption, a
      merged legacy day, or a rerun of one) per service, channel and day, and per-project history starts at adoption,
      the same for every reader. A rerun republishes a day as first published. With `project` (DEC-0151), a project's event carries the latest calibration of the side whose judge and rubric judge its tickets, on every day it still holds for (DEC-0144's carry-forward), whether or not anything was judged that day; a project of a side with no calibration carries none, and a producer with no declaration carries its calibration likewise on each project's event. The rules are held by
@@ -9131,17 +9133,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `sk-or-v1-` key does; for `ghp_` and its kin, 20 or more letters and digits; for `xox?-`, 10 or more letters,
      digits and `-`; for `glpat-`, 20 or more letters, digits, `-` and `_` (19 pass). Prose writes such an alias as a
      prefix and a count of characters, never whole; `test/secret-shape.test.ts` builds them. Knowingly not found
-     either: a key after a triple percent-escape (`%252522`), after an eight-digit `\U00000022` escape, whose last
-     character before the prefix is a digit, after a CSI sequence that is not a colour sequence (`ESC[K`,
-     `ESC[2J`), whose last character is a letter, or after a colour sequence opened by the 8-bit CSI (U+009B), brace escapes (`\x{1b}`, `\u{1b}`), `\E` and the caret `^[` form. The operator's registry rule is to issue no such
-     alias, which this contract does not prove; the rule binds only a producer that carries `project` on a channel,
+     either: a key after a triple percent-escape (`%252522`), after an eight-digit `\U00000022` escape or a `%u0022`
+     escape, whose last character before the prefix is a digit, after a CSI sequence that is not a colour sequence (`ESC[K`,
+     `ESC[2J`), whose last character is a letter, or after a colour sequence opened by the 8-bit CSI (U+009B), brace escapes (`\x{1b}`, `\u{1b}`), `\E` and the caret `^[` form. Whether the registry issues no such alias is the
+     operator's open question until the registry's owner records the rule (CT-210 (g)), and this contract does not prove
+     it; the rule binds only a producer that carries `project` on a channel,
      which checks its alias against the shared detector before publishing (the payload's own check does not run
      `FAC-SEM-101`): one whose alias is read so publishes no event for that project, on any channel, until the
      registry changes its alias; the other projects' events are unaffected. Under DEC-0150's rule (`FAC-SEM-165`) the
      agent's declaration is refused while it holds that entry, so the agent leaves it out until the registry changes the
      alias, and that project's channels still count
      for item 6's rule 1. It keeps that project's days and, once the
-     registry changes the alias, publishes them naming the new alias. A weak `sk-` slug alias (`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`, `project:sk-harbor-customer-care`) passes `FAC-SEM-101` and `FAC-SEM-165` but is still a `FAC-SEM-158` credential in a source tree under DEC-0149, whose tree check keeps its own unbounded, case-insensitive key shapes: a channel agent declaring such a project in `fabric-agent.json` cannot export its source (checked with DEC-0149's `checkSourceTree` at its landing head, read at `e1262368`). The route is the registry's: it issues no alias with a provider prefix at a word start, and the agent never renames an alias.
+     registry changes the alias, publishes them naming the new alias. A weak `sk-` slug alias (`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`, `project:sk-harbor-customer-care`) passes `FAC-SEM-101` and `FAC-SEM-165`, but DEC-0149 (in progress) reads it as a `FAC-SEM-158` credential in a source tree, its tree check keeping its own unbounded, case-insensitive key shapes: once DEC-0149 lands, a channel agent declaring such a project in `fabric-agent.json` cannot export its source (checked with DEC-0149's `checkSourceTree` at `8dd4d04f`). Whether the registry issues an alias with a provider prefix at a word start is the operator's open question until the registry's owner records a rule (CT-210 (g)); the agent never renames an alias.
 - **Why:** the channel agent standard's daily report counts tickets on its signal server and checks each agent's feed
   against it; one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that
   home before any producer may send them. The digit fixes a rule the schema made impossible to keep. The registry
@@ -9170,17 +9173,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (item 6 holds the producer to that). The bytes under the unchanged `$id` widen, so a reader validates against its own
   pinned copy. FAC-SEM-126's messages change, never its code or which payloads it finds: a non-metric name in
   `notMeasured` is reported as not a metric, and the autonomy sum now reads "the autonomy outcomes
-  (resolvedWithoutPerson, toPersonPolicy, toPersonInability) are more than the turns". Item 7 makes every rule that
+  (resolvedWithoutPerson, toPersonPolicy, toPersonInability) are more than the turns", and a `null`, unnamed
+  first-reply metric's message adds "until every reader of the feed has adopted DEC-0151, leave it null and unnamed:
+  support quality, the interim". Item 7 makes every rule that
   uses the shared detector, `FAC-SEM-101` and DEC-0150's `FAC-SEM-165` among them, accept strictly more: a value it
   finds is one the earlier pattern found too (`test/secret-shape.test.ts`). One vector input changes:
   `fixtures/vectors/folder-attribution.json`'s case "AT-15: a remote whose kept part still has a secret's shape records
   no origin" held a digit-free `sk-` user, which the `sk-` strength no longer reads as a key; its user now holds a digit
-  and an upper-case letter, so the case keeps testing what it names. Three AT-15 cases are added that tell this
-  detector from the earlier one: a remote holding `-sk-` inside a word and one holding a weak `sk-` slug now record
-  their origin, and a strong key after a percent-escape records none. Three more pin a look-ahead-free port's reading:
-  a strong key at an inner boundary of a rejected `sk-` run records no origin, an `sk-` run whose only digit lies past
-  256 characters records it, and one whose digit and capital lie there is still a long mixed run. A port re-syncs that file together with the
-  detector. Two semantic
+  and an upper-case letter, so the case keeps testing what it names. Nine AT-15 cases are added. Six fail under the
+  earlier detector (three did before DEC-0151's round 14): a remote holding `-sk-` inside a word, one holding a weak
+  `sk-` slug, one holding a lower-case `sk-` slug of 16 to 31 characters with a digit, one holding a strong `sk-` run
+  glued after a letter (the word start: with the boundary group removed it fails), one whose user is an upper-case
+  `SK-` with a digit and a capital (the canonical case), and an `sk-` run whose only digit lies past 256 characters,
+  each recording its origin. A strong key after a percent-escape records none: it tells DEC-0151 from a port that takes
+  the boundary without its escapes, not from the earlier pattern. Two more pin a look-ahead-free port's reading: a
+  strong key at an inner boundary of a rejected `sk-` run records no origin, and a run whose digit and capital lie past
+  256 characters is still a long mixed run. A port re-syncs that file together with the detector. Two semantic
   fixtures change for the canonical case: `fixtures/semantic/package-secret-shaped-name.json` and
   `fixtures/semantic/estate-secret-value-as-slot.json` held an upper-case `GHP_` value as their credential-shaped slot
   name, which is no longer a key; they now hold an `AKIA` value (an upper-case name that still is one), with their
@@ -9199,8 +9207,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`FAC-SEM-075`), re-synced together with `folder-attribution.json`, and any template or agent that copies the kit;
   whole-file vendors that pin `src/secret-shape.ts` by hash take DEC-0151 at their next re-pin, with their vectors;
   any port that copies
-  `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
-  otherwise. Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json` together with
+  `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since six of its nine new
+  AT-15 cases fail under the earlier detector, and the percent-escape case under a port that takes the boundary without
+  its escapes. Every port drops its case-insensitive flag (`re.I`, `(?i)`) and reads digits as ASCII (`re.ASCII`, `[0-9]` or `(?-u:\d)`): Project Observatory's folder-attribution and estate-record ports and Fabric Switchboard's folder-attribution port compile it case-insensitively today. Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json` together with
   `fixtures/vectors/folder-attribution.json`, so both are re-pinned together; Fabric Dashboards vendors
   `src/session-handoff.ts` and `src/fabric-links.ts`, and its service host's connections hold a port; Fabric
   Dashboards' sample-service kit copies hold the earlier pattern. One port is exempt from that instruction: the
@@ -9216,7 +9225,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   left to correct), `src/support-quality-rules.ts`, `test/support-quality.test.ts`; `src/secret-shape.ts`,
   `src/session-handoff.ts`, `src/connections.ts` (a comment), `test/secret-shape.test.ts`,
   `test/session-handoff-review.test.ts` (its SH-9 key now holds a digit and an upper-case letter),
-  `tools/vectors/folder-attribution.ts` and `fixtures/vectors/folder-attribution.json` (one AT-15 input, six AT-15 cases),
+  `tools/vectors/folder-attribution.ts` and `fixtures/vectors/folder-attribution.json` (one AT-15 input, nine AT-15 cases),
   `fixtures/semantic/package-secret-shaped-name.json`, `fixtures/semantic/estate-secret-value-as-slot.json`,
   `test/package.test.ts`, `test/estate-record.test.ts`,
   `fixtures/positive/service-events-page-support-quality-sk-slug.json`;
@@ -9229,4 +9238,4 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   DEC-0144 and DEC-0044 annotated; `docs/backlog.md` (CT-210, CT-129, CT-103, CT-73, CT-213, CT-188's note);
   `docs/handoffs/2026-11-04-support-quality-tickets.md`.
 - **Source:** CT-210, CT-129; the board request `74105ca1` (thread `b6820b97`); DEC-0151 reserved by git CAS (key
-  `support-quality-v2-dec`, counter commit `ee67e35`). Readings: Rounds 1 to 13 found breaks, each fixed: round 8 the per-day attribution of an absent `project`; round 9 one rule for it (no `project` before adoption, `project` on every event after, a day without it never attributed); round 10 rule 1's trigger the day's tickets and calibration per side; round 11 the observed check by period, only projects whose tickets enter `/1`, merged legacy days kept from reruns before adoption, one-way adoption; round 12 adoption marked by the first day that names `project`, rule 9 per project, the colour boundary's `:` and `\33`; round 13 DEC-0144's calibration carry-forward per project and a weak `sk-` alias still a credential in a DEC-0149 source tree; two consecutive clean rounds are still owed.
+  `support-quality-v2-dec`, counter commit `ee67e35`). Readings: Rounds 1 to 13 found breaks, each fixed: round 8 the per-day attribution of an absent `project`; round 9 one rule for it (no `project` before adoption, `project` on every event after, a day without it never attributed); round 10 rule 1's trigger the day's tickets and calibration per side; round 11 the observed check by period, only projects whose tickets enter `/1`, merged legacy days kept from reruns before adoption, one-way adoption; round 12 adoption marked by the first day that names `project`, rule 9 per project, the colour boundary's `:` and `\33`; round 13 DEC-0144's calibration carry-forward per project and a weak `sk-` alias still a credential in a DEC-0149 source tree; round 14 AT-15 vectors for the canonical case, the `sk-` strength and the word start, the no-alias exception in every copy of rule 2, rule 9's "unnamed", the interim message, and the registry's alias rule as the operator's open question; two consecutive clean rounds are still owed.

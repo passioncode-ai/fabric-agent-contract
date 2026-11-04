@@ -159,9 +159,10 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
   agrees with a comparison by normal form; an alias with a slug word (a word starts after `-`, `_`, `.` or `:`) that
   starts with a provider prefix and holds enough key characters (for `sk-`, 32 or more letters, digits, `-` and `_` after
   it, holding a digit; for `ghp_` and its kin, 20 or more letters and digits; for `xox?-`, 10 or more letters, digits
-  and `-`; for `glpat-`, 20 or more letters, digits, `-` and `_`) is read as a credential by `FAC-SEM-101` (DEC-0151 item 7), and the operator's
-  registry rule is to issue none; a weak `sk-` slug alias passes `FAC-SEM-101` and `FAC-SEM-165` but is still a
-  `FAC-SEM-158` credential in a DEC-0149 source tree, whose tree check keeps its own unbounded key shapes;
+  and `-`; for `glpat-`, 20 or more letters, digits, `-` and `_`) is read as a credential by `FAC-SEM-101` (DEC-0151 item 7), and whether the
+  registry issues none is the operator's open question until the registry's owner records the rule (CT-210 (g)); a weak
+  `sk-` slug alias passes `FAC-SEM-101` and `FAC-SEM-165`, but DEC-0149 (in progress) reads it as a `FAC-SEM-158`
+  credential in a source tree, its tree check keeping its own unbounded key shapes;
 - `agentRef` (`urn:fabric:agent:<publisher>:<id>`): its schema pattern admits only lower case and no `%`, so every valid
   value is already its normal form;
 - opaque ids (`activity-common.schema.json#/$defs/opaqueId`: estates, machines, devices, users, sessions, leases),

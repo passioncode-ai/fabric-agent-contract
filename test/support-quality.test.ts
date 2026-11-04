@@ -288,6 +288,14 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
     // With no first-reply time measured, one finding per percentile, and nothing else.
     expect(paths(load("support-quality-daily-first-reply-interim-both.json").input as Json)).toEqual(["FAC-SEM-126 /nobodyDropped/firstReplyP50Ms", "FAC-SEM-126 /nobodyDropped/firstReplyP90Ms"]);
   });
+  it("points the first-reply finding to DEC-0151's interim, and no other metric's (DEC-0151)", () => {
+    const interim = "; until every reader of the feed has adopted DEC-0151, leave it null and unnamed: support quality, the interim";
+    const messages = evaluateSemanticRules("support-quality-daily", load("support-quality-daily-first-reply-interim-both.json").input).map((f) => f.message);
+    expect(messages).toEqual([`nobodyDropped.firstReplyP50Ms is null, so notMeasured names it${interim}`, `nobodyDropped.firstReplyP90Ms is null, so notMeasured names it${interim}`]);
+    const other = structuredClone(load("support-quality-daily-first-reply-interim.json").input as Json);
+    other.nobodyDropped.replyCoverage = null;
+    expect(evaluateSemanticRules("support-quality-daily", other).map((f) => f.message)).toContain("nobodyDropped.replyCoverage is null, so notMeasured names it");
+  });
   it("keeps DEC-0070's bounds: every object of the schema at most 32 members, and the whole payload inside an events page", async () => {
     const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
     expect(Object.keys(schema.properties)).toHaveLength(19);
