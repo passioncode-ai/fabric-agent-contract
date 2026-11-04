@@ -836,7 +836,9 @@ value (DEC-0142 PS-10).
 listing or a fix, with evidence by reference; a rule is approved by a person, nothing applies itself, and nothing
 about a private agent leaves as a proposal (DEC-0072, [proposals](docs/specification/proposals.md)); handing over its
 **Source export** goes only by a **Source hand-over** (DEC-0149). The operator's standing permission of 2026-10-12 to
-move a private agent's mechanics into a product, with its private data stripped, is unchanged.
+move a private agent's mechanics into a product, rewriting or copying them file by file into the product's own source
+through its own change with private data stripped, is unchanged and needs no word per act, as
+[source](docs/specification/source.md#handing-over) draws the line.
 
 **Protocol revision**: `<name>/<revision>`, the version every document names (DEC-0009); a receiver accepts N and N−1
 of the contract's register, lists them in `protocols`, and refuses another with `schema-unsupported` (DEC-0067,

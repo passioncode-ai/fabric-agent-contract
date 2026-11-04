@@ -204,6 +204,22 @@ const cases: Array<[string, Json, Json[]]> = [
     [{ kind: "link-outside", file: 4, line: 1, column: 1 }, { kind: "link-outside", file: 5, line: 1, column: 1 }]
   ],
   [
+    "a symbolic link's target is read on line 1 in the table's order: a home path, then link-outside",
+    // No segment after the name, so the repository's own privacy check reads no home path with a file in it.
+    tree([{ path: "src/data", text: ["/Us", "ers/jdoe"].join(""), link: true }]),
+    [{ kind: "home-path", file: 4, line: 1, column: 8 }, { kind: "link-outside", file: 4, line: 1, column: 1 }]
+  ],
+  [
+    "a Markdown-named link whose target holds a Markdown link outside is one link-outside",
+    tree([{ path: "src/notes.md", text: "](../../../y)", link: true }]),
+    [{ kind: "link-outside", file: 4, line: 1, column: 1 }]
+  ],
+  [
+    "a link's target is resolved literally: # is a path character, so #/../../../x climbs above the root",
+    tree([{ path: "src/#/f.txt", text: "x" }, { path: "src/l", text: "#/../../../x", link: true }]),
+    [{ kind: "link-outside", file: 5, line: 1, column: 1 }]
+  ],
+  [
     "a LICENSE that is a symbolic link is no licence",
     { manifest, files: [...base.filter((file) => file.path !== "LICENSE"), { path: "LICENSE", text: "README.md", link: true }] },
     [{ kind: "no-license" }]

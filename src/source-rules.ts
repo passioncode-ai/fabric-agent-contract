@@ -797,6 +797,22 @@ function resolveLink(file: string, target: string): string | undefined {
   return parts.join("/");
 }
 
+/**
+ * A symbolic link's target resolved against its folder, literally: split on `/`, with no `#` or `?` stripped and no
+ * percent-decoding (a link names a path, not a URL); undefined when it climbs above the source's root.
+ */
+function resolveLinkTarget(file: string, target: string): string | undefined {
+  const parts = file.split("/").slice(0, -1);
+  for (const segment of target.split("/")) {
+    if (segment === "" || segment === ".") continue;
+    if (segment === "..") {
+      if (parts.length === 0) return undefined;
+      parts.pop();
+    } else parts.push(segment);
+  }
+  return parts.join("/");
+}
+
 /** A root file named as a licence is: `LICENSE`, `LICENCE` or `COPYING`, with an extension or none, in any letter case. */
 const LICENSE_FILE = /^(?:LICENSE|LICENCE|COPYING)(?:\..+)?$/i;
 
@@ -855,9 +871,11 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
     const text = typeof file.text === "string" ? file.text : "";
     // A symbolic link (`link: true`, its target as `text`) is read with link-outside's rule: a target above the root,
     // absolute, or not a source path is a warning, since a source export does not carry what it points at.
+    // The verdict is taken before the lines are read and said on line 1, in the table's order, once per kind.
+    let linkOutside = false;
     if (file.link === true) {
-      const resolved = text.startsWith("/") ? undefined : resolveLink(path, text);
-      if (resolved === undefined || !linkInside(resolved)) problems.push({ kind: "link-outside", file: index, line: 1, column: 1 });
+      const resolved = text.startsWith("/") ? undefined : resolveLinkTarget(path, text);
+      linkOutside = resolved === undefined || !linkInside(resolved);
     }
     const markdown = MARKDOWN.test(path);
     // Lines as an editor numbers them and the adapter reads them: split at LF, a trailing CR dropped.
@@ -885,6 +903,7 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
         });
         if (outside) place("link-outside", outside.index);
       }
+      if (at === 0 && linkOutside && !problems.some((problem) => problem.kind === "link-outside" && problem.file === index && problem.line === 1)) place("link-outside", 0);
     });
   }
   // An include path names a file of the tree, or a folder one lies in: looked up, never compared with every path.
@@ -909,7 +928,7 @@ const MESSAGES: Readonly<Record<SourceFindingKind, string>> = {
   "short-instance-string": "an instance string is a well-formed string of at least 3 characters; this one is not looked for",
   "no-include": "the source manifest names no include path, so nothing is source",
   email: "an e-mail address not listed in publicAddresses: a person's address belongs to the instance",
-  "link-outside": "a relative link to a path outside the source: a source export does not carry its target",
+  "link-outside": "a link to a path outside the source: a source export does not carry its target",
   "no-license": "no licence file at the source's root (LICENSE, LICENCE or COPYING): a source export carries the licence files the source has, and the contract chooses none"
 };
 
@@ -956,7 +975,8 @@ export function checkSourceTree(value: unknown): Finding[] {
 /**
  * FAC-SEM-156: a slot is named once, and neither its name nor its purpose is shaped like a credential (read as a
  * package secret's are, FAC-SEM-065's `secretValue`, so a slot packs cleanly, and as the tree check reads a line,
- * `credentialShaped`, so what FAC-SEM-158 blocks in fabric.source.json this blocks too); the manifest's description is not shaped
+ * `credentialShaped`, as written and in its serialized JSON form, so what FAC-SEM-158 blocks in fabric.source.json this
+ * blocks too); the manifest's description is not shaped
  * like one (read as prose, `proseSecretValue`); a store path is declared once. That a store slot has a path and no other slot has
  * one is the schema's.
  */
@@ -989,7 +1009,7 @@ function slotFindings(value: JsonObject): Finding[] {
     // The message never repeats the value.
     for (const field of ["name", "purpose"] as const) {
       const text = slot[field];
-      if (typeof text === "string" && (secretValue(text) || credentialShaped(text))) flag(`/slots/${index}/${field}`, "a slot is named, never filled: this looks like a credential");
+      if (typeof text === "string" && (secretValue(text) || credentialShaped(text) || credentialShaped(JSON.stringify(text)))) flag(`/slots/${index}/${field}`, "a slot is named, never filled: this looks like a credential");
     }
     if (slot.kind === "store" && typeof slot.path === "string") {
       if (stores.has(slot.path)) flag(`/slots/${index}/path`, `store path ${named(slot.path, `slots[${index}].path`, true)} is declared twice`);

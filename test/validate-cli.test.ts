@@ -1106,6 +1106,7 @@ describe("an agent's source (DEC-0149)", () => {
     const result = run(dir, "--kind", "source-tree");
     // The link's target is read as text (a home path) and with link-outside's rule (an absolute target).
     expect(cells(result.out)).toEqual([["src/data", "/files/2", "FAC-SEM-158"], ["src/data", "/files/2", "FAC-SEM-159 (accepted)"]]);
+    expect(result.out).toContain("src/data line 1, column 1: link-outside: a link to a path outside the source: a source export does not carry its target");
     expect(result.out).toContain("src/data line 1, column 8: home-path: ");
   });
 
@@ -1903,6 +1904,46 @@ describe("an agent's source (DEC-0149)", () => {
       expect(result.out).not.toContain(locked);
     } finally {
       chmodSync(locked, 0o755);
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("never counts an unchecked LICENSE that is a link as a licence, walked or in Git", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], unchecked: [{ path: "LICENSE", reason: "the terms live elsewhere" }] }), "src/a.ts": "x", "terms.txt": "terms" });
+    symlinkSync("terms.txt", path.join(dir, "LICENSE"));
+    for (const git of [false, true]) {
+      if (git) expect(gitIn(dir, "init", "-q").status).toBe(0);
+      expect(cells(run(dir, "--kind", "source-tree").out), String(git)).toEqual([["fabric.source.json", "/files", "FAC-SEM-159 (accepted)"]]);
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("routes a named manifest by lstat: a link to a folder is not a file; an absent folder is .", () => {
+    const target = folder({ "x.txt": "x" });
+    const dir = folder({ LICENSE: "x" });
+    symlinkSync(target, path.join(dir, "fabric.source.json"));
+    const linked = run(path.join(dir, "fabric.source.json"), "--kind", "source-tree");
+    expect(linked.code).toBe(2);
+    expect(linked.out).toContain("cannot read fabric.source.json: not a file");
+    const absent = run(path.join(dir, "no-such-folder", "fabric.source.json"), "--kind", "source-tree");
+    expect(absent.code).toBe(2);
+    expect(absent.out).toContain("cannot read .: ENOENT");
+    expect(absent.out).not.toContain(dir);
+  });
+
+  it("refuses a source manifest under another name passed as a tree document, naming the fix", () => {
+    const target = one("agent.json", sourceManifest({ include: ["LICENSE"] }));
+    const result = run(target, "--kind", "source-tree");
+    expect(result.code).toBe(2);
+    expect(result.out).toContain("cannot check agent.json as a tree: a source manifest: name it fabric.source.json or pass its folder");
+    expect(result.out).not.toContain(path.dirname(target));
+  });
+
+  it.skipIf(process.platform === "win32")("reads a dangling link named on a source route as not a file, never as absent", () => {
+    const dir = folder({ LICENSE: "x" });
+    symlinkSync(path.join(dir, "gone.json"), path.join(dir, "fabric.source.json"));
+    for (const args of [["--kind", "source-manifest"], ["--kind", "source-package"], [], ["--schema", "fabric-source"], ["--kind", "source-tree"]]) {
+      const result = run(path.join(dir, "fabric.source.json"), ...args);
+      expect(result.code, args.join(" ")).toBe(2);
+      expect(result.out, args.join(" ")).toContain("cannot read fabric.source.json: not a file");
     }
   });
 

@@ -498,6 +498,11 @@ describe("FAC-SEM-158 and FAC-SEM-159: the tree check", () => {
       if (packed(text) || treeBlocks(text)) expect(purpose(text).length > 0, text).toBe(true);
     }
     expect(purpose("reads the board")).toEqual([]);
+    // A purpose that becomes a JWK's private member only once the manifest quotes it is caught in that form too.
+    const quoted = ["d", '": "', "a1b2c3d4".repeat(5), "e5f"].join("");
+    expect(treeBlocks(quoted)).toBe(false);
+    expect(treeBlocks(JSON.stringify({ purpose: quoted }))).toBe(true);
+    expect(purpose(quoted).map((finding) => finding.instancePath)).toEqual(["/slots/0/purpose"]);
   });
 
   it("skip a folder in a walk when an exclude folder is it or holds it, unless an include path lies under it", () => {

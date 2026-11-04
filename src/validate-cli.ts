@@ -1022,7 +1022,9 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   } catch (error) {
     // No manifest is one usage error; a folder or a manifest it cannot reach is another, named by its place.
     const code = String((error as NodeJS.ErrnoException).code);
-    if (code === "ENOENT") run.usage.push(`--kind source-tree reads a folder's ${SOURCE_FILE}; the folder holds none`);
+    // A folder that is itself absent is named as ".", never as a folder holding no manifest.
+    if (code === "ENOENT" && !lstatExists(folder)) run.usage.push("cannot read .: ENOENT");
+    else if (code === "ENOENT") run.usage.push(`--kind source-tree reads a folder's ${SOURCE_FILE}; the folder holds none`);
     // lstat needs no permission on the file itself, so any other failure is the folder's: it is named as ".".
     else run.usage.push(`cannot read .: ${code}`);
     return;
@@ -1056,9 +1058,10 @@ function checkSourceFolderAs(run: Run, folder: string): void {
       const stat = lstatSync(full);
       // What is neither a file nor a link (a FIFO, a socket, a device) is no source file, unchecked or not.
       if (!stat.isFile() && !stat.isSymbolicLink()) continue;
+      // A link is said to be one before anything else: an unchecked link keeps no text but is still no licence.
+      if (stat.isSymbolicLink()) { files.push(isUnchecked(relative) ? { path: relative, link: true } : { path: relative, text: readlinkSync(full), link: true }); continue; }
       // An unchecked path is read by its path only, never opened.
       if (isUnchecked(relative)) { files.push({ path: relative }); continue; }
-      if (stat.isSymbolicLink()) { files.push({ path: relative, text: readlinkSync(full), link: true }); continue; }
       // The first BINARY_PROBE bytes decide: a binary file (a large asset, a sparse image) is never read whole.
       if (probeHoldsNul(full)) files.push({ path: relative, binary: true });
       else files.push({ path: relative, text: readFileSync(full).toString("utf8") });
@@ -1146,6 +1149,20 @@ export function regularFile(file: string): boolean {
   }
 }
 
+/** Whether a regular file holds a document with no `manifest` member that validates as a source manifest. */
+function manifestNotTree(file: string): boolean {
+  if (!sourceRegularFile(file)) return false;
+  let value: unknown;
+  try { value = JSON.parse(readFileSync(file, "utf8")); } catch { return false; }
+  if (!isObject(value) || "manifest" in value) return false;
+  return (contract().validator.getSchema(`${SCHEMA_PREFIX}schemas/fabric-source.schema.json`) as ValidateFunction)(value) === true;
+}
+
+/** Whether lstat finds an entry at a path (a dangling link included). */
+const lstatExists = (file: string): boolean => { try { lstatSync(file); return true; } catch { return false; } };
+/** Whether lstat finds a real folder at a path (never a link to one). */
+const lstatIsDirectory = (file: string): boolean => { try { return lstatSync(file).isDirectory(); } catch { return false; } };
+
 /**
  * Whether a source check may read a path as its document: a regular file itself, never a link to one, a FIFO, a
  * socket, a device or a folder (DEC-0149). A path that cannot be stated is left to the read that reports it.
@@ -1214,9 +1231,11 @@ export function main(args: readonly string[]): CliResult {
     let folder = false;
     try { folder = statSync(target).isDirectory(); } catch { /* a missing file is reported when it is read */ }
     // A manifest named under --kind source-tree checks its folder, as the folder route does, before anything else is
-    // asked of it: a dangling link reads "not a file", an unenterable folder "cannot read .".
-    if (!folder && kindArg === "source-tree" && path.basename(target) === SOURCE_FILE) { checkSourceFolder(run, path.dirname(target)); continue; }
-    if (!folder && !existsSync(target) && sourceCheck(target, schemaArg, kindArg)) {
+    // asked of it, unless lstat says it is a real folder: a link (to a folder too) or a dangling link reads "not a
+    // file", an unenterable folder "cannot read .".
+    if (kindArg === "source-tree" && path.basename(target) === SOURCE_FILE && !lstatIsDirectory(target)) { checkSourceFolder(run, path.dirname(target)); continue; }
+    // A source check asks lstat whether its target is there, so a dangling link reaches "not a file".
+    if (!folder && !(sourceCheck(target, schemaArg, kindArg) ? lstatExists(target) : existsSync(target)) && sourceCheck(target, schemaArg, kindArg)) {
       // A source check's target that is not there is named by its basename (or its place), never by its path; any
       // other missing target is read below and named by its path, as before DEC-0149.
       let code = "ENOENT";
@@ -1225,8 +1244,9 @@ export function main(args: readonly string[]): CliResult {
       continue;
     }
     if (!folder && kindArg === "source-tree") {
-      // A source manifest named on its own checks its folder; any other file is the document form, named by its
-      // basename, never by its path.
+      // A source manifest under another name is not a tree document: it is refused, naming the fix, never checked as one.
+      if (manifestNotTree(target)) { run.usage.push(`cannot check ${shownPath(path.basename(target))} as a tree: a source manifest: name it ${SOURCE_FILE} or pass its folder`); continue; }
+      // Any other file is the document form, named by its basename, never by its path.
       // checkFile makes a source check instance-free and names the document by its basename.
       checkFile(run, target, target, schemaArg, kindArg);
       continue;

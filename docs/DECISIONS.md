@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 29 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 30 of
   the readings (round 16 read clean), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
@@ -9076,7 +9076,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      as plain text, never in the source and never exported; keyed digests are not adopted. The contract ships the
      reference check with the list as an input; where a tool keeps the list is the tool's. `pnpm validate` reads none.
   8. **The check** (`checkSourceTree`, kind `source-tree`, pure): `{manifest, files: [{path, text?, binary?,
-     nestedRepository?}], instanceStrings?}`; it ignores a file that is not source and reads an `unchecked` file and a
+     nestedRepository?, link?}], instanceStrings?}` (`link: true` a symbolic link, its target as `text`, read with
+     `link-outside`'s rule and never a licence); it ignores a file that is not source and reads an `unchecked` file and a
      nested repository by their path only. Blocking, `FAC-SEM-158`:
      - `home-path`, on each line and a file's path: a home folder with a name in the forms the Fabric Agent Adapter's
        `v0.58.0` check reads, listed in source.md; a one-character name and the adapter's neutral names, kept equal as
@@ -9102,7 +9103,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
      Warnings, `FAC-SEM-159`, accepted: `email` (the local part at most 64 characters, not in `publicAddresses`, not at
      an RFC 2606 name, not followed by `:`, not ending in an image's extension, not inside a URL the credential kind
-     reports), `link-outside` (a relative Markdown link whose target is not source), `no-license` (no licence file at the
+     reports), `link-outside` (a relative Markdown link or a symbolic link whose target is not source), `no-license` (no licence file at the
      root: the contract chooses no licence, Q7). A finding names the file, line (split at LF, a trailing CR dropped, as
      the adapter reads it) and column (from 1, in UTF-16 code units) and kind, never the text found; a finding in a
      file's own path has no line and no column. `pnpm --silent validate <dir> --kind source-tree` reads what Git would
@@ -9235,5 +9236,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 29 of the readings, cited by round number (their heads were on the review branch, not kept at landing),
+  board message `565b20f3`); rounds 1 to 30 of the readings, cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

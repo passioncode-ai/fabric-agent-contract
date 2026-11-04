@@ -2191,6 +2191,178 @@
       ]
     },
     {
+      "name": "a symbolic link's target is read on line 1 in the table's order: a home path, then link-outside",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/data",
+            "text": "/Users/jdoe",
+            "link": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 1,
+          "column": 8
+        },
+        {
+          "kind": "link-outside",
+          "file": 4,
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "name": "a Markdown-named link whose target holds a Markdown link outside is one link-outside",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/notes.md",
+            "text": "](../../../y)",
+            "link": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "link-outside",
+          "file": 4,
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "name": "a link's target is resolved literally: # is a path character, so #/../../../x climbs above the root",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/#/f.txt",
+            "text": "x"
+          },
+          {
+            "path": "src/l",
+            "text": "#/../../../x",
+            "link": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "link-outside",
+          "file": 5,
+          "line": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
       "name": "a LICENSE that is a symbolic link is no licence",
       "input": {
         "manifest": {

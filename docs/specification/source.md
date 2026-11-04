@@ -118,9 +118,10 @@ source-tree JSON document passed as a file (`pnpm validate <file> --kind source-
 
 ## The tree check
 
-`checkSourceTree` (kind `source-tree`) reads `{manifest, files: [{path, text?, binary?, nestedRepository?}],
+`checkSourceTree` (kind `source-tree`) reads `{manifest, files: [{path, text?, binary?, nestedRepository?, link?}],
 instanceStrings?}`; `nestedRepository: true` marks a folder that holds another repository (a submodule's gitlink, a
-folder holding its own `.git`), read by its path only.
+folder holding its own `.git`), read by its path only; `link: true` marks a symbolic link, its target as `text`, read with
+`link-outside`'s rule and never a licence.
 `sourceTreeProblems` gives the same answer as structured problems, which the vectors pin. The caller restricts `files`
 to the source; the check also ignores any file that `isSourcePath` does not read as source. A file whose `binary` is
 `true` has no text read, and a file under an `unchecked` path is read by its path only.
@@ -136,8 +137,8 @@ to the source; the check also ignores any file that `isSourcePath` does not read
 | `short-instance-string` | `FAC-SEM-158` | an entry of `instanceStrings` that is not a well-formed string (no lone surrogate) of at least 3 characters: refused as input, not looked for |
 | `no-include` | `FAC-SEM-158` | a manifest with no `include` path |
 | `email` | `FAC-SEM-159` | an address matching the e-mail pattern of `src/node-summary.ts` with its local part bounded to 64 characters, read from each `@`, not in `publicAddresses` (compared without regard to case), not at an RFC 2606 name (`example.com`, `example.org`, `example.net` and names under them, or a domain ending `.invalid`, `.test` or `.example`), not followed by `:` (an SSH remote, `git@host:owner/repo`), not ending in an image's extension (`png`, `jpg`, `jpeg`, `gif`, `svg`, `webp`, `ico`: `user@2x.png` is an asset's name) and not inside a URL the `credential` kind reports, as written or once the line's JSON escapes are undone |
-| `link-outside` | `FAC-SEM-159` | in a Markdown file (`.md`, `.mdx`, `.markdown`), a relative link `](target)` (a target and a title hold no `]`, and at most 2048 characters each) (no scheme, not `#…`, not `//…`) whose target, resolved against the file's folder (from the root when it starts with `/`, without its `#` or `?` part), is above the root or is neither a source path nor a folder holding a source file; and a symbolic link in the source whose target (its text) is absolute, climbs above the root or is no source path, read at line 1, column 1 |
-| `no-license` | `FAC-SEM-159` | no source file at the root named `LICENSE`, `LICENCE` or `COPYING`, with an extension or none, in any letter case; a licence that is a symbolic link does not count, since a source export carries the link, not the terms |
+| `link-outside` | `FAC-SEM-159` | in a Markdown file (`.md`, `.mdx`, `.markdown`), a relative link `](target)` (a target and a title hold no `]`, and at most 2048 characters each) (no scheme, not `#…`, not `//…`) whose target, resolved against the file's folder (from the root when it starts with `/`, without its `#` or `?` part), is above the root or is neither a source path nor a folder holding a source file; and a symbolic link in the source whose target (its text) is absolute, climbs above the root or is no source path, resolved literally against the link's folder (split on `/`, `#` and `?` kept as path characters, nothing percent-decoded), the root and a folder holding source being inside; said at line 1, column 1, after line 1's other findings in this table's order and once per line (a link whose target holds a Markdown link outside gets one) |
+| `no-license` | `FAC-SEM-159` | no source file at the root named `LICENSE`, `LICENCE` or `COPYING`, with an extension or none, in any letter case; a licence that is a symbolic link does not count, since a source export carries the link, not the terms, an `unchecked` link included (it is passed as a link with no text) |
 
 The blocking kinds are `FAC-SEM-158`: a source export refuses on any of them. The warnings are `FAC-SEM-159`,
 `accepted`: a note beside the result, never a failure. The contract chooses no licence for an exported agent: a source
@@ -269,7 +270,10 @@ in a walk alike, and is never opened; an `include` path naming only such a file 
 throws anyway (a fault in the checker) ends in a usage error naming the file, or the folder as `.`, and the error's name
 only (`cannot check .: RangeError`), so `--json` always prints one document. A folder run under `--kind source-package` or `--kind source-manifest` lists the folder
 as the ordinary validator does, and refuses a manifest that is not a regular file (a symbolic link, a FIFO) with that
-usage error, exit 2; a plain folder run, which may walk many agents, skips such a manifest with a note and checks the
+usage error, exit 2 (a source route asks `lstat` whether its target is there, so a dangling link reads "not a file",
+never as absent; a `fabric.source.json` named under `--kind source-tree` is routed to its folder unless `lstat` finds a
+real folder there, so a link to a folder reads "not a file", and a manifest whose folder is absent reads `cannot read .:
+ENOENT`); a plain folder run, which may walk many agents, skips such a manifest with a note and checks the
 rest. A document named on its own and recognised as a source manifest only by its content is read as the ordinary
 validator reads a named file: its schema is known only after the read. Outside a source check a
 target that is not there, or one it cannot read, is named by its path, as the ordinary validator names it, and a named
@@ -387,7 +391,8 @@ token needs none ([DL-26](delegation.md#trust-tiers)).
   that call; the refusal carries exactly one `error.data.detail`, the first that applies in this order: (a) a fault AP-2 finds itself (an `at` out of its window, another action's id, a
   schema fault): `decision-ap2`, since AP-2 names no detail of its own; (b) no `target`: `decision-without-target`;
   (c) a `target` other than the exact string: `decision-target-unbound`; (d) a decision already consumed:
-  `decision-consumed`.
+  `decision-consumed`. A `decision-consumed` refusal means an effect may have begun under that word: the session
+  reports the outcome as unknown and never asks the operator for a new word for the same act.
 - **No word.** A T0 or T1 caller with neither form and no decision gets `operator-decision-required` with the detail
   `handover-needs-operator`; a service that can elicit from that caller's client asks the operator instead, once per
   call; a cancelled or unanswered elicitation (a client that cannot show it to a person cancels it) is refused the same
@@ -443,6 +448,12 @@ service pins it, the action's owner enforces them. The departures:
 - the detail `idempotency-conflict` names a key's misuse, outside DL-19's scope of authorisation refusals;
 - an elicitation is taken only when its accepted message names the agent, the source commit and the recipient, and is
   consumed under its record id.
+
+The line between the two is this. Moving an agent's mechanics into a product, by rewriting or copying them file by
+file into that product's own source through the product's own change with the agent's private data stripped, is the
+operator's standing permission of 2026-10-12 (recorded in the knowledge base's
+[roadmap](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/roadmap.md)) and needs no word per act. Handing over the agent's source as such (a source export, pushing the agent's tree or
+a copy of it to another repository, a transfer, a visibility change, a file sent) needs the operator's word for each act.
 
 Every agent follows the same rule, private or not, and a private agent is never handed over on anything less. Under
 [one approval for all the operator's agents](delegation.md#one-approval-binds-all-the-operators-agents) (DEC-0126) a

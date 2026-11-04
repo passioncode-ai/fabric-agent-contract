@@ -159,7 +159,14 @@ source, what never travels with it, the check before a source export, and how a 
   folder; a symbolic link read with link-outside's rule and never a licence; the exit code per package entry; the
   elicitation capability negotiated per session; the hand-over target compared as written; `FAC-SEM-156` reading with
   both detectors; a link at a listed path caught before `.git` is asked; a named manifest under `--kind source-tree`
-  routed as its folder) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  routed as its folder) answered as decided; round 30 (a link's `link-outside` said on line 1 in table order, once per line; link targets
+  resolved literally; `FAC-SEM-156` reading the serialized form too; an unchecked link never a licence; a named
+  manifest routed by `lstat`; an absent folder as `.`; a dangling link on every source route not a file; the
+  `keyShaped` merge note) answered as decided; round 30's product and seam readings (the `link?` member documented; one `link-outside`
+  message; the line between moving mechanics and handing over source; the three greps closing CT-211; the
+  DEC-0150-first merge steps; `decision-consumed` as an effect that may have begun; a source manifest passed as a tree
+  document refused; a dangling link named on every route not a file; the register leases renewed each round; C3.3's
+  cancel scoped to the hand-over) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -246,7 +253,9 @@ on the merge base `d1b905ee`, the review branch's remote ref deleted; never push
 remaining steps, in order:
 
 1. Take fresh agent-sync leases for these files before anything else: `docs/DECISIONS.md`,
-   `docs/specification/conformance.md` and `docs/backlog.md` (origin holds none on them now).
+   `docs/specification/conformance.md` and `docs/backlog.md` (re-measure at landing whether origin holds any). Renew
+   them at each reading round and immediately before steps 5 and 6, re-acquiring any that lapsed; before the step 5
+   commit, `git ls-remote origin 'refs/agent-sync/leases/*'` must list this run's leases on the three files.
 2. Merge the current `origin/main` (with #236, CT-215 and CT-216; re-measure its head at landing) into the fresh branch
    as the merge notes below say, refreshing the sibling heads.
 3. Re-run the full gate on that merge and cite its commit in this handoff. Open the PR from the fresh branch and
@@ -259,16 +268,17 @@ remaining steps, in order:
 5. Make the acceptance edit on the PR branch, as DEC-0147 did (DEC-0149's status line, CT-194 done, this handoff's
    status and the `docs/handoffs/README.md` row); then run the merge gate (`pnpm run check`, each part's exit code
    read) on that head, with its output in the PR. That head is the one that merges; nothing merges before this step.
-6. Merge the knowledge base's PR #628 (CT-211's amendment), run its three greps on the knowledge base's main (`git show
-   origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`, each printing at least one line), then merge the contract PR straight after, in the same
+6. Merge the knowledge base's PR #628 (CT-211's amendment), fetch the knowledge base checkout (`git fetch origin`), and
+   run its three greps on the knowledge base's main (`git show origin/main:knowledge/agents-first.md | grep -n 'source
+   hand-over'`, the same for `knowledge/principles.md` and `knowledge/rules.md`; at PR #628's head they print 4, 3 and
+   2 lines), then merge the contract PR straight after, in the same
    landing session (PR #628's links point at `source.md#handing-over` on main). If main moved after step 5, merge it and
    re-run the merge gate before merging PR #628. If the contract PR cannot merge in that session, do not merge PR #628
    (or revert it at once) and record the wait.
 7. A human gate: asking GitHub to remove the review branch's unreachable commits and their cached views is the
    operator's (GitHub Support).
 
-Right after the merge: update fabric-workspace's RM-36 row (rewriting its "Waiting on" line, which still names the
+Right after the merge: close CT-211 with the three greps' outputs; update fabric-workspace's RM-36 row (rewriting its "Waiting on" line, which still names the
 deleted review branch) and its knowledge page for the agent source (`knowledge/`),
 publish with `node scripts/workspace.mjs sync` from a Fabric checkout, post DEC-0149 to threads `21ac4057` and
 `0a8776f2` with CT-207 and CT-208, and file the Fabric Dashboards request on its attention and degraded counts of agents
@@ -276,7 +286,9 @@ whose entries are all setup states as a tracked row on their side, recording its
 
 At their next re-pin, the consumers that vendor a protocol table (a
 private product's `src/contract/vendor/protocol-revisions.ts`, a deployment template's
-`src/fabric/fabric-protocols.mjs`, another server's `src/fabric/fabric-protocols.mjs`) add `fabric-source`.
+`src/fabric/fabric-protocols.mjs`, another server's `src/fabric/fabric-protocols.mjs`) add `fabric-source`; Fabric
+Dashboards' sample service (`fabric_protocols.py`) is updated at its re-sync, or recorded as not held equal to the
+register.
 
 PR #236 is merged (main has moved since; its Test row in `AGENTS.md` now says Linux, Windows and macOS). The chain of
 the open branches that touch the same registers is PR #235 (DEC-0148), DEC-0149 (this branch), then
@@ -294,8 +306,8 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   lands' docs/specification/support-quality.md` prints 0 on the merged tree. The file lists in these notes are
   refreshed at landing against the siblings' heads then.
 - `docs/backlog.md` (against all four siblings) and `docs/handoffs/README.md` (against DEC-0150 and DEC-0151)
-  conflict as appends at the tail: keep both sides; the merged backlog tail is kept in id order, CT-200 to CT-216 (#235 brings
-  CT-202 and CT-203); the handoffs index is newest first, so at each merge the later-landing branch's row goes above.
+  conflict as appends at the tail: keep both sides; the merged backlog tail is kept in id order, whatever main holds at the merge
+  (re-measure at landing; CT-200 to CT-218 on main's head when this was written, #235 bringing CT-202 and CT-203); the handoffs index is newest first, so at each merge the later-landing branch's row goes above.
   DEC-0151's edited files also include `src/connections.ts` (a comment) and `docs/specification/conformance.md` (the
   secret-shape reference row). DEC-0150's small edits to `src/validate-cli.ts`
   and `test/validate-cli.test.ts` merge cleanly beside this branch's.
@@ -326,7 +338,17 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   accepts or declines it, so a launched session takes the hand-over only as a decision with the exact target; it leaves
   a job's input request unanswered (C3.3 reads a cancel there as the person's no). What a cancelled in-call elicitation
   under AP-2 means for an ordinary relayed action is left open in CT-215's own decision; AP-2 is not changed here.
+  Under (b), carry as an open item what a headless launched session does with any job's `input_required`. A relaunched
+  session carries the request's idempotency key under the same caller identity.
   Check with `grep '^| CT-215 ' docs/backlog.md | grep -c 'source hand-over'`, which prints 1 after the merge.
+- If DEC-0150 lands before this branch, whichever of the two lands second switches `src/channel-agent.ts` `keyShaped`
+  from `JWT_SHAPE.test` to `hasJwt` (this branch brings `hasJwt`); CT-212 stays unchanged. If DEC-0150 is on main at
+  step 2, do what its handoff gives the second lander: `keyShaped` to `hasJwt`, rewrite DEC-0150's "in progress"
+  sentence about DEC-0149's `sk-` sentence, and keep SCN-054 and SCN-055 with its grep.
+- At landing, add to CT-218's row: deploying an agent's tree to the operator's own placement (the local or the cloud
+  form) is not a source hand-over, since there is no recipient outside the estate.
+- `AGENTS.md`: the Check row's exit wording follows the README ("exit 0 when there is no blocking problem (accepted
+  lines may print)"); keep it when main's rows are merged in.
 - At the DEC-0150 step, `docs/ux/screens.md` SCR-03 keeps "SCN-001, SCN-002, SCN-054, SCN-055", and `CONTEXT.md` and
   `docs/ux/scenarios.md` change on both sides: keep both.
 - At the DEC-0150 step, file a backlog row (the next free CT id in the backlog at that merge) on how a channel
@@ -344,9 +366,10 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   provider-key shapes (`KEY_SHAPE_SOURCES`, written out in `src/source-rules.ts`) and its URL rule's pattern
   (`URL_SECRET_VALUE`, built from them), both in the `constants` block of `fixtures/vectors/source-tree.json` and held
   equal to it by test; no test here reads `SECRET_VALUE.source`, and the `FAC-SEM-156` fixture's purpose
-  (`sk-example-Not-a-key-0000-xyz`) is a credential under both detectors. A slot's name and purpose follow the shared
-  `secretValue`, so DEC-0151 moves `FAC-SEM-156`'s slot reading exactly as it moves `FAC-SEM-065`, and the test holding
-  them equal compares the two rules, not fixed verdicts. DEC-0151's instruction to bound the tree check's key shapes is
+  (`sk-example-Not-a-key-0000-xyz`) is a credential under both detectors. Since round 29 `FAC-SEM-156` reads a slot's
+  name and purpose with the shared `secretValue` and the tree check's own reading, so it refuses a purpose like
+  `sk-learn-experiments-2026` before and after DEC-0151; DEC-0151 moves only `FAC-SEM-065`, `FAC-SEM-156` stays a
+  superset, and the parity test is an implication that holds either way. DEC-0151's instruction to bound the tree check's key shapes is
   withdrawn; the coordinator tells that branch.
 - The chain #235, DEC-0149, DEC-0150, DEC-0151 (with #236, now merged) was gated green at review-branch heads in
   rounds 19 and 21, and the round 26 seam reading merged it again green; re-check it at the merged heads before
