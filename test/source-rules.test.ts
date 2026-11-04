@@ -23,6 +23,7 @@ import {
   SOURCE_PATH,
   WARNING_KINDS,
   checkSourceTree,
+  excludedFolderTest,
   isSourcePath,
   isUncheckedPath,
   longRunAt,
@@ -480,6 +481,13 @@ describe("FAC-SEM-158 and FAC-SEM-159: the tree check", () => {
       expect(purpose(text).length > 0, text).toBe(packed(text));
     }
     expect(packed("reads the board")).toBe(false);
+  });
+
+  it("skip a folder in a walk when an exclude folder is it or holds it, unless an include path lies under it", () => {
+    const skipped = excludedFolderTest({ include: ["src/", "src/cache/keep/"], exclude: ["src/cache/", "src/tmp/"] });
+    expect(["src/tmp", "src/tmp/x"].map(skipped)).toEqual([true, true]);
+    expect(["src", "src/cache", "src/a"].map(skipped)).toEqual([false, false, false]);
+    expect(excludedFolderTest(7)("src")).toBe(false);
   });
 
   it("judge a folder in the source as a whole: an include folder holds it, no exclude folder does", () => {

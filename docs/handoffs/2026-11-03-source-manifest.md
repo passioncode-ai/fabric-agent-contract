@@ -261,6 +261,9 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
 `fixtures/catalogue.json`, `src/secret-shape.ts` and `src/session-handoff.ts`. What a textual merge gets wrong, or gets wrong silently:
 
 - The schema count in `test/schema-compilation.test.ts` merges silently to 147: set it to 148.
+- Where DEC-0150 and DEC-0151 meet each other, `docs/DOCMAP.md` and `docs/specification/support-quality.md` conflict:
+  keep DEC-0151's support-quality row and its thresholds bullet, and DEC-0150's channel-agent row and its
+  compatibility bullet. The file lists in these notes are refreshed at landing against the siblings' heads then.
 - `docs/backlog.md` (against all four siblings) and `docs/handoffs/README.md` (against DEC-0150 and DEC-0151)
   conflict as appends at the tail: keep both sides; the merged backlog tail is kept in id order, CT-204 to CT-216, the
   handoffs index in the merge order. DEC-0150's small edits to `src/validate-cli.ts`
@@ -282,8 +285,9 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   FAC-SEM-166).
 - `AGENTS.md` against main (PR #236 merged): keep this branch's Check row and #236's MCP row, which removes an em dash.
   #236 landed first, so this branch adds to CT-205's row, when main is merged in, that a source hand-over is never
-  covered by a task-wide mandate ([source](../specification/source.md#handing-over)); check with `grep -n 'source
-  hand-over' docs/backlog.md | grep CT-205`. CT-211 carries the same line for the knowledge base.
+  covered by a task-wide mandate ([source](../specification/source.md#handing-over)); check with `grep '^| CT-205 '
+  docs/backlog.md | grep -c 'source hand-over'`, which prints 1 after that edit. CT-211 carries the same line for the
+  knowledge base.
 - `src/secret-shape.ts` conflicts textually with DEC-0151 (`origin/agent/sqd-fields-20261104`). The resolution: this
   branch's JWT helpers (`jwtSpans`, `hasJwt`), then DEC-0151's doc comment and `SECRET_VALUE` line as pushed (being
   rewritten as a portable consuming-group boundary plus a strength rule for `sk-`). Its copy in `src/session-handoff.ts`
