@@ -9108,7 +9108,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      recommendation (section 7.5); a budget above 0 names its spend record, since without one it reads 0 (sections 5
      and 11). A final text in the none form owes nothing (only an absent one is found), except `{"none": "not_used"}`
      beside a holding reply when its replies are on, which is found (a holding reply obliges a final reply, section 6); a recommendation on a
-     queue whose answered signal is not `none` is found too, non-blocking (a reader does not read it). It names at most
+     queue whose answered signal is not `none` is found too (the reader keeps the declaration declared; `pnpm validate` still reports it and exits 1; a reader does not read it). It names at most
      64 places per document and then one finding at the key counting the rest; past 64 a place is counted, never built.
   5. CA-5. `FAC-SEM-165`: no member name and no string of the declaration is shaped like a credential, by shape, with
      `FAC-SEM-101`'s detector on a string's first 4097 code points (today an ordinary name of `sk-` and 16 or more
@@ -9196,8 +9196,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      channel's OC-3 binds it, or the account's owner on an `account` channel), never by a name, a display name or text
      in the message; on an `account` channel only when the account's owner is the operator and the send record of the
      account's one session owner (section 9) shows the message was neither sent by an agent nor relayed from the ticket
-     board, otherwise it stays data. That word is carried out as the standard's section 4.10 says and recorded as
-     DEC-0121 AP-3 says. A word recognised in a chat this way is not one of DEC-0121 AP-3's sources: it acts only
+     board, otherwise it stays data. That word is carried out as the standard's section 4.10 says and recorded in the
+     agent's own audit, quoting the message and its sender id. A word recognised in a chat this way is not one of DEC-0121 AP-3's sources: it acts only
      inside that chat, lifting the agent's holding rules for it as section 4.10 says; it never sets `_meta.decision`
      for a service action (AP-2), never starts a mandate (MD-1), and never reaches any action outside that chat. A
      decision beyond the chat comes through AP-3's own routes; AP-3 is unchanged. Text the operator quotes or

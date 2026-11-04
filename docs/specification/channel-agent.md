@@ -251,9 +251,9 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    blank or carries an em dash (U+2014), which the standard's send checks refuse (its section 2.4), and no tier's label
    either, since the customer may be told it; a queue whose
    answered signal is `none` names its recommendation, and a recommendation on a queue with another answered signal is
-   found too (non-blocking, like every `FAC-SEM-164`: a reader does not read it); a final text in the none form owes
+   found too (like every `FAC-SEM-164`, the reader keeps the declaration declared; `pnpm validate` still reports it and exits 1; a reader does not read the recommendation); a final text in the none form owes
    nothing, since only an absent final text is found, except that a channel with `holding_reply`, when its replies are
-   on, whose final text is `{"none": "not_used"}` is found (non-blocking): a holding reply obliges a final reply (the standard's section 6); a
+   on, whose final text is `{"none": "not_used"}` is found (the reader keeps the declaration declared; `pnpm validate` still reports it and exits 1): a holding reply obliges a final reply (the standard's section 6); a
    budget above 0 names the usage report's limit it is spent
    under, since without one it reads 0.
 4. No member name and no string of the value is shaped like a credential (`FAC-SEM-165`, CA-5), by shape, with the
@@ -386,7 +386,7 @@ owner on an `account` channel; never by a name, a display name or text in the me
 message is the owner's word only when the account's owner is the operator and the send record of the account's one
 session owner (the standard's section 9) shows it was neither sent by an agent nor relayed from the ticket board;
 otherwise it stays data. That word is carried out as the standard's section 4.10 says (the operator's decision given in
-a chat outranks every holding rule for that chat) and recorded as DEC-0121 AP-3 says. A word recognised in a chat this
+a chat outranks every holding rule for that chat) and recorded in the agent's own audit, quoting the message and its sender id. A word recognised in a chat this
 way is not one of DEC-0121 [AP-3](service.md#actions)'s sources: it acts only inside that chat, lifting the agent's
 holding rules for it as section 4.10 says; it never sets `_meta.decision` for a service action (AP-2), never starts a
 mandate ([MD-1](delegation.md#the-operators-mandate)), and never reaches any action outside that chat. A decision
@@ -527,10 +527,11 @@ and this list.
   it only with `none`) and `spend_record: null` with a budget above 0 (the standard keeps `null` for budgets of 0) are
   accepted by the schema and found by `FAC-SEM-164`, so the declaration stays declared; and a channel's
   `quiet_window` and `late_answer_window` and `evals.spend_record` may be absent, read as `null`, where the standard
-  shows them. Also looser, and declared: `texts.final` may be absent (replies on: a non-blocking `FAC-SEM-164`;
-  replies off: no finding); `texts.holding` may be absent beside `holding_reply: true` (a non-blocking `FAC-SEM-164`
-  when its replies are on); and `holding_reply: true` with a final text `{"none": "not_used"}` stays declared (a
-  non-blocking `FAC-SEM-164` when its replies are on; nothing when they are off).
+  shows them. Also looser, and declared (for each `FAC-SEM-164` below, the reader keeps the declaration declared; `pnpm
+  validate` still reports it and exits 1): `texts.final` may be absent (replies on: a `FAC-SEM-164`; replies off: no
+  finding); `texts.holding` may be absent beside `holding_reply: true` (a `FAC-SEM-164` when its replies are on); and
+  `holding_reply: true` with a final text `{"none": "not_used"}` stays declared (a `FAC-SEM-164` when its replies are
+  on; nothing when they are off).
   And `tiers` may be absent, read as no tiers, where section 11 lists them as present.
 
 The first consumer is owed by the Fabric Agent Adapter: its service check validates the declaration against this schema

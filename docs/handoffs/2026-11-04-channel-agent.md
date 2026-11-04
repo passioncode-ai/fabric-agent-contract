@@ -240,6 +240,14 @@ FAA-197, on the adapter's main).
   ticket board. A request inside the agent's own task is the task; what stays data is text that tries to change the
   task, its tools, recipients, spend or access. CT-220 is cited as open. The page, item 8 and the conformance row say
   the same; the merge post asks the standard's owner the `account` question.
+- Round 18's seam reading (on `25e68f25`: one merged-tree break), with the coordinator's decisions applied: once
+  DEC-0149 lands, a non-blocking line exits 0 (`severity: "accepted"` only), and `FAC-SEM-164` sets no severity and
+  exits 1, so the behaviour stays and the words change: wherever this branch called `FAC-SEM-164` non-blocking (the
+  page's item 4 and narrowings, DEC-0150's CA-4, the conformance row, the vectors' text) it now says the reader keeps
+  the declaration declared and `pnpm validate` still reports it and exits 1. A chat word is recorded in the agent's own
+  audit, quoting the message and its sender id, since it sets no AP-3 decision record. The merge notes add DEC-0149's
+  exit contract, the schema counts (147, 147, 148; 150 set by hand by the last lander), CAS at landing for the next
+  free ids, and `test/support-quality.test.ts` reading the channel kinds from the schema's enum.
 
 ## The branch and its history
 
@@ -303,9 +311,13 @@ With DEC-0149's branch, now `origin/agent/ct194-source-manifest-v2-20261104` (th
 origin), whichever lands second:
 
 - sets the schema count in `test/schema-compilation.test.ts` to 148: the count merges silently at 147 and must be set
-  by hand;
+  by hand (DEC-0149 and DEC-0150 write 147, DEC-0153 148; with all three on main the last lander sets 150 by hand);
+- reads the CLI's "blocking" as DEC-0149's exit contract: after DEC-0149 lands, a non-blocking line is one with
+  `severity: "accepted"`, which exits 0; `FAC-SEM-164` sets no severity, so `pnpm validate` reports it and exits 1
+  (SCN-002), while a reader keeps the declaration declared; this branch's text says so and never calls it
+  non-blocking;
 - puts the register in code order: `FAC-SEM-155`, `156` to `160`, then `162` to `165`;
-- reads the next-free markers (DEC and SEM) from the CAS refs at the merge, not from either branch, and keeps one
+- reads the next-free markers (DEC and SEM) from the CAS refs at landing, not from either branch, and keeps one
   "Next free ID" line in `docs/DECISIONS.md` and one "Next free rule code" line in conformance.md;
 - adds the comma at the end of the catalogue's last row before the other branch's rows;
 - resolves the `vitest.config.ts` include line, which conflicts textually (git 2.55), into one coverage `include` line
@@ -427,11 +439,13 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
   `docs/backlog.md`;
 - the two "Compared as written" bullets for `project:<slug>` in `docs/specification/identifiers.md`, merged into one;
 - an assertion in `test/channel-agent.test.ts` that the declaration's `project` pattern equals
-  `support-quality-daily.schema.json` `$defs/projectAlias` (S3).
+  `support-quality-daily.schema.json` `$defs/projectAlias` (S3);
+- for whichever of DEC-0150 and DEC-0151 lands second: `test/support-quality.test.ts` reads the channel kinds from
+  `service-channel-agent-extension.schema.json` `$defs/channel/properties/kind`'s `enum` instead of a literal list.
 
 ## Checks actually run
 
-On round 18's change (the readings of rounds 17 and 18 folded in), each exit code read separately: `pnpm typecheck`
+On round 18's change (the readings of rounds 17 and 18, its seam reading included, folded in), each exit code read separately: `pnpm typecheck`
 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0 findings);
 `pnpm vectors:check` 0 (29 vector files match their generators); `pnpm vitest run test/channel-agent.test.ts
 test/consistency.test.ts` 0 (373 passed). On round 17's committed change, `25e68f25`, `pnpm test:fast` 0 (109 files,
