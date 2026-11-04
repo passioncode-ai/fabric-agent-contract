@@ -151,14 +151,22 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   `src/session-handoff.ts`, `src/fabric-links.ts` and its connections port; the parity test is retitled "its vendors
   take this file alone"; the second-lander list adds DEC-0150's `sk-` test title and says its annotate-not-rewrite
   instruction governs; DEC-0150's `keyRereads` at `cd350f47` reads every boundary form, so that item owes nothing.
+- Round 10 of the readings (on `628877b5`): the observed-check prerequisite also accepts a day published without
+  `project` until the readers adopt (page, item 4, CT-210 (d), this Open list); rule 1's trigger is the day's tickets of
+  two projects, by the declaration or the producer's own mapping, the switch day of a moving channel included, and a
+  withheld day is dropped (the row, the schema, the Compatibility sentence, CT-210 (c)); an alias-withheld project's
+  kept days are post-adoption days; the declaration of an alias read as a credential is refused under DEC-0150's rule
+  and its channels still count for rule 1; calibration is per side; rule 2 names `project` on every day first
+  published; the rerun key adds `project` once adopted; joining a renamed alias is the reader's; the escalation counts
+  are in turns, bounded by `nobodyDropped.turns`; the `AKIA` body is read in upper case only.
 
 ## Open
 
 - Two clean rounds of blind readings, then merge (the branch is pushed, no pull request yet).
 - On DEC-0151's merge: close CT-129 (fixed by item 3) with its receipt.
 - The coordinator tells the channel agent standard's owner, on thread `b6820b97`, that its observed check (section 11)
-  must accept a channel a producer withholds during the wait and a project withheld because its alias is read as a
-  credential, and asks for the two prerequisites of section 5.1 (turns for the escalation counts, the ticket counts by
+  must accept, until the feed's readers adopt DEC-0151, a day published without `project` (never attributed, rule 3 of
+  the project section), a withheld channel and a project withheld because its alias is read as a credential, and asks for the two prerequisites of section 5.1 (turns for the escalation counts, the ticket counts by
   the signal server) and the team-chat note (CT-210 step (d)); the coordinator files the adapter's row (step (e)). A
   project withheld for its alias keeps its days, and after the registry changes the alias the producer publishes the
   kept days under the new alias.
@@ -330,6 +338,15 @@ because they quote the earlier wording as history (this one does above).
 
 ## Checks actually run
 
+On the round-10 head, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `python3 docs/ux/lint.py` 0;
+`pnpm run docs:check` 0; `pnpm privacy:check` with the organization's index 0 (0 findings); `pnpm exec tsx
+tools/vectors/run.ts` 0 (28 vector files match). `pnpm vitest run --coverage` ran twice: the first, started at a 15-minute
+load of 44.90 that rose during the run (57.07 s), exited 1 on one timeout in `test/mandate.test.ts` ("a scope
+scopeWithin accepts covers no call its parent does not", 5259 ms against vitest's 5000 ms default; a file this branch does
+not change, which passes alone, 79 tests); the second, started at a 15-minute load of 48.02, exited 0 (109 files, 9833
+tests passed, 1 skipped, 22.97 s). No U+2014 in the added lines, no look-behind in either copy, the differential is
+unchanged (0 new-only), and the D2 checks print nothing.
+
 On the round-9 head and its seam addendum (each run on its head), each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0
 (109 files, 9832 tests passed, 1 skipped, 23.90 s); `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0; `pnpm
 privacy:check` with the organization's index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files
@@ -375,6 +392,6 @@ the added lines.
 
 ## Next task
 
-Round 10 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers, until two consecutive rounds
+Round 11 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers, until two consecutive rounds
 are clean; open the pull request; merge only once DEC-0150 is on main (the merge gate above), applying the merge list;
 mark DEC-0151 accepted, close CT-129, mark CT-210's first step done, release, and answer thread `b6820b97` with the tag.

@@ -69,7 +69,8 @@ export function credentialName(name: string): boolean {
 export const JWT_SHAPE = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]*/;
 /**
  * A value that says it is a credential (`Bearer ` at its start, in any case), or a provider key's shape (OpenAI,
- * GitHub, Slack, AWS, GitLab) with its prefix in its canonical case only: `SK-` or `GHP_` is no key (DEC-0151 item 7).
+ * GitHub, Slack, AWS, GitLab) with its prefix in its canonical case only: `SK-` or `GHP_` is no key (DEC-0151 item 7);
+ * the `AKIA` body is read in upper case only, as an AWS key id is written.
  * A prefix counts only at the start of a value, after a character that is no ASCII letter or digit, or after an
  * escape: a percent-escape (`%22`) or a double one (`%2522`), a backslash escape (`\n`, `\t`, `\r`, `\"`, `\'`, `\b`,
  * `\f`, `\v`, `\0`, `\a`, `\e`), an octal (`\042`), `\x` with two hex digits, `\u` with four, or an ESC colour

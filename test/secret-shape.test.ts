@@ -88,8 +88,8 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
     }
     // The residual: a slug word that starts with a provider prefix and holds enough key characters. For sk-, a run of
     // 32 or more letters, digits, - and _ holding a digit (as a lower-case sk-or-v1- key does); for ghp_, 20 or more.
-    expect(codes("project:sk-customer-support-team-europe-2026")).toContain("FAC-SEM-101");
-    expect(codes("project:ghp_customerservicedeskabcdef")).toContain("FAC-SEM-101");
+    expect(codes(["project:sk", "-customer-support-team-europe-2026"].join(""))).toContain("FAC-SEM-101");
+    expect(codes(["project:gh", "p_customerservicedeskabcdef"].join(""))).toContain("FAC-SEM-101");
     // Slack's prefix with 10 or more characters; the alias is built from parts so no key-shaped literal sits here.
     expect(codes(["project:xox", "b-support-team"].join(""))).toContain("FAC-SEM-101");
     // 31 characters after sk-, holding a digit and no upper-case letter: no key; 32: a key.
@@ -170,5 +170,10 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
     for (const key of [keys.openai, `sk-or-v1-${hex}`, keys.github, keys.slack, keys.aws, keys.gitlab]) {
       for (const head of [`a${esc}[K`, `a${esc}[2J`]) expect(SECRET_VALUE.test(head + key), JSON.stringify(head) + " " + key.slice(0, 5)).toBe(false);
     }
+  });
+  it("reads the AKIA body in upper case only, as an AWS key id is written (DEC-0151)", () => {
+    const body = tail(16, "0123456789ABCDEFGHJ");
+    expect(SECRET_VALUE.test(["AK", "IA", body].join(""))).toBe(true);
+    expect(SECRET_VALUE.test(["AK", "IA", body.toLowerCase()].join(""))).toBe(false);
   });
 });
