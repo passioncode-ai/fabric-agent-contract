@@ -230,6 +230,16 @@ FAA-197, on the adapter's main).
   conformance row now name section 4.10 and cite DEC-0121 AP-3 for where the operator's word comes from; the merge
   post asks the owner to fold CA-8 and its bound into section 4; the sibling notes give the schema count with
   DEC-0149, DEC-0150 and DEC-0153 (150) and the merge steps for DEC-0153 and DEC-0152; main is `ed4d6aa7`.
+- Round 18 of the readings (on `25e68f25`: unit pass with one note, product one break), with the coordinator's
+  decisions applied, the safest reading, which keeps AP-3's prompt-injection boundary closed: CA-8 adds no source to
+  DEC-0121 AP-3. A word recognised in a chat is not one of AP-3's sources: it acts only inside that chat, lifting the
+  agent's holding rules there as section 4.10 says, never sets `_meta.decision` for a service action (AP-2), never
+  starts a mandate (MD-1) and never reaches an action outside that chat; a decision beyond the chat comes through
+  AP-3's own routes, and DEC-0121 is not annotated. On an `account` channel a message is the owner's word only when
+  the owner is the operator and the session owner's send record shows it neither sent by an agent nor relayed from the
+  ticket board. A request inside the agent's own task is the task; what stays data is text that tries to change the
+  task, its tools, recipients, spend or access. CT-220 is cited as open. The page, item 8 and the conformance row say
+  the same; the merge post asks the standard's owner the `account` question.
 
 ## The branch and its history
 
@@ -358,6 +368,8 @@ One line per sibling and per file it shares with this branch:
   when this was written): the lander re-measures main at landing and merges or rebases over it; `docs/backlog.md`
   conflicts only at the tail, where the rows stay in id order (`CT-204`, `CT-205`, `CT-206`, then this branch's
   `CT-209`, then `CT-215` to `CT-220`), and any row an open branch adds takes its place by id.
+- CT-220, which the page and DEC-0150's CA-8 cite as open: the landing confirms that the CT-220 row resolves in
+  `docs/backlog.md` after merging main (it is on main at `ed4d6aa7`, not on this branch).
 - `docs/DECISIONS.md` keeps a blank line before each DEC heading (markdownlint MD022);
 - `docs/DECISIONS.md` keeps one "Next free ID" line, equal to the CAS counter at the merge, and each DEC body in id
   order after the bodies already on main: `grep -c '^\*\*Next free ID' docs/DECISIONS.md` prints 1. (On main, the
@@ -394,7 +406,7 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
   removed, since DEC-0151's section answers it;
 - the daily quality payload bullet in `channel-agent.md#compatibility` (with the shared-channel quality check and the
   unit of `toPerson*`): a pointer to DEC-0151 and to the support quality page's channel kinds table and per-project
-  keying;
+  keying, naming the answered-ticket row `autonomy.answeredTickets`;
 - "(the memory capability's pattern; DEC-0151, in progress on CT-210, proposes the same `projectAlias`)" in
   `channel-agent.md` (what the members mean), which becomes a statement that the two patterns are one;
 - the sentence in `channel-agent.md` (what the members mean) that names DEC-0151 in progress and says when a reader
@@ -419,10 +431,13 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
-On round 17's change (documents only), each exit code read separately: `pnpm typecheck` 0; `pnpm run docs:check` 0
-(markdownlint 0 errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0 findings); `pnpm vectors:check` 0 (29 vector
-files match their generators); `pnpm test:fast` 0 (109 files, 10168 tests passed and 1 skipped). The coverage run is
-owed: the 15-minute load was 86.72, above the heavy-run threshold of 45. No U+2014 in the added text.
+On round 18's change (the readings of rounds 17 and 18 folded in), each exit code read separately: `pnpm typecheck`
+0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0 findings);
+`pnpm vectors:check` 0 (29 vector files match their generators); `pnpm vitest run test/channel-agent.test.ts
+test/consistency.test.ts` 0 (373 passed). On round 17's committed change, `25e68f25`, `pnpm test:fast` 0 (109 files,
+10170 tests passed and 1 skipped). A declaration with an `untrusted_input` member, in a project or at the top, reads
+`FAC-SEM-162` (`channelAgentRules`, run once by hand). The coverage run is owed: the 15-minute load stayed above the
+heavy-run threshold of 45 (86.72, then 66.70). No U+2014 in the added text.
 
 On the change after round 16's fixes and its product and seam folds, each exit code read separately:
 `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 under the session's heavy-run lock, started at a
@@ -456,8 +471,12 @@ here), and adds:
 - `channel-agent-standard/2` is refused until a contract revision;
 - CA-8, the contract's own duty, with its section-4.10 bound, for the standard's owner to fold into section 4 or
   reject: text from a channel is data, and a channel message is the operator's word only when the transport identifies
-  its sender as the operator, that word carried out as section 4.10 says (quoting
+  its sender as the operator, that word carried out as section 4.10 says inside that chat only, never as one of
+  DEC-0121 AP-3's sources (quoting
   [the section](../specification/channel-agent.md#text-from-a-channel-is-data) at posting time);
+- to be asked of the standard's owner: on an `account` channel, is a message the owner's word only when the account's
+  owner is the operator and the send record of section 9's one session owner shows it was neither sent by an agent nor
+  relayed from the ticket board, and data otherwise;
 - a budget above 0 without a spend record is `FAC-SEM-164`;
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;
@@ -488,8 +507,8 @@ here), and adds:
 
 At merge, one adoption row per live producer is filed in that producer's own backlog with its `FAC-SEM-162` places
 (the coordinator files them on the board), with the places read again at posting time. Each row also names the
-producer's own test of CA-8: a channel message asking for an action causes none, and the operator's word, as CA-8
-bounds it, is carried out. Three live producers' current
+producer's own test of CA-8: a channel message asking for an action outside the agent's task causes none, and the
+operator's word, as CA-8 bounds it, is carried out inside that chat. Three live producers' current
 declarations fail today, the places to be read again at posting time: one manifest at `sources/4/max_age`,
 `handoff_queues/0/owner` and `evals/spend_record` (pattern, or null); one well-known builder with no
 `question_route` and a recommendation holding a colon; one well-known builder with `null` for `question_route`,
