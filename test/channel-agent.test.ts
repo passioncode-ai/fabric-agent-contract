@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ValidateFunction } from "ajv/dist/2020.js";
-import { CHANNEL_AGENT_PATHS, MESSAGE_ERRORS, readAsUrl, PATH_DEPTH, PIECE_COST, SECRET_BUDGET, SECRET_FINDINGS, VISIT_COST, codePoints, detectorCost, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, placed, schemaErrors } from "../src/channel-agent.js";
+import { CHANNEL_AGENT_PATHS, MESSAGE_ERRORS, readAsUrl, schemaLine, PATH_DEPTH, PIECE_COST, SECRET_BUDGET, SECRET_FINDINGS, VISIT_COST, codePoints, detectorCost, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, placed, schemaErrors } from "../src/channel-agent.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -627,6 +627,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(placed({ keyword: "oneOf", instancePath: "/projects/0/evals/spend_record", schema: [{ $ref: "#/$defs/nowhere" }, { type: "null" }] })).toBe("oneOf at /projects/0/evals/spend_record");
     expect(placed({ keyword: "oneOf", instancePath: "/projects/0/evals/spend_record", schema: [1, { type: "null" }] })).toBe("oneOf at /projects/0/evals/spend_record");
     expect(placed({ keyword: "oneOf", instancePath: "/projects/0/evals/spend_record" })).toBe("oneOf at /projects/0/evals/spend_record");
+    expect(placed({ keyword: "oneOf", instancePath: "/projects/0/evals/spend_record", schema: [{}, { type: "null" }] })).toBe("oneOf at /projects/0/evals/spend_record");
+    expect(schemaLine(TOO_LARGE)).toBe(`FAC-SEM-162 at /: ${TOO_LARGE}`);
+    expect(schemaLine("maxItems at /projects (at most 64 items)")).toBe("FAC-SEM-162 at /projects: maxItems (at most 64 items)");
   });
   it("names the rule and the place on every line of the view: an invalid declaration's schema and credential places, and a misplaced copy", () => {
     const opening = ["e", "y", "J"].join("");
@@ -667,6 +670,11 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(wide).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /projects/0/gap_registry: maxProperties (more members than the schema declares)"] });
     const missing = channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...p0, question_route: { none: "not_yet" } }] } } }, "well-known");
     expect(missing).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /projects/0/question_route: required (until)"] });
+  });
+  it("reads no value once its member's name has spent the budget", () => {
+    const names = Object.fromEntries(Array.from({ length: 300 }, (_, i) => [`k${i}${"a".repeat(4000)}`, "v"]));
+    const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: names } } }, "well-known");
+    expect(found.filter((f) => f.message.includes("was not read"))).toHaveLength(1);
   });
   it("tells the author of an id that starts with sk- to rename it", () => {
     const id = "sk-support-desk-faq-answers-2026-v2";

@@ -250,21 +250,12 @@ function allowed(error: { keyword: string; schema?: unknown; params?: Record<str
   return "";
 }
 
-/** The schema object at a pointer (`#/...`) from the declaration's schema's root, as its `$ref`s are written. */
-function pointerAt(schemaPath: string): unknown {
-  let node: unknown = schemaShape().schema;
-  for (const token of schemaPath.replace(/^#\/?/, "").split("/").filter((t) => t !== "")) {
-    const key = token.replace(/~1/g, "/").replace(/~0/g, "~");
-    node = Array.isArray(node) ? node[Number(key)] : isObject(node) ? node[key] : undefined;
-  }
-  return node;
-}
-
-/** A branch's type, through one `$ref` into the schema's `$defs`. */
+/** A branch's type, through its `$ref`s into the schema's own `$defs` (the only references this schema makes). */
 function typeOf(branch: unknown): string | undefined {
   if (!isObject(branch)) return undefined;
   if (typeof branch.type === "string") return branch.type;
-  return typeof branch.$ref === "string" && branch.$ref.startsWith("#") ? typeOf(pointerAt(branch.$ref)) : undefined;
+  const defs = (schemaShape().schema as JsonObject).$defs as JsonObject;
+  return typeof branch.$ref === "string" ? typeOf(defs[branch.$ref.slice("#/$defs/".length)]) : undefined;
 }
 
 const article = (word: string): string => (/^[aeiou]/.test(word) ? "an" : "a");
@@ -358,7 +349,7 @@ export function channelAgentView(doc: unknown, site: ChannelAgentSite = "manifes
 }
 
 /** A schema place as a reader's error line: the rule, the place, then the failed keyword and the schema's limit. */
-function schemaLine(error: string): string {
+export function schemaLine(error: string): string {
   const parts = /^(\S+) at (\/\S*)(.*)$/.exec(error);
   return parts === null ? `FAC-SEM-162 at /: ${error}` : `FAC-SEM-162 at ${parts[2]}: ${parts[1]}${parts[3]}`;
 }
