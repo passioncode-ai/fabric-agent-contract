@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/comms-enroll.schema.json",
   "title": "com.enroll arguments: take a Project's responder slot for a capability (fabric-project-comms/0.1, DEC-0073)",
-  "description": "The responder is the authenticated session; a supplied process id, model name, origin, launcher label or descriptor never authorizes it. Estate, caller Project, principal and session come from the authenticated endpoint and are never accepted here: an unknown field is refused (invalid_arguments).",
+  "description": "The responder is the authenticated session; a supplied process id, model name, origin, launcher label or descriptor never authorizes it. Estate, caller Project, principal and session come from the authenticated endpoint and are never accepted here: an unknown field is refused (invalid_arguments). Without the responder grant, a participant reply of the request's target Project is still its answer to a queued request: the result, or the current state with its nearest date, never only a word that it waits; a session that enrolls answers each request it claims in the same turn by a com.progress note or a fenced reply carrying the state, and settles it with com.complete (DEC-0152 SA-2, SA-6).",
   "type": "object",
   "required": [
     "idempotency",

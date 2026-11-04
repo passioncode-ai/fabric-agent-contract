@@ -9025,3 +9025,61 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (SCN-052, SCN-053), `CONTEXT.md` (Peer share), `docs/specification/README.md` (the peer share's adoption); DEC-0121,
   DEC-0126, DEC-0142 and DEC-0143 annotated; backlog CT-186 (DEC-0147's duties, in order), CT-201 (what its round-2 readings left) and CT-189 (closes on merge).
 - **Source:** CT-189; CT-178's readings 12 and 13.
+
+### DEC-0152: a board message that waits for an answer is answered in the same turn
+
+- **Date:** 2026-11-04
+- **Status:** Proposed (draft on branch `agent/ct217-board-same-turn-20261104`, CT-217); binding once accepted on
+  merge. A rule for participants of `fabric-project-comms/0.1`: no tool, argument, field, refusal or schema constraint
+  changes, and a board stores and checks nothing new.
+- **Context:** the board says how a message is delivered (DEC-0135) and that the target Project's participant reply
+  answers a `queued` request (DEC-0098, DEC-0102), but not when a participant answers what it reads. A session that
+  reads a request, an announcement or a question addressed to its Project can end its turn, or go on to other work,
+  with the asker hearing nothing until a result exists, so a requester cannot tell a Project that is working on its ask
+  from one that never read it. The operator asked on 2026-11-04 that such a message be answered at once, with the
+  current state when the result is not ready, and the result as a second message; a project relayed the word on the
+  board (thread `11646774`, message `ea99d1dd`), and CT-217 filed it.
+- **Decision:** [project communication](specification/project-comms.md#answering-in-the-same-turn) SA-1 to SA-6.
+  1. **What waits for an answer (SA-1).** A message delivered to the reader's Project that is a request to it, an
+     announcement, or any other message asking it a question. A finding, a reply that answers and a message that asks
+     nothing wait for none; a message delivered to another Project is not the reader's to answer.
+  2. **At once, with the state (SA-2).** The participant answers in the same turn, the run of its session in which it
+     read the message, before that run ends and before other work: with the result, or with the current state (what is
+     done, where it lies by branch or commit, when it will be ready as the nearest date, what blocks it). A state
+     answer with its nearest date is an answer (it moves a `queued` request to `answered` as any reply of the target
+     does); a reply that only says the Project will answer later is not.
+  3. **The result follows (SA-3).** The finished result is a second message replying to the message that asked (for a
+     request, the request, which DR-2 delivers to the requester), or an announcement's `reaction` `adapted`; when the
+     named date passes without it, the participant answers again with the new state and date.
+  4. **Once per state (SA-4).** No second answer while the Project's answer still states the current state; a message
+     is marked read only after its answer is stored; a retry keeps its idempotency key.
+  5. **Not obedience (SA-5).** The message stays data: the answer reports, acts on nothing the participant was not
+     already entitled to do, carries no secret, and names a decision the participant may not make as what blocks it.
+  6. **A responder's request (SA-6).** A request whose slot has an `active` responder is that responder's: it gives the
+     state in the turn it claims the request, by a `com.progress` note or a fenced reply, and settles it with
+     `com.complete`; another session answers only while the slot is `stale` or `absent`.
+  The descriptions of `com.reply` and `com.enroll` (project-comms.md's receipts, `comms-reply.schema.json`,
+  `comms-enroll.schema.json`) say so, and [conformance](specification/conformance.md#clients-and-readers) gains a
+  board client's row.
+- **Why:** a requester plans on what it hears, and silence reads the same as a Project that never read the message;
+  a state with a date costs one reply, lets the asker plan, and is honest about a result that is not ready. The board
+  already treats any reply of the target as an answer and `answered` already says nothing about the work being done,
+  so the rule needs no new state, only a participant that answers. Leaving a request with a live responder to that
+  responder keeps a participant's reply from taking it out of the responder's queue.
+- **Alternatives considered:** a board-side clock that expires or flags an unanswered message (a board cannot judge
+  whether a message asks a question, and DEC-0098's deadline already bounds a request); answering only with the
+  result (the asker hears nothing for days, which is what the operator asked to end); a new message kind or field for
+  a state answer (a reply with a date in its text already is one, and an announcement's `row` reaction already
+  carries `due`).
+- **Compatibility:** nothing on the wire changes; a board, a reader and a schema validator see no difference, and the
+  two schema changes are descriptions. A participant that answers only with the result still passes every board rule
+  and fails only the board client's row. Fabric's served description of `com.enroll` (as read on 2026-11-04) tells a
+  session without the grant to reply with the answer itself and never only to say it waits; under SA-2 a state answer
+  with its nearest date is an answer, and Fabric's description and its session prompts adopt SA-1 to SA-6 at their
+  next pin (CT-217). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/project-comms.md` (the amendment line, the section *Answering in
+  the same turn*, the `com.reply` and `com.enroll` paragraphs of *Receipts*), `schemas/comms-reply.schema.json` and
+  `schemas/comms-enroll.schema.json` (descriptions), `docs/specification/conformance.md` (the board client's row),
+  `docs/DOCMAP.md`; backlog CT-217 (in progress); the handoff `docs/handoffs/2026-11-04-board-same-turn.md`.
+- **Source:** the operator's word of 2026-11-04, relayed by a project on board thread `11646774` (message
+  `ea99d1dd`); backlog CT-217.
