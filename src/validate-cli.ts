@@ -822,7 +822,7 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
 }
 
 /** The walk without Git: a folder holding its own `.git` is a nested repository, never entered. */
-function walk(dir: string, prefix: string, includes: IncludeIndex, run: Run, skipped: (folder: string) => boolean = () => false, inSourceFolder: (folder: string) => boolean = () => false): Candidate[] {
+function walk(dir: string, prefix: string, includes: IncludeIndex, run: Run, skipped: (folder: string) => boolean, inSourceFolder: (folder: string) => boolean): Candidate[] {
   let raw: Array<Dirent<Buffer>>;
   try {
     // Names are read as bytes: one that does not round-trip as UTF-8 is never decoded into another name.
@@ -884,11 +884,6 @@ export const sourceCheck = (file: string, schema: string | undefined, kindArg: s
   (kindArg !== undefined && SOURCE_KINDS.includes(kindArg)) || schema === "fabric-source.schema.json" || path.basename(file) === SOURCE_FILE;
 /** The three source kinds (DEC-0149), named one by one. */
 const SOURCE_KINDS: readonly string[] = ["source-manifest", "source-tree", "source-package"];
-
-/** Whether a folder can be listed and entered. */
-function readable(folder: string): boolean {
-  try { accessSync(folder, fsConstants.R_OK | fsConstants.X_OK); return true; } catch { return false; }
-}
 
 /**
  * A JSON parse error by its line and column only: the position is found by reading the text again, never taken from the
@@ -1026,7 +1021,8 @@ function checkSourceFolderAs(run: Run, folder: string): void {
     // No manifest is one usage error; a folder or a manifest it cannot reach is another, named by its place.
     const code = String((error as NodeJS.ErrnoException).code);
     if (code === "ENOENT") run.usage.push(`--kind source-tree reads a folder's ${SOURCE_FILE}; the folder holds none`);
-    else run.usage.push(`cannot read ${readable(folder) ? SOURCE_FILE : "."}: ${code}`);
+    // lstat needs no permission on the file itself, so any other failure is the folder's: it is named as ".".
+    else run.usage.push(`cannot read .: ${code}`);
     return;
   }
   const checked = checkFile(run, manifestFile, SOURCE_FILE, "fabric-source.schema.json", undefined);
@@ -1042,7 +1038,8 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   // A manifest that fails its schema is reported alone: the tree runs once it validates.
   if (checked === undefined || run.problems.slice(before.problems).some((problem) => problem.rule.startsWith("schema/"))) { finish(); return; }
   const manifest = checked.value;
-  const includes = isObject(manifest) && Array.isArray(manifest.include) ? manifest.include.filter((include): include is string => typeof include === "string") : [];
+  // The manifest validated, so `include` is a list of paths.
+  const includes = (manifest as JsonObject).include as string[];
   const files: Array<{ path: string; text?: string; binary?: true; nestedRepository?: true }> = [];
   const isSource = sourcePathTest(manifest);
   const isNested = nestedTest(manifest);
