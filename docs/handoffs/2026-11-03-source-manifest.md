@@ -225,14 +225,13 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Checks actually run
 
-Round 27's fixes were gated on head `29189f94` of `agent/ct194-source-manifest-v2-20261104` (the commit before this
-note), each exit code read on its own (the 15-minute load 44.24 when the gate started): `tsc --noEmit -p .` (exit 0);
-`pnpm vitest run --coverage` (exit 0: 112 files, 10136 passed, 3 skipped, the whole suite; branches 98.9 % over the
-set, every per-file floor met); `python3 docs/ux/lint.py` (exit 0); `pnpm run docs:check` (exit 0, 0 errors);
-`ORG_INDEX=... pnpm privacy:check` (exit 0, 0 findings); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files
-match); no U+2014 in the added lines. A walked name that is not UTF-8 is tested with `node:fs` mocked
-(`test/validate-cli-walk-names.test.ts`), since APFS refuses such names; the exclude test's ratio fails on a planted
-scan of every include (about 146 against the bound of 64).
+Round 28's fixes were gated on head `d378c821` of `agent/ct194-source-manifest-v2-20261104` (the commit before this
+note), each exit code read on its own (the 15-minute load 44.93 when the gate started, under the session's lock for
+heavy runs): `tsc --noEmit -p .` (exit 0); `pnpm vitest run --coverage` (exit 0: 112 files, 10139 passed, 3 skipped,
+the whole suite; branches 98.93 % over the set, every per-file floor met); `python3 docs/ux/lint.py` (exit 0); `pnpm run
+docs:check` (exit 0, 0 errors); `ORG_INDEX=... pnpm privacy:check` (exit 0, 0 findings); `pnpm exec tsx
+tools/vectors/run.ts` (exit 0, 29 files match); no U+2014 in the added lines. A run on `e1262368` failed only the
+`src/validate-cli.ts` floor (99.31 %); `d378c821` removes three branches no input reaches and lowers no floor.
 
 ## Next task
 
