@@ -43,8 +43,9 @@ schemas leave the value open, as every vendor extension is ([overview](overview.
 [`service-channel-agent-extension.schema.json`](../../schemas/service-channel-agent-extension.schema.json), which refers
 to no other file, so a kit vendors that one file. A reader treats an invalid value as not declared and reports it, as
 with the [actions](service.md#actions) and [load](agent-network.md#load) keys. A bare declaration checked on its own
-(`pnpm validate --schema service-channel-agent-extension.schema.json`) gets its shape checked and a hint,
-`hint/declaration-only`: `FAC-SEM-163` to `FAC-SEM-165` run only inside a manifest or a well-known answer.
+(`pnpm validate --schema service-channel-agent-extension.schema.json`) gets the generic schema check, whose lines may
+name an undeclared member as written, and a hint, `hint/declaration-only`: `FAC-SEM-163` to `FAC-SEM-165` run only
+inside a manifest or a well-known answer. Check the manifest or the well-known answer instead.
 
 ## The declaration
 
@@ -107,9 +108,10 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
 
 1. The value is the schema's, where a reader reads it (`FAC-SEM-162`, DEC-0150 CA-1, CA-2): present members,
    patterns, the side's and the codes' patterns, durations, the tier rule's grammar, the budgets' type, the slot's
-   grammar; an empty text is refused here, and so is a `null` where section 13.6 says a member is present (a question
-   route, a gap registry, a channel's texts, a personal-data check or a queue's recommendation of `null` is one finding,
-   `fixtures/semantic/manifest-channel-agent-nulls.json`). Refused before the schema runs, so the schema never runs on
+   grammar; an empty text is refused here, and so is a `null` for the question route, the gap registry, a channel's
+   texts, the personal-data check or a queue's recommendation (one finding,
+   `fixtures/semantic/manifest-channel-agent-nulls.json`), while a channel's `decision`, `quiet_window` and
+   `late_answer_window` and `evals.spend_record` take `null`. Refused before the schema runs, so the schema never runs on
    a huge value, each limit read from the schema itself: an array longer than its `maxItems` and a map wider than its
    `maxProperties`; any closed object (the declaration, a project, its taxonomy, a code, a tier, the question route,
    the gap registry, a source, a declined source, a queue, the evals, the tickets, a recorded decision, a channel and
@@ -141,12 +143,19 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    read by a provider key's and a JWT's shapes only, since a long mixed run is its shape by design (a recommendation
    that is a URL with a password is read whole, and found). The detector reads the first 4097 code points of a string,
    and the rule reads at most 1 000 000 code points of names and values in all for one document, every copy of the
-   declaration in it (read or misplaced) sharing them, counting what the detector reads: a string once, again after
-   each `eyJ` to the end of its run (which the JWT shape reads back), and the square of an upper-case run after `?`,
-   `&` or `#` over two (a query name the detector splits by backtracking). Past that, one finding at the declaration
-   says the rest was not read for credentials. Being by shape, it also finds an ordinary hyphenated name that starts
-   with `sk-` and holds a digit and 32 or more name characters after it, such as the valid channel id
-   `sk-support-desk-faq-answers-2026-v2` (a test pins it): do not start an id with `sk-`.
+   declaration in it (read or misplaced) sharing them. The count, `detectorCost`, is a bound any port's detector may
+   need, not a description of one detector: each name or string costs 16 plus its code points; after each `eyJ`, the
+   rest of the base64url run it starts; for each query or fragment name (after `?`, `&` or `#`, up to the next `=`, `&`
+   or `#`) that holds an upper-case letter or a `%`, the square of its raw length over two; for each value (after `=`,
+   up to the next `&` or `#`) that holds a `%`, its raw length and the `eyJ` term of its decoded form; and after each
+   `sk-` that follows a boundary (the start, a character other than a letter or a digit, a `%XX` escape or a
+   backslash escape), up to 255 code points to the end of the string. A member's name is read before its place is
+   written; once the budget is spent nothing more is read and every further member collapses its place. Past the
+   budget, one finding at the first copy walked says, once per document, that the rest was not read for credentials,
+   and the 64 places are counted per document too. Being by shape, the detector also finds an ordinary hyphenated name
+   that starts with `sk-`: today any `sk-` followed by 16 or more letters, digits, `_` or `-`, in any case, such as the
+   valid channel id `sk-support-desk-faq-answers-2026-v2` (a test pins it). DEC-0151, in progress, narrows that to a
+   digit with an upper-case letter and 16, or a digit and 32; either way, do not start an id with `sk-`.
 
 No finding's message carries a declared value, and no rule's place echoes instance data: a place writes a member name
 the schema declares and an index of an array the schema declares, and `*` for any other member name, for a numeric key
@@ -227,8 +236,10 @@ existing fixture validates and checks as before. `contractVersion` stays `0.1.0`
   these grammars, which are narrower than the standard's section 13.6: durations in days, hours, minutes and seconds
   only, no weeks, months or years; zero only for a source's `cadence`; no run of 7 or more digits in an id, a channel's
   id, the side, a category code or a tier code; an owner with no space; a recommendation that is a board `opaqueId`, so
-  no colon; a `spend_record` that is a lower-case usage-report limit id; and a `null` in a required place, or a missing
-  required member, makes the whole declaration not declared. `pnpm validate` on the manifest or the well-known answer
+  no colon; a `spend_record` that is a lower-case usage-report limit id; and a missing required member, or a `null` for
+  the question route, the gap registry, a channel's texts, the personal-data check or a queue's recommendation, makes
+  the whole declaration not declared (a channel's `decision`, `quiet_window` and `late_answer_window` and
+  `evals.spend_record` take `null`). `pnpm validate` on the manifest or the well-known answer
   shows which members a declaration fails.
 
 The first consumer is owed by the Fabric Agent Adapter: its service check validates the declaration against this schema

@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ValidateFunction } from "ajv/dist/2020.js";
-import { CHANNEL_AGENT_PATHS, MESSAGE_ERRORS, PATH_DEPTH, SECRET_BUDGET, SECRET_FINDINGS, detectorCost, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, placed, schemaErrors } from "../src/channel-agent.js";
+import { CHANNEL_AGENT_PATHS, MESSAGE_ERRORS, PATH_DEPTH, SECRET_BUDGET, SECRET_FINDINGS, VISIT_COST, detectorCost, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, placed, schemaErrors } from "../src/channel-agent.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -319,7 +319,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(performance.now() - started).toBeLessThan(2000);
     expect(found.filter((f) => f.code === "FAC-SEM-162").length).toBe(4);
   });
-  it("finds a valid channel id that starts with sk- and holds a digit and 32 name characters, as the page warns", () => {
+  it("finds a valid channel id of sk- and 16 or more name characters, today's rule, as the page warns", () => {
     const id = "sk-support-desk-faq-answers-2026-v2";
     expect(id.length - "sk-".length).toBeGreaterThanOrEqual(32);
     const channel = { ...value.projects[0].channels[0], id };
@@ -332,6 +332,57 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const view = channelAgentView({ extensions: { [KEY]: { ...value, standard: "channel-agent-standard/2", projects: [{ ...value.projects[0], side: "Side", question_route: route }] } } }, "well-known");
     expect(view.declared && !view.valid && view.errors).toEqual(expect.arrayContaining(["const at /standard (channel-agent-standard/1)", "enum at /projects/0/question_route/capability (one of team.ask, operator.ask)", "pattern at /projects/0/side (pattern ^(?![a-z0-9-]*[0-9]{7})[a-z0-9-]{1,32}$)"]));
     expect(JSON.stringify(view)).not.toMatch(/support\.ask|Side"|\/2/);
+  });
+  it("counts every query or fragment name with an upper-case letter or a %, wherever the run starts", () => {
+    const n = 1000;
+    const square = (n * (n + 1)) / 2;
+    expect(detectorCost(`https://a.example/?a${"Q".repeat(n)}=x`)).toBeGreaterThanOrEqual(square);
+    expect(detectorCost(`https://a.example/?${"%41".repeat(n)}=x`)).toBeGreaterThanOrEqual(square);
+    expect(detectorCost(`https://a.example/#a${"Q".repeat(n)}=x`)).toBeGreaterThanOrEqual(square);
+    expect(detectorCost("https://a.example/?q=a%20b")).toBe(26 + 5);
+    // A value that does not decode (a lone %) is read raw.
+    expect(detectorCost("https://a.example/?q=a%zz")).toBe(25 + 4);
+    const shapes = [`https://a.example/?a${"Q".repeat(4000)}=x`, `https://a.example/?${"%41".repeat(1350)}=x`, `https://a.example/#a${"Q".repeat(4000)}=x`];
+    const extra = shapes.flatMap((shape) => Array.from({ length: 300 }, () => shape));
+    const started = performance.now();
+    channelAgentRules({ provider: { extensions: { [KEY]: { ...value, extra } } } });
+    expect(performance.now() - started).toBeLessThan(500);
+  });
+  it("charges up to 255 after every sk- at a boundary, so a run of them is not read past the budget", () => {
+    const text = "-sk".repeat(1366).slice(0, 4096);
+    const boundaries = (text.match(/-sk-/g) ?? []).length;
+    expect(detectorCost(text)).toBeGreaterThanOrEqual(text.length + boundaries * 255);
+    expect(detectorCost("xsk-a")).toBe(5);
+    expect(detectorCost("%2Fsk-a")).toBe(7 + 4);
+    expect(detectorCost("\\nsk-a")).toBe(6 + 4);
+    const started = performance.now();
+    const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array.from({ length: 246 }, () => text) } } }, "well-known");
+    expect(performance.now() - started).toBeLessThan(500);
+    expect(found.some((f) => f.message.includes("was not read"))).toBe(true);
+  });
+  it("charges each name or string its call, so two million empty strings are not read past the budget", () => {
+    expect(VISIT_COST).toBe(16);
+    const started = performance.now();
+    const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array(2_000_000).fill("") } } }, "well-known");
+    expect(performance.now() - started).toBeLessThan(2000);
+    expect(found.filter((f) => f.message.includes("was not read")).length).toBe(1);
+  });
+  it("says the rest was not read once per document, however many copies of the declaration it holds", () => {
+    const opening = ["e", "y", "J"].join("");
+    const heavy = { ...value, extra: [opening.repeat(1366).slice(0, 4096)] };
+    const manifest = { provider: {}, capabilities: Array.from({ length: 1000 }, () => ({ extensions: { [KEY]: heavy } })) };
+    const found = channelAgentRules(manifest);
+    expect(found.filter((f) => f.message.includes("was not read")).length).toBe(1);
+    expect(found.filter((f) => f.code === "FAC-SEM-162").length).toBe(1000);
+  });
+  it("keeps FAC-SEM-162's message short when every project fails", () => {
+    const broken = { ...value.projects[0], side: "Bad Side", channels: [{ ...value.projects[0].channels[0], final_limit: "P1M", kind: "sms" }] };
+    const [finding] = channelAgentRules({ extensions: { [KEY]: { ...value, projects: Array.from({ length: 64 }, () => broken) } } }, "well-known").filter((f) => f.code === "FAC-SEM-162");
+    expect(finding?.message.length).toBeLessThan(1500);
+    expect(finding?.message).toContain("(pattern as above)");
+    // At most eight enum values are named, the rest counted; a pattern is cut to 80 characters.
+    expect(placed({ keyword: "enum", instancePath: "/projects/0/channels/0/kind", params: { allowedValues: Array.from({ length: 10 }, (_, i) => `k${i}`) } })).toBe("enum at /projects/0/channels/0/kind (one of k0, k1, k2, k3, k4, k5, k6, k7 and 2 more)");
+    expect(placed({ keyword: "pattern", instancePath: "/projects/0/side", params: { pattern: "x".repeat(100) } })).toBe(`pattern at /projects/0/side (pattern ${"x".repeat(80)}\u2026)`);
   });
   it("places every descendant of a member that is not plain at the nearest plain ancestor, declared names and all", () => {
     const name = ["sk", "-", "Zx9Q".repeat(5)].join("");

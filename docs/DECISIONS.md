@@ -9070,7 +9070,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `tickets.outbox`) are relative to the agent's repository, so sources and queues carry ids and ages only; a queue's
      `recommendation` is the board's opaque thread id (`^[A-Za-z0-9_-]{8,128}$`); a text is 1 to 4096 code points and
      its language at most 35 characters. Every
-     member section 13.6 shows is required where the standard says present, so a `null` in its place is invalid. A
+     member section 13.6 shows is required where the standard says present: a `null` is refused for the question
+     route, the gap registry, a channel's texts, the personal-data check and a queue's recommendation, while a
+     channel's `decision`, `quiet_window` and `late_answer_window` and `evals.spend_record` take `null`. A
      checker refuses, before the schema runs and with each limit read from the schema, an array longer than its
      `maxItems`, a map wider than its `maxProperties`, any closed object with more members than the schema declares,
      and a string value or a member name over 4096 code points;
@@ -9089,16 +9091,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      recommendation (section 7.5); a budget above 0 names its spend record, since without one it reads 0 (sections 5
      and 11).
   5. CA-5. `FAC-SEM-165`: no member name and no string of the declaration is shaped like a credential, by shape, with
-     `FAC-SEM-101`'s detector on a string's first 4097 code points (an ordinary name that starts with `sk-` and holds
-     a digit and 32 or more name characters after the prefix, such as the valid channel id
-     `sk-support-desk-faq-answers-2026-v2`, is found too; the shared detector stays as it is). Three places read narrower, each only when the value
+     `FAC-SEM-101`'s detector on a string's first 4097 code points (today an ordinary name of `sk-` and 16 or more
+     letters, digits, `_` or `-`, in any case, such as the valid channel id `sk-support-desk-faq-answers-2026-v2`, is
+     found too; DEC-0151, in progress, narrows that to a digit with an upper-case letter and 16, or a digit and 32; the
+     shared detector stays as it is, and an id does not start with `sk-`). Three places read narrower, each only when the value
      matches its own grammar, keyed on the place and not on a holder's name: a project's token slot of the slot's
      grammar segment by segment, its eval suite and outbox of the relative path grammar by the detector's path-aware
      reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a
      provider key's and a JWT's shapes only; anything else is read whole. The rule reads at most 1 000 000 code points for
-     one document, every copy of the declaration in it sharing them, counting what the detector reads (a string once,
-     again after each `eyJ` to the end of its run, and the square of an upper-case run after `?`, `&` or `#` over two),
-     then one finding says the rest was not read. No finding's message carries a declared value and no rule's place echoes
+     one document, every copy of the declaration in it sharing them, counted by `detectorCost`, a bound any port's
+     detector may need: each name or string 16 plus its code points; after each `eyJ`, the rest of its base64url run;
+     for each query or fragment name holding an upper-case letter or a `%`, the square of its raw length over two; for
+     each value holding a `%`, its raw length and the `eyJ` term of its decoded form; after each `sk-` at a boundary, up
+     to 255 code points. Once it is spent, nothing more is read and every further member collapses; one finding per
+     document then says the rest was not read, and the 64 places are counted per document. No finding's message carries a declared value and no rule's place echoes
      instance data: a place writes a declared name, an index of a declared array, else `*` (an undeclared name, a
      numeric object key, a text's language), in `FAC-SEM-162`, `FAC-SEM-164` and `FAC-SEM-165` alike; a member whose
      name is not plain (letters, digits, `_` and `-`, at most 64, no run of 7 digits once `-` and `_` are left out) or
@@ -9145,8 +9151,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   event per service, channel and day, so the standard's observed per-project quality check reads missing for a shared
   channel. Declarations published before this revision are read under these grammars, narrower than section 13.6 (no
   weeks, months or years; zero only for a source's cadence; no 7-digit runs in ids; an owner with no space; a
-  recommendation that is a board `opaqueId`; a lower-case `spend_record`; a `null` in a required place or a missing
-  required member makes the whole declaration not declared); `pnpm validate` shows what a declaration fails.
+  recommendation that is a board `opaqueId`; a lower-case `spend_record`; a missing required member, or a `null` for the
+  question route, the gap registry, a channel's texts, the personal-data check or a queue's recommendation, makes the
+  whole declaration not declared, while `decision`, `quiet_window`, `late_answer_window` and `spend_record` take
+  `null`); `pnpm validate` shows what a declaration fails.
 - **Consequences / affects:** `src/extensions.ts`, `src/channel-agent.ts`, `src/semantic-rules.ts`,
   `src/protocol-revisions.ts`, `schemas/service-channel-agent-extension.schema.json`, `tools/vectors/channel-agent.ts`,
   `tools/vectors/run.ts`, `fixtures/vectors/channel-agent.json`, `fixtures/positive/service-channel-agent-extension.json`,
@@ -9164,7 +9172,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, with the examples made neutral here; rounds 1 to 5 of the readings. `DEC-0150` was reserved by the coordinator with
+  published it on 2026-11-04, with the examples made neutral here; rounds 1 to 7 of the readings. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation

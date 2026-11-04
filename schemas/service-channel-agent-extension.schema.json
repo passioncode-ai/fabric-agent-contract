@@ -215,7 +215,7 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 1000,
-              "description": "Questions the desk sends a day across its side."
+              "description": "The agent's cap for this project's questions a day; the desk's side-wide cap of section 6.4 still binds. This reading is to be confirmed with the standard's owner on thread b6820b97."
             },
             "days": {
               "type": "string",

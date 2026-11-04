@@ -205,10 +205,34 @@ function oversize(value: unknown): string[] {
 function allowed(error: { keyword: string; params?: Record<string, unknown> }, names: Set<string>): string {
   const params = error.params ?? {};
   if (error.keyword === "required" && typeof params.missingProperty === "string" && names.has(params.missingProperty)) return ` (${params.missingProperty})`;
-  if (error.keyword === "enum" && Array.isArray(params.allowedValues)) return ` (one of ${params.allowedValues.map(String).join(", ")})`;
+  if (error.keyword === "enum" && Array.isArray(params.allowedValues)) {
+    const values = params.allowedValues.map(String);
+    const rest = values.length > ENUM_VALUES ? ` and ${values.length - ENUM_VALUES} more` : "";
+    return ` (one of ${values.slice(0, ENUM_VALUES).join(", ")}${rest})`;
+  }
   if (error.keyword === "const" && params.allowedValue !== undefined) return ` (${String(params.allowedValue)})`;
-  if (error.keyword === "pattern" && typeof params.pattern === "string") return ` (pattern ${params.pattern})`;
+  if (error.keyword === "pattern" && typeof params.pattern === "string") return ` (pattern ${params.pattern.length > PATTERN_CHARACTERS ? `${params.pattern.slice(0, PATTERN_CHARACTERS)}\u2026` : params.pattern})`;
   return "";
+}
+
+/** At most this many enum values are named beside a place, and a pattern is cut to this many characters. */
+const ENUM_VALUES = 8;
+const PATTERN_CHARACTERS = 80;
+
+/**
+ * The places a message names, each distinct pattern spelled once: a later place failing the same pattern is named
+ * with `(pattern as above)`.
+ */
+export function messagePlaces(places: readonly string[]): string[] {
+  const seen = new Set<string>();
+  return places.map((place) => {
+    const at = place.indexOf(" (pattern ");
+    if (at < 0) return place;
+    const pattern = place.slice(at);
+    if (seen.has(pattern)) return `${place.slice(0, at)} (pattern as above)`;
+    seen.add(pattern);
+    return place;
+  });
 }
 
 /** An Ajv error as its keyword and its place, every free member name replaced by `*`, never a declared value. */
@@ -263,7 +287,10 @@ function head(text: string): string {
   if (text.length <= DETECTOR_CODE_POINTS) return text;
   return Array.from(text.slice(0, 2 * DETECTOR_CODE_POINTS)).slice(0, DETECTOR_CODE_POINTS).join("");
 }
-/** Whether a string is shaped like a credential, by FAC-SEM-101's detector (by shape: an ordinary name such as `sk-` and 16 more letters is one too). */
+/**
+ * Whether a string is shaped like a credential, by FAC-SEM-101's detector (by shape: today an ordinary name of `sk-` and
+ * 16 or more letters, digits, `_` or `-`, in any case, is one too; DEC-0151, in progress, narrows that rule).
+ */
 const shaped = (text: string): boolean => {
   const read = head(text);
   return secretValue(read) || secretUrl(read);
@@ -285,25 +312,27 @@ export const SECRET_BUDGET = 1_000_000;
 
 const BASE64URL = /[A-Za-z0-9_-]/;
 /** What is left of FAC-SEM-165's reading for one document, shared by every copy of its declaration. */
-interface Budget { left: number }
+interface Budget {
+  /** Code points left to read. */
+  left: number;
+  /** Whether a name or a string was left unread because the budget was spent. */
+  unread: boolean;
+  /** Places named so far, and credential-shaped names or values found past SECRET_FINDINGS. */
+  named: number;
+  more: number;
+  /** The first declaration walked: where the document's summary findings stand. */
+  root: string | undefined;
+}
 
-/**
- * The code points the detector reads in a string, counted in one pass: the string once; after each `eyJ`, again up to
- * the end of the base64url run it starts, which `JWT_SHAPE` reads back from every `eyJ` before it fails; and, for a run
- * of upper-case letters after `?`, `&` or `#` (a query parameter's name, which `nameWords` splits by backtracking),
- * the square of its length over two.
- */
-export function detectorCost(text: string): number {
-  let cost = text.length;
-  for (let at = 0; at < text.length; at += 1) {
-    const mark = text[at];
-    if (mark !== "?" && mark !== "&" && mark !== "#") continue;
-    let end = at + 1;
-    while (end < text.length && (text[end] as string) >= "A" && (text[end] as string) <= "Z") end += 1;
-    const run = end - at - 1;
-    cost += (run * (run + 1)) / 2;
-    at = end - 1;
-  }
+/** A fresh budget for one document. */
+const newBudget = (): Budget => ({ left: SECRET_BUDGET, unread: false, named: 0, more: 0, root: undefined });
+
+/** What each name or string costs beyond its code points: the call itself. */
+export const VISIT_COST = 16;
+
+/** The cost of the JWT shape's reading of a text: after each `eyJ`, the rest of the base64url run it starts. */
+function jwtRereads(text: string): number {
+  let cost = 0;
   let runEnd = 0;
   for (let at = text.indexOf("eyJ"); at >= 0; at = text.indexOf("eyJ", at + 1)) {
     if (runEnd <= at) {
@@ -315,6 +344,57 @@ export function detectorCost(text: string): number {
   return cost;
 }
 
+/** What a provider-key reading may reread after each `sk-` that follows a boundary: up to 255 code points each. */
+function keyRereads(text: string): number {
+  let cost = 0;
+  for (let at = text.indexOf("sk-"); at >= 0; at = text.indexOf("sk-", at + 1)) {
+    const before = text[at - 1];
+    const boundary = at === 0 || !/[A-Za-z0-9]/.test(before as string) || /%[0-9A-Fa-f]{2}$/.test(text.slice(Math.max(0, at - 3), at)) || text[at - 2] === "\\";
+    if (boundary) cost += Math.min(KEY_REREAD, text.length - at);
+  }
+  return cost;
+}
+const KEY_REREAD = 255;
+
+/** A query or fragment value as the detector decodes it, or the raw value when it does not decode. */
+function decoded(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+/**
+ * The code points the detector reads in a string, counted in one pass, a bound any port's detector may need: the string
+ * once; the JWT shape's rereading, after each `eyJ`, of the rest of the base64url run it starts; for every query or
+ * fragment name (after `?`, `&` or `#`, up to the next `=`, `&` or `#`) that holds an upper-case letter or a `%`, the
+ * square of its raw length over two (splitting a name into words may backtrack over it); for every value (after
+ * `=`, up to the next `&` or `#`) that holds a `%`, its raw length and the JWT rereading of its decoded form; and, after
+ * every `sk-` that follows a boundary (the start, a character other than a letter or a digit, a `%XX` escape or a
+ * backslash escape), up to 255 code points to the end of the string (a provider-key reading anchored at a boundary may
+ * read that far after each one).
+ */
+export function detectorCost(text: string): number {
+  let cost = text.length + jwtRereads(text) + keyRereads(text);
+  let at = text.search(/[?#]/);
+  while (at >= 0 && at < text.length) {
+    let end = at + 1;
+    while (end < text.length && text[end] !== "=" && text[end] !== "&" && text[end] !== "#") end += 1;
+    const name = text.slice(at + 1, end);
+    if (/[A-Z%]/.test(name)) cost += (name.length * (name.length + 1)) / 2;
+    if (text[end] === "=") {
+      let stop = end + 1;
+      while (stop < text.length && text[stop] !== "&" && text[stop] !== "#") stop += 1;
+      const value = text.slice(end + 1, stop);
+      if (value.includes("%")) cost += value.length + jwtRereads(decoded(value));
+      end = stop;
+    }
+    at = end;
+  }
+  return cost;
+}
+
 /**
  * FAC-SEM-165: no member name and no string of the declaration is shaped like a credential, by FAC-SEM-101's detector
  * (by shape). Three places read narrower, and only when the value matches its own grammar: a project's token slot
@@ -322,30 +402,36 @@ export function detectorCost(text: string): number {
  * recommendation (a board opaque id) by a provider key's and a JWT's shapes only; anything else is read whole. A place
  * writes a declared name, an index of a declared array, else `*`, as FAC-SEM-162 does; a member whose name is not plain
  * collapses its place, so it and its descendants are placed at its nearest plain ancestor, and so does a member past
- * PATH_DEPTH. At most SECRET_FINDINGS places are named; one more finding counts the rest, and one more says when
- * SECRET_BUDGET code points were read and the rest was not.
+ * PATH_DEPTH. The budget is the document's: at most SECRET_FINDINGS places are named in all, and once SECRET_BUDGET is
+ * spent nothing more is read and every further member collapses; `summary` adds the document's two closing findings.
  */
-function secrets(value: unknown, root: string, budget: Budget = { left: SECRET_BUDGET }): Finding[] {
+function secrets(value: unknown, root: string, budget: Budget = newBudget()): Finding[] {
   const findings: Finding[] = [];
   const names = schemaNames();
-  let more = 0;
-  let unread = false;
+  budget.root ??= root;
   const flag = (at: string, what: string) => {
-    if (findings.length < SECRET_FINDINGS) findings.push({ code: "FAC-SEM-165", instancePath: at, message: `${what} is shaped like a credential: a token is named by its vault slot, never written (DEC-0150 CA-5)` });
-    else more += 1;
+    if (budget.named < SECRET_FINDINGS) {
+      budget.named += 1;
+      findings.push({ code: "FAC-SEM-165", instancePath: at, message: `${what} is shaped like a credential: a token is named by its vault slot, never written (DEC-0150 CA-5)` });
+    } else budget.more += 1;
   };
   const afford = (text: string): boolean => {
-    const cost = detectorCost(head(text));
+    if (budget.unread) return false;
+    const cost = detectorCost(head(text)) + VISIT_COST;
     if (cost > budget.left) {
-      unread = true;
+      budget.unread = true;
       return false;
     }
     budget.left -= cost;
     return true;
   };
-  const tokenOf = (frame: Frame, key: string, index: boolean) => (index || plainName(key) ? placedToken(frame.name, frame.parent, key, index, names) : undefined);
+  // A member's name is read for a plain place only while the budget lasts; once it is spent, the member collapses.
+  const tokenOf = (frame: Frame, key: string, index: boolean) => {
+    if (index) return placedToken(frame.name, frame.parent, key, index, names);
+    return afford(key) && plainName(key) ? placedToken(frame.name, frame.parent, key, index, names) : undefined;
+  };
   walk(value, root, tokenOf, (text, spot, place) => {
-    if (unread || !afford(text)) return;
+    if (!afford(text)) return;
     if (spot.isName) {
       if (shaped(text)) flag(place(spot), "a member's name");
       return;
@@ -359,8 +445,15 @@ function secrets(value: unknown, root: string, budget: Budget = { left: SECRET_B
     else found = shaped(text);
     if (found) flag(place(spot), "a value");
   });
-  if (more > 0) findings.push({ code: "FAC-SEM-165", instancePath: root, message: `and ${more} more names or values shaped like a credential (DEC-0150 CA-5)` });
-  if (unread) findings.push({ code: "FAC-SEM-165", instancePath: root, message: `the declaration holds more than ${SECRET_BUDGET} code points of names and values; the rest was not read for credentials (DEC-0150 CA-5)` });
+  return findings;
+}
+
+/** The document's closing FAC-SEM-165 findings, once: the count past SECRET_FINDINGS, and that the rest was not read. */
+function summary(budget: Budget): Finding[] {
+  const root = budget.root ?? "";
+  const findings: Finding[] = [];
+  if (budget.more > 0) findings.push({ code: "FAC-SEM-165", instancePath: root, message: `and ${budget.more} more names or values shaped like a credential (DEC-0150 CA-5)` });
+  if (budget.unread) findings.push({ code: "FAC-SEM-165", instancePath: root, message: `the document holds more than ${SECRET_BUDGET} code points of names and values in its declarations; the rest was not read for credentials (DEC-0150 CA-5)` });
   return findings;
 }
 
@@ -447,14 +540,14 @@ function obligations(project: JsonObject, at: string): Finding[] {
 export function channelAgentRules(doc: unknown, site: ChannelAgentSite = "manifest"): Finding[] {
   if (!isObject(doc)) return [];
   // One budget for the whole document: every copy of the declaration, read or misplaced, draws on it.
-  const budget: Budget = { left: SECRET_BUDGET };
+  const budget = newBudget();
   const findings = site === "manifest" ? misplaced(doc, budget) : [];
   const view = channelAgentView(doc, site);
-  if (!view.declared) return findings;
+  if (!view.declared) return [...findings, ...summary(budget)];
   const root = CHANNEL_AGENT_PATHS[site];
-  findings.push(...secrets((extensionsAt(doc, site) as JsonObject)[KEY], root, budget));
+  findings.push(...secrets((extensionsAt(doc, site) as JsonObject)[KEY], root, budget), ...summary(budget));
   if (!view.valid) {
-    const named = view.errors.slice(0, MESSAGE_ERRORS).join(", ");
+    const named = messagePlaces(view.errors.slice(0, MESSAGE_ERRORS)).join(", ");
     const more = view.errors.length > MESSAGE_ERRORS ? ` and ${view.errors.length - MESSAGE_ERRORS} more` : "";
     findings.push({ code: "FAC-SEM-162", instancePath: root, message: `the channel-agent declaration fails its schema: ${named}${more}; a reader treats it as not declared and reports it (DEC-0150 CA-2). The grammars are in docs/specification/channel-agent.md#the-declaration` });
     return findings;
