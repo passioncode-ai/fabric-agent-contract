@@ -205,6 +205,19 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   look-ahead-free port's instruction says to retry at every inner `-` or `_` boundary of a rejected run, with the
   strength checked within 256 characters from that `sk-`; three AT-15 vectors and three detector tests pin it; DEC-0149
   is cited as its landing head, `82bed5bd`.
+- Round 14 of the readings (on `82020222`): three AT-15 vectors pin the canonical case (an upper-case `SK-` user with a
+  digit and a capital records its origin), the `sk-` strength (a lower-case `sk-` slug of 16 to 31 characters with a
+  digit records it) and the word start (a strong `sk-` run glued after a letter records it; on a scratch copy with the
+  boundary group removed from `SECRET_VALUE`, that case alone fails, 1 of 230); the earlier detector fails six AT-15
+  cases (three before this round), and the percent-escape case tells DEC-0151 from a port that takes the boundary
+  without its escapes; the vendor lists say every port drops its case-insensitive flag and reads digits as ASCII, and
+  name the ports that compile it case-insensitively today; `%u0022` is knowingly not found (a test pins it); the
+  FAC-SEM-158 sentences say DEC-0149 (in progress), checked at `8dd4d04f`; every copy of rule 2 excepts a project with
+  no registry alias (rule 9), and rule 9 says what "unnamed" means beside an alias-withheld project; FAC-SEM-126's
+  message at a `null`, unnamed first-reply metric points to the interim (a test pins it); the registry's alias rule is
+  the operator's open question (CT-210 (g)); rule 6's no-declaration clause is in the producer row and CT-210 (b);
+  DEC-0144 is annotated with rule 6; the reader's side rule moves from "Not decided here" into rule 5; the DOCMAP row
+  names the project.
 
 ## Open
 
@@ -238,8 +251,9 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   estate-record port (`FAC-SEM-075`), re-synced together with `folder-attribution.json`, and any template or agent that
   copies the kit, and the adapter's dashboard-link test sample, whose lower-case `sk-` sample stops being a key under DEC-0151 and at the re-sync becomes one DEC-0151 reads (a digit and an upper-case letter, built from pieces as the contract's SH-9 case is), and the adapter's profiles test case whose query holds `%zz`, a raw control character and `KIA` with 16 more characters stops being found under DEC-0151 (its `AKIA` borrowed the `A` of the encoded `%1A`) and is rebuilt at the re-sync with a boundary before `AKIA`, built from pieces; whole-file vendors that pin `src/secret-shape.ts` by hash take DEC-0151 at their next re-pin, with
   their vectors; any port that copies
-  `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
-  otherwise. Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json`
+  `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since six of its nine new
+  AT-15 cases fail under the earlier detector (three did before round 14), and the percent-escape case under a port that
+  takes the boundary without its escapes. Every port drops its case-insensitive flag (`re.I`, `(?i)`) and reads digits as ASCII (`re.ASCII`, `[0-9]` or `(?-u:\d)`): Project Observatory's folder-attribution and estate-record ports and Fabric Switchboard's folder-attribution port compile it case-insensitively today. Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json`
   together with `fixtures/vectors/folder-attribution.json`, so both are re-pinned together; Fabric Dashboards vendors
   `src/session-handoff.ts` and `src/fabric-links.ts`, and its service host's connections hold a port; Fabric
   Dashboards' sample-service kit copies hold the earlier pattern. The adapter's files whose answers change (adapter 0.62.0) also include: `test/fixtures/contract/profile-vectors.json`, regenerated at the merge commit, with `test_fabric_profiles.py` `SecretShapeTests` and `fabric-profiles.test.mjs`; the upper-case `SK-` case in `test_whitespace_dot_and_case_read_as_ecmascript` (both modules), beside the `%zz` and `KIA` case; `test/test_provider.py` "a key in an argument (LC-21)", rebuilt from pieces as a key DEC-0151 reads; the repository-credential rule's `test/repository_vectors.json` (its three credential vectors), `test_repository_credential.py` and `repository-credential.test.mjs`; and `test_check_service_dashboard_open.py` `test_a_repository_in_the_evidence_carries_no_key`. A port derives this list by patching `SECRET_VALUE` in its twins and running its suite, never by scanning literals (its samples are hex-encoded or built from pieces). `repositoryName` and `repository_name` (the adapter's `fabric-secrets.mjs` and both `fabric_secrets.py`, and Fabric Dashboards' sample-service copy of `fabric_secrets.py`) must not compose DEC-0151's source after a separator look-behind with the `i` flag: the consuming boundary would need a second separator, so a key after `-`, `.` or `_` goes unfound, and `i` undoes the canonical case and the `sk-` strength. They keep their own boundary-free key shapes (as the source check keeps its own), with case-sensitive prefixes and no `i` flag, and the adapter pins a key after `-`, `.` and `_` in its repository vectors (`test/secret-shape.test.ts` shows why such a composition misses one).
@@ -278,26 +292,32 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   `fabric_secrets.SECRET_VALUE.pattern` and raises `ImportError` on DEC-0151's pattern: it keeps the earlier unbounded
   shapes as its own fixed list, for parity with DEC-0149's tree check, before or together with the detector's port, and
   is exempt from the instruction that every port takes the same boundary (CT-210 (e), CT-207).
-- `fixtures/vectors/folder-attribution.json` changes with the detector: one AT-15 input (a strong `sk-` user) and three
-  new AT-15 cases that tell DEC-0151's detector from the earlier one (a remote holding `-sk-` inside a word and one
-  holding a weak `sk-` slug now record their origin; a strong key after a percent-escape records none). Every port
-  re-syncs that vector file together with the detector, and checks the `sk-` strength outside its regex where the
-  regex has no look-ahead.
+- `fixtures/vectors/folder-attribution.json` changes with the detector: one AT-15 input (a strong `sk-` user) and nine
+  new AT-15 cases. Six fail under the earlier detector (a remote holding `-sk-` inside a word, a weak `sk-` slug, a
+  lower-case `sk-` slug of 16 to 31 characters with a digit, a strong `sk-` run glued after a letter, an upper-case `SK-`
+  user, and an `sk-` run whose only digit lies past 256 characters, each recording its origin); before round 14 it
+  failed three (the `-sk-` word, the weak slug, the digit past 256). The percent-escape case (a strong key after `%22`
+  records none) tells DEC-0151 from a port that takes the boundary without its escapes, not from the earlier pattern;
+  two more pin a look-ahead-free port's reading. Every port re-syncs that vector file together with the detector, and
+  checks the `sk-` strength outside its regex where the regex has no look-ahead.
+- The registry's alias rule (CT-210 (g)): whether the project registry issues no alias whose slug word starts with a
+  provider prefix and holds enough key characters, and none with a weak `sk-` slug word (a FAC-SEM-158 credential under
+  DEC-0149), is the operator's open question until the registry's owner records a rule; the contract words it so.
 - Adoption, CT-210, in its order: `support.tickets_daily` mapped into each reader's ticket view first, readers re-pin and
   key by project, producers re-vendor the schema and carry the members once every reader has adopted.
 
 ## When DEC-0150 and DEC-0151 meet on main
 
-DEC-0150's current branch is `origin/agent/channel-agent-ext-v3-20261104` (`292dcb9e` when this was written); DEC-0149
-now lives on `origin/agent/ct194-source-manifest-v2-20261104` (cited as the DEC-0149 landing head; `82bed5bd` on
-2026-11-04, measured below at it and measured again at merge; the old branch name is deleted); main is at
-`bf50c9fc` (#236 merged, CT-215 and CT-216 added at the backlog tail; #238 changed CI only). The scratch measurements below are of those heads; they are measured again
+DEC-0150's current branch is `origin/agent/channel-agent-ext-v3-20261104` (cited at `fc057cfc` or newer; `388f2b42`
+when this was written); DEC-0149 lives on `origin/agent/ct194-source-manifest-v2-20261104` (cited as the DEC-0149
+landing head; `8dd4d04f` on 2026-11-04, measured below at it and measured again at merge; the old branch name is
+deleted); main is at `7213463f` (the backlog tail through CT-218). The scratch measurements below are of those heads; they are measured again
 at merge, against the heads then current. **Merge gate:** DEC-0150 must be on main before DEC-0151 merges. At
 DEC-0151's merge, `git ls-tree origin/main docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md` prints the
 file and `grep '^### DEC-0150' docs/DECISIONS.md` prints one line; if either prints nothing, DEC-0151 waits (or rebases
 over DEC-0150 once it lands).
 
-The files each open branch shares with this one, from `git merge-tree` against `f7e38dfa` on 2026-11-04 (a textual
+The files each open branch shares with this one, from `git merge-tree` against the round-14 head on 2026-11-04 (a textual
 conflict unless the line says it auto-merges), with the resolution:
 
 - **Against DEC-0150** (`origin/agent/channel-agent-ext-v3-20261104`):
@@ -316,7 +336,8 @@ conflict unless the line says it auto-merges), with the resolution:
     `origin/agent/channel-agent-ext-v3-20261104` prints only the files this list names.
   - `src/secret-shape.ts` (auto-merges): DEC-0150's `rawValues` change and DEC-0151's `SECRET_VALUE` touch different
     lines; keep both.
-- **Against DEC-0149** (`origin/agent/ct194-source-manifest-v2-20261104`, `82bed5bd`): `docs/DECISIONS.md` and
+- **Against DEC-0149** (`origin/agent/ct194-source-manifest-v2-20261104`, `8dd4d04f`; `docs/specification/identifiers.md`
+  auto-merges): `docs/DECISIONS.md` and
   `docs/backlog.md` (tail appends; keep both, in order), `docs/handoffs/README.md` (keep both rows) and
   `src/secret-shape.ts` (the bullet below). Its `URL_SECRET_VALUE` in `src/source-rules.ts` deliberately stays the tree
   check's own earlier unbounded pattern, with the `i` flag, for parity with the adapter's source check: it is NOT
@@ -325,13 +346,12 @@ conflict unless the line says it auto-merges), with the resolution:
   into a path is still held; the DEC-0149 branch makes that change itself.
 - **Against PR #235** (`agent/ct200-renewal-repeat-20261102`, DEC-0148): `docs/DECISIONS.md` and `docs/backlog.md`
   (tail appends; keep both, in order).
-- **Against main at `bf50c9fc`** (PR #236 merged): `docs/backlog.md`, the tail; keep every row, in id order through
-  CT-216 (CT-210, CT-213, CT-215, CT-216). The scratch merge with `60a22ba1`, so resolved, passes: `tsc` exit 0, 28 vector
-  files match, the whole suite passes (109 files, 9836 tests, 1 skipped).
+- **Against main at `7213463f`**: `docs/backlog.md`, the tail; keep every row, in id order through CT-218 (CT-210,
+  CT-213, CT-215 to CT-218). The scratch merge with the round-14 head, so resolved: `tsc` exit 0, 28 vector files match, the whole suite passes (109 files, 9844 tests, 1 skipped).
 
 The second of DEC-0150 and DEC-0151 to merge also rewrites these, at the DEC-0150 landing head. DEC-0150's sentences
 move and are reworded between its rounds, so this list names each by its subject and place, and DEC-0150's own list
-(its handoff's section on meeting DEC-0151) locates the exact sentence at that head; last read at `b57df67a`:
+(its handoff's section on meeting DEC-0151) locates the exact sentence at that head; last read at `388f2b42`:
 
 - `docs/specification/channel-agent.md`, the daily-payload bullet ("**The daily quality payload.**", in the compatibility
   section): it becomes a pointer to DEC-0151 and to [support quality](../specification/support-quality.md)'s channel
@@ -345,8 +365,9 @@ move and are reworded between its rounds, so this list names each by its subject
   with no project is not attributed to any project".
 - `docs/specification/channel-agent.md`, item 4's sentence on the `sk-` rule (the "Being by shape" sentence: today any
   `sk-` and 16 or more name characters in any case, and what DEC-0151 in progress proposes to narrow it to): it states
-  DEC-0151's rule (a word-start boundary, the `sk-` strength, canonical case) and drops "in any case"; the advice not
-  to start an id with `sk-` stays.
+  DEC-0151's rule (a word-start boundary, the `sk-` strength, canonical case) and drops "in any case" from the shared
+  detector's clause only; the second reason (DEC-0149's tree check reads any `sk-` and 16 or more name characters in any
+  case, `FAC-SEM-158`) is kept, and the advice not to start an id with `sk-` stays.
 - DEC-0150's CA-2 in `docs/DECISIONS.md` (the same parenthetical as the alias sentence above): left as written (the
   register is append-only) and annotated with DEC-0151's merge.
 - DEC-0150's CA-5 in `docs/DECISIONS.md` (the detector as it stood, and what DEC-0151 in progress proposes for `sk-`):
@@ -370,7 +391,7 @@ move and are reworded between its rounds, so this list names each by its subject
   `support-quality-daily.schema.json`'s `$defs/projectAlias.pattern` (the second to land adds it if it is still absent at
   the DEC-0150 landing head). DEC-0150's two tests that build `sk-` keys, "finds a channel id the shared detector reads
   as a credential" and "asks for a rename only at a member name or an id, never at a text", both build
-  `sk-support-desk-faq-answers-2026-v2` at `b57df67a`, a key DEC-0151 reads (32 characters with a digit); a scratch
+  `sk-support-desk-faq-answers-2026-v2` at `388f2b42`, a key DEC-0151 reads (32 characters with a digit); a scratch
   merge with this branch passes `test/channel-agent.test.ts` whole (334 tests).
 - DEC-0150's budget sentences in `channel-agent.md` ("SECRET_VALUE's sk- run has no boundary today, so it is tried there
   too", "anywhere and in any case as the shared detector reads it") and its `keyRereads` comments in `src/channel-agent.ts`
@@ -378,7 +399,8 @@ move and are reworded between its rounds, so this list names each by its subject
   reads; the second to land confirms it.
 - DEC-0150's `keyRereads` against this detector's boundary: the second to land confirms that it counts `KEY_REREAD`
   after every boundary form `SECRET_VALUE` lists, the `:` colour parameters and `\33` included (DEC-0150 is fixing
-  `colourBefore` and `ESC_BEFORE` now), by DEC-0150's boundary-forms test extended with this detector's forms.
+  `colourBefore` and `ESC_BEFORE` now), by DEC-0150's boundary-forms test extended with this detector's forms (its
+  `BOUNDARY_FORMS` list in `test/channel-agent.test.ts`; the extension is the second lander's item).
 - `vitest.config.ts`: DEC-0150 and DEC-0149 each widen the coverage `include` line (DEC-0151 does not touch it); the
   merge step is one coverage include line holding both lists.
 - DEC-0150's `FAC-SEM-165` budget: its `keyRereads` has changed (`fc78b510`, `c201208a`, a floor `SK_FLOOR` for an
@@ -391,21 +413,22 @@ move and are reworded between its rounds, so this list names each by its subject
   in DEC-0151's Context and on the support quality page (its section 1 in rule 6): made a link once both are on main.
 - `docs/DECISIONS.md`'s next-free line: DEC-0152 here; at merge take the maximum of the branches' values and the CAS
   counter.
-- `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `82bed5bd`: that head keeps the tree check's own
+- `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `8dd4d04f`: that head keeps the tree check's own
   unbounded provider-key shapes (a fixed list held equal to a vectors constant, for parity with the adapter's source
   check), its tests no longer read `SECRET_VALUE.source`, and its
   `fixtures/semantic/source-manifest-secret-in-purpose.json` holds a key both patterns find. The only conflict is the
   textual one in `src/secret-shape.ts`: keep DEC-0149's JWT helpers (`isUrlBase64`, `runEnd`, `jwtSpans`, `hasJwt`),
-  then DEC-0151's comment and `SECRET_VALUE` line. The DEC-0149 lander also states in `source.md` that a weak `sk-` slug alias in
-  `fabric-agent.json` (`project:sk-learn-experiments` and the like) is a `FAC-SEM-158` credential in a source tree,
-  since its tree check keeps its own unbounded, case-insensitive key shapes, so such an agent cannot export its source
-  until the registry issues another alias (checked with `checkSourceTree` at `e1262368`: each such alias gives one
-  FAC-SEM-158 finding at `fabric-agent.json`, and `project:helpdesk-customer-support` none). Measured on a scratch merge of `82bed5bd` with `f7e38dfa`, resolved
-  so: `tsc` exit 0; 29 vector files match their generators; the whole suite passes (113 files, 10231 tests, 3 skipped).
+  then DEC-0151's comment and `SECRET_VALUE` line. The second of DEC-0149 and DEC-0151 to land owns `source.md`'s
+  sentence that a weak `sk-` slug alias in `fabric-agent.json` (`project:sk-learn-experiments` and the like) is a
+  `FAC-SEM-158` credential in a source tree, since its tree check keeps its own unbounded, case-insensitive key shapes,
+  so such an agent cannot export its source until the registry issues another alias (checked with `checkSourceTree` at
+  `8dd4d04f`: each such alias gives one FAC-SEM-158 finding at `fabric-agent.json`, and
+  `project:helpdesk-customer-support` none), and states as current the sentences that say "DEC-0149 (in progress)":
+  support quality's credential paragraph, DEC-0151 item 7 and `identifiers.md`'s registry-alias bullet. Measured on a
+  scratch merge of `8dd4d04f` with the round-14 head, resolved so: `tsc` exit 0; 29 vector files match their generators; the whole suite passes (114 files, 10240 tests, 3 skipped).
   No test fails.
-- DEC-0150's branch at `292dcb9e`, on a scratch merge with this branch (the conflicting documents taken from this
-  branch for the measurement only): `tsc` exit 0, 29 vector files match, and the whole suite passes on a scratch merge
-  with `f7e38dfa` (110 files, 10250 tests, 1 skipped); at `1ccfbf87` the whole suite had one failure, the rename test's 29-character sample, which DEC-0150 has since lengthened. DEC-0150's `FAC-SEM-165`
+- DEC-0150's branch at `388f2b42`, on a scratch merge with the round-14 head (the conflicting documents taken from this
+  branch for the measurement only): `tsc` exit 0, 29 vector files match, and the whole suite passes (110 files, 10264 tests, 1 skipped); at `1ccfbf87` the whole suite had one failure, the rename test's 29-character sample, which DEC-0150 has since lengthened. DEC-0150's `FAC-SEM-165`
   reads with the same detector, so its declarations accept strictly more.
 - When one project's alias is read as a credential, DEC-0150's `FAC-SEM-165` also flags that project's entry in the
   declaration; the lander states in `channel-agent.md` that the agent leaves that project's entry out until the registry changes the
@@ -425,7 +448,10 @@ prints nothing; and in `docs/DECISIONS.md`, `awk '/^### DEC-0150/,/^### DEC-0151
 'DEC-0151[^.]*in progress|in-progress DEC-0151' | grep -v 'Annotated'` prints only the lines of DEC-0150's CA-2, its
 CA-5, its Compatibility and its Source counter sentence, which stay as written, while `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -c
 '^- \*\*Annotated'` prints at least 1, an annotation naming DEC-0151's merge for all four. A third check: `git grep -n -E 'no boundary today|in any case as the shared detector reads|SECRET_VALUE.s 16' --
-docs/specification src` prints nothing after both land. The handoffs are left out
+docs/specification src` prints nothing after both land. A fourth, after DEC-0149 and DEC-0151 both land:
+`git grep -n -F 'DEC-0149 (in progress)' -- docs src ':!docs/handoffs' ':!docs/DECISIONS.md'` prints nothing, and in
+`docs/DECISIONS.md` DEC-0151 item 7's sentence that says it is annotated with DEC-0149's merge; the second of the two
+to land does both. The handoffs are left out
 because they quote the earlier wording as history (this one does above); other handoffs, DEC-0150's included, are left
 as history and are not edited.
 
@@ -439,6 +465,13 @@ as history and are not edited.
   left to the channel agent standard (support-quality.md, "Not decided here").
 
 ## Checks actually run
+
+On the round-14 head (the commit that carries this entry), each exit code read separately: `pnpm exec tsc --noEmit -p .`
+0; `pnpm vitest run --coverage` 0 (109 files, 9844 tests passed, 1 skipped, 24.91 s; under the shared heavy-run lock,
+started at a 15-minute load of 43.30, 12 GB free); `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0; `pnpm
+privacy:check` with the organization's index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files match). The scratch merges with
+DEC-0150 at `388f2b42`, DEC-0149 at `8dd4d04f` and main at `7213463f` are measured in the merge list above. No U+2014 in
+the lines added since `d1b905ee`, and no look-behind in either copy.
 
 On the round-13 seam head (`f7e38dfa` and the handoff commit after it), each exit code read separately: `pnpm exec tsc
 --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9840 tests passed, 1 skipped, 33.52 s; under the shared
@@ -531,6 +564,6 @@ the added lines.
 
 ## Next task
 
-Round 14 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers, until two consecutive rounds
+Round 15 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers, until two consecutive rounds
 are clean; open the pull request; merge only once DEC-0150 is on main (the merge gate above), applying the merge list;
 mark DEC-0151 accepted, close CT-129, mark CT-210's first step done, release, and answer thread `b6820b97` with the tag.
