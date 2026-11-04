@@ -9182,8 +9182,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   name, which is no longer a key; they now hold an `AKIA` value (an upper-case name that still is one), with their
   digests recomputed, and their tests (`test/package.test.ts`, `test/estate-record.test.ts`) name the new value. Fabric,
   which vendors `src/session-handoff.ts`, re-vendors it to find the same, and every port of the detector takes the same
-  boundary, `sk-` strength (bounded look-aheads) and canonical-case prefixes (no `i` flag). The vendors that re-sync:
-  Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json` together with
+  boundary, `sk-` strength (bounded look-aheads) and canonical-case prefixes (no `i` flag). The vendors that re-sync
+  include: the Fabric Agent Adapter kit's detector ports (its Python and JS secrets modules, its dashboard-link
+  checkers, its connection ports and its dashboard button), its vendored vector files that change answer
+  (`connections-extra` and `feed-protocols`), and any template that copies the kit; any port that copies
+  `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
+  otherwise. Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json` together with
   `fixtures/vectors/folder-attribution.json`, so both are re-pinned together; Fabric Dashboards vendors
   `src/session-handoff.ts` and `src/fabric-links.ts`, and its service host's connections hold a port; Fabric
   Dashboards' sample-service kit copies hold the earlier pattern. One port is exempt from that instruction: the

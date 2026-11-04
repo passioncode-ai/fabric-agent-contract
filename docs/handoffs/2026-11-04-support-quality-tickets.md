@@ -120,7 +120,11 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 - On DEC-0151's merge: close CT-129 (fixed by item 3) with its receipt.
 - The coordinator tells the channel agent standard's owner, on thread `b6820b97`, that its observed check must accept a
   channel a producer withholds during the wait (CT-210 step (d)); the coordinator files the adapter's row (step (e)).
-- The vendors re-sync with item 7: Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json`
+- The vendors re-sync with item 7, including: the Fabric Agent Adapter kit's detector ports (its Python and JS secrets
+  modules, its dashboard-link checkers, its connection ports and its dashboard button), its vendored vector files that
+  change answer (`connections-extra` and `feed-protocols`), and any template that copies the kit; any port that copies
+  `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
+  otherwise. Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json`
   together with `fixtures/vectors/folder-attribution.json`, so both are re-pinned together; Fabric Dashboards vendors
   `src/session-handoff.ts` and `src/fabric-links.ts`, and its service host's connections hold a port; Fabric
   Dashboards' sample-service kit copies hold the earlier pattern.
@@ -138,8 +142,9 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 
 ## When DEC-0150 and DEC-0151 meet on main
 
-DEC-0150's current branch is `origin/agent/channel-agent-ext-v3-20261104` (`fcdb7ccb` when this was written; the
-source-manifest branch was at `93f8f2e0`). **Merge gate:** DEC-0150 must be on main before DEC-0151 merges. At
+DEC-0150's current branch is `origin/agent/channel-agent-ext-v3-20261104` (`8d40067d` when this was written; the
+source-manifest branch was at `801c5cd3`). The scratch measurements below are of those heads; they are measured again
+at merge, against the heads then current. **Merge gate:** DEC-0150 must be on main before DEC-0151 merges. At
 DEC-0151's merge, `git ls-tree origin/main docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md` prints the
 file and `grep '^### DEC-0150' docs/DECISIONS.md` prints one line; if either prints nothing, DEC-0151 waits (or rebases
 over DEC-0150 once it lands).
@@ -160,7 +165,7 @@ conflict unless the line says it auto-merges), with the resolution:
     `project` bullet and DEC-0151's registry-alias bullet into one compared-as-written bullet.
   - `src/secret-shape.ts` (auto-merges): DEC-0150's `rawValues` change and DEC-0151's `SECRET_VALUE` touch different
     lines; keep both.
-- **Against DEC-0149** (`origin/agent/ct194-source-manifest-20261103`, `93f8f2e0`): `docs/DECISIONS.md` and
+- **Against DEC-0149** (`origin/agent/ct194-source-manifest-20261103`, `801c5cd3`): `docs/DECISIONS.md` and
   `docs/backlog.md` (tail appends; keep both, in order), `docs/handoffs/README.md` (keep both rows) and
   `src/secret-shape.ts` (the bullet below). Its `URL_SECRET_VALUE` in `src/source-rules.ts` deliberately stays the tree
   check's own earlier unbounded pattern, with the `i` flag, for parity with the adapter's source check: it is NOT
@@ -173,15 +178,29 @@ conflict unless the line says it auto-merges), with the resolution:
 
 The second of DEC-0150 and DEC-0151 to merge also rewrites these:
 
-- `docs/specification/channel-agent.md`, the "daily quality payload" bullet: "That is DEC-0151 (CT-210), in progress:
-  until DEC-0151 lands, an agent following section 5.1 emits payloads this contract refuses, and how the seven channel
-  kinds here map to `/1`'s four channels ... is DEC-0151's to decide." It becomes a pointer to DEC-0151 and to
-  [support quality](../specification/support-quality.md)'s channel kinds table.
-- `docs/specification/support-quality.md`, DEC-0150's "Not decided here" bullet "The per-project payload ...:
-  DEC-0151 (CT-210), in progress": removed, since DEC-0151's section answers it.
-- DEC-0150's Compatibility sentence "that is DEC-0151 (CT-210), in progress: until it lands, ... the mapping of the
-  seven channel kinds to `/1`'s four channels is DEC-0151's": left as written (the register is append-only) and
-  annotated with DEC-0151's merge.
+- `docs/specification/channel-agent.md` (DEC-0150 at `8d40067d`), the daily-payload bullet (its lines 209 to 215): "That
+  schema is what DEC-0151, in progress on CT-210, proposes. Until it lands, an agent following section 5.1 emits payloads
+  this contract refuses, and how the seven channel kinds here map to `/1`'s four channels ... is what DEC-0151, in
+  progress, proposes to decide. Until then, an agent declaring several projects publishes no per-project
+  `support.quality_daily` on a channel they share ...". It becomes a pointer to DEC-0151 and to
+  [support quality](../specification/support-quality.md)'s channel kinds table and per-project keying.
+- `docs/specification/channel-agent.md` line 70 and DEC-0150's CA-2: the parenthetical "the memory capability's pattern;
+  DEC-0151, in progress on CT-210, proposes the same `projectAlias`" says that `support-quality-daily/1` uses the same
+  `projectAlias`.
+- `test/channel-agent.test.ts`: an assertion that the declaration's `project` pattern equals
+  `support-quality-daily.schema.json`'s `$defs/projectAlias.pattern` (none at `8d40067d`; the second to land adds it
+  if it is still absent).
+- `docs/evidence/sources.md`, DEC-0150's row for the channel agent standard: "section 5.1 the daily
+  `support-quality-daily/1` per project (DEC-0151, in progress)" names DEC-0151 as decided and links it.
+- `docs/specification/support-quality.md`, DEC-0150's "Not decided here" bullet on the per-project payload ("...:
+  DEC-0151 (CT-210), in progress"): removed, since DEC-0151's section answers it.
+- DEC-0150's Compatibility sentence ("that is DEC-0151 (CT-210), in progress: until it lands, an agent following section
+  5.1 emits payloads this contract refuses, and the mapping of the seven channel kinds to `/1`'s four channels is what
+  the in-progress DEC-0151 proposes"): left as written (the register is append-only) and annotated with DEC-0151's merge.
+- DEC-0150's counter sentence in its Source ("the counter moves from next 149 (`d3da4336`) to next 152 in one commit
+  (`ee67e35e`, key `support-quality-v2-dec`), so DEC-0149, DEC-0150 and DEC-0151 (in progress) have no counter commit of
+  their own"): annotated so that it agrees with DEC-0151's Source and with DEC-0149's reservation `e27a5441` (key
+  `ct194-source-manifest`, `"next": 150` by `git cat-file -p e27a5441`).
 - The channel agent standard's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`, named as text
   in DEC-0151's Context and on the support quality page: made a link once both are on main.
 - `docs/DECISIONS.md`'s next-free line: DEC-0152 here; at merge take the maximum of the branches' values and the CAS
@@ -190,33 +209,39 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these:
   is" in its CA-5, in `channel-agent.md`'s check of a declaration, and in its handoff's note on the detector). Whichever
   lands second keeps DEC-0151's boundary and drops that note; the advice to rename an id that starts with `sk-` stays
   true, since a prefix at the start of a value is still found.
-- `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `93f8f2e0`: that head keeps the tree check's own
+- `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `801c5cd3`: that head keeps the tree check's own
   unbounded provider-key shapes (a fixed list held equal to a vectors constant, for parity with the adapter's source
   check), its tests no longer read `SECRET_VALUE.source`, and its
   `fixtures/semantic/source-manifest-secret-in-purpose.json` holds a key both patterns find. The only conflict is the
   textual one in `src/secret-shape.ts`: keep DEC-0149's JWT helpers (`isUrlBase64`, `runEnd`, `jwtSpans`, `hasJwt`),
-  then DEC-0151's comment and `SECRET_VALUE` line. Measured on a scratch merge of `93f8f2e0` with `19ab1f56`, resolved
-  so: `tsc` exit 0; `test/source-rules.test.ts` and `test/validate-cli.test.ts` pass (1945 tests, 2 skipped); 29 vector
-  files match their generators; the whole suite passes (111 files, 10174 tests, 3 skipped). No test fails.
-- DEC-0150's branch at `fcdb7ccb`, on a scratch merge with `19ab1f56` (the documents taken from this branch for the
-  measurement only): its two channel-agent vectors already use keys with a digit and an upper-case letter, `tsc` exit 0,
-  29 vector files match their generators, and the whole suite passes (110 files, 10017 tests, 1 skipped). No test
-  fails. DEC-0150's `FAC-SEM-165` reads with the same detector, so its declarations accept strictly more.
+  then DEC-0151's comment and `SECRET_VALUE` line. Measured on a scratch merge of `801c5cd3` with `53475fde`, resolved
+  so: `tsc` exit 0; `test/source-rules.test.ts` and `test/validate-cli.test.ts` pass (1950 tests, 2 skipped); 29 vector
+  files match their generators; the whole suite passes (111 files, 10179 tests, 3 skipped). No test fails.
+- DEC-0150's branch at `8d40067d`, on a scratch merge with `53475fde` (the five conflicting documents taken from this
+  branch for the measurement only): `tsc` exit 0, 29 vector files match their generators, and the whole suite passes
+  (110 files, 10026 tests, 1 skipped). No test fails. DEC-0150's `FAC-SEM-165` reads with the same detector, so its
+  declarations accept strictly more.
 - When one project's alias is read as a credential, DEC-0150's `FAC-SEM-165` also flags that project's entry in the
   declaration; the lander states in `channel-agent.md` that the agent removes or renames that project's entry.
 - The Source lines of DEC-0150 and DEC-0151 must agree after the merge; whichever lands second annotates its own:
-  `ee67e35e` (key `support-quality-v2-dec`) moved the DEC counter from 149 to 152 and is DEC-0151's reservation;
-  DEC-0149's own reservation is `e27a5441` (key `ct194-source-manifest`); both as the coordinator read the counter's
-  chain, and `git cat-file -p ee67e35e` shows `"next": 152` under that key.
-- DEC-0150's join sentence in `channel-agent.md` ("so a reader joins a declaration to a project's payloads on
-  `project:<slug>`"): once both land it reads "on `project:<slug>`, or, for a payload with no project, on the
-  declaration's one project".
+  `ee67e35e` (key `support-quality-v2-dec`, `"next": 152`) is DEC-0151's reservation, and `d3da4336` (`"next": 149`) the
+  value before it, as DEC-0150's Source cites; DEC-0149's own reservation is `e27a5441` (key `ct194-source-manifest`,
+  `"next": 150`), each read with `git cat-file -p`.
+- DEC-0150's join sentence in `channel-agent.md` (line 74 at `8d40067d`: "DEC-0151 (CT-210, in progress) gives
+  `support-quality-daily` payloads the same alias; once it lands, a reader joins a declaration to a project's payloads
+  on `project:<slug>`"): once both land it reads "DEC-0151 gives `support-quality-daily` payloads the same alias, and a
+  reader joins a declaration to a project's payloads on `project:<slug>`, or, for a payload with no project, on that
+  channel's one project".
 - DEC-0150's handoff Open bullet on section 5.1 ("until DEC-0151 ... lands, an agent following it emits
   `support-quality-daily/1` payloads this contract refuses"): dropped once DEC-0151 is on main.
 - The organization's roadmap row AS-01 ("one event per channel and closed day", fabric-workspace
   `knowledge/roadmap.md`): owed at merge, to say one event per channel, project and closed day.
 - The schema count: 148 after the source-manifest branch and DEC-0150's land (146 on origin/main today); a test or
   document that counts the schemas follows that number.
+
+The check that closes this list, after both land:
+`git grep -n -E 'DEC-0151[^.]*in progress|in-progress DEC-0151' -- docs src test ':!docs/handoffs'` prints nothing.
+The handoffs are left out because they quote the earlier wording as history (this one does above).
 
 ## Decisions taken here
 

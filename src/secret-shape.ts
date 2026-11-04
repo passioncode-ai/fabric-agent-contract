@@ -5,7 +5,11 @@
  * `fabric://` links (`src/fabric-links.ts`, FAC-SEM-052) and declared command lines (`src/semantic-rules.ts`,
  * FAC-SEM-057) use it. `src/session-handoff.ts` keeps a copy, because its vendors take that file alone and run it
  * without this kit; `test/session-handoff-review.test.ts` checks that the copy agrees with this module. Vendors that
- * re-sync on a change (DEC-0151): Fabric vendors this file twice, one copy under a sha256 `pin.json` together with
+ * re-sync on a change (DEC-0151) include: the Fabric Agent Adapter kit's detector ports (its Python and JS secrets
+ * modules, its dashboard-link checkers, its connection ports and its dashboard button), its vendored vector files that
+ * change answer (`connections-extra`, `feed-protocols`) and any template that copies the kit; a port that copies
+ * `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since two AT-15 cases fail
+ * otherwise. Fabric vendors this file twice, one copy under a sha256 `pin.json` together with
  * `fixtures/vectors/folder-attribution.json`; Fabric Dashboards vendors `src/session-handoff.ts` and
  * `src/fabric-links.ts`, and its service host's connections hold a port; Fabric Dashboards' sample-service kit copies
  * hold the earlier pattern.
