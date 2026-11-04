@@ -135,6 +135,20 @@ filed; the coordinator files it on the board).
   successful read, now in `max_age`'s description and on the page.
 - The timing tests measure the test thread's processor time against prose read to the budget in the same run (a
   ratio), never a fixed number of milliseconds, so a loaded machine slows both sides alike.
+- Round 12 of the readings (on `08fd8ccf`): unit pass, seam pass, three product breaks and unit risks, fixed: the
+  credential gap is stated in full (every string not read as a URL, a sentence that holds a URL included, is read for
+  key shapes only; a vector pins `Please write to https://u:p@help.example/` as not found); the read declaration is
+  judged only by the findings under its own path, and the closing "rest not read" finding stands at the copy where the
+  budget ran out, with three vectors carrying the view's answer and a test deriving the view from the findings for
+  every vector; every keyword the schema can fail on names its limit (`additionalProperties`, `propertyNames`, `not`,
+  any `oneOf`), with a pointer for the none form at a holding text or a `texts` object, held by a test over the
+  schema's keywords; `holding_reply` with a final text `{"none": "not_used"}` is a non-blocking `FAC-SEM-164`; a
+  nullable member of the wrong type gets one line; `channelAgentView` always carries `errors` (`[]` when there are
+  none), so a port matching on the view's shape follows it; the Narrowings scope the budget bullet to the read
+  declaration and name two places looser than the standard; the summary table names the none form; a URL is read
+  after leading C0 controls and spaces, as the parser does; every provider prefix's near miss is charged up to its
+  floor; `FAC-SEM-163` and the view's `FAC-SEM-162` are capped at 64 with a closing count, and `FAC-SEM-164` builds no
+  place past 64.
 
 ## The branch and its history
 
@@ -187,8 +201,10 @@ the pull request comes from the v3 branch only.
 - The adoption, owed by the Fabric Agent Adapter, its row to be filed (the coordinator files it on the board): its
   `check_service.py` vendors the schema and the vectors and reports, never fails, a declaration it reads as not
   declared while live producers still publish declarations written before this revision (each producer's own row is
-  filed before the adapter re-pins); at its re-pin both `PROTOCOL_REVISIONS` twins (`fabric_protocols.py`, `fabric-protocols.mjs`) gain `channel-agent-standard`
-  `['1']` and the feed-protocols vectors are vendored again. Then a later decision moves the key to version 1 (CA-7).
+  filed before the adapter re-pins); at its re-pin both register twins, `fabric_protocols.py` and
+  `fabric-protocols.mjs` (held equal by its feed-protocols twin test), gain `channel-agent-standard` `['1']`, the
+  feed-protocols vectors are vendored again, and the Fabric Dashboards sample service's protocol table is updated (or
+  recorded as not held equal to the register). Then a later decision moves the key to version 1 (CA-7).
 
 ## Merging beside the branch of CT-194 and the other open branches
 
@@ -201,9 +217,11 @@ origin), whichever lands second:
 - reads the next-free markers (DEC and SEM) from the CAS refs at the merge, not from either branch, and keeps one
   "Next free ID" line in `docs/DECISIONS.md` and one "Next free rule code" line in conformance.md;
 - adds the comma at the end of the catalogue's last row before the other branch's rows;
-- keeps one coverage `include` line in `vitest.config.ts` holding both branches' lists (a textual union leaves two
-  `include` keys, and the later one silently drops `src/validator.ts`), and keeps `src/channel-agent.ts`,
-  `src/source-rules.ts` and `src/validator.ts` at a branch floor of 100;
+- resolves the `vitest.config.ts` include line, which conflicts textually (git 2.55), into one coverage `include` line
+  holding both branches' lists (two `include` keys would let the later one drop `src/validator.ts`), and keeps
+  `src/channel-agent.ts`, `src/source-rules.ts` and `src/validator.ts` at a branch floor of 100; check:
+  `grep -c 'include: \["src/' vitest.config.ts` prints 1 and `grep -c '^\*\*Next free rule code'
+  docs/specification/conformance.md` prints 1;
 - on conformance.md's clients table keeps CT-194's text for the actions row and appends this branch's row;
 - finds `rawValues` in `src/secret-shape.ts` already the same lines on both branches, and on the merged tree runs
   `pnpm vectors:check` and `test/channel-agent.test.ts` against CT-194's `secret-shape.ts`;
@@ -213,8 +231,8 @@ origin), whichever lands second:
 - leaves `detectorCost` normative: once DEC-0149's one-pass `hasJwt` lands, the `eyJ` term no longer describes this
   repository's detector, and stays as a bound any port's detector may need (the page and CA-5 already say so).
 
-The conformance.md sentence "`FAC-SEM-155` to `FAC-SEM-161` are reserved by open branches (CT-194 and PR #235)" merges
-silently. Whichever of PR #235 and CT-194 lands before this branch, the lander of this branch rewrites it to name only
+The conformance.md sentence "`FAC-SEM-155` to `FAC-SEM-161` are reserved by open branches (CT-194 and PR #235)"
+conflicts textually (git 2.55); the resolution is the same. Whichever of PR #235 and CT-194 lands before this branch, the lander of this branch rewrites it to name only
 the codes still held by an open branch (none once both are on main), and keeps CT-194's own sentence that
 `FAC-SEM-161` is unused.
 
@@ -245,8 +263,9 @@ The gate of DEC-0151 (in progress) puts DEC-0150 on main first. Once DEC-0150 is
 Compatibility and Source sentences that name DEC-0151 as in progress (an annotation under DEC-0150, never a rewrite of
 its body: `docs/DECISIONS.md` is append-only), and rewrites these sentences outside the register. Where this list and
 DEC-0151's meeting list (its handoff, "When DEC-0150 and DEC-0151 meet on main") differ, DEC-0151's governs: its
-annotate-not-rewrite instruction, the alias entry (a project whose registry alias reads as a credential stays out until
-the registry changes the alias, AS-01), and the join sentence, worded in both lists with the adoption condition (a
+annotate-not-rewrite instruction, the alias entry (an agent whose project's registry alias the detector reads as a
+credential leaves that project's entry out until the registry changes the alias; it never renames the alias itself),
+and the join sentence, worded in both lists with the adoption condition (a
 reader joins on `project:<slug>` once the feed's readers have adopted it):
 
 - the "Not decided here" bullet in `docs/specification/support-quality.md` that names DEC-0151 (CT-210) in progress:
@@ -310,6 +329,10 @@ here), and adds:
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;
 - to be asked of the standard's owner: whether one declaration may hold projects on several sides;
+- to be asked of the standard's owner: a string is read as a URL only when its head opens with a scheme and passes the
+  ASCII and percent rules; every other string, a sentence that holds a URL included ("Please write to
+  https://u:p@help.example/"), is read for key shapes only, so a password there is not found: is that gap acceptable
+  for the standard's section 11 check;
 - to be asked of the standard's owner: that section 5.1's table mark `autonomy.answered` and
   `stability.fallbackTurns` new too (they are not in `/1` either), and keep `toPerson*` under `autonomy`;
 - to be asked of the standard's owner: section 5.1 counts `toPersonPolicy` and `toPersonInability` in tickets where

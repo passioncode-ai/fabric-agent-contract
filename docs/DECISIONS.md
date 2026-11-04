@@ -9088,19 +9088,23 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      place, a member name the schema does not declare, a text's language and a number that is no index of a declared
      array, and any numeric key of an object, are written `*`; beside each failed keyword the place names the schema's
      own limit (values, pattern, length in code points, count, bound, format, the type alone for a failed type, and for
-     a nullable member its type and null on its `oneOf` line, with no line for the `null` branch). The finding points to
-     the declaration's grammars.
+     a nullable member its type and null on its `oneOf` line, one line only, `additionalProperties` the members the
+     schema declares, `propertyNames` the names a map takes, `not` what the member takes instead, any other `oneOf` its
+     forms; a holding text or a `texts` object in the none form points to the one member that takes it). The finding
+     points to the declaration's grammars.
   3. CA-3. `FAC-SEM-163`: a project, a category code, a tier code, a channel, a source (read or declined), a hand-off
      queue and a recorded decision appear once; a channel with replies off names a decision, and a channel's decision
-     is one `recorded_decisions` lists (section 11: recorded decisions present for every channel held by one).
+     is one `recorded_decisions` lists (section 11: recorded decisions present for every channel held by one). It
+     names at most 64 places per declaration, then one finding at the key counting the rest.
   4. CA-4. `FAC-SEM-164`: a channel with a holding reply declares its holding text and one that replies its final text
      (section 11: holding and final texts present); a store review asks no clarifying question (sections 4.7, 10); no
      text and no tier's label is blank or carries U+2014 (section 2.4's send checks); a queue whose answered signal is
      `none` names its
      recommendation (section 7.5); a budget above 0 names its spend record, since without one it reads 0 (sections 5
-     and 11). A final text in the none form owes nothing (only an absent one is found); a recommendation on a queue
-     whose answered signal is not `none` is found too, non-blocking (a reader does not read it). It names at most 64
-     places per document and then one finding at the key counting the rest.
+     and 11). A final text in the none form owes nothing (only an absent one is found), except `{"none": "not_used"}`
+     beside a holding reply, which is found (a holding reply obliges a final reply, section 6); a recommendation on a
+     queue whose answered signal is not `none` is found too, non-blocking (a reader does not read it). It names at most
+     64 places per document and then one finding at the key counting the rest; past 64 a place is counted, never built.
   5. CA-5. `FAC-SEM-165`: no member name and no string of the declaration is shaped like a credential, by shape, with
      `FAC-SEM-101`'s detector on a string's first 4097 code points (today an ordinary name of `sk-` and 16 or more
      letters, digits, `_` or `-`, in any case, such as the valid channel id `sk-support-desk-faq-answers-2026-v2`, is
@@ -9116,29 +9120,38 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      its base64url run and, when it ends at a `.`, the dot and the run after it; after each `sk-`, in any case, at a
      boundary (the start, a non-alphanumeric character, `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal
      escape, a backslash escape, or a colour sequence with any number of parameter characters whose ESC is raw or
-     escaped in either case), up to 255 code points; and, for a string read as a URL, on the names and values a
+     escaped in either case), up to 255 code points; after every other provider prefix of the shared detector, anywhere
+     and in any case (`gh?_`, `xox?-`, `AKIA`, `glpat-`), up to its floor (20, 10, 16 and 20 code points), what a near
+     miss is reread before it fails; and, for a string read as a URL, on the names and values a
      WHATWG URL parse yields: 128 per query or fragment piece, its name's and value's code points, the value's `eyJ`
      and `sk-` terms, and the square over two of a name holding an upper-case letter when its value is not empty. Once it is spent, nothing more is read and every further member collapses; one finding per
-     document then says the rest was not read, and the 64 places are counted per document. A reader treats a
+     document then says the rest was not read, at the copy where the budget ran out (never at a read declaration read
+     whole), and the 64 places are counted per document, their count at the copy where the 65th was found. The read
+     declaration is judged only by the findings under its own path: a misplaced copy's credential, or the budget
+     running out in a copy, is found at that copy and leaves the read declaration's answer as it is. A reader treats a
      declaration with `FAC-SEM-165` or `FAC-SEM-163` as not declared, as it does one with `FAC-SEM-162`, keeps one with
      only `FAC-SEM-164` declared and shows those findings to its author, and never displays a credential-shaped value
-     (`channelAgentView`, shaped as `connectionsView`: `declared: false, reported: false` with no key,
+     (`channelAgentView`, shaped as `connectionsView`, `errors` always present: `declared: false, reported: false,
+     errors: []` with no key,
      `declared: false, reported: true` with the findings, `declared: true` with the obligations; every line names the
      rule and the place: `FAC-SEM-162 at <place>: <keyword> (<limit>)` for each schema place of an invalid
      declaration, `FAC-SEM-165 at <place>` for each credential place, and, for a manifest whose only copy is
-     misplaced, `FAC-SEM-162 at <place>` where that copy stands). No finding's message carries a declared value and no rule's place echoes
+     misplaced, `FAC-SEM-162 at <place>` where that copy stands; at most 64 schema places, then
+     `FAC-SEM-162 at /: and N more`). No finding's message carries a declared value and no rule's place echoes
      instance data: a place writes a declared name, an index of a declared array, else `*` (an undeclared name, a
      numeric object key, a text's language), in `FAC-SEM-162`, `FAC-SEM-164` and `FAC-SEM-165` alike; a member whose
      name is not plain (letters, digits, `_` and `-`, at most 64, no run of 7 digits once `-` and `_` are left out) or
      is shaped like a credential collapses its place, so it and every member below it are placed at its nearest plain
      ancestor, and so does a member more than 64 levels down; `FAC-SEM-165` names at most 64 places and counts the rest. The walk keeps an
      explicit stack of one frame per container and builds a place only when it reports one, so its time grows with the
-     value's size. A string is read as a URL (`secretUrl` and `detectorCost`'s URL terms) only when its head, once ASCII
-     tab, line feed and carriage return are removed, is ASCII only, holds no percent-escape of a byte at or above 0x80
-     and opens with a scheme; any other string is read by the value and argument shapes only, with no URL parse, since
-     host processing of a long label outside ASCII, written or escaped, grows with its square (a special scheme takes a
-     host even without `//`). The gap this leaves is named: in such a string only key shapes are found, so a password
-     or a credential-named query parameter there is not. The declaration a reader reads is walked
+     value's size. A string is read as a URL (`secretUrl` and `detectorCost`'s URL terms) only when its head, once its
+     leading C0 controls and spaces are stripped and ASCII tab, line feed and carriage return removed (as the URL parser
+     does), opens with a scheme, is ASCII only and holds no percent-escape of a byte at or above 0x80; any other string
+     is read by the value and argument shapes only, with no URL parse, since host processing of a long label outside
+     ASCII, written or escaped, grows with its square (a special scheme takes a host even without `//`). The gap this
+     leaves is named: every other string, a sentence that holds a URL included (`Please write to
+     https://u:p@help.example/`, pinned by a vector), is read for key shapes only, so a password or a credential-named
+     query parameter there is not found. The declaration a reader reads is walked
      first and its misplaced copies after it, so a copy cannot spend the budget before the read one. A text is blank when nothing is left after white space, `\p{Cf}`, `\p{Cc}`, `\p{Z}`,
      `\p{Default_Ignorable_Code_Point}`, the fillers U+115F, U+1160, U+3164, U+FFA0 and U+2800, and U+FFFC.
   6. CA-6. Not checked statically: that the side is one of the standard's sides and the route's capability the one for
@@ -9197,7 +9210,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 11 of the readings. `DEC-0150` was reserved by the coordinator with
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 12 of the readings. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation

@@ -19,9 +19,9 @@ export type ChannelAgentSite = "manifest" | "well-known";
 
 /** What a reader takes from a declaration: the value, or the keywords it fails and their places (never a declared value). */
 export type ChannelAgentView =
-  | { declared: false; reported: false }
+  | { declared: false; reported: false; errors: [] }
   | { declared: false; reported: true; errors: string[] }
-  | { declared: true; reported: false; standard: string; projects: ChannelAgentProject[]; obligations: string[] };
+  | { declared: true; reported: false; errors: []; standard: string; projects: ChannelAgentProject[]; obligations: string[] };
 
 let shape: ValidateFunction | undefined;
 const KEY = EXTENSION_KEYS.channelAgent;
@@ -215,7 +215,11 @@ function oversize(value: unknown): string[] {
  */
 function allowed(error: { keyword: string; schema?: unknown; params?: Record<string, unknown> }, names: Set<string>): string {
   const params = error.params ?? {};
+  // A member named `none` where the schema does not take the none form: the pointer says where it is taken.
+  const elsewhere = params.additionalProperty === "none" || params.propertyName === "none" ? "; only texts.final takes the none form (Narrowings)" : "";
   if (error.keyword === "required" && typeof params.missingProperty === "string" && names.has(params.missingProperty)) return ` (${params.missingProperty})`;
+  if (error.keyword === "additionalProperties") return ` (no member the schema does not declare${elsewhere})`;
+  if (error.keyword === "propertyNames" && isObject(error.schema)) return ` (${nameRule(error.schema)}${elsewhere})`;
   if (error.keyword === "enum" && Array.isArray(params.allowedValues)) {
     const values = params.allowedValues.map(String);
     const rest = values.length > ENUM_VALUES ? ` and ${values.length - ENUM_VALUES} more` : "";
@@ -235,10 +239,11 @@ function allowed(error: { keyword: string; schema?: unknown; params?: Record<str
     if (error.keyword === "minimum" || error.keyword === "maximum") return ` (${String(params.comparison)} ${limit})`;
   }
   if (error.keyword === "format" && typeof params.format === "string") return ` (format ${params.format})`;
-  // The none form's `until` goes with `not_yet` only.
-  if (error.keyword === "not" && isObject(error.schema) && Array.isArray(error.schema.required)) return ` (no ${error.schema.required.join(", ")} here)`;
+  // `not` says what the member takes: the none form's `until` only with `not_yet`, a language other than `none`.
+  if (error.keyword === "not" && isObject(error.schema) && Array.isArray(error.schema.required)) return ` (${error.schema.required.join(", ")} only with not_yet)`;
+  if (error.keyword === "not" && isObject(error.schema) && error.schema.const !== undefined) return ` (a value other than ${String(error.schema.const)})`;
   // A failed type names the type the schema wants; a nullable member's `oneOf` names its types and null.
-  if (error.keyword === "type" && typeof params.type === "string") return ` (${params.type})`;
+  if (error.keyword === "type" && (typeof params.type === "string" || Array.isArray(params.type))) return ` (${[params.type].flat().join(" or ")})`;
   if (error.keyword === "oneOf") {
     const branches = error.schema;
     if (Array.isArray(branches)) {
@@ -246,8 +251,18 @@ function allowed(error: { keyword: string; schema?: unknown; params?: Record<str
       const nullable = branches.some((branch) => typeOf(branch) === "null");
       if (nullable && types.length > 0) return ` (${article(types[0] as string)} ${types.join(" or ")} or null)`;
     }
+    return " (exactly one of its forms)";
   }
   return "";
+}
+
+/** What a `propertyNames` schema takes, from the schema alone: its pattern, its length, the name it refuses. */
+function nameRule(rule: JsonObject): string {
+  const parts: string[] = [];
+  if (typeof rule.pattern === "string") parts.push(`matching ${rule.pattern}`);
+  if (typeof rule.maxLength === "number") parts.push(`at most ${rule.maxLength} code points`);
+  if (isObject(rule.not) && rule.not.const !== undefined) parts.push(`other than ${String(rule.not.const)}`);
+  return `a member name ${parts.join(", ")}`;
 }
 
 /** A branch's type, through its `$ref`s into the schema's own `$defs` (the only references this schema makes). */
@@ -295,7 +310,10 @@ export function schemaErrors(value: unknown, validate: ValidateFunction): string
     if (validate(value) === true) return [];
     // A nullable member's null branch fails `type` (null) for every non-null value; its `oneOf` line names null instead.
     // An `if` line only says which branch of a member that takes the none form failed; that branch's own lines say how.
-    const errors = (validate.errors as ErrorObject[]).filter((error) => !(error.keyword === "type" && error.params.type === "null") && error.keyword !== "if");
+    // A nullable member of the wrong type gets one line, its `oneOf`: the inner branch's `type` line is dropped.
+    const all = validate.errors as ErrorObject[];
+    const nullable = new Set(all.filter((error) => error.keyword === "oneOf").map((error) => error.instancePath));
+    const errors = all.filter((error) => error.keyword !== "if" && !(error.keyword === "type" && (error.params.type === "null" || nullable.has(error.instancePath))));
     return [...new Set(errors.map(placed))];
   } catch (error) {
     if (error instanceof RangeError) return [TOO_LARGE];
@@ -329,23 +347,43 @@ export function channelAgentView(doc: unknown, site: ChannelAgentSite = "manifes
   if (!view.declared) {
     // Only misplaced copies: each is reported where it stands in the document, with what it holds.
     const copies = site === "manifest" && isObject(doc) ? [...misplaced(doc, budget), ...summary(budget)] : [];
-    return copies.length > 0 ? { declared: false, reported: true, errors: copies.map(named) } : { declared: false, reported: false };
+    return copies.length > 0 ? { declared: false, reported: true, errors: copies.map(named) } : { declared: false, reported: false, errors: [] };
   }
+  // The read declaration alone, walked first and with the whole budget, as `channelAgentRules` walks it: its answer
+  // rests only on the findings under its own path.
   const value = (extensionsAt(doc as JsonObject, site) as JsonObject)[KEY];
   const credentials = [...secrets(value, "", budget), ...summary(budget)].map(named);
-  if (!view.valid) return { declared: false, reported: true, errors: [...view.errors.map(schemaLine), ...credentials] };
-  const blocking = credentials;
+  if (!view.valid) {
+    const lines = view.errors.slice(0, SECRET_FINDINGS).map(schemaLine);
+    if (view.errors.length > SECRET_FINDINGS) lines.push(`FAC-SEM-162 at /: and ${view.errors.length - SECRET_FINDINGS} more`);
+    return { declared: false, reported: true, errors: [...lines, ...credentials] };
+  }
+  const repeated = newCap();
+  const owing = newCap();
+  const blocking: Finding[] = [];
   const owed: Finding[] = [];
   const projects = new Set<unknown>();
   view.projects.forEach((project, i) => {
     const at = `/projects/${i}`;
-    if (projects.has(project.project)) blocking.push(`FAC-SEM-163 at ${at}/project`);
+    if (projects.has(project.project)) blocking.push(...repeat(at, repeated));
     projects.add(project.project);
-    blocking.push(...references(project, at).map(named));
-    owed.push(...obligations(project, at));
+    blocking.push(...references(project, at, repeated));
+    owed.push(...obligations(project, at, owing));
   });
-  if (blocking.length > 0) return { declared: false, reported: true, errors: blocking };
-  return { declared: true, reported: false, standard: view.standard, projects: view.projects, obligations: capped(owed, "").map(named) };
+  blocking.push(...closing("FAC-SEM-163", repeated, ""));
+  const errors = [...credentials, ...blocking.map(named)];
+  if (errors.length > 0) return { declared: false, reported: true, errors };
+  return { declared: true, reported: false, errors: [], standard: view.standard, projects: view.projects, obligations: [...owed, ...closing("FAC-SEM-164", owing, "")].map(named) };
+}
+
+/** FAC-SEM-163 at a project that repeats an earlier entry's, within the cap. */
+function repeat(at: string, cap: Cap): Finding[] {
+  if (cap.named >= SECRET_FINDINGS) {
+    cap.more += 1;
+    return [];
+  }
+  cap.named += 1;
+  return [{ code: "FAC-SEM-163", instancePath: `${at}/project`, message: "this project repeats an earlier entry's (DEC-0150 CA-3)" }];
 }
 
 /** A schema place as a reader's error line: the rule, the place, then the failed keyword and the schema's limit. */
@@ -354,11 +392,15 @@ export function schemaLine(error: string): string {
   return parts === null ? `FAC-SEM-162 at /: ${error}` : `FAC-SEM-162 at ${parts[2]}: ${parts[1]}${parts[3]}`;
 }
 
-/** FAC-SEM-164's findings, at most SECRET_FINDINGS places for the document and one closing count, as FAC-SEM-165 does. */
-function capped(findings: Finding[], root: string): Finding[] {
-  if (findings.length <= SECRET_FINDINGS) return findings;
-  const more = findings.length - SECRET_FINDINGS;
-  return [...findings.slice(0, SECRET_FINDINGS), { code: "FAC-SEM-164", instancePath: root, message: `and ${more} more places that owe a text, a recommendation or a spend record, or carry a blank or refused text (DEC-0150 CA-4)` }];
+/** The places FAC-SEM-163 or FAC-SEM-164 named for one declaration, and those counted past SECRET_FINDINGS. */
+interface Cap { named: number; more: number }
+const newCap = (): Cap => ({ named: 0, more: 0 });
+
+/** The closing count of FAC-SEM-163 or FAC-SEM-164 past SECRET_FINDINGS places, at the declaration, as FAC-SEM-165 has. */
+function closing(code: "FAC-SEM-163" | "FAC-SEM-164", cap: Cap, root: string): Finding[] {
+  if (cap.more === 0) return [];
+  const what = code === "FAC-SEM-163" ? "repeated ids or decisions not named (DEC-0150 CA-3)" : "places that owe a text, a recommendation or a spend record, or carry a blank or refused text (DEC-0150 CA-4)";
+  return [{ code, instancePath: root, message: `and ${cap.more} more ${what}` }];
 }
 
 /** FAC-SEM-162 on a manifest: the key where a reader does not read it (the manifest's own extensions, a capability's). */
@@ -403,7 +445,8 @@ const HIGH_ESCAPE = /%[89A-Fa-f][0-9A-Fa-f]/;
  * the detector's value and argument shapes only, so a password or a credential-named parameter in it is not found.
  */
 export function readAsUrl(text: string): boolean {
-  const read = head(text).replace(/[\t\n\r]/g, "");
+  // As the URL parser does: leading C0 controls and spaces stripped, then tab, line feed and carriage return removed.
+  const read = head(text).replace(/^[\u0000-\u0020]+/, "").replace(/[\t\n\r]/g, "");
   return /^[\x00-\x7f]*$/.test(read) && !HIGH_ESCAPE.test(read) && SCHEME.test(read);
 }
 
@@ -434,12 +477,13 @@ interface Budget {
   /** Places named so far, and credential-shaped names or values found past SECRET_FINDINGS. */
   named: number;
   more: number;
-  /** The first declaration walked: where the document's summary findings stand. */
-  root: string | undefined;
+  /** Where the closing findings stand: the copy whose places passed SECRET_FINDINGS, and the copy where the budget ran out. */
+  moreAt: string | undefined;
+  unreadAt: string | undefined;
 }
 
 /** A fresh budget for one document. */
-const newBudget = (): Budget => ({ left: SECRET_BUDGET, unread: false, named: 0, more: 0, root: undefined });
+const newBudget = (): Budget => ({ left: SECRET_BUDGET, unread: false, named: 0, more: 0, moreAt: undefined, unreadAt: undefined });
 
 /** What each name or string costs beyond its code points: the call itself. */
 export const VISIT_COST = 16;
@@ -515,9 +559,20 @@ function keyRereads(text: string): number {
     const boundary = at === 0 || !/[A-Za-z0-9]/.test(text[at - 1] as string) || ESCAPE_BEFORE.test(text.slice(Math.max(0, at - 6), at)) || colourBefore(text, at);
     if (boundary) cost += codePoints(text, KEY_REREAD, at);
   }
+  // Every other provider prefix, anywhere and in any case as the shared detector reads it: a near miss is reread up to
+  // the run its shape needs (its floor) before it fails.
+  for (const [prefix, floor] of PREFIX_FLOORS) {
+    prefix.lastIndex = 0;
+    for (let match = prefix.exec(text); match !== null; match = prefix.exec(text)) {
+      cost += codePoints(text, floor, match.index + match[0].length);
+      prefix.lastIndex = match.index + 1;
+    }
+  }
   return cost;
 }
 const KEY_REREAD = 255;
+/** The shared detector's other provider prefixes, each with the run its shape needs after it (SECRET_VALUE). */
+export const PREFIX_FLOORS: ReadonlyArray<readonly [RegExp, number]> = [[/gh[pousr]_/gi, 20], [/xox[abposr]-/gi, 10], [/akia/gi, 16], [/glpat-/gi, 20]];
 
 /**
  * The code points the detector reads in a string, counted in one pass, a bound any port's detector may need: the string
@@ -564,13 +619,15 @@ export function detectorCost(text: string): number {
 function secrets(value: unknown, root: string, budget: Budget = newBudget()): Finding[] {
   const findings: Finding[] = [];
   const names = schemaNames();
-  budget.root ??= root;
   const flag = (at: string, what: string, text: string) => {
     if (budget.named < SECRET_FINDINGS) {
       budget.named += 1;
       const rename = /^sk-/i.test(text) ? "; an id that starts with sk- is read as a key; rename it" : "";
       findings.push({ code: "FAC-SEM-165", instancePath: at, message: `${what} is shaped like a credential: a token is named by its vault slot, never written${rename} (DEC-0150 CA-5)` });
-    } else budget.more += 1;
+    } else {
+      budget.more += 1;
+      budget.moreAt ??= root;
+    }
   };
   // The walk stops once the budget is spent, so nothing is read after it.
   const afford = (text: string): boolean => {
@@ -578,6 +635,7 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
     const cost = detectorCost(head(text)) + VISIT_COST;
     if (cost > budget.left) {
       budget.unread = true;
+      budget.unreadAt = root;
       return false;
     }
     budget.left -= cost;
@@ -616,10 +674,9 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
 
 /** The document's closing FAC-SEM-165 findings, once: the count past SECRET_FINDINGS, and that the rest was not read. */
 function summary(budget: Budget): Finding[] {
-  const root = budget.root ?? "";
   const findings: Finding[] = [];
-  if (budget.more > 0) findings.push({ code: "FAC-SEM-165", instancePath: root, message: `and ${budget.more} more names or values shaped like a credential (DEC-0150 CA-5)` });
-  if (budget.unread) findings.push({ code: "FAC-SEM-165", instancePath: root, message: `the document holds more than ${SECRET_BUDGET} code points of names and values in its declarations; the rest was not read for credentials (DEC-0150 CA-5)` });
+  if (budget.more > 0) findings.push({ code: "FAC-SEM-165", instancePath: budget.moreAt ?? "", message: `and ${budget.more} more names or values shaped like a credential (DEC-0150 CA-5)` });
+  if (budget.unread) findings.push({ code: "FAC-SEM-165", instancePath: budget.unreadAt ?? "", message: `the document holds more than ${SECRET_BUDGET} code points of names and values in its declarations; the rest was not read for credentials (DEC-0150 CA-5)` });
   return findings;
 }
 
@@ -635,9 +692,14 @@ function repeats(items: Array<[JsonObject, number]>, member: string): number[] {
 }
 
 /** FAC-SEM-163: ids once, and every channel held by a decision names a recorded one (DEC-0150 CA-3). */
-function references(project: JsonObject, at: string): Finding[] {
+function references(project: JsonObject, at: string, cap: Cap = newCap()): Finding[] {
   const findings: Finding[] = [];
-  const flag = (path: string, message: string) => findings.push({ code: "FAC-SEM-163", instancePath: `${at}${path}`, message: `${message} (DEC-0150 CA-3)` });
+  const flag = (path: string, message: string) => {
+    if (cap.named < SECRET_FINDINGS) {
+      cap.named += 1;
+      findings.push({ code: "FAC-SEM-163", instancePath: `${at}${path}`, message: `${message} (DEC-0150 CA-3)` });
+    } else cap.more += 1;
+  };
   for (const i of repeats(indexed((project.taxonomy as JsonObject).codes), "code")) flag(`/taxonomy/codes/${i}/code`, "this category code repeats an earlier one");
   for (const i of repeats(indexed(project.tiers), "code")) flag(`/tiers/${i}/code`, "this tier code repeats an earlier one");
   const channels = indexed(project.channels);
@@ -665,14 +727,22 @@ function references(project: JsonObject, at: string): Finding[] {
 }
 
 /** FAC-SEM-164: what a channel, a queue and the budgets owe (DEC-0150 CA-4). */
-function obligations(project: JsonObject, at: string): Finding[] {
+function obligations(project: JsonObject, at: string, cap: Cap = newCap()): Finding[] {
   const findings: Finding[] = [];
-  const flag = (path: string, message: string) => findings.push({ code: "FAC-SEM-164", instancePath: `${at}${path}`, message: `${message} (DEC-0150 CA-4)` });
+  // Past SECRET_FINDINGS a place is counted, never built.
+  const flag = (path: string | (() => string), message: string) => {
+    if (cap.named < SECRET_FINDINGS) {
+      cap.named += 1;
+      findings.push({ code: "FAC-SEM-164", instancePath: `${at}${typeof path === "string" ? path : path()}`, message: `${message} (DEC-0150 CA-4)` });
+    } else cap.more += 1;
+  };
   for (const [channel, i] of indexed(project.channels)) {
     const texts = channel.texts as JsonObject;
     if (channel.holding_reply === true && texts.holding === undefined) flag(`/channels/${i}/texts/holding`, "a channel that sends a holding reply declares the holding text");
     // A final text in the none form owes nothing; only an absent one does.
     if (channel.replies_enabled === true && texts.final === undefined) flag(`/channels/${i}/texts/final`, "a channel that replies declares the final text");
+    // A holding reply obliges a final reply (the standard's section 6): a final text that is not used cannot follow it.
+    if (channel.holding_reply === true && isObject(texts.final) && texts.final.none === "not_used") flag(`/channels/${i}/texts/final`, "a channel that sends a holding reply owes a final reply, so its final text is not one it does not use");
     if (channel.kind === "store_review" && channel.clarifying_question === true) flag(`/channels/${i}/clarifying_question`, "a store review gets one public reply and no clarifying question");
     for (const which of ["holding", "final"] as const) {
       if (which === "final" && isNone(texts.final)) continue;
@@ -680,8 +750,8 @@ function obligations(project: JsonObject, at: string): Finding[] {
         // A plain language is written `*`, as FAC-SEM-162 and FAC-SEM-165 write it; one that is not plain, or is shaped
         // like a credential, is placed at its map: no place echoes the declaration's own words.
         const place = () => `/channels/${i}/texts/${which}${plainName(language) ? "/*" : ""}`;
-        if (text.replace(BLANK, "") === "") flag(place(), "a declared text is blank, and nothing empty is sent");
-        else if (text.includes(EM_DASH)) flag(place(), "a declared text carries U+2014, which a send's checks refuse");
+        if (text.replace(BLANK, "") === "") flag(place, "a declared text is blank, and nothing empty is sent");
+        else if (text.includes(EM_DASH)) flag(place, "a declared text carries U+2014, which a send's checks refuse");
       }
     }
   }
@@ -725,14 +795,16 @@ export function channelAgentRules(doc: unknown, site: ChannelAgentSite = "manife
     return findings;
   }
   const projects = new Set<unknown>();
+  const repeated = newCap();
+  const owing = newCap();
   const owed: Finding[] = [];
   view.projects.forEach((project, i) => {
     const at = `${root}/projects/${i}`;
-    if (projects.has(project.project)) findings.push({ code: "FAC-SEM-163", instancePath: `${at}/project`, message: "this project repeats an earlier entry's (DEC-0150 CA-3)" });
+    if (projects.has(project.project)) findings.push(...repeat(at, repeated));
     projects.add(project.project);
-    findings.push(...references(project, at));
-    owed.push(...obligations(project, at));
+    findings.push(...references(project, at, repeated));
+    owed.push(...obligations(project, at, owing));
   });
-  return [...findings, ...capped(owed, root)];
+  return [...findings, ...closing("FAC-SEM-163", repeated, root), ...owed, ...closing("FAC-SEM-164", owing, root)];
 }
 // #endregion channel-agent
