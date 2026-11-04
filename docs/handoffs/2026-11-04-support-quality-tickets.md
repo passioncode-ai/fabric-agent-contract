@@ -87,6 +87,20 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   the operator's; the ports' wording; how a reader combines per-project days is the reader's. A sweep of 300000
   generated values (escapes and ESC included) found 0 that the new pattern finds and origin/main's did not (40485
   both, 107147 only the earlier).
+- Round 5 of the readings (on `97632bed`): two breaks fixed. With no first-reply time measured, both percentiles are
+  `null` and unnamed in the interim: one FAC-SEM-126 finding per unmeasured first-reply metric, the producer's gate
+  accepting exactly those (`fixtures/semantic/support-quality-daily-first-reply-interim-both.json`). connections.md,
+  CT-73 and the `src/connections.ts` comment name two more differences: a connection reads no escape before a prefix,
+  and its `sk-` look-aheads are unbounded (CT-213); `KEY_SHAPE` is not changed here. The coordinator's decisions
+  applied: an absent `project` is the service's one project except a merged day, told apart by the first event that
+  names a project (the residual is the reader's); an alias read as a credential stops only its own project, on every
+  channel, until the registry changes it, and the other projects' events go on; a producer that merged projects under
+  DEC-0095 stops that channel until every reader adopts; item 7 says "at the start of a value, after a boundary
+  character or after a listed escape"; a reader combines only projects of one side; the boundary also takes an octal
+  escape, a double percent-escape and the escaped ESC forms (`\u001B[`, `\x1b[`, `\e[`, `\033[`); CT-213 and the
+  connections comment say "the same strength within 256 characters". The round-5 seam additions applied: the vendors
+  named (below and in DEC-0151's Compatibility and the `src/secret-shape.ts` comment); the adapter's source check is
+  exempt from the ports' instruction; the merge list re-measured against the current heads.
 
 ## Open
 
@@ -94,7 +108,14 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 - On DEC-0151's merge: close CT-129 (fixed by item 3) with its receipt.
 - The coordinator tells the channel agent standard's owner, on thread `b6820b97`, that its observed check must accept a
   channel a producer withholds during the wait (CT-210 step (d)); the coordinator files the adapter's row (step (e)).
-- Fabric vendors `src/session-handoff.ts` alone: its copy of `SECRET_VALUE` changed with item 7, so Fabric re-vendors it.
+- The vendors re-sync with item 7: Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json`
+  together with `fixtures/vectors/folder-attribution.json`, so both are re-pinned together; Fabric Dashboards vendors
+  `src/session-handoff.ts` and `src/fabric-links.ts`, and its service host's connections hold a port; Fabric
+  Dashboards' sample-service kit copies hold the earlier pattern.
+- The adapter's source check (`fabric_source_check.py`) derives its provider-key shapes from
+  `fabric_secrets.SECRET_VALUE.pattern` and raises `ImportError` on DEC-0151's pattern: it keeps the earlier unbounded
+  shapes as its own fixed list, for parity with DEC-0149's tree check, before or together with the detector's port, and
+  is exempt from the instruction that every port takes the same boundary (CT-210 (e), CT-207).
 - `fixtures/vectors/folder-attribution.json` changes with the detector: one AT-15 input (a strong `sk-` user) and three
   new AT-15 cases that tell DEC-0151's detector from the earlier one (a remote holding `-sk-` inside a word and one
   holding a weak `sk-` slug now record their origin; a strong key after a percent-escape records none). Every port
@@ -106,9 +127,12 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 ## When DEC-0150 and DEC-0151 meet on main
 
 DEC-0150's current branch is `origin/agent/channel-agent-ext-v3-20261104` (`fcdb7ccb` when this was written; the
-source-manifest branch was at `c68690c7`). DEC-0151 merges after DEC-0150, or rebases over it.
+source-manifest branch was at `93f8f2e0`). **Merge gate:** DEC-0150 must be on main before DEC-0151 merges. At
+DEC-0151's merge, `git ls-tree origin/main docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md` prints the
+file and `grep '^### DEC-0150' docs/DECISIONS.md` prints one line; if either prints nothing, DEC-0151 waits (or rebases
+over DEC-0150 once it lands).
 
-The files each open branch shares with this one, from `git merge-tree` against `6c8ec0d4` on 2026-11-04 (a textual
+The files each open branch shares with this one, from `git merge-tree` against `19ab1f56` on 2026-11-04 (a textual
 conflict unless the line says it auto-merges), with the resolution:
 
 - **Against DEC-0150** (`origin/agent/channel-agent-ext-v3-20261104`):
@@ -124,10 +148,13 @@ conflict unless the line says it auto-merges), with the resolution:
     `project` bullet and DEC-0151's registry-alias bullet into one compared-as-written bullet.
   - `src/secret-shape.ts` (auto-merges): DEC-0150's `rawValues` change and DEC-0151's `SECRET_VALUE` touch different
     lines; keep both.
-- **Against DEC-0149** (`origin/agent/ct194-source-manifest-20261103`): `docs/DECISIONS.md` and `docs/backlog.md` (tail
-  appends; keep both, in order), `docs/handoffs/README.md` (keep both rows) and `src/secret-shape.ts` (the bullet
-  below). Its `URL_SECRET_VALUE` in `src/source-rules.ts` deliberately stays the tree check's own earlier unbounded
-  pattern, with the `i` flag, for parity with the adapter's source check: it is NOT changed at the merge.
+- **Against DEC-0149** (`origin/agent/ct194-source-manifest-20261103`, `93f8f2e0`): `docs/DECISIONS.md` and
+  `docs/backlog.md` (tail appends; keep both, in order), `docs/handoffs/README.md` (keep both rows) and
+  `src/secret-shape.ts` (the bullet below). Its `URL_SECRET_VALUE` in `src/source-rules.ts` deliberately stays the tree
+  check's own earlier unbounded pattern, with the `i` flag, for parity with the adapter's source check: it is NOT
+  changed at the merge. Decision for its lander: after the merge, DEC-0149's path and word reads (`credentialShaped`,
+  `pathHoldsFinding`) use the tree check's own unbounded key shapes, not the narrowed shared detector, so a key glued
+  into a path is still held; the DEC-0149 branch makes that change itself.
 - **Against PR #235** (`agent/ct200-renewal-repeat-20261102`, DEC-0148): `docs/DECISIONS.md` and `docs/backlog.md`
   (tail appends; keep both, in order).
 - **Against PR #236** (`agent/template-parity-20261103`): `docs/backlog.md` (tail appends; keep both, in order).
@@ -151,23 +178,18 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these:
   is" in its CA-5, in `channel-agent.md`'s check of a declaration, and in its handoff's note on the detector). Whichever
   lands second keeps DEC-0151's boundary and drops that note; the advice to rename an id that starts with `sk-` stays
   true, since a prefix at the start of a value is still found.
-- `src/secret-shape.ts` and the source-manifest branch (DEC-0149): that branch's rework keeps the tree check's own
-  unbounded provider-key shapes, a fixed list held equal to a vectors constant for parity with the adapter's source
-  check, no longer derived from `SECRET_VALUE`, so the earlier instruction that the second to merge gives its
-  `KEY_SHAPES` DEC-0151's boundary, strength and case is withdrawn (the coordinator, from DEC-0149's seam reading).
-  After that rework its tests no longer read `SECRET_VALUE.source`, and its
-  `fixtures/semantic/source-manifest-secret-in-purpose.json` holds a key found under both patterns (at origin's
-  `c68690c7`, read on 2026-11-04, the fixture still held `sk-example-not-a-key-0000`, which DEC-0151's pattern does
-  not find: check it at merge). The only remaining conflict is the textual one in `src/secret-shape.ts`: its
-  `jwtSpans` and `hasJwt` block (with `rawValues`) sits right above DEC-0151's rewritten comment; keep DEC-0149's JWT
-  helpers, then DEC-0151's comment and `SECRET_VALUE` line.
-- DEC-0150's branch at `bba0209d` with DEC-0151's final line and DEC-0151's changed tests, fixtures and vector file, on
-  a scratch copy: its 29 vector files match their generators, and of its whole suite (9930 tests) two fail, owed by the
-  second to merge: the channel-agent vectors "a token slot whose project segment is shaped like a provider key" and "a
-  texts key shaped like a credential: placed at its map" use `sk-` with `a1` or `b2` repeated (a digit, no upper-case
-  letter, 24 characters), which is no longer a key; their inputs in `tools/vectors/channel-agent.ts` take a digit and an
-  upper-case letter, and `fixtures/vectors/channel-agent.json` is written again. DEC-0150's `FAC-SEM-165` reads with
-  the same detector, so its declarations accept strictly more.
+- `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `93f8f2e0`: that head keeps the tree check's own
+  unbounded provider-key shapes (a fixed list held equal to a vectors constant, for parity with the adapter's source
+  check), its tests no longer read `SECRET_VALUE.source`, and its
+  `fixtures/semantic/source-manifest-secret-in-purpose.json` holds a key both patterns find. The only conflict is the
+  textual one in `src/secret-shape.ts`: keep DEC-0149's JWT helpers (`isUrlBase64`, `runEnd`, `jwtSpans`, `hasJwt`),
+  then DEC-0151's comment and `SECRET_VALUE` line. Measured on a scratch merge of `93f8f2e0` with `19ab1f56`, resolved
+  so: `tsc` exit 0; `test/source-rules.test.ts` and `test/validate-cli.test.ts` pass (1945 tests, 2 skipped); 29 vector
+  files match their generators; the whole suite passes (111 files, 10174 tests, 3 skipped). No test fails.
+- DEC-0150's branch at `fcdb7ccb`, on a scratch merge with `19ab1f56` (the documents taken from this branch for the
+  measurement only): its two channel-agent vectors already use keys with a digit and an upper-case letter, `tsc` exit 0,
+  29 vector files match their generators, and the whole suite passes (110 files, 10017 tests, 1 skipped). No test
+  fails. DEC-0150's `FAC-SEM-165` reads with the same detector, so its declarations accept strictly more.
 - DEC-0150's join sentence in `channel-agent.md` ("so a reader joins a declaration to a project's payloads on
   `project:<slug>`"): once both land it reads "on `project:<slug>`, or, for a payload with no project, on the
   declaration's one project".
@@ -189,8 +211,16 @@ The second of DEC-0150 and DEC-0151 to merge also rewrites these:
 
 ## Checks actually run
 
+On the round-5 head (`19ab1f56` and the handoff commit after it, which changes only this file), each exit code read
+separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9830 tests passed, 1 skipped);
+`python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0; `pnpm privacy:check` with the organization's index 0 (0
+findings); `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files match). No U+2014 in the added lines, and no
+look-behind in either copy of `SECRET_VALUE`. The detector's timing on `-sk` repeated 100000 times: 41 to 47 ms of CPU
+per check; a sweep of 300000 generated values (octal, double percent and the escaped ESC forms included) found 0 that
+the new pattern finds and origin/main's did not (32147 both, 115485 only the earlier).
+
 On `03c0328f` the coordinator ran `pnpm vitest run --coverage`: exit 0, 108 files, 9799 tests passed, 1 skipped. On
-the round-4 head, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage`
+the round-4 head (`6c8ec0d4`), each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage`
 0 (109 files, 9823 tests passed, 1 skipped; 9816 on `e1191560`, 9819 on `82aa26eb`, 9820 on `706075de`, 9821 on
 `8660ae24`); `python3 docs/ux/lint.py` 0;
 `pnpm run docs:check` 0; `pnpm privacy:check` with the organization's index 0 (0 findings);
@@ -199,6 +229,6 @@ the added lines.
 
 ## Next task
 
-Round 4 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by two blind readers; fix, re-read until two
-rounds are clean; open the pull request, merge after DEC-0150's branch or rebase over it (the list above), mark DEC-0151
-accepted, close CT-129, mark CT-210's first step done, release, and answer thread `b6820b97` with the tag.
+Round 6 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers, until two consecutive rounds
+are clean; open the pull request; merge only once DEC-0150 is on main (the merge gate above), applying the merge list;
+mark DEC-0151 accepted, close CT-129, mark CT-210's first step done, release, and answer thread `b6820b97` with the tag.
