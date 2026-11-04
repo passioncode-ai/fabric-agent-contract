@@ -143,10 +143,14 @@ source, what never travels with it, the check before a source export, and how a 
   gitlink decided by the index whatever sits at it or above it; the description's keys read as the tree check reads
   them; an excluded folder never walked; the timing tests as ratios to the same text at a sixteenth; the glossary's
   Source hand-over) answered as decided; round 26 (CT-211's second check on `knowledge/principles.md`; CT-215's pointer in the merge
-  notes; a client that cannot show an elicitation to a person declines it; the in-call elicitation scoped to the source
+  notes; a client that cannot show an elicitation to a person (round 27: cancels it, never declines); the in-call elicitation scoped to the source
   hand-over; `handover-declined` for the person's no; one T2 code for the word; DL-26 naming the mandate; unreadable
   names said only once Git mode is kept; the pair's fault caught; the folder pair whatever the schema answer; no-hang
-  bounds widened and absolute CPU bounds dropped) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  bounds widened and absolute CPU bounds dropped) answered as decided; round 27 (a client that cannot show an elicitation cancels it, never declines; interop C3.3
+  leaves AP-2's elicitation for other relayed actions unchanged; a backlog row at the DEC-0150 step for a channel
+  declaration's installation values; PR #628 landing back to back with this merge; a package the folder run did not
+  read noted; a symlinked manifest refused; walked names read as bytes; a pair's fault named by its path; the walk's
+  exclude test indexed) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -235,20 +239,25 @@ remaining steps, in order:
    as the merge notes below say, refreshing the sibling heads.
 2. Re-run the full gate on that merge and cite its commit in this handoff.
 3. Open the PR from the fresh branch and dispatch the CI workflow once on it (`gh workflow run ci.yml --ref
-   agent/ct194-source-manifest-v2-20261104`); read every matrix job (ubuntu 22 and 24, windows, and macos since
-   #238): the Linux-only non-UTF-8 test and the Windows-only `git.exe` test have never run.
+   agent/ct194-source-manifest-v2-20261104`); read every matrix job (ubuntu-latest on Node 22 and 24, windows-latest
+   and macos-latest on Node 24, macos since #238): the Linux-only non-UTF-8 test and the Windows-only `git.exe` test
+   have never run.
 4. Run the next rounds of the readings (unit, seam, product) on that merge until two clean rounds.
 5. A merge condition: CT-211's knowledge-base amendment (fabric-workspace `knowledge/agents-first.md` items 5 and 7,
-   `knowledge/principles.md` section 7) lands in fabric-workspace before or together with this merge, never after;
-   check there with `git show origin/main:knowledge/agents-first.md | grep -n 'source hand-over'` and `git show
-   origin/main:knowledge/principles.md | grep -n 'source hand-over'`, each printing at least one line before the
-   merge.
+   `knowledge/principles.md` section 7), the knowledge base's PR #628, lands back to back with this merge in one
+   landing session: merge PR #628 immediately before the contract's DEC-0149 PR, run the two greps below on the
+   knowledge base's main, then merge the contract PR (PR #628's links point at `source.md#handing-over` on main);
+   the greps are `git show origin/main:knowledge/agents-first.md | grep -n 'source hand-over'` and `git show
+   origin/main:knowledge/principles.md | grep -n 'source hand-over'`, each printing at least one line. The landing
+   session takes a fresh agent-sync lease for `docs/DECISIONS.md` and `docs/specification/conformance.md` before the
+   merge commit (origin's leases on them are stale).
 6. Make the acceptance edit in the PR before it merges, as DEC-0147 did: DEC-0149's status line, CT-194 done, this
    handoff's status and the `docs/handoffs/README.md` row.
 7. A human gate: asking GitHub to remove the review branch's unreachable commits and their cached views is the
    operator's (GitHub Support).
 
-Right after the merge: update fabric-workspace's RM-36 row and its knowledge page for the agent source (`knowledge/`),
+Right after the merge: update fabric-workspace's RM-36 row (rewriting its "Waiting on" line, which still names the
+deleted review branch) and its knowledge page for the agent source (`knowledge/`),
 publish with `node scripts/workspace.mjs sync` from a Fabric checkout, post DEC-0149 to threads `21ac4057` and
 `0a8776f2` with CT-207 and CT-208, and file the Fabric Dashboards request on its attention and degraded counts of agents
 whose entries are all setup states as a tracked row on their side, recording its id in CT-208.
@@ -273,8 +282,10 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   lands' docs/specification/support-quality.md` prints 0 on the merged tree. The file lists in these notes are
   refreshed at landing against the siblings' heads then.
 - `docs/backlog.md` (against all four siblings) and `docs/handoffs/README.md` (against DEC-0150 and DEC-0151)
-  conflict as appends at the tail: keep both sides; the merged backlog tail is kept in id order, CT-204 to CT-216, the
-  handoffs index in the merge order. DEC-0150's small edits to `src/validate-cli.ts`
+  conflict as appends at the tail: keep both sides; the merged backlog tail is kept in id order, CT-200 to CT-216 (#235 brings
+  CT-202 and CT-203); the handoffs index is newest first, so at each merge the later-landing branch's row goes above.
+  DEC-0151's edited files also include `src/connections.ts` (a comment) and `docs/specification/conformance.md` (the
+  secret-shape reference row). DEC-0150's small edits to `src/validate-cli.ts`
   and `test/validate-cli.test.ts` merge cleanly beside this branch's.
 - `vitest.config.ts`: `include` takes the union of both lists, and `thresholds` keeps `src/validator.ts`,
   `src/source-rules.ts` and `src/channel-agent.ts` at 100 (a threshold key that matches no included file passes
@@ -297,8 +308,14 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   docs/backlog.md | grep -c 'source hand-over'`, which prints 1 after that edit. CT-211 carries the same line for the
   knowledge base. CT-215 (on main) gets the same pointer in its part (c): a source hand-over is never covered by a
   relayed mandate and needs the operator's word per act ([source](../specification/source.md#handing-over)), so a
-  launched session with no person at its client takes it only as a decision with the exact target; check with `grep
+  launched session with no person at its client cancels any hand-over elicitation (or declares no elicitation
+  capability), never declines it, and takes the hand-over only as a decision with the exact target; check with `grep
   '^| CT-215 ' docs/backlog.md | grep -c 'source hand-over'`, which prints 1 after the merge.
+- At the DEC-0150 step, file a backlog row (the next free CT id in the backlog at that merge) on how a channel
+  declaration's installation-valued members (`tickets.token_slot`'s vault project and env, `evals.spend_record`, the
+  per-project entries) relate to source slots: the token slot's name is a `secret` slot; the vault project, the env and
+  the spend record are `config` slots or live in the descriptor or the well-known answer; or the declaration is
+  instance data kept out of the source.
 - CT-212 (this branch's row): when DEC-0150 is merged in, add `src/channel-agent.ts` `keyShaped` to the bounded callers
   of `JWT_SHAPE` the row names.
 - The adapter re-vendors the shared detector before or with its `pack` writing `secrets[]` from slots (CT-207); until

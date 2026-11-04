@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
@@ -63,6 +63,22 @@ describe("a check that throws (DEC-0149)", () => {
       const report = JSON.parse(result.out) as { usage: string[]; problems: Array<{ rule: string }> };
       expect(report.usage).toEqual(["cannot check fabric.source.json: Error"]);
       expect(report.problems.filter((problem) => problem.rule === "FAC-SEM-160")).toEqual([]);
+    } finally {
+      plant.manifest = true;
+    }
+  });
+
+  it("names each throwing pair by its path in the folder run", () => {
+    const parent = mkdtempSync(path.join(tmpdir(), "fac-faults-pairs-"));
+    for (const sub of ["one", "two"]) {
+      mkdirSync(path.join(parent, sub));
+      writeFileSync(path.join(parent, sub, "fabric.source.json"), JSON.stringify({ format: "fabric-source/1", include: ["LICENSE"] }));
+      writeFileSync(path.join(parent, sub, "fabric.package.json"), readFileSync(path.join(projectRoot(), "fixtures/positive/fabric-package-agent.json"), "utf8"));
+    }
+    plant.manifest = false;
+    try {
+      const report = JSON.parse(main([parent, "--json"]).out) as { usage: string[] };
+      expect(report.usage).toEqual(["cannot check one/fabric.source.json: Error", "cannot check two/fabric.source.json: Error"]);
     } finally {
       plant.manifest = true;
     }

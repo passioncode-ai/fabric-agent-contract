@@ -1823,6 +1823,13 @@ describe("an agent's source (DEC-0149)", () => {
     expect(lone.out).not.toContain("the document holds no");
   });
 
+  it("notes a package beside the manifest that the folder run skipped, so no pair is read as passed", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["LICENSE"] }), "fabric.package.json": { not: "a package" } });
+    const result = run(dir);
+    expect(result.out).toContain("note/skipped");
+    expect(result.out).toContain("the fabric.package.json beside fabric.source.json was not read as a package, so no pair was checked (FAC-SEM-160)");
+  });
+
   it("refuses a second target under --kind source-tree, and under --kind source-package when a target is a folder", () => {
     const one = folder({ "fabric.source.json": sourceManifest({ include: ["LICENSE"] }), LICENSE: "x" });
     const two = folder({ "fabric.source.json": sourceManifest({ include: ["LICENSE"] }), LICENSE: "x" });
@@ -1876,6 +1883,20 @@ describe("an agent's source (DEC-0149)", () => {
     const descriptor = { ...json("positive/service-descriptor.json"), fabricManifest: "/dev/null" };
     const pair = run(folder({ "example-agent.default.json": descriptor, "fabric-agent.json": json("positive/manifest-mcp.json") }));
     expect(pair.out).toContain("/dev/null is not a file, so no manifest was read");
+  });
+
+  it.skipIf(process.platform === "win32")("refuses a manifest that is a symbolic link on every source route, never reading through it", () => {
+    const real = folder({ "real.json": sourceManifest({ include: ["LICENSE"] }) });
+    const dir = folder({ LICENSE: "x" });
+    symlinkSync(path.join(real, "real.json"), path.join(dir, "fabric.source.json"));
+    const manifest = path.join(dir, "fabric.source.json");
+    for (const args of [[dir, "--kind", "source-tree"], [manifest, "--kind", "source-tree"], [manifest], [manifest, "--kind", "source-manifest"], [dir, "--kind", "source-package"], [dir]]) {
+      const result = run(...args);
+      expect(result.code, args.join(" ")).toBe(2);
+      expect(result.out, args.join(" ")).toMatch(/cannot read (\S*\/)?fabric\.source\.json: not a file/);
+    }
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(run(dir, "--kind", "source-tree").out).toContain("cannot read fabric.source.json: not a file");
   });
 
   it.skipIf(process.platform === "win32")("reads a FIFO under a source path as no source file, in a walk and in Git mode", () => {

@@ -94,8 +94,9 @@ export function sourcePathTest(manifest: unknown): (path: unknown) => boolean {
 export function excludedFolderTest(manifest: unknown): (folder: string) => boolean {
   const source = isObject(manifest) ? manifest : {};
   const exclude = pathList(source.exclude);
-  const includes = strings(source.include).map(([path]) => path);
-  return (folder) => folderPrefixes(`${folder}/`).some((prefix) => exclude.folders.has(prefix)) && !includes.some((path) => path.startsWith(`${folder}/`));
+  // Every folder an include path lies in, indexed once: a folder is looked up, never compared with every include.
+  const under = new Set(strings(source.include).flatMap(([path]) => folderPrefixes(path)));
+  return (folder) => folderPrefixes(`${folder}/`).some((prefix) => exclude.folders.has(prefix)) && !under.has(`${folder}/`);
 }
 
 /**

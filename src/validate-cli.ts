@@ -333,8 +333,8 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
 function checkFileAs(run: Run, file: string, relative: string, schemaArg: string | undefined, kindArg: string | undefined, inFolder = false, settled: { schema?: string } = {}): Checked | undefined {
   // A source check states a file before it reads it (DEC-0149): a source document named on its own, a folder's manifest,
   // the document form of `--kind source-tree`. Any other file is read as before (a piped `/dev/stdin` is read).
-  if (sourceCheck(file, schemaArg, kindArg) && !regularFile(file)) {
-    run.usage.push(`cannot read ${file}: not a file`);
+  if (sourceCheck(file, schemaArg, kindArg) && !sourceRegularFile(file)) {
+    run.usage.push(`cannot read ${inFolder ? relative : file}: not a file`);
     return undefined;
   }
   let text: string;
@@ -570,6 +570,9 @@ function checkPairs(run: Run, checked: Checked[], kindArg?: string): void {
       if (kindArg === "source-package") {
         run.notes = run.notes.filter((note) => note.rule !== "note/pair" || note.file !== source.file);
         run.notes.push({ file: source.file, path: "/", rule: "note/pair", message: `the folder holds no ${PACKAGE_FILE} beside ${SOURCE_FILE}, so no pair was checked (FAC-SEM-160)` });
+      } else if (existsSync(path.join(path.dirname(source.file), PACKAGE_FILE))) {
+        // A package beside the manifest that the run skipped or could not read is no pair: say so, never pass silently.
+        run.notes.push({ file: source.file, path: "/", rule: "note/pair", message: `the ${PACKAGE_FILE} beside ${SOURCE_FILE} was not read as a package, so no pair was checked (FAC-SEM-160)` });
       }
       continue;
     }
@@ -580,7 +583,8 @@ function checkPairs(run: Run, checked: Checked[], kindArg?: string): void {
     try {
       findings = evaluateSemanticRules("source-package", { source: source.value, package: beside.value });
     } catch (error) {
-      run.usage.push(`cannot check ${SOURCE_FILE}: ${errorName(error)}`);
+      // Named by its path in the folder run, so two pairs are told apart.
+      run.usage.push(`cannot check ${shownPath(source.relative)}: ${errorName(error)}`);
       continue;
     }
     addFindings(run, source.file, findings);
@@ -748,10 +752,10 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
   const byPath = (candidates: Candidate[]) => candidates.sort((a, b) => Number(a.path > b.path) - Number(a.path < b.path));
   const walked = (why: string): Candidate[] => {
     run.notes.push({ file: ".", path: "/", rule: "note/walk", message: `${why}, so the folder's files were walked` });
-    return byPath(walk(folder, "", index, run, skipped));
+    return byPath(walk(folder, "", index, run, skipped, sourceFolderTest(manifest)));
   };
   // No git found: a walk with no note, as when there is no Git at all.
-  if (executable === undefined) return byPath(walk(folder, "", index, run, skipped));
+  if (executable === undefined) return byPath(walk(folder, "", index, run, skipped, sourceFolderTest(manifest)));
   const late = `git did not answer within ${gitLimits.timeoutMs / 1000} s`;
   const timedOut = (answer: { error?: Error }) => (answer.error as NodeJS.ErrnoException | undefined)?.code === "ETIMEDOUT";
   const listed = git(executable, folder, ["ls-files", "-z", "--cached", "--others", "--exclude-standard"]);
@@ -785,7 +789,7 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
   run.usage.push(...unreadableLines);
   // The manifest is source whatever include says, and read whatever .gitignore says: a regular file Git leaves out is
   // added (DEC-0149).
-  if (!paths.includes(SOURCE_FILE) && regularFile(path.join(folder, SOURCE_FILE)) && existsSync(path.join(folder, SOURCE_FILE))) paths.push(SOURCE_FILE);
+  if (!paths.includes(SOURCE_FILE) && sourceRegularFile(path.join(folder, SOURCE_FILE)) && existsSync(path.join(folder, SOURCE_FILE))) paths.push(SOURCE_FILE);
   paths.sort();
   // Only a source path, or a nested repository in the source, is looked at: a path outside it is never reached, and
   // one that is no source path is stated only when it may be nested.
@@ -815,10 +819,11 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
 }
 
 /** The walk without Git: a folder holding its own `.git` is a nested repository, never entered. */
-function walk(dir: string, prefix: string, includes: IncludeIndex, run: Run, skipped: (folder: string) => boolean = () => false): Candidate[] {
-  let entries: Dirent[];
+function walk(dir: string, prefix: string, includes: IncludeIndex, run: Run, skipped: (folder: string) => boolean = () => false, inSourceFolder: (folder: string) => boolean = () => false): Candidate[] {
+  let raw: Array<Dirent<Buffer>>;
   try {
-    entries = readdirSync(dir, { withFileTypes: true });
+    // Names are read as bytes: one that does not round-trip as UTF-8 is never decoded into another name.
+    raw = readdirSync(dir, { withFileTypes: true, encoding: "buffer" });
   } catch (error) {
     // The folder by its path with a trailing slash, the root as ".", one whose name holds a finding by its place.
     const relative = prefix.replace(/\/$/, "");
@@ -827,6 +832,16 @@ function walk(dir: string, prefix: string, includes: IncludeIndex, run: Run, ski
     return [];
   }
   const found: Candidate[] = [];
+  const folderOf = prefix.replace(/\/$/, "");
+  // A name that is not UTF-8 gets Git mode's rule: a usage error naming its folder and no part of the name when that
+  // folder lies in the source, otherwise skipped as outside it.
+  let unreadable = false;
+  const entries = raw.flatMap((entry) => {
+    const name = decodedName(entry.name);
+    if (name === undefined) { unreadable = true; return []; }
+    return [{ name, isDirectory: () => entry.isDirectory() }];
+  });
+  if (unreadable && inSourceFolder(folderOf)) run.usage.push(`cannot read a name in ${shownPath(folderOf)}/: it is not UTF-8`);
   // Names in one folder differ, so the order by code unit is total and the same on every machine.
   for (const entry of entries.sort((a, b) => Number(a.name > b.name) - Number(a.name < b.name))) {
     const relative = `${prefix}${entry.name}`;
@@ -835,7 +850,7 @@ function walk(dir: string, prefix: string, includes: IncludeIndex, run: Run, ski
     if (entry.name === ".git" || !includes.reaches(`${relative}/`) || skipped(relative)) continue;
     const full = path.join(dir, entry.name);
     if (existsSync(path.join(full, ".git"))) found.push({ path: relative, nested: true });
-    else found.push(...walk(full, `${relative}/`, includes, run, skipped));
+    else found.push(...walk(full, `${relative}/`, includes, run, skipped, inSourceFolder));
   }
   return found;
 }
@@ -998,7 +1013,7 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   try {
     // A manifest that is not a regular file (a FIFO, a socket, a device, a folder) is never opened: reading a FIFO waits.
     statSync(manifestFile);
-    if (!regularFile(manifestFile)) {
+    if (!sourceRegularFile(manifestFile)) {
       run.usage.push(`cannot read ${SOURCE_FILE}: not a file`);
       return;
     }
@@ -1115,6 +1130,18 @@ function special(file: string): boolean {
 export function regularFile(file: string): boolean {
   try {
     return statSync(file).isFile();
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Whether a source check may read a path as its document: a regular file itself, never a link to one, a FIFO, a
+ * socket, a device or a folder (DEC-0149). A path that cannot be stated is left to the read that reports it.
+ */
+export function sourceRegularFile(file: string): boolean {
+  try {
+    return lstatSync(file).isFile();
   } catch {
     return true;
   }

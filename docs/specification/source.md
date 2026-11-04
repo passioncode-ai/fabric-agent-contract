@@ -219,7 +219,9 @@ by its basename, never by its path.
   could not run (the note gives the error's code only, such as `ENOBUFS`), and when no `git` is found, it walks the folder: never into `.git`, into a folder (a dot-folder and
   `node_modules` included) only when an `include` path reaches into it (names it, with or without its trailing `/`, or
   something in it) or covers it, never into a folder outside the path grammar, never into a folder an `exclude` folder
-  is or holds unless an `include` path lies under it (so an unreadable excluded folder is no usage error), a folder
+  is or holds unless an `include` path lies under it (so an unreadable excluded folder is no usage error); it reads
+  names as bytes, and a name that is not UTF-8 gets Git mode's rule: a usage error naming its folder and no part of the
+  name (`cannot read a name in src/: it is not UTF-8`) when that folder lies in the source, otherwise skipped; a folder
   holding its own `.git` a nested
   repository. When Git was there and did not list the folder, a `note/walk` line says why, naming no folder. In Git
   mode a listed path outside the grammar is dropped before any look at the file system, so neither mode reads it or
@@ -257,7 +259,8 @@ source check's named target that is not there, named by its basename such as `ca
 or folder it cannot read, a name Git lists that is not UTF-8 under a folder an `include` path reaches). A usage error names the
 checked folder itself as `.`, and tells a folder or manifest it cannot read (`cannot read .: EACCES`, `cannot read
 fabric.source.json: EACCES`) from a folder that holds no manifest; a manifest that is not a regular file (a FIFO, a
-socket, a device) is never opened (`cannot read fabric.source.json: not a file`), and neither is any source document
+socket, a device) or that is a symbolic link is never opened or read through (`cannot read fabric.source.json: not a
+file`), and neither is any source document
 named on its own that is not one. A FIFO, a socket or a device under a source path is not a source file, in Git mode and
 in a walk alike, and is never opened; an `include` path naming only such a file reads as `missing`. A source check that
 throws anyway (a fault in the checker) ends in a usage error naming the file, or the folder as `.`, and the error's name
@@ -299,7 +302,9 @@ reads it.
 A package may carry `fabric.source.json` as an ordinary file, listed in `files[]` like any other: a packer that packs
 in place lists it and reads it for `secrets[]` and `state[]`. `pnpm validate <dir>` pairs a source manifest with a
 package only when both sit in the same folder, and checks them as the pair (`FAC-SEM-160`) whatever the manifest's
-schema answer, as the validator's other pairs do; `--kind source-package` on
+schema answer, as the validator's other pairs do. It pairs only a package it can read: a `fabric.package.json` beside
+the manifest that the run skipped (`note/skipped`) or could not read prints "the fabric.package.json beside
+fabric.source.json was not read as a package, so no pair was checked (FAC-SEM-160)". `--kind source-package` on
 a folder checks that same pair too, and a folder with no `fabric.package.json` beside its manifest prints "the folder
 holds no fabric.package.json beside fabric.source.json, so no pair was checked (FAC-SEM-160)". A document, or another
 file of a folder, that holds no `{source, package}` prints a note that no pair was checked. Under `--kind
@@ -344,14 +349,16 @@ two forms, and in no other:
 - the service's own elicitation in the call's form: an MCP `elicitation/create` sent within the hand-over's `tools/call`,
   in form mode, under [C3.3](interop.md#c33-awaiting-a-choice)'s form constraints (`FAC-SEM-018`), never
   `input_required` on a Task or a job, answered by a person and accepted, whose message names the agent, the source
-  commit and the recipient. A client that answers elicitations without showing them to a person (an SDK handler, a
-  headless session) declines a hand-over elicitation, or does not declare the elicitation capability for that call; the
-  service records the message it sent and the accept as the operator's word (the record of
+  commit and the recipient. A client that cannot show an elicitation to a person (an SDK handler, a headless session)
+  cancels a hand-over elicitation (MCP's dismissal, no choice made) or does not declare the elicitation capability for
+  that call, and never answers it with a decline, which is a person's no only; its outcome is
+  `handover-needs-operator`, after which a decision with the exact target may follow in the same task. The service
+  records the message it sent and the accept as the operator's word (the record of
   [OA-6](delegation.md#one-approval-binds-all-the-operators-agents)).
 
 Everything else, except an invalid decision (below), is refused `operator-decision-required`: no word, a mandate (which
-counts as nothing, [MD-6](delegation.md#the-operators-mandate)), an `approval/1`, a declined elicitation, anything
-else. CT-181 defines the approval route (the approver id, the action digest, spending, tiers); until a service pins a
+counts as nothing, [MD-6](delegation.md#the-operators-mandate)), an `approval/1`, a cancelled or unanswered elicitation,
+a person's decline (with its own detail, below), anything else. CT-181 defines the approval route (the approver id, the action digest, spending, tiers); until a service pins a
 contract revision carrying it, an `approval/1` is not read for a hand-over. A caller that presents a delegation token
 reaches the action only under a grant covering `publish`, which is never its authority; a T0 or T1 caller without a
 token needs none ([DL-26](delegation.md#trust-tiers)).
@@ -371,8 +378,9 @@ token needs none ([DL-26](delegation.md#trust-tiers)).
   `decision-consumed`.
 - **No word.** A T0 or T1 caller with neither form and no decision gets `operator-decision-required` with the detail
   `handover-needs-operator`; a service that can elicit from that caller's client asks the operator instead, once per
-  call; a cancelled or unanswered elicitation is refused the same way (`handover-needs-operator`) and not asked again
-  within that call. A person who declines gives the operator's no, refused `operator-decision-required` with its own
+  call; a cancelled or unanswered elicitation (a client that cannot show it to a person cancels it) is refused the same
+  way (`handover-needs-operator`) and not asked again within that call, and a decision with the exact target may follow
+  in the same task. A person who declines gives the operator's no, refused `operator-decision-required` with its own
   detail, `handover-declined`: the caller does not ask again within this task and reports to the coordinator. A T2 caller gets
   `operator-decision-required` with the detail `handover-needs-estate-route` whatever it carries, and is not asked: its decision is no decision (AP-2), and its remedy is that the operator acts through a T0
   or T1 route. A T2 caller that reaches the action has passed DL-13 with a delegation token (a caller no rule places is

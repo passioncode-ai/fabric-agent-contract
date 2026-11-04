@@ -389,7 +389,8 @@ A folder in which no file is a contract document is a usage error. Folders whose
 
 A folder's documents are also checked as pairs: a descriptor with its well-known document, a descriptor with the
 manifest its `fabricManifest` names, a provider entry with its manifest, and a source manifest with the package beside
-it in the same folder (`FAC-SEM-160`). An agent's source tree is checked by `pnpm --silent validate <dir> --kind
+it in the same folder (`FAC-SEM-160`), only a package it can read; a package beside the manifest that the run skipped
+or could not read gets a note that no pair was checked. An agent's source tree is checked by `pnpm --silent validate <dir> --kind
 source-tree` instead ([the checker](../specification/source.md#the-checker)). A file at the named path is read. When it
 is an installed copy outside the folder, a note names it if the folder holds a copy that could have stood in, or if the
 pair rule then fails, so a stale install is visible: reinstall it, or check the folder's copy in a folder without the

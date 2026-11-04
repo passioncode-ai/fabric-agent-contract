@@ -504,6 +504,16 @@ describe("FAC-SEM-158 and FAC-SEM-159: the tree check", () => {
     expect(excludedFolderTest(7)("src")).toBe(false);
   });
 
+  it("skip folders in time linear in the include paths", () => {
+    const manifestOf = (count: number) => ({ include: Array.from({ length: count }, (_, index) => `src/d${index}/`), exclude: Array.from({ length: count }, (_, index) => `src/d${index}/cache/`) });
+    const probe = (count: number) => {
+      const skipped = excludedFolderTest(manifestOf(count));
+      for (let index = 0; index < count; index += 1) skipped(`src/d${index}/cache`);
+    };
+    // Sixteen times the includes, each looked up once: linear about 16, a scan of every include per folder about 256.
+    expect(cpuOf(() => probe(16_000)) / Math.max(cpuOf(() => probe(1000)), 0.01)).toBeLessThan(64);
+  });
+
   it("judge a folder in the source as a whole: an include folder holds it, no exclude folder does", () => {
     const inSource = sourceFolderTest({ include: ["src/", "lib/a/", "README.md"], exclude: ["src/vendor/"] });
     expect(["src", "src/x", "lib/a", "lib/a/b"].map(inSource)).toEqual([true, true, true, true]);
