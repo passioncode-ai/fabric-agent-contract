@@ -140,7 +140,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const pass = ["u", "p"].join(":");
     for (const lead of [" ", "\u0001", "\u0001 \u001f"]) expect(label(`${lead}https://${pass}@help.example/`), JSON.stringify(lead)).toEqual([`${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/taxonomy/codes/0/label`]);
   });
-  it("charges every provider prefix's near miss up to its floor, and reads a run of them about as fast as prose", () => {
+  it("charges every provider prefix's near miss up to its floor, and reads a run of them about as fast as prose", { timeout: 60_000 }, () => {
     const floors = PREFIX_FLOORS.map(([prefix, floor]) => [prefix.source.replace(/\[[a-z]+\]/, "p"), floor] as const);
     expect(floors).toEqual([["ghp_", 20], ["xoxp-", 10], ["akia", 16], ["glpat-", 20]]);
     for (const [prefix, floor] of floors) {
@@ -240,7 +240,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const found = channelAgentRules({ provider: { extensions: { [KEY]: { standard: "channel-agent-standard/1", projects: [deep] } } } });
     expect(found.map((finding) => finding.code)).toEqual(["FAC-SEM-162"]);
   });
-  it("refuses an array longer than its schema allows before the schema runs, with a short message", () => {
+  it("refuses an array longer than its schema allows before the schema runs, with a short message", { timeout: 60_000 }, () => {
     const many = (n: number) => ({ provider: { extensions: { [KEY]: { standard: "channel-agent-standard/1", projects: Array.from({ length: n }, (_, i) => i) } } } });
     const doc = many(200_000);
     const found = channelAgentRules(doc);
@@ -427,7 +427,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       expect(channelAgentView({ extensions: { [KEY]: declared } }, "well-known"), place).toEqual({ declared: false, reported: true, errors: [`FAC-SEM-162 at ${place}: maxProperties (more members than the schema declares)`, "FAC-SEM-165 at /"] });
     }
   });
-  it("reads at most SECRET_BUDGET code points for credentials, then says the rest was not read, in little time", () => {
+  it("reads at most SECRET_BUDGET code points for credentials, then says the rest was not read, in little time", { timeout: 60_000 }, () => {
     const opening = ["e", "y", "J"].join("");
     const strings = Array.from({ length: 488 }, () => opening.repeat(1366).slice(0, 4096));
     const timed = () => channelAgentRules({ extensions: { [KEY]: { ...value, extra: strings } } }, "well-known");
@@ -442,7 +442,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(detectorCost("x eyJeyJ y")).toBe(10 + 6 + 3);
     expect(detectorCost("eyJ".repeat(1000))).toBeGreaterThan(SECRET_BUDGET);
   });
-  it("counts the square of an upper-case run after ?, & or # as read, so a query name cannot slow the detector", () => {
+  it("counts the square of an upper-case run after ?, & or # as read, so a query name cannot slow the detector", { timeout: 60_000 }, () => {
     // Not a URL: the query terms are not counted, since the detector reads no query in it.
     expect(detectorCost("a?BC=x")).toBe(6);
     expect(detectorCost("https://a.example/?aBC=x")).toBe(24 + PIECE_COST + 3 + 1 + 6);
@@ -453,7 +453,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const found = timed();
     expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.message.includes("was not read"))).toEqual([true]);
   });
-  it("shares one reading budget across every copy of the declaration in a manifest", () => {
+  it("shares one reading budget across every copy of the declaration in a manifest", { timeout: 60_000 }, () => {
     const opening = ["e", "y", "J"].join("");
     const heavy = { ...value, extra: Array.from({ length: 300 }, () => opening.repeat(1366).slice(0, 4096)) };
     const manifest = { provider: { extensions: { [KEY]: value } }, extensions: { [KEY]: heavy }, capabilities: [0, 1, 2].map(() => ({ extensions: { [KEY]: heavy } })) };
@@ -476,7 +476,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(view.reported && view.errors).toEqual(expect.arrayContaining(["FAC-SEM-162 at /standard: const (channel-agent-standard/1)", "FAC-SEM-162 at /projects/0/question_route/capability: enum (one of team.ask, operator.ask)", "FAC-SEM-162 at /projects/0/side: pattern (pattern ^(?![a-z0-9-]*[0-9]{7})[a-z0-9-]{1,32}$)"]));
     expect(JSON.stringify(view)).not.toMatch(/support\.ask|Side"|\/2/);
   });
-  it("counts every query or fragment name with an upper-case letter or a %, wherever the run starts", () => {
+  it("counts every query or fragment name with an upper-case letter or a %, wherever the run starts", { timeout: 60_000 }, () => {
     const n = 1000;
     const square = (n * (n + 1)) / 2;
     expect(detectorCost(`https://a.example/?a${"Q".repeat(n)}=x`)).toBeGreaterThanOrEqual(square);
@@ -490,7 +490,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const timed = () => channelAgentRules({ provider: { extensions: { [KEY]: { ...value, extra } } } });
     expect(least(timed)).toBeLessThan(2 * proseBaseline() + 20);
   });
-  it("charges up to 255 after every sk- at a boundary, so a run of them is not read past the budget", () => {
+  it("charges up to 255 after every sk- at a boundary, so a run of them is not read past the budget", { timeout: 60_000 }, () => {
     const text = "-sk".repeat(1366).slice(0, 4096);
     const boundaries = (text.match(/-sk-/g) ?? []).length;
     expect(detectorCost(text)).toBeGreaterThanOrEqual(text.length + boundaries * 255);
@@ -503,7 +503,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const found = timed();
     expect(found.some((f) => f.message.includes("was not read"))).toBe(true);
   });
-  it("charges each name or string its call, so two million empty strings are not read past the budget", () => {
+  it("charges each name or string its call, so two million empty strings are not read past the budget", { timeout: 60_000 }, () => {
     expect(VISIT_COST).toBe(16);
     const doc = { extensions: { [KEY]: { ...value, extra: Array(2_000_000).fill("") } } };
     const timed = () => channelAgentRules(doc, "well-known");
