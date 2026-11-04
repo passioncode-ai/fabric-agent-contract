@@ -55,7 +55,8 @@ the events page fails `FAC-SEM-101`; it stays strict there (`test/secret-shape.t
 is to issue no such alias, a rule of the registry this contract does not prove; the rule here binds a producer that
 names `project`: one whose alias is read so publishes no event for that project, on any channel, until the
 registry changes its alias, and the other projects' events are unaffected. Under DEC-0150's rule (`FAC-SEM-165`) the
-agent's channel agent declaration is refused until that entry is renamed or removed, and that project's channels
+agent's channel agent declaration is refused while it holds that entry, so the agent leaves the entry out until the
+registry changes the alias (the agent never invents one), and that project's channels
 still count for rule 1 of [the project](#the-project-dec-0151), which also says what becomes of its kept days. Such a producer checks its alias
 against the shared detector (or validates its events page) before publishing, because the payload's own check
 (FAC-SEM-126) does not run `FAC-SEM-101`.

@@ -176,4 +176,16 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
     expect(SECRET_VALUE.test(["AK", "IA", body].join(""))).toBe(true);
     expect(SECRET_VALUE.test(["AK", "IA", body.toLowerCase()].join(""))).toBe(false);
   });
+  it("is not composable after a separator look-behind: such a composition misses a key after '-', '.' or '_' (DEC-0151)", () => {
+    // A port that composes `(?:^|(?<=[._-]))(?:SECRET_VALUE.source)` (a repository-name check) needs a second separator,
+    // since the boundary group consumes one: it keeps its own boundary-free key shapes instead, case-sensitive, no i flag.
+    const composed = new RegExp(`(?:^|(?<=[._-]))(?:${SECRET_VALUE.source})`, "i");
+    for (const key of [keys.github, keys.openai, keys.gitlab]) {
+      for (const separator of ["-", ".", "_"]) {
+        const value = `x${separator}${key}`;
+        expect(SECRET_VALUE.test(value), value.slice(0, 8)).toBe(true);
+        expect(composed.test(value), value.slice(0, 8)).toBe(false);
+      }
+    }
+  });
 });

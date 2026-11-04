@@ -20,7 +20,11 @@
  * their next re-pin, with their vectors. Fabric vendors this file twice, one copy under a sha256 `pin.json` together with
  * `fixtures/vectors/folder-attribution.json`; Fabric Dashboards vendors `src/session-handoff.ts` and
  * `src/fabric-links.ts`, and its service host's connections hold a port; Fabric Dashboards' sample-service kit copies
- * hold the earlier pattern.
+ * hold the earlier pattern. A port derives the files whose answers change by patching SECRET_VALUE in its twins and
+ * running its suite, never by scanning literals (the CT-210 handoff names every adapter test such a run failed). A repository-name check must not compose this source after a
+ * separator look-behind with an `i` flag: the boundary group consumes one character, so a key right after `-`, `.`
+ * or `_` goes unfound and `i` undoes the canonical case and the `sk-` strength; it keeps its own boundary-free key
+ * shapes, case-sensitive, with no `i` flag.
  */
 
 /**
