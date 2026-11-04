@@ -51,7 +51,8 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 Counts and rates only: no person's words, no ids (the project's registry alias excepted) and no judge notes, so `FAC-SEM-101` (a credential detector) finds nothing in it; keeping a
 person's words out is the producer's duty (service.md). An alias with an `sk-` slug word passes
 (`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`): the detector takes an `sk-` key only with a
-digit and either an upper-case letter or 32 or more characters (DEC-0151). The residual exception is a slug word that
+digit and an upper-case letter and 16 or more characters, or a digit and 32 or more, and reads every provider prefix in
+its canonical case only (DEC-0151). The residual exception is a slug word that
 starts with another provider prefix (`ghp_` and its kin, `xoxb-` and its kin, `AKIA`, `glpat-`) followed by enough key
 characters, such as `project:ghp_customerservicedeskabcdef`: the detector reads it as a credential and the events page
 fails `FAC-SEM-101`. The detector stays strict there; the registry does not issue such an alias, and a producer whose

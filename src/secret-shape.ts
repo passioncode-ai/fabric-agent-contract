@@ -54,15 +54,17 @@ export function credentialName(name: string): boolean {
 /** A JWT or JWS anywhere in a value: three base64url segments, the first a JSON object's `eyJ`. */
 export const JWT_SHAPE = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]*/;
 /**
- * A value that says it is a credential, or a provider key's shape (OpenAI, GitHub, Slack, AWS, GitLab). A prefix
- * counts only at the start, after a character that is no ASCII letter or digit, or after a percent-escape (`%22`) or a
- * backslash escape (`\n`, `\"`, `\u0022`), matched as a consuming group so a port without look-behind reads it the
- * same (DEC-0151); a key glued right after a letter or digit is knowingly not found. An `sk-` key holds a digit and
- * either an upper-case letter or 32 or more characters, as `src/connections.ts` asks; under this pattern's `i` flag the
- * upper-case test admits any letter. So `project:helpdesk-customer-support` and `project:sk-learn-experiments` are no
- * keys, and `sk-or-v1-` with 64 hex digits is one.
+ * A value that says it is a credential (`Bearer ` at its start, in any case), or a provider key's shape (OpenAI,
+ * GitHub, Slack, AWS, GitLab) with its prefix in its canonical case only: `SK-` or `GHP_` is no key (DEC-0151). A
+ * prefix counts only at the start, after a character that is no ASCII letter or digit, or after a percent-escape
+ * (`%22`) or a backslash escape (`\n`, `\"`, `\u0022`), matched as a consuming group so a port without look-behind
+ * reads it the same; a key glued right after a letter or digit is knowingly not found. An `sk-` key holds what
+ * `src/connections.ts` asks of one: a digit and an upper-case letter with 16 or more characters, or a digit with 32 or
+ * more. So `project:helpdesk-customer-support`, `project:sk-learn-experiments` and `sk-learn-experiments-2026` are no
+ * keys, and `sk-or-v1-` with 64 lower-case hex digits is one. The `sk-` test uses look-ahead: a port whose regex has
+ * none (Rust's `regex` crate) checks that strength outside the regex.
  */
-export const SECRET_VALUE = /(^bearer\s.+|(?:^|[^A-Za-z0-9]|%[0-9A-Fa-f]{2}|\\[nrt"']|\\u[0-9A-Fa-f]{4})(?:sk-(?=[A-Za-z0-9_-]*\d)(?:(?=[A-Za-z0-9_-]*[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}))/i;
+export const SECRET_VALUE = /(^[Bb][Ee][Aa][Rr][Ee][Rr]\s.+|(?:^|[^A-Za-z0-9]|%[0-9A-Fa-f]{2}|\\[nrt"']|\\u[0-9A-Fa-f]{4})(?:sk-(?=[A-Za-z0-9_-]*\d)(?:(?=[A-Za-z0-9_-]*[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}))/;
 /**
  * A long secret: 40 or more characters of base64 or base64url (`+`, `/`, `=`, `-`, `_` included), mixing upper case,
  * lower case and digits. A hex digest is lower case and passes.

@@ -67,9 +67,18 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
         expect(SECRET_VALUE.test(value), JSON.stringify(value)).toBe(true);
       }
     }
-    for (const value of ["sk-learn-experiments", "sk-hynix-customer-care", "acme-sk-customer-support-eu", "sk-telecom-customer-care", `sk-${tail(20, "abcdefgh")}`]) {
+    for (const value of ["sk-learn-experiments", "sk-learn-experiments-2026", "sk-hynix-customer-care", "acme-sk-customer-support-eu", "sk-telecom-customer-care", `sk-${tail(20, "abcdefgh")}`, `sk-${tail(24, "abc123")}`]) {
       expect(SECRET_VALUE.test(value), value).toBe(false);
     }
+  });
+  it("reads provider prefixes in their canonical case only, and Bearer in any case (DEC-0151)", () => {
+    const hex = tail(64, "0123456789abcdef");
+    expect(SECRET_VALUE.test(`sk-or-v1-${hex}`)).toBe(true);
+    for (const value of [keys.openai.replace("sk-", "SK-"), keys.github.replace("ghp_", "GHP_"), keys.slack.replace("xoxb-", "XOXB-"), keys.aws.replace("AKIA", "akia"), keys.gitlab.replace("glpat-", "GLPAT-")]) {
+      expect(SECRET_VALUE.test(value), value).toBe(false);
+    }
+    for (const value of ["Bearer abc.def", "bearer abc.def", "BEARER abc.def", "bEaReR x"]) expect(SECRET_VALUE.test(value), value).toBe(true);
+    expect(SECRET_VALUE.flags).toBe("");
   });
   it("accepts an alias with an sk- slug word, and still reads one whose slug word starts with another prefix as a credential (DEC-0151)", () => {
     const page = (project: string) => ({ events: [{ id: "1", at: "2026-10-19T00:20:00Z", kind: "support.quality_daily", level: "info", text: "Support quality for chat on 2026-10-18.", data: { schema: "https://support.example.com/schemas/support-quality-daily.schema.json", value: { kind: "support-quality-daily/1", project } } }], cursor: "1" });

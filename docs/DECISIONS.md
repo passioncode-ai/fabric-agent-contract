@@ -9107,10 +9107,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      backslash escape (`\n`, `\t`, `\r`, a backslash and a quote, `\u0022`). The boundary is a consuming group, not a
      look-behind, so a port without look-behind (a Rust port, an older browser) reads it the same; `RegExp.test`
      answers as a look-behind would. A key glued directly after an ASCII letter or digit is knowingly no longer found.
-     An `sk-` key also needs what `src/connections.ts` asks of one: a digit, and either an upper-case letter or 32 or
-     more characters (under the pattern's `i` flag the upper-case test admits any letter), so
-     `project:helpdesk-customer-support`, `project:sk-learn-experiments` and `project:sk-hynix-customer-care` are no
-     keys, while a mixed-case key, an `sk-proj-` key and `sk-or-v1-` with 64 lower-case hex digits still are, in every
+     The pattern has no `i` flag: `Bearer` is spelled in any case by hand (`^[Bb][Ee][Aa][Rr][Ee][Rr]\s.+`), and the
+     prefixes are read in their canonical case only, so `SK-`, `GHP_`, `XOXB-`, `akia` and `GLPAT-` are no longer
+     found. An `sk-` key also needs exactly what `src/connections.ts` asks of one: a digit and an upper-case letter with
+     16 or more characters, or a digit with 32 or more; its test uses look-ahead, so a port whose regex has none (Rust's
+     `regex` crate) checks that strength outside the regex. So `project:helpdesk-customer-support`,
+     `project:sk-learn-experiments`, `sk-learn-experiments-2026` and `project:sk-hynix-customer-care` are no keys,
+     while a mixed-case key, an `sk-proj-` key and `sk-or-v1-` with 64 lower-case hex digits still are, in every
      position. The residual: an alias whose slug word starts with another provider prefix followed by enough key
      characters (`project:ghp_customerservicedeskabcdef`) is read as a credential; the registry does not issue one, and
      a producer whose alias is read so publishes nothing for that channel until its alias changes.
@@ -9147,13 +9150,19 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   finds is one the earlier pattern found too (`test/secret-shape.test.ts`). One vector input changes:
   `fixtures/vectors/folder-attribution.json`'s case "AT-15: a remote whose kept part still has a secret's shape records
   no origin" held a digit-free `sk-` user, which the `sk-` strength no longer reads as a key; its user now holds a digit
-  and an upper-case letter, so the case keeps testing what it names, and a port re-vendors that file. Fabric, which
-  vendors `src/session-handoff.ts`, re-vendors it to find the same. `contractVersion` stays `0.1.0`.
+  and an upper-case letter, so the case keeps testing what it names, and a port re-vendors that file. Two semantic
+  fixtures change for the canonical case: `fixtures/semantic/package-secret-shaped-name.json` and
+  `fixtures/semantic/estate-secret-value-as-slot.json` held an upper-case `GHP_` value as their credential-shaped slot
+  name, which is no longer a key; they now hold an `AKIA` value (an upper-case name that still is one), with their
+  digests recomputed, and their tests (`test/package.test.ts`, `test/estate-record.test.ts`) name the new value. Fabric,
+  which vendors `src/session-handoff.ts`, re-vendors it to find the same. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/support-quality-daily.schema.json` (also the `calibration` description DEC-0144
   left to correct), `src/support-quality-rules.ts`, `test/support-quality.test.ts`; `src/secret-shape.ts`,
   `src/session-handoff.ts`, `src/connections.ts` (a comment), `test/secret-shape.test.ts`,
   `test/session-handoff-review.test.ts` (its SH-9 key now holds a digit and an upper-case letter),
   `tools/vectors/folder-attribution.ts` and `fixtures/vectors/folder-attribution.json` (one AT-15 input),
+  `fixtures/semantic/package-secret-shaped-name.json`, `fixtures/semantic/estate-secret-value-as-slot.json`,
+  `test/package.test.ts`, `test/estate-record.test.ts`,
   `fixtures/positive/service-events-page-support-quality-sk-slug.json`;
   `fixtures/positive/support-quality-daily-tickets.json`, `-first-reply-unmeasured.json` and `-project.json`,
   `fixtures/positive/service-events-page-support-quality-projects.json`, six `fixtures/negative/support-quality-daily-*`
