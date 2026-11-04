@@ -45,7 +45,7 @@ const STRING_MEMBERS = ["id", "target", "capability", "label", "purpose", "reaso
 // A provider key's shape where it starts a word: a name such as `flask-server` or `risk-assessment` holds `sk-` inside
 // a word and is not a key (the shared SECRET_VALUE takes a like boundary and the same `sk-` strength within 256 characters since DEC-0151;
 // two differences remain: this shape reads no escape before a prefix, so a key after a percent-escape, a backslash
-// escape other than an escaped quote or an ESC colour sequence passes here while the shared detector finds it, and its `sk-` look-aheads are
+// escape whose last character is a letter or digit (\n, \042, \u0022 and the like) or an ESC colour sequence passes here while the shared detector finds it, and its `sk-` look-aheads are
 // unbounded, CT-213, so a digit beyond 256 characters still counts here). An `sk-` key holds a digit and either an
 // upper-case letter or 32 or more characters (an OpenRouter key is lower-case hex), and a Telegram bot token
 // (`<bot id>:<secret>`, also inside a URL path, `/bot123456789:AA…/getUpdates`) has a secret of 34 or 35 characters

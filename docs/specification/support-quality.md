@@ -27,7 +27,7 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 | `kind` | `support-quality-daily/1` |
 | `day`, `channel` | the closed UTC day, and `chat` (one person's chat), `mail`, `reviews` (store review replies) or `community` (group chats and forums) |
 | `project` | optional (DEC-0151): the project whose tickets these are, as the project registry's alias `project:<slug>` (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written ([identifiers](identifiers.md)), the form the channel agent declaration of DEC-0150 names a project in; absent before every reader of the feed has adopted DEC-0151, named on every day first published after; a day without it is never attributed to a project ([the project](#the-project-dec-0151)) |
-| `rubricVersion`, `judgeModel` | the rubric's version and the judge's `<vendor>/<model>`, or `null` when nothing was judged and no calibration is carried |
+| `rubricVersion`, `judgeModel` | the rubric's version and the judge's `<vendor>/<model>`, or `null` when nothing was judged and no calibration is carried; a day that carries a calibration names them though nothing was judged. With `project` (DEC-0151), a project's event carries the latest calibration of the side whose judge and rubric judge its tickets, on every day it still holds for (DEC-0144's carry-forward), whether or not anything was judged that day; a project of a side with no calibration carries none, and a producer with no declaration carries its calibration likewise on each project's event. |
 | `notMeasured` | each metric not computed that day, as `family.metric` (a metric name may carry digits: `nobodyDropped.firstReplyP50Ms`, DEC-0151), a top-level count by its own name (`arrived`, `ended`, `notATicket`), or `checks` when nothing was judged; at most 32 names (DEC-0070's list), so a producer that would name more leaves out the optional members it did not measure |
 | `arrived`, `ended`, `notATicket` | optional (DEC-0151): the tickets that arrived on the day; the tickets that ended on the day, whatever day they arrived (the **ending cohort**, which every outcome count below is of); the day's automated notices, which are not tickets |
 | `open` | optional (DEC-0151): the open tickets at the day's cutoff by open outcome: `handedOpen` (handed to a person through a queue, not answered yet), `questionOpen` (held while the agent climbs the question ladder), `awaitingCustomer` (the agent asked the customer one question and waits), `awaitingApproval` (a draft waits for a person's or a transport's approval) |
@@ -37,7 +37,7 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 | `checks` | each rubric check's pass rate among its non-NA verdicts, a check with no verdict left out; `null` when nothing was judged, never an empty object. A member of its own, so the payload stays two levels deep |
 | `stability` | `turnErrors`, `modelCallFailures`, `recoveredByFallback`, `processErrors`, `restarts`, `knowledgeAgeHours`; optional (DEC-0151): `fallbackTurns` (the day's turns the checker, the model that gates an answer before it is sent, refused twice in a row) and `fallbackTickets` (the ending cohort's tickets with at least one); neither is `recoveredByFallback`, which counts the model-call fallback |
 | `autonomy` | `resolvedWithoutPerson`, `toPersonPolicy` and `toPersonInability` (in turns, bounded by `nobodyDropped.turns` (not tickets, DEC-0151)), `queueOldestMinutes`, `queueSlaMinutes`; optional (DEC-0151): `answered` (the ending cohort's tickets that ended answered, or answered after a question) |
-| `calibration` | optional (DEC-0144): how well the day's judge, under the day's rubric, agreed with people: `week` (the latest ISO week a person labelled answers, `YYYY-Www`, starting no later than `day`), `labelled` (how many, at least 1) and `helped` (the share of those whose helped verdict the judge matched, `null` when helped was not labelled); absent means no calibration, and a reader never carries one forward, so a producer carries its latest calibration on every day it still holds for. A producer whose judge or rubric changed after the labelled week leaves it out |
+| `calibration` | optional (DEC-0144): how well the day's judge, under the day's rubric, agreed with people: `week` (the latest ISO week a person labelled answers, `YYYY-Www`, starting no later than `day`), `labelled` (how many, at least 1) and `helped` (the share of those whose helped verdict the judge matched, `null` when helped was not labelled); absent means no calibration, and a reader never carries one forward, so a producer carries its latest calibration on every day it still holds for. A producer whose judge or rubric changed after the labelled week leaves it out. With `project` (DEC-0151), a project's event carries the latest calibration of the side whose judge and rubric judge its tickets, on every day it still holds for (DEC-0144's carry-forward), whether or not anything was judged that day; a project of a side with no calibration carries none, and a producer with no declaration carries its calibration likewise on each project's event. |
 | `calibrationChecks` | optional, only beside `calibration`: each rubric check's share of the labelled verdicts the judge matched, named as in `checks`; a check a person did not label is left out, and with none labelled the member is absent. A member of its own, so the payload stays two levels deep |
 
 Counts and rates only: no person's words, no ids (the project's registry alias excepted) and no judge notes, so `FAC-SEM-101` (a credential detector) finds nothing in it; keeping a
@@ -59,7 +59,7 @@ agent's channel agent declaration is refused while it holds that entry, so the a
 registry changes the alias (the agent never invents one), and that project's channels
 still count for rule 1 of [the project](#the-project-dec-0151), which also says what becomes of its kept days. Such a producer checks its alias
 against the shared detector (or validates its events page) before publishing, because the payload's own check
-(FAC-SEM-126) does not run `FAC-SEM-101`.
+(FAC-SEM-126) does not run `FAC-SEM-101`. A weak `sk-` slug alias (`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`, `project:sk-harbor-customer-care`) passes `FAC-SEM-101` and `FAC-SEM-165` but is still a `FAC-SEM-158` credential in a source tree under DEC-0149, whose tree check keeps its own unbounded, case-insensitive key shapes: a channel agent declaring such a project in `fabric-agent.json` cannot export its source (checked with DEC-0149's `checkSourceTree` at its landing head, read at `e1262368`). The route is the registry's: it issues no alias with a provider prefix at a word start, and the agent never renames an alias.
 The feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries `calibration` and
 `calibrationChecks` once every reader of its feed it knows of has adopted DEC-0144. A reader that validates against an
 older copy of the schema (closed) refuses that day's `value` whole and keeps the event's `text`, so the day's numbers
@@ -104,34 +104,31 @@ No producer carries the ticket counts until two prerequisites outside this contr
 channel agent standard's section 5.1 says that `/1` takes `autonomy.toPersonPolicy` and `toPersonInability` in turns,
 and the observed check below holds.
 
-The channel agent standard's observed check (its section 11) accepts what the wait withholds (support quality, the
+The channel agent standard's observed check (its section 11) is to accept (CT-210 (d), owed by its owner until its text lands) what the wait withholds (support quality, the
 ticket counts), by period, the period being the event's day: a producer's adoption is marked by its first published day
-that names `project` (a project under rule 9 never names one and stays in the pre-adoption form). Until that day, a day without `project` and a withheld channel; from adoption on, a project withheld because its alias is read as a credential, until the registry renames it, and then that project's kept days, published late under the new alias. Rule 3 of [the project](#the-project-dec-0151) says how a reader keeps a
+that names `project` (a project under rule 9 never names one and stays in the pre-adoption form). Until that day, a day without `project`, a withheld channel, and a producer whose only named project is
+alias-withheld at adoption (it has no first named day); from adoption on, a project withheld because its alias is read as a credential, until the registry renames it, and then that project's kept days, published late under the new alias. Rule 3 of [the project](#the-project-dec-0151) says how a reader keeps a
 day without `project`.
 
 ### The project (DEC-0151)
 
-`project` names the project whose tickets a day counts, as the registry alias `project:<slug>`. Each rule is stated
-here once; the conformance rows and DEC-0151 point to it.
+`project` names the project whose tickets a day counts, as the registry alias `project:<slug>`. The conformance rows,
+DEC-0151 item 6, its Compatibility and CT-210 point here; where they repeat a rule, this page holds it.
 
-1. **Before adoption.** Until every reader of its feed it knows of has adopted DEC-0151, a producer publishes no `project` and withholds every channel whose day holds tickets of two projects that enter `/1` (by its channel agent declaration, or by its own project mapping when it has none; a project whose kind there is left out of `/1`, such as `team_chat`, does not count); the switch day of a channel moving from one project to another is one of them, and a withheld day is dropped, never published later.
+1. **Before adoption.** Until every reader of its feed it knows of has adopted DEC-0151, a producer publishes no `project` and withholds every channel whose day holds tickets of two projects that enter `/1`, counting every project whose tickets the channel holds: by its channel agent declaration where the declaration names the project, by its own project mapping otherwise (no declaration, no alias, or an alias read as a credential); a project whose kind there is left out of `/1`, such as `team_chat`, does not count. The switch day of a channel moving from one project to another is one of them, and a withheld day is dropped, never published later.
 2. **After adoption.** Once every reader of its feed it knows of has adopted DEC-0151, a producer names `project` on
    every day it first publishes, whatever the number of projects on the channel: one event per project, channel and day
    (`fixtures/positive/service-events-page-support-quality-projects.json`).
 3. **A day without `project`** (published before adoption, a day merged across projects under DEC-0095, or a rerun of
    either) is never attributed to a project: a reader keeps it per service, channel and day, unattributed. Per-project
-   history starts at adoption, the same for every reader. The channel agent standard's observed check accepts, by period, what the wait withholds (the observed-check paragraph under [the ticket counts](#the-ticket-counts-dec-0151) of support quality).
+   history starts at adoption, the same for every reader. The channel agent standard's observed check is to accept (CT-210 (d), owed by its owner until its text lands), by period, what the wait withholds (the observed-check paragraph under [the ticket counts](#the-ticket-counts-dec-0151) of support quality).
 4. **A rerun** republishes a day as first published, with the `project` it had or without one. A day merged across
    projects under DEC-0095 is never rerun while rule 1 holds (before adoption); after adoption it may be rerun only
    unchanged, and it stays unattributed (rule 3). Unchanged is the same form, members and values, not the same bytes.
 5. **A reader that adopted DEC-0151** keeps, per service, channel, day and `project`, the latest event, and keeps a day
    without `project` as rule 3 says.
-6. **Calibration** (DEC-0144), per side (a side as the channel agent standard's section 1 defines it, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md` (added by DEC-0150)):
-   each side's calibration (its labels, the day's judge and rubric) is carried
-   unchanged on the events of that side's projects judged that day by that judge and rubric; a project of a side with
-   no calibration, or an event judged by another judge or not judged, carries none. A reader reads calibration per
-   project's event, never summing or copying it across projects. A producer with no declaration carries its
-   calibration on each project's event judged that day by that judge and rubric.
+6. **Calibration** (DEC-0144), per side (a side as the channel agent standard's section 1 defines it,
+   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md` (added by DEC-0150)): With `project` (DEC-0151), a project's event carries the latest calibration of the side whose judge and rubric judge its tickets, on every day it still holds for (DEC-0144's carry-forward), whether or not anything was judged that day; a project of a side with no calibration carries none, and a producer with no declaration carries its calibration likewise on each project's event. A reader reads calibration per project's event, never summing or copying it across projects.
 7. **An alias read as a credential**: the paragraph on credentials under [the payload](#the-payload) holds the rule.
 8. **Adoption is one-way** per producer: once every reader of its feed it knows of has adopted, it names `project`
    from then on; a reader that appears later on an older copy is that reader's to update, and the producer does not

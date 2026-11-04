@@ -306,4 +306,24 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
     const result = validateDocument(ajv, `${SCHEMA_PREFIX}schemas/service-events-page.schema.json`, page);
     expect(result.valid, JSON.stringify(result.errors)).toBe(true);
   });
+  it("validates the worst case: every required metric null and named, and an unlabelled calibration, with no FAC-SEM-126 (DEC-0151)", async () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
+    const families = ["nobodyDropped", "quality", "stability", "autonomy"];
+    const value: Json = { kind: "support-quality-daily/1", day: "2026-10-18", channel: "chat", rubricVersion: "v1", judgeModel: "qwen/qwen3.8-flash", notMeasured: [] as string[], checks: null };
+    for (const family of families) {
+      value[family] = {};
+      for (const metric of schema.properties[family].required as string[]) {
+        value[family][metric] = null;
+        value.notMeasured.push(`${family}.${metric}`);
+      }
+    }
+    value.notMeasured.push("checks");
+    value.calibration = { week: "2026-W42", labelled: 1, helped: null };
+    value.notMeasured.push("calibration.helped");
+    expect(value.notMeasured).toHaveLength(24);
+    const ajv = await createValidator();
+    const result = validateDocument(ajv, `${SCHEMA_PREFIX}schemas/support-quality-daily.schema.json`, value);
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+    expect(paths(value)).toEqual([]);
+  });
 });

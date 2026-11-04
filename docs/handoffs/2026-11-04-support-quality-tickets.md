@@ -191,6 +191,15 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   to 9; CONTEXT.md and the specification README name DEC-0144 and DEC-0151; the FAC-SEM-126 row points to the interim
   paragraph. The colour boundary takes `:` (ITU T.416) and `\33`; the 8-bit CSI, brace escapes, `\E` and `^[` are
   knowingly not found; the composition test shows the `i` flag finding what `SECRET_VALUE` does not.
+- Round 13 of the readings (on `e85bd11b`): a weak `sk-` slug alias passes FAC-SEM-101 and FAC-SEM-165 but is still a
+  FAC-SEM-158 credential in a DEC-0149 source tree (checked with `checkSourceTree` at `e1262368`), stated on the page,
+  in item 7, identifiers.md and the DEC-0149 merge bullet; rule 6 keeps DEC-0144's carry-forward per project, the same
+  sentence in the calibration and rubric rows, the producer row, item 6, CT-210 (b) and the schema; the page says where
+  rules are repeated and holds them, and every copy of rules 1 and 6 reads the same; rule 1 counts every project by the
+  declaration where it names it, by the producer's mapping otherwise; the standard's acceptance is worded as owed; the
+  post asks about the interim day and the kinds grouping; CT-210 (f) records answers as they arrive; the round history
+  reads in one order; the connections wording names a backslash escape ending in a letter or digit; a worst-case test
+  validates 24 names in `notMeasured` with no finding.
 
 ## Open
 
@@ -206,10 +215,15 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   event's day, and a producer's adoption is marked by its first published day that names `project` (a rule-9 project
   never names one), so the check accepts both lists by that marker; section 5.1 carries `project` with rules 1 and 2;
   section 11's observed check accepts the `team_chat` MAY (a `team_chat`-only project has no daily); and the deferred
-  questions (whether a promotion restates the ticket's end day, `received`, a sum rule). The coordinator files the
+  questions (whether a promotion restates the ticket's end day, `received`, a sum rule). It also asks whether section 11
+  accepts an interim day whose unmeasured first-reply metric is `null` and unnamed, and whether the signal server groups
+  the seven kinds into `/1`'s four channels as support quality's kinds table does. The acceptances are owed by the
+  owner until its text lands; a producer whose only named project is alias-withheld at adoption is in the
+  pre-adoption list. The coordinator files the
   adapter's row (step (e)).
-- Before the merge, the coordinator asks each multi-project `/1` producer on the board whether it merges projects into
-  one event (DEC-0095) and records the answers in CT-210 (step (f)).
+- At landing, the coordinator posts the question to each multi-project `/1` producer on the board, whether it merges
+  projects into one event (DEC-0095), with the answers recorded in CT-210 as they arrive (step (f)); the merge does not
+  wait.
 - The vendors re-sync with item 7, including: the Fabric Agent Adapter kit's detector ports (its Python and JS secrets
   modules, its dashboard-link checkers, its connection ports and its dashboard button), its vendored vector files that
   change answer (`connections-extra` and `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`,
@@ -270,7 +284,7 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 ## When DEC-0150 and DEC-0151 meet on main
 
 DEC-0150's current branch is `origin/agent/channel-agent-ext-v3-20261104` (`b57df67a` when this was written); DEC-0149
-now lives on `origin/agent/ct194-source-manifest-v2-20261104` (cited as the DEC-0149 landing head; `29189f94` on
+now lives on `origin/agent/ct194-source-manifest-v2-20261104` (cited as the DEC-0149 landing head; `e1262368` on
 2026-11-04, measured below at it and measured again at merge; the old branch name is deleted); main is at
 `bf50c9fc` (#236 merged, CT-215 and CT-216 added at the backlog tail; #238 changed CI only). The scratch measurements below are of those heads; they are measured again
 at merge, against the heads then current. **Merge gate:** DEC-0150 must be on main before DEC-0151 merges. At
@@ -371,7 +385,11 @@ move and are reworded between its rounds, so this list names each by its subject
   check), its tests no longer read `SECRET_VALUE.source`, and its
   `fixtures/semantic/source-manifest-secret-in-purpose.json` holds a key both patterns find. The only conflict is the
   textual one in `src/secret-shape.ts`: keep DEC-0149's JWT helpers (`isUrlBase64`, `runEnd`, `jwtSpans`, `hasJwt`),
-  then DEC-0151's comment and `SECRET_VALUE` line. Measured on a scratch merge of `29189f94` with `6027e1e2`, resolved
+  then DEC-0151's comment and `SECRET_VALUE` line. The DEC-0149 lander also states in `source.md` that a weak `sk-` slug alias in
+  `fabric-agent.json` (`project:sk-learn-experiments` and the like) is a `FAC-SEM-158` credential in a source tree,
+  since its tree check keeps its own unbounded, case-insensitive key shapes, so such an agent cannot export its source
+  until the registry issues another alias (checked with `checkSourceTree` at `e1262368`: each such alias gives one
+  FAC-SEM-158 finding at `fabric-agent.json`, and `project:helpdesk-customer-support` none). Measured on a scratch merge of `29189f94` with `6027e1e2`, resolved
   so: `tsc` exit 0; 29 vector files match their generators; the whole suite passes (113 files, 10223 tests, 3 skipped).
   No test fails.
 - DEC-0150's branch at `b57df67a`, on a scratch merge with this branch (the conflicting documents taken from this
@@ -487,6 +505,6 @@ the added lines.
 
 ## Next task
 
-Round 13 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers, until two consecutive rounds
+Round 14 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers, until two consecutive rounds
 are clean; open the pull request; merge only once DEC-0150 is on main (the merge gate above), applying the merge list;
 mark DEC-0151 accepted, close CT-129, mark CT-210's first step done, release, and answer thread `b6820b97` with the tag.
