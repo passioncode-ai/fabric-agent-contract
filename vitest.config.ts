@@ -33,7 +33,7 @@ export default defineConfig({
         "src/dashboard-declaration.ts": { branches: 100 },
         "src/connections.ts": { branches: 100 },
         "src/actions.ts": { branches: 100 },
-        // DEC-0150: measured at 100 (248 of 248 branches) by test/channel-agent.test.ts.
+        // DEC-0150: measured at 100 (271 of 271 branches) by test/channel-agent.test.ts.
         "src/channel-agent.ts": { branches: 100 },
         "src/mandate.ts": { branches: 100 },
         "src/page-link-rules.ts": { branches: 100 },

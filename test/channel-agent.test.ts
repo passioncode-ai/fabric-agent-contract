@@ -301,6 +301,35 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(detectorCost("x eyJeyJ y")).toBe(10 + 6 + 3);
     expect(detectorCost("eyJ".repeat(1000))).toBeGreaterThan(SECRET_BUDGET);
   });
+  it("counts the square of an upper-case run after ?, & or # as read, so a query name cannot slow the detector", () => {
+    expect(detectorCost("a?BC=x")).toBe(6 + 3);
+    expect(detectorCost("#&?")).toBe(3);
+    const strings = Array.from({ length: 245 }, () => `https://a.example/?${"Q".repeat(4060)}=x`);
+    const started = performance.now();
+    const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: strings } } }, "well-known");
+    expect(performance.now() - started).toBeLessThan(500);
+    expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.message.includes("was not read"))).toEqual([true]);
+  });
+  it("shares one reading budget across every copy of the declaration in a manifest", () => {
+    const opening = ["e", "y", "J"].join("");
+    const heavy = { ...value, extra: Array.from({ length: 300 }, () => opening.repeat(1366).slice(0, 4096)) };
+    const manifest = { provider: { extensions: { [KEY]: value } }, extensions: { [KEY]: heavy }, capabilities: [0, 1, 2].map(() => ({ extensions: { [KEY]: heavy } })) };
+    const started = performance.now();
+    const found = channelAgentRules(manifest);
+    expect(performance.now() - started).toBeLessThan(2000);
+    expect(found.filter((f) => f.code === "FAC-SEM-162").length).toBe(4);
+  });
+  it("finds an id that starts with sk- and holds a mixed run, as the page warns", () => {
+    const channel = { ...value.projects[0].channels[0], id: "sk-Support-Desk-2026-v2" };
+    const found = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [{ ...value.projects[0], channels: [channel, value.projects[0].channels[1]] }] } } }, "well-known");
+    expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.instancePath)).toEqual([`${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/channels/0/id`]);
+  });
+  it("names the schema's allowed values beside an enum, a const or a pattern place, never the instance's", () => {
+    const route = { ...value.projects[0].question_route, capability: "support.ask" };
+    const view = channelAgentView({ extensions: { [KEY]: { ...value, standard: "channel-agent-standard/2", projects: [{ ...value.projects[0], side: "Side", question_route: route }] } } }, "well-known");
+    expect(view.declared && !view.valid && view.errors).toEqual(expect.arrayContaining(["const at /standard (channel-agent-standard/1)", "enum at /projects/0/question_route/capability (one of team.ask, operator.ask)", "pattern at /projects/0/side (pattern ^(?![a-z0-9-]*[0-9]{7})[a-z0-9-]{1,32}$)"]));
+    expect(JSON.stringify(view)).not.toMatch(/support\.ask|Side"|\/2/);
+  });
   it("places every descendant of a member that is not plain at the nearest plain ancestor, declared names and all", () => {
     const name = ["sk", "-", "Zx9Q".repeat(5)].join("");
     const bearer = ["Bearer", "q".repeat(24)].join(" ");

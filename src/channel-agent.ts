@@ -198,14 +198,26 @@ function oversize(value: unknown): string[] {
   return [...widths(value), ...long];
 }
 
+/**
+ * What the schema allows at a failed place, from the schema alone, never the instance: the missing member's name for
+ * `required` (when the schema declares it), the values for `enum` and `const`, the pattern for `pattern`.
+ */
+function allowed(error: { keyword: string; params?: Record<string, unknown> }, names: Set<string>): string {
+  const params = error.params ?? {};
+  if (error.keyword === "required" && typeof params.missingProperty === "string" && names.has(params.missingProperty)) return ` (${params.missingProperty})`;
+  if (error.keyword === "enum" && Array.isArray(params.allowedValues)) return ` (one of ${params.allowedValues.map(String).join(", ")})`;
+  if (error.keyword === "const" && params.allowedValue !== undefined) return ` (${String(params.allowedValue)})`;
+  if (error.keyword === "pattern" && typeof params.pattern === "string") return ` (pattern ${params.pattern})`;
+  return "";
+}
+
 /** An Ajv error as its keyword and its place, every free member name replaced by `*`, never a declared value. */
 export function placed(error: { keyword: string; instancePath: string; params?: Record<string, unknown> }): string {
   const names = schemaNames();
   const tokens = error.instancePath.split("/").slice(1).map((token) => token.replace(/~1/g, "/").replace(/~0/g, "~"));
   // The schema enters arrays only where it declares them, so a number after a declared array's name is an index.
   const at = tokens.map((token, i) => placedToken(tokens[i - 1], tokens[i - 2], token, /^(0|[1-9][0-9]{0,8})$/.test(token), names)).join("/");
-  const missing = error.keyword === "required" && typeof error.params?.missingProperty === "string" && names.has(error.params.missingProperty) ? ` (${error.params.missingProperty})` : "";
-  return `${error.keyword} at /${at}${missing}`;
+  return `${error.keyword} at /${at}${allowed(error, names)}`;
 }
 
 /** The schema's errors on a value, as places; a schema that cannot run on it (a RangeError) is TOO_LARGE. */
@@ -231,13 +243,13 @@ export function channelAgentView(doc: unknown, site: ChannelAgentSite = "manifes
 }
 
 /** FAC-SEM-162 on a manifest: the key where a reader does not read it (the manifest's own extensions, a capability's). */
-function misplaced(doc: JsonObject): Finding[] {
+function misplaced(doc: JsonObject, budget: Budget): Finding[] {
   const findings: Finding[] = [];
   const flag = (extensions: JsonObject, at: string) => {
     const root = `${at}/${KEY_TOKEN}`;
     findings.push({ code: "FAC-SEM-162", instancePath: root, message: "a reader reads a manifest's channel-agent declaration under provider.extensions only, so it is not read here (DEC-0150 CA-1)" });
     // Not read, still published: a credential in it is found where it stands.
-    findings.push(...secrets(extensions[KEY], root));
+    findings.push(...secrets(extensions[KEY], root, budget));
   };
   if (isObject(doc.extensions) && Object.hasOwn(doc.extensions, KEY)) flag(doc.extensions, "/extensions");
   for (const [capability, i] of indexed(doc.capabilities)) {
@@ -272,12 +284,26 @@ const relativeRef = (text: string): boolean => text.length >= 1 && text.length <
 export const SECRET_BUDGET = 1_000_000;
 
 const BASE64URL = /[A-Za-z0-9_-]/;
+/** What is left of FAC-SEM-165's reading for one document, shared by every copy of its declaration. */
+interface Budget { left: number }
+
 /**
- * The code points the detector reads in a string: the string once, and, after each `eyJ`, again up to the end of the
- * base64url run it starts, which `JWT_SHAPE` reads back from every `eyJ` before it fails. Counted in one pass.
+ * The code points the detector reads in a string, counted in one pass: the string once; after each `eyJ`, again up to
+ * the end of the base64url run it starts, which `JWT_SHAPE` reads back from every `eyJ` before it fails; and, for a run
+ * of upper-case letters after `?`, `&` or `#` (a query parameter's name, which `nameWords` splits by backtracking),
+ * the square of its length over two.
  */
 export function detectorCost(text: string): number {
   let cost = text.length;
+  for (let at = 0; at < text.length; at += 1) {
+    const mark = text[at];
+    if (mark !== "?" && mark !== "&" && mark !== "#") continue;
+    let end = at + 1;
+    while (end < text.length && (text[end] as string) >= "A" && (text[end] as string) <= "Z") end += 1;
+    const run = end - at - 1;
+    cost += (run * (run + 1)) / 2;
+    at = end - 1;
+  }
   let runEnd = 0;
   for (let at = text.indexOf("eyJ"); at >= 0; at = text.indexOf("eyJ", at + 1)) {
     if (runEnd <= at) {
@@ -299,11 +325,10 @@ export function detectorCost(text: string): number {
  * PATH_DEPTH. At most SECRET_FINDINGS places are named; one more finding counts the rest, and one more says when
  * SECRET_BUDGET code points were read and the rest was not.
  */
-function secrets(value: unknown, root: string): Finding[] {
+function secrets(value: unknown, root: string, budget: Budget = { left: SECRET_BUDGET }): Finding[] {
   const findings: Finding[] = [];
   const names = schemaNames();
   let more = 0;
-  let budget = SECRET_BUDGET;
   let unread = false;
   const flag = (at: string, what: string) => {
     if (findings.length < SECRET_FINDINGS) findings.push({ code: "FAC-SEM-165", instancePath: at, message: `${what} is shaped like a credential: a token is named by its vault slot, never written (DEC-0150 CA-5)` });
@@ -311,11 +336,11 @@ function secrets(value: unknown, root: string): Finding[] {
   };
   const afford = (text: string): boolean => {
     const cost = detectorCost(head(text));
-    if (cost > budget) {
+    if (cost > budget.left) {
       unread = true;
       return false;
     }
-    budget -= cost;
+    budget.left -= cost;
     return true;
   };
   const tokenOf = (frame: Frame, key: string, index: boolean) => (index || plainName(key) ? placedToken(frame.name, frame.parent, key, index, names) : undefined);
@@ -421,15 +446,17 @@ function obligations(project: JsonObject, at: string): Finding[] {
  */
 export function channelAgentRules(doc: unknown, site: ChannelAgentSite = "manifest"): Finding[] {
   if (!isObject(doc)) return [];
-  const findings = site === "manifest" ? misplaced(doc) : [];
+  // One budget for the whole document: every copy of the declaration, read or misplaced, draws on it.
+  const budget: Budget = { left: SECRET_BUDGET };
+  const findings = site === "manifest" ? misplaced(doc, budget) : [];
   const view = channelAgentView(doc, site);
   if (!view.declared) return findings;
   const root = CHANNEL_AGENT_PATHS[site];
-  findings.push(...secrets((extensionsAt(doc, site) as JsonObject)[KEY], root));
+  findings.push(...secrets((extensionsAt(doc, site) as JsonObject)[KEY], root, budget));
   if (!view.valid) {
     const named = view.errors.slice(0, MESSAGE_ERRORS).join(", ");
     const more = view.errors.length > MESSAGE_ERRORS ? ` and ${view.errors.length - MESSAGE_ERRORS} more` : "";
-    findings.push({ code: "FAC-SEM-162", instancePath: root, message: `the channel-agent declaration fails its schema: ${named}${more}; a reader treats it as not declared and reports it (DEC-0150 CA-2). The grammars are in docs/specification/channel-agent.md#the-declaration; pnpm validate --schema service-channel-agent-extension.schema.json on the value alone lists the allowed values` });
+    findings.push({ code: "FAC-SEM-162", instancePath: root, message: `the channel-agent declaration fails its schema: ${named}${more}; a reader treats it as not declared and reports it (DEC-0150 CA-2). The grammars are in docs/specification/channel-agent.md#the-declaration` });
     return findings;
   }
   const projects = new Set<unknown>();

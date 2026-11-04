@@ -9063,8 +9063,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      project's name `^[a-z0-9][a-z0-9._-]{0,127}$` (not `project:<slug>`), `<env>` `^[a-z][a-z0-9-]{0,31}$` and `NAME`
      `^[A-Z][A-Z0-9_]{0,63}$`; durations are ISO 8601 in days, hours, minutes and seconds, above zero, except a source's
      `cadence`, where zero means the source is read on every question (its `max_age` stays above zero, since the signal
-     server reports a source's age against it); `question_route.daily_cap` is the agent's declared per-project cap,
-     below the desk's side-wide cap of section 6.4, which still binds; ids admit no `@`,
+     server reports a source's age against it); `question_route.daily_cap` is to be read as the agent's declared
+     per-project cap, below the desk's side-wide cap of section 6.4, which still binds (to be confirmed with the
+     standard's owner on thread `b6820b97` at merge); ids admit no `@`,
      slash, space or run of 7 or more digits (section 13.2's `id_looks_personal`), and the two paths (`evals.suite`,
      `tickets.outbox`) are relative to the agent's repository, so sources and queues carry ids and ages only; a queue's
      `recommendation` is the board's opaque thread id (`^[A-Za-z0-9_-]{8,128}$`); a text is 1 to 4096 code points and
@@ -9076,8 +9077,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      a value the schema still cannot run on is one finding, "the value is too large to check". Its finding names at most
      ten failed keywords with their places and counts the rest, a missing declared member named beside its place; in a
      place, a member name the schema does not declare, a text's language and a number that is no index of a declared
-     array, and any numeric key of an object, are written `*`. The finding points to the declaration's grammars and to
-     `pnpm validate --schema service-channel-agent-extension.schema.json` on the value alone.
+     array, and any numeric key of an object, are written `*`; beside a failed `enum`, `const` or `pattern` the place
+     names the schema's own allowed values. The finding points to the declaration's grammars.
   3. CA-3. `FAC-SEM-163`: a project, a category code, a tier code, a channel, a source (read or declined), a hand-off
      queue and a recorded decision appear once; a channel with replies off names a decision, and a channel's decision
      is one `recorded_decisions` lists (section 11: recorded decisions present for every channel held by one).
@@ -9088,14 +9089,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      recommendation (section 7.5); a budget above 0 names its spend record, since without one it reads 0 (sections 5
      and 11).
   5. CA-5. `FAC-SEM-165`: no member name and no string of the declaration is shaped like a credential, by shape, with
-     `FAC-SEM-101`'s detector on a string's first 4097 code points (an ordinary name such as `sk-` and 16 more name
-     characters is found too; the shared detector stays as it is). Three places read narrower, each only when the value
+     `FAC-SEM-101`'s detector on a string's first 4097 code points (an ordinary name that starts with `sk-` and holds
+     a mixed run, such as `sk-Support-Desk-2026-v2`, is found too; the shared detector stays as it is). Three places read narrower, each only when the value
      matches its own grammar, keyed on the place and not on a holder's name: a project's token slot of the slot's
      grammar segment by segment, its eval suite and outbox of the relative path grammar by the detector's path-aware
      reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a
-     provider key's and a JWT's shapes only; anything else is read whole. The rule reads at most 1 000 000 code points in
-     all, counting what the detector reads (a string once, and again after each `eyJ` to the end of its run), then one
-     finding says the rest was not read. No finding's message carries a declared value and no rule's place echoes
+     provider key's and a JWT's shapes only; anything else is read whole. The rule reads at most 1 000 000 code points for
+     one document, every copy of the declaration in it sharing them, counting what the detector reads (a string once,
+     again after each `eyJ` to the end of its run, and the square of an upper-case run after `?`, `&` or `#` over two),
+     then one finding says the rest was not read. No finding's message carries a declared value and no rule's place echoes
      instance data: a place writes a declared name, an index of a declared array, else `*` (an undeclared name, a
      numeric object key, a text's language), in `FAC-SEM-162`, `FAC-SEM-164` and `FAC-SEM-165` alike; a member whose
      name is not plain (letters, digits, `_` and `-`, at most 64, no run of 7 digits once `-` and `_` are left out) or
@@ -9108,8 +9110,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      its kind (side codes and kinds live only in the signal server's data), that a tier's fact is a declared customer
      fact (the declaration lists none), that the named agents, capabilities, desk and limit exist, the standard's
      reference values, the working calendar of a limit counted in working time (declared as a wall-clock duration),
-     whether one declaration may hold projects on several sides (asked of the standard's owner), and everything the
-     signal server observes.
+     whether one declaration may hold projects on several sides (to be asked of the standard's owner on thread
+     `b6820b97` at merge), a valid declaration in both a manifest and its well-known answer (no finding; readers read
+     the manifest's), and everything the signal server observes.
   7. CA-7. The key stays at `0.1` until a consumer passes the vectors (`fixtures/vectors/channel-agent.json`, written by
      `tools/vectors/channel-agent.ts`); the standard then names version 1, which a later decision records. Until then
      readers read `/0.1` only, and that decision names the window in which readers read both keys. A new version of the
@@ -9161,7 +9164,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
   published it on 2026-11-04, with the examples made neutral here; rounds 1 to 5 of the readings. `DEC-0150` was reserved by the coordinator with
-  `agent_sync.py reserve DEC` under the key `channel-agent-dec`; the counter's history on origin
-  (`refs/agent-sync/ids/DEC`) shows no commit for it: the counter moves from next 149 (`d3da4336`) to next 152 in one
-  commit (`ee67e35e`, key `support-quality-v2-dec`), so DEC-0149, DEC-0150 and DEC-0151 (in progress) have no counter commit of their own.
+  `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
+  (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
+  (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation
+  of DEC-0151 (in progress), whose Source says the same. DEC-0149's reservation is `e27a5441` (key `ct194-source-manifest`, next 150),
+  which is not on origin's DEC chain.
   `FAC-SEM-162` to `FAC-SEM-165` were reserved under `channel-agent-sem-a` to `-d` (SEM-0162 to SEM-0165).

@@ -54,7 +54,7 @@ serves (at most 64), each project once (DEC-0150 CA-2, the standard's section 13
 | Member | What | Shape |
 |---|---|---|
 | `project`, `side`, `lead_agent`, `adopted_at` | the project, the side the agent expects, its lead agent, the day it adopted the standard | `project:<slug>`; `^[a-z0-9-]{1,32}$`; an id; `YYYY-MM-DD` |
-| `taxonomy` | `{version, codes[]}`, each code `{code, label}`, a ticket's category | a version id; `^[a-z0-9_.]{1,64}$`, each once |
+| `taxonomy` | `{version, codes[]}`, each code `{code, label}`, a ticket's category | a version; `^[a-z0-9_.]{1,64}$`, each once |
 | `tiers` (optional) | `{code, label, rule, escalate}` | `^[a-z0-9_]{1,32}$`, each once; `rule` is `<fact> > <integer>` or `<fact> >= <integer>` with one space each side and an integer of at most 15 digits; `escalate` is `at_once` or `ladder` |
 | `question_route` | `{capability, target, daily_cap, days, tz, send_at, expires}` | `team.ask` or `operator.ask`; the desk's Fabric Project id as `com.submit` addresses it; 1 to 1000; days and ranges (`mon-fri`); `UTC` or an IANA name; `HH:MM`; a duration |
 | `gap_registry` | `{owner, capability}` | an id; a capability name |
@@ -97,8 +97,9 @@ is an IANA name of one segment (`UTC`, `GMT`, `CET`) or of two or three (`Etc/UT
 `America/Argentina/Buenos_Aires`). A text's length is counted in Unicode code points, as JSON Schema's `maxLength`
 counts it, and a text's language is at most 35 characters.
 
-`question_route.daily_cap` is the agent's declared cap for this project's questions; the desk's own cap across its
-side (the standard's section 6.4) still binds, so a project's questions may wait for the desk's next slot below it.
+`question_route.daily_cap` is to be read as the agent's declared cap for this project's questions, with the desk's own
+cap across its side (the standard's section 6.4) still binding, so a project's questions may wait for the desk's next
+slot below it; this reading is to be confirmed with the standard's owner on thread `b6820b97` at merge.
 
 ## What is checked
 
@@ -117,9 +118,10 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    large to check". The finding names at most ten failed keywords with their places and counts the rest; a missing
    member the schema declares is named beside its place (`required at /projects/0 (question_route)`); in a place, a
    member name the schema does not declare (an unknown member), a text's language and a number that is no index of an
-   array the schema declares are written `*`, and so is a numeric key of an object. The message points to the
-   grammars in [the declaration](#the-declaration), and `pnpm validate --schema
-   service-channel-agent-extension.schema.json` on the value alone lists the allowed values of each failed member.
+   array the schema declares are written `*`, and so is a numeric key of an object. Beside a failed `enum`, `const` or
+   `pattern`, the place names what the schema allows, from the schema alone (`enum at
+   /projects/0/question_route/capability (one of team.ask, operator.ask)`). The message points to the grammars in
+   [the declaration](#the-declaration).
 2. Every id once and every decision named (`FAC-SEM-163`, CA-3): a project, a category code, a tier code, a channel, a
    source (a declined one counted with the read ones), a hand-off queue and a recorded decision appear once; a channel
    with replies off names the decision that holds it, and a channel's decision is one `recorded_decisions` lists.
@@ -138,11 +140,12 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    taken for one secret and a long base64 segment is; a queue's `recommendation` of the board's `opaqueId` grammar is
    read by a provider key's and a JWT's shapes only, since a long mixed run is its shape by design (a recommendation
    that is a URL with a password is read whole, and found). The detector reads the first 4097 code points of a string,
-   and the rule reads at most 1 000 000 code points of names and values in all, counting what the detector reads (a
-   string once, and again after each `eyJ` to the end of its run, which the JWT shape reads back): past that, one
-   finding at the declaration says the rest was not read for credentials. Being by shape, it also finds an
-   ordinary hyphenated name that starts with `sk-` and runs 16 more letters, digits, `_` or `-`
-   (`sk-support-desk-faq-v2`): do not start an id with `sk-`.
+   and the rule reads at most 1 000 000 code points of names and values in all for one document, every copy of the
+   declaration in it (read or misplaced) sharing them, counting what the detector reads: a string once, again after
+   each `eyJ` to the end of its run (which the JWT shape reads back), and the square of an upper-case run after `?`,
+   `&` or `#` over two (a query name the detector splits by backtracking). Past that, one finding at the declaration
+   says the rest was not read for credentials. Being by shape, it also finds an ordinary hyphenated name that starts
+   with `sk-` and holds a mixed run (`sk-Support-Desk-2026-v2`, a test pins it): do not start an id with `sk-`.
 
 No finding's message carries a declared value, and no rule's place echoes instance data: a place writes a member name
 the schema declares and an index of an array the schema declares, and `*` for any other member name, for a numeric key
@@ -175,10 +178,13 @@ Section 11 also asks for these; none can be decided from the declaration alone (
   exist: a checker that reads the estate, the board or the usage report checks them there;
 - the reference values (a 7-day final limit, a 1-hour first reply, the operator desk's cap of 10 and a team desk's 15):
   the standard's references, which an agent may declare otherwise;
-- the meaning of `daily_cap`: the agent's declared per-project cap, below the desk's side-wide cap of section 6.4,
-  which still binds; this reading is confirmed with the standard's owner on the board thread;
+- the meaning of `daily_cap`: to be read as the agent's declared per-project cap, below the desk's side-wide cap of
+  section 6.4, which still binds; this reading is to be confirmed with the standard's owner on thread `b6820b97` at
+  merge;
 - sides across projects: a declaration may hold projects on several sides, which the standard's rule that nothing is
-  composed across sides may not intend; its owner is asked on the board thread;
+  composed across sides may not intend; this is to be asked of the standard's owner on thread `b6820b97` at merge;
+- a declaration in both places: a valid declaration in a service's manifest and another in its well-known answer draw
+  no finding for being two; readers read the manifest's;
 - working time: a limit the standard counts in working hours or days (a desk's 2 working days, a team chat's first reply
   in 1 working hour) is declared as a wall-clock duration, and its working calendar is not declared;
 - everything the signal server observes, and the 30 days after `adopted_at` in which its checks report but do not
@@ -188,7 +194,7 @@ Section 11 also asks for these; none can be decided from the declaration alone (
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-162"></a>`FAC-SEM-162` | `manifest`, `service-well-known` | a value under the channel-agent extension key sits under a manifest's `provider.extensions` (not its own `extensions` or a capability's) or a well-known answer's `extensions`, has no array, map or object longer than its schema allows nor a string or name over 4096 code points, and is valid against `service-channel-agent-extension.schema.json`; a reader treats an invalid one as not declared and reports it, naming failed keywords and places, never a declared value, and pointing to the declaration's grammars and to `pnpm validate --schema service-channel-agent-extension.schema.json` on the value alone (DEC-0150 CA-1, CA-2) |
+| <a id="fac-sem-162"></a>`FAC-SEM-162` | `manifest`, `service-well-known` | a value under the channel-agent extension key sits under a manifest's `provider.extensions` (not its own `extensions` or a capability's) or a well-known answer's `extensions`, has no array, map or object longer than its schema allows nor a string or name over 4096 code points, and is valid against `service-channel-agent-extension.schema.json`; a reader treats an invalid one as not declared and reports it, naming failed keywords and places, never a declared value, with the schema's own allowed values beside an `enum`, `const` or `pattern` place, and pointing to the declaration's grammars (DEC-0150 CA-1, CA-2) |
 | <a id="fac-sem-163"></a>`FAC-SEM-163` | `manifest`, `service-well-known` | in a valid channel-agent declaration a project, a category code, a tier code, a channel id, a source id (read or declined), a hand-off queue id and a recorded decision id appear once; a channel with replies off names a decision, and every channel's decision is one `recorded_decisions` lists (DEC-0150 CA-3) |
 | <a id="fac-sem-164"></a>`FAC-SEM-164` | `manifest`, `service-well-known` | in a valid channel-agent declaration a channel with a holding reply declares its holding text and one that replies its final text; a store review asks no clarifying question; no text is blank or carries U+2014; no tier's label is blank or carries U+2014; a queue whose answered signal is `none` names its recommendation; a budget above 0 names its spend record (DEC-0150 CA-4) |
 | <a id="fac-sem-165"></a>`FAC-SEM-165` | `manifest`, `service-well-known` | no member name and no string of a channel-agent declaration is shaped like a credential, by shape (`FAC-SEM-101`'s detector), a misplaced one included, a token slot of its grammar and the suite's and outbox's paths read segment by segment and a queue's recommendation by key shapes only; at most 64 places and a count (DEC-0150 CA-5) |
@@ -208,8 +214,9 @@ existing fixture validates and checks as before. `contractVersion` stays `0.1.0`
 - **The daily quality payload.** The standard's section 5.1 publishes [`support-quality-daily/1`](support-quality.md)
   per project, where `/1` keeps one channel of four per event, with members `/1` does not have (`arrived`, `ended`,
   `open.*`, the outcomes, `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets`,
-  `notATicket`). Section 5.1 defers its new
-  fields itself: "publish them once every reader of the feed takes that schema". That schema is what
+  `notATicket`). Section 5.1 defers only the fields it marks new: "publish them once every reader of the feed takes
+  that schema"; `autonomy.answered` and `stability.fallbackTurns`, which it treats as present, are not in `/1`
+  either. That schema is what
   DEC-0151, in progress on CT-210, proposes. Until it lands, an agent following section 5.1 emits payloads this contract refuses,
   and how the seven channel kinds here map to `/1`'s four channels (`chat`, `mail`, `reviews`, `community`) is what
   DEC-0151, in progress, proposes to decide. Until then, an agent declaring several projects publishes no per-project

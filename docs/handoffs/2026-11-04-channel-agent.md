@@ -32,36 +32,49 @@ filed; the coordinator files it on the board).
   arrays), one product break (section 5.1's payload) and the seam's and product's risks, all fixed.
 - Round 2 of the readings: three unit breaks (a text's language in a path, a number that is no index in FAC-SEM-162's
   places, FAC-SEM-165's quadratic walk), the seam break (null members: the contract stays as written, a fixture
-  documents the boundary) and the product break (the history below), all fixed; FAC-SEM-165 now names at most 64
+  documents the boundary) and the product break (the branch's history), all fixed; FAC-SEM-165 names at most 64
   places and a path at most 64 levels deep, the detector reads 4097 code points, a blank text strips `\p{Cf}` and
-  `\p{Z}`, a misplaced declaration is read for credentials, and `rawValues` appends in place (CT-194's lines).
+  `\p{Z}` (widened in rounds 3 and 4), a misplaced declaration is read for credentials, and `rawValues` appends in
+  place (CT-194's lines).
+- Round 3 of the readings: one unit break (Ajv's patterns throwing on strings of several megabytes) and two product
+  breaks (a present-tense claim about DEC-0151, in progress, and a withdrawn commit named here), all fixed. Before the
+  schema runs, a string or a name over 4096 code points (`maxLength`) and a declaration, project or channel with more
+  members than the schema declares (`maxProperties`) are refused (widened in round 4 to every closed object), and a
+  schema that still throws is one fixed finding; the walk keeps one frame per container and builds a place only for a
+  finding; a plain name counts digits without `-` and `_`; ids, the side and the codes refuse a run of 7 digits; a blank
+  text also strips `\p{Cc}` and the fillers; tier labels are read like texts; the time zone takes one-segment IANA
+  names; FAC-SEM-162 names a missing member; a bare declaration gets `hint/declaration-only`. Superseded by later
+  rounds: the suite's and outbox's paths read segment by segment (round 4: by the path-aware detector); the
+  recommendation read by key shapes only whatever it holds (round 5: only for a value of its own grammar); the
+  project's slug refusing a run of 7 digits (round 4: `project` keeps the registry alias pattern); zero allowed for a
+  source's `max_age` (round 5: only its `cadence` may be zero).
+- Round 4 of the readings: two unit breaks (a numeric object key echoed in a place, the width guard on three objects
+  only) and two product breaks (the project grammar, the history), fixed: a numeric key of an object is `*`; every
+  closed object's width, every array's `maxItems` and every map's `maxProperties` are read from the schema before it
+  runs; `project` keeps the registry alias pattern; the suite's and outbox's paths are read by the path-aware detector;
+  a blank text also strips default-ignorable code points and U+FFFC; service.md, identifiers.md and SCN-002 name the
+  declaration; the branch was rebuilt on `origin/main`. Superseded: FAC-SEM-162's pointer to `pnpm validate --schema`
+  (round 6: the place names the schema's allowed values instead).
 - Round 5 of the readings: one unit break (a finding below a member that is not plain placed at an innocent declared
   member) and one product break (DEC-0151, in progress, presented as fact), fixed: a member that is not plain, or past
   64 levels, collapses its place for every member below it; every place writes `*` for an undeclared name, a numeric
   object key and a text's language, in all three rules; the narrow readings apply only at their place and only to a
   value of their own grammar; FAC-SEM-165 reads at most 1 000 000 code points, counting the JWT shape's rereads after
-  each `eyJ`; a source's `max_age` is above zero again; `daily_cap`'s meaning, the reading of earlier declarations and
-  the shared-channel quality check are stated. `src/secret-shape.ts` keeps only CT-194's `rawValues` lines.
-- Round 4 of the readings: two unit breaks (a numeric object key echoed in a place, the width guard on three objects
-  only) and two product breaks (the project grammar, the history), fixed: a numeric key of an object is `*`; every
-  closed object's width, every array's `maxItems` and every map's `maxProperties` are read from the schema before it
-  runs; `project` keeps the registry alias pattern; the suite's and outbox's paths are read by the path-aware detector;
-  a blank text also strips default-ignorable code points and U+FFFC; FAC-SEM-162 points to the grammars and to
-  `pnpm validate --schema`; service.md, identifiers.md and SCN-002 name the declaration; the branch is one commit.
-- Round 3 of the readings: one unit break (Ajv's patterns throwing on strings of several megabytes) and two product
-  breaks (a present-tense claim about DEC-0151, in progress, and a withdrawn commit named here), all fixed. Before the schema runs, a
-  string or a name over 4096 code points (`maxLength`) and a declaration, project or channel with more members than
-  the schema declares (`maxProperties`) are refused, and a schema that still throws is one fixed finding; the walk keeps
-  one frame per container and builds a place only for a finding; the suite's and outbox's paths are read segment by
-  segment and a recommendation by key shapes only; a plain name counts digits without `-` and `_`; ids, the side, the
-  project's slug and the codes refuse a run of 7 digits; a blank text also strips `\p{Cc}` and the fillers; tier labels
-  are read like texts; a source's durations may be zero; the time zone takes one-segment IANA names; FAC-SEM-162 names a
-  missing member; a bare declaration gets `hint/declaration-only`.
+  each `eyJ`; a source's `max_age` is above zero again; the reading of earlier declarations and the shared-channel
+  quality check are stated. `src/secret-shape.ts` keeps only CT-194's `rawValues` lines.
+- Round 6 of the readings: one product break (this list described a history that was no longer true), fixed by this
+  list. Also: the reading budget is one per document, shared by every copy of the declaration, and counts the square of
+  an upper-case run after `?`, `&` or `#`; FAC-SEM-162 names the schema's own allowed values beside a failed `enum`,
+  `const` or `pattern` and no longer suggests `pnpm validate --schema`; `daily_cap`'s meaning and projects on several
+  sides are to be asked of the standard's owner at merge; a valid declaration in both places is stated; the page's
+  `sk-` example is one both detectors find, pinned by a test; `taxonomy.version` is "a version"; the specification
+  index says the declaration is written by adopting agents and has no reader yet; DEC-0150's Source names each
+  reservation.
 
 ## The branch and its history
 
-The work is on `agent/channel-agent-ext-v3-20261104`, one commit on `origin/main` that holds the whole change after
-four rounds of readings; the earlier branches were deleted, and the pull request comes from the v3 branch only.
+The work is on `agent/channel-agent-ext-v3-20261104`, built on `origin/main`; the earlier branches were deleted, and
+the pull request comes from the v3 branch only.
 
 ## Decisions taken in this run beyond the request
 
@@ -69,21 +82,23 @@ four rounds of readings; the earlier branches were deleted, and the pull request
   open, and an invalid value is a finding a reader treats as not declared (as the actions and load keys are).
 - The patterns of the usage report's limit id, the board's project id and a capability name are repeated, not
   referenced, so a kit vendors one schema file; a test holds them equal.
-- Grammars the standard leaves open: a tier code `^[a-z0-9_]{1,32}$`; a channel id `^[a-z0-9][a-z0-9_-]{0,63}$`; an id
-  admits no `@`, slash, space or run of 7 digits; `suite` and `outbox` are paths relative to the agent's repository;
-  durations in days, hours, minutes and seconds only, above zero; `days` as days and ranges; `tz` as `UTC` or an IANA
-  name; texts 1 to 4096 code points, keyed by BCP 47 tags; `read` a word. `tiers`, `declined_sources` and
+- Grammars the standard leaves open: a tier code `^[a-z0-9_]{1,32}$` and a channel id `^[a-z0-9][a-z0-9_-]{0,63}$`,
+  each with no run of 7 digits; an id admits no `@`, slash, space or run of 7 digits; `suite` and `outbox` are paths
+  relative to the agent's repository; durations in days, hours, minutes and seconds only, above zero except a source's
+  `cadence`; `days` as days and ranges; `tz` as an IANA name of one to three segments; texts 1 to 4096 code points,
+  keyed by BCP 47 tags of at most 35 characters; `read` a word. `tiers`, `declined_sources` and
   `recorded_decisions` are optional; `handoff_queues` is required and may be empty; `spend_record` optional and
   nullable.
 - A final text is owed by a channel that replies, and an em dash or a blank text in a declared text is a finding, from
   section 2.4's send checks.
-- FAC-SEM-162 names failed keywords with their places (member names the schema does not declare written `*`), not
-  Ajv's schema paths, which are relative to a `$ref`'s target.
+- FAC-SEM-162 names failed keywords with their places (member names the schema does not declare written `*`) and,
+  beside a failed `enum`, `const` or `pattern`, the schema's allowed values, not Ajv's schema paths, which are relative
+  to a `$ref`'s target.
 - `channel-agent-standard/1` joins the protocol register (`src/protocol-revisions.ts`), since the schema pins it.
 - Credential shapes for the slot cases a provider might scan for (an AWS or Slack key) are built at run time in
   `test/channel-agent.test.ts`; the vector file carries only `sk-` shapes of repeated or made-up characters.
-- The detector stays shared and by shape: an ordinary hyphenated id that starts with `sk-` and runs 16 more name
-  characters is a `FAC-SEM-165` finding; the page says to rename such an id.
+- The detector stays shared and by shape: an ordinary hyphenated id that starts with `sk-` and holds a mixed run
+  (`sk-Support-Desk-2026-v2`) is a `FAC-SEM-165` finding; the page says not to start an id with `sk-`.
 
 ## Open
 
@@ -150,8 +165,9 @@ DEC-0151 is in progress. The second of the two to land rewrites, in its own chan
   a declaration to a project's payloads on `project:<slug>`" in `channel-agent.md` (the declaration), which becomes a
   statement that the reader joins them;
 - the note in `channel-agent.md` (What is checked, item 4) and DEC-0150 CA-5 that the shared detector finds an ordinary
-  hyphenated name starting with `sk-`: the in-progress DEC-0151 anchors the detector with a boundary before provider prefixes, so the
-  note becomes stale; the advice not to start an id with `sk-` stays;
+  hyphenated name starting with `sk-`: re-check that `sk-Support-Desk-2026-v2` is still found under the detector
+  of DEC-0151, in progress (the test in `test/channel-agent.test.ts` pins it); the advice not to start an id with `sk-`
+  stays;
 - the two "Compared as written" bullets for `project:<slug>` in `docs/specification/identifiers.md`, merged into one;
 - an assertion in `test/channel-agent.test.ts` that the declaration's `project` pattern equals
   `support-quality-daily.schema.json` `$defs/projectAlias` (S3);
@@ -159,21 +175,15 @@ DEC-0151 is in progress. The second of the two to land rewrites, in its own chan
 
 ## Checks actually run
 
-On the change after round 5's fixes, each exit code read separately, the 15-minute load average below 45 at each test
-run: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9944 tests passed and 1 skipped,
-branches 98.86 %, 11959 of 12096; `src/channel-agent.ts` 248 of 248, `src/secret-shape.ts` 47 of 47);
+On the change after round 6's fixes, each exit code read separately, the 15-minute load average below 45 at each test
+run: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage` 0 (109 files, 9948 tests passed and 1 skipped,
+branches 98.86 %, 11982 of 12119; `src/channel-agent.ts` 271 of 271, `src/secret-shape.ts` 47 of 47);
 `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm privacy:check` with the
 organization index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (29 vector files match their generators).
-
-FAC-SEM-165's growth on the thread's processor time, depth 8000 to 32000: 3.87 for a chain of credential-shaped values
-and 4.16 for a chain of credential-shaped names (the test asserts below 6). The probe of 488 strings of 4096 characters
-of `eyJ` runs in under 500 ms (the test's bound), the budget stopping the reading. Under
-`NODE_OPTIONS=--max-old-space-size=256`: a question route with 800 000 members gives `FAC-SEM-162` (`maxProperties at
-/projects/0/question_route`) and one `FAC-SEM-165` saying the rest was not read, in 720 ms; 1 000 000 unknown root
-members give the same pair in 791 ms; `extra: Array(2_000_000).fill(1)` gives one `FAC-SEM-162` in 159 ms; chains of
-depth 20000 finish with 66 findings each; heap at most 202 MB, the inputs included. The organization's privacy check
-over the standard's copy alone: 0 findings. A `git grep` of the change for the three terms of the product described
-before neutralisation prints nothing. No U+2014 in the added text.
+The reading-budget tests: 488 strings of 4096 characters of `eyJ` and 245 query strings with an upper-case name of
+4060 letters each run under 500 ms, and a manifest with four misplaced copies of a heavy declaration under 2000 ms. The
+organization's privacy check over the standard's copy alone: 0 findings. A `git grep` of the change for the three terms
+of the product described before neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
@@ -191,6 +201,11 @@ thread `b6820b97` (the coordinator posts it), listing the narrowings versus the 
   `spend_record` is a lower-case usage-report limit id;
 - a missing required member makes the whole declaration invalid, so a reader treats it as not declared, and a `null`
   is refused wherever section 13.6 lists a member;
+- to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
+  the desk's side-wide cap of section 6.4, which still binds;
+- to be asked of the standard's owner: whether one declaration may hold projects on several sides;
+- to be asked of the standard's owner: that section 5.1's table mark `autonomy.answered` and
+  `stability.fallbackTurns` new too (they are not in `/1` either), and keep `toPerson*` under `autonomy`;
 - the coordinator asks the standard's owner to hold the observed per-project quality check for shared channels until
   DEC-0151 (in progress) lands, since it reads missing there;
 - for each live producer, the members its current declaration fails (`FAC-SEM-162`'s places), read with
