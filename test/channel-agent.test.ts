@@ -436,7 +436,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       ["/projects/0/channels/0/texts", { ...value, projects: [{ ...p0, channels: [{ ...ch, texts: { ...ch.texts, ...wide } }] }] }]
     ];
     for (const [place, declared] of places) {
-      expect(channelAgentView({ extensions: { [KEY]: declared } }, "well-known"), place).toEqual({ declared: false, reported: true, errors: [`FAC-SEM-162 at ${place}: maxProperties (more members than the schema declares)`, "FAC-SEM-165 at /: the document holds more than 1000000 code points of names and values in its declarations; the rest was not read for credentials"] });
+      expect(channelAgentView({ extensions: { [KEY]: declared } }, "well-known"), place).toEqual({ declared: false, reported: true, errors: [`FAC-SEM-162 at ${place}: maxProperties (more members than the schema declares)`, "FAC-SEM-165 at /: the document holds more than 1000000 code points of names and values in its declarations; the rest was not read for credentials, so a reader treats the declaration as not declared; declare fewer or shorter texts or names"] });
     }
   });
   it("reads at most SECRET_BUDGET code points for credentials, then says the rest was not read, in little time", { timeout: 60_000 }, () => {
@@ -650,7 +650,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(read.declared).toBe(true);
     const heavy = { ...p0.channels[0], texts: { holding: { en: opening.repeat(1365) }, final: p0.channels[0].texts.final } };
     const unread = channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [heavy, p0.channels[1]] }] } } }, "well-known");
-    expect(unread).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-165 at /: the document holds more than 1000000 code points of names and values in its declarations; the rest was not read for credentials"] });
+    expect(unread).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-165 at /: the document holds more than 1000000 code points of names and values in its declarations; the rest was not read for credentials, so a reader treats the declaration as not declared; declare fewer or shorter texts or names"] });
   });
   it("reads a string as a URL only when its head, tab and line breaks removed, is ASCII with no high escape and opens with a scheme", () => {
     expect(readAsUrl("https://a.example/?q=1")).toBe(true);
@@ -719,7 +719,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   });
   it("refuses a declaration with more members than its schema declares before the schema runs", () => {
     const wide = Object.fromEntries(Array.from({ length: 100_000 }, (_, i) => [`m${i}`, 1]));
-    expect(channelAgentView({ extensions: { [KEY]: { ...value, ...wide } } }, "well-known")).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /: maxProperties (more members than the schema declares)", "FAC-SEM-165 at /: the document holds more than 1000000 code points of names and values in its declarations; the rest was not read for credentials"] });
+    expect(channelAgentView({ extensions: { [KEY]: { ...value, ...wide } } }, "well-known")).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /: maxProperties (more members than the schema declares)", "FAC-SEM-165 at /: the document holds more than 1000000 code points of names and values in its declarations; the rest was not read for credentials, so a reader treats the declaration as not declared; declare fewer or shorter texts or names"] });
     const long = channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array(200_000).fill(1) } } }, "well-known");
     expect(long.map((f) => f.code)).toEqual(["FAC-SEM-162"]);
     const channel = { ...value.projects[0].channels[0], extra: 1 };
@@ -842,7 +842,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   });
   it("asks for a rename only at a member name or an id, never at a text", () => {
     const p0 = value.projects[0];
-    const key = ["sk", "-", "support-desk-faq-answers-2026"].join("");
+    const key = ["sk", "-", "support-desk-faq-answers-2026-v2"].join("");
     const holding = { ...p0.channels[0], texts: { holding: { en: key }, final: p0.channels[0].texts.final } };
     const found = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [holding, p0.channels[1]] }] } } }, "well-known");
     expect(found.map((f) => f.message)).toEqual(["a value is shaped like a credential: a token is named by its vault slot, never written (DEC-0150 CA-5)"]);
@@ -851,7 +851,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   });
   it("asks for a rename by role: a text keyed id gets none, a channel id keeps it", () => {
     const p0 = value.projects[0];
-    const key = ["sk", "-", "support-desk-faq-answers-2026"].join("");
+    const key = ["sk", "-", "support-desk-faq-answers-2026-v2"].join("");
     const rules = (proj: Json) => channelAgentRules({ extensions: { [KEY]: { ...value, projects: [proj] } } }, "well-known").map((f) => f.message);
     const keyed = { ...p0.channels[0], texts: { holding: { id: key }, final: p0.channels[0].texts.final } };
     expect(rules({ ...p0, channels: [keyed, p0.channels[1]] })).toEqual(["a value is shaped like a credential: a token is named by its vault slot, never written (DEC-0150 CA-5)"]);
@@ -880,6 +880,12 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const key = ["sk", "-", "Q7r2".repeat(5)].join("");
     const found = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [formed({ none: "not_yet", until: key })] } } }, "well-known").filter((f) => f.code === "FAC-SEM-165");
     expect(found.map((f) => f.instancePath)).toEqual([`${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/channels/${replying}/texts/final/until`]);
+  });
+  it("points a texts object wider than its members in the none form to texts.final", () => {
+    const p0 = value.projects[0];
+    const texts = { ...p0.channels[0], texts: { none: "not_used", until: "2027-01-15", holding: p0.channels[0].texts.holding } };
+    const view = channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [texts, p0.channels[1]] }] } } }, "well-known");
+    expect(view.errors).toEqual(["FAC-SEM-162 at /projects/0/channels/0/texts: maxProperties (more members than the schema declares; only texts.final takes the none form (Narrowings))"]);
   });
   it("tells the author of an id that starts with sk- to rename it", () => {
     const id = "sk-support-desk-faq-answers-2026-v2";

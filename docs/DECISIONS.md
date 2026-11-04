@@ -9098,8 +9098,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      queue and a recorded decision appear once; a channel with replies off names a decision, and a channel's decision
      is one `recorded_decisions` lists (section 11: recorded decisions present for every channel held by one). It
      names at most 64 places per declaration, then one finding at the key counting the rest.
-  4. CA-4. `FAC-SEM-164`: a channel with a holding reply declares its holding text and one that replies its final text
-     (section 11: holding and final texts present); a store review asks no clarifying question (sections 4.7, 10); no
+  4. CA-4. `FAC-SEM-164`: a channel with a holding reply declares its holding text and one that replies its final text,
+     both only when its replies are on, since a channel with replies off owes no texts (section 11: holding and final
+     texts present); a store review asks no clarifying question (sections 4.7, 10); no
      text and no tier's label is blank or carries U+2014 (section 2.4's send checks); a queue whose answered signal is
      `none` names its
      recommendation (section 7.5); a budget above 0 names its spend record, since without one it reads 0 (sections 5
@@ -9125,11 +9126,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      escape, a backslash escape, or a colour sequence with any number of parameter characters whose ESC is raw or
      escaped in either case), up to 255 code points; after every other provider prefix of the shared detector, anywhere
      and in any case (`gh?_`, `xox?-`, `AKIA`, `glpat-`), up to its floor (20, 10, 16 and 20 code points), what a near
-     miss is reread before it fails; after every `sk-` away from a boundary, up to 15 code points after it; and, for a
+     miss is reread before it fails; after every `sk-` away from a boundary, up to 15 code points after it (each a bound
+     any detector may need, whatever boundary or case its own shapes take); and, for a
      string read as a URL, on the names and values a
      WHATWG URL parse yields: 128 per query or fragment piece, its name's and value's code points, the value's `eyJ`
      and `sk-` terms, and the square over two of a name holding an upper-case letter when its value is not empty. Once it is spent, nothing more is read and every further member collapses; one finding per
-     document then says the rest was not read, at the copy where the budget ran out (never at a read declaration read
+     document then says the rest was not read, that a reader treats the declaration as not declared and that fewer or
+     shorter texts or names fix it, at the copy where the budget ran out (never at a read declaration read
      whole); the 64 places are a cap per document (a copy names a place only while the document's total is under 64),
      and past it each copy counts its own places and closes them at that copy: the read declaration's count at its key
      holds only its own places, and a misplaced copy's overflow is closed at that copy. The read
@@ -9137,7 +9140,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      running out in a copy, is found at that copy and leaves the read declaration's answer as it is. A reader treats a
      declaration with `FAC-SEM-165` or `FAC-SEM-163` as not declared, as it does one with `FAC-SEM-162`, keeps one with
      only `FAC-SEM-164` declared and shows those findings to its author, and never displays a credential-shaped value
-     (`channelAgentView`, shaped as `connectionsView`, `errors` always present: `declared: false, reported: false,
+     (`channelAgentView`, with the same `declared`, `reported` and `errors` as `connectionsView`, `errors` always present: `declared: false, reported: false,
      errors: []` with no key,
      `declared: false, reported: true` with the findings, `declared: true` with the obligations; every line is
      `<code> at <place>: <reason>`, the reason the finding's message without the decision it cites, identical lines

@@ -4,8 +4,8 @@
 
 The board request `437c404b` (thread `b6820b97`): an extension key under which an agent that answers people on a
 channel (mail, Telegram, store reviews) declares what `channel-agent-standard/1` asks, with the schema in this contract
-and the checks the standard's section 11 makes statically, for the Fabric Agent Adapter's service check (its row to be
-filed; the coordinator files it on the board).
+and the checks the standard's section 11 makes statically, for the Fabric Agent Adapter's service check (its row
+FAA-197, on the adapter's main).
 
 ## Done
 
@@ -167,6 +167,16 @@ filed; the coordinator files it on the board).
   never under a channel's `texts` or a language-keyed map. A message spells a pattern once even across a nullable
   place's ", or null". A final text's none form writes `none` and `until` in places. The page says a floor counts the
   run a shape needs, not the character that ends it.
+- Round 14's product and seam readings, folded into the same batch: a nullable member's failure is described as one
+  line everywhere (page item 1, SCN-002, the decisions above); the Objective names FAA-197; the Narrowings' looser
+  bullet names an absent final or holding text and a holding reply beside a final text not used, and the holding-text
+  sentence of the `null` bullet says looser, not narrower; a channel with replies off owes no texts, whatever its
+  `holding_reply` (a vector pins it); the line that the rest was not read says the reader treats the declaration as not
+  declared and that fewer or shorter texts or names fix it; the view is described as having the same `declared`,
+  `reported` and `errors` as `connectionsView`; the width line of a channel's `texts` in the none form carries the
+  pointer to `texts.final`; SCN-002 says a `FAC-SEM-164` line makes `pnpm validate` exit 1 while a reader keeps the
+  declaration declared; the budget's prefix terms are worded as bounds any detector may need; the `sk-` keys of the
+  rename tests are ones both detectors find.
 
 ## The branch and its history
 
@@ -190,8 +200,8 @@ the pull request comes from the v3 branch only.
   section 2.4's send checks.
 - FAC-SEM-162 names failed keywords with their places (member names the schema does not declare written `*`) and,
   beside each failed keyword, the schema's limit (values, pattern, length in code points, count, bound, format, the
-  type alone for a failed type, and a nullable member's type and null on its `oneOf` line, with no line for the
-  `null` branch), not Ajv's schema paths, which are relative to a `$ref`'s target.
+  type alone for a failed type, and a nullable member's failure as one line, its value branch's, ending ", or null",
+  with no `oneOf` line and no line for the `null` branch), not Ajv's schema paths, which are relative to a `$ref`'s target.
 - Four members keep another owner's grammar, repeated in the schema: `question_route.target` (the board's project id),
   `gap_registry.capability` (a capability name), `evals.spend_record` (the usage report's limit id) and a queue's
   `recommendation` (the board's `opaqueId`).
@@ -288,7 +298,14 @@ and the join sentence, worded in both lists with the adoption condition. Where D
 sentences from an older head, this list locates them on the landing head: CA-5's annotation (its `sk-` parenthesis,
 "DEC-0151, in progress, proposes to narrow that ...") in `docs/DECISIONS.md`, and item 4's in-progress `sk-`
 sentence on the page ("DEC-0151, in progress, proposes to narrow that to a digit with an upper-case letter and 16, or
-a digit and 32"); the lander re-quotes them from the landing head. The join sentence keeps its condition (a
+a digit and 32"); the lander re-quotes them from the landing head. The page's budget sentences (item 4: after every other
+provider prefix "anywhere and in any case", and after an `sk-` away from a boundary) are worded as a bound any detector
+may need, so they stay true under DEC-0151's word-start boundary and canonical case; `keyRereads` changed after
+`cd350f47`, in `fc78b510` (the other prefixes' floors) and `c201208a` (`sk-` away from a boundary), so DEC-0151's
+lander compares against the landing head, not `cd350f47`. Beside the `sk-` test named above, the tests "asks for a
+rename only at a member name or an id, never at a text" and "asks for a rename by role: a text keyed id gets none, a
+channel id keeps it" build their key as `sk-` and `support-desk-faq-answers-2026-v2` (32 name characters with a
+digit), so both detectors find it. The join sentence keeps its condition (a
 reader joins on `project:<slug>` once the feed's readers have adopted it). The list:
 
 - the "Not decided here" bullet in `docs/specification/support-quality.md` that names DEC-0151 (CT-210) in progress:
@@ -325,7 +342,7 @@ coverage run (37.74): `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --covera
 and 1 skipped, branches 98.88 %, 12193 of 12330; `src/channel-agent.ts` 482 of 482, `src/secret-shape.ts` 47 of 47);
 `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm privacy:check` with the
 organization index 0 (0 findings); `pnpm exec tsx tools/vectors/run.ts` 0 (29 vector files match their generators);
-`git grep -n 'its row to be filed' -- docs/specification docs/handoffs/2026-11-04-channel-agent.md` prints nothing.
+`perl -0ne 'print scalar(() = /row to be\s+filed;/g), "\n"' docs/handoffs/2026-11-04-channel-agent.md` prints 0.
 The timing tests hold the test thread's processor time against prose read to the budget in the same run. The URL-shaped strings (a tab, a carriage return or a line feed inside `eyJ`, `-%73k-` in a query) and a query of many
 pieces each run within twice prose's thread time plus 20 ms; 300 strings of 2000 astral code points are read whole;
 the budget's edge falls where the count says, in plain and in astral names. The organization's privacy check over the

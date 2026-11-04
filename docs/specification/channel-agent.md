@@ -225,9 +225,7 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    [the declaration](#the-declaration), whose grammar states every limit the schema enforces. In the message, a
    length is counted in code points, and a failed `type` names the type the schema wants alone (`(boolean)`,
    `(integer)`, `(object)`); a member that takes a value or `null` (`decision`, `quiet_window`, `late_answer_window`,
-   `spend_record`) fails once on its `oneOf`, which names its type and null (`oneOf at
-   /projects/0/evals/spend_record (a string or null)` when it is named alone); in a finding, a nullable member's failure
-   is one line, its value branch's, ending in ", or null" (`pattern at /projects/0/channels/0/decision (pattern ...),
+   `spend_record`) fails in one line, its value branch's, ending in ", or null" (`pattern at /projects/0/channels/0/decision (pattern ...),
    or null`, `type at /projects/0/evals/spend_record (string), or null`), with no `oneOf` line and no line for the
    `null` branch. At the four members that take the none form (`question_route`, `gap_registry`, `tickets.pd_check`, a
    channel's `texts.final`), a failed type, a `null` included, names the form beside the type: `type (string, or the
@@ -236,13 +234,16 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    length, `other than none`), `not` what the member takes instead (`until only with not_yet`, `a value other than
    none`), and a `oneOf` that is not a nullable member's "(exactly one of its forms)". Only at a channel's `texts` or
    its `texts/holding` does a failure on a member named `none` add "; only texts.final takes the none form
-   (Narrowings)"; anywhere else (the evals, the tickets, the taxonomy, a project, a channel) nothing is added. The view
+   (Narrowings)", on the `additionalProperties`, `propertyNames` or `not` line there and on the "more members than the
+   schema declares" width line of a channel's `texts`; anywhere else (the evals, the tickets, the taxonomy, a project, a
+   channel) nothing is added. The view
    names at most 64 schema places and then one `FAC-SEM-162 at /: and N more`.
 2. Every id once and every decision named (`FAC-SEM-163`, CA-3): a project, a category code, a tier code, a channel, a
    source (a declined one counted with the read ones), a hand-off queue and a recorded decision appear once; a channel
    with replies off names the decision that holds it, and a channel's decision is one `recorded_decisions` lists.
 3. What a channel, a queue and the budgets owe (`FAC-SEM-164`, CA-4): a channel with `holding_reply` declares its
-   holding text and one with replies on its final text; a store review asks no clarifying question; no declared text is
+   holding text and one with replies on its final text, both only when its replies are on (a channel with replies off
+   owes no texts, whatever its `holding_reply`); a store review asks no clarifying question; no declared text is
    blank or carries an em dash (U+2014), which the standard's send checks refuse (its section 2.4), and no tier's label
    either, since the customer may be told it; a queue whose
    answered signal is `none` names its recommendation, and a recommendation on a queue with another answered signal is
@@ -276,12 +277,13 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    costs 16 plus its code points, once (a name is not charged again when its member is entered or placed); after each
    `eyJ`, the rest of the base64url run it starts and, when that run ends at a `.`, the dot and the base64url run after
    it (the JWT shape's second segment); after each `sk-`, in any case, that follows a boundary, up to 255 code points to
-   the end of the string; after every other provider prefix the shared detector knows, anywhere and in any case
+   the end of the string; after every other provider prefix, anywhere and in any case (a bound any detector may need,
+   whatever boundary or case its own shapes take)
    (`gh` and one of `pousr` then `_`, `xox` and one of `abposr` then `-`, `AKIA`, `glpat-`), up to its floor, the run
    its shape needs (20, 10, 16 and 20 code points), which is what a near miss is reread before it fails (a floor counts
    the run the shape needs, not the character that ends it); and after
-   every `sk-` away from a boundary, up to 15 code points after it (`SECRET_VALUE`'s `sk-` run has no boundary today,
-   so it is tried there too). A boundary is the start, a character other than a letter or a digit, or an escape that ends
+   every `sk-` away from a boundary, up to 15 code points after it (a bound too: a detector may try an `sk-` run there,
+   and one that requires a boundary reads less). A boundary is the start, a character other than a letter or a digit, or an escape that ends
    right before the `sk-`: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a backslash escape of
    one character, or a colour sequence `ESC[...m` with any number of parameter characters whose ESC is raw or escaped
    (`\x1b`, `\033`, `\u001b` in either case of the hex digits, or `\e`). For a string read as a URL that parses, the URL
@@ -326,8 +328,9 @@ findings, then the read declaration's `FAC-SEM-165`, then
 `FAC-SEM-162` for an invalid value (and nothing after it), then per project `FAC-SEM-163` and `FAC-SEM-164`. A port may
 compare them as a set.
 
-A reader acts on the findings as `channelAgentView` does (DEC-0150 CA-5), shaped as `connectionsView` answers for the
-[connections](connections.md) key, `errors` always present (an empty list when there are none): with no key it answers
+A reader acts on the findings as `channelAgentView` does (DEC-0150 CA-5), with the same `declared`, `reported` and
+`errors` as `connectionsView` answers for the [connections](connections.md) key, `errors` always present (an empty
+list when there are none): with no key it answers
 `declared: false, reported: false, errors: []`. The read declaration is judged only by the findings under its own
 path: a credential in a misplaced copy, or the budget running out in one, is found at that copy and does not change
 the read declaration's answer; a declaration with
@@ -335,12 +338,14 @@ the read declaration's answer; a declaration with
 `FAC-SEM-163` (a repeated project or id, a channel with replies off and no decision, a decision not recorded) answers
 `declared: false, reported: true` with the findings as `errors`; only a declaration read and valid answers
 `declared: true` (and `errors: []`), with `FAC-SEM-164`'s findings as `obligations`, which the reader shows to its
-author. A test derives this answer from `channelAgentRules`' findings for every vector, reasons included, and four
+author. A test derives this answer from `channelAgentRules`' findings for every vector, reasons included, and six
 vectors carry the view's answer (`view`): a sentence that holds a URL with a password (the gap of item 4), a valid
-read declaration beside a heavy misplaced copy, beside a misplaced copy holding a credential, and a read declaration
-whose own read runs out. Every line of `errors` and `obligations` is `<code> at <place>: <reason>`, the reason the
+read declaration beside a heavy misplaced copy, beside a misplaced copy holding a credential, more than 64 credential
+places in the read declaration beside a misplaced copy with more (each closes its own count), a channel with replies
+off and a holding reply with no texts (declared, nothing owed), and a read declaration whose own read runs out. Every line of `errors` and `obligations` is `<code> at <place>: <reason>`, the reason the
 finding's message without the decision it cites (it holds no declared value: `FAC-SEM-165 at /: the document holds more
-than 1000000 code points ...; the rest was not read for credentials` and `FAC-SEM-165 at /: and N more names or values
+than 1000000 code points ...; the rest was not read for credentials, so a reader treats the declaration as not
+declared; declare fewer or shorter texts or names` and `FAC-SEM-165 at /: and N more names or values
 shaped like a credential` read apart), and identical lines (one code, place and reason) are one line. In short: an invalid declaration gives one
 `FAC-SEM-162 at <place>: <keyword> (<limit>)` line for each place the schema fails and one `FAC-SEM-165 at <place>:
 <reason>` line for each credential place (and the closing ones, at `/`); a manifest whose only copy is misplaced answers
@@ -465,8 +470,8 @@ and this list.
   "until": "YYYY-MM-DD"}` or `{"none": "not_used"}`, closed, `until` a full date) at four members only: the question
   route, the gap registry, `tickets.pd_check` and a channel's `texts.final`. The standard's round 4 names "a text of
   `channels[].texts`": here only the final text takes the form, since a holding text is optional and is left out
-  instead. A missing required member, a refused `null` or a none form elsewhere makes the whole declaration not
-  declared.
+  instead, which is looser than the standard, not narrower (see the next bullet but one). A missing required member, a
+  refused `null` or a none form elsewhere makes the whole declaration not declared.
 - Size read for credentials: at most 1 000 000 code points of names and values per document, every copy of the
   declaration in it sharing them, each name or string charged 16 more than its code points; the read declaration is
   read first, and when its own read runs out it is not declared (`FAC-SEM-165`); a misplaced copy past the budget is
@@ -475,7 +480,9 @@ and this list.
   it only with `none`) and `spend_record: null` with a budget above 0 (the standard keeps `null` for budgets of 0) are
   accepted by the schema and found by `FAC-SEM-164`, so the declaration stays declared; and a channel's
   `quiet_window` and `late_answer_window` and `evals.spend_record` may be absent, read as `null`, where the standard
-  shows them.
+  shows them. Also looser, and declared: `texts.final` may be absent (replies on: a non-blocking `FAC-SEM-164`;
+  replies off: no finding); `texts.holding` may be absent beside `holding_reply: true` (a non-blocking `FAC-SEM-164`);
+  and `holding_reply: true` with a final text `{"none": "not_used"}` stays declared (a non-blocking `FAC-SEM-164`).
 
 The first consumer is owed by the Fabric Agent Adapter: its service check validates the declaration against this schema
 and these vectors. The adapter's row is FAA-197 on its main; CT-209 here.

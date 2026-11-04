@@ -187,7 +187,7 @@ function widths(value: unknown): string[] {
     } else if (isObject(item)) {
       const count = Object.keys(item).length;
       const declared = isObject(rule.properties) ? rule.properties : undefined;
-      if (declared !== undefined && rule.additionalProperties === false && count > Object.keys(declared).length) found.push(`maxProperties at ${at || "/"} (more members than the schema declares)`);
+      if (declared !== undefined && rule.additionalProperties === false && count > Object.keys(declared).length) found.push(`maxProperties at ${at || "/"} (more members than the schema declares${/\/channels\/[0-9]+\/texts$/.test(at) && Object.hasOwn(item, "none") ? "; only texts.final takes the none form (Narrowings)" : ""})`);
       else if (typeof rule.maxProperties === "number" && count > rule.maxProperties) found.push(`maxProperties at ${at} (at most ${rule.maxProperties} members)`);
       else if (declared !== undefined) {
         const names = Object.keys(declared).filter((name) => Object.hasOwn(item, name));
@@ -350,7 +350,8 @@ function schemaView(doc: unknown, site: ChannelAgentSite): { declared: false } |
 }
 
 /**
- * The reader of extensions/channel-agent/0.1 at one site (DEC-0150 CA-1, CA-2, CA-5), shaped as `connectionsView`: no
+ * The reader of extensions/channel-agent/0.1 at one site (DEC-0150 CA-1, CA-2, CA-5), with the same declared, reported
+ * and errors as `connectionsView`: no
  * key is `declared: false, reported: false`; an invalid declaration (FAC-SEM-162), one with a credential-shaped name or
  * value or a part left unread for credentials (FAC-SEM-165), or one with a repeated id or an unnamed decision
  * (FAC-SEM-163) is `declared: false, reported: true`, its errors naming the rule and the place, never the value; a read
@@ -583,8 +584,8 @@ function keyRereads(text: string): number {
     // At a boundary the shape may read a long key; anywhere else the detector's `sk-` run is still tried, up to its floor.
     cost += boundary ? codePoints(text, KEY_REREAD, at) : codePoints(text, SK_FLOOR, at + 3);
   }
-  // Every other provider prefix, anywhere and in any case as the shared detector reads it: a near miss is reread up to
-  // the run its shape needs (its floor) before it fails.
+  // Every other provider prefix, anywhere and in any case: a bound any detector may need, whatever boundary or case its
+  // own shapes take, for a near miss reread up to the run its shape needs (its floor) before it fails.
   for (const [prefix, floor] of PREFIX_FLOORS) {
     prefix.lastIndex = 0;
     for (let match = prefix.exec(text); match !== null; match = prefix.exec(text)) {
@@ -595,7 +596,7 @@ function keyRereads(text: string): number {
   return cost;
 }
 const KEY_REREAD = 255;
-/** What a near miss of `sk-` away from a boundary is reread: the run before SECRET_VALUE's 16 fails. */
+/** A bound for an `sk-` away from a boundary, which a detector may still try: up to 15 code points after it. */
 export const SK_FLOOR = 15;
 /** The shared detector's other provider prefixes, each with the run its shape needs after it (SECRET_VALUE). */
 export const PREFIX_FLOORS: ReadonlyArray<readonly [RegExp, number]> = [[/gh[pousr]_/gi, 20], [/xox[abposr]-/gi, 10], [/akia/gi, 16], [/glpat-/gi, 20]];
@@ -712,7 +713,7 @@ const ID_MEMBERS = new Set(["id", "code", "lead_agent", "owner", "decision", "an
 /** The document's closing FAC-SEM-165 findings, once: the count past SECRET_FINDINGS, and that the rest was not read. */
 function summary(budget: Budget): Finding[] {
   const findings: Finding[] = [];
-  if (budget.unread) findings.push({ code: "FAC-SEM-165", instancePath: budget.unreadAt as string, message: `the document holds more than ${SECRET_BUDGET} code points of names and values in its declarations; the rest was not read for credentials (DEC-0150 CA-5)` });
+  if (budget.unread) findings.push({ code: "FAC-SEM-165", instancePath: budget.unreadAt as string, message: `the document holds more than ${SECRET_BUDGET} code points of names and values in its declarations; the rest was not read for credentials, so a reader treats the declaration as not declared; declare fewer or shorter texts or names (DEC-0150 CA-5)` });
   return findings;
 }
 
@@ -774,11 +775,12 @@ function obligations(project: JsonObject, at: string, cap: Cap = newCap()): Find
   };
   for (const [channel, i] of indexed(project.channels)) {
     const texts = channel.texts as JsonObject;
-    if (channel.holding_reply === true && texts.holding === undefined) flag(`/channels/${i}/texts/holding`, "a channel that sends a holding reply declares the holding text");
+    // A channel that does not reply owes no texts: the holding text follows replies_enabled as the final one does.
+    if (channel.replies_enabled === true && channel.holding_reply === true && texts.holding === undefined) flag(`/channels/${i}/texts/holding`, "a channel that sends a holding reply declares the holding text");
     // A final text in the none form owes nothing; only an absent one does.
     if (channel.replies_enabled === true && texts.final === undefined) flag(`/channels/${i}/texts/final`, "a channel that replies declares the final text");
     // A holding reply obliges a final reply (the standard's section 6): a final text that is not used cannot follow it.
-    if (channel.holding_reply === true && isObject(texts.final) && texts.final.none === "not_used") flag(`/channels/${i}/texts/final`, "a channel that sends a holding reply owes a final reply, so its final text is not one it does not use");
+    if (channel.replies_enabled === true && channel.holding_reply === true && isObject(texts.final) && texts.final.none === "not_used") flag(`/channels/${i}/texts/final`, "a channel that sends a holding reply owes a final reply, so its final text is not one it does not use");
     if (channel.kind === "store_review" && channel.clarifying_question === true) flag(`/channels/${i}/clarifying_question`, "a store review gets one public reply and no clarifying question");
     for (const which of ["holding", "final"] as const) {
       if (which === "final" && isNone(texts.final)) continue;
