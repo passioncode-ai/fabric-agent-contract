@@ -156,9 +156,10 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
   quality](support-quality.md), DEC-0151) and in the channel agent declaration's `project` (DEC-0150): a reader keys a
   day by it and the declaration names the project by it, both as written; the pattern
   `^project:[a-z0-9][a-z0-9._-]{0,127}$` admits only its normal form (lower case, no `%`), so comparing it as written
-  agrees with a comparison by normal form; an alias whose slug word starts with a provider prefix other than `sk-`
-  followed by enough key characters is read as a credential by `FAC-SEM-101` (DEC-0151 item 7), and the registry
-  issues none;
+  agrees with a comparison by normal form; an alias with a slug word that starts with a provider prefix and holds
+  enough key characters (for `sk-`, a run of 32 or more letters, digits, `-` and `_` holding a digit; then `ghp_` and
+  its kin, `xox?-` and `glpat-`) is read as a credential by `FAC-SEM-101` (DEC-0151 item 7), and the operator's
+  registry rule is to issue none;
 - `agentRef` (`urn:fabric:agent:<publisher>:<id>`): its schema pattern admits only lower case and no `%`, so every valid
   value is already its normal form;
 - opaque ids (`activity-common.schema.json#/$defs/opaqueId`: estates, machines, devices, users, sessions, leases),

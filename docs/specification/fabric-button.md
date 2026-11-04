@@ -157,7 +157,7 @@ when the action does not define the parameter (`FAC-SEM-052`), when:
 - a parameter's name carries words to act on, as a whole word (`prompt`, `message`, `msg`, `text`,
   `instruction`, `instructions`: `initialPrompt`);
 - a value is shaped like a credential: a JWT or JWS **anywhere** in it, `Bearer …`, a provider key (`sk-…`,
-  `ghp_…`, `xoxb-…`, `AKIA…`, `glpat-…`, the prefix at the start or after no ASCII letter or digit, a percent-escape or a backslash escape, in its canonical case only, an `sk-` key with a digit and an upper-case letter or 32 characters, DEC-0151), or a long secret: a run of 40 or more base64 or base64url
+  `ghp_…`, `xoxb-…`, `AKIA…`, `glpat-…`, DEC-0151 item 7: the prefix in its canonical case only, at the start or after no ASCII letter or digit, or after one of the escapes item 7 lists; an `sk-` key with a digit and an upper-case letter with 16 or more characters, or a digit with 32 or more), or a long secret: a run of 40 or more base64 or base64url
   characters (`+`, `/`, `=`, `-` and `_` among them) that mixes upper case, lower case and digits (a lowercase
   hex digest, such as a commit, passes). Each value is checked as decoded and also as written, percent-decoded
   with a raw `+` kept, since form decoding turns `+` into a space;

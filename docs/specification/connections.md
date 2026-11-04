@@ -57,21 +57,24 @@ No string member carries a credential or a URL with one. What counts is defined 
   that holds a URL, the text before its first scheme's `://` is read for a long run (whatever is glued to the scheme), and the URL
   as below;
 - any URL in the member, at its start or inside prose, that carries a credential as the shared `secretUrl` reads it
-  (DEC-0044's detector: a password, a parameter such as `api_key` with a value, and its own shapes, without a word
-  start or a case rule), plus the Telegram shape, which keeps its word start there. A URL runs from each scheme in a
+  (DEC-0044's detector: a password, a parameter such as `api_key` with a value, and its own shapes, which since
+  DEC-0151 take a word start with escapes, canonical-case prefixes and the `sk-` strength), plus the Telegram shape, which keeps its word start there. A URL runs from each scheme in a
   piece to the next space (any whitespace: a tab or a no-break space ends it too); it is read without the brackets, quotes and punctuation that close a sentence, and with
   one of them put back, since `]` closes an IPv6 host. Inside a URL nothing is promised beyond what `secretUrl`
   finds: it reads a path between its separators, so a secret a `/` splits into short pieces can pass, and its gaps
   are CT-73's.
 
 A URL written without a scheme (`api.example.com/?api_key=…`) is not read as one. A name that matches a shape, such as
-a store `sk-Prod-eu-west-1-db`, a URL path holding `sk-learn-classifier-v2` or a URL path segment of 40 or more mixed
+a store `sk-Prod-eu-west-1-db` or a URL path segment of 40 or more mixed
 characters (a Google Docs document id, or a Notion link whose segment joins the page title and its id; a bare Notion
 id is lower-case hex), hides the whole declaration; its author removes a model id from the text or declares it as a
 model connection of its own whose `target` is the id, drops the link, or renames a target that is the author's own
-name. These shapes are a variant of the shared detector in `src/secret-shape.ts` (DEC-0044): narrower by the word
-start, the `sk-` rules, case-sensitive prefixes, a Bearer token's length and digit, and no long run in a model's
-`target` outside a URL; wider by the Telegram bot token. Whether the shared detector adopts them is CT-73.
+name. These shapes are a variant of the shared detector in `src/secret-shape.ts` (DEC-0044). Since DEC-0151 the shared
+detector has a word-start boundary too (with escapes), canonical-case prefixes and the `sk-` strength, so a URL path
+holding a weak `sk-` name, such as `sk-learn-classifier-v2`, no longer hides a declaration. The remaining differences:
+the Bearer rule (a token's length and digit; the shared `secretValue` reads a value that starts with `Bearer` and a
+space as a credential whatever follows), the per-member long run (none in a model's `target` outside a URL), and the Telegram bot
+token, which only a connection reads. Whether the shared detector adopts them is CT-73.
 
 ## Reading it
 

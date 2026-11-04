@@ -19,10 +19,13 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   `day`, `kind`, a family) named in `notMeasured` is reported as "not a metric" instead of "not carried"; no sum rule,
   since the channel agent standard's section 5 states none (`fixtures/semantic/support-quality-daily-tickets-no-sum.json`).
 - The schema's `calibration` description corrected ("an ISO week that starts no later than day"), as CT-188 noted.
-- Fixtures: four positive (one an events page with two projects' days, one with `project:alpha`), six negative (with
-  catalogue rows), five semantic; the DEC-0151 tests in `test/support-quality.test.ts`, among them DEC-0070's bounds (19
-  top-level members, 10 in `outcomes`, 28 had the outcomes stood at the top level), two projects' days on one channel,
-  and a 40-character mixed-case id refused as a project.
+- Fixtures: five positive (`support-quality-daily-tickets`, `-first-reply-unmeasured` and `-project`, and two events
+  pages, `service-events-page-support-quality-projects` with two projects' days and `-sk-slug`), six negative (with
+  catalogue rows), six semantic. Tests: in `test/support-quality.test.ts`, DEC-0070's bounds (19 top-level members, 10
+  in `outcomes`, 28 had the outcomes stood at the top level), the top-level partition, two projects' days on one
+  channel, a 40-character mixed-case id refused as a project and the interim first-reply day; in
+  `test/secret-shape.test.ts`, the detector's boundary, escapes, `sk-` strength, canonical case, the residual aliases,
+  the differential against origin/main's pattern and the linear-time budget.
 - `pnpm validate --schema support-quality-daily --kind support-quality-daily` prints the same for every support-quality
   fixture of origin/main before and after the change (19 files compared).
 - conformance.md's producer and reader rows, DOCMAP, CONTEXT, DEC-0095 and DEC-0144 annotated; CT-210 filed; CT-129 and
@@ -57,8 +60,8 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   at the time of the day, never re-attributed; CT-210 (d) asks the channel agent standard's owner to write the turn unit
   and the signal server's ticket counts into section 5.1. The seam reading of round 3 then replaced the boundary: a
   consuming group instead of a look-behind (portable to a port without look-behind), and an `sk-` key needs a digit
-  and an upper-case letter or 32 characters, as `src/connections.ts` asks, so an `sk-` slug word passes and only a
-  slug word starting with another provider prefix is read as a credential (the residual the page documents). The
+  and an upper-case letter or 32 characters, as `src/connections.ts` asks, so a weak `sk-` slug word passes (round 4
+  states the residual: a slug word that starts with a provider prefix and holds enough key characters). The
   coordinator then took KEY_SHAPE's exact semantics: the pattern drops its `i` flag, spells `Bearer` in any case by
   hand and reads the prefixes in their canonical case only (`SK-`, `GHP_` are no longer found), so the upper-case test
   means what it says (`sk-learn-experiments-2026` is no key; `sk-or-v1-` with 64 lower-case hex digits still is). A
@@ -68,6 +71,22 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   `GHP_` value now hold an `AKIA` value, digests recomputed. A sweep of 200000 generated values against origin/main's pattern (upper- and lower-case
   prefixes, mixed, lower-case, hex and upper-case tails) found 0 that the new pattern finds and the earlier did not
   (15886 both, 82543 only the earlier).
+- Round 4 of the readings (on `8660ae24`): four breaks fixed. The `sk-` look-aheads were quadratic (`-sk` repeated to
+  320000 characters took 17 s); both are bounded to 255 characters, read lazily, in both copies, and a CPU-time test
+  holds `SECRET_VALUE.test`, `secretValue`, `secretArgument` and `secretUrl` under 150 ms on `-sk` repeated 100000
+  times, with and without an `-a` tail (about 45 to 55 ms each when measured here); the same construct in
+  `src/connections.ts` `KEY_SHAPE` is CT-213. The residual is stated right everywhere: a slug word that starts with a
+  provider prefix and holds enough key characters (for `sk-`, a run of 32 or more holding a digit; `AKIA` dropped, a
+  lower-case alias never holds it), pinned by `project:sk-customer-support-team-europe-2026`. connections.md and CT-73
+  now say what the shared detector has since DEC-0151 (CT-73's examples re-measured), DEC-0044 is annotated, and
+  profiles.md and fabric-button.md take the exact strength wording and point to item 7's escapes. The coordinator's
+  decisions applied: the boundary also takes `\x` with two hex digits, `\b`, `\f`, `\v`, `\0`, `\a`, `\e`, a raw ESC
+  colour sequence and an escaped one; CT-210 (d) is a named prerequisite of producer adoption; a day without `project`
+  from a several-project service is a merged day, never attributed to one project; the interim gate accepts exactly
+  the one FAC-SEM-126 finding; the alias rule binds a producer that must carry `project`, and the registry's rule is
+  the operator's; the ports' wording; how a reader combines per-project days is the reader's. A sweep of 300000
+  generated values (escapes and ESC included) found 0 that the new pattern finds and origin/main's did not (40485
+  both, 107147 only the earlier).
 
 ## Open
 
@@ -101,23 +120,16 @@ was written; the source-manifest branch was at `19bab6fd`). DEC-0151 merges afte
   is" in its CA-5, in `channel-agent.md`'s check of a declaration, and in its handoff's note on the detector). Whichever
   lands second keeps DEC-0151's boundary and drops that note; the advice to rename an id that starts with `sk-` stays
   true, since a prefix at the start of a value is still found.
-- `src/secret-shape.ts` CONFLICTS with the source-manifest branch (DEC-0149): its `jwtSpans` and `hasJwt` block (with
-  `rawValues`) sits right above DEC-0151's rewritten comment. The resolution: keep DEC-0149's JWT helpers, then
-  DEC-0151's comment and `SECRET_VALUE` line, then rewrite the expected source in that branch's
-  `test/source-rules.test.ts` (line 77, "read the provider keys SECRET_VALUE names, without its whole-value bearer
-  branch") to the new pattern: `(^bearer\s.+|`, DEC-0151's boundary group, then the alternatives with the `sk-`
-  strength, as `src/secret-shape.ts` writes them. That branch's `KEY_SHAPES` and `KEY_SHAPE_SOURCES` then take the
-  same boundary and `sk-` strength. Its source rules already need a boundary of their own (`LETTER_OR_DIGIT`, any
-  script); DEC-0151's is ASCII, because the detector reads without the `u` flag, so a non-ASCII letter before a prefix
-  still counts as a boundary here. With the pattern's `i` flag dropped, that branch's `source-rules` tests that derive
-  from `SECRET_VALUE.source` (the line-77 check and "drops the detector's whole-value bearer branch and nothing else")
-  read `^[Bb][Ee][Aa][Rr][Ee][Rr]\s.+` as the bearer branch, and its `KEY_SHAPES` drop their `i` flags too.
-  Checked on a scratch copy of that branch at `19bab6fd` with DEC-0151's final line and DEC-0151's changed tests,
-  fixtures and vector file copied in: its 29 vector files match their generators, and of its whole suite (10088 tests)
-  four fail, all owed by the second to merge: the two source-derived tests above, and
-  `fixtures/semantic/source-manifest-secret-in-purpose.json` (two tests), whose purpose holds
-  `sk-example-not-a-key-0000` (a digit, no upper-case letter, under 32 characters: no longer a key); its value takes a
-  digit and an upper-case letter.
+- `src/secret-shape.ts` and the source-manifest branch (DEC-0149): that branch's rework keeps the tree check's own
+  unbounded provider-key shapes, a fixed list held equal to a vectors constant for parity with the adapter's source
+  check, no longer derived from `SECRET_VALUE`, so the earlier instruction that the second to merge gives its
+  `KEY_SHAPES` DEC-0151's boundary, strength and case is withdrawn (the coordinator, from DEC-0149's seam reading).
+  After that rework its tests no longer read `SECRET_VALUE.source`, and its
+  `fixtures/semantic/source-manifest-secret-in-purpose.json` holds a key found under both patterns (at origin's
+  `c68690c7`, read on 2026-11-04, the fixture still held `sk-example-not-a-key-0000`, which DEC-0151's pattern does
+  not find: check it at merge). The only remaining conflict is the textual one in `src/secret-shape.ts`: its
+  `jwtSpans` and `hasJwt` block (with `rawValues`) sits right above DEC-0151's rewritten comment; keep DEC-0149's JWT
+  helpers, then DEC-0151's comment and `SECRET_VALUE` line.
 - DEC-0150's branch at `bba0209d` with DEC-0151's final line and DEC-0151's changed tests, fixtures and vector file, on
   a scratch copy: its 29 vector files match their generators, and of its whole suite (9930 tests) two fail, owed by the
   second to merge: the channel-agent vectors "a token slot whose project segment is shaped like a provider key" and "a
@@ -147,8 +159,9 @@ was written; the source-manifest branch was at `19bab6fd`). DEC-0151 merges afte
 ## Checks actually run
 
 On `03c0328f` the coordinator ran `pnpm vitest run --coverage`: exit 0, 108 files, 9799 tests passed, 1 skipped. On
-the head that drops the `i` flag, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage`
-0 (109 files, 9821 tests passed, 1 skipped; 9816 on `e1191560`, 9819 on `82aa26eb`, 9820 on `706075de`); `python3 docs/ux/lint.py` 0;
+the round-4 head, each exit code read separately: `pnpm exec tsc --noEmit -p .` 0; `pnpm vitest run --coverage`
+0 (109 files, 9823 tests passed, 1 skipped; 9816 on `e1191560`, 9819 on `82aa26eb`, 9820 on `706075de`, 9821 on
+`8660ae24`); `python3 docs/ux/lint.py` 0;
 `pnpm run docs:check` 0; `pnpm privacy:check` with the organization's index 0 (0 findings);
 `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files match; support quality has no vector generator). No U+2014 in
 the added lines.

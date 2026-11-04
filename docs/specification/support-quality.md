@@ -5,7 +5,8 @@ code [`src/support-quality-rules.ts`](../../src/support-quality-rules.ts) · tes
 [`test/support-quality.test.ts`](../../test/support-quality.test.ts) · fixtures `fixtures/positive/support-quality-daily.json`,
 `fixtures/positive/support-quality-daily-calibrated.json`, `fixtures/positive/support-quality-daily-tickets.json`,
 `fixtures/positive/support-quality-daily-first-reply-unmeasured.json`, `fixtures/positive/support-quality-daily-project.json`,
-`fixtures/positive/service-events-page-support-quality-projects.json`, `fixtures/semantic/support-quality-daily-*`
+`fixtures/positive/service-events-page-support-quality-projects.json`,
+`fixtures/positive/service-events-page-support-quality-sk-slug.json`, `fixtures/semantic/support-quality-daily-*`
 
 An agent that answers people (chat, mail, reviews, community) MAY publish its support quality; one that does publishes,
 on its events feed, one event of kind
@@ -16,7 +17,8 @@ service.md asks. A reader recognises the payload by `data.value.kind` (`support-
 latest event (the greatest id in that service's feed). A reader that adopted DEC-0151 keeps, per service, channel, day
 and project, the latest event: an absent `project` names the service's only project at the time of the day (the
 channel agent declaration's single entry, where one exists), and a day published before the service served a second
-project is not re-attributed. An agent that serves several
+project is not re-attributed. A day without `project` from a service that served several projects that day names no single
+project: a reader keeps it per service, channel and day as a merged day and never attributes it to one project. An agent that serves several
 projects on one channel publishes one event per project and day, each naming its `project`, under DEC-0151's producer
 rule below (`fixtures/positive/service-events-page-support-quality-projects.json`). A producer never changes the project
 form of a day it has already published: a day first published without `project` is rerun without it, and a day a
@@ -49,14 +51,16 @@ standard behind it (what is measured, the rubric, the judge) is the asker's, iss
 | `calibrationChecks` | optional, only beside `calibration`: each rubric check's share of the labelled verdicts the judge matched, named as in `checks`; a check a person did not label is left out, and with none labelled the member is absent. A member of its own, so the payload stays two levels deep |
 
 Counts and rates only: no person's words, no ids (the project's registry alias excepted) and no judge notes, so `FAC-SEM-101` (a credential detector) finds nothing in it; keeping a
-person's words out is the producer's duty (service.md). An alias with an `sk-` slug word passes
+person's words out is the producer's duty (service.md). An alias with a weak `sk-` slug word passes
 (`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`): the detector takes an `sk-` key only with a
-digit and an upper-case letter and 16 or more characters, or a digit and 32 or more, and reads every provider prefix in
-its canonical case only (DEC-0151). The residual exception is a slug word that
-starts with another provider prefix (`ghp_` and its kin, `xoxb-` and its kin, `AKIA`, `glpat-`) followed by enough key
-characters, such as `project:ghp_customerservicedeskabcdef`: the detector reads it as a credential and the events page
-fails `FAC-SEM-101`. The detector stays strict there; the registry does not issue such an alias, and a producer whose
-alias is read so publishes nothing for that channel until its alias changes (`test/secret-shape.test.ts`).
+digit and an upper-case letter with 16 or more characters, or a digit with 32 or more, and reads every provider prefix
+in its canonical case only (DEC-0151). The residual exception is a slug word that starts with a provider prefix and
+holds enough key characters: for `sk-`, a run of letters, digits, `-` and `_` of 32 or more holding a digit, as a
+lower-case `sk-or-v1-` key does (`project:sk-customer-support-team-europe-2026`); then `ghp_` and its kin, `xoxb-` and
+its kin, and `glpat-` (`project:ghp_customerservicedeskabcdef`). The detector reads such an alias as a credential and
+the events page fails `FAC-SEM-101`; it stays strict there (`test/secret-shape.test.ts`). The operator's registry rule
+is to issue no such alias, a rule of the registry this contract does not prove; the rule here binds a producer that
+must carry `project`: one whose alias is read so publishes nothing for that channel until its alias changes.
 The feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries `calibration` and
 `calibrationChecks` once every reader of its feed it knows of has adopted DEC-0144. A reader that validates against an
 older copy of the schema (closed) refuses that day's `value` whole and keeps the event's `text`, so the day's numbers
@@ -93,9 +97,13 @@ one event per project and day once every reader has adopted DEC-0151, and never 
 `nobodyDropped.firstReplyP50Ms` and `firstReplyP90Ms` (the earlier pattern refused them, so a producer could not name
 an unmeasured first-reply time and stay valid); an older copy refuses such a name too, so a producer writes one under
 the same rule. In the meantime a producer with an unmeasured first-reply time leaves it `null` and unnamed, so a reader
-on an older copy still accepts the day: it gives up FAC-SEM-126 for that metric only
-(`fixtures/semantic/support-quality-daily-first-reply-interim.json`), and names it once every reader of its feed has
-adopted DEC-0151.
+on an older copy still accepts the day: the validator then reports exactly one FAC-SEM-126 finding, at that metric
+(`fixtures/semantic/support-quality-daily-first-reply-interim.json`), and a producer's gate accepts exactly that finding
+for that metric and no other; the producer names the metric once every reader of its feed has adopted DEC-0151.
+
+No producer carries the ticket counts until two prerequisites outside this contract hold (CT-210 step (d)): the
+channel agent standard's section 5.1 says that `/1` takes `autonomy.toPersonPolicy` and `toPersonInability` in turns,
+and its observed check accepts a channel a producer withholds during the wait.
 
 ### The channel agent standard's channel kinds (DEC-0151)
 
@@ -152,6 +160,7 @@ a mapping costs nothing.
   until `/1` names a ticket unit, a producer on the channel agent standard writes them in turns, or `null` and named in
   `notMeasured`, and a reader computes no "to a person" ticket share from them: it takes it from the channel agent
   standard's signal server or leaves it out.
+- How a reader combines one channel's per-project days: the reader's choice; rates and percentiles are never summed.
 - The four summary numbers the channel agent standard derives (answered, to a person, fallback, unanswered), as
   shares of `ended`: the reader's.
 - The move from the asker's first implementation (its v2 shape, under its own URN): its producers move to

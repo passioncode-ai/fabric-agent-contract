@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SECRET_VALUE, secretArgument, secretValue } from "../src/secret-shape.js";
+import { SECRET_VALUE, secretArgument, secretUrl, secretValue } from "../src/secret-shape.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 
 // DEC-0151: a provider key's prefix counts only where no letter or digit stands right before it, so a slug such as
@@ -45,7 +45,7 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
   });
   it("finds nothing the earlier pattern did not, over a sweep of prefixes, joins and tails", () => {
     const earlier = /(^bearer\s.+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,})/i;
-    const heads = ["", "a", "Z", "9", "_", "-", ".", ":", " ", "%2", "%20", "%2g", "\\", "\\n", "\\x", "\\u002", "\\u0022", "\\uZZZZ", "\"", "'", "=", "/", "é", "bearer "];
+    const heads = ["", "a", "Z", "9", "_", "-", ".", ":", " ", "%2", "%20", "%2g", "\\", "\\n", "\\x", "\\u002", "\\u0022", "\\uZZZZ", "\\x41", "\\b", "\\e", "\\0", "\u001b[0m", "\\u001b[1;31m", "\u001b[0", "\"", "'", "=", "/", "é", "bearer "];
     const prefixes = ["sk-", "SK-", "ghp_", "gho_", "xoxb-", "xoxq-", "AKIA", "akia", "glpat-", "s k-"];
     const tails = [tail(8, "aB3cD4"), tail(24, "aB3cD4eF5gH6jK7mN8"), tail(16, "0123456789ABCDEF"), tail(40, "abc-def_")];
     let newOnly = 0;
@@ -80,17 +80,48 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
     for (const value of ["Bearer abc.def", "bearer abc.def", "BEARER abc.def", "bEaReR x"]) expect(SECRET_VALUE.test(value), value).toBe(true);
     expect(SECRET_VALUE.flags).toBe("");
   });
-  it("accepts an alias with an sk- slug word, and still reads one whose slug word starts with another prefix as a credential (DEC-0151)", () => {
+  it("accepts an alias with a weak sk- slug word, and reads one whose slug word starts with a provider prefix and holds enough key characters as a credential (DEC-0151)", () => {
     const page = (project: string) => ({ events: [{ id: "1", at: "2026-10-19T00:20:00Z", kind: "support.quality_daily", level: "info", text: "Support quality for chat on 2026-10-18.", data: { schema: "https://support.example.com/schemas/support-quality-daily.schema.json", value: { kind: "support-quality-daily/1", project } } }], cursor: "1" });
     const codes = (project: string) => evaluateSemanticRules("service-events-page", page(project)).map((finding) => finding.code);
     for (const project of ["project:sk-learn-experiments", "project:acme-sk-customer-support-eu", "project:sk-hynix-customer-care"]) {
       expect(codes(project), project).not.toContain("FAC-SEM-101");
     }
-    // The residual: a slug word that starts with ghp_ and 20 or more letters or digits is read as a GitHub key.
+    // The residual: a slug word that starts with a provider prefix and holds enough key characters. For sk-, a run of
+    // 32 or more letters, digits, - and _ holding a digit (as a lower-case sk-or-v1- key does); for ghp_, 20 or more.
+    expect(codes("project:sk-customer-support-team-europe-2026")).toContain("FAC-SEM-101");
     expect(codes("project:ghp_customerservicedeskabcdef")).toContain("FAC-SEM-101");
   });
   it("lets a support-quality day name a project whose slug holds -sk- (FAC-SEM-101 on the events page)", () => {
     const page = { events: [{ id: "1", at: "2026-10-19T00:20:00Z", kind: "support.quality_daily", level: "info", text: "Support quality for chat on 2026-10-18.", data: { schema: "https://support.example.com/schemas/support-quality-daily.schema.json", value: { kind: "support-quality-daily/1", project: "project:helpdesk-customer-support" } } }], cursor: "1" };
     expect(evaluateSemanticRules("service-events-page", page).filter((finding) => finding.code === "FAC-SEM-101")).toEqual([]);
+  });
+  it("finds a key after the further escapes: \\x, \\b \\f \\v \\0 \\a \\e, a raw ESC colour sequence and an escaped one (DEC-0151)", () => {
+    const hex = tail(64, "0123456789abcdef");
+    const esc = String.fromCharCode(27);
+    for (const key of [`sk-or-v1-${hex}`, keys.openai, keys.github, `AKIA${tail(16, "0123456789ABCDEFGHJ")}`]) {
+      for (const head of ["a\\x41", "a\\b", "a\\f", "a\\v", "a\\0", "a\\a", "a\\e", `a${esc}[0m`, `a${esc}[1;31m`, "a\\u001b[0m", "a\\u001b[1;32m"]) {
+        expect(SECRET_VALUE.test(head + key), JSON.stringify(head + key)).toBe(true);
+      }
+    }
+    // Not escapes: a letter or digit before the prefix still hides it.
+    for (const head of ["a\\x4", "a\\q", `a${esc}[0`, "ab"]) expect(SECRET_VALUE.test(head + keys.github), JSON.stringify(head)).toBe(false);
+  });
+  it("reads a long run of sk- prefixes in linear time: the look-aheads are bounded to 255 characters (DEC-0151)", () => {
+    // CPU time of this thread where the runtime offers it, else of the process: a fixed budget, far above the bound.
+    const usage = (): NodeJS.CpuUsage => ((process as unknown as { threadCpuUsage?: () => NodeJS.CpuUsage }).threadCpuUsage ?? process.cpuUsage)();
+    const cpuMs = (run: () => unknown): number => {
+      const start = usage();
+      run();
+      const end = usage();
+      return (end.user - start.user + end.system - start.system) / 1000;
+    };
+    for (const value of ["-sk".repeat(100000), `${"-sk".repeat(100000)}-a`]) {
+      for (const [name, check] of [["SECRET_VALUE.test", (v: string) => SECRET_VALUE.test(v)], ["secretValue", secretValue], ["secretArgument", secretArgument], ["secretUrl", secretUrl]] as const) {
+        let found = true;
+        const ms = cpuMs(() => { found = check(value); });
+        expect(found, name).toBe(false);
+        expect(ms, `${name} on ${value.length} characters`).toBeLessThan(150);
+      }
+    }
   });
 });
