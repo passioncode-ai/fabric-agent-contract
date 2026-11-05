@@ -784,7 +784,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(page).toContain("### Grammar");
     expect(section).toContain("1 000 000");
   });
-  it("names the expected type alone, and a nullable member's types and null on its oneOf line", () => {
+  it("names the expected type alone, and a nullable member's failure in one line ending ', or null'", () => {
     const p0 = value.projects[0];
     const broken = { ...p0, evals: { ...p0.evals, spend_record: "Support" }, channels: [{ ...p0.channels[0], holding_reply: "yes" }, p0.channels[1]] };
     const view = channelAgentView({ extensions: { [KEY]: { ...value, projects: [broken] } } }, "well-known");

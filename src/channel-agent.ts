@@ -325,7 +325,7 @@ export function placed(error: { keyword: string; instancePath: string; schemaPat
 export function schemaErrors(value: unknown, validate: ValidateFunction): string[] {
   try {
     if (validate(value) === true) return [];
-    // A nullable member's null branch fails `type` (null) for every non-null value; its `oneOf` line names null instead.
+    // A nullable member's null branch fails `type` (null) for every non-null value; that line and the `oneOf` line are dropped.
     // An `if` line only says which branch of a member that takes the none form failed; that branch's own lines say how.
     // A nullable member (a `oneOf` with a null branch) fails as its value branch does: that branch's line says
     // ", or null", and the `oneOf` line is dropped, so no line repeats another.

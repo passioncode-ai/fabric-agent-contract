@@ -229,7 +229,7 @@ FAA-197, on the adapter's main).
   the `FAC-SEM-165` line asking for its removal. The seam reading of round 17 failed on the same CA-8 and section 4.10 break, already bounded: CA-8, item 8 and the
   conformance row now name section 4.10 and cite DEC-0121 AP-3 for where the operator's word comes from; the merge
   post asks the owner to fold CA-8 and its bound into section 4; the sibling notes give the schema count with
-  DEC-0149, DEC-0150 and DEC-0153 (150) and the merge steps for DEC-0153 and DEC-0152; main is `ed4d6aa7`.
+  DEC-0149, DEC-0150 and DEC-0153 (150) and the merge steps for DEC-0153 and DEC-0152; main is `ed4d6aa7`. Superseded by round 21.
 - Round 18 of the readings (on `25e68f25`: unit pass with one note, product one break), with the coordinator's
   decisions applied, the safest reading, which keeps AP-3's prompt-injection boundary closed: CA-8 adds no source to
   DEC-0121 AP-3. A word recognised in a chat is not one of AP-3's sources: it acts only inside that chat, lifting the
@@ -239,7 +239,7 @@ FAA-197, on the adapter's main).
   the owner is the operator and the session owner's send record shows it neither sent by an agent nor relayed from the
   ticket board. A request inside the agent's own task is the task; what stays data is text that tries to change the
   task, its tools, recipients, spend or access. CT-220 is cited as open. The page, item 8 and the conformance row say
-  the same; the merge post asks the standard's owner the `account` question.
+  the same; the merge post asks the standard's owner the `account` question. Superseded by round 21.
 - Round 18's seam reading (on `25e68f25`: one merged-tree break), with the coordinator's decisions applied: once
   DEC-0149 lands, a non-blocking line exits 0 (`severity: "accepted"` only), and `FAC-SEM-164` sets no severity and
   exits 1, so the behaviour stays and the words change: wherever this branch called `FAC-SEM-164` non-blocking (the
@@ -256,7 +256,7 @@ FAA-197, on the adapter's main).
   without acting, naming the route), SCN-043 gains it and a customer's injected request as alternative paths, and the
   merge post asks the standard's owner to fold it in. CT-220 is "to be read with" CA-8 when it is drafted. DEC-0150's
   Source names rounds 1 to 19 and round 18's decision. The vectors' text says a reader does not read the
-  recommendation, and the renamed vector pins its view (declared, with its `FAC-SEM-164` obligation).
+  recommendation, and the renamed vector pins its view (declared, with its `FAC-SEM-164` obligation). Superseded by round 21.
 - Round 20 of the readings (on `5a68ce3a`: unit pass with one risk, product three breaks), with the coordinator's
   decisions applied, round 19's response corrected: the out-of-chat response sends nothing in a chat another person can
   read; the agent tells the operator where only the operator reads it (the operator channel when bound, else its own
@@ -268,12 +268,12 @@ FAA-197, on the adapter's main).
   ticket and is not counted in section 5.1's figures; OC-7 is cited beside OC-5. The page drops the count of vectors
   that carry a view. SCN-043's Coverage says each producer's own test is owed, and FLW-29's rejected shape gains the
   chat word. The vectors' text gives both holding-reply clauses of `FAC-SEM-164` with its replies on. DEC-0150's
-  Source names rounds 1 to 20 and the decisions of rounds 19 and 20.
+  Source names rounds 1 to 20 and the decisions of rounds 19 and 20. Superseded by round 21.
 - Round 20's seam reading (on `5a68ce3a`: the scope break, already fixed at `a6f5ec10`), with the coordinator's
   additions: the operator channel's page says that when the agent's bot also answers people, OC-3, OC-7, OC-12 and
   OC-14 to OC-16 bind only the operator channel's bound chat, and every other chat is bounded by CA-8 and the standard
   (staff messages read for the quiet window, the answer under the asked message, sections 4.8 and 10); the adoption
-  paragraph's test names the private response; FLW-29 gains the chat word as an entry point and a branch.
+  paragraph's test names the private response; FLW-29 gains the chat word as an entry point and a branch. Superseded by round 21.
 - Round 21 of the readings (on `62ec2364`: unit pass, product two breaks from clauses added in rounds 19 and 20),
   with the coordinator's decision: CA-8 shrinks to what the standard and AP-3 already support, in one wording on the
   page, in DEC-0150's item 8 and in the conformance row: text from a channel is data and a request inside the task is
@@ -292,6 +292,15 @@ FAA-197, on the adapter's main).
   is not one of CA-8's channels and stays a DEC-0121 AP-3 source (AP-3's own sentence; OC-5 and OC-7 for its form),
   without OC-1; one bot serving both is not covered and keeps every operator-channel rule in every chat as written, and
   the case joins the merge post's questions. A landing note appends CA-8's bound to CT-220's row after merging main.
+- Round 22 of the readings (on `873208a5`: unit pass with one risk and one note, product one break), with the
+  coordinator's decisions: the merge post's section 5.1 item names DEC-0151's ask (CT-210 (d): `autonomy.answeredTickets`,
+  `stability.safeReplyTurns`, `stability.safeReplyTickets`, deferred), posted once, and the landing list names all
+  three; CA-8 adds that until the owners answer a bot that serves both cannot answer people in a group as the standard
+  asks (the operator channel gets its own bot, OC-2), and that the ticket stays a customer ticket, its outcome set and
+  counted as sections 3 and 5.1 say; SCN-043's Anna path is a private chat, the hold that agent's own (section 4.10) or
+  its approval-held draft (section 3), while a service's hold behind `approve-reply` waits for AP-3's sources; the Done
+  entries of rounds 17 to 20 whose clauses were removed say so; the vectors' text and a stale comment and test title
+  follow the nullable member's one-line failure and the none form.
 
 ## The branch and its history
 
@@ -468,7 +477,8 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
   removed, since DEC-0151's section answers it;
 - the daily quality payload bullet in `channel-agent.md#compatibility` (with the shared-channel quality check and the
   unit of `toPerson*`): a pointer to DEC-0151 and to the support quality page's channel kinds table and per-project
-  keying, naming the answered-ticket row `autonomy.answeredTickets`;
+  keying, naming the three new rows `autonomy.answeredTickets`, `stability.safeReplyTurns` and
+  `stability.safeReplyTickets`;
 - "(the memory capability's pattern; DEC-0151, in progress on CT-210, proposes the same `projectAlias`)" in
   `channel-agent.md` (what the members mean), which becomes a statement that the two patterns are one;
 - the sentence in `channel-agent.md` (what the members mean) that names DEC-0151 in progress and says when a reader
@@ -494,6 +504,12 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
   `service-channel-agent-extension.schema.json` `$defs/channel/properties/kind`'s `enum` instead of a literal list.
 
 ## Checks actually run
+
+On round 22's change, each exit code read separately: `pnpm typecheck` 0; `pnpm run docs:check` 0 (markdownlint 0
+errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0 findings); `pnpm vectors:check` 0 (29 vector files match their
+generators, after `pnpm vectors:write`); `pnpm vitest run test/channel-agent.test.ts test/consistency.test.ts
+test/operator-channel.test.ts` 0 (408 passed); a `git grep` of this handoff for the old name of the stability
+turns row prints nothing.
 
 On round 21's seam change, each exit code read separately: `pnpm typecheck` 0; `pnpm run docs:check` 0 (markdownlint 0
 errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0 findings); `pnpm vectors:check` 0 (29 vector files match their
@@ -535,7 +551,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 21 (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 22 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -580,9 +596,9 @@ here), and adds:
   ASCII and percent rules; every other string, a sentence that holds a URL included ("Please write to
   https://u:p@help.example/"), is read for key shapes only, so a password there is not found: is that gap acceptable
   for the standard's section 11 check;
-- to be asked of the standard's owner: that section 5.1 name its answered-ticket row `autonomy.answeredTickets`
-  (v2's `autonomy.answered` counts turns, message `5a1334d1`) and mark it and `stability.fallbackTurns` deferred, as
-  DEC-0151's CT-210 (d) asks; DEC-0151's ask and this one are the same request; and keep `toPerson*` under `autonomy`;
+- the section 5.1 names are DEC-0151's ask (its CT-210 (d), quoted at posting time: `autonomy.answeredTickets`,
+  `stability.safeReplyTurns`, `stability.safeReplyTickets`, marked deferred); the coordinator posts it once; keep
+  `toPerson*` under `autonomy`;
 - to be asked of the standard's owner: section 5.1 counts `toPersonPolicy` and `toPersonInability` in tickets where
   `/1` names no ticket unit (its autonomy counts are bounded by turns); which unit it means (DEC-0151, in progress, proposes one);
 - the coordinator asks the standard's owner to hold the observed per-project quality check for shared channels until

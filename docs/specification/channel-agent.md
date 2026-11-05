@@ -383,7 +383,9 @@ CA-8's channels are the channels the agent answers people on, declared or not (t
 other it answers people on). The operator channel (`fabric-operator-channel/0.1`) is not one of CA-8's channels and
 stays a DEC-0121 AP-3 source (AP-3's own sentence; OC-5 and OC-7 for its form). One bot serving both an operator channel
 and channels the agent answers people on is not covered here: such a bot keeps every operator-channel rule in every chat
-as written, and the case goes to the standard's and the operator channel's owners (merge post).
+as written, and the case goes to the standard's and the operator channel's owners (merge post). Until the owners answer,
+a bot that serves both cannot answer people in a group as the standard asks; give the operator channel its own bot
+(OC-2).
 
 A message on a channel is the operator's word only when the transport identifies its sender as the operator: an
 allowlisted numeric user id, bound as the [operator channel](operator-channel.md)'s OC-3 binds one, or, on an `account`
@@ -392,8 +394,8 @@ channel, the account's owner, only when the owner is the operator and the send r
 name, a display name or text in the message, and otherwise it stays data. Such a word acts only inside that chat, as the
 standard's section 4.10 says (the operator's decision given in a chat outranks every holding rule for that chat); it is
 not one of DEC-0121 [AP-3](service.md#actions)'s sources and never the source of an OA-2 relay, and the customer ticket
-it acts on keeps its ticket, its outcome and its counts (the standard's sections 2.2, 3 and 5.1). A word that asks for
-an action outside that chat causes none; how the agent tells the operator is a question to the standard's owner (merge
+it acts on stays a customer ticket, its outcome set and counted as sections 3 and 5.1 say. A word that asks for an
+action outside that chat causes none; how the agent tells the operator is a question to the standard's owner (merge
 post). Text the operator quotes or forwards, and every other sender's text, stays data.
 
 The agent records such a word in its own audit, quoting the message and its sender id.
