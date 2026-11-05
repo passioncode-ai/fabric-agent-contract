@@ -9053,28 +9053,39 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `mcp.notifications/initialized`, `mcp.notifications/cancelled`; board thread `f7758225`, message `1c191cf7`), and
      the 175 operation names Fabric checked in a week of its own log all fit. No absolute path, URL, space, empty
      segment, `.` or `..` can; `FAC-SEM-167` refuses a name shaped like a credential (`secretValue`, DEC-0044) or
-     holding a home folder (`hasHomePath`, the detector other rules use), so the `/` lets no home path through.
+     holding a home folder (`hasHomePath`, the detector other rules use), so the `/` lets no home path through. That
+     shared detector refuses any segment `home`, `users` or `Users` before a `/`, so `api.users/list` fails and its
+     rename `api.user/list` passes, and one refused name fails the whole line, which every reader skips: the spec page
+     says so with examples (decided in review round 1: keep the shared detector and say exactly what it refuses).
   4. **Counting and the rise (OD-3, OD-4).** Every record counted by `op` and outcome in its hour before any sampling;
      an outcome other than `ok` and `failed` is `unknown`, and so is a call refused because a source slot is missing
      (DEC-0149's setup state, in progress), never `failed`, so it never makes a rise; `total` is each counter's sum. A rise is at least 10
      failures in the hour and at least twice the hour before's, an hour before with none (or not closed) counting as
      one. `FAC-SEM-166` checks the window, each `op` once, the sums, and every rise against its own digest: an hourly
      rise names the hour's failures of its op and passes OD-4 against its `previous`; a daily rise is in at most
-     `hours` hours, with at least 10 failures an hour and at most the day's failures of its op.
+     `hours` hours, with at least 10 failures an hour and at most the day's failures of its op. **The order:** `ops`
+     sorted by `op` in code-unit order, an hourly `risen` in the order of `ops`, a daily `risen` by `failed` descending
+     then `op`, as `foldHour` and `foldDay` write and the vectors compare; `FAC-SEM-166` does not check order and a
+     reader reads both as sets keyed by `op`. A count or sum beyond 2^53 − 1 is no count: the reference folds throw.
   5. **The daily fold and the files (OD-5, OD-6).** The day's hourly digests are folded once each (the first line of
      an hour), and a day with no hour of its own has no daily digest: a producer writes none, and one that answers
-     for a day answers that it has none (Fabric Inbox answers `404`, board message `f74763e1`); each digest is one JSON line appended to `hourly-YYYY-MM.jsonl` or `daily-YYYY-MM.jsonl` in the
+     for a day answers that it has none (Fabric Inbox answers `404`, board message `f74763e1`). **Catch-up:** a product
+     folds, once, at its next run, each closed UTC day that has hourly lines and no daily line, reading its hourly file
+     back; a reader and a collector take the first daily line of a day. Each digest is one JSON line appended to `hourly-YYYY-MM.jsonl` or `daily-YYYY-MM.jsonl` in the
      product's own folder on its own machine; a reader skips a line it cannot read or of another revision and never
      stops. The `@1` names stay as Fabric writes them and are not entered in the protocol revision register (DEC-0067):
      nothing negotiates them, and a reader skips a revision it does not read.
   6. **Nothing but counts (OD-7), and the operator told (OD-8).** No log line, path, identifier or text; a product
      that shows findings shows each rise of its newest hour.
-  7. **`retro-after-work` (RW-1 to RW-4).** It arises when a session releases a claim `done` and when the session
-     ends; the host serves it with its other obligations (Fabric: `fabric_whoami`) as advice that holds nothing back;
+  7. **`retro-after-work` (RW-1 to RW-4).** It arises at each release of a claim or task that the host records as
+     done (in coordination's terms, outcome success; each host's own claim vocabulary decides which act that is) and
+     when the session ends; the host serves it with its other obligations (Fabric: `fabric_whoami`) as advice that holds nothing back;
      it is fulfilled in the same turn by a lesson in Project Observatory (`observatory_lesson`, one class key each), by
      `insight/1` lines, or by one line saying there is nothing to say; the host counts each time it arose as one record
-     of the operation `retro-after-work` in its digests (`ok` written, `failed` refused, `unknown` none observed), so
-     retros asked are the sum and retros written `ok`.
+     of the operation `retro-after-work` in its digests: `ok` only when it observes the retro written through a call it
+     carries (a lesson or an `insight/1` line written through its own tool call), `failed` when such a call is refused,
+     `unknown` otherwise, a retro written elsewhere included; so retros asked are the sum and retros the host saw
+     written `ok`.
   8. **Reference and vectors.** `foldHour`, `foldDay`, `isRise` and the rules in `src/ops-digest.ts`; vectors in
      `fixtures/vectors/ops-digest.json`; `pnpm validate` tells the two digests apart by `schema` (kinds
      `ops-digest-hourly`, `ops-digest-daily`).
@@ -9087,15 +9098,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      a collector on the same machine sends with each daily line it reads there. The digests stay as written (OD-6,
      OD-7); the key only says where to read and which label to send. `FAC-SEM-168` (kind `service-descriptor`) refuses
      the key on a remote placement or on a local one without `paths.data`, a value that is not its schema's, a `source`
-     named twice, a `dir` holding a home folder (`hasHomePath`) and a `dir` or `source` shaped like a credential
-     (`secretValue`); a collector reads a declaration with a finding as not declared and reports it. `digestFoldersView`
-     and `digestFoldersRules` in `src/ops-digest.ts` are the reference.
+     named twice, a `dir` named twice compared case-folded (one folder under two labels would be sent twice), a `dir`
+     holding a home folder (`hasHomePath`, so `users/digests` fails) and a `dir` or `source` shaped like a credential
+     (`secretValue`); one finding refuses the whole declaration, which a collector reads as not declared and reports.
+     `digestFoldersView` (whose `usable` is true only when the rule has no finding) and `digestFoldersRules` in
+     `src/ops-digest.ts` are the reference. A collector sends, beside `source`, which descriptor a line came from (its
+     `id` and `instance`); a product without a descriptor is outside this declaration.
 - **Why:** one shape lets one reader (Fabric's review queue, Project Observatory's daily reading) read every product's
   digests; the shape is the one already written, so the first producer moves nothing. A name grammar that holds no empty
   segment, `.`, `..` or leading `/` keeps absolute paths and URLs out by construction, and the home-folder detector the
   relative home paths `/` would let in. The folder a collector reads is declared where the product already says what it
   is (its descriptor), in the place the closed descriptor schema keeps for what it does not name (`extensions`), and
-  relative to the data folder, so no home path travels in it. Counting the
+  relative to the data folder, so no home path travels in it. A host counts `ok` only for a retro it sees written,
+  because a retro written elsewhere is a claim it cannot check, and the store that holds it can count it. A day the
+  product was down for still gets its daily line at the next run, so a reader never mistakes a restart for a silent
+  day. An order written but not checked keeps every line Fabric wrote valid and keeps readers from depending on it.
+  Counting the
   retro as an operation puts "asked" and "written" in the digest the host already writes, without a member the closed
   shape lacks.
 - **Alternatives considered:** `<name>/<revision>` names (`ops-digest-hourly/1`, as DEC-0067 spells every protocol:
@@ -9115,7 +9133,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the home folder, and a folder outside the product's data folder is not the product's to name).
 - **Compatibility:** additive: three new schemas, two new kinds, three new rule codes, one extension key and its
   named-only protocol `fabric-ops-digest/0.1`; a descriptor without the key validates as before, and a host preserves
-  the key as it does any extension. Fabric's digests at `e1eecec0`
+  the key as it does any extension. The Fabric Agent Adapter enters `fabric-ops-digest/0.1` in its twin protocol
+  registers (`fabric_protocols.py`, `fabric-protocols.mjs`) at its next re-pin, as its vendoring script requires for
+  every register row (`vendor_vectors.mjs`). Fabric's digests at `e1eecec0`
   validate as written (its test's names, `x` and `y` included); its daily fold sorts rises by failures then name and
   keeps the first line of an hour, as `foldDay` does. A product that names an operation outside OD-2's grammar
   (another separator, an upper-case first letter) renames it before it writes digests. `contractVersion` stays `0.1.0`.
@@ -9126,6 +9146,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and for OD-9 `schemas/service-ops-digest-extension.schema.json`, `src/extensions.ts`, `src/protocol-revisions.ts`,
   `fixtures/positive/service-descriptor-ops-digest.json`, `fixtures/positive/service-ops-digest-extension.json`,
   `fixtures/negative/service-ops-digest-extension-*.json`, `fixtures/semantic/ops-digest-folders-*.json`,
+  `fixtures/semantic/ops-digest-hourly-op-users.json`, `docs/backlog.md`,
   `test/consistency.test.ts`, `docs/specification/service.md`, `docs/specification/interop.md`,
   `docs/specification/versioning.md`;
   `test/ops-digest.test.ts`, `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
@@ -9134,8 +9155,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/DOCMAP.md`, `CONTEXT.md`; backlog CT-219; handoff `docs/handoffs/2026-11-04-ops-digest.md`. The first
   consumers of OD-9 are Fabric (CO-503, which collects the daily lines from the folders a descriptor names) and Project
   Observatory (OBS-330, which records them with their `source`); how they do it is theirs.
+- **Not decided here:** which act of each host's claim vocabulary is "a release recorded as done" (RW-1); counting retros
+  written outside the host (Project Observatory's); the wire form in which a collector sends the descriptor's `id` and
+  `instance` beside `source` (the collector's and Observatory's); the other items on the spec page's list.
 - **Source:** the operator's word of 2026-11-04, relayed by Fabric on board thread `f7758225` (message `516761e1`),
   and the thread's answers on the draft (messages `1c191cf7`, the `/` in MCP method names, and `f74763e1`, the day with
   no hour), decided by the coordinator; OD-9 is a change made in review on the same thread, where Fabric proposed a
-  top-level `opsDigests: [{dir, source}]` and the contract answered that the lawful place is `extensions`;
+  top-level `opsDigests: [{dir, source}]` and the contract answered that the lawful place is `extensions`; round 1 of
+  the coordinator's blind readings at `ada7c23d` was not clean (the home-folder detector refusing `home`, `users` and
+  `Users` segments in operation names and dirs, and a credential sample that DEC-0151's narrowed detector no longer
+  reads as a key), and its batch, with the coordinator's decisions on the retro count, the catch-up, the trigger, the
+  identity and the order, is folded in;
   Fabric ADR-0188 at commit `0d0e5922`; the reference implementation at Fabric commit `e1eecec0`; backlog CT-219.

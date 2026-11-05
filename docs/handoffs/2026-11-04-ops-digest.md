@@ -82,15 +82,48 @@ DEC-0149, DEC-0150 and DEC-0152 are on other branches. When DEC-0149, DEC-0150 a
   Proposed, and annotated if it is already Accepted (the register is append-only).
 - DEC-0152 shares `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`, `docs/handoffs/README.md` and
   `conformance.md` (a different row).
+- DEC-0151 (branch `agent/sqd-fields-20261104`) narrows `SECRET_VALUE` in `src/secret-shape.ts`. `FAC-SEM-167` and
+  `FAC-SEM-168` follow the narrowed detector; after DEC-0151 no schema-valid `source` can be an `sk-` key (the source
+  grammar has no upper case, which DEC-0151's `sk-` shape needs), so this branch's credential samples are Slack-shaped
+  and lower case, built from pieces, and found by both detectors. Checked on a scratch merge of `main`, DEC-0151 and
+  this branch (below). The sibling notes in DEC-0149's and DEC-0151's own handoffs belong to those branches and are
+  not edited here.
+- At landing, write both next-free markers from the CAS counters, never from this file: `docs/DECISIONS.md`'s next
+  free ID (`DEC-0154` today) and `conformance.md`'s next free rule code (`FAC-SEM-169` today).
+
+## Consumers
+
+- Fabric (CO-503) collects the daily lines from the folders a descriptor names (OD-9) and sends them with `source` and
+  the descriptor's `id` and `instance`; Project Observatory (OBS-330) records them.
+- The Fabric Agent Adapter, at its next re-pin: `fabric-ops-digest/0.1` enters its twin protocol registers
+  `fabric_protocols.py` and `fabric-protocols.mjs`, which its `test/fixtures/contract/vendor_vectors.mjs` writes from
+  `PROTOCOL_REVISIONS` (the `register` of `feed-protocols-vectors.json`); and its retro counting follows RW-4 (`ok`
+  only for a retro written through a call it carries).
+- Fabric Switchboard (SB-250) and Fabric Inbox (B-205) write the digests; each with a local descriptor may declare
+  its folders (OD-9) and renames any operation `FAC-SEM-167` refuses (OD-2's examples) before writing.
 
 ## Open
 
-- The coordinator's blind readings (unit, seam, product) on this branch, then the pull request.
+- The coordinator's blind readings (unit, seam, product) on this branch, then the pull request. Round 1 at
+  `ada7c23d` was not clean: the seam tier found the credential sample `FAC-SEM-168`'s tests used no longer a key under
+  DEC-0151, and the product tier found the home-folder detector refusing `home`, `users` and `Users` segments in
+  operation names and dirs (`api.users/list`, `users/digests`), with one refused name dropping a whole line. Both are
+  fixed in the round-1 batch, with the coordinator's decisions on the retro count (RW-4), the catch-up (OD-5, OD-6), the
+  trigger (RW-1), the identity (OD-9) and the order (OD-3), and the unit tier's risks (`usable`, a dir named twice,
+  "no C0 control character", counts past 2^53 − 1, the op-path negative's counts). Round 2 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-1 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run` on the same 10 files as OD-9 (4079
+tests); on a scratch merge of `main`, DEC-0151 (`69db2177`) and this branch, `vitest run test/ops-digest.test.ts
+test/validate-cli.test.ts test/fixtures.test.ts test/rule-tolerance.test.ts test/positive-sweep.test.ts` with
+coverage on `src/ops-digest.ts` (4023 tests, 161 of 161 branches); `pnpm exec tsx tools/vectors/run.ts` (29 files);
+`pnpm run docs:check`; `python3 docs/ux/lint.py`; `pnpm run privacy:check` (0 findings); `pnpm validate` on each new
+or changed fixture (each semantic fixture its expected code, the op-path negative `schema/pattern` only, with sums
+that match its total). The full gate is owed: the 15-minute load was 57.7 and free disk 6 GB.
 
 OD-9, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run` on `test/ops-digest.test.ts`,
 `test/consistency.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`,

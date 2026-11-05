@@ -5,8 +5,8 @@
   "ops": [
     {
       "op": "/logs/ops.jsonl",
-      "ok": 1,
-      "failed": 0,
+      "ok": 3,
+      "failed": 2,
       "unknown": 0
     },
     {

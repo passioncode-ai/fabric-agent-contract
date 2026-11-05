@@ -79,11 +79,18 @@ const iso = (at: number): string => new Date(at).toISOString();
 const byName = (a: { op: string }, b: { op: string }): number => (a.op < b.op ? -1 : 1);
 const sum = (ops: readonly Counters[]): Counters =>
   ops.reduce((t, c) => ({ ok: t.ok + c.ok, failed: t.failed + c.failed, unknown: t.unknown + c.unknown }), { ok: 0, failed: 0, unknown: 0 });
+/** A digest whose every count is still an integer from 0 to 2^53 - 1, or a throw: a sum that left it is no count. */
+function safeCounts<T extends HourlyDigest | DailyDigest>(digest: T): T {
+  const counts = [digest.total, ...digest.ops].flatMap((c) => [c.ok, c.failed, c.unknown]).concat(digest.risen.map((r) => r.failed));
+  if (counts.some((n) => !Number.isSafeInteger(n) || n < 0)) throw new Error("a count is not an integer from 0 to 2^53 - 1");
+  return digest;
+}
 
 /**
- * The digest of the hour starting at `from` (a whole UTC hour): `counts` summed by operation and sorted by name, and
- * each operation whose failures rose against `previous`, which counts only when it is the hour just before (a gap
- * compares with none). `from` and `to` are written as `Date.prototype.toISOString` writes them.
+ * The digest of the hour starting at `from` (a whole UTC hour): `counts` summed by operation and sorted by name in
+ * code-unit order, and each operation whose failures rose against `previous`, in the order of `ops`, which counts only
+ * when it is the hour just before (a gap compares with none). `from` and `to` are written as
+ * `Date.prototype.toISOString` writes them. It throws when a count, or a sum, is not an integer from 0 to 2^53 - 1.
  */
 export function foldHour(counts: readonly OpCount[], from: string, previous: HourlyDigest | null): HourlyDigest {
   const start = wholeHour(from);
@@ -97,13 +104,14 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
   const ops = [...merged.values()].sort(byName);
   const before = new Map((previous !== null && wholeHour(previous.to) === start ? previous.ops : []).map((c) => [c.op, c.failed]));
   const risen = ops.filter((c) => isRise(c.failed, before.get(c.op) ?? 0)).map((c) => ({ op: c.op, failed: c.failed, previous: before.get(c.op) ?? 0 }));
-  return { schema: OPS_DIGEST_HOURLY, from: iso(start), to: iso(start + HOUR_MS), ops, total: sum(ops), risen };
+  return safeCounts({ schema: OPS_DIGEST_HOURLY, from: iso(start), to: iso(start + HOUR_MS), ops, total: sum(ops), risen });
 }
 
 /**
  * The day's hourly digests (those whose hour starts on `day`, one per hour, the first of a repeated hour kept) folded
  * into one: the operations summed, the hours counted, and each operation that rose in some hour with the hours it rose
- * in and the failures of those hours, the most failures first. A day with no hour of its own has no digest: null (OD-5).
+ * in and the failures of those hours, the most failures first, then by name. A day with no hour of its own has no
+ * digest: null (OD-5). It throws when a sum is not an integer from 0 to 2^53 - 1.
  */
 export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDigest | null {
   const seen = new Set<number>();
@@ -130,7 +138,7 @@ export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDige
   }
   const ops = [...merged.values()].sort(byName);
   const risen = [...rose.entries()].map(([op, x]) => ({ op, ...x })).sort((a, b) => b.failed - a.failed || byName(a, b));
-  return { schema: OPS_DIGEST_DAILY, day, hours: mine.length, ops, total: sum(ops), risen };
+  return safeCounts({ schema: OPS_DIGEST_DAILY, day, hours: mine.length, ops, total: sum(ops), risen });
 }
 
 const count = (value: unknown): number | null => (typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null);
@@ -216,16 +224,21 @@ export function opsDigestRules(kind: string, value: JsonObject): Finding[] | und
 /** One folder of the ops-digest extension: `dir` inside the product's data folder, and the label sent with its lines. */
 export interface DigestFolder { dir: string; source: string }
 
-/** What a collector reads of a descriptor's ops-digest declaration: the folders, or why it is not declared. */
+/**
+ * What a collector reads of a descriptor's ops-digest declaration: the folders, or why it is not declared. `valid` is the
+ * schema's answer; `usable` is whether `FAC-SEM-168` has no finding on the descriptor. A collector reads the folders only
+ * when `usable` is true, and treats any other declaration as not declared and reports it.
+ */
 export type DigestFoldersView =
   | { declared: false }
-  | { declared: true; valid: false; errors: string[] }
-  | { declared: true; valid: true; folders: DigestFolder[] };
+  | { declared: true; valid: false; usable: false; errors: string[] }
+  | { declared: true; valid: true; usable: boolean; folders: DigestFolder[] };
 
+type DigestFoldersShape = { declared: false } | { declared: true; valid: false; errors: string[] } | { declared: true; valid: true; folders: DigestFolder[] };
 let foldersShape: ValidateFunction | undefined;
 
-/** The reader of extensions/ops-digest/0.1 in a service descriptor, as `actionsView` is for actions: the shape only. */
-export function digestFoldersView(descriptor: unknown): DigestFoldersView {
+/** The declaration's shape against its schema, as `actionsView` reads actions. */
+function digestFoldersShape(descriptor: unknown): DigestFoldersShape {
   const extensions = isObject(descriptor) && isObject(descriptor.extensions) ? descriptor.extensions : undefined;
   if (extensions === undefined || !Object.hasOwn(extensions, EXTENSION_KEYS.opsDigest)) return { declared: false };
   foldersShape ??= createValidatorSync().getSchema(`${SCHEMA_PREFIX}schemas/service-ops-digest-extension.schema.json`) as ValidateFunction;
@@ -236,6 +249,17 @@ export function digestFoldersView(descriptor: unknown): DigestFoldersView {
   return { declared: true, valid: true, folders: value as DigestFolder[] };
 }
 
+/**
+ * The reader of extensions/ops-digest/0.1 in a service descriptor: the shape, and whether a collector may read it
+ * (`usable`: `digestFoldersRules` returns no finding). Never `usable` for a declaration `FAC-SEM-168` refuses.
+ */
+export function digestFoldersView(descriptor: unknown): DigestFoldersView {
+  const shape = digestFoldersShape(descriptor);
+  if (!shape.declared) return shape;
+  if (!shape.valid) return { ...shape, usable: false };
+  return { ...shape, usable: digestFoldersRules(descriptor as JsonObject).length === 0 };
+}
+
 const FOLDERS_PATH = `/extensions/${EXTENSION_KEYS.opsDigest.replace(/~/g, "~0").replace(/\//g, "~1")}`;
 const folderFinding = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-168", instancePath, message });
 
@@ -243,11 +267,13 @@ const folderFinding = (instancePath: string, message: string): Finding => ({ cod
  * FAC-SEM-168 on a service descriptor (kind `service-descriptor`) that carries the ops-digest key: a remote placement
  * (no folder on this machine), or a local one that names no `paths.data` for `dir` to be relative to; a value that is
  * not its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); a `source` named
- * twice; a `dir` that holds a home folder (`hasHomePath`); a `dir` or a `source` shaped like a credential
- * (`secretValue`). A collector reads a declaration with any of these as not declared.
+ * twice; a `dir` named twice, compared case-folded (one folder under two labels would be sent twice); a `dir` that
+ * holds a home folder (`hasHomePath`, which also refuses a segment `home`, `users` or `Users` before a `/`, as in
+ * `users/digests`); a `dir` or a `source` shaped like a credential (`secretValue`). A collector reads the folders only
+ * when this returns no finding (`digestFoldersView`'s `usable`), and treats any other declaration as not declared.
  */
 export function digestFoldersRules(descriptor: JsonObject): Finding[] {
-  const view = digestFoldersView(descriptor);
+  const view = digestFoldersShape(descriptor);
   if (!view.declared) return [];
   const findings: Finding[] = [];
   if (descriptor.placement === "remote") findings.push(folderFinding(FOLDERS_PATH, "a remote placement has no folder on this machine; the ops-digest key is a local descriptor's (DEC-0153 OD-9)"));
@@ -257,10 +283,14 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     return findings;
   }
   const seen = new Set<string>();
+  const dirs = new Set<string>();
   view.folders.forEach((folder, index) => {
     const at = `${FOLDERS_PATH}/${index}`;
     if (seen.has(folder.source)) findings.push(folderFinding(`${at}/source`, `source ${folder.source} is named twice; each folder sends its own label`));
     seen.add(folder.source);
+    const folded = folder.dir.toLowerCase();
+    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `dir ${folder.dir} is named twice (compared case-folded); its lines would be sent twice`));
+    dirs.add(folded);
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
     if (secretValue(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));
     else if (hasHomePath(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir holds a home folder; it is relative to the product's data folder"));

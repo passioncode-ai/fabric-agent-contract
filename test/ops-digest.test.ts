@@ -95,6 +95,22 @@ describe("FAC-SEM-166, FAC-SEM-167 and FAC-SEM-168: the operations digests and w
     expect(found("ops-digest-hourly", value)).toEqual(["FAC-SEM-167 /ops/4/op", "FAC-SEM-167 /risen/1/op"]);
   });
 
+  it("refuses a segment home, users or Users before a slash, and passes its rename (OD-2)", () => {
+    for (const op of ["api.users/list", "ui.home/open", "route:home/feed", "fs.Users/list"]) {
+      const value = hourlyOk();
+      value.ops.push({ op, ok: 1, failed: 0, unknown: 0 });
+      value.total.ok += 1;
+      expect(OP_NAME.test(op), op).toBe(true);
+      expect(found("ops-digest-hourly", value), op).toEqual(["FAC-SEM-167 /ops/4/op"]);
+    }
+    for (const op of ["api.user/list", "ui.homepage/open", "route:feed/home", "fs.files/list"]) {
+      const value = hourlyOk();
+      value.ops.push({ op, ok: 1, failed: 0, unknown: 0 });
+      value.total.ok += 1;
+      expect(found("ops-digest-hourly", value), op).toEqual([]);
+    }
+  });
+
   it("is not the rule of any other kind", () => {
     expect(opsDigestRules("support-quality-daily", {})).toBeUndefined();
     expect(found("ops-digest-hourly", {})).toEqual(["FAC-SEM-166 /from", "FAC-SEM-166 /to"]);
@@ -122,6 +138,16 @@ describe("the reference folds", () => {
     if (digest === null) return;
     expect(valid("ops-digest-daily.schema.json", digest)).toBe(true);
     expect(evaluateSemanticRules("ops-digest-daily", digest)).toEqual([]);
+  });
+  it("throws when a count or a sum is not an integer from 0 to 2^53 - 1", () => {
+    const max = Number.MAX_SAFE_INTEGER;
+    const H = "2026-11-04T01:00:00Z";
+    expect(() => foldHour([{ op: "a", ok: max, failed: 0, unknown: 0 }, { op: "a", ok: 1, failed: 0, unknown: 0 }], H, null)).toThrow(/2\^53/);
+    expect(() => foldHour([{ op: "a", ok: max, failed: 0, unknown: 0 }, { op: "b", ok: 1, failed: 0, unknown: 0 }], H, null)).toThrow(/2\^53/);
+    expect(() => foldHour([{ op: "a", ok: -1, failed: 0, unknown: 0 }], H, null)).toThrow(/2\^53/);
+    const full = foldHour([{ op: "a", ok: max, failed: 0, unknown: 0 }], H, null);
+    expect(full.total.ok).toBe(max);
+    expect(() => foldDay("2026-11-04", [full, foldHour([{ op: "a", ok: 1, failed: 0, unknown: 0 }], "2026-11-04T02:00:00Z", null)])).toThrow(/2\^53/);
   });
   it("refuses an hour that is not whole and skips an hour it cannot read", () => {
     expect(() => foldHour([], "2026-11-04T17:30:00Z", null)).toThrow(/whole UTC hour/);
@@ -172,9 +198,16 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
 
   it("reads a declaration, an invalid one and none", () => {
     for (const none of [null, "x", { extensions: [] }, { extensions: {} }, { extensions: { [`${key}x`]: [] } }]) expect(digestFoldersView(none)).toEqual({ declared: false });
-    expect(digestFoldersView(descriptor())).toEqual({ declared: true, valid: true, folders: descriptor().extensions[key] });
-    expect(digestFoldersView({ extensions: { [key]: {} } })).toEqual({ declared: true, valid: false, errors: ["/ type"] });
-    expect(digestFoldersView({ extensions: { [key]: [{ dir: "../x", source: "app" }] } })).toEqual({ declared: true, valid: false, errors: ["/0/dir pattern"] });
+    expect(digestFoldersView(descriptor())).toEqual({ declared: true, valid: true, usable: true, folders: descriptor().extensions[key] });
+    expect(digestFoldersView({ extensions: { [key]: {} } })).toEqual({ declared: true, valid: false, usable: false, errors: ["/ type"] });
+    expect(digestFoldersView({ extensions: { [key]: [{ dir: "../x", source: "app" }] } })).toEqual({ declared: true, valid: false, usable: false, errors: ["/0/dir pattern"] });
+  });
+
+  it("never answers usable for a declaration FAC-SEM-168 refuses", () => {
+    for (const name of ["ops-digest-folders-home-dir.json", "ops-digest-folders-source-twice.json", "ops-digest-folders-dir-twice.json", "ops-digest-folders-remote.json"]) {
+      const view = digestFoldersView(load(name).input);
+      expect(view, name).toMatchObject({ declared: true, valid: true, usable: false });
+    }
   });
 
   it("refuses the key on a remote placement or with no data folder, beside an invalid value too", () => {
@@ -187,22 +220,30 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     expect(found("service-descriptor", { ...pathless, paths: { data: 7, logs: [] } }).filter((f) => f.startsWith("FAC-SEM-168"))).toEqual([`FAC-SEM-168 ${at}`]);
   });
 
-  it("names each source once and refuses a home folder or a credential in dir and source", () => {
+  it("names each source and each dir once and refuses a home folder or a credential in dir and source", () => {
+    // A Slack-shaped label, lower case so the source grammar takes it, built from pieces; secretValue finds it before
+    // and after DEC-0151 narrows the sk- shape.
+    const slack = ["xo", "xb-", "notareal-0123"].join("");
     const value = withFolders([
       { dir: "digests", source: "app" },
       { dir: "workers/digests", source: "app" },
       { dir: "Users/jdoe/digests", source: "home" },
       { dir: fake, source: "secret" },
       { dir: `Users/jdoe/${fake}`, source: "both" },
-      { dir: "digests", source: "sk-abcdefghijklmnop0123" }
+      { dir: "other", source: slack },
+      { dir: "Workers/Digests", source: "again" },
+      { dir: "users/digests", source: "users" }
     ]);
     expect(found("service-descriptor", value)).toEqual([
       `FAC-SEM-168 ${at}/1/source`,
       `FAC-SEM-168 ${at}/2/dir`,
       `FAC-SEM-168 ${at}/3/dir`,
       `FAC-SEM-168 ${at}/4/dir`,
-      `FAC-SEM-168 ${at}/5/source`
+      `FAC-SEM-168 ${at}/5/source`,
+      `FAC-SEM-168 ${at}/6/dir`,
+      `FAC-SEM-168 ${at}/7/dir`
     ]);
+    expect(found("service-descriptor", withFolders([{ dir: "user-digests", source: "app" }]))).toEqual([]);
     expect(evaluateSemanticRules("service-descriptor", value).find((f) => f.instancePath === `${at}/4/dir`)?.message).toContain("credential");
   });
 

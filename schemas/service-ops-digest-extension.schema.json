@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-ops-digest-extension.schema.json",
   "title": "extensions/ops-digest/0.1: where a collector on the same machine reads a product's daily operations digests, and the label it sends with them (fabric-ops-digest/0.1, DEC-0153)",
-  "description": "The value of the ops-digest extension key https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1 in a local service descriptor: 1 to 8 folders inside the product's own data folder (paths.data) that hold its daily-YYYY-MM.jsonl files (OD-6), each with the source label a collector sends with the daily lines it reads there. The digests stay as written (OD-6, OD-7). A checker reports an invalid value, a source named twice, a remote placement, and a dir or source holding a home folder or shaped like a credential as FAC-SEM-168. docs/specification/ops-digest.md#where-a-collector-reads-the-daily-digests.",
+  "description": "The value of the ops-digest extension key https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1 in a local service descriptor: 1 to 8 folders inside the product's own data folder (paths.data) that hold its daily-YYYY-MM.jsonl files (OD-6), each with the source label a collector sends with the daily lines it reads there. The digests stay as written (OD-6, OD-7). A checker reports an invalid value, a source or a dir named twice, a remote placement or a missing paths.data, and a dir or source holding a home folder or shaped like a credential as FAC-SEM-168. docs/specification/ops-digest.md#where-a-collector-reads-the-daily-digests.",
   "type": "array",
   "minItems": 1,
   "maxItems": 8,
@@ -20,7 +20,7 @@
       "properties": {
         "dir": {
           "$ref": "fabric-package.schema.json#/$defs/path",
-          "description": "A folder inside the product's data folder (paths.data), relative to it: forward slashes, no leading / or ~, no drive, no backslash, no . or .. segment, no control character, at most 256 characters (the grammar of a package path, also used for a package's state relative to the data folder). It holds the product's daily-YYYY-MM.jsonl files (OD-6)."
+          "description": "A folder inside the product's data folder (paths.data), relative to it: forward slashes, no leading / or ~, no drive or other ':', no backslash, no . or .. segment, no C0 control character, no // and no trailing /, at most 256 characters (the grammar of a package path, also used for a package's state relative to the data folder). It holds the product's daily-YYYY-MM.jsonl files (OD-6). Each dir once, compared case-folded, and no segment home, users or Users before a / (FAC-SEM-168)."
         },
         "source": {
           "type": "string",
