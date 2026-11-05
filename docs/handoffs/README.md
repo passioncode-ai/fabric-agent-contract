@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-11-03 an agent's source and its instance](2026-11-03-source-manifest.md) | DEC-0149 (CT-194; CT-207, CT-208, CT-211, CT-212, CT-214 filed) | open: branch `agent/ct194-source-manifest-v2-20261104` (the reviewed tree as one commit on the merge base) |
+| [2026-11-03 an agent's source and its instance](2026-11-03-source-manifest.md) | DEC-0149 (CT-194; CT-207, CT-208, CT-211, CT-212, CT-214 filed) | open: branch `agent/ct194-source-manifest-v2-20261104` (the reviewed tree as a squash plus round commits) |
 | [2026-11-02 a peer share's risks settled](2026-11-02-peer-share-risks.md) | DEC-0147 (CT-189; CT-201 filed) | merged 2026-11-02, #232; released `v0.1.0+2026-11-02.1` |
 | [2026-10-27 the machines' report, its open design questions](2026-10-27-machine-report-design.md) | DEC-0146 (CT-172) | merged 2026-10-30, #230; released `v0.1.0+2026-10-30.2` |
 | [2026-10-26 three decisions for the simple Fabric](2026-10-26-simple-fabric-decisions.md) | DEC-0140 (CT-174) | merged 2026-10-30, #217 `86f3ebad`; released `v0.1.0+2026-10-30.1` |

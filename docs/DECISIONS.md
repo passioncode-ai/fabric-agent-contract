@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 48 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 49 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9042,7 +9042,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   scenario wording, elicitation target, later org release; round 46 not clean: grammar readers, organization later
   public release; round 47 not clean: NFD-stored paths, binaries/missing, later public release, private mirror; round 48 not clean: the
   lead's readers, the grammar's FAC-SEM-157 statement, CT-194's visibility sentence; exclude fails closed; CT-109
-  register is DEC-0149's landing step), cited by round number because their heads were on the review branch, which is not
+  register is DEC-0149's landing step; round 49 not clean: the lead's routes still said 'another person'; vendored
+  files and binaries; boundary copies at DEC-0149's landing; widest reading made literal), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9184,7 +9185,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   12. **Handing over (Q8, option P3):** a local source export is not a transfer and is always allowed, and a copy moved
       within the operator's own estate (the accounts and placements the operator alone holds) to a place that is not
       public and that no one outside the operator can read is not a hand-over, while a push or copy elsewhere that is public,
-      that another owner holds, or that another person is given access to, is one (an organization's repository is
+      that another owner holds, or that another person is given access to (round 49: anyone who could not already read
+      the home, since the round-48 lead filters every route), is one (an organization's repository is
       another owner's even when the operator administers it, as the knowledge base's agents-first item 9, "A source
       hand-over takes the operator's word on that act", reads); the operator's standing
       permission of 2026-10-12 is unchanged (the knowledge base's roadmap records it in its D5 row: "the broker's
@@ -9302,9 +9304,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       home private is none; and material already public needs no word by any route (one clause for every route).
       Decided by the coordinator in round 46, one rule stated once: an organization agent's private home's first public
       release, by any route, takes the word naming its source commit, and every later public release from that home,
-      by any route, is the organization's own act; every release from a private home, first or later, carries only the
+      by any route, is the organization's own act; every public release from a private home, first or later, carries only the
       source export (by push or by file) or, on a registry, a package packed from that source commit holding only source
-      paths that passed the tree check (so no route carries the home's history); a package handed over or published
+      paths that passed the tree check (so no route carries the home's history); a package handed over or published to a public registry
       names as its target the source commit it was packed from; the two exceptions (an organization's later public release
       from its private home and material already public) are stated once, in the lead of the route list, so they cover every route; the export's
       receipt names the recipient; and every reader takes a path in the grammar as written and in NFC (round 47: and in
@@ -9335,11 +9337,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       folder before its first segment made only of dots, spaces and code points HFS+ ignores, everything when that is
       its first segment, or, lengthened only, the entry folded as written), while an `include` entry so read names
       nothing; `FAC-SEM-157` says such an entry once by its cause, in a tree document too; an agent without
-      `fabric.source.json` is handed over or released from a private home only once it has one, since every carrier
-      needs the tree check; a package handed over or published holds only committed source paths besides
-      `fabric.package.json`, so a vendored file travels only as a committed path listed in `binaries`; a hand-over by
+      `fabric.source.json` is handed over or released publicly from a private home only once it has one, since every carrier
+      needs the tree check; a package handed over or published to a public registry holds only committed source paths besides
+      `fabric.package.json`, so a vendored file travels only as a committed source path (a binary one also listed in `binaries`); a hand-over by push or by
       file of a local export records the recipient and the export commit in that export's receipt; the CT-109
-      register's fourth home-path boundary, `SOURCE_HOME_PATHS`, lands with this decision. Handing it to
+      register's fourth home-path boundary, `SOURCE_HOME_PATHS`, lands with this decision.
+      Decided by the coordinator in round 49: the round-48 lead filters every route (a route reaching only those who
+      could already read the home is none, beside the two named exceptions), each route saying "anyone who could not
+      already read the home" where it said another person; an exclude entry's widest reading is the union of the
+      readings (the folder before its first segment that folds to nothing, its parent too when that segment holds two
+      or more dots, each also as a file without a trailing `/`), its cause and effect read from that same segment
+      before a length cause, and an include equal to or under what it removes said once at the include; the opt-in
+      manifest is required only for a hand-over or a public release from a private home, and a package rule only for a
+      package handed over or published to a public registry, a vendored file travelling only as a committed source path
+      (a binary one also listed in `binaries`); a local export records the recipient when handed over by push or by
+      file; every copy that counts the home-path boundaries counts four at DEC-0149's landing. Handing it to
       anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9465,7 +9477,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 48 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 49 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9478,5 +9490,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   scenario wording, elicitation target, later org release; round 46 not clean: grammar readers, organization later
   public release; round 47 not clean: NFD-stored paths, binaries/missing, later public release, private mirror; round 48 not clean: the
   lead's readers, the grammar's FAC-SEM-157 statement, CT-194's visibility sentence; exclude fails closed; CT-109
-  register is DEC-0149's landing step), cited by round number (their heads were on the review branch, not kept at landing),
+  register is DEC-0149's landing step; round 49 not clean: the lead's routes still said 'another person'; vendored
+  files and binaries; boundary copies at DEC-0149's landing; widest reading made literal), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

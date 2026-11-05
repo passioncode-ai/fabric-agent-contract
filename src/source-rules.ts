@@ -98,14 +98,36 @@ const NUSKHURI = /[\u2d00-\u2d25]/gu;
 export const FOLD_UNICODE = "17.0";
 /** A path folded segment by segment (`foldSegment`); a folder's trailing `/` is kept. */
 export const foldPath = (path: string): string => path.split("/").map(foldSegment).join("/");
+/** An entry's segments in NFC (a folder's trailing `/` dropped) and the index of its first segment that folds to nothing, or -1. */
+const emptySegment = (entry: string): { segments: string[]; at: number; bare: boolean } => {
+  const written = nfc(entry);
+  const bare = !written.endsWith("/");
+  const segments = (bare ? written : written.slice(0, -1)).split("/");
+  return { segments, at: segments.findIndex((segment) => foldSegment(segment) === ""), bare };
+};
+/**
+ * The widest reading of an `exclude` entry in the schema's grammar as written that is outside the grammar as a file
+ * system may read it (DEC-0149), the union of the readings a tool may take: with a segment that folds to nothing (made
+ * only of dots, spaces and code points HFS+ ignores), the folder before its first such segment; when that segment holds
+ * two or more dots (a reader may take it as `..`), that folder's parent too; so a first segment, or a second one with
+ * two dots, means everything (`all`); without a trailing `/`, each such folder also as a file of its name. Lengthened
+ * past 256 code points by NFC or NFD only, the entry folded as written. Each entry is folded (`foldSegment`).
+ */
+const widestReading = (entry: string): { all: boolean; parent: boolean; bare: boolean; entries: string[] } => {
+  const { segments, at, bare } = emptySegment(entry);
+  if (at < 0) return { all: false, parent: false, bare, entries: [foldPath(nfc(entry))] };
+  const parent = ((segments[at] as string).match(/\./gu) ?? []).length >= 2;
+  const keep = parent ? at - 1 : at;
+  if (keep <= 0) return { all: true, parent, bare, entries: [] };
+  const folders = [segments.slice(0, at), ...(parent ? [segments.slice(0, at - 1)] : [])].map((part) => part.map(foldSegment).join("/"));
+  return { all: false, parent, bare, entries: folders.flatMap((folder) => (bare ? [`${folder}/`, folder] : [`${folder}/`])) };
+};
 /**
  * A list of paths indexed in their folded form: an entry in the path grammar (`inGrammar`), folded only then. With
  * `widest` (for `exclude`, which fails closed) an entry in the schema's grammar as written that is outside the grammar
- * as a file system may read it still removes its widest reading: with a segment made only of dots, spaces and code
- * points HFS+ ignores, the folded folder before its first such segment (`src/secrets/.../` removes `src/secrets/`, and
- * one whose first segment is such removes everything, `all`); lengthened past 256 code points by NFC or NFD, the entry
- * folded as written. `FAC-SEM-157` still says such an entry once. An `include` entry outside the grammar names nothing
- * (it fails closed the other way). Looked up with `foldedCovers`.
+ * as a file system may read it still removes its widest reading (`widestReading`): `src/secrets/.../` removes
+ * `src/secrets/` and `src/`. `FAC-SEM-157` still says such an entry once. An `include` entry outside the grammar names
+ * nothing (it fails closed the other way). Looked up with `foldedCovers`.
  */
 const foldedList = (value: unknown, widest = false): PathList => {
   const entries: string[] = [];
@@ -113,11 +135,9 @@ const foldedList = (value: unknown, widest = false): PathList => {
   for (const [entry] of strings(value)) {
     if (inGrammar(entry, true)) entries.push(foldPath(nfc(entry)));
     else if (widest && SOURCE_PATH.test(entry)) {
-      const written = nfc(entry);
-      const segments = (written.endsWith("/") ? written.slice(0, -1) : written).split("/");
-      const empty = segments.findIndex((segment) => foldSegment(segment) === "");
-      if (empty === 0) all = true;
-      else entries.push(empty < 0 ? foldPath(written) : `${segments.slice(0, empty).map(foldSegment).join("/")}/`);
+      const reading = widestReading(entry);
+      all ||= reading.all;
+      entries.push(...reading.entries);
     }
   }
   return { files: new Set(entries.filter((entry) => !entry.endsWith("/"))), folders: new Set(entries.filter((entry) => entry.endsWith("/"))), reaches: new Set(), all };
@@ -1232,8 +1252,16 @@ function slotFindings(value: JsonObject): Finding[] {
 }
 
 /** Why an entry in the grammar as written is outside it as a file system reads it: the form that lengthens it, or a segment. */
+// The segment is tested first, from the same index `widestReading` uses, so the cause and the effect agree.
 const outsideCause = (path: string): string =>
-  !SOURCE_PATH.test(nfc(path)) ? "NFC lengthens past 256 code points" : !SOURCE_PATH.test(path.normalize("NFD")) ? "NFD lengthens past 256 code points" : "with a segment made only of dots, spaces and code points HFS+ ignores";
+  emptySegment(path).at >= 0 ? "with a segment made only of dots, spaces and code points HFS+ ignores" : !SOURCE_PATH.test(nfc(path)) ? "NFC lengthens past 256 code points" : "NFD lengthens past 256 code points";
+/** What an `exclude` entry outside the grammar still removes, from its widest reading. */
+const widestEffect = (path: string): string => {
+  const reading = widestReading(path);
+  if (emptySegment(path).at < 0) return "still removes what it names, folded as written";
+  if (reading.all) return "still removes everything but fabric.source.json";
+  return `still removes the folder before that segment${reading.parent ? " and that folder's parent (a reader may take the segment as ..)" : ""}${reading.bare ? ", each also as a file of its name" : ""}`;
+};
 /**
  * FAC-SEM-157's grammar clause, for one entry of `include`, `exclude` or `binaries`: an entry in the schema's grammar as
  * written that is outside it as a file system may read it (`inGrammar`) is said once, by its cause. An `include` or
@@ -1243,9 +1271,7 @@ const outsideCause = (path: string): string =>
 const grammarFinding = (member: "include" | "exclude" | "binaries", path: string, index: number, at = ""): Finding[] => {
   if (!SOURCE_PATH.test(path) || inGrammar(path, true)) return [];
   const cause = outsideCause(path);
-  const effect = member !== "exclude" ? "names, reaches and removes nothing"
-    : cause.startsWith("with") ? "still removes what lies beneath the folder before that segment (everything, when it is the first)"
-      : "still removes what it names, folded as written";
+  const effect = member !== "exclude" ? "names, reaches and removes nothing" : widestEffect(path);
   return [{ code: "FAC-SEM-157", instancePath: `${at}/${member}/${index}`, message: `${member}[${index}] is an entry ${cause}, so it ${effect}` }];
 };
 /**
@@ -1284,9 +1310,12 @@ function pathFindings(value: JsonObject): Finding[] {
   const isSource = sourcePathTest(value);
   // An entry outside the path grammar (over 256 code points) lies in no folder an index holds: its prefixes are not built.
   const prefixesOf = (written: string): string[] => (inGrammar(written, true) ? folderPrefixes(foldPath(nfc(written))) : []);
+  // What the exclude entries outside the grammar remove at their widest: an include equal to it, or under it, is dead too.
+  const widened = foldedList(strings(value.exclude).map(([entry]) => entry).filter((entry) => !inGrammar(entry, true)), true);
   for (const [written, index] of include) {
     const path = foldPath(nfc(written));
-    const dead = excludes.all === true || prefixesOf(written).some((folder) => folder !== path && (excludes.folders.has(folder) || excludes.files.has(folder.slice(0, -1))));
+    const dead = excludes.all === true || prefixesOf(written).some((folder) => folder !== path && (excludes.folders.has(folder) || excludes.files.has(folder.slice(0, -1)))) ||
+      widened.files.has(path) || prefixesOf(written).some((folder) => widened.folders.has(folder) || widened.files.has(folder.slice(0, -1)));
     if (dead) flag(`/include/${index}`, `include[${index}] lies inside an exclude path, so it names nothing`);
   }
   // Every include path, folded, so an exclude entry an include lies beneath is said once, on the include.

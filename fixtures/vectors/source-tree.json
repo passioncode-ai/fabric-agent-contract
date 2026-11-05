@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for an agent's source tree (DEC-0149), written by tools/vectors/source-tree.ts, never by hand. `tree`: sourceTreeProblems({manifest, files, instanceStrings?, listed?}) answers each place the instance shows through as {kind, file?, line?, column?, entry?, include?, exclude?} (a file marked nestedRepository: true is a folder holding another repository, a submodule's gitlink or its own .git, read by its path only; a file marked link: true is a symbolic link whose text is its target, link-outside when that target is absolute, climbs above the root or is no source path, and never a licence): file is the index in files; a finding in a file's path has no line; line and column count from 1, the column in UTF-16 code units where the match begins (for a home path, where its name begins). Blocking kinds (FAC-SEM-158): home-path (a home folder with a name, in the forms and with the neutral names of the Fabric Agent Adapter's check; ~ never), credential (a value shaped like one, or a file that is one by its name), binary (not listed in binaries), nested-repository (a nested repository no exclude path names), instance-string (an entry of the operator's list, without regard to case under Unicode simple case folding, the entry and the text each also in NFC: as written, percent-encoded, form-encoded with + for a space, JSON-escaped, JSON-escaped with \\/ for /, or JSON-escaped with every character outside ASCII as \\uXXXX), missing (an include path in the grammar with no file), short-instance-string, no-include. Warnings (FAC-SEM-159): email (not in publicAddresses, not at an RFC 2606 name), link-outside (a relative Markdown link, or a symbolic link, whose target is not source; a link's target is read literally), no-license, excluded-by-fold (a file an exclude entry names only once folded: never read), unused-exclude (an exclude entry naming nothing listed). Problems come in the order: the list's refused entries, then no-include, then each file in order (its path, then each line: home-path, credential, instance-string, email, link-outside), then excluded-by-fold (a file an exclude entry names only once both are folded: never read, said by its index and the entry's), then missing, then unused-exclude (only when the input carries listed, the paths the tree holds that an exclude entry can name: a file, a symbolic link or a nested repository (a gitlink in Git mode, a folder holding its own .git in a walk) written without /, and a folder written with a trailing /; an entry without / is used by any of them, its name leaving out everything beneath it, while an entry with / is used only by a folder (so a folder entry over a link names nothing); an exclude entry, read folded, that names none of them), then no-license. A file that is not source (outside include, inside exclude, in .git) is not read; a .git segment is read as Git's is_hfs_dotgit and is_ntfs_dotgit read it (ASCII case folded, the code points HFS+ ignores removed, trailing dots and spaces dropped, or GIT~1), and paths are compared in Unicode NFC. `patches`: patchPathsAllowed(manifest, paths) answers the paths that are not source, in the order given, and also a path an exclude entry names once both are folded per segment (an entry without / also names everything beneath it) (HFS+ ignorable code points removed first, then NFD, lower, upper and lower case, NFC, then Georgian Nuskhuri onto Mkhedruli, trailing dots and spaces dropped), a segment shaped like an 8.3 short name when any exclude entry exists, and the manifest itself in any spelling; the manifest is the receiver's current one. Exclude entries are read folded the same way everywhere. The fold is the runtime's case mappings (Node's ICU at the Unicode version constants.FOLD_UNICODE names): canonical caseless matching (NFD before the case mappings): NFD, then lower, upper and lower case, then NFC, then Georgian Nuskhuri onto Mkhedruli (HFS+ joins Asomtavruli and Mkhedruli), which also joins the dotless i with i and I (Unicode's case folding keeps them apart; the join refuses more); constants.FOLD_PAIRS holds segments and their folds. A segment with ~ followed by a digit is refused in a patch when any exclude entry exists. An exclude entry an excluded-by-fold line names is never unused-exclude, and an entry outside the grammar (as written, in NFC or in NFD) is never unused-exclude: FAC-SEM-157 says it. A path or an entry is in the grammar only as written, in NFC and in NFD, with no segment made only of dots, spaces and code points HFS+ ignores (. U+200C ., . followed by a space, ...: it folds to nothing, and a tool that trims or folds names as the fold does may read it as empty, . or ..); a path outside it is no source and is never read, an include or binaries entry outside it names nothing and is never missing, and an exclude entry outside it fails closed: it removes its widest reading (with such a segment, the folded folder before its first one, everything when it is the first; lengthened by NFC or NFD, the entry folded as written).",
+  "about": "Vectors for an agent's source tree (DEC-0149), written by tools/vectors/source-tree.ts, never by hand. `tree`: sourceTreeProblems({manifest, files, instanceStrings?, listed?}) answers each place the instance shows through as {kind, file?, line?, column?, entry?, include?, exclude?} (a file marked nestedRepository: true is a folder holding another repository, a submodule's gitlink or its own .git, read by its path only; a file marked link: true is a symbolic link whose text is its target, link-outside when that target is absolute, climbs above the root or is no source path, and never a licence): file is the index in files; a finding in a file's path has no line; line and column count from 1, the column in UTF-16 code units where the match begins (for a home path, where its name begins). Blocking kinds (FAC-SEM-158): home-path (a home folder with a name, in the forms and with the neutral names of the Fabric Agent Adapter's check; ~ never), credential (a value shaped like one, or a file that is one by its name), binary (not listed in binaries), nested-repository (a nested repository no exclude path names), instance-string (an entry of the operator's list, without regard to case under Unicode simple case folding, the entry and the text each also in NFC: as written, percent-encoded, form-encoded with + for a space, JSON-escaped, JSON-escaped with \\/ for /, or JSON-escaped with every character outside ASCII as \\uXXXX), missing (an include path in the grammar with no file), short-instance-string, no-include. Warnings (FAC-SEM-159): email (not in publicAddresses, not at an RFC 2606 name), link-outside (a relative Markdown link, or a symbolic link, whose target is not source; a link's target is read literally), no-license, excluded-by-fold (a file an exclude entry names only once folded: never read), unused-exclude (an exclude entry naming nothing listed). Problems come in the order: the list's refused entries, then no-include, then each file in order (its path, then each line: home-path, credential, instance-string, email, link-outside), then excluded-by-fold (a file an exclude entry names only once both are folded: never read, said by its index and the entry's), then missing, then unused-exclude (only when the input carries listed, the paths the tree holds that an exclude entry can name: a file, a symbolic link or a nested repository (a gitlink in Git mode, a folder holding its own .git in a walk) written without /, and a folder written with a trailing /; an entry without / is used by any of them, its name leaving out everything beneath it, while an entry with / is used only by a folder (so a folder entry over a link names nothing); an exclude entry, read folded, that names none of them), then no-license. A file that is not source (outside include, inside exclude, in .git) is not read; a .git segment is read as Git's is_hfs_dotgit and is_ntfs_dotgit read it (ASCII case folded, the code points HFS+ ignores removed, trailing dots and spaces dropped, or GIT~1), and paths are compared in Unicode NFC. `patches`: patchPathsAllowed(manifest, paths) answers the paths that are not source, in the order given, and also a path an exclude entry names once both are folded per segment (an entry without / also names everything beneath it) (HFS+ ignorable code points removed first, then NFD, lower, upper and lower case, NFC, then Georgian Nuskhuri onto Mkhedruli, trailing dots and spaces dropped), a segment shaped like an 8.3 short name when any exclude entry exists, and the manifest itself in any spelling; the manifest is the receiver's current one. Exclude entries are read folded the same way everywhere. The fold is the runtime's case mappings (Node's ICU at the Unicode version constants.FOLD_UNICODE names): canonical caseless matching (NFD before the case mappings): NFD, then lower, upper and lower case, then NFC, then Georgian Nuskhuri onto Mkhedruli (HFS+ joins Asomtavruli and Mkhedruli), which also joins the dotless i with i and I (Unicode's case folding keeps them apart; the join refuses more); constants.FOLD_PAIRS holds segments and their folds. A segment with ~ followed by a digit is refused in a patch when any exclude entry exists. An exclude entry an excluded-by-fold line names is never unused-exclude, and an entry outside the grammar (as written, in NFC or in NFD) is never unused-exclude: FAC-SEM-157 says it. A path or an entry is in the grammar only as written, in NFC and in NFD, with no segment made only of dots, spaces and code points HFS+ ignores (. U+200C ., . followed by a space, ...: it folds to nothing, and a tool that trims or folds names as the fold does may read it as empty, . or ..); a path outside it is no source and is never read, an include or binaries entry outside it names nothing and is never missing, and an exclude entry outside it fails closed: it removes its widest reading, the union of the readings a tool may take (with such a segment, the folded folder before its first one, that folder's parent too when the segment holds two or more dots, so a first segment or a second one with two dots means everything but fabric.source.json, and without a trailing / each such folder also as a file of its name; lengthened by NFC or NFD only, the entry folded as written); FAC-SEM-157 names the segment cause before a length cause.",
   "constants": {
     "about": "The constants a port of the tree check holds equal to the reference's, written from src/source-rules.ts's exports (test/source-rules.test.ts holds the block to them): the neutral home names, the synthetic words, the home-folder patterns, the credential-file name patterns, the tree check's own provider-key shapes (KEY_SHAPE_SOURCES, unbounded, kept apart from the shared detector) and the URL rule's pattern (URL_SECRET_VALUE), each pattern as its source and flags.",
     "NEUTRAL_HOMES": [
@@ -4428,7 +4428,7 @@
       "expected": []
     },
     {
-      "name": "an exclude entry with a segment made only of dots fails closed: the folder before that segment is never read",
+      "name": "an exclude entry with a segment made only of a dot and a space fails closed: the folder before that segment is never read",
       "input": {
         "manifest": {
           "format": "fabric-source/1",
@@ -4439,7 +4439,7 @@
             "LICENSE"
           ],
           "exclude": [
-            "src/secrets/.../"
+            "src/secrets/. /"
           ],
           "binaries": [
             "docs/icon.png"
@@ -5070,7 +5070,7 @@
       "expected": []
     },
     {
-      "name": "an exclude entry with a segment made only of dots fails closed: a path beneath the folder before it is refused",
+      "name": "an exclude entry with a segment made only of a dot and a space fails closed: a path beneath the folder before it is refused",
       "input": {
         "manifest": {
           "format": "fabric-source/1",
@@ -5078,7 +5078,7 @@
             "src/"
           ],
           "exclude": [
-            "src/secrets/.../"
+            "src/secrets/. /"
           ]
         },
         "paths": [
@@ -5090,6 +5090,56 @@
       "expected": [
         "src/secrets/key.txt",
         "src/SECRETS/k"
+      ]
+    },
+    {
+      "name": "a segment with two dots may read as ..: the parent of the folder before it is refused too",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "lib/"
+          ],
+          "exclude": [
+            "src/secrets/.‌./"
+          ]
+        },
+        "paths": [
+          "src/secrets/key.txt",
+          "src/main.ts",
+          "lib/x.ts"
+        ]
+      },
+      "expected": [
+        "src/secrets/key.txt",
+        "src/main.ts"
+      ]
+    },
+    {
+      "name": "an entry without a trailing slash also removes the bare name as a file",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "lib/"
+          ],
+          "exclude": [
+            "src/secrets/..."
+          ]
+        },
+        "paths": [
+          "src/secrets",
+          "src/secrets/x",
+          "src/main.ts",
+          "lib/x.ts"
+        ]
+      },
+      "expected": [
+        "src/secrets",
+        "src/secrets/x",
+        "src/main.ts"
       ]
     },
     {

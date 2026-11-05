@@ -146,11 +146,10 @@ receipts' `run` are DEC-0030's amendment (board item V4-RUN-RESULT); the signal'
 
 `state[]` lists what moves when a placement moves, as paths relative to the service's data folder, each with its
 purpose. Absent or empty, nothing moves (v4 §6, Move). A copy for a colleague is packed without state (v4 §6 Path 3).
-Such a copy still carries the agent's source, so handing it to another person is a source hand-over where
+Such a copy still carries the agent's source, so handing it to anyone who could not already read the home is a source hand-over where
 [source](source.md#handing-over) counts one, taken on the operator's word for that act (DEC-0149). A package handed
-over or published holds only committed source paths that passed its source commit's tree check, besides
-`fabric.package.json` (and the signatures and checksums the pack step writes), so a vendored file travels only as a
-committed path the source manifest lists in `binaries` (DEC-0149).
+over or published to a public registry holds only committed source paths that passed its source commit's tree check, besides
+`fabric.package.json` (and the signatures and checksums the pack step writes), so a vendored file travels only as a committed source path (a binary one also listed in `binaries`; DEC-0149).
 With a [source manifest](source.md), a packer writes the `state[]` paths from its `store` slots' paths, and
 `FAC-SEM-160` refuses a package whose state paths differ; an absent or empty `state[]` is a copy packed without state
 and passes (DEC-0149).

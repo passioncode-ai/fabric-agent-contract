@@ -2190,7 +2190,7 @@ describe("an agent's source (DEC-0149)", () => {
   });
 
   it("reads an exclude entry outside the grammar at its widest and says it once, in a folder and in a tree document", () => {
-    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/secrets/.../"] }), LICENSE: "x", "src/a.ts": "x", "src/secrets/key.ts": `"${key}"` });
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/secrets/. /"] }), LICENSE: "x", "src/a.ts": "x", "src/secrets/key.ts": `"${key}"` });
     const result = run(dir, "--kind", "source-tree");
     expect(result.code).toBe(1);
     expect(found(result.out).filter((line) => line.includes("FAC-SEM-157"))).toHaveLength(1);

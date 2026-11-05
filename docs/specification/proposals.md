@@ -51,7 +51,8 @@ The schema holds the shapes. The rules:
   in slash form (`/Users/`, `/home/`, `~/`, `C:\Users\`) and no dash form, so `-Users-<name>-` is not refused here,
   unlike `HOME_PATH` ([activity](activity.md#no-content-no-person), which also refuses relative slash forms and the dash
   form after a character that is not an ASCII letter or digit) and a device's `detail` line
-  ([devices](devices.md#check-in), the dash form after any character); changing any of the three is a decision.
+  ([devices](devices.md#check-in), the dash form after any character) and the source tree check's `SOURCE_HOME_PATHS`
+  (`FAC-SEM-158`, [source](source.md#home-folders)); changing any of the four is a decision.
 
 ## Relation to DEC-0012
 

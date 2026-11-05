@@ -144,7 +144,9 @@ for 24 hours. A service takes a
 authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
 `decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1` (`actionDecision`,
 [service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121). A **Source hand-over** takes a decision only
-with its exact target ([source](docs/specification/source.md#handing-over), DEC-0149).
+with its exact target ([source](docs/specification/source.md#handing-over), DEC-0149). An agent without
+`fabric.source.json` is handed over, or released publicly from a private home, only once it has one, since every
+carrier needs the tree check; the manifest stays opt-in otherwise.
 
 **Mandate**: The operator's instruction for one task, carried with the task down a chain of the operator's agents
 (`mandate/1`): the task, the operator's words verbatim, when they were given, an expiry within 7 days, a scope
@@ -450,15 +452,13 @@ a proposal's `export` destination (`FAC-SEM-103`).
 
 **Source hand-over**: An agent's source reaching a place or a person it was not at; a route is a hand-over only when the source reaches someone who could not already read the home: a copy is none only when it stays in a place the home's owner holds and only the home's readers can read it (the owning organization's members for its own agent, and, for a personal agent's private home, the collaborators given access before DEC-0149 was accepted), and a repository or placement another owner holds stays a hand-over; a release is a source export or a package, and serving and copied content are never a release, so they keep their own rule. The routes include, among others,
 the ones below, each a hand-over except, on every route, an organization's later public release from its private home
-(its own act) and material already public: a **Source export** handed to anyone or sent as a file to another person or a place outside the owner's; a push of a
-commit not already there to a repository that is not the agent's home and that is public, another owner's, or readable
-by another person (an organization's repository included, even one the operator administers), each such push its own; source files' content copied into a message, an issue, a gist or a thread outside the owner's; a package handed to
-another person (a colleague's copy), which carries the source; a personal agent's package or release published to a
+(its own act) and material already public; the lead filters every route, beside those two exceptions: a route that reaches only those who could already read the home is no hand-over (an organization's export pushed to its own private repository, readable only by its members, is none). The routes: a **Source export** handed to anyone who could not already read the home or sent as a file to such a person or to a place outside the owner's that such a person can read; a push of a
+commit not already there to a repository that is not the agent's home and that is public, another owner's, or readable by anyone who could not already read the home (an organization's repository included, even one the operator administers), each such push its own; source files' content copied into a message, an issue, a gist or a thread outside the owner's; a package handed to anyone who could not already read the home (a colleague's copy), which carries the source; a personal agent's package or release published to a
 public registry, unless its home is already public (the files the pack step derives from the public source count as
 public, nothing else does). A hand-over by push or by file carries a source export (one new commit, whose only parent,
 if any, is the earlier export commit the recipient holds; no commit from the home; the tree check passed), never
 another commit; the export's receipt records the recipient and the export commit, from which the next export reads its
-parent, and an export that cannot land as a fast-forward goes as a new branch or pull request, never by a force-push; a package handed over or published names as its target the source commit it was packed
+parent, and an export that cannot land as a fast-forward goes as a new branch or pull request, never by a force-push; a package handed over or published to a public registry names as its target the source commit it was packed
 from and holds only source paths that passed that commit's tree check, besides the files the pack step writes (`fabric.package.json`); built files travel only as committed source paths.
 An act on the whole repository of a personal agent's private home, or of any copy of it within the operator's estate that carries its history (a private mirror), such as a visibility change or access given to any other person, is not done: the source leaves only as a source export; a transfer of a personal agent's home, public or
 private, is not done either (the operator's own permission for it is outside this contract); a public home's access and
@@ -467,7 +467,7 @@ DEC-0149 was accepted stands as the operator's own act (nothing is retroactive),
 repository are its own, under its own release rules, except two that take the word naming the repository: making a
 private organization agent's source public by a visibility change, and giving it new readers outside the organization
 (the word accepts the history as it stands); its first public release from a private home, by any route, takes the word naming
-its source commit, every later one by any route is its own act, and every release from a private home carries only the
+its source commit, every later one by any route is its own act, and every public release from a private home carries only the
 source export (its parent the earlier export commit) or a package packed from that source commit holding only source
 paths that passed the tree check. A processor acting for the owner under the owner's own account
 or host is no recipient while what it holds stays readable by no one but the owner and the processors acting for it;
@@ -485,7 +485,7 @@ a hand-over, the word naming the deploy of a commit that serves source to anyone
 commit and audience); a copy moved within the operator's own estate (here, the accounts and placements the operator
 alone holds) to a place that is not public and that no one outside the operator can read (a private mirror the operator
 owns) is none either. The home carve-out never lets a personal agent's source move into an organization's or a public
-repository, or onto an organization's or a team's placement or one other people can read, which stays one; serving the
+repository, or onto an organization's or a team's placement or one that anyone who could not already read the home can read, which stays one; serving the
 running agent to a team (`peer`, client keys) gives no one the tree, except a prompt or resource that is a source file
 served verbatim, or a bundle built without minification, which is the source tree served. It is taken only on the
 operator's word for that act naming the agent, the target (the source commit, or the repository for an organization's

@@ -943,9 +943,11 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
       expect(isSourcePath({ include: ["src/"] }, `src/${segment}/x.md`), JSON.stringify(segment)).toBe(false);
       expect(nestedInSource({ include: ["src/"] }, `src/${segment}`), JSON.stringify(segment)).toBe(false);
       expect(includeIndex(["src/"]).reaches(`src/${segment}/`), JSON.stringify(segment)).toBe(false);
-      expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [`src/${segment}/`] }), JSON.stringify(segment)).toEqual([
-        { code: "FAC-SEM-157", instancePath: "/exclude/0", message: "exclude[0] is an entry with a segment made only of dots, spaces and code points HFS+ ignores, so it still removes what lies beneath the folder before that segment (everything, when it is the first)" }
-      ]);
+      // Two or more dots: a second segment may read as .., so everything goes; fewer: the folder before it, src/.
+      const everything = (segment.match(/\./gu) ?? []).length >= 2;
+      const said = sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [`src/${segment}/`] }) ?? [];
+      expect(said.find((finding) => finding.instancePath === "/exclude/0")?.message, JSON.stringify(segment)).toBe(`exclude[0] is an entry with a segment made only of dots, spaces and code points HFS+ ignores, so it still removes ${everything ? "everything but fabric.source.json" : "the folder before that segment"}`);
+      expect(said.map((finding) => finding.instancePath).sort(), JSON.stringify(segment)).toEqual(everything ? ["/exclude/0", "/include/0", "/include/1"] : ["/exclude/0", "/include/0"]);
     }
     // A name ending in a dot keeps a letter: it is in the grammar.
     expect(inGrammar("src/a./x.md")).toBe(true);
@@ -960,19 +962,49 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
   });
 
   it("reads an exclude entry outside the grammar at its widest, so it fails closed; an include entry so read names nothing", () => {
-    for (const entry of ["src/secrets/.../", "src/secrets/.\u200c./", "src/Secrets/. /x/", "src/secrets/..."]) {
+    // The widest reading is the union of the readings: the folder before the first segment that folds to nothing, and
+    // its parent too when that segment holds two or more dots (a reader may take it as ..), each also as a file when
+    // the entry has no trailing slash.
+    const readings: Array<[string, boolean, string]> = [
+      ["src/secrets/.../", false, "the folder before that segment and that folder's parent (a reader may take the segment as ..)"],
+      ["src/secrets/.\u200c./", false, "the folder before that segment and that folder's parent (a reader may take the segment as ..)"],
+      ["src/Secrets/. /x/", true, "the folder before that segment"],
+      ["src/secrets/...", false, "the folder before that segment and that folder's parent (a reader may take the segment as ..), each also as a file of its name"],
+      ["src/secrets/. ", true, "the folder before that segment, each also as a file of its name"]
+    ];
+    for (const [entry, mainStays, removes] of readings) {
       const manifest = { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [entry] };
       expect(isSourcePath(manifest, "src/secrets/key.txt"), entry).toBe(false);
       expect(isSourcePath(manifest, "src/secrets/deep/key.txt"), entry).toBe(false);
-      expect(isSourcePath(manifest, "src/main.ts"), entry).toBe(true);
-      expect(patchPathsAllowed(manifest, ["src/secrets/key.txt", "src/SECRETS/k", "src/main.ts"]), entry).toEqual(["src/secrets/key.txt", "src/SECRETS/k"]);
+      expect(isSourcePath(manifest, "src/main.ts"), entry).toBe(mainStays);
+      expect(isSourcePath(manifest, "LICENSE"), entry).toBe(true);
+      expect(patchPathsAllowed(manifest, ["src/secrets/key.txt", "src/SECRETS/k", "src/main.ts"]), entry).toEqual(mainStays ? ["src/secrets/key.txt", "src/SECRETS/k"] : ["src/secrets/key.txt", "src/SECRETS/k", "src/main.ts"]);
       expect(excludedFolderTest(manifest)("src/secrets"), entry).toBe(true);
       expect(sourceFolderTest(manifest)("src/secrets"), entry).toBe(false);
       expect(nestedInSource(manifest, "src/secrets/inner"), entry).toBe(false);
       expect(isUncheckedPath({ ...manifest, unchecked: [{ path: "src/secrets/x/", reason: "r" }] }, "src/secrets/x/a"), entry).toBe(false);
       const findings = sourceRules("source-manifest", { ...manifest, include: ["src/", "LICENSE", "src/secrets/pub.md"] }) ?? [];
-      expect(findings.map((finding) => finding.instancePath).sort(), entry).toEqual(["/exclude/0", "/include/2"]);
+      expect(findings.map((finding) => finding.instancePath).sort(), entry).toEqual(mainStays ? ["/exclude/0", "/include/2"] : ["/exclude/0", "/include/0", "/include/2"]);
+      expect(findings.find((finding) => finding.instancePath === "/exclude/0")?.message, entry).toBe(`exclude[0] is an entry with a segment made only of dots, spaces and code points HFS+ ignores, so it still removes ${removes}`);
     }
+    // Without a trailing slash the bare name goes as a file too: the file src/secrets is out.
+    expect(isSourcePath({ include: ["src/"], exclude: ["src/secrets/..."] }, "src/secrets")).toBe(false);
+    expect(isSourcePath({ include: ["src/"], exclude: ["src/secrets/. "] }, "src/secrets")).toBe(false);
+    expect(isSourcePath({ include: ["src/"], exclude: ["src/secrets/. /"] }, "src/secrets")).toBe(true);
+    // A second segment with two dots removes everything but the manifest; with one dot only its folder.
+    expect(isSourcePath({ include: ["src/", "LICENSE"], exclude: ["src/../"] }, "LICENSE")).toBe(true);
+    expect(isSourcePath({ include: ["src/", "LICENSE"], exclude: ["src/.\u200c./"] }, "LICENSE")).toBe(false);
+    expect(isSourcePath({ include: ["src/", "LICENSE"], exclude: ["src/. /"] }, "LICENSE")).toBe(true);
+    // Both causes: the segment is said first, and the effect is the segment's reading.
+    const both = `src/secrets/.../${"\u00e9".repeat(130)}/`;
+    expect(isSourcePath({ include: ["src/"], exclude: [both] }, "src/secrets/key.txt")).toBe(false);
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [both] })?.find((finding) => finding.instancePath === "/exclude/0")?.message).toBe("exclude[0] is an entry with a segment made only of dots, spaces and code points HFS+ ignores, so it still removes the folder before that segment and that folder's parent (a reader may take the segment as ..)");
+    // An include equal to a folder an out-of-grammar exclude removes is said once, at the include.
+    const equal = sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "src/secrets/", "LICENSE"], exclude: ["src/secrets/. /"] }) ?? [];
+    expect(equal.filter((finding) => finding.instancePath === "/include/1").map((finding) => finding.message)).toEqual(["include[1] lies inside an exclude path, so it names nothing"]);
+    expect(equal.map((finding) => finding.instancePath).sort()).toEqual(["/exclude/0", "/include/1"]);
+    const equalFile = sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "src/secrets", "LICENSE"], exclude: ["src/secrets/. "] }) ?? [];
+    expect(equalFile.map((finding) => finding.instancePath).sort()).toEqual(["/exclude/0", "/include/1"]);
     // A first segment made only of dots removes everything but the manifest itself.
     const everything = { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [".../"] };
     expect(isSourcePath(everything, "src/main.ts")).toBe(false);
