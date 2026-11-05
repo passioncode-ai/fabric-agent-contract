@@ -5968,8 +5968,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   revision; a producer carries them once every reader of its feed it knows of has adopted DEC-0144, and a reader
   validating against an older copy refuses that day's `value` (DEC-0070).
 - **Annotated (2026-11-04):** DEC-0151 (proposed) adds the optional `project` and the ticket counts of the channel
-  agent standard (`arrived`, `ended`, `notATicket`, `open`, `outcomes`, `autonomy.answeredTickets`, `stability.fallbackTurns` and
-  `fallbackTickets`) at the same revision, under DEC-0144's producer rule, and lets a metric name in `notMeasured` carry
+  agent standard (`arrived`, `ended`, `notATicket`, `open`, `outcomes`, `autonomy.answeredTickets`, `stability.safeReplyTurns` and
+  `safeReplyTickets`) at the same revision, under DEC-0144's producer rule, and lets a metric name in `notMeasured` carry
   digits. It narrows item 2: the payload carries one id, the project's registry alias `project:<slug>`. It narrows
   item 1: a channel serving several projects publishes one event per project and day, each naming its `project`,
   and before adoption a channel holding two projects' tickets publishes no event.
@@ -9066,15 +9066,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      customerSilent, expiredByDecision, expired, unanswered, firstReplyLate, promotions}` (the ending cohort by
      outcome, `firstReplyLate` and `promotions` being marks, `promotions` those of the day); `autonomy.answeredTickets` (the
      ending cohort's tickets that ended answered or answered after a question; named for tickets, since the asker's v2
-     shape has `autonomy.answered` counting turns); `stability.fallbackTurns` (the day's
-     turns the checker refused twice in a row) and `stability.fallbackTickets` (the ending cohort's tickets with at
+     shape has `autonomy.answered` counting turns); `stability.safeReplyTurns` (the day's
+     turns answered with a safe reply after the checker refused twice in a row; not v2's `stability.fallbackTurns`,
+     which counts turns a fallback model answered) and `stability.safeReplyTickets` (the ending cohort's tickets with at
      least one), neither of which is `recoveredByFallback`, the model-call fallback. `open` and `outcomes` are never
      empty objects. `/1` keeps `autonomy.toPersonPolicy` and `toPersonInability` in turns, as FAC-SEM-126 bounds
      them: a producer on the channel agent standard, which counts them in tickets, writes them in turns, or `null` and
      named in `notMeasured`, until `/1` names a ticket unit.
   2. FAC-SEM-126 reads each as it reads every metric: `null` and named in `notMeasured` when not measured, never `0`;
      a top-level count is named by its own name (`arrived`), the others as `open.<metric>`, `outcomes.<metric>`,
-     `autonomy.answeredTickets`, `stability.fallbackTurns`, `stability.fallbackTickets`; naming one the payload does not carry
+     `autonomy.answeredTickets`, `stability.safeReplyTurns`, `stability.safeReplyTickets`; naming one the payload does not carry
      is a finding, and naming a top-level member that is no metric (`project`, `day`, `kind`, a family) is a finding
      whose message says it is not a metric. An absent member is one the producer does not carry, read as unknown,
      never as `0`. No sum among the counts is checked: the channel agent standard's section 5 states none.
@@ -9167,7 +9168,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `comms-common`'s `projectId` pattern (the declaration names the registry alias, and that pattern admits the long
   mixed-case ids FAC-SEM-101 flags); the ticket count named `autonomy.answered`, as the channel agent standard's
   section 5.1 table has it (the asker's v2 shape already carries `autonomy.answered` counting turns, so a reader mapping
-  v2 by name would read tickets as turns).
+  v2 by name would read tickets as turns); the safe-reply counts named `stability.fallbackTurns` and `fallbackTickets`,
+  as that table has them (v2's `stability.fallbackTurns` counts turns a fallback model answered, so the same name would
+  carry another meaning).
 - **Compatibility:** a widening of a closed object: a `/1` payload without the new members validates and reads as
   before, and `pnpm validate` reports the same for every existing support-quality fixture. A reader that validates
   against an older copy refuses a day that carries a new member or a metric name with a digit, and keeps the event's
@@ -9222,12 +9225,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   port. The adapter's files whose answers change (adapter 0.62.0) also include: `test/fixtures/contract/profile-vectors.json`, regenerated at the merge commit, with `test_fabric_profiles.py` `SecretShapeTests` and `fabric-profiles.test.mjs`; the upper-case `SK-` case in `test_whitespace_dot_and_case_read_as_ecmascript` (both modules), beside the `%zz` and `KIA` case; `test/test_provider.py` "a key in an argument (LC-21)", rebuilt from pieces as a key DEC-0151 reads; the repository-credential rule's `test/repository_vectors.json` (its three credential vectors), `test_repository_credential.py` and `repository-credential.test.mjs`; and `test_check_service_dashboard_open.py` `test_a_repository_in_the_evidence_carries_no_key`. A port derives this list by patching `SECRET_VALUE` in its twins and running its suite, never by scanning literals (its samples are hex-encoded or built from pieces); a scratch run of the adapter's suites so patched named every failing test, listed in the handoff of CT-210. `repositoryName` and `repository_name` (the adapter's `fabric-secrets.mjs` and both `fabric_secrets.py`, and Fabric Dashboards' sample-service copy of `fabric_secrets.py`) must not compose DEC-0151's source after a separator look-behind with the `i` flag: the consuming boundary would need a second separator, so a key after `-`, `.` or `_` goes unfound, and `i` undoes the canonical case and the `sk-` strength. They keep their own boundary-free key shapes (as the source check keeps its own), with case-sensitive prefixes and no `i` flag, and the adapter pins a key after `-`, `.` and `_` in its repository vectors (`test/secret-shape.test.ts` shows why such a composition misses one). Until every reader of its feed it knows of has adopted DEC-0151, a producer publishes no `project` and withholds every channel whose day holds tickets of two projects that enter `/1`, counting every project whose tickets the channel holds: by its channel agent declaration where the declaration names the project, by its own project mapping otherwise (no declaration, no alias, or an alias read as a credential); a project whose kind there is left out of `/1`, such as `team_chat`, does not count. The switch day of a channel moving from one project to another is one of them, and a withheld day is dropped, never published later. A producer that merged projects into one event under DEC-0095 thus stops publishing that channel
   from DEC-0151 until every reader adopts, so its readers see no days for that channel meanwhile, never reruns a merged day before adoption, and after adoption reruns one only unchanged; whether any `/1` producer does so
   today is the producers' to confirm (CT-103 suggests multi-product producers are still on their v2 shape).
-  `/1` never reuses a v2 field name with another unit; a ticket count is named for tickets: the ending cohort's answered tickets are `autonomy.answeredTickets`, because the asker's
-  v2 shape already has `autonomy.answered` counting turns (board thread `b6820b97`, message `5a1334d1`). The other new
-  members were checked by name against the fields the channel agent standard's section 5.1 table treats as present (it
-  marks every other member new): only `stability.fallbackTurns` is a v2 name, a turn count by its name, whose v2 meaning
-  differs (support quality, "Not decided here"), so a reader maps it explicitly, never by name; whether it keeps the
-  name is open (CT-210's handoff). `contractVersion` stays
+  `/1` never reuses a v2 field name with another meaning or unit; a ticket count is named for tickets: the ending cohort's answered tickets are
+  `autonomy.answeredTickets`, because the asker's v2 shape already has `autonomy.answered` counting turns (board thread
+  `b6820b97`, message `5a1334d1`), and the safe-reply counts are `stability.safeReplyTurns` and
+  `stability.safeReplyTickets`, because Fabric Inbox's v2 quality worker, at commit `99d71f3`, counts in `stability.fallbackTurns` the turns whose run had `modelCalls.recovered > 0` (a fallback model answered; same unit and window), while `/1`'s count is the channel agent standard's section 5.1 row, a safe reply after the checker refused twice in a row (board thread `b6820b97`, message `24cf4f25`). The other new members were checked by name against the
+  fields the channel agent standard's section 5.1 table treats as present (it marks every other member new): none is a
+  v2 name. `contractVersion` stays
   `0.1.0`.
 - **Consequences / affects:** `schemas/support-quality-daily.schema.json` (also the `calibration` description DEC-0144
   left to correct), `src/support-quality-rules.ts`, `test/support-quality.test.ts`; `src/secret-shape.ts`,
@@ -9246,4 +9249,4 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   DEC-0144 and DEC-0044 annotated; `docs/backlog.md` (CT-210, CT-129, CT-103, CT-73, CT-213, CT-188's note);
   `docs/handoffs/2026-11-04-support-quality-tickets.md`.
 - **Source:** CT-210, CT-129; the board request `74105ca1` (thread `b6820b97`); DEC-0151 reserved by git CAS (key
-  `support-quality-v2-dec`, counter commit `ee67e35`). Readings: Rounds 1 to 13 found breaks, each fixed: round 8 the per-day attribution of an absent `project`; round 9 one rule for it (no `project` before adoption, `project` on every event after, a day without it never attributed); round 10 rule 1's trigger the day's tickets and calibration per side; round 11 the observed check by period, only projects whose tickets enter `/1`, merged legacy days kept from reruns before adoption, one-way adoption; round 12 adoption marked by the first day that names `project`, rule 9 per project, the colour boundary's `:` and `\33`; round 13 DEC-0144's calibration carry-forward per project and a weak `sk-` alias still a credential in a DEC-0149 source tree; round 14 AT-15 vectors for the canonical case, the `sk-` strength and the word start, the no-alias exception in every copy of rule 2, rule 9's "unnamed", the interim message, and the registry's alias rule as the operator's open question; before round 15, on a producer's board message (`5a1334d1`), the ticket count `autonomy.answered` renamed `autonomy.answeredTickets`, since v2's `autonomy.answered` counts turns; two consecutive clean rounds are still owed.
+  `support-quality-v2-dec`, counter commit `ee67e35`). Readings: Rounds 1 to 13 found breaks, each fixed: round 8 the per-day attribution of an absent `project`; round 9 one rule for it (no `project` before adoption, `project` on every event after, a day without it never attributed); round 10 rule 1's trigger the day's tickets and calibration per side; round 11 the observed check by period, only projects whose tickets enter `/1`, merged legacy days kept from reruns before adoption, one-way adoption; round 12 adoption marked by the first day that names `project`, rule 9 per project, the colour boundary's `:` and `\33`; round 13 DEC-0144's calibration carry-forward per project and a weak `sk-` alias still a credential in a DEC-0149 source tree; round 14 AT-15 vectors for the canonical case, the `sk-` strength and the word start, the no-alias exception in every copy of rule 2, rule 9's "unnamed", the interim message, and the registry's alias rule as the operator's open question; before round 15, on a producer's board messages, the ticket count `autonomy.answered` renamed `autonomy.answeredTickets`, since v2's `autonomy.answered` counts turns (`5a1334d1`), and `stability.fallbackTurns` and `fallbackTickets` renamed `stability.safeReplyTurns` and `safeReplyTickets`, since v2's `stability.fallbackTurns` counts turns a fallback model answered (`24cf4f25`); two consecutive clean rounds are still owed.

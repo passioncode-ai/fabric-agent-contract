@@ -69,8 +69,8 @@
             "processErrors": 0,
             "restarts": 0,
             "knowledgeAgeHours": 20,
-            "fallbackTurns": 1,
-            "fallbackTickets": 1
+            "safeReplyTurns": 1,
+            "safeReplyTickets": 1
           },
           "autonomy": {
             "resolvedWithoutPerson": 120,
@@ -152,8 +152,8 @@
             "processErrors": 0,
             "restarts": 0,
             "knowledgeAgeHours": 20,
-            "fallbackTurns": 0,
-            "fallbackTickets": 0
+            "safeReplyTurns": 0,
+            "safeReplyTickets": 0
           },
           "autonomy": {
             "resolvedWithoutPerson": 120,

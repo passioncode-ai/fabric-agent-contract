@@ -11,7 +11,7 @@ import { type Finding, type JsonObject, isObject } from "./findings.js";
  * follows the not-measured rule as `calibration.helped`, its week is a real ISO week no later than the day, and
  * `calibrationChecks` stands only beside it. DEC-0151's ticket counts follow the not-measured rule: the top-level
  * `arrived`, `ended` and `notATicket` each under its own name, the `open` and `outcomes` objects as families, and
- * `autonomy.answeredTickets`, `stability.fallbackTurns` and `stability.fallbackTickets` as their families' members; an absent
+ * `autonomy.answeredTickets`, `stability.safeReplyTurns` and `stability.safeReplyTickets` as their families' members; an absent
  * one is not carried, so naming it is a finding, and naming a top-level member that is no metric (`project`, `day`) says
  * so. DEC-0151 adds no sum among them: the channel agent standard states none.
  */

@@ -177,13 +177,13 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
     value.open.awaitingApproval = null;
     value.outcomes.expired = null;
     value.autonomy.answeredTickets = null;
-    value.stability.fallbackTickets = null;
-    expect(paths(value).sort()).toEqual(["FAC-SEM-126 /arrived", "FAC-SEM-126 /autonomy/answeredTickets", "FAC-SEM-126 /open/awaitingApproval", "FAC-SEM-126 /outcomes/expired", "FAC-SEM-126 /stability/fallbackTickets"]);
-    value.notMeasured = [...value.notMeasured, "arrived", "open.awaitingApproval", "outcomes.expired", "autonomy.answeredTickets", "stability.fallbackTickets"];
+    value.stability.safeReplyTickets = null;
+    expect(paths(value).sort()).toEqual(["FAC-SEM-126 /arrived", "FAC-SEM-126 /autonomy/answeredTickets", "FAC-SEM-126 /open/awaitingApproval", "FAC-SEM-126 /outcomes/expired", "FAC-SEM-126 /stability/safeReplyTickets"]);
+    value.notMeasured = [...value.notMeasured, "arrived", "open.awaitingApproval", "outcomes.expired", "autonomy.answeredTickets", "stability.safeReplyTickets"];
     expect(paths(value)).toEqual([]);
     const zero = tickets();
-    zero.notMeasured = [...zero.notMeasured, "notATicket", "outcomes.promotions", "stability.fallbackTurns"];
-    expect(paths(zero).sort()).toEqual(["FAC-SEM-126 /notATicket", "FAC-SEM-126 /outcomes/promotions", "FAC-SEM-126 /stability/fallbackTurns"]);
+    zero.notMeasured = [...zero.notMeasured, "notATicket", "outcomes.promotions", "stability.safeReplyTurns"];
+    expect(paths(zero).sort()).toEqual(["FAC-SEM-126 /notATicket", "FAC-SEM-126 /outcomes/promotions", "FAC-SEM-126 /stability/safeReplyTurns"]);
   });
   it("names only what the payload carries: an absent member named not measured is a finding", () => {
     const value = ok();
