@@ -9049,8 +9049,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `ops.digest.daily@1` {`schema`, `day`, `hours`, `ops`, `total`, `risen`[{`op`, `hours`, `failed`}]}, both closed,
      every count an integer from 0 to 2^53 − 1, at most 4096 operations and rises: a product keeps at most 4095 named
      operations per UTC day plus its one fixed overflow name, under which it counts the rest (their counts kept), so
-     both its hourly and its daily lines validate; a day that would fold more than 4096 operations has no daily digest
-     (the reference `foldDay` throws).
+     both its hourly and its daily lines validate; a day that would fold more than 4096 operations has no daily digest,
+     and an hour of more than 4096 operations or holding a name OD-2 refuses has no hourly digest (the reference
+     `foldDay` and `foldHour` throw: a reference fold never writes a line every reader skips). A finding or a fold's
+     error names a value shaped like a credential or holding a home folder only by its place.
   2. **The window (OD-1).** `from` and `to` are whole UTC hours in RFC 3339 with `Z`, with or without the `.000` that
      `Date.prototype.toISOString` writes (Fabric writes it), `to` one hour after `from`; `day` is `YYYY-MM-DD` UTC;
      `hours` 1 to 24. An hour the product ran through is written even when empty; an hour it did not run is a gap. A
@@ -9128,7 +9130,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      a collector on the same machine sends with each daily line it reads there. The digests stay as written (OD-6,
      OD-7); the key only says where to read and which label to send. `FAC-SEM-168` (kind `service-descriptor`) refuses
      the key on a remote placement or on a local one without `paths.data`, a value that is not its schema's, a `source`
-     named twice, a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped (one folder under two labels would be sent twice), a `dir` holding a home folder (`hasHomePath`, with the
+     named twice, a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped (one folder under two labels would be sent twice), a `dir` holding a home folder (`hasHomePath`, with the
      boundary of item 3: `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x` pass) and a `dir` or `source` shaped like a credential
      (`secretValue`); one finding refuses the whole declaration, which a collector reads as not declared and reports.
      `digestFoldersView` (whose `usable` is true only when the rule has no finding) and `digestFoldersRules` in
@@ -9235,6 +9237,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   handoff), and its batch is folded in; round 7 at `69b06d3f` was not clean: the producer row's bound (it read
   "beyond 4096", now OD-3's 4095 names a day plus one overflow name) and `FAC-SEM-167`'s description (now the shared
   detector's shapes as it applies them, the `sk-` shape inside `task-` and its kin included until DEC-0151 lands), and
-  its batch is folded in;
+  its batch is folded in; round 7's unit and seam readings passed, with risks folded (the `foldHour` bound, the secret
+  echo: no finding or error copies a credential-shaped or home-folder value);
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

@@ -183,13 +183,51 @@ describe("the reference folds", () => {
   });
 
   it("bounds ops and risen at 4096 operations, so a product counts the rest under one name of its own (OD-3)", () => {
+    const H = "2026-11-04T01:00:00Z";
     const many = (n: number) => Array.from({ length: n }, (_, i) => ({ op: `op.n${String(i).padStart(4, "0")}`, ok: 1, failed: 0, unknown: 0 }));
-    const digest = (n: number) => ({ ...foldHour(many(n), "2026-11-04T01:00:00Z", null) });
-    expect(valid("ops-digest-hourly.schema.json", digest(4096))).toBe(true);
-    expect(valid("ops-digest-hourly.schema.json", digest(4097))).toBe(false);
+    expect(valid("ops-digest-hourly.schema.json", foldHour(many(4096), H, null))).toBe(true);
+    // A reference fold never writes a line every reader skips: 4097 operations, no hourly digest.
+    expect(() => foldHour(many(4097), H, null)).toThrow(/4097 operations, more than 4096: no hourly digest \(OD-3\)/);
+    expect(() => foldHour(many(4097), H, null)).toThrow(/4096/);
     const folded = foldHour([...many(4095), { op: "tool.other", ok: 2, failed: 0, unknown: 0 }], "2026-11-04T01:00:00Z", null);
     expect(valid("ops-digest-hourly.schema.json", folded)).toBe(true);
     expect(folded.total.ok).toBe(4097);
+  });
+
+  it("writes no hourly digest for an operation's name that fails OD-2's grammar (OD-3)", () => {
+    const H = "2026-11-04T01:00:00Z";
+    for (const op of ["/logs/ops.jsonl", "Board.tick", "a b", "a".repeat(65), 7 as unknown as string]) {
+      expect(() => foldHour([{ op: "board.tick", ok: 1, failed: 0, unknown: 0 }, { op, ok: 1, failed: 0, unknown: 0 }], H, null), String(op)).toThrow(/the operation at 1 fails OD-2's name grammar: no hourly digest \(OD-3\)/);
+    }
+    expect(foldHour([{ op: "a".repeat(64), ok: 1, failed: 0, unknown: 0 }], H, null).ops).toHaveLength(1);
+  });
+
+  it("never copies a credential-shaped or home-folder value into a finding or an error (FAC-SEM-166, FAC-SEM-168)", () => {
+    const slack = ["xo", "xb-", "notareal-0123"].join("");
+    const home = ["home", "jdoe", "x"].join("/");
+    for (const op of [slack, home]) {
+      const value = hourlyOk();
+      value.ops.push({ op, ok: 0, failed: 10, unknown: 0 }, { op, ok: 0, failed: 10, unknown: 0 });
+      value.total.failed += 20;
+      value.risen.push({ op, failed: 20, previous: 0 }, { op, failed: 20, previous: 0 });
+      const findings = evaluateSemanticRules("ops-digest-hourly", value);
+      expect(findings.some((f) => f.code === "FAC-SEM-166" && f.message.includes("this operation is counted once")), op).toBe(true);
+      expect(findings.some((f) => f.code === "FAC-SEM-166" && f.message.includes("this operation is named once among the rises")), op).toBe(true);
+      for (const f of findings) expect(f.message, op).not.toContain(op);
+      const previous = { ...foldHour([], "2026-11-04T00:00:00Z", null), ops: [{ op: "a", ok: 0, failed: 0, unknown: 0 }, { op: "a", ok: 0, failed: 0, unknown: 0 }] } as HourlyDigest;
+      expect(() => foldHour([{ op: "a", ok: 1, failed: 0, unknown: 0 }], "2026-11-04T01:00:00Z", previous)).toThrow(/^a is named twice/);
+      const secretTwice = { ...previous, ops: [{ op, ok: 0, failed: 0, unknown: 0 }, { op, ok: 0, failed: 0, unknown: 0 }] } as HourlyDigest;
+      expect(() => foldHour([], "2026-11-04T01:00:00Z", secretTwice)).toThrow(/^the operation at 1 is named twice/);
+      if (op === slack) expect(() => foldHour([{ op, ok: -1, failed: 0, unknown: 0 }], "2026-11-04T01:00:00Z", null)).toThrow(/^a count of the operation at 0 is not/);
+    }
+    const key = EXTENSION_KEYS.opsDigest;
+    const descriptor = { ...structuredClone(load("ops-digest-folders-ok.json").input), extensions: { [key]: [{ dir: slack, source: "one" }, { dir: slack, source: "two" }, { dir: "digests", source: slack }, { dir: "other", source: slack }] } };
+    const findings = evaluateSemanticRules("service-descriptor", descriptor).filter((f) => f.code === "FAC-SEM-168");
+    expect(findings.some((f) => f.message.includes("this dir is named twice as a dir"))).toBe(true);
+    expect(findings.some((f) => f.message.includes("this source is named twice as a source"))).toBe(true);
+    for (const f of findings) expect(f.message).not.toContain(slack);
+    expect(found("service-descriptor", { ...descriptor, extensions: { [key]: [{ dir: "digests", source: "app" }, { dir: "Digests", source: "app" }] } }).length).toBe(2);
+    expect(evaluateSemanticRules("service-descriptor", { ...descriptor, extensions: { [key]: [{ dir: "digests", source: "app" }, { dir: "Digests", source: "app" }] } }).map((f) => f.message).join(" ")).toContain("Digests is named twice as a dir");
   });
 
   it("throws when a previous digest's failures give a rise a previous that is no count", () => {
@@ -343,7 +381,7 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     expect(evaluateSemanticRules("service-descriptor", value).find((f) => f.instancePath === `${at}/4/dir`)?.message).toContain("credential");
   });
 
-  it("compares dirs under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped", () => {
+  it("compares dirs under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped", () => {
     const pairs: Array<[string, string]> = [["Straße", "STRASSE"], ["Stra\u1e9ee", "Straße"], ["σασ", "ΣΑΣ"], ["café", "café"], ["digests.", "digests"], ["digests ", "digests"], ["a/Digests./b", "A/digests/B"], ["\u1fbc\u0342", "\u1fb7"], ["\u0131", "i"], ["\u0131", "I"], ["dig\u200cests", "digests"], ["digests\ufeff", "digests"], ["a/\u202adigests", "a/digests"], ["\u10a0\u10c5", "\u10d0\u10f5"], ["\u2d00", "\u10d0"]];
     for (const [a, b] of pairs) {
       expect(foldDir(a), `${a} ${b}`).toBe(foldDir(b));

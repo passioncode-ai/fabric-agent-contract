@@ -104,7 +104,7 @@ DEC-0149, DEC-0150 and DEC-0152 are on other branches. When DEC-0149, DEC-0150 a
   `docs/DOCMAP.md`, the spec README and `src/semantic-kinds.ts`, all ordered appends: the second to land keeps both.
 - DEC-0149 changes `secretValue` (`JWT_SHAPE.test` becomes `hasJwt`, behaviour-equivalent); `FAC-SEM-167` and
   `FAC-SEM-168` call `secretValue` and take it unchanged.
-- DEC-0153 keeps five client rows in `conformance.md` (a product folding its log, a reader of digests, a product
+- At the DEC-0151 landing step (DEC-0151 lands before this branch), DEC-0153 keeps five client rows in `conformance.md` (a product folding its log, a reader of digests, a product
   declaring its folders, a collector, a host serving the retro), not the three DEC-0151's handoff names:
   `grep -c "^| a .*| DEC-0153" docs/specification/conformance.md` prints 5.
 - At landing, write both next-free markers from the CAS counters, never from this file: `docs/DECISIONS.md`'s next
@@ -159,7 +159,9 @@ product's obligation.
   `fabric-source`.
 - **At landing** (DEC-0151 lands before this branch and narrows the `sk-` shape): on the merged tree, add `FAC-SEM-167`
   pass cases for `queue.task-assigned-to-worker`, `work.desk-booking-confirmed` and `ui.disk-usage-refreshed-hourly`,
-  which the `sk-` shape before DEC-0151 reads as keys.
+  which the `sk-` shape before DEC-0151 reads as keys. CT-222 (filed on this branch, the next free CT above every
+  branch and main when written) widens `SECRET_VALUE` for underscore-form provider prefixes, `AIza` keys and `hf_`
+  tokens, owned by DEC-0151's detector, with tests from split literals.
 - **At landing, the fold:** on the merged tree with DEC-0149, `foldDir` calls DEC-0149's `foldPath` (one
   implementation; a `dir` has no trailing `/`), and the parity test in `test/ops-digest.test.ts` (DEC-0149's
   `FOLD_PAIRS` at `d4cc1e16` copied as written, plus the HFS+ samples its next step adds) keeps holding.
@@ -220,12 +222,23 @@ product's obligation.
   hour ("the hour just before when that is the last hour written, else none"), the Why's "a retro the host saw written
   is not asked for twice", RW-3 and CONTEXT's distinction from the Memory Kernel's retrospective, CO-503 quoted
   verbatim, the hourly schema's "observed itself running in", a parity test of `foldDir` against DEC-0149's fold
-  pairs, the channel-agent hint link asserted when its schema exists, and the landing items. Round 8 is next.
+  pairs, the channel-agent hint link asserted when its schema exists, and the landing items.
+- Round 7's unit and seam readings passed with risks, folded: `foldHour` applies OD-3 as `foldDay` does (no hourly
+  digest for more than 4096 operations or a name `OP_NAME` refuses), its docstring names the adjoining previous hour,
+  no finding of FAC-SEM-166 or FAC-SEM-168 and no fold error copies a value shaped like a credential or holding a home
+  folder (it names the place, as `src/descriptor-rules.ts` does), DEC-0153 says "lower, upper and lower case" for the
+  fold, and CT-222 is filed. Round 8 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-7 risks, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of round
+2 (ops-digest, consistency and validate-cli among them) with coverage on `src/ops-digest.ts` (4208 tests; 241 of 241
+statements, 192 of 192 branches); `pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`;
+`python3 docs/ux/lint.py`; `pnpm run privacy:check` (0 findings); `grep -c "^| a .*| DEC-0153"
+docs/specification/conformance.md` prints 5. The branch gate is owed: the 15-minute load was 74.5.
 
 Round-7 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
 round 2 with coverage on `src/ops-digest.ts` (4206 tests; 235 of 235 statements, 181 of 181 branches);

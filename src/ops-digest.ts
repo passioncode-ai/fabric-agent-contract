@@ -96,13 +96,18 @@ function safeCounts<T extends HourlyDigest | DailyDigest>(digest: T): T {
   if (!counts.every(isCount)) throw new Error("a sum is beyond 2^53 - 1");
   return digest;
 }
+/**
+ * A value as a message may show it: itself, or `instead` when it is shaped like a credential or holds a home folder, so
+ * a finding or an error never copies such a value (as `src/descriptor-rules.ts` names only the place).
+ */
+const shown = (value: string, instead: string): string => (secretValue(value) || hasHomePath(value) ? instead : value);
 /** Throws when `ops` names one operation twice; `where` says whose list it is. */
 function once(ops: ReadonlyArray<{ op: string }>, where: string): void {
   const names = new Set<string>();
-  for (const c of ops) {
-    if (names.has(c.op)) throw new Error(`${c.op} is named twice in ${where}`);
+  ops.forEach((c, index) => {
+    if (names.has(c.op)) throw new Error(`${shown(c.op, `the operation at ${index}`)} is named twice in ${where}`);
     names.add(c.op);
-  }
+  });
 }
 
 /**
@@ -111,26 +116,30 @@ function once(ops: ReadonlyArray<{ op: string }>, where: string): void {
  * when it is the hour just before (a gap compares with none). `from` and `to` are written as
  * `Date.prototype.toISOString` writes them. `previous` must already pass FAC-SEM-166. It throws when an input count or
  * a previous digest's count is not an integer from 0 to 2^53 - 1 (each checked before it is used), when a sum is beyond
- * 2^53 - 1, when the previous digest names an operation twice, and when the hour after `from` is not a whole hour the
- * schema writes (after 9999-12-31T23).
+ * 2^53 - 1, when the previous digest, being the hour just before, names an operation twice, when the hour after `from`
+ * is not a whole hour the schema writes (after 9999-12-31T23), and, as OD-3 asks, when an operation's name fails
+ * `OP_NAME` or the hour holds more than 4096 operations: no hourly digest, since a reference fold never writes a line
+ * every reader skips.
  */
 export function foldHour(counts: readonly OpCount[], from: string, previous: HourlyDigest | null): HourlyDigest {
   const start = wholeHour(from);
   if (start === null) throw new Error(`${from} is not a whole UTC hour`);
   if (wholeHour(iso(start + HOUR_MS)) === null) throw new Error(`the hour after ${from} is not a whole UTC hour the schema writes`);
   const merged = new Map<string, OpCount>();
-  for (const c of counts) {
-    if (![c.ok, c.failed, c.unknown].every(isCount)) throw new Error(`a count of ${c.op} is not an integer from 0 to 2^53 - 1`);
+  counts.forEach((c, index) => {
+    if (typeof c.op !== "string" || c.op.length > OP_NAME_MAX || !OP_NAME.test(c.op)) throw new Error(`the operation at ${index} fails OD-2's name grammar: no hourly digest (OD-3)`);
+    if (![c.ok, c.failed, c.unknown].every(isCount)) throw new Error(`a count of ${shown(c.op, `the operation at ${index}`)} is not an integer from 0 to 2^53 - 1`);
     const m = merged.get(c.op) ?? { op: c.op, ok: 0, failed: 0, unknown: 0 };
     m.ok += c.ok; m.failed += c.failed; m.unknown += c.unknown;
     merged.set(c.op, m);
-  }
+  });
+  if (merged.size > OPS_MAX) throw new Error(`the hour counts ${merged.size} operations, more than ${OPS_MAX}: no hourly digest (OD-3)`);
   const ops = [...merged.values()].sort(byName);
   const adjoining = previous !== null && wholeHour(previous.to) === start ? previous.ops : [];
   once(adjoining, "the previous hour's ops");
   const before = new Map(adjoining.map((c) => [c.op, c.failed]));
   // A previous count that is no count (NaN, 1e300, negative) would silently suppress or fake a rise: it throws.
-  for (const c of ops) if (before.has(c.op) && !isCount(before.get(c.op))) throw new Error(`the previous hour's failures of ${c.op} are not an integer from 0 to 2^53 - 1`);
+  for (const c of ops) if (before.has(c.op) && !isCount(before.get(c.op))) throw new Error(`the previous hour's failures of ${shown(c.op, "an operation")} are not an integer from 0 to 2^53 - 1`);
   const risen = ops.filter((c) => isRise(c.failed, before.get(c.op) ?? 0)).map((c) => ({ op: c.op, failed: c.failed, previous: before.get(c.op) ?? 0 }));
   return safeCounts({ schema: OPS_DIGEST_HOURLY, from: iso(start), to: iso(start + HOUR_MS), ops, total: sum(ops), risen });
 }
@@ -157,15 +166,15 @@ export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDige
   const rose = new Map<string, { hours: number; failed: number }>();
   for (const h of mine) {
     for (const c of h.ops) {
-      if (![c.ok, c.failed, c.unknown].every(isCount)) throw new Error(`a count of ${c.op} in ${h.from} is not an integer from 0 to 2^53 - 1`);
+      if (![c.ok, c.failed, c.unknown].every(isCount)) throw new Error(`a count of ${shown(c.op, "an operation")} in ${h.from} is not an integer from 0 to 2^53 - 1`);
       const m = merged.get(c.op) ?? { op: c.op, ok: 0, failed: 0, unknown: 0 };
       m.ok += c.ok; m.failed += c.failed; m.unknown += c.unknown;
       merged.set(c.op, m);
     }
     once(h.risen, `the risen of ${h.from}`);
     for (const r of h.risen) {
-      if (!isCount(r.failed)) throw new Error(`the rise of ${r.op} in ${h.from} is not an integer from 0 to 2^53 - 1`);
-      if (!h.ops.some((c) => c.op === r.op)) throw new Error(`${r.op} rose in ${h.from} but that hour's ops does not count it`);
+      if (!isCount(r.failed)) throw new Error(`the rise of ${shown(r.op, "an operation")} in ${h.from} is not an integer from 0 to 2^53 - 1`);
+      if (!h.ops.some((c) => c.op === r.op)) throw new Error(`${shown(r.op, "an operation")} rose in ${h.from} but that hour's ops does not count it`);
       const x = rose.get(r.op) ?? { hours: 0, failed: 0 };
       x.hours += 1; x.failed += r.failed;
       rose.set(r.op, x);
@@ -207,7 +216,7 @@ export function opsDigestRules(kind: string, value: JsonObject): Finding[] | und
   for (const [entry, index] of indexed(value.ops)) {
     const op = entry.op;
     if (typeof op === "string") {
-      if (byOp.has(op)) window(`/ops/${index}/op`, `${op} is counted once`);
+      if (byOp.has(op)) window(`/ops/${index}/op`, `${shown(op, "this operation")} is counted once`);
       else byOp.set(op, entry);
       named(`/ops/${index}/op`, op);
     }
@@ -232,24 +241,24 @@ export function opsDigestRules(kind: string, value: JsonObject): Finding[] | und
     if (typeof op !== "string") continue;
     const at = `/risen/${index}`;
     named(`${at}/op`, op);
-    if (rose.has(op)) window(`${at}/op`, `${op} is named once among the rises`);
+    if (rose.has(op)) window(`${at}/op`, `${shown(op, "this operation")} is named once among the rises`);
     rose.add(op);
     const counted = byOp.get(op);
     if (counted === undefined) {
-      window(`${at}/op`, `${op} rose, so ops counts it`);
+      window(`${at}/op`, `${shown(op, "this operation")} rose, so ops counts it`);
       continue;
     }
     const failed = count(entry.failed);
     const countedFailed = count(counted.failed);
     if (kind === "ops-digest-hourly") {
       const previous = count(entry.previous);
-      if (failed !== null && countedFailed !== null && failed !== countedFailed) window(`${at}/failed`, `a rise names the hour's failures of ${op}, ${countedFailed}`);
+      if (failed !== null && countedFailed !== null && failed !== countedFailed) window(`${at}/failed`, `a rise names the hour's failures of ${shown(op, "this operation")}, ${countedFailed}`);
       if (failed !== null && previous !== null && !isRise(failed, previous)) window(at, `${failed} failures against ${previous} is no rise: at least ${RISE_MIN_FAILED} and ${RISE_FACTOR} times the hour before (none counts as one)`);
     } else {
       const risenHours = count(entry.hours);
-      if (risenHours !== null && hours !== null && risenHours > hours) window(`${at}/hours`, `${op} rose in at most the day's ${hours} hours`);
+      if (risenHours !== null && hours !== null && risenHours > hours) window(`${at}/hours`, `${shown(op, "this operation")} rose in at most the day's ${hours} hours`);
       if (failed !== null && risenHours !== null && failed < RISE_MIN_FAILED * risenHours) window(`${at}/failed`, `${risenHours} hours of rises hold at least ${RISE_MIN_FAILED * risenHours} failures`);
-      if (failed !== null && countedFailed !== null && failed > countedFailed) window(`${at}/failed`, `the rises' failures are at most the day's failures of ${op}, ${countedFailed}`);
+      if (failed !== null && countedFailed !== null && failed > countedFailed) window(`${at}/failed`, `the rises' failures are at most the day's failures of ${shown(op, "this operation")}, ${countedFailed}`);
     }
   }
   return findings;
@@ -323,7 +332,7 @@ const folderFinding = (instancePath: string, message: string): Finding => ({ cod
  * FAC-SEM-168 on a service descriptor (kind `service-descriptor`) that carries the ops-digest key: a remote placement
  * (no folder on this machine), or a local one that names no `paths.data` for `dir` to be relative to; a value that is
  * not its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); a `source` named
- * twice; a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped, segment
+ * twice; a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped, segment
  * by segment (one folder under two labels would be sent twice); a `dir` that holds a home folder (`hasHomePath`); a
  * `dir` or a `source` shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users`
  * or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
@@ -350,10 +359,10 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
   const dirs = new Set<string>();
   view.folders.forEach((folder, index) => {
     const at = `${FOLDERS_PATH}/${index}`;
-    if (seen.has(folder.source)) findings.push(folderFinding(`${at}/source`, `source ${folder.source} is named twice; each folder sends its own label`));
+    if (seen.has(folder.source)) findings.push(folderFinding(`${at}/source`, `${shown(folder.source, "this source")} is named twice as a source; each folder sends its own label`));
     seen.add(folder.source);
     const folded = foldDir(folder.dir);
-    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `dir ${folder.dir} is named twice (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
+    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `${shown(folder.dir, "this dir")} is named twice as a dir (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
     dirs.add(folded);
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
     if (secretValue(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));
