@@ -1110,6 +1110,8 @@ function checkSourceFolderAs(run: Run, folder: string): void {
 /** Whether a relative path (a folder with a trailing `/`) is in the folder, each segment by lstat, never through a link. */
 function presentWithoutLink(folder: string, relative: string, depth = 0): boolean {
   // An entry that ends in `/` names a folder: its last segment must be a folder or a link it keeps out, never a file.
+  // An entry without `/` names a file: its last segment must be a file, a link, or a folder that is a nested repository
+  // (one holding its own `.git`, as a checked-out submodule does), never a plain folder, whose files it leaves in.
   // Each segment is matched under the fold against the names its folder holds (so `src/secrets./`, a zero-width
   // character or a case difference on a case-sensitive volume still finds what the entry leaves out); an intermediate
   // folder must be a real folder, never a link, while the last segment may be anything, a link included, which the
@@ -1120,7 +1122,8 @@ function presentWithoutLink(folder: string, relative: string, depth = 0): boolea
   try { entries = readdirSync(folder, { withFileTypes: true }); } catch { return false; }
   const last = depth === segments.length - 1;
   const folderEntry = relative.endsWith("/");
-  return entries.some((entry) => foldSegment(entry.name) === wanted && (last ? !folderEntry || entry.isDirectory() || entry.isSymbolicLink() : entry.isDirectory() && presentWithoutLink(path.join(folder, entry.name), relative, depth + 1)));
+  const lastCounts = (entry: Dirent): boolean => entry.isSymbolicLink() || (folderEntry ? entry.isDirectory() : !entry.isDirectory() || existsSync(path.join(folder, entry.name, ".git")));
+  return entries.some((entry) => foldSegment(entry.name) === wanted && (last ? lastCounts(entry) : entry.isDirectory() && presentWithoutLink(path.join(folder, entry.name), relative, depth + 1)));
 }
 
 /** An error's name (`RangeError`), never its message. */

@@ -2023,6 +2023,25 @@ describe("an agent's source (DEC-0149)", () => {
     expect(folded(inGit.out)).toEqual([["files[3]", "/files/3/path"], ["files[4]", "/files/4/path"]]);
   });
 
+  it.skipIf(process.platform === "win32")("calls unused an entry without / over a plain folder, never one over a nested repository, in Git mode and in a walk", () => {
+    for (const git of [true, false]) {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/gen", "src/a.ts", "src/sub"] }), LICENSE: "x", "src/a.ts": "x", "src/gen/g.ts": "x", "src/sub/s.ts": "x" });
+      const sub = path.join(dir, "src", "sub");
+      expect(gitIn(sub, "init", "-q").status).toBe(0);
+      expect(gitIn(sub, "add", "-A").status).toBe(0);
+      expect(gitIn(sub, "commit", "-qm", "x").status).toBe(0);
+      if (git) {
+        expect(gitIn(dir, "init", "-q").status).toBe(0);
+        // The nested repository is committed as a gitlink.
+        expect(gitIn(dir, "add", "-A").status).toBe(0);
+        expect(gitIn(dir, "commit", "-qm", "x").status).toBe(0);
+      }
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code, String(git)).toBe(0);
+      expect(lines(result.out).filter((line) => line.includes("unused-exclude")).map((line) => line.split("  ")[1]), String(git)).toEqual(["/manifest/exclude/0"]);
+    }
+  });
+
   it.skipIf(process.platform === "win32")("calls unused a folder entry whose last segment is a file", () => {
     const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/gen/", "src/a.ts"] }), LICENSE: "x", "src/a.ts": "x", "src/gen": "x" });
     const result = run(dir, "--kind", "source-tree");

@@ -9217,7 +9217,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       (one principle: making a source public for the first time always takes the word): a processor counts only while
       what it holds stays readable by no one outside the owner, and output it makes public or readable by others (a
       public server, a Pages site) is a hand-over; a personal agent's home created public is the visibility change and
-      takes the word, the already-public carve-out covering only a source an earlier act on the word, or the operator's
+      takes the word, the already-public carve-out covering only a source an earlier act on the word, or the owner's
       own act, made public; a personal agent's package or release on a public registry is a hand-over unless its home is
       already public, the files the pack step derives from the public source (`fabric.package.json`, signatures,
       checksums) counting as public and nothing else; an act on the whole repository (a transfer, a visibility change,

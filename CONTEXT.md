@@ -462,7 +462,8 @@ output it makes public is one. Access the owning organization gives its own memb
 What takes the word when a source becomes public: a personal agent's source made public for the first time (its home
 created public included) and an organization agent's private source made public; an organization creating its own
 agent's home public is its own act, and a push or release of what is already public, from a public home to another
-public place of the same owner, reaches no new reader and is none. The repository where the agent's owner keeps and
+public place of the same owner, reaches no new reader and is none, when an earlier act on the word, or the owner's own
+act, made it public. The repository where the agent's owner keeps and
 develops its source is its home, not a recipient, and the owner's placements are the owner's own: the owner's own
 commits, branches and releases in the home, a release that stays where the home's readers are, and a deploy to a
 placement its owner holds (an organization's agent on that organization's placement included) are none, a bundle a

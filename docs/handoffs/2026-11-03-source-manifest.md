@@ -24,7 +24,7 @@ source, what never travels with it, the check before a source export, and how a 
   `source-tree`, `source-package`, `fabric-source/1` in the protocol register; `pnpm --silent validate <dir> --kind
   source-tree` (Git mode with Git's location variables removed and no read through a link, a walk otherwise with a note
   saying why, folder-relative output that never repeats a found value) and the pair in `pnpm validate <dir>`;
-  `fixtures/vectors/source-tree.json` (75 tree cases, 16 patch cases and a `constants` block written from the module's
+  `fixtures/vectors/source-tree.json` (76 tree cases, 16 patch cases and a `constants` block written from the module's
   exports) from `tools/vectors/source-tree.ts`;
   2 positive and 19 negative schema fixtures, 27 semantic fixtures.
 - [source](../specification/source.md) (new), the register (`FAC-SEM-156` to `FAC-SEM-160`; next free `FAC-SEM-162`;
@@ -281,7 +281,13 @@ source, what never travels with it, the check before a source export, and how a 
   personal agent is not done); the fold described as coded, in the code's order, with a `FOLD_INPUTS` entry and a patch
   case where an ignorable code point sits between a letter and its mark; the knowledge base's item 5, item 9,
   principles section 7 and rules section 9 aligned; the decisions below; the seam's notes (a comment in
-  `validate-cli.ts`, the vectors' comment moved); vectors 75 tree and 16 patch cases, 26 `FOLD_PAIRS`; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  `validate-cli.ts`, the vectors' comment moved); and from round 41's seam reading: an exclude entry without `/` counts
+  as present only over a file, a link or a nested repository, never a plain folder whose files it leaves in (tested in
+  Git mode and in a walk, `listed` worded alike in source.md and the vectors' about, and a vector), the
+  installation-valued row confirmed rather than filed here, the backlog tail at CT-221, the glossary's already-public
+  condition and "the owner's own act" everywhere, DEC-0153's `src/validate-cli.ts` hint in the sibling list, and
+  landing step 6 pairing PR #628 only with a contract head of the same round; vectors 76 tree and 16 patch cases, 26
+  `FOLD_PAIRS`; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -391,7 +397,7 @@ source, what never travels with it, the check before a source export, and how a 
   - a processor is no recipient only while what it holds stays readable by no one outside the owner; output it makes
     public or readable by others (a public server, a Pages site) is a hand-over;
   - a personal agent's home created public is the visibility change and takes the word; the already-public carve-out
-    covers only a source an earlier act on the word, or the operator's own act, made public;
+    covers only a source an earlier act on the word, or the owner's own act, made public;
   - a personal agent's package or release on a public registry is a hand-over unless its home is already public; the
     files the pack step derives from the public source count as public, nothing else does;
   - an act on the whole repository hands over the history, which no tree check reads, so the history privacy gate
@@ -438,6 +444,16 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 41's seam items were checked on the working tree over head `dfeccbd4` (this note's commit holds the same tree):
+`pnpm typecheck` (exit 0); `pnpm vitest run --testTimeout=60000 --coverage --coverage.include=src/source-rules.ts
+--coverage.include=src/validate-cli.ts` over `source-rules`, `validate-cli`, `validate-cli-faults`, `rule-tolerance` and
+`positive-sweep` (exit 0: 3169 passed, 2 skipped; `src/source-rules.ts` at 100 % of its branches; `src/validate-cli.ts`
+at 99.47 % over these files against its 99.4 floor); `secret-shape`, `consistency` and `semantic-kinds` (exit 0, 34
+passed); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match; 76 tree and 16 patch cases); `pnpm run
+docs:check` (exit 0, 0 errors); `python3 docs/ux/lint.py` (exit 0); `ORG_INDEX=... pnpm run privacy:check` (exit 0, 0
+findings); no U+2014 in the added lines. The branch gate is owed (the 15-minute load near 72). PR #628 stays at `c6f64c50`: the knowledge base needed no change for these items (item 9
+already reads "the owner's own act" and gives the condition), and its main had not moved.
 
 Round 41's fixes were checked on the working tree over head `9e5de563` (this note's commit holds the same tree), each
 exit code read on its own: `pnpm typecheck` (exit 0); `pnpm vitest run --testTimeout=60000 --coverage
@@ -613,7 +629,9 @@ remaining steps, in order:
 5. Make the acceptance edit on the PR branch, as DEC-0147 did (DEC-0149's status line, CT-194 done, this handoff's
    status and the `docs/handoffs/README.md` row); then run the merge gate (`pnpm run check`, each part's exit code
    read) on that head, with its output in the PR. That head is the one that merges; nothing merges before this step.
-6. First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main: if it is
+6. Pair PR #628 only with a contract head that carries the same round of the readings (the round named in DEC-0149's
+   status line and in the PR's last commit), and re-read the pair on the round-40 and round-41 points before landing.
+   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main: if it is
    behind, merge main into it, keeping main's item 8 and the PR's item 9. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
@@ -654,7 +672,9 @@ the open branches that touch the same registers is PR #235 (DEC-0148), DEC-0149 
 `origin/agent/sqd-fields-20261104` (DEC-0151), then DEC-0152 (head `d760f756` when written: `docs/DECISIONS.md`,
 `docs/specification/conformance.md`, `docs/DOCMAP.md`, `docs/backlog.md`, the handoffs index) and DEC-0153 (head
 `a0e7b53d` when written: `FAC-SEM-166` and `FAC-SEM-167`, two schemas, `src/semantic-kinds.ts`, the rule-tolerance and
-positive-sweep tests, the `vitest.config.ts` include and floor, the vectors runner). Every head here is re-measured at
+positive-sweep tests, the `vitest.config.ts` include and floor, the vectors runner, and `src/validate-cli.ts`, where its
+hint is declaration-only: one `HINT_HELP` name with per-schema help links, the second lander merging both
+`readerHints` entries). Every head here is re-measured at
 landing. DEC-0150 and DEC-0151 reserved DEC-0150, DEC-0151 and FAC-SEM-162 to FAC-SEM-165.
 The channel-agent branch adds `schemas/service-channel-agent-extension.schema.json` and edits `src/semantic-rules.ts`,
 `src/protocol-revisions.ts`, `vitest.config.ts`, `fixtures/catalogue.json` and `src/secret-shape.ts` (`rawValues` only);
@@ -675,7 +695,7 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   refreshed at landing against the siblings' heads then.
 - `docs/backlog.md` (against all four siblings) and `docs/handoffs/README.md` (against DEC-0150 and DEC-0151)
   conflict as appends at the tail: keep both sides; the merged backlog tail is kept in id order, whatever main holds at the merge
-  (re-measure at landing; CT-200 to CT-220 on main's head when this was written, #235 bringing CT-202 and CT-203); the handoffs index is newest first, so at each merge the later-landing branch's row goes above.
+  (re-measure at landing; CT-200 to CT-221 (PR #242) on main's head when this was written, #235 bringing CT-202 and CT-203); the handoffs index is newest first, so at each merge the later-landing branch's row goes above.
   DEC-0151's edited files also include `src/connections.ts` (a comment) and `docs/specification/conformance.md` (the
   secret-shape reference row). DEC-0150's small edits to `src/validate-cli.ts`
   and `test/validate-cli.test.ts` merge cleanly beside this branch's.
@@ -741,7 +761,8 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
 - At landing, file a row in the knowledge base for its owner: `knowledge/authority.md` still says an outage is told
   after more than 5 minutes of a service being unavailable or degraded, while `service.md` cites Fabric Dashboards'
   FD-76 (15 minutes, unavailability only).
-- At the DEC-0150 step, file a backlog row (the next free CT id in the backlog at that merge) on how a channel
+- At the DEC-0150 step, confirm DEC-0150's lander filed the backlog row (`grep -c 'installation-valued'
+  docs/backlog.md` prints 1 on the merged tree) on how a channel
   declaration's installation-valued members (`tickets.token_slot`'s vault project and env, `evals.spend_record`, the
   per-project entries) relate to source slots: the token slot's name is a `secret` slot; the vault project, the env and
   the spend record are `config` slots or live in the descriptor or the well-known answer; or the declaration is
