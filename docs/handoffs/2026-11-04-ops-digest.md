@@ -74,10 +74,13 @@ branches. Landing this branch directly on `main` as it stands:
   `test/consistency.test.ts` (and the test's title), both rows in `interop.md`'s key table, and writes "nine extension
   keys" there (`main` says eight). Its rule codes end at `FAC-SEM-165`, so the register's next free stays `FAC-SEM-169`.
 - DEC-0150's `hint/declaration-only` entry is on `main` too, and `main`'s `Hint` is already the 4-tuple. The merge
-  keeps both `readerHints` lines, each with its explicit help link as the fourth element (ops-digest.md's anchor here,
-  `channel-agent.md#what-is-checked` for DEC-0150's), and one `HINT_HELP` rule name (the collision resolved this way);
-  the check is that each bare declaration prints its own page's link (`test/ops-digest.test.ts` reads it from
-  `--json`, and asserts the channel-agent link when that schema exists).
+  keeps both `readerHints` lines, each with its explicit help link as the fourth element (this branch's is the
+  constant `OPS_DIGEST_HELP`, the anchor written once in `src/validate-cli.ts`; DEC-0150's is
+  `channel-agent.md#what-is-checked`), and one `HINT_HELP` rule name whose shared value may be either side's: each
+  line names its own page, so the value the merge keeps is never what a bare declaration prints. The check is that
+  each bare declaration prints its own page's link (`test/ops-digest.test.ts` reads it from `--json`, and asserts the
+  channel-agent link when that schema exists), and `grep -c 'ops-digest.md#where-a-collector-reads-the-daily-digests'
+  src/validate-cli.ts` prints 1.
 - `vitest.config.ts` keeps one coverage `include` line holding every branch's files, plus `src/ops-digest.ts`'s
   100 % branch floor.
 - `test/positive-sweep.test.ts`'s sources list holds both `source-rules` and `ops-digest`; `test/rule-tolerance.test.ts`
@@ -176,7 +179,7 @@ product's obligation.
   CT-222 (filed on this branch, the next free CT above every branch and main when written) widens `SECRET_VALUE` for
   underscore-form provider prefixes, `AIza` keys and `hf_` tokens, owned by DEC-0151's detector, with tests from split
   literals.
-- **At landing, the fold** (against DEC-0149 at `5a8e1770`, which exports `HFS_IGNORABLE_CHAR` with no global flag and
+- **At landing, the fold** (against DEC-0149 at `899b4710`, which exports `HFS_IGNORABLE_CHAR` with no global flag and
   `stripHfsIgnorable` from `src/source-rules.ts` and keeps its global `HFS_IGNORABLE` private, so the lander exports
   nothing from `src/source-rules.ts`): make `foldDir = (dir) => foldPath(dir)`; delete `NUSKHURI`, `toMkhedruli` and
   the local `HFS_IGNORABLE` from `src/ops-digest.ts` (today only `foldDir` uses it: `dirReadings` removes every
@@ -186,16 +189,20 @@ product's obligation.
   `FOLD_PAIRS` at `d4cc1e16` copied as written, plus the HFS+ samples) keeps holding. The segment check stays local:
   DEC-0149's `inGrammar` is not swapped in, and the NFC/NFD length case it would add is recorded as undecided (spec
   page "Not decided here", Open).
-- **At landing, the home-path boundaries:** DEC-0149 at `5a8e1770` rewrites the copies that count the home-path
-  boundaries (`devices.md`, `proposals.md`, `src/proposal-rules.ts`, `activity.md` "Its scope" and the scope comment
-  in `src/activity-rules.ts`) for four boundaries, `SOURCE_HOME_PATHS` among them; the device-common `detail`
-  `$comment` is count-free on this branch ("Changing any of them is a decision."), as are the `src/proposal-rules.ts`
-  and `src/activity-rules.ts` comments. Fallback: whichever of DEC-0149 and DEC-0153 lands second rewrites any copy
-  that DEC-0149's landed tree misses. `source.md`'s sentence "the scanner for values that must hold no path at all"
-  and its twin in the `SOURCE_HOME_PATHS` docstring (`src/source-rules.ts`), both false once FAC-SEM-168 applies
-  `hasHomePath` to a relative `dir`, fall to whichever of DEC-0149 and DEC-0153 lands second. The order-proof check
-  after both land: `grep -rn -E 'three home-path|any of the three' src docs/specification schemas` prints nothing, and
-  `grep -c SOURCE_HOME_PATHS docs/specification/activity.md src/activity-rules.ts` prints at least 1 for each.
+- **At landing, the home-path boundaries:** DEC-0149 at `899b4710` (or its head at landing) rewrites the copies that
+  count the home-path boundaries (`devices.md`, `proposals.md`, `src/proposal-rules.ts`, `activity.md` "Its scope" and
+  the scope comment in `src/activity-rules.ts`) for four boundaries, `SOURCE_HOME_PATHS` among them; the device-common
+  `detail` `$comment` is count-free on this branch ("Changing any of them is a decision."), as are the
+  `src/proposal-rules.ts` and `src/activity-rules.ts` comments. In the textual conflicts of those two scope comments
+  keep DEC-0149's side (its `SOURCE_HOME_PATHS` clause). Fallback: whichever of DEC-0149 and DEC-0153 lands second
+  rewrites any copy that DEC-0149's landed tree misses. The three places that gloss `hasHomePath` as the scanner for
+  values that hold no path at all (`source.md`'s sentence, its twin in the `SOURCE_HOME_PATHS` docstring in
+  `src/source-rules.ts`, and the comment above the `hasHomePath` assertions in `test/source-rules.test.ts`), all false
+  once FAC-SEM-168 applies `hasHomePath` to a relative `dir`, fall to whichever of DEC-0149 and DEC-0153 lands second.
+  The order-proof checks after both land: `grep -rn -E 'three home-path|any of the three' src docs/specification
+  schemas` prints nothing; `git grep -n -E 'values that (must )?hold no path at all' -- src docs/specification test`
+  prints nothing; and `grep -c SOURCE_HOME_PATHS src/activity-rules.ts src/proposal-rules.ts
+  docs/specification/activity.md` prints at least 1 for each.
 - **At landing, the sweep and the headings:** `NOT_SWEPT` in `test/positive-sweep.test.ts` keeps both
   `service-ops-digest-extension` and `service-channel-agent-extension`; `docs/DECISIONS.md` keeps a blank line before
   `### DEC-0153` (MD022), and `pnpm run docs:check` exits 0 on the merged tree.
@@ -206,10 +213,17 @@ product's obligation.
   clause ("keeps DEC-0150 CA-8's bound ..."), CT-221 once and main's CT-223 to CT-225, in id order. Checks:
   `grep -c "keeps DEC-0150 CA-8's bound" docs/backlog.md` prints 1, and `grep -oE '^\| CT-[0-9]+ ' docs/backlog.md |
   sort | uniq -d` prints nothing.
-- **At landing, the hints:** on the merged tree with DEC-0150, both `readerHints` lines carry an explicit help link (the
-  `Hint`'s fourth element); `test/ops-digest.test.ts` asserts `channel-agent.md#what-is-checked` for the channel-agent
-  bare declaration when that schema and its positive fixture exist (DEC-0150 asserts the same); the `readerHints`
-  comment "DEC-0150 adds its own entry" is reworded to describe both lines.
+- **At landing, the hints:** on the merged tree with DEC-0150, both `readerHints` lines carry an explicit help link
+  (the `Hint`'s fourth element: `OPS_DIGEST_HELP` here, `channel-agent.md#what-is-checked` for DEC-0150), so
+  `HINT_HELP`'s shared `hint/declaration-only` value may keep either side; `test/ops-digest.test.ts` asserts
+  `channel-agent.md#what-is-checked` for the channel-agent bare declaration when that schema and its positive fixture
+  exist (DEC-0150 asserts the same); the `readerHints` comment is the one written here (each bare declaration's line
+  carries its own page), and `main`'s comment line beside it is dropped.
+- **At landing, the registers by hand:** the DEC-0153 row in `docs/handoffs/README.md` goes above the rows already on
+  `main` (newest first); `interop.md`'s "The contract defines eight extension keys" becomes "nine" by hand (git merges
+  it silently), and `grep -c 'defines nine extension keys' docs/specification/interop.md` prints 1; DEC-0153's client
+  rows in `conformance.md` are five (DEC-0151's handoff says three; follow five), and `grep -c "^| a .*| DEC-0153"
+  docs/specification/conformance.md` prints 5.
 
 ## Open
 
@@ -344,12 +358,32 @@ product's obligation.
   line names DEC-0149 at `5a8e1770` with a fallback). Also: "another folder than the one declared, possibly outside
   `paths.data`" everywhere, the 40-character run across `/` refused on purpose stated, OD-3's echo rule naming values
   that are not printable ASCII, the device-common `$comment` count-free, the Next task's order, the sweep and heading
-  landing line, and Consequences naming the five rows. Round 17 is next.
+  landing line, and Consequences naming the five rows.
+- Round 17 at `cc1fc853` was clean. Round 18 at the same head was not (product): the long-run alphabet (stated as the
+  detector reads it now, letters, digits, `+`, `/`, `=`, `_` or `-`, with `Application+Support/MyProduct/Digests2026x`
+  refused and pinned by a test), the acceptance edit left this handoff as it was (step 3 of the Next task now rewrites
+  it) and the knowledge base's plans row (step 8 now writes its Due cell and the products and roadmap Contract rows).
+  Also folded from both rounds: a `dir` segment empty once every default-ignorable code point and its trailing dots
+  and spaces are dropped is refused (`..` + U+2060), the folds name a non-string `from` and a null item with a worded
+  error, FAC-SEM-168's message for a dir that only the long run makes a key says why and how to fix it, the
+  declaration-only help link written once (`OPS_DIGEST_HELP`), `foldDay`'s docstring naming what it checks and what it
+  leaves to the caller, DEC-0153 item 1's echo sentence and Compatibility's renamed names, the home-path landing line
+  against DEC-0149 at `899b4710` with the third gloss place and its `git grep` check, the registers-by-hand landing
+  line, and the Consumers re-read before the pull request. Round 19 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Rounds 17 and 18 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the six
+files of round 16 with coverage on `src/ops-digest.ts` (2043 tests; 287 of 287 statements, 222 of 222 branches); `pnpm
+exec tsx tools/vectors/run.ts`; `pnpm run docs:check`; `python3 docs/ux/lint.py`; `pnpm run privacy:check` (0
+findings). Greps: the old alphabet ("letters, digits, `_`, `-` or `/`" and its schema form) in `src`, `docs` and
+`schemas`, 0; `grep -c 'ops-digest.md#where-a-collector-reads-the-daily-digests' src/validate-cli.ts`, 1. The branch
+gate on this tree before its commit (15-minute load 25.1, 19 GB free, under the heavy lock): `pnpm run check` (109
+files, 9959 tests passed, 1 skipped, coverage floors held; `ux:lint`, `docs:check`, `privacy:check` 0 findings) exit
+0, and `pnpm run vectors:check` exit 0. This paragraph is the only change after it.
 
 Round-16 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on
 `test/ops-digest.test.ts`, `test/proposal-rules.test.ts`, `test/consistency.test.ts`, `test/validate-cli.test.ts`,
@@ -496,22 +530,31 @@ In this order, each step only after the one before:
 
 1. The coordinator's blind readings of DEC-0153 on branch `agent/ct219-ops-digest-20261104` (unit, seam, product),
    until two consecutive clean rounds.
-2. Open the pull request from that branch to `main`.
-3. The acceptance edit, in one commit on the branch, naming only facts that exist at its commit: DEC-0153's Status
-   becomes Accepted with the edit date; CT-219 is marked done with its closure receipt, that pull request's number and
-   the edit date (as CT-200 on `main`, #235), no merge commit; the handoffs README row's cell reads done. Its checks:
-   `pnpm run docs:check` exits 0; `awk '/^### DEC-0153/{f=1} f&&/^- \*\*Status:\*\*/{print; exit}' docs/DECISIONS.md`
-   prints a line starting "- **Status:** Accepted"; `grep -n "CT-219" docs/backlog.md` shows done.
-4. The merge gate (`pnpm run check` and `pnpm run vectors:check`, output in the pull request), then the merge.
-5. Compare `gh pr view <N> --json mergedAt` with the date the acceptance edit wrote; if the UTC day differs, correct
-   the date in DEC-0153's Status, CT-219's receipt and the README row in one commit on `main`.
-6. The release, tagged as the history does; watch its run to success, then write the tag into CT-219's receipt and the
+2. Re-read the Consumers list above at the versions the knowledge base's roadmap names (Fabric Inbox v0.98.0, Fabric
+   Switchboard v0.7.14, the Fabric Agent Adapter v0.66.0, Fabric v0.3.16; read with `git ls-remote` and `gh api` only)
+   and update its dated lines, before the pull request and the board answer.
+3. Open the pull request from that branch to `main`.
+4. The acceptance edit, in one commit on the branch, naming only facts that exist at its commit: DEC-0153's Status
+   becomes Accepted with the edit date; CT-219 is marked done with its closure receipt "accepted <date>, #N" (no
+   "merged" before the merge; as CT-200 on `main`, #235), no merge commit; the handoffs README row's cell reads
+   "accepted <date>, #N". The same commit rewrites this handoff: Done and the Status words read accepted, CT-219 is no
+   longer "in progress", Open records the clean rounds and the head they read and drops "Round N is next", and this
+   Next task then starts at the merge gate. Its checks: `pnpm run docs:check` exits 0; `awk '/^### DEC-0153/{f=1}
+   f&&/^- \*\*Status:\*\*/{print; exit}' docs/DECISIONS.md` prints a line starting "- **Status:** Accepted"; `grep -n
+   "CT-219" docs/backlog.md` shows done; `grep -n -E 'Round [0-9]+ is next|DEC-0153 \(Proposed\)|marked in progress'
+   docs/handoffs/2026-11-04-ops-digest.md` prints nothing.
+5. The merge gate (`pnpm run check` and `pnpm run vectors:check`, output in the pull request), then the merge.
+6. Compare `gh pr view <N> --json mergedAt` with the date the acceptance edit wrote; if the UTC day differs, correct
+   it in DEC-0153's Status, CT-219's receipt and the README row; then CT-219's receipt and the README row read
+   "accepted <date>, #N; merged <date>", in one commit on `main`.
+7. The release, tagged as the history does; watch its run to success, then write the tag into CT-219's receipt and the
    handoffs README row as "merged <date>, #N; released <tag>".
-7. The answer on board thread `f7758225`. It says in one sentence what RW-4's `ok` means (asks answered by a retro the
+8. The answer on board thread `f7758225`. It says in one sentence what RW-4's `ok` means (asks answered by a retro the
    host saw written, never a count of retros) and names Fabric's CO-502 wording ("the daily digest counts retros asked
    and written"), so no view shows `ok` as retros written (CT-219's own row item (b) already says so since round 6),
    and names OD-3's bound of 4095 named operations per UTC day plus one overflow name (Switchboard's SB-257 reads
    "past 4096").
-8. The knowledge base rows: in `fabric-workspace` `knowledge/plans.md`, the contract's row at line 80 replaces PR #240
-   with this decision's pull request and adds OD-9 and `FAC-SEM-168`; confirm CT-221's row reserved on main (PR #242)
-   stays once.
+9. The knowledge base rows in `fabric-workspace`: in `knowledge/plans.md`, the contract's row at line 80 replaces PR
+   #240 with this decision's pull request, adds OD-9 and `FAC-SEM-168`, and its Due cell becomes "merged <date>, #N;
+   released <tag>" (no "draft by"); the Contract rows of `knowledge/products.md` (line 21) and `knowledge/roadmap.md`
+   (line 70) get the new tag and "through DEC-0153"; confirm CT-221's row reserved on main (PR #242) stays once.

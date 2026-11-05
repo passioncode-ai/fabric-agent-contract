@@ -3,7 +3,7 @@ import { type Finding, type JsonObject, indexed, isObject } from "./findings.js"
 import { hasHomePath } from "./activity-rules.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
-import { secretValue } from "./secret-shape.js";
+import { JWT_SHAPE, SECRET_VALUE, secretValue } from "./secret-shape.js";
 import { createValidatorSync } from "./validator.js";
 
 // #region ops-digest, docs: docs/specification/ops-digest.md
@@ -114,6 +114,12 @@ const nameRefusal = (op: unknown): string | null => {
   if (typeof op !== "string" || op.length > OP_NAME_MAX || !OP_NAME.test(op)) return "fails OD-2's name grammar";
   return hidden(op) ? "is refused by FAC-SEM-167" : null;
 };
+/** Throws when an item of `list` is not an object (null included), naming its place; `where` says whose list it is. */
+function objects(list: readonly unknown[], where: string): void {
+  list.forEach((item, index) => {
+    if (!isObject(item)) throw new Error(`the item at ${index} of ${where} is not an object`);
+  });
+}
 /** Throws when `ops` names one operation twice, or names one with no string; `where` says whose list it is. */
 function once(ops: ReadonlyArray<{ op: string }>, where: string): void {
   const names = new Set<string>();
@@ -130,7 +136,9 @@ function once(ops: ReadonlyArray<{ op: string }>, where: string): void {
  * when it is the hour just before (a gap compares with none). `from` and `to` are written as
  * `Date.prototype.toISOString` writes them. `previous` must already pass FAC-SEM-166. It throws when an input count or
  * a previous digest's count is not an integer from 0 to 2^53 - 1 (each checked before it is used), when a sum is beyond
- * 2^53 - 1, when the previous digest, being the hour just before, names an operation twice, when the hour after `from`
+ * 2^53 - 1, when `from` is no whole UTC hour (a value that is not a string included), when an item of `counts` or of the
+ * previous hour's `ops` is not an object (null included), when the previous digest, being the hour just before, names
+ * an operation twice, when the hour after `from`
  * is not a whole hour the schema writes (after 9999-12-31T23), and, as OD-3 asks, when an operation's name is a name
  * OD-2 refuses (its grammar, OP_NAME_MAX included, or FAC-SEM-167: `secretValue` or `hasHomePath`, as `opsDigestRules`
  * tests it) or the hour holds more than 4096 operations: no hourly digest, since a reference fold never writes a line every reader skips. An error
@@ -138,7 +146,9 @@ function once(ops: ReadonlyArray<{ op: string }>, where: string): void {
  */
 export function foldHour(counts: readonly OpCount[], from: string, previous: HourlyDigest | null): HourlyDigest {
   const start = wholeHour(from);
-  if (start === null) throw new Error(`${shown(from, "from")} is not a whole UTC hour`);
+  // A `from` that is no string (a caller's mistake) is named by its place, never handed to the detectors.
+  if (start === null) throw new Error(`${typeof from === "string" ? shown(from, "from") : "from"} is not a whole UTC hour`);
+  objects(counts, "counts");
   if (wholeHour(iso(start + HOUR_MS)) === null) throw new Error(`the hour after ${shown(from, "from")} is not a whole UTC hour the schema writes`);
   const merged = new Map<string, OpCount>();
   counts.forEach((c, index) => {
@@ -153,6 +163,7 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
   if (merged.size > OPS_MAX) throw new Error(`the hour counts ${merged.size} operations, more than ${OPS_MAX}: no hourly digest (OD-3)`);
   const ops = [...merged.values()].sort(byName);
   const adjoining = previous !== null && wholeHour(previous.to) === start ? previous.ops : [];
+  objects(adjoining, "the previous hour's ops");
   once(adjoining, "the previous hour's ops");
   const before = new Map(adjoining.map((c) => [c.op, c.failed]));
   // A previous count that is no count (NaN, 1e300, negative) would silently suppress or fake a rise: it throws.
@@ -165,14 +176,18 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
  * The day's hourly digests (those whose hour starts on `day`, one per hour, the first of a repeated hour kept) folded
  * into one: the operations summed, the hours counted, and each operation that rose in some hour with the hours it rose
  * in and the failures of those hours, the most failures first, then by name. A day with no hour of its own has no
- * digest: null (OD-5). Its hourly digests must already pass FAC-SEM-166. It throws when an input count or an hour's rise
- * is not an integer from 0 to 2^53 - 1 (each checked before it is merged), when a sum is beyond 2^53 - 1, when an hour
- * names a rise twice or a rise of an operation its ops does not count, when a name in an hour's ops or risen is one
- * OD-2 refuses (its grammar, `OP_NAME_MAX` included, or FAC-SEM-167), and when the day folds more than 4096 operations:
- * it writes no daily digest then (OD-3),
- * since a reference fold never writes a line every reader skips.
+ * digest: null (OD-5). Deciding that the UTC `day` is closed is the caller's (OD-1, OD-5): `foldDay` folds what it is
+ * given. Of each hour it checks: that every item of `hourly`, `ops` and `risen` is an object (null included), every
+ * count and every rise's failures an integer from 0 to 2^53 - 1 (each checked before it is merged), each rise named once
+ * and of an operation its `ops` counts, and every name in `ops` and `risen` one OD-2 takes (its grammar, `OP_NAME_MAX`
+ * included, and FAC-SEM-167). It leaves to the caller, whose hourly digests must already pass FAC-SEM-166: an operation
+ * named twice in one hour's `ops` (summed as given), a rise that is no rise by OD-4, and a rise whose `failed` differs
+ * from its hour's failures of that operation. It throws on what it checks, when a sum is beyond 2^53 - 1, and when the
+ * day folds more than 4096 operations: it writes no daily digest then (OD-3), since a reference fold never writes a line
+ * every reader skips.
  */
 export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDigest | null {
+  objects(hourly, "hourly");
   const seen = new Set<number>();
   const mine = hourly.filter((h) => {
     const at = wholeHour(h.from);
@@ -187,6 +202,7 @@ export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDige
     // OD-2 in full, its grammar and FAC-SEM-167: a name it refuses would make every reader skip the daily line. The
     // shown() calls below then return the name; they stay as defence in depth, never echoing a value.
     for (const [list, where] of [[h.ops, "ops"], [h.risen, "risen"]] as const) {
+      objects(list, `${h.from}'s ${where}`);
       list.forEach((c: { op: string }, index: number) => {
         const refused = nameRefusal(c.op);
         if (refused !== null) throw new Error(`the operation at ${index} of ${h.from}'s ${where} ${refused}: no daily digest (OD-3)`);
@@ -355,10 +371,18 @@ export const foldDir = (dir: string): string =>
 const FOLDERS_PATH = `/extensions/${EXTENSION_KEYS.opsDigest.replace(/~/g, "~0").replace(/\//g, "~1")}`;
 const folderFinding = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-168", instancePath, message });
 
+/** FAC-SEM-168's message for a dir that only the long run makes credential-shaped: the reason and the remedy. */
+const LONG_RUN_DIR = "a dir is shaped like a credential: a run of 40 or more letters, digits, +, /, =, _ or - (across segments too) that mixes upper case, lower case and a digit reads as a key; a space or a dot breaks it. It names a folder, never a value";
 /** Every default-ignorable code point (the code points HFS+ ignores among them), for the detectors' readings only. */
 const DEFAULT_IGNORABLE = /\p{Default_Ignorable_Code_Point}/gu;
 /** A dir with each segment's trailing dots and spaces dropped. */
 const trimSegments = (dir: string): string => dir.split("/").map((segment) => segment.replace(/[. ]+$/, "")).join("/");
+/**
+ * Whether a segment is empty once every default-ignorable code point and its trailing dots and spaces are dropped:
+ * `..` + U+2060, `..` + U+200B, `.` + U+200C + `.` and a lone U+2060 are. It covers every segment `foldDir` empties.
+ */
+const emptySegment = (segment: string): boolean => trimSegments(segment.replace(DEFAULT_IGNORABLE, "")) === "";
+const EMPTY_SEGMENT = "a dir segment is empty once its dots, spaces and code points a file system may ignore are dropped; a tool may read it as empty, '.' or '..', another folder than the one declared, possibly outside paths.data";
 /**
  * The four readings of a dir the home-folder and credential tests take: as written (`dir`), with every default-ignorable
  * code point removed (`bare`), and each of those with each segment's trailing dots and spaces dropped: `users./alice`,
@@ -379,13 +403,13 @@ const hiddenDir = (dir: string): boolean => [...dirReadings(dir), foldDir(dir)].
  * not its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); a `source` named
  * twice; a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD,
  * lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped, segment by
- * segment (one folder under two labels would be sent twice); a `dir` with a segment made only of dots, spaces and code
- * points HFS+ ignores (it folds to nothing; a tool that trims or folds names may read it as empty, `.` or `..`, another
- * folder than the one declared, possibly outside `paths.data`); a `source` shaped like a credential (`secretValue`); a
+ * segment (one folder under two labels would be sent twice); a `dir` with a segment made only of dots, spaces and
+ * default-ignorable code points (`emptySegment`: a tool that trims or strips names may read it as empty, `.` or `..`,
+ * another folder than the one declared, possibly outside `paths.data`); a `source` shaped like a credential (`secretValue`); a
  * `dir` shaped like a credential or holding a home folder (`hasHomePath`) in any of its four readings (`dirReadings`:
  * as written, without default-ignorable code points, and each with each segment's trailing dots and spaces dropped;
- * a 40-character run across segments joined by `/` that mixes cases and a digit, `ApplicationSupport/MyProduct/Digests2026`,
- * is refused on purpose; a class of dirs whose `foldDir` holds a home folder is only hidden in messages). `hasHomePath`
+ * a run of 40 or more letters, digits, `+`, `/`, `=`, `_` or `-` that mixes cases and a digit, across segments joined
+ * by `/` too, as in `ApplicationSupport/MyProduct/Digests2026`, is refused on purpose, with the reason and the remedy; a class of dirs whose `foldDir` holds a home folder is only hidden in messages). `hasHomePath`
  * refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
  * and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case,
  * here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or
@@ -422,13 +446,17 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `${hiddenClass.has(folded) || !PRINTABLE_ASCII.test(folder.dir) ? "this dir" : JSON.stringify(folder.dir)} is named twice as a dir (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
     dirs.add(folded);
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
-    // A segment made only of dots, spaces and code points HFS+ ignores folds to nothing; a tool that trims or folds names
-    // as the fold does (Win32 path handling drops trailing dots and spaces; a reader that strips those code points
-    // before joining) may read it as empty, '.' or '..', another folder than the one declared, possibly outside
-    // paths.data. Refused, the safe direction.
-    if (folder.dir.split("/").some((segment) => foldDir(segment) === "")) findings.push(folderFinding(`${at}/dir`, "a dir segment folds to nothing (only dots, spaces or code points a file system may ignore); a tool may read it as empty, '.' or '..', another folder than the one declared, possibly outside paths.data"));
+    // A segment made only of dots, spaces and default-ignorable code points (those HFS+ ignores among them) is empty once
+    // they are dropped; a tool that trims or strips names (Win32 path handling drops trailing dots and spaces; a reader
+    // that strips ignorable code points before joining) may read it as empty, '.' or '..', another folder than the one
+    // declared, possibly outside paths.data. Refused, the safe direction. The fold for duplicates is DEC-0149's, apart.
+    if (folder.dir.split("/").some(emptySegment)) findings.push(folderFinding(`${at}/dir`, EMPTY_SEGMENT));
     const readings = dirReadings(folder.dir);
-    if (readings.some(secretValue)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));
+    if (readings.some(secretValue)) {
+      // When only the long run makes it a key (no provider prefix, no JWT, no bearer), the message says why and how to fix it.
+      const runOnly = !readings.some((reading) => JWT_SHAPE.test(reading) || SECRET_VALUE.test(reading));
+      findings.push(folderFinding(`${at}/dir`, runOnly ? LONG_RUN_DIR : "a dir is shaped like a credential; it names a folder, never a value"));
+    }
     else if (readings.some(hasHomePath)) findings.push(folderFinding(`${at}/dir`, "a dir holds a home folder; it is relative to the product's data folder"));
   });
   return findings;

@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-04
 - **Status:** Proposed (draft on branch `agent/ct219-ops-digest-20261104`; accepted on merge of its pull request after
-  the coordinator's blind readings, which reached round 16 on 2026-11-05; the acceptance edit is item 3 of the
+  the coordinator's blind readings, which reached round 18 on 2026-11-05; the acceptance edit is item 4 of the
   handoff's Next task, after the pull request is open). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and
   `FAC-SEM-168`, a descriptor extension, a reference module and vectors, and a host obligation. Additive: nothing that
   validated before changes.
@@ -9050,11 +9050,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `ops.digest.daily@1` {`schema`, `day`, `hours`, `ops`, `total`, `risen`[{`op`, `hours`, `failed`}]}, both closed,
      every count an integer from 0 to 2^53 − 1, at most 4096 operations and rises: a product keeps at most 4095 named
      operations per UTC day plus its one fixed overflow name, under which it counts the rest (their counts kept), so
-     both its hourly and its daily lines validate; a day that would fold more than 4096 operations has no daily digest,
-     and a day whose hours hold a name OD-2 refuses (its grammar, or FAC-SEM-167) has none either, and an hour of more than 4096 operations or
-     holding a name OD-2 refuses (its grammar, or FAC-SEM-167) has no hourly digest (the reference
-     `foldDay` and `foldHour` throw: a reference fold never writes a line every reader skips). A finding or a fold's
-     error names a value shaped like a credential or holding a home folder only by its place.
+     both its hourly and its daily lines validate; a day that would fold more than 4096 operations has no daily
+     digest, and a day whose hours hold a name OD-2 refuses (its grammar, or FAC-SEM-167) has none either, and an hour
+     of more than 4096 operations or holding a name OD-2 refuses (its grammar, or FAC-SEM-167) has no hourly digest
+     (the reference `foldDay` and `foldHour` throw: a reference fold never writes a line every reader skips). A
+     finding or a fold's error names a value shaped like a credential, holding a home folder, or any value that is not
+     printable ASCII only by its place.
   2. **The window (OD-1).** `from` and `to` are whole UTC hours in RFC 3339 with `Z`, with or without the `.000` that
      `Date.prototype.toISOString` writes (Fabric writes it at `e1eecec0`), `to` one hour after `from`; `day` is
      `YYYY-MM-DD` UTC; `hours` 1 to 24. A product that keeps the log writes one hourly line for each hour it observed
@@ -9081,10 +9082,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      credential detector, which refuses a provider key's shape, in either case and anywhere in the name: `sk-`
      followed by 16 or more letters, digits, `_` or `-` (so inside any word ending in sk: `task-`, `risk-`, `mask-`
      and the like), `gh[pousr]_` followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more
-     letters, digits or `-`, `AKIA` followed by 16 letters or digits, `glpat-` followed by 20 or more letters,
-     digits, `_` or `-`; a JWT (`eyJ` and 2 or more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any number of them, case-sensitive); a value starting with `bearer` in either case, whitespace and one more character other than a line break (as JavaScript's `.` reads it); or a
-     run of 40 or more letters, digits, `_`, `-` or `/` (so across segments joined by `-` or `/`) that mixes upper
-     case, lower case and a digit. `JWT_SHAPE`, `SECRET_VALUE` and `longSecret` (together `secretValue`) in `src/secret-shape.ts` are the definition. So
+     letters, digits or `-`, `AKIA` followed by 16 letters or digits, `glpat-` followed by 20 or more letters, digits,
+     `_` or `-`; a JWT (`eyJ` and 2 or more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any
+     number of them, case-sensitive); a value starting with `bearer` in either case, whitespace and one more character
+     other than a line break (as JavaScript's `.` reads it); or a run of 40 or more letters, digits, `+`, `/`, `=`,
+     `_` or `-` (so across segments joined by `-` or `/`) that mixes upper case, lower case and a digit. `JWT_SHAPE`,
+     `SECRET_VALUE` and `longSecret` (together `secretValue`) in `src/secret-shape.ts` are the definition. So
      `ops.risk-assessment-completed` and `queue.task-assigned-to-worker` are refused and `work.session-end-task-back`
      passes, until DEC-0151's narrowing of the `sk-` shape lands. `hasHomePath` refuses a value in which `home`,
      `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`,
@@ -9152,24 +9155,26 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the key on a remote placement or on a local one without `paths.data`, a value that is not its schema's, a
      `source` named twice, a `dir` named twice, compared under canonical caseless matching (the code points HFS+
      ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and
-     spaces dropped (one folder under two labels would be sent twice), a `dir` segment made only of dots, spaces and
-     code points HFS+ ignores (it folds to nothing, and a tool that trims or folds names as the fold does, Win32 path
-     handling dropping trailing dots and spaces or a reader stripping those code points before joining, may read it as
-     empty, `.` or `..`, another folder than the one declared, possibly outside `paths.data`), a `dir` holding a home
-     folder (`hasHomePath`, with the boundary of item 3: `users/digests`, `my_users/digests`, `my-users/digests` and
-     `a/~b` fail, `user-digests` and `a/~1/x` pass) and a `dir` or `source` shaped like a credential (`secretValue`),
-     a `dir` read four ways: as written, with every default-ignorable code point removed, and each of those with each
-     segment's trailing dots and spaces dropped (a 40-character run across segments joined by `/` that mixes upper
-     case, lower case and a digit, such as `ApplicationSupport/MyProduct/Digests2026`, is refused on purpose: the
-     credential detector's run includes `/` so that a base64 secret holding one is still found; a class of dirs whose
-     fold holds a home folder is hidden in messages, never refused); one finding refuses the whole declaration, which
-     a collector reads as not declared and reports. `digestFoldersView` (whose `usable` is true only when the rule has
-     no finding) and `digestFoldersRules` in `src/ops-digest.ts` are the reference. A collector takes each day's first
-     daily line whenever it first appears (a caught-up day included) and sends it once, with `source` and which
-     descriptor the line came from (its `id` and `instance`; an optional `service {id, instance}` beside `source` is
-     announced, board message `1a12d809`). The collector role is announced by Fabric (board thread `f7758225`, message
-     `2ed505f2`). A product without a local descriptor is outside this declaration, and a declared `dir` holds only
-     the declaring instance's own digests: relaying a remote instance's digests is outside this contract.
+     spaces dropped (one folder under two labels would be sent twice), a `dir` segment that is empty once every
+     default-ignorable code point and its trailing dots and spaces are dropped (`..` + U+2060 among them; a tool that
+     trims or strips names, Win32 path handling dropping trailing dots and spaces or a reader stripping those code
+     points before joining, may read it as empty, `.` or `..`, another folder than the one declared, possibly outside
+     `paths.data`), a `dir` holding a home folder (`hasHomePath`, with the boundary of item 3: `users/digests`,
+     `my_users/digests`, `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x` pass) and a `dir` or `source`
+     shaped like a credential (`secretValue`), a `dir` read four ways: as written, with every default-ignorable code
+     point removed, and each of those with each segment's trailing dots and spaces dropped (a run of 40 or more
+     letters, digits, `+`, `/`, `=`, `_` or `-` that mixes upper case, lower case and a digit, across segments joined
+     by `/` too, such as `ApplicationSupport/MyProduct/Digests2026` or `Application+Support/MyProduct/Digests2026x`,
+     is refused on purpose, its finding saying why and that a space or a dot breaks the run: the credential detector's
+     run includes `/` so that a base64 secret holding one is still found; a class of dirs whose fold holds a home
+     folder is hidden in messages, never refused); one finding refuses the whole declaration, which a collector reads
+     as not declared and reports. `digestFoldersView` (whose `usable` is true only when the rule has no finding) and
+     `digestFoldersRules` in `src/ops-digest.ts` are the reference. A collector takes each day's first daily line
+     whenever it first appears (a caught-up day included) and sends it once, with `source` and which descriptor the
+     line came from (its `id` and `instance`; an optional `service {id, instance}` beside `source` is announced, board
+     message `1a12d809`). The collector role is announced by Fabric (board thread `f7758225`, message `2ed505f2`). A
+     product without a local descriptor is outside this declaration, and a declared `dir` holds only the declaring
+     instance's own digests: relaying a remote instance's digests is outside this contract.
 - **Why:** one shape lets one reader read every product's digests; the shape is the one already written, so the first producer moves nothing. A name grammar that holds no empty
   segment, `.`, `..` or leading `/` keeps absolute paths and URLs out by construction, and the home-folder detector the
   relative home paths `/` would let in. The folder a collector reads is declared where the product already says what it
@@ -9213,15 +9218,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   twin protocol registers (`fabric_protocols.py`, `fabric-protocols.mjs`), which its tests hold equal to the register
   `vendor_vectors.mjs` writes into `feed-protocols-vectors.json` (the twins are kept by hand). Fabric's digests at
   `e1eecec0` validate as written (its test's names, `x` and `y` included). The reference folds are
-  `src/ops-digest.ts`. ADR-0188 section 5's "retros written" is not a digest count here (RW-4): a view built on Fabric's CO-502 ("the daily
-  digest counts retros asked and written", `a6f0ffda`) reads `ok` as asks answered, which the CT-219 handoff's answer
-  on thread `f7758225` tells it. Each product's adoption is tracked in its own rows; the CT-219 handoff's
-  Consumers list records what was read at a date, and vendoring the vectors from the release tag is each product's
-  obligation. At their next re-pin, the consumers that vendor a protocol table (a deployment template's
-  `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the adapter
-  kit's copies in agents built on it, and any other vendored table) add `fabric-ops-digest/0.1`. `schemas/device-common.schema.json`'s bytes change (its `detail` `$comment` only), so a consumer that vendors it
-  re-pins. A product that names an operation outside OD-2's grammar
-  (another separator, an upper-case first letter) renames it before it writes digests. `contractVersion` stays `0.1.0`.
+  `src/ops-digest.ts`. ADR-0188 section 5's "retros written" is not a digest count here (RW-4): a view built on
+  Fabric's CO-502 ("the daily digest counts retros asked and written", `a6f0ffda`) reads `ok` as asks answered, which
+  the CT-219 handoff's answer on thread `f7758225` tells it. Each product's adoption is tracked in its own rows; the
+  CT-219 handoff's Consumers list records what was read at a date, and vendoring the vectors from the release tag is
+  each product's obligation. At their next re-pin, the consumers that vendor a protocol table (a deployment template's
+  `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the
+  adapter kit's copies in agents built on it, and any other vendored table) add `fabric-ops-digest/0.1`.
+  `schemas/device-common.schema.json`'s bytes change (its `detail` `$comment` only), so a consumer that vendors it
+  re-pins. A product that names an operation outside OD-2's grammar (another separator, an upper-case first letter) or
+  that FAC-SEM-167 refuses (a credential's shape, a home folder) renames it before it writes digests; lines already
+  written with such a name are skipped by every reader. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/ops-digest-hourly.schema.json`, `schemas/ops-digest-daily.schema.json`,
   `src/ops-digest.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `tools/vectors/ops-digest.ts`,
   `tools/vectors/run.ts`, `fixtures/vectors/ops-digest.json`, `fixtures/positive/ops-digest-*.json`,
@@ -9304,6 +9311,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   is folded in; round 16 at `6c54c1da` was not clean: the `inGrammar` recommendation without its docs (dropped; the
   NFC/NFD length case is now under Not decided), the module's readings (a `dir` is now read four ways, every
   default-ignorable code point removed in two of them) and the boundary owner (which landing rewrites the home-path
-  copies), and its batch is folded in;
+  copies), and its batch is folded in; round 17 at `cc1fc853` was clean; round 18 at the same head was not clean: the
+  long-run alphabet (now letters, digits, `+`, `/`, `=`, `_` or `-`, as the detector reads it), the acceptance edit left
+  the handoff (it now rewrites it) and the knowledge base's plans row, and its batch, with what both rounds held (a
+  `dir` segment empty once its default-ignorable code points are dropped, the folds' worded errors, the long run's
+  reason and remedy, the help link written once), is folded in;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

@@ -462,7 +462,7 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
         const result = runCli([file, "--schema", "service-ops-digest-extension.schema.json"]);
         expect(result.code, name).toBe(0);
         expect(result.out, name).toContain("hint/declaration-only");
-        expect(result.out, name).toContain("FAC-SEM-168 runs only on the declaration inside a service descriptor's extensions (the placement and paths.data, a source or a dir named twice, a dir with a segment that folds to nothing, a home folder in a dir, a dir or source shaped like a credential); check the descriptor to run it");
+        expect(result.out, name).toContain("FAC-SEM-168 runs only on the declaration inside a service descriptor's extensions (the placement and paths.data, a source or a dir named twice, a dir with a segment of only dots, spaces or ignorable code points, a home folder in a dir, a dir or source shaped like a credential); check the descriptor to run it");
         const json = JSON.parse(runCli([file, "--schema", "service-ops-digest-extension.schema.json", "--json"]).out) as { notes?: Array<{ rule: string; help: string }>; problems: Array<{ rule: string; help: string }> };
         const hint = [...(json.notes ?? []), ...json.problems].find((note) => note.rule === "hint/declaration-only");
         expect(hint?.help, name).toBe("docs/specification/ops-digest.md#where-a-collector-reads-the-daily-digests");
@@ -536,9 +536,34 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     for (const dir of [[".", "\u200c", "."].join(""), ". ", ["..", "\u200d"].join(""), ["a/", ".", "\u200c", ".", "/b"].join("")]) {
       const findings = evaluateSemanticRules("service-descriptor", withFolders([{ dir, source: "app" }])).filter((f) => f.code === "FAC-SEM-168");
       expect(findings.map((f) => f.instancePath), JSON.stringify(dir)).toEqual([`${at}/0/dir`]);
-      expect(findings[0]?.message).toBe("a dir segment folds to nothing (only dots, spaces or code points a file system may ignore); a tool may read it as empty, '.' or '..', another folder than the one declared, possibly outside paths.data");
+      expect(findings[0]?.message).toBe("a dir segment is empty once its dots, spaces and code points a file system may ignore are dropped; a tool may read it as empty, '.' or '..', another folder than the one declared, possibly outside paths.data");
     }
     expect(found("service-descriptor", withFolders([{ dir: "a.", source: "app" }]))).toEqual([]);
+  });
+
+  it("refuses a dir segment empty once every default-ignorable code point and trailing dots and spaces are dropped", () => {
+    for (const dir of [["..", "\u2060"].join(""), ["a/..", "\u200b", "/b"].join(""), "\u2060", ["x/", "\u2060", "/y"].join("")]) {
+      const findings = evaluateSemanticRules("service-descriptor", withFolders([{ dir, source: "app" }])).filter((f) => f.code === "FAC-SEM-168");
+      expect(findings.map((f) => f.instancePath), JSON.stringify(dir)).toEqual([`${at}/0/dir`]);
+      expect(digestFoldersView(withFolders([{ dir, source: "app" }])).declared && (digestFoldersView(withFolders([{ dir, source: "app" }])) as { usable: boolean }).usable).toBe(false);
+    }
+    // A segment with something left after the drop stays lawful.
+    expect(found("service-descriptor", withFolders([{ dir: ["a", "\u2060", "."].join(""), source: "app" }]))).toEqual([]);
+  });
+
+  it("refuses a dir that only the long run makes a key, with its alphabet, the reason and the remedy", () => {
+    const dir = ["Application", "+Support", "/MyProduct", "/Digests2026x"].join("");
+    const view = digestFoldersView(withFolders([{ dir, source: "app" }]));
+    expect(view).toMatchObject({ declared: true, valid: true, usable: false });
+    const messages = evaluateSemanticRules("service-descriptor", withFolders([{ dir, source: "app" }])).filter((f) => f.code === "FAC-SEM-168").map((f) => f.message);
+    expect(messages).toEqual(["a dir is shaped like a credential: a run of 40 or more letters, digits, +, /, =, _ or - (across segments too) that mixes upper case, lower case and a digit reads as a key; a space or a dot breaks it. It names a folder, never a value"]);
+    // A dot or a space breaks the run.
+    for (const broken of [["Application", ".Support", "/MyProduct", "/Digests2026x"].join(""), ["Application", " Support", "/MyProduct", "/Digests2026x"].join("")]) {
+      expect(found("service-descriptor", withFolders([{ dir: broken, source: "app" }])), broken).toEqual([]);
+    }
+    // A provider key keeps the short message.
+    const key2 = ["gh", "p_", "ABCDEFGHIJKLMNOPQRSTUV"].join("");
+    expect(evaluateSemanticRules("service-descriptor", withFolders([{ dir: key2, source: "app" }])).filter((f) => f.code === "FAC-SEM-168").map((f) => f.message)).toEqual(["a dir is shaped like a credential; it names a folder, never a value"]);
   });
 
   it("names a duplicate dir only when it is printable ASCII", () => {
@@ -601,6 +626,16 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     const dir = "\u00e4".repeat(256);
     expect(dir.normalize("NFD").length).toBe(512);
     expect(found("service-descriptor", withFolders([{ dir, source: "app" }]))).toEqual([]);
+  });
+
+  it("names a non-string from and a null item in a fold's input with a worded error, never a TypeError", () => {
+    expect(() => foldHour([], 7 as unknown as string, null)).toThrow(/^from is not a whole UTC hour$/);
+    expect(() => foldHour([null as unknown as HourlyDigest["ops"][number]], "2026-11-04T01:00:00Z", null)).toThrow(/^the item at 0 of counts is not an object$/);
+    const one = foldHour([{ op: "x", ok: 0, failed: 5, unknown: 0 }], "2026-11-04T01:00:00Z", null);
+    expect(() => foldHour([], "2026-11-04T02:00:00Z", { ...one, ops: [null as unknown as HourlyDigest["ops"][number]] })).toThrow(/^the item at 0 of the previous hour's ops is not an object$/);
+    expect(() => foldDay("2026-11-04", [null as unknown as HourlyDigest])).toThrow(/^the item at 0 of hourly is not an object$/);
+    expect(() => foldDay("2026-11-04", [{ ...one, ops: [null as unknown as HourlyDigest["ops"][number]] }])).toThrow(/^the item at 0 of 2026-11-04T01:00:00.000Z's ops is not an object$/);
+    expect(() => foldDay("2026-11-04", [{ ...one, risen: [null as unknown as HourlyDigest["risen"][number]] }])).toThrow(/^the item at 0 of 2026-11-04T01:00:00.000Z's risen is not an object$/);
   });
 
   it("names a non-string operation in a fold's input with an error, never a TypeError", () => {
