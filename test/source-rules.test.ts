@@ -946,7 +946,7 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
       // Two or more dots: a second segment may read as .., so everything goes; fewer: the folder before it, src/.
       const everything = (segment.match(/\./gu) ?? []).length >= 2;
       const said = sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [`src/${segment}/`] }) ?? [];
-      expect(said.find((finding) => finding.instancePath === "/exclude/0")?.message, JSON.stringify(segment)).toBe(`exclude[0] is an entry with a segment made only of dots, spaces and code points HFS+ ignores, so it still removes ${everything ? "everything but fabric.source.json" : "the folder before that segment"}`);
+      expect(said.find((finding) => finding.instancePath === "/exclude/0")?.message, JSON.stringify(segment)).toBe(`exclude[0] is an entry with a segment made only of dots, spaces and code points HFS+ ignores, so it still removes ${everything ? "everything but fabric.source.json" : "the folder the shallowest reading reaches"}`);
       expect(said.map((finding) => finding.instancePath).sort(), JSON.stringify(segment)).toEqual(everything ? ["/exclude/0", "/include/0", "/include/1"] : ["/exclude/0", "/include/0"]);
     }
     // A name ending in a dot keeps a letter: it is in the grammar.
@@ -966,11 +966,11 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
     // its parent too when that segment holds two or more dots (a reader may take it as ..), each also as a file when
     // the entry has no trailing slash.
     const readings: Array<[string, boolean, string]> = [
-      ["src/secrets/.../", false, "the folder before that segment and that folder's parent (a reader may take the segment as ..)"],
-      ["src/secrets/.\u200c./", false, "the folder before that segment and that folder's parent (a reader may take the segment as ..)"],
-      ["src/Secrets/. /x/", true, "the folder before that segment"],
-      ["src/secrets/...", false, "the folder before that segment and that folder's parent (a reader may take the segment as ..), each also as a file of its name"],
-      ["src/secrets/. ", true, "the folder before that segment, each also as a file of its name"]
+      ["src/secrets/.../", false, "the folder the shallowest reading reaches"],
+      ["src/secrets/.\u200c./", false, "the folder the shallowest reading reaches"],
+      ["src/Secrets/. /x/", true, "the folder the shallowest reading reaches"],
+      ["src/secrets/...", false, "the folder the shallowest reading reaches, also as a file of its name"],
+      ["src/secrets/. ", true, "the folder the shallowest reading reaches, also as a file of its name"]
     ];
     for (const [entry, mainStays, removes] of readings) {
       const manifest = { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [entry] };
@@ -998,7 +998,21 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
     // Both causes: the segment is said first, and the effect is the segment's reading.
     const both = `src/secrets/.../${"\u00e9".repeat(130)}/`;
     expect(isSourcePath({ include: ["src/"], exclude: [both] }, "src/secrets/key.txt")).toBe(false);
-    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [both] })?.find((finding) => finding.instancePath === "/exclude/0")?.message).toBe("exclude[0] is an entry with a segment made only of dots, spaces and code points HFS+ ignores, so it still removes the folder before that segment and that folder's parent (a reader may take the segment as ..)");
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [both] })?.find((finding) => finding.instancePath === "/exclude/0")?.message).toBe("exclude[0] is an entry with a segment made only of dots, spaces and code points HFS+ ignores, so it still removes the folder the shallowest reading reaches");
+    // Every segment from the first that folds to nothing is walked: the shallowest reading decides.
+    const walked: Array<[string, string[], string[]]> = [
+      ["src/a/b/.../.../", ["src/x.md", "src/a/b/c.ts"], ["lib/x.ts", "LICENSE"]],
+      ["src/secrets/. /.../", ["src/main.ts", "src/secrets/k"], ["lib/x.ts"]],
+      ["src/secrets/. /x/.../.../", ["src/main.ts", "src/secrets/k"], ["lib/x.ts"]],
+      ["src/a/.../.../", ["src/x.md", "lib/x.ts", "LICENSE"], ["fabric.source.json"]]
+    ];
+    for (const [entry, out, kept] of walked) {
+      const manifest = { format: "fabric-source/1", include: ["src/", "lib/", "LICENSE"], exclude: [entry] };
+      for (const path of out) expect(isSourcePath(manifest, path), `${entry} ${path}`).toBe(false);
+      for (const path of kept) expect(isSourcePath(manifest, path), `${entry} ${path}`).toBe(true);
+      expect(patchPathsAllowed(manifest, [...out, ...kept.filter((path) => path !== "fabric.source.json")]), entry).toEqual(out);
+    }
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: ["src/a/.../.../"] })?.find((finding) => finding.instancePath === "/exclude/0")?.message).toBe("exclude[0] is an entry with a segment made only of dots, spaces and code points HFS+ ignores, so it still removes everything but fabric.source.json");
     // An include equal to a folder an out-of-grammar exclude removes is said once, at the include.
     const equal = sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "src/secrets/", "LICENSE"], exclude: ["src/secrets/. /"] }) ?? [];
     expect(equal.filter((finding) => finding.instancePath === "/include/1").map((finding) => finding.message)).toEqual(["include[1] lies inside an exclude path, so it names nothing"]);

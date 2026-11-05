@@ -107,26 +107,33 @@ const emptySegment = (entry: string): { segments: string[]; at: number; bare: bo
 };
 /**
  * The widest reading of an `exclude` entry in the schema's grammar as written that is outside the grammar as a file
- * system may read it (DEC-0149), the union of the readings a tool may take: with a segment that folds to nothing (made
- * only of dots, spaces and code points HFS+ ignores), the folder before its first such segment; when that segment holds
- * two or more dots (a reader may take it as `..`), that folder's parent too; so a first segment, or a second one with
- * two dots, means everything (`all`); without a trailing `/`, each such folder also as a file of its name. Lengthened
- * past 256 code points by NFC or NFD only, the entry folded as written. Each entry is folded (`foldSegment`).
+ * system may read it (DEC-0149), the union of the readings a tool may take. From its first segment that folds to nothing
+ * (made only of dots, spaces and code points HFS+ ignores) every segment is walked, the depth starting at that segment's
+ * index: a segment that folds to nothing and holds two or more dots may lower it by one (a reader may take it as `..`),
+ * one with fewer dots keeps it, and any other segment raises it by one. The entry removes the folder the shallowest
+ * reading reaches, the folded folder at the minimum depth (at or below 0, everything but `fabric.source.json`: `all`),
+ * and, without a trailing `/`, also that folder as a file of its name. Lengthened past 256 code points by NFC or NFD
+ * only, the entry folded as written.
  */
-const widestReading = (entry: string): { all: boolean; parent: boolean; bare: boolean; entries: string[] } => {
+const widestReading = (entry: string): { all: boolean; bare: boolean; entries: string[] } => {
   const { segments, at, bare } = emptySegment(entry);
-  if (at < 0) return { all: false, parent: false, bare, entries: [foldPath(nfc(entry))] };
-  const parent = ((segments[at] as string).match(/\./gu) ?? []).length >= 2;
-  const keep = parent ? at - 1 : at;
-  if (keep <= 0) return { all: true, parent, bare, entries: [] };
-  const folders = [segments.slice(0, at), ...(parent ? [segments.slice(0, at - 1)] : [])].map((part) => part.map(foldSegment).join("/"));
-  return { all: false, parent, bare, entries: folders.flatMap((folder) => (bare ? [`${folder}/`, folder] : [`${folder}/`])) };
+  if (at < 0) return { all: false, bare, entries: [foldPath(nfc(entry))] };
+  let depth = at;
+  let shallowest = at;
+  for (const segment of segments.slice(at)) {
+    if (foldSegment(segment) !== "") depth += 1;
+    else if ((segment.match(/\./gu) ?? []).length >= 2) depth -= 1;
+    shallowest = Math.min(shallowest, depth);
+  }
+  if (shallowest <= 0) return { all: true, bare, entries: [] };
+  const folder = segments.slice(0, shallowest).map(foldSegment).join("/");
+  return { all: false, bare, entries: bare ? [`${folder}/`, folder] : [`${folder}/`] };
 };
 /**
  * A list of paths indexed in their folded form: an entry in the path grammar (`inGrammar`), folded only then. With
  * `widest` (for `exclude`, which fails closed) an entry in the schema's grammar as written that is outside the grammar
  * as a file system may read it still removes its widest reading (`widestReading`): `src/secrets/.../` removes
- * `src/secrets/` and `src/`. `FAC-SEM-157` still says such an entry once. An `include` entry outside the grammar names
+ * `src/`, the folder its shallowest reading reaches. `FAC-SEM-157` still says such an entry once. An `include` entry outside the grammar names
  * nothing (it fails closed the other way). Looked up with `foldedCovers`.
  */
 const foldedList = (value: unknown, widest = false): PathList => {
@@ -1260,7 +1267,7 @@ const widestEffect = (path: string): string => {
   const reading = widestReading(path);
   if (emptySegment(path).at < 0) return "still removes what it names, folded as written";
   if (reading.all) return "still removes everything but fabric.source.json";
-  return `still removes the folder before that segment${reading.parent ? " and that folder's parent (a reader may take the segment as ..)" : ""}${reading.bare ? ", each also as a file of its name" : ""}`;
+  return `still removes the folder the shallowest reading reaches${reading.bare ? ", also as a file of its name" : ""}`;
 };
 /**
  * FAC-SEM-157's grammar clause, for one entry of `include`, `exclude` or `binaries`: an entry in the schema's grammar as

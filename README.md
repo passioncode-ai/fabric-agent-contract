@@ -40,7 +40,7 @@ lines may print), 1 when it has a problem and 2 on a usage error. The [guide](do
 local-runner rows with minimal examples; for an A2A peer, its profile and the fixture above are the example, and the [Fabric Agent Adapter](https://github.com/passioncode-ai/fabric-agent-adapter) scaffolds
 and probes each kind.
 
-An agent of any kind may also carry a source manifest, `fabric.source.json` (opt-in, DEC-0149): which files are its
+An agent of any kind may also carry a source manifest, `fabric.source.json` (opt-in, DEC-0149, required before a hand-over or a public release from a private home): which files are its
 source, which slots an installation fills, and the check that keeps its instance out of a source export. The export, owed by the
 adapter (CT-207), is to read the operator's list of installation strings; the run here,
 `pnpm --silent validate <folder> --kind source-tree`, reads none ([agent source](docs/specification/source.md)).

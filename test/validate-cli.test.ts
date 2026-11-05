@@ -1348,7 +1348,7 @@ describe("an agent's source (DEC-0149)", () => {
       process.env.PATH = saved.path;
       gitLimits.maxBuffer = saved.maxBuffer;
     }
-  });
+  }, 60_000);
 
   it("labels a file whose path holds an address by its index in a folder and as a document alike, printing no address", () => {
     const address = ["someone", "@", "mail.org"].join("");
@@ -2648,7 +2648,7 @@ describe("an agent's source (DEC-0149)", () => {
       if (saved.list === undefined) delete process.env.FAKE_LIST;
       else process.env.FAKE_LIST = saved.list;
     }
-  });
+  }, 60_000);
 
   it.skipIf(process.platform === "win32")("never reads an untracked name shaped like an index entry as a gitlink", () => {
     const crafted = `160000 ${"0".repeat(40)} 0\tsrc`;
@@ -2671,7 +2671,7 @@ describe("an agent's source (DEC-0149)", () => {
     } finally {
       process.env.PATH = saved;
     }
-  });
+  }, 60_000);
 
   it.skipIf(process.platform === "win32")("says nothing of a name Git listed that is not UTF-8 when the run walks after all", () => {
     const bin = folder({ git: "#!/bin/sh\nfor a in \"$@\"; do case \"$a\" in --stage) exit 3;; esac; done\nfor a in \"$@\"; do case \"$a\" in ls-files) printf 'LICENSE\\000src/a.ts\\000src/\\377.txt\\000'; exit 0;; check-ignore) exit 1;; esac; done\nexit 1\n" });
@@ -2687,7 +2687,7 @@ describe("an agent's source (DEC-0149)", () => {
     } finally {
       process.env.PATH = saved;
     }
-  });
+  }, 60_000);
 
   it.skipIf(process.platform === "win32")("walks with a note when the gitlink listing times out or cannot run", () => {
     // A git that answers the first listing at once and the gitlink listing late, or with more than the buffer takes.

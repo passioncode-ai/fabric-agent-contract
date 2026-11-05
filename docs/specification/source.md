@@ -51,7 +51,7 @@ A path is the package's path grammar (`fabric-package.schema.json#/$defs/path`),
 `include` and `exclude`: relative (a leading `/` or `~` is refused), forward slashes, no `.` or
 `..` segment, no drive, no control character, no `:`. A path that ends in `/` names a folder and everything under it;
 in `include` any other path names one file, and in `exclude` any other path names a file and everything beneath that
-name. There are no globs. An entry outside the grammar as the schema reads it (over 256
+name. There are no globs. An entry outside the grammar as the schema reads it (such as one over 256
 code points as written, or with a `\`, a `//` or a `:`) is a schema problem and names, reaches and removes nothing. A
 file whose own path is outside the grammar (as below, in NFC and NFD too) is not source: it is never read and never
 exported, and no line names it. A `binaries`
@@ -70,12 +70,14 @@ store slot's `path` is written without a trailing slash and names the file or fo
   import; `a.` keeps a letter and stays in it. An entry with such a segment, or one NFC or NFD lengthens past 256
   code points, is `FAC-SEM-157`, said once by its cause (in a tree document too), and names nothing (never `missing`,
   never `unused-exclude`, never a `binaries` path that is no file of the source), except that an `exclude` entry so read fails closed: it still removes its widest reading, the union of the
-  readings a tool may take, which is the folder before its first such segment, that folder's parent too when the
-  segment holds two or more dots (a reader may take it as `..`), and, without a trailing `/`, each such folder also as
-  a file of its name, so a first segment, or a second one with two dots, removes everything but `fabric.source.json`
-  (lengthened only, the entry folded as written; with both causes, the segment's reading): `src/secrets/. /` keeps
-  `src/secrets/key.txt` out of the source and out of a patch, `src/secrets/.../` keeps `src/` out, and
-  `src/secrets/...` the file `src/secrets` too. `FAC-SEM-157`'s message says what such an entry removes, and an
+  readings a tool may take: every segment from its first such segment is walked, the depth starting at that
+  segment's index, a segment that folds to nothing with two or more dots lowering it by one (a reader may take it as
+  `..`), one with fewer dots keeping it and any other segment raising it by one, and the entry removes the folder the
+  shallowest reading reaches, without a trailing `/` also as a file of its name, and everything but
+  `fabric.source.json` when that reading reaches depth 0 (lengthened only, the entry folded as written; with both
+  causes, the segment's reading): `src/secrets/. /` keeps `src/secrets/key.txt` out of the source and out of a patch,
+  `src/secrets/.../` and `src/a/b/.../.../` keep `src/` out, `src/secrets/...` the file `src` too, and `src/a/.../.../`
+  everything but the manifest. `FAC-SEM-157`'s message says what such an entry removes, and an
   `include` path equal to or under what it removes is said once, at the include. An `include` entry so read
   names nothing, which fails closed the other way. A file outside `include` is
   simply not source: it is not a finding, and a source export does not carry it. A file whose path an `exclude` entry
@@ -580,7 +582,7 @@ private home (its own act) and material already public (below). The lead filters
 - a push of a commit not already there to a repository that is not the home and that is public, another owner's, or readable by anyone who could not already read the home (an organization's repository included, even one the operator administers, as the
   knowledge base's [agents-first](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/agents-first.md)
   item 9, "A source hand-over takes the operator's word on that act", reads), each such push its own hand-over;
-- source files' content copied into a message, an issue, a gist or a thread outside the owner's;
+- source files' content copied into a message, an issue, a gist or a thread outside the owner's that is readable by anyone who could not already read the home;
 - a package handed to anyone who could not already read the home (a colleague's copy, [package](package.md#state)'s v4 §6 Path 3), which carries the
   source; and a personal agent's package or release published to a public registry, unless its home is already public
   (below; the files the pack step derives from the public source, `fabric.package.json`, signatures and checksums,
@@ -612,7 +614,7 @@ A processor acting for the owner under the owner's own account or host (a model 
 CI on the home's host, a service the owner runs) is no recipient while what it holds stays readable by no one but the
 owner and the processors acting for the owner; output it makes public (a public server, a Pages site) is a hand-over.
 Access the owning organization gives its own members to its own agent's home is no hand-over, since they are the home's
-readers; for a personal agent the owner is the operator, so any other person's access to a private home, or to a copy of it within the operator's estate that carries its history (a private mirror), is an act on
+readers; for a personal agent the owner is the operator, so any access newly given to another person (beyond the access given before DEC-0149 was accepted) to a private home, or to a copy of it within the operator's estate that carries its history (a private mirror), is an act on
 the whole repository of a personal agent's private home, which is not done (above). Giving access to a public home is no hand-over: nothing unreadable
 becomes readable.
 

@@ -58,7 +58,7 @@ export const PERSON_PREFIXES: readonly string[] = ["employ", "productiv", "asses
  * device-common `detail` pattern refuses the dash form after any character (one line of free text with no path at all),
  * FAC-SEM-103's own pattern in `src/proposal-rules.ts` has no dash form, and the source tree check's `SOURCE_HOME_PATHS`
  * in `src/source-rules.ts` (FAC-SEM-158, DEC-0149) reads the home-path forms of the adapter's check over a source tree
- * (docs/specification/source.md#home-folders). Changing any of the four is a decision.
+ * (docs/specification/source.md#home-folders). Changing any of them is a decision.
  */
 const SLASH = String.raw`(?:[\/\\]|%(?:25)?2[fF])`;
 export const HOME_PATH: readonly RegExp[] = [
