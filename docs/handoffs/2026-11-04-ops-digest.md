@@ -201,7 +201,8 @@ product's obligation.
   decided here, and OBS-330 and OBS-331 quoted by their own text) and Fabric's rows (now quoted from its carry-over
   ledger). Also: the fold inputs FAC-SEM-166 refuses (an operation twice in the previous hour's ops or in one hour's
   risen) throw, the overflow message says "beyond 2^53 - 1", `foldDir` strips the code points HFS+ ignores first as
-  DEC-0149's `foldSegment` does, RW-1's "wrote no retro" judged by what the host observes, `FAC-SEM-167`'s credential
+  DEC-0149's `foldSegment` does and maps Georgian Nuskhuri onto Mkhedruli after NFC as its next step does (add-on),
+  RW-1's "wrote no retro" judged by what the host observes, `FAC-SEM-167`'s credential
   detector described as shared, and the dated-reading wording fixes. Round 7 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
@@ -212,8 +213,9 @@ product's obligation.
 Round-6 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
 round 2 with coverage on `src/ops-digest.ts` (4175 tests; 232 of 232 statements, 181 of 181 branches);
 `pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`; `python3 docs/ux/lint.py`;
-`pnpm run privacy:check` (0 findings). No other repository's code was downloaded or run. The branch gate is owed: the
-15-minute load was 59.8.
+`pnpm run privacy:check` (0 findings). No other repository's code was downloaded or run. The Nuskhuri add-on: the same
+checks again, each exit 0 (4175 tests; 235 of 235 statements, 181 of 181 branches). The branch gate is owed: the
+15-minute load was 59.8, then 64.4.
 
 Round-5 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
 round 2 with coverage on `src/ops-digest.ts` (4173 tests; 220 of 220 statements, 177 of 177 branches);

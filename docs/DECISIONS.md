@@ -9129,7 +9129,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      a collector on the same machine sends with each daily line it reads there. The digests stay as written (OD-6,
      OD-7); the key only says where to read and which label to send. `FAC-SEM-168` (kind `service-descriptor`) refuses
      the key on a remote placement or on a local one without `paths.data`, a value that is not its schema's, a `source`
-     named twice, a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC), trailing dots and spaces dropped (one folder under two labels would be sent twice), a `dir` holding a home folder (`hasHomePath`, with the
+     named twice, a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped (one folder under two labels would be sent twice), a `dir` holding a home folder (`hasHomePath`, with the
      boundary of item 3: `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x` pass) and a `dir` or `source` shaped like a credential
      (`secretValue`); one finding refuses the whole declaration, which a collector reads as not declared and reports.
      `digestFoldersView` (whose `usable` is true only when the rule has no finding) and `digestFoldersRules` in

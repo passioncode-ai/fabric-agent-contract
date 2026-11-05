@@ -297,17 +297,24 @@ export function digestFoldersView(descriptor: unknown): DigestFoldersView {
 }
 
 /**
+ * Georgian Nuskhuri (U+2D00 to U+2D25), where the case mappings leave Asomtavruli (U+10A0 to U+10C5), mapped onto
+ * Mkhedruli (U+10D0 to U+10F5), since HFS+ joins Asomtavruli with Mkhedruli; as DEC-0149's `foldSegment` maps it.
+ */
+const NUSKHURI = /[\u2d00-\u2d25]/gu;
+const toMkhedruli = (letter: string): string => String.fromCodePoint((letter.codePointAt(0) as number) - 0x2d00 + 0x10d0);
+/** Code points HFS+ ignores in a name, stripped before the fold exactly as DEC-0149's `foldSegment` strips them. */
+const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
+/**
  * A `dir` as a file system that folds case compares it, canonical caseless as DEC-0149's fold: each segment with the
  * code points HFS+ ignores removed (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F, U+FEFF), then as NFD,
- * then lower, upper and lower case, then NFC, trailing dots and spaces dropped. So `Straße` meets `STRASSE` and
+ * then lower, upper and lower case, then NFC, then Georgian Nuskhuri mapped onto Mkhedruli (so Asomtavruli meets
+ * Mkhedruli, as HFS+ joins them), trailing dots and spaces dropped. So `Straße` meets `STRASSE` and
  * `Straẞe`, `σασ` meets `ΣΑΣ`, and a letter with U+0345 and another accent meets its precomposed form, which an
  * NFC-first fold splits. It also joins the dotless `ı` with `i` (and `I`): two dirs a file system may keep apart are
  * read as one, the safe direction, since the worst it does is a `FAC-SEM-168` finding on two folders.
  */
-/** Code points HFS+ ignores in a name, stripped before the fold exactly as DEC-0149's `foldSegment` strips them. */
-const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
 export const foldDir = (dir: string): string =>
-  dir.split("/").map((segment) => segment.replace(HFS_IGNORABLE, "").normalize("NFD").toLowerCase().toUpperCase().toLowerCase().normalize("NFC").replace(/[. ]+$/, "")).join("/");
+  dir.split("/").map((segment) => segment.replace(HFS_IGNORABLE, "").normalize("NFD").toLowerCase().toUpperCase().toLowerCase().normalize("NFC").replace(NUSKHURI, toMkhedruli).replace(/[. ]+$/, "")).join("/");
 
 const FOLDERS_PATH = `/extensions/${EXTENSION_KEYS.opsDigest.replace(/~/g, "~0").replace(/\//g, "~1")}`;
 const folderFinding = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-168", instancePath, message });
@@ -316,7 +323,7 @@ const folderFinding = (instancePath: string, message: string): Finding => ({ cod
  * FAC-SEM-168 on a service descriptor (kind `service-descriptor`) that carries the ops-digest key: a remote placement
  * (no folder on this machine), or a local one that names no `paths.data` for `dir` to be relative to; a value that is
  * not its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); a `source` named
- * twice; a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC), trailing dots and spaces dropped, segment
+ * twice; a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped, segment
  * by segment (one folder under two labels would be sent twice); a `dir` that holds a home folder (`hasHomePath`); a
  * `dir` or a `source` shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users`
  * or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
@@ -346,7 +353,7 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     if (seen.has(folder.source)) findings.push(folderFinding(`${at}/source`, `source ${folder.source} is named twice; each folder sends its own label`));
     seen.add(folder.source);
     const folded = foldDir(folder.dir);
-    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `dir ${folder.dir} is named twice (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC), trailing dots and spaces dropped); its lines would be sent twice`));
+    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `dir ${folder.dir} is named twice (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
     dirs.add(folded);
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
     if (secretValue(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));

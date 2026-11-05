@@ -343,8 +343,8 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     expect(evaluateSemanticRules("service-descriptor", value).find((f) => f.instancePath === `${at}/4/dir`)?.message).toContain("credential");
   });
 
-  it("compares dirs under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC), trailing dots and spaces dropped", () => {
-    const pairs: Array<[string, string]> = [["Straße", "STRASSE"], ["Stra\u1e9ee", "Straße"], ["σασ", "ΣΑΣ"], ["café", "café"], ["digests.", "digests"], ["digests ", "digests"], ["a/Digests./b", "A/digests/B"], ["\u1fbc\u0342", "\u1fb7"], ["\u0131", "i"], ["\u0131", "I"], ["dig\u200cests", "digests"], ["digests\ufeff", "digests"], ["a/\u202adigests", "a/digests"]];
+  it("compares dirs under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped", () => {
+    const pairs: Array<[string, string]> = [["Straße", "STRASSE"], ["Stra\u1e9ee", "Straße"], ["σασ", "ΣΑΣ"], ["café", "café"], ["digests.", "digests"], ["digests ", "digests"], ["a/Digests./b", "A/digests/B"], ["\u1fbc\u0342", "\u1fb7"], ["\u0131", "i"], ["\u0131", "I"], ["dig\u200cests", "digests"], ["digests\ufeff", "digests"], ["a/\u202adigests", "a/digests"], ["\u10a0\u10c5", "\u10d0\u10f5"], ["\u2d00", "\u10d0"]];
     for (const [a, b] of pairs) {
       expect(foldDir(a), `${a} ${b}`).toBe(foldDir(b));
       expect(found("service-descriptor", withFolders([{ dir: a, source: "one" }, { dir: b, source: "two" }])), `${a} ${b}`).toEqual([`FAC-SEM-168 ${at}/1/dir`]);
