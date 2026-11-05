@@ -48,8 +48,8 @@ const PROSE = "съешь же ещё этих мягких французски
 // detectorCost without its long-run term (runRereads) and its argument pieces (argumentPieces), each pinned on its own
 // below: the terms the older exact tests count.
 const runsIn = (text: string): number => {
-  let runs = runRereads(text);
-  if (!readAsUrl(text)) return runs + argumentPieces(text);
+  let runs = runRereads(text) + argumentPieces(text);
+  if (!readAsUrl(text)) return runs;
   let url: URL;
   try {
     url = new URL(text);
@@ -407,10 +407,26 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       const characters = large.found.reduce((sum, f) => sum + f.instancePath.length, 0);
       expect(characters).toBeLessThan((SECRET_FINDINGS + 2) * (CHANNEL_AGENT_PATHS["well-known"].length + 2 * PATH_DEPTH + 16));
       expect(Math.max(...large.found.map((f) => f.instancePath.split("/").length))).toBeLessThanOrEqual(CHANNEL_AGENT_PATHS["well-known"].split("/").length + PATH_DEPTH);
-      // A 4x step in size costs about 4x in time: never the quadratic 16x.
+      // A 4x step in size costs about 4x in time: never the quadratic 16x. Both chains run out of the budget at both
+      // sizes, so this pair times the walk past the budget (collapsing every further member), not the reading.
       const ratio = large.micros / Math.max(small.micros, 1);
       expect(ratio).toBeLessThan(6);
     }
+    // A chain cheap enough to stay under the budget at both sizes (about 20 a level: the name `a`, its visit, its runs
+    // and nothing else), so the walk and the reading themselves are timed.
+    const cheapChain = (depth: number) => {
+      let node: Json = { a: "x" };
+      for (let i = 1; i < depth; i += 1) node = { a: node };
+      return node;
+    };
+    const smallCheap = cheapChain(8000);
+    const largeCheap = cheapChain(32000);
+    run(smallCheap);
+    run(largeCheap);
+    const small = total(smallCheap);
+    const large = total(largeCheap);
+    expect(large.found.some((f) => f.message.includes("code points of reading"))).toBe(false);
+    expect(large.micros / Math.max(small.micros, 1)).toBeLessThan(6);
   });
   it("refuses a string or a name over 4096 code points before the schema runs, with no run of it in the finding", { timeout: 60_000 }, () => {
     const base = JSON.parse(read("fixtures/positive/service-well-known-channel-agent.json")) as Json;
@@ -798,20 +814,24 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     // A regression guard: reading it to the budget stays within the repository's rule.
     expect(least(() => channelAgentRules(splitDoc, "well-known"))).toBeLessThan(2 * proseBaseline() + 20);
   });
-  it("charges the argument reading's pieces: ARG_PIECE_COST per white space, =, / and \\, outside a URL only", { timeout: 60_000 }, () => {
+  it("charges the argument reading's pieces: ARG_PIECE_COST per white space, =, / and \\, in every string", { timeout: 60_000 }, () => {
     expect(ARG_PIECE_COST).toBe(4);
     expect(argumentPieces("abc")).toBe(0);
     expect(argumentPieces("a b=c/d\\e")).toBe(4 * ARG_PIECE_COST);
     expect(argumentPieces("a\tb\u00a0c")).toBe(2 * ARG_PIECE_COST);
     expect(detectorCost("a b") - runRereads("a b")).toBe(3 + ARG_PIECE_COST);
-    expect(detectorCost("https://a.example/a/b") - runRereads("https://a.example/a/b")).toBe(21);
+    expect(detectorCost("https://a.example/a/b") - runRereads("https://a.example/a/b")).toBe(21 + 4 * ARG_PIECE_COST);
+    expect(detectorCost("a b")).toBe(13);
     const page = read("docs/specification/channel-agent.md").replace(/\s+/g, " ");
     expect(page).toContain("4 (`ARG_PIECE_COST`) for each white space, `=`, `/` and `\\`");
+    expect(page).toContain("`a b` costs 3, 3 x (1 + 1) and 4: 13");
     const baseline = proseBaseline();
-    for (const separator of [" ", "=", "/"]) {
-      const text = separator.repeat(4096);
+    // secretUrl runs the argument reading first, so a string read as a URL pays its pieces too.
+    const texts = [" ", "=", "/"].map((separator) => separator.repeat(4096));
+    texts.push(`x:${" ".repeat(4094)}`, ...[" ", "\\", "/"].map((separator) => `https://a/${separator.repeat(4086)}`));
+    for (const text of texts) {
       const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => text) } } };
-      expect(least(() => channelAgentRules(doc, "well-known")), JSON.stringify(separator)).toBeLessThan(2 * baseline + 20);
+      expect(least(() => channelAgentRules(doc, "well-known")), JSON.stringify(text.slice(0, 12))).toBeLessThan(2 * baseline + 20);
     }
   });
   it("holds each of the page's cost terms to detectorCost, exactly", () => {

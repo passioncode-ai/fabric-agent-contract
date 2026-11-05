@@ -387,6 +387,18 @@ FAA-197, on the adapter's main).
   pieces), with timing cases for 4096 separators and the budget-edge vectors recounted; the split case asserts the stop
   on the budget; the scaling and URL timing tests take the least of several runs; the baseline comment gives the prose
   costs. The bare-path landing step names where the switch goes.
+- Round 31 of the readings (on `8a36a6db`: unit and product one break each) was not clean: URL strings went
+  uncharged for the argument reading `secretUrl` runs first, and the bot-path clause read two ways. With the
+  coordinator's decisions: `argumentPieces` is charged on every string (the query budget-edge vector's URL now 1131; the
+  `https://a.example/a/b` term counts its four `/`, 21 + 16, where the request said 41), with timing cases for `x:` and
+  4094 spaces and `https://a/` and 4086 of a space, `\` or `/`; `a b` costs 13 on the page and in a test; the
+  linear-time test's budget-capped pairs say so, and a cheap chain under the budget at both sizes times the walk itself.
+  The operator's id is bound in a private chat with the agent's own bot and its word then counts in any chat that bot
+  answers; the `account` path adds that no business bot is connected and that the operator's configuration records the
+  other sessions; Telegram Business automatic messages never count, and a Business connection has no identification
+  yet; the minimum cases add the operator's in-chat request outside the task; the task names section 2.3; SCN-043 and
+  FLW-29 follow; the merge post describes unidentified channels by how they are reached; the landing row's CT id is the
+  next free above every open branch's and main's (CT-221 is reserved on main).
 
 ## The branch and its history
 
@@ -487,8 +499,9 @@ origin), whichever lands second:
   CT-212 is left unchanged (once switched, `keyShaped` is no `JWT_SHAPE` caller);
 - at landing, the DEC-0150 lander files (its one filer; the DEC-0149 lander only confirms the row exists; check: `grep
   -c 'installation-valued' docs/backlog.md` prints 1) the backlog row DEC-0149 owes at the DEC-0150 step, at the next
-  free CT id then: a source export's installation-valued members of a channel-agent declaration (`tickets.token_slot`'s
-  vault project and env, `evals.spend_record`, the per-project entries), checked against the source slots;
+  free id above every open branch's and main's (main reserved CT-221 in PR #242, `1e7be3a5`): a source export's
+  installation-valued members of a channel-agent declaration (`tickets.token_slot`'s vault project and env,
+  `evals.spend_record`, the per-project entries), checked against the source slots;
 - after DEC-0149 lands (its `formatSchemaErrors(errors, { instanceFree: true })`), runs the bare `--schema
   service-channel-agent-extension.schema.json` path instance-free (the switch ORs the schema into `formatSchemaErrors`'
   `instanceFree` option only, never into `sourceCheck`, which returns before every hint) and rewords the second sentence
@@ -635,6 +648,13 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
+On round 31's change, each exit code read separately: `pnpm typecheck` 0; `pnpm vitest run --testTimeout=60000
+test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts test/validate-cli.test.ts` 0 twice
+(2116 passed each time); `pnpm vectors:check` 0 (29 vector files match their generators, after the channel-agent
+generator's `--write`); `pnpm run docs:check` 0 (markdownlint 0 errors); `python3 docs/ux/lint.py` 0; `pnpm run
+privacy:check` with the organization index 0 (0 findings); no U+2014 in the added lines; `operator-channel.md` matches
+main. The coverage run is owed: the 15-minute load was 64.52 (free disk 22 GB).
+
 On round 30's change, each exit code read separately: `pnpm typecheck` 0; `pnpm vitest run --testTimeout=60000
 test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts test/validate-cli.test.ts` 0 (2116
 passed); `pnpm vectors:check` 0 (29 vector files match their generators, after the channel-agent generator's `--write`);
@@ -734,7 +754,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 30 (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 31 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -760,16 +780,18 @@ here), and adds:
   13.5) reaches the agent's audit quotes of the operator's words in a customer's chat; whether on an `account` channel a
   message is the owner's word only when the account's owner is the operator, the send record of section 9's one session
   owner shows it was not sent through that session owner (a send record can show only "not sent through the session
-  owner", not which session sent it), and every other session of the account is the operator's own; that `mail`,
-  `store_review`, `public_comment` and `team_chat` have no operator identification yet, so section 4.10 does not apply
-  on them until the owner answers; whether section 10's `account` row "holding rules" include the session owner's
-  section 9 hold or only the agent's own (CA-8 reads them as the agent's own, per section 4.10); whether the standard
-  intends the operator's chat decision on an `account` channel to be a message the customer reads; and one bot serving
-  both an operator channel and channels the agent answers people on, for the standard's and the operator channel's
-  owners: where a binding code is accepted, how OC-3, OC-4, OC-12 and OC-14 to OC-16 apply to customer chats, whether
-  OC-3 also refuses a message sent on behalf of a chat (`sender_chat` set, a shared placeholder sender), and the shared
-  receiver's order of updates and its status (OC-17); until they answer, such a bot keeps every operator-channel rule in
-  every chat as written;
+  owner", not which session sent it), and every other session of the account is the operator's own; that a channel
+  reached through neither the agent's own bot nor an account session has no operator identification yet (today mail,
+  store reviews, most public comments), so section 4.10 does not apply on it until the owner answers; how a Telegram
+  Business connection identifies the operator, and that messages Telegram Business sends by itself (a greeting, an away
+  message) never count; whether section 10's `account` row "holding rules" include the session owner's section 9 hold or
+  only the agent's own (CA-8 reads them as the agent's own, per section 4.10); whether the standard intends the
+  operator's chat decision on an `account` channel to be a message the customer reads; and one bot serving both an
+  operator channel and channels the agent answers people on, for the standard's and the operator channel's owners: where
+  a binding code is accepted, how OC-3, OC-4, OC-12 and OC-14 to OC-16 apply to customer chats, whether OC-3 also
+  refuses a message sent on behalf of a chat (`sender_chat` set, a shared placeholder sender), and the shared receiver's
+  order of updates and its status (OC-17); until they answer, such a bot keeps every operator-channel rule in every chat
+  as written;
 - a budget above 0 without a spend record is `FAC-SEM-164`;
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;
