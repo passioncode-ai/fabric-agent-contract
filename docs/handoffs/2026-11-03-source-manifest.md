@@ -315,18 +315,18 @@ source, what never travels with it, the check before a source export, and how a 
   taking the earlier export commit as its parent; an organization's first public release and new outside readers
   taking the word; serving named per commit and audience; a patch beneath a symbolic link refused at apply time; the
   stated word outside a service's action (knowledge base item 9); OA-5's clause led by "not a human step"; export dates
-  with their time zone; round 46 (not clean: the grammar's readers, where `foldOnlyExcludeTest` skipped NFC and printed
-  `excluded-by-fold` in Git mode only, and an organization's later release stated for one route only) answered as
+  with their time zone; round 45 (not clean: a nested repository read without NFC, stale wording in DEC-0149, the
+  backlog and SCN-054, the elicitation's target, and an organization's later public release) answered as decided: `nestedTest`
+  and the CLI's gitlink and `listed` reads apply the grammar in NFC (tests: a nested folder NFC lengthens past the
+  grammar is no nested repository in either mode, with the same lines); `FAC-SEM-157` says an include beneath an
+  exclude entry once, on the include; the schema's path description names the bare exclude entry; and the round's
+  decisions below, with every withdrawn phrase grepped (counts in the checks); round 46 (not clean: the grammar's readers, where `foldOnlyExcludeTest` skipped NFC and printed
+  `excluded-by-fold` in Git mode only, and an organization's later public release stated for one route only) answered as
   decided: one `inGrammar` helper in every reader (a table test over an NFC-long path, an NFC-short one and a control,
   and a Git-mode and walk CLI test), an entry outside the grammar left to the schema in `FAC-SEM-157` and never called
   unused, the index sentence scoped to Git mode and its no-include-file fallback walk, the release rule and its two
   exceptions stated once, a package's target, the receipt's recipient, the home-path wording, and the merge note for
-  DEC-0153's `foldDir`; round 45 (not clean: a nested repository read without NFC, stale wording in DEC-0149, the
-  backlog and SCN-054, the elicitation's target, and an organization's later release) answered as decided: `nestedTest`
-  and the CLI's gitlink and `listed` reads apply the grammar in NFC (tests: a nested folder NFC lengthens past the
-  grammar is no nested repository in either mode, with the same lines); `FAC-SEM-157` says an include beneath an
-  exclude entry once, on the include; the schema's path description names the bare exclude entry; and the round's
-  decisions below, with every withdrawn phrase grepped (counts in the checks); round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  DEC-0153's `foldDir`; round 47 (not clean: paths stored in NFD, the `binaries` and `missing` loops, an organization's later public release, a private mirror) answered as decided: `inGrammar` holds as written, in NFC and in NFD, with no segment made only of dots, spaces and code points HFS+ ignores (a table test, a CLI test over three segments of 80 `é` stored in NFD in Git mode, without git and in a folder Git refuses, alone and as a nested repository, and a patch test), the `binaries` and `missing` loops skip an entry outside the grammar, `FAC-SEM-157` names the cause, vectors pin an exclude entry outside the grammar as never unused, `HFS_IGNORABLE` exported for DEC-0153, and the round's decisions below; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -422,18 +422,34 @@ source, what never travels with it, the check before a source export, and how a 
   - `.git` in every form a case-insensitive or Windows file system resolves to it is never source, and a patch path an
     `exclude` entry names under ASCII case folding is refused, since on such a file system the two spellings are one
     file and the rule is otherwise bypassed.
+- Round 47, decided by the coordinator under the operator's recorded rules:
+  - `inGrammar` holds as written, in NFC and in NFD, one rule for a path read from disk and a manifest entry alike, and
+    a path with a segment made only of dots, spaces and code points HFS+ ignores is outside it (it folds to nothing,
+    and a tool that trims or folds names as the fold does may read it as empty, `.` or `..`; a scratch HFS+ volume
+    creates `.` U+200C `.` as its own folder, so no file system mechanism is claimed): no source, refused in a patch,
+    never written by an import;
+  - the `missing` and `binaries` loops skip an entry outside the grammar; `FAC-SEM-157` names it once, by its cause;
+  - the not-done clause covers an act on the whole repository of a personal agent's private home or of any copy of it
+    within the operator's estate that carries its history (a private mirror);
+  - the route list's lead: a route is a hand-over only when the source reaches someone who could not already read the
+    home, and a release is a source export or a package (serving and copied content are never a release);
+  - a package holds only source paths that passed that commit's tree check, besides the files the pack step writes
+    (`fabric.package.json`); built files travel only as committed source paths;
+  - a local export with no recipient records none and is parentless; an export keeps file modes and symbolic links as
+    committed; RM-36's dated restatement and its "Waiting on" line are in PR #628 itself.
 - Round 46, decided by the coordinator under the operator's recorded rules (one rule stated once):
   - an organization agent's private home: its first public release, by any route, takes the word naming its source
     commit; every later public release from it, by any route, is the organization's own act; every release carries only
     the source export or a package packed from that source commit holding only source paths that passed the tree check;
-  - the two exceptions (an organization's later release and material already public) stand once, in the lead of the
+  - the two exceptions (an organization's later public release from its private home and material already public) stand once, in the lead of the
     route list, covering every route;
   - a package handed over or published names as its target the source commit it was packed from;
-  - every reader takes a path in the grammar as written and in NFC through one helper, `inGrammar`.
+  - every reader takes a path in the grammar as written and in NFC through one helper, `inGrammar` (round 47: and in
+    NFD, with no segment made only of dots, spaces and code points HFS+ ignores).
 - Round 45, decided by the coordinator under the operator's recorded rules (stale second statements removed):
   - an organization's later public release from its private home by push takes no word and still carries a source
-    export whose parent is the earlier export commit, so the home's history stays back (round 46: by any route, and a
-    package from that source commit is the other carrier);
+    export whose parent is the earlier export commit, so the home's history stays back (round 46: an organization's later public
+    release from its private home, by any route, and a package from that source commit is the other carrier);
   - the export's receipt records the recipient and the export commit; the next export reads its parent from it,
     fetched from the recipient's repository; any export that cannot land as a fast-forward goes as a new branch or pull
     request;
@@ -549,6 +565,25 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Checks actually run
 
+Round 47's fixes were checked on the working tree over head `941643a7` (this note's commit holds the same tree, plus
+this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files with 10219 passed
+and 3 skipped under the coverage floors, `ux:lint`, `docs:check` with 0 errors, `privacy:check` with 0 findings), run
+under the shared lock with the 15-minute load at 39.0 and 17 GB free, and `pnpm exec tsx tools/vectors/run.ts` (exit
+0, 29 files match); before it, `pnpm vitest run --testTimeout=60000 --coverage` over `source-rules`, `validate-cli`,
+`validate-cli-faults`, `rule-tolerance`, `positive-sweep` and `schema-compilation` (exit 0: 3196 passed, 2 skipped;
+`src/source-rules.ts` at 100 % of its branches, `src/validate-cli.ts` at 99.48 % against its 99.4 floor). The NFD CLI
+test fails with the NFD half of `inGrammar` removed (checked by reverting it on a copy, then restored). No U+2014 in
+the added lines. Narrowed phrases, counted with `grep -c` over source.md, `conformance.md`, `package.md`,
+`CONTEXT.md`, `docs/DECISIONS.md`, `docs/backlog.md`, this note, `docs/ux/scenarios.md`, the code, tests and vectors
+of the tree check, and the knowledge base's agents-first, principles, rules and roadmap: the later release without
+"public", the old not-done clause without the private mirror, the old package line in package.md, the old walk sentence
+in SCN-054, the deleted review branch in RM-36 and the withdrawn file-system mechanism for a dotted segment give 0;
+the earlier rounds' phrases stay where round 46 counted them, each a record of its round, and the old grammar reading
+stays only in round 46's records, each annotated with round 47's. PR #628 at `d31747a8` (round 47 merged the knowledge
+base's main `c219a724`): `source hand-over` in 4, 3 and 3 lines of agents-first, principles and rules, `own estate`
+once on each, item 9 once and item 8 once, RM-36's restatement once and its old branch name 0 times; the knowledge
+base's `npm test` (exit 0, 172 passed) and `npm run verify:content` (exit 0, backlog 0 errors).
+
 Round 46's fixes were checked on the working tree over head `bd88cf3f` (this note's commit holds the same tree):
 `pnpm typecheck` (exit 0); `pnpm vitest run --testTimeout=60000 --coverage --coverage.include=src/source-rules.ts
 --coverage.include=src/validate-cli.ts` over `source-rules`, `validate-cli`, `validate-cli-faults`, `rule-tolerance`,
@@ -559,7 +594,7 @@ privacy:check` (exit 0, 0 findings); no U+2014 in the added lines. Withdrawn and
 `grep -c` over the same ten files as round 45: the three spellings of the old export definition, the force-push
 promise, the later-commit clause, the undated rule start, the commit-only word target, the two-form word, the withdrawn
 gate's anchor, the round-45 line paragraph's route clause and the old fold's name give 0 in every file; the
-push-only later release stays once, in this note's round-45 decisions, annotated with round 46's reading; the quoted
+push-only later public release stays once, in this note's round-45 decisions, annotated with round 46's reading; the quoted
 "or copying" stays once in DEC-0149 item 12, where it records its withdrawal; the defect round 46 fixed is named once
 in DEC-0149 and once in this note's status. PR #628 at `59d7b260` (round 46 merged the knowledge base's main
 `216bed30` in as `482a6fae`): `source hand-over` in 4, 3 and 3 lines of agents-first, principles and rules, `own
@@ -787,7 +822,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 46 into `482a6fae` (head `59d7b260`), which carries main's `216bed30`,
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 47 into `d31747a8` (the PR's head), which carries main's `c219a724`,
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). Refresh PR #235 (DEC-0148) against `main`: it is CONFLICTING on the backlog tail; keep both sides
    in id order. Then merge the current `origin/main` (with #236, CT-215 and CT-216; re-measure its head at landing) into the fresh branch
@@ -812,7 +847,7 @@ remaining steps, in order:
    behind, merge main into it, keeping main's item 8 and the PR's item 9. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `59d7b260`, which carries the knowledge base's main, they print 4, 3 and 3
+   `knowledge/rules.md`; at PR #628's head `d31747a8`, which carries the knowledge base's main, they print 4, 3 and 3
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in
@@ -833,9 +868,9 @@ the operator gave before the rule stands as the operator's own act (DEC-0149 ite
 (probe)", its evidence the round-35 probe (a manifest listing its own key-holding file under `unchecked` exits 0 under
 `--kind source-tree`, exit 1 without that entry), asking the checker to refuse such an entry.
 
-Right after the merge: close CT-211 with the three greps' outputs; update fabric-workspace's RM-36 row (rewriting its "Waiting on" line, which still names the
-deleted review branch, and adding a dated line under its "Decided 2026-11-03" restating the landed export: one new commit
-whose only parent, if any, is the earlier export commit the recipient holds, and no commit from the home) and its
+Right after the merge: close CT-211 with the three greps' outputs; check fabric-workspace's RM-36 entry on its main (PR #628 carries, since round 47, the dated line under "Decided
+2026-11-03" restating the export: one new commit whose only parent, if any, is the earlier export commit the recipient
+holds, and no commit from the home; and a "Waiting on" line naming no branch), update its summary row's state and its
 knowledge page for the agent source (`knowledge/`),
 publish with `node scripts/workspace.mjs sync` from a Fabric checkout, post DEC-0149 to threads `21ac4057` and
 `0a8776f2` with CT-207 and CT-208, and file the Fabric Dashboards request on its attention and degraded counts of agents
@@ -890,7 +925,11 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
 - `fixtures/catalogue.json`: all three branches add entries; add the comma where they meet.
 - Whichever of DEC-0149 and DEC-0153 lands second makes `foldDir` in `src/ops-digest.ts` read `(dir) => foldPath(dir)`
   (this branch's fold, NFD first and the Georgian step included) and removes the constants it then leaves unused, keeping
-  `HFS_IGNORABLE` imported from `src/source-rules.ts` if `hiddenDir` still uses it; `pnpm typecheck` must exit 0.
+  `HFS_IGNORABLE` imported from `src/source-rules.ts` if `hiddenDir` still uses it (exported there since round 47);
+  `pnpm typecheck` must exit 0.
+- The CT-109 register row ("three home-path rules draw three boundaries"): whichever of DEC-0149 and DEC-0153 lands
+  second rewrites it to name four boundaries, the fourth the tree check's `SOURCE_HOME_PATHS` in
+  `src/source-rules.ts` (the home-path forms of the adapter's check, `FAC-SEM-158`), so the register stays true.
 - `docs/specification/conformance.md`: keep this branch's actions row and append the channel row after it. In the
   reserved-codes paragraph keep this branch's `FAC-SEM-161` sentence, add DEC-0150's sentence on `FAC-SEM-162` to
   `FAC-SEM-165` (receipts SEM-0162 to SEM-0165), and drop the sentence saying codes are reserved by open branches;

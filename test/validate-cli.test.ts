@@ -1948,6 +1948,13 @@ describe("an agent's source (DEC-0149)", () => {
       expect(result.out, args.join(" ")).toContain("additionalProperties");
       expect(result.out, args.join(" ")).not.toContain("colour");
     }
+    // An exclude entry outside the grammar as written (a backslash) is the schema's to say: under --kind source-manifest
+    // alone the schema does not run, so the run exits 0 and no semantic rule says it a second time.
+    const slashed = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src\\vendor/"] }), LICENSE: "x", "src/a.ts": "x" });
+    const slashedOnly = run(slashed, "--kind", "source-manifest");
+    expect(slashedOnly.code).toBe(0);
+    expect(found(slashedOnly.out)).toEqual([]);
+    expect(run(slashed, "--kind", "source-manifest", "--schema", "fabric-source").code).toBe(1);
     // A value that is no object is FAC-SEM-000 under --kind source-manifest too: in a folder and as a named file.
     const array = folder({ "fabric.source.json": [] });
     const seven = one("seven.json", 7);
@@ -2142,6 +2149,44 @@ describe("an agent's source (DEC-0149)", () => {
     expect(inGit.out).not.toContain("nested-repository");
     expect(shape(inGit.out)).toEqual(shape(walked.out));
     expect(shape(inGit.out).some((cells) => cells[2]?.startsWith("FAC-SEM-159"))).toBe(true);
+  });
+
+  it("reads a path stored in NFD the same in Git mode, without git and in a folder Git refuses: NFD past the grammar is no source", () => {
+    // Three segments of 80 `é` stored in NFD: within 256 code points in NFC (as Git on macOS lists them), past them in NFD.
+    const deep = `src/${Array.from({ length: 3 }, () => "e\u0301".repeat(80)).join("/")}`;
+    const make = (nested: boolean) => {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x", [`${deep}/x.md`]: `"${key}"` });
+      if (nested) expect(gitIn(path.join(dir, ...deep.split("/")), "init", "-q").status).toBe(0);
+      return dir;
+    };
+    const shape = (out: string) => found(out).map((line) => line.split("  ").slice(0, 3));
+    for (const nested of [false, true]) {
+      const committed = make(nested);
+      expect(gitIn(committed, "init", "-q").status).toBe(0);
+      expect(gitIn(committed, "add", "fabric.source.json", "LICENSE", "src/a.ts").status).toBe(0);
+      if (!nested) expect(gitIn(committed, "add", "-A").status).toBe(0);
+      const inGit = run(committed, "--kind", "source-tree");
+      const plain = make(nested);
+      const saved = process.env.PATH;
+      process.env.PATH = path.join(path.sep, "nonexistent");
+      let noGit: ReturnType<typeof run>;
+      try {
+        noGit = run(plain, "--kind", "source-tree");
+      } finally {
+        process.env.PATH = saved;
+      }
+      // A folder Git refuses: its .git names a repository that does not exist.
+      const refused = make(nested);
+      writeFileSync(path.join(refused, ".git"), `gitdir: ${path.join(refused, "no-such-repository")}\n`);
+      const refusedRun = run(refused, "--kind", "source-tree");
+      for (const other of [noGit, refusedRun]) {
+        expect(other.code, String(nested)).toBe(inGit.code);
+        expect(shape(other.out), String(nested)).toEqual(shape(inGit.out));
+      }
+      expect(inGit.code, String(nested)).toBe(0);
+      expect(inGit.out, String(nested)).not.toContain("credential");
+      expect(inGit.out, String(nested)).not.toContain("nested-repository");
+    }
   });
 
   it("gives a file the same files[<index>] in Git mode and in a walk when a name before it is stored in NFD", () => {

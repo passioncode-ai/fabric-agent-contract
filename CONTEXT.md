@@ -445,10 +445,10 @@ check looks for before a **Source export**, kept on the operator's machine outsi
 the home, after the tree check finds nothing blocking; local, publishing nothing, running
 no test as a condition, never a gitlink. Handing it over is a source hand-over where
 [source](docs/specification/source.md#handing-over) counts one (`publish`, on the operator's word), except an
-organization's later release from its private home and material already public (DEC-0149). Not the peer share's Export (DEC-0147) and not
+organization's later public release from its private home and material already public (DEC-0149). Not the peer share's Export (DEC-0147) and not
 a proposal's `export` destination (`FAC-SEM-103`).
 
-**Source hand-over**: An agent's source reaching a place or a person it was not at; the routes include, among others,
+**Source hand-over**: An agent's source reaching a place or a person it was not at; a route is a hand-over only when the source reaches someone who could not already read the home (a copy to the home's own readers, an organization's members, or a personal agent's private home's earlier collaborators, given access before DEC-0149 was accepted, is none); a release is a source export or a package, and serving and copied content are never a release, so they keep their own rule. The routes include, among others,
 the ones below, each a hand-over except, on every route, an organization's later public release from its private home
 (its own act) and material already public: a **Source export** handed to anyone or sent as a file to another person or a place outside the owner's; a push of a
 commit not already there to a repository that is not the agent's home and that is public, another owner's, or readable
@@ -459,9 +459,8 @@ public, nothing else does). A hand-over by push or by file carries a source expo
 if any, is the earlier export commit the recipient holds; no commit from the home; the tree check passed), never
 another commit; the export's receipt records the recipient and the export commit, from which the next export reads its
 parent, and an export that cannot land as a fast-forward goes as a new branch or pull request, never by a force-push; a package handed over or published names as its target the source commit it was packed
-from and holds only source paths that passed that commit's tree check.
-An act on the whole repository of a personal agent's private home (a visibility change, access given to any other
-person) is not done: the source leaves only as a source export; a transfer of a personal agent's home, public or
+from and holds only source paths that passed that commit's tree check, besides the files the pack step writes (`fabric.package.json`); built files travel only as committed source paths.
+An act on the whole repository of a personal agent's private home, or of any copy of it within the operator's estate that carries its history (a private mirror), such as a visibility change or access given to any other person, is not done: the source leaves only as a source export; a transfer of a personal agent's home, public or
 private, is not done either (the operator's own permission for it is outside this contract); a public home's access and
 visibility are outside that rule, making a public personal home private is none, access the operator gave before
 DEC-0149 was accepted stands as the operator's own act (nothing is retroactive), and an agent never gives new access. An organization's acts on its own agent's whole

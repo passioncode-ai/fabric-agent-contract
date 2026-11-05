@@ -371,7 +371,7 @@ describe("which files are source", () => {
     ]);
     expect(isSourcePath({ include: ["src/"] }, `src/${long}/x`)).toBe(false);
     expect(isSourcePath({ include: ["src/"] }, `src/${"\u0958".repeat(10)}/x`)).toBe(true);
-    // A nested repository is read the same way: in the grammar as written and in NFC.
+    // A nested repository is read the same way: in the grammar as written, in NFC and in NFD.
     const nested = `src/${Array.from({ length: 4 }, () => "\u0958".repeat(60)).join("/")}`;
     expect([...nested].length).toBeLessThanOrEqual(256);
     expect(nestedInSource({ include: ["src/"] }, nested)).toBe(false);
@@ -892,7 +892,7 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
     expect(findings).toEqual([]);
   });
 
-  it("reads every path through one grammar check, as written and in NFC, in every reader", () => {
+  it("reads every path through one grammar check, as written, in NFC and in NFD, in every reader", () => {
     const long = `src/${Array.from({ length: 4 }, () => "\u0958".repeat(60)).join("/")}`;
     const short = `src/${"\u0958".repeat(10)}`;
     const control = "src/plain";
@@ -901,7 +901,12 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
     expect(inGrammar(`${long}/`, true)).toBe(false);
     const value = { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: ["SRC/zz/"] };
     const index = includeIndex(["src/"]);
-    for (const [path, expected] of [[long, false], [short, true], [control, true]] as const) {
+    // Three segments of 80 `é`: within 256 code points in NFC, past them in NFD (stored so on disk, listed NFC by Git).
+    const nfdLong = `src/${Array.from({ length: 3 }, () => "e\u0301".repeat(80)).join("/")}`;
+    expect([...`${nfdLong}/x.md`.normalize("NFC")].length).toBeLessThanOrEqual(256);
+    expect(inGrammar(`${nfdLong}/x.md`.normalize("NFC"))).toBe(false);
+    expect(inGrammar(`${nfdLong}/x.md`)).toBe(false);
+    for (const [path, expected] of [[long, false], [nfdLong, false], [nfdLong.normalize("NFC"), false], [short, true], [control, true]] as const) {
       expect(isSourcePath(value, `${path}/x.ts`), path).toBe(expected && [...`${path}/x.ts`.normalize("NFC")].length <= 256);
       expect(nestedInSource(value, path), path).toBe(expected);
       expect(index.covers(`${path}/x.ts`), path).toBe(expected);
@@ -916,6 +921,40 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
     const tree = sourceTreeProblems({ manifest: { include: ["src/", "LICENSE"], exclude: [`${long}/`] }, files: [{ path: "LICENSE", text: "x" }, { path: "src/a.ts", text: "x" }], listed: [] });
     expect(tree.map((problem) => problem.kind)).toEqual([]);
     expect(sourceRules("source-manifest", value)).toEqual([]);
+    // The missing loop and the binaries loop skip an entry outside the grammar: FAC-SEM-157 says it once.
+    const files = [{ path: "LICENSE", text: "x" }, { path: "src/a.ts", text: "x" }];
+    for (const entry of [`${long}/x.md`, `${nfdLong.normalize("NFC")}/x.md`, "src/.\u200c./x.md"]) {
+      expect(sourceTreeProblems({ manifest: { include: ["src/", "LICENSE", entry] }, files }), entry).toEqual([]);
+      const findings = sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], binaries: [entry] }) ?? [];
+      expect(findings.map((finding) => finding.instancePath), entry).toEqual(["/binaries/0"]);
+      expect(findings[0]?.message, entry).not.toContain("not a file of the source");
+    }
+    expect(sourceTreeProblems({ manifest: { include: ["src/", "LICENSE", "src/b.ts"] }, files })).toEqual([{ kind: "missing", include: 2 }]);
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], binaries: ["lib/x.png"] })?.map((finding) => finding.message)).toEqual(["binaries[0] is not a file of the source"]);
+  });
+
+  it("reads a segment made only of dots, spaces and code points HFS+ ignores as outside the grammar, in every reader and in a patch", () => {
+    const escapes = [".\u200c.", ". ", "...", "..\u200d", ".\u200c", "\ufeff"];
+    for (const segment of escapes) {
+      expect(inGrammar(`src/${segment}/x.md`), JSON.stringify(segment)).toBe(false);
+      expect(inGrammar(`src/${segment}/`, true), JSON.stringify(segment)).toBe(false);
+      expect(isSourcePath({ include: ["src/"] }, `src/${segment}/x.md`), JSON.stringify(segment)).toBe(false);
+      expect(nestedInSource({ include: ["src/"] }, `src/${segment}`), JSON.stringify(segment)).toBe(false);
+      expect(includeIndex(["src/"]).reaches(`src/${segment}/`), JSON.stringify(segment)).toBe(false);
+      expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [`src/${segment}/`] }), JSON.stringify(segment)).toEqual([
+        { code: "FAC-SEM-157", instancePath: "/exclude/0", message: "exclude[0] is an entry with a segment made only of dots, spaces and code points HFS+ ignores, so it names, reaches and removes nothing" }
+      ]);
+    }
+    // A name ending in a dot keeps a letter: it is in the grammar.
+    expect(inGrammar("src/a./x.md")).toBe(true);
+    expect(isSourcePath({ include: ["src/"] }, "src/a./x.md")).toBe(true);
+    const manifest = { format: "fabric-source/1", include: ["src/"] };
+    expect(patchPathsAllowed(manifest, ["src/.\u200c./x", "src/. /x", "src/.../x", "src/..\u200d/x", "src/a./x", "src/main.ts"])).toEqual(["src/.\u200c./x", "src/. /x", "src/.../x", "src/..\u200d/x"]);
+    // An entry NFD lengthens is said by that cause.
+    const nfd = `src/${"\u00e9".repeat(130)}/`;
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [nfd] })).toEqual([
+      { code: "FAC-SEM-157", instancePath: "/exclude/0", message: "exclude[0] is an entry NFD lengthens past 256 code points, so it names, reaches and removes nothing" }
+    ]);
   });
 
   it("reads a path of 129 to 256 code points outside the BMP as in the grammar, in every list", () => {

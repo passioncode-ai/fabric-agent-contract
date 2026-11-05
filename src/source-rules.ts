@@ -31,7 +31,7 @@ export const SOURCE_PATH = /^(?![/~])(?![\s\S]*\\)(?![\s\S]*\/\/)(?!(?:[\s\S]*\/
  * Code points HFS+ ignores in a name (Git's `is_hfs_dotgit`): the zero-width joiners and marks, the bidirectional
  * embeddings and overrides, the deprecated format characters and the byte-order mark.
  */
-const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
+export const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
 /** ASCII case folding only, as Git's `strncasecmp` and a case-insensitive file system's ASCII names read it. */
 export const asciiFold = (text: string): string => text.replace(/[A-Z]/g, (letter) => letter.toLowerCase());
 /**
@@ -55,13 +55,21 @@ const inGit = (path: string): boolean => path.split("/").some(isDotGitSegment);
  */
 const nfc = (path: string): string => path.normalize("NFC");
 /**
- * Whether a path is in the grammar as written and in NFC, the one reading every reader takes (DEC-0149): the file
- * grammar, or with `folder` the path grammar of `include` and `exclude`, which allows a trailing `/`. NFC can lengthen a
- * path (U+0958 becomes two code points), so a path within 256 code points as written may fall outside it in NFC.
+ * Whether a path is in the grammar as written, in NFC and in NFD, with no segment made only of dots, spaces and
+ * code points HFS+ ignores: the one reading every reader takes, for a path read from disk and a manifest entry alike (DEC-0149). The file grammar,
+ * or with `folder` the path grammar of `include` and `exclude`, which allows a trailing `/`. NFC can lengthen a path
+ * (U+0958 becomes two code points) and NFD does (`é` becomes two), so a path within 256 code points as written may fall
+ * outside it in either form; since NFD of the NFC form is the NFD form, Git mode (which lists NFC on macOS) and a walk
+ * (which reads the stored form) agree. A segment made only of dots, spaces and code points HFS+ ignores (`.` U+200C `.`,
+ * `...`, a dot and a space) folds to nothing (`foldSegment` maps it to the empty string), and a tool that trims or folds
+ * names as the fold does (Win32 path handling drops trailing dots and spaces; a reader that strips those code points
+ * before joining) may read it as empty, `.` or `..`: such a path is outside the grammar.
  */
 export const inGrammar = (path: string, folder = false): boolean => {
   const grammar = folder ? SOURCE_PATH : SOURCE_FILE_PATH;
-  return grammar.test(path) && grammar.test(nfc(path));
+  if (!grammar.test(path) || !grammar.test(nfc(path)) || !grammar.test(path.normalize("NFD"))) return false;
+  const body = path.endsWith("/") ? path.slice(0, -1) : path;
+  return body.split("/").every((segment) => foldSegment(segment) !== "");
 };
 /**
  * One path segment as a case-insensitive file system may resolve it, for `exclude` and a patch's paths: canonical
@@ -138,7 +146,7 @@ const foldedCovers = (list: PathList, written: string): boolean => written.lengt
  */
 export interface IncludeIndex { covers(path: string): boolean; reaches(folderPath: string): boolean }
 const reachesNfc = (list: PathList, folderPath: string): boolean =>
-  SOURCE_PATH.test(folderPath.slice(0, -1)) && (list.reaches.has(folderPath) || list.files.has(folderPath.slice(0, -1)) || folderPrefixes(folderPath).some((folder) => list.folders.has(folder)));
+  inGrammar(folderPath.slice(0, -1), true) && (list.reaches.has(folderPath) || list.files.has(folderPath.slice(0, -1)) || folderPrefixes(folderPath).some((folder) => list.folders.has(folder)));
 export function includeIndex(includes: readonly string[]): IncludeIndex {
   const list = pathList(includes, true);
   // A queried path outside the grammar is no source and no folder of one, whatever its length.
@@ -160,7 +168,7 @@ export function sourcePathTest(manifest: unknown): (path: unknown) => boolean {
   // what an exclude entry names under any spelling stays out (it fails closed); `include` is read as written.
   const exclude = foldedList(source.exclude);
   return (path) => {
-    // A path is in the grammar as written and in NFC: one NFC lengthens past 256 code points is no source.
+    // A path is in the grammar as a file system reads it (`inGrammar`): one NFC or NFD lengthens past it is no source.
     if (typeof path !== "string" || !inGrammar(path) || inGit(path)) return false;
     if (nfc(path) === SOURCE_FILE) return true;
     return listCovers(include, path) && !foldedCovers(exclude, path);
@@ -285,7 +293,7 @@ export function nestedTest(manifest: unknown): (written: unknown) => boolean {
   return (written) => {
     // `git ls-files --others` names an untracked repository with a trailing `/`.
     const stored = typeof written === "string" && written.endsWith("/") ? written.slice(0, -1) : written;
-    // In the grammar as written and in NFC, as sourcePathTest reads a path.
+    // In the grammar as a file system reads it (`inGrammar`), as sourcePathTest reads a path.
     if (typeof stored !== "string" || !inGrammar(stored) || inGit(stored)) return false;
     const path = nfc(stored);
     const folder = `${path}/`;
@@ -1061,6 +1069,8 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
   const present = new Set(sourcePaths.map(nfc));
   const presentFolders = new Set([...present].flatMap(folderPrefixes));
   strings(manifest.include).forEach(([written, at]) => {
+    // An entry outside the grammar names nothing and is said once, by the schema or FAC-SEM-157: never also missing.
+    if (!inGrammar(written, true)) return;
     const entry = nfc(written);
     if (!(entry.endsWith("/") ? presentFolders.has(entry) : present.has(entry))) problems.push({ kind: "missing", include: at });
   });
@@ -1073,7 +1083,7 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
     // An entry an excluded-by-fold line names leaves a file out, so it is never called unused.
     const naming = new Set(foldedOut.map((problem) => problem.exclude));
     strings(manifest.exclude).forEach(([written, at]) => {
-      // An entry outside the grammar is said elsewhere (the schema, or FAC-SEM-157 for one NFC lengthens): never unused.
+      // An entry outside the grammar is said elsewhere (the schema, or FAC-SEM-157): never unused.
       if (!inGrammar(written, true)) return;
       const entry = foldPath(nfc(written));
       // An entry without `/` names a file, and a folder too, since it leaves out everything beneath its name.
@@ -1191,6 +1201,10 @@ function slotFindings(value: JsonObject): Finding[] {
   return findings;
 }
 
+/** Why an entry in the grammar as written is outside it as a file system reads it: the form that lengthens it, or a segment. */
+const outsideCause = (path: string): string =>
+  !SOURCE_PATH.test(nfc(path)) ? "NFC lengthens past 256 code points" : !SOURCE_PATH.test(path.normalize("NFD")) ? "NFD lengthens past 256 code points" : "with a segment made only of dots, spaces and code points HFS+ ignores";
+
 /**
  * FAC-SEM-157: each path is listed once in its list; no listed path has a `.git` segment; an `exclude` path lies inside
  * an `include` folder and is not an `include` path; a `binaries` path is a file of the source; an `unchecked` path is
@@ -1206,7 +1220,8 @@ function pathFindings(value: JsonObject): Finding[] {
       if (seen.has(path)) flag(`/${member}/${index}`, `${member}[${index}] is listed twice`);
       seen.add(path);
       if (inGit(path)) flag(`/${member}/${index}`, `${member}[${index}] lies in .git, which is never source`);
-      if (SOURCE_PATH.test(path) && !SOURCE_PATH.test(nfc(path))) flag(`/${member}/${index}`, `${member}[${index}] is an entry NFC lengthens past 256 code points, so it names, reaches and removes nothing`);
+      // In the schema's grammar as written, yet outside it as a file system reads it (`inGrammar`): said once, by its cause.
+      if (SOURCE_PATH.test(path) && !inGrammar(path, true)) flag(`/${member}/${index}`, `${member}[${index}] is an entry ${outsideCause(path)}, so it names, reaches and removes nothing`);
     }
   }
   // Each list is indexed once: a path is looked up by itself and by each folder it lies in. `include` and `exclude` are
@@ -1225,7 +1240,8 @@ function pathFindings(value: JsonObject): Finding[] {
   // Every include path, folded, so an exclude entry an include lies beneath is said once, on the include.
   const foldedIncludePaths = include.map(([written]) => written).filter((path) => inGrammar(path, true)).map((path) => foldPath(nfc(path)));
   for (const [path, index] of strings(value.exclude)) {
-    // An entry outside the grammar, as written (the schema reports it) or in NFC (said once above), is not read again.
+    // An entry outside the grammar, as written (the schema reports it) or as a file system reads it (said once above),
+    // is not read again.
     if (!inGrammar(path, true)) continue;
     const folded = foldPath(nfc(path));
     // A bare entry also names everything beneath it, so it equals an include folder of its name.
@@ -1233,6 +1249,8 @@ function pathFindings(value: JsonObject): Finding[] {
     else if (!prefixesOf(path).some((folder) => foldedIncludes.folders.has(folder)) && !foldedIncludePaths.some((included) => included.startsWith(folded.endsWith("/") ? folded : `${folded}/`))) flag(`/exclude/${index}`, `exclude[${index}] lies inside no include folder, so it removes nothing`);
   }
   for (const [path, index] of strings(value.binaries)) {
+    // An entry outside the grammar is said once: by the schema, or above.
+    if (!inGrammar(path, true)) continue;
     if (!inGit(path) && !isSource(path)) flag(`/binaries/${index}`, `binaries[${index}] is not a file of the source`);
   }
   const unchecked = new Set<string>();
