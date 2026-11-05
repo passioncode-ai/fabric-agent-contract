@@ -144,6 +144,10 @@ The blocking kinds are `FAC-SEM-158`: a source export refuses on any of them. Th
 `accepted`: a note beside the result, never a failure. The contract chooses no licence for an exported agent: a source
 export carries the licence files the source has, and `no-license` says when it has none.
 
+An identifier the tree check reads as a `credential` (for example a weak `sk-` project alias, DEC-0151 (in progress))
+is renamed, or its file is listed under `unchecked`, which loses that file's check; the alias rule is the operator's
+open question in DEC-0151.
+
 A finding never carries the text it found. `instancePath` names the file (`/files/<index>`, or `/files/<index>/path`
 for a finding in its path), the tree as a whole (`/files`, for `no-license`), the manifest's path
 (`/manifest/include/<index>`, for `missing`), the manifest's `include` itself (`/manifest/include`, for `no-include`)
@@ -242,7 +246,7 @@ the checker cannot tell (one missing `include`, any name) is a source check for 
 basename. Whatever schema or rule speaks in such a run, every path relative to the
 checked folder and every file named outside a folder run passes the place mark below, and every message the masks; a
 file named outside a folder run is named by its basename (or its place when the name holds a finding), in its usage
-errors too; a folder run with another source kind echoes the folder as given: a parse error gives its line and column only, found by reading the text again; a schema
+errors too; a folder run with another source kind prints the folder as the ordinary validator does, resolved to an absolute path: a parse error gives its line and column only, found by reading the text again; a schema
 error's message is built from its keyword and the schema's own values (allowed values, a pattern, a limit, the names of
 members the schema defines), so an extra member reads "has a member the schema does not define" without its name, and a
 bad member name is reported at its object; no hint of any kind is printed. A document given with `--kind source-tree`
@@ -463,7 +467,10 @@ operator's standing permission of 2026-10-12 (recorded in the knowledge base's
 anyone, pushing the agent's tree or a copy of it to another repository, a transfer, a visibility change, a file sent)
 needs the operator's word for each act; a local source export needs none. A copy moved within the operator's own estate
 to a place that is not public (a deploy to the operator's own placement, a private mirror the operator owns) has no
-recipient and is not a source hand-over; a push or copy that is public, or that another owner holds, is one.
+recipient and is not a source hand-over; a push or copy that is public, or that another owner holds, is one. An
+organization's repository is another owner's even when the operator administers it (as the knowledge base's
+[rules](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/rules.md) section 9 reads), so a push
+into it is a source hand-over.
 
 Every agent follows the same rule, private or not, and a private agent is never handed over on anything less. Under
 [one approval for all the operator's agents](delegation.md#one-approval-binds-all-the-operators-agents) (DEC-0126) a

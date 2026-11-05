@@ -177,7 +177,11 @@ source, what never travels with it, the check before a source export, and how a 
   in progress with a merge note; the setup answer scoped to the agent's own count, its missing machine marker left
   open; the estate boundary of a source hand-over in the line paragraph and `CONTEXT.md`; SCN-054's refused tree
   document; CT-211's amendment scoped to a source hand-over; no format check; the `.: ENOENT` sentence scoped to a
-  named manifest's folder) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  named manifest's folder) answered as decided; round 33 (a folder run with another source kind prints the folder
+  resolved to an absolute path; item 12 names the estate boundary and keeps the standing permission; an
+  organization's repository is another owner's, so a push into it is a hand-over; an identifier read as a key is
+  renamed or listed under `unchecked`, the alias rule being DEC-0151's open question; a file's named manifest reads
+  ENOTDIR; CT-211's greps cover the estate boundary) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -251,17 +255,17 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Checks actually run
 
-Round 32's fixes were gated on the working tree over head `f714edaf` of `agent/ct194-source-manifest-v2-20261104` (this
-note's commit holds the same tree), each exit code read on its own, under the session's lock for heavy runs, the
-15-minute load checked again once the lock was held (30.12, 12 GB free): `tsc --noEmit -p .` (exit 0); `pnpm vitest
-run --coverage` (exit 0: 113 files, 10153 passed, 3 skipped, the whole suite; branches 98.93 % over the set, every
-per-file floor met); `python3 docs/ux/lint.py` (exit 0); `pnpm run docs:check` (exit 0, 0 errors); `ORG_INDEX=...
-pnpm privacy:check` (exit 0, 0 findings); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match); no U+2014 in
-the added lines. Probes of the folder routes under `--kind source-tree`: an absent folder named directly reads `cannot
-read gone: ENOENT`, a dangling link named directly `cannot read dang: not a file`, the folder of a named
-`fabric.source.json` that is absent or a dangling link `cannot read .: ENOENT`, and a link to an empty folder or the
-empty folder itself, named either way, "the folder holds none" (all exit 2); a JSON array under `--kind source-tree`
-reads `FAC-SEM-000` (exit 1).
+Round 33's fixes were gated on the working tree over head `2cdac496` of `agent/ct194-source-manifest-v2-20261104`
+(this note's commit holds the same tree), each exit code read on its own, under the session's lock for heavy runs, the
+15-minute load checked again once the lock was held (29.91, 9 GB free): `tsc --noEmit -p .` (exit 0); `pnpm vitest run
+--coverage` (exit 0: 113 files, 10153 passed, 3 skipped, the whole suite; branches 98.93 % over the set, every per-file
+floor met); `python3 docs/ux/lint.py` (exit 0); `pnpm run docs:check` (exit 0, 0 errors); `ORG_INDEX=... pnpm
+privacy:check` (exit 0, 0 findings); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match); no U+2014 in the
+added lines. Round 32's probes of the folder routes under `--kind source-tree` stand (an absent folder named directly
+reads `cannot read gone: ENOENT`, a dangling link named directly `not a file`, the folder of a named
+`fabric.source.json` that is absent or a dangling link `cannot read .: ENOENT`, a link to an empty folder "the folder
+holds none"); round 33 adds a file's named manifest, `cannot read .: ENOTDIR`, in the test that routes a named
+manifest by lstat.
 
 ## Next task
 
@@ -293,7 +297,8 @@ remaining steps, in order:
 6. Merge the knowledge base's PR #628 (CT-211's amendment), fetch the knowledge base checkout (`git fetch origin`), and
    run its three greps on the knowledge base's main (`git show origin/main:knowledge/agents-first.md | grep -n 'source
    hand-over'`, the same for `knowledge/principles.md` and `knowledge/rules.md`; at PR #628's head they print 4, 3 and
-   2 lines), then merge the contract PR straight after, in the same
+   2 lines), and `grep -c 'own estate'` on the same three pages (at least 1 each after PR #628's fix), then merge the
+   contract PR straight after, in the same
    landing session (PR #628's links point at `source.md#handing-over` on main). If main moved after step 5, merge it and
    re-run the merge gate before merging PR #628. If the contract PR cannot merge in that session, do not merge PR #628
    (or revert it at once) and record the wait.

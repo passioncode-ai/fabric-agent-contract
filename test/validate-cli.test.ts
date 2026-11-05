@@ -1933,6 +1933,12 @@ describe("an agent's source (DEC-0149)", () => {
     expect(dangling.code).toBe(2);
     expect(dangling.out).toContain("cannot read .: ENOENT");
     expect(dangling.out).not.toContain("holds none");
+    // A file's "folder" is no folder: its named manifest reads ENOTDIR, never "holds none".
+    writeFileSync(path.join(dir, "f"), "x");
+    const notDir = run(path.join(dir, "f", "fabric.source.json"), "--kind", "source-tree");
+    expect(notDir.code).toBe(2);
+    expect(notDir.out).toContain("cannot read .: ENOTDIR");
+    expect(notDir.out).not.toContain("holds none");
     // A link to a real folder with no manifest holds none, named as a folder or by the manifest's name in it.
     mkdirSync(path.join(dir, "empty"));
     symlinkSync("empty", path.join(dir, "link"));

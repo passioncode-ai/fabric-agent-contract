@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 32 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 33 of
   the readings (round 16 read clean), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
@@ -9156,7 +9156,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       SHA-256, counts by kind, the new commit), never a value found. It does not run the source's tests and does not
       refuse on them (Q9); a tool may offer a test run beside it. The adapter's `export`, owed by CT-207, is to be the
       implementation; this repository ships the check.
-  12. **Handing over (Q8, option P3):** a local source export is not a transfer and is always allowed. Handing it to
+  12. **Handing over (Q8, option P3):** a local source export is not a transfer and is always allowed, and a copy moved
+      within the operator's own estate to a place that is not public is not a hand-over; the operator's standing
+      permission of 2026-10-12 to move mechanics file by file is unchanged. Handing it to
       anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       source commit and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9239,5 +9241,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 32 of the readings, cited by round number (their heads were on the review branch, not kept at landing),
+  board message `565b20f3`); rounds 1 to 33 of the readings, cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.
