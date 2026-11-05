@@ -257,6 +257,18 @@ FAA-197, on the adapter's main).
   merge post asks the standard's owner to fold it in. CT-220 is "to be read with" CA-8 when it is drafted. DEC-0150's
   Source names rounds 1 to 19 and round 18's decision. The vectors' text says a reader does not read the
   recommendation, and the renamed vector pins its view (declared, with its `FAC-SEM-164` obligation).
+- Round 20 of the readings (on `5a68ce3a`: unit pass with one risk, product three breaks), with the coordinator's
+  decisions applied, round 19's response corrected: the out-of-chat response sends nothing in a chat another person can
+  read; the agent tells the operator where only the operator reads it (the operator channel when bound, else its own
+  session or its daily report), and answers in the chat only when it is the operator's own private chat with the agent.
+  The page, CA-8, the conformance row and SCN-043 carry that sentence in one wording (`git grep -n 'outside the chat'`
+  prints one line in each). CA-8's scope is the channels the agent answers people on, declared or not; one wording for a
+  bot that serves both; a word in a customer chat is carried out there only and is no AP-3 source, which CT-220 keeps
+  when drafted; a chat word is no OA-2 relay source (delegation.md unchanged); the operator's chat word is no customer
+  ticket and is not counted in section 5.1's figures; OC-7 is cited beside OC-5. The page drops the count of vectors
+  that carry a view. SCN-043's Coverage says each producer's own test is owed, and FLW-29's rejected shape gains the
+  chat word. The vectors' text gives both holding-reply clauses of `FAC-SEM-164` with its replies on. DEC-0150's
+  Source names rounds 1 to 20 and the decisions of rounds 19 and 20.
 
 ## The branch and its history
 
@@ -389,6 +401,8 @@ One line per sibling and per file it shares with this branch:
   when this was written): the lander re-measures main at landing and merges or rebases over it; `docs/backlog.md`
   conflicts only at the tail, where the rows stay in id order (`CT-204`, `CT-205`, `CT-206`, then this branch's
   `CT-209`, then `CT-215` to `CT-220`), and any row an open branch adds takes its place by id.
+- for CT-220's drafter (the coordinator owns CT-220): CT-220 keeps CA-8's bound, a word recognised in a customer chat
+  is carried out inside that chat only and is not a DEC-0121 AP-3 source;
 - CT-220, which the page and DEC-0150's CA-8 cite as open: the landing confirms that the CT-220 row resolves in
   `docs/backlog.md` after merging main (it is on main at `ed4d6aa7`, not on this branch).
 - `docs/DECISIONS.md` keeps a blank line before each DEC heading (markdownlint MD022);
@@ -454,6 +468,13 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
+On round 20's change, and before it on round 19's (`5a68ce3a`), each exit code read separately, the same on both:
+`pnpm typecheck` 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0
+findings); `pnpm vectors:check` 0 (29 vector files match their generators, after `pnpm vectors:write`); `pnpm vitest run
+test/channel-agent.test.ts test/consistency.test.ts` 0 (373 passed); `git grep -n 'outside the chat'` prints one line in
+each of the page, `docs/DECISIONS.md`, conformance.md and `docs/ux/scenarios.md` on round 20's change. The coverage run
+is still owed.
+
 On round 18's change (the readings of rounds 17 and 18, its seam reading included, folded in), each exit code read separately: `pnpm typecheck`
 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0 findings);
 `pnpm vectors:check` 0 (29 vector files match their generators); `pnpm vitest run test/channel-agent.test.ts
@@ -477,7 +498,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 19 (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 20 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -498,8 +519,12 @@ here), and adds:
   DEC-0121 AP-3's sources (quoting
   [the section](../specification/channel-agent.md#text-from-a-channel-is-data) at posting time);
 - to be asked of the standard's owner: when the operator's word in a customer chat asks for an action outside that
-  chat, the agent answers in the chat, without acting, that the request is outside the chat and names the route (its
-  own session, the operator channel, or an accepted relay); would the owner fold that response into section 4;
+  chat, the agent takes no action and sends nothing in a chat another person can read; it tells the operator, where
+  only the operator reads it (the operator channel when bound, else its own session or its daily report), that the
+  request is outside the chat and names the route (its own session, the operator channel, or an accepted relay); it
+  answers in the chat only when that chat is the operator's own private chat with the agent; and the operator's word in
+  a customer chat, and anything the agent does about it, is not a customer ticket and is not counted in section 5.1's
+  figures; would the owner fold both into section 4;
 - to be asked of the standard's owner: on an `account` channel, is a message the owner's word only when the account's
   owner is the operator and the send record of section 9's one session owner shows it was neither sent by an agent nor
   relayed from the ticket board, and data otherwise;
