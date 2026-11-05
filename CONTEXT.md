@@ -297,7 +297,8 @@ again within 30 days of its last certificate's `notAfter` with a CSR from its ke
 certificate keeps the user and role on record, a new epoch is issued, the renewal is audited, and a server MAY refuse
 it by policy (`FAC-SEM-044`). The 30 days are judged by the server's clock (the new certificate's `notBefore`), never
 the device's `requestedAt`; before the last certificate's end the same request is a re-enrollment by the key on record
-with a new epoch (DEC-0102) ([devices](docs/specification/devices.md#enrollment)).
+with a new epoch (DEC-0102); a renewal repeated while the certificate it issued is unpresented and not ended gets
+that certificate again in its epoch, or a refusal (always for a device revoked since) (DEC-0148, `FAC-SEM-155`) ([devices](docs/specification/devices.md#enrollment)).
 
 **Closed organization**: An organization whose closing can no longer be cancelled. Its server MAY answer a device request of a
 node pinned at or after DEC-0103 (never an enrollment) with 410 `organization-closed` and `closedAt`, and a node ends that enrollment at once and drops what it buffered for it
@@ -343,8 +344,8 @@ current policy key set, within a window of at most 7 days. The node runs it only
 ([node summary](docs/specification/node-summary.md#repairs)).
 
 **Stream epoch**: The epoch a device's collectors use, issued by the server at enrollment and greater than
-every epoch issued to that device before; it attributes events, and a lost counter means re-enrolling
-(DEC-0030, DEC-0031).
+every epoch issued to that device before (a renewal repeated under DEC-0148 gets the epoch that renewal issued); it attributes events, and a lost counter means re-enrolling
+(DEC-0030, DEC-0031; a node whose renewed certificate is unpresented presents it first, DEC-0148).
 
 **Delegation grant**: A **Standing grant** that names an `audience` — the one agent its principal may
 call — with that agent's `capabilities` and an `effectCeiling`. The hub mints **Delegation tokens**
