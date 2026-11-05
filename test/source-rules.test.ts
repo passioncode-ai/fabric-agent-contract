@@ -962,9 +962,9 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
   });
 
   it("reads an exclude entry outside the grammar at its widest, so it fails closed; an include entry so read names nothing", () => {
-    // The widest reading is the union of the readings: the folder before the first segment that folds to nothing, and
-    // its parent too when that segment holds two or more dots (a reader may take it as ..), each also as a file when
-    // the entry has no trailing slash.
+    // The widest reading is a walk: from the first segment that folds to nothing the depth starts at that segment's
+    // index, a segment that folds to nothing with two or more dots lowers it by one, one with fewer dots keeps it, a
+    // name raises it; the folder at the shallowest depth goes, also as a file when the entry has no trailing slash.
     const readings: Array<[string, boolean, string]> = [
       ["src/secrets/.../", false, "the folder the shallowest reading reaches"],
       ["src/secrets/.\u200c./", false, "the folder the shallowest reading reaches"],

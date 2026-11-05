@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 50 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 51 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9044,12 +9044,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   lead's readers, the grammar's FAC-SEM-157 statement, CT-194's visibility sentence; exclude fails closed; CT-109
   register is DEC-0149's landing step; round 49 not clean: the lead's routes still said 'another person'; vendored
   files and binaries; boundary copies at DEC-0149's landing; widest reading made literal; round 50 not clean: the widest reading stopped at the first
-  segment; devices.md's strictest claim; the chain still named #235 as open), cited by round number because their heads were on the review branch, which is not
+  segment; devices.md's strictest claim; the chain still named #235 as open; round 51 not clean: devices.md still ranked the boundaries; the
+  Done vector count), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
   (`FAC-SEM-156` to `FAC-SEM-160`; `FAC-SEM-161`, reserved with them, is not used) and a new vector file; no existing
-  schema, kind, code or vector changes.
+  schema's validation, kind, code or vector changes (`device-common.schema.json`'s `$defs.detail.$comment` changes,
+  which is not normative).
 - **Context:** the operator asked that agents can be handed over as source and that a transfer happens only by their
   wish (CT-194, relayed by Fabric `2af39c53` and a personal agent's request `99221f81`). The research report
   [agent portability](reports/2026-10-27-agent-portability/README.md) set out the options (§5) and twelve questions (§6);
@@ -9358,10 +9360,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       one with fewer dots keeping it, any other segment raising it by one), and an exclude entry removes the folder the
       shallowest reading reaches, everything but `fabric.source.json` at depth 0, without a trailing `/` also as a file
       of its name (round 49's reading stopped at the first such segment); devices.md names the one form the `detail`
-      pattern accepts that `SOURCE_HOME_PATHS` reads (`%5CUsers%5C<name>`); a personal agent's private home takes no
+      pattern accepts that `SOURCE_HOME_PATHS` reads (`%5CUsers%5C<name>`) (round 51: devices.md ranks no boundary and
+      counts no exceptions; it says the four boundaries read different forms, that form among them); a personal agent's private home takes no
       access newly given to another person beyond the access given before DEC-0149 was accepted; the copied-content
       route says readable by anyone who could not already read the home; the device-common `$comment` is count-free and
-      the same line as DEC-0153's. Handing it to
+      the same line as DEC-0153's.
+      Decided by the coordinator in round 51: the lead's filter is bound to its place condition, so a route that stays
+      in a place the home's owner holds and reaches only those who could already read the home is no hand-over, while a
+      place another owner holds stays one even when only earlier readers can read it; devices.md ranks no boundary. Handing it to
       anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9487,7 +9493,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 50 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 51 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9502,5 +9508,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   lead's readers, the grammar's FAC-SEM-157 statement, CT-194's visibility sentence; exclude fails closed; CT-109
   register is DEC-0149's landing step; round 49 not clean: the lead's routes still said 'another person'; vendored
   files and binaries; boundary copies at DEC-0149's landing; widest reading made literal; round 50 not clean: the widest reading stopped at the first
-  segment; devices.md's strictest claim; the chain still named #235 as open), cited by round number (their heads were on the review branch, not kept at landing),
+  segment; devices.md's strictest claim; the chain still named #235 as open; round 51 not clean: devices.md still ranked the boundaries; the
+  Done vector count), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

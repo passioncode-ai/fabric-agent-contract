@@ -25,7 +25,7 @@ source, what never travels with it, the check before a source export, and how a 
   `source-tree`, `source-package`, `fabric-source/1` in the protocol register; `pnpm --silent validate <dir> --kind
   source-tree` (Git mode with Git's location variables removed and no read through a link, a walk otherwise with a note
   saying why, folder-relative output that never repeats a found value) and the pair in `pnpm validate <dir>`;
-  `fixtures/vectors/source-tree.json` (80 tree cases, 23 patch cases and a `constants` block written from the module's
+  `fixtures/vectors/source-tree.json` (80 tree cases, 27 patch cases and a `constants` block written from the module's
   exports) from `tools/vectors/source-tree.ts`;
   2 positive and 19 negative schema fixtures, 27 semantic fixtures.
 - [source](../specification/source.md) (new), the register (`FAC-SEM-156` to `FAC-SEM-160`; next free `FAC-SEM-162`;
@@ -344,7 +344,11 @@ source, what never travels with it, the check before a source export, and how a 
   folder the shallowest reading reaches (tests and four patch vectors), the effect message says one folder, the
   PATH-shim git tests carry a 60-second timeout, devices.md names the `%5CUsers%5C<name>` form with a probe, the chain
   and step 2 rewritten against main, the access, copied-content, README and CT-109 wording, the count-free `$comment`
-  equal to DEC-0153's, and the gloss note; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  equal to DEC-0153's, and the gloss note; round 51 (not clean: devices.md still ranked the boundaries; the Done
+  vector count) answered as decided: devices.md says the four boundaries read different forms, the lead's filter bound
+  to its place condition in source.md, `CONTEXT.md` and the knowledge base's item 9, the Done count (80 tree and 27
+  patch cases), the CT range, the re-gated chain and DEC-0153's head re-measured, CT-109's row and DEC-0149's
+  additivity worded exactly, and the walk's test comment; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -440,6 +444,12 @@ source, what never travels with it, the check before a source export, and how a 
   - `.git` in every form a case-insensitive or Windows file system resolves to it is never source, and a patch path an
     `exclude` entry names under ASCII case folding is refused, since on such a file system the two spellings are one
     file and the rule is otherwise bypassed.
+- Round 51, decided by the coordinator under the operator's recorded rules:
+  - the lead's filter is bound to its place condition: a route that stays in a place the home's owner holds and
+    reaches only those who could already read the home is no hand-over; a place another owner holds stays a hand-over
+    even when only earlier readers can read it (a personal agent's export pushed to a collaborator's own private
+    repository is one);
+  - devices.md names the `detail` pattern as one of four boundaries that read different forms, ranking none.
 - Round 50, decided by the coordinator under the operator's recorded rules:
   - the widest reading walks every segment from the first that folds to nothing and removes the folder the shallowest
     reading reaches (everything but `fabric.source.json` at depth 0), without a trailing `/` also as a file of its name;
@@ -613,6 +623,18 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 51's fixes (documentation and a test comment; no code behaviour changed) were checked on the working tree over
+head `899b4710` (this note's commit holds the same tree, plus this paragraph): the branch gate, `ORG_INDEX=... pnpm run
+check` (exit 0: typecheck, 114 test files with 10230 passed and 3 skipped under the coverage floors, `ux:lint`,
+`docs:check` passed with 0 markdownlint errors, `privacy:check` with 0 findings), run under the shared lock with the
+15-minute load at 28.5 and 19 GB free, and `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match;
+`source-tree.json` holds 80 tree and 27 patch cases, measured with `python3` over the file and equal to the Done
+line); before it `pnpm typecheck` (exit 0) and the `source-rules` and `validate-cli` tests (exit 0, 2052 passed, 2
+skipped). `grep -n 'strictest' docs/specification/devices.md` prints nothing. No U+2014 in the added lines. PR #628 at
+`a9de0bdb` (main `5f7df6a7` unmoved): `source hand-over` in 4, 3 and 3 lines of agents-first, principles and rules,
+`own estate` once on each, item 9 once and item 8 once; the knowledge base's `npm test` (exit 0, 172 passed) and `npm
+run verify:content` (exit 0, backlog 0 errors).
 
 Round 50's fixes were checked on the working tree over head `5a8e1770` (this note's commit holds the same tree, plus
 this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files with 10230 passed
@@ -923,7 +945,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 49 into `481ee158`, which carries main's `5f7df6a7` (unmoved at round 50; the PR's head `8c547420`),
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 49 into `481ee158`, which carries main's `5f7df6a7` (unmoved at round 51; the PR's head `a9de0bdb`),
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). PR #235 (DEC-0148) and DEC-0150 are already on main (`1016f0ec` when re-measured in round
    50), so nothing is refreshed for them. Merge the current `origin/main` (re-measure its head at landing) into the fresh branch
@@ -939,7 +961,7 @@ remaining steps, in order:
    the Linux-only non-UTF-8 test and the Windows-only `git.exe` test have never run, and the ubuntu job's coverage line
    for `src/validate-cli.ts` (99.44 % against its 99.4 floor on macOS) must be read too.
 4. Run the next rounds of the readings (unit, seam, product) on that merge until two clean rounds; the chain with
-   DEC-0150 and DEC-0151 is re-gated after they refresh (DEC-0151 now reads their `sk-` test keys).
+   DEC-0151 is re-gated after it refreshes (DEC-0151 now reads the `sk-` test keys; DEC-0150 is on main).
 5. Make the acceptance edit on the PR branch, as DEC-0147 did (DEC-0149's status line, CT-194 done, this handoff's
    status and the `docs/handoffs/README.md` row); then run the merge gate (`pnpm run check`, each part's exit code
    read) on that head, with its output in the PR. That head is the one that merges; nothing merges before this step.
@@ -952,7 +974,7 @@ remaining steps, in order:
    line to the landing round. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `8c547420`, which carries the knowledge base's main, they print 4, 3 and 3
+   `knowledge/rules.md`; at PR #628's head `a9de0bdb`, which carries the knowledge base's main, they print 4, 3 and 3
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in
@@ -998,7 +1020,7 @@ PR #236 is merged (main has moved since; its Test row in `AGENTS.md` now says Li
 re-measured in round 50. The chain of the open branches that touch the same registers is DEC-0149 (this branch), then
 `origin/agent/sqd-fields-20261104` (DEC-0151), then DEC-0152 (head `d760f756` when written: `docs/DECISIONS.md`,
 `docs/specification/conformance.md`, `docs/DOCMAP.md`, `docs/backlog.md`, the handoffs index) and DEC-0153 (head
-`a0e7b53d` when written: `FAC-SEM-166` and `FAC-SEM-167`, two schemas, `src/semantic-kinds.ts`, the rule-tolerance and
+`cc1fc853`, or its head at landing: `FAC-SEM-166` and `FAC-SEM-167`, two schemas, `src/semantic-kinds.ts`, the rule-tolerance and
 positive-sweep tests, the `vitest.config.ts` include and floor, the vectors runner, and `src/validate-cli.ts`, where its
 hint is declaration-only: one `HINT_HELP` name with per-schema help links, the second lander merging both
 `readerHints` entries). Every head here is re-measured at
@@ -1011,7 +1033,7 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
 - The schema count in `test/schema-compilation.test.ts`: each side writes its own count, so a merge reads wrong
   silently; whichever lands last sets it by hand to the full count: 151 once DEC-0149, DEC-0150 and DEC-0153 are all
   on `main` (147 on `main` with DEC-0150 at `1016f0ec`, one for DEC-0149, three for DEC-0153 with its OD-9 schema, on
-  `agent/ct219-ops-digest-20261104` at `ada7c23d` when written); re-count the files under `schemas/` then.
+  `agent/ct219-ops-digest-20261104` at `cc1fc853`, or its head at landing); re-count the files under `schemas/` then.
 - `src/extensions.ts` and `test/consistency.test.ts` ("G-08: one spelling of every extension key"): DEC-0150 adds the
   key `channel-agent/0.1` and DEC-0153 a ninth key with OD-9; the second to land keeps both constants, both test
   entries and both rows of `interop.md`'s key table, and writes "nine extension keys" there.
@@ -1022,13 +1044,13 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   refreshed at landing against the siblings' heads then.
 - `docs/backlog.md` (against all four siblings) and `docs/handoffs/README.md` (against DEC-0150 and DEC-0151)
   conflict as appends at the tail: keep both sides; the merged backlog tail is kept in id order, whatever main holds at the merge
-  (re-measure at landing; CT-200 to CT-221 (PR #242) on main's head when this was written; #235's CT-202 and CT-203 are on main since); the handoffs index is newest first, so at each merge the later-landing branch's row goes above.
+  (re-measure at landing; CT-200 to CT-225 on main's head `1016f0ec`, re-measured in round 51); the handoffs index is newest first, so at each merge the later-landing branch's row goes above.
   DEC-0151's edited files also include `src/connections.ts` (a comment) and `docs/specification/conformance.md` (the
   secret-shape reference row). DEC-0150's small edits to `src/validate-cli.ts`
   and `test/validate-cli.test.ts` merge cleanly beside this branch's.
 - `vitest.config.ts`: `include` takes the union of every branch's list, and `thresholds` keeps `src/validator.ts`,
   `src/source-rules.ts` and `src/channel-agent.ts` at 100; DEC-0153's lander keeps the union include line plus
-  `src/ops-digest.ts`'s floor (DEC-0153's own handoff carries its sibling notes, at `21bb0246` when written). A
+  `src/ops-digest.ts`'s floor (DEC-0153's own handoff carries its sibling notes, at `cc1fc853` or its head at landing). A
   threshold key that matches no included file used to pass silently; `test/consistency.test.ts` ("the coverage
   floors") now fails on one.
 - `fixtures/catalogue.json`: all three branches add entries; add the comma where they meet.
@@ -1042,8 +1064,8 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   (`FAC-SEM-167` and `FAC-SEM-168` reuse `hasHomePath`). This branch already rewrites every copy that counts the
   boundaries: the scope comment in `src/activity-rules.ts`, activity.md's "Its scope (CT-109)", `devices.md`'s check-in
   paragraph, `proposals.md`'s boundary paragraph, `src/proposal-rules.ts`'s scope comment, the
-  `schemas/device-common.schema.json` `$defs.detail.$comment`, and the backlog's CT-109 row (which lists those six
-  places). The `$comment` is count-free and byte for byte DEC-0153's line at `cc1fc853` (pointing to the scope list in
+  `schemas/device-common.schema.json` `$defs.detail.$comment`, and the backlog's CT-109 row (which names the five places that count the boundaries and the `$comment`'s
+  pointer). The `$comment` is count-free and byte for byte DEC-0153's line at `cc1fc853` (pointing to the scope list in
   `src/activity-rules.ts`, ending "Changing any of them is a decision."), so both branches carry the same line and the
   second landing has no conflict there; the scope comments in `src/activity-rules.ts` and `src/proposal-rules.ts` end
   with the same sentence on both branches, this one naming `SOURCE_HOME_PATHS` as the fourth boundary before it. Checks on the landed tree: `grep -c SOURCE_HOME_PATHS src/activity-rules.ts docs/specification/activity.md`

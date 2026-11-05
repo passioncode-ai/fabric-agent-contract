@@ -576,13 +576,13 @@ minification, which is the source tree served.
 
 A source hand-over is the source reaching a place or a person it was not at; a route is a hand-over only when the source reaches someone who could not already read the home: a copy is none only when it stays in a place the home's owner holds and only the home's readers can read it (the owning organization's members for its own agent, and, for a personal agent's private home, the collaborators given access before DEC-0149 was accepted), and a repository or placement another owner holds stays a hand-over; a release is a source export or a package, and serving and copied content are never a release, so they keep their own rule. The routes include, among
 others, the ones below, each a hand-over except two cases that cover every route: an organization's later public release from its
-private home (its own act) and material already public (below). The lead filters every route, beside those two exceptions: a route that reaches only those who could already read the home is no hand-over (an organization's export pushed to its own private repository, readable only by its members, is none). The routes:
+private home (its own act) and material already public (below). The lead filters every route, beside those two exceptions: a route that stays in a place the home's owner holds and reaches only those who could already read the home is no hand-over (an organization's export pushed to its own private repository, readable only by its members, is none), and a place another owner holds stays a hand-over even when only earlier readers can read it (a personal agent's export pushed to a collaborator's own private repository is one, whenever that collaborator was given access). The routes:
 
-- a source export handed to anyone who could not already read the home, or sent as a file to such a person or to a place outside the owner's that such a person can read;
+- a source export handed to anyone who could not already read the home, or sent as a file to such a person or to a place outside the owner's;
 - a push of a commit not already there to a repository that is not the home and that is public, another owner's, or readable by anyone who could not already read the home (an organization's repository included, even one the operator administers, as the
   knowledge base's [agents-first](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/agents-first.md)
   item 9, "A source hand-over takes the operator's word on that act", reads), each such push its own hand-over;
-- source files' content copied into a message, an issue, a gist or a thread outside the owner's that is readable by anyone who could not already read the home;
+- source files' content copied into a message, an issue, a gist or a thread outside the owner's, or into one the owner holds that anyone who could not already read the home can read;
 - a package handed to anyone who could not already read the home (a colleague's copy, [package](package.md#state)'s v4 §6 Path 3), which carries the
   source; and a personal agent's package or release published to a public registry, unless its home is already public
   (below; the files the pack step derives from the public source, `fabric.package.json`, signatures and checksums,
