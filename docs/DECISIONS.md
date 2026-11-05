@@ -9030,12 +9030,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 40 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 41 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
   short names with an extension, unused-exclude, opt-in scope, owner's manifest patch; round 40 not clean: canonical
-  caseless fold), cited by round number because their heads were on the review branch, which is not
+  caseless fold; round 41 not clean: push carries history, history gate undefined, conformance fold, rules section 9),
+  cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9221,9 +9222,23 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       already public, the files the pack step derives from the public source (`fabric.package.json`, signatures,
       checksums) counting as public and nothing else; an act on the whole repository (a transfer, a visibility change,
       access given outside the owner) hands over the history too, which no tree check reads, so the history privacy
-      gate (the knowledge base's rules section 9, `--history`) runs before it; and an organization's release of its
+      gate runs before it (defined in round 41, below); and an organization's release of its
       agent to a public registry is its own act only when the agent's home is already public, a private organization
-      agent's first public release taking the word like a visibility change. Handing it to
+      agent's first public release taking the word like a visibility change. Decided by the coordinator in round 41 on
+      the same ground: a hand-over by push or by file carries a source export (one commit, no history, the tree check
+      passed), never a home commit, and pushing any other commit outside the home is an act on the history that runs the
+      history gate over its ancestry first, so that private data never moves in the tree or in the history by any route;
+      the history gate is defined in [source](specification/source.md#the-history-gate) as the tree check, with the
+      operator's list, over every path and blob reachable from every ref, any `FAC-SEM-158` kind blocking and only counts
+      and indexes reported, owed by CT-207 and CT-208, and until it exists a whole-repository act on a personal agent is
+      not done and its source leaves only as a source export (the engine's release check and the privacy check named
+      before are not that gate: one fails a clean agent repository on its own allowlist, the other has no history mode);
+      a processor is no recipient while what it holds stays readable by no one but the owner and the processors acting
+      for it; what takes the word when a source becomes public is a personal agent's source made public for the first
+      time and an organization agent's private source made public, while an organization creating its own agent's home
+      public is its own act (the rule guards the operator's personal agents and new readers of private source); a bundle
+      a public page serves is the agent's output, and serving the source tree, source maps or unbuilt files publicly is
+      a hand-over; and the prompts or resources a running agent serves to a team are its output. Handing it to
       anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       source commit and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9244,7 +9259,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       `.git` in each of item 4's forms is never source (decided by the coordinator in round 37: the unit reading found
       `.GIT/hooks/post-checkout` and `app/PRIVATE/x` allowed past an excluded `app/private/`). Restated in round 38,
       after the unit reading wrote `app/ſecrets/new` into an excluded `app/secrets/` with `git apply` on APFS and found
-      the Kelvin sign folding to `K` after the ASCII fold: the comparison is under Unicode full case folding after NFC,
+      the Kelvin sign folding to `K` after the ASCII fold: the comparison is by the case mappings after NFC (restated in round 40),
       with the code points HFS+ ignores removed and trailing dots and spaces dropped, both sides folded the same way per
       segment (it folds more than APFS in places, which refuses more), and a segment shaped like an 8.3 short name is
       refused when any `exclude` entry exists. `exclude` is read with the same fold at export too, so an export fails
@@ -9253,10 +9268,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       Restated in round 39, decided by the coordinator after the unit reading wrote `app/PAẞWORDS/token.txt` over an
       excluded `app/passwords/token.txt` with `git apply` on APFS and found short names with an extension passing: the
       fold (as restated in round 40) is canonical caseless matching, NFD, then lower, upper and lower case, then NFC (lower case first brings the capital sharp s to `ß`, and
-      the readers' sweep found no class that disagrees with Unicode full case folding), with the HFS+ ignorable code
+      the readers' sweep found no class that disagrees with Unicode's caseless matching), with the HFS+ ignorable code
       points removed and trailing dots and spaces dropped, following the runtime's case mappings (Node's ICU, Unicode
       17.0 when the vectors were written, the case pairs carried in the vectors; it also joins the dotless `ı` with `i`
-      and `I`, which Unicode full case folding keeps apart, and so refuses more, the safe side); any segment in which `~` is followed
+      and `I`, which Unicode's case folding keeps apart, and so refuses more, the safe side); any segment in which `~` is followed
       by a digit is refused when any `exclude` entry exists; and an import never applies a change to
       `fabric.source.json`, whoever sends it: such a patch is refused whole and held, kept unapplied, until the owner
       decides, and the owner changes the manifest by a commit at the source, which then governs every later patch
@@ -9333,11 +9348,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 40 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 41 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
   and from its seam reading `files[<index>]` differing between Git mode and a walk, `unused-exclude` on a
   case-sensitive volume and the manifest's own rules reading `exclude` literally; round 40 not clean: canonical caseless
-  fold), cited by round number (their heads were on the review branch, not kept at landing),
+  fold; round 41 not clean: push carries history, history gate undefined, conformance fold, rules section 9), cited by
+  round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

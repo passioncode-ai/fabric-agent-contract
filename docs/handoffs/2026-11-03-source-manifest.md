@@ -24,7 +24,7 @@ source, what never travels with it, the check before a source export, and how a 
   `source-tree`, `source-package`, `fabric-source/1` in the protocol register; `pnpm --silent validate <dir> --kind
   source-tree` (Git mode with Git's location variables removed and no read through a link, a walk otherwise with a note
   saying why, folder-relative output that never repeats a found value) and the pair in `pnpm validate <dir>`;
-  `fixtures/vectors/source-tree.json` (75 tree cases, 15 patch cases and a `constants` block written from the module's
+  `fixtures/vectors/source-tree.json` (75 tree cases, 16 patch cases and a `constants` block written from the module's
   exports) from `tools/vectors/source-tree.ts`;
   2 positive and 19 negative schema fixtures, 27 semantic fixtures.
 - [source](../specification/source.md) (new), the register (`FAC-SEM-156` to `FAC-SEM-160`; next free `FAC-SEM-162`;
@@ -128,7 +128,7 @@ source, what never travels with it, the check before a source export, and how a 
   declined elicitation; a failure after the effect began stored under its key; atomic consumption; a caller in no tier;
   `FAC-SEM-156` on the tree check's own reads; a FIFO installed manifest; a FIFO under a source path; the merge notes)
   answered as decided; round 22 (an unchecked path stated before it is counted; a folder on disk nested
-  in Git mode only by a trailing `/`, a gitlink in the index or its own `.git`; a name that is not UTF-8 a usage error
+  in Git mode solely by a trailing `/`, a gitlink in the index or its own `.git`; a name that is not UTF-8 a usage error
   only under a folder an include reaches; the landing from one new commit; `--kind action-call` not run on a
   hand-over's calls until CT-181; a repeated key in flight; CT-214) answered as decided; round 23 (the landing as the next task, never a PR from this branch; `unknown-state`
   (`handover-in-flight`) for a repeated key in flight; one T2 code; the hand-over's arguments carrying the target's
@@ -257,7 +257,7 @@ source, what never travels with it, the check before a source export, and how a 
   segment that is a link counts, an intermediate link never) and never calling unused an entry an `excluded-by-fold`
   line names, the opt-in scope (the hand-over rule binds every agent's source), the manifest patch held whoever sends
   it, SCN-054's two warnings, and the product decisions below; and, from round 39's seam reading: a read file's
-  `files[<index>]` the same in Git mode and in a walk (a path left out only under the fold, Git mode only, indexed after
+  `files[<index>]` the same in Git mode and in a walk (a path left out only under the fold, listed by Git mode, indexed after
   every read file and always named `files[<index>]`, tested with a home path committed and walked), `unused-exclude`
   verified on a case-sensitive APFS disk image (created, tested in Git mode and in a walk, detached and deleted in
   scratch: `exclude` `src/Secrets/` over `src/secrets/k.ts` gives `excluded-by-fold` only) and its test held to exact
@@ -272,7 +272,16 @@ source, what never travels with it, the check before a source export, and how a 
   it), the measured pairs pinned, multi-code-point `FOLD_PAIRS` and patch and tree vectors; the comments, source.md and
   SCN-054 saying which fold-only paths each mode lists (a walk a fold-only file, Git mode also the paths under a
   fold-excluded folder), with a test; a folder entry whose last segment is a file is unused, tested; and the product
-  decisions below; vectors 75 tree and 15 patch cases; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  decisions below; vectors 75 tree and 15 patch cases; round 41 (not clean, product tier: a push carries history,
+  the history gate was named after tools that cannot run it, `conformance.md` still described the fold as Unicode's,
+  and rules section 9 contradicted item 9 on what is already public) answered as the coordinator decided: a hand-over
+  by push or by file carries a source export, never a home commit, and any other commit pushed outside the home or any
+  act on the whole repository first passes the history gate, now defined in
+  [source](../specification/source.md#the-history-gate) and owed by CT-207 and CT-208 (until then such an act on a
+  personal agent is not done); the fold described as coded, in the code's order, with a `FOLD_INPUTS` entry and a patch
+  case where an ignorable code point sits between a letter and its mark; the knowledge base's item 5, item 9,
+  principles section 7 and rules section 9 aligned; the decisions below; the seam's notes (a comment in
+  `validate-cli.ts`, the vectors' comment moved); vectors 75 tree and 16 patch cases, 26 `FOLD_PAIRS`; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -361,6 +370,22 @@ source, what never travels with it, the check before a source export, and how a 
   - `.git` in every form a case-insensitive or Windows file system resolves to it is never source, and a patch path an
     `exclude` entry names under ASCII case folding is refused, since on such a file system the two spellings are one
     file and the rule is otherwise bypassed.
+- Round 41, decided by the coordinator under the operator's recorded rules:
+  - a hand-over by push or by file carries a source export, never a home commit, and any other commit pushed outside
+    the home runs the history gate over its ancestry, so private data never moves in the tree or the history by any
+    route;
+  - the history gate is the tree check with the operator's list over every path and blob reachable from every ref,
+    counts and indexes only; the engine's release check and the privacy check are not it; until CT-207 or CT-208
+    implements it, a whole-repository act on a personal agent is not done;
+  - a processor is no recipient while what it holds stays readable by no one but the owner and the processors acting
+    for it;
+  - what takes the word when a source becomes public is a personal agent's source made public for the first time and
+    an organization agent's private source made public; an organization creating its own agent's home public is its
+    own act;
+  - a deploy to the owner's placement is none, a bundle a public page serves is output, and serving the source tree,
+    source maps or unbuilt files publicly is a hand-over; the prompts or resources a running agent serves are output;
+  - the knowledge base's item 5 moves the source hand-over out of the human-gate list, as a `relayed` act on the
+    operator's word with its exact target.
 - Round 40, decided by the coordinator under the operator's recorded rules (one principle: making a source public for
   the first time always takes the word):
   - a processor is no recipient only while what it holds stays readable by no one outside the owner; output it makes
@@ -375,7 +400,7 @@ source, what never travels with it, the check before a source export, and how a 
     public; a private organization agent's first public release takes the word.
 - Round 39, decided by the coordinator under the operator's recorded rules:
   - the fold lower-cases first, so the capital sharp s meets `ss` (the readers' sweep found no class disagreeing with
-    Unicode full case folding with lower, upper, lower), and any `~` followed by a digit is a possible short name;
+    Unicode's caseless matching with lower, upper, lower), and any `~` followed by a digit is a possible short name;
   - the manifest, the tree check, the export and the import bind a repository with `fabric.source.json`, while the
     hand-over rule binds every agent's source, so the absence of a file never decides what the operator's word does;
   - an import never applies a change to `fabric.source.json`, whoever sends it: the patch is held, kept unapplied,
@@ -413,6 +438,21 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 41's fixes were checked on the working tree over head `9e5de563` (this note's commit holds the same tree), each
+exit code read on its own: `pnpm typecheck` (exit 0); `pnpm vitest run --testTimeout=60000 --coverage
+--coverage.include=src/source-rules.ts --coverage.include=src/validate-cli.ts` over `source-rules`, `validate-cli`,
+`validate-cli-faults`, `rule-tolerance` and `positive-sweep` (exit 0: 3167 passed, 2 skipped; `src/source-rules.ts` at
+100 % of its branches, its floor; `src/validate-cli.ts` at 99.47 % over these files against its 99.4 floor);
+`secret-shape`, `consistency` and `semantic-kinds` (exit 0, 34 passed); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29
+files match; `source-tree.json` 75 tree and 16 patch cases, 26 `FOLD_PAIRS`); `pnpm run docs:check` (exit 0, 0
+errors); `python3 docs/ux/lint.py` (exit 0); `ORG_INDEX=... pnpm run privacy:check` (exit 0, 0 findings); no U+2014 in
+the added lines; the coordinator's two greps over `docs`, `tools`, `CONTEXT.md` and `src` (for the old name of the fold
+and for the old mode wording of `excluded-by-fold`) print nothing. The branch gate is owed: the 15-minute load stayed above 45 (60 to 78 this round; `/` held 18 to
+20 GB). PR #628 at `c6f64c50` (the knowledge base's main merged in after the round's commit, cleanly): `source
+hand-over` in 4, 3 and 3 lines of agents-first, principles and rules, `own estate` once on each, `^9\. \*\*A source
+hand-over` once and `^8\. \*\*No person in the chat` once; the knowledge base's `npm test` (exit 0, 172 passed) and
+`npm run verify:content` (exit 0, backlog 0 errors).
 
 Round 40's fixes were checked on the working tree over head `fed1e080` (this note's commit holds the same tree), each
 exit code read on its own: `pnpm typecheck` (exit 0); `pnpm vitest run --testTimeout=60000 --coverage
@@ -554,7 +594,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 40 before `833c16a6`, which GitHub read as mergeable,
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 41 into `c6f64c50`, which GitHub read as mergeable,
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). Refresh PR #235 (DEC-0148) against `main`: it is CONFLICTING on the backlog tail; keep both sides
    in id order. Then merge the current `origin/main` (with #236, CT-215 and CT-216; re-measure its head at landing) into the fresh branch
@@ -577,7 +617,7 @@ remaining steps, in order:
    behind, merge main into it, keeping main's item 8 and the PR's item 9. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `833c16a6`, which carries the knowledge base's main, they print 4, 3 and 3
+   `knowledge/rules.md`; at PR #628's head `c6f64c50`, which carries the knowledge base's main, they print 4, 3 and 3
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in

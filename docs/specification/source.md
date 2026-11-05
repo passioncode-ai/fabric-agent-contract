@@ -73,7 +73,7 @@ store slot's `path` is written without a trailing slash and names the file or fo
   (`FOLD_UNICODE`; another Unicode version may differ on a few code points, Python 16 on 28 by the readers' count), and
   the vectors carry segments with their folds (`constants.FOLD_PAIRS`) so a port can hold its fold equal. The fold is
   idempotent and keeps every pair of the case mappings together (tested over every code point). Lower, upper, lower
-  case also joins the dotless `ı` with `i` and `I`, which Unicode full case folding keeps apart: the join refuses more,
+  case also joins the dotless `ı` with `i` and `I`, which Unicode's case folding keeps apart: the join refuses more,
   the safe side.
   `src/Secrets/notes.md`, `src/ſecrets/notes.md`, `src/PAẞWORDS/notes.md` (under `src/passwords/`) and `src/secrets./x`
   all lie in an excluded `src/secrets/` or `src/passwords/`. The fold is wider than APFS's in places (`ı` meets `i`), which leaves more
@@ -519,38 +519,50 @@ The repository where the agent's owner keeps and develops its source is its home
 its owner holds are the owner's own. The owner's own commits, branches and releases in the home are no hand-over, nor is
 a release that stays where the home's readers are, nor a deploy of the agent to a placement its owner holds (an
 organization's agent on that organization's placement included), whether the home is the operator's private repository,
-a public one or an organization's. A source hand-over is the source reaching a place or a person it was not at: a source
-export handed to anyone; a push of a commit not already in it to a repository that is not the home and that is public
-or that another owner holds (an organization's repository included, even one the operator administers, as the
-knowledge base's [agents-first](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/agents-first.md)
-item 9, "A source hand-over takes the operator's word on that act", reads), each such push its own hand-over; a
-transfer; a visibility change; access given to another person; a file sent to another person or to a place outside the
-owner's. A processor acting for the owner under the owner's own account or host (a model provider used in the owner's
-session, CI on the home's host, a service the owner runs) is no recipient while what it holds stays readable by no one
-outside the owner; output it makes public, or readable by others (a public server, a Pages site), is a hand-over. A package handed to another person (a
-colleague's copy, [package](package.md#state)'s v4 §6 Path 3) carries the source and is a hand-over, and so is a
-personal agent's package or release published to a public registry, unless its home is already public (below); the
-files the pack step derives from the public source (`fabric.package.json`, signatures, checksums) count as already
-public, and nothing else does. Access the owning organization gives its own members to its own agent's home is no hand-over, since they are the
-home's readers; access given to anyone outside the owner is one, and for a personal agent the owner is the operator,
-so any other person's access is one. An organization's agent released by the organization to a public registry is the
-organization's own act only when the agent's home is already public; a private organization agent's first public
-release makes its source public and takes the word, like a visibility change: making a source public for the first
-time always takes the word. A push or release of what is already public, from a public home to another public place of
-the same owner (a mirror, a marketplace repository, a public registry), reaches no reader who could not read it already
-and is no hand-over: the hand-over that made the source public was the visibility change. That carve-out covers only a
-source some earlier act on the operator's word, or the operator's own act, made public; a personal agent's home created
-public is that visibility change, a hand-over that takes the word.
-Each needs the operator's word for that act, naming the agent, the source
-commit and the recipient; for an act that hands over the whole repository (a transfer, a visibility change, access
-given outside the owner) the word names the repository instead of one commit, and the act hands over the history too,
-which no tree check reads, so the history privacy gate (the knowledge base's rules section 9, `--history`) runs first. A local source export needs none. A copy moved within the operator's own estate (here, the accounts and placements the
-operator alone holds) to a place that is not public and that no one outside the operator can read (a deploy to the
-operator's own placement, a private mirror the operator owns) has no recipient and is not a source hand-over; a push
-or copy elsewhere that is public, that another owner holds, or that another person is given access to, is one. The
-home carve-out never lets a personal agent's source move into an organization's or a public repository, or onto an
-organization's or a team's placement or one other people can read: that move stays a source hand-over. Serving the
-running agent to a team (`peer`, client keys, the one-time code) gives no one the tree and is no hand-over.
+a public one or an organization's. A bundle a public page serves is the agent's output; serving the source tree, source
+maps or unbuilt files publicly is a hand-over. Serving the running agent to a team (`peer`, client keys, the one-time
+code) gives no one the tree and is no hand-over; the prompts or resources it serves are its output.
+
+A source hand-over is the source reaching a place or a person it was not at. The routes are:
+
+- a source export handed to anyone, or sent as a file to another person or to a place outside the owner's; a hand-over
+  by push or by file carries a source export (one commit, no history, the tree check passed), never a home commit;
+- a push of a commit not already there to a repository that is not the home and that is public or that another owner
+  holds (an organization's repository included, even one the operator administers, as the knowledge base's
+  [agents-first](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/agents-first.md) item 9, "A
+  source hand-over takes the operator's word on that act", reads), each such push its own hand-over; pushing any commit
+  other than a source export there is an act on the history and runs the [history gate](#the-history-gate) over its
+  ancestry first;
+- an act on the whole repository: a transfer, a visibility change, access given to anyone outside the owner; it hands
+  over the history too, so the [history gate](#the-history-gate) runs first, and the word names the repository instead
+  of one commit;
+- a package handed to another person (a colleague's copy, [package](package.md#state)'s v4 §6 Path 3), which carries the
+  source; and a personal agent's package or release published to a public registry, unless its home is already public
+  (below; the files the pack step derives from the public source, `fabric.package.json`, signatures and checksums,
+  count as already public, and nothing else does).
+
+A processor acting for the owner under the owner's own account or host (a model provider used in the owner's session,
+CI on the home's host, a service the owner runs) is no recipient while what it holds stays readable by no one but the
+owner and the processors acting for the owner; output it makes public (a public server, a Pages site) is a hand-over.
+Access the owning organization gives its own members to its own agent's home is no hand-over, since they are the home's
+readers; for a personal agent the owner is the operator, so any other person's access is one.
+
+What takes the word when a source becomes public: a personal agent's source made public for the first time (its home
+created public included), and an organization agent's private source made public (a visibility change, or a first
+public release from a private home). An organization creating its own agent's home public is the organization's own
+act, no hand-over, and so is its release of an agent whose home is already public. A push or release of what is already
+public, from a public home to another public place of the same owner (a mirror, a marketplace repository, a public
+registry), reaches no reader who could not read it already and is no hand-over, when an earlier act on the operator's
+word, or the owner's own act, made it public.
+
+Each hand-over needs the operator's word for that act, naming the agent, the source commit (the repository, for an act
+on the whole repository) and the recipient; a local source export needs none. A copy moved within the operator's own
+estate (here, the accounts and placements the operator alone holds) to a place that is not public and that no one
+outside the operator can read (a deploy to the operator's own placement, a private mirror the operator owns) has no
+recipient and is not a source hand-over; a push or copy elsewhere that is public, that another owner holds, or that
+another person is given access to, is one. The home carve-out never lets a personal agent's source move into an
+organization's or a public repository, or onto an organization's or a team's placement or one other people can read:
+that move stays a source hand-over.
 
 Every agent follows the same rule, private or not, and a private agent is never handed over on anything less. Under
 [one approval for all the operator's agents](delegation.md#one-approval-binds-all-the-operators-agents) (DEC-0126) a
@@ -559,6 +571,16 @@ relay carries the operator's words verbatim, and an approval for one hand-over c
 the action's owner (Fabric's "give as source", owed by CT-208; the adapter's, owed by CT-207), whose action is to refuse a
 mandate as its authority. An export tool never creates a repository and never pushes. The hand-over's screens are
 Fabric's (CT-208).
+
+### The history gate
+
+The history gate is the [tree check](#the-tree-check) (`checkSourceTree`, with the operator's list of installation
+strings) run over every path and every blob reachable from every ref of the repository, source or not, since an act on
+the whole repository hands over all of them: each path and each blob read as the tree check reads a source file's path
+and text, a blob once whatever commit holds it. Any `FAC-SEM-158` kind blocks the act. It reports counts by kind and paths by their index only, never a value or a path's text. It is owed as
+an implementation by CT-207 (the adapter's export kit) and CT-208 (Fabric's "give as source"); until one exists, an act
+on the whole repository of a personal agent (a transfer, a visibility change, access given outside the owner) is not
+done, and its source leaves only as a source export.
 
 ## Import
 
@@ -626,7 +648,7 @@ in its first answer or its doctor command.
 | a source export (the adapter's `export`) | reads a committed tree, exports no gitlink, refuses on a blocking finding, writes one commit by the neutral author with no history and no link back, rewrites no file, writes its receipt in the instance without a found value, creates no repository and pushes nothing, runs no test as a condition | the tool's own test |
 | `pack` | writes the package's `secrets[]` from the source's secret slots and, unless it packs a copy without state, `state[]` from its store slots | `FAC-SEM-160`; the tool's own test |
 | an import of a patch | refuses the whole patch when a path is not source (read against the receiver's current manifest, `exclude` folded, a segment with `~` and a digit once an exclude exists) and holds, kept unapplied, any patch that changes `fabric.source.json` until the owner decides; applies at the source | `patchPathsAllowed` in the vectors; the tool's own test |
-| a hand-over (Fabric's "give as source", any tool) | gated as `publish`, a person's act each time; its action declares `relayed` and takes the hand-over only on the operator's word naming the agent, the source commit and the recipient, from a T0 or T1 caller as a valid decision with the exact `target` or the service's accepted elicitation naming the three, consumed when the effect begins, never by a mandate, as [handing over](#handing-over) specifies; before an act on the whole repository (a transfer, a visibility change, access given outside the owner) it runs the history privacy gate, since such an act hands over the history, which no tree check reads | the tool's own test |
+| a hand-over (Fabric's "give as source", any tool) | gated as `publish`, a person's act each time; its action declares `relayed` and takes the hand-over only on the operator's word naming the agent, the source commit and the recipient, from a T0 or T1 caller as a valid decision with the exact `target` or the service's accepted elicitation naming the three, consumed when the effect begins, never by a mandate, as [handing over](#handing-over) specifies; a hand-over by push or by file carries a source export, never a home commit; before an act on the whole repository (a transfer, a visibility change, access given outside the owner), or a push of any other commit outside the home, it runs the [history gate](#the-history-gate), and until that gate exists such an act on a personal agent is not done | the tool's own test |
 | an agent started without its instance | starts, answers `degraded` with one `setup: true` entry per missing required slot (an `endpoint` included), a filled endpoint it cannot reach a failure without `setup`, refuses only what needs a missing slot, with its tool's own error naming the slot and no value | the agent's own test |
 
 ## Not decided here

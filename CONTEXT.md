@@ -448,33 +448,34 @@ the operator's word for that act, never by a mandate, as [source](docs/specifica
 a proposal's `export` destination (`FAC-SEM-103`).
 
 **Source hand-over**: An agent's source reaching a place or a person it was not at: a **Source export** handed to
-anyone; a push of a commit not already in it to a repository that is not the agent's home and that is public or that
-another owner holds (an organization's repository included, even one the operator administers), each such push its
-own; a transfer; a visibility change; access given to another person; a file sent to another person or to a place outside the owner's (a processor acting
-for the owner under the owner's own account or host, such as a model provider in the owner's session or CI on the
-home's host, is no recipient while what it holds stays readable by no one outside the owner; output it makes public or
-readable by others is one); a package handed to another person
-(a colleague's copy), which carries the source; a personal agent's package or release published to a public registry, unless its home is already public (the files
-the pack step derives from the public source count as public, nothing else does).
-The repository where the agent's owner keeps and develops its source is its home, not a recipient, and the owner's
-placements are the owner's own: the owner's own commits, branches and releases in the home, a release that stays where
-the home's readers are, and a deploy to a placement its owner holds (an organization's agent on that organization's
-placement included) are none; a copy moved within the operator's own estate (here, the accounts and placements the
-operator alone holds) to a place that is not public and that no one outside the operator can read (a private mirror
-the operator owns) is none either, while a push or copy elsewhere that is public, that another owner holds, or that
-another person is given access to, is one. The home carve-out never lets a personal agent's source move into an
-organization's or a public repository, or onto an organization's or a team's placement or one other people can read,
-which stays one; serving the running agent to a team (`peer`, client keys) gives no one the tree and is none. Access the
-owning organization gives its own members to its own agent's home is none (they are the home's readers), access given
-to anyone outside the owner is one (for a personal agent, anyone but the operator), and an organization's agent
-released by the organization to a public registry is the organization's own act only when its home is already
-public (making a source public for the first time always takes the word, a personal agent's home created public
-included); a push or release of what is already public, from a public home to another public place of the same owner,
-reaches no new reader and is none. An act on the whole repository hands over its history too, so the history privacy
-gate runs first. It is
-one synchronous call of effect class `publish`, taken only on the operator's word for that act naming the agent, the
-source commit (the repository, for an act on the whole repository) and the recipient (a decision with its exact
-target, or the service's in-call elicitation), never by a mandate or an `approval/1` before CT-181, as
+anyone or sent as a file to another person or a place outside the owner's (a hand-over by push or by file carries a
+source export, never a home commit); a push of a commit not already there to a repository that is not the agent's home
+and that is public or that another owner holds (an organization's repository included, even one the operator
+administers), each such push its own, any commit other than a source export first passing the history gate over its
+ancestry; an act on the whole repository (a transfer, a visibility change, access given to anyone outside the owner),
+which hands over the history too and so first passes the history gate (until one exists, not done for a personal
+agent); a package handed to another person (a colleague's copy), which carries the source; a personal agent's package
+or release published to a public registry, unless its home is already public (the files the pack step derives from the
+public source count as public, nothing else does). A processor acting for the owner under the owner's own account or
+host is no recipient while what it holds stays readable by no one but the owner and the processors acting for it;
+output it makes public is one. Access the owning organization gives its own members to its own agent's home is none.
+What takes the word when a source becomes public: a personal agent's source made public for the first time (its home
+created public included) and an organization agent's private source made public; an organization creating its own
+agent's home public is its own act, and a push or release of what is already public, from a public home to another
+public place of the same owner, reaches no new reader and is none. The repository where the agent's owner keeps and
+develops its source is its home, not a recipient, and the owner's placements are the owner's own: the owner's own
+commits, branches and releases in the home, a release that stays where the home's readers are, and a deploy to a
+placement its owner holds (an organization's agent on that organization's placement included) are none, a bundle a
+public page serves being the agent's output while serving the source tree, source maps or unbuilt files publicly is a
+hand-over; a copy moved within the operator's own estate (here, the accounts and placements the operator alone holds)
+to a place that is not public and that no one outside the operator can read (a private mirror the operator owns) is
+none either, while a push or copy elsewhere that is public, that another owner holds, or that another person is given
+access to, is one. The home carve-out never lets a personal agent's source move into an organization's or a public
+repository, or onto an organization's or a team's placement or one other people can read, which stays one; serving the
+running agent to a team (`peer`, client keys) gives no one the tree, the prompts or resources it serves being its
+output. It is one synchronous call of effect class `publish`, taken only on the operator's word for that act naming
+the agent, the source commit (the repository, for an act on the whole repository) and the recipient (a decision with
+its exact target, or the service's in-call elicitation), never by a mandate or an `approval/1` before CT-181, as
 [source](docs/specification/source.md#handing-over) specifies (DEC-0149). *Avoid*: a bare "hand-over" for this meaning.
 
 **Package digest**: SHA-256 over the RFC 8785 form of a **Package** without its digest and signatures; through the

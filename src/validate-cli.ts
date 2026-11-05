@@ -1084,8 +1084,8 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   }
   files.push(...foldedOut);
   run.files.push({ file: ".", schema: null, kinds: ["source-tree"] });
-  // Each exclude entry the folder holds, found by lstat one segment at a time and never through a symbolic link, is
-  // listed, so an entry that names nothing is said (unused-exclude, accepted); nothing is read and no name is printed.
+  // Each exclude entry the folder holds, found by reading each folder's names and matching each segment under the fold,
+  // an intermediate folder never a symbolic link, is listed, so an entry that names nothing is said (unused-exclude, accepted); nothing is read and no name is printed.
   const listed = (((manifest as JsonObject).exclude as string[] | undefined) ?? []).filter((entry) => SOURCE_PATH.test(entry) && presentWithoutLink(folder, entry));
   const findings = evaluateSemanticRules("source-tree", { manifest, files, listed });
   const inPath = new Set(findings.flatMap((finding) => {
