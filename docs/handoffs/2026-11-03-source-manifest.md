@@ -183,7 +183,9 @@ source, what never travels with it, the check before a source export, and how a 
   renamed or listed under `unchecked`, the alias rule being DEC-0151's open question; a file's named manifest reads
   ENOTDIR; CT-211's greps cover the estate boundary; PR #628 at `c3daf91c` carrying the knowledge base's main, where
   the rule's home is agents-first item 9, checked by `git show c3daf91c:knowledge/<page>.md`: 4, 3 and 2 lines of
-  `source hand-over`, 1 of `own estate` on each page) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  `source hand-over`, 1 of `own estate` on each page) answered as decided; round 33's seam reading (the knowledge-base
+  item named by number and title, with a grep of its title on the PR head; DEC-0153's wording annotated or edited by its
+  state; the task lease taken per register commit and released after the push) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -257,17 +259,20 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Checks actually run
 
-Round 33's fixes were gated on the working tree over head `2cdac496` of `agent/ct194-source-manifest-v2-20261104`
-(this note's commit holds the same tree), each exit code read on its own, under the session's lock for heavy runs, the
-15-minute load checked again once the lock was held (29.91, 9 GB free): `tsc --noEmit -p .` (exit 0); `pnpm vitest run
---coverage` (exit 0: 113 files, 10153 passed, 3 skipped, the whole suite; branches 98.93 % over the set, every per-file
-floor met); `python3 docs/ux/lint.py` (exit 0); `pnpm run docs:check` (exit 0, 0 errors); `ORG_INDEX=... pnpm
-privacy:check` (exit 0, 0 findings); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match); no U+2014 in the
-added lines. Round 32's probes of the folder routes under `--kind source-tree` stand (an absent folder named directly
-reads `cannot read gone: ENOENT`, a dangling link named directly `not a file`, the folder of a named
+Round 33's fixes, its item-9 addendum and its seam notes were gated on the working tree over head `99a606b0` of
+`agent/ct194-source-manifest-v2-20261104` (this note's commit holds the same tree), each exit code read on its own,
+under the session's lock for heavy runs, the 15-minute load and the free disk checked again once the lock was held
+(31.42, 8 GB free; two earlier tries deferred at 7 GB): `tsc --noEmit -p .` (exit 0); `pnpm vitest run --coverage`
+(exit 0: 113 files, 10153 passed, 3 skipped, the whole suite; branches 98.93 % over the set, every per-file floor met);
+`python3 docs/ux/lint.py` (exit 0); `pnpm run docs:check` (exit 0, 0 errors); `ORG_INDEX=... pnpm privacy:check` (exit
+0, 0 findings); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match); no U+2014 in the added lines. On
+PR #628's head `c3daf91c` (`git show c3daf91c:knowledge/<page>.md`): `source hand-over` in 4, 3 and 2 lines of
+agents-first, principles and rules, `own estate` once on each, and `^9\. \*\*A source hand-over` once in
+agents-first. The folder routes under `--kind source-tree` read as round 32's probes found (an absent folder named
+directly `cannot read gone: ENOENT`, a dangling link named directly `not a file`, the folder of a named
 `fabric.source.json` that is absent or a dangling link `cannot read .: ENOENT`, a link to an empty folder "the folder
-holds none"); round 33 adds a file's named manifest, `cannot read .: ENOTDIR`, in the test that routes a named
-manifest by lstat.
+holds none"), and a file's named manifest reads `cannot read .: ENOTDIR` in the test that routes a named manifest by
+lstat.
 
 ## Next task
 
@@ -275,8 +280,9 @@ The landing continues on `agent/ct194-source-manifest-v2-20261104` (step 1 is do
 on the merge base `d1b905ee`, the review branch's remote ref deleted; never push the review branch again). The
 remaining steps, in order:
 
-1. Acquire the task lease CT-194 first, and renew it at each reading round and immediately before steps 5 and 6; the
-   register commits go under it, which the guard accepts. This run's path leases on `docs/DECISIONS.md`,
+1. Acquire the task lease CT-194 before each register commit (and before steps 5 and 6) and release it after the push;
+   the register commits go under it, which the guard accepts. A released lease leaves no ref, so its absence between
+   rounds is expected. This run's path leases on `docs/DECISIONS.md`,
    `docs/specification/conformance.md` and `docs/backlog.md` expired and cannot be reaped by this session; re-take
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
@@ -300,8 +306,10 @@ remaining steps, in order:
    run its three greps on the knowledge base's main (`git show origin/main:knowledge/agents-first.md | grep -n 'source
    hand-over'`, the same for `knowledge/principles.md` and `knowledge/rules.md`; at PR #628's head `c3daf91c`, which
    carries fabric-workspace main, they print 4, 3 and 2 lines), and `grep -c 'own estate'` on the same three pages
-   (1 each). There the rule's home is agents-first item 9 (main's own item 8 is "No person in the chat: no production
-   step"): items 5 and 7 point to item 9, and principles section 7 and rules section 9 cite item 9. Then merge the
+   (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
+   agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in
+   the chat: no production step"): items 5 and 7 point to item 9, and principles section 7 and rules section 9 cite
+   item 9. Then merge the
    contract PR straight after, in the same
    landing session (PR #628's links point at `source.md#handing-over` on main). If main moved after step 5, merge it and
    re-run the merge gate before merging PR #628. If the contract PR cannot merge in that session, do not merge PR #628
@@ -384,8 +392,9 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   step 2, do what its handoff gives the second lander: `keyShaped` to `hasJwt`, rewrite DEC-0150's "in progress"
   sentence about DEC-0149's `sk-` sentence, and keep SCN-054 and SCN-055 with its grep.
 - `source.md` says "(DEC-0151, in progress)" and "(DEC-0153, in progress)". Whichever of DEC-0149 and DEC-0153 lands
-  second drops "in progress" from both pages (`source.md`, and `ops-digest.md` OD-3 with DEC-0153's decision text and
-  its conformance row); the same for DEC-0149 and DEC-0151.
+  second drops "in progress" from both pages (`source.md`, and `ops-digest.md` OD-3 with its conformance row); in the
+  register, which is append-only, it annotates DEC-0153's decision text if DEC-0153 is already accepted and edits it if
+  it is still Proposed. The same for DEC-0149 and DEC-0151.
 - At landing, add to CT-218's row: deploying an agent's tree to the operator's own placement (the local or the cloud
   form) is not a source hand-over, since there is no recipient outside the estate, as
   [handing over](../specification/source.md#handing-over)'s line paragraph states (a copy moved within the operator's
