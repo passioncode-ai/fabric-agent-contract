@@ -35,7 +35,8 @@ fields are Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's
   the named-only list in `versioning.md`; two conformance rows (a product declaring its folders, a collector), the
   register row and next free `FAC-SEM-169`. Fabric (CO-503) and Project Observatory (OBS-330) are its first consumers.
 - `conformance.md`: the reference module row, three rows (a product folding its log, a reader of digests, a host
-  serving `retro-after-work`), the register rows `FAC-SEM-166` and `FAC-SEM-167`, next free `FAC-SEM-168`;
+  serving `retro-after-work`), the register rows `FAC-SEM-166` and `FAC-SEM-167`, next free `FAC-SEM-168` (the state before OD-9; `FAC-SEM-169`
+  since OD-9);
   `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (Operations digest, Retro after work); backlog
   CT-219 marked in progress.
 
@@ -93,32 +94,53 @@ DEC-0149, DEC-0150 and DEC-0152 are on other branches. When DEC-0149, DEC-0150 a
   and lower case, built from pieces, and found by both detectors. Checked on a scratch merge of `main`, DEC-0151 and
   this branch (below). The sibling notes in DEC-0149's and DEC-0151's own handoffs belong to those branches and are
   not edited here.
+- PR #235 (DEC-0148) overlaps in `docs/DECISIONS.md`, `docs/backlog.md`, `conformance.md`, `CONTEXT.md`,
+  `docs/DOCMAP.md`, the spec README and `src/semantic-kinds.ts`, all ordered appends: the second to land keeps both.
+- DEC-0149 changes `secretValue` (`JWT_SHAPE.test` becomes `hasJwt`, behaviour-equivalent); `FAC-SEM-167` and
+  `FAC-SEM-168` call `secretValue` and take it unchanged.
 - At landing, write both next-free markers from the CAS counters, never from this file: `docs/DECISIONS.md`'s next
-  free ID (`DEC-0154` today) and `conformance.md`'s next free rule code (`FAC-SEM-169` today).
+  free ID (`DEC-0154` today) and `conformance.md`'s next free rule code (`FAC-SEM-169` today). They, and
+  `interop.md`'s count of extension keys ("nine" once DEC-0150 lands too), merge silently stale, since git sees equal or
+  disjoint lines; the lander writes them by hand. Backlog CT-221 asks for a docs-check that compares each marker with
+  the register's highest id.
 
 ## Consumers
 
-What ships, and what is owed (the spec README's maturity cell says the same):
+What ships, and what is owed. This list is the authority on the products' departures; the spec README's maturity cell
+and DEC-0153's Compatibility name the main ones and point here.
 
 - Fabric writes the digests since `e1eecec0`, the shape's origin; the reference folds are this contract's
-  `src/ops-digest.ts`, since Fabric's daily fold answers 2 of the 4 day vectors differently. Fabric owes OD-5's
-  catch-up (announced in its 0.3.16) and RW-4's count (`ok` a lower bound; Project Observatory counts retros written,
-  board message `1a12d809`). Fabric also owes its operation names: some come unchecked from a client's JSON-RPC body
-  (`toolTrace.ts:127`, `toolOutcome.ts:118` in Fabric), so a name that fails `OP_NAME` or `FAC-SEM-167` is to be
-  counted under one fixed name such as `tool.other`, or one bad name drops the whole line.
+  `src/ops-digest.ts`, since Fabric's daily fold answers 2 of the 4 day vectors differently. Fabric owes:
+  - OD-5's catch-up (announced in its 0.3.16);
+  - the hour it stops in, which it does not write (`opsDigestRun.ts:36`, `:117`, and its before-quit path), and
+    `previous`, which it does not read back after a restart (OD-1);
+  - RW-4's count (`ok` a lower bound; Project Observatory counts retros written, board message `1a12d809`).
+
+  Its operation names that came unchecked from a client's JSON-RPC body (`toolTrace.ts:127`, `toolOutcome.ts:118`) are
+  fixed in its main as `callOpName`, counting a name that fails `OP_NAME` or `FAC-SEM-167` as `tool.other` or
+  `mcp.other` (board message `6476789c`); the fix ships in its 0.3.16.
 - The OD-9 collector is not built yet: Fabric took the role (board thread `f7758225`, message `2ed505f2`), its CO-503
   row does not yet record it; it will send each day's first daily line once, with `source` and the optional
   `service {id, instance}` Project Observatory (OBS-330) agreed (message `1a12d809`).
-- Fabric Inbox (B-205), Fabric Dashboards (FD-144) and Fabric Switchboard (SB-250) shipped digests before the
-  contract, with known departures, each now owed: the OD-3 outcome map, the OD-5 catch-up and the fold of a repeated
-  hour; each renames any operation `FAC-SEM-167` refuses (OD-2's examples). None of them has a local descriptor today:
-  Dashboards and Switchboard reach a collector through Fabric's list of known hosts (message `08458f55`), and the Inbox
-  Mac app plans one (its B-210). Those are arrangements outside this contract, not OD-9 declarations.
+- Fabric Inbox (B-205) shipped digests before the contract. Its Mac app writes no empty hour, does not write the hour
+  it stops in (`desktop/ops-digest.cjs:6`) and does not read `previous` back after a restart (OD-1); it owes the OD-3
+  outcome map and the OD-5 catch-up. It folds a repeated hour as the vectors do (14 of 14, board messages `9ed2a464`,
+  `f36bbc2c`). The Mac app plans a local descriptor (its B-210): its own folder is an OD-9 declaration; the server
+  folder it fetches is a relayed remote instance's, outside this contract.
+- Fabric Dashboards (FD-144) shipped digests before the contract. It keeps `open.json` and reads its last hour back, so
+  its `previous` holds across a restart; it folds a repeated hour as the vectors do (14 of 14, the same messages); it
+  owes the OD-3 outcome map and the OD-5 catch-up. It has no local descriptor and reaches a collector through Fabric's
+  list of known hosts (message `08458f55`), an arrangement outside this contract.
+- Fabric Switchboard (SB-250) shipped digests before the contract. It writes on its tick only, so the hour it stops in
+  is not written (`digest.rs`), does not read `previous` back after a restart, and owes the fold of a repeated hour,
+  the OD-3 outcome map and the OD-5 catch-up. It reaches a collector as Dashboards does, outside this contract.
+- All four vendor the vectors from the contract's release tag, and each renames any operation `FAC-SEM-167` refuses
+  (OD-2's examples) before it writes.
 - The Fabric Agent Adapter owes the obligation (FAA-206) and, at its next re-pin, enters `fabric-ops-digest/0.1` in its
   twin protocol registers `fabric_protocols.py` and `fabric-protocols.mjs`, which its
   `test/fixtures/contract/vendor_vectors.mjs` writes from `PROTOCOL_REVISIONS` (the `register` of
-  `feed-protocols-vectors.json`); its retro counting follows RW-4 (`ok` only for a retro written through a call it
-  carries, a hook observing the session's own tool call included).
+  `feed-protocols-vectors.json`); its retro counting follows RW-4 (`ok` only for a lesson or `insight/1` line written
+  through a call it carries, a hook observing the session's own tool call included).
 
 ## Open
 
@@ -135,12 +157,24 @@ What ships, and what is owed (the spec README's maturity cell says the same):
   exactly in all eight places with a test pinning every example, the maturity cell and the Consumers above rewritten,
   and the coordinator's decisions (the OD-3 outcome map, `hours` as hours folded, the collector's caught-up day, the
   identity and the products without a descriptor, the retro's end and hour, why there is no scenario) and the unit and
-  seam risks (dir folding under NFC and Unicode case, `previous` checked, one copy of the op grammar). Round 3 is next.
+  seam risks (dir folding under NFC and Unicode case, `previous` checked, one copy of the op grammar).
+- Round 3 at `be737b89` was not clean: the product tier found departures missing from the maturity cell,
+  Compatibility and Consumers, and RW-4's undefined "or moved on". Both are fixed in the round-3 batch: the Consumers
+  list above made complete and the authority; "moved on" deleted; the hour a product stops in and `previous` read back
+  (OD-1), a `dir` holding only its own instance's digests (OD-9), the 4096 bound (OD-3), RW-4's `ok` cases made one
+  list, and the unit tier's facts (the boundary's optional name, double or single quote and `F` in either case before
+  and after, the `ẞ` fold, each input count checked, the hour after 9999-12-31T23). Round 4 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-3 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
+round 2 (4170 tests); `test/ops-digest.test.ts` with coverage on `src/ops-digest.ts` (63 tests, 169 of 169 branches);
+`pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`; `python3 docs/ux/lint.py`;
+`pnpm run privacy:check` (0 findings); `pnpm validate` on the positive descriptor and hourly fixtures. The branch gate
+at `be737b89` is the coordinator's (it holds the heavy lock); this batch's gate is owed.
 
 Round-2 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run` on the 10 files of OD-9 plus
 `test/activity-rules.test.ts` (11 files, 4168 tests); `test/ops-digest.test.ts` with coverage on `src/ops-digest.ts`

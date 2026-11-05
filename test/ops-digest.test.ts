@@ -99,7 +99,7 @@ describe("FAC-SEM-166, FAC-SEM-167 and FAC-SEM-168: the operations digests and w
   // The examples OD-2, OD-9, the rule rows and DEC-0153 give of the home-folder detector's boundary: each one documented
   // on the page and answered by hasHomePath as documented, so the text and the detector cannot drift apart.
   const REFUSED = ["api.users/list", "api.get_users/list", "api.my_users/list", "ui.home/open", "users/digests", "my_users/digests", "my-users/digests", "a/~b"];
-  const PASSES = ["api.user/list", "api.get_user/list", "user-digests"];
+  const PASSES = ["api.user/list", "api.get_user/list", "user-digests", "a/~1/x"];
   it("refuses every documented example of the home-folder boundary and passes every documented rename (OD-2, OD-9)", () => {
     const page = readFileSync(path.join(root, "docs/specification/ops-digest.md"), "utf8");
     const decision = readFileSync(path.join(root, "docs/DECISIONS.md"), "utf8");
@@ -173,6 +173,25 @@ describe("the reference folds", () => {
     expect(full.total.ok).toBe(max);
     expect(() => foldDay("2026-11-04", [full, foldHour([{ op: "a", ok: 1, failed: 0, unknown: 0 }], "2026-11-04T02:00:00Z", null)])).toThrow(/2\^53/);
   });
+  it("checks each input count before it is merged, and the hour after the last one the schema writes", () => {
+    const H = "2026-11-04T01:00:00Z";
+    expect(() => foldHour([{ op: "a", ok: -1, failed: 0, unknown: 0 }, { op: "a", ok: 1, failed: 0, unknown: 0 }], H, null)).toThrow(/2\^53/);
+    expect(() => foldHour([{ op: "a", ok: 0.5, failed: 0, unknown: 0 }, { op: "a", ok: 0.5, failed: 0, unknown: 0 }], H, null)).toThrow(/2\^53/);
+    expect(() => foldHour([{ op: "a", ok: 0, failed: 0, unknown: Number.NaN }], H, null)).toThrow(/2\^53/);
+    expect(() => foldHour([], "9999-12-31T23:00:00Z", null)).toThrow(/whole UTC hour the schema writes/);
+    expect(foldHour([], "9999-12-31T22:00:00Z", null).to).toBe("9999-12-31T23:00:00.000Z");
+  });
+
+  it("bounds ops and risen at 4096 operations, so a product counts the rest under one name of its own (OD-3)", () => {
+    const many = (n: number) => Array.from({ length: n }, (_, i) => ({ op: `op.n${String(i).padStart(4, "0")}`, ok: 1, failed: 0, unknown: 0 }));
+    const digest = (n: number) => ({ ...foldHour(many(n), "2026-11-04T01:00:00Z", null) });
+    expect(valid("ops-digest-hourly.schema.json", digest(4096))).toBe(true);
+    expect(valid("ops-digest-hourly.schema.json", digest(4097))).toBe(false);
+    const folded = foldHour([...many(4095), { op: "tool.other", ok: 2, failed: 0, unknown: 0 }], "2026-11-04T01:00:00Z", null);
+    expect(valid("ops-digest-hourly.schema.json", folded)).toBe(true);
+    expect(folded.total.ok).toBe(4097);
+  });
+
   it("throws when a previous digest's failures give a rise a previous that is no count", () => {
     const H = "2026-11-04T02:00:00Z";
     for (const failed of [-40, 2.5]) {
@@ -281,7 +300,7 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
   });
 
   it("compares dirs under Unicode case folding after NFC, trailing dots and spaces dropped", () => {
-    const pairs: Array<[string, string]> = [["Straße", "STRASSE"], ["σασ", "ΣΑΣ"], ["café", "café"], ["digests.", "digests"], ["digests ", "digests"], ["a/Digests./b", "A/digests/B"]];
+    const pairs: Array<[string, string]> = [["Straße", "STRASSE"], ["Stra\u1e9ee", "Straße"], ["σασ", "ΣΑΣ"], ["café", "café"], ["digests.", "digests"], ["digests ", "digests"], ["a/Digests./b", "A/digests/B"]];
     for (const [a, b] of pairs) {
       expect(foldDir(a), `${a} ${b}`).toBe(foldDir(b));
       expect(found("service-descriptor", withFolders([{ dir: a, source: "one" }, { dir: b, source: "two" }])), `${a} ${b}`).toEqual([`FAC-SEM-168 ${at}/1/dir`]);

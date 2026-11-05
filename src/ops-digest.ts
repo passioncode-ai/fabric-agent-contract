@@ -94,13 +94,17 @@ function safeCounts<T extends HourlyDigest | DailyDigest>(digest: T): T {
  * The digest of the hour starting at `from` (a whole UTC hour): `counts` summed by operation and sorted by name in
  * code-unit order, and each operation whose failures rose against `previous`, in the order of `ops`, which counts only
  * when it is the hour just before (a gap compares with none). `from` and `to` are written as
- * `Date.prototype.toISOString` writes them. It throws when a count, or a sum, is not an integer from 0 to 2^53 - 1.
+ * `Date.prototype.toISOString` writes them. It throws when an input count, a sum or a previous digest's count is not
+ * an integer from 0 to 2^53 - 1 (each input count is checked before it is merged), and when the hour after `from` is
+ * not a whole hour the schema writes (after 9999-12-31T23).
  */
 export function foldHour(counts: readonly OpCount[], from: string, previous: HourlyDigest | null): HourlyDigest {
   const start = wholeHour(from);
   if (start === null) throw new Error(`${from} is not a whole UTC hour`);
+  if (wholeHour(iso(start + HOUR_MS)) === null) throw new Error(`the hour after ${from} is not a whole UTC hour the schema writes`);
   const merged = new Map<string, OpCount>();
   for (const c of counts) {
+    if (![c.ok, c.failed, c.unknown].every((n) => Number.isSafeInteger(n) && n >= 0)) throw new Error(`a count of ${c.op} is not an integer from 0 to 2^53 - 1`);
     const m = merged.get(c.op) ?? { op: c.op, ok: 0, failed: 0, unknown: 0 };
     m.ok += c.ok; m.failed += c.failed; m.unknown += c.unknown;
     merged.set(c.op, m);
@@ -265,11 +269,12 @@ export function digestFoldersView(descriptor: unknown): DigestFoldersView {
 }
 
 /**
- * A `dir` as a file system that folds case compares it: each segment as NFC, then upper case, then lower case (Unicode
- * case folding, so `Straße` meets `STRASSE` and `σασ` meets `ΣΑΣ`), then NFC again, trailing dots and spaces dropped.
+ * A `dir` as a file system that folds case compares it: each segment as NFC, then lower, upper and lower case (Unicode
+ * case folding, so `Straße` meets `STRASSE` and `Straẞe`, and `σασ` meets `ΣΑΣ`), then NFC again, trailing dots and
+ * spaces dropped.
  */
 export const foldDir = (dir: string): string =>
-  dir.split("/").map((segment) => segment.normalize("NFC").toUpperCase().toLowerCase().normalize("NFC").replace(/[. ]+$/, "")).join("/");
+  dir.split("/").map((segment) => segment.normalize("NFC").toLowerCase().toUpperCase().toLowerCase().normalize("NFC").replace(/[. ]+$/, "")).join("/");
 
 const FOLDERS_PATH = `/extensions/${EXTENSION_KEYS.opsDigest.replace(/~/g, "~0").replace(/\//g, "~1")}`;
 const folderFinding = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-168", instancePath, message });
@@ -282,13 +287,14 @@ const folderFinding = (instancePath: string, message: string): Finding => ({ cod
  * by segment (one folder under two labels would be sent twice); a `dir` that holds a home folder (`hasHomePath`); a
  * `dir` or a `source` shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users`
  * or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
- * and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either
- * case) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after
- * such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or
- * after whitespace, a quote, `=`, `/` or `\`, followed by an optional name and then `/`, `\` or the end. So
- * `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` are refused, and `user-digests` passes. A
- * collector reads the folders only when this returns no finding (`digestFoldersView`'s `usable`), and treats any other
- * declaration as not declared.
+ * and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case,
+ * here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or
+ * `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit;
+ * or in which `~` stands at the start or after whitespace, a double or single quote, `=`, `/` or `\`, followed by an
+ * optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So
+ * `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` are refused, and `user-digests` and `a/~1/x` pass.
+ * A collector reads the folders only when this returns no finding (`digestFoldersView`'s `usable`), and treats any
+ * other declaration as not declared.
  */
 export function digestFoldersRules(descriptor: JsonObject): Finding[] {
   const view = digestFoldersShape(descriptor);

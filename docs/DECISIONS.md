@@ -9046,13 +9046,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. **The shapes, as ADR-0188 names them.** `ops.digest.hourly@1` {`schema`, `from`, `to`, `ops`[{`op`, `ok`,
      `failed`, `unknown`}], `total`{`ok`, `failed`, `unknown`}, `risen`[{`op`, `failed`, `previous`}]} and
      `ops.digest.daily@1` {`schema`, `day`, `hours`, `ops`, `total`, `risen`[{`op`, `hours`, `failed`}]}, both closed,
-     every count an integer from 0 to 2^53 − 1, at most 4096 operations and rises.
+     every count an integer from 0 to 2^53 − 1, at most 4096 operations and rises: beyond 4096 a product counts the
+     rest under one fixed operation name of its own (their counts kept, as Fabric's `tool.other`), so the line still
+     validates.
   2. **The window (OD-1).** `from` and `to` are whole UTC hours in RFC 3339 with `Z`, with or without the `.000` that
      `Date.prototype.toISOString` writes (Fabric writes it), `to` one hour after `from`; `day` is `YYYY-MM-DD` UTC;
      `hours` 1 to 24. An hour the product ran through is written even when empty; an hour it did not run is a gap. An
      hour counts as run through if the product ran at any moment in it; a product that folds on request from stored
      records (an always-on server) folds only hours holding a record, so `hours` means hours folded, and a reader never
-     infers uptime from it.
+     infers uptime from it. The hour a product stops in is kept with its counts and written when it closes, at the next
+     run, compared with the last hour written; a product that cannot keep it writes nothing for that hour, never a
+     partial line, since a restart in the same hour would leave two lines and readers keep the first. At start a
+     product reads its last hourly line back for `previous`.
   3. **An operation's name (OD-2).** `^[a-z][A-Za-z0-9_]*(?:[.:/-][A-Za-z0-9_]+)*$`, at most 64 characters. `/` is
      a separator because Fabric logs an MCP method as `mcp.<method>` (`mcp.tools/list`,
      `mcp.notifications/initialized`, `mcp.notifications/cancelled`; board thread `f7758225`, message `1c191cf7`), and
@@ -9061,12 +9066,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      holding a home folder (`hasHomePath`, the detector other rules use), so the `/` lets no home path through.
      `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character
      that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and
-     is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case) and then an ASCII letter, digit or `_`; in which
+     is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which
      `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed
-     by an ASCII letter or digit; or in which `~` stands at the start or after whitespace, a quote, `=`, `/` or `\`,
-     followed by an optional name and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`,
+     by an ASCII letter or digit; or in which `~` stands at the start or after whitespace, a double or single quote, `=`, `/` or `\`,
+     followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`,
      `api.my_users/list`, `ui.home/open`, `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` are
-     refused, and `api.user/list`, `api.get_user/list` and `user-digests` pass. One refused name fails the whole line,
+     refused, and `api.user/list`, `api.get_user/list`, `user-digests` and `a/~1/x` pass. One refused name fails the whole line,
      which every reader skips. The shared detector stays (decided in review round 1, its boundary stated exactly in
      round 2), and a test pins every example on the spec page and here.
   4. **Counting and the rise (OD-3, OD-4).** Every record counted by `op` and outcome in its hour before any sampling;
@@ -9080,7 +9085,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      failures in the hour and at least twice the hour before's, an hour before with none (or not closed) counting as
      one. `FAC-SEM-166` checks the window, each `op` once, the sums, and every rise against its own digest: an hourly
      rise names the hour's failures of its op and passes OD-4 against its `previous`; a daily rise is in at most
-     `hours` hours, with at least 10 failures an hour and at most the day's failures of its op. **The order:** `ops`
+     `hours` hours, with at least 10 failures an hour and at most the day's failures of its op; a rise missing from
+     `risen` needs the hour before, so `FAC-SEM-166` cannot see it and the vectors check it. **The order:** `ops`
      sorted by `op` in code-unit order, an hourly `risen` in the order of `ops`, a daily `risen` by `failed` descending
      then `op`, as `foldHour` and `foldDay` write and the vectors compare; `FAC-SEM-166` does not check order and a
      reader reads both as sets keyed by `op`. A count or sum beyond 2^53 − 1 is no count: the reference folds throw.
@@ -9100,10 +9106,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      it is fulfilled in the same turn by a lesson in Project Observatory (`observatory_lesson`, one class key each), by
      `insight/1` lines, or by one line saying there is nothing to say; the host counts each time it arose as one record
      of the operation `retro-after-work` in its digests, in the hour the record is resolved (answered, or `unknown` at
-     the end): `ok` only when it observes the retro written through a call it carries (a lesson or an `insight/1` line
-     written through its own tool call, a host hook observing the session's own tool call included), `failed` when
-     such a call is refused,
-     `unknown` otherwise, a retro written elsewhere included; so retros asked are the sum and retros the host saw
+     the end): `ok` only when it observes a lesson or an `insight/1` line written through a call it carries (its own
+     tool call, or a host hook observing the session's own tool call), `failed` when such a call is refused, `unknown`
+     otherwise, a retro written elsewhere and a line saying there is nothing to say included; so retros asked are the sum and retros the host saw
      written `ok`, a lower bound of the retros written.
   8. **Reference and vectors.** `foldHour`, `foldDay`, `isRise` and the rules in `src/ops-digest.ts`; vectors in
      `fixtures/vectors/ops-digest.json`; `pnpm validate` tells the two digests apart by `schema` (kinds
@@ -9127,7 +9132,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      caught-up day included) and sends it once, with `source` and which descriptor the line came from (its `id` and
      `instance`; Project Observatory agreed an optional `service {id, instance}` beside `source`, board message
      `1a12d809`). Fabric took the collector role (board thread `f7758225`, message `2ed505f2`); its CO-503 row does not
-     yet record it. A product without a local descriptor is outside this declaration.
+     yet record it. A product without a local descriptor is outside this declaration, and a declared `dir` holds only
+     the declaring instance's own digests: relaying a remote instance's digests is outside this contract.
 - **Why:** one shape lets one reader (Fabric's review queue, Project Observatory's daily reading) read every product's
   digests; the shape is the one already written, so the first producer moves nothing. A name grammar that holds no empty
   segment, `.`, `..` or leading `/` keeps absolute paths and URLs out by construction, and the home-folder detector the
@@ -9139,7 +9145,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   day. An order written but not checked keeps every line Fabric wrote valid and keeps readers from depending on it.
   Mapping each product's outcome words keeps one meaning of `failed` across products, and keeping the map out of the
   digest keeps OD-7. `hours` as hours folded is what an always-on server that folds from stored records can truthfully
-  write. A collector that sends a caught-up day once loses no day and doubles none. The end of a session raises the
+  write. A collector that sends a caught-up day once loses no day and doubles none. Writing the hour a product
+  stops in only when it closes, and never partly, keeps one line per hour, since readers keep the first; reading the
+  last line back keeps `previous` true across a restart. A `dir` that holds only its own instance's digests keeps one
+  count per instance; the 4096 bound with one overflow name keeps a busy hour's line valid and its totals whole. A line
+  saying there is nothing to say has no call a host can observe, so it is no `ok`. The end of a session raises the
   retro only when none was written, so one retro is not asked twice; a record counted in the hour it is resolved keeps
   every hour's counts closed when the hour closes. There is no UX scenario for this decision: it is a reporting format,
   the operator's view of it is each product's own (Fabric's review queue), as DEC-0095's support quality was. Counting the
@@ -9167,9 +9177,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   every register row (`vendor_vectors.mjs`). Fabric's digests at `e1eecec0`
   validate as written (its test's names, `x` and `y` included); its daily fold sorts rises by failures then name, as
   `foldDay` does, but answers 2 of the 4 day vectors differently, so the reference folds are `src/ops-digest.ts`, and
-  Fabric owes the difference with OD-5's catch-up and RW-4's count. Fabric Inbox, Fabric Dashboards and Fabric
-  Switchboard shipped digests before this decision, with known departures, each now owed: the OD-3 outcome map, the
-  OD-5 catch-up and the fold of a repeated hour. A product that names an operation outside OD-2's grammar
+  Fabric owes the difference with OD-5's catch-up and RW-4's count. Fabric, Fabric Inbox, Fabric Dashboards and Fabric
+  Switchboard shipped digests before this decision with known departures, listed in the CT-219 handoff's Consumers
+  list (the authority, which this sentence does not repeat): among them the hour a product stops in left unwritten,
+  `previous` not read back after a restart, the OD-3 outcome map and the OD-5 catch-up. Fabric's client-supplied
+  operation names are fixed in its main (board message `6476789c`) and ship in its 0.3.16; Dashboards and Inbox fold a
+  repeated hour as the vectors do (14 of 14, messages `9ed2a464`, `f36bbc2c`); all four vendor the vectors from the
+  release tag. A product that names an operation outside OD-2's grammar
   (another separator, an upper-case first letter) renames it before it writes digests. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/ops-digest-hourly.schema.json`, `schemas/ops-digest-daily.schema.json`,
   `src/ops-digest.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `tools/vectors/ops-digest.ts`,
@@ -9190,8 +9204,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Not decided here:** which act of each host's claim vocabulary is "a release recorded as done" (RW-1); counting retros
   written outside the host (Project Observatory's); the wire form in which a collector sends the descriptor's `id` and
   `instance`; how products without a local descriptor reach a collector (Fabric Dashboards and Fabric Switchboard
-  through Fabric's list of known hosts, message `08458f55`; the Fabric Inbox Mac app plans a local descriptor, its
-  B-210), which are arrangements outside this contract; the other items on the spec page's list.
+  through Fabric's list of known hosts, message `08458f55`, an arrangement outside this contract; the Fabric Inbox Mac
+  app plans a local descriptor, its B-210, whose own folder is an OD-9 declaration while the server folder it fetches
+  is a relayed remote instance's, outside it); the identity a relayed remote instance's lines are sent under, so that
+  N relays are not N counts (Project Observatory keys a digest by project, service, source and day); the other items
+  on the spec page's list.
 - **Source:** the operator's word of 2026-11-04, relayed by Fabric on board thread `f7758225` (message `516761e1`),
   and the thread's answers on the draft (messages `1c191cf7`, the `/` in MCP method names, and `f74763e1`, the day with
   no hour), decided by the coordinator; OD-9 is a change made in review on the same thread, where Fabric proposed a
@@ -9203,6 +9220,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   stated exactly and pinned by a test) and the maturity claim (the spec README credited the products beyond what they
   ship), and its batch, with the coordinator's decisions on the outcome map, the hours folded, the collector's caught-up
   day, the identity and the products without a descriptor, the retro's end and hour, and why there is no scenario, is
-  folded in;
+  folded in; round 3 at `be737b89` was not clean: product departures (the maturity claim and Compatibility omitted
+  some) and RW-4's undefined "moved on", and its batch, with the coordinator's decisions on the hour a product stops
+  in, `previous` read back, a declared `dir` holding only its instance's own digests, the 4096 bound and RW-4's `ok`
+  cases, is folded in;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.
