@@ -448,17 +448,22 @@ the operator's word for that act, never by a mandate, as [source](docs/specifica
 a proposal's `export` destination (`FAC-SEM-103`).
 
 **Source hand-over**: An agent's source reaching a place or a person it was not at: a **Source export** handed to
-anyone; the agent's tree or a copy of it pushed to a repository it was not in, that is public or that another owner
-holds (an organization's repository included, even one the operator administers); a transfer; a visibility change;
-access given to another person; a file sent. The repository where the agent's owner keeps and develops its source is
-its home, not a recipient, so the owner's own commits, branches and releases there are none; a copy moved within the
-operator's own estate (here, the accounts and placements the operator alone holds) to a place that is not public and
-that no one outside the operator can read (a deploy to the operator's own placement, a private mirror the operator
-owns) is none either; and the home carve-out never lets a personal agent's source move into an organization's or a
-public repository, which stays one. It is one synchronous call of effect class `publish`, taken only on the operator's
-word for that act (a decision with its exact target, or the service's in-call elicitation), never by a mandate or an
-`approval/1` before CT-181, as [source](docs/specification/source.md#handing-over) specifies (DEC-0149). *Avoid*: a
-bare "hand-over" for this meaning.
+anyone; a push of a commit not already in it to a repository that is not the agent's home and that is public or that
+another owner holds (an organization's repository included, even one the operator administers), each such push its
+own; a transfer; a visibility change; access given to another person; a file sent; a package handed to another person
+(a colleague's copy), which carries the source; a personal agent's package or release published to a public registry.
+The repository where the agent's owner keeps and develops its source is its home, not a recipient, and the owner's
+placements are the owner's own: the owner's own commits, branches and releases in the home, a release that stays where
+the home's readers are, and a deploy to a placement its owner holds (an organization's agent on that organization's
+placement included) are none; a copy moved within the operator's own estate (here, the accounts and placements the
+operator alone holds) to a place that is not public and that no one outside the operator can read (a private mirror
+the operator owns) is none either, while a push or copy elsewhere that is public, that another owner holds, or that
+another person is given access to, is one. The home carve-out never lets a personal agent's source move into an
+organization's or a public repository, or onto an organization's or a team's placement or one other people can read,
+which stays one; serving the running agent to a team (`peer`, client keys) gives no one the tree and is none. It is
+one synchronous call of effect class `publish`, taken only on the operator's word for that act (a decision with its
+exact target, or the service's in-call elicitation), never by a mandate or an `approval/1` before CT-181, as
+[source](docs/specification/source.md#handing-over) specifies (DEC-0149). *Avoid*: a bare "hand-over" for this meaning.
 
 **Package digest**: SHA-256 over the RFC 8785 form of a **Package** without its digest and signatures; through the
 listed files it covers the whole folder, and a countersignature does not change it (DEC-0050).
@@ -843,10 +848,12 @@ value (DEC-0142 PS-10).
 **Proposal**: A change proposed to a project's manager or the CEO (`fabric-proposal/1`): a rule, an agent, a skill, a
 listing or a fix, with evidence by reference; a rule is approved by a person, nothing applies itself, and nothing
 about a private agent leaves as a proposal (DEC-0072, [proposals](docs/specification/proposals.md)); handing over its
-**Source export** goes only by a **Source hand-over** (DEC-0149). The operator's standing permission of 2026-10-12 to
-move a private agent's mechanics into a product, rewriting or copying them file by file into the product's own source
-through its own change with private data stripped, is unchanged and needs no word per act, as
-[source](docs/specification/source.md#handing-over) draws the line.
+**Source export** goes only by a **Source hand-over** (DEC-0149). The operator's standing permission of 2026-10-12 lets
+a private agent's mechanics move into a product (the knowledge base's roadmap records it in its D5 row: "the broker's
+mechanics go into `node.lifecycle`, with a standing permission in his global instructions"); the contract reads it as
+rewriting or copying them file by file into the product's own source through that product's own change, private data
+stripped. It is unchanged and needs no word per act, as [source](docs/specification/source.md#handing-over) draws the
+line.
 
 **Protocol revision**: `<name>/<revision>`, the version every document names (DEC-0009); a receiver accepts N and N−1
 of the contract's register, lists them in `protocols`, and refuses another with `schema-unsupported` (DEC-0067,

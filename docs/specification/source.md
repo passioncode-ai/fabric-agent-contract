@@ -55,7 +55,13 @@ store slot's `path` is written without a trailing slash and names the file or fo
 - **Default deny.** Only what `include` names is source; `exclude` carves holes in it. A file outside `include` is
   simply not source: it is not a finding, and a source export does not carry it.
 - **`.git` is never source**, whatever the lists say: a path with a `.git` segment is not source, and listing one is
-  `FAC-SEM-157`.
+  `FAC-SEM-157`. A segment counts in every form a case-insensitive or a Windows file system resolves to `.git`, as Git's
+  own `is_hfs_dotgit` and `is_ntfs_dotgit` read it: under ASCII case folding (`.GIT`), with the code points HFS+ ignores
+  removed (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F, U+FEFF), with any trailing run of dots and spaces
+  dropped (`.git.`, or `.git` and a space), and as the NTFS short name `GIT~1` (`isDotGitSegment`).
+- **Paths compare in Unicode NFC.** Git on macOS lists names in NFC while a walk reads a name as it is stored (often
+  NFD), so every entry of the manifest and every path asked about is normalised to NFC before they are compared; a file
+  is still read, and named in a message, by its name as stored.
 - **The manifest is source**: `fabric.source.json` travels with the source whatever `include` says.
 
 `isSourcePath(manifest, path)` in `src/source-rules.ts` is the reference reading.
@@ -368,8 +374,8 @@ owed by CT-207, is to be it, and the tree check is the contract's part.
 
 ## Handing over
 
-Handing a source export to anyone (creating a repository someone else can read, pushing the source to one it was not
-in, sending a file, changing its visibility; the line, with the source's home, is drawn below, after the departures) is
+Handing a source export to anyone (creating a repository someone else can read, pushing a commit not already there to one
+that is not the source's home, sending a file, changing its visibility; the line, with the source's home, is drawn below, after the departures) is
 an act of
 effect class `publish` (`schemas/common.schema.json`), and a person's act each time, which no standing grant authorises
 ([external effects](governance-and-roles.md#external-effects)). The hand-over action declares the gate `relayed`
@@ -469,23 +475,31 @@ service pins it, the action's owner enforces them. The departures:
 - an elicitation is taken only when its accepted message names the agent, the source commit and the recipient, and is
   consumed under its record id.
 
-The line between the two is this. Moving an agent's mechanics into a product, by rewriting or copying them file by
-file into that product's own source through the product's own change with the agent's private data stripped, is the
-operator's standing permission of 2026-10-12 (recorded in the knowledge base's
-[roadmap](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/roadmap.md)) and needs no word per act.
+The line between the two is this. The operator's standing permission of 2026-10-12 lets an agent's mechanics move
+into a product: the knowledge base's [roadmap](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/roadmap.md)
+records it in its D5 row as "the broker's mechanics go into `node.lifecycle`, with a standing permission in his global
+instructions". This contract reads it as rewriting or copying the mechanics file by file into the product's own source
+through that product's own change, the agent's private data stripped; such a move needs no word per act.
 
-The repository where the agent's owner keeps and develops its source is its home, not a recipient: the owner's own
-commits, branches and releases there are no hand-over, whether that home is the operator's private repository, a public
-one or an organization's. A source hand-over is the source reaching a place or a person it was not at: a source export
-handed to anyone; the agent's tree or a copy of it pushed to a repository it was not in, that is public or that another
-owner holds (an organization's repository included, even one the operator administers, as the knowledge base's
-[agents-first](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/agents-first.md) item 9, "A source
-hand-over takes the operator's word on that act", reads); a transfer; a visibility change; access given to another
-person; a file sent. Each needs the operator's word for that act; a local source export needs none. A copy moved within
-the operator's own estate (here, the accounts and placements the operator alone holds) to a place that is not public
-and that no one outside the operator can read (a deploy to the operator's own placement, a private mirror the operator
-owns) has no recipient and is not a source hand-over. The home carve-out never lets a personal agent's source move into
-an organization's or a public repository: that move stays a source hand-over.
+The repository where the agent's owner keeps and develops its source is its home, not a recipient, and the placements
+its owner holds are the owner's own. The owner's own commits, branches and releases in the home are no hand-over, nor is
+a release that stays where the home's readers are, nor a deploy of the agent to a placement its owner holds (an
+organization's agent on that organization's placement included), whether the home is the operator's private repository,
+a public one or an organization's. A source hand-over is the source reaching a place or a person it was not at: a source
+export handed to anyone; a push of a commit not already in it to a repository that is not the home and that is public
+or that another owner holds (an organization's repository included, even one the operator administers, as the
+knowledge base's [agents-first](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/agents-first.md)
+item 9, "A source hand-over takes the operator's word on that act", reads), each such push its own hand-over; a
+transfer; a visibility change; access given to another person; a file sent. A package handed to another person (a
+colleague's copy, [package](package.md#state)'s v4 §6 Path 3) carries the source and is a hand-over, and so is a
+personal agent's package or release published to a public registry. Each needs the operator's word for that act; a
+local source export needs none. A copy moved within the operator's own estate (here, the accounts and placements the
+operator alone holds) to a place that is not public and that no one outside the operator can read (a deploy to the
+operator's own placement, a private mirror the operator owns) has no recipient and is not a source hand-over; a push
+or copy elsewhere that is public, that another owner holds, or that another person is given access to, is one. The
+home carve-out never lets a personal agent's source move into an organization's or a public repository, or onto an
+organization's or a team's placement or one other people can read: that move stays a source hand-over. Serving the
+running agent to a team (`peer`, client keys, the one-time code) gives no one the tree and is no hand-over.
 
 Every agent follows the same rule, private or not, and a private agent is never handed over on anything less. Under
 [one approval for all the operator's agents](delegation.md#one-approval-binds-all-the-operators-agents) (DEC-0126) a
@@ -498,8 +512,10 @@ Fabric's (CT-208).
 ## Import
 
 A patch back from an exported copy applies only when every path it touches is a source path; otherwise it is refused
-whole. It applies at the source, never at an exported copy. `patchPathsAllowed(manifest, paths)` answers the paths that
-are not source.
+whole. It applies at the source, never at an exported copy. On a case-insensitive file system two spellings of a path
+are one file, so a patch path is also refused when, under ASCII case folding, it is a path an `exclude` entry names
+(`app/PRIVATE/x` when `app/private/` is excluded), and `.git` in any of its forms is never source. `patchPathsAllowed(manifest, paths)` answers the paths that
+are not source, and those.
 
 ## Starting without the instance
 
@@ -535,7 +551,7 @@ in its first answer or its doctor command.
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-156"></a>`FAC-SEM-156` | `source-manifest` | a slot is named once, and neither its name nor its purpose nor the manifest's description is shaped like a credential; a store path is declared once (DEC-0149) |
-| <a id="fac-sem-157"></a>`FAC-SEM-157` | `source-manifest` | a path is listed once in `include`, `exclude`, `binaries` and `unchecked`; none of the first three has a `.git` segment; an `include` path lies inside no `exclude` folder; an `exclude` path lies inside an `include` folder and is not an `include` path; a `binaries` path is a file of the source; an `unchecked` path is a file of the source or a folder in it (DEC-0149) |
+| <a id="fac-sem-157"></a>`FAC-SEM-157` | `source-manifest` | a path is listed once in `include`, `exclude`, `binaries` and `unchecked`; none of the first three has a `.git` segment, in any form [paths](#paths) reads as `.git`; an `include` path lies inside no `exclude` folder; an `exclude` path lies inside an `include` folder and is not an `include` path; a `binaries` path is a file of the source; an `unchecked` path is a file of the source or a folder in it (DEC-0149) |
 | <a id="fac-sem-158"></a>`FAC-SEM-158` | `source-tree` | a source tree holds no home folder with a person's name, no credential (a value in a line or a path, or a file by its name), no binary file `binaries` does not list, no nested repository and no installation string; every `include` path names a file; the list's entries are well-formed strings of at least 3 characters and the manifest names an `include` path (DEC-0149) |
 | <a id="fac-sem-159"></a>`FAC-SEM-159` | `source-tree` | accepted: an e-mail address not in `publicAddresses`, a relative Markdown link out of the source, no licence file at the root (DEC-0149) |
 | <a id="fac-sem-160"></a>`FAC-SEM-160` | `source-package` | a package's `secrets[]` are the source's `secret` slots by name and `optional`, and, when its `state[]` holds any entry, its `state[]` paths the source's `store` slots' paths, as sets (DEC-0149) |

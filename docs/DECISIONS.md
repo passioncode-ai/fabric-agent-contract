@@ -9030,9 +9030,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 36 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 37 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
-  not clean: no home-repository carve-out), cited by round number because their heads were on the review branch, which is not
+  not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
+  exclude hole), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9059,7 +9060,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      decision.
   4. **Default deny (Q2):** `include` (at least one path) names the source, `exclude` carves holes in it. A path is the
      package's path grammar; one ending in `/` names a folder and everything under it; no globs. `.git` is never source
-     (a path with a `.git` segment); the manifest itself always is. A file outside `include` is simply not source.
+     (a path with a `.git` segment, a segment read as Git's `is_hfs_dotgit` and `is_ntfs_dotgit` read one: ASCII case
+     folded, the code points HFS+ ignores removed, trailing dots and spaces dropped, or the short name `GIT~1`, decided
+     by the coordinator in round 37 because a case-insensitive or Windows file system resolves each of these to the
+     repository's `.git`); the manifest itself always is. Paths are compared in Unicode NFC, a file read and named by its
+     name as stored. A file outside `include` is simply not source.
   5. **Members:** `format`, `include`, `exclude`, `slots`, `binaries` (binary files that are source, each inside it,
      Q12), `unchecked` (at most 64 `{path, reason}`: source paths, files or folders, that travel with the source and
      that the tree check reads by their path only, such as synthetic test vectors or a licence whose copyright line
@@ -9163,15 +9168,26 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       that another owner holds, or that another person is given access to, is one (an organization's repository is
       another owner's even when the operator administers it, as the knowledge base's agents-first item 9, "A source
       hand-over takes the operator's word on that act", reads); the operator's standing
-      permission of 2026-10-12 to move mechanics file by file is unchanged. The repository where the agent's owner
-      keeps and develops its source is its home, not a recipient: the owner's own commits, branches and releases there
-      are no hand-over, and a hand-over is the source reaching a place or a person it was not at; the carve-out never
-      lets a personal agent's source move into an organization's or a public repository, which stays a hand-over
+      permission of 2026-10-12 is unchanged (the knowledge base's roadmap records it in its D5 row: "the broker's
+      mechanics go into `node.lifecycle`, with a standing permission in his global instructions"; moving mechanics file
+      by file into a product's own source through that product's own change is this contract's reading of it, not its
+      text). The repository where the agent's owner keeps and develops its source is its home, not a recipient: the
+      owner's own commits, branches and releases there are no hand-over, and a hand-over is the source reaching a place
+      or a person it was not at; the carve-out never lets a personal agent's source move into an organization's or a
+      public repository, which stays a hand-over
       ([source](specification/source.md#handing-over)'s line paragraph; decided by the coordinator in round 36 under the
       operator's recorded rules: the rule guards source leaving the operator's estate or reaching new readers, personal
       agents stay private, and an organization's agents are developed in its repositories by its standing practice of
       branches, landing and releases, so without the carve-out every ordinary push and release of such an agent, and of
-      a public skill set, would need a word per act). Handing it to
+      a public skill set, would need a word per act). Decided by the coordinator in round 37 on the same ground: the
+      owner's own placements are part of the home carve-out, so a deploy of the agent to a placement its owner holds
+      (an organization's agent on that organization's placement included) is no hand-over, while a personal agent's
+      source on an organization's or a team's placement, or on one other people can read, is one (it reaches new
+      readers); serving the running agent to a team gives no one the tree and is none; each push of a commit not
+      already in a repository that is not the home and that is public or another owner's is its own hand-over (each
+      brings new source to new readers); a package handed to another person (a colleague's copy) carries the source
+      and is a hand-over, a release that stays where the home's readers are is covered by "releases there", and a
+      personal agent's package or release published to a public registry stays a hand-over. Handing it to
       anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       source commit and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9187,7 +9203,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       never creates a repository and never pushes; Fabric's "give as source" action is to be the hand-over's twin under DEC-0121 (CT-208), and the
       hand-over's screens are Fabric's (CT-208).
   13. **Import:** a patch applies only when every path it touches is source, else it is refused whole; it applies at the
-      source, never at an exported copy (`patchPathsAllowed`).
+      source, never at an exported copy (`patchPathsAllowed`). Because a case-insensitive file system makes two
+      spellings one file, a patch path is also refused when, under ASCII case folding, an `exclude` entry names it, and
+      `.git` in each of item 4's forms is never source (decided by the coordinator in round 37: the unit reading found
+      `.GIT/hooks/post-checkout` and `app/PRIVATE/x` allowed past an excluded `app/private/`).
   14. **Starting without the instance (§5.8):** an agent started with an empty data folder and no slot filled starts;
       a service answers `status: degraded` with one `degraded[]` entry per missing required slot, its `source` the
       slot's name, each `setup: true` (DEC-0044's setup state), an `endpoint` included; a `store` slot is never a setup
@@ -9243,9 +9262,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/vectors/source-tree.json`; `fixtures/positive/fabric-source-*.json`, `fixtures/negative/fabric-source-*.json`,
   `fixtures/semantic/source-*.json`, `fixtures/catalogue.json`; `test/source-rules.test.ts`,
   `test/validate-cli.test.ts`, `test/validate-cli-faults.test.ts`, `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
-  `test/schema-compilation.test.ts`, `test/protocol-revisions.test.ts`, `test/validator.test.ts`; `vitest.config.ts` (the floors, `src/validator.ts` added); `docs/specification/source.md` (new), `docs/guides/connecting-compatible-agents.md` (the inference row and the pair),
+  `test/schema-compilation.test.ts`, `test/protocol-revisions.test.ts`, `test/validator.test.ts`, `test/secret-shape.test.ts`
+  (`jwtSpans` and `hasJwt`); `vitest.config.ts` (the floors, `src/validator.ts` added); `docs/specification/source.md` (new), `docs/guides/connecting-compatible-agents.md` (the inference row and the pair),
   `package.md` (secrets and state from the source's slots, a copy without state), `proposals.md` (a private agent's
-  source), `delegation.md` (MD-5, MD-6, DL-18's order of checks, DL-26's exception, OA-5), `governance-and-roles.md` (external effects), `conformance.md` (the register,
+  source), `delegation.md` (MD-5, MD-6, DL-18's order of checks, DL-26's exception, OA-5), `governance-and-roles.md` (external effects), `identifiers.md` (the hand-over's `target` compared exactly), `conformance.md` (the register,
   the reference module, the readers' rows), `docs/specification/README.md`, `README.md` (Build an agent),
   `docs/DOCMAP.md`, `CONTEXT.md` (Source, Instance, Source slot, Installation string, Source export, Source hand-over), `AGENTS.md`
   (`pnpm --silent validate`), `docs/evidence/sources.md` (RFC 2606), `docs/ux/foundation.md` (ST-037),
@@ -9254,6 +9274,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 36 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
-  sentence; round 36 not clean: no home-repository carve-out), cited by round number (their heads were on the review branch, not kept at landing),
+  board message `565b20f3`); rounds 1 to 37 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
+  case-insensitive `.git` and exclude hole), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

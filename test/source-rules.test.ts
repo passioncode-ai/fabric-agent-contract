@@ -211,6 +211,40 @@ describe("which files are source", () => {
     expect(nestedInSource(null, "src/vendor/lib")).toBe(false);
   });
 
+  it("reads .git as a case-insensitive or Windows file system resolves it, as Git's is_hfs_dotgit and is_ntfs_dotgit do", () => {
+    const test = (path: string) => isSourcePath({ include: ["src/"] }, path);
+    for (const path of ["src/.GIT/config", "src/.Git/x", "src/.git /config", "src/.git./config", "src/.git. ./x", "src/GIT~1/config", "src/git~1./x", "src/.g\u200cit/config", "src/\ufeff.git/x", "src/.gi\u202et/x"]) {
+      expect(test(path), path).toBe(false);
+      expect(nestedInSource({ include: ["src/"] }, path), path).toBe(false);
+    }
+    for (const path of ["src/.github/x", "src/git~10/x", "src/.gitignore", "src/git/x", "src/.git-x/y", "src/x.git/y"]) expect(test(path), path).toBe(true);
+    expect(sourceFolderTest({ include: ["src/"] })("src/.GIT")).toBe(false);
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["app/", ".GIT/"], exclude: ["app/private/"] })).toEqual([
+      { code: "FAC-SEM-157", instancePath: "/include/1", message: "include[1] lies in .git, which is never source" }
+    ]);
+  });
+
+  it("refuses a patch path that an exclude entry names under ASCII case folding, and .git in any of its forms", () => {
+    const value = { format: "fabric-source/1", include: ["app/", ".GIT/"], exclude: ["app/private/"] };
+    expect(patchPathsAllowed(value, [".GIT/hooks/post-checkout", "app/PRIVATE/x"])).toEqual([".GIT/hooks/post-checkout", "app/PRIVATE/x"]);
+    expect(patchPathsAllowed(value, ["app/main.ts", "app/Privates/x"])).toEqual([]);
+    expect(patchPathsAllowed({ include: ["app/"], exclude: ["app/Secret.ts"] }, ["app/SECRET.TS", "app/secret.ts.bak"])).toEqual(["app/SECRET.TS"]);
+    expect(patchPathsAllowed(null, ["app/x", SOURCE_FILE])).toEqual(["app/x"]);
+  });
+
+  it("compares paths in Unicode NFC, so a name read in NFD meets an entry written in NFC", () => {
+    const nfcName = "caf\u00e9";
+    const nfdName = "cafe\u0301";
+    expect(isSourcePath({ include: [`${nfcName}/`] }, `${nfdName}/x`)).toBe(true);
+    expect(isSourcePath({ include: [`${nfdName}/`] }, `${nfcName}/x`)).toBe(true);
+    expect(isSourcePath({ include: ["src/"], exclude: [`src/${nfcName}/`] }, `src/${nfdName}/x`)).toBe(false);
+    expect(excludedFolderTest({ include: ["src/"], exclude: [`src/${nfcName}/`] })(`src/${nfdName}`)).toBe(true);
+    expect(sourceFolderTest({ include: [`${nfcName}/`] })(nfdName)).toBe(true);
+    expect(nestedInSource({ include: [`${nfcName}/`] }, `${nfdName}/lib`)).toBe(true);
+    expect(isUncheckedPath({ include: ["src/"], unchecked: [{ path: `src/${nfcName}.md`, reason: "r" }] }, `src/${nfdName}.md`)).toBe(true);
+    expect(sourceTreeProblems({ manifest: { include: [`${nfcName}.md`, "LICENSE"], binaries: [`${nfcName}.png`] }, files: [{ path: `${nfdName}.md`, text: "x" }, { path: "LICENSE", text: "x" }] })).toEqual([]);
+  });
+
   it("refuses a patch's paths given as anything but a list", () => {
     expect(patchPathsAllowed(manifest, "src/main.ts" as unknown as string[])).toEqual([]);
     expect(patchPathsAllowed(manifest, [3, "src/main.ts"])).toEqual(["3"]);
@@ -752,7 +786,17 @@ describe("the rules over long lists (DEC-0149)", () => {
     const small = timed(() => check(2000));
     const large = timed(() => check(32_000));
     expect(large / small).toBeLessThan(64);
-  });
+  }, 180_000);
+
+  // An include entry far longer than the grammar is left out before its folders are listed, as pathList leaves it out:
+  // listing them first costs the square of its length.
+  it("builds excludedFolderTest in time linear in an include entry far longer than the path grammar", () => {
+    const check = (size: number) => excludedFolderTest({ include: ["a/".repeat(size)], exclude: ["a/"] })("a/b");
+    expect(check(2000)).toBe(true);
+    const small = timed(() => check(2000));
+    const large = timed(() => check(32_000));
+    expect(large / small).toBeLessThan(64);
+  }, 180_000);
 
   it("answers patchPathsAllowed in time linear in the paths", () => {
     const manifestValue = manifestOf(4000);

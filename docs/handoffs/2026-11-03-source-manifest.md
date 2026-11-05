@@ -24,7 +24,7 @@ source, what never travels with it, the check before a source export, and how a 
   `source-tree`, `source-package`, `fabric-source/1` in the protocol register; `pnpm --silent validate <dir> --kind
   source-tree` (Git mode with Git's location variables removed and no read through a link, a walk otherwise with a note
   saying why, folder-relative output that never repeats a found value) and the pair in `pnpm validate <dir>`;
-  `fixtures/vectors/source-tree.json` (61 tree cases, 3 patch cases and a `constants` block written from the module's
+  `fixtures/vectors/source-tree.json` (68 tree cases, 6 patch cases and a `constants` block written from the module's
   exports) from `tools/vectors/source-tree.ts`;
   2 positive and 19 negative schema fixtures, 27 semantic fixtures.
 - [source](../specification/source.md) (new), the register (`FAC-SEM-156` to `FAC-SEM-160`; next free `FAC-SEM-162`;
@@ -218,7 +218,19 @@ source, what never travels with it, the check before a source export, and how a 
   credential finding is filed at landing; the source-manifest scope test also runs `[]` in a folder and `7` as a named
   file (each `FAC-SEM-000`, exit 1); the absolute-path test also runs a top folder it cannot read under both kinds and
   an empty folder under `source-package`; `source.md`'s "(or no document it can tell)" is dropped (that line needs no
-  `--kind`); round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  `--kind`); round 37 (not clean: the product tier found `governance-and-roles.md` glossing a source hand-over as an
+  exported source handed to anyone, and the unit tier a security hole: `.git` and `exclude` matched case-sensitively,
+  so on a case-insensitive file system `patchPathsAllowed` let `.GIT/hooks/post-checkout` and `app/PRIVATE/x` past an
+  excluded `app/private/`, and `src/.GIT/config`, `src/.git /config`, `src/.git./config` and `src/GIT~1/config` read as
+  source) answered as decided: `isDotGitSegment` reads `.git` as Git's `is_hfs_dotgit` and `is_ntfs_dotgit` do (ASCII
+  case folding, the HFS+ ignorable code points removed, trailing dots and spaces dropped, `GIT~1`), so `FAC-SEM-157`
+  reports such an include and a walk never enters such a folder; `patchPathsAllowed` also refuses a path an `exclude`
+  entry names under ASCII case folding; paths compare in Unicode NFC on both sides (Git's NFC list and a walk's names
+  as stored), reads and messages keeping the stored name; `excludedFolderTest` leaves an include entry outside the
+  grammar out before listing its folders; four patch vectors and two tree vectors; direct tests of `jwtSpans` and
+  `hasJwt` in a new `test/secret-shape.test.ts`; the governance gloss, `source.md`, `CONTEXT.md`, `package.md` and
+  DEC-0149 items 4, 12 and 13 carry the coordinator's round-37 decisions (below); the CT-218 note restated to them;
+  a landing step files the `unchecked` row; the chain figures re-measured for DEC-0153's OD-9; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -290,6 +302,23 @@ source, what never travels with it, the check before a source export, and how a 
   branches and landing, §11 on releases), so without the carve-out every ordinary push and release of such an agent,
   of a public skill set, and of every agent CT-207's templates give a manifest would need a word per act. The carve-out
   never lets a personal agent's source move into an organization's or a public repository.
+- Round 37, decided by the coordinator under the operator's recorded rules (the rule guards source leaving the owner's
+  estate or reaching new readers; personal agents stay private):
+  - the home carve-out includes the owner's own placements: a deploy to a placement its owner holds (an organization's
+    agent on that organization's placement included) is no hand-over, since the source reaches no new reader, while a
+    personal agent's source on an organization's or a team's placement, or on one other people can read, is one;
+    serving the running agent to a team gives no one the tree;
+  - each push of a commit not already in a repository that is not the home and is public or another owner's is its
+    own hand-over, since each brings new source to new readers ("pushed to a repository it was not in" read as one act
+    for the first push only);
+  - a package handed to another person carries the source and is a hand-over; "releases there" covers a release that
+    stays where the home's readers are; a personal agent's package or release on a public registry stays a hand-over;
+  - the 2026-10-12 standing permission is cited in the operator's recorded wording (the knowledge base's roadmap D5
+    row), and "file by file through the product's own change" is presented as this contract's reading, since the
+    wording itself says less;
+  - `.git` in every form a case-insensitive or Windows file system resolves to it is never source, and a patch path an
+    `exclude` entry names under ASCII case folding is refused, since on such a file system the two spellings are one
+    file and the rule is otherwise bypassed.
 - A hand-over `target` past 200 characters is `sha256:` and the hex SHA-256 of `<agent>@<commit>-><recipient>`,
   which still binds all three, rather than a target that drops the recipient.
 - More missing required slots than `degraded[]`'s 64 entries end in one `setup: true` entry with `source`
@@ -301,6 +330,26 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 37's fixes were checked on the working tree over head `033af3f9` (this note's commit holds the same tree), each
+exit code read on its own: `pnpm typecheck` (exit 0); `pnpm vitest run test/source-rules.test.ts
+test/secret-shape.test.ts test/validate-cli.test.ts test/consistency.test.ts` without coverage (exit 0: 2016 passed,
+2 skipped); `pnpm vitest run --coverage --coverage.include=src/source-rules.ts` over `source-rules`, `validate-cli`,
+`validate-cli-faults`, `rule-tolerance` and `positive-sweep` (`src/source-rules.ts` at 100 % of its branches, its floor;
+a first reading at 99.5 % found two length guards written as `if` branches and the non-object manifest of
+`patchPathsAllowed` untested, both fixed before this commit); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files
+match; `source-tree.json` now 68 tree and 6 patch cases); `pnpm run docs:check` (exit 0, 0 errors); `python3
+docs/ux/lint.py` (exit 0); `ORG_INDEX=... pnpm run privacy:check` (exit 0, 0 findings, after a new vector's home-path
+text was replaced by binary files); no U+2014 in the added lines. The coordinator's check:
+`patchPathsAllowed({format:'fabric-source/1',include:['app/','.GIT/'],exclude:['app/private/']},
+['.GIT/hooks/post-checkout','app/PRIVATE/x'])` returns both paths and `--kind source-manifest` on the same manifest
+reports `FAC-SEM-157` at `/include/1` (both now in `test/source-rules.test.ts`). The branch gate is owed: checked every
+2 minutes from 12:16 to 12:36 UTC, eleven times, the 15-minute load stayed between 53 and 64 and `/` held 6 to 7 GB
+free. PR #628 at `24cc7a34` (the knowledge base's main `8fe39d34` merged in, its item 8 conflict resolved by keeping
+main's item 8 and the PR's item 9, with round 37's item 9, principles section 7 and rules section 9): `git show
+24cc7a34:knowledge/<page>.md` gives `source hand-over` in 4, 3 and 2 lines of agents-first, principles and rules, `own
+estate` once on each, `^9\. \*\*A source hand-over` once and `^8\. \*\*No person in the chat` once in agents-first;
+the knowledge base's `npm run verify:content` (exit 0, backlog 0 errors) and `npm test` (exit 0, 172 passed).
 
 Round 36's fixes were checked on the working tree over head `69a0ce8b` (this note's commit holds the same tree), each
 exit code read on its own: `pnpm typecheck` (exit 0); `pnpm vitest run test/validate-cli.test.ts
@@ -369,7 +418,7 @@ remaining steps, in order:
    `grep -n '^\*\*Next free' docs/DECISIONS.md docs/specification/conformance.md`, whose DEC and `FAC-SEM` markers
    must equal the next free ids the CAS counters hold (`refs/agent-sync/ids/` on `origin`): a merge keeps a stale
    marker without a conflict (after the chain the registers read DEC-0152 and `FAC-SEM-162` while the counters read
-   154 and 168).
+   154 and 169 when this was written).
 3. Re-run the full gate on that merge and cite its commit in this handoff. Open the PR from the fresh branch and
    dispatch the CI workflow once on it (`gh workflow run ci.yml --ref agent/ct194-source-manifest-v2-20261104`); read
    every matrix job (ubuntu-latest on Node 22 and 24, windows-latest and macos-latest on Node 24, macos since #238):
@@ -384,7 +433,7 @@ remaining steps, in order:
    behind, merge main into it, keeping main's item 8 and the PR's item 9. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `7ac0b217`, which carries the knowledge base's main, they print 4, 3 and 2
+   `knowledge/rules.md`; at PR #628's head `24cc7a34`, which carries the knowledge base's main, they print 4, 3 and 2
    lines), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in
@@ -429,8 +478,12 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
 `fixtures/catalogue.json`, `src/secret-shape.ts` and `src/session-handoff.ts`. What a textual merge gets wrong, or gets wrong silently:
 
 - The schema count in `test/schema-compilation.test.ts`: each side writes its own count, so a merge reads wrong
-  silently; whichever lands last sets it by hand to the full count (at the time of writing 148 after DEC-0149 and
-  DEC-0150, 150 once DEC-0153 lands; re-count the files under `schemas/` then).
+  silently; whichever lands last sets it by hand to the full count: 151 once DEC-0149, DEC-0150 and DEC-0153 are all
+  on `main` (146 on `main`, one for DEC-0149, one for DEC-0150, three for DEC-0153 with its OD-9 schema, on
+  `agent/ct219-ops-digest-20261104` at `ada7c23d` when written); re-count the files under `schemas/` then.
+- `src/extensions.ts` and `test/consistency.test.ts` ("G-08: one spelling of every extension key"): DEC-0150 adds the
+  key `channel-agent/0.1` and DEC-0153 a ninth key with OD-9; the second to land keeps both constants, both test
+  entries and both rows of `interop.md`'s key table, and writes "nine extension keys" there.
 - Where DEC-0150 and DEC-0151 meet each other, `docs/DOCMAP.md` and `docs/specification/support-quality.md` conflict:
   follow DEC-0151's meeting list. Keep DEC-0151's thresholds line and drop the "Not decided here" bullet; in DOCMAP,
   DEC-0151's support-quality row first, then DEC-0150's channel-agent row. Check: `grep -c 'DEC-0151 (in progress)
@@ -454,10 +507,11 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   check: `grep -n 'reserved by open branches' docs/specification/conformance.md` prints nothing.
 - `docs/DECISIONS.md`: DEC-0148 through DEC-0153 in id order, a blank line before each heading (markdownlint MD022).
   The rule register: `FAC-SEM-155`, then `FAC-SEM-156` to `FAC-SEM-160`, then the `FAC-SEM-161` note, then
-  `FAC-SEM-162` to `FAC-SEM-167` (docs-check G-13).
+  `FAC-SEM-162` to `FAC-SEM-168` (docs-check G-13).
 - The next-free markers (`docs/DECISIONS.md`, the register in `conformance.md`) are written by whichever lands later
   from the CAS refs at merge time, never from a fixed value: `git ls-remote origin 'refs/agent-sync/ids/*'`, then
-  `git cat-file -p <sha>` for each (at the time of writing, DEC next 154 and SEM next 168; read the CAS refs at merge).
+  `git cat-file -p <sha>` for each (at the time of writing, DEC next 154 and SEM next 169, DEC-0153's OD-9 having taken
+  `FAC-SEM-168`; read the CAS refs at merge).
 - `AGENTS.md` against main (PR #236 merged): keep this branch's Check row and #236's MCP row, which removes an em dash.
   #236 landed first, so this branch adds to CT-205's row, when main is merged in, that a source hand-over is never
   covered by a task-wide mandate (written in the backlog row as `[source](specification/source.md#handing-over)`, the
@@ -483,15 +537,15 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   second drops "in progress" from both pages (`source.md`, and `ops-digest.md` OD-3 with its conformance row); in the
   register, which is append-only, it annotates DEC-0153's decision text if DEC-0153 is already accepted and edits it if
   it is still Proposed. The same for DEC-0149 and DEC-0151.
-- At landing, add to CT-218's row: deploying an agent's tree to the operator's own placement (the local or the cloud
-  form) is not a source hand-over when the placement is within the operator's own estate, is not public and is
-  readable by no one outside the operator, since it has no recipient; a placement an organization or a team holds, or
-  one whose tree another person or the team can read, is a hand-over (the knowledge base's agents-first item 9, "A
-  source hand-over takes the operator's word on that act"); serving the running agent to a team (`peer`, client keys,
-  the one-time code) gives no one the tree and is no hand-over; as
-  [handing over](../specification/source.md#handing-over)'s line paragraph states (linked in the row in the backlog's
-  own form, `specification/source.md#handing-over`). Check with `grep '^| CT-218 ' docs/backlog.md | grep -c 'specification/source.md#handing-over'`, which
-  prints 1 on the landed tree.
+- At landing, add to CT-218's row: a deploy of an agent to a placement its owner holds (the local or the cloud form)
+  is no source hand-over, an organization's agent on that organization's placement included; a personal agent's source
+  on an organization's or a team's placement, or on one other people can read, stays a hand-over; serving the running
+  agent to a team (`peer`, client keys, the one-time code) gives no one the tree and is no hand-over. These are the
+  coordinator's round-37 decisions, written in [handing over](../specification/source.md#handing-over)'s line
+  paragraph and in the knowledge base's agents-first item 9, "A source hand-over takes the operator's word on that
+  act" (linked in the row in the backlog's own form, `specification/source.md#handing-over`). Check with
+  `grep '^| CT-218 ' docs/backlog.md | grep -c 'specification/source.md#handing-over'`, which prints 1 on the landed
+  tree.
 - `AGENTS.md`: the Check row's exit wording follows the README ("exit 0 when there is no blocking problem (accepted
   lines may print)"); keep it when main's rows are merged in.
 - At the DEC-0150 step, `docs/ux/screens.md` SCR-03 keeps "SCN-001, SCN-002, SCN-054, SCN-055", and `CONTEXT.md` and

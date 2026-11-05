@@ -24,8 +24,33 @@ export const SOURCE_FILE_PATH = /^(?![/~])(?![\s\S]*\\)(?![\s\S]*\/\/)(?!(?:[\s\
 /** A path of `include` or `exclude`: a file, or with a trailing `/` a folder and everything under it (`#/$defs/path`). */
 export const SOURCE_PATH = /^(?![/~])(?![\s\S]*\\)(?![\s\S]*\/\/)(?!(?:[\s\S]*\/)?\.{1,2}(?:\/|$))[^\u0000-\u001f:]{1,256}$/u;
 
-/** A path with a `.git` segment is never source, whatever the lists say: the repository's history is not its source. */
-const inGit = (path: string): boolean => path.split("/").includes(".git");
+/**
+ * Code points HFS+ ignores in a name (Git's `is_hfs_dotgit`): the zero-width joiners and marks, the bidirectional
+ * embeddings and overrides, the deprecated format characters and the byte-order mark.
+ */
+const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
+/** ASCII case folding only, as Git's `strncasecmp` and a case-insensitive file system's ASCII names read it. */
+export const asciiFold = (text: string): string => text.replace(/[A-Z]/g, (letter) => letter.toLowerCase());
+/**
+ * Whether one path segment names the repository's `.git` on some file system, as Git's `is_hfs_dotgit` and
+ * `is_ntfs_dotgit` read it: `.git` under ASCII case folding, with the code points HFS+ ignores removed and any run of
+ * trailing dots or spaces dropped (NTFS drops them), or the NTFS short name `git~1` read the same way.
+ */
+export const isDotGitSegment = (segment: string): boolean => {
+  const name = asciiFold(segment.replace(HFS_IGNORABLE, "")).replace(/[ .]+$/u, "");
+  return name === ".git" || name === "git~1";
+};
+/**
+ * A path with a `.git` segment is never source, whatever the lists say: the repository's history is not its source.
+ * A segment that a case-insensitive or a Windows file system resolves to `.git` counts (`isDotGitSegment`).
+ */
+const inGit = (path: string): boolean => path.split("/").some(isDotGitSegment);
+/**
+ * A path compared in Unicode NFC: Git on macOS lists names in NFC and a walk reads them as stored (often NFD), so the
+ * manifest's entries and every path asked about are normalised before they are compared; reads and messages keep the
+ * name as stored.
+ */
+const nfc = (path: string): string => path.normalize("NFC");
 
 /** Every prefix of a path that ends in `/`: the folders it lies in, the path itself when it is a folder. */
 const folderPrefixes = (path: string): string[] => {
@@ -45,7 +70,7 @@ interface PathList { files: Set<string>; folders: Set<string>; reaches: Set<stri
  * `include`).
  */
 const pathList = (value: unknown, withReaches = false): PathList => {
-  const entries = strings(value).map(([entry]) => entry).filter((entry) => SOURCE_PATH.test(entry));
+  const entries = strings(value).map(([entry]) => nfc(entry)).filter((entry) => SOURCE_PATH.test(entry));
   return {
     files: new Set(entries.filter((entry) => !entry.endsWith("/"))),
     folders: new Set(entries.filter((entry) => entry.endsWith("/"))),
@@ -54,20 +79,23 @@ const pathList = (value: unknown, withReaches = false): PathList => {
 };
 /** Whether a list names a path: the file itself, or a folder it lies in (`covers` for each entry, by lookup). */
 // 256 code points are at most 512 UTF-16 units: a longer string is outside the grammar, which counts code points.
-const listCovers = (list: PathList, path: string): boolean =>
-  path.length <= 512 && (list.files.has(path) || folderPrefixes(path).some((folder) => list.folders.has(folder)));
+const coversNfc = (list: PathList, path: string): boolean =>
+  list.files.has(path) || folderPrefixes(path).some((folder) => list.folders.has(folder));
+const listCovers = (list: PathList, written: string): boolean => written.length <= 512 && coversNfc(list, nfc(written));
 
 /**
  * The include paths as a walk asks about them, indexed once: whether one names a path, and whether one reaches into a
  * folder (names it, with or without its trailing `/`, or something in it) or covers it. `folderPath` ends in `/`.
  */
 export interface IncludeIndex { covers(path: string): boolean; reaches(folderPath: string): boolean }
+const reachesNfc = (list: PathList, folderPath: string): boolean =>
+  SOURCE_PATH.test(folderPath.slice(0, -1)) && (list.reaches.has(folderPath) || list.files.has(folderPath.slice(0, -1)) || folderPrefixes(folderPath).some((folder) => list.folders.has(folder)));
 export function includeIndex(includes: readonly string[]): IncludeIndex {
   const list = pathList(includes, true);
   // A queried path outside the grammar is no source and no folder of one, whatever its length.
   return {
     covers: (path) => path.length <= 512 && SOURCE_FILE_PATH.test(path) && listCovers(list, path),
-    reaches: (folderPath) => folderPath.length <= 513 && SOURCE_PATH.test(folderPath.slice(0, -1)) && (list.reaches.has(folderPath) || list.files.has(folderPath.slice(0, -1)) || folderPrefixes(folderPath).some((folder) => list.folders.has(folder)))
+    reaches: (written) => written.length <= 513 && reachesNfc(list, nfc(written))
   };
 }
 
@@ -82,7 +110,7 @@ export function sourcePathTest(manifest: unknown): (path: unknown) => boolean {
   const exclude = pathList(source.exclude);
   return (path) => {
     if (typeof path !== "string" || !SOURCE_FILE_PATH.test(path) || inGit(path)) return false;
-    if (path === SOURCE_FILE) return true;
+    if (nfc(path) === SOURCE_FILE) return true;
     return listCovers(include, path) && !listCovers(exclude, path);
   };
 }
@@ -94,9 +122,13 @@ export function sourcePathTest(manifest: unknown): (path: unknown) => boolean {
 export function excludedFolderTest(manifest: unknown): (folder: string) => boolean {
   const source = isObject(manifest) ? manifest : {};
   const exclude = pathList(source.exclude);
-  // Every folder an include path lies in, indexed once: a folder is looked up, never compared with every include.
-  const under = new Set(strings(source.include).flatMap(([path]) => folderPrefixes(path)));
-  return (folder) => folderPrefixes(`${folder}/`).some((prefix) => exclude.folders.has(prefix)) && !under.has(`${folder}/`);
+  // Every folder an include path lies in, indexed once: a folder is looked up, never compared with every include. Only
+  // entries in the path grammar are indexed, as pathList does: a longer one would cost the square of its length.
+  const under = new Set(strings(source.include).map(([path]) => nfc(path)).filter((path) => SOURCE_PATH.test(path)).flatMap((path) => folderPrefixes(path)));
+  return (written) => {
+    const folder = nfc(written);
+    return folderPrefixes(`${folder}/`).some((prefix) => exclude.folders.has(prefix)) && !under.has(`${folder}/`);
+  };
 }
 
 /**
@@ -108,7 +140,11 @@ export function sourceFolderTest(manifest: unknown): (folder: string) => boolean
   const include = pathList(source.include);
   const exclude = pathList(source.exclude);
   const held = (list: PathList, folder: string) => folderPrefixes(`${folder}/`).some((prefix) => list.folders.has(prefix));
-  return (folder) => folder !== "" && folder.length <= 512 && !inGit(`${folder}/x`) && held(include, folder) && !held(exclude, folder);
+  return (written) => {
+    if (written === "" || written.length > 512) return false;
+    const folder = nfc(written);
+    return !inGit(`${folder}/x`) && held(include, folder) && !held(exclude, folder);
+  };
 }
 
 /**
@@ -123,7 +159,8 @@ export function isSourcePath(manifest: unknown, path: unknown): boolean {
  * Whether a folder (a path ending in `/`) lies in the source: inside an `include` folder or one itself, with no
  * `.git` segment, inside no `exclude` folder.
  */
-function folderInSource(includes: PathList, excludes: PathList, folder: string): boolean {
+function folderInSource(includes: PathList, excludes: PathList, written: string): boolean {
+  const folder = nfc(written);
   return SOURCE_PATH.test(folder) && !inGit(folder.slice(0, -1)) &&
     folderPrefixes(folder).some((prefix) => includes.folders.has(prefix)) &&
     !folderPrefixes(folder).some((prefix) => excludes.folders.has(prefix));
@@ -167,8 +204,9 @@ export function nestedTest(manifest: unknown): (written: unknown) => boolean {
   const exclude = pathList(source.exclude);
   return (written) => {
     // `git ls-files --others` names an untracked repository with a trailing `/`.
-    const path = typeof written === "string" && written.endsWith("/") ? written.slice(0, -1) : written;
-    if (typeof path !== "string" || !SOURCE_FILE_PATH.test(path) || inGit(path)) return false;
+    const stored = typeof written === "string" && written.endsWith("/") ? written.slice(0, -1) : written;
+    if (typeof stored !== "string" || !SOURCE_FILE_PATH.test(stored) || inGit(stored)) return false;
+    const path = nfc(stored);
     const folder = `${path}/`;
     // An include path names it, lies under it (its folder is one of that entry's prefixes) or covers it.
     const reached = include.files.has(path) || include.reaches.has(folder) || folderPrefixes(folder).some((prefix) => include.folders.has(prefix));
@@ -182,7 +220,11 @@ export function nestedTest(manifest: unknown): (written: unknown) => boolean {
  */
 export function patchPathsAllowed(manifest: unknown, paths: readonly unknown[]): string[] {
   const isSource = sourcePathTest(manifest);
-  return (Array.isArray(paths) ? paths : []).filter((path) => !isSource(path)).map((path) => show(path));
+  // On a case-insensitive file system `app/PRIVATE/x` is the file `app/private/` excludes: a patch path is also refused
+  // when, under ASCII case folding, it is a path an exclude entry names (`.git` is already read so by `inGit`).
+  const source = isObject(manifest) ? manifest : {};
+  const folded = pathList(strings(source.exclude).map(([entry]) => asciiFold(entry)));
+  return (Array.isArray(paths) ? paths : []).filter((path) => !isSource(path) || listCovers(folded, asciiFold(path as string))).map((path) => show(path));
 }
 
 // #region source-tree-check (docs: docs/specification/source.md#the-tree-check)
@@ -837,7 +879,7 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
   }
   if (strings(manifest.include).length === 0) problems.push({ kind: "no-include" });
   const allowed = new Set(strings(manifest.publicAddresses).map(([address]) => address.toLowerCase()));
-  const binaries = new Set(strings(manifest.binaries).map(([path]) => path));
+  const binaries = new Set(strings(manifest.binaries).map(([path]) => nfc(path)));
   // The manifest's lists are indexed once, so each path is looked up rather than compared with every entry.
   const isSource = sourcePathTest(manifest);
   const isNested = nestedTest(manifest);
@@ -849,8 +891,8 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
   const sourcePaths = files.filter(([file]) => file.nestedRepository !== true).map(([file]) => file.path as string);
   // A resolved target has no trailing slash: the root, a source file, or a folder some source file lies in.
   // Every folder some source file lies in, built once per tree, so a link is looked up, never compared with each path.
-  const sourceFolders = new Set(sourcePaths.flatMap((path) => path.split("/").slice(0, -1).map((_part, index, parts) => parts.slice(0, index + 1).join("/"))));
-  const linkInside = (target: string): boolean => target === "" || isSource(target) || sourceFolders.has(target);
+  const sourceFolders = new Set(sourcePaths.flatMap((path) => nfc(path).split("/").slice(0, -1).map((_part, index, parts) => parts.slice(0, index + 1).join("/"))));
+  const linkInside = (target: string): boolean => target === "" || isSource(target) || sourceFolders.has(nfc(target));
 
   for (const [file, index] of files) {
     const path = file.path as string;
@@ -866,7 +908,7 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
     // An unchecked file travels and is read by its path only.
     if (listCovers(unchecked, path)) continue;
     if (binary) {
-      if (!binaries.has(path)) problems.push({ kind: "binary", file: index });
+      if (!binaries.has(nfc(path))) problems.push({ kind: "binary", file: index });
       continue;
     }
     const text = typeof file.text === "string" ? file.text : "";
@@ -912,9 +954,10 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
     });
   }
   // An include path names a file of the tree, or a folder one lies in: looked up, never compared with every path.
-  const present = new Set(sourcePaths);
-  const presentFolders = new Set(sourcePaths.flatMap(folderPrefixes));
-  strings(manifest.include).forEach(([entry, at]) => {
+  const present = new Set(sourcePaths.map(nfc));
+  const presentFolders = new Set([...present].flatMap(folderPrefixes));
+  strings(manifest.include).forEach(([written, at]) => {
+    const entry = nfc(written);
     if (!(entry.endsWith("/") ? presentFolders.has(entry) : present.has(entry))) problems.push({ kind: "missing", include: at });
   });
   // A licence that is a symbolic link is no licence: the export carries the link, not the terms.
@@ -1046,13 +1089,14 @@ function pathFindings(value: JsonObject): Finding[] {
   const excludes = pathList(value.exclude);
   const isSource = sourcePathTest(value);
   // An entry outside the path grammar (over 256 code points) lies in no folder an index holds: its prefixes are not built.
-  const prefixesOf = (path: string): string[] => (SOURCE_PATH.test(path) ? folderPrefixes(path) : []);
-  for (const [path, index] of include) {
+  const prefixesOf = (written: string): string[] => { const path = nfc(written); return SOURCE_PATH.test(path) ? folderPrefixes(path) : []; };
+  for (const [written, index] of include) {
+    const path = nfc(written);
     const dead = prefixesOf(path).some((folder) => folder !== path && excludes.folders.has(folder));
     if (dead) flag(`/include/${index}`, `include[${index}] lies inside an exclude folder, so it names nothing`);
   }
   for (const [path, index] of strings(value.exclude)) {
-    if (includes.files.has(path) || includes.folders.has(path)) flag(`/exclude/${index}`, `exclude[${index}] is an include path: it would remove it whole, so leave both out`);
+    if (includes.files.has(nfc(path)) || includes.folders.has(nfc(path))) flag(`/exclude/${index}`, `exclude[${index}] is an include path: it would remove it whole, so leave both out`);
     else if (!prefixesOf(path).some((folder) => includes.folders.has(folder))) flag(`/exclude/${index}`, `exclude[${index}] lies inside no include folder, so it removes nothing`);
   }
   for (const [path, index] of strings(value.binaries)) {

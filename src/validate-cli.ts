@@ -24,7 +24,7 @@ import { ruleHelp } from "./rule-codes.js";
 import { documentKindsOf, isSemanticKind } from "./semantic-kinds.js";
 import { evaluateSemanticRules } from "./semantic-rules.js";
 import { PACKAGE_FILE } from "./package-rules.js";
-import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, excludedFolderTest, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
+import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, excludedFolderTest, isDotGitSegment, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
 import { createValidatorSync, formatSchemaErrors } from "./validator.js";
 
 export interface Problem { file: string; path: string; rule: string; message: string; help?: string }
@@ -852,7 +852,8 @@ function walk(dir: string, prefix: string, includes: IncludeIndex, run: Run, ski
     const relative = `${prefix}${entry.name}`;
     if (!entry.isDirectory()) { found.push({ path: relative }); continue; }
     // An excluded folder holds no source and is never entered, unless an include path lies under it.
-    if (entry.name === ".git" || !includes.reaches(`${relative}/`) || skipped(relative)) continue;
+    // A folder a case-insensitive or Windows file system resolves to `.git` is never entered either.
+    if (isDotGitSegment(entry.name) || !includes.reaches(`${relative}/`) || skipped(relative)) continue;
     const full = path.join(dir, entry.name);
     if (existsSync(path.join(full, ".git"))) found.push({ path: relative, nested: true });
     else found.push(...walk(full, `${relative}/`, includes, run, skipped, inSourceFolder));
