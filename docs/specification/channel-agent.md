@@ -292,9 +292,8 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    non-boundary, up to 16, so a port that decodes such a form before a boundary-bound `sk-` reading is outside this
    bound (DEC-0151 lists them as knowingly not found). Every string read as a URL pays 128 (`PIECE_COST`) once for its two URL parses (the cost's and `secretUrl`'s), whether it parses or the parser throws (`ws:` costs 3, 3 x 4 and 128: 143). For a string read as a URL that parses, the URL terms are counted
    on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed, percent-decoded), not on
-   the raw text: for every query or fragment piece, 128, and 4 (`ARG_PIECE_COST`) for each `&` of the search and the hash, an empty piece included; its name's and its value's UTF-16 units, the value's `eyJ` and
-   `sk-` terms and, when the value is not empty and the name holds an upper-case letter, the triangular number of the
-   name's length, n(n+1)/2 (`https://a.example/?aBC=x` costs 24, 128, 3, 1 and 6). A member's name is read before its place is written; once the budget is spent nothing more is read and every further member collapses its place. Past the
+   the raw text: for every query or fragment piece, 128, and 4 (`ARG_PIECE_COST`) for each `&` of the search and the hash, an empty piece included; its name's and its value's UTF-16 units, the value's `eyJ` term, `sk-` term, provider-prefix floors and long-run term and, when the value is not empty and the name holds an upper-case letter, the triangular number of the
+   name's length, n(n+1)/2 (`https://a.example/?aBC=x` costs 24, 128, 3, 1 and 6; the value `ghp_ab,cd` costs 9, a `ghp_` floor of 5 and a long-run term of 3 x (36 + 4): 134). A member's name is read before its place is written; once the budget is spent nothing more is read and every further member collapses its place. Past the
    budget, one finding says, once per document, that reading the declarations for credentials takes more than 1 000 000
    UTF-16 units of reading; it stands at the copy where
    the budget ran out (the read declaration's key, or a misplaced copy's), never at a read declaration that was read

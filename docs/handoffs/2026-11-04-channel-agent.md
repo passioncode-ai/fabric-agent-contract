@@ -445,6 +445,11 @@ FAA-197, on the adapter's main).
   answer's bytes; the Narrowings size bullet gives both costs (Latin about 12 to 14 per unit, Cyrillic or CJK about 2 or
   less, measured 1.84 and 1.52); the send record is named as this contract's assumption about the session owner of
   section 9, on the page, in item 8, the row and the merge post's identification question.
+- Round 34's seam reading (pass, one risk), folded after round 35: the page, CA-5 and the conformance row list a URL
+  value's terms word for word as `detectorCost` charges them ("the value's `eyJ` term, `sk-` term, provider-prefix floors
+  and long-run term"); two budget-edge vectors on `https://a.example/?api_key=ghp_ab,cd` (1103) flip their verdict if a
+  value's prefix floor or long-run term is dropped; the cost-terms test pins the value example; the DEC-0151 landing
+  list drops the `i` flag of the rename advice.
 
 ## The branch and its history
 
@@ -702,10 +707,18 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 - the page's sentence on a language tag that starts with `sk-`: DEC-0151's narrowing clears a long tag only when it
   holds no digit, so the advice to write `sk` or `sk-SK` stays; the lander restates the test under DEC-0151's detector
   (`sk-Latn-SK-u-ca-gregory` then passes, `sk-Latn-150-u-ca-gregory` stays a key);
+- the rename advice in `src/channel-agent.ts` (`flag`'s `/^sk-/i`) drops its `i` flag: under DEC-0151's canonical case
+  an upper-case `SK-` is not a key, so the advice would name the wrong cause;
 - for whichever of DEC-0150 and DEC-0151 lands second: `test/support-quality.test.ts` reads the channel kinds from
   `service-channel-agent-extension.schema.json` `$defs/channel/properties/kind`'s `enum` instead of a literal list.
 
 ## Checks actually run
+
+On the round-34 seam fold (no source code moved), each exit code read separately: `pnpm typecheck` 0; `pnpm vitest run
+--testTimeout=60000 test/channel-agent.test.ts test/consistency.test.ts test/validate-cli.test.ts` 0 (2089 passed);
+`pnpm vectors:check` 0; `pnpm run docs:check` 0; `python3 docs/ux/lint.py` 0; `pnpm run privacy:check` with the
+organization index 0. A mutation of the URL-value line in `detectorCost` to the length and the `eyJ` term alone, run
+once and reverted, failed both new budget-edge vectors and four cost tests.
 
 On round 35's change (documents only, no code moved), each exit code read separately: `pnpm typecheck` 0; `pnpm vitest
 run --testTimeout=60000 test/channel-agent.test.ts test/consistency.test.ts test/validate-cli.test.ts` 0 (2085 passed);

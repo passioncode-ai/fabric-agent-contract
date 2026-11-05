@@ -924,6 +924,11 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       expect(bare(text), text).toBe(cost);
     }
     expect(bare("https://a.example/?aBC=x&api_key=abc123")).toBe(318);
+    // A URL value holding short runs and a near-miss prefix pays its own prefix floor and long-run term.
+    expect(page.replace(/\s+/g, " ")).toContain("the value `ghp_ab,cd` costs 9, a `ghp_` floor of 5 and a long-run term of 3 x (36 + 4): 134");
+    // Against a value of the same runs and no prefix, the `ghp_` floor is charged twice: in the string and in the value.
+    expect(detectorCost("https://a.example/?api_key=ghp_ab,cd") - detectorCost("https://a.example/?api_key=xyzwvu,ts")).toBe(5 + 5);
+    expect(detectorCost("https://a.example/?api_key=ghp_ab,cd")).toBe(1103);
     expect(VISIT_COST).toBe(16);
     expect(page.replace(/\s+/g, " ")).toContain("The walk charges each name or string 16 (`VISIT_COST`)");
   });

@@ -91,6 +91,11 @@ function budgetEdge(): Array<[string, unknown, Json[]]> {
   // A URL whose query name holds an upper-case letter: 39 UTF-16 units, then per piece 128, the name's and the value's
   // units, and for aBC (3) with a value the triangular number 6: 39 + (128 + 3 + 1 + 6) + (128 + 7 + 6) = 318.
   const query = "https://a.example/?aBC=x&api_key=abc123";
+  // A URL whose query value holds short runs and a near-miss provider prefix, so the value's own prefix floor and
+  // long-run term decide the edge: 36 units, `ghp_` floor 5, the string's runs 298 + 187 + 164 = 649, its 3 `/` and 1 `=`
+  // (16), the parses 128; the piece 128, the name `api_key` 7, the value `ghp_ab,cd` 9, its `ghp_` floor 5 and its runs
+  // 3 x (36 + 4) = 120: 1103 in all.
+  const prefixed = "https://a.example/?api_key=ghp_ab,cd";
   // The long-run term, by hand: min(length, 39) per code point of each base64 run shorter than 40, in each of three
   // partitions (the class; without `=`; without `=` and `/`). `Bearer` and the 24 z's hold neither, so 3 x (36 + 576) =
   // 1836; the tail adds `sk-ab`, 3 x 25 (1911 in all); the URL: `https` 3 x 25, `//a` 9 + 9 + 1, `example/` 64 + 64 +
@@ -99,7 +104,7 @@ function budgetEdge(): Array<[string, unknown, Json[]]> {
   // Every string also pays 4 for each separator the argument reading splits at: the bearer's space (4), the tail's
   // second space (4 more), the URL's three `/` and two `=` (20, so 1131), and its query's one `&` (4 more, 1135); a
   // string read as a URL also pays 128 once for its parses (1263).
-  const lastCost = (last: string) => visit + (last === query ? 1263 : last.length + 1836 + 4 + (last === tail ? "sk-ab".length + 75 + 4 : 0));
+  const lastCost = (last: string) => visit + (last === prefixed ? 1103 : last === query ? 1263 : last.length + 1836 + 4 + (last === tail ? "sk-ab".length + 75 + 4 : 0));
   // The pad's UTF-16 units, so the document's reading lands on the budget plus `extra`: an a-pad is `p` and a's; an
   // astral pad is one or two `é` (one unit each, no run) and astral characters (two units each).
   const pad = (extra: number, unit: string, last: string) => {
@@ -120,7 +125,9 @@ function budgetEdge(): Array<[string, unknown, Json[]]> {
     ["the budget's edge with a boundary sk- near the last string's end, counted from its s: read and found", doc(0, "a", tail), [f(sem(165), `${WK_PATH}/*/*`), f(sem(162), WK_PATH)]],
     ["one UTF-16 unit past that edge: the last value is not read", doc(1, "a", tail), [f(sem(165), WK_PATH), f(sem(162), WK_PATH)]],
     ["the budget's edge with a URL whose query name holds an upper-case letter, its triangular number counted: read and found", doc(0, "a", query), [f(sem(165), `${WK_PATH}/*/*`), f(sem(162), WK_PATH)]],
-    ["one UTF-16 unit past that edge: the URL is not read", doc(1, "a", query), [f(sem(165), WK_PATH), f(sem(162), WK_PATH)]]
+    ["one UTF-16 unit past that edge: the URL is not read", doc(1, "a", query), [f(sem(165), WK_PATH), f(sem(162), WK_PATH)]],
+    ["the budget's edge with a URL value's own prefix floor and long-run term counted: read and found", doc(0, "a", prefixed), [f(sem(165), `${WK_PATH}/*/*`), f(sem(162), WK_PATH)]],
+    ["one UTF-16 unit past that edge: the URL with the value's terms is not read", doc(1, "a", prefixed), [f(sem(165), WK_PATH), f(sem(162), WK_PATH)]]
   ];
 }
 

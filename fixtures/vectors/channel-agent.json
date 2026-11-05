@@ -13600,6 +13600,58 @@
       ]
     },
     {
+      "name": "the budget's edge with a URL value's own prefix floor and long-run term counted: read and found",
+      "site": "well-known",
+      "input": {
+        "protocol": "fabric-service/0.1",
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1": {
+            "eyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJ": [],
+            "paaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": [],
+            "last": [
+              "https://a.example/?api_key=ghp_ab,cd"
+            ]
+          }
+        }
+      },
+      "findings": [
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1/*/*"
+        },
+        {
+          "code": "FAC-SEM-162",
+          "instancePath": "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1"
+        }
+      ]
+    },
+    {
+      "name": "one UTF-16 unit past that edge: the URL with the value's terms is not read",
+      "site": "well-known",
+      "input": {
+        "protocol": "fabric-service/0.1",
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1": {
+            "eyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJeyJ": [],
+            "paaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": [],
+            "last": [
+              "https://a.example/?api_key=ghp_ab,cd"
+            ]
+          }
+        }
+      },
+      "findings": [
+        {
+          "code": "FAC-SEM-165",
+          "instancePath": "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1"
+        },
+        {
+          "code": "FAC-SEM-162",
+          "instancePath": "/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1"
+        }
+      ]
+    },
+    {
       "name": "a URL with an ASCII authority and a credential-named query parameter: read as a URL, found",
       "site": "manifest",
       "input": {
