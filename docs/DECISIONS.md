@@ -9292,7 +9292,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 35 of the readings, round 21's seam reading included; CA-8 is the coordinator's
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 36 of the readings, round 21's seam reading included; CA-8 is the coordinator's
   decision of round 17 on thread `b6820b97` (message `5a1334d1`), answering a producer who asked whether the declaration
   needs an `untrusted_input` field, and its bounds are the coordinator's decision of round 18, taken in the coordinating
   session with no board message: a word recognised in a chat is not a DEC-0121 AP-3 source, it never sets
@@ -9338,8 +9338,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Round 34 was not clean (the Narrowings size bullet and the offline rule in SCN-043 and FLW-29): the coordinator's
   decision states the size charge as item 4 does, makes a message marked offline or scheduled never the operator's on
   any path, names the link-code departure from sections 2.1, 2.2 and 5.1, and charges each container the reading enters.
-  Round 35 was not clean (budget versus 2 MiB cap outside Latin script): the coordinator's decision says the credential
-  budget binds before the cap only for Latin-script prose, and names the send record as this contract's assumption.
+  Round 35 was not clean (budget versus 2 MiB cap outside Latin script) and round 36 was not clean (per-script cost
+  figures): the coordinators' decisions state the cap once (Latin-script prose stays under the 2 MiB cap at the budget,
+  escaped or not; Chinese, Japanese or Thai prose can exceed it as written, and prose in any other script can when
+  escaped as `\uXXXX`. Keep a large declaration in the manifest and measure the answer's bytes.) and the per-script
+  costs as a test measures them, and name the send record as this contract's assumption.
   `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149

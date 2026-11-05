@@ -911,13 +911,61 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       expect(least(() => channelAgentRules(doc, "well-known")), JSON.stringify(text.slice(0, 12))).toBeLessThan(2 * baseline + 20);
     }
   });
+  // Sample sentences written for this test, one or two per script, each repeated to 4 096 code points: the page's
+  // Narrowings state the ranges this test measures, so a figure on the page always resolves to it.
+  const SAMPLES: Array<[string, string, number, number]> = [
+    ["English", "We will check your order today and write back as soon as the parcel leaves our store. ", 10, 14],
+    ["English", "Please send us the number on your receipt so that we can find the payment quickly. ", 10, 14],
+    ["Vietnamese", "Chúng tôi sẽ kiểm tra đơn hàng của bạn và trả lời ngay khi có tin mới. ", 4.5, 6],
+    ["German", "Wir prüfen Ihre Bestellung heute und melden uns, sobald das Paket unterwegs ist. ", 5, 23],
+    ["Finnish", "Tarkistamme tilauksesi tänään ja vastaamme heti kun paketti lähtee varastostamme. ", 20, 23],
+    ["Russian", "Мы проверим ваш заказ сегодня и напишем, как только посылка покинет склад. ", 1.6, 2.2],
+    ["Greek", "Θα ελέγξουμε την παραγγελία σας σήμερα και θα σας γράψουμε σύντομα. ", 1.6, 2.2],
+    ["Arabic", "سنراجع طلبك اليوم ونكتب إليك فور خروج الطرد من المستودع. ", 1.6, 2.2],
+    ["Devanagari", "हम आज आपके ऑर्डर की जाँच करेंगे और पार्सल निकलते ही आपको लिखेंगे। ", 1.6, 2.2],
+    ["Hangul", "오늘 주문을 확인하고 소포가 출발하면 바로 연락드리겠습니다. ", 1.6, 2.2],
+    ["Chinese", "我们今天会检查您的订单，包裹一离开仓库就会通知您。", 1, 1.1],
+    ["Japanese", "本日ご注文を確認し、荷物が倉庫を出たらすぐにご連絡します。", 1, 1.1],
+    ["Thai", "เราจะตรวจสอบคำสั่งซื้อของคุณวันนี้และแจ้งให้ทราบทันทีเมื่อพัสดุออกจากคลัง ", 1, 1.1]
+  ];
+  const repeatTo = (sentence: string, points: number): string => {
+    const units = Array.from(sentence);
+    return Array.from({ length: points }, (_, i) => units[i % units.length]).join("");
+  };
+  it("states each script's cost per UTF-16 unit as the page does", () => {
+    for (const [script, sentence, low, high] of SAMPLES) {
+      const text = repeatTo(sentence, 4096);
+      const perUnit = (detectorCost(text) + VISIT_COST) / text.length;
+      expect(perUnit, script).toBeGreaterThanOrEqual(low);
+      expect(perUnit, script).toBeLessThanOrEqual(high);
+    }
+    const page = read("docs/specification/channel-agent.md").replace(/\s+/g, " ");
+    expect(page).toContain("English prose about 10 to 14, other Latin-script samples from about 5 (Vietnamese) to about 22 (Finnish); Cyrillic, Greek, Arabic, Devanagari and Hangul prose about 1.6 to 2.2; Chinese, Japanese and Thai about 1 to 1.1");
+  });
+  it("lets a Chinese answer within the budget exceed 2 MiB, and stops an English one well under it", () => {
+    const answer = (sentence: string, channels: number) => {
+      const languages = Array.from({ length: 32 }, (_, i) => `${"ab"[Math.floor(i / 26)]}${String.fromCharCode(97 + (i % 26))}`);
+      const text = repeatTo(sentence, 4096);
+      const many = Object.fromEntries(languages.map((language) => [language, text]));
+      const p0 = value.projects[0];
+      const dm = p0.channels[0] as Json;
+      const list = Array.from({ length: channels }, (_, j) => ({ ...dm, id: `c${j}`, texts: { holding: many, final: many } }));
+      return { protocol: "fabric-service/0.1", extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: list }] } } };
+    };
+    const chinese = answer("我们今天会检查您的订单，包裹一离开仓库就会通知您。", 3);
+    expect(Buffer.byteLength(JSON.stringify(chinese), "utf8")).toBeGreaterThan(2_097_152);
+    expect(channelAgentRules(chinese, "well-known").filter((f) => f.code === "FAC-SEM-165" || f.code === "FAC-SEM-162")).toEqual([]);
+    const english = answer("We will check your order today and write back as soon as the parcel leaves our store. ", 1);
+    expect(Buffer.byteLength(JSON.stringify(english), "utf8")).toBeLessThan(2_097_152);
+    expect(channelAgentRules(english, "well-known").some((f) => f.message.includes("UTF-16 units of reading"))).toBe(true);
+  });
   it("holds each of the page's cost terms to detectorCost, exactly", () => {
     const page = read("docs/specification/channel-agent.md");
     const terms: Array<[string, number, string]> = [
       ["eyJab.cd", 8 + 8, "`eyJab.cd` costs 8 and 8"],
       ["sk-a", 8, "`sk-a` costs 4 and 4: 8"],
       ["xsk-a", 5 + 1, "`xsk-a` costs 5 and 1"],
-      ["https://a.example/?aBC=x", 24 + PIECE_COST + 3 + 1 + 6, "`https://a.example/?aBC=x` costs 24, 128, 3, 1 and 6"]
+      ["https://a.example/?aBC=x", 24 + PIECE_COST + 3 + 1 + 6, "`https://a.example/?aBC=x` costs 24, 128, 3, 1, 3 for `x`'s long-run term and 6"]
     ];
     for (const [text, cost, quoted] of terms) {
       expect(page.replace(/\s+/g, " "), quoted).toContain(quoted);

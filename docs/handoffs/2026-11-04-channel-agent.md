@@ -441,15 +441,27 @@ FAA-197, on the adapter's main).
 - Round 35 of the readings (on `644dcbe6`: product one break) was not clean: the page and SCN-055 said the credential
   budget always binds before the 2 MiB well-known cap, which is false outside Latin script (CJK prose of 760 000 units
   is 2 292 326 bytes, Russian with `\uXXXX` escapes 449 922 units is 2 347 303 bytes, both read as declared). With the
-  coordinator's decisions: both now say the budget binds before the cap for Latin-script prose only, and to measure the
-  answer's bytes; the Narrowings size bullet gives both costs (Latin about 12 to 14 per unit, Cyrillic or CJK about 2 or
-  less, measured 1.84 and 1.52); the send record is named as this contract's assumption about the session owner of
-  section 9, on the page, in item 8, the row and the merge post's identification question.
+  coordinator's decisions (with round 36's): both now say: "Latin-script prose stays under the 2 MiB cap at the budget,
+  escaped or not; Chinese, Japanese or Thai prose can exceed it as written, and prose in any other script can when
+  escaped as `\uXXXX`. Keep a large declaration in the manifest and measure the answer's bytes."; the Narrowings size
+  bullet gives the per-script costs as a test measures them (English about 10 to 14 per unit, other Latin-script samples
+  about 5 to 22, Cyrillic, Greek, Arabic, Devanagari and Hangul about 1.6 to 2.2, Chinese, Japanese and Thai about 1 to
+  1.1); the send record is named as this contract's assumption about the session owner of section 9, on the page, in
+  item 8, the row and the merge post's identification question.
 - Round 34's seam reading (pass, one risk), folded after round 35: the page, CA-5 and the conformance row list a URL
   value's terms word for word as `detectorCost` charges them ("the value's `eyJ` term, `sk-` term, provider-prefix floors
   and long-run term"); two budget-edge vectors on `https://a.example/?api_key=ghp_ab,cd` (1103) flip their verdict if a
   value's prefix floor or long-run term is dropped; the cost-terms test pins the value example; the DEC-0151 landing
   list drops the `i` flag of the rename advice.
+- Round 36 of the readings (on `6dac4d36`: product one break) was not clean: the per-script cost figures did not hold.
+  With the coordinator's decisions, every cost figure resolves to a test: the test "states each script's cost per UTF-16
+  unit as the page does" measures samples written for it in thirteen scripts, and the Narrowings size bullet states its
+  ranges (the Finnish sample measures about 22, where the request said 26, so the page says 22); the cap sentence reads
+  the same on the page, in SCN-055, in DEC-0150's Source and here, pinned by a test (a Chinese answer within the budget
+  over 2 097 152 bytes, an English answer that draws `FAC-SEM-165` well under it); "Not checked here" says `pnpm
+  validate` does not check the 2 MiB cap, and CT-223 is filed for a hint (until it lands the adapter's FAA-197 check of
+  live answers names the cap, which the landing post to FAA-197 carries); the `aBC=x` example names `x`'s long-run
+  term; the conformance row's stray space is gone; the `detectorCost` comment names the provider-prefix floors.
 
 ## The branch and its history
 
@@ -714,6 +726,12 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
+On round 36's change (a comment in `src/channel-agent.ts`, no logic moved), each exit code read separately: `pnpm
+typecheck` 0; `pnpm vitest run --testTimeout=60000 test/channel-agent.test.ts test/consistency.test.ts
+test/validate-cli.test.ts` 0 (2091 passed); `pnpm vectors:check` 0; `pnpm run docs:check` 0; `python3 docs/ux/lint.py`
+0; `pnpm run privacy:check` with the organization index 0 (0 findings, the new sample sentences included); no U+2014 in
+the added lines. The coverage run is owed: the 15-minute load was 84.48.
+
 On the round-34 seam fold (no source code moved), each exit code read separately: `pnpm typecheck` 0; `pnpm vitest run
 --testTimeout=60000 test/channel-agent.test.ts test/consistency.test.ts test/validate-cli.test.ts` 0 (2089 passed);
 `pnpm vectors:check` 0; `pnpm run docs:check` 0; `python3 docs/ux/lint.py` 0; `pnpm run privacy:check` with the
@@ -854,7 +872,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 35 (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 36 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -901,6 +919,7 @@ here), and adds:
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;
 - to be asked of the standard's owner: whether one declaration may hold projects on several sides;
+- posted on the board at landing, for FAA-197: until CT-223's hint lands, its check of live answers names the 2 MiB cap of a well-known answer;
 - posted on the board at landing, for FAA-197 (the adapter's adoption row, on its main), what that row lacks: both
   `PROTOCOL_REVISIONS` twins with `channel-agent-standard` `['1']` and the feed-protocols vectors vendored again; the
   check reports, never fails, a declaration it reads as not declared while live producers still fail; and the well-known

@@ -703,7 +703,7 @@ export const PREFIX_FLOORS: ReadonlyArray<readonly [RegExp, number]> = [[/gh[pou
  * for each maximal run of base64 characters shorter than LONG_RUN_FLOOR (40), min(length, 39) per character. For a
  * string `readAsUrl` admits and that parses as a URL, on the names and values a WHATWG URL parse yields (tab, line feed and carriage return
  * removed, percent-decoded, as `rawValues` hands them over), for every query or fragment piece: PIECE_COST, its name's
- * and value's UTF-16 units, the value's JWT, `sk-` and long-run terms, and, when the value is not empty and the name holds an
+ * and value's UTF-16 units, the value's JWT and `sk-` terms, provider-prefix floors and long-run term, and, when the value is not empty and the name holds an
  * upper-case letter, the triangular number n(n+1)/2 of the name's length (splitting a name into words may backtrack over it).
  * For every string, ARG_PIECE_COST for each white space, `=`, `/` and `\\` (the argument reading's pieces). For every
  * string `readAsUrl` admits, PIECE_COST once for its URL parses, whether it parses or not. Only the head is counted.

@@ -37,7 +37,7 @@ A service with a manifest declares only in its manifest: a reader of such a serv
 ignores one in its well-known answer. A reader knows a service has a manifest from its descriptor's `fabricManifest` (or
 the registry's provider entry); with only a well-known answer in hand it reads that answer's declaration. The checker
 still checks a well-known declaration beside a manifest: its author sees any findings, and a reader ignores the copy
-whether or not it is valid. A well-known declaration shares the answer's size with its host's readers (Fabric Dashboards' probe caps a well-known answer at 2 MiB, [sources](../evidence/sources.md)), so a large declaration belongs in the manifest. For Latin-script prose the credential budget binds before that cap. Prose in other scripts costs about 2 per UTF-16 unit or less, so a declaration within the budget can still exceed 2 MiB, more so when the writer escapes non-ASCII as `\uXXXX`: keep a large declaration in the manifest and measure the answer's bytes, not its units. A well-known answer lists `channel-agent-standard/1` in its `protocols` only once
+whether or not it is valid. A well-known declaration shares the answer's size with its host's readers (Fabric Dashboards' probe caps a well-known answer at 2 MiB, [sources](../evidence/sources.md)), so a large declaration belongs in the manifest. Latin-script prose stays under the 2 MiB cap at the budget, escaped or not; Chinese, Japanese or Thai prose can exceed it as written, and prose in any other script can when escaped as `\uXXXX`. Keep a large declaration in the manifest and measure the answer's bytes. A well-known answer lists `channel-agent-standard/1` in its `protocols` only once
 its readers have re-pinned to this revision of the contract.
 
 The same rules run in both places: kind `manifest` reads the first, kind `service-well-known` the second. No other
@@ -293,7 +293,7 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    bound (DEC-0151 lists them as knowingly not found). Every string read as a URL pays 128 (`PIECE_COST`) once for its two URL parses (the cost's and `secretUrl`'s), whether it parses or the parser throws (`ws:` costs 3, 3 x 4 and 128: 143). For a string read as a URL that parses, the URL terms are counted
    on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed, percent-decoded), not on
    the raw text: for every query or fragment piece, 128, and 4 (`ARG_PIECE_COST`) for each `&` of the search and the hash, an empty piece included; its name's and its value's UTF-16 units, the value's `eyJ` term, `sk-` term, provider-prefix floors and long-run term and, when the value is not empty and the name holds an upper-case letter, the triangular number of the
-   name's length, n(n+1)/2 (`https://a.example/?aBC=x` costs 24, 128, 3, 1 and 6; the value `ghp_ab,cd` costs 9, a `ghp_` floor of 5 and a long-run term of 3 x (36 + 4): 134). A member's name is read before its place is written; once the budget is spent nothing more is read and every further member collapses its place. Past the
+   name's length, n(n+1)/2 (`https://a.example/?aBC=x` costs 24, 128, 3, 1, 3 for `x`'s long-run term and 6; the value `ghp_ab,cd` costs 9, a `ghp_` floor of 5 and a long-run term of 3 x (36 + 4): 134). A member's name is read before its place is written; once the budget is spent nothing more is read and every further member collapses its place. Past the
    budget, one finding says, once per document, that reading the declarations for credentials takes more than 1 000 000
    UTF-16 units of reading; it stands at the copy where
    the budget ran out (the read declaration's key, or a misplaced copy's), never at a read declaration that was read
@@ -467,6 +467,8 @@ Section 11 also asks for these; none can be decided from the declaration alone (
   no finding for being two; readers read the manifest's;
 - working time: a limit the standard counts in working hours or days (a desk's 2 working days, a team chat's first reply
   in 1 working hour) is declared as a wall-clock duration, and its working calendar is not declared;
+- the size of a well-known answer: `pnpm validate` does not check the 2 MiB cap of its host's readers (a hint is a
+  backlog row, CT-223; until it lands the adapter's FAA-197 check of live answers names the cap);
 - everything the signal server observes, and the 30 days after `adopted_at` in which its checks report but do not
   fail.
 
@@ -563,11 +565,13 @@ at merge sends the grammar and this list.
   a none form elsewhere makes the whole declaration not declared.
 - Size read for credentials: at most 1 000 000 UTF-16 units per document, every copy of the declaration in it sharing
   them; each name or string costs what [item 4](#what-is-checked) counts for its head (`detectorCost`: its UTF-16 units
-  and the rereads beside them) plus 16, and each array or object the reading enters 16, so Latin-script prose costs
-  about 12 to 14 per UTF-16 unit and roughly 70 000 units fit, while Cyrillic or CJK prose costs about 2 per unit or
-  less (measured 1.84 and 1.52), so several hundred thousand units fit; the read declaration is read first, and when its
-  own read runs out it is not declared (`FAC-SEM-165`); a misplaced copy past the budget is reported at that copy and
-  leaves the read declaration's answer as it is.
+  and the rereads beside them) plus 16, and each array or object the reading enters 16. The cost per UTF-16 unit depends
+  on the script and the words. Measured on 4 096-code-point samples (test "states each script's cost per UTF-16 unit as
+  the page does" in `test/channel-agent.test.ts`): English prose about 10 to 14, other Latin-script samples from about 5
+  (Vietnamese) to about 22 (Finnish); Cyrillic, Greek, Arabic, Devanagari and Hangul prose about 1.6 to 2.2; Chinese,
+  Japanese and Thai about 1 to 1.1. Measure a declaration with `pnpm validate` rather than by these figures. The read
+  declaration is read first, and when its own read runs out it is not declared (`FAC-SEM-165`); a misplaced copy past
+  the budget is reported at that copy and leaves the read declaration's answer as it is.
 - Looser than the standard: a queue's `recommendation` beside an answered signal other than `none` (the standard has
   it only with `none`) and `spend_record: null` with a budget above 0 (the standard keeps `null` for budgets of 0) are
   accepted by the schema and found by `FAC-SEM-164`, so the declaration stays declared; and a channel's
