@@ -25,10 +25,10 @@ source, what never travels with it, the check before a source export, and how a 
   `source-tree`, `source-package`, `fabric-source/1` in the protocol register; `pnpm --silent validate <dir> --kind
   source-tree` (Git mode with Git's location variables removed and no read through a link, a walk otherwise with a note
   saying why, folder-relative output that never repeats a found value) and the pair in `pnpm validate <dir>`;
-  `fixtures/vectors/source-tree.json` (82 tree cases, 27 patch cases and a `constants` block written from the module's
+  `fixtures/vectors/source-tree.json` (84 tree cases, 28 patch cases and a `constants` block written from the module's
   exports) from `tools/vectors/source-tree.ts`;
   2 positive and 19 negative schema fixtures, 27 semantic fixtures.
-- [source](../specification/source.md) (new), the register (`FAC-SEM-156` to `FAC-SEM-160`; next free `FAC-SEM-162`;
+- [source](../specification/source.md) (new), the register (`FAC-SEM-156` to `FAC-SEM-160`; next free `FAC-SEM-162` on this branch when this line was written, the landed marker set at the acceptance edit;
   `FAC-SEM-161` reserved and unused), the reference module and readers' rows, `package.md`, `proposals.md`,
   `delegation.md` (MD-5, MD-6, DL-18's order of checks, OA-5), `governance-and-roles.md`, `service.md` (the setup state), the index, `README.md`,
   `DOCMAP.md`, `CONTEXT.md` (Source slot, Source export), `AGENTS.md`, the RFC 2606 ledger row, ST-037, SCN-054 on SCR-03; backlog CT-194 (DEC-0149 proposed, done at merge), CT-207 and CT-208
@@ -354,7 +354,13 @@ source, what never travels with it, the check before a source export, and how a 
   refuses an `unchecked` entry naming the manifest and the tree check reads the manifest whatever `unchecked` says (a
   test), item 12's operative rule leads it, the earlier readers scoped to the home, the manifest requirement scoped to
   its carriers, the export's "no hosted or remote repository", a personal agent's later public releases, the
-  knowledge base's RM-36 row and integration pointer, and the seam notes; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  knowledge base's RM-36 row and integration pointer, and the seam notes; round 53 (not clean: the tree check's own
+  unchecked list skipped the manifest; an organization's own repositories; a personal agent's visibility change; a
+  package to earlier readers) answered as decided: `sourceTreeProblems` reads unchecked through `uncheckedTest` and the
+  manifest never as binary (two tree vectors, a test and a CLI test where the manifest unchecks itself),
+  `patchPathsAllowed` refuses a credential file by its name (a patch vector, a test), the `.env.example` exceptions read
+  as written (the `.ENV.EXAMPLE` vector now blocks), and the organization, visibility, package, receipt and release
+  sentences scoped; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -450,11 +456,19 @@ source, what never travels with it, the check before a source export, and how a 
   - `.git` in every form a case-insensitive or Windows file system resolves to it is never source, and a patch path an
     `exclude` entry names under ASCII case folding is refused, since on such a file system the two spellings are one
     file and the rule is otherwise bypassed.
+- Round 53, decided by the coordinator under the operator's recorded rules:
+  - the manifest is always read, as text: never unchecked by the tree check, never binary;
+  - an import never writes a credential file; the `.env.example` exceptions fail closed (as written, lower case);
+  - for a personal agent an organization's repository is another owner's; an organization's own repositories are its
+    own agent's owner's places; an organization's visibility change or new outside readers take the word and accept
+    the history, and for a personal agent's private home neither is done;
+  - a package sent to a place outside the owner's is a hand-over; whoever hands a local export over records its
+    receipt, one record per recipient.
 - Round 52, decided by the coordinator under the operator's recorded rules:
   - a credential file's name is read folded as a `.git` segment is; no `unchecked` entry names the manifest;
   - item 12 leads with its operative rule; a commit reaching pre-DEC-0149 readers is no hand-over in that home only;
-  - a hand-over by push or by file, a package or a public release needs the manifest (each carries a source export or
-    a package); a visibility change or new readers take the word and accept the history as it stands;
+  - a hand-over by push or by file, a package handed over or published to a public registry or a public release needs the manifest (each carries a source export or
+    a package); an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home neither is done;
   - every later public release of a personal agent from a private home is its own hand-over; a source export creates
     no hosted or remote repository and never pushes.
 - Round 51, decided by the coordinator under the operator's recorded rules:
@@ -636,6 +650,20 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 53's fixes were checked on the working tree over head `b2fdbf92` (this note's commit holds the same tree, plus
+this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files with 10241 passed
+and 3 skipped under the coverage floors, `ux:lint`, `docs:check` passed with 0 markdownlint errors, `privacy:check` with
+0 findings), run under the shared lock with the 15-minute load at 41.1 and 17 GB free, and `pnpm exec tsx
+tools/vectors/run.ts` (exit 0, 29 files match; `source-tree.json` 84 tree and 28 patch cases, measured with `python3`
+and equal to the Done line); before it, the targeted coverage run over `source-rules`, `validate-cli`,
+`validate-cli-faults`, `rule-tolerance`, `positive-sweep`, `schema-compilation` and `consistency` (exit 0: 3241 passed,
+2 skipped; `src/source-rules.ts` at 100 % of its branches, `src/validate-cli.ts` at 99.48 %). A first privacy run
+found a private name in this note and a home path with a further segment in two new vectors; both were reworded before
+the gate. No U+2014 in the added lines. PR #628 at `252c1d11` (round 53 merged the knowledge base's main `3d224ace`,
+item 8 kept as main has it): `source hand-over` in 4, 3 and 3 lines of agents-first, principles and rules, `own
+estate` once on each, item 9 once and item 8 once; the knowledge base's `npm test` (exit 0, 172 passed) and `npm run
+verify:content` (exit 0, backlog 0 errors).
 
 Round 52's fixes were checked on the working tree over head `4f89df17` (this note's commit holds the same tree, plus
 this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files with 10234 passed
@@ -972,7 +1000,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 49 into `481ee158`, which carries main's `5f7df6a7` (unmoved at round 52; the PR's head `bafe94b4`),
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 53 into `252c1d11` (the PR's head), which carries main's `3d224ace` (its item 8's last line changed again),
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). PR #235 (DEC-0148) and DEC-0150 are already on main (`1016f0ec` when re-measured in round
    50), so nothing is refreshed for them. Merge the current `origin/main` (re-measure its head at landing) into the fresh branch
@@ -997,13 +1025,13 @@ remaining steps, in order:
 6. Pair PR #628 only with a contract head that carries the same round of the readings (the round named in DEC-0149's
    status line and in RM-36's "Restated 2026-11-05" line in the PR's `knowledge/roadmap.md`, not its last commit,
    which may be a merge of main), and re-read the pair on the round-40 and round-41 points before landing.
-   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`5f7df6a7` at
-   round 49, merged into the PR as `481ee158`): if it is behind, merge main into it (never a rebase or a force-push),
+   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`3d224ace` at
+   round 53, merged into the PR as `252c1d11`): if it is behind, merge main into it (never a rebase or a force-push),
    keeping main's item 8 as main has it and the PR's item 9, and set the round named in RM-36's "Restated 2026-11-05"
    line to the landing round. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `bafe94b4`, which carries the knowledge base's main, they print 4, 3 and 3
+   `knowledge/rules.md`; at PR #628's head `252c1d11`, which carries the knowledge base's main, they print 4, 3 and 3
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in
@@ -1093,7 +1121,8 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   `SOURCE_HOME_PATHS` as the fourth boundary before it): take DEC-0149's side.
 - The adapter's `SECRET_FILE` and `TOKEN_FILE` (CT-207) are to read a file's name folded as the contract's credential
   files are since round 52 (the code points HFS+ ignores removed, ASCII case folded, any trailing run of dots and spaces
-  dropped), so `KEY.PEM` or `.env.` blocks there too; parity is CT-207's.
+  dropped), so `KEY.PEM` or `.env.` blocks there too, while `SECRET_FILE_OK` matches only the name as written, in lower
+  case (round 53), so `.ENV.EXAMPLE` blocks too; parity in both directions is CT-207's.
 - The CT-109 register lands with DEC-0149 itself, not with whichever lands second: `SOURCE_HOME_PATHS`
   (`src/source-rules.ts`) is the fourth home-path boundary as soon as DEC-0149 is on main, and DEC-0153 adds none
   (`FAC-SEM-167` and `FAC-SEM-168` reuse `hasHomePath`). This branch already rewrites every copy that counts the

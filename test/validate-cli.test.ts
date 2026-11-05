@@ -2201,6 +2201,17 @@ describe("an agent's source (DEC-0149)", () => {
     expect(found(tree.out).filter((line) => line.includes("FAC-SEM-157") && line.includes("/manifest/include/0"))).toHaveLength(1);
   });
 
+  it("reads a folder's manifest even when it unchecks itself: FAC-SEM-157 and FAC-SEM-158 on fabric.source.json", () => {
+    const home = ["", "home", "jdoe", "notes"].join("/");
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], unchecked: [{ path: "fabric.source.json", reason: `kept in ${home}` }] }), LICENSE: "x", "src/a.ts": "x" });
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    const manifestLines = found(result.out).filter((line) => line.startsWith("fabric.source.json"));
+    expect(manifestLines.some((line) => line.includes("FAC-SEM-157"))).toBe(true);
+    expect(manifestLines.some((line) => line.includes("FAC-SEM-158") && line.includes("home-path"))).toBe(true);
+    expect(result.out).not.toContain(home);
+  });
+
   it("gives a file the same files[<index>] in Git mode and in a walk when a name before it is stored in NFD", () => {
     const home = ["", "home", "jdoe", "notes"].join("/");
     const files = { "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/e\u0301.ts": "x", "src/f.ts": `const notes = "${home}";` };

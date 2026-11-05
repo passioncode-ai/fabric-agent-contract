@@ -366,7 +366,9 @@ export function nestedTest(manifest: unknown): (written: unknown) => boolean {
  * sends it: a patch path that is the manifest itself, in any spelling, is refused, and the patch is held (kept
  * unapplied) until the owner decides; the owner changes the manifest by a commit at the source. `exclude` is read folded
  * (`foldSegment`), and when the manifest has any exclude entry a segment in which `~` is followed by a digit
- * (`PRIVAT~1.MD`) is refused, since Windows may resolve such a short name to an excluded folder. A path beneath a
+ * (`PRIVAT~1.MD`) is refused, since Windows may resolve such a short name to an excluded folder. A path whose file name
+ * is a credential file (read folded, as the tree check reads it: `src/.env`, `src/KEY.PEM`) is refused, so an import
+ * never writes one. A path beneath a
  * symbolic link in the receiver's tree is refused too, as `git apply` refuses one; the path list cannot tell, so the
  * receiver checks it at apply time.
  */
@@ -377,7 +379,8 @@ export function patchPathsAllowed(manifest: unknown, paths: readonly unknown[]):
   const refused = (path: unknown): boolean => {
     if (!isSource(path)) return true;
     const folded = foldPath(nfc(path as string));
-    return folded === SOURCE_FILE || (anyExclude && folded.split("/").some((segment) => SHORT_NAME.test(segment)));
+    // A credential file by its name, read as the tree check reads it, is never source: an import never writes one.
+    return folded === SOURCE_FILE || credentialFile(path as string) || (anyExclude && folded.split("/").some((segment) => SHORT_NAME.test(segment)));
   };
   return (Array.isArray(paths) ? paths : []).filter(refused).map((path) => show(path));
 }
@@ -415,9 +418,12 @@ export const TOKEN_FILE = /^[^\n]+\.(?:token|credential)$/;
  * system resolves them.
  */
 export const credentialFileName = (name: string): string => asciiFold(name.replace(HFS_IGNORABLE, "")).replace(/[ .]+$/u, "");
+// The patterns read the folded name; the exceptions (`.env.example` and its kin) match only the name as written, in lower
+// case, so `.ENV.EXAMPLE` or `.env.example.` is a credential file again: the exceptions fail closed.
 const credentialFile = (path: string): boolean => {
-  const name = credentialFileName(path.slice(path.lastIndexOf("/") + 1));
-  return (CREDENTIAL_FILE.test(name) && !CREDENTIAL_FILE_OK.test(name)) || TOKEN_FILE.test(name);
+  const written = path.slice(path.lastIndexOf("/") + 1);
+  const name = credentialFileName(written);
+  return (CREDENTIAL_FILE.test(name) && !CREDENTIAL_FILE_OK.test(written)) || TOKEN_FILE.test(name);
 };
 
 /**
@@ -1047,7 +1053,8 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
   // The manifest's lists are indexed once, so each path is looked up rather than compared with every entry.
   const isSource = sourcePathTest(manifest);
   const isNested = nestedTest(manifest);
-  const unchecked = pathList(uncheckedPaths(manifest).map(([path]) => path));
+  // Read as `uncheckedTest` reads it, so the manifest, which always travels and is always read, is never skipped.
+  const isUnchecked = uncheckedTest(manifest);
   const files = (Array.isArray(input.files) ? input.files : [])
     .map((file: unknown, index: number) => [file, index] as const)
     .filter((pair): pair is readonly [JsonObject, number] =>
@@ -1068,7 +1075,8 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
 
   for (const [file, index] of files) {
     const path = file.path as string;
-    const binary = file.binary === true;
+    // The manifest is never binary: it is read as text whatever the caller marks.
+    const binary = file.binary === true && nfc(path) !== SOURCE_FILE;
     if (homeAt(path) >= 0) problems.push({ kind: "home-path", file: index });
     if (credentialFile(path) || credentialAt(path) >= 0) problems.push({ kind: "credential", file: index });
     for (const [entry, patterns] of instance) if (firstOf(patterns, path) >= 0) problems.push({ kind: "instance-string", file: index, entry });
@@ -1078,7 +1086,7 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
       continue;
     }
     // An unchecked file travels and is read by its path only.
-    if (listCovers(unchecked, path)) continue;
+    if (isUnchecked(path)) continue;
     if (binary) {
       if (!binaries.has(nfc(path))) problems.push({ kind: "binary", file: index });
       continue;
@@ -1347,6 +1355,11 @@ function pathFindings(value: JsonObject): Finding[] {
   for (const [path, index] of strings(value.binaries)) {
     // An entry outside the grammar is said once: by the schema, or above.
     if (!inGrammar(path, true)) continue;
+    // The manifest, in any spelling under the fold, is always read as text: it is never a binary.
+    if (foldPath(nfc(path)) === SOURCE_FILE) {
+      flag(`/binaries/${index}`, `binaries[${index}] names ${SOURCE_FILE}, which is always read as text, so it is never a binary`);
+      continue;
+    }
     if (!inGit(path) && !isSource(path)) flag(`/binaries/${index}`, `binaries[${index}] is not a file of the source`);
   }
   const unchecked = new Set<string>();

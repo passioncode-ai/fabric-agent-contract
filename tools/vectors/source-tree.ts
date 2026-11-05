@@ -286,17 +286,27 @@ const cases: Array<[string, Json, Json[]]> = [
     [{ kind: "credential", file: 5 }]
   ],
   [
-    "a credential file's name is read folded (case, an ignorable code point, a trailing dot or space): unchecked or not",
+    "a credential file's name is read folded (case, an ignorable code point, a trailing dot or space): unchecked or not; the .env.example exceptions match only as written in lower case",
     {
       manifest: { ...manifest, unchecked: [{ path: "src/vectors/", reason: "synthetic test vectors" }] },
       files: [...base, { path: "src/vectors/KEY.PEM" }, { path: "src/.ENV", text: "x" }, { path: "src/ID_RSA", text: "x" }, { path: "src/svc.TOKEN", text: "x" }, { path: "src/.env.", text: "x" }, { path: "src/.env ", text: "x" }, { path: "src/key.pem.", text: "x" }, { path: "src/.e\u200cnv", text: "x" }, { path: "src/.ENV.EXAMPLE", text: "x" }]
     },
-    [4, 5, 6, 7, 8, 9, 10, 11].map((file) => ({ kind: "credential", file }))
+    [4, 5, 6, 7, 8, 9, 10, 11, 12].map((file) => ({ kind: "credential", file }))
   ],
   [
     "a binary listed in binaries whose name, read folded, is a credential file still blocks",
     { manifest: { ...manifest, binaries: ["docs/store.P12"] }, files: [...base, { path: "docs/store.P12", binary: true }] },
     [{ kind: "credential", file: 4 }]
+  ],
+  [
+    "an unchecked entry naming fabric.source.json: the manifest's text is still read",
+    { manifest: { ...manifest, unchecked: [{ path: "fabric.source.json", reason: "the manifest" }] }, files: [...base, { path: "fabric.source.json", text: "{\"note\": \"/home/jdoe\"}" }] },
+    [{ kind: "home-path", file: 4, line: 1, column: 17 }]
+  ],
+  [
+    "the manifest is never binary: it is read as text whatever the caller marks",
+    { manifest: { ...manifest, binaries: ["fabric.source.json"] }, files: [...base, { path: "fabric.source.json", text: "{\"note\": \"/home/jdoe\"}", binary: true }] },
+    [{ kind: "home-path", file: 4, line: 1, column: 17 }]
   ],
   ["an instance string in a file's path", tree([{ path: "docs/example-holding/notes.md", text: "notes" }], { instanceStrings: ["example-holding"] }), [{ kind: "instance-string", file: 4, entry: 0 }]],
   ["an instance string shorter than 3 characters is refused as input", tree([], { instanceStrings: ["ex", "example holding"] }), [{ kind: "short-instance-string", entry: 0 }]],
@@ -378,6 +388,7 @@ const patches: Array<[string, string[], string[], Json?]> = [
   ["an exclude entry with the Kelvin sign names its ASCII spelling", ["app/kit/x", "app/kite/x"], ["app/kit/x"], { format: "fabric-source/1", include: ["app/"], exclude: ["app/\u212ait/"] }],
   ["an excluded folder with an ignorable code point, a trailing dot or space, or as a short name", ["src/gen\u200cerated/x", "src/generated./x", "src/generated /x", "src/GENERA~1/x", "src/main.ts"], ["src/gen\u200cerated/x", "src/generated./x", "src/generated /x", "src/GENERA~1/x"]],
   ["a path in NFD under an include path in NFC", ["docs/cafe\u0301.md"], []],
+  ["a credential file by its name, read folded, is refused: an import never writes one", ["src/.env", "src/KEY.PEM", "src/.ENV.EXAMPLE", "src/.env.example", "src/main.ts"], ["src/.env", "src/KEY.PEM", "src/.ENV.EXAMPLE"]],
   ["an exclude entry with a segment made only of a dot and a space fails closed: a path beneath the folder before it is refused", ["src/secrets/key.txt", "src/SECRETS/k", "src/main.ts"], ["src/secrets/key.txt", "src/SECRETS/k"], { format: "fabric-source/1", include: ["src/"], exclude: ["src/secrets/. /"] }],
   ["every segment from the first that folds to nothing is walked: the folder the shallowest reading reaches is refused", ["src/x.md", "src/a/b/c.ts", "lib/x.ts"], ["src/x.md", "src/a/b/c.ts"], { format: "fabric-source/1", include: ["src/", "lib/"], exclude: ["src/a/b/.../.../"] }],
   ["a one-dot segment keeps the depth and a later two-dot one lowers it", ["src/main.ts", "src/secrets/k", "lib/x.ts"], ["src/main.ts", "src/secrets/k"], { format: "fabric-source/1", include: ["src/", "lib/"], exclude: ["src/secrets/. /.../"] }],

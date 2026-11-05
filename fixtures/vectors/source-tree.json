@@ -3124,7 +3124,7 @@
       ]
     },
     {
-      "name": "a credential file's name is read folded (case, an ignorable code point, a trailing dot or space): unchecked or not",
+      "name": "a credential file's name is read folded (case, an ignorable code point, a trailing dot or space): unchecked or not; the .env.example exceptions match only as written in lower case",
       "input": {
         "manifest": {
           "format": "fabric-source/1",
@@ -3236,6 +3236,10 @@
         {
           "kind": "credential",
           "file": 11
+        },
+        {
+          "kind": "credential",
+          "file": 12
         }
       ]
     },
@@ -3287,6 +3291,119 @@
         {
           "kind": "credential",
           "file": 4
+        }
+      ]
+    },
+    {
+      "name": "an unchecked entry naming fabric.source.json: the manifest's text is still read",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ],
+          "unchecked": [
+            {
+              "path": "fabric.source.json",
+              "reason": "the manifest"
+            }
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "fabric.source.json",
+            "text": "{\"note\": \"/home/jdoe\"}"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 1,
+          "column": 17
+        }
+      ]
+    },
+    {
+      "name": "the manifest is never binary: it is read as text whatever the caller marks",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "fabric.source.json"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "fabric.source.json",
+            "text": "{\"note\": \"/home/jdoe\"}",
+            "binary": true
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "home-path",
+          "file": 4,
+          "line": 1,
+          "column": 17
         }
       ]
     },
@@ -5235,6 +5352,41 @@
         ]
       },
       "expected": []
+    },
+    {
+      "name": "a credential file by its name, read folded, is refused: an import never writes one",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "paths": [
+          "src/.env",
+          "src/KEY.PEM",
+          "src/.ENV.EXAMPLE",
+          "src/.env.example",
+          "src/main.ts"
+        ]
+      },
+      "expected": [
+        "src/.env",
+        "src/KEY.PEM",
+        "src/.ENV.EXAMPLE"
+      ]
     },
     {
       "name": "an exclude entry with a segment made only of a dot and a space fails closed: a path beneath the folder before it is refused",

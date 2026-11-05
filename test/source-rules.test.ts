@@ -1055,6 +1055,27 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
     expect(isUncheckedPath({ include: ["src/"], unchecked: [{ path: "src/a.ts", reason: "r" }] }, "src/a.ts")).toBe(true);
   });
 
+  it("never reads the manifest as binary, and refuses a binaries entry naming it in any spelling", () => {
+    for (const spelling of ["fabric.source.json", "FABRIC.SOURCE.JSON"]) {
+      const findings = sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], binaries: [spelling] }) ?? [];
+      expect(findings.map((finding) => [finding.instancePath, finding.message]), spelling).toEqual([["/binaries/0", "binaries[0] names fabric.source.json, which is always read as text, so it is never a binary"]]);
+    }
+    const home = ["", "home", "jdoe", "agent"].join("/");
+    const tree = sourceTreeProblems({ manifest: { include: ["src/", "LICENSE"], binaries: ["fabric.source.json"], unchecked: [{ path: "fabric.source.json", reason: "r" }] }, files: [{ path: "LICENSE", text: "x" }, { path: "src/a.ts", text: "x" }, { path: "fabric.source.json", text: `{"note": "${home}"}`, binary: true }] });
+    expect(tree.map((problem) => [problem.kind, problem.file])).toEqual([["home-path", 2]]);
+  });
+
+  it("refuses a patch path whose name is a credential file, read as the tree check reads it", () => {
+    const manifest = { format: "fabric-source/1", include: ["src/"] };
+    expect(patchPathsAllowed(manifest, ["src/.env", "src/KEY.PEM", "src/svc.TOKEN", "src/.env.Example", "src/.env.example", "src/main.ts"])).toEqual(["src/.env", "src/KEY.PEM", "src/svc.TOKEN", "src/.env.Example"]);
+  });
+
+  it("reads the .env.example exceptions only as written in lower case, so a folded spelling is a credential file", () => {
+    const names = [".env.Example", ".ENV.EXAMPLE", ".env.example.", ".env.sample ", ".env.template", ".env.sample"];
+    const tree = sourceTreeProblems({ manifest: { include: ["src/", "LICENSE"] }, files: [{ path: "LICENSE", text: "x" }, ...names.map((name) => ({ path: `src/${name}`, text: "x" }))] });
+    expect(tree.filter((problem) => problem.kind === "credential").map((problem) => names[(problem.file as number) - 1])).toEqual([".env.Example", ".ENV.EXAMPLE", ".env.example.", ".env.sample "]);
+  });
+
   it("reads a credential file's name folded: case, ignorable code points and trailing dots and spaces", () => {
     for (const name of ["KEY.PEM", ".ENV", "ID_RSA", "svc.TOKEN", "store.P12", ".env.", ".env ", "key.pem.", ".e\u200cnv"]) {
       expect(credentialFileName(name), name).toMatch(/^(?:\.env|key\.pem|id_rsa|svc\.token|store\.p12)$/u);
