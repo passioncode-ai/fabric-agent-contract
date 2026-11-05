@@ -161,7 +161,10 @@ product's obligation.
 - **At landing** (DEC-0151 lands before this branch and narrows the `sk-` shape): on the merged tree, add `FAC-SEM-167`
   pass cases for `queue.task-assigned-to-worker`, `work.desk-booking-confirmed` and `ui.disk-usage-refreshed-hourly`,
   which the `sk-` shape before DEC-0151 reads as keys, and move `queue.task-assigned-to-worker` out of the
-  refused names of the test "applies OD-2 in full" in `test/ops-digest.test.ts` (it folds on the merged tree). CT-222 (filed on this branch, the next free CT above every
+  refused names of the test "applies OD-2 in full" in `test/ops-digest.test.ts` (it folds on the merged tree). Then
+  restate the detector's shapes in OD-2, the FAC-SEM-167 row and DEC-0153 item 3 as DEC-0151's `SECRET_VALUE` reads
+  them, and re-pin their examples in the test "pins the shared detector's sk- shape": `ops.risk-assessment-completed`
+  (refused before DEC-0151) and `work.session-end-task-back` (passing), each as the merged detector answers. CT-222 (filed on this branch, the next free CT above every
   branch and main when written) widens `SECRET_VALUE` for underscore-form provider prefixes, `AIza` keys and `hf_`
   tokens, owned by DEC-0151's detector, with tests from split literals.
 - **At landing, the fold:** on the merged tree with DEC-0149, `foldDir` calls DEC-0149's `foldPath` (one
@@ -236,12 +239,24 @@ product's obligation.
   never uptime: OD-1"). Also: OD-1's restart rebuilds the day's named operations, OD-3's overflow name is published with
   the outcome map, "at most once in `risen`", the on-request case in the producer row, the next free DEC marker written
   from CAS (`DEC-0154`), Compatibility on ADR-0188 §5's "retros written", the adapter line read at v0.65.0, and the
-  duplicate-dir message hidden when either dir is. Round 9 is next.
+  duplicate-dir message hidden when either dir is.
+- Round 9 at `4b46cd05` was not clean: the collision class leak (a duplicate of a class holding a hidden dir could name
+  a visible member equal to it but for case; now a first pass hides the whole class, tested over every order of two
+  three-member classes), `foldDay`'s grammar (now OD-2 in full, its grammar and `OP_NAME_MAX` too, for ops and risen)
+  and Compatibility's present tense about Fabric (now what a view built on CO-502 reads, pinned at `a6f0ffda`). Also:
+  OD-1's two kinds of writer, the start rebuild from the hourly lines and the hour kept, an hour written as no digest
+  being a gap, DEC-0153 items 2 and 4 carrying the start rebuild and the published overflow name, and the detector's
+  shapes stated in words with `SECRET_VALUE` as the definition. Round 10 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-9 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
+round 2 with coverage on `src/ops-digest.ts` (4213 tests; 257 of 257 statements, 202 of 202 branches);
+`pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`; `python3 docs/ux/lint.py`;
+`pnpm run privacy:check` (0 findings). The branch gate is owed: the 15-minute load was 72.7.
 
 Round-8 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
 round 2 with coverage on `src/ops-digest.ts` (4210 tests; 253 of 253 statements, 204 of 204 branches);

@@ -102,6 +102,11 @@ function safeCounts<T extends HourlyDigest | DailyDigest>(digest: T): T {
  */
 const hidden = (value: string): boolean => secretValue(value) || hasHomePath(value);
 const shown = (value: string, instead: string): string => (hidden(value) ? instead : value);
+/** What OD-2 refuses in an operation's name, its grammar or FAC-SEM-167, as a fold's error words it; null for a lawful name. */
+const nameRefusal = (op: unknown): string | null => {
+  if (typeof op !== "string" || op.length > OP_NAME_MAX || !OP_NAME.test(op)) return "fails OD-2's name grammar";
+  return hidden(op) ? "is refused by FAC-SEM-167" : null;
+};
 /** Throws when `ops` names one operation twice; `where` says whose list it is. */
 function once(ops: ReadonlyArray<{ op: string }>, where: string): void {
   const names = new Set<string>();
@@ -126,11 +131,12 @@ function once(ops: ReadonlyArray<{ op: string }>, where: string): void {
 export function foldHour(counts: readonly OpCount[], from: string, previous: HourlyDigest | null): HourlyDigest {
   const start = wholeHour(from);
   if (start === null) throw new Error(`${shown(from, "from")} is not a whole UTC hour`);
-  if (wholeHour(iso(start + HOUR_MS)) === null) throw new Error(`the hour after ${from} is not a whole UTC hour the schema writes`);
+  if (wholeHour(iso(start + HOUR_MS)) === null) throw new Error(`the hour after ${shown(from, "from")} is not a whole UTC hour the schema writes`);
   const merged = new Map<string, OpCount>();
   counts.forEach((c, index) => {
-    if (typeof c.op !== "string" || c.op.length > OP_NAME_MAX || !OP_NAME.test(c.op)) throw new Error(`the operation at ${index} fails OD-2's name grammar: no hourly digest (OD-3)`);
-    if (hidden(c.op)) throw new Error(`the operation at ${index} is refused by FAC-SEM-167: no hourly digest (OD-3)`);
+    const refused = nameRefusal(c.op);
+    if (refused !== null) throw new Error(`the operation at ${index} ${refused}: no hourly digest (OD-3)`);
+    // The name passed nameRefusal, so shown() below returns it; it stays as defence in depth, never echoing a value.
     if (![c.ok, c.failed, c.unknown].every(isCount)) throw new Error(`a count of ${shown(c.op, `the operation at ${index}`)} is not an integer from 0 to 2^53 - 1`);
     const m = merged.get(c.op) ?? { op: c.op, ok: 0, failed: 0, unknown: 0 };
     m.ok += c.ok; m.failed += c.failed; m.unknown += c.unknown;
@@ -153,8 +159,9 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
  * in and the failures of those hours, the most failures first, then by name. A day with no hour of its own has no
  * digest: null (OD-5). Its hourly digests must already pass FAC-SEM-166. It throws when an input count or an hour's rise
  * is not an integer from 0 to 2^53 - 1 (each checked before it is merged), when a sum is beyond 2^53 - 1, when an hour
- * names a rise twice or a rise of an operation its ops does not count, when an operation in an hour's ops or risen is
- * refused by FAC-SEM-167, and when the day folds more than 4096 operations: it writes no daily digest then (OD-3),
+ * names a rise twice or a rise of an operation its ops does not count, when a name in an hour's ops or risen is one
+ * OD-2 refuses (its grammar, `OP_NAME_MAX` included, or FAC-SEM-167), and when the day folds more than 4096 operations:
+ * it writes no daily digest then (OD-3),
  * since a reference fold never writes a line every reader skips.
  */
 export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDigest | null {
@@ -169,9 +176,14 @@ export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDige
   const merged = new Map<string, OpCount>();
   const rose = new Map<string, { hours: number; failed: number }>();
   for (const h of mine) {
-    // OD-2 in full, as FAC-SEM-167 reads it: a name it refuses would make every reader skip the daily line.
-    h.ops.forEach((c, index) => { if (hidden(c.op)) throw new Error(`the operation at ${index} of ${h.from}'s ops is refused by FAC-SEM-167: no daily digest (OD-3)`); });
-    h.risen.forEach((r, index) => { if (hidden(r.op)) throw new Error(`the operation at ${index} of ${h.from}'s risen is refused by FAC-SEM-167: no daily digest (OD-3)`); });
+    // OD-2 in full, its grammar and FAC-SEM-167: a name it refuses would make every reader skip the daily line. The
+    // shown() calls below then return the name; they stay as defence in depth, never echoing a value.
+    for (const [list, where] of [[h.ops, "ops"], [h.risen, "risen"]] as const) {
+      list.forEach((c: { op: string }, index: number) => {
+        const refused = nameRefusal(c.op);
+        if (refused !== null) throw new Error(`the operation at ${index} of ${h.from}'s ${where} ${refused}: no daily digest (OD-3)`);
+      });
+    }
     for (const c of h.ops) {
       if (![c.ok, c.failed, c.unknown].every(isCount)) throw new Error(`a count of ${shown(c.op, "an operation")} in ${h.from} is not an integer from 0 to 2^53 - 1`);
       const m = merged.get(c.op) ?? { op: c.op, ok: 0, failed: 0, unknown: 0 };
@@ -363,16 +375,19 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     return findings;
   }
   const seen = new Set<string>();
-  const dirs = new Map<string, string>();
+  // Two passes: each class of dirs that fold alike (foldDir) is hidden as a whole when any member is credential-shaped
+  // or a home folder, so no duplicate message of that class names a value the class hides; the second pass only marks
+  // which entries are duplicates (the first of a class is not).
+  const hiddenClass = new Set<string>();
+  for (const folder of view.folders) if (hidden(folder.dir)) hiddenClass.add(foldDir(folder.dir));
+  const dirs = new Set<string>();
   view.folders.forEach((folder, index) => {
     const at = `${FOLDERS_PATH}/${index}`;
     if (seen.has(folder.source)) findings.push(folderFinding(`${at}/source`, `${shown(folder.source, "this source")} is named twice as a source; each folder sends its own label`));
     seen.add(folder.source);
     const folded = foldDir(folder.dir);
-    const first = dirs.get(folded);
-    // The message names the dir only when neither it nor the dir it collides with is credential-shaped or a home folder.
-    if (first !== undefined) findings.push(folderFinding(`${at}/dir`, `${hidden(folder.dir) || hidden(first) ? "this dir" : folder.dir} is named twice as a dir (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
-    if (first === undefined) dirs.set(folded, folder.dir);
+    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `${hiddenClass.has(folded) ? "this dir" : folder.dir} is named twice as a dir (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
+    dirs.add(folded);
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
     if (secretValue(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));
     else if (hasHomePath(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir holds a home folder; it is relative to the product's data folder"));

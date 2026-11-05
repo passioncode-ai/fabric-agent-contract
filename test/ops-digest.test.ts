@@ -257,6 +257,26 @@ describe("the reference folds", () => {
     }
   });
 
+  it("applies OD-2's grammar to every name a day folds, in ops and in risen, naming the place only", () => {
+    for (const op of ["Bad Name", "a".repeat(70)]) {
+      const hour = { schema: "ops.digest.hourly@1", from: "2026-11-04T01:00:00.000Z", to: "2026-11-04T02:00:00.000Z", ops: [{ op, ok: 0, failed: 12, unknown: 0 }], total: { ok: 0, failed: 12, unknown: 0 }, risen: [{ op, failed: 12, previous: 0 }] } as HourlyDigest;
+      for (const input of [hour, { ...hour, ops: [{ op: "board.tick", ok: 0, failed: 12, unknown: 0 }] } as HourlyDigest]) {
+        let daily = "";
+        try { foldDay("2026-11-04", [input]); } catch (e) { daily = (e as Error).message; }
+        expect(daily, op).toMatch(/^the operation at 0 of 2026-11-04T01:00:00.000Z's (ops|risen) fails OD-2's name grammar: no daily digest \(OD-3\)$/);
+      }
+    }
+  });
+
+  it("pins the shared detector's sk- shape inside a word ending in sk (until DEC-0151 narrows it)", () => {
+    for (const [op, refused] of [["ops.risk-assessment-completed", true], ["work.session-end-task-back", false]] as const) {
+      const value = hourlyOk();
+      value.ops.push({ op, ok: 1, failed: 0, unknown: 0 });
+      value.total.ok += 1;
+      expect(found("ops-digest-hourly", value), op).toEqual(refused ? ["FAC-SEM-167 /ops/4/op"] : []);
+    }
+  });
+
   it("never echoes a credential-shaped or home-folder from", () => {
     for (const from of [["home", "jdoe", "x"].join("/"), ["xo", "xb-", "notareal-0123"].join("")]) {
       let message = "";
@@ -468,6 +488,20 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
   ];
   it.each(DEC_0149_FOLD_PAIRS)("folds %j as DEC-0149's fold does", (input, folded) => {
     expect(foldDir(input)).toBe(folded);
+  });
+
+  it("hides a whole collision class when any of its dirs is hidden, in every order", () => {
+    const fake = ["Ex4mpleN0tARealKey", "ButShapedLikeOne", "AbCdEf012345"].join("");
+    const home = ["home", "jdoe"].join("/");
+    const permutations = <T,>(items: T[]): T[][] => (items.length <= 1 ? [items] : items.flatMap((item, i) => permutations([...items.slice(0, i), ...items.slice(i + 1)]).map((rest) => [item, ...rest])));
+    for (const [members, hiddenValue] of [[[fake.toLowerCase(), fake, fake.toUpperCase()], fake], [[home.toUpperCase(), home, "Home/jdoe"], home]] as const) {
+      for (const order of permutations([...members])) {
+        const value = withFolders(order.map((dir, i) => ({ dir, source: `s${i}` })));
+        const messages = evaluateSemanticRules("service-descriptor", value).filter((f) => f.code === "FAC-SEM-168").map((f) => f.message);
+        expect(messages.filter((m) => m.startsWith("this dir is named twice as a dir")), order.join(" ")).toHaveLength(2);
+        for (const m of messages) expect(m.toLowerCase(), order.join(" ")).not.toContain(hiddenValue.toLowerCase());
+      }
+    }
   });
 
   it("is a descriptor's rule only, and a declaration's absence is no finding", () => {

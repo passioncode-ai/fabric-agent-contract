@@ -9050,36 +9050,51 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      every count an integer from 0 to 2^53 − 1, at most 4096 operations and rises: a product keeps at most 4095 named
      operations per UTC day plus its one fixed overflow name, under which it counts the rest (their counts kept), so
      both its hourly and its daily lines validate; a day that would fold more than 4096 operations has no daily digest,
-     and a day whose hours hold a name FAC-SEM-167 refuses has none either, and an hour of more than 4096 operations or
+     and a day whose hours hold a name OD-2 refuses (its grammar, or FAC-SEM-167) has none either, and an hour of more than 4096 operations or
      holding a name OD-2 refuses (its grammar, or FAC-SEM-167) has no hourly digest (the reference
      `foldDay` and `foldHour` throw: a reference fold never writes a line every reader skips). A finding or a fold's
      error names a value shaped like a credential or holding a home folder only by its place.
   2. **The window (OD-1).** `from` and `to` are whole UTC hours in RFC 3339 with `Z`, with or without the `.000` that
-     `Date.prototype.toISOString` writes (Fabric writes it), `to` one hour after `from`; `day` is `YYYY-MM-DD` UTC;
-     `hours` 1 to 24. An hour the product ran through is written even when empty; an hour it did not run is a gap. A
-     product writes an hour only if it observed itself running in it (a tick or a record inside the hour), never
-     filling the hours from the last written to now without observing them (round 4: a sleep is not a run); a product that folds on request from stored
-     records (an always-on server) folds only hours holding a record, so `hours` means hours folded, and a reader never
-     infers uptime from it. The hour a product stops in is kept with its counts and written when it closes, at the next
-     run, compared with the hour just before when that is the last hour written, else with none (a gap); a product that cannot keep it writes nothing for that hour, never a
-     partial line, since a restart in the same hour would leave two lines and readers keep the first. At start a
-     product reads its last hourly line back for `previous`, and writes every closed hour it kept, the hour it stopped
-     in included, before it folds any closed day (OD-5); otherwise that day's daily line loses that hour for good.
-  3. **An operation's name (OD-2).** `^[a-z][A-Za-z0-9_]*(?:[.:/-][A-Za-z0-9_]+)*$`, at most 64 characters. `/` is
-     a separator because Fabric logs an MCP method as `mcp.<method>` (`mcp.tools/list`,
-     `mcp.notifications/initialized`, `mcp.notifications/cancelled`; board thread `f7758225`, message `1c191cf7`), and
-     the 175 operation names Fabric checked in a week of its own log all fit. No absolute path, URL, space, empty
-     segment, `.` or `..` can; `FAC-SEM-167` refuses a name shaped like a credential (`secretValue`, DEC-0044) or
-     holding a home folder (`hasHomePath`, the detector other rules use), so the `/` lets no home path through;
-     `secretValue` is the shared credential detector (`src/secret-shape.ts`), which refuses a provider key's shape (`sk-`, `gh[pousr]_`, `xox?-`, `AKIA`, `glpat-`), a JWT (`eyJ` and two more dotted segments), a value starting with `Bearer` and a space, or a run of 40 or more letters, digits, `_`, `-` or `/` (so across segments joined by `-` or `/`) that mixes upper case, lower case and a digit. On the shared detector as it stands, the `sk-` shape also matches inside `ask-`, `task-`, `desk-` and `disk-` (so `queue.task-assigned-to-worker` is refused) until DEC-0151's narrowing lands.
-     `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character
-     that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and
-     is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which
-     `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed
-     by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`,
-     followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`, `api.my_users/list` and `ui.home/open` are refused, and `api.user/list` and `api.get_user/list` pass (a dir's examples are in item 9). One refused name fails the whole line,
-     which every reader skips. The shared detector stays (decided in review round 1, its boundary stated exactly in
-     round 2), and a test pins every example on the spec page and here.
+     `Date.prototype.toISOString` writes (Fabric writes it at `e1eecec0`), `to` one hour after `from`; `day` is
+     `YYYY-MM-DD` UTC; `hours` 1 to 24. Two kinds of writer, never both for one product and day: a product that writes
+     hourly lines writes every hour it observed itself running in (a tick or a record inside the hour), an empty one
+     included, never filling the hours from the last written to now without observing them (round 4: a sleep is not a
+     run), and its daily line folds those lines; a product that folds on request from stored records (an always-on
+     server) writes no hourly lines, and its daily answer is the fold of its record hours. So `hours` means hours
+     folded, and a reader never infers uptime from it. An hour it did not run, or written as no digest under OD-3, is
+     a gap for the hour after it. The hour a product stops in is kept with its counts and written when it closes, at
+     the next run, compared with the hour just before when that is the last hour written, else with none (a gap); a
+     product that cannot keep it writes nothing for that hour, never a partial line, since a restart in the same hour
+     would leave two lines and readers keep the first. At start a product reads its last hourly line back for
+     `previous`, rebuilds the day's named operations from that day's hourly lines and the hour it kept, and writes
+     every closed hour it kept, the hour it stopped in included, before it folds any closed day (OD-5); otherwise that
+     day's daily line loses that hour for good.
+  3. **An operation's name (OD-2).** `^[a-z][A-Za-z0-9_]*(?:[.:/-][A-Za-z0-9_]+)*$`, at most 64 characters. `/` is a
+     separator because Fabric logs an MCP method as `mcp.<method>` (`mcp.tools/list`, `mcp.notifications/initialized`,
+     `mcp.notifications/cancelled`; board thread `f7758225`, message `1c191cf7`), and the 175 operation names Fabric
+     checked in a week of its own log all fit. No absolute path, URL, space, empty segment, `.` or `..` can;
+     `FAC-SEM-167` refuses a name shaped like a credential (`secretValue`, DEC-0044) or holding a home folder
+     (`hasHomePath`, the detector other rules use), so the `/` lets no home path through; `secretValue` is the shared
+     credential detector, which refuses a provider key's shape, in either case and anywhere in the name: `sk-`
+     followed by 16 or more letters, digits, `_` or `-` (so inside any word ending in sk: `task-`, `risk-`, `mask-`
+     and the like), `gh[pousr]_` followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more
+     letters, digits or `-`, `AKIA` followed by 16 capitals or digits, `glpat-` followed by 20 or more letters,
+     digits, `_` or `-`; a JWT (`eyJ` and two more dotted segments); a value starting with `Bearer` and a space; or a
+     run of 40 or more letters, digits, `_`, `-` or `/` (so across segments joined by `-` or `/`) that mixes upper
+     case, lower case and a digit. `SECRET_VALUE` and `longSecret` in `src/secret-shape.ts` are the definition. So
+     `ops.risk-assessment-completed` and `queue.task-assigned-to-worker` are refused and `work.session-end-task-back`
+     passes, until DEC-0151's narrowing of the `sk-` shape lands. `hasHomePath` refuses a value in which `home`,
+     `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`,
+     `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in
+     either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`,
+     `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII
+     letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double
+     or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters,
+     digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`,
+     `api.my_users/list` and `ui.home/open` are refused, and `api.user/list` and `api.get_user/list` pass (a dir's
+     examples are in item 9). One refused name fails the whole line, which every reader skips. The shared detector
+     stays (decided in review round 1, its boundary stated exactly in round 2), and a test pins every example on the
+     spec page and here.
   4. **Counting and the rise (OD-3, OD-4).** Every record counted by `op` and outcome in its hour before any sampling;
      an outcome other than `ok` and `failed` is `unknown`. A product whose log uses its own outcome words maps each to
      `ok` (it did what it was asked), `failed` (it tried and did not, by a fault) or `unknown` (a setup answer, a
@@ -9087,7 +9102,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      own documentation, not in the digest. A product's own call refused for its own missing source slot (DEC-0149,
      in progress: "Starting without the instance") is `unknown`, never `failed`, so it never makes a rise; a host
      that relays calls counts an error as it sees it, since a relayed error cannot tell setup from failure (DEC-0149).
-     `total` is each counter's sum. A rise is at least 10
+     `total` is each counter's sum. A product keeps at most 4095 named operations per UTC day plus its one fixed
+     overflow name, which it publishes with its outcome map (item 1). A rise is at least 10
      failures in the hour and at least twice the hour before's, an hour before with none (or not closed) counting as
      one. `FAC-SEM-166` checks the window, each `op` once in `ops` and at most once in `risen`, the sums, and every rise against its own digest: an hourly
      rise names the hour's failures of its op and passes OD-4 against its `previous`; a daily rise is in at most
@@ -9182,8 +9198,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   twin protocol registers (`fabric_protocols.py`, `fabric-protocols.mjs`), which its tests hold equal to the register
   `vendor_vectors.mjs` writes into `feed-protocols-vectors.json` (the twins are kept by hand). Fabric's digests at
   `e1eecec0` validate as written (its test's names, `x` and `y` included). The reference folds are
-  `src/ops-digest.ts`. ADR-0188 §5's "retros written" is not a digest count here (RW-4); Fabric's CO-502 view is to read
-  `ok` as asks answered (the CT-219 handoff's answer on thread `f7758225` says so). Each product's adoption is tracked in its own rows; the CT-219 handoff's
+  `src/ops-digest.ts`. ADR-0188 section 5's "retros written" is not a digest count here (RW-4): a view built on Fabric's CO-502 ("the daily
+  digest counts retros asked and written", `a6f0ffda`) reads `ok` as asks answered, which the CT-219 handoff's answer
+  on thread `f7758225` tells it. Each product's adoption is tracked in its own rows; the CT-219 handoff's
   Consumers list records what was read at a date, and vendoring the vectors from the release tag is each product's
   obligation. At their next re-pin, the consumers that vendor a protocol table (a deployment template's
   `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the adapter
@@ -9243,6 +9260,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   echo: no finding or error copies a credential-shaped or home-folder value); round 8 at `b96e73d4` was not clean: the
   reference folds against FAC-SEM-167 (they now refuse a name it refuses, so they never write a line every reader
   skips), the `from` echo and the daily `hours` (hours folded, never uptime), and its batch is folded in, with OD-1's
-  rebuilt day of names, OD-3's published overflow name and "at most once in `risen`";
+  rebuilt day of names, OD-3's published overflow name and "at most once in `risen`"; round 9 at `4b46cd05` was not
+  clean: the collision class leak (a duplicate dir named a value its class hides), `foldDay`'s grammar (it applied
+  FAC-SEM-167 but not OD-2's grammar) and Compatibility's present tense about Fabric, and its batch is folded in, with
+  OD-1's two kinds of writer and the detector's shapes stated in words;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.
