@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ValidateFunction } from "ajv/dist/2020.js";
-import { CHANNEL_AGENT_PATHS, LONG_RUN_FLOOR, MESSAGE_ERRORS, PREFIX_FLOORS, runRereads, SK_FLOOR, readAsUrl, schemaLine, PATH_DEPTH, PIECE_COST, SECRET_BUDGET, SECRET_FINDINGS, VISIT_COST, codePoints, detectorCost, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, messagePlaces, placed, schemaErrors } from "../src/channel-agent.js";
+import { ARG_PIECE_COST, CHANNEL_AGENT_PATHS, LONG_RUN_FLOOR, argumentPieces, MESSAGE_ERRORS, PREFIX_FLOORS, runRereads, SK_FLOOR, readAsUrl, schemaLine, PATH_DEPTH, PIECE_COST, SECRET_BUDGET, SECRET_FINDINGS, VISIT_COST, codePoints, detectorCost, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, messagePlaces, placed, schemaErrors } from "../src/channel-agent.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { SECRET_VALUE, rawValues } from "../src/secret-shape.js";
@@ -37,17 +37,19 @@ const least = (work: () => unknown): number => {
   work();
   return Math.min(cpuMs(work), cpuMs(work), cpuMs(work));
 };
-// The baseline's prose is read to the budget at 4096 + 16 a string, as before the long-run term: its letters are outside
-// ASCII, so it holds no base64 run for runRereads to charge, and 245 strings still spend the budget (a prose of ASCII
-// words now costs about four times as much a string, so the budget would stop it after about 57 strings).
+// The baseline's prose holds no base64 run for runRereads to charge: its letters are outside ASCII. It pays 4096 code
+// points, the visit and its spaces' argument pieces (about 7036 a string), so the budget stops it after about 142
+// strings and 245 still spend the budget. A prose of ASCII words now costs about eleven times as much a string (44,036
+// with the long-run term, 47,388 with the argument pieces), so the budget would stop it after about 22 strings.
 // Its letters take two bytes each in UTF-8 (one UTF-16 unit, one code point), so the bound is about 20 % tighter than
 // with ASCII prose; watch the nightly run for flakes.
 const PROSE = "съешь же ещё этих мягких французских булок да выпей чаю ".repeat(80).slice(0, 4096);
 
-// detectorCost without its long-run term (runRereads, pinned on its own below): the terms the older exact tests count.
+// detectorCost without its long-run term (runRereads) and its argument pieces (argumentPieces), each pinned on its own
+// below: the terms the older exact tests count.
 const runsIn = (text: string): number => {
   let runs = runRereads(text);
-  if (!readAsUrl(text)) return runs;
+  if (!readAsUrl(text)) return runs + argumentPieces(text);
   let url: URL;
   try {
     url = new URL(text);
@@ -381,9 +383,15 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       return { found, micros: spent.user + spent.system };
     };
     // Five runs at each size after one warm run of each, summed, so a moment of another process does not read as growth.
-    const total = (chain: Json) => {
+    const summed = (chain: Json) => {
       const runs = [run(chain), run(chain), run(chain), run(chain), run(chain)];
       return { found: runs[0]?.found ?? [], micros: runs.reduce((sum, r) => sum + r.micros, 0) };
+    };
+    // The least of three summed totals per size, as least() takes the least of three runs: one slow moment under
+    // parallel load cannot read as growth.
+    const total = (chain: Json) => {
+      const totals = [summed(chain), summed(chain), summed(chain)];
+      return totals.reduce((best, t) => (t.micros < best.micros ? t : best));
     };
     for (const build of [valueChain, nameChain]) {
       const smallChain = build(8000);
@@ -708,7 +716,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     };
     const prose = PROSE;
     time(prose);
-    const baseline = Math.min(time(prose), time(prose), time(prose));
+    // The least of five runs on each side, so a slow moment under load (the coverage run included) cannot read as a cost.
+    const leastOf = (text: string) => Math.min(time(text), time(text), time(text), time(text), time(text));
+    const baseline = leastOf(prose);
     // A special scheme takes a host without `//`, and a percent-escaped host is decoded before host processing: none is parsed.
     const wide = Array.from({ length: 4091 }, (_, i) => String.fromCodePoint(0x4e00 + i)).join("");
     const special = ["http:", "http:/", "http:\\\\", "https:/\t/", "HTTP:", "ws:"].map((scheme) => `${scheme}${wide}`);
@@ -716,7 +726,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     for (const text of [...special, escaped]) expect(readAsUrl(text), text.slice(0, 9)).toBe(false);
     for (const text of [host, "x", ...special, escaped]) {
       time(text);
-      expect(Math.min(time(text), time(text), time(text)), text.slice(0, 12)).toBeLessThan(2 * baseline + 20);
+      expect(leastOf(text), text.slice(0, 12)).toBeLessThan(2 * baseline + 20);
     }
   });
   it("answers no key as connectionsView does: not declared and not reported", () => {
@@ -783,7 +793,26 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const split = `${a39}=${a39},`.repeat(52).slice(0, 4096);
     expect(detectorCost(split)).toBeGreaterThan(4096 * 38);
     const splitDoc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => split) } } };
+    // The split document stops on the budget, which tells the charge apart from an older one that did not stop it.
+    expect(channelAgentRules(splitDoc, "well-known").some((f) => f.code === "FAC-SEM-165" && f.message.includes("code points of reading"))).toBe(true);
+    // A regression guard: reading it to the budget stays within the repository's rule.
     expect(least(() => channelAgentRules(splitDoc, "well-known"))).toBeLessThan(2 * proseBaseline() + 20);
+  });
+  it("charges the argument reading's pieces: ARG_PIECE_COST per white space, =, / and \\, outside a URL only", { timeout: 60_000 }, () => {
+    expect(ARG_PIECE_COST).toBe(4);
+    expect(argumentPieces("abc")).toBe(0);
+    expect(argumentPieces("a b=c/d\\e")).toBe(4 * ARG_PIECE_COST);
+    expect(argumentPieces("a\tb\u00a0c")).toBe(2 * ARG_PIECE_COST);
+    expect(detectorCost("a b") - runRereads("a b")).toBe(3 + ARG_PIECE_COST);
+    expect(detectorCost("https://a.example/a/b") - runRereads("https://a.example/a/b")).toBe(21);
+    const page = read("docs/specification/channel-agent.md").replace(/\s+/g, " ");
+    expect(page).toContain("4 (`ARG_PIECE_COST`) for each white space, `=`, `/` and `\\`");
+    const baseline = proseBaseline();
+    for (const separator of [" ", "=", "/"]) {
+      const text = separator.repeat(4096);
+      const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => text) } } };
+      expect(least(() => channelAgentRules(doc, "well-known")), JSON.stringify(separator)).toBeLessThan(2 * baseline + 20);
+    }
   });
   it("holds each of the page's cost terms to detectorCost, exactly", () => {
     const page = read("docs/specification/channel-agent.md");

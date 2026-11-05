@@ -527,6 +527,17 @@ export const VISIT_COST = 16;
  * gate's coverage run, costs about as much as reading 100 code points of prose.
  */
 export const PIECE_COST = 8 * VISIT_COST;
+/**
+ * What the argument reading (secretArgument) costs per piece it makes, beside the code points: it splits a string at
+ * each white space and `=`, and a path-like piece again at each `/` and `\`, then reads every piece; a string of
+ * separators only is all pieces. Charged per separator, `/` and `\` included wherever they stand (a bound).
+ */
+export const ARG_PIECE_COST = 4;
+const SEPARATOR = /[\s=/\\]/g;
+/** ARG_PIECE_COST for each separator the argument reading may split at. */
+export function argumentPieces(text: string): number {
+  return ARG_PIECE_COST * (text.match(SEPARATOR)?.length ?? 0);
+}
 
 /** The end of the base64url run that starts at `from`. */
 function runFrom(text: string, from: number): number {
@@ -667,10 +678,12 @@ export const PREFIX_FLOORS: ReadonlyArray<readonly [RegExp, number]> = [[/gh[pou
  * removed, percent-decoded, as `rawValues` hands them over), for every query or fragment piece: PIECE_COST, its name's
  * and value's code points, the value's JWT, `sk-` and long-run terms, and, when the value is not empty and the name holds an
  * upper-case letter, the triangular number n(n+1)/2 of the name's length (splitting a name into words may backtrack over it).
+ * For a string not read as a URL, ARG_PIECE_COST for each white space, `=`, `/` and `\\` (the argument reading's pieces).
  */
 export function detectorCost(text: string): number {
   let cost = codePoints(text) + jwtRereads(text) + keyRereads(text) + runRereads(text);
-  if (!readAsUrl(text)) return cost;
+  // A string not read as a URL is read as an argument too (secretArgument): each separator makes a piece.
+  if (!readAsUrl(text)) return cost + argumentPieces(text);
   let url: URL;
   try {
     url = new URL(text);

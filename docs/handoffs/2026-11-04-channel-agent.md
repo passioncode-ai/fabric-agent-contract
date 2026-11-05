@@ -375,6 +375,18 @@ FAA-197, on the adapter's main).
   the out-of-chat example is Bob's review in another chat; the conformance row carries the bound sentence; the timing
   baseline's note says its prose is Cyrillic; the DEC-0153 line is re-measured at `be737b89` and splits auto-merging
   from pairwise-conflicting files. The local ASCII prose baselines in the timing tests now use the same run-free prose.
+- Round 30 of the readings (on `6998c611`: unit and seam pass, product one break) was not clean: the page named OA-2
+  and `_meta.decision` without defining or linking them. With the coordinator's decisions: both are linked and defined
+  in one clause each, the same in the page, item 8 and the conformance row; on an `account` channel the word counts only
+  where every other session of the account is the operator's own (a send record shows only "not sent through the
+  session owner"), on the page, item 8, the row, SCN-043 and FLW-29's node K; the merge post's identification question
+  says so and adds that mail, store reviews, public comments and team chats have no operator identification yet; the
+  operator's user id is bound in a private chat with the agent's own bot; the Bot API row in `docs/evidence/sources.md`
+  adds `sender_chat` and the privacy-mode rule (10.3, re-read 2026-11-05). Unit: `detectorCost` charges 4
+  (`ARG_PIECE_COST`) for each white space, `=`, `/` and `\` of a string not read as a URL (the argument reading's
+  pieces), with timing cases for 4096 separators and the budget-edge vectors recounted; the split case asserts the stop
+  on the budget; the scaling and URL timing tests take the least of several runs; the baseline comment gives the prose
+  costs. The bare-path landing step names where the switch goes.
 
 ## The branch and its history
 
@@ -478,8 +490,9 @@ origin), whichever lands second:
   free CT id then: a source export's installation-valued members of a channel-agent declaration (`tickets.token_slot`'s
   vault project and env, `evals.spend_record`, the per-project entries), checked against the source slots;
 - after DEC-0149 lands (its `formatSchemaErrors(errors, { instanceFree: true })`), runs the bare `--schema
-  service-channel-agent-extension.schema.json` path instance-free and rewords the second sentence of
-  `hint/declaration-only` to "A bare declaration's lines may name a map key as written (a language tag shaped like a
+  service-channel-agent-extension.schema.json` path instance-free (the switch ORs the schema into `formatSchemaErrors`'
+  `instanceFree` option only, never into `sourceCheck`, which returns before every hint) and rewords the second sentence
+  of `hint/declaration-only` to "A bare declaration's lines may name a map key as written (a language tag shaped like a
   credential included) and print one line per item, since widths are not checked first here.", changing in the same step
   every dependent: `readerHints`' text in `src/validate-cli.ts`, the 'may name its members as written' assertion in
   `test/validate-cli.test.ts`, the page's paragraph on a bare declaration (`channel-agent.md`, "Where it is declared"),
@@ -622,6 +635,13 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
+On round 30's change, each exit code read separately: `pnpm typecheck` 0; `pnpm vitest run --testTimeout=60000
+test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts test/validate-cli.test.ts` 0 (2116
+passed); `pnpm vectors:check` 0 (29 vector files match their generators, after the channel-agent generator's `--write`);
+`pnpm run docs:check` 0 (markdownlint 0 errors); `python3 docs/ux/lint.py` 0; `pnpm run privacy:check` with the
+organization index 0 (0 findings); no U+2014 in the added lines; `operator-channel.md` matches main. With `ARG_PIECE_COST` 4, a one-off script
+read 4096 spaces, `=` or `/` at 0.71 to 0.93 of the prose baseline. The coverage run is owed: the 15-minute load was 54.55 (free disk 21 GB).
+
 On round 29's change, each exit code read separately: `pnpm typecheck` 0; `pnpm vitest run --testTimeout=60000
 test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts test/validate-cli.test.ts` 0 (2115
 passed); `pnpm vectors:check` 0 (29 vector files match their generators, after the channel-agent generator's `--write`);
@@ -714,7 +734,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 29 (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 30 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -738,15 +758,18 @@ here), and adds:
   whether that ticket's outcome is `answered` or `answered_elsewhere` (sections 3 and 4.8); whether `first_reply_from`
   (F-4) joins section 13.6 (until it does, the closed channel object refuses it); whether privacy deletion (section
   13.5) reaches the agent's audit quotes of the operator's words in a customer's chat; whether on an `account` channel a
-  message is the owner's word only when the account's owner is the operator and the send record of section 9's one
-  session owner shows it was neither sent by an agent nor relayed from the ticket board; whether section 10's `account`
-  row "holding rules" include the session owner's section 9 hold or only the agent's own (CA-8 reads them as the agent's
-  own, per section 4.10); whether the standard intends the operator's chat decision on an `account` channel to be a
-  message the customer reads; and one bot serving both an operator channel and channels the agent answers people on, for
-  the standard's and the operator channel's owners: where a binding code is accepted, how OC-3, OC-4, OC-12 and OC-14 to
-  OC-16 apply to customer chats, whether OC-3 also refuses a message sent on behalf of a chat (`sender_chat` set, a
-  shared placeholder sender), and the shared receiver's order of updates and its status (OC-17); until they answer, such
-  a bot keeps every operator-channel rule in every chat as written;
+  message is the owner's word only when the account's owner is the operator, the send record of section 9's one session
+  owner shows it was not sent through that session owner (a send record can show only "not sent through the session
+  owner", not which session sent it), and every other session of the account is the operator's own; that `mail`,
+  `store_review`, `public_comment` and `team_chat` have no operator identification yet, so section 4.10 does not apply
+  on them until the owner answers; whether section 10's `account` row "holding rules" include the session owner's
+  section 9 hold or only the agent's own (CA-8 reads them as the agent's own, per section 4.10); whether the standard
+  intends the operator's chat decision on an `account` channel to be a message the customer reads; and one bot serving
+  both an operator channel and channels the agent answers people on, for the standard's and the operator channel's
+  owners: where a binding code is accepted, how OC-3, OC-4, OC-12 and OC-14 to OC-16 apply to customer chats, whether
+  OC-3 also refuses a message sent on behalf of a chat (`sender_chat` set, a shared placeholder sender), and the shared
+  receiver's order of updates and its status (OC-17); until they answer, such a bot keeps every operator-channel rule in
+  every chat as written;
 - a budget above 0 without a spend record is `FAC-SEM-164`;
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;

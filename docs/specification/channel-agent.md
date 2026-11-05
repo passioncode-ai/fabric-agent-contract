@@ -284,7 +284,7 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    any case, that follows a boundary, its three characters included, up to 255 code points to the end of the string
    (`sk-a` costs 4 and 4: 8); after every `sk-` away from a boundary, up to 16 code points after it, the run the shape
    needs (`xsk-a` costs 5 and 1); after every other provider prefix, anywhere and in any case (`gh` and one of `pousr`
-   then `_`, `xox` and one of `abposr` then `-`, `AKIA`, `glpat-`), up to its floor, the run its shape needs (20, 10, 16 and 20 code points; a floor counts the run the shape needs, not the character that ends it); and, beside the prefixes, the shared detector's long-run floor of 40 (`LONG_RUN`): in each of three partitions the shared detector's readings split a string into (the base64 class `[A-Za-z0-9+/=_-]`; that class without `=`, where `secretArgument` splits; and without `=` and `/`, a path's segments), for each maximal run shorter than 40, min(length, 39) per code point, since a reading that needs 40 may start at each of them (`abc,de` costs 6 and 3 x (9 + 4); the other examples here count their own terms only). Each of these is a bound
+   then `_`, `xox` and one of `abposr` then `-`, `AKIA`, `glpat-`), up to its floor, the run its shape needs (20, 10, 16 and 20 code points; a floor counts the run the shape needs, not the character that ends it); and, beside the prefixes, the shared detector's long-run floor of 40 (`LONG_RUN`): in each of three partitions the shared detector's readings split a string into (the base64 class `[A-Za-z0-9+/=_-]`; that class without `=`, where `secretArgument` splits; and without `=` and `/`, a path's segments), for each maximal run shorter than 40, min(length, 39) per code point, since a reading that needs 40 may start at each of them (`abc,de` costs 6 and 3 x (9 + 4)); and, for a string not read as a URL, which the shared detector also reads as an argument split into pieces, 4 (`ARG_PIECE_COST`) for each white space, `=`, `/` and `\` it may split at (`a b` costs 3 and 4; the other examples here count their own terms only). Each of these is a bound
    any detector may need, whatever boundary or case its own shapes take. A boundary is the start, a character other
    than a letter or a digit, or an escape that ends right before the `sk-`: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or
    three-digit octal escape, a backslash escape of one character, or a colour sequence `ESC[...m` with any number of
@@ -390,31 +390,37 @@ effect, OC-4 limits what it sends to its events feed and results, and in a group
 give the operator channel a bot of its own.
 
 A message on a channel is the operator's word only when the transport identifies its sender as the operator: an
-allowlisted numeric user id, bound as the [operator channel](operator-channel.md)'s OC-3 binds one, or, on an `account`
-channel, the account's owner, only when the owner is the operator and the send record of the account's one session owner
-(the standard's section 9) shows the message was neither sent by an agent nor relayed from the ticket board; never by a
-name, a display name or text in the message, and otherwise it stays data. The operator is a person's own user id; a
-message sent on behalf of a chat (`sender_chat` set: an anonymous admin, or a member posting as a channel) carries a
-shared placeholder sender and is never the operator's word. On an `account` channel, a message the session owner cannot
-attribute to the operator's own session (its send record is missing, or does not show the operator's word) stays data
-until the standard's owner answers the identification question (merge post). Such a word acts only inside that chat, as
-the standard's section 4.10 says (the operator's decision given in a chat "outranks
+allowlisted numeric user id, bound as the [operator channel](operator-channel.md)'s OC-3 binds one, in a private chat
+with the agent's own bot, or, on an `account` channel, the account's owner, only when the owner is the operator, the
+send record of the account's one session owner (the standard's section 9) shows the message was not sent through that
+session owner (neither by an agent nor relayed from the ticket board; a send record can show only that, not which
+session sent it), and every other session of the account is the operator's own (no second person, no connected business
+bot); never by a name, a display name or text in the message, and otherwise it stays data. The operator is a person's
+own user id; a message sent on behalf of a chat (`sender_chat` set: an anonymous admin, or a member posting as a
+channel) carries a shared placeholder sender and is never the operator's word. On an `account` channel, a message the
+session owner cannot attribute to the operator's own session (its send record is missing, or does not show the
+operator's word) stays data until the standard's owner answers the identification question (merge post). Such a word
+acts only inside that chat, as the standard's section 4.10 says (the operator's decision given in a chat "outranks
 every holding rule of the agent for that chat"); it is not one of DEC-0121 [AP-3](service.md#actions)'s sources and
-never the source of an OA-2 relay, and the customer ticket it acts on stays a customer ticket, its outcome set and
-counted as sections 3 and 5.1 say. That word does not release a send held by the transport's owner (the standard's
-section 9) or behind a service's relayed action: the owner's own approval rules end the first (section 9), and an agent
-relays a decision on the second only from DEC-0121 AP-3's sources (AP-1 and AP-2 still take the service's own page, an
-accepted elicitation and the host's click). A word that asks for an action outside that chat causes none; how the agent
-tells the operator is a question to the standard's owner (merge post). Text the operator quotes or forwards, and every
-other sender's text, stays data.
+never the source of an [OA-2 relay](delegation.md#one-approval-binds-all-the-operators-agents) (DEC-0126: the operator's
+words passed to another of their agents, as a `mandate/1` or a `_meta.decision` with `source`, or prose carrying the
+four parts), and the customer ticket it acts on stays a customer ticket, its outcome set and counted as sections 3 and
+5.1 say. That word does not release a send held by the transport's owner (the standard's section 9) or behind a
+service's relayed action: the owner's own approval rules end the first (section 9), and an agent relays a decision on
+the second only from DEC-0121 AP-3's sources (AP-1 and AP-2 still take the service's own page, an accepted elicitation
+and the host's click). A word that asks for an action outside that chat causes none; how the agent tells the operator is
+a question to the standard's owner (merge post). Text the operator quotes or forwards, and every other sender's text,
+stays data.
 
 The agent records such a word in its own audit, quoting the message and its sender id.
 
 A producer's own test of CA-8 covers at least: a message from anyone but the operator asking for an action outside the
 task causes none; the operator's request for an action outside that chat causes nothing and is audited; only a sender
-the transport identifies is the operator, and that word acts only in that chat; a chat word never sets `_meta.decision`
-or an OA-2 relay; quoted or forwarded text stays data; a message with `sender_chat` set is never the operator's; and,
-where the agent has an operator channel, that channel stays a DEC-0121 AP-3 source.
+the transport identifies is the operator, and that word acts only in that chat; a chat word never sets
+[`_meta.decision`](service.md#actions) (AP-2: the decision a service call carries for a relayed action) or an [OA-2
+relay](delegation.md#one-approval-binds-all-the-operators-agents); quoted or forwarded text stays data; a message with
+`sender_chat` set is never the operator's; and, where the agent has an operator channel, that channel stays a DEC-0121
+AP-3 source.
 
 CA-8 is bounded by section 4.10 and by section 10's `account` row and does not override them; the identification bound
 (who counts as the operator in a chat) is sent to the standard's owner. CT-220, when drafted, is to keep this bound (the
