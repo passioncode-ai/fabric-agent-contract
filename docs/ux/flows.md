@@ -754,7 +754,8 @@ flowchart TD
   Q --> O
   D -->|invalid| I[decision-invalid; the agent asks again]
   D -->|valid| R[Taken as the operator's; audited with the agent]
-  W[Word in a customer chat] --> K[CA-8: no decision, the route named to the operator privately]
+  O -->|in a customer chat| W[Word in a customer chat]
+  W --> K[CA-8: acts inside that chat only; a request outside it causes no action and is recorded in the agent's audit]
 ```
 
 - **Screens traversed:** SCR-30 the operator's agent and the service's audit row.

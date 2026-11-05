@@ -1,6 +1,6 @@
 # Operator channel `fabric-operator-channel/0.1`
 
-DEC-0034, group chats and liveness DEC-0035, status invariants DEC-0058 · status schema [`operator-channel-status.schema.json`](../../schemas/operator-channel-status.schema.json)
+DEC-0034, group chats and liveness DEC-0035, status invariants DEC-0058, a bot that also answers people DEC-0150 · status schema [`operator-channel-status.schema.json`](../../schemas/operator-channel-status.schema.json)
 · builds on [`fabric-service/0.1`](service.md) · beside [`fabric-project-comms/0.1`](project-comms.md)
 
 An **operator channel** is an agent's own messenger channel to the person who operates it. The
@@ -66,10 +66,14 @@ found set on a token that the agent is configured to poll makes the channel `deg
 operator's decision, taken by them or relayed to the agent ([service](service.md#actions) AP-2, DEC-0121). A conflict answer from the transport (another `getUpdates` running) makes the
 channel `degraded` (`receiver-conflict`).
 
-When the agent's bot also answers people (a [channel agent](channel-agent.md#text-from-a-channel-is-data)), OC-3, OC-7,
-OC-12 and OC-14 to OC-16 bind only the operator channel's bound chat; every other chat the bot is in is bounded by
-DEC-0150 CA-8 and the channel agent standard: there it may read staff messages for the quiet window and answer under the
-asked message, as the standard's sections 4.8 and 10 say.
+When the agent's bot also answers people (a [channel
+agent](channel-agent.md#text-from-a-channel-is-data), DEC-0150), OC-3, OC-7 and OC-14 to OC-16 bind
+only the operator channel's bound chat; OC-12 binds in every chat (a bot's message may be read as a
+signal, never answered, and never sent a command). Every other chat the bot is in is bounded by
+DEC-0150 CA-8 and the channel agent standard: there it may read staff messages for the quiet window
+and answer under the asked message, as the standard's sections 4.8 and 10 say. On a shared receiver
+the status figures (OC-17) are the receiver's, not the operator chat's, and the order of updates is
+not decided here.
 
 **OC-3 — Binding by a one-time code.** The agent issues a link code locally — from its command
 line or its dashboard, never through the channel. The code MUST carry at least 40 bits of

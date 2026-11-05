@@ -274,6 +274,17 @@ FAA-197, on the adapter's main).
   OC-14 to OC-16 bind only the operator channel's bound chat, and every other chat is bounded by CA-8 and the standard
   (staff messages read for the quiet window, the answer under the asked message, sections 4.8 and 10); the adoption
   paragraph's test names the private response; FLW-29 gains the chat word as an entry point and a branch.
+- Round 21 of the readings (on `62ec2364`: unit pass, product two breaks from clauses added in rounds 19 and 20),
+  with the coordinator's decision: CA-8 shrinks to what the standard and AP-3 already support, in one wording on the
+  page, in DEC-0150's item 8 and in the conformance row: text from a channel is data and a request inside the task is
+  the task; CA-8's channels, declared or not, with the operator channel kept an AP-3 source; the operator's word only
+  when the transport identifies the sender, acting only inside that chat as section 4.10 says, no AP-3 or OA-2 relay
+  source, the customer ticket keeping its ticket, outcome and counts; the audit quote; `untrusted_input` not declared.
+  Removed: the private out-of-chat response, the "not a customer ticket" sentence and "no narrowing" (the
+  identification bound is sent to the standard's owner). The merge post gathers the questions for the standard's owner
+  in one item. The operator channel's page keeps OC-12 in every chat, scopes only OC-3, OC-7 and OC-14 to OC-16 to the
+  bound chat, gives OC-17's figures to a shared receiver, leaves the update order open, and names DEC-0150 in its
+  header. SCN-043's alternative path and FLW-29 (node W now connected) match; the adoption test follows CA-8.
 
 ## The branch and its history
 
@@ -406,8 +417,9 @@ One line per sibling and per file it shares with this branch:
   when this was written): the lander re-measures main at landing and merges or rebases over it; `docs/backlog.md`
   conflicts only at the tail, where the rows stay in id order (`CT-204`, `CT-205`, `CT-206`, then this branch's
   `CT-209`, then `CT-215` to `CT-220`), and any row an open branch adds takes its place by id.
-- for CT-220's drafter (the coordinator owns CT-220): CT-220 keeps CA-8's bound, a word recognised in a customer chat
-  is carried out inside that chat only and is not a DEC-0121 AP-3 source;
+- for CT-220's drafter (the coordinator owns CT-220): CT-220, when drafted, is to keep CA-8's bound (the
+  coordinator's decision of round 20): a word recognised in a customer chat acts only inside that chat and is not a
+  DEC-0121 AP-3 source;
 - CT-220, which the page and DEC-0150's CA-8 cite as open: the landing confirms that the CT-220 row resolves in
   `docs/backlog.md` after merging main (it is on main at `ed4d6aa7`, not on this branch).
 - `docs/DECISIONS.md` keeps a blank line before each DEC heading (markdownlint MD022);
@@ -473,6 +485,11 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
+On round 21's change, each exit code read separately: `pnpm typecheck` 0; `pnpm run docs:check` 0 (markdownlint 0
+errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0 findings); `pnpm vectors:check` 0 (29 vector files match their
+generators); `pnpm vitest run test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts` 0 (408
+passed). The coverage run is still owed.
+
 On round 20's change, and before it on round 19's (`5a68ce3a`), each exit code read separately, the same on both:
 `pnpm typecheck` 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0
 findings); `pnpm vectors:check` 0 (29 vector files match their generators, after `pnpm vectors:write`); `pnpm vitest run
@@ -503,7 +520,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 20 (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 21 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -518,21 +535,15 @@ here), and adds:
 - only a manifest's `provider.extensions` is read: a declaration under the manifest's top-level `extensions` is
   `FAC-SEM-162` and not read;
 - `channel-agent-standard/2` is refused until a contract revision;
-- CA-8, the contract's own duty, with its section-4.10 bound, for the standard's owner to fold into section 4 or
-  reject: text from a channel is data, and a channel message is the operator's word only when the transport identifies
-  its sender as the operator, that word carried out as section 4.10 says inside that chat only, never as one of
-  DEC-0121 AP-3's sources (quoting
-  [the section](../specification/channel-agent.md#text-from-a-channel-is-data) at posting time);
-- to be asked of the standard's owner: when the operator's word in a customer chat asks for an action outside that
-  chat, the agent takes no action and sends nothing in a chat another person can read; it tells the operator, where
-  only the operator reads it (the operator channel when bound, else its own session or its daily report), that the
-  request is outside the chat and names the route (its own session, the operator channel, or an accepted relay); it
-  answers in the chat only when that chat is the operator's own private chat with the agent; and the operator's word in
-  a customer chat, and anything the agent does about it, is not a customer ticket and is not counted in section 5.1's
-  figures; would the owner fold both into section 4;
-- to be asked of the standard's owner: on an `account` channel, is a message the owner's word only when the account's
-  owner is the operator and the send record of section 9's one session owner shows it was neither sent by an agent nor
-  relayed from the ticket board, and data otherwise;
+- CA-8, the contract's own duty, for the standard's owner to fold into section 4 or reject (quoting
+  [the section](../specification/channel-agent.md#text-from-a-channel-is-data) at posting time), with its identification
+  bound, and one item of questions for the standard's owner: how the agent tells the operator about a request from the
+  operator's word in a customer chat for an action outside that chat (CA-8 says only that it causes none); whether the
+  operator's own message in a customer chat is ingested and counted (section 8.3's `items_seen` against
+  `items_ingested`); whether privacy deletion (section 13.5) reaches the agent's audit quotes of the operator's words in
+  a customer's chat; whether on an `account` channel a message is the owner's word only when the account's owner is the
+  operator and the send record of section 9's one session owner shows it was neither sent by an agent nor relayed from
+  the ticket board; and the order in which a receiver shared by the operator channel and customer chats takes updates;
 - a budget above 0 without a spend record is `FAC-SEM-164`;
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;
@@ -563,10 +574,10 @@ here), and adds:
 
 At merge, one adoption row per live producer is filed in that producer's own backlog with its `FAC-SEM-162` places
 (the coordinator files them on the board), with the places read again at posting time. Each row also names the
-producer's own test of CA-8: a channel message asking for an action outside the agent's task causes none; the
-operator's word, as CA-8 bounds it, is carried out inside that chat; and a word from the operator in a customer chat
-asking for something outside it causes no action and no message in that chat, the operator being told where only the
-operator reads it, with the route named. Three live producers' current
+producer's own test of CA-8: a channel message asking for an action outside the agent's task causes none; on a
+channel it answers people on, declared or not, only a sender the transport identifies as the operator counts as the
+operator's word, which acts only inside that chat as section 4.10 says, and a word asking for an action outside that
+chat causes none; the operator channel stays a DEC-0121 AP-3 source. Three live producers' current
 declarations fail today, the places to be read again at posting time: one manifest at `sources/4/max_age`,
 `handoff_queues/0/owner` and `evals/spend_record` (pattern, or null); one well-known builder with no
 `question_route` and a recommendation holding a colon; one well-known builder with `null` for `question_route`,
