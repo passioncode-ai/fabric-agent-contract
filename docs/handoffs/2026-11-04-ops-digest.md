@@ -54,6 +54,10 @@ DEC-0149, DEC-0150 and DEC-0152 are on other branches. When DEC-0149, DEC-0150 a
 - `test/positive-sweep.test.ts`'s sources list holds both `source-rules` and `ops-digest`; `test/rule-tolerance.test.ts`
   holds both branches' kinds, separated by a comma; so do the last rows of `fixtures/catalogue.json`.
 - The register in `conformance.md` lists `FAC-SEM-166` and `FAC-SEM-167` after `FAC-SEM-165`.
+- Whichever of DEC-0149 and DEC-0153 lands second drops "(DEC-0153, in progress)" from `source.md`'s setup-answer
+  sentence, and "in progress" from `ops-digest.md`'s OD-3 and from the DEC-0153 conformance row where it names
+  DEC-0149. DEC-0153's own decision text ("DEC-0149's setup state, in progress") is edited if DEC-0153 is still
+  Proposed, and annotated if it is already Accepted (the register is append-only).
 - DEC-0152 shares `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`, `docs/handoffs/README.md` and
   `conformance.md` (a different row).
 
