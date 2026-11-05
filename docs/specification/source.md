@@ -252,7 +252,7 @@ checked folder and every file named outside a folder run passes the place mark b
 file named outside a folder run is named by its basename (or its place when the name holds a finding), in its usage
 errors too; a folder run with another source kind prints the folder as the ordinary validator does, resolved to an absolute path,
 in its problem and note lines; its usage errors name a file by its path in the folder, while a folder it cannot read,
-or one that holds no `.json` file (or no document it can tell), is named by its absolute path. A parse error gives its line
+or one that holds no `.json` file, is named by its absolute path. A parse error gives its line
 and column only, found by reading the text again; a schema
 error's message is built from its keyword and the schema's own values (allowed values, a pattern, a limit, the names of
 members the schema defines), so an extra member reads "has a member the schema does not define" without its name, and a
@@ -368,8 +368,9 @@ owed by CT-207, is to be it, and the tree check is the contract's part.
 
 ## Handing over
 
-Handing a source export to anyone (creating a repository someone else can read, pushing to one, sending a file,
-changing its visibility; the line is drawn below, after the departures) is an act of
+Handing a source export to anyone (creating a repository someone else can read, pushing the source to one it was not
+in, sending a file, changing its visibility; the line, with the source's home, is drawn below, after the departures) is
+an act of
 effect class `publish` (`schemas/common.schema.json`), and a person's act each time, which no standing grant authorises
 ([external effects](governance-and-roles.md#external-effects)). The hand-over action declares the gate `relayed`
 ([actions](service.md#actions), DEC-0121).
@@ -471,15 +472,20 @@ service pins it, the action's owner enforces them. The departures:
 The line between the two is this. Moving an agent's mechanics into a product, by rewriting or copying them file by
 file into that product's own source through the product's own change with the agent's private data stripped, is the
 operator's standing permission of 2026-10-12 (recorded in the knowledge base's
-[roadmap](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/roadmap.md)) and needs no word per act. Handing over the agent's source as such (handing a source export to
-anyone, pushing the agent's tree or a copy of it to a repository that is public or that another owner holds, a transfer, a visibility change, a file sent)
-needs the operator's word for each act; a local source export needs none. A copy moved within the operator's own estate
-(here, the accounts and placements the operator alone holds) to a place that is not public and that no one outside the
-operator can read (a deploy to the operator's own placement, a private mirror the operator owns) has no recipient and
-is not a source hand-over; a push or copy that is public, that another owner holds, or that another person is given
-access to, is a hand-over. An organization's repository is another owner's even when the operator administers it (as
-the knowledge base's [agents-first](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/agents-first.md)
-item 9, "A source hand-over takes the operator's word on that act", reads), so a push into it is a source hand-over.
+[roadmap](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/roadmap.md)) and needs no word per act.
+
+The repository where the agent's owner keeps and develops its source is its home, not a recipient: the owner's own
+commits, branches and releases there are no hand-over, whether that home is the operator's private repository, a public
+one or an organization's. A source hand-over is the source reaching a place or a person it was not at: a source export
+handed to anyone; the agent's tree or a copy of it pushed to a repository it was not in, that is public or that another
+owner holds (an organization's repository included, even one the operator administers, as the knowledge base's
+[agents-first](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/agents-first.md) item 9, "A source
+hand-over takes the operator's word on that act", reads); a transfer; a visibility change; access given to another
+person; a file sent. Each needs the operator's word for that act; a local source export needs none. A copy moved within
+the operator's own estate (here, the accounts and placements the operator alone holds) to a place that is not public
+and that no one outside the operator can read (a deploy to the operator's own placement, a private mirror the operator
+owns) has no recipient and is not a source hand-over. The home carve-out never lets a personal agent's source move into
+an organization's or a public repository: that move stays a source hand-over.
 
 Every agent follows the same rule, private or not, and a private agent is never handed over on anything less. Under
 [one approval for all the operator's agents](delegation.md#one-approval-binds-all-the-operators-agents) (DEC-0126) a

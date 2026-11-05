@@ -205,7 +205,20 @@ source, what never travels with it, the check before a source export, and how a 
   folder run's unreadable or empty folder named by its absolute path (tested); `--kind source-manifest`'s scope
   pinned by a test and its `FAC-SEM-000`; the adapter kit's protocol tables at its next re-vendor; and, from DEC-0151's
   round-16 seam reading, the `it.each` "reads %s in time linear in its lists" given its siblings' 180 000 ms timeout,
-  its assertion unchanged; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  its assertion unchanged; round 36 (not clean: the product tier found no home-repository carve-out, so every
+  ordinary push and release of an agent whose home is an organization's or a public repository read as a per-act
+  hand-over; its seam reading ended on an API error, and round 37's seam reading covers the seam) answered as the
+  coordinator decided: a hand-over is the source reaching a place or a person it was not at, the repository where the
+  agent's owner keeps and develops its source is its home and the owner's commits, branches and releases there are
+  none, and a personal agent's source moving into an organization's or a public repository stays one (`source.md`'s
+  line paragraph, `CONTEXT.md`, DEC-0149 item 12, and PR #628's agents-first item 9 with principles section 7 and rules
+  section 9 saying the rule reaches every agent with that carve-out); item 9's list is the contract's (a transfer added,
+  the bare "another owner" dropped); the CT-218 note says serving the running agent to a team gives no one the tree,
+  while a placement whose tree another person or the team can read is a hand-over; a CT row for `unchecked` covering a
+  credential finding is filed at landing; the source-manifest scope test also runs `[]` in a folder and `7` as a named
+  file (each `FAC-SEM-000`, exit 1); the absolute-path test also runs a top folder it cannot read under both kinds and
+  an empty folder under `source-package`; `source.md`'s "(or no document it can tell)" is dropped (that line needs no
+  `--kind`); round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -228,7 +241,8 @@ source, what never travels with it, the check before a source export, and how a 
 - CT-211: the fabric-workspace amendment owed in the merge session (see **Next task**).
 - The checker does not refuse an `unchecked` entry that covers a credential finding: a probe in round 35 (a manifest
   listing its own key-holding file under `unchecked`) exits 0. source.md and SCN-054 say `unchecked` is no remedy for a
-  credential finding; enforcing it in the checker is a candidate follow-up row, not done here.
+  credential finding; enforcing it in the checker is a follow-up row filed at landing (see **Next task**), not done
+  here.
 - The landing's first step is done: the reviewed tree is one commit on the merge base `d1b905ee`, on
   `agent/ct194-source-manifest-v2-20261104`, and the review branch's remote ref is deleted. GitHub may still keep
   unreachable commits and cached views of the review branch; asking GitHub to remove them is the operator's step
@@ -270,6 +284,12 @@ source, what never travels with it, the check before a source export, and how a 
   content; it counts for `missing` and `no-license`. A nested repository is passed to the pure check as a file
   marked `nestedRepository: true`.
 - Links are followed in Markdown files only. A warning fixture lists `FAC-SEM-159` under `accepted`, beside `expect`.
+- The source's home is not a recipient (round 36, decided by the coordinator under the operator's recorded rules): the
+  rule guards source leaving the operator's estate or reaching new readers, personal agents stay private, and an
+  organization's agents are developed in its repositories by its standing practice (the knowledge base's rules §2 on
+  branches and landing, §11 on releases), so without the carve-out every ordinary push and release of such an agent,
+  of a public skill set, and of every agent CT-207's templates give a manifest would need a word per act. The carve-out
+  never lets a personal agent's source move into an organization's or a public repository.
 - A hand-over `target` past 200 characters is `sha256:` and the hex SHA-256 of `<agent>@<commit>-><recipient>`,
   which still binds all three, rather than a target that drops the recipient.
 - More missing required slots than `degraded[]`'s 64 entries end in one `setup: true` entry with `source`
@@ -281,6 +301,20 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 36's fixes were checked on the working tree over head `69a0ce8b` (this note's commit holds the same tree), each
+exit code read on its own: `pnpm typecheck` (exit 0); `pnpm vitest run test/validate-cli.test.ts
+test/source-rules.test.ts test/consistency.test.ts` without coverage (exit 1: 2002 passed, 2 skipped, two timed out at
+vitest's 5 seconds under a 15-minute load near 85, the semantic fixture `access-log-disclosure-hourly-usage` and "counts
+files[<index>] from 0 ...", neither touched here; run again alone with `-t`, both pass, exit 0); the two extended tests
+pass; `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match); `pnpm run docs:check` (exit 0, 0 errors); `python3
+docs/ux/lint.py` (exit 0); `ORG_INDEX=... pnpm run privacy:check` (exit 0, 0 findings); no U+2014 in the added lines.
+The branch gate is owed again: checked every 2 minutes from 10:51 to 11:11 UTC, eleven times, the 15-minute load stayed
+between 86 and 126 and `/` held 2 to 7 GB free. PR #628 at `7ac0b217` (the knowledge base's main merged in at
+`a0560056`, then item 9's definition and home carve-out, principles section 7 and rules section 9): `git show
+7ac0b217:knowledge/<page>.md` gives `source hand-over` in 4, 3 and 2 lines of agents-first, principles and rules, `own
+estate` once on each, `^9\. \*\*A source hand-over` once and `^8\. \*\*No person in the chat` once in agents-first;
+the knowledge base's `npm run verify:content` (exit 0, backlog 0 errors) and `npm test` (exit 0, 172 passed).
 
 Round 35's fixes were checked on the working tree over head `47d66a15` of `agent/ct194-source-manifest-v2-20261104`
 (this note's commit holds the same tree), each exit code read on its own: `pnpm typecheck` (exit 0); `pnpm vitest run
@@ -350,7 +384,7 @@ remaining steps, in order:
    behind, merge main into it, keeping main's item 8 and the PR's item 9. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `27549ae7`, which carries the knowledge base's main, they print 4, 3 and 2
+   `knowledge/rules.md`; at PR #628's head `7ac0b217`, which carries the knowledge base's main, they print 4, 3 and 2
    lines), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in
@@ -362,6 +396,10 @@ remaining steps, in order:
    (or revert it at once) and record the wait.
 7. A human gate: asking GitHub to remove the review branch's unreachable commits and their cached views is the
    operator's (GitHub Support).
+
+At landing, file a backlog row under the next free CT id then: "`unchecked` covering a credential finding exits 0
+(probe)", its evidence the round-35 probe (a manifest listing its own key-holding file under `unchecked` exits 0 under
+`--kind source-tree`, exit 1 without that entry), asking the checker to refuse such an entry.
 
 Right after the merge: close CT-211 with the three greps' outputs; update fabric-workspace's RM-36 row (rewriting its "Waiting on" line, which still names the
 deleted review branch) and its knowledge page for the agent source (`knowledge/`),
@@ -448,7 +486,9 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
 - At landing, add to CT-218's row: deploying an agent's tree to the operator's own placement (the local or the cloud
   form) is not a source hand-over when the placement is within the operator's own estate, is not public and is
   readable by no one outside the operator, since it has no recipient; a placement an organization or a team holds, or
-  one other people can read, is a hand-over (the knowledge base's agents-first item 9), as
+  one whose tree another person or the team can read, is a hand-over (the knowledge base's agents-first item 9, "A
+  source hand-over takes the operator's word on that act"); serving the running agent to a team (`peer`, client keys,
+  the one-time code) gives no one the tree and is no hand-over; as
   [handing over](../specification/source.md#handing-over)'s line paragraph states (linked in the row in the backlog's
   own form, `specification/source.md#handing-over`). Check with `grep '^| CT-218 ' docs/backlog.md | grep -c 'specification/source.md#handing-over'`, which
   prints 1 on the landed tree.

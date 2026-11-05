@@ -1917,10 +1917,23 @@ describe("an agent's source (DEC-0149)", () => {
     } finally {
       chmodSync(sub, 0o755);
     }
+    const top = folder({ "fabric.source.json": sourceManifest({ include: ["LICENSE"] }) });
+    chmodSync(top, 0o000);
+    try {
+      for (const kind of ["source-manifest", "source-package"]) {
+        const result = run(top, "--kind", kind);
+        expect(result.code, kind).toBe(2);
+        expect(result.out.split("\n").filter((line) => line.startsWith("usage error:")), kind).toEqual([`usage error: cannot read ${top}: EACCES`]);
+      }
+    } finally {
+      chmodSync(top, 0o755);
+    }
     const empty = folder({});
-    const result = run(empty, "--kind", "source-manifest");
-    expect(result.code).toBe(2);
-    expect(result.out).toContain(`usage error: ${empty} holds no readable .json file`);
+    for (const kind of ["source-manifest", "source-package"]) {
+      const result = run(empty, "--kind", kind);
+      expect(result.code, kind).toBe(2);
+      expect(result.out, kind).toContain(`usage error: ${empty} holds no readable .json file`);
+    }
   });
 
   it("checks a manifest's extra member only where its schema runs, never under --kind source-manifest alone", () => {
@@ -1934,6 +1947,15 @@ describe("an agent's source (DEC-0149)", () => {
       expect(result.out, args.join(" ")).toContain("has a member the schema does not define");
       expect(result.out, args.join(" ")).toContain("additionalProperties");
       expect(result.out, args.join(" ")).not.toContain("colour");
+    }
+    // A value that is no object is FAC-SEM-000 under --kind source-manifest too: in a folder and as a named file.
+    const array = folder({ "fabric.source.json": [] });
+    const seven = one("seven.json", 7);
+    for (const target of [array, seven]) {
+      const result = run(target, "--kind", "source-manifest");
+      expect(result.code, target).toBe(1);
+      expect(result.out.split("\n").filter((line) => line.includes("FAC-SEM-000")), target).toHaveLength(1);
+      expect(result.out, target).toContain("value must be an object");
     }
   });
 

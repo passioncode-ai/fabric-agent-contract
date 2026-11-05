@@ -447,14 +447,18 @@ the operator's word for that act, never by a mandate, as [source](docs/specifica
 (DEC-0149). Not the peer share's Export (DEC-0147) and not
 a proposal's `export` destination (`FAC-SEM-103`).
 
-**Source hand-over**: Handing a **Source export** to anyone, or the agent's tree itself (a public repository or one another owner holds created,
-a push to such a repository, a transfer, a visibility changed, a file sent); a copy moved within the operator's own estate (here, the
-accounts and placements the operator alone holds) to a place that is not public and that no one outside the operator
-can read (a deploy to the operator's own placement, a private mirror the operator owns) has no recipient and is not
-one, while a push or copy that is public, that another owner holds (an organization's repository included, even one
-the operator administers), or that another person is given access to, is one: one synchronous call of effect class `publish`, taken only on the operator's word for that act (a decision
-with its exact target, or the service's in-call elicitation), never by a mandate or an `approval/1` before CT-181, as
-[source](docs/specification/source.md#handing-over) specifies (DEC-0149). *Avoid*: a bare "hand-over" for this meaning.
+**Source hand-over**: An agent's source reaching a place or a person it was not at: a **Source export** handed to
+anyone; the agent's tree or a copy of it pushed to a repository it was not in, that is public or that another owner
+holds (an organization's repository included, even one the operator administers); a transfer; a visibility change;
+access given to another person; a file sent. The repository where the agent's owner keeps and develops its source is
+its home, not a recipient, so the owner's own commits, branches and releases there are none; a copy moved within the
+operator's own estate (here, the accounts and placements the operator alone holds) to a place that is not public and
+that no one outside the operator can read (a deploy to the operator's own placement, a private mirror the operator
+owns) is none either; and the home carve-out never lets a personal agent's source move into an organization's or a
+public repository, which stays one. It is one synchronous call of effect class `publish`, taken only on the operator's
+word for that act (a decision with its exact target, or the service's in-call elicitation), never by a mandate or an
+`approval/1` before CT-181, as [source](docs/specification/source.md#handing-over) specifies (DEC-0149). *Avoid*: a
+bare "hand-over" for this meaning.
 
 **Package digest**: SHA-256 over the RFC 8785 form of a **Package** without its digest and signatures; through the
 listed files it covers the whole folder, and a countersignature does not change it (DEC-0050).
