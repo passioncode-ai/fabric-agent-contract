@@ -442,12 +442,12 @@ FAA-197, on the adapter's main).
   budget always binds before the 2 MiB well-known cap, which is false outside Latin script (CJK prose of 760 000 units
   is 2 292 326 bytes, Russian with `\uXXXX` escapes 449 922 units is 2 347 303 bytes, both read as declared). With the
   coordinator's decisions (with round 36's): both now say: "Latin-script prose stays under the 2 MiB cap at the budget,
-  escaped or not; Chinese, Japanese or Thai prose can exceed it as written, and prose in any other script can when
-  escaped as `\uXXXX`. Keep a large declaration in the manifest and measure the answer's bytes."; the Narrowings size
-  bullet gives the per-script costs as a test measures them (English about 10 to 14 per unit, other Latin-script samples
-  about 5 to 22, Cyrillic, Greek, Arabic, Devanagari and Hangul about 1.6 to 2.2, Chinese, Japanese and Thai about 1 to
-  1.1); the send record is named as this contract's assumption about the session owner of section 9, on the page, in
-  item 8, the row and the merge post's identification question.
+  escaped or not; prose in any other script can exceed it, as written or escaped as `\uXXXX`. Keep a large declaration
+  in the manifest and measure the answer's bytes."; the Narrowings size bullet gives the per-script costs as a test
+  measures them (English about 10 to 14 per unit, other Latin-script samples about 5 to 22, Cyrillic, Greek, Arabic,
+  Devanagari and Hangul about 1.6 to 2.2, Chinese, Japanese and Thai about 1 to 1.1); the send record is named as this
+  contract's assumption about the session owner of section 9, on the page, in item 8, the row and the merge post's
+  identification question.
 - Round 34's seam reading (pass, one risk), folded after round 35: the page, CA-5 and the conformance row list a URL
   value's terms word for word as `detectorCost` charges them ("the value's `eyJ` term, `sk-` term, provider-prefix floors
   and long-run term"); two budget-edge vectors on `https://a.example/?api_key=ghp_ab,cd` (1103) flip their verdict if a
@@ -455,13 +455,38 @@ FAA-197, on the adapter's main).
   list drops the `i` flag of the rename advice.
 - Round 36 of the readings (on `6dac4d36`: product one break) was not clean: the per-script cost figures did not hold.
   With the coordinator's decisions, every cost figure resolves to a test: the test "states each script's cost per UTF-16
-  unit as the page does" measures samples written for it in thirteen scripts, and the Narrowings size bullet states its
-  ranges (the Finnish sample measures about 22, where the request said 26, so the page says 22); the cap sentence reads
-  the same on the page, in SCN-055, in DEC-0150's Source and here, pinned by a test (a Chinese answer within the budget
-  over 2 097 152 bytes, an English answer that draws `FAC-SEM-165` well under it); "Not checked here" says `pnpm
-  validate` does not check the 2 MiB cap, and CT-223 is filed for a hint (until it lands the adapter's FAA-197 check of
-  live answers names the cap, which the landing post to FAA-197 carries); the `aBC=x` example names `x`'s long-run
-  term; the conformance row's stray space is gone; the `detectorCost` comment names the provider-prefix floors.
+  unit as the page does" measures thirteen samples in twelve languages (nine scripts), written for it, and the
+  Narrowings size bullet states its ranges (the Finnish sample measures about 22, where the request said 26, so the page
+  says 22); the cap sentence (simplified in round 37) reads the same on the page, in SCN-055, in DEC-0150's Source and
+  here, pinned by a test (a Chinese answer within the budget over 2 097 152 bytes, an English answer that draws
+  `FAC-SEM-165` well under it); "Not checked here" says `pnpm validate` does not check the 2 MiB cap, and CT-223 is
+  filed for a hint (until it lands the adapter's FAA-197 check of live answers names the cap, which the landing post to
+  FAA-197 carries); the `aBC=x` example names `x`'s long-run term; the conformance row's stray space is gone; the
+  `detectorCost` comment names the provider-prefix floors.
+- Round 35's unit reading (on `644dcbe6`, rechecked at `33933109`: one break) was not clean: the vectors' text did not
+  state the container charge. With the coordinator's decision, one uniform charge: every value the reading reaches costs
+  16, a name or a string 16 plus its detector cost, each array or object 16 (the declaration itself and empty ones
+  included), and each number, boolean or null 16. The walk charges scalars through `onEnter`, as it does containers; the
+  rule reads word for word in item 4, the Narrowings size bullet, CA-5, the conformance row and the vectors' text (which
+  holds "each array or object" and "number, boolean or null"); the budget-edge vectors hold no scalar, so they did not
+  move; two tests now expect the budget finding beside `FAC-SEM-162` for 200 000 numbers. Timing: 2 000 000 zeros beside
+  2 000 000 empty strings, the same least of five. A ratio test pins `rawValues`' in-place append (2047 pieces against
+  512 under one name, below 8); a copying append, run once in the working tree and restored, read 11.8. The walk's
+  comment and the page say one frame per non-empty container (an empty one is charged and skipped), and `onEnter` is
+  documented.
+- Round 37's product reading (on `33933109`: one break) was not clean: the round-36 entry miscounted the samples. With
+  the coordinator's decisions: the entry says thirteen samples in twelve languages (nine scripts); the cap sentence is
+  simplified, word for word on the page, in SCN-055, DEC-0150's Source and here (Latin-script prose stays under the 2 MiB cap at the budget, escaped or not; prose in any other script can exceed it, as written or escaped as `\uXXXX`. Keep a large declaration in the manifest and measure the answer's bytes.); Lao and Khmer join the
+  samples (measured 1.15 and 1.14), and the Narrowings say "Chinese, Japanese, Thai, Lao and Khmer about 1 to 1.2"; the
+  memory sentence ("2.5 to 3.6 times"), which no command pinned, is dropped; "Not checked here" and CT-223 say FAA-197 is
+  asked to name the cap until the hint lands; SCN-055 gains a recovery line for an answer over 2 MiB; a test pins
+  `detectorCost` of the `aBC=x` example at 625. With the unit batch: `head()` and the length check use `u`-flag regular
+  expressions instead of a scanned loop, so astral text reads in the engine (a pair is never split); `runRereads`
+  steps over a surrogate pair as one character (no cost moves: a pair is outside every run), so astral text reads within
+  the bound under coverage too; the two astral timing cases take the least of five runs. From round 36's seam reading:
+  `Hint` takes DEC-0153's form, a fourth element for its own help link; the channel-agent line passes
+  `docs/specification/channel-agent.md#what-is-checked` and the notes read `help ?? HINT_HELP[rule]`, so the DEC-0153
+  note above is true at this head. A vector pins a declaration that is a number (reached at 16, `FAC-SEM-162`).
 
 ## The branch and its history
 
@@ -726,6 +751,15 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
+On round 37's change (with round 35's unit fold and round 36's seam items), each exit code read separately: `pnpm
+typecheck` 0; `pnpm vitest run --testTimeout=60000 --coverage --coverage.include=src/channel-agent.ts
+test/channel-agent.test.ts` 0 (378 passed, `src/channel-agent.ts` at its 100 % branch floor), at a 15-minute load of
+73.46; `src/validate-cli.ts` under `test/validate-cli.test.ts` with coverage at 99.72 % branches (floor 99.4); `pnpm
+vitest run --testTimeout=60000 test/consistency.test.ts test/validate-cli.test.ts test/operator-channel.test.ts` 0 (1751
+passed); `pnpm vectors:check` 0; `pnpm run docs:check` 0; `python3 docs/ux/lint.py` 0; `pnpm run privacy:check` with
+the organization index 0; no U+2014 in the added lines. A copying append in `rawValues`, run once and restored, read a
+ratio of 11.8 against the bound of 8. The full coverage gate is owed (load).
+
 On round 36's change (a comment in `src/channel-agent.ts`, no logic moved), each exit code read separately: `pnpm
 typecheck` 0; `pnpm vitest run --testTimeout=60000 test/channel-agent.test.ts test/consistency.test.ts
 test/validate-cli.test.ts` 0 (2091 passed); `pnpm vectors:check` 0; `pnpm run docs:check` 0; `python3 docs/ux/lint.py`
@@ -872,7 +906,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 36 (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 37 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -919,7 +953,7 @@ here), and adds:
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;
 - to be asked of the standard's owner: whether one declaration may hold projects on several sides;
-- posted on the board at landing, for FAA-197: until CT-223's hint lands, its check of live answers names the 2 MiB cap of a well-known answer;
+- posted on the board at landing, for FAA-197: until CT-223's hint lands, FAA-197 is asked to name the 2 MiB cap of a well-known answer in its check of live answers;
 - posted on the board at landing, for FAA-197 (the adapter's adoption row, on its main), what that row lacks: both
   `PROTOCOL_REVISIONS` twins with `channel-agent-standard` `['1']` and the feed-protocols vectors vendored again; the
   check reports, never fails, a declaration it reads as not declared while live producers still fail; and the well-known

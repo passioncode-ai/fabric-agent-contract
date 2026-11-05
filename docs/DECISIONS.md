@@ -9121,7 +9121,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      grammar segment by segment, its eval suite and outbox of the relative path grammar by the detector's path-aware
      reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a
      provider key's and a JWT's shapes only; anything else is read whole. The rule reads at most 1 000 000 UTF-16 units for
-     one document, every copy of the declaration in it sharing them: the walk charges each name or string 16, once, and each array or object it enters 16 (walking containers outside the reading is linear in the document's size and outside the budget),
+     one document, every copy of the declaration in it sharing them: the walk charges once: every value the reading reaches costs 16 (`VISIT_COST`): a name or a string 16 plus its detector cost, each array or object 16 (the declaration itself and empty ones included), and each number, boolean or null 16 (walking containers outside the reading is linear in the document's size and outside the budget),
      beside what `detectorCost` counts, a bound any port's detector may need, in UTF-16 units, what every pass reads (an astral character is two): the string's UTF-16 units;
      from each `eyJ`, its base64url run, `eyJ` included, and when it ends at a `.`, the dot and the run after it; from
      each `sk-`, in any case, at a boundary (the start, a character other than a letter or a digit, `%XX`, `%25XX`,
@@ -9292,7 +9292,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 36 of the readings, round 21's seam reading included; CA-8 is the coordinator's
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 37 of the readings, round 21's seam reading included; CA-8 is the coordinator's
   decision of round 17 on thread `b6820b97` (message `5a1334d1`), answering a producer who asked whether the declaration
   needs an `untrusted_input` field, and its bounds are the coordinator's decision of round 18, taken in the coordinating
   session with no board message: a word recognised in a chat is not a DEC-0121 AP-3 source, it never sets
@@ -9338,11 +9338,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Round 34 was not clean (the Narrowings size bullet and the offline rule in SCN-043 and FLW-29): the coordinator's
   decision states the size charge as item 4 does, makes a message marked offline or scheduled never the operator's on
   any path, names the link-code departure from sections 2.1, 2.2 and 5.1, and charges each container the reading enters.
+  Round 35's unit reading was not clean (the vectors' text against the container charge): the coordinator's decision
+  states one charge for every value the reading reaches; round 37 was not clean (the sample count and the cap sentence):
+  the cap sentence is simplified, Lao and Khmer join the measured samples, and an unpinned memory claim is dropped.
   Round 35 was not clean (budget versus 2 MiB cap outside Latin script) and round 36 was not clean (per-script cost
   figures): the coordinators' decisions state the cap once (Latin-script prose stays under the 2 MiB cap at the budget,
-  escaped or not; Chinese, Japanese or Thai prose can exceed it as written, and prose in any other script can when
-  escaped as `\uXXXX`. Keep a large declaration in the manifest and measure the answer's bytes.) and the per-script
-  costs as a test measures them, and name the send record as this contract's assumption.
+  escaped or not; prose in any other script can exceed it, as written or escaped as `\uXXXX`. Keep a large declaration
+  in the manifest and measure the answer's bytes.) and the per-script costs as a test measures them, and name the send
+  record as this contract's assumption.
   `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149

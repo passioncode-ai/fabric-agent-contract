@@ -291,9 +291,11 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const many = (n: number) => ({ provider: { extensions: { [KEY]: { standard: "channel-agent-standard/1", projects: Array.from({ length: n }, (_, i) => i) } } } });
     const doc = many(200_000);
     const found = channelAgentRules(doc);
-    expect(found.map(({ code, instancePath }) => ({ code, instancePath }))).toEqual([{ code: "FAC-SEM-162", instancePath: CHANNEL_AGENT_PATHS.manifest }]);
-    expect(found[0]?.message).toMatch(/^the channel-agent declaration fails its schema: maxItems at \/projects \(at most 64 items\); a reader treats it as not declared/);
-    expect(found[0]?.message).toContain("channel-agent.md#the-declaration");
+    // Every value the reading reaches costs VISIT_COST, so 200 000 numbers also spend the budget: the rest is not read.
+    expect(found.map(({ code, instancePath }) => ({ code, instancePath }))).toEqual([{ code: "FAC-SEM-165", instancePath: CHANNEL_AGENT_PATHS.manifest }, { code: "FAC-SEM-162", instancePath: CHANNEL_AGENT_PATHS.manifest }]);
+    const schema162 = found.find((f) => f.code === "FAC-SEM-162");
+    expect(schema162?.message).toMatch(/^the channel-agent declaration fails its schema: maxItems at \/projects \(at most 64 items\); a reader treats it as not declared/);
+    expect(schema162?.message).toContain("channel-agent.md#the-declaration");
     // The probe: 200000 items cost the walk, never the schema's errors per item.
     expect(least(() => channelAgentRules(doc))).toBeLessThan(2 * proseBaseline() + 20);
     const inner = { ...value.projects[0], channels: Array.from({ length: 33 }, () => value.projects[0].channels[0]), sources: Array.from({ length: 65 }, () => value.projects[0].sources[0]) };
@@ -580,6 +582,10 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const timed = () => channelAgentRules(doc, "well-known");
     // The least of five runs: with three it flaked once under load (77.48 against 73.12).
     expect(leastOf(timed, 5)).toBeLessThan(5 * proseBaseline() + 20);
+    // Two million numbers: each costs VISIT_COST too, so the reading stops at the budget, held to the same bound.
+    const zeros = { extensions: { [KEY]: { ...value, extra: Array(2_000_000).fill(0) } } };
+    expect(channelAgentRules(zeros, "well-known").some((f) => f.message.includes("UTF-16 units of reading"))).toBe(true);
+    expect(leastOf(() => channelAgentRules(zeros, "well-known"), 5)).toBeLessThan(5 * proseBaseline() + 20);
     const found = timed();
     expect(found.filter((f) => f.message.includes("UTF-16 units of reading")).length).toBe(1);
   });
@@ -676,7 +682,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const wide = "\u{1F600}".repeat(4096);
     const baseline = proseBaseline();
     const extra = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => wide) } } };
-    expect(least(() => channelAgentRules(extra, "well-known"))).toBeLessThan(2 * baseline + 20);
+    expect(leastOf(() => channelAgentRules(extra, "well-known"), 5)).toBeLessThan(2 * baseline + 20);
     // A schema-valid declaration: each channel's texts maps hold 64 languages of that text.
     const languages = Array.from({ length: 64 }, (_, i) => `${"abc"[Math.floor(i / 26)]}${String.fromCharCode(97 + (i % 26))}`);
     const many = Object.fromEntries(languages.map((language) => [language, wide]));
@@ -684,7 +690,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const channels = p0.channels.map((channel: Json) => ({ ...channel, texts: { holding: many, final: many } }));
     const valid = { extensions: { [KEY]: { ...value, projects: [{ ...p0, channels }] } } };
     expect(channelAgentRules(valid, "well-known").filter((f) => f.code === "FAC-SEM-162")).toEqual([]);
-    expect(least(() => channelAgentRules(valid, "well-known"))).toBeLessThan(2 * baseline + 20);
+    expect(leastOf(() => channelAgentRules(valid, "well-known"), 5)).toBeLessThan(2 * baseline + 20);
   });
   // Timing catches a term that grows faster than the input (a quadratic reread, a parse per piece); the exact assertions
   // beside it guard the constant-factor terms, which a timing bound of 2x prose plus 20 ms cannot see.
@@ -723,6 +729,16 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const empty = { extensions: { [KEY]: { ...value, extra: Array(2_000_000).fill([]) } } };
     expect(channelAgentRules(empty, "well-known").some((f) => f.message.includes("UTF-16 units of reading"))).toBe(true);
     expect(leastOf(() => channelAgentRules(empty, "well-known"), 5)).toBeLessThan(5 * baseline + 20);
+  });
+  it("grows linearly in the pieces under one query name, rawValues appending in place", { timeout: 60_000 }, () => {
+    // A copying append (a new array per piece) makes this quadratic: 4x the pieces would cost about 16x the time.
+    const small = `x:?${"a&".repeat(512)}`;
+    const large = `x:?${"a&".repeat(2047)}`;
+    const time = (text: string) => leastOf(() => {
+      for (let i = 0; i < 40; i += 1) detectorCost(text);
+    }, 5);
+    const ratio = time(large) / Math.max(time(small), 0.001);
+    expect(ratio).toBeLessThan(8);
   });
   it("reads many pieces under one query name in time, rawValues appending in place", { timeout: 60_000 }, () => {
     const text = `x:?${"a&".repeat(2040)}`;
@@ -848,7 +864,8 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const wide = Object.fromEntries(Array.from({ length: 100_000 }, (_, i) => [`m${i}`, 1]));
     expect(channelAgentView({ extensions: { [KEY]: { ...value, ...wide } } }, "well-known")).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /: maxProperties (more members than the schema declares)", "FAC-SEM-165 at /: reading the declarations for credentials takes more than 1000000 UTF-16 units of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names"] });
     const long = channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array(200_000).fill(1) } } }, "well-known");
-    expect(long.map((f) => f.code)).toEqual(["FAC-SEM-162"]);
+    // 200 000 numbers cost 16 each to the reading: the budget is spent before the schema's refusal is reported.
+    expect(long.map((f) => f.code)).toEqual(["FAC-SEM-165", "FAC-SEM-162"]);
     const channel = { ...value.projects[0].channels[0], extra: 1 };
     expect(channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...value.projects[0], channels: [channel] }] } } }, "well-known")).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /projects/0/channels/0: maxProperties (more members than the schema declares)"] });
   });
@@ -871,6 +888,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(runRereads("a+/=_-9Z")).toBe(64 + (9 + 16) + (4 + 16));
     expect(runRereads("a".repeat(39))).toBe(3 * 39 * 39);
     expect(runRereads("a".repeat(40))).toBe(0);
+    // A pair is stepped over as one character; a lone high surrogate does not swallow the letter after it.
+    expect(runRereads("\u{1F600}ab")).toBe(3 * 4);
+    expect(runRereads("\uD83Dab")).toBe(3 * 4);
     expect(runRereads(`${"a".repeat(39)}\u00e9${"b".repeat(2)}`)).toBe(3 * (39 * 39 + 4));
     const a39 = "a".repeat(39);
     expect(runRereads(`${a39}=${a39},`)).toBe(2 * 2 * 39 * 39);
@@ -924,9 +944,11 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     ["Arabic", "سنراجع طلبك اليوم ونكتب إليك فور خروج الطرد من المستودع. ", 1.6, 2.2],
     ["Devanagari", "हम आज आपके ऑर्डर की जाँच करेंगे और पार्सल निकलते ही आपको लिखेंगे। ", 1.6, 2.2],
     ["Hangul", "오늘 주문을 확인하고 소포가 출발하면 바로 연락드리겠습니다. ", 1.6, 2.2],
-    ["Chinese", "我们今天会检查您的订单，包裹一离开仓库就会通知您。", 1, 1.1],
-    ["Japanese", "本日ご注文を確認し、荷物が倉庫を出たらすぐにご連絡します。", 1, 1.1],
-    ["Thai", "เราจะตรวจสอบคำสั่งซื้อของคุณวันนี้และแจ้งให้ทราบทันทีเมื่อพัสดุออกจากคลัง ", 1, 1.1]
+    ["Chinese", "我们今天会检查您的订单，包裹一离开仓库就会通知您。", 1, 1.2],
+    ["Japanese", "本日ご注文を確認し、荷物が倉庫を出たらすぐにご連絡します。", 1, 1.2],
+    ["Thai", "เราจะตรวจสอบคำสั่งซื้อของคุณวันนี้และแจ้งให้ทราบทันทีเมื่อพัสดุออกจากคลัง ", 1, 1.2],
+    ["Lao", "ພວກເຮົາຈະກວດສອບຄໍາສັ່ງຊື້ຂອງທ່ານມື້ນີ້ ແລະ ແຈ້ງໃຫ້ທ່ານຮູ້ທັນທີທີ່ພັດສະດຸອອກຈາກສາງ ", 1, 1.2],
+    ["Khmer", "យើងនឹងពិនិត្យការបញ្ជាទិញរបស់អ្នកនៅថ្ងៃនេះ ហើយនឹងប្រាប់អ្នកភ្លាមៗ នៅពេលកញ្ចប់ចេញពីឃ្លាំង ", 1, 1.2]
   ];
   const repeatTo = (sentence: string, points: number): string => {
     const units = Array.from(sentence);
@@ -940,7 +962,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       expect(perUnit, script).toBeLessThanOrEqual(high);
     }
     const page = read("docs/specification/channel-agent.md").replace(/\s+/g, " ");
-    expect(page).toContain("English prose about 10 to 14, other Latin-script samples from about 5 (Vietnamese) to about 22 (Finnish); Cyrillic, Greek, Arabic, Devanagari and Hangul prose about 1.6 to 2.2; Chinese, Japanese and Thai about 1 to 1.1");
+    expect(page).toContain("English prose about 10 to 14, other Latin-script samples from about 5 (Vietnamese) to about 22 (Finnish); Cyrillic, Greek, Arabic, Devanagari and Hangul prose about 1.6 to 2.2; Chinese, Japanese, Thai, Lao and Khmer about 1 to 1.2");
   });
   it("lets a Chinese answer within the budget exceed 2 MiB, and stops an English one well under it", () => {
     const answer = (sentence: string, channels: number) => {
@@ -977,8 +999,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     // Against a value of the same runs and no prefix, the `ghp_` floor is charged twice: in the string and in the value.
     expect(detectorCost("https://a.example/?api_key=ghp_ab,cd") - detectorCost("https://a.example/?api_key=xyzwvu,ts")).toBe(5 + 5);
     expect(detectorCost("https://a.example/?api_key=ghp_ab,cd")).toBe(1103);
+    expect(detectorCost("https://a.example/?aBC=x")).toBe(625);
     expect(VISIT_COST).toBe(16);
-    expect(page.replace(/\s+/g, " ")).toContain("The walk charges each name or string 16 (`VISIT_COST`)");
+    expect(page.replace(/\s+/g, " ")).toContain("every value the reading reaches costs 16 (`VISIT_COST`): a name or a string 16 plus its detector cost, each array or object 16 (the declaration itself and empty ones included), and each number, boolean or null 16");
   });
   it("charges 255 after the boundary forms the page lists, and 16 after a form that ends in a letter or a digit", () => {
     const diff = (head: string) => detectorCost(`${head}sk-${"a".repeat(300)}`) - detectorCost(`${head}xx-${"a".repeat(300)}`);

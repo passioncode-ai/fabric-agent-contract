@@ -37,7 +37,7 @@ A service with a manifest declares only in its manifest: a reader of such a serv
 ignores one in its well-known answer. A reader knows a service has a manifest from its descriptor's `fabricManifest` (or
 the registry's provider entry); with only a well-known answer in hand it reads that answer's declaration. The checker
 still checks a well-known declaration beside a manifest: its author sees any findings, and a reader ignores the copy
-whether or not it is valid. A well-known declaration shares the answer's size with its host's readers (Fabric Dashboards' probe caps a well-known answer at 2 MiB, [sources](../evidence/sources.md)), so a large declaration belongs in the manifest. Latin-script prose stays under the 2 MiB cap at the budget, escaped or not; Chinese, Japanese or Thai prose can exceed it as written, and prose in any other script can when escaped as `\uXXXX`. Keep a large declaration in the manifest and measure the answer's bytes. A well-known answer lists `channel-agent-standard/1` in its `protocols` only once
+whether or not it is valid. A well-known declaration shares the answer's size with its host's readers (Fabric Dashboards' probe caps a well-known answer at 2 MiB, [sources](../evidence/sources.md)), so a large declaration belongs in the manifest. Latin-script prose stays under the 2 MiB cap at the budget, escaped or not; prose in any other script can exceed it, as written or escaped as `\uXXXX`. Keep a large declaration in the manifest and measure the answer's bytes. A well-known answer lists `channel-agent-standard/1` in its `protocols` only once
 its readers have re-pinned to this revision of the contract.
 
 The same rules run in both places: kind `manifest` reads the first, kind `service-well-known` the second. No other
@@ -275,7 +275,7 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    read by a provider key's and a JWT's shapes only, since a long mixed run is its shape by design (a recommendation
    that is a URL with a password is read whole, and found). The detector reads the first 4097 code points of a string, its head, and only the head is counted,
    and the rule reads at most 1 000 000 UTF-16 units of names and values in all for one document, every copy of the
-   declaration in it (read or misplaced) sharing them. The walk charges each name or string 16 (`VISIT_COST`), once (a name is not charged again when its member is entered or placed), beside what `detectorCost` counts, and each array or object it enters 16 too, so wrapping counts against the budget. Walking containers outside the reading (the checks of sizes and widths before the schema) is linear in the document's size and outside the 1 000 000-unit budget. `detectorCost` is a bound any
+   declaration in it (read or misplaced) sharing them. The walk charges once (every value the reading reaches costs 16 (`VISIT_COST`): a name or a string 16 plus its detector cost, each array or object 16 (the declaration itself and empty ones included), and each number, boolean or null 16; a name is not charged again when its member is entered or placed), so wrapping and scalars count against the budget. Walking containers outside the reading (the checks of sizes and widths before the schema) is linear in the document's size and outside the 1 000 000-unit budget. `detectorCost` is a bound any
    port's detector may need, not a description of one detector, counted in UTF-16 units, what every pass reads (an astral character is two): the string's UTF-16 units; from each `eyJ`, its base64url run, `eyJ` included, and when that run ends at a `.`, the
    dot and the base64url run after it (the JWT shape's second segment: `eyJab.cd` costs 8 and 8); from each `sk-`, in
    any case, that follows a boundary, its three characters included, up to 255 UTF-16 units to the end of the string
@@ -317,15 +317,15 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
 
 No finding's message carries a declared value, and no rule's place echoes instance data: a place writes a member name
 the schema declares and an index of an array the schema declares, and `*` for any other member name, for a numeric key
-of an object and for a text's language, in `FAC-SEM-162`, `FAC-SEM-164` and `FAC-SEM-165` alike. A member whose name
-is not plain (letters, digits, `_` and `-`, at most 64, with no run of 7 or more digits once `-` and `_` are left out)
-or is itself shaped like a credential collapses its place: it and every member below it are placed at its nearest
-plain ancestor (a text whose language is not plain is placed at its `texts/holding` or `texts/final` map), and so is a
-member more than 64 levels below the declaration, at its ancestor 64 levels down. `FAC-SEM-165` names at most 64 places, then one more finding counts the rest, and `FAC-SEM-163` and `FAC-SEM-164` do the same for their own places, at the declaration (past 64 a place is counted, never built). The walk keeps
-an explicit stack of one frame per container, not per member, and builds a member's place only when it reports one, so
-no depth or size of a value throws and the time grows with the value's size, not its square. Memory grows linearly too:
-measured on chains of 50 000 and 200 000 nested members, a run allocates about 2.5 to 3.6 times the input's own heap
-before collection, and four times the input takes about four times the memory. A text counts as blank
+of an object and for a text's language, in `FAC-SEM-162`, `FAC-SEM-164` and `FAC-SEM-165` alike. A member whose name is
+not plain (letters, digits, `_` and `-`, at most 64, with no run of 7 or more digits once `-` and `_` are left out) or
+is itself shaped like a credential collapses its place: it and every member below it are placed at its nearest plain
+ancestor (a text whose language is not plain is placed at its `texts/holding` or `texts/final` map), and so is a member
+more than 64 levels below the declaration, at its ancestor 64 levels down. `FAC-SEM-165` names at most 64 places, then
+one more finding counts the rest, and `FAC-SEM-163` and `FAC-SEM-164` do the same for their own places, at the
+declaration (past 64 a place is counted, never built). The walk keeps an explicit stack of one frame per non-empty
+container, not per member (an empty one is charged and skipped), and builds a member's place only when it reports one,
+so no depth or size of a value throws and the time grows with the value's size, not its square. A text counts as blank
 when nothing is left after removing white space, format characters (`\p{Cf}`, such as U+200B), control characters
 (`\p{Cc}`), separators (`\p{Z}`), default-ignorable code points (`\p{Default_Ignorable_Code_Point}`), the filler
 characters U+115F, U+1160, U+3164, U+FFA0 and U+2800, and the object replacement character U+FFFC.
@@ -468,7 +468,8 @@ Section 11 also asks for these; none can be decided from the declaration alone (
 - working time: a limit the standard counts in working hours or days (a desk's 2 working days, a team chat's first reply
   in 1 working hour) is declared as a wall-clock duration, and its working calendar is not declared;
 - the size of a well-known answer: `pnpm validate` does not check the 2 MiB cap of its host's readers (a hint is a
-  backlog row, CT-223; until it lands the adapter's FAA-197 check of live answers names the cap);
+  backlog row, CT-223; until it lands, FAA-197 is asked to name the cap in its check of live answers, posted at
+  landing);
 - everything the signal server observes, and the 30 days after `adopted_at` in which its checks report but do not
   fail.
 
@@ -564,14 +565,16 @@ at merge sends the grammar and this list.
   Leaving it out is accepted, which is looser (the looser bullet below). A missing required member, a refused `null` or
   a none form elsewhere makes the whole declaration not declared.
 - Size read for credentials: at most 1 000 000 UTF-16 units per document, every copy of the declaration in it sharing
-  them; each name or string costs what [item 4](#what-is-checked) counts for its head (`detectorCost`: its UTF-16 units
-  and the rereads beside them) plus 16, and each array or object the reading enters 16. The cost per UTF-16 unit depends
-  on the script and the words. Measured on 4 096-code-point samples (test "states each script's cost per UTF-16 unit as
-  the page does" in `test/channel-agent.test.ts`): English prose about 10 to 14, other Latin-script samples from about 5
-  (Vietnamese) to about 22 (Finnish); Cyrillic, Greek, Arabic, Devanagari and Hangul prose about 1.6 to 2.2; Chinese,
-  Japanese and Thai about 1 to 1.1. Measure a declaration with `pnpm validate` rather than by these figures. The read
-  declaration is read first, and when its own read runs out it is not declared (`FAC-SEM-165`); a misplaced copy past
-  the budget is reported at that copy and leaves the read declaration's answer as it is.
+  them; every value the reading reaches costs 16 (`VISIT_COST`): a name or a string 16 plus its detector cost, each
+  array or object 16 (the declaration itself and empty ones included), and each number, boolean or null 16 ([item
+  4](#what-is-checked); a string's detector cost is what `detectorCost` counts for its head: its UTF-16 units and the
+  rereads beside them). The cost per UTF-16 unit depends on the script and the words. Measured on 4 096-code-point
+  samples (test "states each script's cost per UTF-16 unit as the page does" in `test/channel-agent.test.ts`): English
+  prose about 10 to 14, other Latin-script samples from about 5 (Vietnamese) to about 22 (Finnish); Cyrillic, Greek,
+  Arabic, Devanagari and Hangul prose about 1.6 to 2.2; Chinese, Japanese, Thai, Lao and Khmer about 1 to 1.2. Measure a
+  declaration with `pnpm validate` rather than by these figures. The read declaration is read first, and when its own
+  read runs out it is not declared (`FAC-SEM-165`); a misplaced copy past the budget is reported at that copy and leaves
+  the read declaration's answer as it is.
 - Looser than the standard: a queue's `recommendation` beside an answered signal other than `none` (the standard has
   it only with `none`) and `spend_record: null` with a budget above 0 (the standard keeps `null` for budgets of 0) are
   accepted by the schema and found by `FAC-SEM-164`, so the declaration stays declared; and a channel's

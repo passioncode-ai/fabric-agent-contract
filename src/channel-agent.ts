@@ -106,10 +106,12 @@ const emptyObject = (object: JsonObject): boolean => {
   return true;
 };
 /**
- * Every member name and string value under `value`, read with an explicit stack of cursor frames (one per container, not
- * one per member), so neither depth nor size throws. `tokenOf` gives a member's path token, or undefined to place it at
- * its holder; below PATH_DEPTH every member is placed at its ancestor at that depth. A member's path is built only when
- * the visit asks for it (a container's, when it is entered).
+ * Every member name and string value under `value`, read with an explicit stack of cursor frames (one per non-empty
+ * container, not one per member; an empty one is charged and skipped), so neither depth nor size throws. `tokenOf` gives
+ * a member's path token, or undefined to place it at its holder; below PATH_DEPTH every member is placed at its ancestor
+ * at that depth. A member's path is built only when the visit asks for it (a container's, when it is entered). `visit`
+ * is called for each name and string; `onEnter` once for every other value the walk reaches, the root included: each
+ * array or object, empty or not, and each number, boolean or null.
  */
 function walk(value: unknown, root: string, tokenOf: (frame: Frame, key: string, index: boolean) => string | undefined, visit: Visit, stop: () => boolean = () => false, onEnter: () => void = () => undefined): void {
   // A name is placed at its holder. A member is placed at its own token, or, when its key is not written (no token, or
@@ -122,7 +124,11 @@ function walk(value: unknown, root: string, tokenOf: (frame: Frame, key: string,
     return written === undefined ? frame.at : `${frame.at}/${written}`;
   };
   if (typeof value === "string" && !stop()) visit(value, { frame: undefined, key: "", isName: false }, place);
-  if (!Array.isArray(value) && !isObject(value)) return;
+  if (!Array.isArray(value) && !isObject(value)) {
+    // A number, a boolean or a null at the root is reached too; a string was visited above.
+    if (typeof value !== "string") onEnter();
+    return;
+  }
   const enter = (container: unknown[] | JsonObject, at: string, depth: number, name: string | undefined, parent: string | undefined, collapsed: boolean, role: Role): Frame => ({ container, keys: Array.isArray(container) ? undefined : Object.keys(container), next: 0, at, depth, name, parent, collapsed, role });
   onEnter();
   const stack: Frame[] = [enter(value, root, 0, undefined, undefined, false, "root")];
@@ -147,12 +153,14 @@ function walk(value: unknown, root: string, tokenOf: (frame: Frame, key: string,
       if (Array.isArray(child) ? child.length === 0 : emptyObject(child)) continue;
       const written = token(frame, key);
       stack.push(enter(child, written === undefined ? frame.at : `${frame.at}/${written}`, frame.depth + 1, key, frame.name, written === undefined, roleOf(frame.role, key, index)));
-    }
+    } else onEnter();
   }
 }
 
 /** Whether a string is longer than LONGEST_STRING code points, without counting a long one whole or building an array. */
-const tooLong = (text: string): boolean => text.length > LONGEST_STRING && (text.length > 2 * LONGEST_STRING || codePoints(text, LONGEST_STRING + 1) > LONGEST_STRING);
+const tooLong = (text: string): boolean => text.length > LONGEST_STRING && (text.length > 2 * LONGEST_STRING || PAST_LONGEST.test(text));
+/** LONGEST_STRING + 1 code points from the start (with the `u` flag a surrogate pair is one): matched by the engine. */
+const PAST_LONGEST = new RegExp(`^[\\s\\S]{${LONGEST_STRING + 1}}`, "u");
 
 /**
  * A member's token in a FAC-SEM-162 place: a declared name, or an index of a declared array, else `*`. A text's language
@@ -470,15 +478,11 @@ function misplaced(doc: JsonObject, budget: Budget): Finding[] {
  */
 function head(text: string): string {
   if (text.length <= DETECTOR_CODE_POINTS) return text;
-  let count = 0;
-  let at = 0;
-  while (at < text.length && count < DETECTOR_CODE_POINTS) {
-    const unit = text.charCodeAt(at);
-    at += unit >= 0xd800 && unit <= 0xdbff && at + 1 < text.length && text.charCodeAt(at + 1) >= 0xdc00 && text.charCodeAt(at + 1) <= 0xdfff ? 2 : 1;
-    count += 1;
-  }
-  return text.slice(0, at);
+  // The regular expression engine takes the first DETECTOR_CODE_POINTS code points, a pair as one, in one pass.
+  return (HEAD.exec(text) as RegExpExecArray)[0];
 }
+// With the `u` flag a surrogate pair is one character, so no pair is ever split; a lone surrogate is one too.
+const HEAD = new RegExp(`^[\\s\\S]{0,${DETECTOR_CODE_POINTS}}`, "u");
 /**
  * Whether a string is shaped like a credential, by FAC-SEM-101's detector (by shape: today an ordinary name of `sk-` and
  * 16 or more letters, digits, `_` or `-`, in any case, is one too; DEC-0151, in progress, narrows that rule).
@@ -685,6 +689,8 @@ export function runRereads(text: string): number {
       whole = 0;
       noEquals = 0;
       noSlash = 0;
+      // A surrogate pair is one character outside every run: its low half is stepped over, never read alone.
+      if (c >= 0xd800 && c <= 0xdbff && (text.charCodeAt(i + 1) & 0xfc00) === 0xdc00) i += 1;
     }
   }
   return cost;
@@ -696,7 +702,8 @@ export const PREFIX_FLOORS: ReadonlyArray<readonly [RegExp, number]> = [[/gh[pou
 
 /**
  * The UTF-16 units the detector reads in a string's head (an astral character is two), counted in one pass, a bound any
- * port's detector may need (the walk adds VISIT_COST per name or string beside it): the string's UTF-16 units; the JWT shape's rereading, from each `eyJ`,
+ * port's detector may need (the walk adds VISIT_COST per name or string beside it, and VISIT_COST for every other
+ * value it reaches: each array or object and each number, boolean or null): the string's UTF-16 units; the JWT shape's rereading, from each `eyJ`,
  * of its base64url run, `eyJ` included (and of the dot and the run after it); from each `sk-`, in any case, that follows a boundary (the start, a character other than a letter or
  * a digit, an escape ESCAPE_BEFORE names or a colour sequence), its three characters included, up to 255 UTF-16 units to
  * the end of the string; after an `sk-` away from a boundary, up to SK_FLOOR; after another provider prefix, its floor;
@@ -807,7 +814,8 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
     else found = shapedRead(read);
     if (found) flag(place(spot), "a value", text, ID_MEMBERS.has(key) && !inTexts(spot.frame));
   }, () => budget.unread, () => {
-    // Each array or object the walk enters costs VISIT_COST: wrapping is read too, so it counts against the budget.
+    // Every value the reading reaches costs VISIT_COST: each array or object (the declaration itself and empty ones
+    // included) and each number, boolean or null here, each name and string through afford.
     if (budget.unread) return;
     if (VISIT_COST > budget.left) {
       budget.unread = true;
