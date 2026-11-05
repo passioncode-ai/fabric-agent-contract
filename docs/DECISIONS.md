@@ -9149,7 +9149,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      a collector on the same machine sends with each daily line it reads there. The digests stay as written (OD-6,
      OD-7); the key only says where to read and which label to send. `FAC-SEM-168` (kind `service-descriptor`) refuses
      the key on a remote placement or on a local one without `paths.data`, a value that is not its schema's, a `source`
-     named twice, a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped (one folder under two labels would be sent twice), a `dir` holding a home folder (`hasHomePath`, with the
+     named twice, a `dir` with a segment that folds to nothing (a file system reads it as `.` or `..`, so the folder would
+     leave `paths.data`), a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped (one folder under two labels would be sent twice), a `dir` holding a home folder (`hasHomePath`, with the
      boundary of item 3: `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x` pass) and a `dir` or `source` shaped like a credential
      (`secretValue`); one finding refuses the whole declaration, which a collector reads as not declared and reports.
      `digestFoldersView` (whose `usable` is true only when the rule has no finding) and `digestFoldersRules` in
@@ -9275,6 +9276,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   as the detector reads it; round 12 at `4e00da84` was not clean: a daily line promised for every day (now "each closed
   UTC day that has hourly lines", since a day with none has no daily digest, OD-5), and its batch is folded in, with the
   producer row's duties stated once, the `bearer` gloss's "other than a line break" and `HOME_PATH`'s boundary as the
-  operations digests page states it;
+  operations digests page states it, and from its seam reading a `dir` segment that folds to nothing (`.`, U+200C, `.`
+  reads as `..` on HFS+) refused;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

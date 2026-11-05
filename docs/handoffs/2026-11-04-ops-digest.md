@@ -165,17 +165,25 @@ product's obligation.
   `fabric-source`.
 - **At landing** (DEC-0151 lands before this branch and narrows the `sk-` shape): on the merged tree, add `FAC-SEM-167`
   pass cases for `queue.task-assigned-to-worker`, `work.desk-booking-confirmed` and `ui.disk-usage-refreshed-hourly`,
-  which the `sk-` shape before DEC-0151 reads as keys, and move `queue.task-assigned-to-worker` out of the
-  refused names of the test "applies OD-2 in full" in `test/ops-digest.test.ts` (it folds on the merged tree). Then
-  restate the detector's shapes in OD-2, the FAC-SEM-167 row and DEC-0153 item 3 as DEC-0151's `SECRET_VALUE` reads
-  them, and re-pin their examples in the test "pins the shared detector's sk- shape": `ops.risk-assessment-completed`
-  (refused before DEC-0151) and `work.session-end-task-back` (passing), each as the merged detector answers. CT-222 (filed on this branch, the next free CT above every
-  branch and main when written) widens `SECRET_VALUE` for underscore-form provider prefixes, `AIza` keys and `hf_`
-  tokens, owned by DEC-0151's detector, with tests from split literals.
+  which the `sk-` shape before DEC-0151 reads as keys, and move `queue.task-assigned-to-worker` out of the refused names
+  of the test "applies OD-2 in full" in `test/ops-digest.test.ts` (it folds on the merged tree). In the test "pins the
+  shared detector's shapes the page states: sk- inside a word ending in sk (until DEC-0151), the JWT, akia", re-pin each
+  row as the merged detector answers: `ops.risk-assessment-completed` (refused before DEC-0151) and
+  `work.session-end-task-back` (passing), the lower-case `akia` row as passing (DEC-0151 reads the provider prefixes in
+  canonical case), and an upper-case `AKIA` sample built from pieces as the refused case. Then restate the detector's
+  shapes in OD-2, the FAC-SEM-167 row and DEC-0153 item 3 as DEC-0151's `SECRET_VALUE` reads them, dropping "in either
+  case" and "anywhere in the name" for the provider-prefix shapes (DEC-0151 reads them in canonical case at a boundary).
+  CT-222 (filed on this branch, the next free CT above every branch and main when written) widens `SECRET_VALUE` for
+  underscore-form provider prefixes, `AIza` keys and `hf_` tokens, owned by DEC-0151's detector, with tests from split
+  literals.
 - **At landing, the fold:** on the merged tree with DEC-0149, `foldDir` calls DEC-0149's `foldPath` (one
-  implementation; a `dir` has no trailing `/`); remove `NUSKHURI` and `toMkhedruli` from `src/ops-digest.ts` and import
-  `HFS_IGNORABLE` from `src/source-rules.ts` if `hiddenDir` still uses it, so `pnpm typecheck` exits 0 (no TS6133), and the parity test in `test/ops-digest.test.ts` (DEC-0149's
-  `FOLD_PAIRS` at `d4cc1e16` copied as written, plus the HFS+ samples its next step adds) keeps holding.
+  implementation; a `dir` has no trailing `/`); remove `NUSKHURI` and `toMkhedruli` from `src/ops-digest.ts`; export
+  `HFS_IGNORABLE` from `src/source-rules.ts` and import it in `src/ops-digest.ts` for `hiddenDir` and
+  `digestFoldersRules`, removing the local constant, so `pnpm typecheck` exits 0 (no TS6133); and the parity test in
+  `test/ops-digest.test.ts` (DEC-0149's `FOLD_PAIRS` at `d4cc1e16` copied as written, plus the HFS+ samples its next
+  step adds) keeps holding. Whichever of DEC-0149 and DEC-0153 lands second also names `SOURCE_HOME_PATHS` in the
+  CT-109 register (`activity.md` and the scope comment in `src/activity-rules.ts`: four boundaries) and words
+  `source.md`'s `hasHomePath` sentence so it allows FAC-SEM-168's use on a relative `dir`.
 - **At landing, the hints:** on the merged tree with DEC-0150, both `readerHints` lines carry an explicit help link (the
   `Hint`'s fourth element); `test/ops-digest.test.ts` asserts `channel-agent.md#what-is-checked` for the channel-agent
   bare declaration when that schema and its positive fixture exist (DEC-0150 asserts the same); the `readerHints`
@@ -276,8 +284,9 @@ product's obligation.
   producer row's duties stated once with one OD reference, the `bearer` gloss "other than a line break (as
   JavaScript's `.` reads it)", pinned (`bearer` with two spaces is refused, `bearer`, a space and a line break is not;
   the round-12 note's `'bearer ' + ' '` is refused on this tree, so the line break is the passing sample), and
-  `HOME_PATH`'s boundary in `activity.md` and its docstring stated as the operations digests page states it. Round 13 is
-  next.
+  `HOME_PATH`'s boundary in `activity.md` and its docstring stated as the operations digests page states it. The seam
+  reading's add-on (its own commit): a `dir` segment that folds to nothing is refused (FAC-SEM-168, OD-9, the rule row,
+  the schema), and the landing notes for DEC-0151's detector and DEC-0149's fold are corrected. Round 13 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
@@ -288,6 +297,7 @@ Round-12 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --te
 round 2 with coverage on `src/ops-digest.ts` (4214 tests; 260 of 260 statements, 208 of 208 branches);
 `pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`; `python3 docs/ux/lint.py`;
 `pnpm run privacy:check` (0 findings).
+The seam add-on, the same checks, each exit 0 (4215 tests; 263 of 263 statements, 210 of 210 branches).
 
 Round-11 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
 round 2 with coverage on `src/ops-digest.ts` (4214 tests; 260 of 260 statements, 208 of 208 branches);

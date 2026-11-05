@@ -357,6 +357,7 @@ const hiddenDir = (dir: string): boolean => hidden(dir) || hidden(dir.replace(HF
  * twice; a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped, segment
  * by segment (one folder under two labels would be sent twice); a `dir` that holds a home folder (`hasHomePath`), the
  * `dir` read both as written and with the code points HFS+ ignores removed, for these findings and for hiding a class; a
+ * `dir` with a segment that folds (`foldDir`) to nothing, which a file system reads as `.` or `..`; a
  * `dir` or a `source` shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users`
  * or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
  * and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case,
@@ -393,6 +394,9 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `${hiddenClass.has(folded) ? "this dir" : folder.dir} is named twice as a dir (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
     dirs.add(folded);
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
+    // A segment that folds to nothing reads as '.' or '..' on a file system that ignores some code points (HFS+) or
+    // drops trailing dots and spaces (NTFS), and would climb out of paths.data.
+    if (folder.dir.split("/").some((segment) => foldDir(segment) === "")) findings.push(folderFinding(`${at}/dir`, "a dir segment reads as '.' or '..' on a file system that ignores some code points; it is relative to the product's data folder"));
     const bare = folder.dir.replace(HFS_IGNORABLE, "");
     if (secretValue(folder.dir) || secretValue(bare)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));
     else if (hasHomePath(folder.dir) || hasHomePath(bare)) findings.push(folderFinding(`${at}/dir`, "a dir holds a home folder; it is relative to the product's data folder"));

@@ -531,6 +531,15 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     expect(found("service-descriptor", withFolders([{ dir: home, source: "app" }]))).toEqual([`FAC-SEM-168 ${at}/0/dir`]);
   });
 
+  it("refuses a dir segment that a file system reads as '.' or '..', naming the place only", () => {
+    for (const dir of [[".", "\u200c", "."].join(""), ". ", ["..", "\u200d"].join(""), ["a/", ".", "\u200c", ".", "/b"].join("")]) {
+      const findings = evaluateSemanticRules("service-descriptor", withFolders([{ dir, source: "app" }])).filter((f) => f.code === "FAC-SEM-168");
+      expect(findings.map((f) => f.instancePath), JSON.stringify(dir)).toEqual([`${at}/0/dir`]);
+      expect(findings[0]?.message).toBe("a dir segment reads as '.' or '..' on a file system that ignores some code points; it is relative to the product's data folder");
+    }
+    expect(found("service-descriptor", withFolders([{ dir: "a.", source: "app" }]))).toEqual([]);
+  });
+
   it("is a descriptor's rule only, and a declaration's absence is no finding", () => {
     expect(found("service-well-known", { extensions: { [key]: "digests" } }).filter((f) => f.startsWith("FAC-SEM-168"))).toEqual([]);
     const { extensions: _dropped, ...bare } = descriptor();
