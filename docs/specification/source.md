@@ -145,7 +145,8 @@ The blocking kinds are `FAC-SEM-158`: a source export refuses on any of them. Th
 export carries the licence files the source has, and `no-license` says when it has none.
 
 An identifier the tree check reads as a key that is a registry alias is renamed only by the registry's owner (DEC-0151,
-in progress); until then the agent does not export its source. Listing the file under `unchecked` to pass the finding
+in progress); until then the identifier stays out of the source (the entry left out, or kept in the instance) or the
+agent does not export its source. Listing the file under `unchecked` to pass the finding
 is not a remedy: it removes that file's check (for `fabric-agent.json`, every line of the agent's manifest).
 
 A finding never carries the text it found. `instancePath` names the file (`/files/<index>`, or `/files/<index>/path`
@@ -241,7 +242,8 @@ source manifest `fabric.source.json` or pass its folder; any other file is a sou
 A source check prints no instance data in a schema or parse message. A source check is any run with a `source-` kind
 (`--kind source-tree`, on a folder or a document, `--kind source-manifest`, `--kind source-package`), any document
 checked against `fabric-source.schema.json` (named with `--schema` or inferred), and any file named
-`fabric.source.json` whatever schema reads it. `--kind source-manifest` runs only `FAC-SEM-156` and `FAC-SEM-157`; a
+`fabric.source.json` whatever schema reads it. `--kind source-manifest` runs only `FAC-SEM-156` and `FAC-SEM-157` (and `FAC-SEM-000` for a value that is no
+object); a
 manifest is checked whole (its schema too) by `--kind source-tree` or a plain run, or by adding `--schema
 fabric-source`. A document whose closest schema is `fabric-source.schema.json` but that
 the checker cannot tell (one missing `include`, any name) is a source check for its name: its usage line names it by its
@@ -249,7 +251,8 @@ basename. Whatever schema or rule speaks in such a run, every path relative to t
 checked folder and every file named outside a folder run passes the place mark below, and every message the masks; a
 file named outside a folder run is named by its basename (or its place when the name holds a finding), in its usage
 errors too; a folder run with another source kind prints the folder as the ordinary validator does, resolved to an absolute path,
-in its problem and note lines; its usage errors name a file by its path in the folder. A parse error gives its line
+in its problem and note lines; its usage errors name a file by its path in the folder, while a folder it cannot read,
+or one that holds no `.json` file (or no document it can tell), is named by its absolute path. A parse error gives its line
 and column only, found by reading the text again; a schema
 error's message is built from its keyword and the schema's own values (allowed values, a pattern, a limit, the names of
 members the schema defines), so an extra member reads "has a member the schema does not define" without its name, and a
@@ -365,7 +368,8 @@ owed by CT-207, is to be it, and the tree check is the contract's part.
 
 ## Handing over
 
-Handing a source export to anyone (creating a repository, pushing, sending a file, changing its visibility) is an act of
+Handing a source export to anyone (creating a repository someone else can read, pushing to one, sending a file,
+changing its visibility; the line is drawn below, after the departures) is an act of
 effect class `publish` (`schemas/common.schema.json`), and a person's act each time, which no standing grant authorises
 ([external effects](governance-and-roles.md#external-effects)). The hand-over action declares the gate `relayed`
 ([actions](service.md#actions), DEC-0121).
@@ -468,7 +472,7 @@ The line between the two is this. Moving an agent's mechanics into a product, by
 file into that product's own source through the product's own change with the agent's private data stripped, is the
 operator's standing permission of 2026-10-12 (recorded in the knowledge base's
 [roadmap](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/roadmap.md)) and needs no word per act. Handing over the agent's source as such (handing a source export to
-anyone, pushing the agent's tree or a copy of it to another repository, a transfer, a visibility change, a file sent)
+anyone, pushing the agent's tree or a copy of it to a repository that is public or that another owner holds, a transfer, a visibility change, a file sent)
 needs the operator's word for each act; a local source export needs none. A copy moved within the operator's own estate
 (here, the accounts and placements the operator alone holds) to a place that is not public and that no one outside the
 operator can read (a deploy to the operator's own placement, a private mirror the operator owns) has no recipient and

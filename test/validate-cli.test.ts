@@ -1903,6 +1903,40 @@ describe("an agent's source (DEC-0149)", () => {
     }
   });
 
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("names an unreadable subfolder and an empty folder in a folder run with another source kind by their absolute paths", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["LICENSE"] }), "sub/x.json": {} });
+    const sub = path.join(dir, "sub");
+    chmodSync(sub, 0o000);
+    try {
+      for (const kind of ["source-manifest", "source-package"]) {
+        const result = run(dir, "--kind", kind);
+        expect(result.code, kind).toBe(2);
+        const usage = result.out.split("\n").filter((line) => line.startsWith("usage error:"));
+        expect(usage, kind).toContain(`usage error: cannot read ${sub}: EACCES`);
+      }
+    } finally {
+      chmodSync(sub, 0o755);
+    }
+    const empty = folder({});
+    const result = run(empty, "--kind", "source-manifest");
+    expect(result.code).toBe(2);
+    expect(result.out).toContain(`usage error: ${empty} holds no readable .json file`);
+  });
+
+  it("checks a manifest's extra member only where its schema runs, never under --kind source-manifest alone", () => {
+    const dir = folder({ "fabric.source.json": { ...sourceManifest({ include: ["LICENSE"] }), colour: "blue" }, LICENSE: "x" });
+    const manifestOnly = run(dir, "--kind", "source-manifest");
+    expect(manifestOnly.code).toBe(0);
+    expect(manifestOnly.out).not.toContain("has a member the schema does not define");
+    for (const args of [["--kind", "source-manifest", "--schema", "fabric-source"], [], ["--kind", "source-tree"]]) {
+      const result = run(dir, ...args);
+      expect(result.code, args.join(" ")).toBe(1);
+      expect(result.out, args.join(" ")).toContain("has a member the schema does not define");
+      expect(result.out, args.join(" ")).toContain("additionalProperties");
+      expect(result.out, args.join(" ")).not.toContain("colour");
+    }
+  });
+
   it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("routes a named manifest under --kind source-tree as its folder: a dangling link, a loop, an unenterable folder", () => {
     const dangling = folder({ LICENSE: "x" });
     symlinkSync(path.join(dangling, "gone.json"), path.join(dangling, "fabric.source.json"));

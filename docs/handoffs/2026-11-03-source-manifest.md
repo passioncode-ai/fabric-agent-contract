@@ -191,7 +191,21 @@ source, what never travels with it, the check before a source export, and how a 
   places no one outside the operator can read, with access given to another person a hand-over; the conformance row
   pointing to the hand-over's home; the organization sentence citing agents-first item 9; a relative folder printed
   absolute under `--kind source-package`, tested; the folder-run sentence split; `--kind source-manifest` running only
-  `FAC-SEM-156` and `FAC-SEM-157`) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  `FAC-SEM-156` and `FAC-SEM-157`) answered as decided; round 35 (not clean: the product tier found SCN-054 teaching
+  `unchecked` as a fix for a finding, and this handoff saying a purpose that `FAC-SEM-156` lets through is refused by the
+  adapter's pack) answered as decided: SCN-054's step 3 limits `unchecked` to synthetic test vectors and a licence's
+  holder line, never to pass a credential finding, and an alternate path keeps a registry alias blocking until the
+  registry's owner renames it or the entry leaves the source (left out, or kept in the instance); the `FAC-SEM-156`
+  sentence restated (both detectors, so no purpose it passes is refused by a pack vendoring this branch's detector;
+  the re-vendoring owed by CT-207); the hand-over's lists name a public repository or one another owner holds (here in
+  `source.md` and `CONTEXT.md`, and in PR #628's agents-first item 9, principles section 7 and rules section 9);
+  DEC-0149 item 12 and principles section 7 carry the organization sentence, item 9 the standing permission;
+  the CT-218 note carries the three conditions and the organization clause in the backlog's link form, with its
+  grep; the registry-alias paragraph gives the second remedy (the identifier kept out of the source); a source-kind
+  folder run's unreadable or empty folder named by its absolute path (tested); `--kind source-manifest`'s scope
+  pinned by a test and its `FAC-SEM-000`; the adapter kit's protocol tables at its next re-vendor; and, from DEC-0151's
+  round-16 seam reading, the `it.each` "reads %s in time linear in its lists" given its siblings' 180 000 ms timeout,
+  its assertion unchanged; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -212,6 +226,9 @@ source, what never travels with it, the check before a source export, and how a 
   `/dev/stdin` is read, `/dev/null` is "not JSON"), and a folder entry that links to a folder is an `EISDIR` usage
   error. A source check never opens a file that is not a regular file.
 - CT-211: the fabric-workspace amendment owed in the merge session (see **Next task**).
+- The checker does not refuse an `unchecked` entry that covers a credential finding: a probe in round 35 (a manifest
+  listing its own key-holding file under `unchecked`) exits 0. source.md and SCN-054 say `unchecked` is no remedy for a
+  credential finding; enforcing it in the checker is a candidate follow-up row, not done here.
 - The landing's first step is done: the reviewed tree is one commit on the merge base `d1b905ee`, on
   `agent/ct194-source-manifest-v2-20261104`, and the review branch's remote ref is deleted. GitHub may still keep
   unreachable commits and cached views of the review branch; asking GitHub to remove them is the operator's step
@@ -265,6 +282,26 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Checks actually run
 
+Round 35's fixes were checked on the working tree over head `47d66a15` of `agent/ct194-source-manifest-v2-20261104`
+(this note's commit holds the same tree), each exit code read on its own: `pnpm typecheck` (exit 0); `pnpm vitest run
+test/validate-cli.test.ts test/source-rules.test.ts test/consistency.test.ts` without coverage (exit 1: 2003 passed, 2
+skipped, one failed, `source-rules`' "reads source-manifest in time linear in its lists", which timed out at vitest's
+default 5 seconds under a 15-minute load near 120); that `it.each` now sets the explicit 180 000 ms timeout its siblings
+set, its linearity assertion unchanged (DEC-0151's round-16 seam reading, relayed by the coordinator), and then `pnpm
+vitest run test/source-rules.test.ts -t 'in time linear in its lists'` (exit 0, 2 passed) and the whole file (exit 0,
+168 passed) pass, with `pnpm typecheck` again exit 0; `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match); `pnpm run
+docs:check` (exit 0, 0 errors); `python3 docs/ux/lint.py` (exit 0); `ORG_INDEX=... pnpm run privacy:check` (exit 0, 0
+findings); no U+2014 in the added lines. The two new tests (an unreadable subfolder and an empty folder under a source
+kind named by their absolute paths; `--kind source-manifest`'s scope over an extra member) pass. The branch gate (`tsc`, `vitest --coverage`, UX, docs, privacy, vectors) is owed: checked every 2 minutes
+from 02:32 to 02:52 UTC, eleven times, the 15-minute load stayed between 116 and 156 and `/` held 4 to 7 GB free, never
+under 45 and at least 8 GB; the coverage floor of `src/validate-cli.ts` is therefore not re-measured on this tree. Probe: a
+manifest that lists its own key-holding file under `unchecked` exits 0 under `--kind source-tree` (exit 1 without the
+entry). PR #628 at `27549ae7` (the knowledge base's main merged in at `e1ec78e0`, then the lists and the organization
+sentence): `git show 27549ae7:knowledge/<page>.md` gives `source hand-over` in 4, 3 and 2 lines of agents-first,
+principles and rules, `own estate` once on each, `^9\. \*\*A source hand-over` once and `^8\. \*\*No person in the
+chat` once in agents-first; the knowledge base's `npm run verify:content` (exit 0, backlog 0 errors) and `npm test`
+(exit 0, 172 passed).
+
 Round 34's fixes were gated on the working tree over head `69f6b067` of `agent/ct194-source-manifest-v2-20261104`
 (this note's commit holds the same tree), each exit code read on its own, under the session's lock for heavy runs,
 after waiting for the limits (the 15-minute load under 45 and at least 8 GB free on `/`, checked again once the lock
@@ -313,7 +350,7 @@ remaining steps, in order:
    behind, merge main into it, keeping main's item 8 and the PR's item 9. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `d04df3ff`, which carries the knowledge base's main, they print 4, 3 and 2
+   `knowledge/rules.md`; at PR #628's head `27549ae7`, which carries the knowledge base's main, they print 4, 3 and 2
    lines), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in
@@ -336,7 +373,9 @@ At their next re-pin, the consumers that vendor a protocol table (a
 private product's `src/contract/vendor/protocol-revisions.ts`, a deployment template's
 `src/fabric/fabric-protocols.mjs`, another server's `src/fabric/fabric-protocols.mjs`) add `fabric-source`; Fabric
 Dashboards' sample service (`fabric_protocols.py`) is updated at its re-sync, or recorded as not held equal to the
-register.
+register. The adapter kit's copies of the table (`fabric_protocols.py` and `fabric-protocols.mjs` in agents built on
+the kit) take `fabric-source` at the kit's next re-vendor (CT-207). `fabric-source/1` is a file format that no service
+declares, so a stale table has no wire effect.
 
 PR #236 is merged (main has moved since; its Test row in `AGENTS.md` now says Linux, Windows and macOS). The chain of
 the open branches that touch the same registers is PR #235 (DEC-0148), DEC-0149 (this branch), then
@@ -407,9 +446,12 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   register, which is append-only, it annotates DEC-0153's decision text if DEC-0153 is already accepted and edits it if
   it is still Proposed. The same for DEC-0149 and DEC-0151.
 - At landing, add to CT-218's row: deploying an agent's tree to the operator's own placement (the local or the cloud
-  form) is not a source hand-over, since there is no recipient outside the estate, as
-  [handing over](../specification/source.md#handing-over)'s line paragraph states (a copy moved within the operator's
-  own estate to a place that is not public).
+  form) is not a source hand-over when the placement is within the operator's own estate, is not public and is
+  readable by no one outside the operator, since it has no recipient; a placement an organization or a team holds, or
+  one other people can read, is a hand-over (the knowledge base's agents-first item 9), as
+  [handing over](../specification/source.md#handing-over)'s line paragraph states (linked in the row in the backlog's
+  own form, `specification/source.md#handing-over`). Check with `grep '^| CT-218 ' docs/backlog.md | grep -c 'specification/source.md#handing-over'`, which
+  prints 1 on the landed tree.
 - `AGENTS.md`: the Check row's exit wording follows the README ("exit 0 when there is no blocking problem (accepted
   lines may print)"); keep it when main's rows are merged in.
 - At the DEC-0150 step, `docs/ux/screens.md` SCR-03 keeps "SCN-001, SCN-002, SCN-054, SCN-055", and `CONTEXT.md` and
@@ -419,9 +461,10 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   per-project entries) relate to source slots: the token slot's name is a `secret` slot; the vault project, the env and
   the spend record are `config` slots or live in the descriptor or the well-known answer; or the declaration is
   instance data kept out of the source.
-- The adapter re-vendors the shared detector before or with its `pack` writing `secrets[]` from slots (CT-207); until
-  then a slot purpose `FAC-SEM-156` accepts, such as `sk-learn-experiments-2026`, is refused by its pack, which fails
-  safe.
+- The adapter re-vendors the shared detector before or with its `pack` writing `secrets[]` from slots (CT-207).
+  `FAC-SEM-156` reads a slot's name and purpose with both detectors (the shared `secretValue` and the tree check's own
+  reading), so no purpose it passes is refused by a pack that vendors the shared detector at this branch's version; the
+  re-vendoring is still owed (CT-207) so that the adapter's pack keeps parity with the shared detector after DEC-0151.
 - `src/secret-shape.ts` conflicts textually with DEC-0151 (`origin/agent/sqd-fields-20261104`). The resolution: this
   branch's JWT helpers (`jwtSpans`, `hasJwt`), then DEC-0151's doc comment and `SECRET_VALUE` line as pushed (being
   rewritten as a portable consuming-group boundary plus a strength rule for `sk-`). Its copy in `src/session-handoff.ts`

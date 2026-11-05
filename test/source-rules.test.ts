@@ -789,7 +789,7 @@ describe("the rules over long lists (DEC-0149)", () => {
     const small = timed(() => check(1000));
     const large = timed(() => check(16_000));
     expect(large / small).toBeLessThan(64);
-  });
+  }, 180_000);
 });
 
 describe("FAC-SEM-160: the package beside the source", () => {
