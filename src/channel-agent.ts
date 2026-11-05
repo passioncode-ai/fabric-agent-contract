@@ -99,13 +99,19 @@ interface Spot { frame: Frame | undefined; key: string; isName: boolean }
 /** What the walk shows each name and string: the text, where it sits, and the function that places it (called only when needed). */
 type Visit = (text: string, spot: Spot, place: (spot: Spot) => string) => void;
 
+/** Whether an object has no own member, without building its key list. */
+const emptyObject = (object: JsonObject): boolean => {
+  // A parsed JSON object has no inherited enumerable member, so any key the loop meets is its own.
+  for (const key in object) return key === undefined;
+  return true;
+};
 /**
  * Every member name and string value under `value`, read with an explicit stack of cursor frames (one per container, not
  * one per member), so neither depth nor size throws. `tokenOf` gives a member's path token, or undefined to place it at
  * its holder; below PATH_DEPTH every member is placed at its ancestor at that depth. A member's path is built only when
  * the visit asks for it (a container's, when it is entered).
  */
-function walk(value: unknown, root: string, tokenOf: (frame: Frame, key: string, index: boolean) => string | undefined, visit: Visit, stop: () => boolean = () => false): void {
+function walk(value: unknown, root: string, tokenOf: (frame: Frame, key: string, index: boolean) => string | undefined, visit: Visit, stop: () => boolean = () => false, onEnter: () => void = () => undefined): void {
   // A name is placed at its holder. A member is placed at its own token, or, when its key is not written (no token, or
   // past PATH_DEPTH), its frame is collapsed: it and every descendant are placed at its holder's place.
   const token = (frame: Frame, key: string): string | undefined => (frame.collapsed || frame.depth >= PATH_DEPTH ? undefined : tokenOf(frame, key, frame.keys === undefined));
@@ -118,6 +124,7 @@ function walk(value: unknown, root: string, tokenOf: (frame: Frame, key: string,
   if (typeof value === "string" && !stop()) visit(value, { frame: undefined, key: "", isName: false }, place);
   if (!Array.isArray(value) && !isObject(value)) return;
   const enter = (container: unknown[] | JsonObject, at: string, depth: number, name: string | undefined, parent: string | undefined, collapsed: boolean, role: Role): Frame => ({ container, keys: Array.isArray(container) ? undefined : Object.keys(container), next: 0, at, depth, name, parent, collapsed, role });
+  onEnter();
   const stack: Frame[] = [enter(value, root, 0, undefined, undefined, false, "root")];
   while (stack.length > 0 && !stop()) {
     const frame = stack[stack.length - 1] as Frame;
@@ -134,6 +141,10 @@ function walk(value: unknown, root: string, tokenOf: (frame: Frame, key: string,
     if (!index) visit(key, { frame, key, isName: true }, place);
     if (typeof child === "string") visit(child, { frame, key, isName: false }, place);
     else if (Array.isArray(child) || isObject(child)) {
+      onEnter();
+      // An empty container has nothing to visit: no frame is built for it, so a document of empty arrays or objects is
+      // walked at the cost of its members, not of a frame and a path each.
+      if (Array.isArray(child) ? child.length === 0 : emptyObject(child)) continue;
       const written = token(frame, key);
       stack.push(enter(child, written === undefined ? frame.at : `${frame.at}/${written}`, frame.depth + 1, key, frame.name, written === undefined, roleOf(frame.role, key, index)));
     }
@@ -512,13 +523,13 @@ const plainName = (name: string): boolean => NAME_CHARACTERS.test(name) && !/[0-
 const RELATIVE_REF = /^(?![/~])(?![A-Za-z][A-Za-z0-9+.-]*:)(?!(?:[^/]*\/)*\.\.(?:\/|$))[A-Za-z0-9._:/-]+$/;
 const OPAQUE_ID = /^[A-Za-z0-9_-]{8,128}$/;
 const relativeRef = (text: string): boolean => text.length >= 1 && text.length <= 256 && RELATIVE_REF.test(text);
-/** FAC-SEM-165 reads at most this many code points in all; a declaration past it is not read further. */
+/** FAC-SEM-165 reads at most this many UTF-16 units in all (an astral character is two); a declaration past it is not read further. */
 export const SECRET_BUDGET = 1_000_000;
 
 const BASE64URL = /[A-Za-z0-9_-]/;
 /** What is left of FAC-SEM-165's reading for one document, shared by every copy of its declaration. */
 interface Budget {
-  /** Code points left to read. */
+  /** UTF-16 units left to read (an astral character is two). */
   left: number;
   /** Whether a name or a string was left unread because the budget was spent. */
   unread: boolean;
@@ -534,15 +545,15 @@ interface Budget {
 /** A fresh budget for one document. */
 const newBudget = (): Budget => ({ left: SECRET_BUDGET, unread: false, named: 0, more: 0, unreadAt: undefined, copies: new Set() });
 
-/** What each name or string costs beyond its code points: the call itself. */
+/** What each name or string costs beyond its UTF-16 units: the call itself. */
 export const VISIT_COST = 16;
 /**
  * What each query or fragment piece costs: the detector decodes and splits every piece, which, measured under the
- * gate's coverage run, costs about as much as reading 100 code points of prose.
+ * gate's coverage run, costs about as much as reading 100 UTF-16 units of prose.
  */
 export const PIECE_COST = 8 * VISIT_COST;
 /**
- * What the argument reading (secretArgument) costs per piece it makes, beside the code points: it splits a string at
+ * What the argument reading (secretArgument) costs per piece it makes, beside the UTF-16 units: it splits a string at
  * each white space and `=`, and a path-like piece again at each `/` and `\`, then reads every piece; a string of
  * separators only is all pieces. Charged per separator, `/` and `\` included wherever they stand (a bound).
  */
@@ -640,8 +651,8 @@ export const LONG_RUN_FLOOR = 40;
  * The shared detector's near-miss reread of a long run, over the three partitions its readings split a string into: the
  * base64 class `[A-Za-z0-9+/=_-]` (secretValue), that class without `=` (secretArgument splits at `=`), and that class
  * without `=` and `/` (secretArgument then splits a path at `/`). In each partition, for each maximal run shorter than
- * LONG_RUN_FLOOR, a regular expression that needs 40 may start at each of its code points and read to the run's end, so
- * each code point is charged min(length, 39); a run of 40 or more matches at once and is charged nothing more here.
+ * LONG_RUN_FLOOR, a regular expression that needs 40 may start at each of its characters and read to the run's end, so
+ * each character is charged min(length, 39); a run of 40 or more matches at once and is charged nothing more here.
  */
 export function runRereads(text: string): number {
   let cost = 0;
@@ -678,21 +689,21 @@ export function runRereads(text: string): number {
   }
   return cost;
 }
-/** A bound for an `sk-` away from a boundary, which a detector may still try: up to the 16 code points its run needs. */
+/** A bound for an `sk-` away from a boundary, which a detector may still try: up to the 16 UTF-16 units its run needs. */
 export const SK_FLOOR = 16;
 /** The shared detector's other provider prefixes, each with the run its shape needs after it (SECRET_VALUE). */
 export const PREFIX_FLOORS: ReadonlyArray<readonly [RegExp, number]> = [[/gh[pousr]_/gi, 20], [/xox[abposr]-/gi, 10], [/akia/gi, 16], [/glpat-/gi, 20]];
 
 /**
- * The code points the detector reads in a string, counted in one pass, a bound any port's detector may need (the walk
- * adds VISIT_COST per name or string beside it): the string's code points; the JWT shape's rereading, from each `eyJ`,
+ * The UTF-16 units the detector reads in a string's head (an astral character is two), counted in one pass, a bound any
+ * port's detector may need (the walk adds VISIT_COST per name or string beside it): the string's UTF-16 units; the JWT shape's rereading, from each `eyJ`,
  * of its base64url run, `eyJ` included (and of the dot and the run after it); from each `sk-`, in any case, that follows a boundary (the start, a character other than a letter or
- * a digit, an escape ESCAPE_BEFORE names or a colour sequence), its three characters included, up to 255 code points to
+ * a digit, an escape ESCAPE_BEFORE names or a colour sequence), its three characters included, up to 255 UTF-16 units to
  * the end of the string; after an `sk-` away from a boundary, up to SK_FLOOR; after another provider prefix, its floor;
- * for each maximal run of base64 characters shorter than LONG_RUN_FLOOR (40), min(length, 39) per code point. For a
+ * for each maximal run of base64 characters shorter than LONG_RUN_FLOOR (40), min(length, 39) per character. For a
  * string `readAsUrl` admits and that parses as a URL, on the names and values a WHATWG URL parse yields (tab, line feed and carriage return
  * removed, percent-decoded, as `rawValues` hands them over), for every query or fragment piece: PIECE_COST, its name's
- * and value's code points, the value's JWT, `sk-` and long-run terms, and, when the value is not empty and the name holds an
+ * and value's UTF-16 units, the value's JWT, `sk-` and long-run terms, and, when the value is not empty and the name holds an
  * upper-case letter, the triangular number n(n+1)/2 of the name's length (splitting a name into words may backtrack over it).
  * For every string, ARG_PIECE_COST for each white space, `=`, `/` and `\\` (the argument reading's pieces). For every
  * string `readAsUrl` admits, PIECE_COST once for its URL parses, whether it parses or not. Only the head is counted.
@@ -795,7 +806,16 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
     else if (role === "queue" && key === "recommendation" && OPAQUE_ID.test(text)) found = keyShaped(text);
     else found = shapedRead(read);
     if (found) flag(place(spot), "a value", text, ID_MEMBERS.has(key) && !inTexts(spot.frame));
-  }, () => budget.unread);
+  }, () => budget.unread, () => {
+    // Each array or object the walk enters costs VISIT_COST: wrapping is read too, so it counts against the budget.
+    if (budget.unread) return;
+    if (VISIT_COST > budget.left) {
+      budget.unread = true;
+      budget.unreadAt = root;
+      return;
+    }
+    budget.left -= VISIT_COST;
+  });
   if (more > 0) findings.push({ code: "FAC-SEM-165", instancePath: root, message: `and ${more} more names or values shaped like a credential (DEC-0150 CA-5)` });
   return findings;
 }

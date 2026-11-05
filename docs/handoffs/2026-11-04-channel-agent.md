@@ -423,6 +423,21 @@ FAA-197, on the adapter's main).
   minimum case covers them, and the merge post asks about the operator's scheduled messages. The page says "the post to
   the standard's owner on thread `b6820b97` at merge" and lists the none-form fixture; adoption rows quote with absolute
   links or as plain text; older handoff lines about the budget in code points say "(as of that round)".
+- Round 34 of the readings (on `f15dd8ea`: product one break, unit pass with risks) was not clean: the Narrowings size
+  bullet said each name or string costs 16 more than its units, and SCN-043 and FLW-29 lagged round 33's offline rule.
+  With the coordinator's decisions: the size bullet states the charge as item 4 does, with a rule of thumb (prose about
+  12 to 14 per UTF-16 unit, measured, so roughly 70 000 to 80 000 units fit), and the manifest advice says the
+  credential budget binds first; a message marked offline or scheduled (Bot API `Message.is_from_offline`, MTProto
+  `message.offline` or `message.from_scheduled`) is never the operator's word on any path, on the page, in item 8, the
+  row, SCN-043 (both paths) and FLW-29's nodes B and K, and the merge post asks whether the owner wants scheduled words
+  counted later; the link-code exemption names its departure from sections 2.1, 2.2 and 5.1's `notATicket`; the
+  Business terms are defined and linked to the sources rows, whose MTProto row quotes both flags verbatim. Unit:
+  `secrets()` charges 16 for each array or object it enters, and the walk builds no frame for an empty container
+  (2 000 000 empty arrays now read in about the time of 2 000 000 empty strings); timing cases for 66 000 copies of
+  five nested arrays and 2 000 000 empty arrays; the five tiny-URL cases use 40 000 copies; a case of many pieces under
+  one query name; the two-million case takes the least of five runs; comments say UTF-16 units where the budget counts
+  them; the bare hint's link is asserted. Watch item for the nightly host: tiny strings read at 2.4 to 3.2 times prose
+  stay within 2x + 20 ms only by the 20 ms slack.
 
 ## The branch and its history
 
@@ -589,7 +604,10 @@ One line per sibling and per file it shares with this branch:
   merged tree: `grep -c 'nine extension keys' docs/specification/interop.md` prints 1, `grep -c 'toHaveLength(151)'
   test/schema-compilation.test.ts` prints 1, `grep -c 151 test/schema-compilation.test.ts` prints 3, and `channelAgent`
   and `opsDigest` both stand in `src/extensions.ts`.
-- At the DEC-0153 step (DEC-0153 now at `6eb61183`), `src/validate-cli.ts` conflicts textually: both branches add
+- At the DEC-0153 step (DEC-0153 now at `69b06d3f`, whose `Hint` carries a fourth element, its help link),
+  `src/validate-cli.ts` conflicts textually; this branch's line passes
+  `docs/specification/channel-agent.md#what-is-checked` as its fourth element, so neither line depends on `HINT_HELP`,
+  and `test/validate-cli.test.ts` already asserts that link (text and `--json`): both branches add
   `hint/declaration-only` with different help pages. The hint line carries its help link per schema
   (`channel-agent.md#what-is-checked` for this schema, `ops-digest.md`'s anchor for DEC-0153's) under one `HINT_HELP`
   rule name; whoever lands second merges both `readerHints` entries and keeps the per-schema links; check: each bare
@@ -681,6 +699,14 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
   `service-channel-agent-extension.schema.json` `$defs/channel/properties/kind`'s `enum` instead of a literal list.
 
 ## Checks actually run
+
+On round 34's change, each exit code read separately: `pnpm typecheck` 0; `pnpm vitest run --testTimeout=60000
+test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts test/validate-cli.test.ts` 0 three
+times (2120 passed each time); `pnpm vectors:check` 0 (29 vector files match their generators, after the channel-agent
+generator's `--write`); `pnpm run docs:check` 0 (markdownlint 0 errors); `python3 docs/ux/lint.py` 0; `pnpm run
+privacy:check` with the organization index 0 (0 findings); no U+2014 in the added lines; `operator-channel.md` matches
+main. The coverage run is owed: the 15-minute load was 82.26 (free disk 11 GB); it would also confirm the 100 % branch
+floor after `emptyObject` and the container charge.
 
 On round 33's change, each exit code read separately: `pnpm typecheck` 0; `pnpm vitest run --testTimeout=60000
 test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts test/validate-cli.test.ts` 0 twice
@@ -802,7 +828,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 33 (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 34 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -834,16 +860,16 @@ here), and adds:
   declares; whether the session owner must compare the account's live sessions with the operator's recorded
   configuration before a word counts; whether the operator's later words in the private chat with the agent's own bot
   are a ticket and counted (the link-code message is consumed by the binding, counted in `not_a_ticket` volume, a
-  departure from section 2.2); whether the operator's own scheduled message, which the server marks offline as it does a
-  greeting or an away message, is his word (until answered it is data); how a Telegram Business connection identifies
-  the operator, and that messages Telegram Business sends by itself (a greeting, an away message) never count; whether
-  section 10's `account` row "holding rules" include the session owner's section 9 hold or only the agent's own (CA-8
-  reads them as the agent's own, per section 4.10); whether the standard intends the operator's chat decision on an
-  `account` channel to be a message the customer reads; and one bot serving both an operator channel and channels the
-  agent answers people on, for the standard's and the operator channel's owners: where a binding code is accepted, how
-  OC-3, OC-4, OC-12 and OC-14 to OC-16 apply to customer chats, whether OC-3 also refuses a message sent on behalf of a
-  chat (`sender_chat` set, a shared placeholder sender), and the shared receiver's order of updates and its status
-  (OC-17); until they answer, such a bot keeps every operator-channel rule in every chat as written;
+  departure from sections 2.1, 2.2 and 5.1's `notATicket`); whether the owner wants the operator's scheduled words
+  counted later (CA-8 counts no message marked offline or scheduled, on any path); how a Telegram Business connection
+  identifies the operator, and that messages Telegram Business sends by itself (a greeting, an away message) never
+  count; whether section 10's `account` row "holding rules" include the session owner's section 9 hold or only the
+  agent's own (CA-8 reads them as the agent's own, per section 4.10); whether the standard intends the operator's chat
+  decision on an `account` channel to be a message the customer reads; and one bot serving both an operator channel and
+  channels the agent answers people on, for the standard's and the operator channel's owners: where a binding code is
+  accepted, how OC-3, OC-4, OC-12 and OC-14 to OC-16 apply to customer chats, whether OC-3 also refuses a message sent
+  on behalf of a chat (`sender_chat` set, a shared placeholder sender), and the shared receiver's order of updates and
+  its status (OC-17); until they answer, such a bot keeps every operator-channel rule in every chat as written;
 - a budget above 0 without a spend record is `FAC-SEM-164`;
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;

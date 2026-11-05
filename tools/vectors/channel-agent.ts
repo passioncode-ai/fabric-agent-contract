@@ -103,7 +103,8 @@ function budgetEdge(): Array<[string, unknown, Json[]]> {
   // The pad's UTF-16 units, so the document's reading lands on the budget plus `extra`: an a-pad is `p` and a's; an
   // astral pad is one or two `é` (one unit each, no run) and astral characters (two units each).
   const pad = (extra: number, unit: string, last: string) => {
-    const total = budget - (heavyCost + (visit + "last".length + 48) + lastCost(last) + visit) + extra;
+    // Four containers are entered at 16 each: the declaration object and the three members' arrays.
+    const total = budget - (heavyCost + (visit + "last".length + 48) + lastCost(last) + visit + 4 * visit) + extra;
     if (unit === "a") return `p${"a".repeat(total - 1)}`;
     const pairs = Math.floor((total - 1) / 2);
     return `${"\u00e9".repeat(total - 2 * pairs)}${unit.repeat(pairs)}`;

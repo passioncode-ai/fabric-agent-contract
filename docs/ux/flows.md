@@ -755,8 +755,8 @@ flowchart TD
   D -->|invalid| I[decision-invalid; the agent asks again]
   D -->|valid| R[Taken as the operator's; audited with the agent]
   O -->|in a customer chat| W[Word in a customer chat]
-  W -->|account channel| K[CA-8 on an account channel, the operator's own account, every other session of it the operator's own, no business bot connected, and the send record showing the message not sent through the session owner: acts inside that chat only; a send the account's session owner holds stays held under the owner's approval rules, and the chat word does not release it; a request outside the chat causes no action and is recorded in the agent's audit]
-  W -->|a group the agent's own bot answers, not the operator channel's bot| B[CA-8, the operator's allowlisted id bound in a private chat with that bot and sender_chat unset: acts inside that chat only; the agent's own hold is lifted; a request outside the chat causes no action and is recorded in the agent's audit]
+  W -->|account channel| K[CA-8 on an account channel, the operator's own account, every other session of it the operator's own, no business bot connected, the message not marked offline or scheduled, and the send record showing it not sent through the session owner: acts inside that chat only; a send the account's session owner holds stays held under the owner's approval rules, and the chat word does not release it; a request outside the chat causes no action and is recorded in the agent's audit]
+  W -->|a group the agent's own bot answers, not the operator channel's bot| B[CA-8, the operator's allowlisted id bound in a private chat with that bot, sender_chat unset, not marked offline or scheduled: acts inside that chat only; the agent's own hold is lifted; a request outside the chat causes no action and is recorded in the agent's audit]
 ```
 
 - **Screens traversed:** SCR-30 the operator's agent and the service's audit row.

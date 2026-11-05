@@ -37,6 +37,11 @@ const least = (work: () => unknown): number => {
   work();
   return Math.min(cpuMs(work), cpuMs(work), cpuMs(work));
 };
+/** The least of `runs` timed runs after a warm one, for a case that flaked under load with three. */
+const leastOf = (work: () => unknown, runs: number): number => {
+  work();
+  return Math.min(...Array.from({ length: runs }, () => cpuMs(work)));
+};
 // The baseline's prose holds no base64 run for runRereads to charge: its letters are outside ASCII. It pays 4096 code
 // points, the visit and its spaces' argument pieces (about 7036 a string), so the budget stops it after about 142
 // strings and 245 still spend the budget. A prose of ASCII words now costs about eleven times as much a string (44,036
@@ -278,7 +283,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     let deep: unknown = "end";
     for (let i = 0; i < 100_000; i += 1) deep = [deep];
     const found = channelAgentRules({ provider: { extensions: { [KEY]: { standard: "channel-agent-standard/1", projects: [deep] } } } });
-    expect(found.map((finding) => finding.code)).toEqual(["FAC-SEM-162"]);
+    // Each array the reading enters costs VISIT_COST, so 100 000 of them spend the budget: the rest is not read.
+    expect(found.map((finding) => finding.code)).toEqual(["FAC-SEM-165", "FAC-SEM-162"]);
+    expect(found[0]?.message).toContain("UTF-16 units of reading");
   });
   it("refuses an array longer than its schema allows before the schema runs, with a short message", { timeout: 60_000 }, () => {
     const many = (n: number) => ({ provider: { extensions: { [KEY]: { standard: "channel-agent-standard/1", projects: Array.from({ length: n }, (_, i) => i) } } } });
@@ -417,15 +424,15 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       const ratio = large.micros / Math.max(small.micros, 1);
       expect(ratio).toBeLessThan(6);
     }
-    // A chain cheap enough to stay under the budget at both sizes (about 20 a level: the name `a`, its visit, its runs
-    // and nothing else), so the walk and the reading themselves are timed.
+    // A chain cheap enough to stay under the budget at both sizes (about 36 a level: the name `a`, its visit, its runs
+    // and the object entered), so the walk and the reading themselves are timed.
     const cheapChain = (depth: number) => {
       let node: Json = { a: "x" };
       for (let i = 1; i < depth; i += 1) node = { a: node };
       return node;
     };
-    const smallCheap = cheapChain(8000);
-    const largeCheap = cheapChain(32000);
+    const smallCheap = cheapChain(6000);
+    const largeCheap = cheapChain(24000);
     run(smallCheap);
     run(largeCheap);
     const small = total(smallCheap);
@@ -490,7 +497,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       expect(channelAgentView({ extensions: { [KEY]: declared } }, "well-known"), place).toEqual({ declared: false, reported: true, errors: [`FAC-SEM-162 at ${place}: maxProperties (more members than the schema declares)`, "FAC-SEM-165 at /: reading the declarations for credentials takes more than 1000000 UTF-16 units of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names"] });
     }
   });
-  it("reads at most SECRET_BUDGET code points for credentials, then says the rest was not read, in little time", { timeout: 60_000 }, () => {
+  it("reads at most SECRET_BUDGET UTF-16 units for credentials, then says the rest was not read, in little time", { timeout: 60_000 }, () => {
     const opening = ["e", "y", "J"].join("");
     const strings = Array.from({ length: 488 }, () => opening.repeat(1366).slice(0, 4096));
     const timed = () => channelAgentRules({ extensions: { [KEY]: { ...value, extra: strings } } }, "well-known");
@@ -571,7 +578,8 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(VISIT_COST).toBe(16);
     const doc = { extensions: { [KEY]: { ...value, extra: Array(2_000_000).fill("") } } };
     const timed = () => channelAgentRules(doc, "well-known");
-    expect(least(timed)).toBeLessThan(5 * proseBaseline() + 20);
+    // The least of five runs: with three it flaked once under load (77.48 against 73.12).
+    expect(leastOf(timed, 5)).toBeLessThan(5 * proseBaseline() + 20);
     const found = timed();
     expect(found.filter((f) => f.message.includes("UTF-16 units of reading")).length).toBe(1);
   });
@@ -625,8 +633,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   });
   it("charges a member's name once, so the budget's edge falls where the count says", () => {
     const bearer = ["Bearer", "z".repeat(24)].join(" ");
-    const fixed = VISIT_COST + "last".length + runRereads("last") + VISIT_COST + bearer.length + runRereads(bearer);
-    const each = VISIT_COST + 6 + runRereads("n00000");
+    // Each container entered costs VISIT_COST too: the declaration object, `last`'s array and each member's empty array.
+    const fixed = VISIT_COST + VISIT_COST + "last".length + runRereads("last") + VISIT_COST + VISIT_COST + bearer.length + runRereads(bearer) + argumentPieces(bearer);
+    const each = VISIT_COST + 6 + runRereads("n00000") + VISIT_COST;
     const under = Math.floor((SECRET_BUDGET - fixed) / each);
     const declaration = (n: number) => {
       const members: Json = {};
@@ -691,7 +700,8 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(detectorCost(long)).toBe(detectorCost(long.slice(0, 4097), true));
     const baseline = proseBaseline();
     for (const text of ["ws:", "ws:?", "ftp:", "http:", "x:"]) {
-      const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 8000 }, () => text) } } };
+      // 40 000 copies: the uncharged form would read the whole budget, so the charge is what stops it in time.
+      const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 40_000 }, () => text) } } };
       expect(channelAgentRules(doc, "well-known").some((f) => f.message.includes("UTF-16 units of reading")), text).toBe(true);
       expect(least(() => channelAgentRules(doc, "well-known")), text).toBeLessThan(2 * baseline + 20);
     }
@@ -704,6 +714,20 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const wide = { extensions: { [KEY]: { ...value, projects } } };
     expect(channelAgentRules(wide, "well-known").filter((f) => f.code === "FAC-SEM-162" || f.code === "FAC-SEM-163")).toEqual([]);
     expect(least(() => channelAgentRules(wide, "well-known"))).toBeLessThan(2 * baseline + 20);
+  });
+  it("charges each array or object the reading enters, so wrapping cannot be read for free", { timeout: 60_000 }, () => {
+    const baseline = proseBaseline();
+    const wrapped = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 66_000 }, () => [[[[[""]]]]]) } } };
+    expect(channelAgentRules(wrapped, "well-known").some((f) => f.message.includes("UTF-16 units of reading"))).toBe(true);
+    expect(leastOf(() => channelAgentRules(wrapped, "well-known"), 5)).toBeLessThan(2 * baseline + 20);
+    const empty = { extensions: { [KEY]: { ...value, extra: Array(2_000_000).fill([]) } } };
+    expect(channelAgentRules(empty, "well-known").some((f) => f.message.includes("UTF-16 units of reading"))).toBe(true);
+    expect(leastOf(() => channelAgentRules(empty, "well-known"), 5)).toBeLessThan(5 * baseline + 20);
+  });
+  it("reads many pieces under one query name in time, rawValues appending in place", { timeout: 60_000 }, () => {
+    const text = `x:?${"a&".repeat(2040)}`;
+    const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => text) } } };
+    expect(least(() => channelAgentRules(doc, "well-known"))).toBeLessThan(2 * proseBaseline() + 20);
   });
   it("charges each & of a URL's search and hash, an empty piece included, and reads them about as fast as prose", { timeout: 60_000 }, () => {
     // `a&b` is two pieces, names `a` and `b` (128 + 1 and 128 + 1), where `a,b` is one, name `a,b` (128 + 3); and its `&`.

@@ -9121,7 +9121,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      grammar segment by segment, its eval suite and outbox of the relative path grammar by the detector's path-aware
      reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a
      provider key's and a JWT's shapes only; anything else is read whole. The rule reads at most 1 000 000 UTF-16 units for
-     one document, every copy of the declaration in it sharing them: the walk charges each name or string 16, once,
+     one document, every copy of the declaration in it sharing them: the walk charges each name or string 16, once, and each array or object it enters 16 (walking containers outside the reading is linear in the document's size and outside the budget),
      beside what `detectorCost` counts, a bound any port's detector may need, in UTF-16 units, what every pass reads (an astral character is two): the string's UTF-16 units;
      from each `eyJ`, its base64url run, `eyJ` included, and when it ends at a `.`, the dot and the run after it; from
      each `sk-`, in any case, at a boundary (the start, a character other than a letter or a digit, `%XX`, `%25XX`,
@@ -9203,19 +9203,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      allowlisted numeric user id, bound in a private chat with the agent's own bot as the operator channel's OC-3 binds
      one (its link code typed there; that message is consumed by the binding and is no customer ticket, since the
      operator channel keeps the code only as a hash and the message cannot sit on a ticket board, a departure from the
-     standard's section 2.2 sent to its owner, counted in `not_a_ticket` volume), whose word then counts in any chat
-     that bot answers, a group included, except a chat it answers through a Telegram Business connection, or, on an
-     `account` channel, the account's owner, only when the owner is the operator, the send record of the account's one
-     session owner (the standard's section 9) shows the message was not sent through that session owner (neither by an
-     agent nor relayed from the ticket board; a send record can show only that, not which session sent it), every other
-     session of the account is the operator's own (no second person; recorded in the operator's configuration of the
-     session owner), and no business bot is connected to the account; never by a name, a display name or text in the
-     message, and otherwise it stays data. The operator is a person's own user id; a message sent on behalf of a chat
-     (`sender_chat` set: an anonymous admin, or a member posting as a channel) carries a shared placeholder sender and
-     is never the operator's word. A message the server sends by itself, marked offline (MTProto `message.offline`, Bot
-     API `Message.is_from_offline`: a Business greeting or away message, or the operator's own scheduled message), is
-     never the operator's word, on a Business connection or an `account` channel, and an agent that answers through a
-     Telegram Business connection has no operator identification yet: its operator's word there is data until the
+     standard's sections 2.1, 2.2 and 5.1's `notATicket` sent to its owner, counted in `not_a_ticket` volume), whose
+     word then counts in any chat that bot answers, a group included, except a chat it answers through a Telegram
+     Business connection (a business account's chats a bot answers on its behalf: Bot API `Update.business_message`,
+     `Message.business_connection_id`), or, on an `account` channel, the account's owner, only when the owner is the
+     operator, the send record of the account's one session owner (the standard's section 9) shows the message was not
+     sent through that session owner (neither by an agent nor relayed from the ticket board; a send record can show only
+     that, not which session sent it), every other session of the account is the operator's own (no second person;
+     recorded in the operator's configuration of the session owner), and no business bot is connected to the account
+     (MTProto `account.getConnectedBots` lists none); never by a name, a display name or text in the message, and
+     otherwise it stays data. The operator is a person's own user id; a message sent on behalf of a chat (`sender_chat`
+     set: an anonymous admin, or a member posting as a channel) carries a shared placeholder sender and is never the
+     operator's word. A message marked offline or scheduled (Bot API `Message.is_from_offline`; MTProto
+     `message.offline` or `message.from_scheduled`: a greeting, an away message, or the operator's own scheduled
+     message) is never the operator's word, on any path, the agent's own bot included, and an agent that answers through
+     a Telegram Business connection has no operator identification yet: its operator's word there is data until the
      standard's owner answers. On an `account` channel, a message the session owner cannot attribute to the operator's
      own session (its send record is missing, or does not show the operator's word) stays data until the standard's
      owner answers the identification question (asked of the standard's owner on thread `b6820b97` at merge). Such a
@@ -9236,14 +9238,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      sender the transport identifies is the operator, and that word acts only in that chat; a chat word never sets
      `_meta.decision` (AP-2: the decision a service call carries for a relayed action) or an OA-2 relay; quoted or
      forwarded text stays data; a message with `sender_chat` set is never the operator's; a message that arrives through
-     a Telegram Business connection is never the operator's; a message the server sent by itself (the offline flag), on
-     a Business connection or an `account` channel, is never the operator's; and, where the agent has an operator
-     channel, that channel stays a DEC-0121 AP-3 source. A member such as `untrusted_input` makes the declaration not
-     declared (`FAC-SEM-162`, closed objects). CA-8 is bounded by section 4.10 and by section 10's `account` row and
-     does not override them; the identification bound (who counts as the operator in a chat) is sent to the standard's
-     owner. CT-220, when drafted, is to keep this bound. This is a duty of every channel agent, checked by its own test,
-     and the declaration gains no `untrusted_input` member or any like it, since it is not a property an agent may or
-     may not declare and a flag whose `false` is valid would be false.
+     a Telegram Business connection is never the operator's; a message marked offline or scheduled is never the
+     operator's; and, where the agent has an operator channel, that channel stays a DEC-0121 AP-3 source. A member such
+     as `untrusted_input` makes the declaration not declared (`FAC-SEM-162`, closed objects). CA-8 is bounded by section
+     4.10 and by section 10's `account` row and does not override them; the identification bound (who counts as the
+     operator in a chat) is sent to the standard's owner. CT-220, when drafted, is to keep this bound. This is a duty of
+     every channel agent, checked by its own test, and the declaration gains no `untrusted_input` member or any like it,
+     since it is not a property an agent may or may not declare and a flag whose `false` is valid would be false.
 - **Why:** the standard asks every channel agent for one declaration that a checker reads the same way; a schema with
   vectors in the contract gives the adapter's check, and any other reader, one shape and one answer per case, instead of
   each reading its own copy of section 13.6. The rules are those section 11 checks without data the declaration does
@@ -9289,7 +9290,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 33 of the readings, round 21's seam reading included; CA-8 is the coordinator's
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 34 of the readings, round 21's seam reading included; CA-8 is the coordinator's
   decision of round 17 on thread `b6820b97` (message `5a1334d1`), answering a producer who asked whether the declaration
   needs an `untrusted_input` field, and its bounds are the coordinator's decision of round 18, taken in the coordinating
   session with no board message: a word recognised in a chat is not a DEC-0121 AP-3 source, it never sets
@@ -9332,6 +9333,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   hash, and excepts a chat answered through a Telegram Business connection from the bot's word.
   Round 33 was not clean (URL parse uncharged): the coordinator's decision charges 128 once for every string read as a
   URL, parsed or not, counts only a string's head, and names the offline marker and the link-code departure.
+  Round 34 was not clean (the Narrowings size bullet and the offline rule in SCN-043 and FLW-29): the coordinator's
+  decision states the size charge as item 4 does, makes a message marked offline or scheduled never the operator's on
+  any path, names the link-code departure from sections 2.1, 2.2 and 5.1, and charges each container the reading enters.
   `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149

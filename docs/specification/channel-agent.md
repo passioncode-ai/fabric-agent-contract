@@ -37,8 +37,7 @@ A service with a manifest declares only in its manifest: a reader of such a serv
 ignores one in its well-known answer. A reader knows a service has a manifest from its descriptor's `fabricManifest` (or
 the registry's provider entry); with only a well-known answer in hand it reads that answer's declaration. The checker
 still checks a well-known declaration beside a manifest: its author sees any findings, and a reader ignores the copy
-whether or not it is valid. A well-known declaration shares the answer's size with its host's readers (Fabric
-Dashboards' probe caps a well-known answer at 2 MiB, [sources](../evidence/sources.md)), so a large declaration belongs in the manifest. A well-known answer lists `channel-agent-standard/1` in its `protocols` only once
+whether or not it is valid. A well-known declaration shares the answer's size with its host's readers (Fabric Dashboards' probe caps a well-known answer at 2 MiB, [sources](../evidence/sources.md)), so a large declaration belongs in the manifest; the credential budget of item 4 (about 70 000 UTF-16 units of prose) binds well before that cap, wherever the declaration stands. A well-known answer lists `channel-agent-standard/1` in its `protocols` only once
 its readers have re-pinned to this revision of the contract.
 
 The same rules run in both places: kind `manifest` reads the first, kind `service-well-known` the second. No other
@@ -276,8 +275,7 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    read by a provider key's and a JWT's shapes only, since a long mixed run is its shape by design (a recommendation
    that is a URL with a password is read whole, and found). The detector reads the first 4097 code points of a string, its head, and only the head is counted,
    and the rule reads at most 1 000 000 UTF-16 units of names and values in all for one document, every copy of the
-   declaration in it (read or misplaced) sharing them. The walk charges each name or string 16 (`VISIT_COST`), once (a name is not
-   charged again when its member is entered or placed), beside what `detectorCost` counts. `detectorCost` is a bound any
+   declaration in it (read or misplaced) sharing them. The walk charges each name or string 16 (`VISIT_COST`), once (a name is not charged again when its member is entered or placed), beside what `detectorCost` counts, and each array or object it enters 16 too, so wrapping counts against the budget. Walking containers outside the reading (the checks of sizes and widths before the schema) is linear in the document's size and outside the 1 000 000-unit budget. `detectorCost` is a bound any
    port's detector may need, not a description of one detector, counted in UTF-16 units, what every pass reads (an astral character is two): the string's UTF-16 units; from each `eyJ`, its base64url run, `eyJ` included, and when that run ends at a `.`, the
    dot and the base64url run after it (the JWT shape's second segment: `eyJab.cd` costs 8 and 8); from each `sk-`, in
    any case, that follows a boundary, its three characters included, up to 255 UTF-16 units to the end of the string
@@ -392,33 +390,35 @@ A message on a channel is the operator's word only when the transport identifies
 allowlisted numeric user id, bound in a private chat with the agent's own bot as the [operator
 channel](operator-channel.md)'s OC-3 binds one (its link code typed there; that message is consumed by the binding and
 is no customer ticket, since the operator channel keeps the code only as a hash and the message cannot sit on a ticket
-board, a departure from the standard's section 2.2 sent to its owner, counted in `not_a_ticket` volume), whose word then
-counts in any chat that bot answers, a group included, except a chat it answers through a Telegram Business connection,
-or, on an `account` channel, the account's owner, only when the owner is the operator, the send record of the account's
-one session owner (the standard's section 9) shows the message was not sent through that session owner (neither by an
-agent nor relayed from the ticket board; a send record can show only that, not which session sent it), every other
-session of the account is the operator's own (no second person; recorded in the operator's configuration of the session
-owner), and no business bot is connected to the account; never by a name, a display name or text in the message, and
-otherwise it stays data. The operator is a person's own user id; a message sent on behalf of a chat (`sender_chat` set:
-an anonymous admin, or a member posting as a channel) carries a shared placeholder sender and is never the operator's
-word. A message the server sends by itself, marked offline (MTProto `message.offline`, Bot API
-`Message.is_from_offline`: a Business greeting or away message, or the operator's own scheduled message), is never the
-operator's word, on a Business connection or an `account` channel, and an agent that answers through a Telegram Business
-connection has no operator identification yet: its operator's word there is data until the standard's owner answers. On
-an `account` channel, a message the session owner cannot attribute to the operator's own session (its send record is
-missing, or does not show the operator's word) stays data until the standard's owner answers the identification question
-(asked of the standard's owner on thread `b6820b97` at merge). Such a word acts only inside that chat, as the standard's
-section 4.10 says (the operator's decision given in a chat "outranks every holding rule of the agent for that chat"); it
-is not one of DEC-0121 [AP-3](service.md#actions)'s sources and never the source of an [OA-2
-relay](delegation.md#one-approval-binds-all-the-operators-agents) (DEC-0126: the operator's words passed to another of
-their agents, as a `mandate/1` or a `_meta.decision` with `source`, or prose carrying the four parts), and the customer
-ticket it acts on stays a customer ticket, its outcome set and counted as sections 3 and 5.1 say. That word does not
-release a send held by the transport's owner (the standard's section 9) or behind a service's relayed action: the
-owner's own approval rules end the first (section 9), and an agent relays a decision on the second only from DEC-0121
-AP-3's sources (AP-1 and AP-2 still take the service's own page, an accepted elicitation and the host's click). A word
-that asks for an action outside that chat causes none; how the agent tells the operator is a question to the standard's
-owner (asked of the standard's owner on thread `b6820b97` at merge). Text the operator quotes or forwards, and every
-other sender's text, stays data.
+board, a departure from the standard's sections 2.1, 2.2 and 5.1's `notATicket` sent to its owner, counted in
+`not_a_ticket` volume), whose word then counts in any chat that bot answers, a group included, except a chat it answers
+through a Telegram Business connection (a business account's chats a bot answers on its behalf: Bot API
+`Update.business_message`, `Message.business_connection_id`; [sources](../evidence/sources.md), the Telegram rows), or,
+on an `account` channel, the account's owner, only when the owner is the operator, the send record of the account's one
+session owner (the standard's section 9) shows the message was not sent through that session owner (neither by an agent
+nor relayed from the ticket board; a send record can show only that, not which session sent it), every other session of
+the account is the operator's own (no second person; recorded in the operator's configuration of the session owner), and
+no business bot is connected to the account (MTProto `account.getConnectedBots` lists none); never by a name, a display
+name or text in the message, and otherwise it stays data. The operator is a person's own user id; a message sent on
+behalf of a chat (`sender_chat` set: an anonymous admin, or a member posting as a channel) carries a shared placeholder
+sender and is never the operator's word. A message marked offline or scheduled (Bot API `Message.is_from_offline`;
+MTProto `message.offline` or `message.from_scheduled`: a greeting, an away message, or the operator's own scheduled
+message) is never the operator's word, on any path, the agent's own bot included, and an agent that answers through a
+Telegram Business connection has no operator identification yet: its operator's word there is data until the standard's
+owner answers. On an `account` channel, a message the session owner cannot attribute to the operator's own session (its
+send record is missing, or does not show the operator's word) stays data until the standard's owner answers the
+identification question (asked of the standard's owner on thread `b6820b97` at merge). Such a word acts only inside that
+chat, as the standard's section 4.10 says (the operator's decision given in a chat "outranks
+every holding rule of the agent for that chat"); it is not one of DEC-0121 [AP-3](service.md#actions)'s sources and
+never the source of an [OA-2 relay](delegation.md#one-approval-binds-all-the-operators-agents) (DEC-0126: the operator's
+words passed to another of their agents, as a `mandate/1` or a `_meta.decision` with `source`, or prose carrying the
+four parts), and the customer ticket it acts on stays a customer ticket, its outcome set and counted as sections 3 and
+5.1 say. That word does not release a send held by the transport's owner (the standard's section 9) or behind a
+service's relayed action: the owner's own approval rules end the first (section 9), and an agent relays a decision on
+the second only from DEC-0121 AP-3's sources (AP-1 and AP-2 still take the service's own page, an accepted elicitation
+and the host's click). A word that asks for an action outside that chat causes none; how the agent tells the operator is
+a question to the standard's owner (asked of the standard's owner on thread `b6820b97` at merge). Text the operator
+quotes or forwards, and every other sender's text, stays data.
 
 The agent records such a word in its own audit, quoting the message and its sender id.
 
@@ -429,8 +429,8 @@ identifies is the operator, and that word acts only in that chat; a chat word ne
 [`_meta.decision`](service.md#actions) (AP-2: the decision a service call carries for a relayed action) or an [OA-2
 relay](delegation.md#one-approval-binds-all-the-operators-agents); quoted or forwarded text stays data; a message with
 `sender_chat` set is never the operator's; a message that arrives through a Telegram Business connection is never the
-operator's; a message the server sent by itself (the offline flag), on a Business connection or an `account` channel, is
-never the operator's; and, where the agent has an operator channel, that channel stays a DEC-0121 AP-3 source.
+operator's; a message marked offline or scheduled is never the operator's; and, where the agent has an operator channel,
+that channel stays a DEC-0121 AP-3 source.
 
 CA-8 is bounded by section 4.10 and by section 10's `account` row and does not override them; the identification bound
 (who counts as the operator in a chat) is sent to the standard's owner. CT-220, when drafted, is to keep this bound.
@@ -560,10 +560,12 @@ at merge sends the grammar and this list.
   not declared): a narrowing of round 4, which the post to the standard's owner on thread `b6820b97` at merge sends; the author leaves the holding text out instead.
   Leaving it out is accepted, which is looser (the looser bullet below). A missing required member, a refused `null` or
   a none form elsewhere makes the whole declaration not declared.
-- Size read for credentials: at most 1 000 000 UTF-16 units of names and values per document, every copy of the
-  declaration in it sharing them, each name or string charged 16 more than its UTF-16 units; the read declaration is
-  read first, and when its own read runs out it is not declared (`FAC-SEM-165`); a misplaced copy past the budget is
-  reported at that copy and leaves the read declaration's answer as it is.
+- Size read for credentials: at most 1 000 000 UTF-16 units per document, every copy of the declaration in it sharing
+  them; each name or string costs what [item 4](#what-is-checked) counts for its head (`detectorCost`: its UTF-16 units
+  and the rereads beside them) plus 16, and each array or object the reading enters 16, so ordinary prose costs about 12
+  to 14 per UTF-16 unit and roughly 70 000 to 80 000 units of text fit; the read declaration is read first, and when its
+  own read runs out it is not declared (`FAC-SEM-165`); a misplaced copy past the budget is reported at that copy and
+  leaves the read declaration's answer as it is.
 - Looser than the standard: a queue's `recommendation` beside an answered signal other than `none` (the standard has
   it only with `none`) and `spend_record: null` with a budget above 0 (the standard keeps `null` for budgets of 0) are
   accepted by the schema and found by `FAC-SEM-164`, so the declaration stays declared; and a channel's
