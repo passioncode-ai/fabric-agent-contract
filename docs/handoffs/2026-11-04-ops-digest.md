@@ -177,27 +177,24 @@ product's obligation.
   underscore-form provider prefixes, `AIza` keys and `hf_` tokens, owned by DEC-0151's detector, with tests from split
   literals.
 - **At landing, the fold** (against DEC-0149 at `47d392a4`, its round 48, which exports `HFS_IGNORABLE_CHAR` with no
-  global flag and `stripHfsIgnorable` from `src/source-rules.ts` and keeps its global `HFS_IGNORABLE` private): make
-  `foldDir = (dir) => foldPath(dir)`; delete `NUSKHURI`, `toMkhedruli` and the local `HFS_IGNORABLE` from
-  `src/ops-digest.ts`; wherever `src/ops-digest.ts` still strips or tests the HFS+ class (`dirReadings` for
-  `hiddenDir` and the home-folder and credential tests), use `stripHfsIgnorable` or `HFS_IGNORABLE_CHAR` from
-  `./source-rules.js`, importing only what is used. Checks: `pnpm typecheck` exits 0, `grep -c 'u200c-\\u200f'
-  src/ops-digest.ts` prints 0, and the parity test in `test/ops-digest.test.ts` (DEC-0149's `FOLD_PAIRS` at `d4cc1e16`
-  copied as written, plus the HFS+ samples) keeps holding. Recommended: use DEC-0149's `inGrammar(dir, true)` in place
-  of the local segment check, so FAC-SEM-168 also refuses a `dir` that NFC or NFD grows past 256 code points; its probe,
-  added as a test case at landing: a `dir` of 256 precomposed `ä` (U+00E4) is refused by FAC-SEM-168 after the swap
-  (it passes today).
-- **At landing, the home-path boundaries:** DEC-0149 lands the CT-109 four-boundary edit itself (at `47d392a4`:
-  `activity.md` "Its scope" and the scope comment in `src/activity-rules.ts` name `SOURCE_HOME_PATHS`). The line is
-  order-proof: the second of DEC-0149 and DEC-0153 to land checks `grep -c SOURCE_HOME_PATHS
-  docs/specification/activity.md src/activity-rules.ts` (each at least 1 once DEC-0149 is on `main`) and adds it if
-  missing; DEC-0153 adds no boundary. DEC-0153's lander still owes `source.md`'s sentence "the scanner for values that
-  must hold no path at all" and its twin in the `SOURCE_HOME_PATHS` docstring (`src/source-rules.ts`), both false once
-  FAC-SEM-168 applies `hasHomePath` to a relative `dir`, and the boundary-copy rule: whichever lands second runs
-  `grep -rn -E 'three home-path|any of the three|values that (must )?hold no path at all' src docs/specification
-  schemas` and rewrites what is left (`devices.md` at its two `detail` sentences, `proposals.md`'s FAC-SEM-103
-  paragraph, `src/proposal-rules.ts`'s scope comment, the device-common `detail` `$comment`, `src/activity-rules.ts`'s
-  "any of the three").
+  global flag and `stripHfsIgnorable` from `src/source-rules.ts` and keeps its global `HFS_IGNORABLE` private, so the
+  lander exports nothing from `src/source-rules.ts`): make `foldDir = (dir) => foldPath(dir)`; delete `NUSKHURI`,
+  `toMkhedruli` and the local `HFS_IGNORABLE` from `src/ops-digest.ts`; replace its `.replace(HFS_IGNORABLE, "")` uses
+  (`dirReadings`, which feeds `hiddenDir` and the home-folder and credential tests) with `stripHfsIgnorable`, and any
+  test of the class with `HFS_IGNORABLE_CHAR.test`, both from `./source-rules.js`, importing only what is used. Checks:
+  `pnpm typecheck` exits 0, `grep -c 'u200c-\\u200f' src/ops-digest.ts` prints 0, and the parity test in
+  `test/ops-digest.test.ts` (DEC-0149's `FOLD_PAIRS` at `d4cc1e16` copied as written, plus the HFS+ samples) keeps
+  holding. Recommended: use DEC-0149's `inGrammar(dir, true)` in place of the local segment check, so FAC-SEM-168 also
+  refuses a `dir` that NFC or NFD grows past 256 code points; its probe, added as a test case at landing: a `dir` of 256
+  precomposed `ä` (U+00E4) is refused by FAC-SEM-168 after the swap (it passes today).
+- **At landing, the home-path boundaries:** DEC-0149's landing rewrites every copy that counts the home-path boundaries
+  (`activity.md` "Its scope", the scope comment in `src/activity-rules.ts`, `devices.md`, `proposals.md`,
+  `src/proposal-rules.ts` and the device-common `detail` `$comment`, with this branch's `$comment` wording). DEC-0153's
+  lander owes only what depends on DEC-0153: `source.md`'s sentence "the scanner for values that must hold no path at
+  all" and its twin in the `SOURCE_HOME_PATHS` docstring (`src/source-rules.ts`), both false once FAC-SEM-168 applies
+  `hasHomePath` to a relative `dir`. The order-proof check after both land: `grep -rn -E 'three home-path|any of the
+  three' src docs/specification schemas` prints nothing, and `grep -c SOURCE_HOME_PATHS
+  docs/specification/activity.md src/activity-rules.ts` prints at least 1 for each.
 - **At landing, the scenarios:** `docs/ux/scenarios.md` conflicts in SCN-002. Keep `main`'s channel-agent clause and this
   branch's ops-digest clause in Errors & recovery, and list `test/validate-cli.test.ts`, `test/channel-agent.test.ts`
   and `test/ops-digest.test.ts` in its Coverage; `python3 docs/ux/lint.py` exits 0.
@@ -330,7 +327,10 @@ product's obligation.
   home-folder check missed a dir whose segment ends in dots or spaces (now read also with each segment's trailing dots
   and spaces dropped). Also: a named duplicate dir quoted, "outside `paths.data`" qualified everywhere as the message
   says, SCN-002's clause and landing line, OD-9's bare-declaration sentence, the Why and Consequences, the device-common
-  re-pin line, and the fold and home-path landing lines read against DEC-0149 at `47d392a4`. Round 16 is next.
+  re-pin line, and the fold and home-path landing lines read against DEC-0149 at `47d392a4`. Amended after DEC-0149's
+  round-49 seam reading: DEC-0149's landing rewrites every boundary copy, so this branch keeps only `source.md`'s
+  sentence, its docstring twin and the order-proof check, and the fold line exports nothing (`stripHfsIgnorable` for
+  the `.replace` uses, `HFS_IGNORABLE_CHAR` for any `.test`). Round 16 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
