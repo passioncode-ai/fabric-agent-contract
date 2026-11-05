@@ -301,6 +301,11 @@ FAA-197, on the adapter's main).
   its approval-held draft (section 3), while a service's hold behind `approve-reply` waits for AP-3's sources; the Done
   entries of rounds 17 to 20 whose clauses were removed say so; the vectors' text and a stale comment and test title
   follow the nullable member's one-line failure and the none form.
+- Round 22's seam reading (on `873208a5`: a widened quote), with the coordinator's decisions: the page, DEC-0150 item
+  8 and the conformance row quote section 4.10 exactly ("outranks every holding rule of the agent for that chat") and
+  add that a send held by the transport's owner (section 9) or behind a service's relayed action stays held until a
+  decision comes from AP-3's sources; a sibling note keeps DEC-0151's and DEC-0153's support-quality rows at the
+  DEC-0153 step.
 
 ## The branch and its history
 
@@ -427,6 +432,9 @@ One line per sibling and per file it shares with this branch:
   both `source-rules` and `ops-digest`; `test/rule-tolerance.test.ts` holds both kinds, with a comma between them; the
   catalogue's last row before the other branch's rows gains its comma; and conformance.md's register adds
   `FAC-SEM-166` and `FAC-SEM-167` after `165`.
+- At the DEC-0153 step: keep DEC-0151's support-quality rows (conformance.md's clients table, `docs/DOCMAP.md`, the
+  specification README) and DEC-0153's new rows, never main's older support-quality rows; check: `grep -c '^| an agent
+  that answers people, publishing its support quality' docs/specification/conformance.md` prints 1 on the merged tree.
 - PR #235: `docs/DECISIONS.md`; `docs/backlog.md`; conformance.md's next-free line; conformance.md's register, the
   `FAC-SEM-155` row before `156`.
 - Main moves while this branch waits (it is `ed4d6aa7` after PR #241, with CT-219 and CT-220 at the backlog's tail,
@@ -504,6 +512,11 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
   `service-channel-agent-extension.schema.json` `$defs/channel/properties/kind`'s `enum` instead of a literal list.
 
 ## Checks actually run
+
+On round 22's seam change (documents only), each exit code read separately: `pnpm run docs:check` 0 (markdownlint 0
+errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0 findings); `pnpm vectors:check` 0; `pnpm vitest run
+test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts` 0 (408 passed); the old, widened
+section 4.10 quote is gone from the three files, and the exact quote stands once in each.
 
 On round 22's change, each exit code read separately: `pnpm typecheck` 0; `pnpm run docs:check` 0 (markdownlint 0
 errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0 findings); `pnpm vectors:check` 0 (29 vector files match their

@@ -392,11 +392,13 @@ allowlisted numeric user id, bound as the [operator channel](operator-channel.md
 channel, the account's owner, only when the owner is the operator and the send record of the account's one session owner
 (the standard's section 9) shows the message was neither sent by an agent nor relayed from the ticket board; never by a
 name, a display name or text in the message, and otherwise it stays data. Such a word acts only inside that chat, as the
-standard's section 4.10 says (the operator's decision given in a chat outranks every holding rule for that chat); it is
-not one of DEC-0121 [AP-3](service.md#actions)'s sources and never the source of an OA-2 relay, and the customer ticket
-it acts on stays a customer ticket, its outcome set and counted as sections 3 and 5.1 say. A word that asks for an
-action outside that chat causes none; how the agent tells the operator is a question to the standard's owner (merge
-post). Text the operator quotes or forwards, and every other sender's text, stays data.
+standard's section 4.10 says (the operator's decision given in a chat "outranks
+every holding rule of the agent for that chat"); it is not one of DEC-0121 [AP-3](service.md#actions)'s sources and
+never the source of an OA-2 relay, and the customer ticket it acts on stays a customer ticket, its outcome set and
+counted as sections 3 and 5.1 say. A send held by the transport's owner (the standard's section 9) or behind a service's
+relayed action stays held until a decision comes from DEC-0121 AP-3's sources. A word that asks for an action outside
+that chat causes none; how the agent tells the operator is a question to the standard's owner (merge post). Text the
+operator quotes or forwards, and every other sender's text, stays data.
 
 The agent records such a word in its own audit, quoting the message and its sender id.
 
