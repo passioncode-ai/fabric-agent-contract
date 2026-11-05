@@ -362,7 +362,7 @@ reserved (receipt SEM-0095, DEC-0064) and is not used: the rule it was
 for became a fix of `FAC-SEM-006`. `FAC-SEM-141` was reserved (receipt SEM-0141) by DEC-0121's run and is not used: the
 decision names `FAC-SEM-142`, reserved after it.
 
-**Next free rule code:** `FAC-SEM-156` (the CAS counter's next value when this line was last written; read
+**Next free rule code:** `FAC-SEM-169` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/SEM` on origin for the current one)
 
 | Code | Kind | Defined in | Receipt |

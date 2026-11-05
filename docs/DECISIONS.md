@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0149` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0154` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -9034,8 +9034,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0148: a renewal by the key on record is repeated, not reissued, while its certificate is unpresented and not ended (`FAC-SEM-155`)
 
 - **Date:** 2026-11-02
-- **Status:** Proposed (2026-11-02), its shape posted for objections until 2026-11-05 18:00 UTC (board thread
-  `1dcd7fda`, the first organization server's request `38014539`); accepted on merge after that window. A new duty for an
+- **Status:** Accepted, merged 2026-11-05 after its objection window closed (2026-11-05 18:00 UTC) with no
+  objection on thread `1dcd7fda` (the first organization server's request `38014539`; its answer of 2026-11-02 14:13 UTC
+  says "no objection" and that it matches its 0.5.1). A new duty for an
   organization server; the first organization server already does this in its 0.5.0 (`renewed_from`, a repeat while the
   renewed certificate is unpresented and not ended). Additive for nodes. Consumer adoption: CT-203 (the first
   organization server's re-pin and its `FAC-SEM-155` test; Project Observatory's node already repeats a lost renewal
