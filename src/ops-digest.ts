@@ -141,7 +141,8 @@ function once(ops: ReadonlyArray<{ op: string }>, where: string): void {
  * when it is the hour just before (a gap compares with none). `from` and `to` are written as
  * `Date.prototype.toISOString` writes them. `previous` must already pass FAC-SEM-166. It throws when an input count or
  * a previous digest's count is not an integer from 0 to 2^53 - 1 (each checked before it is used), when a sum is beyond
- * 2^53 - 1, when `from` is no whole UTC hour (a value that is not a string included), when `counts` or the previous hour's
+ * 2^53 - 1, when `from` is no whole UTC hour (a value that is not a string included), when `previous` is neither null,
+ * undefined nor an object with a string `to`, when `counts` or the previous hour's
  * `ops` is not an array or holds an item that is not an object (null included), when the previous digest, being the hour just before, names
  * an operation twice, when the hour after `from`
  * is not a whole hour the schema writes (after 9999-12-31T23), and, as OD-3 asks, when an operation's name is a name
@@ -168,7 +169,9 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
   if (merged.size > OPS_MAX) throw new Error(`the hour counts ${merged.size} operations, more than ${OPS_MAX}: no hourly digest (OD-3)`);
   const ops = [...merged.values()].sort(byName);
   // An absent previous (null or undefined) compares with none.
-  const adjoining = previous !== null && previous !== undefined && wholeHour(previous.to) === start ? previous.ops : [];
+  const absent = previous === null || previous === undefined;
+  if (!absent && !(isObject(previous) && typeof previous.to === "string")) throw new Error("the previous hour is neither absent nor a digest with a string to");
+  const adjoining = !absent && wholeHour(previous.to) === start ? previous.ops : [];
   objects(adjoining, "the previous hour's ops");
   once(adjoining, "the previous hour's ops");
   const before = new Map(adjoining.map((c) => [c.op, c.failed]));
@@ -183,7 +186,7 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
  * into one: the operations summed, the hours counted, and each operation that rose in some hour with the hours it rose
  * in and the failures of those hours, the most failures first, then by name. A day with no hour of its own has no
  * digest: null (OD-5). Deciding that the UTC `day` is closed is the caller's (OD-1, OD-5): `foldDay` folds what it is
- * given. Of each hour it checks: that `hourly`, `ops` and `risen` are arrays whose every item is an object (null included), every
+ * given; a `day` that is no real UTC day (a value that is not a string included) throws. Of each hour it checks: that `hourly`, `ops` and `risen` are arrays whose every item is an object (null included), every
  * count and every rise's failures an integer from 0 to 2^53 - 1 (each checked before it is merged), each rise named once
  * and of an operation its `ops` counts, and every name in `ops` and `risen` one OD-2 takes (its grammar, `OP_NAME_MAX`
  * included, and FAC-SEM-167). It leaves to the caller, whose hourly digests must already pass FAC-SEM-166: an operation
@@ -193,6 +196,8 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
  * every reader skips.
  */
 export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDigest | null {
+  // A `day` that is no real UTC day (a caller's mistake) is named by its place when it is no string.
+  if (!realDay(day)) throw new Error(`${typeof day === "string" ? shown(day, "day") : "day"} is not a real UTC day`);
   objects(hourly, "hourly");
   const seen = new Set<number>();
   const mine = hourly.filter((h) => {

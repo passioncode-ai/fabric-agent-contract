@@ -60,8 +60,13 @@ fields are Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's
   hourly rise must equal the hour's failures of its op.
 - Vectors were added (the backlog row asks for them; the folds are what every product reimplements).
 - OD-9's `dir` reuses the package-path grammar rather than a new one; a local descriptor with the key must name
-  `paths.data` (`FAC-SEM-168`), since `dir` is relative to it. Tests, not vectors, pin `FAC-SEM-168`: the reader is
-  a shape check plus four list checks, and the semantic fixtures carry its cases.
+  `paths.data` (`FAC-SEM-168`), since `dir` is relative to it. Tests, not vectors, pin `FAC-SEM-168`. The reader is a
+  shape check (the extension schema), the placement and `paths.data` check, and per-entry checks: a `source` named
+  twice, a `dir` named twice, a `dir` segment empty once its default-ignorable code points and trailing dots and
+  spaces are dropped, a `dir` holding a lone surrogate, a `dir` holding a home folder, and a credential's shape in a
+  `source` or in any of a `dir`'s four readings. The semantic fixtures (`fixtures/semantic/ops-digest-folders-*.json`)
+  carry the remote placement, the invalid value, a `source` twice, a `dir` twice, a home folder in a `dir` and a
+  credential-shaped `source`, beside the lawful one; `test/ops-digest.test.ts` carries the rest.
 
 ## Siblings on the same registers
 
@@ -130,11 +135,14 @@ product's obligation.
 
 - **Fabric**: (a) `passioncode-ai/fabric` origin/main `a6f0ffda`, latest prerelease v0.3.15. (b) Its CO rows live in
   the carry-over ledger `docs/evidence/specs/2026-08-16-software-fabric-carryover.md` at `a6f0ffda` (its
-  `docs/evidence/backlog.md` points there): CO-500 "closed" (Fabric reads its own log every hour and every day); CO-502
-  "open" (`retro-after-work`; its row says "the daily digest counts retros asked and written"); CO-503 "open" ("The
-  daily digest goes to Observatory"; target the organization slice, 2026-11-21, P-27). CO-509 is announced
-  (board messages `449b3e7e`, `fefb0266`) and is not in the ledger, whose next free id is `CO-507`. (c) Not run (the
-  round-4 readers reported its daily fold differing on 2 of the 4 day vectors at this commit, against this branch's
+  `docs/evidence/backlog.md` points there): CO-500 "closed" (Fabric reads its own log every hour and every day);
+  CO-502 "open" (`retro-after-work`; its row says "the daily digest counts retros asked and written"); CO-503 "open"
+  ("The daily digest goes to Observatory"; target the organization slice, 2026-11-21, P-27). CO-509 is announced
+  (board messages `449b3e7e`, `fefb0266`) and is not in the ledger, whose next free id is `CO-507`. Read again on
+  2026-11-05 at origin/main `b8c0a38c`: the ledger now holds CO-509, "The digest's edges", whose first clause says
+  that after a gap longer than a day the earlier day's daily digest is never written. That is Fabric's OD-5 departure:
+  OD-5's catch-up writes a daily line for each closed UTC day that has hourly lines. (c) Not run (the round-4 readers
+  reported its daily fold differing on 2 of the 4 day vectors at this commit, against this branch's
   `fixtures/vectors/ops-digest.json`, blob `c5a0a84489ec`, unchanged since `21bb0246`).
 - **Fabric Inbox**: (a) release tag v0.95.0 (`6fed640`); `passioncode-ai/fabric-inbox` origin/main `71a3edd6`, where
   its rows were read. (b) B-212 "in review (0.95.0)", shipped in the v0.95.0 tag through PR #413; B-213 "open; due
@@ -167,32 +175,36 @@ product's obligation.
   `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the adapter
   kit's copies in agents built on it, and any other vendored table) add `fabric-ops-digest/0.1`, as DEC-0149 asks for
   `fabric-source`.
-- **At landing, DEC-0151's narrowed detector** (order-proof: whichever of DEC-0151 and DEC-0153 lands second re-pins
-  the two tests and restates OD-2, the FAC-SEM-167 row and DEC-0153 item 3 for the narrowed detector): on the tree
-  that holds both, add `FAC-SEM-167` pass cases for `queue.task-assigned-to-worker`, `work.desk-booking-confirmed` and
-  `ui.disk-usage-refreshed-hourly`, which the `sk-` shape before DEC-0151 reads as keys, and move
-  `queue.task-assigned-to-worker` out of the refused names of the test "applies OD-2 in full" in
-  `test/ops-digest.test.ts` (it folds on the merged tree). In the test "pins the shared detector's shapes the page
-  states: sk- inside a word ending in sk (until DEC-0151), the JWT, akia", re-pin each row as the merged detector
-  answers: `ops.risk-assessment-completed` (refused before DEC-0151) and `work.session-end-task-back` (passing), the
-  lower-case `akia` row as passing (DEC-0151 reads the provider prefixes in canonical case), and an upper-case `AKIA`
-  sample built from pieces as the refused case. Then restate the detector's shapes in OD-2, the FAC-SEM-167 row and
-  DEC-0153 item 3 as DEC-0151's `SECRET_VALUE` reads them, dropping "in either case" and "anywhere in the name" for
-  the provider-prefix shapes (DEC-0151 reads them in canonical case at a boundary). CT-222 (filed on this branch, the
-  next free CT above every branch and main when written) widens `SECRET_VALUE` for underscore-form provider prefixes,
-  `AIza` keys and `hf_` tokens, owned by DEC-0151's detector, with tests from split literals. Check after both land:
-  `grep -n -E 'until DEC-0151|in either case and anywhere in the name' docs/specification/ops-digest.md
-  docs/DECISIONS.md` prints only annotated lines; the lines it must annotate, never rewrite, are the history in DEC-0153's Source (round 7's "until DEC-0151 lands"), and the test titled "pins the shared detector's shapes the page states: sk- inside a word ending in sk (until DEC-0151), the JWT, akia" in `test/ops-digest.test.ts` is renamed for the narrowed detector at that landing.
-- **At landing, the fold** (against DEC-0149 at `899b4710`, or its head at landing: re-read that head and run the fold checks below against it; which exports `HFS_IGNORABLE_CHAR` with no global flag and
-  `stripHfsIgnorable` from `src/source-rules.ts` and keeps its global `HFS_IGNORABLE` private, so the lander exports
-  nothing from `src/source-rules.ts`): make `foldDir = (dir) => foldPath(dir)`; delete `NUSKHURI`, `toMkhedruli` and
-  the local `HFS_IGNORABLE` from `src/ops-digest.ts` (today only `foldDir` uses it: `dirReadings` removes every
-  default-ignorable code point, a wider class, and keeps doing so); any test of the HFS+ class takes
-  `HFS_IGNORABLE_CHAR.test` from `./source-rules.js`, importing only what is used. Checks: `pnpm typecheck` exits 0,
-  `grep -c 'u200c-\\u200f' src/ops-digest.ts` prints 0, and the parity test in `test/ops-digest.test.ts` (DEC-0149's
-  `FOLD_PAIRS` at `d4cc1e16` copied as written, plus the HFS+ samples) keeps holding. The segment check stays local:
-  DEC-0149's `inGrammar` is not swapped in, and the NFC/NFD length case it would add is recorded as undecided (spec
-  page "Not decided here", Open).
+- **At landing, DEC-0151's narrowed detector** (order-proof: whichever of DEC-0151 and DEC-0153 lands second does it):
+  on the tree that holds both, add `FAC-SEM-167` pass cases for `queue.task-assigned-to-worker`,
+  `work.desk-booking-confirmed` and `ui.disk-usage-refreshed-hourly`, which the `sk-` shape before DEC-0151 reads as
+  keys, and move `queue.task-assigned-to-worker` out of the refused names of the test "applies OD-2 in full" in
+  `test/ops-digest.test.ts` (it folds on the merged tree). Rename the test whose title ends "(until DEC-0151), the
+  JWT, akia" for the narrowed detector and re-pin each row as the merged detector answers:
+  `ops.risk-assessment-completed` (refused before DEC-0151) and `work.session-end-task-back` (passing), the lower-case
+  `akia` row as passing (DEC-0151 reads the provider prefixes in canonical case), and an upper-case `AKIA` sample
+  built from pieces as the refused case. Then, under the register's append-only rule (as the mirror line for item 4):
+  OD-2 and the `FAC-SEM-167` row on the spec page are rewritten as DEC-0151's `SECRET_VALUE` reads the shapes,
+  dropping "in either case" and "anywhere in the name" for the provider-prefix shapes (DEC-0151 reads them in
+  canonical case at a boundary); DEC-0153 item 3 is edited the same way only if DEC-0153 is still Proposed, else it
+  stays as written and an "Annotated (<date>)" line under DEC-0153 restates the detector's shapes as DEC-0151 reads
+  them (naming `hasJwt` if DEC-0149 has landed). The Source's history (round 7's sentence on DEC-0151) is never
+  rewritten. CT-222 (filed on this branch, the next free CT above every branch and main when written) widens
+  `SECRET_VALUE` for underscore-form provider prefixes, `AIza` keys and `hf_` tokens, owned by DEC-0151's detector,
+  with tests from split literals. Check after both land: `grep -n -E 'until DEC-0151|in either case and anywhere in
+  the name' docs/specification/ops-digest.md` prints nothing; DEC-0153's section carries an Annotated line when
+  DEC-0153 was Accepted; and the landing diff removes no line inside DEC-0153's Decision items when it was Accepted.
+- **At landing, the fold:** whichever of DEC-0149 and DEC-0153 lands second does it, against DEC-0149 at `899b4710` or
+  its head at landing (re-read that head and run the fold checks below against it; at `899b4710` DEC-0149 exports
+  `HFS_IGNORABLE_CHAR` with no global flag and `stripHfsIgnorable` from `src/source-rules.ts` and keeps its global
+  `HFS_IGNORABLE` private, so the lander exports nothing from `src/source-rules.ts`): make `foldDir = (dir) =>
+  foldPath(dir)`; delete `NUSKHURI`, `toMkhedruli` and the local `HFS_IGNORABLE` from `src/ops-digest.ts` (today only
+  `foldDir` uses it: `dirReadings` removes every default-ignorable code point, a wider class, and keeps doing so); any
+  test of the HFS+ class takes `HFS_IGNORABLE_CHAR.test` from `./source-rules.js`, importing only what is used.
+  Checks: `pnpm typecheck` exits 0, `grep -c 'u200c-\\u200f' src/ops-digest.ts` prints 0, and the parity test in
+  `test/ops-digest.test.ts` (DEC-0149's `FOLD_PAIRS` at `d4cc1e16` copied as written, plus the HFS+ samples) keeps
+  holding. The segment check stays local: DEC-0149's `inGrammar` is not swapped in, and the NFC/NFD length case it
+  would add is recorded as undecided (spec page "Not decided here", Open).
 - **At landing, the JWT test:** `hasJwt` is exported from `src/secret-shape.ts` only on DEC-0149's branch (at
   `b2fdbf92`), not on `main`. Whichever of DEC-0149 and DEC-0153 lands second switches the long-run check in
   `digestFoldersRules` (`src/ops-digest.ts`, `JWT_SHAPE.test(reading)`) to `hasJwt(reading)` and drops the `JWT_SHAPE`
@@ -398,11 +410,28 @@ product's obligation.
   sentence removed, `objects()` reading a sparse array's holes, the DEC-0151 line naming the lines to annotate and the
   test title to rename, the JWT landing line (`hasJwt` is only on DEC-0149's branch) and the fold line re-read against
   DEC-0149's head at landing. Round 21 is next.
+- - Round 21 at `7e8a9429` was not clean (unit passed; product and seam each found one break, the seam tier's gates on
+  both landing orders green): the handoff counted FAC-SEM-168's checks wrongly (now named one by one, with which the
+  semantic fixtures carry), and the DEC-0151 landing line would have rewritten an Accepted decision's body (now under
+  the register's append-only rule: the spec page rewritten, DEC-0153 item 3 edited only while Proposed, else an
+  Annotated line). Also: the Consumers re-read runs `pnpm validate` on each OD-9 declarer's shipped descriptor,
+  Fabric's CO-509 named as its OD-5 departure, the fold landing line opening with its second lander, conformance's
+  declaring row naming `paths.data`, the hourly and daily schema descriptions naming each op once in ops and at most
+  once in risen, and the folds' worded errors for an odd `previous` and a `day` that is no real UTC day. Round 22 is
+  next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-21 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the six files of
+round 16 with coverage on `src/ops-digest.ts` (2044 tests; 298 of 298 statements, 238 of 238 branches); `pnpm exec tsx
+tools/vectors/run.ts`; `pnpm run docs:check`; `python3 docs/ux/lint.py`; `pnpm run privacy:check` (0 findings).
+Fabric's ledger was read with `gh api` at origin/main `b8c0a38c` for CO-509; nothing of another repository was run.
+The branch gate on this tree before its commit (15-minute load 33.3, 16 GB free, under the heavy lock): `pnpm run
+check` (109 files, 9960 tests passed, 1 skipped, coverage floors held; `ux:lint`, `docs:check`, `privacy:check` 0
+findings) exit 0, and `pnpm run vectors:check` exit 0. This paragraph is the only change after it.
 
 Round-20 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the six files of
 round 16 with coverage on `src/ops-digest.ts` (2044 tests; 293 of 293 statements, 227 of 227 branches); `pnpm exec tsx
@@ -580,7 +609,10 @@ In this order, each step only after the one before:
 2. Re-read the Consumers list above at the versions the knowledge base's roadmap names (read with `git ls-remote` and
    `gh api` only) and update its dated lines, among them the SB-257 line ("closed 2026-11-05: released in v0.7.13" if
    that is what the release shows), and re-read every product row the board answer below quotes, before the pull
-   request and the board answer.
+   request and the board answer. For each product the knowledge base's roadmap says declares OD-9 (Fabric Inbox
+   v0.98.0 today), read its shipped descriptor read-only (the file at its release tag, or its live well-known answer
+   or descriptor), run `pnpm validate` on it at the branch's head, and record the `FAC-SEM-168` result in the
+   Consumers list; a refusal becomes that product's row before the merge, asked for by a board message to its project.
 3. Open the pull request from that branch to `main`.
 4. The acceptance edit, in one commit on the branch, naming only facts that exist at its commit: DEC-0153's Status
    becomes Accepted with the edit date; CT-219 is marked done with its closure receipt "accepted <date>, #N" (no

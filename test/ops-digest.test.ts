@@ -660,6 +660,12 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
       expect(() => foldHour([], "2026-11-04T02:00:00Z", { ...one, ops: none as unknown as HourlyDigest["ops"] })).toThrow(/^the previous hour's ops is not an array$/);
     }
     expect(foldHour([], "2026-11-04T02:00:00Z", undefined)).toEqual(foldHour([], "2026-11-04T02:00:00Z", null));
+    // A previous that is neither absent nor a digest with a string to, and a day that is no real UTC day.
+    for (const odd of [7, "x", {}, { to: 7 }]) {
+      expect(() => foldHour([], "2026-11-04T02:00:00Z", odd as unknown as HourlyDigest)).toThrow(/^the previous hour is neither absent nor a digest with a string to$/);
+    }
+    expect(() => foldDay(7 as unknown as string, [])).toThrow(/^day is not a real UTC day$/);
+    expect(() => foldDay("2026-02-30", [])).toThrow(/^2026-02-30 is not a real UTC day$/);
     // A hole in a sparse array is an item that is not an object, named by its place.
     const holed = <T,>(item: T): T[] => {
       const list: T[] = [];

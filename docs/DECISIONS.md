@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-04
 - **Status:** Proposed (draft on branch `agent/ct219-ops-digest-20261104`; accepted on merge of its pull request after
-  the coordinator's blind readings, which reached round 20 on 2026-11-05; the acceptance edit is item 4 of the
+  the coordinator's blind readings, which reached round 21 on 2026-11-05; the acceptance edit is item 4 of the
   handoff's Next task, after the pull request is open). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and
   `FAC-SEM-168`, a descriptor extension, a reference module and vectors, and a host obligation. Additive: nothing that
   validated before changes.
@@ -9324,6 +9324,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   line for a day the product was down and claimed no change for the first producer (now scoped to the shape, with the
   writing rules each product's to adopt), and its batch is folded in; round 20 at `5b2fc3ed` was not clean: the lone
   surrogate missing from three lists of what FAC-SEM-168 checks, and the receipt fast-forward naming a weaker gate, and
-  its batch is folded in;
+  its batch is folded in; round 21 at `7e8a9429` was not clean: the handoff's count of FAC-SEM-168's checks, and
+  the DEC-0151 landing line, which would have rewritten an Accepted body, and its batch is folded in;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.
