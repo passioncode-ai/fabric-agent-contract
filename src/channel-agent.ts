@@ -140,8 +140,8 @@ function walk(value: unknown, root: string, tokenOf: (frame: Frame, key: string,
   }
 }
 
-/** Whether a string is longer than LONGEST_STRING code points, without counting a long one whole. */
-const tooLong = (text: string): boolean => text.length > LONGEST_STRING && (text.length > 2 * LONGEST_STRING || Array.from(text).length > LONGEST_STRING);
+/** Whether a string is longer than LONGEST_STRING code points, without counting a long one whole or building an array. */
+const tooLong = (text: string): boolean => text.length > LONGEST_STRING && (text.length > 2 * LONGEST_STRING || codePoints(text, LONGEST_STRING + 1) > LONGEST_STRING);
 
 /**
  * A member's token in a FAC-SEM-162 place: a declared name, or an index of a declared array, else `*`. A text's language
@@ -453,19 +453,28 @@ function misplaced(doc: JsonObject, budget: Budget): Finding[] {
   return findings;
 }
 
-/** The first DETECTOR_CODE_POINTS code points of a string, which is all the detector reads. */
+/**
+ * The first DETECTOR_CODE_POINTS code points of a string, which is all the detector reads: a scan over UTF-16 units that
+ * slices without an array and never splits a surrogate pair. The walk computes it once per string and passes it on.
+ */
 function head(text: string): string {
   if (text.length <= DETECTOR_CODE_POINTS) return text;
-  return Array.from(text.slice(0, 2 * DETECTOR_CODE_POINTS)).slice(0, DETECTOR_CODE_POINTS).join("");
+  let count = 0;
+  let at = 0;
+  while (at < text.length && count < DETECTOR_CODE_POINTS) {
+    const unit = text.charCodeAt(at);
+    at += unit >= 0xd800 && unit <= 0xdbff && at + 1 < text.length && text.charCodeAt(at + 1) >= 0xdc00 && text.charCodeAt(at + 1) <= 0xdfff ? 2 : 1;
+    count += 1;
+  }
+  return text.slice(0, at);
 }
 /**
  * Whether a string is shaped like a credential, by FAC-SEM-101's detector (by shape: today an ordinary name of `sk-` and
  * 16 or more letters, digits, `_` or `-`, in any case, is one too; DEC-0151, in progress, narrows that rule).
  */
-const shaped = (text: string): boolean => {
-  const read = head(text);
-  return secretValue(read) || urlReading(read);
-};
+const shaped = (text: string): boolean => shapedRead(head(text));
+/** shaped() on a string already cut to its head (the walk cuts each string once). */
+const shapedRead = (read: string): boolean => secretValue(read) || urlReadingRead(read);
 
 /** A scheme at the start of a string: what a string must open with to be read as a URL. */
 const SCHEME = /^[A-Za-z][A-Za-z0-9+.-]*:/;
@@ -479,13 +488,18 @@ const HIGH_ESCAPE = /%[89A-Fa-f][0-9A-Fa-f]/;
  * the detector's value and argument shapes only, so a password or a credential-named parameter in it is not found.
  */
 export function readAsUrl(text: string): boolean {
+  return readAsUrlRead(head(text));
+}
+/** readAsUrl() on a string already cut to its head. */
+function readAsUrlRead(head: string): boolean {
   // As the URL parser does: leading C0 controls and spaces stripped, then tab, line feed and carriage return removed.
-  const read = head(text).replace(/^[\u0000-\u0020]+/, "").replace(/[\t\n\r]/g, "");
+  const read = head.replace(/^[\u0000-\u0020]+/, "").replace(/[\t\n\r]/g, "");
   return /^[\x00-\x7f]*$/.test(read) && !HIGH_ESCAPE.test(read) && SCHEME.test(read);
 }
 
-/** The detector's URL reading where `readAsUrl` admits the string, its argument reading otherwise (no URL parse). */
-const urlReading = (text: string): boolean => (readAsUrl(text) ? secretUrl(text) : secretArgument(text));
+/** The detector's URL reading where `readAsUrl` admits the string, its argument reading otherwise (no URL parse), on a
+ * string already cut to its head. */
+const urlReadingRead = (read: string): boolean => (readAsUrlRead(read) ? secretUrl(read) : secretArgument(read));
 /** Only a provider key's or a JWT's shape: a board thread's id is a long mixed run by design. */
 const keyShaped = (text: string): boolean => {
   const read = head(text);
@@ -595,7 +609,9 @@ function colourBefore(text: string, at: number): boolean {
   return text[start] === "[" && ESC_BEFORE.test(text.slice(Math.max(0, start - 6), start));
 }
 
-/** What a provider-key reading may reread from each `sk-`, in any case, that follows a boundary, its three characters included: up to 255 code points. */
+/** UTF-16 units from `from`, at most `limit`: what a reading charges (an astral character is two). */
+const units = (text: string, limit: number, from: number): number => Math.max(0, Math.min(limit, text.length - from));
+/** What a provider-key reading may reread from each `sk-`, in any case, that follows a boundary, its three characters included: up to 255 UTF-16 units. */
 function keyRereads(text: string): number {
   let cost = 0;
   const pattern = /sk-/gi;
@@ -604,14 +620,14 @@ function keyRereads(text: string): number {
     pattern.lastIndex = at + 1;
     const boundary = at === 0 || !/[A-Za-z0-9]/.test(text[at - 1] as string) || ESCAPE_BEFORE.test(text.slice(Math.max(0, at - 6), at)) || colourBefore(text, at);
     // At a boundary the shape may read a long key; anywhere else the detector's `sk-` run is still tried, up to its floor.
-    cost += boundary ? codePoints(text, KEY_REREAD, at) : codePoints(text, SK_FLOOR, at + 3);
+    cost += boundary ? units(text, KEY_REREAD, at) : units(text, SK_FLOOR, at + 3);
   }
   // Every other provider prefix, anywhere and in any case: a bound any detector may need, whatever boundary or case its
   // own shapes take, for a near miss reread up to the run its shape needs (its floor) before it fails.
   for (const [prefix, floor] of PREFIX_FLOORS) {
     prefix.lastIndex = 0;
     for (let match = prefix.exec(text); match !== null; match = prefix.exec(text)) {
-      cost += codePoints(text, floor, match.index + match[0].length);
+      cost += units(text, floor, match.index + match[0].length);
       prefix.lastIndex = match.index + 1;
     }
   }
@@ -680,10 +696,11 @@ export const PREFIX_FLOORS: ReadonlyArray<readonly [RegExp, number]> = [[/gh[pou
  * upper-case letter, the triangular number n(n+1)/2 of the name's length (splitting a name into words may backtrack over it).
  * For every string, ARG_PIECE_COST for each white space, `=`, `/` and `\\` (the argument reading's pieces).
  */
-export function detectorCost(text: string): number {
+export function detectorCost(text: string, isHead = false): number {
   // Every string is read as an argument too (secretArgument, which secretUrl also runs first): each separator a piece.
-  let cost = codePoints(text) + jwtRereads(text) + keyRereads(text) + runRereads(text) + argumentPieces(text);
-  if (!readAsUrl(text)) return cost;
+  // Counted in UTF-16 units, what every pass reads (an astral character is two).
+  let cost = text.length + jwtRereads(text) + keyRereads(text) + runRereads(text) + argumentPieces(text);
+  if (!(isHead ? readAsUrlRead(text) : readAsUrl(text))) return cost;
   let url: URL;
   try {
     url = new URL(text);
@@ -691,11 +708,13 @@ export function detectorCost(text: string): number {
     return cost;
   }
   for (const part of [url.search, url.hash]) {
+    // Each `&` makes a piece, an empty one included, which rawValues still reads.
+    cost += ARG_PIECE_COST * (part.split("&").length - 1);
     for (const [name, values] of rawValues(part.slice(1))) {
-      const length = codePoints(name);
+      const length = name.length;
       const upper = /[A-Z]/.test(name);
       for (const value of values) {
-        cost += PIECE_COST + length + codePoints(value) + jwtRereads(value) + keyRereads(value) + runRereads(value);
+        cost += PIECE_COST + length + value.length + jwtRereads(value) + keyRereads(value) + runRereads(value);
         if (value !== "" && upper) cost += (length * (length + 1)) / 2;
       }
     }
@@ -731,9 +750,10 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
     }
   };
   // The walk stops once the budget is spent, so nothing is read after it.
-  const afford = (text: string): boolean => {
+  // `read` is the string's head, cut once by the walk's callback.
+  const afford = (read: string): boolean => {
     if (budget.unread) return false;
-    const cost = (text === "" ? 0 : detectorCost(head(text))) + VISIT_COST;
+    const cost = (read === "" ? 0 : detectorCost(read, true)) + VISIT_COST;
     if (cost > budget.left) {
       budget.unread = true;
       budget.unreadAt = root;
@@ -752,22 +772,23 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
     return plain ? placedToken(frame.name, frame.parent, key, index, names, isNone(frame.container)) : undefined;
   };
   walk(value, root, tokenOf, (text, spot, place) => {
+    const read = head(text);
     if (spot.isName) {
       last = { frame: spot.frame, key: text, plain: false };
-      if (!afford(text)) return;
-      const isShaped = shaped(text);
+      if (!afford(read)) return;
+      const isShaped = shapedRead(read);
       last.plain = !isShaped && NAME_CHARACTERS.test(text) && !/[0-9]{7}/.test(text.replace(/[-_]/g, ""));
       if (isShaped) flag(place(spot), "a member's name", text, !inTexts(spot.frame));
       return;
     }
-    if (!afford(text)) return;
+    if (!afford(read)) return;
     const role = spot.frame?.role;
     const key = spot.key;
     let found: boolean;
     if (role === "tickets" && key === "token_slot" && TOKEN_SLOT.test(text)) found = text.split("/").some((segment) => secretValue(segment));
-    else if (((role === "evals" && key === "suite") || (role === "tickets" && key === "outbox")) && relativeRef(text)) found = urlReading(text);
+    else if (((role === "evals" && key === "suite") || (role === "tickets" && key === "outbox")) && relativeRef(text)) found = urlReadingRead(read);
     else if (role === "queue" && key === "recommendation" && OPAQUE_ID.test(text)) found = keyShaped(text);
-    else found = shaped(text);
+    else found = shapedRead(read);
     if (found) flag(place(spot), "a value", text, ID_MEMBERS.has(key) && !inTexts(spot.frame));
   }, () => budget.unread);
   if (more > 0) findings.push({ code: "FAC-SEM-165", instancePath: root, message: `and ${more} more names or values shaped like a credential (DEC-0150 CA-5)` });
@@ -787,7 +808,7 @@ function summary(budget: Budget): Finding[] {
     const at = budget.unreadAt as string;
     // At a misplaced copy, which no reader reads, the fix is to remove it; at the read declaration, to shorten it.
     const fix = budget.copies.has(at) ? "this copy is not read by a reader and should be removed" : "a reader treats the declaration as not declared; declare fewer or shorter texts or names";
-    findings.push({ code: "FAC-SEM-165", instancePath: at, message: `reading the declarations for credentials takes more than ${SECRET_BUDGET} code points of reading; ${fix} (DEC-0150 CA-5)` });
+    findings.push({ code: "FAC-SEM-165", instancePath: at, message: `reading the declarations for credentials takes more than ${SECRET_BUDGET} UTF-16 units of reading; ${fix} (DEC-0150 CA-5)` });
   }
   return findings;
 }

@@ -275,16 +275,15 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    taken for one secret and a long base64 segment is; a queue's `recommendation` of the board's `opaqueId` grammar is
    read by a provider key's and a JWT's shapes only, since a long mixed run is its shape by design (a recommendation
    that is a URL with a password is read whole, and found). The detector reads the first 4097 code points of a string,
-   and the rule reads at most 1 000 000 code points of names and values in all for one document, every copy of the
+   and the rule reads at most 1 000 000 UTF-16 units of names and values in all for one document, every copy of the
    declaration in it (read or misplaced) sharing them. The walk charges each name or string 16 (`VISIT_COST`), once (a name is not
    charged again when its member is entered or placed), beside what `detectorCost` counts. `detectorCost` is a bound any
-   port's detector may need, not a description of one detector, counted in code points (an astral character is one):
-   the string's code points; from each `eyJ`, its base64url run, `eyJ` included, and when that run ends at a `.`, the
+   port's detector may need, not a description of one detector, counted in UTF-16 units, what every pass reads (an astral character is two): the string's UTF-16 units; from each `eyJ`, its base64url run, `eyJ` included, and when that run ends at a `.`, the
    dot and the base64url run after it (the JWT shape's second segment: `eyJab.cd` costs 8 and 8); from each `sk-`, in
-   any case, that follows a boundary, its three characters included, up to 255 code points to the end of the string
-   (`sk-a` costs 4 and 4: 8); after every `sk-` away from a boundary, up to 16 code points after it, the run the shape
+   any case, that follows a boundary, its three characters included, up to 255 UTF-16 units to the end of the string
+   (`sk-a` costs 4 and 4: 8); after every `sk-` away from a boundary, up to 16 UTF-16 units after it, the run the shape
    needs (`xsk-a` costs 5 and 1); after every other provider prefix, anywhere and in any case (`gh` and one of `pousr`
-   then `_`, `xox` and one of `abposr` then `-`, `AKIA`, `glpat-`), up to its floor, the run its shape needs (20, 10, 16 and 20 code points; a floor counts the run the shape needs, not the character that ends it); and, beside the prefixes, the shared detector's long-run floor of 40 (`LONG_RUN`): in each of three partitions the shared detector's readings split a string into (the base64 class `[A-Za-z0-9+/=_-]`; that class without `=`, where `secretArgument` splits; and without `=` and `/`, a path's segments), for each maximal run shorter than 40, min(length, 39) per code point, since a reading that needs 40 may start at each of them (`abc,de` costs 6 and 3 x (9 + 4)); and, for every string, which the shared detector also reads as an argument split into pieces (`secretUrl` runs that reading first, so a string read as a URL is no exception), 4 (`ARG_PIECE_COST`) for each white space, `=`, `/` and `\` it may split at (`a b` costs 3, 3 x (1 + 1) and 4: 13; the other examples here count their own terms only). Each of these is a bound
+   then `_`, `xox` and one of `abposr` then `-`, `AKIA`, `glpat-`), up to its floor, the run its shape needs (20, 10, 16 and 20 UTF-16 units; a floor counts the run the shape needs, not the character that ends it); and, beside the prefixes, the shared detector's long-run floor of 40 (`LONG_RUN`): in each of three partitions the shared detector's readings split a string into (the base64 class `[A-Za-z0-9+/=_-]`; that class without `=`, where `secretArgument` splits; and without `=` and `/`, a path's segments), for each maximal run shorter than 40, min(length, 39) per UTF-16 unit (the class is ASCII, so per character), since a reading that needs 40 may start at each of them (`abc,de` costs 6 and 3 x (9 + 4)); and, for every string, which the shared detector also reads as an argument split into pieces (`secretUrl` runs that reading first, so a string read as a URL is no exception), 4 (`ARG_PIECE_COST`) for each white space, `=`, `/` and `\` it may split at (`a b` costs 3, 3 x (1 + 1) and 4: 13; the other examples here count their own terms only). Each of these is a bound
    any detector may need, whatever boundary or case its own shapes take. A boundary is the start, a character other
    than a letter or a digit, or an escape that ends right before the `sk-`: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or
    three-digit octal escape, a backslash escape of one character, or a colour sequence `ESC[...m` with any number of
@@ -295,11 +294,11 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    non-boundary, up to 16, so a port that decodes such a form before a boundary-bound `sk-` reading is outside this
    bound (DEC-0151 lists them as knowingly not found). For a string read as a URL that parses, the URL terms are counted
    on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed, percent-decoded), not on
-   the raw text: for every query or fragment piece, 128, its name's and its value's code points, the value's `eyJ` and
+   the raw text: for every query or fragment piece, 128, and 4 (`ARG_PIECE_COST`) for each `&` of the search and the hash, an empty piece included; its name's and its value's UTF-16 units, the value's `eyJ` and
    `sk-` terms and, when the value is not empty and the name holds an upper-case letter, the triangular number of the
    name's length, n(n+1)/2 (`https://a.example/?aBC=x` costs 24, 128, 3, 1 and 6). A member's name is read before its place is written; once the budget is spent nothing more is read and every further member collapses its place. Past the
    budget, one finding says, once per document, that reading the declarations for credentials takes more than 1 000 000
-   code points of reading; it stands at the copy where
+   UTF-16 units of reading; it stands at the copy where
    the budget ran out (the read declaration's key, or a misplaced copy's), never at a read declaration that was read
    whole. At the read declaration it says a reader treats the declaration as not declared and that fewer or shorter
    texts or names fix it; at a misplaced copy it says the copy is not read by a reader and should be removed. The 64 places are a cap per document: a copy names a place only while the document's total is under 64.
@@ -358,7 +357,7 @@ places in the read declaration beside a misplaced copy with more (each closes it
 off and a holding reply with no texts (declared, nothing owed), and a read declaration whose own read runs out. Every line of `errors` and `obligations` is `<code> at <place>: <reason>`, the reason the
 finding's message without the decision it cites (it holds no declared value), so the budget line,
 
-`FAC-SEM-165 at /: reading the declarations for credentials takes more than 1000000 code points of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names`
+`FAC-SEM-165 at /: reading the declarations for credentials takes more than 1000000 UTF-16 units of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names`
 
 and `FAC-SEM-165 at /: and N more names or values shaped like a credential` read apart, and identical lines (one code, place and reason) are one line. In short: an invalid declaration gives one
 `FAC-SEM-162 at <place>: <keyword> (<limit>)` line for each place the schema fails and one `FAC-SEM-165 at <place>:
@@ -384,37 +383,39 @@ CA-8's channels are the channels the agent answers people on, declared or not (t
 other it answers people on). The operator channel (`fabric-operator-channel/0.1`) is not one of CA-8's channels and
 stays a DEC-0121 AP-3 source (AP-3's own sentence; OC-5 and OC-7 for its form). One bot serving both an operator channel
 and channels the agent answers people on is not covered here: such a bot keeps every operator-channel rule in every chat
-as written, and the case goes to the standard's and the operator channel's owners (merge post). Until the owners answer,
-a bot that serves both cannot answer people as the standard asks in any chat: OC-3 lets only an allowlisted id cause an
-effect, OC-4 limits what it sends to its events feed and results, and in a group OC-14 keeps it silent unless addressed;
-give the operator channel a bot of its own.
+as written, and the case goes to the standard's and the operator channel's owners (asked of the standard's owner on
+thread `b6820b97` at merge). Until the owners answer, a bot that serves both cannot answer people as the standard asks
+in any chat: OC-3 lets only an allowlisted id cause an effect, OC-4 limits what it sends to its events feed and results,
+and in a group OC-14 keeps it silent unless addressed; give the operator channel a bot of its own.
 
 A message on a channel is the operator's word only when the transport identifies its sender as the operator: an
 allowlisted numeric user id, bound in a private chat with the agent's own bot as the [operator
 channel](operator-channel.md)'s OC-3 binds one (its link code typed there), whose word then counts in any chat that bot
-answers, a group included, or, on an `account` channel, the account's owner, only when the owner is the operator, the
-send record of the account's one session owner (the standard's section 9) shows the message was not sent through that
-session owner (neither by an agent nor relayed from the ticket board; a send record can show only that, not which
-session sent it), every other session of the account is the operator's own (no second person; recorded in the operator's
-configuration of the session owner), and no business bot is connected to the account; never by a name, a display name or
-text in the message, and otherwise it stays data. The operator is a person's own user id; a message sent on behalf of a
-chat (`sender_chat` set: an anonymous admin, or a member posting as a channel) carries a shared placeholder sender and
-is never the operator's word. Telegram Business messages the server sends by itself (a greeting, an away message) are
-never the operator's word, and an agent that answers through a Telegram Business connection has no operator
-identification yet: its operator's word there is data until the standard's owner answers. On an `account` channel, a
-message the session owner cannot attribute to the operator's own session (its send record is missing, or does not show
-the operator's word) stays data until the standard's owner answers the identification question (merge post). Such a word
-acts only inside that chat, as the standard's section 4.10 says (the operator's decision given in a chat "outranks
-every holding rule of the agent for that chat"); it is not one of DEC-0121 [AP-3](service.md#actions)'s sources and
-never the source of an [OA-2 relay](delegation.md#one-approval-binds-all-the-operators-agents) (DEC-0126: the operator's
-words passed to another of their agents, as a `mandate/1` or a `_meta.decision` with `source`, or prose carrying the
-four parts), and the customer ticket it acts on stays a customer ticket, its outcome set and counted as sections 3 and
-5.1 say. That word does not release a send held by the transport's owner (the standard's section 9) or behind a
-service's relayed action: the owner's own approval rules end the first (section 9), and an agent relays a decision on
-the second only from DEC-0121 AP-3's sources (AP-1 and AP-2 still take the service's own page, an accepted elicitation
-and the host's click). A word that asks for an action outside that chat causes none; how the agent tells the operator is
-a question to the standard's owner (merge post). Text the operator quotes or forwards, and every other sender's text,
-stays data.
+answers, a group included, except a chat it answers through a Telegram Business connection (the link-code message is
+consumed by the binding and is not a customer ticket), or, on an `account` channel, the account's owner, only when the
+owner is the operator, the send record of the account's one session owner (the standard's section 9) shows the message
+was not sent through that session owner (neither by an agent nor relayed from the ticket board; a send record can show
+only that, not which session sent it), every other session of the account is the operator's own (no second person;
+recorded in the operator's configuration of the session owner), and no business bot is connected to the account; never
+by a name, a display name or text in the message, and otherwise it stays data. The operator is a person's own user id; a
+message sent on behalf of a chat (`sender_chat` set: an anonymous admin, or a member posting as a channel) carries a
+shared placeholder sender and is never the operator's word. Telegram Business messages the server sends by itself (a
+greeting, an away message) are never the operator's word, and an agent that answers through a Telegram Business
+connection has no operator identification yet: its operator's word there is data until the standard's owner answers. On
+an `account` channel, a message the session owner cannot attribute to the operator's own session (its send record is
+missing, or does not show the operator's word) stays data until the standard's owner answers the identification question
+(asked of the standard's owner on thread `b6820b97` at merge). Such a word acts only inside that chat, as the standard's
+section 4.10 says (the operator's decision given in a chat "outranks every holding rule of the agent for that chat"); it
+is not one of DEC-0121 [AP-3](service.md#actions)'s sources and never the source of an [OA-2
+relay](delegation.md#one-approval-binds-all-the-operators-agents) (DEC-0126: the operator's words passed to another of
+their agents, as a `mandate/1` or a `_meta.decision` with `source`, or prose carrying the four parts), and the customer
+ticket it acts on stays a customer ticket, its outcome set and counted as sections 3 and 5.1 say. That word does not
+release a send held by the transport's owner (the standard's section 9) or behind a service's relayed action: the
+owner's own approval rules end the first (section 9), and an agent relays a decision on the second only from DEC-0121
+AP-3's sources (AP-1 and AP-2 still take the service's own page, an accepted elicitation and the host's click). A word
+that asks for an action outside that chat causes none; how the agent tells the operator is a question to the standard's
+owner (asked of the standard's owner on thread `b6820b97` at merge). Text the operator quotes or forwards, and every
+other sender's text, stays data.
 
 The agent records such a word in its own audit, quoting the message and its sender id.
 
@@ -424,12 +425,12 @@ none; the operator's request for an action outside that chat causes nothing and 
 identifies is the operator, and that word acts only in that chat; a chat word never sets
 [`_meta.decision`](service.md#actions) (AP-2: the decision a service call carries for a relayed action) or an [OA-2
 relay](delegation.md#one-approval-binds-all-the-operators-agents); quoted or forwarded text stays data; a message with
-`sender_chat` set is never the operator's; and, where the agent has an operator channel, that channel stays a DEC-0121
-AP-3 source.
+`sender_chat` set is never the operator's; a message that arrives through a Telegram Business connection, a greeting or
+an away message included, is never the operator's; and, where the agent has an operator channel, that channel stays a
+DEC-0121 AP-3 source.
 
 CA-8 is bounded by section 4.10 and by section 10's `account` row and does not override them; the identification bound
-(who counts as the operator in a chat) is sent to the standard's owner. CT-220, when drafted, is to keep this bound (the
-coordinator's decision of round 20).
+(who counts as the operator in a chat) is sent to the standard's owner. CT-220, when drafted, is to keep this bound.
 
 The declaration has no member for it. It is not a property an agent may or may not declare, and a member whose `false`
 were valid would declare something false. A member such as `untrusted_input` makes the declaration not declared
@@ -472,7 +473,7 @@ Section 11 also asks for these; none can be decided from the declaration alone (
 | <a id="fac-sem-162"></a>`FAC-SEM-162` | `manifest`, `service-well-known` | a value under the channel-agent extension key sits under a manifest's `provider.extensions` (not its own `extensions` or a capability's) or a well-known answer's `extensions`, has no array, map or object longer than its schema allows nor a string or name over 4096 code points, and is valid against `service-channel-agent-extension.schema.json`; a reader treats an invalid one as not declared and reports it, naming failed keywords and places, never a declared value, with the schema's own limit beside each place, and pointing to the declaration's grammar (DEC-0150 CA-1, CA-2) |
 | <a id="fac-sem-163"></a>`FAC-SEM-163` | `manifest`, `service-well-known` | in a valid channel-agent declaration a project, a category code, a tier code, a channel id, a source id (read or declined), a hand-off queue id and a recorded decision id appear once; a channel with replies off names a decision, and every channel's decision is one `recorded_decisions` lists (DEC-0150 CA-3) |
 | <a id="fac-sem-164"></a>`FAC-SEM-164` | `manifest`, `service-well-known` | in a valid channel-agent declaration a channel with a holding reply declares its holding text and one that replies its final text, when its replies are on; a store review asks no clarifying question; no text is blank or carries U+2014; no tier's label is blank or carries U+2014; a final text in the none form owes nothing (only an absent one is found), except `not_used` beside a holding reply when its replies are on; a queue whose answered signal is `none` names its recommendation, and one with another answered signal that carries a recommendation is found too (a reader does not read it); a budget above 0 names its spend record; at most 64 places per document, then one counting the rest (DEC-0150 CA-4) |
-| <a id="fac-sem-165"></a>`FAC-SEM-165` | `manifest`, `service-well-known` | no member name and no string of a channel-agent declaration is shaped like a credential, by shape (`FAC-SEM-101`'s detector), a misplaced one included, a token slot of its grammar read segment by segment, a suite's and an outbox's relative path by the path-aware reading, a queue's opaque recommendation by key shapes only; a string is read as a URL only when its head, leading C0 controls and spaces stripped, opens with a scheme, is ASCII only and holds no non-ASCII percent-escape, so every other string, a sentence that holds a URL included, is read for key shapes only and a password or a credential-named query parameter in it is not found; the rest not read stands at the copy where the budget ran out; at most 1 000 000 code points read per document and 64 places named, each once per document (DEC-0150 CA-5) |
+| <a id="fac-sem-165"></a>`FAC-SEM-165` | `manifest`, `service-well-known` | no member name and no string of a channel-agent declaration is shaped like a credential, by shape (`FAC-SEM-101`'s detector), a misplaced one included, a token slot of its grammar read segment by segment, a suite's and an outbox's relative path by the path-aware reading, a queue's opaque recommendation by key shapes only; a string is read as a URL only when its head, leading C0 controls and spaces stripped, opens with a scheme, is ASCII only and holds no non-ASCII percent-escape, so every other string, a sentence that holds a URL included, is read for key shapes only and a password or a credential-named query parameter in it is not found; the rest not read stands at the copy where the budget ran out; at most 1 000 000 UTF-16 units read per document and 64 places named, each once per document (DEC-0150 CA-5) |
 
 ## Compatibility
 
@@ -556,8 +557,8 @@ and this list.
   not declared): a narrowing of round 4, which the merge post sends; the author leaves the holding text out instead.
   Leaving it out is accepted, which is looser (the looser bullet below). A missing required member, a refused `null` or
   a none form elsewhere makes the whole declaration not declared.
-- Size read for credentials: at most 1 000 000 code points of names and values per document, every copy of the
-  declaration in it sharing them, each name or string charged 16 more than its code points; the read declaration is
+- Size read for credentials: at most 1 000 000 UTF-16 units of names and values per document, every copy of the
+  declaration in it sharing them, each name or string charged 16 more than its UTF-16 units; the read declaration is
   read first, and when its own read runs out it is not declared (`FAC-SEM-165`); a misplaced copy past the budget is
   reported at that copy and leaves the read declaration's answer as it is.
 - Looser than the standard: a queue's `recommendation` beside an answered signal other than `none` (the standard has

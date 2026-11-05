@@ -56,7 +56,10 @@ const runsIn = (text: string): number => {
   } catch {
     return runs;
   }
-  for (const part of [url.search, url.hash]) for (const [, values] of rawValues(part.slice(1))) for (const v of values) runs += runRereads(v);
+  for (const part of [url.search, url.hash]) {
+    runs += ARG_PIECE_COST * (part.split("&").length - 1);
+    for (const [, values] of rawValues(part.slice(1))) for (const v of values) runs += runRereads(v);
+  }
   return runs;
 };
 const bare = (text: string): number => detectorCost(text) - runsIn(text);
@@ -403,12 +406,13 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       const secret = large.found.filter((f) => f.code === "FAC-SEM-165");
       // The places, the count of the rest, and, past SECRET_BUDGET code points, the finding that the rest was not read.
       expect(secret.slice(0, SECRET_FINDINGS + 1).at(-1)?.message).toMatch(/^and [0-9]+ more /);
-      expect(secret.length - SECRET_FINDINGS - 1).toBe(secret.at(-1)?.message.includes("code points of reading") ? 1 : 0);
+      expect(secret.length - SECRET_FINDINGS - 1).toBe(secret.at(-1)?.message.includes("UTF-16 units of reading") ? 1 : 0);
       const characters = large.found.reduce((sum, f) => sum + f.instancePath.length, 0);
       expect(characters).toBeLessThan((SECRET_FINDINGS + 2) * (CHANNEL_AGENT_PATHS["well-known"].length + 2 * PATH_DEPTH + 16));
       expect(Math.max(...large.found.map((f) => f.instancePath.split("/").length))).toBeLessThanOrEqual(CHANNEL_AGENT_PATHS["well-known"].split("/").length + PATH_DEPTH);
       // A 4x step in size costs about 4x in time: never the quadratic 16x. Both chains run out of the budget at both
-      // sizes, so this pair times the walk past the budget (collapsing every further member), not the reading.
+      // sizes, so this pair times the checks that walk the whole value (oversize, widths, schema) with the reading
+      // stopped at the budget, not the reading itself.
       const ratio = large.micros / Math.max(small.micros, 1);
       expect(ratio).toBeLessThan(6);
     }
@@ -425,7 +429,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     run(largeCheap);
     const small = total(smallCheap);
     const large = total(largeCheap);
-    expect(large.found.some((f) => f.message.includes("code points of reading"))).toBe(false);
+    expect(large.found.some((f) => f.message.includes("UTF-16 units of reading"))).toBe(false);
     expect(large.micros / Math.max(small.micros, 1)).toBeLessThan(6);
   });
   it("refuses a string or a name over 4096 code points before the schema runs, with no run of it in the finding", { timeout: 60_000 }, () => {
@@ -482,7 +486,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       ["/projects/0/channels/0/texts", { ...value, projects: [{ ...p0, channels: [{ ...ch, texts: { ...ch.texts, ...wide } }] }] }]
     ];
     for (const [place, declared] of places) {
-      expect(channelAgentView({ extensions: { [KEY]: declared } }, "well-known"), place).toEqual({ declared: false, reported: true, errors: [`FAC-SEM-162 at ${place}: maxProperties (more members than the schema declares)`, "FAC-SEM-165 at /: reading the declarations for credentials takes more than 1000000 code points of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names"] });
+      expect(channelAgentView({ extensions: { [KEY]: declared } }, "well-known"), place).toEqual({ declared: false, reported: true, errors: [`FAC-SEM-162 at ${place}: maxProperties (more members than the schema declares)`, "FAC-SEM-165 at /: reading the declarations for credentials takes more than 1000000 UTF-16 units of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names"] });
     }
   });
   it("reads at most SECRET_BUDGET code points for credentials, then says the rest was not read, in little time", { timeout: 60_000 }, () => {
@@ -509,7 +513,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const timed = () => channelAgentRules({ extensions: { [KEY]: { ...value, extra: strings } } }, "well-known");
     expect(least(timed)).toBeLessThan(2 * proseBaseline() + 20);
     const found = timed();
-    expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.message.includes("code points of reading"))).toEqual([true]);
+    expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.message.includes("UTF-16 units of reading"))).toEqual([true]);
   });
   it("shares one reading budget across every copy of the declaration in a manifest", { timeout: 60_000 }, () => {
     const opening = ["e", "y", "J"].join("");
@@ -560,7 +564,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const timed = () => channelAgentRules(doc, "well-known");
     expect(least(timed)).toBeLessThan(2 * proseBaseline() + 20);
     const found = timed();
-    expect(found.some((f) => f.message.includes("code points of reading"))).toBe(true);
+    expect(found.some((f) => f.message.includes("UTF-16 units of reading"))).toBe(true);
   });
   it("charges each name or string its call, so two million empty strings are not read past the budget", { timeout: 60_000 }, () => {
     expect(VISIT_COST).toBe(16);
@@ -568,14 +572,14 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const timed = () => channelAgentRules(doc, "well-known");
     expect(least(timed)).toBeLessThan(5 * proseBaseline() + 20);
     const found = timed();
-    expect(found.filter((f) => f.message.includes("code points of reading")).length).toBe(1);
+    expect(found.filter((f) => f.message.includes("UTF-16 units of reading")).length).toBe(1);
   });
   it("says the rest was not read once per document, however many copies of the declaration it holds", () => {
     const opening = ["e", "y", "J"].join("");
     const heavy = { ...value, extra: [opening.repeat(1366).slice(0, 4096)] };
     const manifest = { provider: {}, capabilities: Array.from({ length: 1000 }, () => ({ extensions: { [KEY]: heavy } })) };
     const found = channelAgentRules(manifest);
-    expect(found.filter((f) => f.message.includes("code points of reading")).length).toBe(1);
+    expect(found.filter((f) => f.message.includes("UTF-16 units of reading")).length).toBe(1);
     expect(found.filter((f) => f.code === "FAC-SEM-162").length).toBe(1000);
   });
   it("keeps FAC-SEM-162's message short when every project fails", () => {
@@ -630,8 +634,8 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       return members;
     };
     const at = (n: number) => channelAgentRules({ extensions: { [KEY]: declaration(n) } }, "well-known").filter((f) => f.code === "FAC-SEM-165");
-    expect(at(under).map((f) => [f.instancePath, f.message.includes("code points of reading")])).toEqual([[`${CHANNEL_AGENT_PATHS["well-known"]}/*/*`, false]]);
-    expect(at(under + 1).map((f) => f.message.includes("code points of reading"))).toEqual([true]);
+    expect(at(under).map((f) => [f.instancePath, f.message.includes("UTF-16 units of reading")])).toEqual([[`${CHANNEL_AGENT_PATHS["well-known"]}/*/*`, false]]);
+    expect(at(under + 1).map((f) => f.message.includes("UTF-16 units of reading"))).toEqual([true]);
   });
   it("counts the URL terms on the names and values a WHATWG URL parse yields", () => {
     const tab = `https://a.example/?q=${"ey\tJ".repeat(1000)}`;
@@ -655,11 +659,31 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       expect(Math.min(time(shape), time(shape), time(shape)), JSON.stringify(shape.slice(0, 30))).toBeLessThan(2 * baseline + 20);
     }
   });
-  it("counts code points, not UTF-16 units, so astral text is not read past the budget early", () => {
+  it("counts UTF-16 units, an astral character two, and reads astral text about as fast as prose", { timeout: 60_000 }, () => {
     const astral = "\u{1F600}".repeat(2000);
-    expect(bare(astral)).toBe(2000);
-    const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array.from({ length: 300 }, () => astral) } } }, "well-known");
-    expect(found.some((f) => f.message.includes("code points of reading"))).toBe(false);
+    expect(bare(astral)).toBe(4000);
+    expect(codePoints(astral)).toBe(2000);
+    const wide = "\u{1F600}".repeat(4096);
+    const baseline = proseBaseline();
+    const extra = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => wide) } } };
+    expect(least(() => channelAgentRules(extra, "well-known"))).toBeLessThan(2 * baseline + 20);
+    // A schema-valid declaration: each channel's texts maps hold 64 languages of that text.
+    const languages = Array.from({ length: 64 }, (_, i) => `${"abc"[Math.floor(i / 26)]}${String.fromCharCode(97 + (i % 26))}`);
+    const many = Object.fromEntries(languages.map((language) => [language, wide]));
+    const p0 = value.projects[0];
+    const channels = p0.channels.map((channel: Json) => ({ ...channel, texts: { holding: many, final: many } }));
+    const valid = { extensions: { [KEY]: { ...value, projects: [{ ...p0, channels }] } } };
+    expect(channelAgentRules(valid, "well-known").filter((f) => f.code === "FAC-SEM-162")).toEqual([]);
+    expect(least(() => channelAgentRules(valid, "well-known"))).toBeLessThan(2 * baseline + 20);
+  });
+  it("charges each & of a URL's search and hash, an empty piece included, and reads them about as fast as prose", { timeout: 60_000 }, () => {
+    // `a&b` is two pieces, names `a` and `b` (128 + 1 and 128 + 1), where `a,b` is one, name `a,b` (128 + 3); and its `&`.
+    expect(detectorCost("https://a/?a&b") - detectorCost("https://a/?a,b")).toBe(ARG_PIECE_COST + PIECE_COST + 2 - 3);
+    const baseline = proseBaseline();
+    for (const text of [`https://a/?${"&".repeat(4070)}`, `x:#${"&".repeat(4090)}`]) {
+      const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => text) } } };
+      expect(least(() => channelAgentRules(doc, "well-known")), text.slice(0, 11)).toBeLessThan(2 * baseline + 20);
+    }
   });
   it("finds sk- in any case and colour sequences of any length, in either case of their hex digits", () => {
     const tail = "a".repeat(300);
@@ -698,7 +722,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(read.declared).toBe(true);
     const heavy = { ...p0.channels[0], texts: { holding: { en: opening.repeat(1365) }, final: p0.channels[0].texts.final } };
     const unread = channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [heavy, p0.channels[1]] }] } } }, "well-known");
-    expect(unread).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-165 at /: reading the declarations for credentials takes more than 1000000 code points of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names"] });
+    expect(unread).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-165 at /: reading the declarations for credentials takes more than 1000000 UTF-16 units of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names"] });
   });
   it("reads a string as a URL only when its head, tab and line breaks removed, is ASCII with no high escape and opens with a scheme", { timeout: 60_000 }, () => {
     expect(readAsUrl("https://a.example/?q=1")).toBe(true);
@@ -769,7 +793,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   });
   it("refuses a declaration with more members than its schema declares before the schema runs", () => {
     const wide = Object.fromEntries(Array.from({ length: 100_000 }, (_, i) => [`m${i}`, 1]));
-    expect(channelAgentView({ extensions: { [KEY]: { ...value, ...wide } } }, "well-known")).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /: maxProperties (more members than the schema declares)", "FAC-SEM-165 at /: reading the declarations for credentials takes more than 1000000 code points of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names"] });
+    expect(channelAgentView({ extensions: { [KEY]: { ...value, ...wide } } }, "well-known")).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-162 at /: maxProperties (more members than the schema declares)", "FAC-SEM-165 at /: reading the declarations for credentials takes more than 1000000 UTF-16 units of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names"] });
     const long = channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array(200_000).fill(1) } } }, "well-known");
     expect(long.map((f) => f.code)).toEqual(["FAC-SEM-162"]);
     const channel = { ...value.projects[0].channels[0], extra: 1 };
@@ -810,7 +834,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(detectorCost(split)).toBeGreaterThan(4096 * 38);
     const splitDoc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => split) } } };
     // The split document stops on the budget, which tells the charge apart from an older one that did not stop it.
-    expect(channelAgentRules(splitDoc, "well-known").some((f) => f.code === "FAC-SEM-165" && f.message.includes("code points of reading"))).toBe(true);
+    expect(channelAgentRules(splitDoc, "well-known").some((f) => f.code === "FAC-SEM-165" && f.message.includes("UTF-16 units of reading"))).toBe(true);
     // A regression guard: reading it to the budget stays within the repository's rule.
     expect(least(() => channelAgentRules(splitDoc, "well-known"))).toBeLessThan(2 * proseBaseline() + 20);
   });
@@ -858,7 +882,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   it("tells a misplaced copy where the budget ran out to be removed, not shortened", () => {
     const opening = ["e", "y", "J"].join("");
     const doc = { provider: { extensions: { [KEY]: value } }, extensions: { [KEY]: { ...value, extra: opening.repeat(1365) } } };
-    const line = channelAgentRules(doc).find((f) => f.message.includes("code points of reading"));
+    const line = channelAgentRules(doc).find((f) => f.message.includes("UTF-16 units of reading"));
     expect(line?.instancePath).toBe(`/extensions/${KEY.replace(/\//g, "~1")}`);
     expect(line?.message).toContain("this copy is not read by a reader and should be removed");
     expect(line?.message).not.toContain("declare fewer");
@@ -947,7 +971,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   it("reads no value once its member's name has spent the budget", () => {
     const names = Object.fromEntries(Array.from({ length: 300 }, (_, i) => [`k${i}${"a".repeat(4000)}`, "v"]));
     const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: names } } }, "well-known");
-    expect(found.filter((f) => f.message.includes("code points of reading"))).toHaveLength(1);
+    expect(found.filter((f) => f.message.includes("UTF-16 units of reading"))).toHaveLength(1);
   });
   it("points to texts.final only at a channel's texts or holding text, and names the none form at its four members", () => {
     const p0 = value.projects[0];

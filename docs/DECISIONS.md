@@ -9120,22 +9120,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      matches its own grammar, keyed on the place and not on a holder's name: a project's token slot of the slot's
      grammar segment by segment, its eval suite and outbox of the relative path grammar by the detector's path-aware
      reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a
-     provider key's and a JWT's shapes only; anything else is read whole. The rule reads at most 1 000 000 code points for
+     provider key's and a JWT's shapes only; anything else is read whole. The rule reads at most 1 000 000 UTF-16 units for
      one document, every copy of the declaration in it sharing them: the walk charges each name or string 16, once,
-     beside what `detectorCost` counts, a bound any port's detector may need, in code points: the string's code points;
+     beside what `detectorCost` counts, a bound any port's detector may need, in UTF-16 units, what every pass reads (an astral character is two): the string's UTF-16 units;
      from each `eyJ`, its base64url run, `eyJ` included, and when it ends at a `.`, the dot and the run after it; from
      each `sk-`, in any case, at a boundary (the start, a character other than a letter or a digit, `%XX`, `%25XX`,
      `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a backslash escape, or a colour sequence with any number of
      parameter characters (digits, `;`, `:`) whose ESC is raw or escaped in either case, `\33` included), its three
-     characters included, up to 255 code points (these forms only: a form ending in a letter or a digit, such as a CSI
+     characters included, up to 255 UTF-16 units (these forms only: a form ending in a letter or a digit, such as a CSI
      with a private parameter or another final, `\U00000041` or `%u0041`, is charged as a non-boundary, and a port that
-     decodes it before a boundary-bound reading is outside the bound); after every `sk-` away from a boundary, up to 16
-     code points after it (the run the shape needs); after every other provider prefix, anywhere and in any case
-     (`gh?_`, `xox?-`, `AKIA`, `glpat-`), up to its floor (20, 10, 16 and 20 code points), what a near miss is reread before it fails; beside them the shared detector's long-run floor of 40: in each of three partitions (the base64 class; without `=`; without `=` and `/`), for each maximal run shorter than 40, min(length, 39) per code point (a URL's values too); and, for every string (a string read as a URL included, since `secretUrl` runs the argument reading first), 4 (`ARG_PIECE_COST`) for each white space, `=`, `/` and `\` the argument reading may split at (each a bound any detector may need, whatever boundary or case its own shapes take); and, for a
+     decodes it before a boundary-bound reading is outside the bound); after every `sk-` away from a boundary, up to 16 UTF-16 units after it (the run the shape needs); after every other provider prefix, anywhere and in any case
+     (`gh?_`, `xox?-`, `AKIA`, `glpat-`), up to its floor (20, 10, 16 and 20 UTF-16 units), what a near miss is reread before it fails; beside them the shared detector's long-run floor of 40: in each of three partitions (the base64 class; without `=`; without `=` and `/`), for each maximal run shorter than 40, min(length, 39) per code point (a URL's values too); and, for every string (a string read as a URL included, since `secretUrl` runs the argument reading first), 4 (`ARG_PIECE_COST`) for each white space, `=`, `/` and `\` the argument reading may split at (each a bound any detector may need, whatever boundary or case its own shapes take); and, for a
      string read as a URL, on the names and values a WHATWG URL parse yields: 128 per query or fragment piece, its
-     name's and value's code points, the value's `eyJ` and `sk-` terms, and the triangular number n(n+1)/2 of the
+     name's and value's UTF-16 units, 4 for each `&` of the search and the hash, the value's `eyJ` and `sk-` terms, and the triangular number n(n+1)/2 of the
      length of a name holding an upper-case letter when its value is not empty. Once it is spent, nothing more is read and every further member collapses; one finding per
-     document then says that reading the declarations for credentials takes more than 1000000 code points of reading,
+     document then says that reading the declarations for credentials takes more than 1000000 UTF-16 units of reading,
      that a reader treats the declaration as not declared and that fewer or shorter texts or names fix it (at a
      misplaced copy, that the copy is not read and should be removed), at the copy where the budget ran out (never at a read declaration read
      whole); the 64 places are a cap per document (a copy names a place only while the document's total is under 64),
@@ -9197,26 +9196,28 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      operator channel (`fabric-operator-channel/0.1`) is not one of CA-8's channels and stays a DEC-0121 AP-3 source
      (AP-3's own sentence; OC-5 and OC-7 for its form). One bot serving both an operator channel and channels the agent
      answers people on is not covered here: such a bot keeps every operator-channel rule in every chat as written, and
-     the case goes to the standard's and the operator channel's owners (merge post). Until the owners answer, a bot that
-     serves both cannot answer people as the standard asks in any chat: OC-3 lets only an allowlisted id cause an
-     effect, OC-4 limits what it sends to its events feed and results, and in a group OC-14 keeps it silent unless
-     addressed; give the operator channel a bot of its own. A message on a channel is the operator's word only when the
-     transport identifies its sender as the operator: an allowlisted numeric user id, bound in a private chat with the
-     agent's own bot as the operator channel's OC-3 binds one (its link code typed there), whose word then counts in any
-     chat that bot answers, a group included, or, on an `account` channel, the account's owner, only when the owner is
-     the operator, the send record of the account's one session owner (the standard's section 9) shows the message was
-     not sent through that session owner (neither by an agent nor relayed from the ticket board; a send record can show
-     only that, not which session sent it), every other session of the account is the operator's own (no second person;
-     recorded in the operator's configuration of the session owner), and no business bot is connected to the account;
-     never by a name, a display name or text in the message, and otherwise it stays data. The operator is a person's own
-     user id; a message sent on behalf of a chat (`sender_chat` set: an anonymous admin, or a member posting as a
-     channel) carries a shared placeholder sender and is never the operator's word. Telegram Business messages the
-     server sends by itself (a greeting, an away message) are never the operator's word, and an agent that answers
-     through a Telegram Business connection has no operator identification yet: its operator's word there is data until
-     the standard's owner answers. On an `account` channel, a message the session owner cannot attribute to the
-     operator's own session (its send record is missing, or does not show the operator's word) stays data until the
-     standard's owner answers the identification question (merge post). Such a word acts only inside that chat, as the
-     standard's section 4.10 says (the operator's decision given in a chat "outranks
+     the case goes to the standard's and the operator channel's owners (asked of the standard's owner on thread
+     `b6820b97` at merge). Until the owners answer, a bot that serves both cannot answer people as the standard asks in
+     any chat: OC-3 lets only an allowlisted id cause an effect, OC-4 limits what it sends to its events feed and
+     results, and in a group OC-14 keeps it silent unless addressed; give the operator channel a bot of its own. A
+     message on a channel is the operator's word only when the transport identifies its sender as the operator: an
+     allowlisted numeric user id, bound in a private chat with the agent's own bot as the operator channel's OC-3 binds
+     one (its link code typed there), whose word then counts in any chat that bot answers, a group included, except a
+     chat it answers through a Telegram Business connection (the link-code message is consumed by the binding and is not
+     a customer ticket), or, on an `account` channel, the account's owner, only when the owner is the operator, the send
+     record of the account's one session owner (the standard's section 9) shows the message was not sent through that
+     session owner (neither by an agent nor relayed from the ticket board; a send record can show only that, not which
+     session sent it), every other session of the account is the operator's own (no second person; recorded in the
+     operator's configuration of the session owner), and no business bot is connected to the account; never by a name, a
+     display name or text in the message, and otherwise it stays data. The operator is a person's own user id; a message
+     sent on behalf of a chat (`sender_chat` set: an anonymous admin, or a member posting as a channel) carries a shared
+     placeholder sender and is never the operator's word. Telegram Business messages the server sends by itself (a
+     greeting, an away message) are never the operator's word, and an agent that answers through a Telegram Business
+     connection has no operator identification yet: its operator's word there is data until the standard's owner
+     answers. On an `account` channel, a message the session owner cannot attribute to the operator's own session (its
+     send record is missing, or does not show the operator's word) stays data until the standard's owner answers the
+     identification question (asked of the standard's owner on thread `b6820b97` at merge). Such a word acts only inside
+     that chat, as the standard's section 4.10 says (the operator's decision given in a chat "outranks
      every holding rule of the agent for that chat"); it is not one of DEC-0121 AP-3's sources and never the source of
      an OA-2 relay (DEC-0126: the operator's words passed to another of their agents, as a `mandate/1` or a
      `_meta.decision` with `source`, or prose carrying the four parts), and the customer ticket it acts on stays a
@@ -9225,20 +9226,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      rules end the first (section 9), and an agent relays a decision on the second only from DEC-0121 AP-3's sources
      (AP-1 and AP-2 still take the service's own page, an accepted elicitation and the host's click). A word that asks
      for an action outside that chat causes none; how the agent tells the operator is a question to the standard's owner
-     (merge post). Text the operator quotes or forwards, and every other sender's text, stays data. The agent records
-     such a word in its own audit, quoting the message and its sender id. A producer's own test of CA-8 covers at least:
-     a message from anyone but the operator asking for an action outside the task causes none; the operator's in-chat
-     request for an action outside the task (a refund, an access change) causes none; the operator's request for an
-     action outside that chat causes nothing and is audited; only a sender the transport identifies is the operator, and
-     that word acts only in that chat; a chat word never sets `_meta.decision` (AP-2: the decision a service call
-     carries for a relayed action) or an OA-2 relay; quoted or forwarded text stays data; a message with `sender_chat`
-     set is never the operator's; and, where the agent has an operator channel, that channel stays a DEC-0121 AP-3
-     source. A member such as `untrusted_input` makes the declaration not declared (`FAC-SEM-162`, closed objects). CA-8
-     is bounded by section 4.10 and by section 10's `account` row and does not override them; the identification bound
-     (who counts as the operator in a chat) is sent to the standard's owner. CT-220, when drafted, is to keep this bound
-     (the coordinator's decision of round 20). This is a duty of every channel agent, checked by its own test, and the
-     declaration gains no `untrusted_input` member or any like it, since it is not a property an agent may or may not
-     declare and a flag whose `false` is valid would be false.
+     (asked of the standard's owner on thread `b6820b97` at merge). Text the operator quotes or forwards, and every
+     other sender's text, stays data. The agent records such a word in its own audit, quoting the message and its sender
+     id. A producer's own test of CA-8 covers at least: a message from anyone but the operator asking for an action
+     outside the task causes none; the operator's in-chat request for an action outside the task (a refund, an access
+     change) causes none; the operator's request for an action outside that chat causes nothing and is audited; only a
+     sender the transport identifies is the operator, and that word acts only in that chat; a chat word never sets
+     `_meta.decision` (AP-2: the decision a service call carries for a relayed action) or an OA-2 relay; quoted or
+     forwarded text stays data; a message with `sender_chat` set is never the operator's; a message that arrives through
+     a Telegram Business connection, a greeting or an away message included, is never the operator's; and, where the
+     agent has an operator channel, that channel stays a DEC-0121 AP-3 source. A member such as `untrusted_input` makes
+     the declaration not declared (`FAC-SEM-162`, closed objects). CA-8 is bounded by section 4.10 and by section 10's
+     `account` row and does not override them; the identification bound (who counts as the operator in a chat) is sent
+     to the standard's owner. CT-220, when drafted, is to keep this bound. This is a duty of every channel agent,
+     checked by its own test, and the declaration gains no `untrusted_input` member or any like it, since it is not a
+     property an agent may or may not declare and a flag whose `false` is valid would be false.
 - **Why:** the standard asks every channel agent for one declaration that a checker reads the same way; a schema with
   vectors in the contract gives the adapter's check, and any other reader, one shape and one answer per case, instead of
   each reading its own copy of section 13.6. The rules are those section 11 checks without data the declaration does
@@ -9284,7 +9286,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 31 of the readings, round 21's seam reading included; CA-8 is the coordinator's
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 32 of the readings, round 21's seam reading included; CA-8 is the coordinator's
   decision of round 17 on thread `b6820b97` (message `5a1334d1`), answering a producer who asked whether the declaration
   needs an `untrusted_input` field, and its bounds are the coordinator's decision of round 18, taken in the coordinating
   session with no board message: a word recognised in a chat is not a DEC-0121 AP-3 source, it never sets
@@ -9322,6 +9324,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Round 31 was not clean (URL strings uncharged and the bot-path clause): the coordinator's decision charges the
   argument pieces on every string, separates where the operator's id is bound from where the word counts, adds the
   Telegram Business conditions and the in-chat request outside the task, and names section 2.3 in the task.
+  Round 32 was not clean (astral text and `head()`): the coordinator's decision counts the budget in UTF-16 units (an
+  astral character is two), cuts each string's head once without an array, charges each `&` of a URL's search and
+  hash, and excepts a chat answered through a Telegram Business connection from the bot's word.
   `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
