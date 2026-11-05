@@ -24,7 +24,7 @@ import { ruleHelp } from "./rule-codes.js";
 import { documentKindsOf, isSemanticKind } from "./semantic-kinds.js";
 import { evaluateSemanticRules } from "./semantic-rules.js";
 import { PACKAGE_FILE } from "./package-rules.js";
-import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, SOURCE_PATH, excludedFolderTest, foldOnlyExcludeTest, isDotGitSegment, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
+import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, SOURCE_PATH, excludedFolderTest, foldOnlyExcludeTest, foldSegment, isDotGitSegment, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
 import { createValidatorSync, formatSchemaErrors } from "./validator.js";
 
 export interface Problem { file: string; path: string; rule: string; message: string; help?: string }
@@ -740,7 +740,8 @@ export function gitNames(stdout: Buffer): { names: string[]; unreadable: number[
  * holds its own `.git`. Otherwise every file under the folder, entering a folder only when an
  * include path reaches into it or covers it and never `.git`, a folder holding its own `.git` a nested repository; a
  * note says why the folder was walked when Git was there and did not list it. No note names the folder. Either way
- * the list is in UTF-16 code-unit order of the paths: `files[<index>]` counts from 0 in that order.
+ * the list is in UTF-16 code-unit order of the paths: `files[<index>]` counts from 0 in that order over the files the
+ * check reads; a path left out only under the fold (which Git mode alone lists) is indexed after all of them.
  */
 function sourceCandidates(run: Run, folder: string, manifest: unknown, includes: readonly string[]): Candidate[] {
   const executable = gitExecutable();
@@ -1053,12 +1054,14 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   const isNested = nestedTest(manifest);
   const isUnchecked = uncheckedTest(manifest);
   const foldOnly = foldOnlyExcludeTest(manifest);
+  const foldedOut: Array<{ path: string }> = [];
   for (const candidate of sourceCandidates(run, folder, manifest, includes)) {
     const relative = candidate.path;
     // A nested repository in the source goes by its path; one outside it is not counted, in either mode.
     if (candidate.nested) { if (isNested(relative)) files.push({ path: relative, nestedRepository: true }); continue; }
-    // Left out only under the fold: by its path, never opened.
-    if (foldOnly(relative) >= 0) { files.push({ path: relative }); continue; }
+    // Left out only under the fold (Git mode only): by its path, never opened, and indexed after every file read, so a
+    // read file's files[<index>] is the same in Git mode and in a walk.
+    if (foldOnly(relative) >= 0) { foldedOut.push({ path: relative }); continue; }
     if (!isSource(relative)) continue;
     const full = path.join(folder, ...relative.split("/"));
     try {
@@ -1076,6 +1079,7 @@ function checkSourceFolderAs(run: Run, folder: string): void {
       run.usage.push(`cannot read ${shownPath(relative)}: ${String((error as NodeJS.ErrnoException).code)}`);
     }
   }
+  files.push(...foldedOut);
   run.files.push({ file: ".", schema: null, kinds: ["source-tree"] });
   // Each exclude entry the folder holds, found by lstat one segment at a time and never through a symbolic link, is
   // listed, so an entry that names nothing is said (unused-exclude, accepted); nothing is read and no name is printed.
@@ -1101,17 +1105,17 @@ function checkSourceFolderAs(run: Run, folder: string): void {
 }
 
 /** Whether a relative path (a folder with a trailing `/`) is in the folder, each segment by lstat, never through a link. */
-function presentWithoutLink(folder: string, relative: string): boolean {
+function presentWithoutLink(folder: string, relative: string, depth = 0): boolean {
+  // Each segment is matched under the fold against the names its folder holds (so `src/secrets./`, a zero-width
+  // character or a case difference on a case-sensitive volume still finds what the entry leaves out); an intermediate
+  // folder must be a real folder, never a link, while the last segment may be anything, a link included, which the
+  // entry keeps out (it is never followed).
   const segments = relative.split("/").filter((segment) => segment !== "");
-  let at = folder;
-  for (const [index, segment] of segments.entries()) {
-    at = path.join(at, segment);
-    let stat;
-    try { stat = lstatSync(at); } catch { return false; }
-    if (stat.isSymbolicLink()) return false;
-    if (index < segments.length - 1 && !stat.isDirectory()) return false;
-  }
-  return true;
+  const wanted = foldSegment(segments[depth] as string);
+  let entries: Dirent[];
+  try { entries = readdirSync(folder, { withFileTypes: true }); } catch { return false; }
+  const last = depth === segments.length - 1;
+  return entries.some((entry) => foldSegment(entry.name) === wanted && (last || (entry.isDirectory() && presentWithoutLink(path.join(folder, entry.name), relative, depth + 1))));
 }
 
 /** An error's name (`RangeError`), never its message. */

@@ -147,7 +147,7 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "signing-credential": doc(),
   "source-manifest": doc("fabric-source.schema.json"),
   "source-package": wrap("source", "package"),
-  "source-tree": wrap("manifest", "files", "instanceStrings"),
+  "source-tree": wrap("manifest", "files", "instanceStrings", "listed"),
   "spend-policy": doc("spend-policy.schema.json"),
   "support-quality-daily": doc("support-quality-daily.schema.json"),
   "telemetry-event": doc("telemetry-event.schema.json"),

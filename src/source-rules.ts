@@ -53,12 +53,17 @@ const inGit = (path: string): boolean => path.split("/").some(isDotGitSegment);
 const nfc = (path: string): string => path.normalize("NFC");
 /**
  * One path segment as a case-insensitive file system may resolve it, for `exclude` and a patch's paths: the code points
- * HFS+ ignores removed, NFC, Unicode full case folding (upper case, then lower case, so `ß` and `ss`, `ſ` and `s`, the
- * Kelvin sign and `k`, the final sigma and `σ` meet), NFC again, then any trailing run of dots and spaces dropped
- * (NTFS). It folds more than APFS does in places (`ı` and `i`), which refuses more: the safe side.
+ * HFS+ ignores removed, NFC, then lower case, upper case and lower case again (so `ß`, `ẞ` and `ss`, `ſ` and `s`, the
+ * Kelvin sign and `k`, the Angstrom sign and `å`, the final sigma and `σ` meet: lower case first brings the capital
+ * sharp s to `ß`, which upper case then spells `SS`), NFC again, then any trailing run of dots and spaces dropped
+ * (NTFS). The case mappings are the runtime's (Node's ICU; Unicode 17.0 when this was written, `FOLD_UNICODE`); the
+ * fold is idempotent and keeps every pair of the case mappings together, and it folds more than APFS does in places
+ * (`ı` and `i`), which refuses more: the safe side.
  */
 export const foldSegment = (segment: string): string =>
-  segment.replace(HFS_IGNORABLE, "").normalize("NFC").toUpperCase().toLowerCase().normalize("NFC").replace(/[ .]+$/u, "");
+  segment.replace(HFS_IGNORABLE, "").normalize("NFC").toLowerCase().toUpperCase().toLowerCase().normalize("NFC").replace(/[ .]+$/u, "");
+/** The Unicode version whose case mappings the fold and the vectors were written with (Node's ICU). */
+export const FOLD_UNICODE = "17.0";
 /** A path folded segment by segment (`foldSegment`); a folder's trailing `/` is kept. */
 export const foldPath = (path: string): string => path.split("/").map(foldSegment).join("/");
 /**
@@ -207,10 +212,11 @@ export function isSourcePath(manifest: unknown, path: unknown): boolean {
  * `.git` segment, inside no `exclude` folder.
  */
 function folderInSource(includes: PathList, excludes: PathList, written: string): boolean {
+  // `excludes` is a folded list (`foldedList`): the folder is looked up in it folded, as the source test reads exclude.
   const folder = nfc(written);
   return SOURCE_PATH.test(folder) && !inGit(folder.slice(0, -1)) &&
     folderPrefixes(folder).some((prefix) => includes.folders.has(prefix)) &&
-    !folderPrefixes(folder).some((prefix) => excludes.folders.has(prefix));
+    !folderPrefixes(foldPath(folder)).some((prefix) => excludes.folders.has(prefix));
 }
 
 /**
@@ -266,10 +272,11 @@ export function nestedTest(manifest: unknown): (written: unknown) => boolean {
  * DEC-0149 item 13: the paths of a patch that are not source, in the order given. A patch applies only when this is
  * empty; otherwise it is refused whole, and it applies at the source, never at an exported copy. `manifest` is the
  * RECEIVER's current source manifest, never one the patch brings: a patch that rewrote `fabric.source.json` to drop an
- * exclude would otherwise open the way for a later one. So a patch path that is the manifest itself, in any spelling,
- * is refused too, and held for the owner's word. `exclude` is read folded (`foldSegment`), and when the manifest has
- * any exclude entry a segment shaped like an 8.3 short name (`PRIVAT~1`) is refused, since Windows may resolve it to
- * an excluded folder.
+ * exclude would otherwise open the way for a later one. So an import never applies a change to the manifest, whoever
+ * sends it: a patch path that is the manifest itself, in any spelling, is refused, and the patch is held (kept
+ * unapplied) until the owner decides; the owner changes the manifest by a commit at the source. `exclude` is read folded
+ * (`foldSegment`), and when the manifest has any exclude entry a segment in which `~` is followed by a digit
+ * (`PRIVAT~1.MD`) is refused, since Windows may resolve such a short name to an excluded folder.
  */
 export function patchPathsAllowed(manifest: unknown, paths: readonly unknown[]): string[] {
   const isSource = sourcePathTest(manifest);
@@ -282,8 +289,8 @@ export function patchPathsAllowed(manifest: unknown, paths: readonly unknown[]):
   };
   return (Array.isArray(paths) ? paths : []).filter(refused).map((path) => show(path));
 }
-/** A folded segment shaped like a Windows 8.3 short name: a `~` and digits at its end. */
-const SHORT_NAME = /~[0-9]+$/u;
+/** A folded segment that may be a Windows 8.3 short name: a `~` followed by a digit anywhere (`PRIVAT~1.MD`). */
+const SHORT_NAME = /~[0-9]/u;
 
 // #region source-tree-check (docs: docs/specification/source.md#the-tree-check)
 /** What the tree check reports: the blocking kinds (FAC-SEM-158) and the warnings (FAC-SEM-159). */
@@ -1033,9 +1040,11 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
     const listed = strings(input.listed).map(([path]) => path).filter((path) => path.length <= 513).map((path) => foldPath(nfc(path)));
     const listedFiles = new Set(listed);
     const listedFolders = new Set(listed.flatMap(folderPrefixes));
+    // An entry an excluded-by-fold line names leaves a file out, so it is never called unused.
+    const naming = new Set(foldedOut.map((problem) => problem.exclude));
     strings(manifest.exclude).forEach(([written, at]) => {
       const entry = foldPath(nfc(written));
-      if (!(entry.endsWith("/") ? listedFolders.has(entry) : listedFiles.has(entry))) problems.push({ kind: "unused-exclude", exclude: at });
+      if (!naming.has(at) && !(entry.endsWith("/") ? listedFolders.has(entry) : listedFiles.has(entry))) problems.push({ kind: "unused-exclude", exclude: at });
     });
   }
   // A licence that is a symbolic link is no licence: the export carries the link, not the terms.
@@ -1074,7 +1083,7 @@ export const labelledByIndex = (path: unknown): boolean => typeof path === "stri
 export function checkSourceTree(value: unknown): Finding[] {
   const problems = sourceTreeProblems(value);
   const files = isObject(value) && Array.isArray(value.files) ? value.files : [];
-  const inPath = (problem: SourceProblem) => problem.file !== undefined && problem.line === undefined && problem.kind !== "binary" && problem.kind !== "nested-repository" && problem.kind !== "excluded-by-fold";
+  const inPath = (problem: SourceProblem) => problem.file !== undefined && problem.line === undefined && problem.kind !== "binary" && problem.kind !== "nested-repository";
   const named = new Set(problems.filter(inPath).map((problem) => problem.file));
   return problems.map((problem): Finding => {
     const blocking = BLOCKING_KINDS.includes(problem.kind);
@@ -1166,20 +1175,23 @@ function pathFindings(value: JsonObject): Finding[] {
       if (inGit(path)) flag(`/${member}/${index}`, `${member}[${index}] lies in .git, which is never source`);
     }
   }
-  // Each list is indexed once: a path is looked up by itself and by each folder it lies in.
+  // Each list is indexed once: a path is looked up by itself and by each folder it lies in. `include` and `exclude` are
+  // compared folded, as the source test reads exclude (an exclude spelt `SRC/gen/` removes `src/gen/`).
   const includes = pathList(value.include);
-  const excludes = pathList(value.exclude);
+  const foldedIncludes = foldedList(value.include);
+  const excludes = foldedList(value.exclude);
   const isSource = sourcePathTest(value);
   // An entry outside the path grammar (over 256 code points) lies in no folder an index holds: its prefixes are not built.
-  const prefixesOf = (written: string): string[] => { const path = nfc(written); return SOURCE_PATH.test(path) ? folderPrefixes(path) : []; };
+  const prefixesOf = (written: string): string[] => { const path = nfc(written); return SOURCE_PATH.test(path) ? folderPrefixes(foldPath(path)) : []; };
   for (const [written, index] of include) {
-    const path = nfc(written);
-    const dead = prefixesOf(path).some((folder) => folder !== path && excludes.folders.has(folder));
+    const path = foldPath(nfc(written));
+    const dead = prefixesOf(written).some((folder) => folder !== path && excludes.folders.has(folder));
     if (dead) flag(`/include/${index}`, `include[${index}] lies inside an exclude folder, so it names nothing`);
   }
   for (const [path, index] of strings(value.exclude)) {
-    if (includes.files.has(nfc(path)) || includes.folders.has(nfc(path))) flag(`/exclude/${index}`, `exclude[${index}] is an include path: it would remove it whole, so leave both out`);
-    else if (!prefixesOf(path).some((folder) => includes.folders.has(folder))) flag(`/exclude/${index}`, `exclude[${index}] lies inside no include folder, so it removes nothing`);
+    const folded = foldPath(nfc(path));
+    if (foldedIncludes.files.has(folded) || foldedIncludes.folders.has(folded)) flag(`/exclude/${index}`, `exclude[${index}] is an include path: it would remove it whole, so leave both out`);
+    else if (!prefixesOf(path).some((folder) => foldedIncludes.folders.has(folder))) flag(`/exclude/${index}`, `exclude[${index}] lies inside no include folder, so it removes nothing`);
   }
   for (const [path, index] of strings(value.binaries)) {
     if (!inGit(path) && !isSource(path)) flag(`/binaries/${index}`, `binaries[${index}] is not a file of the source`);

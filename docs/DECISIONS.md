@@ -9030,10 +9030,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 38 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 39 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
-  exclude hole; round 38 not clean: Unicode case folding bypass of exclude), cited by round number because their heads were on the review branch, which is not
+  exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
+  short names with an extension, unused-exclude, opt-in scope, owner's manifest patch), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9055,7 +9056,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      repository, `format: "fabric-source/1"`, schema `schemas/fabric-source.schema.json`, closed. It travels with the
      source; it is not a member of `fabric-agent.json`, not the package and never the descriptor.
   2. **Every kind (Q11):** serving agents, consumer agents and skill sets.
-  3. **Opt-in (Q10):** a repository with `fabric.source.json` is held to this decision, one without is not; the
+  3. **Opt-in (Q10):** the manifest, the tree check, the source export and the import bind a repository with
+     `fabric.source.json`, and one without has none of them; the hand-over rule (item 12) binds every agent's source,
+     with a manifest or without one (decided by the coordinator in round 39: an opt-in that freed an agent without a
+     manifest from the hand-over rule would let the absence of a file decide what only the operator's word may). The
      adapter's templates are to write one for every new agent (owed by CT-207). Requiring it of every agent is a later
      decision.
   4. **Default deny (Q2):** `include` (at least one path) names the source, `exclude` carves holes in it. A path is the
@@ -9197,7 +9201,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       access given to anyone outside the owner is one, any person but the operator for a personal agent; an
       organization's agent released by the organization to a public registry is its own release, the organization
       being the home's owner; for an act on the whole repository (a transfer, a visibility change, access given) the
-      word names the repository instead of one commit, since the act hands over every commit. Handing it to
+      word names the repository instead of one commit, since the act hands over every commit. Decided by the
+      coordinator in round 39 on the same ground: a file is a hand-over when it is sent to another person or to a place
+      outside the owner's, and a processor acting for the owner under the owner's own account or host (a model provider
+      in the owner's session, CI on the home's host, a service the owner runs) is no recipient, since the rule targets
+      disclosure and development uses such processors daily; a push or release of what is already public, from a public
+      home to another public place of the same owner (a mirror, a marketplace repository, a public registry), reaches
+      no reader who could not read it already and is no hand-over, the hand-over having been the visibility change that
+      made it public (the operator's recorded practice has agents release public skill sets themselves); mechanics are
+      "adapted file by file" when the result does not run as the agent, carries none of its manifest, identity, data,
+      keys or private names, and each file is changed into the product's own interfaces in the product's own change,
+      and in doubt the move is a hand-over and takes the word. Handing it to
       anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       source commit and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9214,7 +9228,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       hand-over's screens are Fabric's (CT-208).
   13. **Import:** a patch applies only when every path it touches is source, else it is refused whole; it applies at the
       source, never at an exported copy (`patchPathsAllowed`). Because a case-insensitive file system makes two
-      spellings one file, a patch path is also refused when, under ASCII case folding, an `exclude` entry names it, and
+      spellings one file, a patch path is also refused when an `exclude` entry names it once both are folded, and
       `.git` in each of item 4's forms is never source (decided by the coordinator in round 37: the unit reading found
       `.GIT/hooks/post-checkout` and `app/PRIVATE/x` allowed past an excluded `app/private/`). Restated in round 38,
       after the unit reading wrote `app/ſecrets/new` into an excluded `app/secrets/` with `git apply` on APFS and found
@@ -9222,9 +9236,19 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       with the code points HFS+ ignores removed and trailing dots and spaces dropped, both sides folded the same way per
       segment (it folds more than APFS in places, which refuses more), and a segment shaped like an 8.3 short name is
       refused when any `exclude` entry exists. `exclude` is read with the same fold at export too, so an export fails
-      closed. A patch is checked against the receiver's current manifest, never one the patch brings, and a patch from
-      anyone but the owner that changes `fabric.source.json` is refused and held for the owner's word (decided by the
+      closed. A patch is checked against the receiver's current manifest, never one the patch brings (decided by the
       coordinator in round 38: one patch could drop an `exclude` and a later one land in the folder it left out).
+      Restated in round 39, decided by the coordinator after the unit reading wrote `app/PAẞWORDS/token.txt` over an
+      excluded `app/passwords/token.txt` with `git apply` on APFS and found short names with an extension passing: the
+      fold is NFC, then lower, upper and lower case, then NFC (lower case first brings the capital sharp s to `ß`, and
+      the readers' sweep found no class that disagrees with Unicode full case folding), with the HFS+ ignorable code
+      points removed and trailing dots and spaces dropped, following the runtime's case mappings (Node's ICU, Unicode
+      17.0 when the vectors were written, the case pairs carried in the vectors; it also joins the dotless `ı` with `i`
+      and `I`, which Unicode full case folding keeps apart, and so refuses more, the safe side); any segment in which `~` is followed
+      by a digit is refused when any `exclude` entry exists; and an import never applies a change to
+      `fabric.source.json`, whoever sends it: such a patch is refused whole and held, kept unapplied, until the owner
+      decides, and the owner changes the manifest by a commit at the source, which then governs every later patch
+      (round 38's wording, which limited the hold to an outsider's patch, left two answers for the owner's own patch).
   14. **Starting without the instance (§5.8):** an agent started with an empty data folder and no slot filled starts;
       a service answers `status: degraded` with one `degraded[]` entry per missing required slot, its `source` the
       slot's name, each `setup: true` (DEC-0044's setup state), an `endpoint` included; a `store` slot is never a setup
@@ -9292,7 +9316,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 38 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 39 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
-  case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude), cited by round number (their heads were on the review branch, not kept at landing),
+  case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
+  clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
+  and from its seam reading `files[<index>]` differing between Git mode and a walk, `unused-exclude` on a
+  case-sensitive volume and the manifest's own rules reading `exclude` literally), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

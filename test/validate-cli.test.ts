@@ -1978,12 +1978,55 @@ describe("an agent's source (DEC-0149)", () => {
     expect(inGit.out).not.toContain("FAC-SEM-158");
     expect(inGit.out).not.toContain("credential");
     expect(lines(inGit.out).filter((line) => line.includes("excluded-by-fold"))).toEqual([
-      expect.stringMatching(/^src\/Private\/notes\.md {2}\/files\/\d+ {2}FAC-SEM-159 \(accepted\) {2}src\/Private\/notes\.md: excluded-by-fold: .*\(exclude\[0\]\)/)
+      expect.stringMatching(/^files\[(\d+)\] {2}\/files\/\1\/path {2}FAC-SEM-159 \(accepted\) {2}files\[\1\], its path: excluded-by-fold: .*\(exclude\[0\]\)/)
     ]);
     // A walk never enters the folder the fold leaves out, so it reads nothing there either.
     const walked = run(folder(files), "--kind", "source-tree");
     expect(walked.code).toBe(0);
     expect(walked.out).not.toContain("FAC-SEM-158");
+  });
+
+  it("gives a read file the same files[<index>] in Git mode and in a walk, a path left out only under the fold indexed after every read file", () => {
+    const home = ["", "home", "jdoe", "notes"].join("/");
+    const files = { "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/private/"] }), LICENSE: "x", "src/Private/notes.md": "x", "src/b/z.ts": `const notes = "${home}";` };
+    const committed = folder(files);
+    expect(gitIn(committed, "init", "-q").status).toBe(0);
+    expect(gitIn(committed, "add", "-A").status).toBe(0);
+    expect(gitIn(committed, "commit", "-qm", "x").status).toBe(0);
+    const homeLine = (out: string) => lines(out).filter((line) => line.includes("home-path")).map((line) => line.split("  ").slice(0, 2));
+    const inGit = run(committed, "--kind", "source-tree");
+    const walked = run(folder(files), "--kind", "source-tree");
+    expect(inGit.code).toBe(1);
+    expect(walked.code).toBe(1);
+    expect(homeLine(inGit.out)).toEqual([["src/b/z.ts", "/files/2"]]);
+    expect(homeLine(walked.out)).toEqual(homeLine(inGit.out));
+    // The path left out only under the fold comes after every read file, by its index alone.
+    expect(lines(inGit.out).filter((line) => line.includes("excluded-by-fold")).map((line) => line.split("  ").slice(0, 2))).toEqual([["files[3]", "/files/3/path"]]);
+    expect(inGit.out).not.toContain("Private");
+  });
+
+  it.skipIf(process.platform === "win32")("never calls unused an entry that keeps a link out or leaves files out only under the fold, in Git mode and in a walk", () => {
+    const outside = folder({ "x.ts": "x" });
+    const files = {
+      "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/link/", "src/secrets./", "src/pri\u200cvate/", "src/private/", "src/gone/"] }),
+      LICENSE: "x", "src/a.ts": "x", "src/secrets/a.md": "x", "src/Private/b.md": "x"
+    };
+    for (const git of [true, false]) {
+      const dir = folder(files);
+      symlinkSync(outside, path.join(dir, "src", "link"));
+      if (git) {
+        expect(gitIn(dir, "init", "-q").status).toBe(0);
+        expect(gitIn(dir, "add", "-A").status).toBe(0);
+      }
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code, String(git)).toBe(0);
+      const unused = lines(result.out).filter((line) => line.includes("unused-exclude")).map((line) => line.split("  ")[1]);
+      expect(unused, String(git)).toEqual(["/manifest/exclude/4"]);
+      if (git) {
+        // Git lists the files the fold leaves out, and each is named beside its entry.
+        expect(lines(result.out).filter((line) => line.includes("excluded-by-fold")).length).toBe(2);
+      }
+    }
   });
 
   it.skipIf(process.platform === "win32")("says an exclude entry that names nothing in the folder, found by lstat and never through a link (accepted)", () => {
@@ -1997,9 +2040,8 @@ describe("an agent's source (DEC-0149)", () => {
     expect(result.code).toBe(0);
     const said = lines(result.out).filter((line) => line.includes("unused-exclude"));
     // src/cache/ is not there, src/linked/x/ lies through a link, src/a.ts/x under a file; src/gen/ is there, and src/Gen/
-    // folds to it on a case-sensitive file system only when it is there too, so it is said where the folder is absent.
-    expect(said.map((line) => line.split("  ")[1])).toEqual(expect.arrayContaining(["/manifest/exclude/1", "/manifest/exclude/2", "/manifest/exclude/3"]));
-    expect(said.map((line) => line.split("  ")[1])).not.toContain("/manifest/exclude/0");
+    // matches it under the fold on any volume.
+    expect(said.map((line) => line.split("  ")[1])).toEqual(["/manifest/exclude/1", "/manifest/exclude/2", "/manifest/exclude/3"]);
     for (const line of said) expect(line).toContain("FAC-SEM-159 (accepted)");
   });
 

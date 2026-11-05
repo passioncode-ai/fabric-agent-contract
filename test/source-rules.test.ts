@@ -23,8 +23,10 @@ import {
   SOURCE_PATH,
   WARNING_KINDS,
   checkSourceTree,
+  FOLD_UNICODE,
   excludedFolderTest,
   foldOnlyExcludeTest,
+  foldSegment,
   isSourcePath,
   isUncheckedPath,
   longRunAt,
@@ -248,6 +250,42 @@ describe("which files are source", () => {
     expect(nestedInSource(value, "app/STRASSE/lib")).toBe(false);
     // An exclude entry the fold shortens (a segment of dots) still removes what it names.
     expect(isSourcePath({ include: ["app/"], exclude: ["app/.../"] }, "app/.../x")).toBe(false);
+  });
+
+  it("folds every code point idempotently and keeps every pair of the case mappings together", () => {
+    // The fold follows the runtime's case mappings (Node's ICU); FOLD_UNICODE names the version the vectors were written with.
+    expect(FOLD_UNICODE).toMatch(/^\d+\.\d+$/);
+    let checked = 0;
+    for (let code = 0; code <= 0x10ffff; code += 1) {
+      if (code >= 0xd800 && code <= 0xdfff) continue;
+      const char = String.fromCodePoint(code);
+      const folded = foldSegment(char);
+      if (foldSegment(folded) !== folded) throw new Error(`not idempotent at U+${code.toString(16)}`);
+      for (const mapped of [char.toLowerCase(), char.toUpperCase()]) {
+        if (foldSegment(mapped) !== folded) throw new Error(`U+${code.toString(16)} and its case mapping fold apart`);
+      }
+      checked += 1;
+    }
+    expect(checked).toBe(0x110000 - 0x800);
+    expect(foldSegment("PA\u1e9eWORDS")).toBe("passwords");
+    expect(foldSegment("pa\u00dfwords")).toBe("passwords");
+  }, 180_000);
+
+  it("reads exclude folded in the manifest's own rules, as the source test does", () => {
+    // An exclude spelt in another case removes what the include folder holds: no "removes nothing".
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: ["SRC/gen/"] })).toEqual([]);
+    // An include inside an exclude folder spelt otherwise names nothing, and says so.
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "src/Cache/keep/", "LICENSE"], exclude: ["src/cache/"] })).toEqual([
+      { code: "FAC-SEM-157", instancePath: "/include/1", message: "include[1] lies inside an exclude folder, so it names nothing" }
+    ]);
+    // An exclude that equals an include path in another case would remove it whole.
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: ["SRC/"] })).toEqual([
+      { code: "FAC-SEM-157", instancePath: "/exclude/0", message: "exclude[0] is an include path: it would remove it whole, so leave both out" }
+    ]);
+    // An unchecked folder an exclude folder holds in another spelling is not in the source.
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: ["src/Vectors/"], unchecked: [{ path: "src/vectors/", reason: "r" }] })).toEqual([
+      { code: "FAC-SEM-157", instancePath: "/unchecked/0/path", message: "unchecked[0] is not in the source" }
+    ]);
   });
 
   it("names the exclude entry that leaves a path out only once folded, the first that writes it", () => {
