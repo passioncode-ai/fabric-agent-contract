@@ -2,12 +2,13 @@
   "kind": "support-quality-daily/1",
   "day": "2026-10-19",
   "channel": "chat",
-  "rubricVersion": "v1",
-  "judgeModel": "qwen/qwen3.8-flash",
+  "rubricVersion": null,
+  "judgeModel": null,
   "notMeasured": [
     "nobodyDropped.firstReplyP50Ms",
     "nobodyDropped.firstReplyP90Ms",
-    "nobodyDropped.answeredLater"
+    "nobodyDropped.answeredLater",
+    "checks"
   ],
   "nobodyDropped": {
     "turns": 4,
@@ -24,14 +25,7 @@
     "helpedPartly": 0,
     "helpedNo": 0
   },
-  "checks": {
-    "language": 0.97,
-    "addressed": 0.92,
-    "policy_safe": 1,
-    "routing": 0.95,
-    "actionable": 0.9,
-    "continuity": 0.97
-  },
+  "checks": null,
   "stability": {
     "turnErrors": 0,
     "modelCallFailures": 0,

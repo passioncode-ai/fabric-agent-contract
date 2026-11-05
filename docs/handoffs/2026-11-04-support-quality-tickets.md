@@ -243,8 +243,29 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   starts with a digit is refused (the existing `negative/support-quality-daily-not-measured-digit-first.json` and a new
   `-family-digit-first.json`, both in the catalogue). DEC-0151 item 3, Compatibility (a widening: every earlier valid
   document stays valid), Source, the page and CT-210 say so.
-- The channel agent standard's owner applied CT-210 (d)'s section 5.1 renames at the standard's main `86c49ec` (board
-  message `b840a16b`); the rest of (d) follows after 2026-11-06 (recorded in CT-210).
+- The channel agent standard's owner applied more than CT-210 (d)'s renames at the standard's commit `86c49ec` (board
+  message `b840a16b`): section 5.1 names `autonomy.answeredTickets` (marked "(new)"), `stability.safeReplyTurns` and
+  `stability.safeReplyTickets` (the copy received on 2026-11-04 named them `autonomy.answered` and
+  `stability.fallbackTurns`; the standard renamed them at the owner's commit `86c49ec`), carries the turns sentence
+  ("/1 takes toPersonPolicy and toPersonInability in turns until it names a ticket unit") and the signal-server
+  sentence (the ticket counts travel by the signal server), and renames the summary number "fallback" to "safe reply".
+  So the page's first prerequisite (section 5.1 says turns) holds in the standard's master; what the owner still owes,
+  after 2026-11-06, is section 11's observed-check acceptances and the deferred questions (CT-210 (d)).
+- Round 15 of the readings (on `a0f8c160`), not clean: the product tier found one break,
+  `fixtures/positive/support-quality-daily-no-reply.json` showing check pass rates, `rubricVersion` and `judgeModel` on a
+  day where nothing was judged (`quality.sampled` 0). Fixed: `checks`, `rubricVersion` and `judgeModel` are `null` and
+  `notMeasured` names `checks` beside the three `nobodyDropped` names, as the payload table says; the fixture is in the
+  page's header list; its test asserts `checks` null and named, the rubric and judge `null`, and that a valid payload
+  whose `notMeasured` is `["family2.metric"]` gives exactly the `/notMeasured` finding "which the payload does not
+  carry". The notes and risks applied: DEC-0151's Compatibility rule is scoped to "no member DEC-0151 adds reuses a v2
+  field name with another meaning or unit", naming `/1`'s older `channel` (DEC-0095) as the member that shares v2's
+  name with another value space (the page and both schema descriptions likewise); CT-210 (d), this handoff's Done and
+  Open lists and the merge-list bullet record what `86c49ec` applied; the four summary numbers read "safe reply
+  (fallback in the received copy)"; CT-129's note says either part admits digits after its first letter; FAC-SEM-126's
+  interim message reads "names it, but until every reader of the feed has adopted DEC-0151, leave it null and unnamed"
+  (the rule and its test changed together; DEC-0151's Compatibility quote still holds as a substring); the merge list
+  names `source.md`'s two "(DEC-0151, in progress)" sentences at DEC-0149's `47d66a15`, adds DEC-0153 and DEC-0152, and
+  refreshes its figures; the closing check spans lines.
 - The collision check, by name, of every other new DEC-0151 member against the v2 fields: the evidence is the
   channel agent standard's section 5.1 table (DEC-0150's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`
   at `388f2b42`), which marks every member new except `autonomy.answered` and
@@ -261,24 +282,20 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 
 - Two clean rounds of blind readings, then merge (the branch is pushed, no pull request yet).
 - On DEC-0151's merge: close CT-129 (fixed by item 3) with its receipt.
-- The coordinator tells the channel agent standard's owner, on thread `b6820b97` (CT-210 step (d)): its observed check
-  (section 11) accepts, by period, what support quality's observed-check paragraph lists (before adoption a day without
-  `project` and a withheld channel; from adoption on a project withheld for its alias until the registry renames it, and
-  then its kept days published late under the new alias); the withholding starts at DEC-0151's merge whatever the
-  counts, so that acceptance is owed before any producer on the standard has a shared channel; section 5.1 says `/1`
-  takes the escalation counts in turns and the ticket counts travel by the signal server, names the ticket count
-  `autonomy.answeredTickets` (its `autonomy.answered` row is v2's turn count, which `/1` does not reuse) and the
-  checker's counts `stability.safeReplyTurns` and `stability.safeReplyTickets` (its `stability.fallbackTurns` row is
-  v2's count of turns a fallback model answered), and marks the three deferred like its '(new)' fields; and the team-chat note. It adds: the period is the
-  event's day, and a producer's adoption is marked by its first published day that names `project` (a rule-9 project
-  never names one), so the check accepts both lists by that marker; section 5.1 carries `project` with rules 1 and 2;
-  section 11's observed check accepts the `team_chat` MAY (a `team_chat`-only project has no daily); and the deferred
-  questions (whether a promotion restates the ticket's end day, `received`, a sum rule). It also asks whether section 11
-  accepts an interim day whose unmeasured first-reply metric is `null` and unnamed, and whether the signal server groups
-  the seven kinds into `/1`'s four channels as support quality's kinds table does. The acceptances are owed by the
-  owner until its text lands; a producer whose only named project is alias-withheld at adoption is in the
-  pre-adoption list. The coordinator files the
-  adapter's row (step (e)).
+- The coordinator tells the channel agent standard's owner, on thread `b6820b97` (CT-210 step (d)), what is still owed
+  after `86c49ec` (which already carries section 5.1's renames, the turns sentence and the signal-server sentence): its
+  observed check (section 11) accepts, by period, what support quality's observed-check paragraph lists (before
+  adoption a day without `project` and a withheld channel; from adoption on a project withheld for its alias until the
+  registry renames it, and then its kept days published late under the new alias); the withholding starts at
+  DEC-0151's merge whatever the counts, so that acceptance is owed before any producer on the standard has a shared
+  channel; the period is the event's day, and a producer's adoption is marked by its first published day that names
+  `project` (a rule-9 project never names one), so the check accepts both lists by that marker; section 11's observed
+  check accepts the `team_chat` MAY (a `team_chat`-only project has no daily) and, as asked, an interim day whose
+  unmeasured first-reply metric is `null` and unnamed. And the deferred questions: whether a promotion restates the
+  ticket's end day, `received`, a sum rule, whether section 5.1 carries `project` with rules 1 and 2, and whether the
+  signal server groups the seven kinds into `/1`'s four channels as support quality's kinds table does. The
+  acceptances are owed by the owner until its text lands; a producer whose only named project is alias-withheld at
+  adoption is in the pre-adoption list. The coordinator files the adapter's row (step (e)).
 - At landing, the coordinator posts the question to each multi-project `/1` producer on the board, whether it merges
   projects into one event (DEC-0095), with the answers recorded in CT-210 as they arrive (step (f)); the merge does not
   wait.
@@ -348,11 +365,13 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
 
 ## When DEC-0150 and DEC-0151 meet on main
 
-DEC-0150's current branch is `origin/agent/channel-agent-ext-v3-20261104` (cited at `fc057cfc` or newer; `388f2b42`
-when this was written); DEC-0149 lives on `origin/agent/ct194-source-manifest-v2-20261104` (cited as the DEC-0149
-landing head; `8dd4d04f` on 2026-11-04, measured below at it and measured again at merge; the old branch name is
-deleted); main is at `7213463f` (the backlog tail through CT-218). The scratch measurements below are of those heads; they are measured again
-at merge, against the heads then current. **Merge gate:** DEC-0150 must be on main before DEC-0151 merges. At
+DEC-0150's current branch is `origin/agent/channel-agent-ext-v3-20261104` (cited at `7a0b05b6` on 2026-11-05;
+`388f2b42` when the measurements below were taken); DEC-0149 lives on `origin/agent/ct194-source-manifest-v2-20261104`
+(cited at `47d66a15` on 2026-11-05; the measurements below were taken at `8dd4d04f`; the old branch name is deleted);
+main is at `ed4d6aa7` on 2026-11-05, its backlog tail through CT-220 (the scratch merge below was at `7213463f`).
+DEC-0152 (`d760f756`, branch `agent/ct217-board-same-turn-20261104`) and DEC-0153 (`ff00a448`, branch
+`agent/ct219-ops-digest-20261104`) are open beside them. The scratch measurements below are of the heads they name;
+they are measured again at merge, against the heads then current. **Merge gate:** DEC-0150 must be on main before DEC-0151 merges. At
 DEC-0151's merge, `git ls-tree origin/main docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md` prints the
 file and `grep '^### DEC-0150' docs/DECISIONS.md` prints one line; if either prints nothing, DEC-0151 waits (or rebases
 over DEC-0150 once it lands).
@@ -376,18 +395,34 @@ conflict unless the line says it auto-merges), with the resolution:
     `origin/agent/channel-agent-ext-v3-20261104` prints only the files this list names.
   - `src/secret-shape.ts` (auto-merges): DEC-0150's `rawValues` change and DEC-0151's `SECRET_VALUE` touch different
     lines; keep both.
-- **Against DEC-0149** (`origin/agent/ct194-source-manifest-v2-20261104`, `8dd4d04f`; `docs/specification/identifiers.md`
-  auto-merges): `docs/DECISIONS.md` and
+- **Against DEC-0149** (`origin/agent/ct194-source-manifest-v2-20261104`, cited at `47d66a15`, measured at `8dd4d04f`;
+  `docs/specification/identifiers.md` auto-merges): `source.md` at `47d66a15` holds two sentences that call DEC-0151 in
+  progress, both written "(DEC-0151, in progress)": the one at its line 95 (once the shared detector's key shapes are
+  bounded, `FAC-SEM-156` is stricter than `FAC-SEM-065`) and the one wrapped across its lines 147 and 148 (an identifier
+  the tree check reads as a key that is a registry alias is renamed only by the registry's owner); the second of
+  DEC-0149 and DEC-0151 to land states both as current. The other files: `docs/DECISIONS.md` and
   `docs/backlog.md` (tail appends; keep both, in order), `docs/handoffs/README.md` (keep both rows) and
   `src/secret-shape.ts` (the bullet below). Its `URL_SECRET_VALUE` in `src/source-rules.ts` deliberately stays the tree
   check's own earlier unbounded pattern, with the `i` flag, for parity with the adapter's source check: it is NOT
   changed at the merge. Decision for its lander: after the merge, DEC-0149's path and word reads (`credentialShaped`,
   `pathHoldsFinding`) use the tree check's own unbounded key shapes, not the narrowed shared detector, so a key glued
   into a path is still held; the DEC-0149 branch makes that change itself.
+- **Against DEC-0153** (`ff00a448`, branch `agent/ct219-ops-digest-20261104`; `git merge-tree` with this head
+  conflicts in `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`, `docs/handoffs/README.md`,
+  `docs/specification/README.md` and `docs/specification/conformance.md`; `CONTEXT.md` auto-merges): in
+  `conformance.md` keep DEC-0151's two support-quality rows (producer, reader) and DEC-0153's three new rows, never
+  main's older producer and reader rows; in `docs/DOCMAP.md` and `docs/specification/README.md` keep DEC-0151's
+  support-quality row and DEC-0153's operations-digest row, never both support-quality rows; `DECISIONS.md`, the
+  backlog and the handoffs README as tail or top appends, in order. Check on the merged tree:
+  `grep -c '^| an agent that answers people, publishing its support quality' docs/specification/conformance.md` and
+  `grep -c '^| a reader of support quality' docs/specification/conformance.md` each print 1, and
+  `grep -c 'support-quality-daily/1' docs/DOCMAP.md docs/specification/README.md` prints 1 per file.
+- **Against DEC-0152** (`d760f756`, branch `agent/ct217-board-same-turn-20261104`): `docs/DECISIONS.md`,
+  `docs/backlog.md` and `docs/handoffs/README.md` only, tail (or top) appends; keep both, in order.
 - **Against PR #235** (`agent/ct200-renewal-repeat-20261102`, DEC-0148): `docs/DECISIONS.md` and `docs/backlog.md`
   (tail appends; keep both, in order).
-- **Against main at `7213463f`**: `docs/backlog.md`, the tail; keep every row, in id order through CT-218 (CT-210,
-  CT-213, CT-215 to CT-218). The scratch merge with the round-14 head, so resolved: `tsc` exit 0, 28 vector files match, the whole suite passes (109 files, 9844 tests, 1 skipped).
+- **Against main** (`ed4d6aa7` on 2026-11-05; measured at `7213463f`): `docs/backlog.md`, the tail; keep every row, in
+  id order through CT-220 (CT-210, CT-213, CT-215 to CT-220). The scratch merge with the round-14 head, so resolved: `tsc` exit 0, 28 vector files match, the whole suite passes (109 files, 9844 tests, 1 skipped).
 
 The second of DEC-0150 and DEC-0151 to merge also rewrites these, at the DEC-0150 landing head. DEC-0150's sentences
 move and are reworded between its rounds, so this list names each by its subject and place, and DEC-0150's own list
@@ -395,9 +430,9 @@ move and are reworded between its rounds, so this list names each by its subject
 
 - `docs/specification/channel-agent.md`, the daily-payload bullet's member list (it names `autonomy.answered` among the
   members `/1` lacks, and `stability.fallbackTurns` and `stability.fallbackTickets`): the rewritten bullet names
-  `autonomy.answeredTickets`, `stability.safeReplyTurns` and `stability.safeReplyTickets`, and says section 5.1's
-  `autonomy.answered` and `stability.fallbackTurns` rows are v2 names with another unit or meaning, which `/1` does not
-  reuse.
+  `autonomy.answeredTickets`, `stability.safeReplyTurns` and `stability.safeReplyTickets`, and says: the copy received
+  on 2026-11-04 named them `autonomy.answered` and `stability.fallbackTurns`; the standard renamed them at the owner's
+  commit `86c49ec`.
 - `docs/specification/channel-agent.md`, the daily-payload bullet ("**The daily quality payload.**", in the compatibility
   section): it becomes a pointer to DEC-0151 and to [support quality](../specification/support-quality.md)'s channel
   kinds table and project rules, and says that the escalation counts (`autonomy.toPersonPolicy`, `toPersonInability`)
@@ -457,7 +492,8 @@ move and are reworded between its rounds, so this list names each by its subject
 - The channel agent standard's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`, named as text
   in DEC-0151's Context and on the support quality page (its section 1 in rule 6): made a link once both are on main.
 - `docs/DECISIONS.md`'s next-free line: DEC-0152 here; at merge take the maximum of the branches' values and the CAS
-  counter.
+  counters, read at landing (`refs/agent-sync/ids/DEC` and `refs/agent-sync/ids/SEM` on `origin`, each by
+  `git cat-file -p`): on 2026-11-05 they read next DEC-0154 and next FAC-SEM-168.
 - `src/secret-shape.ts` and the source-manifest branch (DEC-0149) at `8dd4d04f`: that head keeps the tree check's own
   unbounded provider-key shapes (a fixed list held equal to a vectors constant, for parity with the adapter's source
   check), its tests no longer read `SECRET_VALUE.source`, and its
@@ -484,17 +520,21 @@ move and are reworded between its rounds, so this list names each by its subject
   `"next": 150`), each read with `git cat-file -p`.
 - The organization's roadmap row AS-01 ("one event per channel and closed day", fabric-workspace
   `knowledge/roadmap.md`): owed at merge, to say one event per channel, project and closed day.
-- The schema count: 148 after the source-manifest branch and DEC-0150's land (146 on origin/main today); a test or
+- The schema count: 150 after DEC-0149, DEC-0150 and DEC-0153 land (146 on origin/main at `ed4d6aa7`); a test or
   document that counts the schemas follows that number.
 
-The check that closes this list, after both land, in two parts:
-`git grep -n -E 'DEC-0151[^.]*in progress|in-progress DEC-0151' -- docs src test ':!docs/handoffs' ':!docs/DECISIONS.md'`
-prints nothing; and in `docs/DECISIONS.md`, `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -n -E
+The check that closes this list, after both land, in two parts. The first spans lines, since a sentence may wrap
+between "DEC-0151," and "in progress" (as `source.md` does at DEC-0149's `47d66a15`, lines 147 and 148), so it reads
+each file whole rather than line by line:
+`python3 -c "import re,subprocess;fs=subprocess.run(['git','ls-files','--','docs','src','test',':!docs/handoffs',':!docs/DECISIONS.md'],capture_output=True,text=True).stdout.split();[print(f) for f in fs if re.search(r'DEC-0151[^.]*in\s+progress|in-progress\s+DEC-0151',open(f,encoding='utf-8',errors='replace').read(),re.S)]"`
+prints nothing (on this branch today it prints `docs/specification/identifiers.md`, whose sentence runs from DEC-0151
+to "DEC-0149 (in progress)", the fourth check's subject); and in `docs/DECISIONS.md`, `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -n -E
 'DEC-0151[^.]*in progress|in-progress DEC-0151' | grep -v 'Annotated'` prints only the lines of DEC-0150's CA-2, its
 CA-5, its Compatibility and its Source counter sentence, which stay as written, while `awk '/^### DEC-0150/,/^### DEC-0151/' docs/DECISIONS.md | grep -c
 '^- \*\*Annotated'` prints at least 1, an annotation naming DEC-0151's merge for all four. A third check: `git grep -n -E 'no boundary today|in any case as the shared detector reads|SECRET_VALUE.s 16' --
 docs/specification src` prints nothing after both land. A fourth, after DEC-0149 and DEC-0151 both land:
-`git grep -n -F 'DEC-0149 (in progress)' -- docs src ':!docs/handoffs' ':!docs/DECISIONS.md'` prints nothing, and in
+the same reading with the pattern `DEC-0149\s+\(in\s+progress\)` over `docs` and `src` (handoffs and `DECISIONS.md`
+left out) prints nothing, and in
 `docs/DECISIONS.md` DEC-0151 item 7's sentence that says it is annotated with DEC-0149's merge; the second of the two
 to land does both. The handoffs are left out
 because they quote the earlier wording as history (this one does above); other handoffs, DEC-0150's included, are left
@@ -503,7 +543,8 @@ as history and are not edited.
 ## Decisions taken here
 
 - The ticket count of answered tickets is `autonomy.answeredTickets`, not `autonomy.answered` (the coordinator's
-  decision before round 15): `/1` never reuses a v2 field name with another meaning or unit.
+  decision before round 15): no member DEC-0151 adds reuses a v2 field name with another meaning or unit (`/1`'s
+  older `channel`, DEC-0095, shares v2's name with another value space; scoped so in round 15).
 - The checker's counts are `stability.safeReplyTurns` and `stability.safeReplyTickets`, not `stability.fallbackTurns`
   and `fallbackTickets` (the coordinator's decision before round 15, on the producer's evidence, `24cf4f25`).
 
@@ -515,6 +556,15 @@ as history and are not edited.
   left to the channel agent standard (support-quality.md, "Not decided here").
 
 ## Checks actually run
+
+After round 15's fixes (the commit that carries this entry), each exit code read separately: `pnpm typecheck` 0;
+`pnpm vitest run test/support-quality.test.ts test/fixtures.test.ts test/consistency.test.ts test/secret-shape.test.ts`
+0 (4 files, 1156 tests passed); `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files match); `pnpm run docs:check` 0
+(0 markdownlint errors); `python3 docs/ux/lint.py` 0; `pnpm run privacy:check` with the organization's index 0 (0
+findings); `pnpm validate fixtures/positive/support-quality-daily-no-reply.json --schema support-quality-daily --kind
+support-quality-daily` 0. The full run with coverage is owed: the 1-minute load was 74.91 and under 6 GB were free,
+above and below what the heavy-run rule allows. The closing check's first part, run as written on this branch, prints
+only `docs/specification/identifiers.md` (the DEC-0149 sentence it names). No U+2014 in the lines this commit adds.
 
 After the `notMeasured` pattern change (the commit that carries this entry), each exit code read separately: `pnpm
 exec tsc --noEmit -p .` 0; `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0; `pnpm privacy:check` with the
@@ -635,6 +685,6 @@ the added lines.
 
 ## Next task
 
-Round 15 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers, until two consecutive rounds
-are clean; open the pull request; merge only once DEC-0150 is on main (the merge gate above), applying the merge list;
+Round 16 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers (round 15 was not clean),
+until two consecutive rounds are clean, with the full coverage run at low load; open the pull request; merge only once DEC-0150 is on main (the merge gate above), applying the merge list;
 mark DEC-0151 accepted, close CT-129, mark CT-210's first step done, release, and answer thread `b6820b97` with the tag.

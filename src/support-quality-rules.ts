@@ -45,7 +45,7 @@ export function isoWeekMonday(week: string): string | null {
 // DEC-0151's interim: until every reader of the feed has adopted it, a producer leaves an unmeasured first-reply time
 // null and unnamed, since an older copy refuses a metric name with a digit; the message points there.
 const FIRST_REPLY = new Set(["nobodyDropped.firstReplyP50Ms", "nobodyDropped.firstReplyP90Ms"]);
-const INTERIM = "; until every reader of the feed has adopted DEC-0151, leave it null and unnamed: support quality, the interim";
+const INTERIM = ", but until every reader of the feed has adopted DEC-0151, leave it null and unnamed: support quality, the interim";
 
 export function supportQualityRules(value: JsonObject): Finding[] {
   const findings: Finding[] = [];

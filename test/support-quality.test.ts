@@ -226,9 +226,21 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
     expect(value.notMeasured).toEqual(expect.arrayContaining(["nobodyDropped.firstReplyP50Ms", "nobodyDropped.firstReplyP90Ms"]));
     expect(value.nobodyDropped.firstReplyP50Ms).toBeNull();
     expect(value.nobodyDropped.firstReplyP90Ms).toBeNull();
+    // Nothing was judged that day: checks is null and named, and no rubric or judge is named (support quality's payload table).
+    expect(value.quality.sampled).toBe(0);
+    expect(value.checks).toBeNull();
+    expect(value.notMeasured).toContain("checks");
+    expect(value.rubricVersion).toBeNull();
+    expect(value.judgeModel).toBeNull();
     const result = validateDocument(ajv, schemaId, value);
     expect(result.valid, JSON.stringify(result.errors)).toBe(true);
     expect(paths(value)).toEqual([]);
+    // A valid name the payload does not carry is the one FAC-SEM-126 finding that says so.
+    const unknown = ok();
+    unknown.nobodyDropped.answeredLater = 0;
+    unknown.notMeasured = ["family2.metric"];
+    expect(validateDocument(ajv, schemaId, unknown).valid).toBe(true);
+    expect(evaluateSemanticRules("support-quality-daily", unknown).map((f) => `${f.instancePath} ${f.message}`)).toEqual(["/notMeasured notMeasured names family2.metric, which the payload does not carry"]);
     for (const name of ["family2.metric", "top9", "a1.b2_c"]) expect(validateDocument(ajv, schemaId, Object.assign(ok(), { notMeasured: [name] })).valid, name).toBe(true);
     for (const name of ["9nobodyDropped.answeredLater", "nobodyDropped.9turns", "_a.b", "a.b.c"]) expect(validateDocument(ajv, schemaId, Object.assign(ok(), { notMeasured: [name] })).valid, name).toBe(false);
   });
@@ -301,7 +313,7 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
     expect(paths(load("support-quality-daily-first-reply-interim-both.json").input as Json)).toEqual(["FAC-SEM-126 /nobodyDropped/firstReplyP50Ms", "FAC-SEM-126 /nobodyDropped/firstReplyP90Ms"]);
   });
   it("points the first-reply finding to DEC-0151's interim, and no other metric's (DEC-0151)", () => {
-    const interim = "; until every reader of the feed has adopted DEC-0151, leave it null and unnamed: support quality, the interim";
+    const interim = ", but until every reader of the feed has adopted DEC-0151, leave it null and unnamed: support quality, the interim";
     const messages = evaluateSemanticRules("support-quality-daily", load("support-quality-daily-first-reply-interim-both.json").input).map((f) => f.message);
     expect(messages).toEqual([`nobodyDropped.firstReplyP50Ms is null, so notMeasured names it${interim}`, `nobodyDropped.firstReplyP90Ms is null, so notMeasured names it${interim}`]);
     const other = structuredClone(load("support-quality-daily-first-reply-interim.json").input as Json);

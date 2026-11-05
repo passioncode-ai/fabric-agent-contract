@@ -4,7 +4,8 @@ DEC-0095, DEC-0144, DEC-0151 · rule code `FAC-SEM-126` · schema [`support-qual
 code [`src/support-quality-rules.ts`](../../src/support-quality-rules.ts) · tests
 [`test/support-quality.test.ts`](../../test/support-quality.test.ts) · fixtures `fixtures/positive/support-quality-daily.json`,
 `fixtures/positive/support-quality-daily-calibrated.json`, `fixtures/positive/support-quality-daily-tickets.json`,
-`fixtures/positive/support-quality-daily-first-reply-unmeasured.json`, `fixtures/positive/support-quality-daily-project.json`,
+`fixtures/positive/support-quality-daily-first-reply-unmeasured.json`, `fixtures/positive/support-quality-daily-no-reply.json`,
+`fixtures/positive/support-quality-daily-project.json`,
 `fixtures/positive/service-events-page-support-quality-projects.json`,
 `fixtures/positive/service-events-page-support-quality-sk-slug.json`, `fixtures/semantic/support-quality-daily-*`
 
@@ -104,7 +105,8 @@ feed has adopted DEC-0151, leave it null and unnamed"; `test/support-quality.tes
 
 No producer carries the ticket counts until two prerequisites outside this contract hold (CT-210 step (d)): the
 channel agent standard's section 5.1 says that `/1` takes `autonomy.toPersonPolicy` and `toPersonInability` in turns,
-and the observed check below holds.
+and the observed check below holds. The first holds in the standard's master since its owner's commit `86c49ec`
+(section 5.1 says turns); the second is still owed.
 
 The channel agent standard's observed check (its section 11) is to accept (CT-210 (d), owed by its owner until its text lands) what the wait withholds (support quality, the
 ticket counts), by period, the period being the event's day: a producer's adoption is marked by its first published day
@@ -210,11 +212,12 @@ a mapping costs nothing.
 - How a reader combines one channel's per-project days: the reader's choice; rates and percentiles are never summed.
   Which projects a reader on the channel agent standard may combine, and how it keeps a day without `project`, is
   decided: rule 5 of [the project](#the-project-dec-0151).
-- The four summary numbers the channel agent standard derives (answered, to a person, fallback, unanswered), as
+- The four summary numbers the channel agent standard derives (answered, to a person, safe reply (fallback in the received copy), unanswered), as
   shares of `ended`: the reader's.
 - The move from the asker's first implementation (its v2 shape, under its own URN): its producers move to
   `support-quality-daily/1`, and until then a `/1` reader reads none of their events (board row CT-61). v2's
   `stability.fallbackTurns` counts turns a fallback model answered and v2's `autonomy.answered` counts turns; `/1` has
   no member of either name: its safe-reply count is `stability.safeReplyTurns` and its ticket count
-  `autonomy.answeredTickets` (DEC-0151), since `/1` never reuses a v2 field name with another meaning or unit, and a reader maps v2's members explicitly,
+  `autonomy.answeredTickets` (DEC-0151), since no member DEC-0151 adds reuses a v2 field name with another meaning or unit (`/1`'s older `channel`, DEC-0095,
+  shares v2's name with another value space), and a reader maps v2's members explicitly,
   never by name.

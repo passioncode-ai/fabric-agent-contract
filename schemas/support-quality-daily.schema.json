@@ -258,7 +258,7 @@
         },
         "safeReplyTurns": {
           "$ref": "#/$defs/count",
-          "description": "Optional (DEC-0151): the day's turns answered with a safe reply after the checker (the model that gates an answer before it is sent) refused twice in a row. Not recoveredByFallback, which counts the model-call fallback, and not v2's stability.fallbackTurns (a fallback model answered): /1 never reuses a v2 field name with another meaning or unit."
+          "description": "Optional (DEC-0151): the day's turns answered with a safe reply after the checker (the model that gates an answer before it is sent) refused twice in a row. Not recoveredByFallback, which counts the model-call fallback, and not v2's stability.fallbackTurns (a fallback model answered): no member DEC-0151 adds reuses a v2 field name with another meaning or unit (/1's older channel, DEC-0095, shares v2's name with another value space)."
         },
         "safeReplyTickets": {
           "$ref": "#/$defs/count",
@@ -296,7 +296,7 @@
         },
         "answeredTickets": {
           "$ref": "#/$defs/count",
-          "description": "Optional (DEC-0151): the ending cohort's tickets that ended answered or answered_after_question. Named for tickets: /1 never reuses a v2 field name with another meaning or unit, and v2's autonomy.answered counts turns."
+          "description": "Optional (DEC-0151): the ending cohort's tickets that ended answered or answered_after_question. Named for tickets: no member DEC-0151 adds reuses a v2 field name with another meaning or unit (/1's older channel, DEC-0095, shares v2's name with another value space), and v2's autonomy.answered counts turns."
         }
       }
     },
