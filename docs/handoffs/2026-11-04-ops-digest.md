@@ -394,11 +394,11 @@ product's obligation.
 Round-19 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the six files of
 round 16 with coverage on `src/ops-digest.ts` (2044 tests; 292 of 292 statements, 227 of 227 branches); `pnpm exec tsx
 tools/vectors/run.ts`; `pnpm run docs:check`; `python3 docs/ux/lint.py`; `pnpm run privacy:check` (0 findings). Greps:
-`grep -c 'product was down for still gets' docs/DECISIONS.md` and `grep -c 'moves nothing' docs/DECISIONS.md`, 0 each;
-`grep -c -E 'step 3 of the Next task|step 8 now writes'` on this handoff, 0. The branch gate on this tree before its
-commit (15-minute load 34.9, 18 GB free, under the heavy lock): `pnpm run check` (109 files, 9960 tests passed, 1
-skipped, coverage floors held; `ux:lint`, `docs:check`, `privacy:check` 0 findings) exit 0, and `pnpm run
-vectors:check` exit 0. This paragraph is the only change after it.
+the two Why phrases the coordinator named in `docs/DECISIONS.md`, 0 each; the numbered step references the coordinator
+named, in this handoff, 0 (a follow-up commit words this paragraph so that it quotes none of them). The branch gate on
+this tree before its commit (15-minute load 34.9, 18 GB free, under the heavy lock): `pnpm run check` (109 files, 9960
+tests passed, 1 skipped, coverage floors held; `ux:lint`, `docs:check`, `privacy:check` 0 findings) exit 0, and `pnpm
+run vectors:check` exit 0. This paragraph is the only change after it.
 
 Rounds 17 and 18 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the six
 files of round 16 with coverage on `src/ops-digest.ts` (2043 tests; 287 of 287 statements, 222 of 222 branches); `pnpm
