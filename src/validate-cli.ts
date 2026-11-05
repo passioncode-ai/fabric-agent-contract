@@ -245,12 +245,15 @@ const HINT_HELP = {
   "hint/extension-key": "docs/specification/interop.md#extension-key",
   "hint/profile-version": "docs/specification/profiles.md",
   "hint/reader-pending": "docs/specification/provider.md",
+  "hint/declaration-only": "docs/specification/ops-digest.md#where-a-collector-reads-the-daily-digests",
 } as const;
 /** A hint: where it is, which hint, what it says. */
 type Hint = [string, keyof typeof HINT_HELP, string];
 
 /** A member the schema allows but a reader the contract names does not accept yet (CT-27 for `run.mcp.stdio.scope`). */
 function readerHints(schema: string | undefined, value: unknown, out: Hint[]): void {
+  // DEC-0153 OD-9: a bare ops-digest declaration checks its shape only; FAC-SEM-168 reads it inside its descriptor.
+  if (schema === "service-ops-digest-extension.schema.json") out.push(["/", "hint/declaration-only", "FAC-SEM-168 runs only on the declaration inside a service descriptor's extensions (the placement and paths.data, a source or a dir named twice, a home folder in a dir, a dir or source shaped like a credential); check the descriptor to run it"]);
   if (schema !== "provider.schema.json" || !isObject(value) || !isObject(value.run) || !isObject(value.run.mcp) || !isObject(value.run.mcp.stdio)) return;
   if (Object.hasOwn(value.run.mcp.stdio, "scope")) out.push(["/run/mcp/stdio/scope", "hint/reader-pending", "Fabric's registry does not accept run.mcp.stdio.scope yet (CT-27); leave it out and readers take on-demand"]);
 }

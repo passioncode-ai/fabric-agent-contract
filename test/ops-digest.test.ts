@@ -194,12 +194,23 @@ describe("the reference folds", () => {
 
   it("throws when a previous digest's failures give a rise a previous that is no count", () => {
     const H = "2026-11-04T02:00:00Z";
-    for (const failed of [-40, 2.5]) {
+    for (const failed of [-40, 2.5, Number.NaN, 1e300]) {
       const previous = { ...foldHour([], "2026-11-04T01:00:00Z", null), ops: [{ op: "x", ok: 0, failed, unknown: 0 }] } as HourlyDigest;
       expect(() => foldHour([{ op: "x", ok: 0, failed: 12, unknown: 0 }], H, previous), String(failed)).toThrow(/2\^53/);
     }
     const clean = foldHour([{ op: "x", ok: 0, failed: 5, unknown: 0 }], "2026-11-04T01:00:00Z", null);
     expect(foldHour([{ op: "x", ok: 0, failed: 12, unknown: 0 }], H, clean).risen).toEqual([{ op: "x", failed: 12, previous: 5 }]);
+    // An unmatched previous operation is not read, so its count does not matter.
+    const other = { ...clean, ops: [{ op: "y", ok: 0, failed: Number.NaN, unknown: 0 }] } as HourlyDigest;
+    expect(foldHour([{ op: "x", ok: 0, failed: 12, unknown: 0 }], H, other).risen).toEqual([{ op: "x", failed: 12, previous: 0 }]);
+  });
+
+  it("checks each hourly digest's counts before the day folds them", () => {
+    const a = foldHour([{ op: "x", ok: 5, failed: 0, unknown: 0 }], "2026-11-04T01:00:00Z", null);
+    const b = foldHour([{ op: "x", ok: 5, failed: 0, unknown: 0 }], "2026-11-04T02:00:00Z", null);
+    const negative = { ...a, ops: [{ op: "x", ok: -5, failed: 0, unknown: 0 }] } as HourlyDigest;
+    expect(() => foldDay("2026-11-04", [negative, b])).toThrow(/2\^53/);
+    expect(foldDay("2026-11-04", [a, b])?.total.ok).toBe(10);
   });
   it("refuses an hour that is not whole and skips an hour it cannot read", () => {
     expect(() => foldHour([], "2026-11-04T17:30:00Z", null)).toThrow(/whole UTC hour/);
@@ -272,7 +283,7 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     expect(found("service-descriptor", { ...pathless, paths: { data: 7, logs: [] } }).filter((f) => f.startsWith("FAC-SEM-168"))).toEqual([`FAC-SEM-168 ${at}`]);
   });
 
-  it("names each source and each dir once and refuses a home folder or a credential in dir and source", () => {
+  it("names each source and each dir once and refuses a dir holding a home folder, and a dir or source shaped like a credential", () => {
     // A Slack-shaped label, lower case so the source grammar takes it, built from pieces; secretValue finds it before
     // and after DEC-0151 narrows the sk- shape.
     const slack = ["xo", "xb-", "notareal-0123"].join("");
@@ -300,13 +311,29 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
   });
 
   it("compares dirs under Unicode case folding after NFC, trailing dots and spaces dropped", () => {
-    const pairs: Array<[string, string]> = [["Straße", "STRASSE"], ["Stra\u1e9ee", "Straße"], ["σασ", "ΣΑΣ"], ["café", "café"], ["digests.", "digests"], ["digests ", "digests"], ["a/Digests./b", "A/digests/B"]];
+    const pairs: Array<[string, string]> = [["Straße", "STRASSE"], ["Stra\u1e9ee", "Straße"], ["σασ", "ΣΑΣ"], ["café", "café"], ["digests.", "digests"], ["digests ", "digests"], ["a/Digests./b", "A/digests/B"], ["\u1fbc\u0342", "\u1fb7"], ["\u0131", "i"], ["\u0131", "I"]];
     for (const [a, b] of pairs) {
       expect(foldDir(a), `${a} ${b}`).toBe(foldDir(b));
       expect(found("service-descriptor", withFolders([{ dir: a, source: "one" }, { dir: b, source: "two" }])), `${a} ${b}`).toEqual([`FAC-SEM-168 ${at}/1/dir`]);
     }
     expect(foldDir("digests/a")).not.toBe(foldDir("digests/b"));
     expect(found("service-descriptor", withFolders([{ dir: "digests", source: "one" }, { dir: "digests/more", source: "two" }]))).toEqual([]);
+  });
+
+  it("hints that a bare declaration checks its shape only, refused dir or not (FAC-SEM-168 runs inside a descriptor)", () => {
+    const scratch = mkdtempSync(path.join(tmpdir(), "fac-ops-digest-"));
+    try {
+      for (const [name, value] of [["ok.json", [{ dir: "digests", source: "app" }]], ["refused.json", [{ dir: "users/digests", source: "app" }]]] as const) {
+        const file = path.join(scratch, name);
+        writeFileSync(file, JSON.stringify(value));
+        const result = runCli([file, "--schema", "service-ops-digest-extension.schema.json"]);
+        expect(result.code, name).toBe(0);
+        expect(result.out, name).toContain("hint/declaration-only");
+        expect(result.out, name).toContain("FAC-SEM-168 runs only on the declaration inside a service descriptor");
+      }
+    } finally {
+      rmSync(scratch, { recursive: true, force: true });
+    }
   });
 
   it("is a descriptor's rule only, and a declaration's absence is no finding", () => {

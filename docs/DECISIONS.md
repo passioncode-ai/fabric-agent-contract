@@ -9051,8 +9051,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      validates.
   2. **The window (OD-1).** `from` and `to` are whole UTC hours in RFC 3339 with `Z`, with or without the `.000` that
      `Date.prototype.toISOString` writes (Fabric writes it), `to` one hour after `from`; `day` is `YYYY-MM-DD` UTC;
-     `hours` 1 to 24. An hour the product ran through is written even when empty; an hour it did not run is a gap. An
-     hour counts as run through if the product ran at any moment in it; a product that folds on request from stored
+     `hours` 1 to 24. An hour the product ran through is written even when empty; an hour it did not run is a gap. A
+     product writes an hour only if it observed itself running in it (a tick or a record inside the hour), never
+     filling the hours from the last written to now without observing them (round 4: a sleep is not a run); a product that folds on request from stored
      records (an always-on server) folds only hours holding a record, so `hours` means hours folded, and a reader never
      infers uptime from it. The hour a product stops in is kept with its counts and written when it closes, at the next
      run, compared with the last hour written; a product that cannot keep it writes nothing for that hour, never a
@@ -9068,10 +9069,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and
      is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which
      `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed
-     by an ASCII letter or digit; or in which `~` stands at the start or after whitespace, a double or single quote, `=`, `/` or `\`,
-     followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`,
-     `api.my_users/list`, `ui.home/open`, `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` are
-     refused, and `api.user/list`, `api.get_user/list`, `user-digests` and `a/~1/x` pass. One refused name fails the whole line,
+     by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`,
+     followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`, `api.my_users/list` and `ui.home/open` are refused, and `api.user/list` and `api.get_user/list` pass (a dir's examples are in item 9). One refused name fails the whole line,
      which every reader skips. The shared detector stays (decided in review round 1, its boundary stated exactly in
      round 2), and a test pins every example on the spec page and here.
   4. **Counting and the rise (OD-3, OD-4).** Every record counted by `op` and outcome in its hour before any sampling;
@@ -9124,8 +9123,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the key on a remote placement or on a local one without `paths.data`, a value that is not its schema's, a `source`
      named twice, a `dir` named twice, compared under Unicode case folding after NFC with trailing dots and spaces
      dropped (one folder under two labels would be sent twice), a `dir` holding a home folder (`hasHomePath`, with the
-     boundary of item 3: `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail, `user-digests`
-     passes) and a `dir` or `source` shaped like a credential
+     boundary of item 3: `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x` pass) and a `dir` or `source` shaped like a credential
      (`secretValue`); one finding refuses the whole declaration, which a collector reads as not declared and reports.
      `digestFoldersView` (whose `usable` is true only when the rule has no finding) and `digestFoldersRules` in
      `src/ops-digest.ts` are the reference. A collector takes each day's first daily line whenever it first appears (a
@@ -9147,7 +9145,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   digest keeps OD-7. `hours` as hours folded is what an always-on server that folds from stored records can truthfully
   write. A collector that sends a caught-up day once loses no day and doubles none. Writing the hour a product
   stops in only when it closes, and never partly, keeps one line per hour, since readers keep the first; reading the
-  last line back keeps `previous` true across a restart. A `dir` that holds only its own instance's digests keeps one
+  last line back keeps `previous` true across a restart. An hour written only when the product saw itself in it keeps
+  a sleep from reading as hours run with nothing failing. A `dir` that holds only its own instance's digests keeps one
   count per instance; the 4096 bound with one overflow name keeps a busy hour's line valid and its totals whole. A line
   saying there is nothing to say has no call a host can observe, so it is no `ok`. The end of a session raises the
   retro only when none was written, so one retro is not asked twice; a record counted in the hour it is resolved keeps
@@ -9175,15 +9174,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the key as it does any extension. The Fabric Agent Adapter enters `fabric-ops-digest/0.1` in its twin protocol
   registers (`fabric_protocols.py`, `fabric-protocols.mjs`) at its next re-pin, as its vendoring script requires for
   every register row (`vendor_vectors.mjs`). Fabric's digests at `e1eecec0`
-  validate as written (its test's names, `x` and `y` included); its daily fold sorts rises by failures then name, as
-  `foldDay` does, but answers 2 of the 4 day vectors differently, so the reference folds are `src/ops-digest.ts`, and
-  Fabric owes the difference with OD-5's catch-up and RW-4's count. Fabric, Fabric Inbox, Fabric Dashboards and Fabric
-  Switchboard shipped digests before this decision with known departures, listed in the CT-219 handoff's Consumers
-  list (the authority, which this sentence does not repeat): among them the hour a product stops in left unwritten,
-  `previous` not read back after a restart, the OD-3 outcome map and the OD-5 catch-up. Fabric's client-supplied
-  operation names are fixed in its main (board message `6476789c`) and ship in its 0.3.16; Dashboards and Inbox fold a
-  repeated hour as the vectors do (14 of 14, messages `9ed2a464`, `f36bbc2c`); all four vendor the vectors from the
-  release tag. A product that names an operation outside OD-2's grammar
+  validate as written (its test's names, `x` and `y` included). The reference folds are `src/ops-digest.ts`; Fabric
+  writes digests since `e1eecec0`, and its daily fold differed on 2 of the 4 day vectors at its `a6f0ffda`. The OD-9
+  collector is not built (Fabric CO-503). Each product's adoption is tracked in its own rows; the CT-219 handoff's
+  Consumers list records what was read at a date, and vendoring the vectors from the release tag is each product's
+  obligation. At their next re-pin, the consumers that vendor a protocol table (a deployment template's
+  `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the adapter
+  kit's copies in agents built on it, and any other vendored table) add `fabric-ops-digest/0.1`. A product that names an operation outside OD-2's grammar
   (another separator, an upper-case first letter) renames it before it writes digests. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/ops-digest-hourly.schema.json`, `schemas/ops-digest-daily.schema.json`,
   `src/ops-digest.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `tools/vectors/ops-digest.ts`,
@@ -9192,7 +9189,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and for OD-9 `schemas/service-ops-digest-extension.schema.json`, `src/extensions.ts`, `src/protocol-revisions.ts`,
   `fixtures/positive/service-descriptor-ops-digest.json`, `fixtures/positive/service-ops-digest-extension.json`,
   `fixtures/negative/service-ops-digest-extension-*.json`, `fixtures/semantic/ops-digest-folders-*.json`,
-  `fixtures/semantic/ops-digest-hourly-op-users.json`, `docs/backlog.md`,
+  `fixtures/semantic/ops-digest-hourly-op-users.json`, `docs/backlog.md`, `src/validate-cli.ts` (the declaration-only hint
+  on a bare declaration),
   `test/consistency.test.ts`, `docs/specification/service.md`, `docs/specification/interop.md`,
   `docs/specification/versioning.md`;
   `test/ops-digest.test.ts`, `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
@@ -9223,6 +9221,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   folded in; round 3 at `be737b89` was not clean: product departures (the maturity claim and Compatibility omitted
   some) and RW-4's undefined "moved on", and its batch, with the coordinator's decisions on the hour a product stops
   in, `previous` read back, a declared `dir` holding only its instance's own digests, the 4096 bound and RW-4's `ok`
-  cases, is folded in;
+  cases, is folded in; round 4 at `ddf5b684` was not clean: the Consumers list against product code (the products'
+  states were written as facts beyond their code), and its batch, with the coordinator's decisions on the sleep (an
+  hour written only when observed), the operation-shaped examples of OD-2, the protocol-table re-pin, the
+  declaration-only hint and the canonical caseless fold, is folded in; the Consumers list is now a dated reading of each
+  product's code;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

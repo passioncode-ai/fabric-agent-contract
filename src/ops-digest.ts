@@ -75,6 +75,8 @@ export function realDay(value: unknown): boolean {
 }
 
 const iso = (at: number): string => new Date(at).toISOString();
+/** Whether `n` is a count: an integer from 0 to 2^53 - 1. */
+const isCount = (n: unknown): boolean => Number.isSafeInteger(n) && (n as number) >= 0;
 /** By name in code-unit order; both callers compare names that are already unique. */
 const byName = (a: { op: string }, b: { op: string }): number => (a.op < b.op ? -1 : 1);
 const sum = (ops: readonly Counters[]): Counters =>
@@ -86,7 +88,7 @@ const sum = (ops: readonly Counters[]): Counters =>
 function safeCounts<T extends HourlyDigest | DailyDigest>(digest: T): T {
   const counts = [digest.total, ...digest.ops].flatMap((c) => [c.ok, c.failed, c.unknown])
     .concat(digest.risen.flatMap((r) => ("previous" in r ? [r.failed, r.previous] : [r.failed])));
-  if (counts.some((n) => !Number.isSafeInteger(n) || n < 0)) throw new Error("a count is not an integer from 0 to 2^53 - 1");
+  if (!counts.every(isCount)) throw new Error("a count is not an integer from 0 to 2^53 - 1");
   return digest;
 }
 
@@ -104,13 +106,15 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
   if (wholeHour(iso(start + HOUR_MS)) === null) throw new Error(`the hour after ${from} is not a whole UTC hour the schema writes`);
   const merged = new Map<string, OpCount>();
   for (const c of counts) {
-    if (![c.ok, c.failed, c.unknown].every((n) => Number.isSafeInteger(n) && n >= 0)) throw new Error(`a count of ${c.op} is not an integer from 0 to 2^53 - 1`);
+    if (![c.ok, c.failed, c.unknown].every(isCount)) throw new Error(`a count of ${c.op} is not an integer from 0 to 2^53 - 1`);
     const m = merged.get(c.op) ?? { op: c.op, ok: 0, failed: 0, unknown: 0 };
     m.ok += c.ok; m.failed += c.failed; m.unknown += c.unknown;
     merged.set(c.op, m);
   }
   const ops = [...merged.values()].sort(byName);
   const before = new Map((previous !== null && wholeHour(previous.to) === start ? previous.ops : []).map((c) => [c.op, c.failed]));
+  // A previous count that is no count (NaN, 1e300, negative) would silently suppress or fake a rise: it throws.
+  for (const c of ops) if (before.has(c.op) && !isCount(before.get(c.op))) throw new Error(`the previous hour's failures of ${c.op} are not an integer from 0 to 2^53 - 1`);
   const risen = ops.filter((c) => isRise(c.failed, before.get(c.op) ?? 0)).map((c) => ({ op: c.op, failed: c.failed, previous: before.get(c.op) ?? 0 }));
   return safeCounts({ schema: OPS_DIGEST_HOURLY, from: iso(start), to: iso(start + HOUR_MS), ops, total: sum(ops), risen });
 }
@@ -119,7 +123,8 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
  * The day's hourly digests (those whose hour starts on `day`, one per hour, the first of a repeated hour kept) folded
  * into one: the operations summed, the hours counted, and each operation that rose in some hour with the hours it rose
  * in and the failures of those hours, the most failures first, then by name. A day with no hour of its own has no
- * digest: null (OD-5). It throws when a sum is not an integer from 0 to 2^53 - 1.
+ * digest: null (OD-5). It throws when an input count (checked before it is merged) or a sum is not an integer from 0
+ * to 2^53 - 1.
  */
 export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDigest | null {
   const seen = new Set<number>();
@@ -134,6 +139,7 @@ export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDige
   const rose = new Map<string, { hours: number; failed: number }>();
   for (const h of mine) {
     for (const c of h.ops) {
+      if (![c.ok, c.failed, c.unknown].every(isCount)) throw new Error(`a count of ${c.op} in ${h.from} is not an integer from 0 to 2^53 - 1`);
       const m = merged.get(c.op) ?? { op: c.op, ok: 0, failed: 0, unknown: 0 };
       m.ok += c.ok; m.failed += c.failed; m.unknown += c.unknown;
       merged.set(c.op, m);
@@ -269,12 +275,14 @@ export function digestFoldersView(descriptor: unknown): DigestFoldersView {
 }
 
 /**
- * A `dir` as a file system that folds case compares it: each segment as NFC, then lower, upper and lower case (Unicode
- * case folding, so `Straße` meets `STRASSE` and `Straẞe`, and `σασ` meets `ΣΑΣ`), then NFC again, trailing dots and
- * spaces dropped.
+ * A `dir` as a file system that folds case compares it, canonical caseless as DEC-0149's fold: each segment as NFD,
+ * then lower, upper and lower case, then NFC, trailing dots and spaces dropped. So `Straße` meets `STRASSE` and
+ * `Straẞe`, `σασ` meets `ΣΑΣ`, and a letter with U+0345 and another accent meets its precomposed form, which an
+ * NFC-first fold splits. It also joins the dotless `ı` with `i` (and `I`): two dirs a file system may keep apart are
+ * read as one, the safe direction, since the worst it does is a `FAC-SEM-168` finding on two folders.
  */
 export const foldDir = (dir: string): string =>
-  dir.split("/").map((segment) => segment.normalize("NFC").toLowerCase().toUpperCase().toLowerCase().normalize("NFC").replace(/[. ]+$/, "")).join("/");
+  dir.split("/").map((segment) => segment.normalize("NFD").toLowerCase().toUpperCase().toLowerCase().normalize("NFC").replace(/[. ]+$/, "")).join("/");
 
 const FOLDERS_PATH = `/extensions/${EXTENSION_KEYS.opsDigest.replace(/~/g, "~0").replace(/\//g, "~1")}`;
 const folderFinding = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-168", instancePath, message });
@@ -290,7 +298,7 @@ const folderFinding = (instancePath: string, message: string): Finding => ({ cod
  * and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case,
  * here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or
  * `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit;
- * or in which `~` stands at the start or after whitespace, a double or single quote, `=`, `/` or `\`, followed by an
+ * or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an
  * optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So
  * `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` are refused, and `user-digests` and `a/~1/x` pass.
  * A collector reads the folders only when this returns no finding (`digestFoldersView`'s `usable`), and treats any

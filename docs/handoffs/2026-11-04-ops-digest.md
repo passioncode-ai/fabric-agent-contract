@@ -71,7 +71,10 @@ DEC-0149, DEC-0150 and DEC-0152 are on other branches. When DEC-0149, DEC-0150 a
 - DEC-0150 (branch `agent/channel-agent-ext-v3-20261104`) adds the extension key `channel-agent/0.1` too: the second
   to land keeps both constants in `src/extensions.ts` and `test/consistency.test.ts` (and the test's title), both rows
   in `interop.md`'s key table, and writes "nine extension keys" there. Its rule codes end at `FAC-SEM-165`, so the
-  register's next free stays `FAC-SEM-169`.
+  register's next free stays `FAC-SEM-169`. DEC-0150 also adds a `hint/declaration-only` entry to
+  `src/validate-cli.ts` (`HINT_HELP` and `readerHints`) for its bare declaration, as this branch does for
+  `service-ops-digest-extension.schema.json`: the second to land keeps both `readerHints` lines and one `HINT_HELP`
+  key (each hint's message names its own rule codes), with a help link both pages share or the first one's.
 - `vitest.config.ts` keeps one coverage `include` line holding every branch's files, plus `src/ops-digest.ts`'s
   100 % branch floor.
 - `test/positive-sweep.test.ts`'s sources list holds both `source-rules` and `ops-digest`; `test/rule-tolerance.test.ts`
@@ -106,41 +109,54 @@ DEC-0149, DEC-0150 and DEC-0152 are on other branches. When DEC-0149, DEC-0150 a
 
 ## Consumers
 
-What ships, and what is owed. This list is the authority on the products' departures; the spec README's maturity cell
-and DEC-0153's Compatibility name the main ones and point here.
+A dated reading, not a status: each line says what the product's code showed at the commit named, read with
+`git ls-remote` and `gh api` (read-only) on 2026-11-05. What a product owes is named by its own row, with the date it
+gave; a fix announced on the board is written "announced", never as shipped. Products move daily: read again before
+relying on a line. Vendoring the vectors from the contract's release tag is every product's obligation.
 
-- Fabric writes the digests since `e1eecec0`, the shape's origin; the reference folds are this contract's
-  `src/ops-digest.ts`, since Fabric's daily fold answers 2 of the 4 day vectors differently. Fabric owes:
-  - OD-5's catch-up (announced in its 0.3.16);
-  - the hour it stops in, which it does not write (`opsDigestRun.ts:36`, `:117`, and its before-quit path), and
-    `previous`, which it does not read back after a restart (OD-1);
-  - RW-4's count (`ok` a lower bound; Project Observatory counts retros written, board message `1a12d809`).
-
-  Its operation names that came unchecked from a client's JSON-RPC body (`toolTrace.ts:127`, `toolOutcome.ts:118`) are
-  fixed in its main as `callOpName`, counting a name that fails `OP_NAME` or `FAC-SEM-167` as `tool.other` or
-  `mcp.other` (board message `6476789c`); the fix ships in its 0.3.16.
-- The OD-9 collector is not built yet: Fabric took the role (board thread `f7758225`, message `2ed505f2`), its CO-503
-  row does not yet record it; it will send each day's first daily line once, with `source` and the optional
-  `service {id, instance}` Project Observatory (OBS-330) agreed (message `1a12d809`).
-- Fabric Inbox (B-205) shipped digests before the contract. Its Mac app writes no empty hour, does not write the hour
-  it stops in (`desktop/ops-digest.cjs:6`) and does not read `previous` back after a restart (OD-1); it owes the OD-3
-  outcome map and the OD-5 catch-up. It folds a repeated hour as the vectors do (14 of 14, board messages `9ed2a464`,
-  `f36bbc2c`). The Mac app plans a local descriptor (its B-210): its own folder is an OD-9 declaration; the server
-  folder it fetches is a relayed remote instance's, outside this contract.
-- Fabric Dashboards (FD-144) shipped digests before the contract. It keeps `open.json` and reads its last hour back, so
-  its `previous` holds across a restart; it folds a repeated hour as the vectors do (14 of 14, the same messages); it
-  owes the OD-3 outcome map and the OD-5 catch-up. It has no local descriptor and reaches a collector through Fabric's
-  list of known hosts (message `08458f55`), an arrangement outside this contract.
-- Fabric Switchboard (SB-250) shipped digests before the contract. It writes on its tick only, so the hour it stops in
-  is not written (`digest.rs`), does not read `previous` back after a restart, and owes the fold of a repeated hour,
-  the OD-3 outcome map and the OD-5 catch-up. It reaches a collector as Dashboards does, outside this contract.
-- All four vendor the vectors from the contract's release tag, and each renames any operation `FAC-SEM-167` refuses
-  (OD-2's examples) before it writes.
-- The Fabric Agent Adapter owes the obligation (FAA-206) and, at its next re-pin, enters `fabric-ops-digest/0.1` in its
-  twin protocol registers `fabric_protocols.py` and `fabric-protocols.mjs`, which its
-  `test/fixtures/contract/vendor_vectors.mjs` writes from `PROTOCOL_REVISIONS` (the `register` of
-  `feed-protocols-vectors.json`); its retro counting follows RW-4 (`ok` only for a lesson or `insight/1` line written
-  through a call it carries, a hook observing the session's own tool call included).
+- **Fabric**, at `passioncode-ai/fabric` origin/main `a6f0ffda` (latest release v0.3.15), read 2026-11-05: writes
+  both digests (`apps/desktop/src/main/opsDigestRun.ts`); `apps/desktop/src/main/toolTrace.ts:127` builds an operation
+  name from the client's call (`tool.<name>`, `mcp.<method>`) unchecked; the hour loop fills the empty hours from the
+  last one written to now, up to a day (`opsDigestRun.ts:86-103`), without observing them; nothing writes the hour it
+  stops in; `previous` starts empty at each start (not read back). Owed in CO-509 by 2026-11-18 (board messages
+  `449b3e7e`, `fefb0266`); a checked operation name (`callOpName`, `tool.other` and `mcp.other`) is announced for its
+  0.3.16 candidate (board `fefb0266`). Its daily fold differed on 2 of the 4 day vectors at this commit (the round-4
+  readers' measurement); the reference folds are `src/ops-digest.ts`.
+- **The OD-9 collector**: not built. Fabric took the role (board thread `f7758225`, message `2ed505f2`, its CO-503);
+  Project Observatory agreed an optional `service {id, instance}` beside `source` (message `1a12d809`).
+- **Fabric Inbox**, at its release tag v0.95.0 (`6fed640`; `passioncode-ai/fabric-inbox` origin/main `71a3edd6` is one
+  docs commit ahead), read 2026-11-05: B-212 shipped in v0.95.0 (PR #413): the closed day folded from the hourly file
+  at its close and at every start, the OD-3 map published in its `docs/architecture.md`, an hour written twice folded
+  once. Open, both due 2026-11-16 (board message `17613e30`): B-213, the Mac app's hour it stops in, `previous` read
+  back at start, and operations beyond 4096 under one name; and B-210, OD-9 for the Mac app's own folder. B-210, as
+  first filed, named a top-level `opsDigests` member and a `server` source; its row was narrowed by PR #414 (`71a3edd`,
+  a plan, not code) to the Mac app's own folder in a local descriptor `fabric-inbox.desktop`, with the server's digest
+  not declared until forwarding a remote instance is decided.
+- **Fabric Dashboards**, at `passioncode-ai/fabric-dashboards` origin/main `9b9085bd` (latest release v0.8.23, main two
+  commits ahead), read 2026-11-05: FD-153, released in v0.8.23, `foldDay` answers null for a day without hours, closed
+  days with hours and no daily line are folded at the first roll after a start and once a day, the OD-3 map is
+  published in its RUNBOOK, and an hour written twice is folded once; `src/core/ops-digest.ts` keeps the open hour in
+  `open.json` across a quit and reads its last hourly line back for `previous`, and a roll writes only the open hour. Its
+  first digest row is FD-144.
+- **Fabric Switchboard**, at `passioncode-ai/fabric-switchboard` origin/main `32f94cea` (latest release v0.7.11), read
+  2026-11-05: `4123ef69` (`fold_day` folds each hour once, none for an empty day), `ba0f6cb` (PR #403, SB-254 and
+  SB-255: the OD-5 catch-up and the OD-3 map, for release 0.7.12, being built) and `32f94ce` (PR #405, SB-257: an hour
+  written only if it observed itself in it, the hour it stops in kept in `digests/open.json` and written at the next
+  run, `previous` read back from the last hourly line for the adjoining hour only, operations beyond 4096 counted as
+  `other_operations`) are in main; SB-257 is in main and ships in the next release after 0.7.12 (board message
+  `157e65b4`).
+- **Project Observatory**, at `passioncode-ai/project-observatory-dashboard` origin/main `4116b3ac` (latest release
+  v0.33.1), read 2026-11-05: no code reads digests yet; OBS-330 and OBS-331 are open and start from the contract's tag.
+- **The Fabric Agent Adapter**, at `passioncode-ai/fabric-agent-adapter` origin/main `d51aa73f` (latest release
+  v0.64.0), read 2026-11-05: FAA-206 part 1 (the retro reminder, a `PostToolUse` hook on Fabric's release tools)
+  shipped in v0.64.0; part 2 (the digest module, OD-9, the sleep rule, OD-2's grammar) waits on the contract's tag. At
+  its next re-vendor, `fabric-ops-digest/0.1` enters its twin protocol registers `fabric_protocols.py` and
+  `fabric-protocols.mjs`, which `test/fixtures/contract/vendor_vectors.mjs` writes from `PROTOCOL_REVISIONS`; its retro
+  counting follows RW-4.
+- **Protocol tables**: at their next re-pin, the consumers that vendor a protocol table (a deployment template's
+  `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the adapter
+  kit's copies in agents built on it, and any other vendored table) add `fabric-ops-digest/0.1`, as DEC-0149 asks
+  for `fabric-source`.
 
 ## Open
 
@@ -163,12 +179,25 @@ and DEC-0153's Compatibility name the main ones and point here.
   list above made complete and the authority; "moved on" deleted; the hour a product stops in and `previous` read back
   (OD-1), a `dir` holding only its own instance's digests (OD-9), the 4096 bound (OD-3), RW-4's `ok` cases made one
   list, and the unit tier's facts (the boundary's optional name, double or single quote and `F` in either case before
-  and after, the `ẞ` fold, each input count checked, the hour after 9999-12-31T23). Round 4 is next.
+  and after, the `ẞ` fold, each input count checked, the hour after 9999-12-31T23).
+- Round 4 at `ddf5b684` was not clean: the Consumers list, Compatibility and the maturity cell stated product states
+  beyond the products' code. The branch first merged `origin/main` (`1e7be3a5`, PR #242, CT-221 reserved on main with
+  a row equal to this branch's; it appears once). The Consumers list is now a dated reading of each product's code, and
+  the maturity cell and Compatibility no longer list per-product state. Folded in with it: OD-1's sleep rule (an hour
+  written only when observed), OD-2's operation-shaped examples, the protocol-table re-pin line, the declaration-only
+  hint on a bare declaration, the canonical caseless `dir` fold (NFD first, `ı` joined with `i`), the previous digest's
+  matched counts and `foldDay`'s inputs checked, "whitespace as JavaScript's `\s` reads it", and the extension
+  schema's description of what is refused. Round 5 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-4 batch, 2026-11-05, after merging `origin/main` (`1e7be3a5`), each exit 0: `pnpm typecheck`;
+`pnpm vitest run --testTimeout=60000` on the 11 files of round 2 with coverage on `src/ops-digest.ts` (4172 tests;
+215 of 215 statements, 173 of 173 branches); `pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`;
+`python3 docs/ux/lint.py`; `pnpm run privacy:check` (0 findings). The branch gate is owed: the 15-minute load was 61.8.
 
 Round-3 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
 round 2 (4170 tests); `test/ops-digest.test.ts` with coverage on `src/ops-digest.ts` (63 tests, 169 of 169 branches);
@@ -209,4 +238,6 @@ and its per-file floors (109 files, 9846 tests passed, 1 skipped), each exit 0. 
 ## Next task
 
 The coordinator's blind readings of DEC-0153 on branch `agent/ct219-ops-digest-20261104`, until two clean rounds;
-then the pull request, the merge and the answer on thread `f7758225`.
+then the pull request, the merge and the answer on thread `f7758225`. At landing, also: update the knowledge base's
+plans row for the contract (`fabric-workspace` `knowledge/plans.md`, its row at line 80 names neither OD-9 nor
+`FAC-SEM-168`), and confirm CT-221's row reserved on main (PR #242) stays once.
