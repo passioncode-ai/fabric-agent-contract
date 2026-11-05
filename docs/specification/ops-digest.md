@@ -10,15 +10,15 @@ DEC-0153 · rule codes `FAC-SEM-166`, `FAC-SEM-167`, `FAC-SEM-168` · schemas
 `fixtures/negative/ops-digest-*`, `fixtures/semantic/ops-digest-*`, `fixtures/positive/service-descriptor-ops-digest.json`,
 `fixtures/positive/service-ops-digest-extension.json`, `fixtures/negative/service-ops-digest-extension-*`
 
-A product keeps its own operations log on its own machine, and reads it itself: it writes one `ops.digest.hourly@1` line
-for each hour it observed itself running in, an empty one included, and every UTC day folds that day's hourly lines
-into one `ops.digest.daily@1` line.
-No model reads the log; the fold is arithmetic. A failure count that rose against the hour before is a rise, which the
-product tells its operator. Every agent closes its work with a retro, `retro-after-work`, which the host asks for and
-counts. The split of who keeps and reads what is Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is
-Fabric's commit `e1eecec0`, and this page is the shape every product writes, so one reader reads them all. The
-reference folds are this contract's [`src/ops-digest.ts`](../../src/ops-digest.ts) with its vectors. This page makes
-no claim about any product's code; what each product's code was read to do, at a date, is in the CT-219 handoff.
+A product keeps its own operations log on its own machine, and reads it itself: it writes one `ops.digest.hourly@1`
+line for each hour it observed itself running in, an empty one included, and folds each closed UTC day that has hourly
+lines into one `ops.digest.daily@1` line. No model reads the log; the fold is arithmetic. A failure count that rose
+against the hour before is a rise, which the product tells its operator. Every agent closes its work with a retro,
+`retro-after-work`, which the host asks for and counts. The split of who keeps and reads what is Fabric's ADR-0188
+(commit `0d0e5922`); the shape's origin is Fabric's commit `e1eecec0`, and this page is the shape every product
+writes, so one reader reads them all. The reference folds are this contract's
+[`src/ops-digest.ts`](../../src/ops-digest.ts) with its vectors. This page makes no claim about any product's code;
+what each product's code was read to do, at a date, is in the CT-219 handoff.
 
 ## The hourly digest, `ops.digest.hourly@1`
 
@@ -48,20 +48,21 @@ text among them, fails it.
 - **OD-1, the window.** An hourly digest covers one whole UTC hour, `to` one hour after `from`; a daily digest one UTC
   day. A product that keeps the log writes one `ops.digest.hourly@1` line for each hour it observed itself running in
   (a tick or a record inside the hour), an empty one included (`ops` empty, every total 0), so the next hour compares
-  with zero, and every UTC day folds that day's hourly lines into one daily line. Filling the hours from the last one
-  written to now without observing them (across a sleep, say) is not allowed. A product that keeps its records
-  elsewhere and answers for a day on request (an always-on server) writes each hourly line when that hour closes, as
-  any writer does, folding its stored records for that hour, with an empty line for an hour it observed itself running
-  in (a tick it records) and no stored record; its answer for a closed day folds the lines already written. An hour
-  the product did not run is not written (a gap), and so is an hour written as no digest under OD-3; the hour after a
-  gap compares with none. `hours` counts the hourly lines folded, never hours the product was up: a reader never
-  infers uptime from it. **The hour a product stops in** is kept with its counts and written when it closes, at the
-  next run, compared with the hour just before when that is the last hour written, else with none (a gap); a product
-  that cannot keep it writes nothing for that hour, never a partial line, since a restart in the same hour would leave
-  two lines and readers keep the first. At start a product reads its last hourly line back for `previous`, rebuilds
-  the day's named operations from that day's hourly lines and the hour it kept (so a restart never names more than
-  OD-3 allows), and writes every closed hour it kept, the hour it stopped in included, before it folds any closed day
-  (OD-5): otherwise that day's daily line loses that hour for good.
+  with zero, and folds each closed UTC day that has hourly lines into one daily line (a day with none has no daily
+  digest, OD-5). Filling the hours from the last one written to now without observing them (across a sleep, say) is
+  not allowed. A product that keeps its records elsewhere and answers for a day on request (an always-on server)
+  writes each hourly line when that hour closes, as any writer does, folding its stored records for that hour, with an
+  empty line for an hour it observed itself running in (a tick it records) and no stored record; its answer for a
+  closed day folds the lines already written. An hour the product did not run is not written (a gap), and so is an
+  hour written as no digest under OD-3; the hour after a gap compares with none. `hours` counts the hourly lines
+  folded, never hours the product was up: a reader never infers uptime from it. **The hour a product stops in** is
+  kept with its counts and written when it closes, at the next run, compared with the hour just before when that is
+  the last hour written, else with none (a gap); a product that cannot keep it writes nothing for that hour, never a
+  partial line, since a restart in the same hour would leave two lines and readers keep the first. At start a product
+  reads its last hourly line back for `previous`, rebuilds the day's named operations from that day's hourly lines and
+  the hour it kept (so a restart never names more than OD-3 allows), and writes every closed hour it kept, the hour it
+  stopped in included, before it folds any closed day (OD-5): otherwise that day's daily line loses that hour for
+  good.
 - **OD-2, an operation's name.** `op` is a short identifier: a lower-case letter, then letters, digits and `_` in
   segments joined by `.`, `:`, `/` or `-` (`board.tick`, `ipc.work:home`, `work.sweep-done-review`, and an MCP method
   as `mcp.<method>`: `mcp.tools/list`, `mcp.notifications/initialized`), at most 64 characters (one copy of the
@@ -81,7 +82,7 @@ text among them, fails it.
   value of it: no identifier, count or credential. `FAC-SEM-167` also refuses a name the shared credential detector
   reads as a credential: a provider key's shape, in either case and anywhere in the name: `sk-` followed by 16 or more
   letters, digits, `_` or `-` (so inside any word ending in sk: `task-`, `risk-`, `mask-` and the like), `gh[pousr]_`
-  followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more letters, digits or `-`, `AKIA` followed by 16 letters or digits, `glpat-` followed by 20 or more letters, digits, `_` or `-`; a JWT (`eyJ` and 2 or more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any number of them, case-sensitive); a value starting with `bearer` in either case, whitespace and one more character; or a run of 40 or more letters, digits, `_`, `-`
+  followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more letters, digits or `-`, `AKIA` followed by 16 letters or digits, `glpat-` followed by 20 or more letters, digits, `_` or `-`; a JWT (`eyJ` and 2 or more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any number of them, case-sensitive); a value starting with `bearer` in either case, whitespace and one more character other than a line break (as JavaScript's `.` reads it); or a run of 40 or more letters, digits, `_`, `-`
   or `/` (so across segments joined by `-` or `/`) that mixes upper case, lower case and a digit. `JWT_SHAPE`, `SECRET_VALUE` and `longSecret` (together `secretValue`) in [`src/secret-shape.ts`](../../src/secret-shape.ts) are the definition. So
   `ops.risk-assessment-completed` and `queue.task-assigned-to-worker` are refused and `work.session-end-task-back`
   passes, until DEC-0151's narrowing of the `sk-` shape lands.
@@ -223,7 +224,7 @@ A product with one folder of digests, `digests` in its data folder, writes in it
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-166"></a>`FAC-SEM-166` | `ops-digest-hourly`, `ops-digest-daily` | an hourly digest's `from` and `to` are whole UTC hours of real days, one hour apart, and a daily digest's `day` a real UTC day; each `op` once in `ops` and at most once in `risen`; `total` each counter's sum over `ops`; every `risen` op counted in `ops`; an hourly rise names the hour's failures of its op and is a rise by OD-4 against its `previous`; a daily rise is in at most the day's `hours`, with at least 10 failures an hour it rose and at most the day's failures of its op (DEC-0153) |
-| <a id="fac-sem-167"></a>`FAC-SEM-167` | `ops-digest-hourly`, `ops-digest-daily` | no `op`, in `ops` or in `risen`, is shaped like a credential (`secretValue` of [`src/secret-shape.ts`](../../src/secret-shape.ts), the shared detector: a provider key's shape, in either case and anywhere in the name: `sk-` followed by 16 or more letters, digits, `_` or `-` (so inside any word ending in sk: `task-`, `risk-`, `mask-` and the like), `gh[pousr]_` followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more letters, digits or `-`, `AKIA` followed by 16 letters or digits, `glpat-` followed by 20 or more letters, digits, `_` or `-`; a JWT (`eyJ` and 2 or more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any number of them, case-sensitive); a value starting with `bearer` in either case, whitespace and one more character; or a run of 40 or more letters, digits, `_`, `-` or `/` (so across segments joined by `-` or `/`) that mixes upper case, lower case and a digit. `JWT_SHAPE`, `SECRET_VALUE` and `longSecret` (together `secretValue`) in [`src/secret-shape.ts`](../../src/secret-shape.ts) are the definition. So `ops.risk-assessment-completed` and `queue.task-assigned-to-worker` are refused and `work.session-end-task-back` passes, until DEC-0151's narrowing of the `sk-` shape lands) or holds a home folder (`hasHomePath` of [`src/activity-rules.ts`](../../src/activity-rules.ts)). `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`, `api.my_users/list` and `ui.home/open` fail and `api.user/list` and `api.get_user/list` pass. One refused name fails the whole line, which every reader skips (DEC-0153) |
+| <a id="fac-sem-167"></a>`FAC-SEM-167` | `ops-digest-hourly`, `ops-digest-daily` | no `op`, in `ops` or in `risen`, is shaped like a credential (`secretValue` of [`src/secret-shape.ts`](../../src/secret-shape.ts), the shared detector: a provider key's shape, in either case and anywhere in the name: `sk-` followed by 16 or more letters, digits, `_` or `-` (so inside any word ending in sk: `task-`, `risk-`, `mask-` and the like), `gh[pousr]_` followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more letters, digits or `-`, `AKIA` followed by 16 letters or digits, `glpat-` followed by 20 or more letters, digits, `_` or `-`; a JWT (`eyJ` and 2 or more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any number of them, case-sensitive); a value starting with `bearer` in either case, whitespace and one more character other than a line break (as JavaScript's `.` reads it); or a run of 40 or more letters, digits, `_`, `-` or `/` (so across segments joined by `-` or `/`) that mixes upper case, lower case and a digit. `JWT_SHAPE`, `SECRET_VALUE` and `longSecret` (together `secretValue`) in [`src/secret-shape.ts`](../../src/secret-shape.ts) are the definition. So `ops.risk-assessment-completed` and `queue.task-assigned-to-worker` are refused and `work.session-end-task-back` passes, until DEC-0151's narrowing of the `sk-` shape lands) or holds a home folder (`hasHomePath` of [`src/activity-rules.ts`](../../src/activity-rules.ts)). `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`, `api.my_users/list` and `ui.home/open` fail and `api.user/list` and `api.get_user/list` pass. One refused name fails the whole line, which every reader skips (DEC-0153) |
 | <a id="fac-sem-168"></a>`FAC-SEM-168` | `service-descriptor` | a descriptor that carries the ops-digest key (`extensions/ops-digest/0.1`) is a `local` one that names `paths.data`; its value is valid against `service-ops-digest-extension.schema.json` (a reader treats an invalid one as not declared and reports it); each `source` is named once and each `dir` once, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped; no `dir` holds a home folder (`hasHomePath`) and no `dir` or `source` is shaped like a credential (`secretValue`), a `dir` read both as written and with the code points HFS+ ignores removed. `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail and `user-digests` and `a/~1/x` pass. One finding refuses the whole declaration, which a collector reads as not declared (DEC-0153 OD-9) |
 
 ## Not decided here

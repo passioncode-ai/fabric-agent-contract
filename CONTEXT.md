@@ -559,8 +559,8 @@ event's data an agent that answers people publishes: counts and rates in four fa
 and named, never `0`.
 
 **Operations digest**: A product's own operations log counted by operation and outcome, one `ops.digest.hourly@1` line
-for each hour the product observed itself running in (an empty one included) and one `ops.digest.daily@1` line per
-closed UTC day folding that day's hourly lines (DEC-0153): counts only, no log line, path or
+for each hour the product observed itself running in (an empty one included) and one `ops.digest.daily@1` line for
+each closed UTC day that has hourly lines, folding them (DEC-0153): counts only, no log line, path or
 identifier. A **rise** is an operation's failures in an hour at least 10 and at least twice the hour before's (none
 counting as one), told to the operator. A local descriptor says where a collector on its machine reads the daily
 digests, and the label it sends with them, under `extensions/ops-digest/0.1` (OD-9).

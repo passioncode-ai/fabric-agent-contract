@@ -269,12 +269,25 @@ product's obligation.
   records elsewhere writing each hourly line when that hour closes (an empty one for an observed hour with no record)
   and answering a closed day with the lines already written, "each hour it observed itself running in" in the module
   docstring, the producer row, DOCMAP and the spec README, the `bearer` shape stated as the detector reads it (pinned
-  as a dir), and the Consumers re-read for Switchboard v0.7.12 and v0.7.13 and Inbox PR #417. Round 12 is next.
+  as a dir), and the Consumers re-read for Switchboard v0.7.12 and v0.7.13 and Inbox PR #417.
+- Round 12 at `4e00da84` was not clean: a daily line was promised for every UTC day, though a day with no hourly line has
+  no daily digest (OD-5); now "each closed UTC day that has hourly lines" in DOCMAP, the spec README, the page intro,
+  OD-1, DEC-0153 item 2, the producer row, CONTEXT and the module docstring ("every UTC day" counts 0 there). Also: the
+  producer row's duties stated once with one OD reference, the `bearer` gloss "other than a line break (as
+  JavaScript's `.` reads it)", pinned (`bearer` with two spaces is refused, `bearer`, a space and a line break is not;
+  the round-12 note's `'bearer ' + ' '` is refused on this tree, so the line break is the passing sample), and
+  `HOME_PATH`'s boundary in `activity.md` and its docstring stated as the operations digests page states it. Round 13 is
+  next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-12 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
+round 2 with coverage on `src/ops-digest.ts` (4214 tests; 260 of 260 statements, 208 of 208 branches);
+`pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`; `python3 docs/ux/lint.py`;
+`pnpm run privacy:check` (0 findings).
 
 Round-11 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
 round 2 with coverage on `src/ops-digest.ts` (4214 tests; 260 of 260 statements, 208 of 208 branches);

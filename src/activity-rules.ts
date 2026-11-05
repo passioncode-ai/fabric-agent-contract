@@ -37,8 +37,9 @@ export const PERSON_PAIRS: ReadonlySet<string> = new Set(["display_name", "full_
 export const PERSON_PREFIXES: readonly string[] = ["employ", "productiv", "assess", "apprais"];
 
 /**
- * A home directory inside a value, in the user-name segment form: a home root (`Users`, `users`, `home`) between two
- * separators of the same kind, followed by a name. Matched forms:
+ * A home directory inside a value, in the user-name segment form: a home root (`Users`, `users`, `home`) at the start
+ * or after any character that is not an ASCII letter or digit, then a separator, then a name (the exact boundary, as
+ * docs/specification/ops-digest.md#fac-sem-167 states it for FAC-SEM-167 and FAC-SEM-168). Matched forms:
  * - slash forms, absolute or relative, plain or URL-encoded once or twice: `/Users/<name>`, `users/<name>`,
  *   `home/<name>`, `C:\Users\<name>`, `%2FUsers%2F<name>`, `%252FUsers%252F<name>`;
  * - the dash forms runtimes write into file names: `-Users-<name>-`, `C--Users-<name>`, `-home-<name>-`, after any

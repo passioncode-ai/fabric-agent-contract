@@ -265,8 +265,10 @@ depth is split into words — at `camelCase` boundaries, `_`, `-` and `.` — an
 - the key is `user` anywhere but the event's own `/user`.
 
 A value that holds a home directory is refused too. `HOME_PATH` in the same module matches the
-**user-name segment form**: a home root (`Users`, `users`, `home`) between two separators of the same
-kind, followed by a name. The forms it covers:
+**user-name segment form**: a home root (`Users`, `users`, `home`) at the start or after any character that is not
+an ASCII letter or digit, then a separator, then a name; the exact boundary, with the dash and tilde forms, is the one
+[operations digests](ops-digest.md#fac-sem-167) states for `FAC-SEM-167` and `FAC-SEM-168`, which this register now
+governs too. The forms it covers:
 
 - slash forms, absolute or relative: `/Users/<name>`, `users/<name>`, `home/<name>`,
   `C:\Users\<name>`;

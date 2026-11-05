@@ -8,6 +8,7 @@ import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { type HourlyDigest, OP_NAME, OP_NAME_MAX, digestFoldersView, foldDay, foldDir, foldHour, isRise, opsDigestRules, realDay, wholeHour } from "../src/ops-digest.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { hasHomePath } from "../src/activity-rules.js";
+import { secretValue } from "../src/secret-shape.js";
 import { VECTOR_FILE, buildOpsDigestVectors } from "../tools/vectors/ops-digest.js";
 import { main as runCli } from "../src/validate-cli.js";
 
@@ -523,6 +524,9 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     // operation's name holds no whitespace).
     expect(found("service-descriptor", withFolders([{ dir: ["bear", "er x"].join(""), source: "app" }]))).toEqual([`FAC-SEM-168 ${at}/0/dir`]);
     expect(found("service-descriptor", withFolders([{ dir: ["Bear", "er "].join(""), source: "app" }]))).toEqual([]);
+    // "One more character other than a line break": a space after the whitespace is one, a line break is not.
+    expect(found("service-descriptor", withFolders([{ dir: ["bearer ", " "].join(""), source: "app" }]))).toEqual([`FAC-SEM-168 ${at}/0/dir`]);
+    expect(secretValue(["bearer ", "\n"].join(""))).toBe(false);
     const home = ["us", "\u200c", "ers/jdoe/digests"].join("");
     expect(found("service-descriptor", withFolders([{ dir: home, source: "app" }]))).toEqual([`FAC-SEM-168 ${at}/0/dir`]);
   });
