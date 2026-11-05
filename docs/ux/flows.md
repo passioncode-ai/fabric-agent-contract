@@ -736,7 +736,7 @@ flowchart TD
 
 - **Traces:** ST-035 (JTBD-07, JRN-06/#3)
 - **Goal:** a step the operator would take on a dashboard happens when they tell their agent, recorded as their decision
-- **Entry points:** the operator's chat with their agent; a service's `operator-decision-required`; a job waiting for a choice
+- **Entry points:** the operator's chat with their agent; a service's `operator-decision-required`; a job waiting for a choice; a word the operator gives in a customer chat a channel agent answers (DEC-0150 CA-8)
 - **Success exit:** the service took the action as the operator's decision, and its audit names the agent that relayed it
 - **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the object when the operator named one, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision.
 - **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121); the one page-only step is the operator's move of a board slot until its twin ships (DEC-0140, SCN-051). A word the operator gives in a customer chat a channel agent answers, reaching a service action: rejected, because a word given in a customer chat reaches no service action (DEC-0150 CA-8, SCN-043).
@@ -754,6 +754,7 @@ flowchart TD
   Q --> O
   D -->|invalid| I[decision-invalid; the agent asks again]
   D -->|valid| R[Taken as the operator's; audited with the agent]
+  W[Word in a customer chat] --> K[CA-8: no decision, the route named to the operator privately]
 ```
 
 - **Screens traversed:** SCR-30 the operator's agent and the service's audit row.

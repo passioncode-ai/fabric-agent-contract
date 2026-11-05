@@ -269,6 +269,11 @@ FAA-197, on the adapter's main).
   that carry a view. SCN-043's Coverage says each producer's own test is owed, and FLW-29's rejected shape gains the
   chat word. The vectors' text gives both holding-reply clauses of `FAC-SEM-164` with its replies on. DEC-0150's
   Source names rounds 1 to 20 and the decisions of rounds 19 and 20.
+- Round 20's seam reading (on `5a68ce3a`: the scope break, already fixed at `a6f5ec10`), with the coordinator's
+  additions: the operator channel's page says that when the agent's bot also answers people, OC-3, OC-7, OC-12 and
+  OC-14 to OC-16 bind only the operator channel's bound chat, and every other chat is bounded by CA-8 and the standard
+  (staff messages read for the quiet window, the answer under the asked message, sections 4.8 and 10); the adoption
+  paragraph's test names the private response; FLW-29 gains the chat word as an entry point and a branch.
 
 ## The branch and its history
 
@@ -558,8 +563,10 @@ here), and adds:
 
 At merge, one adoption row per live producer is filed in that producer's own backlog with its `FAC-SEM-162` places
 (the coordinator files them on the board), with the places read again at posting time. Each row also names the
-producer's own test of CA-8: a channel message asking for an action outside the agent's task causes none, and the
-operator's word, as CA-8 bounds it, is carried out inside that chat. Three live producers' current
+producer's own test of CA-8: a channel message asking for an action outside the agent's task causes none; the
+operator's word, as CA-8 bounds it, is carried out inside that chat; and a word from the operator in a customer chat
+asking for something outside it causes no action and no message in that chat, the operator being told where only the
+operator reads it, with the route named. Three live producers' current
 declarations fail today, the places to be read again at posting time: one manifest at `sources/4/max_age`,
 `handoff_queues/0/owner` and `evals/spend_record` (pattern, or null); one well-known builder with no
 `question_route` and a recommendation holding a colon; one well-known builder with `null` for `question_route`,

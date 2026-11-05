@@ -9254,7 +9254,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/consistency.test.ts` (G-08's key list), `vitest.config.ts` (the module's floor), `src/secret-shape.ts`
   (`rawValues`), `fixtures/semantic/manifest-channel-agent-nulls.json`, `src/validate-cli.ts` and
   `test/validate-cli.test.ts` (`hint/declaration-only`), `docs/specification/service.md` (the well-known answer's
-  extensions), `docs/specification/identifiers.md` (compared as written), `docs/ux/scenarios.md` (SCN-002);
+  extensions), `docs/specification/identifiers.md` (compared as written), `docs/ux/scenarios.md` (SCN-002, SCN-043's alternative paths), `docs/ux/flows.md` (FLW-29), `docs/specification/operator-channel.md` (one bot that also answers people);
   `docs/specification/channel-agent.md`, `docs/specification/README.md`, `interop.md` (the extension keys), `support-quality.md` (the
   pointer), `conformance.md` (the register, the reference modules, the channel agent's rows), `docs/DOCMAP.md`,
   `CONTEXT.md` (Channel agent), `docs/evidence/sources.md`,
