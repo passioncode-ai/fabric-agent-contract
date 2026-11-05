@@ -610,22 +610,43 @@ const KEY_REREAD = 255;
 /** The shared detector's long-run floor (LONG_RUN in `secret-shape.ts`): a run of base64 characters this long or longer. */
 export const LONG_RUN_FLOOR = 40;
 /**
- * The shared detector's near-miss reread of a long run: for each maximal run of `[A-Za-z0-9+/=_-]` shorter than
+ * The shared detector's near-miss reread of a long run, over the three partitions its readings split a string into: the
+ * base64 class `[A-Za-z0-9+/=_-]` (secretValue), that class without `=` (secretArgument splits at `=`), and that class
+ * without `=` and `/` (secretArgument then splits a path at `/`). In each partition, for each maximal run shorter than
  * LONG_RUN_FLOOR, a regular expression that needs 40 may start at each of its code points and read to the run's end, so
- * each code point is charged min(length, 39). A run of 40 or more matches at once and is charged nothing more here.
+ * each code point is charged min(length, 39); a run of 40 or more matches at once and is charged nothing more here.
  */
 export function runRereads(text: string): number {
   let cost = 0;
-  let run = 0;
-  // One pass past the end closes the last run: the character there reads as NaN, which no range takes.
+  let whole = 0;
+  let noEquals = 0;
+  let noSlash = 0;
+  const charge = (run: number) => (run < LONG_RUN_FLOOR ? run * Math.min(run, LONG_RUN_FLOOR - 1) : 0);
+  // One pass past the end closes the last runs: the character there reads as NaN, which no range takes.
   for (let i = 0; i <= text.length; i += 1) {
     const c = text.charCodeAt(i);
-    // A-Z, a-z, 0-9, +, /, =, _ and -: ASCII, so a run's UTF-16 units are its code points.
-    if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122) || (c >= 48 && c <= 57) || c === 43 || c === 47 || c === 61 || c === 95 || c === 45) {
-      run += 1;
+    // A-Z, a-z, 0-9, +, _ and -: in every partition. ASCII, so a run's UTF-16 units are its code points.
+    if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122) || (c >= 48 && c <= 57) || c === 43 || c === 95 || c === 45) {
+      whole += 1;
+      noEquals += 1;
+      noSlash += 1;
+    } else if (c === 47) {
+      // `/` ends a run only in the third partition.
+      whole += 1;
+      noEquals += 1;
+      cost += charge(noSlash);
+      noSlash = 0;
+    } else if (c === 61) {
+      // `=` ends a run in the second and the third.
+      whole += 1;
+      cost += charge(noEquals) + charge(noSlash);
+      noEquals = 0;
+      noSlash = 0;
     } else {
-      if (run < LONG_RUN_FLOOR) cost += run * Math.min(run, LONG_RUN_FLOOR - 1);
-      run = 0;
+      cost += charge(whole) + charge(noEquals) + charge(noSlash);
+      whole = 0;
+      noEquals = 0;
+      noSlash = 0;
     }
   }
   return cost;

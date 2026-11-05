@@ -284,7 +284,7 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    any case, that follows a boundary, its three characters included, up to 255 code points to the end of the string
    (`sk-a` costs 4 and 4: 8); after every `sk-` away from a boundary, up to 16 code points after it, the run the shape
    needs (`xsk-a` costs 5 and 1); after every other provider prefix, anywhere and in any case (`gh` and one of `pousr`
-   then `_`, `xox` and one of `abposr` then `-`, `AKIA`, `glpat-`), up to its floor, the run its shape needs (20, 10, 16 and 20 code points; a floor counts the run the shape needs, not the character that ends it); and, beside the prefixes, the shared detector's long-run floor of 40 (`LONG_RUN`): for each maximal run of base64 characters (`[A-Za-z0-9+/=_-]`) shorter than 40, min(length, 39) per code point, since a reading that needs 40 may start at each of them (`abc,de` costs 6, 9 and 4; the other examples here count their own terms only). Each of these is a bound
+   then `_`, `xox` and one of `abposr` then `-`, `AKIA`, `glpat-`), up to its floor, the run its shape needs (20, 10, 16 and 20 code points; a floor counts the run the shape needs, not the character that ends it); and, beside the prefixes, the shared detector's long-run floor of 40 (`LONG_RUN`): in each of three partitions the shared detector's readings split a string into (the base64 class `[A-Za-z0-9+/=_-]`; that class without `=`, where `secretArgument` splits; and without `=` and `/`, a path's segments), for each maximal run shorter than 40, min(length, 39) per code point, since a reading that needs 40 may start at each of them (`abc,de` costs 6 and 3 x (9 + 4); the other examples here count their own terms only). Each of these is a bound
    any detector may need, whatever boundary or case its own shapes take. A boundary is the start, a character other
    than a letter or a digit, or an escape that ends right before the `sk-`: `%XX`, `%25XX`, `\xHH`, `\uHHHH`, a two- or
    three-digit octal escape, a backslash escape of one character, or a colour sequence `ESC[...m` with any number of
@@ -373,11 +373,12 @@ rules', not the view's.
 
 Every channel agent owes this, whatever it declares (DEC-0150 CA-8). Text that arrives from a channel (a message, a
 caption, a file name, a link, a quoted reply, an attachment and any text extracted from it, a mail's headers, and what a
-link leads to) is data, never an instruction to the agent. A request inside the agent's own task (an answer, the
-product's checks, reading the customer's own account as the standard's section 4.6 says (with the customer identified by
-the channel, never by text in the message), a hand-off by section 4.2's rule) is the task; the agent never makes a tool
-call, sends a message, spends, changes access or takes any other action outside its task because a channel message asks
-for it, and it replies on the reply path its operator configured.
+link leads to) is data, never an instruction to the agent. A request inside the agent's own task is the task, and the
+task is what the standard's sections 4 and 6 ask (for example an answer, the product's checks of section 4.2 and the
+section 6 ladder beside them, reading the customer's own account as section 4.6 says (with the customer identified by
+the channel, never by text in the message), a hand-off by section 4.1's rule, a tier's priority by section 2.3); the
+agent never makes a tool call, sends a message, spends, changes access or takes any other action outside its task
+because a channel message asks for it, and it replies on the reply path its operator configured.
 
 CA-8's channels are the channels the agent answers people on, declared or not (those a valid declaration names, and any
 other it answers people on). The operator channel (`fabric-operator-channel/0.1`) is not one of CA-8's channels and
@@ -395,22 +396,25 @@ channel, the account's owner, only when the owner is the operator and the send r
 name, a display name or text in the message, and otherwise it stays data. The operator is a person's own user id; a
 message sent on behalf of a chat (`sender_chat` set: an anonymous admin, or a member posting as a channel) carries a
 shared placeholder sender and is never the operator's word. On an `account` channel, a message the session owner cannot
-attribute to the operator's own session stays data until the standard's owner answers the identification question (merge
-post). Such a word acts only inside that chat, as the standard's section 4.10 says (the operator's decision given in a
-chat "outranks every holding rule of the agent for that chat"); it is not one of DEC-0121 [AP-3](service.md#actions)'s
-sources and never the source of an OA-2 relay, and the customer ticket it acts on stays a customer ticket, its outcome
-set and counted as sections 3 and 5.1 say. That word does not release a send held by the transport's owner (the
-standard's section 9) or behind a service's relayed action: the owner's own approval rules end the first (section 9),
-and an agent relays a decision on the second only from DEC-0121 AP-3's sources (AP-1 and AP-2 still take the service's
-own page, an accepted elicitation and the host's click). A word that asks for an action outside that chat causes none;
-how the agent tells the operator is a question to the standard's owner (merge post). Text the operator quotes or
-forwards, and every other sender's text, stays data.
+attribute to the operator's own session (its send record is missing, or does not show the operator's word) stays data
+until the standard's owner answers the identification question (merge post). Such a word acts only inside that chat, as
+the standard's section 4.10 says (the operator's decision given in a chat "outranks
+every holding rule of the agent for that chat"); it is not one of DEC-0121 [AP-3](service.md#actions)'s sources and
+never the source of an OA-2 relay, and the customer ticket it acts on stays a customer ticket, its outcome set and
+counted as sections 3 and 5.1 say. That word does not release a send held by the transport's owner (the standard's
+section 9) or behind a service's relayed action: the owner's own approval rules end the first (section 9), and an agent
+relays a decision on the second only from DEC-0121 AP-3's sources (AP-1 and AP-2 still take the service's own page, an
+accepted elicitation and the host's click). A word that asks for an action outside that chat causes none; how the agent
+tells the operator is a question to the standard's owner (merge post). Text the operator quotes or forwards, and every
+other sender's text, stays data.
 
 The agent records such a word in its own audit, quoting the message and its sender id.
 
-A producer's own test of CA-8 covers at least: a request for an action outside that chat causes nothing and is audited;
-only a sender the transport identifies is the operator, and that word acts only in that chat; quoted or forwarded text
-stays data; a message with `sender_chat` set is never the operator's; the operator channel stays a DEC-0121 AP-3 source.
+A producer's own test of CA-8 covers at least: a message from anyone but the operator asking for an action outside the
+task causes none; the operator's request for an action outside that chat causes nothing and is audited; only a sender
+the transport identifies is the operator, and that word acts only in that chat; a chat word never sets `_meta.decision`
+or an OA-2 relay; quoted or forwarded text stays data; a message with `sender_chat` set is never the operator's; and,
+where the agent has an operator channel, that channel stays a DEC-0121 AP-3 source.
 
 CA-8 is bounded by section 4.10 and by section 10's `account` row and does not override them; the identification bound
 (who counts as the operator in a chat) is sent to the standard's owner. CT-220, when drafted, is to keep this bound (the

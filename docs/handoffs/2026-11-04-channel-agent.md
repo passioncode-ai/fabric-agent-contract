@@ -361,7 +361,20 @@ FAA-197, on the adapter's main).
   `first_reply_from`; the sibling lines name the auto-merging files and the one CT-217 row. From round 28's seam reading:
   the reserved-codes sentence is dropped outright, with a line for PR #235's lander; the DEC-0151 list says what happens
   if DEC-0151 lands first; the schema-count conflict at the DEC-0153 step is textual; the installation-valued row has
-  one filer; the live manifest producer fails at one place.
+  one filer; the live manifest producer fails at one place. Superseded by round 29 for that producer's count, which
+  was false.
+- Round 29 of the readings (on `34f9f6ba`: unit pass, product and seam one break each) was not clean: the adoption
+  paragraph paraphrased the page's minimum cases, and the bare-path landing step was incomplete. With the coordinator's
+  decisions: adoption rows quote the page's minimum-cases sentence verbatim at posting time; the landing step keeps a
+  reworded second hint sentence (map keys) and names every dependent it changes, with its check; `runRereads` charges
+  the three partitions the shared detector's readings split a string into (the class; without `=`; without `=` and `/`),
+  so a near miss split at `=` is bounded, with an exact test and a timing case; the producer's failing places are read
+  at posting time, with no count; the minimum cases add the headline case and a chat word never setting
+  `_meta.decision` or an OA-2 relay, and make the operator-channel case conditional; the task is what sections 4 and 6
+  ask, its list an example; "cannot attribute" is the send-record test; SCN-043's group bot receives every message and
+  the out-of-chat example is Bob's review in another chat; the conformance row carries the bound sentence; the timing
+  baseline's note says its prose is Cyrillic; the DEC-0153 line is re-measured at `be737b89` and splits auto-merging
+  from pairwise-conflicting files. The local ASCII prose baselines in the timing tests now use the same run-free prose.
 
 ## The branch and its history
 
@@ -436,8 +449,9 @@ origin), whichever lands second:
   (SCN-002), while a reader keeps the declaration declared; this branch's text says so and never calls it
   non-blocking;
 - puts the register in code order: `FAC-SEM-155`, `156` to `160`, then `162` to `165`;
-- reads the next-free markers (DEC and SEM) from the CAS refs at landing, not from either branch, and keeps one
-  "Next free ID" line in `docs/DECISIONS.md` and one "Next free rule code" line in conformance.md;
+- reads the next-free markers (DEC and SEM) from the CAS refs at landing (when last read, DEC next 154 and FAC-SEM next
+  169), not from either branch, and keeps one "Next free ID" line in `docs/DECISIONS.md` and one "Next free rule code"
+  line in conformance.md;
 - adds the comma at the end of the catalogue's last row before the other branch's rows;
 - resolves the `vitest.config.ts` include line, which conflicts textually (git 2.55), into one coverage `include` line
   holding both branches' lists (two `include` keys would let the later one drop `src/validator.ts`), and keeps
@@ -463,9 +477,15 @@ origin), whichever lands second:
   -c 'installation-valued' docs/backlog.md` prints 1) the backlog row DEC-0149 owes at the DEC-0150 step, at the next
   free CT id then: a source export's installation-valued members of a channel-agent declaration (`tickets.token_slot`'s
   vault project and env, `evals.spend_record`, the per-project entries), checked against the source slots;
-- after DEC-0149 lands (its `formatSchemaErrors(errors, { instanceFree: true })`), makes the bare `--schema
-  service-channel-agent-extension.schema.json` path run instance-free and drops the second sentence of
-  `hint/declaration-only`;
+- after DEC-0149 lands (its `formatSchemaErrors(errors, { instanceFree: true })`), runs the bare `--schema
+  service-channel-agent-extension.schema.json` path instance-free and rewords the second sentence of
+  `hint/declaration-only` to "A bare declaration's lines may name a map key as written (a language tag shaped like a
+  credential included) and print one line per item, since widths are not checked first here.", changing in the same step
+  every dependent: `readerHints`' text in `src/validate-cli.ts`, the 'may name its members as written' assertion in
+  `test/validate-cli.test.ts`, the page's paragraph on a bare declaration (`channel-agent.md`, "Where it is declared"),
+  SCN-002's errors line in `docs/ux/scenarios.md`, and CT-209's "Owed as a follow-up" text in `docs/backlog.md`; check:
+  a declaration with `texts.final["sk-Latn-150-u-ca-gregory"] = 5` prints a hint naming map keys, and `grep -n 'as
+  written'` on the page and in the scenarios matches the landed output;
 - leaves `detectorCost` normative: once DEC-0149's one-pass `hasJwt` lands, the `eyJ` term no longer describes this
   repository's detector, and stays as a bound any port's detector may need (the page and CA-5 already say so).
 
@@ -491,28 +511,29 @@ One line per sibling and per file it shares with this branch:
   `docs/backlog.md` with its row CT-217, a different row of `docs/specification/conformance.md`) and
   `docs/handoffs/README.md`, where both branches add a top row and both are kept; `docs/backlog.md` keeps one CT-217
   row, DEC-0152's.
-- DEC-0153 (branch `agent/ct219-ops-digest-20261104`, read at `ada7c23d`, with OD-9: the descriptor extension
-  `ops-digest/0.1`, a ninth extension key, a third schema and `FAC-SEM-168`): `docs/DECISIONS.md`; `docs/DOCMAP.md`;
-  `docs/backlog.md`; `docs/handoffs/README.md`; `docs/specification/conformance.md`; `docs/specification/README.md`;
+- DEC-0153 (branch `agent/ct219-ops-digest-20261104`, re-measured at `be737b89` (149 schemas, "eight extension keys" on
+  its side, `FAC-SEM-166` to `FAC-SEM-168`), with OD-9: the descriptor extension `ops-digest/0.1`, a ninth extension
+  key, a third schema and `FAC-SEM-168`): `docs/DECISIONS.md`; `docs/DOCMAP.md`; `docs/backlog.md`;
+  `docs/handoffs/README.md`; `docs/specification/conformance.md`; `docs/specification/README.md`;
   `docs/specification/interop.md`; `CONTEXT.md`; `fixtures/catalogue.json`; `src/extensions.ts`;
-  `src/semantic-rules.ts`; `test/consistency.test.ts`; `test/positive-sweep.test.ts`; `tools/vectors/run.ts`;
-  `vitest.config.ts`; `test/schema-compilation.test.ts`; and, auto-merging, `src/protocol-revisions.ts`,
-  `docs/specification/service.md`, `CONTEXT.md`, conformance.md and `fixtures/catalogue.json`. With DEC-0149, DEC-0150
-  and DEC-0153 all on main the schema count is 151: each side writes 147 or 149, and at the DEC-0153 step the lines
-  conflict textually (they do not merge silently), so the last lander sets 151 by hand in the title, `toHaveLength` and
-  `toBe` (the Set size) of `test/schema-compilation.test.ts` (`grep -c 151` prints 3). The second of DEC-0150 and
-  DEC-0153 to land keeps both constants (`channelAgent` and `opsDigest`) in `src/extensions.ts` and in
-  `test/consistency.test.ts` (its title naming both keys), keeps both rows in interop.md's table, and writes "nine
-  extension keys" there: the count line merges silently as "eight", and no check catches it. `NOT_SWEPT` in
-  `test/positive-sweep.test.ts` keeps both extension schemas. The merged tree keeps one coverage `include` line holding
-  every branch's list, with `src/ops-digest.ts`'s floor beside the others; `test/positive-sweep.test.ts`'s `sources`
-  holds both `source-rules` and `ops-digest`; `test/rule-tolerance.test.ts`, where either branch adds a kind, holds
-  both, with a comma between them; the catalogue's last row before the other branch's rows gains its comma; and
-  conformance.md's register adds `FAC-SEM-166` to `FAC-SEM-168` after `165`, the next free `FAC-SEM-169` and `DEC-0154`
-  read from the CAS refs at landing. Checks on the merged tree: `grep -c 'nine extension keys'
-  docs/specification/interop.md` prints 1, `grep -c 'toHaveLength(151)' test/schema-compilation.test.ts` prints 1, `grep
-  -c 151 test/schema-compilation.test.ts` prints 3, and `channelAgent` and `opsDigest` both stand in
-  `src/extensions.ts`.
+  `test/consistency.test.ts`; `test/positive-sweep.test.ts`; `vitest.config.ts`; `test/schema-compilation.test.ts`;
+  auto-merging: `src/protocol-revisions.ts`, `docs/specification/service.md`, `src/semantic-rules.ts` and
+  `tools/vectors/run.ts`; `CONTEXT.md`, conformance.md and `fixtures/catalogue.json` conflict pairwise (`CONTEXT.md`
+  auto-merges only in the chain after DEC-0149 and DEC-0151). With DEC-0149, DEC-0150 and DEC-0153 all on main the
+  schema count is 151: each side writes 147 or 149, and at the DEC-0153 step the lines conflict textually (they do not
+  merge silently), so the last lander sets 151 by hand in the title, `toHaveLength` and `toBe` (the Set size) of
+  `test/schema-compilation.test.ts` (`grep -c 151` prints 3). The second of DEC-0150 and DEC-0153 to land keeps both
+  constants (`channelAgent` and `opsDigest`) in `src/extensions.ts` and in `test/consistency.test.ts` (its title naming
+  both keys), keeps both rows in interop.md's table, and writes "nine extension keys" there: the count line merges
+  silently as "eight", and no check catches it. `NOT_SWEPT` in `test/positive-sweep.test.ts` keeps both extension
+  schemas. The merged tree keeps one coverage `include` line holding every branch's list, with `src/ops-digest.ts`'s
+  floor beside the others; `test/positive-sweep.test.ts`'s `sources` holds both `source-rules` and `ops-digest`;
+  `test/rule-tolerance.test.ts`, where either branch adds a kind, holds both, with a comma between them; the catalogue's
+  last row before the other branch's rows gains its comma; and conformance.md's register adds `FAC-SEM-166` to
+  `FAC-SEM-168` after `165`, the next free `FAC-SEM-169` and `DEC-0154` read from the CAS refs at landing. Checks on the
+  merged tree: `grep -c 'nine extension keys' docs/specification/interop.md` prints 1, `grep -c 'toHaveLength(151)'
+  test/schema-compilation.test.ts` prints 1, `grep -c 151 test/schema-compilation.test.ts` prints 3, and `channelAgent`
+  and `opsDigest` both stand in `src/extensions.ts`.
 - At the DEC-0153 step: keep DEC-0151's support-quality rows (conformance.md's clients table, `docs/DOCMAP.md`, the
   specification README) and DEC-0153's new rows, never main's older support-quality rows; check: `grep -c '^| an agent
   that answers people, publishing its support quality' docs/specification/conformance.md` prints 1 on the merged tree.
@@ -601,6 +622,13 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
+On round 29's change, each exit code read separately: `pnpm typecheck` 0; `pnpm vitest run --testTimeout=60000
+test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts test/validate-cli.test.ts` 0 (2115
+passed); `pnpm vectors:check` 0 (29 vector files match their generators, after the channel-agent generator's `--write`);
+`pnpm run docs:check` 0 (markdownlint 0 errors); `python3 docs/ux/lint.py` 0; `pnpm run privacy:check` with the
+organization index 0 (0 findings); no U+2014 in the added lines; `operator-channel.md` matches main. The coverage run
+is owed: the 15-minute load was 39.53, but free disk was 4.2 GB, under 8 GB.
+
 On round 28's change (with round 27's findings and round 28's seam items), each exit code read separately: `pnpm
 typecheck` 0; `pnpm run docs:check` 0 (markdownlint 0 errors); `python3 docs/ux/lint.py` 0; `pnpm run privacy:check` 0
 (0 findings); `pnpm vectors:check` 0 (29 vector files match their generators, after the channel-agent generator's
@@ -686,7 +714,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 28 (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 29 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -755,12 +783,10 @@ here), and adds:
 
 At merge, one adoption row is filed for every producer declaring the key (five on 2026-11-05), each in that producer's
 own backlog with its `FAC-SEM-162` places (the coordinator files them on the board), the places read again at posting
-time. Each row also names the producer's own test of CA-8, at least the cases the page lists: a channel message asking
-for an action outside the agent's task causes none; on a channel it answers people on, declared or not, only a sender
-the transport identifies as the operator counts as the operator's word, which acts only inside that chat as section 4.10
-says, and a word asking for an action outside that chat causes none; the operator channel stays a DEC-0121 AP-3 source.
-Today the live manifest producer fails at one place, `/projects/0/sources/4/max_age`, and two well-known builders fail
-as follows, all to be read again at posting time: one well-known builder with no `question_route` and a recommendation
+time. Each row also names the producer's own test of CA-8 by quoting, verbatim and re-taken from the landed page at
+posting time, the page's sentence listing the minimum cases that test covers (never a paraphrase). Each producer's
+failing places are read at posting time with `pnpm validate` on its manifest or well-known answer (no count is kept
+here); earlier readings found, among others: one well-known builder with no `question_route` and a recommendation
 holding a colon; one well-known builder with `null` for `question_route`, `gap_registry`, a channel's texts, a queue's
 recommendation and `pd_check` (the question route, the gap registry and `pd_check` may now take the none form instead; a
 `null` there is still refused). The adapter's row names the update of both `PROTOCOL_REVISIONS` twins

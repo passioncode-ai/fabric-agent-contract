@@ -40,6 +40,8 @@ const least = (work: () => unknown): number => {
 // The baseline's prose is read to the budget at 4096 + 16 a string, as before the long-run term: its letters are outside
 // ASCII, so it holds no base64 run for runRereads to charge, and 245 strings still spend the budget (a prose of ASCII
 // words now costs about four times as much a string, so the budget would stop it after about 57 strings).
+// Its letters take two bytes each in UTF-8 (one UTF-16 unit, one code point), so the bound is about 20 % tighter than
+// with ASCII prose; watch the nightly run for flakes.
 const PROSE = "съешь же ещё этих мягких французских булок да выпей чаю ".repeat(80).slice(0, 4096);
 
 // detectorCost without its long-run term (runRereads, pinned on its own below): the terms the older exact tests count.
@@ -577,7 +579,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   });
   it("reads a query of many pieces about as fast as prose of the same size", () => {
     const query = `https://a.example/?${"a=b&".repeat(1100)}`.slice(0, 4096);
-    const prose = "the quick brown fox jumps over the lazy dog ".repeat(100).slice(0, 4096);
+    const prose = PROSE;
     // The test thread's own processor time, so another file's work does not count.
     const thread = (process as unknown as { threadCpuUsage?: (previous?: NodeJS.CpuUsage) => NodeJS.CpuUsage }).threadCpuUsage;
     const clock = (previous?: NodeJS.CpuUsage): NodeJS.CpuUsage => (thread === undefined ? process.cpuUsage(previous) : thread.call(process, previous));
@@ -620,7 +622,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       const spent = clock(started);
       return (spent.user + spent.system) / 1000;
     };
-    const prose = "the quick brown fox jumps over the lazy dog ".repeat(100).slice(0, 4096);
+    const prose = PROSE;
     const shapes = [tab.slice(0, 4096), `https://a.example/#q=${"ey\rJ".repeat(1000)}`.slice(0, 4096), `https://a.example/#q=${"ey\nJ".repeat(1000)}`.slice(0, 4096), sk.slice(0, 4096)];
     time(prose);
     const baseline = Math.min(time(prose), time(prose), time(prose));
@@ -704,7 +706,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       const spent = clock(started);
       return (spent.user + spent.system) / 1000;
     };
-    const prose = "the quick brown fox jumps over the lazy dog ".repeat(100).slice(0, 4096);
+    const prose = PROSE;
     time(prose);
     const baseline = Math.min(time(prose), time(prose), time(prose));
     // A special scheme takes a host without `//`, and a percent-escaped host is decoded before host processing: none is parsed.
@@ -761,18 +763,27 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   it("charges the long-run near miss: min(length, 39) per code point of each base64 run shorter than 40", { timeout: 60_000 }, () => {
     expect(LONG_RUN_FLOOR).toBe(40);
     expect(runRereads("")).toBe(0);
-    expect(runRereads("abc,de")).toBe(9 + 4);
-    expect(runRereads("a+/=_-9Z")).toBe(64);
-    expect(runRereads("a".repeat(39))).toBe(39 * 39);
+    // Three partitions: the class; without `=` (secretArgument splits there); without `=` and `/` (a path's segments).
+    expect(runRereads("abc,de")).toBe(3 * (9 + 4));
+    expect(runRereads("a+/=_-9Z")).toBe(64 + (9 + 16) + (4 + 16));
+    expect(runRereads("a".repeat(39))).toBe(3 * 39 * 39);
     expect(runRereads("a".repeat(40))).toBe(0);
-    expect(runRereads(`${"a".repeat(39)}\u00e9${"b".repeat(2)}`)).toBe(39 * 39 + 4);
-    expect(detectorCost("abc,de")).toBe(6 + 9 + 4);
+    expect(runRereads(`${"a".repeat(39)}\u00e9${"b".repeat(2)}`)).toBe(3 * (39 * 39 + 4));
+    const a39 = "a".repeat(39);
+    expect(runRereads(`${a39}=${a39},`)).toBe(2 * 2 * 39 * 39);
+    expect(runRereads(`${a39}/${a39}`)).toBe(2 * 39 * 39);
+    expect(detectorCost("abc,de")).toBe(6 + 39);
     const page = read("docs/specification/channel-agent.md").replace(/\s+/g, " ");
-    expect(page).toContain("`abc,de` costs 6, 9 and 4");
+    expect(page).toContain("`abc,de` costs 6 and 3 x (9 + 4)");
     const near = `${"a".repeat(39)},`.repeat(103).slice(0, 4096);
     expect(detectorCost(near)).toBeGreaterThan(4096 * 19);
     const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => near) } } };
     expect(least(() => channelAgentRules(doc, "well-known"))).toBeLessThan(2 * proseBaseline() + 20);
+    // A near miss split at `=` (secretArgument's pieces): each piece of 39 is charged, so the budget still bounds it.
+    const split = `${a39}=${a39},`.repeat(52).slice(0, 4096);
+    expect(detectorCost(split)).toBeGreaterThan(4096 * 38);
+    const splitDoc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => split) } } };
+    expect(least(() => channelAgentRules(splitDoc, "well-known"))).toBeLessThan(2 * proseBaseline() + 20);
   });
   it("holds each of the page's cost terms to detectorCost, exactly", () => {
     const page = read("docs/specification/channel-agent.md");
