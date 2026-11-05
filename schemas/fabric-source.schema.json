@@ -92,7 +92,7 @@
     "path": {
       "type": "string",
       "pattern": "^(?![/~])(?![\\s\\S]*\\\\)(?![\\s\\S]*//)(?!(?:[\\s\\S]*/)?\\.{1,2}(?:/|$))[^\\u0000-\\u001f:]{1,256}$",
-      "description": "A file, or with a trailing / a folder and everything under it, in the same grammar as #/$defs/file."
+      "description": "A file, or with a trailing / a folder and everything under it, in the same grammar as #/$defs/file; in exclude, a path without / also names everything beneath that name."
     },
     "slot": {
       "type": "object",

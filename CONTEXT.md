@@ -451,28 +451,31 @@ a proposal's `export` destination (`FAC-SEM-103`).
 **Source hand-over**: An agent's source reaching a place or a person it was not at; the routes include, among others,
 a **Source export** handed to anyone or sent as a file to another person or a place outside the owner's; a push of a
 commit not already there to a repository that is not the agent's home and that is public, another owner's, or readable
-by another person (an organization's repository included, even one the operator administers), each such push its own;
-source files' content copied into a message, an issue, a gist or a thread outside the owner's; a package handed to
+by another person (an organization's repository included, even one the operator administers), each such push its own,
+except an organization's later release, which is its own act and still carries a source export; source files' content copied into a message, an issue, a gist or a thread outside the owner's; a package handed to
 another person (a colleague's copy), which carries the source; a personal agent's package or release published to a
 public registry, unless its home is already public (the files the pack step derives from the public source count as
 public, nothing else does). A hand-over by push or by file carries a source export (one new commit, whose only parent,
 if any, is the earlier export commit the recipient holds; no commit from the home; the tree check passed), never
-another commit; a later export lands as a fast-forward or, when the recipient's branch has moved, as a new branch or
-pull request, never by a force-push. An act on the whole repository of a personal agent's private home (a transfer, a
-visibility change, access given to any other person) is not done: the source leaves only as a source export; a public
-home's access and visibility are outside that rule, access the operator gave before the rule stands as the operator's
-own act (nothing is retroactive), and an agent never gives new access. An organization's acts on its own agent's whole
+another commit; the export's receipt records the recipient and the export commit, from which the next export reads its
+parent, and an export that cannot land as a fast-forward goes as a new branch or pull request, never by a force-push.
+An act on the whole repository of a personal agent's private home (a visibility change, access given to any other
+person) is not done: the source leaves only as a source export; a transfer of a personal agent's home, public or
+private, is not done either (the operator's own permission for it is outside this contract); a public home's access and
+visibility are outside that rule, making a public personal home private is none, access the operator gave before
+DEC-0149 was accepted stands as the operator's own act (nothing is retroactive), and an agent never gives new access. An organization's acts on its own agent's whole
 repository are its own, under its own release rules, except two that take the word naming the repository: making a
 private organization agent's source public by a visibility change, and giving it new readers outside the organization
 (the word accepts the history as it stands); its first public release from a private home takes the word naming its
-source commit, and later ones from that home are its own. A processor acting for the owner under the owner's own account
+source commit, and a later one from that home by push takes no word and still carries a source export whose parent is
+the earlier export commit. A processor acting for the owner under the owner's own account
 or host is no recipient while what it holds stays readable by no one but the owner and the processors acting for it;
 output it makes public is one. Access the owning organization gives its own members to its own agent's home is none,
 and giving access to a public home is none. What takes the word when a source becomes public: a personal agent's source
 made public for the first time and an organization agent's private source made public; an organization creating its
 own agent's home public is its own act, and a push, release or serving of what is already public, from a public home to
 any other public place (another owner's included), reaches no new reader and is none, when an earlier act on the word,
-or the owner's own act, made it public. The repository where the agent's owner keeps and develops its source is its
+or the owner's own act, made it public; material already public needs no word by any route. The repository where the agent's owner keeps and develops its source is its
 home, not a recipient, and the owner's placements are the owner's own: the owner's own commits, branches and releases
 in the home, a release that stays where the home's readers are, and a deploy to a placement its owner holds (an
 organization's agent on that organization's placement included) are none; a bundle a public page serves is the agent's

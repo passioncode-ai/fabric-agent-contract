@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 44 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 45 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9038,7 +9038,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   caseless fold; round 41 not clean: push carries history, history gate undefined, conformance fold, rules section 9;
   round 42 not clean: history gate scope, KB item 5, and from its unit reading the Georgian join and a folder entry over
   a link; round 43 not clean: whole-repository word text, CONTEXT team serving; round 44 not clean: target forms, word
-  forms, export parent, existing readers, public home), cited by round number because their heads were on the review branch, which is not
+  forms, export parent, existing readers, public home; round 45 not clean: NFC nested repository; stale DEC/backlog/
+  scenario wording, elicitation target, later org release), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9165,14 +9166,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       `pnpm validate <dir>` checks a folder holding both files as that pair.
   11. **Source export (Q4, Q5, Q6, Q9):** it reads a committed tree at a named commit, takes only the source paths and
       never a gitlink, runs the check with the operator's list and refuses on any blocking finding; it writes a
-      directory holding a new Git repository with one commit and no history, author and committer `Fabric source export
+      directory holding a Git repository with one new commit whose only parent, if any, is the earlier export commit the
+      recipient holds, and no commit from the home, author and committer `Fabric source export
       <source-export@fabric.invalid>`, the source commit's committer date, the message `Source export`; it rewrites no
       file (so the source's identity fields name the publisher, never a person or the operator's account), carries no
       link to the original, publishes nothing, and writes a receipt in the instance (source commit, the manifest's
       SHA-256, counts by kind, the new commit), never a value found. Author and committer dates are both the source
-      commit's committer date, with its time zone; a later export for a recipient that already holds one takes that
-      export commit as its parent (round 43), landing as a fast-forward or as a new branch or pull request when the
-      recipient's branch has moved, never a force-push (round 44). It does not run the source's tests and does not
+      commit's committer date, with its time zone; the receipt records the recipient and the export commit, the next
+      export to that recipient reads its parent from it (fetched from the recipient's repository), and an export that
+      cannot land as a fast-forward (a moved branch, or a parentless export into a non-empty branch) goes as a new
+      branch or pull request, never a force-push (rounds 43 to 45). It does not run the source's tests and does not
       refuse on them (Q9); a tool may offer a test run beside it. The adapter's `export`, owed by CT-207, is to be the
       implementation; this repository ships the check.
   12. **Handing over (Q8, option P3):** a local source export is not a transfer and is always allowed, and a copy moved
@@ -9265,7 +9268,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       stands, its other acts staying its own; serving source takes the word as the deploy of a commit that serves it to
       others, one word per commit and audience, and serving what is already public from a public home is none; a patch
       path beneath a symbolic link in the receiver's tree is refused whole, as `git apply` refuses one; and outside a
-      service's action the agent states the agent, the source commit and the recipient, the operator's reply accepting
+      service's action the agent states the agent, the target and the recipient, the operator's reply accepting
       that statement being the word. Decided by the coordinator in round 44, aiming for fewer rules: the word names the
       repository only for an organization agent's private home made public (a visibility change) or given new readers
       outside the organization, and every other hand-over, an organization's first public release from a private home
@@ -9278,18 +9281,29 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       (from the earlier hand-over's receipt; none named, a parentless export) and landing as a fast-forward while the
       recipient's branch still ends there, otherwise as a new branch or pull request for the recipient to merge under its
       own rules, never a force-push (the recipient's history is the recipient's); access the operator gave to a personal
-      agent's private home before this rule stands as the operator's own act, so a commit reaching those readers is no
+      agent's private home before DEC-0149 was accepted stands as the operator's own act, so a commit reaching those readers is no
       hand-over, nothing is retroactive and an agent never gives new access (an inventory of such homes is filed at
       landing for the operator to review, as information, not a gate); the whole-repository rule covers a personal
       agent's private home only, a public home's access and visibility being outside it; and serving is a hand-over to
-      anyone who cannot read the home. Handing it to
+      anyone who cannot read the home. Decided by the coordinator in round 45 on the same ground, removing second
+      statements that had gone stale: an organization's later public release from its private home by push takes no
+      word and still carries a source export whose parent is the earlier export commit, so the home's history stays
+      back (its release rules govern its own releases, and the export keeps the history out); the export's receipt
+      records the recipient and the export commit, from which the next export reads its parent, its objects fetched
+      from the recipient's repository, and any export that cannot land as a fast-forward goes as a new branch or pull
+      request (one landing rule, no force-push); access the operator gave to a personal agent's private home stands
+      when given before DEC-0149 was accepted, on its merge date (a fixed point, written at landing); a transfer of a
+      personal agent's home, public or private, is not done, since the operator's rule asks his explicit permission for
+      any transfer of a personal agent and that permission is outside this contract, while making a public personal
+      home private is none; and material already public needs no word by any route (one clause for every route).
+      Handing it to
       anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
-      source commit and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
+      target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
       `actionDecision` table apply except where source.md gives another answer; CT-181 owns bringing the departures
       [source](specification/source.md#handing-over) lists into the reference gate and defines the approval route;
       until a service pins a revision carrying it, an `approval/1` is not read for a hand-over and the action's owner
-      enforces the departures. The two forms of the word, the `target` form, the order of checks, consumption,
+      enforces the departures. The three forms of the word, the `target` form, the order of checks, consumption,
       idempotency and the refusal codes are in source.md. Every agent
       follows the same rule, private or not, and a private agent is never handed over on anything less; under DEC-0126 a
       relay carries the operator's words verbatim and an approval for one hand-over covers that act only (OA-5,
@@ -9408,7 +9422,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 44 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 45 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9417,5 +9431,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   fold; round 41 not clean: push carries history, history gate undefined, conformance fold, rules section 9; round 42
   not clean: history gate scope, KB item 5, and from its unit reading the Georgian join and a folder entry over a
   link; round 43 not clean: whole-repository word text, CONTEXT team serving; round 44 not clean: target forms, word
-  forms, export parent, existing readers, public home), cited by round number (their heads were on the review branch, not kept at landing),
+  forms, export parent, existing readers, public home; round 45 not clean: NFC nested repository; stale DEC/backlog/
+  scenario wording, elicitation target, later org release), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

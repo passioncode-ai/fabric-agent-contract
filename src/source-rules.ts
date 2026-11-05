@@ -276,7 +276,8 @@ export function nestedTest(manifest: unknown): (written: unknown) => boolean {
   return (written) => {
     // `git ls-files --others` names an untracked repository with a trailing `/`.
     const stored = typeof written === "string" && written.endsWith("/") ? written.slice(0, -1) : written;
-    if (typeof stored !== "string" || !SOURCE_FILE_PATH.test(stored) || inGit(stored)) return false;
+    // In the grammar as written and in NFC, as sourcePathTest reads a path.
+    if (typeof stored !== "string" || !SOURCE_FILE_PATH.test(stored) || !SOURCE_FILE_PATH.test(nfc(stored)) || inGit(stored)) return false;
     const path = nfc(stored);
     const folder = `${path}/`;
     // An include path names it, lies under it (its folder is one of that entry's prefixes) or covers it.
@@ -1208,15 +1209,17 @@ function pathFindings(value: JsonObject): Finding[] {
   for (const [written, index] of include) {
     const path = foldPath(nfc(written));
     const dead = prefixesOf(written).some((folder) => folder !== path && (excludes.folders.has(folder) || excludes.files.has(folder.slice(0, -1))));
-    if (dead) flag(`/include/${index}`, `include[${index}] lies inside an exclude folder, so it names nothing`);
+    if (dead) flag(`/include/${index}`, `include[${index}] lies inside an exclude path, so it names nothing`);
   }
+  // Every include path, folded, so an exclude entry an include lies beneath is said once, on the include.
+  const foldedIncludePaths = include.map(([written]) => nfc(written)).filter((path) => SOURCE_PATH.test(path)).map(foldPath);
   for (const [path, index] of strings(value.exclude)) {
     // An entry NFC lengthens past the grammar is said once above, not again with another reason.
     if (SOURCE_PATH.test(path) && !SOURCE_PATH.test(nfc(path))) continue;
     const folded = foldPath(nfc(path));
     // A bare entry also names everything beneath it, so it equals an include folder of its name.
     if (foldedIncludes.files.has(folded) || foldedIncludes.folders.has(folded) || foldedIncludes.folders.has(`${folded}/`)) flag(`/exclude/${index}`, `exclude[${index}] is an include path: it would remove it whole, so leave both out`);
-    else if (!prefixesOf(path).some((folder) => foldedIncludes.folders.has(folder))) flag(`/exclude/${index}`, `exclude[${index}] lies inside no include folder, so it removes nothing`);
+    else if (!prefixesOf(path).some((folder) => foldedIncludes.folders.has(folder)) && !foldedIncludePaths.some((included) => included.startsWith(folded.endsWith("/") ? folded : `${folded}/`))) flag(`/exclude/${index}`, `exclude[${index}] lies inside no include folder, so it removes nothing`);
   }
   for (const [path, index] of strings(value.binaries)) {
     if (!inGit(path) && !isSource(path)) flag(`/binaries/${index}`, `binaries[${index}] is not a file of the source`);

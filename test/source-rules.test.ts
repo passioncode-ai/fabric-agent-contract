@@ -283,7 +283,7 @@ describe("which files are source", () => {
     expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: ["SRC/gen/"] })).toEqual([]);
     // An include inside an exclude folder spelt otherwise names nothing, and says so.
     expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "src/Cache/keep/", "LICENSE"], exclude: ["src/cache/"] })).toEqual([
-      { code: "FAC-SEM-157", instancePath: "/include/1", message: "include[1] lies inside an exclude folder, so it names nothing" }
+      { code: "FAC-SEM-157", instancePath: "/include/1", message: "include[1] lies inside an exclude path, so it names nothing" }
     ]);
     // An exclude that equals an include path in another case would remove it whole.
     expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: ["SRC/"] })).toEqual([
@@ -336,7 +336,16 @@ describe("which files are source", () => {
     expect(foldOnlyExcludeTest(value)("vendor/LIB/x.ts")).toBe(0);
     expect(foldOnlyExcludeTest(value)("vendor/lib/x.ts")).toBe(-1);
     expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "src/gen/keep/", "LICENSE"], exclude: ["src/Gen"] })).toEqual([
-      { code: "FAC-SEM-157", instancePath: "/include/1", message: "include[1] lies inside an exclude folder, so it names nothing" }
+      { code: "FAC-SEM-157", instancePath: "/include/1", message: "include[1] lies inside an exclude path, so it names nothing" }
+    ]);
+  });
+
+  it("says an include beneath an exclude entry once, on the include, never also that the exclude removes nothing", () => {
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/a/b/", "LICENSE"], exclude: ["src/a"] })).toEqual([
+      { code: "FAC-SEM-157", instancePath: "/include/0", message: "include[0] lies inside an exclude path, so it names nothing" }
+    ]);
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/a/b/", "LICENSE"], exclude: ["src/a/"] })).toEqual([
+      { code: "FAC-SEM-157", instancePath: "/include/0", message: "include[0] lies inside an exclude path, so it names nothing" }
     ]);
   });
 
@@ -360,6 +369,11 @@ describe("which files are source", () => {
     ]);
     expect(isSourcePath({ include: ["src/"] }, `src/${long}/x`)).toBe(false);
     expect(isSourcePath({ include: ["src/"] }, `src/${"\u0958".repeat(10)}/x`)).toBe(true);
+    // A nested repository is read the same way: in the grammar as written and in NFC.
+    const nested = `src/${Array.from({ length: 4 }, () => "\u0958".repeat(60)).join("/")}`;
+    expect([...nested].length).toBeLessThanOrEqual(256);
+    expect(nestedInSource({ include: ["src/"] }, nested)).toBe(false);
+    expect(nestedInSource({ include: ["src/"] }, `src/${"\u0958".repeat(10)}`)).toBe(true);
   });
 
   it("names the exclude entry that leaves a path out only once folded, the first that writes it", () => {

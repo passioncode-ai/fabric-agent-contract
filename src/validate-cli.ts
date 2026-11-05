@@ -24,7 +24,7 @@ import { ruleHelp } from "./rule-codes.js";
 import { documentKindsOf, isSemanticKind } from "./semantic-kinds.js";
 import { evaluateSemanticRules } from "./semantic-rules.js";
 import { PACKAGE_FILE } from "./package-rules.js";
-import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, SOURCE_PATH, excludedFolderTest, foldOnlyExcludeTest, foldPath, foldSegment, isDotGitSegment, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
+import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, SOURCE_FILE_PATH, SOURCE_PATH, excludedFolderTest, foldOnlyExcludeTest, foldPath, foldSegment, isDotGitSegment, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
 import { createValidatorSync, formatSchemaErrors } from "./validator.js";
 
 export interface Problem { file: string; path: string; rule: string; message: string; help?: string }
@@ -1098,12 +1098,12 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   // an intermediate folder never a symbolic link, is listed, so an entry that names nothing is said (unused-exclude, accepted); nothing is read and no name is printed.
   // An entry excluding a gitlink as nestedTest reads it is used: a bare entry naming it or a folder it lies in, an entry
   // ending in `/` naming a folder it lies in or is.
-  const foldedGitlinks = [...gitlinks].map((name) => foldPath(name.normalize("NFC")));
+  const foldedGitlinks = [...gitlinks].filter((name) => SOURCE_FILE_PATH.test(name.normalize("NFC"))).map((name) => foldPath(name.normalize("NFC")));
   const excludesGitlink = (entry: string): boolean => {
     const folded = foldPath(entry.normalize("NFC"));
     return foldedGitlinks.some((link) => (folded.endsWith("/") ? `${link}/`.startsWith(folded) : link === folded || link.startsWith(`${folded}/`)));
   };
-  const listed = (((manifest as JsonObject).exclude as string[] | undefined) ?? []).filter((entry) => SOURCE_PATH.test(entry) && (excludesGitlink(entry) || presentWithoutLink(folder, entry)));
+  const listed = (((manifest as JsonObject).exclude as string[] | undefined) ?? []).filter((entry) => SOURCE_PATH.test(entry.normalize("NFC")) && (excludesGitlink(entry) || presentWithoutLink(folder, entry)));
   const findings = evaluateSemanticRules("source-tree", { manifest, files, listed });
   const inPath = new Set(findings.flatMap((finding) => {
     const at = /^\/files\/(\d+)\/path$/.exec(finding.instancePath);

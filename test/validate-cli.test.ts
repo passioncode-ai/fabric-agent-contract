@@ -2108,6 +2108,27 @@ describe("an agent's source (DEC-0149)", () => {
     }
   });
 
+  it("never reads a folder NFC lengthens past the grammar as a nested repository, in Git mode or in a walk", () => {
+    const long = `src/${Array.from({ length: 4 }, () => "\u0958".repeat(60)).join("/")}`;
+    const address = ["dev", "acme-example.io"].join("@");
+    const make = () => {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x", "src/z.md": `write to ${address}` });
+      mkdirSync(path.join(dir, ...long.split("/")), { recursive: true });
+      expect(gitIn(path.join(dir, ...long.split("/")), "init", "-q").status).toBe(0);
+      return dir;
+    };
+    const committed = make();
+    expect(gitIn(committed, "init", "-q").status).toBe(0);
+    expect(gitIn(committed, "add", "fabric.source.json", "LICENSE", "src/a.ts", "src/z.md").status).toBe(0);
+    const shape = (out: string) => found(out).map((line) => line.split("  ").slice(0, 3));
+    const inGit = run(committed, "--kind", "source-tree");
+    const walked = run(make(), "--kind", "source-tree");
+    expect(inGit.code).toBe(walked.code);
+    expect(inGit.out).not.toContain("nested-repository");
+    expect(shape(inGit.out)).toEqual(shape(walked.out));
+    expect(shape(inGit.out).some((cells) => cells[2]?.startsWith("FAC-SEM-159"))).toBe(true);
+  });
+
   it("gives a file the same files[<index>] in Git mode and in a walk when a name before it is stored in NFD", () => {
     const home = ["", "home", "jdoe", "notes"].join("/");
     const files = { "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/e\u0301.ts": "x", "src/f.ts": `const notes = "${home}";` };
