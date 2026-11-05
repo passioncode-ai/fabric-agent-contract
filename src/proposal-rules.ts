@@ -49,7 +49,7 @@ function transitionFindings(value: JsonObject): Finding[] {
  * It differs from `HOME_PATH` in `src/activity-rules.ts` (FAC-SEM-037, FAC-SEM-040, FAC-SEM-128, FAC-SEM-138, FAC-SEM-167
  * and FAC-SEM-168, which
  * also match relative slash forms and the dash form after a character that is not an ASCII letter or digit) and from
- * the device-common `detail` pattern (the dash form after any character). Changing any of the three is a decision.
+ * the device-common `detail` pattern (the dash form after any character). Changing any of them is a decision.
  */
 const HOME_PATH = new RegExp(String.raw`(?:^|file:\/\/(?:localhost)?|[^\p{L}\p{N}_.\-\/~@+])(?:\/Users\/|\/home\/|~\/|[A-Za-z]:\\Users\\)`, "u");
 

@@ -9030,10 +9030,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-04
 - **Status:** Proposed (draft on branch `agent/ct219-ops-digest-20261104`; accepted on merge of its pull request after
-  the coordinator's blind readings, which reached round 15 on 2026-11-05; the acceptance edit is the first item of the
-  handoff's Next task). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168`, a
-  descriptor extension, a reference module and vectors, and a host obligation. Additive: nothing that validated before
-  changes.
+  the coordinator's blind readings, which reached round 16 on 2026-11-05; the acceptance edit is item 3 of the
+  handoff's Next task, after the pull request is open). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and
+  `FAC-SEM-168`, a descriptor extension, a reference module and vectors, and a host obligation. Additive: nothing that
+  validated before changes.
 - **Context:** the operator asked on 2026-11-04 that every product's log be read every hour and every day, and that
   every agent close its work with a retro whose lessons are kept centrally; Fabric recorded the split in its ADR-0188
   (commit `0d0e5922`) and relayed the contract's part on board thread `f7758225` (message `516761e1`, item 2 of its
@@ -9155,17 +9155,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      spaces dropped (one folder under two labels would be sent twice), a `dir` segment made only of dots, spaces and
      code points HFS+ ignores (it folds to nothing, and a tool that trims or folds names as the fold does, Win32 path
      handling dropping trailing dots and spaces or a reader stripping those code points before joining, may read it as
-     empty, `.` or `..`, another folder than the one declared (outside `paths.data` when it leads)), a `dir` holding a home folder (`hasHomePath`, with the boundary of
-     item 3: `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x`
-     pass) and a `dir` or `source` shaped like a credential (`secretValue`); one finding refuses the whole
-     declaration, which a collector reads as not declared and reports. `digestFoldersView` (whose `usable` is true
-     only when the rule has no finding) and `digestFoldersRules` in `src/ops-digest.ts` are the reference. A collector
-     takes each day's first daily line whenever it first appears (a caught-up day included) and sends it once, with
-     `source` and which descriptor the line came from (its `id` and `instance`; an optional `service {id, instance}`
-     beside `source` is announced, board message `1a12d809`). The collector role is announced by Fabric (board thread
-     `f7758225`, message `2ed505f2`). A product without a local descriptor is outside this declaration, and a declared
-     `dir` holds only the declaring instance's own digests: relaying a remote instance's digests is outside this
-     contract.
+     empty, `.` or `..`, another folder than the one declared, possibly outside `paths.data`), a `dir` holding a home
+     folder (`hasHomePath`, with the boundary of item 3: `users/digests`, `my_users/digests`, `my-users/digests` and
+     `a/~b` fail, `user-digests` and `a/~1/x` pass) and a `dir` or `source` shaped like a credential (`secretValue`),
+     a `dir` read four ways: as written, with every default-ignorable code point removed, and each of those with each
+     segment's trailing dots and spaces dropped (a 40-character run across segments joined by `/` that mixes upper
+     case, lower case and a digit, such as `ApplicationSupport/MyProduct/Digests2026`, is refused on purpose: the
+     credential detector's run includes `/` so that a base64 secret holding one is still found; a class of dirs whose
+     fold holds a home folder is hidden in messages, never refused); one finding refuses the whole declaration, which
+     a collector reads as not declared and reports. `digestFoldersView` (whose `usable` is true only when the rule has
+     no finding) and `digestFoldersRules` in `src/ops-digest.ts` are the reference. A collector takes each day's first
+     daily line whenever it first appears (a caught-up day included) and sends it once, with `source` and which
+     descriptor the line came from (its `id` and `instance`; an optional `service {id, instance}` beside `source` is
+     announced, board message `1a12d809`). The collector role is announced by Fabric (board thread `f7758225`, message
+     `2ed505f2`). A product without a local descriptor is outside this declaration, and a declared `dir` holds only
+     the declaring instance's own digests: relaying a remote instance's digests is outside this contract.
 - **Why:** one shape lets one reader read every product's digests; the shape is the one already written, so the first producer moves nothing. A name grammar that holds no empty
   segment, `.`, `..` or leading `/` keeps absolute paths and URLs out by construction, and the home-folder detector the
   relative home paths `/` would let in. The folder a collector reads is declared where the product already says what it
@@ -9228,22 +9232,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/semantic/ops-digest-hourly-op-users.json`, `docs/backlog.md`, `src/validate-cli.ts` (the declaration-only hint
   on a bare declaration),
   `test/consistency.test.ts`, `docs/specification/service.md`, `docs/specification/interop.md`,
-  `docs/specification/versioning.md`; and from review rounds 10 to 15 `docs/specification/activity.md` (the `HOME_PATH`
+  `docs/specification/versioning.md`; and from review rounds 10 to 16 `docs/specification/activity.md` (the `HOME_PATH`
   boundary and its scope), `src/activity-rules.ts` (the `HOME_PATH` docstring and scope comment), `src/proposal-rules.ts`
   (its scope comment), `schemas/device-common.schema.json` (the `detail` `$comment`), `docs/ux/scenarios.md` (SCN-002)
   and `docs/handoffs/README.md`;
   `test/ops-digest.test.ts`, `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
   `test/schema-compilation.test.ts`, `vitest.config.ts`; `docs/specification/ops-digest.md`, `conformance.md` (the
-  reference module, the producer, reader and host rows, the register), `docs/specification/README.md`,
+  reference module, the producer, reader, declaring product, collector and host rows, the register), `docs/specification/README.md`,
   `docs/DOCMAP.md`, `CONTEXT.md`; backlog CT-219; handoff `docs/handoffs/2026-11-04-ops-digest.md`. The first
   consumers of OD-9 are announced as Fabric's CO-503 (collecting the daily lines) and Project Observatory's OBS-330
   (recording them); how they do it is theirs.
 - **Not decided here:** which act of each host's claim vocabulary is "a release recorded as done" (RW-1); counting retros
   written outside the host (Project Observatory's); the wire form in which a collector sends the descriptor's `id` and
   `instance`; how a product without a local descriptor reaches a collector (outside this contract; a product's own
-  folder in its own local descriptor is an OD-9 declaration, a remote instance's folder fetched by a local app is not); the identity a relayed remote instance's lines are sent under, so that
-  N relays are not N counts; the other items
-  on the spec page's list.
+  folder in its own local descriptor is an OD-9 declaration, a remote instance's folder fetched by a local app is not); the identity a relayed remote instance's lines are sent under, so that N relays are not N counts; a `dir` that NFC or
+  NFD grows past 256 code points (it passes `FAC-SEM-168`, DEC-0149's `inGrammar` refuses it); the other items on the
+  spec page's list.
 - **Source:** the operator's word of 2026-11-04, relayed by Fabric on board thread `f7758225` (message `516761e1`),
   and the thread's answers on the draft (messages `1c191cf7`, the `/` in MCP method names, and `f74763e1`, the day with
   no hour), decided by the coordinator; OD-9 is a change made in review on the same thread, where Fabric proposed a
@@ -9297,6 +9301,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   duplicate message (a dir is now named only when it is printable ASCII), and its batch is folded in; round 15 at
   `f1321b27` was not clean: the acceptance edit named a commit that does not exist yet, an operation's name echoed raw
   in FAC-SEM-166's messages, and the home-folder check missing a dir whose segment ends in dots or spaces, and its batch
-  is folded in;
+  is folded in; round 16 at `6c54c1da` was not clean: the `inGrammar` recommendation without its docs (dropped; the
+  NFC/NFD length case is now under Not decided), the module's readings (a `dir` is now read four ways, every
+  default-ignorable code point removed in two of them) and the boundary owner (which landing rewrites the home-path
+  copies), and its batch is folded in;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

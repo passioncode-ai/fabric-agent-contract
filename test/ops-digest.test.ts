@@ -536,7 +536,7 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     for (const dir of [[".", "\u200c", "."].join(""), ". ", ["..", "\u200d"].join(""), ["a/", ".", "\u200c", ".", "/b"].join("")]) {
       const findings = evaluateSemanticRules("service-descriptor", withFolders([{ dir, source: "app" }])).filter((f) => f.code === "FAC-SEM-168");
       expect(findings.map((f) => f.instancePath), JSON.stringify(dir)).toEqual([`${at}/0/dir`]);
-      expect(findings[0]?.message).toBe("a dir segment folds to nothing (only dots, spaces or code points a file system may ignore); a tool may read it as empty, '.' or '..', another folder than the one declared (outside paths.data when it leads)");
+      expect(findings[0]?.message).toBe("a dir segment folds to nothing (only dots, spaces or code points a file system may ignore); a tool may read it as empty, '.' or '..', another folder than the one declared, possibly outside paths.data");
     }
     expect(found("service-descriptor", withFolders([{ dir: "a.", source: "app" }]))).toEqual([]);
   });
@@ -577,6 +577,36 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     let message = "";
     try { foldHour([], "\u001b", null); } catch (e) { message = (e as Error).message; }
     expect(message).toBe("from is not a whole UTC hour");
+  });
+
+  it("reads a dir four ways for its detectors, default-ignorables removed, and hides a class its fold makes a home folder", () => {
+    const refused = (dir: string) => expect(found("service-descriptor", withFolders([{ dir, source: "app" }])), JSON.stringify(dir)).toEqual([`FAC-SEM-168 ${at}/0/dir`]);
+    refused(["x", "\u200e", "users./alice"].join(""));
+    refused(["users", "\u2060", "/alice"].join(""));
+    for (const mark of ["\u200b", "\u2060"]) refused(["gh", "p_", "ABCDEFGHIJ", mark, "KLMNOPQRSTUV"].join(""));
+    // A credential reached only through the trimmed reading: a 40-character mixed run once the segment's dot is dropped.
+    const run = ["Ex4mpleN0tARealKey", ".", "/ButShapedLikeOneAbCdEf012345"].join("");
+    refused(run);
+    // A 40-character run across segments joined by '/' is refused on purpose (LONG_RUN includes '/').
+    refused(["ApplicationSupport", "/MyProduct", "/Digests2026"].join(""));
+    // A hidden class reached only through the trimmed reading, and one reached only through the fold.
+    for (const pair of [[run, run.toLowerCase()], ["USERS/alice", "USERS/Alice"]]) {
+      const messages = evaluateSemanticRules("service-descriptor", withFolders([{ dir: pair[0], source: "one" }, { dir: pair[1], source: "two" }])).filter((f) => f.code === "FAC-SEM-168").map((f) => f.message);
+      expect(messages.some((m) => m.startsWith("this dir is named twice as a dir")), pair[1]).toBe(true);
+    }
+    expect(found("service-descriptor", withFolders([{ dir: "USERS/alice", source: "app" }]))).toEqual([]);
+  });
+
+  it("passes a dir of 256 precomposed code points that NFD doubles (not decided: the page's 'Not decided here')", () => {
+    const dir = "\u00e4".repeat(256);
+    expect(dir.normalize("NFD").length).toBe(512);
+    expect(found("service-descriptor", withFolders([{ dir, source: "app" }]))).toEqual([]);
+  });
+
+  it("names a non-string operation in a fold's input with an error, never a TypeError", () => {
+    const one = foldHour([{ op: "x", ok: 0, failed: 5, unknown: 0 }], "2026-11-04T01:00:00Z", null);
+    const odd = { ...one, ops: [{ op: 7 as unknown as string, ok: 0, failed: 0, unknown: 0 }] } as HourlyDigest;
+    expect(() => foldHour([], "2026-11-04T02:00:00Z", odd)).toThrow(/^the operation at 0 of the previous hour's ops has no string name$/);
   });
 
   it("is a descriptor's rule only, and a declaration's absence is no finding", () => {

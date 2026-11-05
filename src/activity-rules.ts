@@ -57,7 +57,7 @@ export const PERSON_PREFIXES: readonly string[] = ["employ", "productiv", "asses
  * The `sourceKey` schema pattern (`activity-common`) repeats its dash clause over the key's alphabet, and a test in
  * `test/activity-rules.test.ts` pins that the two refuse the same keys. Two other rules draw other boundaries: the
  * device-common `detail` pattern refuses the dash form after any character (one line of free text with no path at all),
- * and FAC-SEM-103's own pattern in `src/proposal-rules.ts` has no dash form. Changing any of the three is a decision.
+ * and FAC-SEM-103's own pattern in `src/proposal-rules.ts` has no dash form. Changing any of them is a decision.
  */
 const SLASH = String.raw`(?:[\/\\]|%(?:25)?2[fF])`;
 export const HOME_PATH: readonly RegExp[] = [

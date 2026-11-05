@@ -97,13 +97,15 @@ function safeCounts<T extends HourlyDigest | DailyDigest>(digest: T): T {
   if (!counts.every(isCount)) throw new Error("a sum is beyond 2^53 - 1");
   return digest;
 }
-/**
- * A value as a message may show it: itself, or `instead` when it is shaped like a credential or holds a home folder, so
- * a finding or an error never copies such a value (as `src/descriptor-rules.ts` names only the place).
- */
+/** Whether a value is shaped like a credential (`secretValue`) or holds a home folder (`hasHomePath`). */
 const hidden = (value: string): boolean => secretValue(value) || hasHomePath(value);
 /** A value a message may name: printable ASCII only (U+0020 to U+007E). */
 const PRINTABLE_ASCII = /^[\x20-\x7e]+$/;
+/**
+ * A value as a message may show it: itself, or `instead` when it is shaped like a credential, holds a home folder or is
+ * not printable ASCII, so a finding or an error never copies such a value (as `src/descriptor-rules.ts` names only the
+ * place).
+ */
 const shown = (value: string, instead: string): string => (hidden(value) || !PRINTABLE_ASCII.test(value) ? instead : value);
 /** An operation's name as FAC-SEM-166 may print it: only one that OD-2's grammar takes and `shown` lets through. */
 const opShown = (op: string): string => (op.length <= OP_NAME_MAX && OP_NAME.test(op) ? shown(op, "this operation") : "this operation");
@@ -112,10 +114,11 @@ const nameRefusal = (op: unknown): string | null => {
   if (typeof op !== "string" || op.length > OP_NAME_MAX || !OP_NAME.test(op)) return "fails OD-2's name grammar";
   return hidden(op) ? "is refused by FAC-SEM-167" : null;
 };
-/** Throws when `ops` names one operation twice; `where` says whose list it is. */
+/** Throws when `ops` names one operation twice, or names one with no string; `where` says whose list it is. */
 function once(ops: ReadonlyArray<{ op: string }>, where: string): void {
   const names = new Set<string>();
   ops.forEach((c, index) => {
+    if (typeof c.op !== "string") throw new Error(`the operation at ${index} of ${where} has no string name`);
     if (names.has(c.op)) throw new Error(`${shown(c.op, `the operation at ${index}`)} is named twice in ${where}`);
     names.add(c.op);
   });
@@ -352,27 +355,38 @@ export const foldDir = (dir: string): string =>
 const FOLDERS_PATH = `/extensions/${EXTENSION_KEYS.opsDigest.replace(/~/g, "~0").replace(/\//g, "~1")}`;
 const folderFinding = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-168", instancePath, message });
 
-/** A dir is hidden when it, or it with the code points HFS+ ignores removed, is credential-shaped or a home folder. */
+/** Every default-ignorable code point (the code points HFS+ ignores among them), for the detectors' readings only. */
+const DEFAULT_IGNORABLE = /\p{Default_Ignorable_Code_Point}/gu;
+/** A dir with each segment's trailing dots and spaces dropped. */
+const trimSegments = (dir: string): string => dir.split("/").map((segment) => segment.replace(/[. ]+$/, "")).join("/");
 /**
- * The readings of a dir the home-folder and credential tests take: as written, with the code points HFS+ ignores removed,
- * and that with each segment's trailing dots and spaces dropped (`users./alice` and `Users /Alice` read as home folders).
+ * The four readings of a dir the home-folder and credential tests take: as written (`dir`), with every default-ignorable
+ * code point removed (`bare`), and each of those with each segment's trailing dots and spaces dropped: `users./alice`,
+ * `Users /Alice`, `x` + U+200E + `users./alice` and `users` + U+2060 + `/alice` read as home folders.
  */
 const dirReadings = (dir: string): string[] => {
-  const bare = dir.replace(HFS_IGNORABLE, "");
-  return [dir, bare, bare.split("/").map((segment) => segment.replace(/[. ]+$/, "")).join("/")];
+  const bare = dir.replace(DEFAULT_IGNORABLE, "");
+  return [dir, bare, trimSegments(dir), trimSegments(bare)];
 };
-const hiddenDir = (dir: string): boolean => dirReadings(dir).some(hidden);
+/**
+ * A dir is hidden, for the class rule of duplicate messages, when any of its four readings or its fold (`foldDir`) is
+ * credential-shaped or a home folder. The fold only hides (`USERS/alice` folds to a home folder); it never refuses.
+ */
+const hiddenDir = (dir: string): boolean => [...dirReadings(dir), foldDir(dir)].some(hidden);
 /**
  * FAC-SEM-168 on a service descriptor (kind `service-descriptor`) that carries the ops-digest key: a remote placement
  * (no folder on this machine), or a local one that names no `paths.data` for `dir` to be relative to; a value that is
  * not its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); a `source` named
- * twice; a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped, segment
- * by segment (one folder under two labels would be sent twice); a `dir` that holds a home folder (`hasHomePath`), the
- * `dir` read both as written and with the code points HFS+ ignores removed, for these findings and for hiding a class; a
- * `dir` with a segment made only of dots, spaces and code points HFS+ ignores (it folds to nothing; a tool that trims or
- * folds names may read it as empty, `.` or `..`); a
- * `dir` or a `source` shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users`
- * or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
+ * twice; a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD,
+ * lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped, segment by
+ * segment (one folder under two labels would be sent twice); a `dir` with a segment made only of dots, spaces and code
+ * points HFS+ ignores (it folds to nothing; a tool that trims or folds names may read it as empty, `.` or `..`, another
+ * folder than the one declared, possibly outside `paths.data`); a `source` shaped like a credential (`secretValue`); a
+ * `dir` shaped like a credential or holding a home folder (`hasHomePath`) in any of its four readings (`dirReadings`:
+ * as written, without default-ignorable code points, and each with each segment's trailing dots and spaces dropped;
+ * a 40-character run across segments joined by `/` that mixes cases and a digit, `ApplicationSupport/MyProduct/Digests2026`,
+ * is refused on purpose; a class of dirs whose `foldDir` holds a home folder is only hidden in messages). `hasHomePath`
+ * refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
  * and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case,
  * here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or
  * `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit;
@@ -410,9 +424,9 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
     // A segment made only of dots, spaces and code points HFS+ ignores folds to nothing; a tool that trims or folds names
     // as the fold does (Win32 path handling drops trailing dots and spaces; a reader that strips those code points
-    // before joining) may read it as empty, '.' or '..', another folder than the one declared (outside paths.data when it
-    // leads). Refused, the safe direction.
-    if (folder.dir.split("/").some((segment) => foldDir(segment) === "")) findings.push(folderFinding(`${at}/dir`, "a dir segment folds to nothing (only dots, spaces or code points a file system may ignore); a tool may read it as empty, '.' or '..', another folder than the one declared (outside paths.data when it leads)"));
+    // before joining) may read it as empty, '.' or '..', another folder than the one declared, possibly outside
+    // paths.data. Refused, the safe direction.
+    if (folder.dir.split("/").some((segment) => foldDir(segment) === "")) findings.push(folderFinding(`${at}/dir`, "a dir segment folds to nothing (only dots, spaces or code points a file system may ignore); a tool may read it as empty, '.' or '..', another folder than the one declared, possibly outside paths.data"));
     const readings = dirReadings(folder.dir);
     if (readings.some(secretValue)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));
     else if (readings.some(hasHomePath)) findings.push(folderFinding(`${at}/dir`, "a dir holds a home folder; it is relative to the product's data folder"));
