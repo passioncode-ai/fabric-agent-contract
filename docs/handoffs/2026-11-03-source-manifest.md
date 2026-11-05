@@ -181,7 +181,9 @@ source, what never travels with it, the check before a source export, and how a 
   resolved to an absolute path; item 12 names the estate boundary and keeps the standing permission; an
   organization's repository is another owner's, so a push into it is a hand-over; an identifier read as a key is
   renamed or listed under `unchecked`, the alias rule being DEC-0151's open question; a file's named manifest reads
-  ENOTDIR; CT-211's greps cover the estate boundary) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  ENOTDIR; CT-211's greps cover the estate boundary; PR #628 at `c3daf91c` carrying the knowledge base's main, where
+  the rule's home is agents-first item 9, checked by `git show c3daf91c:knowledge/<page>.md`: 4, 3 and 2 lines of
+  `source hand-over`, 1 of `own estate` on each page) answered as decided; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -296,8 +298,10 @@ remaining steps, in order:
    read) on that head, with its output in the PR. That head is the one that merges; nothing merges before this step.
 6. Merge the knowledge base's PR #628 (CT-211's amendment), fetch the knowledge base checkout (`git fetch origin`), and
    run its three greps on the knowledge base's main (`git show origin/main:knowledge/agents-first.md | grep -n 'source
-   hand-over'`, the same for `knowledge/principles.md` and `knowledge/rules.md`; at PR #628's head they print 4, 3 and
-   2 lines), and `grep -c 'own estate'` on the same three pages (at least 1 each after PR #628's fix), then merge the
+   hand-over'`, the same for `knowledge/principles.md` and `knowledge/rules.md`; at PR #628's head `c3daf91c`, which
+   carries fabric-workspace main, they print 4, 3 and 2 lines), and `grep -c 'own estate'` on the same three pages
+   (1 each). There the rule's home is agents-first item 9 (main's own item 8 is "No person in the chat: no production
+   step"): items 5 and 7 point to item 9, and principles section 7 and rules section 9 cite item 9. Then merge the
    contract PR straight after, in the same
    landing session (PR #628's links point at `source.md#handing-over` on main). If main moved after step 5, merge it and
    re-run the merge gate before merging PR #628. If the contract PR cannot merge in that session, do not merge PR #628

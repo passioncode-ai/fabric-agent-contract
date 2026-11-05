@@ -9197,7 +9197,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the handing over they asked for. The knowledge base's agents-first item 7 (one approval holds for the whole task,
   carried as `mandate/1`) was read: the hand-over stays per act under it, because a hand-over publishes the agent to a
   recipient, possibly outside the estate, and the operator's standing rule asks an explicit instruction for each
-  outward act; the merge is to amend agents-first item 8 as the rule's home (items 5 and 7 pointing to it) to name the
+  outward act; the merge is to amend agents-first item 9 as the rule's home (items 5 and 7 pointing to it; item 8 is main's own, no production step without a person in the chat) to name the
   exception, and `knowledge/principles.md`
   section 7, which today says private agents are never moved, published or listed, to carve out the source hand-over
   on the operator's word for that act (CT-211, a merge condition). A source check prints no instance
