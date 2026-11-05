@@ -123,9 +123,9 @@ function once(ops: ReadonlyArray<{ op: string }>, where: string): void {
  * `Date.prototype.toISOString` writes them. `previous` must already pass FAC-SEM-166. It throws when an input count or
  * a previous digest's count is not an integer from 0 to 2^53 - 1 (each checked before it is used), when a sum is beyond
  * 2^53 - 1, when the previous digest, being the hour just before, names an operation twice, when the hour after `from`
- * is not a whole hour the schema writes (after 9999-12-31T23), and, as OD-3 asks, when an operation's name fails
- * `OP_NAME` or is refused by FAC-SEM-167 (`secretValue` or `hasHomePath`, as `opsDigestRules` tests it), or the hour holds
- * more than 4096 operations: no hourly digest, since a reference fold never writes a line every reader skips. An error
+ * is not a whole hour the schema writes (after 9999-12-31T23), and, as OD-3 asks, when an operation's name is a name
+ * OD-2 refuses (its grammar, OP_NAME_MAX included, or FAC-SEM-167: `secretValue` or `hasHomePath`, as `opsDigestRules`
+ * tests it) or the hour holds more than 4096 operations: no hourly digest, since a reference fold never writes a line every reader skips. An error
  * names a credential-shaped or home-folder value (`from` included) only by its place.
  */
 export function foldHour(counts: readonly OpCount[], from: string, previous: HourlyDigest | null): HourlyDigest {
@@ -347,12 +347,15 @@ export const foldDir = (dir: string): string =>
 const FOLDERS_PATH = `/extensions/${EXTENSION_KEYS.opsDigest.replace(/~/g, "~0").replace(/\//g, "~1")}`;
 const folderFinding = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-168", instancePath, message });
 
+/** A dir is hidden when it, or it with the code points HFS+ ignores removed, is credential-shaped or a home folder. */
+const hiddenDir = (dir: string): boolean => hidden(dir) || hidden(dir.replace(HFS_IGNORABLE, ""));
 /**
  * FAC-SEM-168 on a service descriptor (kind `service-descriptor`) that carries the ops-digest key: a remote placement
  * (no folder on this machine), or a local one that names no `paths.data` for `dir` to be relative to; a value that is
  * not its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); a `source` named
  * twice; a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped, segment
- * by segment (one folder under two labels would be sent twice); a `dir` that holds a home folder (`hasHomePath`); a
+ * by segment (one folder under two labels would be sent twice); a `dir` that holds a home folder (`hasHomePath`), the
+ * `dir` read both as written and with the code points HFS+ ignores removed, for these findings and for hiding a class; a
  * `dir` or a `source` shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users`
  * or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
  * and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case,
@@ -379,7 +382,7 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
   // or a home folder, so no duplicate message of that class names a value the class hides; the second pass only marks
   // which entries are duplicates (the first of a class is not).
   const hiddenClass = new Set<string>();
-  for (const folder of view.folders) if (hidden(folder.dir)) hiddenClass.add(foldDir(folder.dir));
+  for (const folder of view.folders) if (hiddenDir(folder.dir)) hiddenClass.add(foldDir(folder.dir));
   const dirs = new Set<string>();
   view.folders.forEach((folder, index) => {
     const at = `${FOLDERS_PATH}/${index}`;
@@ -389,8 +392,9 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `${hiddenClass.has(folded) ? "this dir" : folder.dir} is named twice as a dir (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
     dirs.add(folded);
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
-    if (secretValue(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));
-    else if (hasHomePath(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir holds a home folder; it is relative to the product's data folder"));
+    const bare = folder.dir.replace(HFS_IGNORABLE, "");
+    if (secretValue(folder.dir) || secretValue(bare)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));
+    else if (hasHomePath(folder.dir) || hasHomePath(bare)) findings.push(folderFinding(`${at}/dir`, "a dir holds a home folder; it is relative to the product's data folder"));
   });
   return findings;
 }

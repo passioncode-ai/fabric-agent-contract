@@ -244,14 +244,30 @@ product's obligation.
   a visible member equal to it but for case; now a first pass hides the whole class, tested over every order of two
   three-member classes), `foldDay`'s grammar (now OD-2 in full, its grammar and `OP_NAME_MAX` too, for ops and risen)
   and Compatibility's present tense about Fabric (now what a view built on CO-502 reads, pinned at `a6f0ffda`). Also:
-  OD-1's two kinds of writer, the start rebuild from the hourly lines and the hour kept, an hour written as no digest
+  OD-1's writers split by how they keep records (reverted in round 10), the start rebuild from the hourly lines and the hour kept, an hour written as no digest
   being a gap, DEC-0153 items 2 and 4 carrying the start rebuild and the published overflow name, and the detector's
-  shapes stated in words with `SECRET_VALUE` as the definition. Round 10 is next.
+  shapes stated in words with `SECRET_VALUE` as the definition.
+- Round 10 at `281619f7` was not clean: round 9's two kinds of writer were half-applied, so OD-1 now has one kind (a
+  product writes one hourly line for each hour it observed itself running in, an empty one included, and folds each
+  day's lines; one that keeps its records elsewhere and answers on request still writes those hourly lines, folding its
+  records hour by hour), in OD-1, DEC-0153 item 2, the producer row, the page intro, CONTEXT and the daily schema's
+  title; and the JWT shape is stated as `JWT_SHAPE` reads it (pinned: `a.eyJa.bb.c` and `a.eyJab.b.c` pass,
+  `a.eyJab.bb.c` is refused, a lower-case `akia` tail is refused). The Alternatives' "which OD-1 makes impossible"
+  (a daily digest of zero hours) is true again under one kind and is kept. Also: `dir` read also with the code points
+  HFS+ ignores removed (findings and class hiding), `foldHour`'s docstring, FAC-SEM-167 and FAC-SEM-168 in
+  `HOME_PATH`'s scope register, and OD-9's "the key anywhere but a local service descriptor is unread and unreported".
+  Round 11 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-10 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
+round 2 with coverage on `src/ops-digest.ts` (4214 tests; 260 of 260 statements, 208 of 208 branches);
+`pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`; `python3 docs/ux/lint.py`;
+`pnpm run privacy:check` (0 findings). "two kinds", "writes no hourly" and "never both" count 0 in DEC-0153, the spec
+page, conformance, CONTEXT and the daily schema. The branch gate is owed: the 15-minute load was 70.5.
 
 Round-9 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
 round 2 with coverage on `src/ops-digest.ts` (4213 tests; 257 of 257 statements, 202 of 202 branches);

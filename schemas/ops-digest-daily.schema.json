@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/ops-digest-daily.schema.json",
-  "title": "ops.digest.daily@1 (DEC-0153): one closed UTC day of a product's hourly operations digests, folded",
+  "title": "ops.digest.daily@1 (DEC-0153): one closed UTC day of a product's hourly operations digests (one line for each hour it observed itself running in), folded",
   "description": "One line of daily-YYYY-MM.jsonl. Counts only: no log line, no path, no identifier, no free text. FAC-SEM-166: day a real UTC day, each op once, total each counter's sum over ops, every rise an op of ops in at most the day's hours with at least 10 failures an hour it rose and no more than the day's failures. FAC-SEM-167: no op shaped like a credential or holding a home folder.",
   "type": "object",
   "additionalProperties": false,

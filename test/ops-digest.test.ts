@@ -268,8 +268,13 @@ describe("the reference folds", () => {
     }
   });
 
-  it("pins the shared detector's sk- shape inside a word ending in sk (until DEC-0151 narrows it)", () => {
-    for (const [op, refused] of [["ops.risk-assessment-completed", true], ["work.session-end-task-back", false]] as const) {
+  it("pins the shared detector's shapes the page states: sk- inside a word ending in sk (until DEC-0151), the JWT, akia", () => {
+    const jwt = (a: string, b: string) => ["a.", "ey", "J", a, ".", b, ".c"].join("");
+    const akia = ["ops.", "ak", "ia", "abcdefghijklmnop"].join("");
+    for (const [op, refused] of [
+      ["ops.risk-assessment-completed", true], ["work.session-end-task-back", false],
+      [jwt("a", "bb"), false], [jwt("ab", "b"), false], [jwt("ab", "bb"), true], [akia, true]
+    ] as const) {
       const value = hourlyOk();
       value.ops.push({ op, ok: 1, failed: 0, unknown: 0 });
       value.total.ok += 1;
@@ -502,6 +507,20 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
         for (const m of messages) expect(m.toLowerCase(), order.join(" ")).not.toContain(hiddenValue.toLowerCase());
       }
     }
+  });
+
+  it("reads a dir also with the code points HFS+ ignores removed, for its findings and for hiding a class", () => {
+    const run = ["Ex4mpleN0tARealKey", "ButShapedLike", "\u200c", "OneAbCdEf012345"].join("");
+    const bare = run.replace("\u200c", "");
+    const twice = evaluateSemanticRules("service-descriptor", withFolders([{ dir: run, source: "one" }, { dir: run, source: "two" }])).filter((f) => f.code === "FAC-SEM-168");
+    expect(twice.some((f) => f.message.startsWith("this dir is named twice as a dir"))).toBe(true);
+    for (const f of twice) {
+      expect(f.message).not.toContain(bare);
+      expect(f.message).not.toContain(run);
+    }
+    expect(found("service-descriptor", withFolders([{ dir: run, source: "app" }]))).toEqual([`FAC-SEM-168 ${at}/0/dir`]);
+    const home = ["us", "\u200c", "ers/jdoe/digests"].join("");
+    expect(found("service-descriptor", withFolders([{ dir: home, source: "app" }]))).toEqual([`FAC-SEM-168 ${at}/0/dir`]);
   });
 
   it("is a descriptor's rule only, and a declaration's absence is no finding", () => {

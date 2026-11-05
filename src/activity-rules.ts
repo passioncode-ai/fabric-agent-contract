@@ -50,8 +50,8 @@ export const PERSON_PREFIXES: readonly string[] = ["employ", "productiv", "asses
  * is undetectable by design. The control is the rule that a path-derived key is `hmac-sha256:` under the device's
  * telemetry key (`pathSourceKey`) and that no field carries a path (DEC-0030).
  *
- * Scope (CT-109): the value scanner of FAC-SEM-037 and FAC-SEM-040 (`forbiddenKeys`), FAC-SEM-128 (`src/node-summary.ts`)
- * and FAC-SEM-138 (`src/credentials.ts`). It reads values that may hold ordinary words, so it matches only the user-name
+ * Scope (CT-109): the value scanner of FAC-SEM-037 and FAC-SEM-040 (`forbiddenKeys`), FAC-SEM-128 (`src/node-summary.ts`),
+ * FAC-SEM-138 (`src/credentials.ts`), and FAC-SEM-167 and FAC-SEM-168 (`src/ops-digest.ts`). It reads values that may hold ordinary words, so it matches only the user-name
  * segment form, and the dash form only after a character that is not an ASCII letter or digit: `my-users-list` passes.
  * The `sourceKey` schema pattern (`activity-common`) repeats its dash clause over the key's alphabet, and a test in
  * `test/activity-rules.test.ts` pins that the two refuse the same keys. Two other rules draw other boundaries: the

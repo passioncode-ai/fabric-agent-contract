@@ -9056,19 +9056,19 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      error names a value shaped like a credential or holding a home folder only by its place.
   2. **The window (OD-1).** `from` and `to` are whole UTC hours in RFC 3339 with `Z`, with or without the `.000` that
      `Date.prototype.toISOString` writes (Fabric writes it at `e1eecec0`), `to` one hour after `from`; `day` is
-     `YYYY-MM-DD` UTC; `hours` 1 to 24. Two kinds of writer, never both for one product and day: a product that writes
-     hourly lines writes every hour it observed itself running in (a tick or a record inside the hour), an empty one
-     included, never filling the hours from the last written to now without observing them (round 4: a sleep is not a
-     run), and its daily line folds those lines; a product that folds on request from stored records (an always-on
-     server) writes no hourly lines, and its daily answer is the fold of its record hours. So `hours` means hours
-     folded, and a reader never infers uptime from it. An hour it did not run, or written as no digest under OD-3, is
-     a gap for the hour after it. The hour a product stops in is kept with its counts and written when it closes, at
-     the next run, compared with the hour just before when that is the last hour written, else with none (a gap); a
-     product that cannot keep it writes nothing for that hour, never a partial line, since a restart in the same hour
-     would leave two lines and readers keep the first. At start a product reads its last hourly line back for
-     `previous`, rebuilds the day's named operations from that day's hourly lines and the hour it kept, and writes
-     every closed hour it kept, the hour it stopped in included, before it folds any closed day (OD-5); otherwise that
-     day's daily line loses that hour for good.
+     `YYYY-MM-DD` UTC; `hours` 1 to 24. A product that keeps the log writes one hourly line for each hour it observed
+     itself running in (a tick or a record inside the hour), an empty one included, never filling the hours from the
+     last written to now without observing them (round 4: a sleep is not a run), and every UTC day folds that day's
+     lines into one daily line. A product that keeps its records elsewhere and answers on request still writes those
+     hourly lines, folding its stored records hour by hour, and its answer is the fold of those lines (one kind of
+     writer, decided in round 10). `hours` counts hourly lines folded, never uptime. An hour it did not run, or
+     written as no digest under OD-3, is a gap for the hour after it. The hour a product stops in is kept with its
+     counts and written when it closes, at the next run, compared with the hour just before when that is the last hour
+     written, else with none (a gap); a product that cannot keep it writes nothing for that hour, never a partial
+     line, since a restart in the same hour would leave two lines and readers keep the first. At start a product reads
+     its last hourly line back for `previous`, rebuilds the day's named operations from that day's hourly lines and
+     the hour it kept, and writes every closed hour it kept, the hour it stopped in included, before it folds any
+     closed day (OD-5); otherwise that day's daily line loses that hour for good.
   3. **An operation's name (OD-2).** `^[a-z][A-Za-z0-9_]*(?:[.:/-][A-Za-z0-9_]+)*$`, at most 64 characters. `/` is a
      separator because Fabric logs an MCP method as `mcp.<method>` (`mcp.tools/list`, `mcp.notifications/initialized`,
      `mcp.notifications/cancelled`; board thread `f7758225`, message `1c191cf7`), and the 175 operation names Fabric
@@ -9078,10 +9078,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      credential detector, which refuses a provider key's shape, in either case and anywhere in the name: `sk-`
      followed by 16 or more letters, digits, `_` or `-` (so inside any word ending in sk: `task-`, `risk-`, `mask-`
      and the like), `gh[pousr]_` followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more
-     letters, digits or `-`, `AKIA` followed by 16 capitals or digits, `glpat-` followed by 20 or more letters,
-     digits, `_` or `-`; a JWT (`eyJ` and two more dotted segments); a value starting with `Bearer` and a space; or a
+     letters, digits or `-`, `AKIA` followed by 16 letters or digits, `glpat-` followed by 20 or more letters,
+     digits, `_` or `-`; a JWT (`eyJ` and 2 or more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any number of them, case-sensitive); a value starting with `Bearer` and a space; or a
      run of 40 or more letters, digits, `_`, `-` or `/` (so across segments joined by `-` or `/`) that mixes upper
-     case, lower case and a digit. `SECRET_VALUE` and `longSecret` in `src/secret-shape.ts` are the definition. So
+     case, lower case and a digit. `JWT_SHAPE`, `SECRET_VALUE` and `longSecret` (together `secretValue`) in `src/secret-shape.ts` are the definition. So
      `ops.risk-assessment-completed` and `queue.task-assigned-to-worker` are refused and `work.session-end-task-back`
      passes, until DEC-0151's narrowing of the `sk-` shape lands. `hasHomePath` refuses a value in which `home`,
      `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`,
@@ -9263,6 +9263,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   rebuilt day of names, OD-3's published overflow name and "at most once in `risen`"; round 9 at `4b46cd05` was not
   clean: the collision class leak (a duplicate dir named a value its class hides), `foldDay`'s grammar (it applied
   FAC-SEM-167 but not OD-2's grammar) and Compatibility's present tense about Fabric, and its batch is folded in, with
-  OD-1's two kinds of writer and the detector's shapes stated in words;
+  OD-1's writers split by how they keep records (reverted in round 10) and the detector's shapes stated in words; round
+  10 at `281619f7` was not clean: the writer kinds half-applied (now one kind: every product writes an hourly line for
+  each hour it observed itself in, one that answers on request folding its stored records hour by hour) and the JWT
+  shape (now stated as `JWT_SHAPE` reads it, with `JWT_SHAPE`, `SECRET_VALUE` and `longSecret` the definition), and its
+  batch is folded in, with a `dir` read also with the code points HFS+ ignores removed;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.
