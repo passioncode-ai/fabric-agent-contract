@@ -102,7 +102,11 @@ function safeCounts<T extends HourlyDigest | DailyDigest>(digest: T): T {
  * a finding or an error never copies such a value (as `src/descriptor-rules.ts` names only the place).
  */
 const hidden = (value: string): boolean => secretValue(value) || hasHomePath(value);
-const shown = (value: string, instead: string): string => (hidden(value) ? instead : value);
+/** A value a message may name: printable ASCII only (U+0020 to U+007E). */
+const PRINTABLE_ASCII = /^[\x20-\x7e]+$/;
+const shown = (value: string, instead: string): string => (hidden(value) || !PRINTABLE_ASCII.test(value) ? instead : value);
+/** An operation's name as FAC-SEM-166 may print it: only one that OD-2's grammar takes and `shown` lets through. */
+const opShown = (op: string): string => (op.length <= OP_NAME_MAX && OP_NAME.test(op) ? shown(op, "this operation") : "this operation");
 /** What OD-2 refuses in an operation's name, its grammar or FAC-SEM-167, as a fold's error words it; null for a lawful name. */
 const nameRefusal = (op: unknown): string | null => {
   if (typeof op !== "string" || op.length > OP_NAME_MAX || !OP_NAME.test(op)) return "fails OD-2's name grammar";
@@ -236,7 +240,7 @@ export function opsDigestRules(kind: string, value: JsonObject): Finding[] | und
   for (const [entry, index] of indexed(value.ops)) {
     const op = entry.op;
     if (typeof op === "string") {
-      if (byOp.has(op)) window(`/ops/${index}/op`, `${shown(op, "this operation")} is counted once`);
+      if (byOp.has(op)) window(`/ops/${index}/op`, `${opShown(op)} is counted once`);
       else byOp.set(op, entry);
       named(`/ops/${index}/op`, op);
     }
@@ -261,24 +265,24 @@ export function opsDigestRules(kind: string, value: JsonObject): Finding[] | und
     if (typeof op !== "string") continue;
     const at = `/risen/${index}`;
     named(`${at}/op`, op);
-    if (rose.has(op)) window(`${at}/op`, `${shown(op, "this operation")} is named once among the rises`);
+    if (rose.has(op)) window(`${at}/op`, `${opShown(op)} is named once among the rises`);
     rose.add(op);
     const counted = byOp.get(op);
     if (counted === undefined) {
-      window(`${at}/op`, `${shown(op, "this operation")} rose, so ops counts it`);
+      window(`${at}/op`, `${opShown(op)} rose, so ops counts it`);
       continue;
     }
     const failed = count(entry.failed);
     const countedFailed = count(counted.failed);
     if (kind === "ops-digest-hourly") {
       const previous = count(entry.previous);
-      if (failed !== null && countedFailed !== null && failed !== countedFailed) window(`${at}/failed`, `a rise names the hour's failures of ${shown(op, "this operation")}, ${countedFailed}`);
+      if (failed !== null && countedFailed !== null && failed !== countedFailed) window(`${at}/failed`, `a rise names the hour's failures of ${opShown(op)}, ${countedFailed}`);
       if (failed !== null && previous !== null && !isRise(failed, previous)) window(at, `${failed} failures against ${previous} is no rise: at least ${RISE_MIN_FAILED} and ${RISE_FACTOR} times the hour before (none counts as one)`);
     } else {
       const risenHours = count(entry.hours);
-      if (risenHours !== null && hours !== null && risenHours > hours) window(`${at}/hours`, `${shown(op, "this operation")} rose in ${risenHours} hours; the day folds ${hours}`);
+      if (risenHours !== null && hours !== null && risenHours > hours) window(`${at}/hours`, `${opShown(op)} rose in ${risenHours} hours; the day folds ${hours}`);
       if (failed !== null && risenHours !== null && failed < RISE_MIN_FAILED * risenHours) window(`${at}/failed`, `${risenHours} hours of rises hold at least ${RISE_MIN_FAILED * risenHours} failures`);
-      if (failed !== null && countedFailed !== null && failed > countedFailed) window(`${at}/failed`, `the rises' failures are at most the day's failures of ${shown(op, "this operation")}, ${countedFailed}`);
+      if (failed !== null && countedFailed !== null && failed > countedFailed) window(`${at}/failed`, `the rises' failures are at most the day's failures of ${opShown(op)}, ${countedFailed}`);
     }
   }
   return findings;
@@ -333,8 +337,6 @@ const NUSKHURI = /[\u2d00-\u2d25]/gu;
 const toMkhedruli = (letter: string): string => String.fromCodePoint((letter.codePointAt(0) as number) - 0x2d00 + 0x10d0);
 /** Code points HFS+ ignores in a name, stripped before the fold exactly as DEC-0149's `foldSegment` strips them. */
 const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
-/** A dir a message may name: printable ASCII only (U+0020 to U+007E). */
-const PRINTABLE_ASCII = /^[\x20-\x7e]+$/;
 /**
  * A `dir` as a file system that folds case compares it, canonical caseless as DEC-0149's fold: each segment with the
  * code points HFS+ ignores removed (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F, U+FEFF), then as NFD,
@@ -351,7 +353,15 @@ const FOLDERS_PATH = `/extensions/${EXTENSION_KEYS.opsDigest.replace(/~/g, "~0")
 const folderFinding = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-168", instancePath, message });
 
 /** A dir is hidden when it, or it with the code points HFS+ ignores removed, is credential-shaped or a home folder. */
-const hiddenDir = (dir: string): boolean => hidden(dir) || hidden(dir.replace(HFS_IGNORABLE, ""));
+/**
+ * The readings of a dir the home-folder and credential tests take: as written, with the code points HFS+ ignores removed,
+ * and that with each segment's trailing dots and spaces dropped (`users./alice` and `Users /Alice` read as home folders).
+ */
+const dirReadings = (dir: string): string[] => {
+  const bare = dir.replace(HFS_IGNORABLE, "");
+  return [dir, bare, bare.split("/").map((segment) => segment.replace(/[. ]+$/, "")).join("/")];
+};
+const hiddenDir = (dir: string): boolean => dirReadings(dir).some(hidden);
 /**
  * FAC-SEM-168 on a service descriptor (kind `service-descriptor`) that carries the ops-digest key: a remote placement
  * (no folder on this machine), or a local one that names no `paths.data` for `dir` to be relative to; a value that is
@@ -395,16 +405,17 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     seen.add(folder.source);
     const folded = foldDir(folder.dir);
     // The message names the dir only when it is printable ASCII (and its class holds nothing hidden); otherwise "this dir".
-    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `${hiddenClass.has(folded) || !PRINTABLE_ASCII.test(folder.dir) ? "this dir" : folder.dir} is named twice as a dir (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
+    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `${hiddenClass.has(folded) || !PRINTABLE_ASCII.test(folder.dir) ? "this dir" : JSON.stringify(folder.dir)} is named twice as a dir (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
     dirs.add(folded);
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
     // A segment made only of dots, spaces and code points HFS+ ignores folds to nothing; a tool that trims or folds names
     // as the fold does (Win32 path handling drops trailing dots and spaces; a reader that strips those code points
-    // before joining) may read it as empty, '.' or '..', outside paths.data. Refused, the safe direction.
+    // before joining) may read it as empty, '.' or '..', another folder than the one declared (outside paths.data when it
+    // leads). Refused, the safe direction.
     if (folder.dir.split("/").some((segment) => foldDir(segment) === "")) findings.push(folderFinding(`${at}/dir`, "a dir segment folds to nothing (only dots, spaces or code points a file system may ignore); a tool may read it as empty, '.' or '..', another folder than the one declared (outside paths.data when it leads)"));
-    const bare = folder.dir.replace(HFS_IGNORABLE, "");
-    if (secretValue(folder.dir) || secretValue(bare)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));
-    else if (hasHomePath(folder.dir) || hasHomePath(bare)) findings.push(folderFinding(`${at}/dir`, "a dir holds a home folder; it is relative to the product's data folder"));
+    const readings = dirReadings(folder.dir);
+    if (readings.some(secretValue)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));
+    else if (readings.some(hasHomePath)) findings.push(folderFinding(`${at}/dir`, "a dir holds a home folder; it is relative to the product's data folder"));
   });
   return findings;
 }

@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-04
 - **Status:** Proposed (draft on branch `agent/ct219-ops-digest-20261104`; accepted on merge of its pull request after
-  the coordinator's blind readings, which reached round 14 on 2026-11-05; the acceptance edit is the first item of the
+  the coordinator's blind readings, which reached round 15 on 2026-11-05; the acceptance edit is the first item of the
   handoff's Next task). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168`, a
   descriptor extension, a reference module and vectors, and a host obligation. Additive: nothing that validated before
   changes.
@@ -9155,7 +9155,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      spaces dropped (one folder under two labels would be sent twice), a `dir` segment made only of dots, spaces and
      code points HFS+ ignores (it folds to nothing, and a tool that trims or folds names as the fold does, Win32 path
      handling dropping trailing dots and spaces or a reader stripping those code points before joining, may read it as
-     empty, `.` or `..`, outside `paths.data`), a `dir` holding a home folder (`hasHomePath`, with the boundary of
+     empty, `.` or `..`, another folder than the one declared (outside `paths.data` when it leads)), a `dir` holding a home folder (`hasHomePath`, with the boundary of
      item 3: `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x`
      pass) and a `dir` or `source` shaped like a credential (`secretValue`); one finding refuses the whole
      declaration, which a collector reads as not declared and reports. `digestFoldersView` (whose `usable` is true
@@ -9183,8 +9183,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   count per instance; the 4096 bound with one overflow name keeps a busy hour's line valid and its totals whole. A line
   saying there is nothing to say has no call a host can observe, so it is no `ok`. The end of a session raises the
   retro only when none was written, so a retro the host saw written is not asked for twice; a record counted in the hour it is resolved keeps
-  every hour's counts closed when the hour closes. There is no UX scenario for this decision: it is a reporting format,
-  the operator's view of it is each product's own (ADR-0188 §2), as DEC-0095's support quality was. Counting the
+  every hour's counts closed when the hour closes. There is no scenario of its own for this decision: it is a reporting format,
+  the operator's view of it is each product's own (ADR-0188 §2), as DEC-0095's support quality was; SCN-002 carries its
+  `pnpm validate` path (the declaration-only hint on a bare declaration). Counting the
   retro as an operation puts "asked" and "written" in the digest the host already writes, without a member the closed
   shape lacks.
 - **Alternatives considered:** `<name>/<revision>` names (`ops-digest-hourly/1`, as DEC-0067 spells every protocol:
@@ -9214,7 +9215,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Consumers list records what was read at a date, and vendoring the vectors from the release tag is each product's
   obligation. At their next re-pin, the consumers that vendor a protocol table (a deployment template's
   `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the adapter
-  kit's copies in agents built on it, and any other vendored table) add `fabric-ops-digest/0.1`. A product that names an operation outside OD-2's grammar
+  kit's copies in agents built on it, and any other vendored table) add `fabric-ops-digest/0.1`. `schemas/device-common.schema.json`'s bytes change (its `detail` `$comment` only), so a consumer that vendors it
+  re-pins. A product that names an operation outside OD-2's grammar
   (another separator, an upper-case first letter) renames it before it writes digests. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `schemas/ops-digest-hourly.schema.json`, `schemas/ops-digest-daily.schema.json`,
   `src/ops-digest.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `tools/vectors/ops-digest.ts`,
@@ -9226,7 +9228,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/semantic/ops-digest-hourly-op-users.json`, `docs/backlog.md`, `src/validate-cli.ts` (the declaration-only hint
   on a bare declaration),
   `test/consistency.test.ts`, `docs/specification/service.md`, `docs/specification/interop.md`,
-  `docs/specification/versioning.md`;
+  `docs/specification/versioning.md`; and from review rounds 10 to 15 `docs/specification/activity.md` (the `HOME_PATH`
+  boundary and its scope), `src/activity-rules.ts` (the `HOME_PATH` docstring and scope comment), `src/proposal-rules.ts`
+  (its scope comment), `schemas/device-common.schema.json` (the `detail` `$comment`), `docs/ux/scenarios.md` (SCN-002)
+  and `docs/handoffs/README.md`;
   `test/ops-digest.test.ts`, `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
   `test/schema-compilation.test.ts`, `vitest.config.ts`; `docs/specification/ops-digest.md`, `conformance.md` (the
   reference module, the producer, reader and host rows, the register), `docs/specification/README.md`,
@@ -9289,6 +9294,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   that parenthesis of round 12 is withdrawn; the refusal stays, the safe direction, for the reason item 9 now gives) and
   its four lists (the rule now named in each), and its batch is folded in; round 14 at `95823e35` was not clean: CT-220's
   DEC-0150 clause at landing, the acceptance edit missing, copies of `HOME_PATH`'s users and control characters in the
-  duplicate message (a dir is now named only when it is printable ASCII), and its batch is folded in;
+  duplicate message (a dir is now named only when it is printable ASCII), and its batch is folded in; round 15 at
+  `f1321b27` was not clean: the acceptance edit named a commit that does not exist yet, an operation's name echoed raw
+  in FAC-SEM-166's messages, and the home-folder check missing a dir whose segment ends in dots or spaces, and its batch
+  is folded in;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

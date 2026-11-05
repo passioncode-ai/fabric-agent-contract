@@ -236,7 +236,7 @@ describe("the reference folds", () => {
       for (const m of messages) expect(m.toLowerCase()).not.toContain(fake.toLowerCase());
     }
     expect(found("service-descriptor", { ...descriptor, extensions: { [key]: [{ dir: "digests", source: "app" }, { dir: "Digests", source: "app" }] } }).length).toBe(2);
-    expect(evaluateSemanticRules("service-descriptor", { ...descriptor, extensions: { [key]: [{ dir: "digests", source: "app" }, { dir: "Digests", source: "app" }] } }).map((f) => f.message).join(" ")).toContain("Digests is named twice as a dir");
+    expect(evaluateSemanticRules("service-descriptor", { ...descriptor, extensions: { [key]: [{ dir: "digests", source: "app" }, { dir: "Digests", source: "app" }] } }).map((f) => f.message).join(" ")).toContain("\"Digests\" is named twice as a dir");
   });
 
   it("applies OD-2 in full: a name FAC-SEM-167 refuses makes no hourly and no daily digest, and is never echoed", () => {
@@ -548,7 +548,7 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
       for (const f of findings) expect(f.message, code.toString(16)).not.toContain(mark);
       if (findings.some((f) => f.message.includes("named twice"))) expect(findings.some((f) => f.message.startsWith("this dir is named twice")), code.toString(16)).toBe(true);
     }
-    expect(evaluateSemanticRules("service-descriptor", withFolders([{ dir: "digests", source: "one" }, { dir: "Digests", source: "two" }])).map((f) => f.message).join(" ")).toContain("Digests is named twice as a dir");
+    expect(evaluateSemanticRules("service-descriptor", withFolders([{ dir: "digests", source: "one" }, { dir: "Digests", source: "two" }])).map((f) => f.message).join(" ")).toContain("\"Digests\" is named twice as a dir");
   });
 
   it("never prints a dir holding a code point HFS+ ignores in a duplicate message", () => {
@@ -556,6 +556,27 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     const findings = evaluateSemanticRules("service-descriptor", withFolders([{ dir: `a${rlo}digests`, source: "one" }, { dir: `A${rlo}DIGESTS`, source: "two" }])).filter((f) => f.code === "FAC-SEM-168");
     expect(findings.map((f) => f.message.slice(0, 31))).toEqual(["this dir is named twice as a di"]);
     for (const f of findings) expect(f.message).not.toContain(rlo);
+  });
+
+  it("reads a dir with each segment's trailing dots and spaces dropped for the home-folder test, and quotes a named dir", () => {
+    for (const dir of ["users./alice", "Users /Alice"]) expect(found("service-descriptor", withFolders([{ dir, source: "app" }])), dir).toEqual([`FAC-SEM-168 ${at}/0/dir`]);
+    const messages = evaluateSemanticRules("service-descriptor", withFolders([{ dir: "digests", source: "one" }, { dir: "Digests ", source: "two" }])).map((f) => f.message);
+    expect(messages.join(" ")).toContain('"Digests " is named twice as a dir');
+  });
+
+  it("never prints an operation's name that OD-2's grammar refuses or that is not printable ASCII (FAC-SEM-166)", () => {
+    for (const code of [0x001b, 0x202e, 0x0085]) {
+      const mark = String.fromCodePoint(code);
+      const op = `x${mark}y`;
+      const hourly = { schema: "ops.digest.hourly@1", from: "2026-11-04T01:00:00.000Z", to: "2026-11-04T02:00:00.000Z", ops: [{ op, ok: 0, failed: 12, unknown: 0 }, { op, ok: 0, failed: 12, unknown: 0 }], total: { ok: 0, failed: 24, unknown: 0 }, risen: [{ op, failed: 13, previous: 0 }, { op, failed: 13, previous: 0 }, { op: `z${mark}`, failed: 12, previous: 0 }] };
+      const daily = { schema: "ops.digest.daily@1", day: "2026-11-04", hours: 1, ops: [{ op, ok: 0, failed: 12, unknown: 0 }, { op, ok: 0, failed: 12, unknown: 0 }], total: { ok: 0, failed: 24, unknown: 0 }, risen: [{ op, hours: 2, failed: 30 }, { op, hours: 1, failed: 5 }] };
+      const findings = [...evaluateSemanticRules("ops-digest-hourly", hourly), ...evaluateSemanticRules("ops-digest-daily", daily)].filter((f) => f.code === "FAC-SEM-166");
+      expect(findings.length, code.toString(16)).toBeGreaterThan(5);
+      for (const f of findings) expect(f.message, code.toString(16)).not.toContain(mark);
+    }
+    let message = "";
+    try { foldHour([], "\u001b", null); } catch (e) { message = (e as Error).message; }
+    expect(message).toBe("from is not a whole UTC hour");
   });
 
   it("is a descriptor's rule only, and a declaration's absence is no finding", () => {

@@ -176,25 +176,31 @@ product's obligation.
   CT-222 (filed on this branch, the next free CT above every branch and main when written) widens `SECRET_VALUE` for
   underscore-form provider prefixes, `AIza` keys and `hf_` tokens, owned by DEC-0151's detector, with tests from split
   literals.
-- **At landing, the fold:** on the merged tree with DEC-0149, `foldDir` calls DEC-0149's `foldPath` (one
-  implementation; a `dir` has no trailing `/`); remove `NUSKHURI` and `toMkhedruli` from `src/ops-digest.ts`; export
-  `HFS_IGNORABLE` from `src/source-rules.ts` (and DEC-0149's exported non-global twin, by whatever name the landed tree
-  exports it) and import them in `src/ops-digest.ts` for `hiddenDir` and `digestFoldersRules`, removing the local
-  constant, so `pnpm typecheck` exits 0 (no TS6133) and `grep -c 'u200c-\\u200f' src/ops-digest.ts` prints 0; and the
-  parity test in `test/ops-digest.test.ts` (DEC-0149's `FOLD_PAIRS` at `d4cc1e16` copied as written, plus the HFS+
-  samples its next step adds) keeps holding. Recommended: use DEC-0149's `inGrammar(dir, true)` in place of the local
-  segment check, so FAC-SEM-168 also refuses a `dir` that NFC or NFD grows past 256 code points; its check is a probe
-  (a 256-character `dir` of `ä` written decomposed is refused). (The round-14 batch dropped the local non-global copy
-  of the class: the duplicate-dir message now names a dir only when it is printable ASCII, so nothing used it.)
-- **At landing, the home-path boundaries:** the CT-109 register counting four boundaries (`activity.md` "Its scope" and
-  the scope comment in `src/activity-rules.ts`) is DEC-0149's own landing step. DEC-0153's lander owes only what
-  depends on DEC-0153: `source.md`'s sentence "the scanner for values that must hold no path at all" and its twin in
-  the `SOURCE_HOME_PATHS` docstring (`src/source-rules.ts`, both on DEC-0149's branch), false once FAC-SEM-168 applies
-  `hasHomePath` to a relative `dir`. Every other copy that counts boundaries (`devices.md` at its two `detail`
-  sentences, `proposals.md`'s FAC-SEM-103 paragraph, `src/proposal-rules.ts`'s scope comment, the device-common
-  `detail` `$comment`, `src/activity-rules.ts`'s "any of the three") follows one rule: whichever of DEC-0149 and
-  DEC-0153 lands second runs `grep -rn -E 'three home-path|any of the three|values that (must )?hold no path at all' src
-  docs/specification schemas` and rewrites what is left.
+- **At landing, the fold** (against DEC-0149 at `47d392a4`, its round 48, which exports `HFS_IGNORABLE_CHAR` with no
+  global flag and `stripHfsIgnorable` from `src/source-rules.ts` and keeps its global `HFS_IGNORABLE` private): make
+  `foldDir = (dir) => foldPath(dir)`; delete `NUSKHURI`, `toMkhedruli` and the local `HFS_IGNORABLE` from
+  `src/ops-digest.ts`; wherever `src/ops-digest.ts` still strips or tests the HFS+ class (`dirReadings` for
+  `hiddenDir` and the home-folder and credential tests), use `stripHfsIgnorable` or `HFS_IGNORABLE_CHAR` from
+  `./source-rules.js`, importing only what is used. Checks: `pnpm typecheck` exits 0, `grep -c 'u200c-\\u200f'
+  src/ops-digest.ts` prints 0, and the parity test in `test/ops-digest.test.ts` (DEC-0149's `FOLD_PAIRS` at `d4cc1e16`
+  copied as written, plus the HFS+ samples) keeps holding. Recommended: use DEC-0149's `inGrammar(dir, true)` in place
+  of the local segment check, so FAC-SEM-168 also refuses a `dir` that NFC or NFD grows past 256 code points; its probe,
+  added as a test case at landing: a `dir` of 256 precomposed `ä` (U+00E4) is refused by FAC-SEM-168 after the swap
+  (it passes today).
+- **At landing, the home-path boundaries:** DEC-0149 lands the CT-109 four-boundary edit itself (at `47d392a4`:
+  `activity.md` "Its scope" and the scope comment in `src/activity-rules.ts` name `SOURCE_HOME_PATHS`). The line is
+  order-proof: the second of DEC-0149 and DEC-0153 to land checks `grep -c SOURCE_HOME_PATHS
+  docs/specification/activity.md src/activity-rules.ts` (each at least 1 once DEC-0149 is on `main`) and adds it if
+  missing; DEC-0153 adds no boundary. DEC-0153's lander still owes `source.md`'s sentence "the scanner for values that
+  must hold no path at all" and its twin in the `SOURCE_HOME_PATHS` docstring (`src/source-rules.ts`), both false once
+  FAC-SEM-168 applies `hasHomePath` to a relative `dir`, and the boundary-copy rule: whichever lands second runs
+  `grep -rn -E 'three home-path|any of the three|values that (must )?hold no path at all' src docs/specification
+  schemas` and rewrites what is left (`devices.md` at its two `detail` sentences, `proposals.md`'s FAC-SEM-103
+  paragraph, `src/proposal-rules.ts`'s scope comment, the device-common `detail` `$comment`, `src/activity-rules.ts`'s
+  "any of the three").
+- **At landing, the scenarios:** `docs/ux/scenarios.md` conflicts in SCN-002. Keep `main`'s channel-agent clause and this
+  branch's ops-digest clause in Errors & recovery, and list `test/validate-cli.test.ts`, `test/channel-agent.test.ts`
+  and `test/ops-digest.test.ts` in its Coverage; `python3 docs/ux/lint.py` exits 0.
 - **At landing, the backlog:** `docs/backlog.md` keeps this branch's CT-219 and CT-222, main's CT-220 with DEC-0150's
   clause ("keeps DEC-0150 CA-8's bound ..."), CT-221 once and main's CT-223 to CT-225, in id order. Checks:
   `grep -c "keeps DEC-0150 CA-8's bound" docs/backlog.md` prints 1, and `grep -oE '^\| CT-[0-9]+ ' docs/backlog.md |
@@ -317,12 +323,28 @@ product's obligation.
   duplicate message (it now names a dir only when it is printable ASCII). Also: the segment message's "another folder
   than the one declared (outside paths.data when it leads)", the hint test's full list, the declaring product's row's
   credential duty, FAC-SEM-166's "x rose in 2 hours; the day folds 1", SCN-002's error path and coverage, and the fold
-  and `inGrammar` landing notes. Round 15 is next.
+  and `inGrammar` landing notes.
+- Round 15 at `f1321b27` was not clean: the acceptance edit named a merge commit that does not exist at its commit (now
+  the pull request number and the merge date, and the handoffs README row's cell), FAC-SEM-166's messages echoed an
+  operation's name raw (now "this operation" for a name OD-2's grammar refuses or that is not printable ASCII), and the
+  home-folder check missed a dir whose segment ends in dots or spaces (now read also with each segment's trailing dots
+  and spaces dropped). Also: a named duplicate dir quoted, "outside `paths.data`" qualified everywhere as the message
+  says, SCN-002's clause and landing line, OD-9's bare-declaration sentence, the Why and Consequences, the device-common
+  re-pin line, and the fold and home-path landing lines read against DEC-0149 at `47d392a4`. Round 16 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-15 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 12 files of
+round 14 with coverage on `src/ops-digest.ts` (4228 tests; 270 of 270 statements, 212 of 212 branches);
+`pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`; `python3 docs/ux/lint.py`;
+`pnpm run privacy:check` (0 findings). Greps: `declaration-only` in `ops-digest.md` once; "outside `paths.data`"
+without "when it leads" in the page, DEC-0153, the module and the extension schema, 0. The branch gate on this tree
+before its commit (15-minute load 31.0, 18 GB free, under the heavy lock): `pnpm run check` (109 files, 9953 tests
+passed, 1 skipped, coverage floors held; `ux:lint`, `docs:check`, `privacy:check` 0 findings) exit 0, and
+`pnpm run vectors:check` exit 0. This paragraph is the only change after it.
 
 Round-14 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
 round 2 plus `test/proposal-rules.test.ts` with coverage on `src/ops-digest.ts` (4226 tests; 264 of 264 statements,
@@ -445,10 +467,11 @@ and its per-file floors (109 files, 9846 tests passed, 1 skipped), each exit 0. 
 
 ## Next task
 
-Before the merge gate, the acceptance edit, in one commit on the branch: DEC-0153's Status becomes Accepted with the
-merge date, CT-219 is marked done with its closure receipt (the pull request and merge commit), this handoff's status
-and the handoffs README row read done. Its checks: `pnpm run docs:check` exits 0, `grep -n "DEC-0153" docs/DECISIONS.md
-| head -3` shows Accepted, and `grep -n "CT-219" docs/backlog.md` shows done.
+Before the merge gate, the acceptance edit, in one commit on the branch, naming only facts that exist at its commit:
+DEC-0153's Status becomes Accepted with the merge date; CT-219 is marked done with its closure receipt, the pull request
+number and the merge date (as CT-200 and CT-209 on `main`), no merge commit; the handoffs README row's cell reads done.
+Its checks: `pnpm run docs:check` exits 0; `awk '/^### DEC-0153/{f=1} f&&/^- \*\*Status:\*\*/{print; exit}'
+docs/DECISIONS.md` prints a line starting "- **Status:** Accepted"; `grep -n "CT-219" docs/backlog.md` shows done.
 
 The coordinator's blind readings of DEC-0153 on branch `agent/ct219-ops-digest-20261104`, until two clean rounds;
 then the pull request, the merge and the answer on thread `f7758225`. That answer says in one sentence what RW-4's
