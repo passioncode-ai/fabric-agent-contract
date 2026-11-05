@@ -340,6 +340,17 @@ describe("which files are source", () => {
     ]);
   });
 
+  it("reads a bare exclude entry as an include path when an include folder has its name, and keeps unchecked folders beneath it out", () => {
+    for (const include of [["src/", "src/a/"], ["src/a/"]]) {
+      expect(sourceRules("source-manifest", { format: "fabric-source/1", include, exclude: ["src/a"] }), include.join(",")).toEqual([
+        { code: "FAC-SEM-157", instancePath: "/exclude/0", message: "exclude[0] is an include path: it would remove it whole, so leave both out" }
+      ]);
+    }
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/"], exclude: ["src/a"], unchecked: [{ path: "src/a/x/", reason: "r" }] })).toEqual([
+      { code: "FAC-SEM-157", instancePath: "/unchecked/0/path", message: "unchecked[0] is not in the source" }
+    ]);
+  });
+
   it("reads the path grammar on the NFC form too: an entry NFC lengthens past 256 code points is said once, a path so lengthened is no source", () => {
     const long = "\u0958".repeat(126);
     expect([...`src/${long}/`].length).toBeLessThanOrEqual(256);

@@ -2092,6 +2092,20 @@ describe("an agent's source (DEC-0149)", () => {
       if (excluded) expect(result.out, label).not.toContain("nested-repository");
       else expect(result.out, label).toContain("nested-repository");
     }
+    // An entry ending in / over the gitlink, and a bare entry naming a folder it lies in, are used too.
+    for (const [include, exclude, link, extra] of [
+      [["src/", "vendor/", "LICENSE"], ["vendor/lib/"], "vendor/lib", { "vendor/keep.ts": "x" }],
+      [["src/", "LICENSE"], ["src/vendor"], "src/vendor/lib", {}]
+    ] as const) {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: [...include], exclude: [...exclude] }), LICENSE: "x", "src/a.ts": "x", ...extra });
+      expect(gitIn(dir, "init", "-q").status).toBe(0);
+      expect(gitIn(dir, "add", "-A").status).toBe(0);
+      expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${"1".repeat(40)},${link}`).status).toBe(0);
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code, exclude[0]).toBe(0);
+      expect(result.out, exclude[0]).not.toContain("unused-exclude");
+      expect(result.out, exclude[0]).not.toContain("nested-repository");
+    }
   });
 
   it("gives a file the same files[<index>] in Git mode and in a walk when a name before it is stored in NFD", () => {

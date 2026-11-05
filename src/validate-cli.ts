@@ -1096,8 +1096,14 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   run.files.push({ file: ".", schema: null, kinds: ["source-tree"] });
   // Each exclude entry the folder holds, found by reading each folder's names and matching each segment under the fold,
   // an intermediate folder never a symbolic link, is listed, so an entry that names nothing is said (unused-exclude, accepted); nothing is read and no name is printed.
-  const foldedGitlinks = new Set([...gitlinks].map((name) => foldPath(name.normalize("NFC"))));
-  const listed = (((manifest as JsonObject).exclude as string[] | undefined) ?? []).filter((entry) => SOURCE_PATH.test(entry) && (foldedGitlinks.has(foldPath(entry.normalize("NFC"))) || presentWithoutLink(folder, entry)));
+  // An entry excluding a gitlink as nestedTest reads it is used: a bare entry naming it or a folder it lies in, an entry
+  // ending in `/` naming a folder it lies in or is.
+  const foldedGitlinks = [...gitlinks].map((name) => foldPath(name.normalize("NFC")));
+  const excludesGitlink = (entry: string): boolean => {
+    const folded = foldPath(entry.normalize("NFC"));
+    return foldedGitlinks.some((link) => (folded.endsWith("/") ? `${link}/`.startsWith(folded) : link === folded || link.startsWith(`${folded}/`)));
+  };
+  const listed = (((manifest as JsonObject).exclude as string[] | undefined) ?? []).filter((entry) => SOURCE_PATH.test(entry) && (excludesGitlink(entry) || presentWithoutLink(folder, entry)));
   const findings = evaluateSemanticRules("source-tree", { manifest, files, listed });
   const inPath = new Set(findings.flatMap((finding) => {
     const at = /^\/files\/(\d+)\/path$/.exec(finding.instancePath);

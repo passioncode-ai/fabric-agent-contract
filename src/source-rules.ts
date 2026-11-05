@@ -231,7 +231,7 @@ function folderInSource(includes: PathList, excludes: PathList, written: string)
   const folder = nfc(written);
   return SOURCE_PATH.test(folder) && !inGit(folder.slice(0, -1)) &&
     folderPrefixes(folder).some((prefix) => includes.folders.has(prefix)) &&
-    !folderPrefixes(foldPath(folder)).some((prefix) => excludes.folders.has(prefix));
+    !folderPrefixes(foldPath(folder)).some((prefix) => excludes.folders.has(prefix) || excludes.files.has(prefix.slice(0, -1)));
 }
 
 /**
@@ -1211,7 +1211,8 @@ function pathFindings(value: JsonObject): Finding[] {
     // An entry NFC lengthens past the grammar is said once above, not again with another reason.
     if (SOURCE_PATH.test(path) && !SOURCE_PATH.test(nfc(path))) continue;
     const folded = foldPath(nfc(path));
-    if (foldedIncludes.files.has(folded) || foldedIncludes.folders.has(folded)) flag(`/exclude/${index}`, `exclude[${index}] is an include path: it would remove it whole, so leave both out`);
+    // A bare entry also names everything beneath it, so it equals an include folder of its name.
+    if (foldedIncludes.files.has(folded) || foldedIncludes.folders.has(folded) || foldedIncludes.folders.has(`${folded}/`)) flag(`/exclude/${index}`, `exclude[${index}] is an include path: it would remove it whole, so leave both out`);
     else if (!prefixesOf(path).some((folder) => foldedIncludes.folders.has(folder))) flag(`/exclude/${index}`, `exclude[${index}] lies inside no include folder, so it removes nothing`);
   }
   for (const [path, index] of strings(value.binaries)) {

@@ -9320,7 +9320,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       for a name stored in NFD; and the path grammar is read on the NFC form too, an entry NFC lengthens past 256 code
       points being `FAC-SEM-157` with its own message and a path so lengthened no source. With every name beneath an entry
       without `/` left out, such an entry over a plain folder leaves that folder's files out and is used, which replaces
-      the round-41 reading that counted it unused.
+      the round-41 reading that counted it unused. So such an entry naming an include folder is an include path
+      (`FAC-SEM-157`), an `unchecked` folder beneath it is not in the source, and an entry that excludes a gitlink as a
+      nested repository is read counts as used (round 43).
   14. **Starting without the instance (§5.8):** an agent started with an empty data folder and no slot filled starts;
       a service answers `status: degraded` with one `degraded[]` entry per missing required slot, its `source` the
       slot's name, each `setup: true` (DEC-0044's setup state), an `endpoint` included; a `store` slot is never a setup

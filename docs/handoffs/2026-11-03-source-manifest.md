@@ -314,7 +314,11 @@ source, what never travels with it, the check before a source export, and how a 
   taking the earlier export commit as its parent; an organization's first public release and new outside readers
   taking the word; serving named per commit and audience; a patch beneath a symbolic link refused at apply time; the
   stated word outside a service's action (knowledge base item 9); OA-5's clause led by "not a human step"; export dates
-  with their time zone; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  with their time zone; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
+  name): `FAC-SEM-157` reads a bare entry naming an include folder as an include path, `folderInSource` keeps an
+  `unchecked` folder beneath a bare entry out of the source, and an entry that excludes a gitlink as `nestedTest`
+  reads it (bare over it or a folder holding it, ending in `/` over a folder holding it or itself) is used, each
+  tested; source.md says the index is read whenever Git answers; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -499,10 +503,11 @@ source, what never travels with it, the check before a source export, and how a 
 ## Checks actually run
 
 Round 43's fixes were checked on the working tree over head `e6511b89` (this note's commit holds the same tree; code
-changed only in a doc comment): `pnpm typecheck` (exit 0); `pnpm vitest run --testTimeout=60000 --coverage
+with round 43's unit items, which change `src/source-rules.ts` and `src/validate-cli.ts`, in a second commit): `pnpm
+typecheck` (exit 0); `pnpm vitest run --testTimeout=60000 --coverage
 --coverage.include=src/source-rules.ts --coverage.include=src/validate-cli.ts` over `source-rules`, `validate-cli`,
-`validate-cli-faults`, `rule-tolerance` and `positive-sweep` (exit 0: 3177 passed, 2 skipped; `src/source-rules.ts` at
-100 % of its branches; `src/validate-cli.ts` at 99.47 % against its 99.4 floor); `pnpm exec tsx tools/vectors/run.ts`
+`validate-cli-faults`, `rule-tolerance` and `positive-sweep` (exit 0: 3178 passed, 2 skipped with the unit items;
+`src/source-rules.ts` at 100 % of its branches; `src/validate-cli.ts` at 99.48 % against its 99.4 floor); `pnpm exec tsx tools/vectors/run.ts`
 (exit 0, 29 files match); `pnpm run docs:check` (exit 0, 0 errors); `python3 docs/ux/lint.py` (exit 0); `ORG_INDEX=...
 pnpm run privacy:check` (exit 0, 0 findings); no U+2014 in the added lines. PR #628 at `f699400a` (the knowledge
 base's main merged in first, cleanly): `source hand-over` in 4, 3 and 3 lines of agents-first, principles and rules,
