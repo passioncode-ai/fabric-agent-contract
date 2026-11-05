@@ -89,10 +89,11 @@ branches. Landing this branch directly on `main` as it stands:
   next free `FAC-SEM-169`. `src/protocol-revisions.ts` and `versioning.md` hold `fabric-ops-digest/0.1` beside any
   revision another branch adds.
 - Whichever of DEC-0149 and DEC-0153 lands second edits the live mirror lines: "(DEC-0153, in progress)" in
-  `source.md`'s setup-answer sentence (DEC-0149's branch), "in progress" in `ops-digest.md`'s OD-3 (where it reads "DEC-0149, in progress" before
-  "Starting without the instance"), and "in progress" in DEC-0153's item 4, which is edited if DEC-0153
-  is still Proposed and annotated if it is already Accepted (the register is append-only). No conformance row names
-  DEC-0149.
+  `source.md`'s setup-answer sentence (DEC-0149's branch), "in progress" in `ops-digest.md`'s OD-3 (where it reads
+  "DEC-0149, in progress" before "Starting without the instance"), and "in progress" in DEC-0153's item 4, which is
+  edited if DEC-0153 is still Proposed and annotated if it is already Accepted (the register is append-only). No
+  conformance row names DEC-0149. Check after both land: `git grep -n -E 'DEC-0153, in progress|DEC-0149, in progress'
+  -- docs/specification` prints nothing.
 - DEC-0151's handoff resolves its overlap with this branch for the support-quality rows of `conformance.md`, the spec
   README and `docs/DOCMAP.md` under its heading "Against DEC-0153"; the second to land follows it.
 - DEC-0152 shares `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`, `docs/handoffs/README.md` and
@@ -166,19 +167,22 @@ product's obligation.
   `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the adapter
   kit's copies in agents built on it, and any other vendored table) add `fabric-ops-digest/0.1`, as DEC-0149 asks for
   `fabric-source`.
-- **At landing** (DEC-0151 lands before this branch and narrows the `sk-` shape): on the merged tree, add `FAC-SEM-167`
-  pass cases for `queue.task-assigned-to-worker`, `work.desk-booking-confirmed` and `ui.disk-usage-refreshed-hourly`,
-  which the `sk-` shape before DEC-0151 reads as keys, and move `queue.task-assigned-to-worker` out of the refused names
-  of the test "applies OD-2 in full" in `test/ops-digest.test.ts` (it folds on the merged tree). In the test "pins the
-  shared detector's shapes the page states: sk- inside a word ending in sk (until DEC-0151), the JWT, akia", re-pin each
-  row as the merged detector answers: `ops.risk-assessment-completed` (refused before DEC-0151) and
-  `work.session-end-task-back` (passing), the lower-case `akia` row as passing (DEC-0151 reads the provider prefixes in
-  canonical case), and an upper-case `AKIA` sample built from pieces as the refused case. Then restate the detector's
-  shapes in OD-2, the FAC-SEM-167 row and DEC-0153 item 3 as DEC-0151's `SECRET_VALUE` reads them, dropping "in either
-  case" and "anywhere in the name" for the provider-prefix shapes (DEC-0151 reads them in canonical case at a boundary).
-  CT-222 (filed on this branch, the next free CT above every branch and main when written) widens `SECRET_VALUE` for
-  underscore-form provider prefixes, `AIza` keys and `hf_` tokens, owned by DEC-0151's detector, with tests from split
-  literals.
+- **At landing, DEC-0151's narrowed detector** (order-proof: whichever of DEC-0151 and DEC-0153 lands second re-pins
+  the two tests and restates OD-2, the FAC-SEM-167 row and DEC-0153 item 3 for the narrowed detector): on the tree
+  that holds both, add `FAC-SEM-167` pass cases for `queue.task-assigned-to-worker`, `work.desk-booking-confirmed` and
+  `ui.disk-usage-refreshed-hourly`, which the `sk-` shape before DEC-0151 reads as keys, and move
+  `queue.task-assigned-to-worker` out of the refused names of the test "applies OD-2 in full" in
+  `test/ops-digest.test.ts` (it folds on the merged tree). In the test "pins the shared detector's shapes the page
+  states: sk- inside a word ending in sk (until DEC-0151), the JWT, akia", re-pin each row as the merged detector
+  answers: `ops.risk-assessment-completed` (refused before DEC-0151) and `work.session-end-task-back` (passing), the
+  lower-case `akia` row as passing (DEC-0151 reads the provider prefixes in canonical case), and an upper-case `AKIA`
+  sample built from pieces as the refused case. Then restate the detector's shapes in OD-2, the FAC-SEM-167 row and
+  DEC-0153 item 3 as DEC-0151's `SECRET_VALUE` reads them, dropping "in either case" and "anywhere in the name" for
+  the provider-prefix shapes (DEC-0151 reads them in canonical case at a boundary). CT-222 (filed on this branch, the
+  next free CT above every branch and main when written) widens `SECRET_VALUE` for underscore-form provider prefixes,
+  `AIza` keys and `hf_` tokens, owned by DEC-0151's detector, with tests from split literals. Check after both land:
+  `grep -n -E 'until DEC-0151|in either case and anywhere in the name' docs/specification/ops-digest.md
+  docs/DECISIONS.md` prints only annotated lines.
 - **At landing, the fold** (against DEC-0149 at `899b4710`, which exports `HFS_IGNORABLE_CHAR` with no global flag and
   `stripHfsIgnorable` from `src/source-rules.ts` and keeps its global `HFS_IGNORABLE` private, so the lander exports
   nothing from `src/source-rules.ts`): make `foldDir = (dir) => foldPath(dir)`; delete `NUSKHURI`, `toMkhedruli` and
@@ -218,7 +222,10 @@ product's obligation.
   `HINT_HELP`'s shared `hint/declaration-only` value may keep either side; `test/ops-digest.test.ts` asserts
   `channel-agent.md#what-is-checked` for the channel-agent bare declaration when that schema and its positive fixture
   exist (DEC-0150 asserts the same); the `readerHints` comment is the one written here (each bare declaration's line
-  carries its own page), and `main`'s comment line beside it is dropped.
+  carries its own page); of `main`'s comments, the `Hint` docstring ending "(DEC-0153's form)" is dropped for this
+  branch's ("its own help link when it differs per schema"), and the comment above the channel-agent push ("DEC-0150:
+  a bare channel-agent declaration ...") is kept: `grep -c 'DEC-0150: a bare channel-agent declaration'
+  src/validate-cli.ts` prints 1 on the merged tree.
 - **At landing, the registers by hand:** the DEC-0153 row in `docs/handoffs/README.md` goes above the rows already on
   `main` (newest first); `interop.md`'s "The contract defines eight extension keys" becomes "nine" by hand (git merges
   it silently), and `grep -c 'defines nine extension keys' docs/specification/interop.md` prints 1; DEC-0153's client
@@ -361,20 +368,37 @@ product's obligation.
   landing line, and Consequences naming the five rows.
 - Round 17 at `cc1fc853` was clean. Round 18 at the same head was not (product): the long-run alphabet (stated as the
   detector reads it now, letters, digits, `+`, `/`, `=`, `_` or `-`, with `Application+Support/MyProduct/Digests2026x`
-  refused and pinned by a test), the acceptance edit left this handoff as it was (step 3 of the Next task now rewrites
-  it) and the knowledge base's plans row (step 8 now writes its Due cell and the products and roadmap Contract rows).
+  refused and pinned by a test), the acceptance edit left this handoff as it was (the acceptance edit in the Next task now rewrites it) and the knowledge base's plans row (the knowledge base rows in the Next task now write its Due cell and the products and roadmap Contract rows).
   Also folded from both rounds: a `dir` segment empty once every default-ignorable code point and its trailing dots
   and spaces are dropped is refused (`..` + U+2060), the folds name a non-string `from` and a null item with a worded
   error, FAC-SEM-168's message for a dir that only the long run makes a key says why and how to fix it, the
   declaration-only help link written once (`OPS_DIGEST_HELP`), `foldDay`'s docstring naming what it checks and what it
   leaves to the caller, DEC-0153 item 1's echo sentence and Compatibility's renamed names, the home-path landing line
   against DEC-0149 at `899b4710` with the third gloss place and its `git grep` check, the registers-by-hand landing
-  line, and the Consumers re-read before the pull request. Round 19 is next.
+  line, and the Consumers re-read before the pull request.
+- Round 19 at `dc6d0afc` was not clean (product; unit and seam passed, the seam tier's gates on both landing orders
+  exiting 0): the Why still promised a daily line for a day the product was down and claimed no change for the first
+  producer (now: a closed day gets its daily line at the next run when it has hourly lines, none without; the first
+  producer's lines need no new member or format, and OD-1, OD-3 and OD-5's writing rules are each product's to adopt).
+  Also: the intro's operator and retro wording, the steps named by subject, the landing merge before the gate with its
+  `--is-ancestor` check, the DEC-0151 line order-proof with its check, the products row's commit and unlanded list,
+  the receipt commits' route on `main`, the README index row, the long run's remedy (a space or a dot inside a
+  segment, not at its end), the folds' "is not an array" and an undefined `previous`, a `dir` holding a lone surrogate
+  refused, the hints landing line naming the dropped and kept comments, and the mirror lines' check. Round 20 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-19 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the six files of
+round 16 with coverage on `src/ops-digest.ts` (2044 tests; 292 of 292 statements, 227 of 227 branches); `pnpm exec tsx
+tools/vectors/run.ts`; `pnpm run docs:check`; `python3 docs/ux/lint.py`; `pnpm run privacy:check` (0 findings). Greps:
+`grep -c 'product was down for still gets' docs/DECISIONS.md` and `grep -c 'moves nothing' docs/DECISIONS.md`, 0 each;
+`grep -c -E 'step 3 of the Next task|step 8 now writes'` on this handoff, 0. The branch gate on this tree before its
+commit (15-minute load 34.9, 18 GB free, under the heavy lock): `pnpm run check` (109 files, 9960 tests passed, 1
+skipped, coverage floors held; `ux:lint`, `docs:check`, `privacy:check` 0 findings) exit 0, and `pnpm run
+vectors:check` exit 0. This paragraph is the only change after it.
 
 Rounds 17 and 18 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the six
 files of round 16 with coverage on `src/ops-digest.ts` (2043 tests; 287 of 287 statements, 222 of 222 branches); `pnpm
@@ -537,19 +561,25 @@ In this order, each step only after the one before:
 3. Open the pull request from that branch to `main`.
 4. The acceptance edit, in one commit on the branch, naming only facts that exist at its commit: DEC-0153's Status
    becomes Accepted with the edit date; CT-219 is marked done with its closure receipt "accepted <date>, #N" (no
-   "merged" before the merge; as CT-200 on `main`, #235), no merge commit; the handoffs README row's cell reads
-   "accepted <date>, #N". The same commit rewrites this handoff: Done and the Status words read accepted, CT-219 is no
-   longer "in progress", Open records the clean rounds and the head they read and drops "Round N is next", and this
-   Next task then starts at the merge gate. Its checks: `pnpm run docs:check` exits 0; `awk '/^### DEC-0153/{f=1}
-   f&&/^- \*\*Status:\*\*/{print; exit}' docs/DECISIONS.md` prints a line starting "- **Status:** Accepted"; `grep -n
-   "CT-219" docs/backlog.md` shows done; `grep -n -E 'Round [0-9]+ is next|DEC-0153 \(Proposed\)|marked in progress'
-   docs/handoffs/2026-11-04-ops-digest.md` prints nothing.
-5. The merge gate (`pnpm run check` and `pnpm run vectors:check`, output in the pull request), then the merge.
+   "merged" before the merge; as CT-200 on `main`, #235), no merge commit; the handoffs README index row reads
+   "DEC-0153 (CT-219; CT-222 filed)" with the cell "accepted <date>, #N". The same commit rewrites this handoff: Done
+   and the Status words read accepted, CT-219 is no longer "in progress", Open records the clean rounds and the head
+   they read and drops "Round N is next", and this Next task then starts at the landing merge. Its checks: `pnpm run
+   docs:check` exits 0; `awk '/^### DEC-0153/{f=1} f&&/^- \*\*Status:\*\*/{print; exit}' docs/DECISIONS.md` prints a
+   line starting "- **Status:** Accepted"; `grep -n "CT-219" docs/backlog.md` shows done; `grep -n -E 'Round [0-9]+ is
+   next|DEC-0153 \(Proposed\)|marked in progress' docs/handoffs/2026-11-04-ops-digest.md` prints nothing.
+5. The landing merge and the gate: merge `origin/main` into the branch (a merge commit on the branch, never a
+   force-push), apply every "At landing" line above, and write both next-free markers from the CAS refs
+   (`refs/agent-sync/ids/`), never from this file. Check `git merge-base --is-ancestor origin/main <PR head>` exits 0,
+   then run the merge gate on that merged head (`pnpm run check` and `pnpm run vectors:check`, output in the pull
+   request), then merge the pull request.
 6. Compare `gh pr view <N> --json mergedAt` with the date the acceptance edit wrote; if the UTC day differs, correct
    it in DEC-0153's Status, CT-219's receipt and the README row; then CT-219's receipt and the README row read
-   "accepted <date>, #N; merged <date>", in one commit on `main`.
+   "accepted <date>, #N; merged <date>". The commit lands on `main` as a fast-forward after `pnpm run docs:check`
+   exits 0 (the knowledge base's `knowledge/rules.md`, line 29) or through a receipt pull request.
 7. The release, tagged as the history does; watch its run to success, then write the tag into CT-219's receipt and the
-   handoffs README row as "merged <date>, #N; released <tag>".
+   handoffs README row as "merged <date>, #N; released <tag>", landed on `main` the same way (a fast-forward after
+   `pnpm run docs:check`, or a receipt pull request).
 8. The answer on board thread `f7758225`. It says in one sentence what RW-4's `ok` means (asks answered by a retro the
    host saw written, never a count of retros) and names Fabric's CO-502 wording ("the daily digest counts retros asked
    and written"), so no view shows `ok` as retros written (CT-219's own row item (b) already says so since round 6),
@@ -557,5 +587,7 @@ In this order, each step only after the one before:
    "past 4096").
 9. The knowledge base rows in `fabric-workspace`: in `knowledge/plans.md`, the contract's row at line 80 replaces PR
    #240 with this decision's pull request, adds OD-9 and `FAC-SEM-168`, and its Due cell becomes "merged <date>, #N;
-   released <tag>" (no "draft by"); the Contract rows of `knowledge/products.md` (line 21) and `knowledge/roadmap.md`
-   (line 70) get the new tag and "through DEC-0153"; confirm CT-221's row reserved on main (PR #242) stays once.
+   released <tag>" (no "draft by"); the Contract row of `knowledge/products.md` (line 21) gets the new tag, the `main`
+   commit the tag points at, and "through DEC-0153" with whatever is still unlanded named (today "DEC-0149, DEC-0151
+   and DEC-0152 still on branches"); the Contract row of `knowledge/roadmap.md` (line 70) gets the new tag and
+   "through DEC-0153"; confirm CT-221's row reserved on main (PR #242) stays once.

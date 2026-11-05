@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-04
 - **Status:** Proposed (draft on branch `agent/ct219-ops-digest-20261104`; accepted on merge of its pull request after
-  the coordinator's blind readings, which reached round 18 on 2026-11-05; the acceptance edit is item 4 of the
+  the coordinator's blind readings, which reached round 19 on 2026-11-05; the acceptance edit is item 4 of the
   handoff's Next task, after the pull request is open). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and
   `FAC-SEM-168`, a descriptor extension, a reference module and vectors, and a host obligation. Additive: nothing that
   validated before changes.
@@ -9159,44 +9159,49 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      default-ignorable code point and its trailing dots and spaces are dropped (`..` + U+2060 among them; a tool that
      trims or strips names, Win32 path handling dropping trailing dots and spaces or a reader stripping those code
      points before joining, may read it as empty, `.` or `..`, another folder than the one declared, possibly outside
-     `paths.data`), a `dir` holding a home folder (`hasHomePath`, with the boundary of item 3: `users/digests`,
-     `my_users/digests`, `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x` pass) and a `dir` or `source`
-     shaped like a credential (`secretValue`), a `dir` read four ways: as written, with every default-ignorable code
-     point removed, and each of those with each segment's trailing dots and spaces dropped (a run of 40 or more
-     letters, digits, `+`, `/`, `=`, `_` or `-` that mixes upper case, lower case and a digit, across segments joined
-     by `/` too, such as `ApplicationSupport/MyProduct/Digests2026` or `Application+Support/MyProduct/Digests2026x`,
-     is refused on purpose, its finding saying why and that a space or a dot breaks the run: the credential detector's
-     run includes `/` so that a base64 secret holding one is still found; a class of dirs whose fold holds a home
-     folder is hidden in messages, never refused); one finding refuses the whole declaration, which a collector reads
-     as not declared and reports. `digestFoldersView` (whose `usable` is true only when the rule has no finding) and
-     `digestFoldersRules` in `src/ops-digest.ts` are the reference. A collector takes each day's first daily line
-     whenever it first appears (a caught-up day included) and sends it once, with `source` and which descriptor the
-     line came from (its `id` and `instance`; an optional `service {id, instance}` beside `source` is announced, board
-     message `1a12d809`). The collector role is announced by Fabric (board thread `f7758225`, message `2ed505f2`). A
-     product without a local descriptor is outside this declaration, and a declared `dir` holds only the declaring
-     instance's own digests: relaying a remote instance's digests is outside this contract.
-- **Why:** one shape lets one reader read every product's digests; the shape is the one already written, so the first producer moves nothing. A name grammar that holds no empty
-  segment, `.`, `..` or leading `/` keeps absolute paths and URLs out by construction, and the home-folder detector the
-  relative home paths `/` would let in. The folder a collector reads is declared where the product already says what it
-  is (its descriptor), in the place the closed descriptor schema keeps for what it does not name (`extensions`), and
-  relative to the data folder, so no home path travels in it. A host counts `ok` only for a retro it sees written,
-  because a retro written elsewhere is a claim it cannot check, and the store that holds it can count it. A day the
-  product was down for still gets its daily line at the next run, so a reader never mistakes a restart for a silent
-  day. An order written but not checked keeps every line written at the shape's origin valid and keeps readers from depending on it.
-  Mapping each product's outcome words keeps one meaning of `failed` across products, and keeping the map out of the
-  digest keeps OD-7. `hours` counts hourly lines folded, never uptime, because an hour a product could not keep (OD-1)
-  or wrote as no digest (OD-3) is not folded, and a restart can leave a gap. A collector that sends a caught-up day once loses no day and doubles none. Writing the hour a product
-  stops in only when it closes, and never partly, keeps one line per hour, since readers keep the first; reading the
-  last line back keeps `previous` true across a restart. An hour written only when the product saw itself in it keeps
-  a sleep from reading as hours run with nothing failing. A `dir` that holds only its own instance's digests keeps one
-  count per instance; the 4096 bound with one overflow name keeps a busy hour's line valid and its totals whole. A line
-  saying there is nothing to say has no call a host can observe, so it is no `ok`. The end of a session raises the
-  retro only when none was written, so a retro the host saw written is not asked for twice; a record counted in the hour it is resolved keeps
-  every hour's counts closed when the hour closes. There is no scenario of its own for this decision: it is a reporting format,
-  the operator's view of it is each product's own (ADR-0188 §2), as DEC-0095's support quality was; SCN-002 carries its
-  `pnpm validate` path (the declaration-only hint on a bare declaration). Counting the
-  retro as an operation puts "asked" and "written" in the digest the host already writes, without a member the closed
-  shape lacks.
+     `paths.data`), a `dir` holding a lone surrogate (not well-formed Unicode, which no file system can name), a `dir`
+     holding a home folder (`hasHomePath`, with the boundary of item 3: `users/digests`, `my_users/digests`,
+     `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x` pass) and a `dir` or `source` shaped like a
+     credential (`secretValue`), a `dir` read four ways: as written, with every default-ignorable code point removed,
+     and each of those with each segment's trailing dots and spaces dropped (a run of 40 or more letters, digits, `+`,
+     `/`, `=`, `_` or `-` that mixes upper case, lower case and a digit, across segments joined by `/` too, such as
+     `ApplicationSupport/MyProduct/Digests2026` or `Application+Support/MyProduct/Digests2026x`, is refused on
+     purpose, its finding saying why and that a space or a dot inside a segment, not at its end, breaks the run: the
+     credential detector's run includes `/` so that a base64 secret holding one is still found; a class of dirs whose
+     fold holds a home folder is hidden in messages, never refused); one finding refuses the whole declaration, which
+     a collector reads as not declared and reports. `digestFoldersView` (whose `usable` is true only when the rule has
+     no finding) and `digestFoldersRules` in `src/ops-digest.ts` are the reference. A collector takes each day's first
+     daily line whenever it first appears (a caught-up day included) and sends it once, with `source` and which
+     descriptor the line came from (its `id` and `instance`; an optional `service {id, instance}` beside `source` is
+     announced, board message `1a12d809`). The collector role is announced by Fabric (board thread `f7758225`, message
+     `2ed505f2`). A product without a local descriptor is outside this declaration, and a declared `dir` holds only
+     the declaring instance's own digests: relaying a remote instance's digests is outside this contract.
+- **Why:** one shape lets one reader read every product's digests; the shape is the one already written, so the first
+  producer's lines need no new member or format; the writing rules OD-1, OD-3 and OD-5 add (no filled hours across a
+  sleep, the 4095-name bound and its overflow name, the daily catch-up) are each product's to adopt in its own rows. A
+  name grammar that holds no empty segment, `.`, `..` or leading `/` keeps absolute paths and URLs out by
+  construction, and the home-folder detector the relative home paths `/` would let in. The folder a collector reads is
+  declared where the product already says what it is (its descriptor), in the place the closed descriptor schema keeps
+  for what it does not name (`extensions`), and relative to the data folder, so no home path travels in it. A host
+  counts `ok` only for a retro it sees written, because a retro written elsewhere is a claim it cannot check, and the
+  store that holds it can count it. A day that closed while the product was down still gets its daily line at the next
+  run when it has hourly lines (OD-5), so a reader never mistakes a restart for a silent day; a day with no hourly
+  line has none. An order written but not checked keeps every line written at the shape's origin valid and keeps
+  readers from depending on it. Mapping each product's outcome words keeps one meaning of `failed` across products,
+  and keeping the map out of the digest keeps OD-7. `hours` counts hourly lines folded, never uptime, because an hour
+  a product could not keep (OD-1) or wrote as no digest (OD-3) is not folded, and a restart can leave a gap. A
+  collector that sends a caught-up day once loses no day and doubles none. Writing the hour a product stops in only
+  when it closes, and never partly, keeps one line per hour, since readers keep the first; reading the last line back
+  keeps `previous` true across a restart. An hour written only when the product saw itself in it keeps a sleep from
+  reading as hours run with nothing failing. A `dir` that holds only its own instance's digests keeps one count per
+  instance; the 4096 bound with one overflow name keeps a busy hour's line valid and its totals whole. A line saying
+  there is nothing to say has no call a host can observe, so it is no `ok`. The end of a session raises the retro only
+  when none was written, so a retro the host saw written is not asked for twice; a record counted in the hour it is
+  resolved keeps every hour's counts closed when the hour closes. There is no scenario of its own for this decision:
+  it is a reporting format, the operator's view of it is each product's own (ADR-0188 §2), as DEC-0095's support
+  quality was; SCN-002 carries its `pnpm validate` path (the declaration-only hint on a bare declaration). Counting
+  the retro as an operation puts "asked" and "written" in the digest the host already writes, without a member the
+  closed shape lacks.
 - **Alternatives considered:** `<name>/<revision>` names (`ops-digest-hourly/1`, as DEC-0067 spells every protocol:
   Fabric's files already say `@1`, and a rename would leave its written months unreadable for nothing negotiated);
   `from` and `to` without the fraction only (Fabric writes `.000`, so its every line would fail); a `total` as one
@@ -9315,6 +9320,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   long-run alphabet (now letters, digits, `+`, `/`, `=`, `_` or `-`, as the detector reads it), the acceptance edit left
   the handoff (it now rewrites it) and the knowledge base's plans row, and its batch, with what both rounds held (a
   `dir` segment empty once its default-ignorable code points are dropped, the folds' worded errors, the long run's
-  reason and remedy, the help link written once), is folded in;
+  reason and remedy, the help link written once), is folded in; round 19 at `dc6d0afc` was not clean: the Why still promised a daily
+  line for a day the product was down and claimed no change for the first producer (now scoped to the shape, with the
+  writing rules each product's to adopt), and its batch is folded in;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

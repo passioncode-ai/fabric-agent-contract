@@ -114,8 +114,12 @@ const nameRefusal = (op: unknown): string | null => {
   if (typeof op !== "string" || op.length > OP_NAME_MAX || !OP_NAME.test(op)) return "fails OD-2's name grammar";
   return hidden(op) ? "is refused by FAC-SEM-167" : null;
 };
-/** Throws when an item of `list` is not an object (null included), naming its place; `where` says whose list it is. */
-function objects(list: readonly unknown[], where: string): void {
+/**
+ * Throws when `list` is not an array, or when an item of it is not an object (null included), naming its place; `where`
+ * says whose list it is.
+ */
+function objects(list: unknown, where: string): void {
+  if (!Array.isArray(list)) throw new Error(`${where} is not an array`);
   list.forEach((item, index) => {
     if (!isObject(item)) throw new Error(`the item at ${index} of ${where} is not an object`);
   });
@@ -136,15 +140,15 @@ function once(ops: ReadonlyArray<{ op: string }>, where: string): void {
  * when it is the hour just before (a gap compares with none). `from` and `to` are written as
  * `Date.prototype.toISOString` writes them. `previous` must already pass FAC-SEM-166. It throws when an input count or
  * a previous digest's count is not an integer from 0 to 2^53 - 1 (each checked before it is used), when a sum is beyond
- * 2^53 - 1, when `from` is no whole UTC hour (a value that is not a string included), when an item of `counts` or of the
- * previous hour's `ops` is not an object (null included), when the previous digest, being the hour just before, names
+ * 2^53 - 1, when `from` is no whole UTC hour (a value that is not a string included), when `counts` or the previous hour's
+ * `ops` is not an array or holds an item that is not an object (null included), when the previous digest, being the hour just before, names
  * an operation twice, when the hour after `from`
  * is not a whole hour the schema writes (after 9999-12-31T23), and, as OD-3 asks, when an operation's name is a name
  * OD-2 refuses (its grammar, OP_NAME_MAX included, or FAC-SEM-167: `secretValue` or `hasHomePath`, as `opsDigestRules`
  * tests it) or the hour holds more than 4096 operations: no hourly digest, since a reference fold never writes a line every reader skips. An error
  * names a credential-shaped or home-folder value (`from` included) only by its place.
  */
-export function foldHour(counts: readonly OpCount[], from: string, previous: HourlyDigest | null): HourlyDigest {
+export function foldHour(counts: readonly OpCount[], from: string, previous: HourlyDigest | null | undefined): HourlyDigest {
   const start = wholeHour(from);
   // A `from` that is no string (a caller's mistake) is named by its place, never handed to the detectors.
   if (start === null) throw new Error(`${typeof from === "string" ? shown(from, "from") : "from"} is not a whole UTC hour`);
@@ -162,7 +166,8 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
   });
   if (merged.size > OPS_MAX) throw new Error(`the hour counts ${merged.size} operations, more than ${OPS_MAX}: no hourly digest (OD-3)`);
   const ops = [...merged.values()].sort(byName);
-  const adjoining = previous !== null && wholeHour(previous.to) === start ? previous.ops : [];
+  // An absent previous (null or undefined) compares with none.
+  const adjoining = previous !== null && previous !== undefined && wholeHour(previous.to) === start ? previous.ops : [];
   objects(adjoining, "the previous hour's ops");
   once(adjoining, "the previous hour's ops");
   const before = new Map(adjoining.map((c) => [c.op, c.failed]));
@@ -177,7 +182,7 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
  * into one: the operations summed, the hours counted, and each operation that rose in some hour with the hours it rose
  * in and the failures of those hours, the most failures first, then by name. A day with no hour of its own has no
  * digest: null (OD-5). Deciding that the UTC `day` is closed is the caller's (OD-1, OD-5): `foldDay` folds what it is
- * given. Of each hour it checks: that every item of `hourly`, `ops` and `risen` is an object (null included), every
+ * given. Of each hour it checks: that `hourly`, `ops` and `risen` are arrays whose every item is an object (null included), every
  * count and every rise's failures an integer from 0 to 2^53 - 1 (each checked before it is merged), each rise named once
  * and of an operation its `ops` counts, and every name in `ops` and `risen` one OD-2 takes (its grammar, `OP_NAME_MAX`
  * included, and FAC-SEM-167). It leaves to the caller, whose hourly digests must already pass FAC-SEM-166: an operation
@@ -372,7 +377,9 @@ const FOLDERS_PATH = `/extensions/${EXTENSION_KEYS.opsDigest.replace(/~/g, "~0")
 const folderFinding = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-168", instancePath, message });
 
 /** FAC-SEM-168's message for a dir that only the long run makes credential-shaped: the reason and the remedy. */
-const LONG_RUN_DIR = "a dir is shaped like a credential: a run of 40 or more letters, digits, +, /, =, _ or - (across segments too) that mixes upper case, lower case and a digit reads as a key; a space or a dot breaks it. It names a folder, never a value";
+const LONG_RUN_DIR = "a dir is shaped like a credential: a run of 40 or more letters, digits, +, /, =, _ or - (across segments too) that mixes upper case, lower case and a digit reads as a key; a space or a dot inside a segment (not at its end) breaks it. It names a folder, never a value";
+/** A UTF-16 surrogate standing alone (with the `u` flag a pair reads as one code point and never matches). */
+const LONE_SURROGATE = /[\ud800-\udfff]/u;
 /** Every default-ignorable code point (the code points HFS+ ignores among them), for the detectors' readings only. */
 const DEFAULT_IGNORABLE = /\p{Default_Ignorable_Code_Point}/gu;
 /** A dir with each segment's trailing dots and spaces dropped. */
@@ -409,7 +416,8 @@ const hiddenDir = (dir: string): boolean => [...dirReadings(dir), foldDir(dir)].
  * `dir` shaped like a credential or holding a home folder (`hasHomePath`) in any of its four readings (`dirReadings`:
  * as written, without default-ignorable code points, and each with each segment's trailing dots and spaces dropped;
  * a run of 40 or more letters, digits, `+`, `/`, `=`, `_` or `-` that mixes cases and a digit, across segments joined
- * by `/` too, as in `ApplicationSupport/MyProduct/Digests2026`, is refused on purpose, with the reason and the remedy; a class of dirs whose `foldDir` holds a home folder is only hidden in messages). `hasHomePath`
+ * by `/` too, as in `ApplicationSupport/MyProduct/Digests2026`, is refused on purpose, with the reason and the remedy;
+ * a `dir` holding a lone surrogate (not well-formed Unicode, which no file system can name) is refused too; a class of dirs whose `foldDir` holds a home folder is only hidden in messages). `hasHomePath`
  * refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
  * and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case,
  * here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or
@@ -451,6 +459,8 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     // that strips ignorable code points before joining) may read it as empty, '.' or '..', another folder than the one
     // declared, possibly outside paths.data. Refused, the safe direction. The fold for duplicates is DEC-0149's, apart.
     if (folder.dir.split("/").some(emptySegment)) findings.push(folderFinding(`${at}/dir`, EMPTY_SEGMENT));
+    // A lone surrogate is no character a file system can name: the dir names no folder at all.
+    if (LONE_SURROGATE.test(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir holds a lone surrogate, which no file system can name; write it as well-formed Unicode"));
     const readings = dirReadings(folder.dir);
     if (readings.some(secretValue)) {
       // When only the long run makes it a key (no provider prefix, no JWT, no bearer), the message says why and how to fix it.

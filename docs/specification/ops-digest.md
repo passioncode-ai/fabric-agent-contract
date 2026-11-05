@@ -13,10 +13,10 @@ DEC-0153 · rule codes `FAC-SEM-166`, `FAC-SEM-167`, `FAC-SEM-168` · schemas
 A product keeps its own operations log on its own machine, and reads it itself: it writes one `ops.digest.hourly@1`
 line for each hour it observed itself running in, an empty one included, and folds each closed UTC day that has hourly
 lines into one `ops.digest.daily@1` line. No model reads the log; the fold is arithmetic. A failure count that rose
-against the hour before is a rise, which the product tells its operator. Every agent closes its work with a retro,
-`retro-after-work`, which the host asks for and counts. The split of who keeps and reads what is Fabric's ADR-0188
-(commit `0d0e5922`); the shape's origin is Fabric's commit `e1eecec0`, and this page is the shape every product
-writes, so one reader reads them all. The reference folds are this contract's
+against the hour before is a rise, which a product that shows findings tells its operator. Every agent is asked to
+close its work with a retro, `retro-after-work`, which the host asks for and counts. The split of who keeps and reads
+what is Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's commit `e1eecec0`, and this page is the
+shape every product writes, so one reader reads them all. The reference folds are this contract's
 [`src/ops-digest.ts`](../../src/ops-digest.ts) with its vectors. This page makes no claim about any product's code;
 what each product's code was read to do, at a date, is in the CT-219 handoff.
 
@@ -169,18 +169,20 @@ its own `.json` file) and tells the two apart by `schema`.
     `/alice` hold home folders); a run of 40 or more letters, digits, `+`, `/`, `=`, `_` or `-` that mixes upper case,
     lower case and a digit, across segments joined by `/` too (`ApplicationSupport/MyProduct/Digests2026`,
     `Application+Support/MyProduct/Digests2026x`), is refused on purpose, since the credential detector's run includes
-    `/` so that a base64 secret holding one is still found; its finding says so and that a space or a dot breaks the
-    run. For hiding a class of dirs in a message the dir's fold counts too (`USERS/alice` folds to a home folder: it
-    is hidden, never refused). The home-folder detector applies to `dir`: `hasHomePath` refuses a value in which
-    `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit
-    (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or
-    `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in
-    which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is
-    followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s`
-    reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then
-    ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `users/digests`, `my_users/digests`,
-    `my-users/digests` and `a/~b` are refused, and `user-digests` and `a/~1/x` pass (`a/~1/x` passes the detector; `~`
-    is outside OD-2's grammar, so it is no operation name).
+    `/` so that a base64 secret holding one is still found; its finding says so and that a space or a dot inside a
+    segment (not at its end) breaks the run. A `dir` holding a lone surrogate (not well-formed Unicode:
+    `String.prototype.isWellFormed` rejects it) names no folder a file system can hold and is refused. For hiding a
+    class of dirs in a message the dir's fold counts too (`USERS/alice` folds to a home folder: it is hidden, never
+    refused). The home-folder detector applies to `dir`: `hasHomePath` refuses a value in which `home`, `users` or
+    `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
+    and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either
+    case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`,
+    `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII
+    letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double
+    or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters,
+    digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `users/digests`, `my_users/digests`, `my-users/digests`
+    and `a/~b` are refused, and `user-digests` and `a/~1/x` pass (`a/~1/x` passes the detector; `~` is outside OD-2's
+    grammar, so it is no operation name).
   - `source` is `^[a-z][a-z0-9-]{0,31}$`: the label the collector sends with each daily digest it reads in `dir`.
     `app` is the conventional label of a product's one folder; each label is named once in the list.
 - **Local only.** Only a descriptor whose placement is `local` (an absent `placement` is `local`) carries the key, and
@@ -199,14 +201,15 @@ its own `.json` file) and tells the two apart by `schema`.
   a value that is not the schema's; a `source` named twice; a `dir` named twice, compared under canonical caseless
   matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto
   Mkhedruli), trailing dots and spaces dropped; a `dir` with a segment that is empty once every default-ignorable code
-  point and its trailing dots and spaces are dropped; a `dir` that holds a home folder (`hasHomePath`, the detector
-  `FAC-SEM-167` uses, with the boundary above), and a `dir` or `source` shaped like a credential (`secretValue`). One
-  finding refuses the whole declaration: a collector treats a declaration with a `FAC-SEM-168` finding as not declared
-  and reports it, as a host treats an invalid load key ([agent network](agent-network.md#load), `FAC-SEM-133`), so no
-  folder of it is read. `digestFoldersView` in [`src/ops-digest.ts`](../../src/ops-digest.ts) is the reader (`usable`
-  is true only when `digestFoldersRules`, the rule, has no finding). A bare declaration checked with `pnpm validate
-  --schema service-ops-digest-extension.schema.json` gets the schema check and a `hint/declaration-only` line; check
-  the descriptor to run `FAC-SEM-168`.
+  point and its trailing dots and spaces are dropped; a `dir` holding a lone surrogate (not well-formed Unicode); a
+  `dir` that holds a home folder (`hasHomePath`, the detector `FAC-SEM-167` uses, with the boundary above), and a
+  `dir` or `source` shaped like a credential (`secretValue`). One finding refuses the whole declaration: a collector
+  treats a declaration with a `FAC-SEM-168` finding as not declared and reports it, as a host treats an invalid load
+  key ([agent network](agent-network.md#load), `FAC-SEM-133`), so no folder of it is read. `digestFoldersView` in
+  [`src/ops-digest.ts`](../../src/ops-digest.ts) is the reader (`usable` is true only when `digestFoldersRules`, the
+  rule, has no finding). A bare declaration checked with `pnpm validate --schema
+  service-ops-digest-extension.schema.json` gets the schema check and a `hint/declaration-only` line; check the
+  descriptor to run `FAC-SEM-168`.
 
 A product with one folder of digests, `digests` in its data folder, writes in its descriptor:
 
@@ -252,7 +255,7 @@ A product with one folder of digests, `digests` in its data folder, writes in it
 |---|---|---|
 | <a id="fac-sem-166"></a>`FAC-SEM-166` | `ops-digest-hourly`, `ops-digest-daily` | an hourly digest's `from` and `to` are whole UTC hours of real days, one hour apart, and a daily digest's `day` a real UTC day; each `op` once in `ops` and at most once in `risen`; `total` each counter's sum over `ops`; every `risen` op counted in `ops`; an hourly rise names the hour's failures of its op and is a rise by OD-4 against its `previous`; a daily rise is in at most the day's `hours`, with at least 10 failures an hour it rose and at most the day's failures of its op (DEC-0153) |
 | <a id="fac-sem-167"></a>`FAC-SEM-167` | `ops-digest-hourly`, `ops-digest-daily` | no `op`, in `ops` or in `risen`, is shaped like a credential (`secretValue` of [`src/secret-shape.ts`](../../src/secret-shape.ts), the shared detector: a provider key's shape, in either case and anywhere in the name: `sk-` followed by 16 or more letters, digits, `_` or `-` (so inside any word ending in sk: `task-`, `risk-`, `mask-` and the like), `gh[pousr]_` followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more letters, digits or `-`, `AKIA` followed by 16 letters or digits, `glpat-` followed by 20 or more letters, digits, `_` or `-`; a JWT (`eyJ` and 2 or more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any number of them, case-sensitive); a value starting with `bearer` in either case, whitespace and one more character other than a line break (as JavaScript's `.` reads it); or a run of 40 or more letters, digits, `+`, `/`, `=`, `_` or `-` (so across segments joined by `-` or `/`) that mixes upper case, lower case and a digit. `JWT_SHAPE`, `SECRET_VALUE` and `longSecret` (together `secretValue`) in [`src/secret-shape.ts`](../../src/secret-shape.ts) are the definition. So `ops.risk-assessment-completed` and `queue.task-assigned-to-worker` are refused and `work.session-end-task-back` passes, until DEC-0151's narrowing of the `sk-` shape lands) or holds a home folder (`hasHomePath` of [`src/activity-rules.ts`](../../src/activity-rules.ts)). `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`, `api.my_users/list` and `ui.home/open` fail and `api.user/list` and `api.get_user/list` pass. One refused name fails the whole line, which every reader skips (DEC-0153) |
-| <a id="fac-sem-168"></a>`FAC-SEM-168` | `service-descriptor` | a descriptor that carries the ops-digest key (`extensions/ops-digest/0.1`) is a `local` one that names `paths.data`; its value is valid against `service-ops-digest-extension.schema.json` (a reader treats an invalid one as not declared and reports it); each `source` is named once and each `dir` once, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped; no `dir` segment is empty once every default-ignorable code point and its trailing dots and spaces are dropped (a tool that trims or strips names may read it as empty, `.` or `..`, another folder than the one declared, possibly outside `paths.data`); no `dir` holds a home folder (`hasHomePath`) and no `dir` or `source` is shaped like a credential (`secretValue`), a `dir` read four ways (as written, with every default-ignorable code point removed, and each of those with each segment's trailing dots and spaces dropped), a run of 40 or more letters, digits, `+`, `/`, `=`, `_` or `-` that mixes cases and a digit, across segments joined by `/` too (`Application+Support/MyProduct/Digests2026x`), refused on purpose with the reason and the remedy in its message. `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail and `user-digests` and `a/~1/x` pass. One finding refuses the whole declaration, which a collector reads as not declared (DEC-0153 OD-9) |
+| <a id="fac-sem-168"></a>`FAC-SEM-168` | `service-descriptor` | a descriptor that carries the ops-digest key (`extensions/ops-digest/0.1`) is a `local` one that names `paths.data`; its value is valid against `service-ops-digest-extension.schema.json` (a reader treats an invalid one as not declared and reports it); each `source` is named once and each `dir` once, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped; no `dir` segment is empty once every default-ignorable code point and its trailing dots and spaces are dropped (a tool that trims or strips names may read it as empty, `.` or `..`, another folder than the one declared, possibly outside `paths.data`); no `dir` holds a home folder (`hasHomePath`) and no `dir` or `source` is shaped like a credential (`secretValue`), a `dir` read four ways (as written, with every default-ignorable code point removed, and each of those with each segment's trailing dots and spaces dropped), a run of 40 or more letters, digits, `+`, `/`, `=`, `_` or `-` that mixes cases and a digit, across segments joined by `/` too (`Application+Support/MyProduct/Digests2026x`), refused on purpose with the reason and the remedy in its message (a space or a dot inside a segment, not at its end, breaks the run); no `dir` holds a lone surrogate (not well-formed Unicode). `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail and `user-digests` and `a/~1/x` pass. One finding refuses the whole declaration, which a collector reads as not declared (DEC-0153 OD-9) |
 
 ## Not decided here
 
