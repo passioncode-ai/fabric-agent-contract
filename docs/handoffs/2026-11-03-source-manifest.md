@@ -24,7 +24,7 @@ source, what never travels with it, the check before a source export, and how a 
   `source-tree`, `source-package`, `fabric-source/1` in the protocol register; `pnpm --silent validate <dir> --kind
   source-tree` (Git mode with Git's location variables removed and no read through a link, a walk otherwise with a note
   saying why, folder-relative output that never repeats a found value) and the pair in `pnpm validate <dir>`;
-  `fixtures/vectors/source-tree.json` (68 tree cases, 6 patch cases and a `constants` block written from the module's
+  `fixtures/vectors/source-tree.json` (71 tree cases, 10 patch cases and a `constants` block written from the module's
   exports) from `tools/vectors/source-tree.ts`;
   2 positive and 19 negative schema fixtures, 27 semantic fixtures.
 - [source](../specification/source.md) (new), the register (`FAC-SEM-156` to `FAC-SEM-160`; next free `FAC-SEM-162`;
@@ -230,7 +230,21 @@ source, what never travels with it, the check before a source export, and how a 
   grammar out before listing its folders; four patch vectors and two tree vectors; direct tests of `jwtSpans` and
   `hasJwt` in a new `test/secret-shape.test.ts`; the governance gloss, `source.md`, `CONTEXT.md`, `package.md` and
   DEC-0149 items 4, 12 and 13 carry the coordinator's round-37 decisions (below); the CT-218 note restated to them;
-  a landing step files the `unchecked` row; the chain figures re-measured for DEC-0153's OD-9; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  a landing step files the `unchecked` row; the chain figures re-measured for DEC-0153's OD-9; round 38 (not clean:
+  the unit tier proved with `git apply` on APFS that `patchPathsAllowed` folded ASCII before NFC, so the Kelvin sign in
+  `app/Keys/k` passed an excluded `app/keys/`, and that the ASCII fold let a long s, a sharp s, a final sigma, `É` and
+  the Angstrom sign reach an excluded folder; the product tier passed with risks) answered as decided: one fold per
+  segment (`foldSegment`: the HFS+ ignorable code points removed, NFC, upper then lower case, NFC, trailing dots and
+  spaces dropped) on both sides, for patches and for `exclude` at export (fails closed), an 8.3 short-name segment
+  refused in a patch when any `exclude` entry exists, a patch checked against the receiver's current manifest and a
+  patch to `fabric.source.json` held for the owner's word, the warning `unused-exclude` (FAC-SEM-159) with the
+  checker's `lstat` of each entry, a walk test over a `src/.git` folder with a trailing space and `src/GIT~1`, four patch vectors and two tree
+  vectors, then a third from the seam reading (71 and 10 in all), and the product decisions below; from the seam reading, a file an `exclude` entry names only once folded is not
+  source in the source test, the walk and Git mode and gets the warning `excluded-by-fold` naming the entry (a tree
+  vector with `src/GENERATED/x.ts` under `src/generated/`, and a test over a committed repository holding
+  `src/Private/notes.md` under `src/private/`), the merge note for `test/secret-shape.test.ts`, the conformance row's
+  pointer to `source.md#import`, CT-207's clause and the PR #235 refresh before landing step 2; `git~N` beyond `git~1` is not read as `.git`, as Git's
+  own `is_ntfs_dotgit` reads only `git~1`, and a patch refuses any short-name segment once an exclude exists; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -319,6 +333,21 @@ source, what never travels with it, the check before a source export, and how a 
   - `.git` in every form a case-insensitive or Windows file system resolves to it is never source, and a patch path an
     `exclude` entry names under ASCII case folding is refused, since on such a file system the two spellings are one
     file and the rule is otherwise bypassed.
+- Round 38, decided by the coordinator under the operator's recorded rules:
+  - the 2026-10-12 permission covers mechanics adapted into a product's source file by file; the agent's source as
+    such (its tree, or a whole copy under any name) moving into an organization's or a public repository stays a
+    hand-over, since the permission's text names mechanics;
+  - access the owning organization gives its own members to its own agent's home is no hand-over (they are the home's
+    readers); access given to anyone outside the owner is one, and for a personal agent any other person's access;
+    for an act on the whole repository (transfer, visibility change, access given) the word names the repository, not
+    one commit, since the act hands over every commit;
+  - an organization's agent released by the organization to a public registry is its own release, not a hand-over;
+  - the knowledge base's principles section 7 and rules section 9 point to agents-first item 9's list instead of
+    repeating it, and rules section 9's "never publish" gains the hand-over exception, so one list is kept;
+  - a patch is checked against the receiver's current manifest and a patch to `fabric.source.json` is held for the
+    owner's word, since one patch could drop an `exclude` for a later one; `exclude` is folded on both sides, since
+    APFS matches names under Unicode case folding;
+  - the next free rule code at landing is the higher of the register's marker and the CAS counter.
 - A hand-over `target` past 200 characters is `sha256:` and the hex SHA-256 of `<agent>@<commit>-><recipient>`,
   which still binds all three, rather than a target that drops the recipient.
 - More missing required slots than `degraded[]`'s 64 entries end in one `setup: true` entry with `source`
@@ -330,6 +359,30 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 38's fixes were checked on the working tree over head `a443fcb2` (this note's commit holds the same tree), each
+exit code read on its own: `pnpm typecheck` (exit 0); `pnpm vitest run --coverage --coverage.include=src/source-rules.ts
+--coverage.include=src/validate-cli.ts` over `source-rules`, `secret-shape`, `validate-cli`, `validate-cli-faults`,
+`rule-tolerance`, `positive-sweep` and `consistency` (a first run exited 1: `src/source-rules.ts` at 99.84 % of its
+branches, the non-object manifest of `foldOnlyExcludeTest` untested; with its test added, the same files without
+`secret-shape` and `consistency` exit 0 at 100 %, its floor, and `secret-shape` with `consistency` exit 0, 26 passed;
+`src/validate-cli.ts` at 99.47 % over these files against its 99.4 floor, `presentWithoutLink` and the fold-only path
+fully covered); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match; `source-tree.json` 71 tree and 10 patch
+cases); the seam reading's check, a committed Git repository on this Mac holding `src/Private/notes.md` with a
+key-shaped line under `exclude` `src/private/`: `pnpm --silent validate <dir> --kind source-tree` exits 0 with no
+`FAC-SEM-158` and prints the `excluded-by-fold` line naming the file and `exclude[0]` (now a test, in Git mode and in a
+walk); `pnpm run docs:check` (exit 0, 0 errors); `python3 docs/ux/lint.py` (exit 0);
+`ORG_INDEX=... pnpm run privacy:check` (exit 0, 0 findings); no U+2014 in the added lines. The coordinator's cases:
+with `exclude` `app/secrets/`, `app/keys/`, `app/strasse/`, `app/σx/`, `app/café/`, `app/å/` and `app/private/`,
+`patchPathsAllowed` refuses `app/ſecrets/x`, the Kelvin-sign `app/Keys/k`, `app/straße/x`, `app/Σx/f`, `app/ςx/f`,
+`app/CAFÉ/x`, the Angstrom-sign `app/Å/x`, `app/private/x` with a zero-width non-joiner, `app/private./x`, `app/private`
+followed by a space, and `app/PRIVAT~1/x`, and allows `app/main.ts`; with `exclude` `app/Kit/` (Kelvin sign) it
+refuses `app/kit/x` (a test and a vector each). The branch gate is owed: at the start the 15-minute load was about 44
+and `/` held 3 to 4 GB free, under the 8 GB the gate needs. PR #628 at `e023f8fc` (the knowledge base's main merged in
+first): `git show e023f8fc:knowledge/<page>.md` gives `source hand-over` in 4, 3 and 3 lines of agents-first,
+principles and rules (rules section 9's "never publish" now names the hand-over exception), `own estate` once on each,
+`^9\. \*\*A source hand-over` once and `^8\. \*\*No person in the chat` once in agents-first; the knowledge base's
+`npm test` (exit 0, 172 passed) and `npm run verify:content` on the commit (exit 0, backlog 0 errors).
 
 Round 37's fixes were checked on the working tree over head `033af3f9` (this note's commit holds the same tree), each
 exit code read on its own: `pnpm typecheck` (exit 0); `pnpm vitest run test/source-rules.test.ts
@@ -413,7 +466,8 @@ remaining steps, in order:
    `docs/specification/conformance.md` and `docs/backlog.md` expired and cannot be reaped by this session; re-take
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
-2. Merge the current `origin/main` (with #236, CT-215 and CT-216; re-measure its head at landing) into the fresh branch
+2. Before this step, refresh PR #235 (DEC-0148) against `main`: it is CONFLICTING on the backlog tail; keep both sides
+   in id order. Then merge the current `origin/main` (with #236, CT-215 and CT-216; re-measure its head at landing) into the fresh branch
    as the merge notes below say, refreshing the sibling heads. Close it with the merge notes' greps and with
    `grep -n '^\*\*Next free' docs/DECISIONS.md docs/specification/conformance.md`, whose DEC and `FAC-SEM` markers
    must equal the next free ids the CAS counters hold (`refs/agent-sync/ids/` on `origin`): a merge keeps a stale
@@ -433,8 +487,8 @@ remaining steps, in order:
    behind, merge main into it, keeping main's item 8 and the PR's item 9. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `24cc7a34`, which carries the knowledge base's main, they print 4, 3 and 2
-   lines), and `grep -c 'own estate'` on the same three pages
+   `knowledge/rules.md`; at PR #628's head `e023f8fc`, which carries the knowledge base's main, they print 4, 3 and 3
+   lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in
    the chat: no production step"): items 5 and 7 point to item 9, and principles section 7 and rules section 9 cite
@@ -511,7 +565,8 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
 - The next-free markers (`docs/DECISIONS.md`, the register in `conformance.md`) are written by whichever lands later
   from the CAS refs at merge time, never from a fixed value: `git ls-remote origin 'refs/agent-sync/ids/*'`, then
   `git cat-file -p <sha>` for each (at the time of writing, DEC next 154 and SEM next 169, DEC-0153's OD-9 having taken
-  `FAC-SEM-168`; read the CAS refs at merge).
+  `FAC-SEM-168`; read the CAS refs at merge). Where the register's marker and the counter differ, the lander keeps the
+  higher of the two (the coordinator's round-38 decision): a lower marker would hand out a code already reserved.
 - `AGENTS.md` against main (PR #236 merged): keep this branch's Check row and #236's MCP row, which removes an em dash.
   #236 landed first, so this branch adds to CT-205's row, when main is merged in, that a source hand-over is never
   covered by a task-wide mandate (written in the backlog row as `[source](specification/source.md#handing-over)`, the
@@ -559,10 +614,15 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   `FAC-SEM-156` reads a slot's name and purpose with both detectors (the shared `secretValue` and the tree check's own
   reading), so no purpose it passes is refused by a pack that vendors the shared detector at this branch's version; the
   re-vendoring is still owed (CT-207) so that the adapter's pack keeps parity with the shared detector after DEC-0151.
+- `test/secret-shape.test.ts` is an add/add conflict with DEC-0151 (`agent/sqd-fields-20261104`), and a plain keep-both
+  drops a `});` (TS1005). Keep both `describe` blocks in one file, each closed, under one import of `{ JWT_SHAPE,
+  SECRET_VALUE, hasJwt, jwtSpans, secretArgument, secretUrl, secretValue }` from `../src/secret-shape.js` plus
+  `evaluateSemanticRules`. Check on the merged tree: `grep -c '^describe(' test/secret-shape.test.ts` prints 2, and
+  `pnpm typecheck` exits 0.
 - `src/secret-shape.ts` conflicts textually with DEC-0151 (`origin/agent/sqd-fields-20261104`). The resolution: this
   branch's JWT helpers (`jwtSpans`, `hasJwt`), then DEC-0151's doc comment and `SECRET_VALUE` line as pushed (being
   rewritten as a portable consuming-group boundary plus a strength rule for `sk-`). Its copy in `src/session-handoff.ts`
-  follows DEC-0151. Nothing else changes in this branch's tests at that merge: the tree check keeps its own unbounded
+  follows DEC-0151. The tree check keeps its own unbounded
   provider-key shapes (`KEY_SHAPE_SOURCES`, written out in `src/source-rules.ts`) and its URL rule's pattern
   (`URL_SECRET_VALUE`, built from them), both in the `constants` block of `fixtures/vectors/source-tree.json` and held
   equal to it by test; no test here reads `SECRET_VALUE.source`, and the `FAC-SEM-156` fixture's purpose

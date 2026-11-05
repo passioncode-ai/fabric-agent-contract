@@ -51,6 +51,24 @@ const inGit = (path: string): boolean => path.split("/").some(isDotGitSegment);
  * name as stored.
  */
 const nfc = (path: string): string => path.normalize("NFC");
+/**
+ * One path segment as a case-insensitive file system may resolve it, for `exclude` and a patch's paths: the code points
+ * HFS+ ignores removed, NFC, Unicode full case folding (upper case, then lower case, so `ß` and `ss`, `ſ` and `s`, the
+ * Kelvin sign and `k`, the final sigma and `σ` meet), NFC again, then any trailing run of dots and spaces dropped
+ * (NTFS). It folds more than APFS does in places (`ı` and `i`), which refuses more: the safe side.
+ */
+export const foldSegment = (segment: string): string =>
+  segment.replace(HFS_IGNORABLE, "").normalize("NFC").toUpperCase().toLowerCase().normalize("NFC").replace(/[ .]+$/u, "");
+/** A path folded segment by segment (`foldSegment`); a folder's trailing `/` is kept. */
+export const foldPath = (path: string): string => path.split("/").map(foldSegment).join("/");
+/**
+ * A list of `exclude` paths indexed in their folded form: an entry in the path grammar as written, folded only then, so
+ * an entry the fold shortens (`a/.../`) still removes what it names. Looked up with `foldedCovers`.
+ */
+const foldedList = (value: unknown): PathList => {
+  const entries = strings(value).map(([entry]) => nfc(entry)).filter((entry) => SOURCE_PATH.test(entry)).map(foldPath);
+  return { files: new Set(entries.filter((entry) => !entry.endsWith("/"))), folders: new Set(entries.filter((entry) => entry.endsWith("/"))), reaches: new Set() };
+};
 
 /** Every prefix of a path that ends in `/`: the folders it lies in, the path itself when it is a folder. */
 const folderPrefixes = (path: string): string[] => {
@@ -82,6 +100,8 @@ const pathList = (value: unknown, withReaches = false): PathList => {
 const coversNfc = (list: PathList, path: string): boolean =>
   list.files.has(path) || folderPrefixes(path).some((folder) => list.folders.has(folder));
 const listCovers = (list: PathList, written: string): boolean => written.length <= 512 && coversNfc(list, nfc(written));
+/** Whether a folded list (`foldedList`) names a path: the path folded the same way, then looked up. */
+const foldedCovers = (list: PathList, written: string): boolean => written.length <= 512 && coversNfc(list, foldPath(nfc(written)));
 
 /**
  * The include paths as a walk asks about them, indexed once: whether one names a path, and whether one reaches into a
@@ -107,11 +127,38 @@ export function includeIndex(includes: readonly string[]): IncludeIndex {
 export function sourcePathTest(manifest: unknown): (path: unknown) => boolean {
   const source = isObject(manifest) ? manifest : {};
   const include = pathList(source.include);
-  const exclude = pathList(source.exclude);
+  // `exclude` is read folded (`foldSegment`): on a case-insensitive file system `src/Secrets/` is `src/secrets/`, so
+  // what an exclude entry names under any spelling stays out (it fails closed); `include` is read as written.
+  const exclude = foldedList(source.exclude);
   return (path) => {
     if (typeof path !== "string" || !SOURCE_FILE_PATH.test(path) || inGit(path)) return false;
     if (nfc(path) === SOURCE_FILE) return true;
-    return listCovers(include, path) && !listCovers(exclude, path);
+    return listCovers(include, path) && !foldedCovers(exclude, path);
+  };
+}
+
+/**
+ * Whether a path is left out only because `exclude` is read folded: in the grammar, not in `.git`, inside an `include`
+ * path, named by no `exclude` entry as written, yet named by one once both are folded. The answer is the index of the
+ * first such entry, or -1. Such a file is not source (it fails closed) and the tree check says so (`excluded-by-fold`),
+ * so the author sees both spellings.
+ */
+export function foldOnlyExcludeTest(manifest: unknown): (path: unknown) => number {
+  const source = isObject(manifest) ? manifest : {};
+  const include = pathList(source.include);
+  const literal = pathList(source.exclude);
+  // Each folded entry to the first index that writes it, so the entry naming a path is looked up, never searched for.
+  const first = new Map<string, number>();
+  for (const [entry, at] of strings(source.exclude)) {
+    const written = nfc(entry);
+    if (SOURCE_PATH.test(written) && !first.has(foldPath(written))) first.set(foldPath(written), at);
+  }
+  return (path) => {
+    if (typeof path !== "string" || !SOURCE_FILE_PATH.test(path) || inGit(path) || nfc(path) === SOURCE_FILE) return -1;
+    if (!listCovers(include, path) || listCovers(literal, path)) return -1;
+    const folded = foldPath(nfc(path));
+    const keys = [folded, ...folderPrefixes(folded)].filter((key) => first.has(key));
+    return keys.length === 0 ? -1 : Math.min(...keys.map((key) => first.get(key) as number));
   };
 }
 
@@ -121,13 +168,13 @@ export function sourcePathTest(manifest: unknown): (path: unknown) => boolean {
  */
 export function excludedFolderTest(manifest: unknown): (folder: string) => boolean {
   const source = isObject(manifest) ? manifest : {};
-  const exclude = pathList(source.exclude);
+  const exclude = foldedList(source.exclude);
   // Every folder an include path lies in, indexed once: a folder is looked up, never compared with every include. Only
   // entries in the path grammar are indexed, as pathList does: a longer one would cost the square of its length.
   const under = new Set(strings(source.include).map(([path]) => nfc(path)).filter((path) => SOURCE_PATH.test(path)).flatMap((path) => folderPrefixes(path)));
   return (written) => {
     const folder = nfc(written);
-    return folderPrefixes(`${folder}/`).some((prefix) => exclude.folders.has(prefix)) && !under.has(`${folder}/`);
+    return folderPrefixes(`${foldPath(folder)}/`).some((prefix) => exclude.folders.has(prefix)) && !under.has(`${folder}/`);
   };
 }
 
@@ -138,12 +185,12 @@ export function excludedFolderTest(manifest: unknown): (folder: string) => boole
 export function sourceFolderTest(manifest: unknown): (folder: string) => boolean {
   const source = isObject(manifest) ? manifest : {};
   const include = pathList(source.include);
-  const exclude = pathList(source.exclude);
+  const exclude = foldedList(source.exclude);
   const held = (list: PathList, folder: string) => folderPrefixes(`${folder}/`).some((prefix) => list.folders.has(prefix));
   return (written) => {
     if (written === "" || written.length > 512) return false;
     const folder = nfc(written);
-    return !inGit(`${folder}/x`) && held(include, folder) && !held(exclude, folder);
+    return !inGit(`${folder}/x`) && held(include, folder) && !held(exclude, foldPath(folder));
   };
 }
 
@@ -201,7 +248,7 @@ export function nestedInSource(manifest: unknown, written: unknown): boolean {
 export function nestedTest(manifest: unknown): (written: unknown) => boolean {
   const source = isObject(manifest) ? manifest : {};
   const include = pathList(source.include, true);
-  const exclude = pathList(source.exclude);
+  const exclude = foldedList(source.exclude);
   return (written) => {
     // `git ls-files --others` names an untracked repository with a trailing `/`.
     const stored = typeof written === "string" && written.endsWith("/") ? written.slice(0, -1) : written;
@@ -210,37 +257,48 @@ export function nestedTest(manifest: unknown): (written: unknown) => boolean {
     const folder = `${path}/`;
     // An include path names it, lies under it (its folder is one of that entry's prefixes) or covers it.
     const reached = include.files.has(path) || include.reaches.has(folder) || folderPrefixes(folder).some((prefix) => include.folders.has(prefix));
-    return reached && !exclude.files.has(path) && !folderPrefixes(folder).some((prefix) => exclude.folders.has(prefix));
+    const folded = foldPath(path);
+    return reached && !exclude.files.has(folded) && !folderPrefixes(`${folded}/`).some((prefix) => exclude.folders.has(prefix));
   };
 }
 
 /**
  * DEC-0149 item 13: the paths of a patch that are not source, in the order given. A patch applies only when this is
- * empty; otherwise it is refused whole, and it applies at the source, never at an exported copy.
+ * empty; otherwise it is refused whole, and it applies at the source, never at an exported copy. `manifest` is the
+ * RECEIVER's current source manifest, never one the patch brings: a patch that rewrote `fabric.source.json` to drop an
+ * exclude would otherwise open the way for a later one. So a patch path that is the manifest itself, in any spelling,
+ * is refused too, and held for the owner's word. `exclude` is read folded (`foldSegment`), and when the manifest has
+ * any exclude entry a segment shaped like an 8.3 short name (`PRIVAT~1`) is refused, since Windows may resolve it to
+ * an excluded folder.
  */
 export function patchPathsAllowed(manifest: unknown, paths: readonly unknown[]): string[] {
   const isSource = sourcePathTest(manifest);
-  // On a case-insensitive file system `app/PRIVATE/x` is the file `app/private/` excludes: a patch path is also refused
-  // when, under ASCII case folding, it is a path an exclude entry names (`.git` is already read so by `inGit`).
   const source = isObject(manifest) ? manifest : {};
-  const folded = pathList(strings(source.exclude).map(([entry]) => asciiFold(entry)));
-  return (Array.isArray(paths) ? paths : []).filter((path) => !isSource(path) || listCovers(folded, asciiFold(path as string))).map((path) => show(path));
+  const anyExclude = strings(source.exclude).length > 0;
+  const refused = (path: unknown): boolean => {
+    if (!isSource(path)) return true;
+    const folded = foldPath(nfc(path as string));
+    return folded === SOURCE_FILE || (anyExclude && folded.split("/").some((segment) => SHORT_NAME.test(segment)));
+  };
+  return (Array.isArray(paths) ? paths : []).filter(refused).map((path) => show(path));
 }
+/** A folded segment shaped like a Windows 8.3 short name: a `~` and digits at its end. */
+const SHORT_NAME = /~[0-9]+$/u;
 
 // #region source-tree-check (docs: docs/specification/source.md#the-tree-check)
 /** What the tree check reports: the blocking kinds (FAC-SEM-158) and the warnings (FAC-SEM-159). */
 export type SourceFindingKind =
   | "home-path" | "credential" | "binary" | "nested-repository" | "instance-string" | "missing" | "short-instance-string" | "no-include"
-  | "email" | "link-outside" | "no-license";
+  | "email" | "link-outside" | "no-license" | "unused-exclude" | "excluded-by-fold";
 export const BLOCKING_KINDS: readonly SourceFindingKind[] = ["home-path", "credential", "binary", "nested-repository", "instance-string", "missing", "short-instance-string", "no-include"];
-export const WARNING_KINDS: readonly SourceFindingKind[] = ["email", "link-outside", "no-license"];
+export const WARNING_KINDS: readonly SourceFindingKind[] = ["email", "link-outside", "no-license", "unused-exclude", "excluded-by-fold"];
 
 /**
  * One place the instance shows through. `file` is the index in `files`; a finding in a file's path has no `line`;
  * `line` and `column` count from 1, the column in UTF-16 code units where the match begins. `entry` is the index of an
  * instance string in the operator's list, `include` the index of an `include` path. Never the text found.
  */
-export interface SourceProblem { kind: SourceFindingKind; file?: number; line?: number; column?: number; entry?: number; include?: number }
+export interface SourceProblem { kind: SourceFindingKind; file?: number; line?: number; column?: number; entry?: number; include?: number; exclude?: number }
 
 /**
  * Files that are credentials by their name: the names the adapter's `pack` refuses to carry (`fabric_package.py`
@@ -889,6 +947,14 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
     .filter((pair): pair is readonly [JsonObject, number] =>
       isObject(pair[0]) && (pair[0].nestedRepository === true ? isNested(pair[0].path) : isSource(pair[0].path)));
   const sourcePaths = files.filter(([file]) => file.nestedRepository !== true).map(([file]) => file.path as string);
+  // A file left out only because exclude is read folded is never read; it is said after the source files, by its path
+  // and the entry that names it.
+  const foldOnly = foldOnlyExcludeTest(manifest);
+  const foldedOut = (Array.isArray(input.files) ? input.files : []).flatMap((file: unknown, index: number): SourceProblem[] => {
+    if (!isObject(file) || file.nestedRepository === true) return [];
+    const at = foldOnly(file.path);
+    return at < 0 ? [] : [{ kind: "excluded-by-fold", file: index, exclude: at }];
+  });
   // A resolved target has no trailing slash: the root, a source file, or a folder some source file lies in.
   // Every folder some source file lies in, built once per tree, so a link is looked up, never compared with each path.
   const sourceFolders = new Set(sourcePaths.flatMap((path) => nfc(path).split("/").slice(0, -1).map((_part, index, parts) => parts.slice(0, index + 1).join("/"))));
@@ -953,6 +1019,7 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
       if (at === 0 && linkOutside) place("link-outside", 0);
     });
   }
+  problems.push(...foldedOut);
   // An include path names a file of the tree, or a folder one lies in: looked up, never compared with every path.
   const present = new Set(sourcePaths.map(nfc));
   const presentFolders = new Set([...present].flatMap(folderPrefixes));
@@ -960,6 +1027,17 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
     const entry = nfc(written);
     if (!(entry.endsWith("/") ? presentFolders.has(entry) : present.has(entry))) problems.push({ kind: "missing", include: at });
   });
+  // With `listed` (every path the tree holds, source or not, a folder written with a trailing `/`), an exclude entry
+  // that names none of them, read folded, is said once: a misspelt entry would leave out nothing.
+  if (Array.isArray(input.listed)) {
+    const listed = strings(input.listed).map(([path]) => path).filter((path) => path.length <= 513).map((path) => foldPath(nfc(path)));
+    const listedFiles = new Set(listed);
+    const listedFolders = new Set(listed.flatMap(folderPrefixes));
+    strings(manifest.exclude).forEach(([written, at]) => {
+      const entry = foldPath(nfc(written));
+      if (!(entry.endsWith("/") ? listedFolders.has(entry) : listedFiles.has(entry))) problems.push({ kind: "unused-exclude", exclude: at });
+    });
+  }
   // A licence that is a symbolic link is no licence: the export carries the link, not the terms.
   const linked = new Set(files.filter(([file]) => file.link === true).map(([file]) => file.path as string));
   if (!sourcePaths.some((path) => !path.includes("/") && LICENSE_FILE.test(path) && !linked.has(path))) problems.push({ kind: "no-license" });
@@ -977,7 +1055,9 @@ const MESSAGES: Readonly<Record<SourceFindingKind, string>> = {
   "no-include": "the source manifest names no include path, so nothing is source",
   email: "an e-mail address not listed in publicAddresses: a person's address belongs to the instance",
   "link-outside": "a link to a path outside the source: a source export does not carry its target",
-  "no-license": "no licence file at the source's root (LICENSE, LICENCE or COPYING): a source export carries the licence files the source has, and the contract chooses none"
+  "no-license": "no licence file at the source's root (LICENSE, LICENCE or COPYING): a source export carries the licence files the source has, and the contract chooses none",
+  "unused-exclude": "an exclude path names no file or folder the tree holds, in any letter case: check its spelling, since it leaves nothing out",
+  "excluded-by-fold": "an exclude path names this file only in another spelling (letter case, a Unicode form, a trailing dot or space): it is left out and never read, as a case-insensitive file system would leave it out; write the exclude path as the file is spelt"
 };
 
 /**
@@ -994,7 +1074,7 @@ export const labelledByIndex = (path: unknown): boolean => typeof path === "stri
 export function checkSourceTree(value: unknown): Finding[] {
   const problems = sourceTreeProblems(value);
   const files = isObject(value) && Array.isArray(value.files) ? value.files : [];
-  const inPath = (problem: SourceProblem) => problem.file !== undefined && problem.line === undefined && problem.kind !== "binary" && problem.kind !== "nested-repository";
+  const inPath = (problem: SourceProblem) => problem.file !== undefined && problem.line === undefined && problem.kind !== "binary" && problem.kind !== "nested-repository" && problem.kind !== "excluded-by-fold";
   const named = new Set(problems.filter(inPath).map((problem) => problem.file));
   return problems.map((problem): Finding => {
     const blocking = BLOCKING_KINDS.includes(problem.kind);
@@ -1008,13 +1088,15 @@ export function checkSourceTree(value: unknown): Finding[] {
         : "the file's path holds a value shaped like a credential, which never travels in a source";
     const entry = problem.entry === undefined ? "" : ` (entry ${problem.entry} of the operator's list)`;
     const include = problem.include === undefined ? "" : ` (include[${problem.include}])`;
+    const exclude = problem.exclude === undefined ? "" : ` (exclude[${problem.exclude}])`;
     const instancePath =
       problem.kind === "short-instance-string" ? `/instanceStrings/${problem.entry}`
         : problem.kind === "missing" ? `/manifest/include/${problem.include}`
+          : problem.kind === "unused-exclude" ? `/manifest/exclude/${problem.exclude}`
           : problem.kind === "no-include" ? "/manifest/include"
             : problem.file === undefined ? "/files"
               : inPath(problem) ? `/files/${problem.file}/path` : `/files/${problem.file}`;
-    const message = `${where}${problem.kind}: ${said}${entry}${include}`;
+    const message = `${where}${problem.kind}: ${said}${entry}${include}${exclude}`;
     return blocking ? { code: "FAC-SEM-158", instancePath, message } : { code: "FAC-SEM-159", instancePath, message, severity: "accepted" };
   });
 }

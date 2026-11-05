@@ -24,7 +24,7 @@ import { ruleHelp } from "./rule-codes.js";
 import { documentKindsOf, isSemanticKind } from "./semantic-kinds.js";
 import { evaluateSemanticRules } from "./semantic-rules.js";
 import { PACKAGE_FILE } from "./package-rules.js";
-import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, excludedFolderTest, isDotGitSegment, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
+import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, SOURCE_PATH, excludedFolderTest, foldOnlyExcludeTest, isDotGitSegment, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
 import { createValidatorSync, formatSchemaErrors } from "./validator.js";
 
 export interface Problem { file: string; path: string; rule: string; message: string; help?: string }
@@ -794,7 +794,9 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
   paths.sort();
   // Only a source path, or a nested repository in the source, is looked at: a path outside it is never reached, and
   // one that is no source path is stated only when it may be nested.
-  return paths.filter((name) => isSource(name) || isNested(name)).flatMap((name): Candidate[] => {
+  // A path left out only because exclude is read folded is kept by its path, never read, so the check can say so.
+  const foldOnly = foldOnlyExcludeTest(manifest);
+  return paths.filter((name) => isSource(name) || isNested(name) || foldOnly(name) >= 0).flatMap((name): Candidate[] => {
     // The index decides a gitlink, and nothing is read: it is a nested repository whatever sits at it or above it now
     // (a folder, a file, a link, or nothing).
     if (linked.has(name)) return [{ path: name, nested: true }];
@@ -805,7 +807,7 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
       // before anything at the path is.
       for (let depth = 1; depth < parts.length; depth += 1) if (lstatSync(path.join(folder, ...parts.slice(0, depth))).isSymbolicLink()) return [];
       // A path that is no source path is stated only when it may be nested, and a link there is never followed.
-      if (!isSource(name)) {
+      if (!isSource(name) && foldOnly(name) < 0) {
         // The link is caught before anything under it is asked: `<path>/.git` is never stated through a link.
         if (lstatSync(full).isSymbolicLink()) return [];
         if (!listedAsFolder.has(name) && !existsSync(path.join(full, ".git"))) return [];
@@ -1050,10 +1052,13 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   const isSource = sourcePathTest(manifest);
   const isNested = nestedTest(manifest);
   const isUnchecked = uncheckedTest(manifest);
+  const foldOnly = foldOnlyExcludeTest(manifest);
   for (const candidate of sourceCandidates(run, folder, manifest, includes)) {
     const relative = candidate.path;
     // A nested repository in the source goes by its path; one outside it is not counted, in either mode.
     if (candidate.nested) { if (isNested(relative)) files.push({ path: relative, nestedRepository: true }); continue; }
+    // Left out only under the fold: by its path, never opened.
+    if (foldOnly(relative) >= 0) { files.push({ path: relative }); continue; }
     if (!isSource(relative)) continue;
     const full = path.join(folder, ...relative.split("/"));
     try {
@@ -1072,7 +1077,10 @@ function checkSourceFolderAs(run: Run, folder: string): void {
     }
   }
   run.files.push({ file: ".", schema: null, kinds: ["source-tree"] });
-  const findings = evaluateSemanticRules("source-tree", { manifest, files });
+  // Each exclude entry the folder holds, found by lstat one segment at a time and never through a symbolic link, is
+  // listed, so an entry that names nothing is said (unused-exclude, accepted); nothing is read and no name is printed.
+  const listed = (((manifest as JsonObject).exclude as string[] | undefined) ?? []).filter((entry) => SOURCE_PATH.test(entry) && presentWithoutLink(folder, entry));
+  const findings = evaluateSemanticRules("source-tree", { manifest, files, listed });
   const inPath = new Set(findings.flatMap((finding) => {
     const at = /^\/files\/(\d+)\/path$/.exec(finding.instancePath);
     return at === null ? [] : [Number(at[1])];
@@ -1090,6 +1098,20 @@ function checkSourceFolderAs(run: Run, folder: string): void {
     addFindings(run, file, [{ ...finding, message: `${lead}${masked(finding.message.slice(lead.length), finding.instancePath)}` }]);
   }
   finish();
+}
+
+/** Whether a relative path (a folder with a trailing `/`) is in the folder, each segment by lstat, never through a link. */
+function presentWithoutLink(folder: string, relative: string): boolean {
+  const segments = relative.split("/").filter((segment) => segment !== "");
+  let at = folder;
+  for (const [index, segment] of segments.entries()) {
+    at = path.join(at, segment);
+    let stat;
+    try { stat = lstatSync(at); } catch { return false; }
+    if (stat.isSymbolicLink()) return false;
+    if (index < segments.length - 1 && !stat.isDirectory()) return false;
+  }
+  return true;
 }
 
 /** An error's name (`RangeError`), never its message. */

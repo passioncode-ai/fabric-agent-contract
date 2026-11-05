@@ -24,6 +24,7 @@ import {
   WARNING_KINDS,
   checkSourceTree,
   excludedFolderTest,
+  foldOnlyExcludeTest,
   isSourcePath,
   isUncheckedPath,
   longRunAt,
@@ -229,7 +230,45 @@ describe("which files are source", () => {
     expect(patchPathsAllowed(value, [".GIT/hooks/post-checkout", "app/PRIVATE/x"])).toEqual([".GIT/hooks/post-checkout", "app/PRIVATE/x"]);
     expect(patchPathsAllowed(value, ["app/main.ts", "app/Privates/x"])).toEqual([]);
     expect(patchPathsAllowed({ include: ["app/"], exclude: ["app/Secret.ts"] }, ["app/SECRET.TS", "app/secret.ts.bak"])).toEqual(["app/SECRET.TS"]);
-    expect(patchPathsAllowed(null, ["app/x", SOURCE_FILE])).toEqual(["app/x"]);
+    expect(patchPathsAllowed(null, ["app/x", SOURCE_FILE])).toEqual(["app/x", SOURCE_FILE]);
+  });
+
+  it("refuses a patch path an exclude entry names under Unicode full case folding, ignorable code points, NTFS dots and spaces, or a short name", () => {
+    const value = { format: "fabric-source/1", include: ["app/"], exclude: ["app/secrets/", "app/keys/", "app/strasse/", "app/\u03c3x/", "app/caf\u00e9/", "app/\u00e5/", "app/private/"] };
+    const refused = ["app/\u017fecrets/x", "app/\u212aeys/k", "app/stra\u00dfe/x", "app/\u03a3x/f", "app/\u03c2x/f", "app/CAF\u00c9/x", "app/CAFE\u0301/x", "app/\u212b/x", "app/\u00c5/x", "app/pri\u200cvate/x", "app/private./x", "app/private /x", "app/PRIVAT~1/x"];
+    expect(patchPathsAllowed(value, [...refused, "app/main.ts"])).toEqual(refused);
+    expect(patchPathsAllowed({ include: ["app/"], exclude: ["app/\u212ait/"] }, ["app/kit/x", "app/kite/x"])).toEqual(["app/kit/x"]);
+    // Without any exclude entry a name shaped like a short name is ordinary source.
+    expect(patchPathsAllowed({ include: ["app/"] }, ["app/PRIVAT~1/x"])).toEqual([]);
+    // The export reads exclude the same way, so it fails closed.
+    expect(isSourcePath(value, "app/\u017fecrets/x")).toBe(false);
+    expect(isSourcePath(value, "app/Private/notes.md")).toBe(false);
+    expect(excludedFolderTest(value)("app/SECRETS")).toBe(true);
+    expect(sourceFolderTest(value)("app/Keys")).toBe(false);
+    expect(nestedInSource(value, "app/STRASSE/lib")).toBe(false);
+    // An exclude entry the fold shortens (a segment of dots) still removes what it names.
+    expect(isSourcePath({ include: ["app/"], exclude: ["app/.../"] }, "app/.../x")).toBe(false);
+  });
+
+  it("names the exclude entry that leaves a path out only once folded, the first that writes it", () => {
+    const value = { include: ["app/"], exclude: ["app/x.ts", "app/Private/", "app/PRIVATE/", "app/private/a.ts"] };
+    const test = foldOnlyExcludeTest(value);
+    expect(test("app/private/a.ts")).toBe(-1);
+    expect(test("app/private/b.ts")).toBe(1);
+    expect(test("app/X.ts")).toBe(0);
+    expect(test("app/Private/b.ts")).toBe(-1);
+    for (const path of ["app/main.ts", "other/private/x", ".git/x", SOURCE_FILE, 7, "app/../x"]) expect(test(path), String(path)).toBe(-1);
+    expect(foldOnlyExcludeTest(null)("app/x")).toBe(-1);
+  });
+
+  it("checks a patch against the receiver's current manifest, never one the patch brings, and holds a patch to the manifest", () => {
+    const receiver = { format: "fabric-source/1", include: ["app/"], exclude: ["app/private/"] };
+    const brought = { format: "fabric-source/1", include: ["app/"] };
+    // The first patch rewrites the manifest to drop the exclude: refused and held for the owner's word.
+    expect(patchPathsAllowed(receiver, ["fabric.source.json", "app/main.ts"])).toEqual(["fabric.source.json"]);
+    // A later patch into the formerly excluded folder is read against the receiver's manifest, still refused.
+    expect(patchPathsAllowed(receiver, ["app/private/x"])).toEqual(["app/private/x"]);
+    expect(patchPathsAllowed(brought, ["app/private/x"])).toEqual([]);
   });
 
   it("compares paths in Unicode NFC, so a name read in NFD meets an entry written in NFC", () => {

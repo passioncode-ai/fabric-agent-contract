@@ -1959,6 +1959,50 @@ describe("an agent's source (DEC-0149)", () => {
     }
   });
 
+  it.skipIf(process.platform === "win32")("never reads a folder a case-insensitive or Windows file system resolves to .git, in a walk", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x", "src/.git /config": `const key = "${key}";`, "src/GIT~1/config": `const key = "${key}";` });
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(0);
+    expect(found(result.out)).toEqual([]);
+    expect(result.out).not.toContain("credential");
+  });
+
+  it("never reads a file an exclude entry names in another spelling, and says so with the entry, in Git mode and in a walk", () => {
+    const files = { "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/private/"] }), LICENSE: "x", "src/a.ts": "x", "src/Private/notes.md": `const key = "${key}";` };
+    const committed = folder(files);
+    expect(gitIn(committed, "init", "-q").status).toBe(0);
+    expect(gitIn(committed, "add", "-A").status).toBe(0);
+    expect(gitIn(committed, "commit", "-qm", "x").status).toBe(0);
+    const inGit = run(committed, "--kind", "source-tree");
+    expect(inGit.code).toBe(0);
+    expect(inGit.out).not.toContain("FAC-SEM-158");
+    expect(inGit.out).not.toContain("credential");
+    expect(lines(inGit.out).filter((line) => line.includes("excluded-by-fold"))).toEqual([
+      expect.stringMatching(/^src\/Private\/notes\.md {2}\/files\/\d+ {2}FAC-SEM-159 \(accepted\) {2}src\/Private\/notes\.md: excluded-by-fold: .*\(exclude\[0\]\)/)
+    ]);
+    // A walk never enters the folder the fold leaves out, so it reads nothing there either.
+    const walked = run(folder(files), "--kind", "source-tree");
+    expect(walked.code).toBe(0);
+    expect(walked.out).not.toContain("FAC-SEM-158");
+  });
+
+  it.skipIf(process.platform === "win32")("says an exclude entry that names nothing in the folder, found by lstat and never through a link (accepted)", () => {
+    const outside = folder({ "secrets/x.ts": "x" });
+    const dir = folder({
+      "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/gen/", "src/cache/", "src/linked/x/", "src/a.ts/x", "src/Gen/"] }),
+      LICENSE: "x", "src/a.ts": "x", "src/gen/out.ts": "x"
+    });
+    symlinkSync(outside, path.join(dir, "src", "linked"));
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(0);
+    const said = lines(result.out).filter((line) => line.includes("unused-exclude"));
+    // src/cache/ is not there, src/linked/x/ lies through a link, src/a.ts/x under a file; src/gen/ is there, and src/Gen/
+    // folds to it on a case-sensitive file system only when it is there too, so it is said where the folder is absent.
+    expect(said.map((line) => line.split("  ")[1])).toEqual(expect.arrayContaining(["/manifest/exclude/1", "/manifest/exclude/2", "/manifest/exclude/3"]));
+    expect(said.map((line) => line.split("  ")[1])).not.toContain("/manifest/exclude/0");
+    for (const line of said) expect(line).toContain("FAC-SEM-159 (accepted)");
+  });
+
   it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("routes a named manifest under --kind source-tree as its folder: a dangling link, a loop, an unenterable folder", () => {
     const dangling = folder({ LICENSE: "x" });
     symlinkSync(path.join(dangling, "gone.json"), path.join(dangling, "fabric.source.json"));
@@ -2357,7 +2401,7 @@ describe("an agent's source (DEC-0149)", () => {
         [sourceManifest({ include: ["src/", "LICENSE"] }), { "src/a.ts": "x" }, ["LICENSE", "src/a.ts", "outside/\\377.txt"]],
         [sourceManifest({ include: ["src/a/", "LICENSE"] }), { "src/a/k.ts": "x" }, ["LICENSE", "src/a/k.ts", "src/\\377/x.ts"]],
         [sourceManifest({ include: ["src/a.ts", "LICENSE"] }), { "src/a.ts": "x" }, ["LICENSE", "src/a.ts", "src/\\377.txt"]],
-        [sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/vendor/"] }), { "src/a.ts": "x" }, ["LICENSE", "src/a.ts", "src/vendor/\\377.txt"]]
+        [sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/vendor/"] }), { "src/a.ts": "x", "src/vendor/keep.txt": "x" }, ["LICENSE", "src/a.ts", "src/vendor/\\377.txt"]]
       ] as const) {
         expect(probe(manifest, files, [...list]), list[2]).toEqual({ code: 0, out: "" });
       }

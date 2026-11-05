@@ -53,12 +53,23 @@ path names a file only; a
 store slot's `path` is written without a trailing slash and names the file or folder the agent keeps its store in.
 
 - **Default deny.** Only what `include` names is source; `exclude` carves holes in it. A file outside `include` is
-  simply not source: it is not a finding, and a source export does not carry it.
+  simply not source: it is not a finding, and a source export does not carry it. A file whose path an `exclude` entry
+  names only once both are folded (below; `src/Private/notes.md` under `src/private/`) is not source either, in the
+  source test, in the walk and in Git mode alike, so an export fails closed; it is never read, and the warning
+  `excluded-by-fold` names it beside the entry, so the author sees both spellings. The same fold refuses a patch's
+  path ([import](#import)).
 - **`.git` is never source**, whatever the lists say: a path with a `.git` segment is not source, and listing one is
   `FAC-SEM-157`. A segment counts in every form a case-insensitive or a Windows file system resolves to `.git`, as Git's
   own `is_hfs_dotgit` and `is_ntfs_dotgit` read it: under ASCII case folding (`.GIT`), with the code points HFS+ ignores
   removed (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F, U+FEFF), with any trailing run of dots and spaces
   dropped (`.git.`, or `.git` and a space), and as the NTFS short name `GIT~1` (`isDotGitSegment`).
+- **`exclude` is read folded.** A case-insensitive file system (APFS, NTFS) resolves several spellings to one file,
+  so an `exclude` entry and every path asked about are compared segment by segment after one fold (`foldSegment`):
+  the code points HFS+ ignores removed, NFC, Unicode full case folding (upper case, then lower case), NFC again, and
+  any trailing run of dots and spaces dropped. `src/Secrets/notes.md`, `src/ſecrets/notes.md` and `src/secrets./x`
+  all lie in an excluded `src/secrets/`. The fold is wider than APFS's in places (`ı` meets `i`), which leaves more
+  out: an export fails closed. `include` is read as written. An `exclude` entry that names nothing the folder holds,
+  read folded, is the warning `unused-exclude` (a misspelt entry would leave nothing out).
 - **Paths compare in Unicode NFC.** Git on macOS lists names in NFC while a walk reads a name as it is stored (often
   NFD), so every entry of the manifest and every path asked about is normalised to NFC before they are compared; a file
   is still read, and named in a message, by its name as stored.
@@ -144,6 +155,8 @@ to the source; the check also ignores any file that `isSourcePath` does not read
 | `no-include` | `FAC-SEM-158` | a manifest with no `include` path |
 | `email` | `FAC-SEM-159` | an address matching the e-mail pattern of `src/node-summary.ts` with its local part bounded to 64 characters, read from each `@`, not in `publicAddresses` (compared without regard to case), not at an RFC 2606 name (`example.com`, `example.org`, `example.net` and names under them, or a domain ending `.invalid`, `.test` or `.example`), not followed by `:` (an SSH remote, `git@host:owner/repo`), not ending in an image's extension (`png`, `jpg`, `jpeg`, `gif`, `svg`, `webp`, `ico`: `user@2x.png` is an asset's name) and not inside a URL the `credential` kind reports, as written or once the line's JSON escapes are undone |
 | `link-outside` | `FAC-SEM-159` | in a Markdown file (`.md`, `.mdx`, `.markdown`), a relative link `](target)` (a target and a title hold no `]`, and at most 2048 characters each) (no scheme, not `#…`, not `//…`) whose target, resolved against the file's folder (from the root when it starts with `/`, without its `#` or `?` part), is above the root or is neither a source path nor a folder holding a source file; and a symbolic link in the source whose target (its text) is absolute, climbs above the root or is no source path, resolved literally against the link's folder (split on `/`, `#` and `?` kept as path characters, nothing percent-decoded), the root and a folder holding source being inside; said at line 1, column 1, after line 1's other findings in this table's order and once per line (a link whose target holds a Markdown link outside gets one) |
+| `excluded-by-fold` | `FAC-SEM-159` | a file inside an `include` path that no `exclude` entry names as written but one names once both are folded ([paths](#paths)): it is not source and never read; the line names the file and the entry (`exclude[<i>]`). The [checker](#the-checker) keeps such a path from Git's list by its path only; a walk never enters a folder the fold leaves out, so it reads nothing there and says nothing |
+| `unused-exclude` | `FAC-SEM-159` | an `exclude` entry that names no file or folder the tree holds, read folded as [paths](#paths) says; reported only when the input carries `listed` (every path the tree holds, source or not, a folder written with a trailing `/`), which the [checker](#the-checker) fills with each `exclude` entry it finds in the folder by `lstat`, segment by segment and never through a symbolic link |
 | `no-license` | `FAC-SEM-159` | no source file at the root named `LICENSE`, `LICENCE` or `COPYING`, with an extension or none, in any letter case; a licence that is a symbolic link does not count, since a source export carries the link, not the terms, an `unchecked` link included (it is passed as a link with no text) |
 
 The blocking kinds are `FAC-SEM-158`: a source export refuses on any of them. The warnings are `FAC-SEM-159`,
@@ -157,14 +170,14 @@ is not a remedy: it removes that file's check (for `fabric-agent.json`, every li
 
 A finding never carries the text it found. `instancePath` names the file (`/files/<index>`, or `/files/<index>/path`
 for a finding in its path), the tree as a whole (`/files`, for `no-license`), the manifest's path
-(`/manifest/include/<index>`, for `missing`), the manifest's `include` itself (`/manifest/include`, for `no-include`)
+(`/manifest/include/<index>`, for `missing`; `/manifest/exclude/<index>`, for `unused-exclude`), the manifest's `include` itself (`/manifest/include`, for `no-include`)
 or the list's entry (`/instanceStrings/<index>`, for `short-instance-string`). The message names the file's path, the line and column and the kind, and for an
 instance string the entry's index in the operator's list; a file whose own path holds a finding is named
 `files[<index>]`. A finding in a file's own path has no line and no column. A line counts from 1, split at LF with a
 trailing CR dropped, as the adapter reads it (a lone CR does not end a line); a column counts from 1 in UTF-16 code units where the match begins (for a home folder, where its name begins; for
 an instance string found only in the line's NFC form, its index there; for a credential found only once the line's JSON
 escapes are undone, where its first character is written). On each line the kinds come in the order of the table, one
-finding per kind (an instance string: one per entry); a file's path comes before its lines; `missing` and `no-license`
+finding per kind (an instance string: one per entry); a file's path comes before its lines; `excluded-by-fold` follows the files, and `missing`, `unused-exclude` and `no-license`
 come last, the list's refused entries and `no-include` first. That order is the check's result; the
 [checker](#the-checker) prints the blocking findings before the warnings.
 
@@ -409,7 +422,8 @@ token needs none ([DL-26](delegation.md#trust-tiers)).
   uses, beside the commit, so a caller builds the exact target from its own arguments. The required `target` is
   `<agent>@<commit>-><recipient>`: the agent's id is its package's `id` (a
   kebab-case name of at most 64 characters; a source not yet packed uses the `id` its package will carry), the commit
-  the full source commit, the recipient as the action names it. When that string exceeds the decision schema's 200
+  the full source commit (for an act that hands over the whole repository, a transfer, a visibility change or access
+  given, the repository as the action names it, in the commit's place), the recipient as the action names it. When that string exceeds the decision schema's 200
   characters, the `target` is `sha256:` and the lowercase hex SHA-256 of its UTF-8 bytes; the action computes the same
   string and compares it exactly. Naming the three in `instruction` is the relaying agent's duty under AP-3, and nothing
   checks it.
@@ -479,7 +493,9 @@ The line between the two is this. The operator's standing permission of 2026-10-
 into a product: the knowledge base's [roadmap](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/roadmap.md)
 records it in its D5 row as "the broker's mechanics go into `node.lifecycle`, with a standing permission in his global
 instructions". This contract reads it as rewriting or copying the mechanics file by file into the product's own source
-through that product's own change, the agent's private data stripped; such a move needs no word per act.
+through that product's own change, the agent's private data stripped; such a move needs no word per act. It covers
+mechanics adapted into a product's source, never the agent's source as such: its tree, or a whole copy of it under any
+name, moving into an organization's or a public repository stays a source hand-over.
 
 The repository where the agent's owner keeps and develops its source is its home, not a recipient, and the placements
 its owner holds are the owner's own. The owner's own commits, branches and releases in the home are no hand-over, nor is
@@ -492,8 +508,12 @@ knowledge base's [agents-first](https://github.com/passioncode-ai/fabric-workspa
 item 9, "A source hand-over takes the operator's word on that act", reads), each such push its own hand-over; a
 transfer; a visibility change; access given to another person; a file sent. A package handed to another person (a
 colleague's copy, [package](package.md#state)'s v4 §6 Path 3) carries the source and is a hand-over, and so is a
-personal agent's package or release published to a public registry. Each needs the operator's word for that act; a
-local source export needs none. A copy moved within the operator's own estate (here, the accounts and placements the
+personal agent's package or release published to a public registry. Access the owning organization gives its own members to its own agent's home is no hand-over, since they are the
+home's readers; access given to anyone outside the owner is one, and for a personal agent the owner is the operator,
+so any other person's access is one. An organization's agent released by the organization to a public registry is the
+organization's own release, not a hand-over. Each needs the operator's word for that act, naming the agent, the source
+commit and the recipient; for an act that hands over the whole repository (a transfer, a visibility change, access
+given) the word names the repository instead of one commit. A local source export needs none. A copy moved within the operator's own estate (here, the accounts and placements the
 operator alone holds) to a place that is not public and that no one outside the operator can read (a deploy to the
 operator's own placement, a private mirror the operator owns) has no recipient and is not a source hand-over; a push
 or copy elsewhere that is public, that another owner holds, or that another person is given access to, is one. The
@@ -513,9 +533,17 @@ Fabric's (CT-208).
 
 A patch back from an exported copy applies only when every path it touches is a source path; otherwise it is refused
 whole. It applies at the source, never at an exported copy. On a case-insensitive file system two spellings of a path
-are one file, so a patch path is also refused when, under ASCII case folding, it is a path an `exclude` entry names
-(`app/PRIVATE/x` when `app/private/` is excluded), and `.git` in any of its forms is never source. `patchPathsAllowed(manifest, paths)` answers the paths that
-are not source, and those.
+are one file, so a patch path is also refused when an `exclude` entry names it under Unicode full case folding after
+NFC, with the code points HFS+ ignores removed and trailing dots and spaces dropped, both sides folded the same way
+([paths](#paths)): `app/PRIVATE/x`, `app/ſecrets/x` (a long s) and `app/Keys/k` (the Kelvin sign) are refused when
+`app/private/`, `app/secrets/` and `app/keys/` are excluded. When any `exclude` entry exists, a segment shaped like a
+Windows 8.3 short name (`~` and digits at its end, `PRIVAT~1`) is refused too, and `.git` in any of its forms is never
+source.
+
+A patch is always checked against the receiver's current source manifest, never against a manifest the patch brings:
+one patch could rewrite `fabric.source.json` to drop an `exclude`, and a later one land in the folder it left out. So a
+patch from anyone but the owner that changes `fabric.source.json` itself, in any spelling, is refused and held for the
+owner's word. `patchPathsAllowed(manifest, paths)`, given the receiver's manifest, answers every path refused.
 
 ## Starting without the instance
 
@@ -553,7 +581,7 @@ in its first answer or its doctor command.
 | <a id="fac-sem-156"></a>`FAC-SEM-156` | `source-manifest` | a slot is named once, and neither its name nor its purpose nor the manifest's description is shaped like a credential; a store path is declared once (DEC-0149) |
 | <a id="fac-sem-157"></a>`FAC-SEM-157` | `source-manifest` | a path is listed once in `include`, `exclude`, `binaries` and `unchecked`; none of the first three has a `.git` segment, in any form [paths](#paths) reads as `.git`; an `include` path lies inside no `exclude` folder; an `exclude` path lies inside an `include` folder and is not an `include` path; a `binaries` path is a file of the source; an `unchecked` path is a file of the source or a folder in it (DEC-0149) |
 | <a id="fac-sem-158"></a>`FAC-SEM-158` | `source-tree` | a source tree holds no home folder with a person's name, no credential (a value in a line or a path, or a file by its name), no binary file `binaries` does not list, no nested repository and no installation string; every `include` path names a file; the list's entries are well-formed strings of at least 3 characters and the manifest names an `include` path (DEC-0149) |
-| <a id="fac-sem-159"></a>`FAC-SEM-159` | `source-tree` | accepted: an e-mail address not in `publicAddresses`, a relative Markdown link out of the source, no licence file at the root (DEC-0149) |
+| <a id="fac-sem-159"></a>`FAC-SEM-159` | `source-tree` | accepted: an e-mail address not in `publicAddresses`, a relative Markdown link out of the source, no licence file at the root, an `exclude` entry that names nothing the tree holds, a file an `exclude` entry names only once folded (DEC-0149) |
 | <a id="fac-sem-160"></a>`FAC-SEM-160` | `source-package` | a package's `secrets[]` are the source's `secret` slots by name and `optional`, and, when its `state[]` holds any entry, its `state[]` paths the source's `store` slots' paths, as sets (DEC-0149) |
 
 ## Conformance

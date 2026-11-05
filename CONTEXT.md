@@ -460,9 +460,13 @@ operator alone holds) to a place that is not public and that no one outside the 
 the operator owns) is none either, while a push or copy elsewhere that is public, that another owner holds, or that
 another person is given access to, is one. The home carve-out never lets a personal agent's source move into an
 organization's or a public repository, or onto an organization's or a team's placement or one other people can read,
-which stays one; serving the running agent to a team (`peer`, client keys) gives no one the tree and is none. It is
-one synchronous call of effect class `publish`, taken only on the operator's word for that act (a decision with its
-exact target, or the service's in-call elicitation), never by a mandate or an `approval/1` before CT-181, as
+which stays one; serving the running agent to a team (`peer`, client keys) gives no one the tree and is none. Access the
+owning organization gives its own members to its own agent's home is none (they are the home's readers), access given
+to anyone outside the owner is one (for a personal agent, anyone but the operator), and an organization's agent
+released by the organization to a public registry is the organization's own release. It is
+one synchronous call of effect class `publish`, taken only on the operator's word for that act naming the agent, the
+source commit (the repository, for an act on the whole repository) and the recipient (a decision with its exact
+target, or the service's in-call elicitation), never by a mandate or an `approval/1` before CT-181, as
 [source](docs/specification/source.md#handing-over) specifies (DEC-0149). *Avoid*: a bare "hand-over" for this meaning.
 
 **Package digest**: SHA-256 over the RFC 8785 form of a **Package** without its digest and signatures; through the
@@ -852,8 +856,9 @@ about a private agent leaves as a proposal (DEC-0072, [proposals](docs/specifica
 a private agent's mechanics move into a product (the knowledge base's roadmap records it in its D5 row: "the broker's
 mechanics go into `node.lifecycle`, with a standing permission in his global instructions"); the contract reads it as
 rewriting or copying them file by file into the product's own source through that product's own change, private data
-stripped. It is unchanged and needs no word per act, as [source](docs/specification/source.md#handing-over) draws the
-line.
+stripped. It is unchanged and needs no word per act; the agent's source as such (its tree, or a whole copy under any
+name) moving into an organization's or a public repository stays a **Source hand-over**, as
+[source](docs/specification/source.md#handing-over) draws the line.
 
 **Protocol revision**: `<name>/<revision>`, the version every document names (DEC-0009); a receiver accepts N and N−1
 of the contract's register, lists them in `protocols`, and refuses another with `schema-unsupported` (DEC-0067,

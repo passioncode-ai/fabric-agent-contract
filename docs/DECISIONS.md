@@ -9030,10 +9030,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 37 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 38 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
-  exclude hole), cited by round number because their heads were on the review branch, which is not
+  exclude hole; round 38 not clean: Unicode case folding bypass of exclude), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9110,7 +9110,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      Warnings, `FAC-SEM-159`, accepted: `email` (the local part at most 64 characters, not in `publicAddresses`, not at
      an RFC 2606 name, not followed by `:`, not ending in an image's extension, not inside a URL the credential kind
      reports), `link-outside` (a relative Markdown link or a symbolic link whose target is not source), `no-license` (no licence file at the
-     root: the contract chooses no licence, Q7). A finding names the file, line (split at LF, a trailing CR dropped, as
+     root: the contract chooses no licence, Q7), `unused-exclude` (an `exclude` entry that names nothing the tree holds,
+     read folded; round 38), `excluded-by-fold` (a file an `exclude` entry names only once folded: not source, never
+     read, named beside the entry; round 38). A finding names the file, line (split at LF, a trailing CR dropped, as
      the adapter reads it) and column (from 1, in UTF-16 code units) and kind, never the text found; a finding in a
      file's own path has no line and no column. `pnpm --silent validate <dir> --kind source-tree` reads what Git would
      commit in a work tree that does not ignore the folder (a `git` from PATH's absolute folders only, `-c
@@ -9187,7 +9189,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       already in a repository that is not the home and that is public or another owner's is its own hand-over (each
       brings new source to new readers); a package handed to another person (a colleague's copy) carries the source
       and is a hand-over, a release that stays where the home's readers are is covered by "releases there", and a
-      personal agent's package or release published to a public registry stays a hand-over. Handing it to
+      personal agent's package or release published to a public registry stays a hand-over. Decided by the coordinator
+      in round 38 on the same ground: the permission covers mechanics adapted into a product's source file by file, and
+      the agent's source as such (its tree, or a whole copy under any name) moving into an organization's or a public
+      repository stays a hand-over (the permission's text names mechanics, not a repository); access the owning
+      organization gives its own members to its own agent's home is none, since they are the home's readers, while
+      access given to anyone outside the owner is one, any person but the operator for a personal agent; an
+      organization's agent released by the organization to a public registry is its own release, the organization
+      being the home's owner; for an act on the whole repository (a transfer, a visibility change, access given) the
+      word names the repository instead of one commit, since the act hands over every commit. Handing it to
       anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       source commit and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9206,7 +9216,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       source, never at an exported copy (`patchPathsAllowed`). Because a case-insensitive file system makes two
       spellings one file, a patch path is also refused when, under ASCII case folding, an `exclude` entry names it, and
       `.git` in each of item 4's forms is never source (decided by the coordinator in round 37: the unit reading found
-      `.GIT/hooks/post-checkout` and `app/PRIVATE/x` allowed past an excluded `app/private/`).
+      `.GIT/hooks/post-checkout` and `app/PRIVATE/x` allowed past an excluded `app/private/`). Restated in round 38,
+      after the unit reading wrote `app/ſecrets/new` into an excluded `app/secrets/` with `git apply` on APFS and found
+      the Kelvin sign folding to `K` after the ASCII fold: the comparison is under Unicode full case folding after NFC,
+      with the code points HFS+ ignores removed and trailing dots and spaces dropped, both sides folded the same way per
+      segment (it folds more than APFS in places, which refuses more), and a segment shaped like an 8.3 short name is
+      refused when any `exclude` entry exists. `exclude` is read with the same fold at export too, so an export fails
+      closed. A patch is checked against the receiver's current manifest, never one the patch brings, and a patch from
+      anyone but the owner that changes `fabric.source.json` is refused and held for the owner's word (decided by the
+      coordinator in round 38: one patch could drop an `exclude` and a later one land in the folder it left out).
   14. **Starting without the instance (§5.8):** an agent started with an empty data folder and no slot filled starts;
       a service answers `status: degraded` with one `degraded[]` entry per missing required slot, its `source` the
       slot's name, each `setup: true` (DEC-0044's setup state), an `endpoint` included; a `store` slot is never a setup
@@ -9274,7 +9292,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 37 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 38 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
-  case-insensitive `.git` and exclude hole), cited by round number (their heads were on the review branch, not kept at landing),
+  case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.
