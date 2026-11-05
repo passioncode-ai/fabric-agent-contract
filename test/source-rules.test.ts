@@ -268,6 +268,13 @@ describe("which files are source", () => {
     }
     expect(checked).toBe(0x110000 - 0x800);
     expect(foldSegment("PA\u1e9eWORDS")).toBe("passwords");
+    // HFS+ joins Georgian Asomtavruli with Mkhedruli; the fold maps both, and Nuskhuri, onto Mkhedruli.
+    for (let at = 0; at <= 0x25; at += 1) {
+      const mkhedruli = String.fromCharCode(0x10d0 + at);
+      expect(foldSegment(String.fromCharCode(0x10a0 + at))).toBe(foldSegment(mkhedruli));
+      expect(foldSegment(String.fromCharCode(0x2d00 + at))).toBe(mkhedruli);
+      expect(foldSegment(mkhedruli)).toBe(mkhedruli);
+    }
     expect(foldSegment("pa\u00dfwords")).toBe("passwords");
   }, 180_000);
 
@@ -317,6 +324,32 @@ describe("which files are source", () => {
     expect(patchPathsAllowed({ include: ["app/"], exclude: ["app/\u1fb7/"] }, ["app/\u1fbc\u0342/token.txt"])).toEqual(["app/\u1fbc\u0342/token.txt"]);
     expect(isSourcePath({ include: ["app/"], exclude: ["app/\u1fb7/"] }, "app/\u1fbc\u0342/notes.md")).toBe(false);
   }, 180_000);
+
+  it("reads an exclude entry without / as leaving out everything beneath that name too, in any spelling", () => {
+    const value = { format: "fabric-source/1", include: ["vendor/", "src/"], exclude: ["vendor/lib"] };
+    expect(patchPathsAllowed(value, ["vendor/lib/x.ts", "Vendor/LIB/y/z.ts", "vendor/lib", "vendor/library.ts", "vendor/other.ts"])).toEqual(["vendor/lib/x.ts", "Vendor/LIB/y/z.ts", "vendor/lib"]);
+    expect(isSourcePath(value, "vendor/lib/x.ts")).toBe(false);
+    expect(isSourcePath(value, "vendor/library.ts")).toBe(true);
+    expect(excludedFolderTest(value)("vendor/Lib")).toBe(true);
+    expect(sourceFolderTest(value)("vendor/lib/sub")).toBe(false);
+    expect(nestedInSource(value, "vendor/lib/inner")).toBe(false);
+    expect(foldOnlyExcludeTest(value)("vendor/LIB/x.ts")).toBe(0);
+    expect(foldOnlyExcludeTest(value)("vendor/lib/x.ts")).toBe(-1);
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "src/gen/keep/", "LICENSE"], exclude: ["src/Gen"] })).toEqual([
+      { code: "FAC-SEM-157", instancePath: "/include/1", message: "include[1] lies inside an exclude folder, so it names nothing" }
+    ]);
+  });
+
+  it("reads the path grammar on the NFC form too: an entry NFC lengthens past 256 code points is said once, a path so lengthened is no source", () => {
+    const long = "\u0958".repeat(126);
+    expect([...`src/${long}/`].length).toBeLessThanOrEqual(256);
+    expect([...`src/${long}/`.normalize("NFC")].length).toBeGreaterThan(256);
+    expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [`src/${long}/`] })).toEqual([
+      { code: "FAC-SEM-157", instancePath: "/exclude/0", message: "exclude[0] is an entry NFC lengthens past 256 code points, so it names, reaches and removes nothing" }
+    ]);
+    expect(isSourcePath({ include: ["src/"] }, `src/${long}/x`)).toBe(false);
+    expect(isSourcePath({ include: ["src/"] }, `src/${"\u0958".repeat(10)}/x`)).toBe(true);
+  });
 
   it("names the exclude entry that leaves a path out only once folded, the first that writes it", () => {
     const value = { include: ["app/"], exclude: ["app/x.ts", "app/Private/", "app/PRIVATE/", "app/private/a.ts"] };

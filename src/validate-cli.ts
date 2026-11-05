@@ -24,7 +24,7 @@ import { ruleHelp } from "./rule-codes.js";
 import { documentKindsOf, isSemanticKind } from "./semantic-kinds.js";
 import { evaluateSemanticRules } from "./semantic-rules.js";
 import { PACKAGE_FILE } from "./package-rules.js";
-import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, SOURCE_PATH, excludedFolderTest, foldOnlyExcludeTest, foldSegment, isDotGitSegment, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
+import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, SOURCE_PATH, excludedFolderTest, foldOnlyExcludeTest, foldPath, foldSegment, isDotGitSegment, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
 import { createValidatorSync, formatSchemaErrors } from "./validator.js";
 
 export interface Problem { file: string; path: string; rule: string; message: string; help?: string }
@@ -732,6 +732,12 @@ export function gitNames(stdout: Buffer): { names: string[]; unreadable: number[
   return { names, unreadable, folders };
 }
 
+/** Two paths in UTF-16 code-unit order of their NFC forms, the stored names breaking a tie; no branch, one sign. */
+const pathOrder = (a: string, b: string): number => {
+  const x = a.normalize("NFC");
+  const y = b.normalize("NFC");
+  return 2 * (Number(x > y) - Number(x < y)) + Number(a > b) - Number(a < b);
+};
 /**
  * The files `--kind source-tree` reads, relative to the folder. In a Git work tree that does not ignore the folder:
  * what Git would commit (tracked files and untracked ones not ignored, `git ls-files -z --cached --others
@@ -745,15 +751,16 @@ export function gitNames(stdout: Buffer): { names: string[]; unreadable: number[
  * the mode: a walk lists a fold-only file but never enters a folder the fold leaves out, while Git mode lists the
  * fold-only paths under such a folder too; a read file's index is the same in both.
  */
-function sourceCandidates(run: Run, folder: string, manifest: unknown, includes: readonly string[]): Candidate[] {
+function sourceCandidates(run: Run, folder: string, manifest: unknown, includes: readonly string[], gitlinks: Set<string> = new Set()): Candidate[] {
   const executable = gitExecutable();
   // The manifest's lists are indexed once: each path is looked up, never compared with every entry.
   const index = includeIndex(includes);
   const isSource = sourcePathTest(manifest);
   const isNested = nestedTest(manifest);
   const skipped = excludedFolderTest(manifest);
-  // Every mode lists by path in UTF-16 code-unit order, so files[<index>] is the same on every machine and in both modes.
-  const byPath = (candidates: Candidate[]) => candidates.sort((a, b) => Number(a.path > b.path) - Number(a.path < b.path));
+  // Every mode lists by path in UTF-16 code-unit order of the path's NFC form, the stored name only breaking a tie, so
+  // files[<index>] is the same on every machine and in both modes (Git on macOS lists NFC, a walk reads names as stored).
+  const byPath = (candidates: Candidate[]) => candidates.sort((a, b) => pathOrder(a.path, b.path));
   const walked = (why: string): Candidate[] => {
     run.notes.push({ file: ".", path: "/", rule: "note/walk", message: `${why}, so the folder's files were walked` });
     return byPath(walk(folder, "", index, run, skipped, sourceFolderTest(manifest)));
@@ -784,8 +791,9 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
   if (staged.error !== undefined) return walked(`git ls-files --stage could not run (${String((staged.error as NodeJS.ErrnoException).code)})`);
   if (staged.status !== 0) return walked(`git ls-files --stage refused the folder (exit ${String(staged.status)})`);
   const linked = new Set(gitlinkNames(staged.stdout));
+  for (const name of linked) gitlinks.add(name);
   const listedAsFolder = new Set(names.filter((name) => name.endsWith("/")).map((name) => name.slice(0, -1)));
-  const paths = [...new Set(names.map((name) => (name.endsWith("/") ? name.slice(0, -1) : name)))].sort();
+  const paths = [...new Set(names.map((name) => (name.endsWith("/") ? name.slice(0, -1) : name)))].sort(pathOrder);
   // Walked only when Git lists nothing under any include path: a file under one, or a nested repository in the source.
   if (!paths.some((name) => isNested(name) || index.covers(name))) {
     return walked("Git lists no file under an include path here");
@@ -794,7 +802,7 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
   // The manifest is source whatever include says, and read whatever .gitignore says: a regular file Git leaves out is
   // added (DEC-0149).
   if (!paths.includes(SOURCE_FILE) && sourceRegularFile(path.join(folder, SOURCE_FILE)) && existsSync(path.join(folder, SOURCE_FILE))) paths.push(SOURCE_FILE);
-  paths.sort();
+  paths.sort(pathOrder);
   // Only a source path, or a nested repository in the source, is looked at: a path outside it is never reached, and
   // one that is no source path is stated only when it may be nested.
   // A path left out only because exclude is read folded is kept by its path, never read, so the check can say so.
@@ -1057,7 +1065,9 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   const isUnchecked = uncheckedTest(manifest);
   const foldOnly = foldOnlyExcludeTest(manifest);
   const foldedOut: Array<{ path: string }> = [];
-  for (const candidate of sourceCandidates(run, folder, manifest, includes)) {
+  // The gitlinks Git's index records (Git mode), so an exclude entry naming one is never called unused.
+  const gitlinks = new Set<string>();
+  for (const candidate of sourceCandidates(run, folder, manifest, includes, gitlinks)) {
     const relative = candidate.path;
     // A nested repository in the source goes by its path; one outside it is not counted, in either mode.
     if (candidate.nested) { if (isNested(relative)) files.push({ path: relative, nestedRepository: true }); continue; }
@@ -1086,7 +1096,8 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   run.files.push({ file: ".", schema: null, kinds: ["source-tree"] });
   // Each exclude entry the folder holds, found by reading each folder's names and matching each segment under the fold,
   // an intermediate folder never a symbolic link, is listed, so an entry that names nothing is said (unused-exclude, accepted); nothing is read and no name is printed.
-  const listed = (((manifest as JsonObject).exclude as string[] | undefined) ?? []).filter((entry) => SOURCE_PATH.test(entry) && presentWithoutLink(folder, entry));
+  const foldedGitlinks = new Set([...gitlinks].map((name) => foldPath(name.normalize("NFC"))));
+  const listed = (((manifest as JsonObject).exclude as string[] | undefined) ?? []).filter((entry) => SOURCE_PATH.test(entry) && (foldedGitlinks.has(foldPath(entry.normalize("NFC"))) || presentWithoutLink(folder, entry)));
   const findings = evaluateSemanticRules("source-tree", { manifest, files, listed });
   const inPath = new Set(findings.flatMap((finding) => {
     const at = /^\/files\/(\d+)\/path$/.exec(finding.instancePath);
@@ -1109,20 +1120,21 @@ function checkSourceFolderAs(run: Run, folder: string): void {
 
 /** Whether a relative path (a folder with a trailing `/`) is in the folder, each segment by lstat, never through a link. */
 function presentWithoutLink(folder: string, relative: string, depth = 0): boolean {
-  // An entry that ends in `/` names a folder: its last segment must be a folder or a link it keeps out, never a file.
-  // An entry without `/` names a file: its last segment must be a file, a link, or a folder that is a nested repository
-  // (one holding its own `.git`, as a checked-out submodule does), never a plain folder, whose files it leaves in.
+  // An entry that ends in `/` names a folder: its last segment must be a folder, never a file or a symbolic link (such an
+  // entry excludes only what is under a folder, so a link there stays a source file; written without `/` it leaves the
+  // link out).
+  // An entry without `/` names a file and everything beneath that name: its last segment may be a file, a link or a
+  // folder (whose files it leaves out too).
   // Each segment is matched under the fold against the names its folder holds (so `src/secrets./`, a zero-width
   // character or a case difference on a case-sensitive volume still finds what the entry leaves out); an intermediate
-  // folder must be a real folder, never a link, while the last segment may be anything, a link included, which the
-  // entry keeps out (it is never followed).
+  // folder must be a real folder, never a link; a link is never followed.
   const segments = relative.split("/").filter((segment) => segment !== "");
   const wanted = foldSegment(segments[depth] as string);
   let entries: Dirent[];
   try { entries = readdirSync(folder, { withFileTypes: true }); } catch { return false; }
   const last = depth === segments.length - 1;
   const folderEntry = relative.endsWith("/");
-  const lastCounts = (entry: Dirent): boolean => entry.isSymbolicLink() || (folderEntry ? entry.isDirectory() : !entry.isDirectory() || existsSync(path.join(folder, entry.name, ".git")));
+  const lastCounts = (entry: Dirent): boolean => !folderEntry || entry.isDirectory();
   return entries.some((entry) => foldSegment(entry.name) === wanted && (last ? lastCounts(entry) : entry.isDirectory() && presentWithoutLink(path.join(folder, entry.name), relative, depth + 1)));
 }
 

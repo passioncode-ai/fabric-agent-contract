@@ -2023,9 +2023,10 @@ describe("an agent's source (DEC-0149)", () => {
     expect(folded(inGit.out)).toEqual([["files[3]", "/files/3/path"], ["files[4]", "/files/4/path"]]);
   });
 
-  it.skipIf(process.platform === "win32")("calls unused an entry without / over a plain folder, never one over a nested repository, in Git mode and in a walk", () => {
+  it.skipIf(process.platform === "win32")("reads an entry without / over a folder as leaving its files out, never unused, in Git mode and in a walk", () => {
+    const home = ["", "home", "jdoe", "notes"].join("/");
     for (const git of [true, false]) {
-      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/gen", "src/a.ts", "src/sub"] }), LICENSE: "x", "src/a.ts": "x", "src/gen/g.ts": "x", "src/sub/s.ts": "x" });
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/gen", "src/b.ts", "src/sub"] }), LICENSE: "x", "src/a.ts": "x", "src/gen/g.ts": `const notes = "${home}";`, "src/sub/s.ts": "x" });
       const sub = path.join(dir, "src", "sub");
       expect(gitIn(sub, "init", "-q").status).toBe(0);
       expect(gitIn(sub, "add", "-A").status).toBe(0);
@@ -2037,8 +2038,12 @@ describe("an agent's source (DEC-0149)", () => {
         expect(gitIn(dir, "commit", "-qm", "x").status).toBe(0);
       }
       const result = run(dir, "--kind", "source-tree");
+      // src/gen/g.ts is never read (no home-path), and only src/b.ts, which is not there, is unused.
       expect(result.code, String(git)).toBe(0);
-      expect(lines(result.out).filter((line) => line.includes("unused-exclude")).map((line) => line.split("  ")[1]), String(git)).toEqual(["/manifest/exclude/0"]);
+      expect(result.out, String(git)).not.toContain("home-path");
+      const unused = lines(result.out).filter((line) => line.includes("unused-exclude"));
+      expect(unused.map((line) => line.split("  ")[1]), String(git)).toEqual(["/manifest/exclude/1"]);
+      expect(unused[0], String(git)).toContain("an entry without / names a file, a link or a folder and everything beneath that name");
     }
   });
 
@@ -2052,7 +2057,7 @@ describe("an agent's source (DEC-0149)", () => {
   it.skipIf(process.platform === "win32")("never calls unused an entry that keeps a link out or leaves files out only under the fold, in Git mode and in a walk", () => {
     const outside = folder({ "x.ts": "x" });
     const files = {
-      "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/link/", "src/secrets./", "src/pri\u200cvate/", "src/private/", "src/gone/"] }),
+      "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/link", "src/secrets./", "src/pri\u200cvate/", "src/private/", "src/gone/"] }),
       LICENSE: "x", "src/a.ts": "x", "src/secrets/a.md": "x", "src/Private/b.md": "x"
     };
     for (const git of [true, false]) {
@@ -2071,6 +2076,43 @@ describe("an agent's source (DEC-0149)", () => {
         expect(lines(result.out).filter((line) => line.includes("excluded-by-fold")).length).toBe(2);
       }
     }
+  });
+
+  it("never calls unused an entry naming a gitlink the index records, with an empty folder or none", () => {
+    for (const withFolder of [true, false]) for (const excluded of [true, false]) {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "vendor/", "LICENSE"], ...(excluded ? { exclude: ["vendor/lib"] } : {}) }), LICENSE: "x", "src/a.ts": "x", "vendor/keep.ts": "x" });
+      if (withFolder) mkdirSync(path.join(dir, "vendor", "lib"), { recursive: true });
+      expect(gitIn(dir, "init", "-q").status).toBe(0);
+      expect(gitIn(dir, "add", "-A").status).toBe(0);
+      expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${"1".repeat(40)},vendor/lib`).status).toBe(0);
+      const result = run(dir, "--kind", "source-tree");
+      const label = `${String(withFolder)} ${String(excluded)}`;
+      expect(result.code, label).toBe(excluded ? 0 : 1);
+      expect(result.out, label).not.toContain("unused-exclude");
+      if (excluded) expect(result.out, label).not.toContain("nested-repository");
+      else expect(result.out, label).toContain("nested-repository");
+    }
+  });
+
+  it("gives a file the same files[<index>] in Git mode and in a walk when a name before it is stored in NFD", () => {
+    const home = ["", "home", "jdoe", "notes"].join("/");
+    const files = { "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/e\u0301.ts": "x", "src/f.ts": `const notes = "${home}";` };
+    const committed = folder(files);
+    expect(gitIn(committed, "init", "-q").status).toBe(0);
+    expect(gitIn(committed, "add", "-A").status).toBe(0);
+    const homeLine = (out: string) => lines(out).filter((line) => line.includes("home-path")).map((line) => line.split("  ")[1]);
+    const inGit = homeLine(run(committed, "--kind", "source-tree").out);
+    expect(inGit).toHaveLength(1);
+    expect(homeLine(run(folder(files), "--kind", "source-tree").out)).toEqual(inGit);
+  });
+
+  it.skipIf(process.platform === "win32")("calls unused a folder entry over a symbolic link, which it leaves in, and says to write it without /", () => {
+    const outside = folder({ "x.ts": "x" });
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/link/"] }), LICENSE: "x", "src/a.ts": "x" });
+    symlinkSync(outside, path.join(dir, "src", "link"));
+    const said = lines(run(dir, "--kind", "source-tree").out).filter((line) => line.includes("unused-exclude"));
+    expect(said.map((line) => line.split("  ")[1])).toEqual(["/manifest/exclude/0"]);
+    expect(said[0]).toContain("write it without / to leave the link out");
   });
 
   it.skipIf(process.platform === "win32")("says an exclude entry that names nothing in the folder, found by lstat and never through a link (accepted)", () => {

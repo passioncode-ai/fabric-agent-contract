@@ -56,13 +56,17 @@ const nfc = (path: string): string => path.normalize("NFC");
  * caseless matching. The code points HFS+ ignores removed, NFD (so the case mappings meet a letter apart from its
  * marks: `ᾼ͂` and `ᾷ` meet, which APFS joins), then lower case, upper case and lower case again (so `ß`, `ẞ` and `ss`,
  * `ſ` and `s`, the Kelvin sign and `k`, the Angstrom sign and `å`, the final sigma and `σ` meet: lower case first brings
- * the capital sharp s to `ß`, which upper case then spells `SS`), NFC, then any trailing run of dots and spaces dropped
- * (NTFS). The case mappings are the runtime's (Node's ICU; Unicode 17.0 when this was written, `FOLD_UNICODE`); the
+ * the capital sharp s to `ß`, which upper case then spells `SS`), NFC, then Georgian Nuskhuri U+2D00 to U+2D25 mapped
+ * onto Mkhedruli U+10D0 to U+10F5 (HFS+ joins Asomtavruli U+10A0 to U+10C5, which lower case makes Nuskhuri, with
+ * Mkhedruli), then any trailing run of dots and spaces dropped (NTFS). The case mappings are the runtime's (Node's ICU; Unicode 17.0 when this was written, `FOLD_UNICODE`); the
  * fold is idempotent and keeps every pair of the case mappings together, and it folds more than APFS does in places
  * (`ı` and `i`), which refuses more: the safe side.
  */
 export const foldSegment = (segment: string): string =>
-  segment.replace(HFS_IGNORABLE, "").normalize("NFD").toLowerCase().toUpperCase().toLowerCase().normalize("NFC").replace(/[ .]+$/u, "");
+  segment.replace(HFS_IGNORABLE, "").normalize("NFD").toLowerCase().toUpperCase().toLowerCase().normalize("NFC")
+    .replace(NUSKHURI, (letter) => String.fromCharCode(letter.charCodeAt(0) - 0x2d00 + 0x10d0)).replace(/[ .]+$/u, "");
+/** Georgian Nuskhuri U+2D00 to U+2D25, which the fold maps onto Mkhedruli U+10D0 to U+10F5 as HFS+ joins them. */
+const NUSKHURI = /[\u2d00-\u2d25]/gu;
 /** The Unicode version whose case mappings the fold and the vectors were written with (Node's ICU). */
 export const FOLD_UNICODE = "17.0";
 /** A path folded segment by segment (`foldSegment`); a folder's trailing `/` is kept. */
@@ -106,8 +110,15 @@ const pathList = (value: unknown, withReaches = false): PathList => {
 const coversNfc = (list: PathList, path: string): boolean =>
   list.files.has(path) || folderPrefixes(path).some((folder) => list.folders.has(folder));
 const listCovers = (list: PathList, written: string): boolean => written.length <= 512 && coversNfc(list, nfc(written));
-/** Whether a folded list (`foldedList`) names a path: the path folded the same way, then looked up. */
-const foldedCovers = (list: PathList, written: string): boolean => written.length <= 512 && coversNfc(list, foldPath(nfc(written)));
+/**
+ * Whether an exclude list names a path: the file itself, a folder it lies in, or a file entry it lies beneath (an
+ * exclude entry without `/` also leaves out everything under that name: a nested repository's files, or anything
+ * placed there later).
+ */
+const excludeCoversNfc = (list: PathList, path: string): boolean =>
+  list.files.has(path) || folderPrefixes(path).some((folder) => list.folders.has(folder) || list.files.has(folder.slice(0, -1)));
+/** Whether a folded exclude list (`foldedList`) names a path: the path folded the same way, then looked up. */
+const foldedCovers = (list: PathList, written: string): boolean => written.length <= 512 && excludeCoversNfc(list, foldPath(nfc(written)));
 
 /**
  * The include paths as a walk asks about them, indexed once: whether one names a path, and whether one reaches into a
@@ -137,7 +148,8 @@ export function sourcePathTest(manifest: unknown): (path: unknown) => boolean {
   // what an exclude entry names under any spelling stays out (it fails closed); `include` is read as written.
   const exclude = foldedList(source.exclude);
   return (path) => {
-    if (typeof path !== "string" || !SOURCE_FILE_PATH.test(path) || inGit(path)) return false;
+    // A path is in the grammar as written and in NFC: one NFC lengthens past 256 code points is no source.
+    if (typeof path !== "string" || !SOURCE_FILE_PATH.test(path) || !SOURCE_FILE_PATH.test(nfc(path)) || inGit(path)) return false;
     if (nfc(path) === SOURCE_FILE) return true;
     return listCovers(include, path) && !foldedCovers(exclude, path);
   };
@@ -161,9 +173,10 @@ export function foldOnlyExcludeTest(manifest: unknown): (path: unknown) => numbe
   }
   return (path) => {
     if (typeof path !== "string" || !SOURCE_FILE_PATH.test(path) || inGit(path) || nfc(path) === SOURCE_FILE) return -1;
-    if (!listCovers(include, path) || listCovers(literal, path)) return -1;
+    if (!listCovers(include, path) || (path.length <= 512 && excludeCoversNfc(literal, nfc(path)))) return -1;
     const folded = foldPath(nfc(path));
-    const keys = [folded, ...folderPrefixes(folded)].filter((key) => first.has(key));
+    // A folder entry is keyed with its `/`, a file entry without: a path beneath a file entry is left out too.
+    const keys = [folded, ...folderPrefixes(folded).flatMap((folder) => [folder, folder.slice(0, -1)])].filter((key) => first.has(key));
     return keys.length === 0 ? -1 : Math.min(...keys.map((key) => first.get(key) as number));
   };
 }
@@ -180,7 +193,7 @@ export function excludedFolderTest(manifest: unknown): (folder: string) => boole
   const under = new Set(strings(source.include).map(([path]) => nfc(path)).filter((path) => SOURCE_PATH.test(path)).flatMap((path) => folderPrefixes(path)));
   return (written) => {
     const folder = nfc(written);
-    return folderPrefixes(`${foldPath(folder)}/`).some((prefix) => exclude.folders.has(prefix)) && !under.has(`${folder}/`);
+    return folderPrefixes(`${foldPath(folder)}/`).some((prefix) => exclude.folders.has(prefix) || exclude.files.has(prefix.slice(0, -1))) && !under.has(`${folder}/`);
   };
 }
 
@@ -193,10 +206,11 @@ export function sourceFolderTest(manifest: unknown): (folder: string) => boolean
   const include = pathList(source.include);
   const exclude = foldedList(source.exclude);
   const held = (list: PathList, folder: string) => folderPrefixes(`${folder}/`).some((prefix) => list.folders.has(prefix));
+  const heldBeneath = (folder: string) => folderPrefixes(`${folder}/`).some((prefix) => exclude.folders.has(prefix) || exclude.files.has(prefix.slice(0, -1)));
   return (written) => {
     if (written === "" || written.length > 512) return false;
     const folder = nfc(written);
-    return !inGit(`${folder}/x`) && held(include, folder) && !held(exclude, foldPath(folder));
+    return !inGit(`${folder}/x`) && held(include, folder) && !heldBeneath(foldPath(folder));
   };
 }
 
@@ -265,7 +279,7 @@ export function nestedTest(manifest: unknown): (written: unknown) => boolean {
     // An include path names it, lies under it (its folder is one of that entry's prefixes) or covers it.
     const reached = include.files.has(path) || include.reaches.has(folder) || folderPrefixes(folder).some((prefix) => include.folders.has(prefix));
     const folded = foldPath(path);
-    return reached && !exclude.files.has(folded) && !folderPrefixes(`${folded}/`).some((prefix) => exclude.folders.has(prefix));
+    return reached && !exclude.files.has(folded) && !folderPrefixes(`${folded}/`).some((prefix) => exclude.folders.has(prefix) || exclude.files.has(prefix.slice(0, -1)));
   };
 }
 
@@ -1045,7 +1059,8 @@ export function sourceTreeProblems(value: unknown): SourceProblem[] {
     const naming = new Set(foldedOut.map((problem) => problem.exclude));
     strings(manifest.exclude).forEach(([written, at]) => {
       const entry = foldPath(nfc(written));
-      if (!naming.has(at) && !(entry.endsWith("/") ? listedFolders.has(entry) : listedFiles.has(entry))) problems.push({ kind: "unused-exclude", exclude: at });
+      // An entry without `/` names a file, and a folder too, since it leaves out everything beneath its name.
+      if (!naming.has(at) && !(entry.endsWith("/") ? listedFolders.has(entry) : listedFiles.has(entry) || listedFolders.has(`${entry}/`))) problems.push({ kind: "unused-exclude", exclude: at });
     });
   }
   // A licence that is a symbolic link is no licence: the export carries the link, not the terms.
@@ -1066,7 +1081,7 @@ const MESSAGES: Readonly<Record<SourceFindingKind, string>> = {
   email: "an e-mail address not listed in publicAddresses: a person's address belongs to the instance",
   "link-outside": "a link to a path outside the source: a source export does not carry its target",
   "no-license": "no licence file at the source's root (LICENSE, LICENCE or COPYING): a source export carries the licence files the source has, and the contract chooses none",
-  "unused-exclude": "an exclude path names no file or folder the tree holds, in any letter case: check its spelling, since it leaves nothing out",
+  "unused-exclude": "an exclude path names nothing the tree holds, in any letter case (an entry ending in / names a folder, and one over a symbolic link leaves the link in: write it without / to leave the link out; an entry without / names a file, a link or a folder and everything beneath that name): check its spelling, since it leaves nothing out",
   "excluded-by-fold": "an exclude path names this file only in another spelling (letter case, a Unicode form, a trailing dot or space): it is left out and never read, as a case-insensitive file system would leave it out; write the exclude path as the file is spelt"
 };
 
@@ -1174,6 +1189,7 @@ function pathFindings(value: JsonObject): Finding[] {
       if (seen.has(path)) flag(`/${member}/${index}`, `${member}[${index}] is listed twice`);
       seen.add(path);
       if (inGit(path)) flag(`/${member}/${index}`, `${member}[${index}] lies in .git, which is never source`);
+      if (SOURCE_PATH.test(path) && !SOURCE_PATH.test(nfc(path))) flag(`/${member}/${index}`, `${member}[${index}] is an entry NFC lengthens past 256 code points, so it names, reaches and removes nothing`);
     }
   }
   // Each list is indexed once: a path is looked up by itself and by each folder it lies in. `include` and `exclude` are
@@ -1186,10 +1202,12 @@ function pathFindings(value: JsonObject): Finding[] {
   const prefixesOf = (written: string): string[] => { const path = nfc(written); return SOURCE_PATH.test(path) ? folderPrefixes(foldPath(path)) : []; };
   for (const [written, index] of include) {
     const path = foldPath(nfc(written));
-    const dead = prefixesOf(written).some((folder) => folder !== path && excludes.folders.has(folder));
+    const dead = prefixesOf(written).some((folder) => folder !== path && (excludes.folders.has(folder) || excludes.files.has(folder.slice(0, -1))));
     if (dead) flag(`/include/${index}`, `include[${index}] lies inside an exclude folder, so it names nothing`);
   }
   for (const [path, index] of strings(value.exclude)) {
+    // An entry NFC lengthens past the grammar is said once above, not again with another reason.
+    if (SOURCE_PATH.test(path) && !SOURCE_PATH.test(nfc(path))) continue;
     const folded = foldPath(nfc(path));
     if (foldedIncludes.files.has(folded) || foldedIncludes.folders.has(folded)) flag(`/exclude/${index}`, `exclude[${index}] is an include path: it would remove it whole, so leave both out`);
     else if (!prefixesOf(path).some((folder) => foldedIncludes.folders.has(folder))) flag(`/exclude/${index}`, `exclude[${index}] lies inside no include folder, so it removes nothing`);

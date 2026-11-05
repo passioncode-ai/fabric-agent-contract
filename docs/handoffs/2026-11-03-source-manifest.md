@@ -24,7 +24,7 @@ source, what never travels with it, the check before a source export, and how a 
   `source-tree`, `source-package`, `fabric-source/1` in the protocol register; `pnpm --silent validate <dir> --kind
   source-tree` (Git mode with Git's location variables removed and no read through a link, a walk otherwise with a note
   saying why, folder-relative output that never repeats a found value) and the pair in `pnpm validate <dir>`;
-  `fixtures/vectors/source-tree.json` (76 tree cases, 16 patch cases and a `constants` block written from the module's
+  `fixtures/vectors/source-tree.json` (76 tree cases, 19 patch cases and a `constants` block written from the module's
   exports) from `tools/vectors/source-tree.ts`;
   2 positive and 19 negative schema fixtures, 27 semantic fixtures.
 - [source](../specification/source.md) (new), the register (`FAC-SEM-156` to `FAC-SEM-160`; next free `FAC-SEM-162`;
@@ -276,9 +276,8 @@ source, what never travels with it, the check before a source export, and how a 
   the history gate was named after tools that cannot run it, `conformance.md` still described the fold as Unicode's,
   and rules section 9 contradicted item 9 on what is already public) answered as the coordinator decided: a hand-over
   by push or by file carries a source export, never a home commit, and any other commit pushed outside the home or any
-  act on the whole repository first passes the history gate, now defined in
-  [source](../specification/source.md#the-history-gate) and owed by CT-207 and CT-208 (until then such an act on a
-  personal agent is not done); the fold described as coded, in the code's order, with a `FOLD_INPUTS` entry and a patch
+  act on the whole repository first passes the history gate, then defined in source.md and owed by CT-207 and CT-208
+  (withdrawn in round 42: such an act on a personal agent is not done); the fold described as coded, in the code's order, with a `FOLD_INPUTS` entry and a patch
   case where an ignorable code point sits between a letter and its mark; the knowledge base's item 5, item 9,
   principles section 7 and rules section 9 aligned; the decisions below; the seam's notes (a comment in
   `validate-cli.ts`, the vectors' comment moved); and from round 41's seam reading: an exclude entry without `/` counts
@@ -287,7 +286,26 @@ source, what never travels with it, the check before a source export, and how a 
   installation-valued row confirmed rather than filed here, the backlog tail at CT-221, the glossary's already-public
   condition and "the owner's own act" everywhere, DEC-0153's `src/validate-cli.ts` hint in the sibling list, and
   landing step 6 pairing PR #628 only with a contract head of the same round; vectors 76 tree and 16 patch cases, 26
-  `FOLD_PAIRS`; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  `FOLD_PAIRS`; round 42 (not clean: the history gate's scope and the knowledge base's item 5; from round 41's unit
+  reading, HFS+ joining Georgian Asomtavruli with Mkhedruli, which the fold split, and a folder entry over a link
+  counted as present) answered as the coordinator decided: the history gate is withdrawn, a hand-over by push or by file
+  carries a source export, never another commit, and an act on the whole repository of a personal agent is not done
+  (an organization's acts on its own are its own, except making a private agent's source public); the already-public
+  carve-out reaches any public place and access to a public home is none; a source file served verbatim or an
+  unminified bundle is the source tree served; the permission reads "rewriting" only; item 5 no longer lists a source
+  hand-over among the human gates; the fold maps Nuskhuri onto Mkhedruli after NFC (a test over U+10A0 to U+10C5,
+  `FOLD_PAIRS` and two patch vectors); a folder entry over a link is `unused-exclude`, its message saying to write it
+  without `/` (tested); and from round 42's unit and seam readings: an exclude entry without `/` leaves out everything
+  beneath that name (export and patch, a test and a vector), a gitlink the index records counts as present for
+  `unused-exclude` with or without its folder (Git mode, tested both ways, and `nested-repository` without the entry),
+  candidates ordered by their paths' NFC forms so a name stored in NFD keeps one `files[<index>]` in both modes
+  (tested), the grammar read on the NFC form (`FAC-SEM-157`'s own message, such a path no source, tested), the
+  `unused-exclude` message worded for an entry without `/` over a plain folder (tested), and DEC-0149 item 13 naming
+  the ignorable code points removed first; `presentWithoutLink` still reads per entry (round 42's optional index not
+  taken); with everything beneath an entry without `/` left out, such an entry over a plain folder is used (its
+  folder's files are left out and never read, tested in Git mode and in a walk), which replaces round 41's seam
+  reading and the round-42 seam wording of its message (the message now says an entry without `/` names a file, a link
+  or a folder and everything beneath that name); vectors 76 tree and 19 patch cases, 30 `FOLD_PAIRS`; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -376,7 +394,20 @@ source, what never travels with it, the check before a source export, and how a 
   - `.git` in every form a case-insensitive or Windows file system resolves to it is never source, and a patch path an
     `exclude` entry names under ASCII case folding is refused, since on such a file system the two spellings are one
     file and the rule is otherwise bypassed.
-- Round 41, decided by the coordinator under the operator's recorded rules:
+- Round 42, decided by the coordinator under the operator's recorded rules:
+  - the history gate is withdrawn: a host keeps and serves more than any local clone sees (`refs/pull/*`, dangling and
+    force-pushed commits by id, fork networks), so no local gate can stand behind "never moves in its history"; a
+    hand-over by push or by file carries a source export, never another commit, and an act on the whole repository of
+    a personal agent is not done; a gate that would let one carry the history is not decided here;
+  - an organization's acts on its own agent's whole repository are its own, under its release rules, except that making
+    a private organization agent's source public takes the word;
+  - what is already public may go to any public place, another owner's included, when an earlier act on the word or the
+    owner's own act made it public; access to a public home is none, to a private one it is a hand-over;
+  - a source file served verbatim, or a bundle built without minification, is the source tree served;
+  - the 2026-10-12 permission is read as rewriting mechanics file by file, not copying them;
+  - the fold maps Georgian Nuskhuri onto Mkhedruli after NFC, as HFS+ joins Asomtavruli and Mkhedruli; a folder entry
+    over a link is unused, since it excludes only what is under a folder.
+- Round 41, decided by the coordinator under the operator's recorded rules (its history gate withdrawn in round 42):
   - a hand-over by push or by file carries a source export, never a home commit, and any other commit pushed outside
     the home runs the history gate over its ancestry, so private data never moves in the tree or the history by any
     route;
@@ -444,6 +475,20 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 42's fixes (with round 41's unit items and round 42's unit and seam items) were checked on the working tree over head `d4cc1e16` (this note's commit
+holds the same tree): `pnpm typecheck` (exit 0); `pnpm vitest run --testTimeout=60000 --coverage
+--coverage.include=src/source-rules.ts --coverage.include=src/validate-cli.ts` over `source-rules`, `validate-cli`,
+`validate-cli-faults`, `rule-tolerance` and `positive-sweep` (exit 0: 3177 passed, 2 skipped, with round 42's unit and
+seam items; `src/source-rules.ts` at
+100 % of its branches; `src/validate-cli.ts` at 99.47 % over these files against its 99.4 floor); `secret-shape`,
+`consistency` and `semantic-kinds` (exit 0, 34 passed); `pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match; 76 tree and 19 patch cases, 30
+`FOLD_PAIRS`); `pnpm run docs:check` (exit 0, 0 errors); `python3 docs/ux/lint.py` (exit 0); `ORG_INDEX=... pnpm run
+privacy:check` (exit 0, 0 findings); no U+2014 in the added lines; a grep for the withdrawn gate's anchor over `docs`, `CONTEXT.md`
+and `src` prints nothing. PR #628 at `d3b279f9` (the knowledge base's main merged in first, cleanly): `source hand-over` in 4, 3 and 3 lines of
+agents-first, principles and rules, `own estate` once on each, item 9 once and item 8 once; the knowledge base's `npm
+test` (exit 0, 172 passed) and `npm run verify:content` (exit 0, backlog 0 errors). The branch gate is owed: the
+15-minute load stayed above 45 (62 to 76 this round).
 
 Round 41's seam items were checked on the working tree over head `dfeccbd4` (this note's commit holds the same tree):
 `pnpm typecheck` (exit 0); `pnpm vitest run --testTimeout=60000 --coverage --coverage.include=src/source-rules.ts
@@ -610,7 +655,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 41 into `c6f64c50`, which GitHub read as mergeable,
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 42 before `d3b279f9`, which GitHub read as mergeable,
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). Refresh PR #235 (DEC-0148) against `main`: it is CONFLICTING on the backlog tail; keep both sides
    in id order. Then merge the current `origin/main` (with #236, CT-215 and CT-216; re-measure its head at landing) into the fresh branch
@@ -635,7 +680,7 @@ remaining steps, in order:
    behind, merge main into it, keeping main's item 8 and the PR's item 9. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `c6f64c50`, which carries the knowledge base's main, they print 4, 3 and 3
+   `knowledge/rules.md`; at PR #628's head `d3b279f9`, which carries the knowledge base's main, they print 4, 3 and 3
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in

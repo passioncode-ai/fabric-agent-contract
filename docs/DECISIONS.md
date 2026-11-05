@@ -9030,13 +9030,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 41 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 42 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
   short names with an extension, unused-exclude, opt-in scope, owner's manifest patch; round 40 not clean: canonical
-  caseless fold; round 41 not clean: push carries history, history gate undefined, conformance fold, rules section 9),
-  cited by round number because their heads were on the review branch, which is not
+  caseless fold; round 41 not clean: push carries history, history gate undefined, conformance fold, rules section 9;
+  round 42 not clean: history gate scope, KB item 5, and from its unit reading the Georgian join and a folder entry over
+  a link), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9221,24 +9222,33 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       own act, made public; a personal agent's package or release on a public registry is a hand-over unless its home is
       already public, the files the pack step derives from the public source (`fabric.package.json`, signatures,
       checksums) counting as public and nothing else; an act on the whole repository (a transfer, a visibility change,
-      access given outside the owner) hands over the history too, which no tree check reads, so the history privacy
-      gate runs before it (defined in round 41, below); and an organization's release of its
+      access given outside the owner) hands over the history too, which no tree check reads (round 42 settles it
+      below); and an organization's release of its
       agent to a public registry is its own act only when the agent's home is already public, a private organization
       agent's first public release taking the word like a visibility change. Decided by the coordinator in round 41 on
       the same ground: a hand-over by push or by file carries a source export (one commit, no history, the tree check
-      passed), never a home commit, and pushing any other commit outside the home is an act on the history that runs the
-      history gate over its ancestry first, so that private data never moves in the tree or in the history by any route;
-      the history gate is defined in [source](specification/source.md#the-history-gate) as the tree check, with the
-      operator's list, over every path and blob reachable from every ref, any `FAC-SEM-158` kind blocking and only counts
-      and indexes reported, owed by CT-207 and CT-208, and until it exists a whole-repository act on a personal agent is
-      not done and its source leaves only as a source export (the engine's release check and the privacy check named
-      before are not that gate: one fails a clean agent repository on its own allowlist, the other has no history mode);
+      passed), never a home commit (round 42 restates it);
       a processor is no recipient while what it holds stays readable by no one but the owner and the processors acting
       for it; what takes the word when a source becomes public is a personal agent's source made public for the first
       time and an organization agent's private source made public, while an organization creating its own agent's home
       public is its own act (the rule guards the operator's personal agents and new readers of private source); a bundle
       a public page serves is the agent's output, and serving the source tree, source maps or unbuilt files publicly is
-      a hand-over; and the prompts or resources a running agent serves to a team are its output. Handing it to
+      a hand-over; and the prompts or resources a running agent serves to a team are its output. Decided by the
+      coordinator in round 42, simplifying the rule instead of defining a gate: a hand-over by push or by file carries a
+      source export (one commit, no history, the tree check passed), never another commit; an act on the whole
+      repository of a personal agent (a transfer, a visibility change, access given outside the owner) is not done, and
+      the source leaves only as a source export; a gate that would let such an act carry the history is not decided
+      here. The reason: a host keeps and serves more than any local clone sees (`refs/pull/*`, dangling and
+      force-pushed commits by id, fork networks), so no local gate can stand behind "never moves in its history", and
+      the history gate round 41 defined is withdrawn. An organization's acts on its own agent's whole repository are its
+      own, under its own release rules (the knowledge base's rules section 9), except that making a private
+      organization agent's source public takes the word. A push or release of what is already public, from a public
+      home to any other public place (another owner's included, such as a marketplace repository or a
+      fork-and-pull-request flow), reaches no reader who could not read it already and is no hand-over when an earlier
+      act on the word or the owner's own act made it public, and giving access to a public home is none, while on a
+      private home it is one. A prompt or resource that is a source file served verbatim, or a bundle built without
+      minification, is the source tree served. The 2026-10-12 permission is read as rewriting mechanics file by file,
+      without "or copying", the adapted-file test standing. Handing it to
       anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       source commit and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9267,7 +9277,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       coordinator in round 38: one patch could drop an `exclude` and a later one land in the folder it left out).
       Restated in round 39, decided by the coordinator after the unit reading wrote `app/PAẞWORDS/token.txt` over an
       excluded `app/passwords/token.txt` with `git apply` on APFS and found short names with an extension passing: the
-      fold (as restated in round 40) is canonical caseless matching, NFD, then lower, upper and lower case, then NFC (lower case first brings the capital sharp s to `ß`, and
+      fold (as restated in round 40) is canonical caseless matching: the HFS+ ignorable code points removed first, then
+      NFD, lower, upper and lower case, then NFC (lower case first brings the capital sharp s to `ß`, and
       the readers' sweep found no class that disagrees with Unicode's caseless matching), with the HFS+ ignorable code
       points removed and trailing dots and spaces dropped, following the runtime's case mappings (Node's ICU, Unicode
       17.0 when the vectors were written, the case pairs carried in the vectors; it also joins the dotless `ı` with `i`
@@ -9280,7 +9291,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       `app/ᾼ͂/token.txt` passed an excluded `app/ᾷ/` and the export read `app/ᾼ͂/notes.md`: case mappings applied to NFC
       text split a letter that carries U+0345 and another mark, so the fold is canonical caseless matching, NFD before
       the case mappings (the reader measured no split among 55,020 APFS collision pairs, and idempotence on every code
-      point).
+      point). Restated again (decided by the coordinator after the round-41 unit reading reproduced on an HFS+ image a
+      patch to `app/<Asomtavruli>/token.txt` landing inside an excluded `app/<Mkhedruli>/`): after NFC and before the
+      trailing dots and spaces are dropped, Georgian Nuskhuri U+2D00 to U+2D25 is mapped onto Mkhedruli U+10D0 to
+      U+10F5, since HFS+ joins Asomtavruli U+10A0 to U+10C5 with Mkhedruli (the reader found no split on HFS+ or APFS,
+      case-insensitive or case-sensitive, and idempotence on every code point). A folder entry over a symbolic link is
+      `unused-exclude`: it excludes only what is under a folder, so the link stays a source file. Decided by the coordinator after
+      the round-42 unit reading: an exclude entry without `/` also leaves out everything beneath that name (a nested
+      repository's files, or anything placed there later), at export and in a patch, since `git apply` writes beneath an
+      uninitialised submodule's name; a gitlink the index records counts as present for `unused-exclude`, with or
+      without its folder; candidates are ordered by the NFC form of their paths in both modes, so `files[<index>]` agrees
+      for a name stored in NFD; and the path grammar is read on the NFC form too, an entry NFC lengthens past 256 code
+      points being `FAC-SEM-157` with its own message and a path so lengthened no source. With every name beneath an entry
+      without `/` left out, such an entry over a plain folder leaves that folder's files out and is used, which replaces
+      the round-41 reading that counted it unused.
   14. **Starting without the instance (§5.8):** an agent started with an empty data folder and no slot filled starts;
       a service answers `status: degraded` with one `degraded[]` entry per missing required slot, its `source` the
       slot's name, each `setup: true` (DEC-0044's setup state), an `endpoint` included; a `store` slot is never a setup
@@ -9348,12 +9372,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 41 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 42 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
   and from its seam reading `files[<index>]` differing between Git mode and a walk, `unused-exclude` on a
   case-sensitive volume and the manifest's own rules reading `exclude` literally; round 40 not clean: canonical caseless
-  fold; round 41 not clean: push carries history, history gate undefined, conformance fold, rules section 9), cited by
-  round number (their heads were on the review branch, not kept at landing),
+  fold; round 41 not clean: push carries history, history gate undefined, conformance fold, rules section 9; round 42
+  not clean: history gate scope, KB item 5, and from its unit reading the Georgian join and a folder entry over a
+  link), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.
