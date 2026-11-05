@@ -1874,13 +1874,32 @@ describe("an agent's source (DEC-0149)", () => {
       const out = run(dir, "--kind", "source-package").out;
       expect(out).toContain("cannot read fabric.package.json: EACCES");
       expect(out).toContain("the fabric.package.json beside fabric.source.json was not read as a package");
-      // The usage line names the file by its path in the folder; a folder run with another source kind still echoes
-      // the folder as given in its file column, as the ordinary validator does.
+      // The usage line names the file by its path in the folder; a folder run with another source kind prints the
+      // folder resolved to an absolute path in its file column, as the ordinary validator does.
       const usage = out.split("\n").filter((line) => line.startsWith("usage error:"));
       expect(usage).toEqual(["usage error: cannot read fabric.package.json: EACCES"]);
       expect(out).not.toContain("<a value the tree check reads");
     } finally {
       chmodSync(path.join(dir, "fabric.package.json"), 0o644);
+    }
+  });
+
+  it("a folder named relatively under --kind source-package is printed resolved to an absolute path in its problem lines", () => {
+    const parent = folder({ "agent/fabric.source.json": sourceManifest({ include: ["LICENSE"] }), "agent/LICENSE": "x", "agent/fabric.package.json": json("positive/fabric-package-agent.json") });
+    const before = { cwd: process.env.INIT_CWD, event: process.env.npm_lifecycle_event };
+    process.env.INIT_CWD = parent;
+    process.env.npm_lifecycle_event = "validate";
+    try {
+      const result = run("./agent", "--kind", "source-package");
+      expect(result.code).toBe(1);
+      const problems = result.out.split("\n").filter((line) => line.includes("FAC-SEM-160"));
+      expect(problems.length).toBeGreaterThan(0);
+      for (const line of problems) expect(line.startsWith(path.join(parent, "agent", "fabric.source.json") + "  ")).toBe(true);
+    } finally {
+      for (const [name, value] of [["INIT_CWD", before.cwd], ["npm_lifecycle_event", before.event]] as const) {
+        if (value === undefined) delete process.env[name];
+        else process.env[name] = value;
+      }
     }
   });
 
@@ -1939,6 +1958,7 @@ describe("an agent's source (DEC-0149)", () => {
     expect(notDir.code).toBe(2);
     expect(notDir.out).toContain("cannot read .: ENOTDIR");
     expect(notDir.out).not.toContain("holds none");
+    expect(notDir.out).not.toContain(dir);
     // A link to a real folder with no manifest holds none, named as a folder or by the manifest's name in it.
     mkdirSync(path.join(dir, "empty"));
     symlinkSync("empty", path.join(dir, "link"));
