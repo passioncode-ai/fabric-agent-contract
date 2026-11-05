@@ -760,6 +760,12 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
+At landing (after merging main at `08e24572` and the post-clean commit), the full gate under the session's heavy lock,
+taken at a 15-minute load of 39.57, each exit code read separately: `pnpm run typecheck` 0; `pnpm test` 0 (109 files,
+10256 tests passed and 1 skipped; branches 98.89 %, 12285 of 12422, every per-file floor met); `pnpm run ux:lint` 0;
+`pnpm run docs:check` 0 (markdownlint 0 errors); `pnpm run vectors:check` 0 (29 vector files match their generators);
+`pnpm run privacy:check` with the organization index 0 (0 findings); U+2014 in the added lines against `origin/main`: 0.
+
 On round 37's change (with round 35's unit fold and round 36's seam items), each exit code read separately: `pnpm
 typecheck` 0; `pnpm vitest run --testTimeout=60000 --coverage --coverage.include=src/channel-agent.ts
 test/channel-agent.test.ts` 0 (378 passed, `src/channel-agent.ts` at its 100 % branch floor), at a 15-minute load of
