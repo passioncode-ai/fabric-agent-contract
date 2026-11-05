@@ -104,6 +104,9 @@ DEC-0149, DEC-0150 and DEC-0152 are on other branches. When DEC-0149, DEC-0150 a
   `docs/DOCMAP.md`, the spec README and `src/semantic-kinds.ts`, all ordered appends: the second to land keeps both.
 - DEC-0149 changes `secretValue` (`JWT_SHAPE.test` becomes `hasJwt`, behaviour-equivalent); `FAC-SEM-167` and
   `FAC-SEM-168` call `secretValue` and take it unchanged.
+- DEC-0153 keeps five client rows in `conformance.md` (a product folding its log, a reader of digests, a product
+  declaring its folders, a collector, a host serving the retro), not the three DEC-0151's handoff names:
+  `grep -c "^| a .*| DEC-0153" docs/specification/conformance.md` prints 5.
 - At landing, write both next-free markers from the CAS counters, never from this file: `docs/DECISIONS.md`'s next
   free ID (`DEC-0154` today) and `conformance.md`'s next free rule code (`FAC-SEM-169` today). They, and
   `interop.md`'s count of extension keys ("nine" once DEC-0150 lands too), merge silently stale, since git sees equal or
@@ -124,8 +127,8 @@ product's obligation.
 - **Fabric**: (a) `passioncode-ai/fabric` origin/main `a6f0ffda`, latest prerelease v0.3.15. (b) Its CO rows live in
   the carry-over ledger `docs/evidence/specs/2026-08-16-software-fabric-carryover.md` at `a6f0ffda` (its
   `docs/evidence/backlog.md` points there): CO-500 "closed" (Fabric reads its own log every hour and every day); CO-502
-  "open" (`retro-after-work`; its row says "the daily digest counts retros asked and written"); CO-503 "open" (the
-  daily digest goes to Project Observatory; target the organization slice, 2026-11-21, P-27). CO-509 is announced
+  "open" (`retro-after-work`; its row says "the daily digest counts retros asked and written"); CO-503 "open" ("The
+  daily digest goes to Observatory"; target the organization slice, 2026-11-21, P-27). CO-509 is announced
   (board messages `449b3e7e`, `fefb0266`) and is not in the ledger, whose next free id is `CO-507`. (c) Not run (the
   round-4 readers reported its daily fold differing on 2 of the 4 day vectors at this commit).
 - **Fabric Inbox**: (a) release tag v0.95.0 (`6fed640`); `passioncode-ai/fabric-inbox` origin/main `71a3edd6`, where
@@ -157,6 +160,13 @@ product's obligation.
 - **At landing** (DEC-0151 lands before this branch and narrows the `sk-` shape): on the merged tree, add `FAC-SEM-167`
   pass cases for `queue.task-assigned-to-worker`, `work.desk-booking-confirmed` and `ui.disk-usage-refreshed-hourly`,
   which the `sk-` shape before DEC-0151 reads as keys.
+- **At landing, the fold:** on the merged tree with DEC-0149, `foldDir` calls DEC-0149's `foldPath` (one
+  implementation; a `dir` has no trailing `/`), and the parity test in `test/ops-digest.test.ts` (DEC-0149's
+  `FOLD_PAIRS` at `d4cc1e16` copied as written, plus the HFS+ samples its next step adds) keeps holding.
+- **At landing, the hints:** on the merged tree with DEC-0150, both `readerHints` lines carry an explicit help link (the
+  `Hint`'s fourth element); `test/ops-digest.test.ts` asserts `channel-agent.md#what-is-checked` for the channel-agent
+  bare declaration when that schema and its positive fixture exist (DEC-0150 asserts the same); the `readerHints`
+  comment "DEC-0150 adds its own entry" is reworded to describe both lines.
 
 ## Open
 
@@ -203,12 +213,25 @@ product's obligation.
   risen) throw, the overflow message says "beyond 2^53 - 1", `foldDir` strips the code points HFS+ ignores first as
   DEC-0149's `foldSegment` does and maps Georgian Nuskhuri onto Mkhedruli after NFC as its next step does (add-on),
   RW-1's "wrote no retro" judged by what the host observes, `FAC-SEM-167`'s credential
-  detector described as shared, and the dated-reading wording fixes. Round 7 is next.
+  detector described as shared, and the dated-reading wording fixes.
+- Round 7 at `69b06d3f` was not clean: the producer row's bound ("beyond 4096", now OD-3's 4095 names a day plus one
+  overflow name) and `FAC-SEM-167`'s description (now the shared detector's shapes as it applies them, with the `sk-`
+  shape matching inside `ask-`, `task-`, `desk-` and `disk-` until DEC-0151 lands). Also: OD-1's comparison of a kept
+  hour ("the hour just before when that is the last hour written, else none"), the Why's "a retro the host saw written
+  is not asked for twice", RW-3 and CONTEXT's distinction from the Memory Kernel's retrospective, CO-503 quoted
+  verbatim, the hourly schema's "observed itself running in", a parity test of `foldDir` against DEC-0149's fold
+  pairs, the channel-agent hint link asserted when its schema exists, and the landing items. Round 8 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-7 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
+round 2 with coverage on `src/ops-digest.ts` (4206 tests; 235 of 235 statements, 181 of 181 branches);
+`pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check` (after a code span with a trailing space was
+reworded); `python3 docs/ux/lint.py`; `pnpm run privacy:check` (0 findings). No other repository's code was run; the
+parity pairs were read from this repository's DEC-0149 branch. The branch gate is owed: the 15-minute load was 75.6.
 
 Round-6 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
 round 2 with coverage on `src/ops-digest.ts` (4175 tests; 232 of 232 statements, 181 of 181 branches);
@@ -269,7 +292,8 @@ and its per-file floors (109 files, 9846 tests passed, 1 skipped), each exit 0. 
 The coordinator's blind readings of DEC-0153 on branch `agent/ct219-ops-digest-20261104`, until two clean rounds;
 then the pull request, the merge and the answer on thread `f7758225`. That answer says in one sentence what RW-4's
 `ok` means (asks answered by a retro the host saw written, never a count of retros) and names Fabric's CO-502 wording
-("the daily digest counts retros asked and written"), so no view shows `ok` as retros written (CT-219's own row item (b) already says so
+("the daily digest counts retros asked and written"), so no view shows `ok` as retros written, and names OD-3's bound of
+4095 named operations per UTC day plus one overflow name (Switchboard's SB-257 reads "past 4096") (CT-219's own row item (b) already says so
 since round 6). At landing, also: update the knowledge base's
 plans row for the contract (`fabric-workspace` `knowledge/plans.md`, its row at line 80 names neither OD-9 nor
 `FAC-SEM-168`), and confirm CT-221's row reserved on main (PR #242) stays once.

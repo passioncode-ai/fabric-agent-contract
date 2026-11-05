@@ -33,7 +33,7 @@
       "items": {
         "$ref": "#/$defs/opCount"
       },
-      "description": "Every operation recorded in the hour, once each; an hour the product ran through with nothing recorded has none."
+      "description": "Every operation recorded in the hour, once each; an hour the product observed itself running in, with nothing recorded, has none."
     },
     "total": {
       "$ref": "#/$defs/counters"

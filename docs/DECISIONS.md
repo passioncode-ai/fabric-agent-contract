@@ -9058,7 +9058,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      filling the hours from the last written to now without observing them (round 4: a sleep is not a run); a product that folds on request from stored
      records (an always-on server) folds only hours holding a record, so `hours` means hours folded, and a reader never
      infers uptime from it. The hour a product stops in is kept with its counts and written when it closes, at the next
-     run, compared with the last hour written; a product that cannot keep it writes nothing for that hour, never a
+     run, compared with the hour just before when that is the last hour written, else with none (a gap); a product that cannot keep it writes nothing for that hour, never a
      partial line, since a restart in the same hour would leave two lines and readers keep the first. At start a
      product reads its last hourly line back for `previous`, and writes every closed hour it kept, the hour it stopped
      in included, before it folds any closed day (OD-5); otherwise that day's daily line loses that hour for good.
@@ -9068,8 +9068,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the 175 operation names Fabric checked in a week of its own log all fit. No absolute path, URL, space, empty
      segment, `.` or `..` can; `FAC-SEM-167` refuses a name shaped like a credential (`secretValue`, DEC-0044) or
      holding a home folder (`hasHomePath`, the detector other rules use), so the `/` lets no home path through;
-     `secretValue` is the shared credential detector (`src/secret-shape.ts`), which also reads a long camelCase segment
-     with a digit as one.
+     `secretValue` is the shared credential detector (`src/secret-shape.ts`), which refuses a provider key's shape (`sk-`, `gh[pousr]_`, `xox?-`, `AKIA`, `glpat-`), a JWT (`eyJ` and two more dotted segments), a value starting with `Bearer` and a space, or a run of 40 or more letters, digits, `_`, `-` or `/` (so across segments joined by `-` or `/`) that mixes upper case, lower case and a digit. On the shared detector as it stands, the `sk-` shape also matches inside `ask-`, `task-`, `desk-` and `disk-` (so `queue.task-assigned-to-worker` is refused) until DEC-0151's narrowing lands.
      `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character
      that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and
      is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which
@@ -9154,7 +9153,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   a sleep from reading as hours run with nothing failing. A `dir` that holds only its own instance's digests keeps one
   count per instance; the 4096 bound with one overflow name keeps a busy hour's line valid and its totals whole. A line
   saying there is nothing to say has no call a host can observe, so it is no `ok`. The end of a session raises the
-  retro only when none was written, so one retro is not asked twice; a record counted in the hour it is resolved keeps
+  retro only when none was written, so a retro the host saw written is not asked for twice; a record counted in the hour it is resolved keeps
   every hour's counts closed when the hour closes. There is no UX scenario for this decision: it is a reporting format,
   the operator's view of it is each product's own (ADR-0188 §2), as DEC-0095's support quality was. Counting the
   retro as an operation puts "asked" and "written" in the digest the host already writes, without a member the closed
@@ -9233,6 +9232,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   summed), and its batch is folded in; round 6 at `1ed18a61` was not clean: the day's ops bound (a day of more than
   4096 operations has no daily digest; a product keeps 4095 names plus one overflow name a day), Observatory facts (no
   claim about what Project Observatory counts or keys) and Fabric's rows (quoted from its carry-over ledger in the
-  handoff), and its batch is folded in;
+  handoff), and its batch is folded in; round 7 at `69b06d3f` was not clean: the producer row's bound (it read
+  "beyond 4096", now OD-3's 4095 names a day plus one overflow name) and `FAC-SEM-167`'s description (now the shared
+  detector's shapes as it applies them, the `sk-` shape inside `task-` and its kin included until DEC-0151 lands), and
+  its batch is folded in;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

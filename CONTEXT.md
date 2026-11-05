@@ -570,7 +570,8 @@ records as done, or ends without a retro since it began or the obligation last a
 Observatory, `insight/1` lines, or one line saying there is nothing to say; the host counts each one asked as the
 operation `retro-after-work` in its digests, `ok` for an ask answered by a lesson or `insight/1` line it saw written
 through a call it carries (one written elsewhere, or a line saying there is nothing to say, counts `unknown`); `ok`
-counts asks, not retros.
+counts asks, not retros. It is a session's note, not the Memory Kernel's project retrospective: a lesson recorded for it
+is no learning proposal and changes no revision.
 
 **Runner**: An installed coding-agent CLI a host can drive (Claude Code, Codex, …),
 known from a catalogue entry that names its binaries, its version command and the

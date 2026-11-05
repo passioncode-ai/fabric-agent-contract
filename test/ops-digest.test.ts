@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -367,9 +367,33 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
         const hint = [...(json.notes ?? []), ...json.problems].find((note) => note.rule === "hint/declaration-only");
         expect(hint?.help, name).toBe("docs/specification/ops-digest.md#where-a-collector-reads-the-daily-digests");
       }
+      // On the merged tree with DEC-0150, its bare declaration prints its own page's link (DEC-0150 asserts the same).
+      const channel = path.join(root, "schemas/service-channel-agent-extension.schema.json");
+      const sample = path.join(root, "fixtures/positive/service-channel-agent-extension.json");
+      if (existsSync(channel) && existsSync(sample)) {
+        const json = JSON.parse(runCli([sample, "--schema", "service-channel-agent-extension.schema.json", "--json"]).out) as { notes?: Array<{ rule: string; help: string }> };
+        expect(json.notes?.find((note) => note.rule === "hint/declaration-only")?.help).toBe("docs/specification/channel-agent.md#what-is-checked");
+      }
     } finally {
       rmSync(scratch, { recursive: true, force: true });
     }
+  });
+
+  // Parity with DEC-0149's fold until the merged tree makes foldDir call its foldPath (one implementation): its
+  // FOLD_PAIRS (fixtures/vectors/source-tree.json on its branch at d4cc1e16, Unicode 17.0), copied as written, and the
+  // HFS+ samples its next step adds (U+200C, U+FEFF, U+202A removed; Asomtavruli, Nuskhuri and Mkhedruli joined).
+  const DEC_0149_FOLD_PAIRS: Array<[string, string]> = [
+    ["PA\u1e9eWORDS", "passwords"], ["pa\u00dfwords", "passwords"], ["PASSWORDS", "passwords"], ["\u017fecrets", "secrets"],
+    ["\u212aeys", "keys"], ["\u212b", "\u00e5"], ["\u00c5", "\u00e5"], ["\u03a3x", "\u03c3x"], ["\u03c2x", "\u03c3x"],
+    ["x\u03a3", "x\u03c2"], ["\u0130d", "i\u0307d"], ["\u0131d", "id"], ["\ufb00ile", "ffile"], ["cafe\u0301", "caf\u00e9"],
+    ["CAF\u00c9", "caf\u00e9"], ["pri\u200cvate", "private"], ["private. .", "private"], ["PRIVAT~1.MD", "privat~1.md"],
+    ["\u1fbc\u0342", "\u1fb6\u03b9"], ["\u1fb7", "\u1fb6\u03b9"], ["\u0391\u0342\u0345", "\u1fb6\u03b9"],
+    ["\u1fcc\u0342", "\u1fc6\u03b9"], ["\u1fc7", "\u1fc6\u03b9"], ["\u1ffc\u0342", "\u1ff6\u03b9"], ["\u1ff7", "\u1ff6\u03b9"],
+    ["cafe\u200c\u0301", "caf\u00e9"],
+    ["x\ufeff", "x"], ["\u202ax", "x"], ["\u10a0", "\u10d0"], ["\u2d00", "\u10d0"], ["\u10d0", "\u10d0"]
+  ];
+  it.each(DEC_0149_FOLD_PAIRS)("folds %j as DEC-0149's fold does", (input, folded) => {
+    expect(foldDir(input)).toBe(folded);
   });
 
   it("is a descriptor's rule only, and a declaration's absence is no finding", () => {
