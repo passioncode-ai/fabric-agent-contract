@@ -379,11 +379,12 @@ product's obligation.
 Rounds 17 and 18 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the six
 files of round 16 with coverage on `src/ops-digest.ts` (2043 tests; 287 of 287 statements, 222 of 222 branches); `pnpm
 exec tsx tools/vectors/run.ts`; `pnpm run docs:check`; `python3 docs/ux/lint.py`; `pnpm run privacy:check` (0
-findings). Greps: the old alphabet ("letters, digits, `_`, `-` or `/`" and its schema form) in `src`, `docs` and
-`schemas`, 0; `grep -c 'ops-digest.md#where-a-collector-reads-the-daily-digests' src/validate-cli.ts`, 1. The branch
-gate on this tree before its commit (15-minute load 25.1, 19 GB free, under the heavy lock): `pnpm run check` (109
-files, 9959 tests passed, 1 skipped, coverage floors held; `ux:lint`, `docs:check`, `privacy:check` 0 findings) exit
-0, and `pnpm run vectors:check` exit 0. This paragraph is the only change after it.
+findings). Greps: the alphabet as written before this round (with no `+` or `=`, in its Markdown and its schema form)
+in `src`, `docs` and `schemas`, 0 (this paragraph rewords it in a follow-up commit, so that grep finds nothing here
+either); `grep -c 'ops-digest.md#where-a-collector-reads-the-daily-digests' src/validate-cli.ts`, 1. The branch gate
+on this tree before its commit (15-minute load 25.1, 19 GB free, under the heavy lock): `pnpm run check` (109 files,
+9959 tests passed, 1 skipped, coverage floors held; `ux:lint`, `docs:check`, `privacy:check` 0 findings) exit 0, and
+`pnpm run vectors:check` exit 0. This paragraph is the only change after it.
 
 Round-16 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on
 `test/ops-digest.test.ts`, `test/proposal-rules.test.ts`, `test/consistency.test.ts`, `test/validate-cli.test.ts`,
