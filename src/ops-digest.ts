@@ -123,8 +123,8 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
  * The day's hourly digests (those whose hour starts on `day`, one per hour, the first of a repeated hour kept) folded
  * into one: the operations summed, the hours counted, and each operation that rose in some hour with the hours it rose
  * in and the failures of those hours, the most failures first, then by name. A day with no hour of its own has no
- * digest: null (OD-5). It throws when an input count (checked before it is merged) or a sum is not an integer from 0
- * to 2^53 - 1.
+ * digest: null (OD-5). It throws when an input count or an hour's rise (each checked before it is merged) or a sum is
+ * not an integer from 0 to 2^53 - 1, and when an hour names a rise of an operation its ops does not count.
  */
 export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDigest | null {
   const seen = new Set<number>();
@@ -145,6 +145,8 @@ export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDige
       merged.set(c.op, m);
     }
     for (const r of h.risen) {
+      if (!isCount(r.failed)) throw new Error(`the rise of ${r.op} in ${h.from} is not an integer from 0 to 2^53 - 1`);
+      if (!h.ops.some((c) => c.op === r.op)) throw new Error(`${r.op} rose in ${h.from} but that hour's ops does not count it`);
       const x = rose.get(r.op) ?? { hours: 0, failed: 0 };
       x.hours += 1; x.failed += r.failed;
       rose.set(r.op, x);
@@ -291,7 +293,7 @@ const folderFinding = (instancePath: string, message: string): Finding => ({ cod
  * FAC-SEM-168 on a service descriptor (kind `service-descriptor`) that carries the ops-digest key: a remote placement
  * (no folder on this machine), or a local one that names no `paths.data` for `dir` to be relative to; a value that is
  * not its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); a `source` named
- * twice; a `dir` named twice, compared under Unicode case folding after NFC, trailing dots and spaces dropped, segment
+ * twice; a `dir` named twice, compared under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped, segment
  * by segment (one folder under two labels would be sent twice); a `dir` that holds a home folder (`hasHomePath`); a
  * `dir` or a `source` shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users`
  * or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
@@ -321,7 +323,7 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     if (seen.has(folder.source)) findings.push(folderFinding(`${at}/source`, `source ${folder.source} is named twice; each folder sends its own label`));
     seen.add(folder.source);
     const folded = foldDir(folder.dir);
-    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `dir ${folder.dir} is named twice (compared under Unicode case folding after NFC, trailing dots and spaces dropped); its lines would be sent twice`));
+    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `dir ${folder.dir} is named twice (compared under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped); its lines would be sent twice`));
     dirs.add(folded);
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
     if (secretValue(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));

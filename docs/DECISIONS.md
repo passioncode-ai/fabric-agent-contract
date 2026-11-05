@@ -9037,8 +9037,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   every agent close its work with a retro whose lessons are kept centrally; Fabric recorded the split in its ADR-0188
   (commit `0d0e5922`) and relayed the contract's part on board thread `f7758225` (message `516761e1`, item 2 of its
   split). Fabric writes the two digests since commit `e1eecec0` (`apps/desktop/src/shared/opsDigest.ts`,
-  `apps/desktop/src/main/opsDigestRun.ts`), the shape's origin, and asks for the retro; the other products that write
-  digests (Switchboard, Inbox, Dashboards) need the shape pinned so one reader reads them all. Of those, only a product
+  `apps/desktop/src/main/opsDigestRun.ts`), the shape's origin; every other product that writes digests needs the shape
+  pinned so one reader reads them all. Every statement in this decision about Fabric's code is about that commit;
+  what each product's code was read to do at a later date is in the CT-219 handoff, never here. Of those, only a product
   with a local service descriptor can say where its daily digests are (OD-9); the others reach a collector by
   arrangements outside this contract. ADR-0188 left open the format of `from`, `to` and
   `day`, the grammar of `op` and `total` as the sum of `ops`.
@@ -9047,7 +9048,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `failed`, `unknown`}], `total`{`ok`, `failed`, `unknown`}, `risen`[{`op`, `failed`, `previous`}]} and
      `ops.digest.daily@1` {`schema`, `day`, `hours`, `ops`, `total`, `risen`[{`op`, `hours`, `failed`}]}, both closed,
      every count an integer from 0 to 2^53 − 1, at most 4096 operations and rises: beyond 4096 a product counts the
-     rest under one fixed operation name of its own (their counts kept, as Fabric's `tool.other`), so the line still
+     rest under one fixed operation name of its own (their counts kept), so the line still
      validates.
   2. **The window (OD-1).** `from` and `to` are whole UTC hours in RFC 3339 with `Z`, with or without the `.000` that
      `Date.prototype.toISOString` writes (Fabric writes it), `to` one hour after `from`; `day` is `YYYY-MM-DD` UTC;
@@ -9058,7 +9059,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      infers uptime from it. The hour a product stops in is kept with its counts and written when it closes, at the next
      run, compared with the last hour written; a product that cannot keep it writes nothing for that hour, never a
      partial line, since a restart in the same hour would leave two lines and readers keep the first. At start a
-     product reads its last hourly line back for `previous`.
+     product reads its last hourly line back for `previous`, and writes every closed hour it kept, the hour it stopped
+     in included, before it folds any closed day (OD-5); otherwise that day's daily line loses that hour for good.
   3. **An operation's name (OD-2).** `^[a-z][A-Za-z0-9_]*(?:[.:/-][A-Za-z0-9_]+)*$`, at most 64 characters. `/` is
      a separator because Fabric logs an MCP method as `mcp.<method>` (`mcp.tools/list`,
      `mcp.notifications/initialized`, `mcp.notifications/cancelled`; board thread `f7758225`, message `1c191cf7`), and
@@ -9091,7 +9093,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      reader reads both as sets keyed by `op`. A count or sum beyond 2^53 − 1 is no count: the reference folds throw.
   5. **The daily fold and the files (OD-5, OD-6).** The day's hourly digests are folded once each (the first line of
      an hour), and a day with no hour of its own has no daily digest: a producer writes none, and one that answers
-     for a day answers that it has none (Fabric Inbox answers `404`, board message `f74763e1`). **Catch-up:** a product
+     for a day answers that it has none (`404` over HTTP, announced, board message `f74763e1`). **Catch-up:** a product
      folds, once, at its next run, each closed UTC day that has hourly lines and no daily line, reading its hourly file
      back; a reader and a collector take the first daily line of a day. Each digest is one JSON line appended to `hourly-YYYY-MM.jsonl` or `daily-YYYY-MM.jsonl` in the
      product's own folder on its own machine; a reader skips a line it cannot read or of another revision and never
@@ -9101,14 +9103,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      that shows findings shows each rise of its newest hour.
   7. **`retro-after-work` (RW-1 to RW-4).** It arises at each release of a claim or task that the host records as
      done (in coordination's terms, outcome success; each host's own claim vocabulary decides which act that is) and
-     when the session ends, only if the session wrote no retro since it last arose; the host serves it with its other obligations (Fabric: `fabric_whoami`) as advice that holds nothing back;
+     when the session ends, only if the session wrote no retro since the session began or the obligation last arose,
+     whichever is later; the host serves it with its other obligations as advice that holds nothing back;
      it is fulfilled in the same turn by a lesson in Project Observatory (`observatory_lesson`, one class key each), by
      `insight/1` lines, or by one line saying there is nothing to say; the host counts each time it arose as one record
      of the operation `retro-after-work` in its digests, in the hour the record is resolved (answered, or `unknown` at
      the end): `ok` only when it observes a lesson or an `insight/1` line written through a call it carries (its own
      tool call, or a host hook observing the session's own tool call), `failed` when such a call is refused, `unknown`
-     otherwise, a retro written elsewhere and a line saying there is nothing to say included; so retros asked are the sum and retros the host saw
-     written `ok`, a lower bound of the retros written.
+     otherwise, a retro written elsewhere and a line saying there is nothing to say included. Retros asked are the
+     sum; `ok` counts the asks answered by a retro the host saw written, and since one retro may answer several asks,
+     `ok` is not a count of retros and no bound on them: Project Observatory counts the retros written itself (round 5).
   8. **Reference and vectors.** `foldHour`, `foldDay`, `isRise` and the rules in `src/ops-digest.ts`; vectors in
      `fixtures/vectors/ops-digest.json`; `pnpm validate` tells the two digests apart by `schema` (kinds
      `ops-digest-hourly`, `ops-digest-daily`).
@@ -9121,26 +9125,23 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      a collector on the same machine sends with each daily line it reads there. The digests stay as written (OD-6,
      OD-7); the key only says where to read and which label to send. `FAC-SEM-168` (kind `service-descriptor`) refuses
      the key on a remote placement or on a local one without `paths.data`, a value that is not its schema's, a `source`
-     named twice, a `dir` named twice, compared under Unicode case folding after NFC with trailing dots and spaces
-     dropped (one folder under two labels would be sent twice), a `dir` holding a home folder (`hasHomePath`, with the
+     named twice, a `dir` named twice, compared under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped (one folder under two labels would be sent twice), a `dir` holding a home folder (`hasHomePath`, with the
      boundary of item 3: `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x` pass) and a `dir` or `source` shaped like a credential
      (`secretValue`); one finding refuses the whole declaration, which a collector reads as not declared and reports.
      `digestFoldersView` (whose `usable` is true only when the rule has no finding) and `digestFoldersRules` in
      `src/ops-digest.ts` are the reference. A collector takes each day's first daily line whenever it first appears (a
      caught-up day included) and sends it once, with `source` and which descriptor the line came from (its `id` and
-     `instance`; Project Observatory agreed an optional `service {id, instance}` beside `source`, board message
-     `1a12d809`). Fabric took the collector role (board thread `f7758225`, message `2ed505f2`); its CO-503 row does not
-     yet record it. A product without a local descriptor is outside this declaration, and a declared `dir` holds only
+     `instance`; an optional `service {id, instance}` beside `source` is announced, board message `1a12d809`). The
+     collector role is announced by Fabric (board thread `f7758225`, message `2ed505f2`). A product without a local descriptor is outside this declaration, and a declared `dir` holds only
      the declaring instance's own digests: relaying a remote instance's digests is outside this contract.
-- **Why:** one shape lets one reader (Fabric's review queue, Project Observatory's daily reading) read every product's
-  digests; the shape is the one already written, so the first producer moves nothing. A name grammar that holds no empty
+- **Why:** one shape lets one reader read every product's digests; the shape is the one already written, so the first producer moves nothing. A name grammar that holds no empty
   segment, `.`, `..` or leading `/` keeps absolute paths and URLs out by construction, and the home-folder detector the
   relative home paths `/` would let in. The folder a collector reads is declared where the product already says what it
   is (its descriptor), in the place the closed descriptor schema keeps for what it does not name (`extensions`), and
   relative to the data folder, so no home path travels in it. A host counts `ok` only for a retro it sees written,
   because a retro written elsewhere is a claim it cannot check, and the store that holds it can count it. A day the
   product was down for still gets its daily line at the next run, so a reader never mistakes a restart for a silent
-  day. An order written but not checked keeps every line Fabric wrote valid and keeps readers from depending on it.
+  day. An order written but not checked keeps every line written at the shape's origin valid and keeps readers from depending on it.
   Mapping each product's outcome words keeps one meaning of `failed` across products, and keeping the map out of the
   digest keeps OD-7. `hours` as hours folded is what an always-on server that folds from stored records can truthfully
   write. A collector that sends a caught-up day once loses no day and doubles none. Writing the hour a product
@@ -9151,7 +9152,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   saying there is nothing to say has no call a host can observe, so it is no `ok`. The end of a session raises the
   retro only when none was written, so one retro is not asked twice; a record counted in the hour it is resolved keeps
   every hour's counts closed when the hour closes. There is no UX scenario for this decision: it is a reporting format,
-  the operator's view of it is each product's own (Fabric's review queue), as DEC-0095's support quality was. Counting the
+  the operator's view of it is each product's own (ADR-0188 §2), as DEC-0095's support quality was. Counting the
   retro as an operation puts "asked" and "written" in the digest the host already writes, without a member the closed
   shape lacks.
 - **Alternatives considered:** `<name>/<revision>` names (`ops-digest-hourly/1`, as DEC-0067 spells every protocol:
@@ -9171,12 +9172,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the home folder, and a folder outside the product's data folder is not the product's to name).
 - **Compatibility:** additive: three new schemas, two new kinds, three new rule codes, one extension key and its
   named-only protocol `fabric-ops-digest/0.1`; a descriptor without the key validates as before, and a host preserves
-  the key as it does any extension. The Fabric Agent Adapter enters `fabric-ops-digest/0.1` in its twin protocol
-  registers (`fabric_protocols.py`, `fabric-protocols.mjs`) at its next re-pin, as its vendoring script requires for
-  every register row (`vendor_vectors.mjs`). Fabric's digests at `e1eecec0`
-  validate as written (its test's names, `x` and `y` included). The reference folds are `src/ops-digest.ts`; Fabric
-  writes digests since `e1eecec0`, and its daily fold differed on 2 of the 4 day vectors at its `a6f0ffda`. The OD-9
-  collector is not built (Fabric CO-503). Each product's adoption is tracked in its own rows; the CT-219 handoff's
+  the key as it does any extension. The Fabric Agent Adapter enters `fabric-ops-digest/0.1` at its next re-pin in its
+  twin protocol registers (`fabric_protocols.py`, `fabric-protocols.mjs`), which its tests hold equal to the register
+  `vendor_vectors.mjs` writes into `feed-protocols-vectors.json` (the twins are kept by hand). Fabric's digests at
+  `e1eecec0` validate as written (its test's names, `x` and `y` included). The reference folds are
+  `src/ops-digest.ts`. Each product's adoption is tracked in its own rows; the CT-219 handoff's
   Consumers list records what was read at a date, and vendoring the vectors from the release tag is each product's
   obligation. At their next re-pin, the consumers that vendor a protocol table (a deployment template's
   `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the adapter
@@ -9197,14 +9197,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/schema-compilation.test.ts`, `vitest.config.ts`; `docs/specification/ops-digest.md`, `conformance.md` (the
   reference module, the producer, reader and host rows, the register), `docs/specification/README.md`,
   `docs/DOCMAP.md`, `CONTEXT.md`; backlog CT-219; handoff `docs/handoffs/2026-11-04-ops-digest.md`. The first
-  consumers of OD-9 are Fabric (CO-503, which collects the daily lines from the folders a descriptor names) and Project
-  Observatory (OBS-330, which records them with their `source`); how they do it is theirs.
+  consumers of OD-9 are announced as Fabric's CO-503 (collecting the daily lines) and Project Observatory's OBS-330
+  (recording them); how they do it is theirs.
 - **Not decided here:** which act of each host's claim vocabulary is "a release recorded as done" (RW-1); counting retros
   written outside the host (Project Observatory's); the wire form in which a collector sends the descriptor's `id` and
-  `instance`; how products without a local descriptor reach a collector (Fabric Dashboards and Fabric Switchboard
-  through Fabric's list of known hosts, message `08458f55`, an arrangement outside this contract; the Fabric Inbox Mac
-  app plans a local descriptor, its B-210, whose own folder is an OD-9 declaration while the server folder it fetches
-  is a relayed remote instance's, outside it); the identity a relayed remote instance's lines are sent under, so that
+  `instance`; how a product without a local descriptor reaches a collector (outside this contract; a product's own
+  folder in its own local descriptor is an OD-9 declaration, a remote instance's folder fetched by a local app is not); the identity a relayed remote instance's lines are sent under, so that
   N relays are not N counts (Project Observatory keys a digest by project, service, source and day); the other items
   on the spec page's list.
 - **Source:** the operator's word of 2026-11-04, relayed by Fabric on board thread `f7758225` (message `516761e1`),
@@ -9225,6 +9223,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   states were written as facts beyond their code), and its batch, with the coordinator's decisions on the sleep (an
   hour written only when observed), the operation-shaped examples of OD-2, the protocol-table re-pin, the
   declaration-only hint and the canonical caseless fold, is folded in; the Consumers list is now a dated reading of each
-  product's code;
+  product's code; round 5 at `6eb61183` was not clean: the start order (a kept hour written before a day is folded),
+  RW-4's count (`ok` counts asks, not retros), product claims (removed from this decision and the spec, kept only as
+  the handoff's dated reading of each product's rows and folds) and `foldDay`'s rises (checked before they are
+  summed), and its batch is folded in;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

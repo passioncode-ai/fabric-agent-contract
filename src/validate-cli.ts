@@ -247,13 +247,14 @@ const HINT_HELP = {
   "hint/reader-pending": "docs/specification/provider.md",
   "hint/declaration-only": "docs/specification/ops-digest.md#where-a-collector-reads-the-daily-digests",
 } as const;
-/** A hint: where it is, which hint, what it says. */
-type Hint = [string, keyof typeof HINT_HELP, string];
+/** A hint: where it is, which hint, what it says, and its own help link when it differs per schema. */
+type Hint = [string, keyof typeof HINT_HELP, string, string?];
 
 /** A member the schema allows but a reader the contract names does not accept yet (CT-27 for `run.mcp.stdio.scope`). */
 function readerHints(schema: string | undefined, value: unknown, out: Hint[]): void {
   // DEC-0153 OD-9: a bare ops-digest declaration checks its shape only; FAC-SEM-168 reads it inside its descriptor.
-  if (schema === "service-ops-digest-extension.schema.json") out.push(["/", "hint/declaration-only", "FAC-SEM-168 runs only on the declaration inside a service descriptor's extensions (the placement and paths.data, a source or a dir named twice, a home folder in a dir, a dir or source shaped like a credential); check the descriptor to run it"]);
+  // One rule name for every bare declaration; each line carries its own schema's page (DEC-0150 adds its own entry).
+  if (schema === "service-ops-digest-extension.schema.json") out.push(["/", "hint/declaration-only", "FAC-SEM-168 runs only on the declaration inside a service descriptor's extensions (the placement and paths.data, a source or a dir named twice, a home folder in a dir, a dir or source shaped like a credential); check the descriptor to run it", "docs/specification/ops-digest.md#where-a-collector-reads-the-daily-digests"]);
   if (schema !== "provider.schema.json" || !isObject(value) || !isObject(value.run) || !isObject(value.run.mcp) || !isObject(value.run.mcp.stdio)) return;
   if (Object.hasOwn(value.run.mcp.stdio, "scope")) out.push(["/run/mcp/stdio/scope", "hint/reader-pending", "Fabric's registry does not accept run.mcp.stdio.scope yet (CT-27); leave it out and readers take on-demand"]);
 }
@@ -360,7 +361,7 @@ function checkFile(run: Run, file: string, relative: string, schemaArg: string |
   // A hint is advice, never a failure: a vendor key the contract does not know is legal, so a near miss is reported
   // beside the result and the exit code ignores it.
   readerHints(schema, value, hints);
-  for (const [at, rule, message] of hints) run.notes.push({ file, path: at, rule, message, help: HINT_HELP[rule] });
+  for (const [at, rule, message, help] of hints) run.notes.push({ file, path: at, rule, message, help: help ?? HINT_HELP[rule] });
   return { file, relative, value, schema };
 }
 

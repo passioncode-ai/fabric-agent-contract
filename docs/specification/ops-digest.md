@@ -14,11 +14,10 @@ A product keeps its own operations log on its own machine, and reads it itself: 
 into one `ops.digest.hourly@1` line, and every UTC day the day's hourly lines into one `ops.digest.daily@1` line.
 No model reads the log; the fold is arithmetic. A failure count that rose against the hour before is a rise, which the
 product tells its operator. Every agent closes its work with a retro, `retro-after-work`, which the host asks for and
-counts. The split of who keeps and reads what is Fabric's ADR-0188 (commit `0d0e5922`); Fabric writes these digests
-since commit `e1eecec0` (`apps/desktop/src/shared/opsDigest.ts`, `apps/desktop/src/main/opsDigestRun.ts`), the origin
-of this shape, and this page is the shape every other product writes too, so one reader reads them all. The reference
-folds are this contract's [`src/ops-digest.ts`](../../src/ops-digest.ts) with its vectors, not Fabric's code: Fabric's
-daily fold at `e1eecec0` answers 2 of the 4 day vectors differently.
+counts. The split of who keeps and reads what is Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is
+Fabric's commit `e1eecec0`, and this page is the shape every product writes, so one reader reads them all. The
+reference folds are this contract's [`src/ops-digest.ts`](../../src/ops-digest.ts) with its vectors. This page makes
+no claim about any product's code; what each product's code was read to do, at a date, is in the CT-219 handoff.
 
 ## The hourly digest, `ops.digest.hourly@1`
 
@@ -55,7 +54,9 @@ text among them, fails it.
   folds the hourly digests whose hour starts on its day. **The hour a product stops in** is kept with its counts and
   written when it closes, at the next run, compared with the last hour written; a product that cannot keep it writes
   nothing for that hour, never a partial line, since a restart in the same hour would leave two lines and readers keep
-  the first. At start a product reads its last hourly line back for `previous`.
+  the first. At start a product reads its last hourly line back for `previous`, and writes every closed hour it kept,
+  the hour it stopped in included, before it folds any closed day (OD-5): otherwise that day's daily line loses that
+  hour for good.
 - **OD-2, an operation's name.** `op` is a short identifier: a lower-case letter, then letters, digits and `_` in
   segments joined by `.`, `:`, `/` or `-` (`board.tick`, `ipc.work:home`, `work.sweep-done-review`, and an MCP method
   as `mcp.<method>`: `mcp.tools/list`, `mcp.notifications/initialized`), at most 64 characters (one copy of the
@@ -83,7 +84,7 @@ text among them, fails it.
   `op` is named once in `ops` and once in `risen`. A count, and every sum, is an integer from 0 to 2^53 − 1; a
   product that would write a larger one writes no digest for that hour (the reference folds throw). `ops` and `risen`
   hold at most 4096 operations each: beyond 4096 a product counts the rest under one fixed operation name of its own
-  (their counts kept, as Fabric's `tool.other`), so the line still validates.
+  (their counts kept), so the line still validates.
 - **The order.** `ops` is sorted by `op` in code-unit order (the order of JavaScript's `<` on strings); an hourly
   `risen` is in the order of `ops`; a daily `risen` is sorted by `failed`, the most first, then by `op` in code-unit
   order. The reference folds write this order and the vectors compare in it. `FAC-SEM-166` does not check order, and a
@@ -96,13 +97,13 @@ text among them, fails it.
   `FAC-SEM-166` cannot see it in one digest; the vectors check it.
 - **OD-5, the daily fold.** The day's hourly digests are folded once each: a product that finds two lines for one hour
   (a restart that read its own file back) folds the first. `hours` is how many were folded. A day with no hourly
-  digest of its own has no daily digest: a product writes none for it, and one that answers for a day (Fabric Inbox,
-  over HTTP) answers that it has none (`404`) rather than a digest of zero hours (`foldDay` returns null). **Catch-up:**
+  digest of its own has no daily digest: a product writes none for it, and one that answers for a day over HTTP
+  answers that it has none (`404`) rather than a digest of zero hours (`foldDay` returns null). **Catch-up:**
   a product that was not running when a UTC day closed folds that day once, at its next run, reading its hourly file
   back: each closed UTC day that has hourly lines and no daily line gets its daily line then, and no day gets two.
 - **OD-6, the files.** A product appends each digest as one line of JSON, ended by a line feed, to
   `hourly-YYYY-MM.jsonl` (the month of `from`) and `daily-YYYY-MM.jsonl` (the month of `day`), in a folder of its own
-  on its own machine that only its user reads (Fabric's: `digests` in its data folder, files mode `0600`). A digest
+  on its own machine that only its user reads (files mode `0600` where the system has modes). A digest
   stays on the machine; the daily digest MAY be sent onward as a record (ADR-0188 §3), and how is not this page's.
   A reader reads line by line: it skips a line that is not JSON, that names another `schema` (a later revision
   included) or that fails the schema or a rule, never stopping at one; of two lines for one hour it reads the first,
@@ -110,10 +111,10 @@ text among them, fails it.
 - **OD-7, nothing but counts.** A digest holds no log line, no path, no identifier (of a session, a request, a person
   or a machine) and no text. What the log's records say stays in the log.
 - **OD-8, the operator is told.** A product that shows its operator findings shows each rise of its newest closed hour
-  with the operation, the failures and the hour before's (Fabric's review queue, ADR-0188 §2); a rise is never
+  with the operation, the failures and the hour before's (ADR-0188 §2); a rise is never
   told as the cause of a failure, only as its count.
 
-The `@1` names are the ones Fabric writes, kept as written: they are no `<name>/<revision>` of the protocol revision
+The `@1` names are the ones of the shape's origin, kept as written: they are no `<name>/<revision>` of the protocol revision
 register ([versioning](versioning.md#protocol-revisions)), because nothing negotiates them; a reader that meets a line
 naming a revision it does not read skips that line (OD-6). `pnpm validate` reads one digest at a time (a line saved as
 its own `.json` file) and tells the two apart by `schema`.
@@ -130,7 +131,7 @@ its own `.json` file) and tells the two apart by `schema`.
     no trailing `/`, at most 256 characters (the grammar of a package path, `fabric-package.schema.json#/$defs/path`,
     which a package's state relative to the data folder also uses). It holds the product's `daily-YYYY-MM.jsonl` files
     (OD-6); a collector reads those files in `<paths.data>/<dir>` and nothing else there. Each `dir` is named once,
-    compared under Unicode case folding after NFC, trailing dots and spaces dropped, segment by segment (a folder
+    compared under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped, segment by segment (a folder
     under two labels would be sent twice). The home-folder detector applies to `dir`: `hasHomePath` refuses a value in
     which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or
     digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or
@@ -152,8 +153,7 @@ its own `.json` file) and tells the two apart by `schema`.
   `instance`), so two products with the label `app` stay apart. A product without a local descriptor is outside this
   declaration (see Not decided here).
 - **`FAC-SEM-168`** checks a descriptor that carries the key: a remote placement, or a local one without
-  `paths.data`; a value that is not the schema's; a `source` named twice; a `dir` named twice, compared under Unicode
-  case folding after NFC, trailing dots and spaces dropped; a `dir` that holds a home folder (`hasHomePath`, the
+  `paths.data`; a value that is not the schema's; a `source` named twice; a `dir` named twice, compared under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped; a `dir` that holds a home folder (`hasHomePath`, the
   detector `FAC-SEM-167` uses, with the boundary above), and a `dir` or `source` shaped like a credential
   (`secretValue`). One finding refuses the whole declaration: a collector treats a
   declaration with a `FAC-SEM-168` finding as not declared and reports it, as a host treats an invalid load key
@@ -175,11 +175,11 @@ A product with one folder of digests, `digests` in its data folder, writes in it
 
 - **RW-1, when it arises.** A host's obligation `retro-after-work` arises for a session at each release of a claim or
   task that the host records as done (in [coordination](coordination.md) terms, a release with outcome success; each
-  host's own claim vocabulary decides which act that is, Fabric's `fabric_work_release` with `done` among them), and
-  when the session ends, only if the session wrote no retro since the obligation last arose. One retro answers every
+  host's own claim vocabulary decides which act that is), and when the session ends, only if the session wrote no
+  retro since the session began or the obligation last arose, whichever is later. One retro answers every
   time it arose since the session's last retro.
-- **RW-2, how it is asked.** The host serves it among the obligations it hands a session (Fabric: in `fabric_whoami`'s
-  answer), naming it `retro-after-work`: write the retro in the same turn as the release, or before the session ends.
+- **RW-2, how it is asked.** The host serves it among the obligations it hands a session, naming it
+  `retro-after-work`: write the retro in the same turn as the release, or before the session ends.
   It is advice: it never holds a release or an end back.
 - **RW-3, what fulfils it.** Any of: one or more lessons recorded in Project Observatory (`observatory_lesson`, one
   class key per lesson) saying what went wrong and what would have prevented it; one or more `insight/1` lines with
@@ -191,9 +191,9 @@ A product with one folder of digests, `digests` in its data folder, writes in it
   `unknown` at the session's end): `ok` only when it observes a lesson or an `insight/1` line written through a call it
   carries (its own tool call, or a host hook that observes the session's own tool call), `failed` when such a call was
   refused (a lesson the memory refused), `unknown` otherwise: a retro written elsewhere, a line saying there is nothing
-  to say, or none, at the session's end. Retros asked are the three
-  counters' sum, retros the host saw written are `ok`, a lower bound of the retros written; counting retros written
-  elsewhere is Project Observatory's, not the host's. Nothing of the retro's text enters the digest.
+  to say, or none, at the session's end. Retros asked are the three counters' sum; `ok` counts the asks answered by a
+  retro the host saw written. One retro may answer several asks, so `ok` is not a count of retros and no bound on
+  them: Project Observatory counts the retros written itself (its OBS-331). Nothing of the retro's text enters the digest.
 
 ## Semantic rules
 
@@ -201,7 +201,7 @@ A product with one folder of digests, `digests` in its data folder, writes in it
 |---|---|---|
 | <a id="fac-sem-166"></a>`FAC-SEM-166` | `ops-digest-hourly`, `ops-digest-daily` | an hourly digest's `from` and `to` are whole UTC hours of real days, one hour apart, and a daily digest's `day` a real UTC day; each `op` once in `ops` and once in `risen`; `total` each counter's sum over `ops`; every `risen` op counted in `ops`; an hourly rise names the hour's failures of its op and is a rise by OD-4 against its `previous`; a daily rise is in at most the day's `hours`, with at least 10 failures an hour it rose and at most the day's failures of its op (DEC-0153) |
 | <a id="fac-sem-167"></a>`FAC-SEM-167` | `ops-digest-hourly`, `ops-digest-daily` | no `op`, in `ops` or in `risen`, is shaped like a credential (`secretValue` of [`src/secret-shape.ts`](../../src/secret-shape.ts)) or holds a home folder (`hasHomePath` of [`src/activity-rules.ts`](../../src/activity-rules.ts)). `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`, `api.my_users/list` and `ui.home/open` fail and `api.user/list` and `api.get_user/list` pass. One refused name fails the whole line, which every reader skips (DEC-0153) |
-| <a id="fac-sem-168"></a>`FAC-SEM-168` | `service-descriptor` | a descriptor that carries the ops-digest key (`extensions/ops-digest/0.1`) is a `local` one that names `paths.data`; its value is valid against `service-ops-digest-extension.schema.json` (a reader treats an invalid one as not declared and reports it); each `source` is named once and each `dir` once, compared under Unicode case folding after NFC, trailing dots and spaces dropped; no `dir` holds a home folder (`hasHomePath`) and no `dir` or `source` is shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail and `user-digests` and `a/~1/x` pass. One finding refuses the whole declaration, which a collector reads as not declared (DEC-0153 OD-9) |
+| <a id="fac-sem-168"></a>`FAC-SEM-168` | `service-descriptor` | a descriptor that carries the ops-digest key (`extensions/ops-digest/0.1`) is a `local` one that names `paths.data`; its value is valid against `service-ops-digest-extension.schema.json` (a reader treats an invalid one as not declared and reports it); each `source` is named once and each `dir` once, compared under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped; no `dir` holds a home folder (`hasHomePath`) and no `dir` or `source` is shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail and `user-digests` and `a/~1/x` pass. One finding refuses the whole declaration, which a collector reads as not declared (DEC-0153 OD-9) |
 
 ## Not decided here
 
@@ -213,15 +213,13 @@ A product with one folder of digests, `digests` in its data folder, writes in it
   OD-9 says only where a collector on the same machine reads the daily lines and which label it sends; who collects,
   how often and over which call is the collector's and Observatory's.
 - `pnpm validate` reading a `.jsonl` file whole.
-- Which act of each host's claim vocabulary is "a release recorded as done" for RW-1 (Fabric's `fabric_work_release`
-  with `done`, a coding agent's own task list, another host's claim tool): each host names its own.
+- Which act of each host's claim vocabulary is "a release recorded as done" for RW-1: each host names its own.
 - Counting retros written outside the host (a lesson recorded straight in Project Observatory): Observatory's to count.
-- The wire form in which a collector sends the descriptor's `id` and `instance` beside `source` (OD-9): Project
-  Observatory agreed an optional `service {id, instance}` beside `source` (board thread `f7758225`, message
-  `1a12d809`); the form is the collector's and Observatory's.
-- Products without a local descriptor: Fabric Dashboards and Fabric Switchboard reach a collector through Fabric's
-  list of known hosts (message `08458f55`), an arrangement outside this contract. The Fabric Inbox Mac app plans a
-  local descriptor (its B-210): its own folder is an OD-9 declaration; the server folder it fetches is a relayed
-  remote instance's, outside this contract.
+- The wire form in which a collector sends the descriptor's `id` and `instance` beside `source` (OD-9): an optional
+  `service {id, instance}` beside `source` is announced (board thread `f7758225`, message `1a12d809`); the form is the
+  collector's and Project Observatory's.
+- How a product without a local descriptor reaches a collector: outside this contract. A product's own folder in its
+  own local descriptor is an OD-9 declaration; a folder of a remote instance's digests fetched by a local app is a
+  relayed remote instance's, outside this contract.
 - The identity a relayed remote instance's lines are sent under, so that N relays are not N counts (Project
   Observatory keys a digest by project, service, source and day).

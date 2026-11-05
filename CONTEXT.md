@@ -566,10 +566,11 @@ digests, and the label it sends with them, under `extensions/ops-digest/0.1` (OD
 ([operations digests](docs/specification/ops-digest.md))
 
 **Retro after work**: The host obligation `retro-after-work` (DEC-0153): when a session releases a claim or task the host
-records as done, or ends without a retro since it last arose, it writes in the same turn a lesson in Project
+records as done, or ends without a retro since it began or the obligation last arose, it writes in the same turn a lesson in Project
 Observatory, `insight/1` lines, or one line saying there is nothing to say; the host counts each one asked as the
-operation `retro-after-work` in its digests, `ok` only for a lesson or `insight/1` line it saw written through a call it
-carries (one written elsewhere, or a line saying there is nothing to say, counts `unknown`).
+operation `retro-after-work` in its digests, `ok` for an ask answered by a lesson or `insight/1` line it saw written
+through a call it carries (one written elsewhere, or a line saying there is nothing to say, counts `unknown`); `ok`
+counts asks, not retros.
 
 **Runner**: An installed coding-agent CLI a host can drive (Claude Code, Codex, …),
 known from a catalogue entry that names its binaries, its version command and the

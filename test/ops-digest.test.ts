@@ -212,6 +212,16 @@ describe("the reference folds", () => {
     expect(() => foldDay("2026-11-04", [negative, b])).toThrow(/2\^53/);
     expect(foldDay("2026-11-04", [a, b])?.total.ok).toBe(10);
   });
+
+  it("checks each hour's rises before the day sums them, and refuses a rise its hour does not count", () => {
+    const hour = (from: string, failed: number) => ({ ...foldHour([{ op: "x", ok: 0, failed: 30, unknown: 0 }], from, null), risen: [{ op: "x", failed, previous: 0 }] }) as HourlyDigest;
+    for (const [one, two] of [[-5, 30], [2.5, 7.5], [Number.NaN, 30]] as Array<[number, number]>) {
+      expect(() => foldDay("2026-11-04", [hour("2026-11-04T01:00:00Z", one), hour("2026-11-04T02:00:00Z", two)]), `${one} ${two}`).toThrow(/rise of x in 2026-11-04T0\d:00:00.000Z/);
+    }
+    const stray = { ...hour("2026-11-04T01:00:00Z", 30), risen: [{ op: "y", failed: 30, previous: 0 }] } as HourlyDigest;
+    expect(() => foldDay("2026-11-04", [stray])).toThrow(/y rose in 2026-11-04T01:00:00.000Z but that hour's ops does not count it/);
+    expect(foldDay("2026-11-04", [hour("2026-11-04T01:00:00Z", 30), hour("2026-11-04T02:00:00Z", 30)])?.risen).toEqual([{ op: "x", hours: 2, failed: 60 }]);
+  });
   it("refuses an hour that is not whole and skips an hour it cannot read", () => {
     expect(() => foldHour([], "2026-11-04T17:30:00Z", null)).toThrow(/whole UTC hour/);
     const broken = { ...foldHour([], "2026-11-04T01:00:00Z", null), from: "soon" } as unknown as HourlyDigest;
@@ -310,7 +320,7 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     expect(evaluateSemanticRules("service-descriptor", value).find((f) => f.instancePath === `${at}/4/dir`)?.message).toContain("credential");
   });
 
-  it("compares dirs under Unicode case folding after NFC, trailing dots and spaces dropped", () => {
+  it("compares dirs under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped", () => {
     const pairs: Array<[string, string]> = [["Straße", "STRASSE"], ["Stra\u1e9ee", "Straße"], ["σασ", "ΣΑΣ"], ["café", "café"], ["digests.", "digests"], ["digests ", "digests"], ["a/Digests./b", "A/digests/B"], ["\u1fbc\u0342", "\u1fb7"], ["\u0131", "i"], ["\u0131", "I"]];
     for (const [a, b] of pairs) {
       expect(foldDir(a), `${a} ${b}`).toBe(foldDir(b));
@@ -330,6 +340,9 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
         expect(result.code, name).toBe(0);
         expect(result.out, name).toContain("hint/declaration-only");
         expect(result.out, name).toContain("FAC-SEM-168 runs only on the declaration inside a service descriptor");
+        const json = JSON.parse(runCli([file, "--schema", "service-ops-digest-extension.schema.json", "--json"]).out) as { notes?: Array<{ rule: string; help: string }>; problems: Array<{ rule: string; help: string }> };
+        const hint = [...(json.notes ?? []), ...json.problems].find((note) => note.rule === "hint/declaration-only");
+        expect(hint?.help, name).toBe("docs/specification/ops-digest.md#where-a-collector-reads-the-daily-digests");
       }
     } finally {
       rmSync(scratch, { recursive: true, force: true });
