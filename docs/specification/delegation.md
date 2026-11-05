@@ -680,8 +680,8 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
 - **OA-5, what stays the person's.** The human steps of AP-4 and MD-6: a sign-in (with its one-time code), a consent,
   a payment or top-up, a secret typed in or handed out, spend above a limit, a passkey signature, a comparison of codes between two
   people or the choice to share without one (DEC-0142); a decision recorded as the
-  operator's own when the relay does not carry it; and a source hand-over, which a relay covers only as the operator's
-  word for that one act, as [source](source.md#handing-over) specifies (DEC-0149).
+  operator's own when the relay does not carry it; and, not a human step: a source hand-over, which a relay covers only
+  as the operator's word for that one act, as [source](source.md#handing-over) specifies (DEC-0149).
 - **OA-6, the record.** The receiver records the relay as its reason: the operator's words (a peer share link's fragment
   replaced by the share id, PS-4, DEC-0147), `at` and `source` in its change log or audit record, its reply in the thread, its handoff. A service records `source` with the decision or
   the mandate (`actionDecision` and `mandateCovers` return it in `recordAs`). `source` is the relaying agent's

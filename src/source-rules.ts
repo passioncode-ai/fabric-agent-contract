@@ -291,7 +291,9 @@ export function nestedTest(manifest: unknown): (written: unknown) => boolean {
  * sends it: a patch path that is the manifest itself, in any spelling, is refused, and the patch is held (kept
  * unapplied) until the owner decides; the owner changes the manifest by a commit at the source. `exclude` is read folded
  * (`foldSegment`), and when the manifest has any exclude entry a segment in which `~` is followed by a digit
- * (`PRIVAT~1.MD`) is refused, since Windows may resolve such a short name to an excluded folder.
+ * (`PRIVAT~1.MD`) is refused, since Windows may resolve such a short name to an excluded folder. A path beneath a
+ * symbolic link in the receiver's tree is refused too, as `git apply` refuses one; the path list cannot tell, so the
+ * receiver checks it at apply time.
  */
 export function patchPathsAllowed(manifest: unknown, paths: readonly unknown[]): string[] {
   const isSource = sourcePathTest(manifest);
