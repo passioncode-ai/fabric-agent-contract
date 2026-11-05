@@ -9234,14 +9234,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   read only a manifest or a well-known answer that carries it. No existing schema changes; `rawValues` in
   `src/secret-shape.ts` appends in place (the same lines as CT-194's branch), which changes no answer;
   `channel-agent-standard/1` joins the protocol register as a schema `const`. `contractVersion` stays `0.1.0`. The
-  standard's section 5.1 publishes `support-quality-daily/1` per project, where `/1` keeps one channel of four per event,
-  with members `/1` does not have, and defers them itself until every reader of the feed takes that schema, which
-  DEC-0151 (CT-210, in progress) proposes, with the unit of `toPerson*` and the mapping of the seven channel kinds to
-  `/1`'s four channels; until it lands an agent following section 5.1 emits payloads this contract refuses, and an
-  agent declaring several projects publishes no per-project `support.quality_daily` on a shared channel, so the
-  standard's observed per-project quality check reads missing there. Declarations published before this revision are
-  read under these grammars; what they narrow against the standard's section 13.6 is the one list in
-  [channel agent](specification/channel-agent.md#narrowings-against-the-standard), held to the schema.
+  standard's section 5.1 publishes `support-quality-daily/1` per project, where `/1` keeps one channel of four per
+  event, with members `/1` does not have, and defers them itself until every reader of the feed takes that schema, as
+  round 4 reads; the owner's master since `86c49ec` renames the two members (`autonomy.answeredTickets`,
+  `stability.safeReplyTurns`, `stability.safeReplyTickets`) and takes `toPerson*` in turns (board message `b840a16b`).
+  That schema and the mapping of the seven channel kinds to `/1`'s four channels are what DEC-0151 (CT-210, in progress)
+  proposes; until it lands an agent following section 5.1 emits payloads this contract refuses. An agent declaring
+  several projects publishes no per-project `support.quality_daily` on a shared channel; under DEC-0151's rule 1 such a
+  channel stays withheld after DEC-0151 lands, until its feed's readers adopt, so the standard's observed per-project
+  quality check reads missing there until the standard's section 11 accepts that withholding by period. Declarations
+  published before this revision are read under these grammars; what they narrow against the standard's section 13.6 is
+  the one list in [channel agent](specification/channel-agent.md#narrowings-against-the-standard), held to the schema.
 - **Consequences / affects:** `src/extensions.ts`, `src/channel-agent.ts`, `src/semantic-rules.ts`,
   `src/protocol-revisions.ts`, `schemas/service-channel-agent-extension.schema.json`, `tools/vectors/channel-agent.ts`,
   `tools/vectors/run.ts`, `fixtures/vectors/channel-agent.json`, `fixtures/positive/service-channel-agent-extension.json`,
@@ -9252,14 +9255,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/consistency.test.ts` (G-08's key list), `vitest.config.ts` (the module's floor), `src/secret-shape.ts`
   (`rawValues`), `fixtures/semantic/manifest-channel-agent-nulls.json`, `src/validate-cli.ts` and
   `test/validate-cli.test.ts` (`hint/declaration-only`), `docs/specification/service.md` (the well-known answer's
-  extensions), `docs/specification/identifiers.md` (compared as written), `docs/ux/scenarios.md` (SCN-002, SCN-043's alternative paths), `docs/ux/flows.md` (FLW-29);
+  extensions), `docs/specification/identifiers.md` (compared as written), `docs/ux/scenarios.md` (SCN-002, SCN-043's alternative paths, SCN-055), `docs/ux/screens.md` (SCR-03), `docs/ux/flows.md` (FLW-29);
   `docs/specification/channel-agent.md`, `docs/specification/README.md`, `interop.md` (the extension keys), `support-quality.md` (the
   pointer), `conformance.md` (the register, the reference modules, the channel agent's rows), `docs/DOCMAP.md`,
   `CONTEXT.md` (Channel agent), `docs/evidence/sources.md`,
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 23 of the readings, round 21's seam reading included; CA-8 is the coordinator's
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 24 of the readings, round 21's seam reading included; CA-8 is the coordinator's
   decision of round 17 on thread `b6820b97` (message `5a1334d1`), answering a producer who asked whether the declaration
   needs an `untrusted_input` field, and its bounds are the coordinator's decision of round 18, taken in the coordinating
   session with no board message: a word recognised in a chat is not a DEC-0121 AP-3 source, it never sets
@@ -9279,6 +9282,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   AP-3's sources. Round 23 was not clean (the held-send and shared-bot sentences): the coordinator's decision scoped the
   held send to the chat word (the owner's approval rules end a section 9 hold; AP-1 and AP-2 still take the service's
   page, an accepted elicitation and the host's click) and based the shared-bot sentence on OC-3, OC-4 and OC-14.
+  Round 24 was not clean (the merge post cited a paragraph main lacks): the coordinator's decision quotes the list in
+  the post, states round 4's section 5.1 as round 4's beside the owner's later master, and says a shared channel stays
+  withheld after DEC-0151 lands until its readers adopt.
   `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149

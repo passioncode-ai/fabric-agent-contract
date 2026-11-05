@@ -6,7 +6,7 @@
  *   tsx tools/vectors/channel-agent.ts --write   write it
  *
  * Every vector change is made here and written by `--write`, never by hand. Each expected finding is written below by
- * hand from DEC-0150 (CA-1 to CA-5) and channel-agent-standard/1 sections 11 and 13.6; nothing here imports
+ * hand from DEC-0150 (CA-1 to CA-5, and CA-8 for `untrusted_input`) and channel-agent-standard/1 sections 11 and 13.6; nothing here imports
  * `src/channel-agent.ts`, so the gate checks that the reference agrees.
  */
 import { readFileSync, writeFileSync } from "node:fs";
@@ -258,6 +258,7 @@ function declarations(): Json[] {
     ["an untrusted_input member at the top: not declared (CA-8)", manifest({ ...declaration(), untrusted_input: false }), invalid, { declared: false, reported: true, errors: ["FAC-SEM-162 at /: maxProperties (more members than the schema declares)"] }],
     ["an untrusted_input member in a project: not declared (CA-8)", manifest(declaration(project({ untrusted_input: false }))), invalid, { declared: false, reported: true, errors: ["FAC-SEM-162 at /projects/0: maxProperties (more members than the schema declares)"] }],
     ["an untrusted_input member in a channel: not declared (CA-8)", withChannel({ ...dm, untrusted_input: false }), invalid, { declared: false, reported: true, errors: ["FAC-SEM-162 at /projects/0/channels/0: maxProperties (more members than the schema declares)"] }],
+    ["an untrusted_input member in the sparse reviews channel: not declared, by additionalProperties (CA-8)", withChannel({ ...reviews, untrusted_input: false }, 1), invalid, { declared: false, reported: true, errors: ["FAC-SEM-162 at /projects/0/channels/1: additionalProperties (only declared members are taken)"] }],
     overflowCopies(),
     ["a channel with replies off, a holding reply and a final text it does not use: declared, nothing owed", manifest(declaration(project({ channels: [dm, { ...dm, id: "quiet-desk", replies_enabled: false, holding_reply: true, decision: "replies-off-2026", texts: { final: { none: "not_used" } } }], recorded_decisions: [{ id: "replies-off-2026", date: "2026-11-01", effect: "replies_off" }] }))), [], { declared: true, reported: false, errors: [], obligations: [] }],
     ["a channel with replies off and a holding reply, with no texts: declared, nothing owed", manifest(declaration(project({ channels: [dm, { ...dm, id: "quiet-desk", replies_enabled: false, holding_reply: true, decision: "replies-off-2026", texts: {} }], recorded_decisions: [{ id: "replies-off-2026", date: "2026-11-01", effect: "replies_off" }] }))), [], { declared: true, reported: false, errors: [], obligations: [] }],

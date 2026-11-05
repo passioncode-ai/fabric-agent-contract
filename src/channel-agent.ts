@@ -254,8 +254,8 @@ function allowed(error: { keyword: string; schema?: unknown; params?: Record<str
     const form = NONE_FORM_AT.test(at) ? ", or the none form {none: not_yet, until} / {none: not_used}" : "";
     return ` (${[params.type].flat().join(" or ")}${form})`;
   }
-  // A guard for a future non-nullable `oneOf`: schemaErrors drops a nullable member's `oneOf` line, so no line reaches
-  // this branch today.
+  // A guard for a future non-nullable `oneOf`: schemaErrors drops a nullable member's `oneOf` line, so no line from it
+  // reaches this branch today; the nullable sub-branch serves direct `placed()` callers.
   if (error.keyword === "oneOf") {
     const branches = error.schema;
     if (Array.isArray(branches)) {

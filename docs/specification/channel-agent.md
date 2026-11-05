@@ -466,16 +466,18 @@ existing fixture validates and checks as before. `contractVersion` stays `0.1.0`
   (`FAC-SEM-162` in a declaration, and `FAC-SEM-099` in a `protocols` list that names it).
 - **The daily quality payload.** The standard's section 5.1 publishes [`support-quality-daily/1`](support-quality.md)
   per project, where `/1` keeps one channel of four per event, with members `/1` does not have (`arrived`, `ended`,
-  `open.*`, the outcomes, `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets`,
-  `notATicket`). Section 5.1 defers only the fields it marks new: "publish them once every reader of the feed takes
-  that schema"; `autonomy.answered` and `stability.fallbackTurns`, which it treats as present, are not in `/1`
-  either, and it counts `toPersonPolicy` and `toPersonInability` in tickets, where `/1` names no ticket unit (its
-  autonomy counts are bounded by turns). That schema, the
-  unit of those counts and how the seven channel kinds here map to `/1`'s four channels (`chat`, `mail`, `reviews`,
-  `community`) are what DEC-0151, in progress on CT-210, proposes. Until it lands, an agent following section 5.1 emits
-  payloads this contract refuses, and an agent declaring several projects publishes no per-project
-  `support.quality_daily` on a channel they share, because a `/1` reader keeps one event per service, channel and day,
-  so the standard's observed per-project quality check reads missing for a shared channel.
+  `open.*`, the outcomes, `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets`, `notATicket`),
+  as round 4 reads; the owner's master since `86c49ec` renames the two members (`autonomy.answeredTickets`,
+  `stability.safeReplyTurns`, `stability.safeReplyTickets`) and takes `toPerson*` in turns (board message `b840a16b`).
+  Round 4's section 5.1 defers only the fields it marks new: "publish them once every reader of the feed takes that
+  schema", and counts `toPersonPolicy` and `toPersonInability` in tickets, where `/1` names no ticket unit (its autonomy
+  counts are bounded by turns). That schema and how the seven channel kinds here map to `/1`'s four channels (`chat`,
+  `mail`, `reviews`, `community`) are what DEC-0151, in progress on CT-210, proposes. Until it lands, an agent following
+  section 5.1 emits payloads this contract refuses. An agent declaring several projects publishes no per-project
+  `support.quality_daily` on a channel they share, because a `/1` reader keeps one event per service, channel and day;
+  under DEC-0151's rule 1 such a channel stays withheld after DEC-0151 lands, until its feed's readers adopt, so the
+  standard's observed per-project quality check reads missing for a shared channel until the standard's section 11
+  accepts that withholding by period.
 - **Declarations published before this revision.** A declaration an agent published before this revision is read under
   these grammars; `pnpm validate` on its manifest or well-known answer shows which members it fails.
 
