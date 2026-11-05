@@ -9140,25 +9140,31 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   8. **Reference and vectors.** `foldHour`, `foldDay`, `isRise` and the rules in `src/ops-digest.ts`; vectors in
      `fixtures/vectors/ops-digest.json`; `pnpm validate` tells the two digests apart by `schema` (kinds
      `ops-digest-hourly`, `ops-digest-daily`).
-  9. **Where a collector reads the daily digests (OD-9), a change made in review.** A local service descriptor MAY carry
-     the extension key `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1` (protocol
+  9. **Where a collector reads the daily digests (OD-9), a change made in review.** A local service descriptor MAY
+     carry the extension key `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1` (protocol
      `fabric-ops-digest/0.1`, named only in the register), whose value is 1 to 8 closed `{dir, source}`
      (`schemas/service-ops-digest-extension.schema.json`): `dir` a folder inside `paths.data`, relative to it, in the
      grammar of a package path (no leading `/` or `~`, no drive, no backslash, no `.` or `..` segment), holding the
      product's `daily-YYYY-MM.jsonl` files (OD-6); `source` the label (`^[a-z][a-z0-9-]{0,31}$`, `app` by convention)
      a collector on the same machine sends with each daily line it reads there. The digests stay as written (OD-6,
      OD-7); the key only says where to read and which label to send. `FAC-SEM-168` (kind `service-descriptor`) refuses
-     the key on a remote placement or on a local one without `paths.data`, a value that is not its schema's, a `source`
-     named twice, a `dir` with a segment that folds to nothing (a file system reads it as `.` or `..`, so the folder would
-     leave `paths.data`), a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped (one folder under two labels would be sent twice), a `dir` holding a home folder (`hasHomePath`, with the
-     boundary of item 3: `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x` pass) and a `dir` or `source` shaped like a credential
-     (`secretValue`); one finding refuses the whole declaration, which a collector reads as not declared and reports.
-     `digestFoldersView` (whose `usable` is true only when the rule has no finding) and `digestFoldersRules` in
-     `src/ops-digest.ts` are the reference. A collector takes each day's first daily line whenever it first appears (a
-     caught-up day included) and sends it once, with `source` and which descriptor the line came from (its `id` and
-     `instance`; an optional `service {id, instance}` beside `source` is announced, board message `1a12d809`). The
-     collector role is announced by Fabric (board thread `f7758225`, message `2ed505f2`). A product without a local descriptor is outside this declaration, and a declared `dir` holds only
-     the declaring instance's own digests: relaying a remote instance's digests is outside this contract.
+     the key on a remote placement or on a local one without `paths.data`, a value that is not its schema's, a
+     `source` named twice, a `dir` named twice, compared under canonical caseless matching (the code points HFS+
+     ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and
+     spaces dropped (one folder under two labels would be sent twice), a `dir` segment made only of dots, spaces and
+     code points HFS+ ignores (it folds to nothing, and a tool that trims or folds names as the fold does, Win32 path
+     handling dropping trailing dots and spaces or a reader stripping those code points before joining, may read it as
+     empty, `.` or `..`, outside `paths.data`), a `dir` holding a home folder (`hasHomePath`, with the boundary of
+     item 3: `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x`
+     pass) and a `dir` or `source` shaped like a credential (`secretValue`); one finding refuses the whole
+     declaration, which a collector reads as not declared and reports. `digestFoldersView` (whose `usable` is true
+     only when the rule has no finding) and `digestFoldersRules` in `src/ops-digest.ts` are the reference. A collector
+     takes each day's first daily line whenever it first appears (a caught-up day included) and sends it once, with
+     `source` and which descriptor the line came from (its `id` and `instance`; an optional `service {id, instance}`
+     beside `source` is announced, board message `1a12d809`). The collector role is announced by Fabric (board thread
+     `f7758225`, message `2ed505f2`). A product without a local descriptor is outside this declaration, and a declared
+     `dir` holds only the declaring instance's own digests: relaying a remote instance's digests is outside this
+     contract.
 - **Why:** one shape lets one reader read every product's digests; the shape is the one already written, so the first producer moves nothing. A name grammar that holds no empty
   segment, `.`, `..` or leading `/` keeps absolute paths and URLs out by construction, and the home-folder detector the
   relative home paths `/` would let in. The folder a collector reads is declared where the product already says what it
@@ -9277,6 +9283,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   UTC day that has hourly lines", since a day with none has no daily digest, OD-5), and its batch is folded in, with the
   producer row's duties stated once, the `bearer` gloss's "other than a line break" and `HOME_PATH`'s boundary as the
   operations digests page states it, and from its seam reading a `dir` segment that folds to nothing (`.`, U+200C, `.`
-  reads as `..` on HFS+) refused;
+  reads as `..` on HFS+) refused; round 13 at `db110586` was not clean: the segment rule's stated mechanism (a reader
+  measured on a scratch HFS+ volume that `.`, U+200C, `.` is created as its own folder and never resolves to `..`, so
+  that parenthesis of round 12 is withdrawn; the refusal stays, the safe direction, for the reason item 9 now gives) and
+  its four lists (the rule now named in each), and its batch is folded in;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

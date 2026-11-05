@@ -65,19 +65,19 @@ fields are Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's
 
 ## Siblings on the same registers
 
-DEC-0149, DEC-0150 and DEC-0152 are on other branches. When DEC-0149, DEC-0150 and DEC-0153 are all on `main`:
+DEC-0148 and DEC-0150 are on `main` (`1016f0ec`, read 2026-11-05); DEC-0149, DEC-0151 and DEC-0152 are on other
+branches. Landing this branch directly on `main` as it stands:
 
-- `test/schema-compilation.test.ts` counts 151 schemas (146 on `main`, one for DEC-0149, one for DEC-0150, three
-  for DEC-0153). This branch writes 149, DEC-0149's 147 and DEC-0150's 147; whichever lands last sets 151 by hand.
-- DEC-0150 (branch `agent/channel-agent-ext-v3-20261104`) adds the extension key `channel-agent/0.1` too: the second
-  to land keeps both constants in `src/extensions.ts` and `test/consistency.test.ts` (and the test's title), both rows
-  in `interop.md`'s key table, and writes "nine extension keys" there. Its rule codes end at `FAC-SEM-165`, so the
-  register's next free stays `FAC-SEM-169`. DEC-0150 also adds a `hint/declaration-only` entry to
-  `src/validate-cli.ts` (`HINT_HELP` and `readerHints`) for its bare declaration, as this branch does for
-  `service-ops-digest-extension.schema.json`: the second to land keeps both `readerHints` lines and one `HINT_HELP`
-  rule name with each line carrying its own schema's help link (a `Hint`'s fourth element: ops-digest.md's anchor here,
-  `channel-agent.md#what-is-checked` for DEC-0150's); the check is that each bare declaration prints its own page's
-  link (`test/ops-digest.test.ts` reads it from `--json`).
+- `test/schema-compilation.test.ts` counts 150 schemas (147 on `main` at `1016f0ec`, three for DEC-0153), and 151 once
+  DEC-0149 lands too (one more); whichever lands last sets the count by hand.
+- DEC-0150's extension key `channel-agent/0.1` is on `main`: the merge keeps both constants in `src/extensions.ts` and
+  `test/consistency.test.ts` (and the test's title), both rows in `interop.md`'s key table, and writes "nine extension
+  keys" there (`main` says eight). Its rule codes end at `FAC-SEM-165`, so the register's next free stays `FAC-SEM-169`.
+- DEC-0150's `hint/declaration-only` entry is on `main` too, and `main`'s `Hint` is already the 4-tuple. The merge
+  keeps both `readerHints` lines, each with its explicit help link as the fourth element (ops-digest.md's anchor here,
+  `channel-agent.md#what-is-checked` for DEC-0150's), and one `HINT_HELP` rule name (the collision resolved this way);
+  the check is that each bare declaration prints its own page's link (`test/ops-digest.test.ts` reads it from
+  `--json`, and asserts the channel-agent link when that schema exists).
 - `vitest.config.ts` keeps one coverage `include` line holding every branch's files, plus `src/ops-digest.ts`'s
   100 % branch floor.
 - `test/positive-sweep.test.ts`'s sources list holds both `source-rules` and `ops-digest`; `test/rule-tolerance.test.ts`
@@ -281,17 +281,33 @@ product's obligation.
 - Round 12 at `4e00da84` was not clean: a daily line was promised for every UTC day, though a day with no hourly line has
   no daily digest (OD-5); now "each closed UTC day that has hourly lines" in DOCMAP, the spec README, the page intro,
   OD-1, DEC-0153 item 2, the producer row, CONTEXT and the module docstring ("every UTC day" counts 0 there). Also: the
-  producer row's duties stated once with one OD reference, the `bearer` gloss "other than a line break (as
+  producer row's duties stated once, the `bearer` gloss "other than a line break (as
   JavaScript's `.` reads it)", pinned (`bearer` with two spaces is refused, `bearer`, a space and a line break is not;
   the round-12 note's `'bearer ' + ' '` is refused on this tree, so the line break is the passing sample), and
   `HOME_PATH`'s boundary in `activity.md` and its docstring stated as the operations digests page states it. The seam
   reading's add-on (its own commit): a `dir` segment that folds to nothing is refused (FAC-SEM-168, OD-9, the rule row,
-  the schema), and the landing notes for DEC-0151's detector and DEC-0149's fold are corrected. Round 13 is next.
+  the schema), and the landing notes for DEC-0151's detector and DEC-0149's fold are corrected.
+- Round 13 at `db110586` was not clean: the segment rule's stated mechanism (a reader measured on a scratch HFS+ volume
+  that `.`, U+200C, `.` is created as its own folder and never resolves to `..`; the refusal stays, the safe direction,
+  now worded: a segment made only of dots, spaces and code points HFS+ ignores folds to nothing, and a tool that trims
+  or folds names as the fold does may read it as empty, `.` or `..`, outside `paths.data`) and its four lists (the rule
+  now named in the page's FAC-SEM-168 bullet, the declaring product's conformance row, the schema's root description and
+  the declaration-only hint). Also: a duplicate dir holding a code point HFS+ ignores is printed as "this dir",
+  `HOME_PATH`'s docstring names the `%2F` boundary, and the siblings and landing notes now that DEC-0148 and DEC-0150
+  are on `main`. Round 14 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-13 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
+round 2 with coverage on `src/ops-digest.ts` (4216 tests; 264 of 264 statements, 212 of 212 branches);
+`pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`; `python3 docs/ux/lint.py`;
+`pnpm run privacy:check` (0 findings). The branch gate on this tree before its commit (15-minute load 40.5, 19 GB free,
+under the heavy lock): `pnpm run check` (109 files, 9950 tests passed, 1 skipped, coverage floors held; `ux:lint`,
+`docs:check`, `privacy:check` 0 findings) exit 0, and `pnpm run vectors:check` exit 0. This paragraph is the only
+change after the gate.
 
 The branch gate at `74f293f5`, 2026-11-05 (15-minute load 37.9, 20 GB free, under the heavy lock):
 `ORG_INDEX=<org-index checkout> pnpm run check` (typecheck, `pnpm test` with coverage and its per-file floors: 109 files,

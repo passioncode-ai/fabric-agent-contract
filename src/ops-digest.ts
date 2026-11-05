@@ -333,6 +333,8 @@ const NUSKHURI = /[\u2d00-\u2d25]/gu;
 const toMkhedruli = (letter: string): string => String.fromCodePoint((letter.codePointAt(0) as number) - 0x2d00 + 0x10d0);
 /** Code points HFS+ ignores in a name, stripped before the fold exactly as DEC-0149's `foldSegment` strips them. */
 const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
+/** The same class without the global flag, for a stateless test. */
+const HFS_IGNORABLE_ONE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/u;
 /**
  * A `dir` as a file system that folds case compares it, canonical caseless as DEC-0149's fold: each segment with the
  * code points HFS+ ignores removed (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F, U+FEFF), then as NFD,
@@ -357,7 +359,8 @@ const hiddenDir = (dir: string): boolean => hidden(dir) || hidden(dir.replace(HF
  * twice; a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped, segment
  * by segment (one folder under two labels would be sent twice); a `dir` that holds a home folder (`hasHomePath`), the
  * `dir` read both as written and with the code points HFS+ ignores removed, for these findings and for hiding a class; a
- * `dir` with a segment that folds (`foldDir`) to nothing, which a file system reads as `.` or `..`; a
+ * `dir` with a segment made only of dots, spaces and code points HFS+ ignores (it folds to nothing; a tool that trims or
+ * folds names may read it as empty, `.` or `..`); a
  * `dir` or a `source` shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users`
  * or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
  * and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case,
@@ -391,12 +394,15 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     if (seen.has(folder.source)) findings.push(folderFinding(`${at}/source`, `${shown(folder.source, "this source")} is named twice as a source; each folder sends its own label`));
     seen.add(folder.source);
     const folded = foldDir(folder.dir);
-    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `${hiddenClass.has(folded) ? "this dir" : folder.dir} is named twice as a dir (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
+    // "this dir" also when the dir holds a code point HFS+ ignores (a bidirectional control among them), so no invisible
+    // control reaches a reader's output.
+    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `${hiddenClass.has(folded) || HFS_IGNORABLE_ONE.test(folder.dir) ? "this dir" : folder.dir} is named twice as a dir (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
     dirs.add(folded);
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
-    // A segment that folds to nothing reads as '.' or '..' on a file system that ignores some code points (HFS+) or
-    // drops trailing dots and spaces (NTFS), and would climb out of paths.data.
-    if (folder.dir.split("/").some((segment) => foldDir(segment) === "")) findings.push(folderFinding(`${at}/dir`, "a dir segment reads as '.' or '..' on a file system that ignores some code points; it is relative to the product's data folder"));
+    // A segment made only of dots, spaces and code points HFS+ ignores folds to nothing; a tool that trims or folds names
+    // as the fold does (Win32 path handling drops trailing dots and spaces; a reader that strips those code points
+    // before joining) may read it as empty, '.' or '..', outside paths.data. Refused, the safe direction.
+    if (folder.dir.split("/").some((segment) => foldDir(segment) === "")) findings.push(folderFinding(`${at}/dir`, "a dir segment folds to nothing (only dots, spaces or code points a file system may ignore); a tool may read it as '.' or '..', outside the product's data folder"));
     const bare = folder.dir.replace(HFS_IGNORABLE, "");
     if (secretValue(folder.dir) || secretValue(bare)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));
     else if (hasHomePath(folder.dir) || hasHomePath(bare)) findings.push(folderFinding(`${at}/dir`, "a dir holds a home folder; it is relative to the product's data folder"));
