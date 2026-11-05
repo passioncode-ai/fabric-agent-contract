@@ -135,7 +135,10 @@ product's obligation.
 - **Fabric Inbox**: (a) release tag v0.95.0 (`6fed640`); `passioncode-ai/fabric-inbox` origin/main `71a3edd6`, where
   its rows were read. (b) B-212 "in review (0.95.0)", shipped in the v0.95.0 tag through PR #413; B-213 "open; due
   2026-11-16"; B-210 "open; due 2026-11-16 (Fabric's side 2026-11-18)", narrowed by PR #414 to the Mac app's own
-  folder (announced, board message `17613e30`). (c) Not run.
+  folder (announced, board message `17613e30`). (c) Not run. Re-read 2026-11-05 18:37Z (read only, nothing run): the
+  latest release is v0.96.0 (16:17Z); PR #417, "the Mac app's digests keep the stop hour, and its descriptor names
+  their folder (B-213, B-210, 0.98.0)", is open, so OD-1 and OD-3 (B-213) and OD-9 (B-210) for 0.98.0 are the board's
+  claim (reply `132e7e91` on `f7758225`) until that release exists.
 - **Fabric Dashboards**: (a) `passioncode-ai/fabric-dashboards` origin/main `9b9085bd`, latest release v0.8.23 (main
   two commits ahead). (b) FD-144 "done 2026-11-04, merged through PR #319, #323 and #324, released in 0.8.21"; FD-153 "done 2026-11-05,
   merged through PR #333, released in 0.8.23". (c) Not run.
@@ -143,7 +146,9 @@ product's obligation.
   (b) SB-250 "closed 2026-11-05: released in v0.7.11"; SB-255 "in review 2026-11-05, branch `sb-254-crash-restart`"
   (merged to main in PR #403); SB-257 "in review 2026-11-05, branch `sb-257-stop-hour`" (merged to main in PR #405;
   the next release after 0.7.12, announced, board message `157e65b4`); SB-251 to SB-254 and SB-256 are not about
-  digests. (c) Not run.
+  digests. (c) Not run. Re-read 2026-11-05 18:37Z (read only, nothing run): v0.7.12 (published 16:19Z, `e6da46ff`) is
+  an ancestor of `32f94cea` and contains `ba0f6cb` (PR #403); v0.7.13 (published 18:09Z, `1ac3ccd3`) contains
+  `32f94ce` (PR #405, SB-257's OD-1 work), as the board reply `36e22447` on `f7758225` says.
 - **Project Observatory**: (a) `passioncode-ai/project-observatory-dashboard` origin/main `4116b3ac`, latest release
   v0.33.1. (b) OBS-330 "open": "Accept Fabric's daily digest of its own operations log as a project record kind";
   OBS-331 "open": "A daily review of what every agent learned: once a day, read the lessons (`observatory_lesson`) and
@@ -168,7 +173,8 @@ product's obligation.
   branch and main when written) widens `SECRET_VALUE` for underscore-form provider prefixes, `AIza` keys and `hf_`
   tokens, owned by DEC-0151's detector, with tests from split literals.
 - **At landing, the fold:** on the merged tree with DEC-0149, `foldDir` calls DEC-0149's `foldPath` (one
-  implementation; a `dir` has no trailing `/`), and the parity test in `test/ops-digest.test.ts` (DEC-0149's
+  implementation; a `dir` has no trailing `/`); remove `NUSKHURI` and `toMkhedruli` from `src/ops-digest.ts` and import
+  `HFS_IGNORABLE` from `src/source-rules.ts` if `hiddenDir` still uses it, so `pnpm typecheck` exits 0 (no TS6133), and the parity test in `test/ops-digest.test.ts` (DEC-0149's
   `FOLD_PAIRS` at `d4cc1e16` copied as written, plus the HFS+ samples its next step adds) keeps holding.
 - **At landing, the hints:** on the merged tree with DEC-0150, both `readerHints` lines carry an explicit help link (the
   `Hint`'s fourth element); `test/ops-digest.test.ts` asserts `channel-agent.md#what-is-checked` for the channel-agent
@@ -255,13 +261,27 @@ product's obligation.
   `a.eyJab.bb.c` is refused, a lower-case `akia` tail is refused). The Alternatives' "which OD-1 makes impossible"
   (a daily digest of zero hours) is true again under one kind and is kept. Also: `dir` read also with the code points
   HFS+ ignores removed (findings and class hiding), `foldHour`'s docstring, FAC-SEM-167 and FAC-SEM-168 in
-  `HOME_PATH`'s scope register, and OD-9's "the key anywhere but a local service descriptor is unread and unreported".
+  `HOME_PATH`'s scope register, and OD-9's "the key in any document other than a service descriptor is unread and unreported; on a remote service descriptor it is a `FAC-SEM-168` finding" (reworded in round 11).
   Round 11 is next.
+- Round 11 at `fcb1c55f` was not clean: OD-9's sentence on a remote descriptor (now "The key in any document other
+  than a service descriptor is unread and unreported; on a remote service descriptor it is a `FAC-SEM-168` finding").
+  Also: the Why restated for one writer (`hours` counts hourly lines folded, never uptime), a product that keeps its
+  records elsewhere writing each hourly line when that hour closes (an empty one for an observed hour with no record)
+  and answering a closed day with the lines already written, "each hour it observed itself running in" in the module
+  docstring, the producer row, DOCMAP and the spec README, the `bearer` shape stated as the detector reads it (pinned
+  as a dir), and the Consumers re-read for Switchboard v0.7.12 and v0.7.13 and Inbox PR #417. Round 12 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-11 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
+round 2 with coverage on `src/ops-digest.ts` (4214 tests; 260 of 260 statements, 208 of 208 branches);
+`pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`; `python3 docs/ux/lint.py`;
+`pnpm run privacy:check` (0 findings). "folds from stored records" counts 0 in DEC-0153; "ran through" and "folded every
+hour" count 0 in the module, the producer row, DOCMAP, the spec README, the spec page and CONTEXT. The branch gate is
+owed: the 15-minute load was 51.6.
 
 Round-10 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
 round 2 with coverage on `src/ops-digest.ts` (4214 tests; 260 of 260 statements, 208 of 208 branches);

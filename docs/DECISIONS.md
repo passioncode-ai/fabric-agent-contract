@@ -9059,16 +9059,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `YYYY-MM-DD` UTC; `hours` 1 to 24. A product that keeps the log writes one hourly line for each hour it observed
      itself running in (a tick or a record inside the hour), an empty one included, never filling the hours from the
      last written to now without observing them (round 4: a sleep is not a run), and every UTC day folds that day's
-     lines into one daily line. A product that keeps its records elsewhere and answers on request still writes those
-     hourly lines, folding its stored records hour by hour, and its answer is the fold of those lines (one kind of
-     writer, decided in round 10). `hours` counts hourly lines folded, never uptime. An hour it did not run, or
-     written as no digest under OD-3, is a gap for the hour after it. The hour a product stops in is kept with its
-     counts and written when it closes, at the next run, compared with the hour just before when that is the last hour
-     written, else with none (a gap); a product that cannot keep it writes nothing for that hour, never a partial
-     line, since a restart in the same hour would leave two lines and readers keep the first. At start a product reads
-     its last hourly line back for `previous`, rebuilds the day's named operations from that day's hourly lines and
-     the hour it kept, and writes every closed hour it kept, the hour it stopped in included, before it folds any
-     closed day (OD-5); otherwise that day's daily line loses that hour for good.
+     lines into one daily line. A product that keeps its records elsewhere and answers on request writes each hourly
+     line when that hour closes, as any writer does, folding its stored records for that hour, with an empty line for
+     an hour it observed itself running in (a tick it records) and no stored record; its answer for a closed day folds
+     the lines already written (one kind of writer, decided in round 10). `hours` counts hourly lines folded, never
+     uptime. An hour it did not run, or written as no digest under OD-3, is a gap for the hour after it. The hour a
+     product stops in is kept with its counts and written when it closes, at the next run, compared with the hour just
+     before when that is the last hour written, else with none (a gap); a product that cannot keep it writes nothing
+     for that hour, never a partial line, since a restart in the same hour would leave two lines and readers keep the
+     first. At start a product reads its last hourly line back for `previous`, rebuilds the day's named operations
+     from that day's hourly lines and the hour it kept, and writes every closed hour it kept, the hour it stopped in
+     included, before it folds any closed day (OD-5); otherwise that day's daily line loses that hour for good.
   3. **An operation's name (OD-2).** `^[a-z][A-Za-z0-9_]*(?:[.:/-][A-Za-z0-9_]+)*$`, at most 64 characters. `/` is a
      separator because Fabric logs an MCP method as `mcp.<method>` (`mcp.tools/list`, `mcp.notifications/initialized`,
      `mcp.notifications/cancelled`; board thread `f7758225`, message `1c191cf7`), and the 175 operation names Fabric
@@ -9079,7 +9080,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      followed by 16 or more letters, digits, `_` or `-` (so inside any word ending in sk: `task-`, `risk-`, `mask-`
      and the like), `gh[pousr]_` followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more
      letters, digits or `-`, `AKIA` followed by 16 letters or digits, `glpat-` followed by 20 or more letters,
-     digits, `_` or `-`; a JWT (`eyJ` and 2 or more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any number of them, case-sensitive); a value starting with `Bearer` and a space; or a
+     digits, `_` or `-`; a JWT (`eyJ` and 2 or more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any number of them, case-sensitive); a value starting with `bearer` in either case, whitespace and one more character; or a
      run of 40 or more letters, digits, `_`, `-` or `/` (so across segments joined by `-` or `/`) that mixes upper
      case, lower case and a digit. `JWT_SHAPE`, `SECRET_VALUE` and `longSecret` (together `secretValue`) in `src/secret-shape.ts` are the definition. So
      `ops.risk-assessment-completed` and `queue.task-assigned-to-worker` are refused and `work.session-end-task-back`
@@ -9165,8 +9166,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   product was down for still gets its daily line at the next run, so a reader never mistakes a restart for a silent
   day. An order written but not checked keeps every line written at the shape's origin valid and keeps readers from depending on it.
   Mapping each product's outcome words keeps one meaning of `failed` across products, and keeping the map out of the
-  digest keeps OD-7. `hours` as hours folded is what an always-on server that folds from stored records can truthfully
-  write. A collector that sends a caught-up day once loses no day and doubles none. Writing the hour a product
+  digest keeps OD-7. `hours` counts hourly lines folded, never uptime, because an hour a product could not keep (OD-1)
+  or wrote as no digest (OD-3) is not folded, and a restart can leave a gap. A collector that sends a caught-up day once loses no day and doubles none. Writing the hour a product
   stops in only when it closes, and never partly, keeps one line per hour, since readers keep the first; reading the
   last line back keeps `previous` true across a restart. An hour written only when the product saw itself in it keeps
   a sleep from reading as hours run with nothing failing. A `dir` that holds only its own instance's digests keeps one
@@ -9267,6 +9268,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   10 at `281619f7` was not clean: the writer kinds half-applied (now one kind: every product writes an hourly line for
   each hour it observed itself in, one that answers on request folding its stored records hour by hour) and the JWT
   shape (now stated as `JWT_SHAPE` reads it, with `JWT_SHAPE`, `SECRET_VALUE` and `longSecret` the definition), and its
-  batch is folded in, with a `dir` read also with the code points HFS+ ignores removed;
+  batch is folded in, with a `dir` read also with the code points HFS+ ignores removed; round 11 at `fcb1c55f` was not
+  clean: OD-9's remote descriptor sentence (the key outside a service descriptor is unread and unreported, on a remote
+  one a FAC-SEM-168 finding), and its batch is folded in, with the Why restated for one writer and the `bearer` shape
+  as the detector reads it;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

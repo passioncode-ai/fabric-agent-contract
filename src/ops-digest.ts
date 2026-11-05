@@ -9,7 +9,8 @@ import { createValidatorSync } from "./validator.js";
 // #region ops-digest, docs: docs/specification/ops-digest.md
 /**
  * A product's operations digests (DEC-0153): every record of its operations log counted by operation and outcome in the
- * hour it happened, one `ops.digest.hourly@1` line per closed hour and one `ops.digest.daily@1` line per closed UTC day.
+ * hour it happened, one `ops.digest.hourly@1` line for each hour it observed itself running in (an empty one included),
+ * written when that hour closes, and one `ops.digest.daily@1` line per closed UTC day.
  * Counts only: no log line, no path, no identifier. A failure count that rose against the hour before is a rise (OD-4).
  * `foldHour` and `foldDay` are the reference folds; `opsDigestRules` is `FAC-SEM-166` (the window and the arithmetic) and
  * `FAC-SEM-167` (no credential and no home folder in an operation's name). `digestFoldersView` reads where a local

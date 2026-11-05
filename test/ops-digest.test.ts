@@ -519,6 +519,10 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
       expect(f.message).not.toContain(run);
     }
     expect(found("service-descriptor", withFolders([{ dir: run, source: "app" }]))).toEqual([`FAC-SEM-168 ${at}/0/dir`]);
+    // The bearer shape as the detector reads it: bearer in either case, whitespace and one more character (a dir, since an
+    // operation's name holds no whitespace).
+    expect(found("service-descriptor", withFolders([{ dir: ["bear", "er x"].join(""), source: "app" }]))).toEqual([`FAC-SEM-168 ${at}/0/dir`]);
+    expect(found("service-descriptor", withFolders([{ dir: ["Bear", "er "].join(""), source: "app" }]))).toEqual([]);
     const home = ["us", "\u200c", "ers/jdoe/digests"].join("");
     expect(found("service-descriptor", withFolders([{ dir: home, source: "app" }]))).toEqual([`FAC-SEM-168 ${at}/0/dir`]);
   });
