@@ -694,13 +694,18 @@ export const PREFIX_FLOORS: ReadonlyArray<readonly [RegExp, number]> = [[/gh[pou
  * removed, percent-decoded, as `rawValues` hands them over), for every query or fragment piece: PIECE_COST, its name's
  * and value's code points, the value's JWT, `sk-` and long-run terms, and, when the value is not empty and the name holds an
  * upper-case letter, the triangular number n(n+1)/2 of the name's length (splitting a name into words may backtrack over it).
- * For every string, ARG_PIECE_COST for each white space, `=`, `/` and `\\` (the argument reading's pieces).
+ * For every string, ARG_PIECE_COST for each white space, `=`, `/` and `\\` (the argument reading's pieces). For every
+ * string `readAsUrl` admits, PIECE_COST once for its URL parses, whether it parses or not. Only the head is counted.
  */
-export function detectorCost(text: string, isHead = false): number {
+export function detectorCost(whole: string, isHead = false): number {
+  // The detector reads only a string's head: a caller that has not cut it yet gets it cut here.
+  const text = isHead ? whole : head(whole);
   // Every string is read as an argument too (secretArgument, which secretUrl also runs first): each separator a piece.
   // Counted in UTF-16 units, what every pass reads (an astral character is two).
   let cost = text.length + jwtRereads(text) + keyRereads(text) + runRereads(text) + argumentPieces(text);
-  if (!(isHead ? readAsUrlRead(text) : readAsUrl(text))) return cost;
+  if (!readAsUrlRead(text)) return cost;
+  // A string read as a URL is parsed twice (here and by secretUrl), whether it parses or throws: PIECE_COST for that.
+  cost += PIECE_COST;
   let url: URL;
   try {
     url = new URL(text);

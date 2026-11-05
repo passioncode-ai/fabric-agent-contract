@@ -59,7 +59,7 @@ FAA-197, on the adapter's main).
   member) and one product break (DEC-0151, in progress, presented as fact), fixed: a member that is not plain, or past
   64 levels, collapses its place for every member below it; every place writes `*` for an undeclared name, a numeric
   object key and a text's language, in all three rules; the narrow readings apply only at their place and only to a
-  value of their own grammar; FAC-SEM-165 reads at most 1 000 000 code points, counting the JWT shape's rereads after
+  value of their own grammar; FAC-SEM-165 reads at most 1 000 000 code points (as of that round), counting the JWT shape's rereads after
   each `eyJ`; a source's `max_age` is above zero again; the reading of earlier declarations and the shared-channel
   quality check are stated. `src/secret-shape.ts` keeps only CT-194's `rawValues` lines.
 - Round 6 of the readings: one product break (this list described a history that was no longer true), fixed by this
@@ -113,7 +113,7 @@ FAA-197, on the adapter's main).
   `db:/...`, with negative vectors); every line of the view names the rule and the place (`FAC-SEM-162 at <place>:
   <keyword> (<limit>)`, `FAC-SEM-165 at <place>`, a misplaced-only manifest reported where its copy stands); a failed
   type names the type alone and a nullable member's `oneOf` its type and null; a Narrowings bullet states the
-  1 000 000 code points; "Not checked here" names only references the agent declares, the desk caps of 10 and 15 move
+  1 000 000 code points (as of that round); "Not checked here" names only references the agent declares, the desk caps of 10 and 15 move
   to the `daily_cap` bullet; the finding on an id that starts with `sk-` asks for a rename; Compatibility says `/1`
   names no ticket unit.
 - The standard's owner answered on thread `b6820b97` (round 4 of section 13.6; the coordinator accepted it there), in a
@@ -184,7 +184,7 @@ FAA-197, on the adapter's main).
   post sends; leaving it out accepted, looser); item 1's pointer comes on the `additionalProperties`, `propertyNames`
   and width lines only; `tiers` may be absent (looser); a draft scenario, SCN-055, follows the reader path, traced to
   FAA-197; the page and CA-1 say how a reader knows a service has a manifest; a member name's own failures are stated
-  by its `propertyNames` line alone; the budget line says reading takes more than 1000000 code points of reading; the
+  by its `propertyNames` line alone; the budget line says reading takes more than 1000000 code points (as of that round) of reading; the
   rename advice follows the role down the walk (any frame at or below a channel's `texts`); `SK_FLOOR` is 16; the
   boundary `sk-` charge is described from its `s`, with an exact test and a vector at the budget's edge; a test checks
   the boundary forms both ways; a well-known declaration shares the answer's size with its host's readers.
@@ -411,6 +411,18 @@ FAA-197, on the adapter's main).
   `b6820b97`; the round history leaves the page. SCN-043 reads as the page; `docs/evidence/sources.md` gains a
   Telegram Business row and an MTProto row. The merge notes add the `hint/declaration-only` collision with DEC-0153 at
   `6eb61183`, a validate-cli assertion for the instance-free collapse, and two landing greps.
+- Round 33 of the readings (on `a8208af0`: unit one break, product pass with risks) was not clean: strings `readAsUrl`
+  admits paid nothing for their two URL parses (`ws:` and its like up to twelve times prose). With the coordinator's
+  decisions: every such string pays 128 (`PIECE_COST`) once, parsed or not (the page's example `ws:` costs 143, the
+  query budget-edge vector 1263); the exported `detectorCost` cuts to the head when it is not given one, so a URL of
+  5000 characters costs what its head does; timing cases cover `ws:`, `ws:?`, `ftp:`, `http:` and `x:` read to the
+  budget and a schema-valid declaration of 12 projects, 32 channels and 64 languages of `ws:`, beside a note that
+  timing catches terms growing faster than the input while the exact assertions guard constant factors. CA-8: the
+  link-code exemption sits by the binding, with its reason, its departure from section 2.2 and its `not_a_ticket` count;
+  the offline marker (MTProto `message.offline`, Bot API `Message.is_from_offline`) names server-sent messages, a
+  minimum case covers them, and the merge post asks about the operator's scheduled messages. The page says "the post to
+  the standard's owner on thread `b6820b97` at merge" and lists the none-form fixture; adoption rows quote with absolute
+  links or as plain text; older handoff lines about the budget in code points say "(as of that round)".
 
 ## The branch and its history
 
@@ -670,6 +682,13 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
+On round 33's change, each exit code read separately: `pnpm typecheck` 0; `pnpm vitest run --testTimeout=60000
+test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts test/validate-cli.test.ts` 0 twice
+(2118 passed each time); `pnpm vectors:check` 0 (29 vector files match their generators, after the channel-agent
+generator's `--write`); `pnpm run docs:check` 0 (markdownlint 0 errors); `python3 docs/ux/lint.py` 0; `pnpm run
+privacy:check` with the organization index 0 (0 findings); no U+2014 in the added lines; `operator-channel.md` matches
+main. The coverage run is owed: the 15-minute load was 64.25 (free disk 19 GB).
+
 On round 32's change, each exit code read separately: `pnpm typecheck` 0; `pnpm vitest run --testTimeout=60000
 test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts test/validate-cli.test.ts` 0 twice
 (2117 passed each time); `pnpm vectors:check` 0 (29 vector files match their generators, after the channel-agent
@@ -783,7 +802,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 32 (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 33 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -813,16 +832,18 @@ here), and adds:
   than an `account` channel that the agent's own bot does not answer has no operator identification yet, so section 4.10
   does not apply on it until the owner answers, and which kind a group or a private chat answered through an account
   declares; whether the session owner must compare the account's live sessions with the operator's recorded
-  configuration before a word counts; whether the operator's private chat with the agent's own bot (the link code and
-  later words) is a ticket and counted; how a Telegram Business connection identifies the operator, and that messages
-  Telegram Business sends by itself (a greeting, an away message) never count; whether section 10's `account` row
-  "holding rules" include the session owner's section 9 hold or only the agent's own (CA-8 reads them as the agent's
-  own, per section 4.10); whether the standard intends the operator's chat decision on an `account` channel to be a
-  message the customer reads; and one bot serving both an operator channel and channels the agent answers people on, for
-  the standard's and the operator channel's owners: where a binding code is accepted, how OC-3, OC-4, OC-12 and OC-14 to
-  OC-16 apply to customer chats, whether OC-3 also refuses a message sent on behalf of a chat (`sender_chat` set, a
-  shared placeholder sender), and the shared receiver's order of updates and its status (OC-17); until they answer, such
-  a bot keeps every operator-channel rule in every chat as written;
+  configuration before a word counts; whether the operator's later words in the private chat with the agent's own bot
+  are a ticket and counted (the link-code message is consumed by the binding, counted in `not_a_ticket` volume, a
+  departure from section 2.2); whether the operator's own scheduled message, which the server marks offline as it does a
+  greeting or an away message, is his word (until answered it is data); how a Telegram Business connection identifies
+  the operator, and that messages Telegram Business sends by itself (a greeting, an away message) never count; whether
+  section 10's `account` row "holding rules" include the session owner's section 9 hold or only the agent's own (CA-8
+  reads them as the agent's own, per section 4.10); whether the standard intends the operator's chat decision on an
+  `account` channel to be a message the customer reads; and one bot serving both an operator channel and channels the
+  agent answers people on, for the standard's and the operator channel's owners: where a binding code is accepted, how
+  OC-3, OC-4, OC-12 and OC-14 to OC-16 apply to customer chats, whether OC-3 also refuses a message sent on behalf of a
+  chat (`sender_chat` set, a shared placeholder sender), and the shared receiver's order of updates and its status
+  (OC-17); until they answer, such a bot keeps every operator-channel rule in every chat as written;
 - a budget above 0 without a spend record is `FAC-SEM-164`;
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;
@@ -860,14 +881,15 @@ here), and adds:
 At merge, one adoption row is filed for every producer declaring the key (five on 2026-11-05), each in that producer's
 own backlog with its `FAC-SEM-162` places (the coordinator files them on the board), the places read again at posting
 time. Each row also names the producer's own test of CA-8 by quoting, verbatim and re-taken from the landed page at
-posting time, the page's sentence listing the minimum cases that test covers (never a paraphrase). Each producer's
-failing places are read at posting time with `pnpm validate` on its manifest or well-known answer (no count is kept
-here); earlier readings found, among others: one well-known builder with no `question_route` and a recommendation
-holding a colon; one well-known builder with `null` for `question_route`, `gap_registry`, a channel's texts, a queue's
-recommendation and `pd_check` (the question route, the gap registry and `pd_check` may now take the none form instead; a
-`null` there is still refused). The adapter's row names the update of both `PROTOCOL_REVISIONS` twins
-(`channel-agent-standard` `['1']`) with the feed-protocols vectors vendored again, and the Fabric Dashboards sample
-service's copy of the protocol table (or records that it is not held equal to the register). The merge post asks every
-vendored protocol table that re-pins to add `channel-agent-standard` `['1']` together with `fabric-source`: the
-adapter's two twins, the Fabric Dashboards sample service's table, a product's vendored `protocol-revisions.ts`,
-deployment templates' `fabric-protocols.mjs` and kit copies of `fabric_protocols.py` in agent repositories.
+posting time, the page's sentence listing the minimum cases that test covers (never a paraphrase), with its links made
+absolute to the landed page's anchors, or as plain text. Each producer's failing places are read at posting time with
+`pnpm validate` on its manifest or well-known answer (no count is kept here); earlier readings found, among others: one
+well-known builder with no `question_route` and a recommendation holding a colon; one well-known builder with `null` for
+`question_route`, `gap_registry`, a channel's texts, a queue's recommendation and `pd_check` (the question route, the
+gap registry and `pd_check` may now take the none form instead; a `null` there is still refused). The adapter's row
+names the update of both `PROTOCOL_REVISIONS` twins (`channel-agent-standard` `['1']`) with the feed-protocols vectors
+vendored again, and the Fabric Dashboards sample service's copy of the protocol table (or records that it is not held
+equal to the register). The merge post asks every vendored protocol table that re-pins to add `channel-agent-standard`
+`['1']` together with `fabric-source`: the adapter's two twins, the Fabric Dashboards sample service's table, a
+product's vendored `protocol-revisions.ts`, deployment templates' `fabric-protocols.mjs` and kit copies of
+`fabric_protocols.py` in agent repositories.

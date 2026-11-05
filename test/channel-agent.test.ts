@@ -50,6 +50,7 @@ const PROSE = "съешь же ещё этих мягких французски
 const runsIn = (text: string): number => {
   let runs = runRereads(text) + argumentPieces(text);
   if (!readAsUrl(text)) return runs;
+  runs += PIECE_COST;
   let url: URL;
   try {
     url = new URL(text);
@@ -676,6 +677,34 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(channelAgentRules(valid, "well-known").filter((f) => f.code === "FAC-SEM-162")).toEqual([]);
     expect(least(() => channelAgentRules(valid, "well-known"))).toBeLessThan(2 * baseline + 20);
   });
+  // Timing catches a term that grows faster than the input (a quadratic reread, a parse per piece); the exact assertions
+  // beside it guard the constant-factor terms, which a timing bound of 2x prose plus 20 ms cannot see.
+  it("charges PIECE_COST once for every string read as a URL, parsed or not, and counts only the head", { timeout: 60_000 }, () => {
+    expect(detectorCost("ws:")).toBe(3 + 3 * 4 + PIECE_COST);
+    const page = read("docs/specification/channel-agent.md").replace(/\s+/g, " ");
+    expect(page).toContain("`ws:` costs 3, 3 x 4 and 128: 143");
+    // A string the parser refuses (an invalid port) still pays for the two parses it is given.
+    expect(bare("http://a.example:99999/")).toBe(23);
+    // The exported cost reads the head only: a URL of 5000 characters costs what its head does.
+    const long = `https://a.example/?q=${"b".repeat(4979)}`;
+    expect(long.length).toBe(5000);
+    expect(detectorCost(long)).toBe(detectorCost(long.slice(0, 4097), true));
+    const baseline = proseBaseline();
+    for (const text of ["ws:", "ws:?", "ftp:", "http:", "x:"]) {
+      const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 8000 }, () => text) } } };
+      expect(channelAgentRules(doc, "well-known").some((f) => f.message.includes("UTF-16 units of reading")), text).toBe(true);
+      expect(least(() => channelAgentRules(doc, "well-known")), text).toBeLessThan(2 * baseline + 20);
+    }
+    // A schema-valid declaration: 12 projects of 32 channels, each texts map 64 languages of `ws:`.
+    const languages = Array.from({ length: 64 }, (_, i) => `${"abc"[Math.floor(i / 26)]}${String.fromCharCode(97 + (i % 26))}`);
+    const many = Object.fromEntries(languages.map((language) => [language, "ws:"]));
+    const p0 = value.projects[0];
+    const dm = p0.channels[0] as Json;
+    const projects = Array.from({ length: 12 }, (_, i) => ({ ...p0, project: `project:example-${i}`, channels: Array.from({ length: 32 }, (_, j) => ({ ...dm, id: `c${j}`, texts: { holding: many, final: many } })) }));
+    const wide = { extensions: { [KEY]: { ...value, projects } } };
+    expect(channelAgentRules(wide, "well-known").filter((f) => f.code === "FAC-SEM-162" || f.code === "FAC-SEM-163")).toEqual([]);
+    expect(least(() => channelAgentRules(wide, "well-known"))).toBeLessThan(2 * baseline + 20);
+  });
   it("charges each & of a URL's search and hash, an empty piece included, and reads them about as fast as prose", { timeout: 60_000 }, () => {
     // `a&b` is two pieces, names `a` and `b` (128 + 1 and 128 + 1), where `a,b` is one, name `a,b` (128 + 3); and its `&`.
     expect(detectorCost("https://a/?a&b") - detectorCost("https://a/?a,b")).toBe(ARG_PIECE_COST + PIECE_COST + 2 - 3);
@@ -844,7 +873,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(argumentPieces("a b=c/d\\e")).toBe(4 * ARG_PIECE_COST);
     expect(argumentPieces("a\tb\u00a0c")).toBe(2 * ARG_PIECE_COST);
     expect(detectorCost("a b") - runRereads("a b")).toBe(3 + ARG_PIECE_COST);
-    expect(detectorCost("https://a.example/a/b") - runRereads("https://a.example/a/b")).toBe(21 + 4 * ARG_PIECE_COST);
+    expect(detectorCost("https://a.example/a/b") - runRereads("https://a.example/a/b")).toBe(21 + 4 * ARG_PIECE_COST + PIECE_COST);
     expect(detectorCost("a b")).toBe(13);
     const page = read("docs/specification/channel-agent.md").replace(/\s+/g, " ");
     expect(page).toContain("4 (`ARG_PIECE_COST`) for each white space, `=`, `/` and `\\`");
