@@ -42,6 +42,8 @@ describe("every positive fixture passes", () => {
     const result = run(fixture("positive/service-channel-agent-extension.json"), "--schema", "service-channel-agent-extension.schema.json");
     expect(result.code).toBe(0);
     expect(result.out).toContain("hint/declaration-only");
+    expect(result.out).toContain("may name its members as written");
+    expect(result.out).toMatch(/ {2}\/ {2}hint\/declaration-only/);
   });
 
   it("a provider entry with run.mcp.stdio.scope gets the reader-pending hint and still passes (CT-27)", () => {

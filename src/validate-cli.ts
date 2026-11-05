@@ -253,7 +253,8 @@ type Hint = [string, keyof typeof HINT_HELP, string];
 /** A member the schema allows but a reader the contract names does not accept yet (CT-27 for `run.mcp.stdio.scope`). */
 function readerHints(schema: string | undefined, value: unknown, out: Hint[]): void {
   // DEC-0150: a bare channel-agent declaration checks its shape only; its other rules read it inside its document.
-  if (schema === "service-channel-agent-extension.schema.json") out.push(["", "hint/declaration-only", "FAC-SEM-163 to FAC-SEM-165 run only on a declaration inside a manifest's provider.extensions or a well-known answer's extensions; check that document to run them"]);
+  // Until DEC-0149's instance-free schema lines land, this bare path prints the generic lines, so the hint says so.
+  if (schema === "service-channel-agent-extension.schema.json") out.push(["/", "hint/declaration-only", "FAC-SEM-163 to FAC-SEM-165 run only on a declaration inside a manifest's provider.extensions or a well-known answer's extensions; check that document to run them. A bare declaration's lines may name its members as written (a credential-shaped name included) and print one line per item, since widths are not checked first here"]);
   if (schema !== "provider.schema.json" || !isObject(value) || !isObject(value.run) || !isObject(value.run.mcp) || !isObject(value.run.mcp.stdio)) return;
   if (Object.hasOwn(value.run.mcp.stdio, "scope")) out.push(["/run/mcp/stdio/scope", "hint/reader-pending", "Fabric's registry does not accept run.mcp.stdio.scope yet (CT-27); leave it out and readers take on-demand"]);
 }

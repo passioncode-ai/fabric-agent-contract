@@ -607,6 +607,29 @@ function keyRereads(text: string): number {
   return cost;
 }
 const KEY_REREAD = 255;
+/** The shared detector's long-run floor (LONG_RUN in `secret-shape.ts`): a run of base64 characters this long or longer. */
+export const LONG_RUN_FLOOR = 40;
+/**
+ * The shared detector's near-miss reread of a long run: for each maximal run of `[A-Za-z0-9+/=_-]` shorter than
+ * LONG_RUN_FLOOR, a regular expression that needs 40 may start at each of its code points and read to the run's end, so
+ * each code point is charged min(length, 39). A run of 40 or more matches at once and is charged nothing more here.
+ */
+export function runRereads(text: string): number {
+  let cost = 0;
+  let run = 0;
+  // One pass past the end closes the last run: the character there reads as NaN, which no range takes.
+  for (let i = 0; i <= text.length; i += 1) {
+    const c = text.charCodeAt(i);
+    // A-Z, a-z, 0-9, +, /, =, _ and -: ASCII, so a run's UTF-16 units are its code points.
+    if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122) || (c >= 48 && c <= 57) || c === 43 || c === 47 || c === 61 || c === 95 || c === 45) {
+      run += 1;
+    } else {
+      if (run < LONG_RUN_FLOOR) cost += run * Math.min(run, LONG_RUN_FLOOR - 1);
+      run = 0;
+    }
+  }
+  return cost;
+}
 /** A bound for an `sk-` away from a boundary, which a detector may still try: up to the 16 code points its run needs. */
 export const SK_FLOOR = 16;
 /** The shared detector's other provider prefixes, each with the run its shape needs after it (SECRET_VALUE). */
@@ -617,14 +640,15 @@ export const PREFIX_FLOORS: ReadonlyArray<readonly [RegExp, number]> = [[/gh[pou
  * adds VISIT_COST per name or string beside it): the string's code points; the JWT shape's rereading, from each `eyJ`,
  * of its base64url run, `eyJ` included (and of the dot and the run after it); from each `sk-`, in any case, that follows a boundary (the start, a character other than a letter or
  * a digit, an escape ESCAPE_BEFORE names or a colour sequence), its three characters included, up to 255 code points to
- * the end of the string; after an `sk-` away from a boundary, up to SK_FLOOR; after another provider prefix, its floor. For a
+ * the end of the string; after an `sk-` away from a boundary, up to SK_FLOOR; after another provider prefix, its floor;
+ * for each maximal run of base64 characters shorter than LONG_RUN_FLOOR (40), min(length, 39) per code point. For a
  * string `readAsUrl` admits and that parses as a URL, on the names and values a WHATWG URL parse yields (tab, line feed and carriage return
  * removed, percent-decoded, as `rawValues` hands them over), for every query or fragment piece: PIECE_COST, its name's
- * and value's code points, the value's JWT and `sk-` terms, and, when the value is not empty and the name holds an
+ * and value's code points, the value's JWT, `sk-` and long-run terms, and, when the value is not empty and the name holds an
  * upper-case letter, the triangular number n(n+1)/2 of the name's length (splitting a name into words may backtrack over it).
  */
 export function detectorCost(text: string): number {
-  let cost = codePoints(text) + jwtRereads(text) + keyRereads(text);
+  let cost = codePoints(text) + jwtRereads(text) + keyRereads(text) + runRereads(text);
   if (!readAsUrl(text)) return cost;
   let url: URL;
   try {
@@ -637,7 +661,7 @@ export function detectorCost(text: string): number {
       const length = codePoints(name);
       const upper = /[A-Z]/.test(name);
       for (const value of values) {
-        cost += PIECE_COST + length + codePoints(value) + jwtRereads(value) + keyRereads(value);
+        cost += PIECE_COST + length + codePoints(value) + jwtRereads(value) + keyRereads(value) + runRereads(value);
         if (value !== "" && upper) cost += (length * (length + 1)) / 2;
       }
     }
@@ -675,7 +699,7 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
   // The walk stops once the budget is spent, so nothing is read after it.
   const afford = (text: string): boolean => {
     if (budget.unread) return false;
-    const cost = detectorCost(head(text)) + VISIT_COST;
+    const cost = (text === "" ? 0 : detectorCost(head(text))) + VISIT_COST;
     if (cost > budget.left) {
       budget.unread = true;
       budget.unreadAt = root;

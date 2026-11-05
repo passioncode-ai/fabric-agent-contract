@@ -2,10 +2,10 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ValidateFunction } from "ajv/dist/2020.js";
-import { CHANNEL_AGENT_PATHS, MESSAGE_ERRORS, PREFIX_FLOORS, SK_FLOOR, readAsUrl, schemaLine, PATH_DEPTH, PIECE_COST, SECRET_BUDGET, SECRET_FINDINGS, VISIT_COST, codePoints, detectorCost, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, messagePlaces, placed, schemaErrors } from "../src/channel-agent.js";
+import { CHANNEL_AGENT_PATHS, LONG_RUN_FLOOR, MESSAGE_ERRORS, PREFIX_FLOORS, runRereads, SK_FLOOR, readAsUrl, schemaLine, PATH_DEPTH, PIECE_COST, SECRET_BUDGET, SECRET_FINDINGS, VISIT_COST, codePoints, detectorCost, TOKEN_SLOT, TOO_LARGE, channelAgentRules, channelAgentView, messagePlaces, placed, schemaErrors } from "../src/channel-agent.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
-import { SECRET_VALUE } from "../src/secret-shape.js";
+import { SECRET_VALUE, rawValues } from "../src/secret-shape.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidatorSync } from "../src/validator.js";
 import { buildChannelAgentVectors } from "../tools/vectors/channel-agent.js";
@@ -37,7 +37,25 @@ const least = (work: () => unknown): number => {
   work();
   return Math.min(cpuMs(work), cpuMs(work), cpuMs(work));
 };
-const PROSE = "the quick brown fox jumps over the lazy dog ".repeat(100).slice(0, 4096);
+// The baseline's prose is read to the budget at 4096 + 16 a string, as before the long-run term: its letters are outside
+// ASCII, so it holds no base64 run for runRereads to charge, and 245 strings still spend the budget (a prose of ASCII
+// words now costs about four times as much a string, so the budget would stop it after about 57 strings).
+const PROSE = "съешь же ещё этих мягких французских булок да выпей чаю ".repeat(80).slice(0, 4096);
+
+// detectorCost without its long-run term (runRereads, pinned on its own below): the terms the older exact tests count.
+const runsIn = (text: string): number => {
+  let runs = runRereads(text);
+  if (!readAsUrl(text)) return runs;
+  let url: URL;
+  try {
+    url = new URL(text);
+  } catch {
+    return runs;
+  }
+  for (const part of [url.search, url.hash]) for (const [, values] of rawValues(part.slice(1))) for (const v of values) runs += runRereads(v);
+  return runs;
+};
+const bare = (text: string): number => detectorCost(text) - runsIn(text);
 /** 245 strings of prose, about SECRET_BUDGET code points: a document read to the budget. */
 const proseBaseline = (): number => {
   const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => PROSE) } } };
@@ -158,9 +176,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const floors = PREFIX_FLOORS.map(([prefix, floor]) => [prefix.source.replace(/\[[a-z]+\]/, "p"), floor] as const);
     expect(floors).toEqual([["ghp_", 20], ["xoxp-", 10], ["akia", 16], ["glpat-", 20]]);
     for (const [prefix, floor] of floors) {
-      expect(detectorCost(`${prefix}ab`)).toBe(prefix.length + 2 + 2);
-      expect(detectorCost(`${prefix}${"a".repeat(floor + 5)}`)).toBe(prefix.length + floor + 5 + floor);
-      expect(detectorCost(prefix.toUpperCase())).toBe(prefix.length);
+      expect(bare(`${prefix}ab`)).toBe(prefix.length + 2 + 2);
+      expect(bare(`${prefix}${"a".repeat(floor + 5)}`)).toBe(prefix.length + floor + 5 + floor);
+      expect(bare(prefix.toUpperCase())).toBe(prefix.length);
     }
     const baseline = proseBaseline();
     for (const [prefix, floor] of floors) {
@@ -450,17 +468,17 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => [f.instancePath, f.message.includes(`more than ${SECRET_BUDGET}`)])).toEqual([[CHANNEL_AGENT_PATHS["well-known"], true]]);
   });
   it("counts what the detector reads: a string once, and again after each eyJ to the end of its run", () => {
-    expect(detectorCost("")).toBe(0);
-    expect(detectorCost("plain text")).toBe(10);
-    expect(detectorCost("eyJab.cd")).toBe(8 + 8);
-    expect(detectorCost("x eyJeyJ y")).toBe(10 + 6 + 3);
+    expect(bare("")).toBe(0);
+    expect(bare("plain text")).toBe(10);
+    expect(bare("eyJab.cd")).toBe(8 + 8);
+    expect(bare("x eyJeyJ y")).toBe(10 + 6 + 3);
     expect(detectorCost("eyJ".repeat(1000))).toBeGreaterThan(SECRET_BUDGET);
   });
   it("counts the square of an upper-case run after ?, & or # as read, so a query name cannot slow the detector", { timeout: 60_000 }, () => {
     // Not a URL: the query terms are not counted, since the detector reads no query in it.
-    expect(detectorCost("a?BC=x")).toBe(6);
-    expect(detectorCost("https://a.example/?aBC=x")).toBe(24 + PIECE_COST + 3 + 1 + 6);
-    expect(detectorCost("https://a.example/#&?")).toBe(20 + PIECE_COST + 1);
+    expect(bare("a?BC=x")).toBe(6);
+    expect(bare("https://a.example/?aBC=x")).toBe(24 + PIECE_COST + 3 + 1 + 6);
+    expect(bare("https://a.example/#&?")).toBe(20 + PIECE_COST + 1);
     const strings = Array.from({ length: 245 }, () => `https://a.example/?${"Q".repeat(4060)}=x`);
     const timed = () => channelAgentRules({ extensions: { [KEY]: { ...value, extra: strings } } }, "well-known");
     expect(least(timed)).toBeLessThan(2 * proseBaseline() + 20);
@@ -496,9 +514,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(detectorCost(`https://a.example/?a${"Q".repeat(n)}=x`)).toBeGreaterThanOrEqual(square);
     expect(detectorCost(`https://a.example/?${"%41".repeat(n)}=x`)).toBeGreaterThanOrEqual(square);
     expect(detectorCost(`https://a.example/#a${"Q".repeat(n)}=x`)).toBeGreaterThanOrEqual(square);
-    expect(detectorCost("https://a.example/?q=a%20b")).toBe(26 + PIECE_COST + 1 + 3);
+    expect(bare("https://a.example/?q=a%20b")).toBe(26 + PIECE_COST + 1 + 3);
     // A value that does not decode (a lone %) is read raw.
-    expect(detectorCost("https://a.example/?q=a%zz")).toBe(25 + PIECE_COST + 1 + 4);
+    expect(bare("https://a.example/?q=a%zz")).toBe(25 + PIECE_COST + 1 + 4);
     const shapes = [`https://a.example/?a${"Q".repeat(4000)}=x`, `https://a.example/?${"%41".repeat(1350)}=x`, `https://a.example/#a${"Q".repeat(4000)}=x`];
     const extra = shapes.flatMap((shape) => Array.from({ length: 300 }, () => shape));
     const timed = () => channelAgentRules({ provider: { extensions: { [KEY]: { ...value, extra } } } });
@@ -509,9 +527,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const boundaries = (text.match(/-sk-/g) ?? []).length;
     expect(detectorCost(text)).toBeGreaterThanOrEqual(text.length + boundaries * 255);
     // Away from a boundary, `sk-` still costs up to SK_FLOOR after it.
-    expect(detectorCost("xsk-a")).toBe(5 + 1);
-    expect(detectorCost("%2Fsk-a")).toBe(7 + 4);
-    expect(detectorCost("\\nsk-a")).toBe(6 + 4);
+    expect(bare("xsk-a")).toBe(5 + 1);
+    expect(bare("%2Fsk-a")).toBe(7 + 4);
+    expect(bare("\\nsk-a")).toBe(6 + 4);
     const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 246 }, () => text) } } };
     const timed = () => channelAgentRules(doc, "well-known");
     expect(least(timed)).toBeLessThan(2 * proseBaseline() + 20);
@@ -553,9 +571,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       const text = `${escape}sk-${"a".repeat(260)}`.repeat(5);
       expect(detectorCost(text), escape).toBeGreaterThanOrEqual(text.length + 5 * 255);
     }
-    expect(detectorCost(`a1sk-${"a".repeat(300)}`)).toBe(305 + 16);
+    expect(bare(`a1sk-${"a".repeat(300)}`)).toBe(305 + 16);
     // At a boundary the count runs from the s of `sk-`, its three characters included.
-    expect(detectorCost("sk-a")).toBe(8);
+    expect(bare("sk-a")).toBe(8);
   });
   it("reads a query of many pieces about as fast as prose of the same size", () => {
     const query = `https://a.example/?${"a=b&".repeat(1100)}`.slice(0, 4096);
@@ -576,8 +594,8 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   });
   it("charges a member's name once, so the budget's edge falls where the count says", () => {
     const bearer = ["Bearer", "z".repeat(24)].join(" ");
-    const fixed = VISIT_COST + "last".length + VISIT_COST + bearer.length;
-    const each = VISIT_COST + 6;
+    const fixed = VISIT_COST + "last".length + runRereads("last") + VISIT_COST + bearer.length + runRereads(bearer);
+    const each = VISIT_COST + 6 + runRereads("n00000");
     const under = Math.floor((SECRET_BUDGET - fixed) / each);
     const declaration = (n: number) => {
       const members: Json = {};
@@ -613,7 +631,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   });
   it("counts code points, not UTF-16 units, so astral text is not read past the budget early", () => {
     const astral = "\u{1F600}".repeat(2000);
-    expect(detectorCost(astral)).toBe(2000);
+    expect(bare(astral)).toBe(2000);
     const found = channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array.from({ length: 300 }, () => astral) } } }, "well-known");
     expect(found.some((f) => f.message.includes("code points of reading"))).toBe(false);
   });
@@ -675,9 +693,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const cjk = Array.from({ length: 4080 }, (_, i) => String.fromCodePoint(0x4e00 + i)).join("");
     const host = `http://${cjk}/`;
     expect(readAsUrl(host)).toBe(false);
-    expect(detectorCost(host)).toBe(4088);
+    expect(bare(host)).toBe(4088);
     // A scheme that does not parse (an invalid port) is read by the other shapes only.
-    expect(detectorCost("http://a.example:99999/?q=a")).toBe(27);
+    expect(bare("http://a.example:99999/?q=a")).toBe(27);
     const thread = (process as unknown as { threadCpuUsage?: (previous?: NodeJS.CpuUsage) => NodeJS.CpuUsage }).threadCpuUsage;
     const clock = (previous?: NodeJS.CpuUsage): NodeJS.CpuUsage => (thread === undefined ? process.cpuUsage(previous) : thread.call(process, previous));
     const time = (text: string) => {
@@ -740,6 +758,22 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     for (const ok of ["UTC", "GMT", "CET", "Etc/UTC", "Europe/Warsaw", "America/Argentina/Buenos_Aires", "Etc/GMT+3"]) expect(zone?.(ok), ok).toBe(true);
     for (const bad of ["", "Europe/", "/UTC", "a/b/c/d", "Europe Warsaw", "+03:00"]) expect(zone?.(bad), bad).toBe(false);
   });
+  it("charges the long-run near miss: min(length, 39) per code point of each base64 run shorter than 40", { timeout: 60_000 }, () => {
+    expect(LONG_RUN_FLOOR).toBe(40);
+    expect(runRereads("")).toBe(0);
+    expect(runRereads("abc,de")).toBe(9 + 4);
+    expect(runRereads("a+/=_-9Z")).toBe(64);
+    expect(runRereads("a".repeat(39))).toBe(39 * 39);
+    expect(runRereads("a".repeat(40))).toBe(0);
+    expect(runRereads(`${"a".repeat(39)}\u00e9${"b".repeat(2)}`)).toBe(39 * 39 + 4);
+    expect(detectorCost("abc,de")).toBe(6 + 9 + 4);
+    const page = read("docs/specification/channel-agent.md").replace(/\s+/g, " ");
+    expect(page).toContain("`abc,de` costs 6, 9 and 4");
+    const near = `${"a".repeat(39)},`.repeat(103).slice(0, 4096);
+    expect(detectorCost(near)).toBeGreaterThan(4096 * 19);
+    const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => near) } } };
+    expect(least(() => channelAgentRules(doc, "well-known"))).toBeLessThan(2 * proseBaseline() + 20);
+  });
   it("holds each of the page's cost terms to detectorCost, exactly", () => {
     const page = read("docs/specification/channel-agent.md");
     const terms: Array<[string, number, string]> = [
@@ -750,9 +784,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     ];
     for (const [text, cost, quoted] of terms) {
       expect(page.replace(/\s+/g, " "), quoted).toContain(quoted);
-      expect(detectorCost(text), text).toBe(cost);
+      expect(bare(text), text).toBe(cost);
     }
-    expect(detectorCost("https://a.example/?aBC=x&api_key=abc123")).toBe(318);
+    expect(bare("https://a.example/?aBC=x&api_key=abc123")).toBe(318);
     expect(VISIT_COST).toBe(16);
     expect(page.replace(/\s+/g, " ")).toContain("The walk charges each name or string 16 (`VISIT_COST`)");
   });
@@ -876,7 +910,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   it("charges up to SK_FLOOR after an sk- away from a boundary, and reads a run of them about as fast as prose", { timeout: 60_000 }, () => {
     expect(SK_FLOOR).toBe(16);
     const near = `xsk-${"a".repeat(15)}.`;
-    expect(detectorCost(near)).toBe(near.length + 16);
+    expect(bare(near)).toBe(near.length + 16);
     const text = near.repeat(Math.ceil(4096 / near.length)).slice(0, 4096);
     const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 245 }, () => text) } } };
     expect(least(() => channelAgentRules(doc, "well-known"))).toBeLessThan(2 * proseBaseline() + 20);
@@ -890,11 +924,23 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const named = channelAgentRules({ extensions: { [KEY]: { ...value, extra: { [key]: 1 } } } }, "well-known");
     expect(named.some((f) => f.message.includes("rename it"))).toBe(true);
   });
+  it("carries the walk-order vector's document as JSON text, the heavy member first, and reads it in ECMAScript order", () => {
+    const withText = vectors.declarations.filter((v) => Object.hasOwn(v, "inputText")) as unknown as Array<{ input: unknown; inputText: string; findings: unknown[] }>;
+    expect(withText).toHaveLength(1);
+    const vector = withText[0] as { input: unknown; inputText: string; findings: unknown[] };
+    expect(vector.inputText.indexOf('"heavy"')).toBeLessThan(vector.inputText.indexOf('"5"'));
+    const parsed = JSON.parse(vector.inputText) as unknown;
+    expect(parsed).toEqual(vector.input);
+    expect(channelAgentRules(parsed).map((f) => ({ code: f.code, instancePath: f.instancePath }))).toEqual(vector.findings);
+  });
   it("reads a language tag that starts with sk- and 16 or more characters as a key, and sk-SK as a tag", () => {
     const p0 = value.projects[0];
     const tagged = (language: string) => channelAgentRules({ extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [{ ...p0.channels[0], texts: { holding: p0.channels[0].texts.holding, final: { [language]: "Please write to our support." } } }, p0.channels[1]] }] } } }, "well-known").map((f) => `${f.code} ${f.instancePath}`);
+    expect(tagged("sk")).toEqual([]);
     expect(tagged("sk-SK")).toEqual([]);
-    expect(tagged(["sk", "Latn-SK-u-ca-gregory"].join("-"))).toEqual([`FAC-SEM-165 ${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/channels/0/texts/final`]);
+    for (const long of [["sk", "Latn-SK-u-ca-gregory"].join("-"), ["sk", "Latn-150-u-ca-gregory"].join("-")]) {
+      expect(tagged(long), long).toEqual([`FAC-SEM-165 ${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/channels/0/texts/final`]);
+    }
   });
   it("asks for a rename by role: a text keyed id gets none, a channel id keeps it", () => {
     const p0 = value.projects[0];
@@ -948,7 +994,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const key = ["sk", "-", "Q7r2".repeat(5)].join("");
     for (const form of BOUNDARY_FORMS) {
       const text = `${form}${key}`;
-      expect(detectorCost(text), JSON.stringify(form)).toBe(codePoints(text) + key.length);
+      expect(bare(text), JSON.stringify(form)).toBe(codePoints(text) + key.length);
       expect(SECRET_VALUE.test(text), JSON.stringify(form)).toBe(true);
     }
     // A colour sequence with `:` parameters and the escaped ESC `\33` are boundaries too: the full 255 is charged.
@@ -956,7 +1002,7 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       expect(detectorCost(`${head}sk-${"a".repeat(300)}`) - detectorCost(`${head}xx-${"a".repeat(300)}`), JSON.stringify(head)).toBe(255);
     }
     // Away from a boundary the run is charged up to SK_FLOOR after the `sk-`.
-    expect(detectorCost(`a${key}`)).toBe(1 + key.length + SK_FLOOR);
+    expect(bare(`a${key}`)).toBe(1 + key.length + SK_FLOOR);
   });
   it("tells the author of an id that starts with sk- to rename it", () => {
     const id = "sk-support-desk-faq-answers-2026-v2";
