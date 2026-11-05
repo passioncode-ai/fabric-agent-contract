@@ -306,7 +306,7 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    texts or names fix it; at a misplaced copy it says the copy is not read by a reader and should be removed. The 64 places are a cap per document: a copy names a place only while the document's total is under 64.
    Past it, each copy counts its own places and closes them at that copy: the read declaration's "and N more" at its key
    counts only its own places past 64, and a misplaced copy's overflow gets its own closing finding at that copy, so the
-   view (which reads the read declaration alone) and the rules agree, and a vector pins both. The read declaration is walked first, with the whole budget, so its own reading never depends on a copy. Being by shape, the detector also finds an ordinary hyphenated name
+   view (which reads the read declaration alone) and the rules agree, and a vector pins both. The read declaration is walked first, with the whole budget, so its own reading never depends on a copy. Inside an object the walk takes members in ECMAScript own-property order: integer-like keys ascending, then the rest in document order (a vector pins it). Being by shape, the detector also finds an ordinary hyphenated name
    that starts with `sk-`: today any `sk-` followed by 16 or more letters, digits, `_` or `-`, in any case, such as the
    valid channel id `sk-support-desk-faq-answers-2026-v2` (a test pins it). DEC-0151, in progress, proposes to narrow
    that to a digit with an upper-case letter and 16, or a digit and 32; either way, do not start an id with `sk-`, for a
@@ -315,7 +315,7 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    `sk-` id that `FAC-SEM-165` would accept under DEC-0151 would still block a source export. The
    finding on a member name, or on a value whose member takes an id (`id`, `code`, `lead_agent`, `owner`, `decision`,
    `answered_signal`, `target`, `spend_record`, `project`, `side`), that starts with `sk-` says so: an id that starts
-   with `sk-` is read as a key; rename it. The advice goes by role, not by key: never under a channel's `texts` or its
+   with `sk-` is read as a key; rename it. A text's language tag that starts with `sk-` and has 16 or more characters after it (such as `sk-Latn-SK-u-ca-gregory`) is read as a key under the current detector, so write `sk` or `sk-SK` (a test pins both); DEC-0151's narrowing, in progress, clears such tags. The advice goes by role, not by key: never under a channel's `texts` or its
    language-keyed maps (`holding`, `final`), so a text keyed `id`, `code`, `owner`, `target`, `project` or `side` (a
    language tag) gets the vault-slot sentence alone, and so does a label. In a final text's none form, a place writes
    `none` and `until` as the schema's names; in a language map a language is still `*`.
@@ -467,17 +467,17 @@ existing fixture validates and checks as before. `contractVersion` stays `0.1.0`
 - **The daily quality payload.** The standard's section 5.1 publishes [`support-quality-daily/1`](support-quality.md)
   per project, where `/1` keeps one channel of four per event, with members `/1` does not have (`arrived`, `ended`,
   `open.*`, the outcomes, `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets`, `notATicket`),
-  as round 4 reads; the owner's master since `86c49ec` renames the two members (`autonomy.answeredTickets`,
-  `stability.safeReplyTurns`, `stability.safeReplyTickets`) and takes `toPerson*` in turns (board message `b840a16b`).
-  Round 4's section 5.1 defers only the fields it marks new: "publish them once every reader of the feed takes that
-  schema", and counts `toPersonPolicy` and `toPersonInability` in tickets, where `/1` names no ticket unit (its autonomy
-  counts are bounded by turns). That schema and how the seven channel kinds here map to `/1`'s four channels (`chat`,
-  `mail`, `reviews`, `community`) are what DEC-0151, in progress on CT-210, proposes. Until it lands, an agent following
-  section 5.1 emits payloads this contract refuses. An agent declaring several projects publishes no per-project
-  `support.quality_daily` on a channel they share, because a `/1` reader keeps one event per service, channel and day;
-  under DEC-0151's rule 1 such a channel stays withheld after DEC-0151 lands, until its feed's readers adopt, so the
-  standard's observed per-project quality check reads missing for a shared channel until the standard's section 11
-  accepts that withholding by period.
+  as round 4 reads; the owner's master since `86c49ec` renames `autonomy.answered` to `autonomy.answeredTickets`, and
+  `stability.fallbackTurns` and `fallbackTickets` to `stability.safeReplyTurns` and `safeReplyTickets`, and takes
+  `toPerson*` in turns (board message `b840a16b`). Round 4's section 5.1 defers only the fields it marks new: "publish
+  them once every reader of the feed takes that schema", and counts `toPersonPolicy` and `toPersonInability` in tickets,
+  where `/1` names no ticket unit (its autonomy counts are bounded by turns). That schema and how the seven channel
+  kinds here map to `/1`'s four channels (`chat`, `mail`, `reviews`, `community`) are what DEC-0151, in progress on
+  CT-210, proposes. Until it lands, an agent following section 5.1 emits payloads this contract refuses. An agent
+  declaring several projects publishes no per-project `support.quality_daily` on a channel they share, because a `/1`
+  reader keeps one event per service, channel and day; under DEC-0151's rule 1 such a channel is withheld from
+  DEC-0151's landing until its feed's readers adopt, so the standard's observed per-project quality check reads missing
+  for a shared channel until the standard's section 11 accepts that withholding by period.
 - **Declarations published before this revision.** A declaration an agent published before this revision is read under
   these grammars; `pnpm validate` on its manifest or well-known answer shows which members it fails.
 

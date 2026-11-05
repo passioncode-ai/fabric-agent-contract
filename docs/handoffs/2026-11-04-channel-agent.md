@@ -328,6 +328,20 @@ FAA-197, on the adapter's main).
   own customer bot. DEC-0150's Consequences add SCN-055 and SCR-03; the round-22 entries are marked superseded; a
   sibling note tells CT-218's drafter that an agent with a manifest declares only there; a vector pins `untrusted_input`
   in the sparse reviews channel.
+- Round 25 of the readings (on `d5fad236`) was clean; its landing edits were deferred. Round 26 (on `d5fad236`: seam
+  one break, product and unit notes) was not clean: the DEC-0153 sibling line went stale when DEC-0153 moved to
+  `ada7c23d` (OD-9: the descriptor extension `ops-digest/0.1`, a ninth extension key, a third schema, `FAC-SEM-168`).
+  With the coordinator's decisions: the merge notes give the schema count 151 with all three branches, both extension
+  constants and interop rows with "nine extension keys", `NOT_SWEPT`, `FAC-SEM-166` to `FAC-SEM-168`, and the next free
+  ids from CAS; the `keyShaped` step drops `JWT_SHAPE` from its import. Round 25's deferred edits: the merge post quotes
+  DEC-0151's observed-check sentence verbatim from `69db2177` (round 24's paraphrase was not a quote), re-taken at
+  posting time with a substring check; the CT-218 note keeps the page's condition; SCN-043 gains the bot case and
+  FLW-29's edge to node B says it is not the operator channel's bot; the Compatibility names the renames member by
+  member and says a shared channel is withheld from DEC-0151's landing until its readers adopt; the FAA-197 item asks the
+  adapter to re-quote CA-8. Round 26's notes: SCN-055 step 3 lists `FAC-SEM-164`'s findings; the merge post asks whether
+  the operator's chat decision on an `account` channel is meant to be read by the customer; the page warns about `sk-`
+  language tags (a test pins `sk-SK` and `sk-Latn-SK-u-ca-gregory`); the walk order is stated and a vector pins an
+  integer-like key read before a heavy member; `roleOf` uses `Object.hasOwn`.
 
 ## The branch and its history
 
@@ -373,10 +387,11 @@ the pull request comes from the v3 branch only.
 
 - Section 5.1's daily payload: until DEC-0151 (in progress on CT-210, branch `agent/sqd-fields-20261104`) lands, an
   agent following round 4's section 5.1 emits `support-quality-daily/1` payloads this contract refuses; DEC-0151, in
-  progress, proposes how the seven channel kinds map to `/1`'s four. The owner's master since `86c49ec` renames the two
-  members and takes `toPerson*` in turns. Under DEC-0151's rule 1 a shared channel stays withheld after DEC-0151 lands,
-  until its readers adopt, so the observed per-project check reads missing until the standard's section 11 accepts that
-  by period.
+  progress, proposes how the seven channel kinds map to `/1`'s four. The owner's master since `86c49ec` renames
+  `autonomy.answered` to `autonomy.answeredTickets`, and `stability.fallbackTurns` and `fallbackTickets` to
+  `stability.safeReplyTurns` and `safeReplyTickets`, and takes `toPerson*` in turns. Under DEC-0151's rule 1 a shared
+  channel is withheld from DEC-0151's landing until its feed's readers adopt, so the observed per-project check reads
+  missing until the standard's section 11 accepts that by period.
 - What section 11 asks and no declaration can show (DEC-0150 CA-6): the side among the standard's sides, the route's
   capability for the side's kind, a tier's fact among the customer facts, the existence of the named agents,
   capabilities, desk and limit, a working-time limit's calendar, and everything the signal server observes.
@@ -394,7 +409,7 @@ With DEC-0149's branch, now `origin/agent/ct194-source-manifest-v2-20261104` (th
 origin), whichever lands second:
 
 - sets the schema count in `test/schema-compilation.test.ts` to 148: the count merges silently at 147 and must be set
-  by hand (DEC-0149 and DEC-0150 write 147, DEC-0153 148; with all three on main the last lander sets 150 by hand);
+  by hand (DEC-0149 and DEC-0150 write 147, DEC-0153 149; with all three on main the last lander sets 151 by hand);
 - reads the CLI's "blocking" as DEC-0149's exit contract: after DEC-0149 lands, a non-blocking line is one with
   `severity: "accepted"`, which exits 0; `FAC-SEM-164` sets no severity, so `pnpm validate` reports it and exits 1
   (SCN-002), while a reader keeps the declaration declared; this branch's text says so and never calls it
@@ -420,7 +435,8 @@ origin), whichever lands second:
 - whichever of DEC-0149 and DEC-0150 lands second states DEC-0149's source tree check as current where this branch
   writes it in progress (item 4's `sk-` sentence, `FAC-SEM-158`);
 - at this branch's landing, if main then holds DEC-0149's one-pass `hasJwt`, the landing step switches `keyShaped` in
-  `src/channel-agent.ts` from `JWT_SHAPE.test` to `hasJwt`; if DEC-0149 lands after this branch, its lander does;
+  `src/channel-agent.ts` from `JWT_SHAPE.test` to `hasJwt`; if DEC-0149 lands after this branch, its lander does; and
+  drops `JWT_SHAPE` from the import of `./secret-shape.js` (`noUnusedLocals`; without it `tsc` fails with TS6133);
   CT-212 is left unchanged (once switched, `keyShaped` is no `JWT_SHAPE` caller);
 - at landing, files the backlog row DEC-0149 owes at the DEC-0150 step, at the next free CT id then: a source export's
   installation-valued members of a channel-agent declaration (`tickets.token_slot`'s vault project and env,
@@ -447,21 +463,31 @@ One line per sibling and per file it shares with this branch:
 - DEC-0152 (branch `agent/ct217-board-same-turn-20261104`): the registers only (`docs/DECISIONS.md`,
   `docs/DOCMAP.md`, `docs/backlog.md` with its row CT-217, a different row of `docs/specification/conformance.md`) and
   `docs/handoffs/README.md`, where both branches add a top row and both are kept.
-- DEC-0153 (branch `agent/ct219-ops-digest-20261104`): `docs/DECISIONS.md`; `docs/DOCMAP.md`; `docs/backlog.md`;
-  `docs/handoffs/README.md`; `docs/specification/conformance.md`; `docs/specification/README.md`; `CONTEXT.md`;
-  `fixtures/catalogue.json`; `src/semantic-rules.ts`; `test/positive-sweep.test.ts`; `test/rule-tolerance.test.ts`;
+- DEC-0153 (branch `agent/ct219-ops-digest-20261104`, read at `ada7c23d`, with OD-9: the descriptor extension
+  `ops-digest/0.1`, a ninth extension key, a third schema and `FAC-SEM-168`): `docs/DECISIONS.md`; `docs/DOCMAP.md`;
+  `docs/backlog.md`; `docs/handoffs/README.md`; `docs/specification/conformance.md`; `docs/specification/README.md`;
+  `docs/specification/interop.md`; `CONTEXT.md`; `fixtures/catalogue.json`; `src/extensions.ts`;
+  `src/semantic-rules.ts`; `test/consistency.test.ts`; `test/positive-sweep.test.ts`; `test/rule-tolerance.test.ts`;
   `tools/vectors/run.ts`; `vitest.config.ts`; `test/schema-compilation.test.ts`. With DEC-0149, DEC-0150 and DEC-0153
-  all on main the schema count is 150: each side writes 148 and git merges it silently, so whichever lands last sets it
-  by hand in `test/schema-compilation.test.ts`. The merged tree keeps one coverage `include` line holding every
-  branch's list, with `src/ops-digest.ts`'s floor beside the others; `test/positive-sweep.test.ts`'s `sources` holds
-  both `source-rules` and `ops-digest`; `test/rule-tolerance.test.ts` holds both kinds, with a comma between them; the
-  catalogue's last row before the other branch's rows gains its comma; and conformance.md's register adds
-  `FAC-SEM-166` and `FAC-SEM-167` after `165`.
+  all on main the schema count is 151: each side writes 147 or 149 and git merges it silently, so the last lander sets
+  151 by hand in `test/schema-compilation.test.ts`. The second of DEC-0150 and DEC-0153 to land keeps both constants
+  (`channelAgent` and `opsDigest`) in `src/extensions.ts` and in `test/consistency.test.ts` (its title naming both
+  keys), keeps both rows in interop.md's table, and writes "nine extension keys" there: the count line merges silently
+  as "eight", and no check catches it. `NOT_SWEPT` in `test/positive-sweep.test.ts` keeps both extension schemas. The
+  merged tree keeps one coverage `include` line holding every branch's list, with `src/ops-digest.ts`'s floor beside the
+  others; `test/positive-sweep.test.ts`'s `sources` holds both `source-rules` and `ops-digest`;
+  `test/rule-tolerance.test.ts` holds both kinds, with a comma between them; the catalogue's last row before the other
+  branch's rows gains its comma; and conformance.md's register adds `FAC-SEM-166` to `FAC-SEM-168` after `165`, the next
+  free `FAC-SEM-169` and `DEC-0154` read from the CAS refs at landing. Checks on the merged tree: `grep -c 'nine
+  extension keys' docs/specification/interop.md` prints 1, `grep -c 'toHaveLength(151)' test/schema-compilation.test.ts`
+  prints 1, and `channelAgent` and `opsDigest` both stand in `src/extensions.ts`.
 - At the DEC-0153 step: keep DEC-0151's support-quality rows (conformance.md's clients table, `docs/DOCMAP.md`, the
   specification README) and DEC-0153's new rows, never main's older support-quality rows; check: `grep -c '^| an agent
   that answers people, publishing its support quality' docs/specification/conformance.md` prints 1 on the merged tree.
-- For CT-218's drafter: a remote instance of an agent that has a manifest declares only in the manifest, as the page
-  says (CA-1); a reader of such a service ignores a declaration in its well-known answer.
+- For CT-218's drafter: the page's condition holds (CA-1): a service with a manifest declares only there, and a reader
+  that knows the manifest (its descriptor's `fabricManifest` or the registry's provider entry) ignores a declaration in
+  the well-known answer, while a reader holding only the well-known answer reads it. CT-218's drafter decides which of
+  the two a remote instance's readers get.
 - PR #235: `docs/DECISIONS.md`; `docs/backlog.md`; conformance.md's next-free line; conformance.md's register, the
   `FAC-SEM-155` row before `156`.
 - Main moves while this branch waits (it is `ed4d6aa7` after PR #241, with CT-219 and CT-220 at the backlog's tail,
@@ -535,10 +561,21 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 - the two "Compared as written" bullets for `project:<slug>` in `docs/specification/identifiers.md`, merged into one;
 - an assertion in `test/channel-agent.test.ts` that the declaration's `project` pattern equals
   `support-quality-daily.schema.json` `$defs/projectAlias` (S3);
+- the page's sentence on a language tag that starts with `sk-` (`sk-Latn-SK-u-ca-gregory`): DEC-0151's narrowing clears
+  such tags, so the sentence and its test are restated under DEC-0151's detector (the long tag then passes);
 - for whichever of DEC-0150 and DEC-0151 lands second: `test/support-quality.test.ts` reads the channel kinds from
   `service-channel-agent-extension.schema.json` `$defs/channel/properties/kind`'s `enum` instead of a literal list.
 
 ## Checks actually run
+
+On round 26's change (with round 25's deferred edits), each exit code read separately: `pnpm typecheck` 0; `pnpm run
+docs:check` 0 (markdownlint 0 errors); `python3 docs/ux/lint.py` 0; `pnpm run privacy:check` 0 (0 findings); `pnpm
+vectors:check` 0 (29 vector files match their generators, after the channel-agent generator's `--write`); `pnpm vitest
+run test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts` 0 (419 passed); the merge
+post's DEC-0151 sentence is a substring of `69db2177`'s `support-quality.md` with line breaks read as spaces (checked
+by a short script); `git grep` of this handoff for a schema count of 150 prints nothing; `operator-channel.md` matches
+main. The coverage run is owed (it would also confirm `roleOf`'s new branches): the 15-minute load was 55.88 and free
+disk 7.0 GB.
 
 On round 24's change, each exit code read separately: `pnpm typecheck` 0; `pnpm run docs:check` 0 (markdownlint 0
 errors); `python3 docs/ux/lint.py` 0; `pnpm run privacy:check` 0 (0 findings); `pnpm vectors:check` 0 (29 vector files
@@ -605,7 +642,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 24 (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 26 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -629,19 +666,23 @@ here), and adds:
   a customer's chat; whether on an `account` channel a message is the owner's word only when the account's owner is the
   operator and the send record of section 9's one session owner shows it was neither sent by an agent nor relayed from
   the ticket board; whether section 10's `account` row "holding rules" include the session owner's section 9 hold or
-  only the agent's own (CA-8 reads them as the agent's own, per section 4.10); and one bot serving both an operator
-  channel and channels the agent answers people on, for the standard's and the operator channel's owners: where a
-  binding code is accepted, how OC-3, OC-4, OC-12 and OC-14 to OC-16 apply to customer chats, and the shared receiver's
-  order of updates and its status (OC-17); until they answer, such a bot keeps every operator-channel rule in every chat
-  as written;
+  only the agent's own (CA-8 reads them as the agent's own, per section 4.10); whether the standard intends the
+  operator's chat decision on an `account` channel to be a message the customer reads; and one bot serving both an
+  operator channel and channels the agent answers people on, for the standard's and the operator channel's owners: where
+  a binding code is accepted, how OC-3, OC-4, OC-12 and OC-14 to OC-16 apply to customer chats, and the shared
+  receiver's order of updates and its status (OC-17); until they answer, such a bot keeps every operator-channel rule in
+  every chat as written;
 - a budget above 0 without a spend record is `FAC-SEM-164`;
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;
 - to be asked of the standard's owner: whether one declaration may hold projects on several sides;
 - posted on the board at landing, for FAA-197 (the adapter's adoption row, on its main), what that row lacks: both
   `PROTOCOL_REVISIONS` twins with `channel-agent-standard` `['1']` and the feed-protocols vectors vendored again; the
-  check reports, never fails, a declaration it reads as not declared while live producers still fail; and the
-  well-known site (`extensions` of a well-known answer) beside `fabric-agent.json`'s `provider.extensions`;
+  check reports, never fails, a declaration it reads as not declared while live producers still fail; and the well-known
+  site (`extensions` of a well-known answer) beside `fabric-agent.json`'s `provider.extensions`; and, since the
+  adapter's `practices.md` (released 0.63.0) restates CA-8 as "acts on its own task and its operator's word", that it
+  re-quotes CA-8 from the landed page, including the identification bound, "acts only inside that chat as section 4.10
+  says" and "no AP-3 or OA-2 source";
 - for Fabric Dashboards, an adoption item: its sample service's `fabric_protocols.py` register gains the
   `channel-agent-standard` row at its next pin;
 - to be asked of the standard's owner: the page's "Not checked here" list names section 11 checks no declaration can
@@ -653,11 +694,15 @@ here), and adds:
   https://u:p@help.example/"), is read for key shapes only, so a password there is not found: is that gap acceptable
   for the standard's section 11 check;
 - the coordinator asks the standard's owner to hold the observed per-project quality check for shared channels until the
-  standard's section 11 accepts by period the list DEC-0151 (in progress, branch `agent/sqd-fields-20261104` at
-  `69db2177`) gives, quoted here because main lacks it: before a producer's adoption, a day without `project`, a
-  withheld shared channel, and a producer whose only named project is alias-withheld at adoption; after adoption, a
-  project withheld because its alias is read as a credential, until the registry renames it, and that project's kept
-  days, since it reads missing there (posted with DEC-0150's landing, the list quoted in the post itself);
+  standard's section 11 accepts what DEC-0151 (in progress, branch `agent/sqd-fields-20261104`, head `69db2177`)
+  withholds, in DEC-0151's words (its `support-quality.md`), verbatim: "by period, the period being the event's day: a
+  producer's adoption is marked by its first published day that names `project` (a project under rule 9 never names one
+  and stays in the pre-adoption form). Until that day, a day without `project`, a withheld channel, and a producer whose
+  only named project is alias-withheld at adoption (it has no first named day); from adoption on, a project withheld
+  because its alias is read as a credential, until the registry renames it, and then that project's kept days, published
+  late under the new alias" At posting time the coordinator re-takes the sentence from DEC-0151's head and checks that
+  it is a substring of that head's `support-quality.md` with its line breaks read as spaces; posted with DEC-0150's
+  landing;
 - for each live producer, the members its current declaration fails (`FAC-SEM-162`'s places), read again with
   `pnpm validate` on its manifest or well-known answer at posting time.
 

@@ -890,6 +890,12 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const named = channelAgentRules({ extensions: { [KEY]: { ...value, extra: { [key]: 1 } } } }, "well-known");
     expect(named.some((f) => f.message.includes("rename it"))).toBe(true);
   });
+  it("reads a language tag that starts with sk- and 16 or more characters as a key, and sk-SK as a tag", () => {
+    const p0 = value.projects[0];
+    const tagged = (language: string) => channelAgentRules({ extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [{ ...p0.channels[0], texts: { holding: p0.channels[0].texts.holding, final: { [language]: "Please write to our support." } } }, p0.channels[1]] }] } } }, "well-known").map((f) => `${f.code} ${f.instancePath}`);
+    expect(tagged("sk-SK")).toEqual([]);
+    expect(tagged(["sk", "Latn-SK-u-ca-gregory"].join("-"))).toEqual([`FAC-SEM-165 ${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/channels/0/texts/final`]);
+  });
   it("asks for a rename by role: a text keyed id gets none, a channel id keeps it", () => {
     const p0 = value.projects[0];
     const key = ["sk", "-", "support-desk-faq-answers-2026-v2"].join("");

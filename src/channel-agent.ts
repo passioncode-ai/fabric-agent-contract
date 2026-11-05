@@ -90,7 +90,9 @@ const roleOf = (holder: Role, key: string, index: boolean): Role => {
   // A channel's texts and everything below them (its maps, and anything put inside a text's place) keep the role.
   if (holder === "texts") return "texts";
   if (index) return holder === "projects" ? "project" : holder === "queues" ? "queue" : holder === "channels" ? "channel" : undefined;
-  return holder === undefined ? undefined : ROLES[holder]?.[key];
+  if (holder === undefined || !Object.hasOwn(ROLES, holder)) return undefined;
+  const roles = ROLES[holder] as Readonly<Record<string, Role>>;
+  return Object.hasOwn(roles, key) ? roles[key] : undefined;
 };
 /** Where a name or a string the walk shows sits: its holder's frame (none for the walked value itself) and its key. */
 interface Spot { frame: Frame | undefined; key: string; isName: boolean }

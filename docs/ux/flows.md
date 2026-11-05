@@ -756,7 +756,7 @@ flowchart TD
   D -->|valid| R[Taken as the operator's; audited with the agent]
   O -->|in a customer chat| W[Word in a customer chat]
   W -->|account channel| K[CA-8 on an account channel, the operator's own account: acts inside that chat only; a send the account's session owner holds stays held under the owner's approval rules, and the chat word does not release it; a request outside the chat causes no action and is recorded in the agent's audit]
-  W -->|the agent's own customer bot, the operator's allowlisted id| B[CA-8: acts inside that chat only; the agent's own hold is lifted; a request outside the chat causes no action and is recorded in the agent's audit]
+  W -->|the agent's own customer bot, not the operator channel's bot| B[CA-8: acts inside that chat only; the agent's own hold is lifted; a request outside the chat causes no action and is recorded in the agent's audit]
 ```
 
 - **Screens traversed:** SCR-30 the operator's agent and the service's audit row.
