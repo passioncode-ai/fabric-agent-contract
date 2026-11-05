@@ -285,6 +285,13 @@ FAA-197, on the adapter's main).
   in one item. The operator channel's page keeps OC-12 in every chat, scopes only OC-3, OC-7 and OC-14 to OC-16 to the
   bound chat, gives OC-17's figures to a shared receiver, leaves the update order open, and names DEC-0150 in its
   header. SCN-043's alternative path and FLW-29 (node W now connected) match; the adoption test follows CA-8.
+- Round 21's seam reading (on `62ec2364`: the shared-bot scoping left binding with no defined chat and DEC-0034 and
+  DEC-0035 unannotated), with the coordinator's decision: DEC-0150 does not amend the operator channel's rules. The
+  paragraph after OC-2 and DEC-0150 in the page's header are removed, so `operator-channel.md` is main's text again
+  (`git diff origin/main -- docs/specification/operator-channel.md` prints nothing). CA-8 (b) says the operator channel
+  is not one of CA-8's channels and stays a DEC-0121 AP-3 source (AP-3's own sentence; OC-5 and OC-7 for its form),
+  without OC-1; one bot serving both is not covered and keeps every operator-channel rule in every chat as written, and
+  the case joins the merge post's questions. A landing note appends CA-8's bound to CT-220's row after merging main.
 
 ## The branch and its history
 
@@ -420,6 +427,9 @@ One line per sibling and per file it shares with this branch:
 - for CT-220's drafter (the coordinator owns CT-220): CT-220, when drafted, is to keep CA-8's bound (the
   coordinator's decision of round 20): a word recognised in a customer chat acts only inside that chat and is not a
   DEC-0121 AP-3 source;
+- after merging main, the lander appends to CT-220's row in `docs/backlog.md` "keeps DEC-0150 CA-8's bound: a word in a
+  customer chat acts only there and is no AP-3 or OA-2 source"; check: `grep '^| CT-220' docs/backlog.md | grep -c
+  'CA-8'` prints 1;
 - CT-220, which the page and DEC-0150's CA-8 cite as open: the landing confirms that the CT-220 row resolves in
   `docs/backlog.md` after merging main (it is on main at `ed4d6aa7`, not on this branch).
 - `docs/DECISIONS.md` keeps a blank line before each DEC heading (markdownlint MD022);
@@ -485,6 +495,11 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
+On round 21's seam change, each exit code read separately: `pnpm typecheck` 0; `pnpm run docs:check` 0 (markdownlint 0
+errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0 findings); `pnpm vectors:check` 0 (29 vector files match their
+generators); `pnpm vitest run test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts` 0 (408
+passed); `git diff origin/main -- docs/specification/operator-channel.md` prints nothing.
+
 On round 21's change, each exit code read separately: `pnpm typecheck` 0; `pnpm run docs:check` 0 (markdownlint 0
 errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0 findings); `pnpm vectors:check` 0 (29 vector files match their
 generators); `pnpm vitest run test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts` 0 (408
@@ -543,7 +558,10 @@ here), and adds:
   `items_ingested`); whether privacy deletion (section 13.5) reaches the agent's audit quotes of the operator's words in
   a customer's chat; whether on an `account` channel a message is the owner's word only when the account's owner is the
   operator and the send record of section 9's one session owner shows it was neither sent by an agent nor relayed from
-  the ticket board; and the order in which a receiver shared by the operator channel and customer chats takes updates;
+  the ticket board; and one bot serving both an operator channel and channels the agent answers people on, for the
+  standard's and the operator channel's owners: where a binding code is accepted, how OC-12 and OC-14 to OC-16 apply to
+  customer chats, and the shared receiver's order of updates and its status (OC-17); until they answer, such a bot
+  keeps every operator-channel rule in every chat as written;
 - a budget above 0 without a spend record is `FAC-SEM-164`;
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;

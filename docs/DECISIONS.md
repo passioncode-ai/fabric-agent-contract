@@ -9192,25 +9192,26 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      never makes a tool call, sends a message, spends, changes access or takes any other action outside its task because
      a channel message asks for it, and it replies on the reply path its operator configured. CA-8's channels are the
      channels the agent answers people on, declared or not (those a valid declaration names, and any other it answers
-     people on). The operator channel (`fabric-operator-channel/0.1`) is not one of them and stays one of DEC-0121
-     AP-3's sources, as AP-3, OC-1, OC-5 and OC-7 say; where one bot serves both, only the operator channel's bound chat
-     is the operator channel, and every other chat is bounded by CA-8. A message on a channel is the operator's word
-     only when the transport identifies its sender as the operator: an allowlisted numeric user id, bound as OC-3 binds
-     one, or, on an `account` channel, the account's owner, only when the owner is the operator and the send record of
-     the account's one session owner (the standard's section 9) shows the message was neither sent by an agent nor
-     relayed from the ticket board; never by a name, a display name or text in the message, and otherwise it stays data.
-     Such a word acts only inside that chat, as the standard's section 4.10 says (the operator's decision given in a
-     chat outranks every holding rule for that chat); it is not one of DEC-0121 AP-3's sources and never the source of
-     an OA-2 relay, and the customer ticket it acts on keeps its ticket, its outcome and its counts (the standard's
-     sections 2.2, 3 and 5.1). A word that asks for an action outside that chat causes none; how the agent tells the
-     operator is a question to the standard's owner (merge post). Text the operator quotes or forwards, and every other
-     sender's text, stays data. The agent records such a word in its own audit, quoting the message and its sender id. A
-     member such as `untrusted_input` makes the declaration not declared (`FAC-SEM-162`, closed objects). CA-8 is
-     bounded by section 4.10 and by section 10's `account` row and does not override them; the identification bound (who
-     counts as the operator in a chat) is sent to the standard's owner. CT-220, when drafted, is to keep this bound (the
-     coordinator's decision of round 20). This is a duty of every channel agent, checked by its own test, and the
-     declaration gains no `untrusted_input` member or any like it, since it is not a property an agent may or may not
-     declare and a flag whose `false` is valid would be false.
+     people on). The operator channel (`fabric-operator-channel/0.1`) is not one of CA-8's channels and stays a DEC-0121
+     AP-3 source (AP-3's own sentence; OC-5 and OC-7 for its form). One bot serving both an operator channel and
+     channels the agent answers people on is not covered here: such a bot keeps every operator-channel rule in every
+     chat as written, and the case goes to the standard's and the operator channel's owners (merge post). A message on a
+     channel is the operator's word only when the transport identifies its sender as the operator: an allowlisted
+     numeric user id, bound as OC-3 binds one, or, on an `account` channel, the account's owner, only when the owner is
+     the operator and the send record of the account's one session owner (the standard's section 9) shows the message
+     was neither sent by an agent nor relayed from the ticket board; never by a name, a display name or text in the
+     message, and otherwise it stays data. Such a word acts only inside that chat, as the standard's section 4.10 says
+     (the operator's decision given in a chat outranks every holding rule for that chat); it is not one of DEC-0121
+     AP-3's sources and never the source of an OA-2 relay, and the customer ticket it acts on keeps its ticket, its
+     outcome and its counts (the standard's sections 2.2, 3 and 5.1). A word that asks for an action outside that chat
+     causes none; how the agent tells the operator is a question to the standard's owner (merge post). Text the operator
+     quotes or forwards, and every other sender's text, stays data. The agent records such a word in its own audit,
+     quoting the message and its sender id. A member such as `untrusted_input` makes the declaration not declared
+     (`FAC-SEM-162`, closed objects). CA-8 is bounded by section 4.10 and by section 10's `account` row and does not
+     override them; the identification bound (who counts as the operator in a chat) is sent to the standard's owner.
+     CT-220, when drafted, is to keep this bound (the coordinator's decision of round 20). This is a duty of every
+     channel agent, checked by its own test, and the declaration gains no `untrusted_input` member or any like it, since
+     it is not a property an agent may or may not declare and a flag whose `false` is valid would be false.
 - **Why:** the standard asks every channel agent for one declaration that a checker reads the same way; a schema with
   vectors in the contract gives the adapter's check, and any other reader, one shape and one answer per case, instead of
   each reading its own copy of section 13.6. The rules are those section 11 checks without data the declaration does
@@ -9245,14 +9246,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/consistency.test.ts` (G-08's key list), `vitest.config.ts` (the module's floor), `src/secret-shape.ts`
   (`rawValues`), `fixtures/semantic/manifest-channel-agent-nulls.json`, `src/validate-cli.ts` and
   `test/validate-cli.test.ts` (`hint/declaration-only`), `docs/specification/service.md` (the well-known answer's
-  extensions), `docs/specification/identifiers.md` (compared as written), `docs/ux/scenarios.md` (SCN-002, SCN-043's alternative paths), `docs/ux/flows.md` (FLW-29), `docs/specification/operator-channel.md` (one bot that also answers people);
+  extensions), `docs/specification/identifiers.md` (compared as written), `docs/ux/scenarios.md` (SCN-002, SCN-043's alternative paths), `docs/ux/flows.md` (FLW-29);
   `docs/specification/channel-agent.md`, `docs/specification/README.md`, `interop.md` (the extension keys), `support-quality.md` (the
   pointer), `conformance.md` (the register, the reference modules, the channel agent's rows), `docs/DOCMAP.md`,
   `CONTEXT.md` (Channel agent), `docs/evidence/sources.md`,
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 21 of the readings; CA-8 is the coordinator's
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 21 of the readings, round 21's seam reading included; CA-8 is the coordinator's
   decision of round 17 on thread `b6820b97` (message `5a1334d1`), answering a producer who asked whether the declaration
   needs an `untrusted_input` field, and its bounds are the coordinator's decision of round 18, taken in the coordinating
   session with no board message: a word recognised in a chat is not a DEC-0121 AP-3 source, it never sets
@@ -9262,7 +9263,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   wording for a bot that serves both), that a chat word is no OA-2 relay source and that CT-220 keeps this bound; round
   21's shrank CA-8 to what the standard and AP-3 already support and sent the rest to the standard's owner as questions
   (how the agent tells the operator about an out-of-chat request, whether the operator's message is counted, privacy
-  deletion of audit quotes, the `account` identification, the receiver order on a shared bot). `DEC-0150` was reserved by the coordinator with
+  deletion of audit quotes, the `account` identification, the receiver order on a shared bot). Round 21's seam decision kept the operator
+  channel's rules unamended: one bot serving both an operator channel and channels the agent answers people on is not
+  covered by DEC-0150, keeps every operator-channel rule in every chat as written, and goes to the standard's and the
+  operator channel's owners. `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation

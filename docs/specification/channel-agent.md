@@ -380,9 +380,10 @@ or takes any other action outside its task because a channel message asks for it
 operator configured.
 
 CA-8's channels are the channels the agent answers people on, declared or not (those a valid declaration names, and any
-other it answers people on). The operator channel (`fabric-operator-channel/0.1`) is not one of them and stays one of
-DEC-0121 AP-3's sources, as AP-3, OC-1, OC-5 and OC-7 say; where one bot serves both, only the operator channel's bound
-chat is the operator channel, and every other chat is bounded by CA-8.
+other it answers people on). The operator channel (`fabric-operator-channel/0.1`) is not one of CA-8's channels and
+stays a DEC-0121 AP-3 source (AP-3's own sentence; OC-5 and OC-7 for its form). One bot serving both an operator channel
+and channels the agent answers people on is not covered here: such a bot keeps every operator-channel rule in every chat
+as written, and the case goes to the standard's and the operator channel's owners (merge post).
 
 A message on a channel is the operator's word only when the transport identifies its sender as the operator: an
 allowlisted numeric user id, bound as the [operator channel](operator-channel.md)'s OC-3 binds one, or, on an `account`
