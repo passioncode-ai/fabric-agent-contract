@@ -462,7 +462,7 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
         const result = runCli([file, "--schema", "service-ops-digest-extension.schema.json"]);
         expect(result.code, name).toBe(0);
         expect(result.out, name).toContain("hint/declaration-only");
-        expect(result.out, name).toContain("FAC-SEM-168 runs only on the declaration inside a service descriptor's extensions (the placement and paths.data, a source or a dir named twice, a dir with a segment of only dots, spaces or ignorable code points, a home folder in a dir, a dir or source shaped like a credential); check the descriptor to run it");
+        expect(result.out, name).toContain("FAC-SEM-168 runs only on the declaration inside a service descriptor's extensions (the placement and paths.data, a source or a dir named twice, a dir with a segment of only dots, spaces or ignorable code points, a dir holding a lone surrogate, a home folder in a dir, a dir or source shaped like a credential); check the descriptor to run it");
         const json = JSON.parse(runCli([file, "--schema", "service-ops-digest-extension.schema.json", "--json"]).out) as { notes?: Array<{ rule: string; help: string }>; problems: Array<{ rule: string; help: string }> };
         const hint = [...(json.notes ?? []), ...json.problems].find((note) => note.rule === "hint/declaration-only");
         expect(hint?.help, name).toBe("docs/specification/ops-digest.md#where-a-collector-reads-the-daily-digests");
@@ -660,6 +660,17 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
       expect(() => foldHour([], "2026-11-04T02:00:00Z", { ...one, ops: none as unknown as HourlyDigest["ops"] })).toThrow(/^the previous hour's ops is not an array$/);
     }
     expect(foldHour([], "2026-11-04T02:00:00Z", undefined)).toEqual(foldHour([], "2026-11-04T02:00:00Z", null));
+    // A hole in a sparse array is an item that is not an object, named by its place.
+    const holed = <T,>(item: T): T[] => {
+      const list: T[] = [];
+      list[1] = item;
+      return list;
+    };
+    const op = { op: "x", ok: 0, failed: 0, unknown: 0 };
+    expect(() => foldHour(holed(op), "2026-11-04T01:00:00Z", null)).toThrow(/^the item at 0 of counts is not an object$/);
+    expect(() => foldHour([], "2026-11-04T02:00:00Z", { ...one, ops: holed(op) })).toThrow(/^the item at 0 of the previous hour's ops is not an object$/);
+    expect(() => foldDay("2026-11-04", [{ ...one, ops: holed(op) }])).toThrow(/^the item at 0 of 2026-11-04T01:00:00.000Z's ops is not an object$/);
+    expect(() => foldDay("2026-11-04", [{ ...one, risen: holed({ op: "x", failed: 10, previous: 0 }) }])).toThrow(/^the item at 0 of 2026-11-04T01:00:00.000Z's risen is not an object$/);
   });
 
   it("names a non-string operation in a fold's input with an error, never a TypeError", () => {

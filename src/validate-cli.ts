@@ -257,7 +257,7 @@ function readerHints(schema: string | undefined, value: unknown, out: Hint[]): v
   // DEC-0153 OD-9: a bare ops-digest declaration checks its shape only; FAC-SEM-168 reads it inside its descriptor.
   // One rule name for every bare declaration; each bare declaration's line carries its own schema's page explicitly, so
   // it prints that page whichever value HINT_HELP's shared entry holds.
-  if (schema === "service-ops-digest-extension.schema.json") out.push(["/", "hint/declaration-only", "FAC-SEM-168 runs only on the declaration inside a service descriptor's extensions (the placement and paths.data, a source or a dir named twice, a dir with a segment of only dots, spaces or ignorable code points, a home folder in a dir, a dir or source shaped like a credential); check the descriptor to run it", OPS_DIGEST_HELP]);
+  if (schema === "service-ops-digest-extension.schema.json") out.push(["/", "hint/declaration-only", "FAC-SEM-168 runs only on the declaration inside a service descriptor's extensions (the placement and paths.data, a source or a dir named twice, a dir with a segment of only dots, spaces or ignorable code points, a dir holding a lone surrogate, a home folder in a dir, a dir or source shaped like a credential); check the descriptor to run it", OPS_DIGEST_HELP]);
   if (schema !== "provider.schema.json" || !isObject(value) || !isObject(value.run) || !isObject(value.run.mcp) || !isObject(value.run.mcp.stdio)) return;
   if (Object.hasOwn(value.run.mcp.stdio, "scope")) out.push(["/run/mcp/stdio/scope", "hint/reader-pending", "Fabric's registry does not accept run.mcp.stdio.scope yet (CT-27); leave it out and readers take on-demand"]);
 }

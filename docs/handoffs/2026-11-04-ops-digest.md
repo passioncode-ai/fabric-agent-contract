@@ -182,8 +182,8 @@ product's obligation.
   next free CT above every branch and main when written) widens `SECRET_VALUE` for underscore-form provider prefixes,
   `AIza` keys and `hf_` tokens, owned by DEC-0151's detector, with tests from split literals. Check after both land:
   `grep -n -E 'until DEC-0151|in either case and anywhere in the name' docs/specification/ops-digest.md
-  docs/DECISIONS.md` prints only annotated lines.
-- **At landing, the fold** (against DEC-0149 at `899b4710`, which exports `HFS_IGNORABLE_CHAR` with no global flag and
+  docs/DECISIONS.md` prints only annotated lines; the lines it must annotate, never rewrite, are the history in DEC-0153's Source (round 7's "until DEC-0151 lands"), and the test titled "pins the shared detector's shapes the page states: sk- inside a word ending in sk (until DEC-0151), the JWT, akia" in `test/ops-digest.test.ts` is renamed for the narrowed detector at that landing.
+- **At landing, the fold** (against DEC-0149 at `899b4710`, or its head at landing: re-read that head and run the fold checks below against it; which exports `HFS_IGNORABLE_CHAR` with no global flag and
   `stripHfsIgnorable` from `src/source-rules.ts` and keeps its global `HFS_IGNORABLE` private, so the lander exports
   nothing from `src/source-rules.ts`): make `foldDir = (dir) => foldPath(dir)`; delete `NUSKHURI`, `toMkhedruli` and
   the local `HFS_IGNORABLE` from `src/ops-digest.ts` (today only `foldDir` uses it: `dirReadings` removes every
@@ -193,6 +193,11 @@ product's obligation.
   `FOLD_PAIRS` at `d4cc1e16` copied as written, plus the HFS+ samples) keeps holding. The segment check stays local:
   DEC-0149's `inGrammar` is not swapped in, and the NFC/NFD length case it would add is recorded as undecided (spec
   page "Not decided here", Open).
+- **At landing, the JWT test:** `hasJwt` is exported from `src/secret-shape.ts` only on DEC-0149's branch (at
+  `b2fdbf92`), not on `main`. Whichever of DEC-0149 and DEC-0153 lands second switches the long-run check in
+  `digestFoldersRules` (`src/ops-digest.ts`, `JWT_SHAPE.test(reading)`) to `hasJwt(reading)` and drops the `JWT_SHAPE`
+  import there if unused; it adds nothing to CT-212 (whose list names other files). Check after both land: `grep -c
+  'JWT_SHAPE' src/ops-digest.ts` prints 0.
 - **At landing, the home-path boundaries:** DEC-0149 at `899b4710` (or its head at landing) rewrites the copies that
   count the home-path boundaries (`devices.md`, `proposals.md`, `src/proposal-rules.ts`, `activity.md` "Its scope" and
   the scope comment in `src/activity-rules.ts`) for four boundaries, `SOURCE_HOME_PATHS` among them; the device-common
@@ -313,7 +318,6 @@ product's obligation.
   (a daily digest of zero hours) is true again under one kind and is kept. Also: `dir` read also with the code points
   HFS+ ignores removed (findings and class hiding), `foldHour`'s docstring, FAC-SEM-167 and FAC-SEM-168 in
   `HOME_PATH`'s scope register, and OD-9's "the key in any document other than a service descriptor is unread and unreported; on a remote service descriptor it is a `FAC-SEM-168` finding" (reworded in round 11).
-  Round 11 is next.
 - Round 11 at `fcb1c55f` was not clean: OD-9's sentence on a remote descriptor (now "The key in any document other
   than a service descriptor is unread and unreported; on a remote service descriptor it is a `FAC-SEM-168` finding").
   Also: the Why restated for one writer (`hours` counts hourly lines folded, never uptime), a product that keeps its
@@ -385,11 +389,29 @@ product's obligation.
   the receipt commits' route on `main`, the README index row, the long run's remedy (a space or a dot inside a
   segment, not at its end), the folds' "is not an array" and an undefined `previous`, a `dir` holding a lone surrogate
   refused, the hints landing line naming the dropped and kept comments, and the mirror lines' check. Round 20 is next.
+- Round 20 at `5b2fc3ed` was not clean (product; unit and seam passed, the seam tier's gates on both landing orders
+  exiting 0): the lone surrogate was missing from three lists of what FAC-SEM-168 checks (the declaring product's
+  conformance row, the extension schema's root description and the bare-declaration hint, now all naming it), and the
+  receipt fast-forward named a weaker gate (now `pnpm run check`, the repository's local gate). Also: the board answer
+  states the SB-257 bound in our words, the Consumers re-read covers the rows the answer quotes, the acceptance edit's
+  receipt keeps only the pull request number, the version list dropped from the re-read step, a stale "Round 11"
+  sentence removed, `objects()` reading a sparse array's holes, the DEC-0151 line naming the lines to annotate and the
+  test title to rename, the JWT landing line (`hasJwt` is only on DEC-0149's branch) and the fold line re-read against
+  DEC-0149's head at landing. Round 21 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-20 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the six files of
+round 16 with coverage on `src/ops-digest.ts` (2044 tests; 293 of 293 statements, 227 of 227 branches); `pnpm exec tsx
+tools/vectors/run.ts`; `pnpm run docs:check`; `python3 docs/ux/lint.py`; `pnpm run privacy:check` (0 findings).
+Case-insensitive counts of the lone-surrogate word: `conformance.md` 3 (two rows of other decisions and the declaring
+product's row), the extension schema 2 (its root and its `dir`), `src/validate-cli.ts` 1 (the bare-declaration hint).
+The branch gate on this tree before its commit (15-minute load 40.4, 17 GB free, under the heavy lock): `pnpm run
+check` (109 files, 9960 tests passed, 1 skipped, coverage floors held; `ux:lint`, `docs:check`, `privacy:check` 0
+findings) exit 0, and `pnpm run vectors:check` exit 0. This paragraph is the only change after it.
 
 Round-19 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the six files of
 round 16 with coverage on `src/ops-digest.ts` (2044 tests; 292 of 292 statements, 227 of 227 branches); `pnpm exec tsx
@@ -555,19 +577,20 @@ In this order, each step only after the one before:
 
 1. The coordinator's blind readings of DEC-0153 on branch `agent/ct219-ops-digest-20261104` (unit, seam, product),
    until two consecutive clean rounds.
-2. Re-read the Consumers list above at the versions the knowledge base's roadmap names (Fabric Inbox v0.98.0, Fabric
-   Switchboard v0.7.14, the Fabric Agent Adapter v0.66.0, Fabric v0.3.16; read with `git ls-remote` and `gh api` only)
-   and update its dated lines, before the pull request and the board answer.
+2. Re-read the Consumers list above at the versions the knowledge base's roadmap names (read with `git ls-remote` and
+   `gh api` only) and update its dated lines, among them the SB-257 line ("closed 2026-11-05: released in v0.7.13" if
+   that is what the release shows), and re-read every product row the board answer below quotes, before the pull
+   request and the board answer.
 3. Open the pull request from that branch to `main`.
 4. The acceptance edit, in one commit on the branch, naming only facts that exist at its commit: DEC-0153's Status
    becomes Accepted with the edit date; CT-219 is marked done with its closure receipt "accepted <date>, #N" (no
-   "merged" before the merge; as CT-200 on `main`, #235), no merge commit; the handoffs README index row reads
-   "DEC-0153 (CT-219; CT-222 filed)" with the cell "accepted <date>, #N". The same commit rewrites this handoff: Done
-   and the Status words read accepted, CT-219 is no longer "in progress", Open records the clean rounds and the head
-   they read and drops "Round N is next", and this Next task then starts at the landing merge. Its checks: `pnpm run
-   docs:check` exits 0; `awk '/^### DEC-0153/{f=1} f&&/^- \*\*Status:\*\*/{print; exit}' docs/DECISIONS.md` prints a
-   line starting "- **Status:** Accepted"; `grep -n "CT-219" docs/backlog.md` shows done; `grep -n -E 'Round [0-9]+ is
-   next|DEC-0153 \(Proposed\)|marked in progress' docs/handoffs/2026-11-04-ops-digest.md` prints nothing.
+   "merged" before the merge), no merge commit; the handoffs README index row reads "DEC-0153 (CT-219; CT-222 filed)"
+   with the cell "accepted <date>, #N". The same commit rewrites this handoff: Done and the Status words read
+   accepted, CT-219 is no longer "in progress", Open records the clean rounds and the head they read and drops "Round
+   N is next", and this Next task then starts at the landing merge. Its checks: `pnpm run docs:check` exits 0; `awk
+   '/^### DEC-0153/{f=1} f&&/^- \*\*Status:\*\*/{print; exit}' docs/DECISIONS.md` prints a line starting "-
+   **Status:** Accepted"; `grep -n "CT-219" docs/backlog.md` shows done; `grep -n -E 'Round [0-9]+ is next|DEC-0153
+   \(Proposed\)|marked in progress' docs/handoffs/2026-11-04-ops-digest.md` prints nothing.
 5. The landing merge and the gate: merge `origin/main` into the branch (a merge commit on the branch, never a
    force-push), apply every "At landing" line above, and write both next-free markers from the CAS refs
    (`refs/agent-sync/ids/`), never from this file. Check `git merge-base --is-ancestor origin/main <PR head>` exits 0,
@@ -575,16 +598,19 @@ In this order, each step only after the one before:
    request), then merge the pull request.
 6. Compare `gh pr view <N> --json mergedAt` with the date the acceptance edit wrote; if the UTC day differs, correct
    it in DEC-0153's Status, CT-219's receipt and the README row; then CT-219's receipt and the README row read
-   "accepted <date>, #N; merged <date>". The commit lands on `main` as a fast-forward after `pnpm run docs:check`
-   exits 0 (the knowledge base's `knowledge/rules.md`, line 29) or through a receipt pull request.
+   "accepted <date>, #N; merged <date>". The commit lands on `main` as a fast-forward after `pnpm run check` exits 0
+   (the repository's local gate: the knowledge base's `knowledge/rules.md`, line 29; `AGENTS.md`), or through a
+   receipt pull request.
 7. The release, tagged as the history does; watch its run to success, then write the tag into CT-219's receipt and the
-   handoffs README row as "merged <date>, #N; released <tag>", landed on `main` the same way (a fast-forward after
-   `pnpm run docs:check`, or a receipt pull request).
+   handoffs README row as "merged <date>, #N; released <tag>", landed on `main` as a fast-forward after `pnpm run
+   check` exits 0 (the repository's local gate: `knowledge/rules.md`, line 29; `AGENTS.md`), or through a receipt pull
+   request.
 8. The answer on board thread `f7758225`. It says in one sentence what RW-4's `ok` means (asks answered by a retro the
    host saw written, never a count of retros) and names Fabric's CO-502 wording ("the daily digest counts retros asked
    and written"), so no view shows `ok` as retros written (CT-219's own row item (b) already says so since round 6),
-   and names OD-3's bound of 4095 named operations per UTC day plus one overflow name (Switchboard's SB-257 reads
-   "past 4096").
+   and states, in our words, OD-3's bound against Switchboard's SB-257: SB-257 reads a per-line bound of 4096
+   operations, with the rest counted under one fixed name, and OD-3 bounds 4095 named operations per UTC day plus one
+   overflow name.
 9. The knowledge base rows in `fabric-workspace`: in `knowledge/plans.md`, the contract's row at line 80 replaces PR
    #240 with this decision's pull request, adds OD-9 and `FAC-SEM-168`, and its Due cell becomes "merged <date>, #N;
    released <tag>" (no "draft by"); the Contract row of `knowledge/products.md` (line 21) gets the new tag, the `main`

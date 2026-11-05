@@ -120,9 +120,10 @@ const nameRefusal = (op: unknown): string | null => {
  */
 function objects(list: unknown, where: string): void {
   if (!Array.isArray(list)) throw new Error(`${where} is not an array`);
-  list.forEach((item, index) => {
-    if (!isObject(item)) throw new Error(`the item at ${index} of ${where} is not an object`);
-  });
+  // By index, so a hole in a sparse array reads as undefined and is named too (forEach would skip it).
+  for (let index = 0; index < list.length; index += 1) {
+    if (!isObject(list[index])) throw new Error(`the item at ${index} of ${where} is not an object`);
+  }
 }
 /** Throws when `ops` names one operation twice, or names one with no string; `where` says whose list it is. */
 function once(ops: ReadonlyArray<{ op: string }>, where: string): void {
