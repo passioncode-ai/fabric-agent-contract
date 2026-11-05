@@ -213,6 +213,29 @@ describe("the reference folds", () => {
     expect(foldDay("2026-11-04", [a, b])?.total.ok).toBe(10);
   });
 
+  it("refuses fold inputs FAC-SEM-166 refuses: an operation twice in the previous hour's ops or in one hour's risen", () => {
+    const one = foldHour([{ op: "x", ok: 0, failed: 5, unknown: 0 }], "2026-11-04T01:00:00Z", null);
+    const twice = { ...one, ops: [...one.ops, ...one.ops] } as HourlyDigest;
+    expect(() => foldHour([{ op: "x", ok: 0, failed: 12, unknown: 0 }], "2026-11-04T02:00:00Z", twice)).toThrow(/x is named twice in the previous hour's ops/);
+    // A previous digest that is not the hour just before is not read.
+    expect(foldHour([{ op: "x", ok: 0, failed: 12, unknown: 0 }], "2026-11-04T05:00:00Z", twice).risen).toEqual([{ op: "x", failed: 12, previous: 0 }]);
+    const rose = foldHour([{ op: "x", ok: 0, failed: 12, unknown: 0 }], "2026-11-04T01:00:00Z", null);
+    const risenTwice = { ...rose, risen: [...rose.risen, ...rose.risen] } as HourlyDigest;
+    expect(() => foldDay("2026-11-04", [risenTwice])).toThrow(/x is named twice in the risen of 2026-11-04T01:00:00.000Z/);
+  });
+
+  it("writes no daily digest for a day of more than 4096 operations (OD-3)", () => {
+    const many = (prefix: string, n: number) => Array.from({ length: n }, (_, i) => ({ op: `${prefix}.n${String(i).padStart(4, "0")}`, ok: 1, failed: 0, unknown: 0 }));
+    const a = foldHour(many("a", 4096), "2026-11-04T01:00:00Z", null);
+    const b = foldHour(many("b", 4096), "2026-11-04T02:00:00Z", null);
+    expect(valid("ops-digest-hourly.schema.json", a)).toBe(true);
+    expect(() => foldDay("2026-11-04", [a, b])).toThrow(/8192 operations, more than 4096: no daily digest/);
+    const same = foldHour(many("a", 4096), "2026-11-04T02:00:00Z", null);
+    const day = foldDay("2026-11-04", [a, same]);
+    expect(day?.ops).toHaveLength(4096);
+    expect(valid("ops-digest-daily.schema.json", day)).toBe(true);
+  });
+
   it("checks each hour's rises before the day sums them, and refuses a rise its hour does not count", () => {
     const hour = (from: string, failed: number) => ({ ...foldHour([{ op: "x", ok: 0, failed: 30, unknown: 0 }], from, null), risen: [{ op: "x", failed, previous: 0 }] }) as HourlyDigest;
     for (const [one, two] of [[-5, 30], [2.5, 7.5], [Number.NaN, 30]] as Array<[number, number]>) {
@@ -320,8 +343,8 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     expect(evaluateSemanticRules("service-descriptor", value).find((f) => f.instancePath === `${at}/4/dir`)?.message).toContain("credential");
   });
 
-  it("compares dirs under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped", () => {
-    const pairs: Array<[string, string]> = [["Straße", "STRASSE"], ["Stra\u1e9ee", "Straße"], ["σασ", "ΣΑΣ"], ["café", "café"], ["digests.", "digests"], ["digests ", "digests"], ["a/Digests./b", "A/digests/B"], ["\u1fbc\u0342", "\u1fb7"], ["\u0131", "i"], ["\u0131", "I"]];
+  it("compares dirs under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC), trailing dots and spaces dropped", () => {
+    const pairs: Array<[string, string]> = [["Straße", "STRASSE"], ["Stra\u1e9ee", "Straße"], ["σασ", "ΣΑΣ"], ["café", "café"], ["digests.", "digests"], ["digests ", "digests"], ["a/Digests./b", "A/digests/B"], ["\u1fbc\u0342", "\u1fb7"], ["\u0131", "i"], ["\u0131", "I"], ["dig\u200cests", "digests"], ["digests\ufeff", "digests"], ["a/\u202adigests", "a/digests"]];
     for (const [a, b] of pairs) {
       expect(foldDir(a), `${a} ${b}`).toBe(foldDir(b));
       expect(found("service-descriptor", withFolders([{ dir: a, source: "one" }, { dir: b, source: "two" }])), `${a} ${b}`).toEqual([`FAC-SEM-168 ${at}/1/dir`]);

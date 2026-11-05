@@ -70,8 +70,9 @@ text among them, fails it.
   digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional
   name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`, `api.my_users/list` and `ui.home/open` are refused, and `api.user/list` and `api.get_user/list` pass (a dir's examples are in OD-9). One refused name fails the whole line, so every reader skips that
   hour's digest (OD-6): a product checks its names against `FAC-SEM-167` before it writes. An operation's name names
-  the operation, never a value of it: no identifier, count or credential (`FAC-SEM-167` also refuses one shaped like a
-  credential).
+  the operation, never a value of it: no identifier, count or credential. `FAC-SEM-167` also refuses a name the shared
+  credential detector ([`src/secret-shape.ts`](../../src/secret-shape.ts)) reads as a credential, a long camelCase
+  segment with a digit included (40 or more characters of upper case, lower case and digits).
 - **OD-3, counting.** Every record the product's log takes is counted, by `op` and outcome, in the hour it happened,
   before the log decides whether to write or only count it (a sampled success is counted too). The outcome `ok` counts
   as `ok`, `failed` as `failed`, any other as `unknown`. A product whose log uses its own outcome words maps each one
@@ -83,8 +84,9 @@ text among them, fails it.
   that relays calls counts an error as it sees it: a relayed error cannot tell setup from failure (DEC-0149). `total` is each counter's sum over `ops`. Each
   `op` is named once in `ops` and once in `risen`. A count, and every sum, is an integer from 0 to 2^53 − 1; a
   product that would write a larger one writes no digest for that hour (the reference folds throw). `ops` and `risen`
-  hold at most 4096 operations each: beyond 4096 a product counts the rest under one fixed operation name of its own
-  (their counts kept), so the line still validates.
+  hold at most 4096 operations each: a product keeps at most 4095 named operations per UTC day plus its one fixed
+  overflow name, under which it counts the rest (their counts kept), so both its hourly and its daily lines validate. A
+  day that would fold more than 4096 operations has no daily digest (the reference `foldDay` throws).
 - **The order.** `ops` is sorted by `op` in code-unit order (the order of JavaScript's `<` on strings); an hourly
   `risen` is in the order of `ops`; a daily `risen` is sorted by `failed`, the most first, then by `op` in code-unit
   order. The reference folds write this order and the vectors compare in it. `FAC-SEM-166` does not check order, and a
@@ -131,7 +133,7 @@ its own `.json` file) and tells the two apart by `schema`.
     no trailing `/`, at most 256 characters (the grammar of a package path, `fabric-package.schema.json#/$defs/path`,
     which a package's state relative to the data folder also uses). It holds the product's `daily-YYYY-MM.jsonl` files
     (OD-6); a collector reads those files in `<paths.data>/<dir>` and nothing else there. Each `dir` is named once,
-    compared under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped, segment by segment (a folder
+    compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC), trailing dots and spaces dropped, segment by segment (a folder
     under two labels would be sent twice). The home-folder detector applies to `dir`: `hasHomePath` refuses a value in
     which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or
     digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or
@@ -153,7 +155,7 @@ its own `.json` file) and tells the two apart by `schema`.
   `instance`), so two products with the label `app` stay apart. A product without a local descriptor is outside this
   declaration (see Not decided here).
 - **`FAC-SEM-168`** checks a descriptor that carries the key: a remote placement, or a local one without
-  `paths.data`; a value that is not the schema's; a `source` named twice; a `dir` named twice, compared under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped; a `dir` that holds a home folder (`hasHomePath`, the
+  `paths.data`; a value that is not the schema's; a `source` named twice; a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC), trailing dots and spaces dropped; a `dir` that holds a home folder (`hasHomePath`, the
   detector `FAC-SEM-167` uses, with the boundary above), and a `dir` or `source` shaped like a credential
   (`secretValue`). One finding refuses the whole declaration: a collector treats a
   declaration with a `FAC-SEM-168` finding as not declared and reports it, as a host treats an invalid load key
@@ -176,7 +178,8 @@ A product with one folder of digests, `digests` in its data folder, writes in it
 - **RW-1, when it arises.** A host's obligation `retro-after-work` arises for a session at each release of a claim or
   task that the host records as done (in [coordination](coordination.md) terms, a release with outcome success; each
   host's own claim vocabulary decides which act that is), and when the session ends, only if the session wrote no
-  retro since the session began or the obligation last arose, whichever is later. One retro answers every
+  retro since the session began or the obligation last arose, whichever is later; the host judges "wrote no retro" by
+  what it observes (RW-4). One retro answers every
   time it arose since the session's last retro.
 - **RW-2, how it is asked.** The host serves it among the obligations it hands a session, naming it
   `retro-after-work`: write the retro in the same turn as the release, or before the session ends.
@@ -193,15 +196,15 @@ A product with one folder of digests, `digests` in its data folder, writes in it
   refused (a lesson the memory refused), `unknown` otherwise: a retro written elsewhere, a line saying there is nothing
   to say, or none, at the session's end. Retros asked are the three counters' sum; `ok` counts the asks answered by a
   retro the host saw written. One retro may answer several asks, so `ok` is not a count of retros and no bound on
-  them: Project Observatory counts the retros written itself (its OBS-331). Nothing of the retro's text enters the digest.
+  them; counting the retros written is Project Observatory's (Not decided here). Nothing of the retro's text enters the digest.
 
 ## Semantic rules
 
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-166"></a>`FAC-SEM-166` | `ops-digest-hourly`, `ops-digest-daily` | an hourly digest's `from` and `to` are whole UTC hours of real days, one hour apart, and a daily digest's `day` a real UTC day; each `op` once in `ops` and once in `risen`; `total` each counter's sum over `ops`; every `risen` op counted in `ops`; an hourly rise names the hour's failures of its op and is a rise by OD-4 against its `previous`; a daily rise is in at most the day's `hours`, with at least 10 failures an hour it rose and at most the day's failures of its op (DEC-0153) |
-| <a id="fac-sem-167"></a>`FAC-SEM-167` | `ops-digest-hourly`, `ops-digest-daily` | no `op`, in `ops` or in `risen`, is shaped like a credential (`secretValue` of [`src/secret-shape.ts`](../../src/secret-shape.ts)) or holds a home folder (`hasHomePath` of [`src/activity-rules.ts`](../../src/activity-rules.ts)). `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`, `api.my_users/list` and `ui.home/open` fail and `api.user/list` and `api.get_user/list` pass. One refused name fails the whole line, which every reader skips (DEC-0153) |
-| <a id="fac-sem-168"></a>`FAC-SEM-168` | `service-descriptor` | a descriptor that carries the ops-digest key (`extensions/ops-digest/0.1`) is a `local` one that names `paths.data`; its value is valid against `service-ops-digest-extension.schema.json` (a reader treats an invalid one as not declared and reports it); each `source` is named once and each `dir` once, compared under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped; no `dir` holds a home folder (`hasHomePath`) and no `dir` or `source` is shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail and `user-digests` and `a/~1/x` pass. One finding refuses the whole declaration, which a collector reads as not declared (DEC-0153 OD-9) |
+| <a id="fac-sem-167"></a>`FAC-SEM-167` | `ops-digest-hourly`, `ops-digest-daily` | no `op`, in `ops` or in `risen`, is shaped like a credential (`secretValue` of [`src/secret-shape.ts`](../../src/secret-shape.ts), the shared detector, which also reads a long camelCase segment with a digit as one) or holds a home folder (`hasHomePath` of [`src/activity-rules.ts`](../../src/activity-rules.ts)). `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`, `api.my_users/list` and `ui.home/open` fail and `api.user/list` and `api.get_user/list` pass. One refused name fails the whole line, which every reader skips (DEC-0153) |
+| <a id="fac-sem-168"></a>`FAC-SEM-168` | `service-descriptor` | a descriptor that carries the ops-digest key (`extensions/ops-digest/0.1`) is a `local` one that names `paths.data`; its value is valid against `service-ops-digest-extension.schema.json` (a reader treats an invalid one as not declared and reports it); each `source` is named once and each `dir` once, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC), trailing dots and spaces dropped; no `dir` holds a home folder (`hasHomePath`) and no `dir` or `source` is shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail and `user-digests` and `a/~1/x` pass. One finding refuses the whole declaration, which a collector reads as not declared (DEC-0153 OD-9) |
 
 ## Not decided here
 
@@ -214,12 +217,12 @@ A product with one folder of digests, `digests` in its data folder, writes in it
   how often and over which call is the collector's and Observatory's.
 - `pnpm validate` reading a `.jsonl` file whole.
 - Which act of each host's claim vocabulary is "a release recorded as done" for RW-1: each host names its own.
-- Counting retros written outside the host (a lesson recorded straight in Project Observatory): Observatory's to count.
+- Counting the retros written, inside or outside a host (a lesson recorded straight in Project Observatory included):
+  Project Observatory's.
 - The wire form in which a collector sends the descriptor's `id` and `instance` beside `source` (OD-9): an optional
   `service {id, instance}` beside `source` is announced (board thread `f7758225`, message `1a12d809`); the form is the
   collector's and Project Observatory's.
 - How a product without a local descriptor reaches a collector: outside this contract. A product's own folder in its
   own local descriptor is an OD-9 declaration; a folder of a remote instance's digests fetched by a local app is a
   relayed remote instance's, outside this contract.
-- The identity a relayed remote instance's lines are sent under, so that N relays are not N counts (Project
-  Observatory keys a digest by project, service, source and day).
+- The identity a relayed remote instance's lines are sent under, so that N relays are not N counts.

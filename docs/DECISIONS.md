@@ -9047,9 +9047,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. **The shapes, as ADR-0188 names them.** `ops.digest.hourly@1` {`schema`, `from`, `to`, `ops`[{`op`, `ok`,
      `failed`, `unknown`}], `total`{`ok`, `failed`, `unknown`}, `risen`[{`op`, `failed`, `previous`}]} and
      `ops.digest.daily@1` {`schema`, `day`, `hours`, `ops`, `total`, `risen`[{`op`, `hours`, `failed`}]}, both closed,
-     every count an integer from 0 to 2^53 − 1, at most 4096 operations and rises: beyond 4096 a product counts the
-     rest under one fixed operation name of its own (their counts kept), so the line still
-     validates.
+     every count an integer from 0 to 2^53 − 1, at most 4096 operations and rises: a product keeps at most 4095 named
+     operations per UTC day plus its one fixed overflow name, under which it counts the rest (their counts kept), so
+     both its hourly and its daily lines validate; a day that would fold more than 4096 operations has no daily digest
+     (the reference `foldDay` throws).
   2. **The window (OD-1).** `from` and `to` are whole UTC hours in RFC 3339 with `Z`, with or without the `.000` that
      `Date.prototype.toISOString` writes (Fabric writes it), `to` one hour after `from`; `day` is `YYYY-MM-DD` UTC;
      `hours` 1 to 24. An hour the product ran through is written even when empty; an hour it did not run is a gap. A
@@ -9066,7 +9067,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `mcp.notifications/initialized`, `mcp.notifications/cancelled`; board thread `f7758225`, message `1c191cf7`), and
      the 175 operation names Fabric checked in a week of its own log all fit. No absolute path, URL, space, empty
      segment, `.` or `..` can; `FAC-SEM-167` refuses a name shaped like a credential (`secretValue`, DEC-0044) or
-     holding a home folder (`hasHomePath`, the detector other rules use), so the `/` lets no home path through.
+     holding a home folder (`hasHomePath`, the detector other rules use), so the `/` lets no home path through;
+     `secretValue` is the shared credential detector (`src/secret-shape.ts`), which also reads a long camelCase segment
+     with a digit as one.
      `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character
      that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and
      is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which
@@ -9100,11 +9103,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      stops. The `@1` names stay as Fabric writes them and are not entered in the protocol revision register (DEC-0067):
      nothing negotiates them, and a reader skips a revision it does not read.
   6. **Nothing but counts (OD-7), and the operator told (OD-8).** No log line, path, identifier or text; a product
-     that shows findings shows each rise of its newest hour.
+     that shows findings shows each rise of its newest closed hour.
   7. **`retro-after-work` (RW-1 to RW-4).** It arises at each release of a claim or task that the host records as
      done (in coordination's terms, outcome success; each host's own claim vocabulary decides which act that is) and
      when the session ends, only if the session wrote no retro since the session began or the obligation last arose,
-     whichever is later; the host serves it with its other obligations as advice that holds nothing back;
+     whichever is later, the host judging "wrote no retro" by what it observes (RW-4); the host serves it with its other obligations as advice that holds nothing back;
      it is fulfilled in the same turn by a lesson in Project Observatory (`observatory_lesson`, one class key each), by
      `insight/1` lines, or by one line saying there is nothing to say; the host counts each time it arose as one record
      of the operation `retro-after-work` in its digests, in the hour the record is resolved (answered, or `unknown` at
@@ -9112,7 +9115,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      tool call, or a host hook observing the session's own tool call), `failed` when such a call is refused, `unknown`
      otherwise, a retro written elsewhere and a line saying there is nothing to say included. Retros asked are the
      sum; `ok` counts the asks answered by a retro the host saw written, and since one retro may answer several asks,
-     `ok` is not a count of retros and no bound on them: Project Observatory counts the retros written itself (round 5).
+     `ok` is not a count of retros and no bound on them; counting the retros written is Project Observatory's (Not
+     decided here).
   8. **Reference and vectors.** `foldHour`, `foldDay`, `isRise` and the rules in `src/ops-digest.ts`; vectors in
      `fixtures/vectors/ops-digest.json`; `pnpm validate` tells the two digests apart by `schema` (kinds
      `ops-digest-hourly`, `ops-digest-daily`).
@@ -9125,7 +9129,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      a collector on the same machine sends with each daily line it reads there. The digests stay as written (OD-6,
      OD-7); the key only says where to read and which label to send. `FAC-SEM-168` (kind `service-descriptor`) refuses
      the key on a remote placement or on a local one without `paths.data`, a value that is not its schema's, a `source`
-     named twice, a `dir` named twice, compared under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped (one folder under two labels would be sent twice), a `dir` holding a home folder (`hasHomePath`, with the
+     named twice, a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC), trailing dots and spaces dropped (one folder under two labels would be sent twice), a `dir` holding a home folder (`hasHomePath`, with the
      boundary of item 3: `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x` pass) and a `dir` or `source` shaped like a credential
      (`secretValue`); one finding refuses the whole declaration, which a collector reads as not declared and reports.
      `digestFoldersView` (whose `usable` is true only when the rule has no finding) and `digestFoldersRules` in
@@ -9203,7 +9207,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   written outside the host (Project Observatory's); the wire form in which a collector sends the descriptor's `id` and
   `instance`; how a product without a local descriptor reaches a collector (outside this contract; a product's own
   folder in its own local descriptor is an OD-9 declaration, a remote instance's folder fetched by a local app is not); the identity a relayed remote instance's lines are sent under, so that
-  N relays are not N counts (Project Observatory keys a digest by project, service, source and day); the other items
+  N relays are not N counts; the other items
   on the spec page's list.
 - **Source:** the operator's word of 2026-11-04, relayed by Fabric on board thread `f7758225` (message `516761e1`),
   and the thread's answers on the draft (messages `1c191cf7`, the `/` in MCP method names, and `f74763e1`, the day with
@@ -9226,6 +9230,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   product's code; round 5 at `6eb61183` was not clean: the start order (a kept hour written before a day is folded),
   RW-4's count (`ok` counts asks, not retros), product claims (removed from this decision and the spec, kept only as
   the handoff's dated reading of each product's rows and folds) and `foldDay`'s rises (checked before they are
-  summed), and its batch is folded in;
+  summed), and its batch is folded in; round 6 at `1ed18a61` was not clean: the day's ops bound (a day of more than
+  4096 operations has no daily digest; a product keeps 4095 names plus one overflow name a day), Observatory facts (no
+  claim about what Project Observatory counts or keys) and Fabric's rows (quoted from its carry-over ledger in the
+  handoff), and its batch is folded in;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

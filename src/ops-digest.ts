@@ -27,6 +27,11 @@ export const RISE_FACTOR = 2;
  */
 export const OP_NAME = /^[a-z][A-Za-z0-9_]*(?:[.:/-][A-Za-z0-9_]+)*$/;
 export const OP_NAME_MAX = 64;
+/**
+ * At most this many operations in a digest's `ops` (and so in `risen`). A product keeps at most 4095 named operations per
+ * UTC day plus its one overflow name, so both its hourly and its daily lines validate (OD-3).
+ */
+export const OPS_MAX = 4096;
 
 const HOUR_MS = 3_600_000;
 /** A whole UTC hour as the schema writes it: seconds and an optional all-zero fraction, then `Z`. */
@@ -82,23 +87,32 @@ const byName = (a: { op: string }, b: { op: string }): number => (a.op < b.op ? 
 const sum = (ops: readonly Counters[]): Counters =>
   ops.reduce((t, c) => ({ ok: t.ok + c.ok, failed: t.failed + c.failed, unknown: t.unknown + c.unknown }), { ok: 0, failed: 0, unknown: 0 });
 /**
- * A digest whose every count, an hourly rise's `previous` (taken from the previous digest) included, is still an
- * integer from 0 to 2^53 - 1, or a throw: a sum that left it, or a previous digest's broken count, is no count.
+ * A digest whose every count, an hourly rise's `previous` included, is still an integer from 0 to 2^53 - 1, or a throw.
+ * Every input is checked before it is merged, so what fails here is a sum beyond 2^53 - 1.
  */
 function safeCounts<T extends HourlyDigest | DailyDigest>(digest: T): T {
   const counts = [digest.total, ...digest.ops].flatMap((c) => [c.ok, c.failed, c.unknown])
     .concat(digest.risen.flatMap((r) => ("previous" in r ? [r.failed, r.previous] : [r.failed])));
-  if (!counts.every(isCount)) throw new Error("a count is not an integer from 0 to 2^53 - 1");
+  if (!counts.every(isCount)) throw new Error("a sum is beyond 2^53 - 1");
   return digest;
+}
+/** Throws when `ops` names one operation twice; `where` says whose list it is. */
+function once(ops: ReadonlyArray<{ op: string }>, where: string): void {
+  const names = new Set<string>();
+  for (const c of ops) {
+    if (names.has(c.op)) throw new Error(`${c.op} is named twice in ${where}`);
+    names.add(c.op);
+  }
 }
 
 /**
  * The digest of the hour starting at `from` (a whole UTC hour): `counts` summed by operation and sorted by name in
  * code-unit order, and each operation whose failures rose against `previous`, in the order of `ops`, which counts only
  * when it is the hour just before (a gap compares with none). `from` and `to` are written as
- * `Date.prototype.toISOString` writes them. It throws when an input count, a sum or a previous digest's count is not
- * an integer from 0 to 2^53 - 1 (each input count is checked before it is merged), and when the hour after `from` is
- * not a whole hour the schema writes (after 9999-12-31T23).
+ * `Date.prototype.toISOString` writes them. `previous` must already pass FAC-SEM-166. It throws when an input count or
+ * a previous digest's count is not an integer from 0 to 2^53 - 1 (each checked before it is used), when a sum is beyond
+ * 2^53 - 1, when the previous digest names an operation twice, and when the hour after `from` is not a whole hour the
+ * schema writes (after 9999-12-31T23).
  */
 export function foldHour(counts: readonly OpCount[], from: string, previous: HourlyDigest | null): HourlyDigest {
   const start = wholeHour(from);
@@ -112,7 +126,9 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
     merged.set(c.op, m);
   }
   const ops = [...merged.values()].sort(byName);
-  const before = new Map((previous !== null && wholeHour(previous.to) === start ? previous.ops : []).map((c) => [c.op, c.failed]));
+  const adjoining = previous !== null && wholeHour(previous.to) === start ? previous.ops : [];
+  once(adjoining, "the previous hour's ops");
+  const before = new Map(adjoining.map((c) => [c.op, c.failed]));
   // A previous count that is no count (NaN, 1e300, negative) would silently suppress or fake a rise: it throws.
   for (const c of ops) if (before.has(c.op) && !isCount(before.get(c.op))) throw new Error(`the previous hour's failures of ${c.op} are not an integer from 0 to 2^53 - 1`);
   const risen = ops.filter((c) => isRise(c.failed, before.get(c.op) ?? 0)).map((c) => ({ op: c.op, failed: c.failed, previous: before.get(c.op) ?? 0 }));
@@ -123,8 +139,10 @@ export function foldHour(counts: readonly OpCount[], from: string, previous: Hou
  * The day's hourly digests (those whose hour starts on `day`, one per hour, the first of a repeated hour kept) folded
  * into one: the operations summed, the hours counted, and each operation that rose in some hour with the hours it rose
  * in and the failures of those hours, the most failures first, then by name. A day with no hour of its own has no
- * digest: null (OD-5). It throws when an input count or an hour's rise (each checked before it is merged) or a sum is
- * not an integer from 0 to 2^53 - 1, and when an hour names a rise of an operation its ops does not count.
+ * digest: null (OD-5). Its hourly digests must already pass FAC-SEM-166. It throws when an input count or an hour's rise
+ * is not an integer from 0 to 2^53 - 1 (each checked before it is merged), when a sum is beyond 2^53 - 1, when an hour
+ * names a rise twice or a rise of an operation its ops does not count, and when the day folds more than 4096
+ * operations: it writes no daily digest then (OD-3).
  */
 export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDigest | null {
   const seen = new Set<number>();
@@ -144,6 +162,7 @@ export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDige
       m.ok += c.ok; m.failed += c.failed; m.unknown += c.unknown;
       merged.set(c.op, m);
     }
+    once(h.risen, `the risen of ${h.from}`);
     for (const r of h.risen) {
       if (!isCount(r.failed)) throw new Error(`the rise of ${r.op} in ${h.from} is not an integer from 0 to 2^53 - 1`);
       if (!h.ops.some((c) => c.op === r.op)) throw new Error(`${r.op} rose in ${h.from} but that hour's ops does not count it`);
@@ -152,6 +171,7 @@ export function foldDay(day: string, hourly: readonly HourlyDigest[]): DailyDige
       rose.set(r.op, x);
     }
   }
+  if (merged.size > OPS_MAX) throw new Error(`the day folds ${merged.size} operations, more than ${OPS_MAX}: no daily digest (OD-3)`);
   const ops = [...merged.values()].sort(byName);
   const risen = [...rose.entries()].map(([op, x]) => ({ op, ...x })).sort((a, b) => b.failed - a.failed || byName(a, b));
   return safeCounts({ schema: OPS_DIGEST_DAILY, day, hours: mine.length, ops, total: sum(ops), risen });
@@ -277,14 +297,17 @@ export function digestFoldersView(descriptor: unknown): DigestFoldersView {
 }
 
 /**
- * A `dir` as a file system that folds case compares it, canonical caseless as DEC-0149's fold: each segment as NFD,
+ * A `dir` as a file system that folds case compares it, canonical caseless as DEC-0149's fold: each segment with the
+ * code points HFS+ ignores removed (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F, U+FEFF), then as NFD,
  * then lower, upper and lower case, then NFC, trailing dots and spaces dropped. So `Straße` meets `STRASSE` and
  * `Straẞe`, `σασ` meets `ΣΑΣ`, and a letter with U+0345 and another accent meets its precomposed form, which an
  * NFC-first fold splits. It also joins the dotless `ı` with `i` (and `I`): two dirs a file system may keep apart are
  * read as one, the safe direction, since the worst it does is a `FAC-SEM-168` finding on two folders.
  */
+/** Code points HFS+ ignores in a name, stripped before the fold exactly as DEC-0149's `foldSegment` strips them. */
+const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
 export const foldDir = (dir: string): string =>
-  dir.split("/").map((segment) => segment.normalize("NFD").toLowerCase().toUpperCase().toLowerCase().normalize("NFC").replace(/[. ]+$/, "")).join("/");
+  dir.split("/").map((segment) => segment.replace(HFS_IGNORABLE, "").normalize("NFD").toLowerCase().toUpperCase().toLowerCase().normalize("NFC").replace(/[. ]+$/, "")).join("/");
 
 const FOLDERS_PATH = `/extensions/${EXTENSION_KEYS.opsDigest.replace(/~/g, "~0").replace(/\//g, "~1")}`;
 const folderFinding = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-168", instancePath, message });
@@ -293,7 +316,7 @@ const folderFinding = (instancePath: string, message: string): Finding => ({ cod
  * FAC-SEM-168 on a service descriptor (kind `service-descriptor`) that carries the ops-digest key: a remote placement
  * (no folder on this machine), or a local one that names no `paths.data` for `dir` to be relative to; a value that is
  * not its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); a `source` named
- * twice; a `dir` named twice, compared under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped, segment
+ * twice; a `dir` named twice, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC), trailing dots and spaces dropped, segment
  * by segment (one folder under two labels would be sent twice); a `dir` that holds a home folder (`hasHomePath`); a
  * `dir` or a `source` shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users`
  * or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
@@ -323,7 +346,7 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     if (seen.has(folder.source)) findings.push(folderFinding(`${at}/source`, `source ${folder.source} is named twice; each folder sends its own label`));
     seen.add(folder.source);
     const folded = foldDir(folder.dir);
-    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `dir ${folder.dir} is named twice (compared under canonical caseless matching (NFD, case folded, NFC), trailing dots and spaces dropped); its lines would be sent twice`));
+    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `dir ${folder.dir} is named twice (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, case folded, NFC), trailing dots and spaces dropped); its lines would be sent twice`));
     dirs.add(folded);
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
     if (secretValue(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));

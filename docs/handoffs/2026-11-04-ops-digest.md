@@ -6,7 +6,7 @@ Draft CT-219 by its own decision: the shapes `ops.digest.hourly@1` and `ops.dige
 host obligation `retro-after-work`, fixtures, vectors, `pnpm validate` for both and the conformance rows. Names and
 fields are Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's commit `e1eecec0`
 (`apps/desktop/src/shared/opsDigest.ts`, `apps/desktop/src/main/opsDigestRun.ts`). Asked on board thread `f7758225`
-(message `516761e1`, item 2); Switchboard (SB-250) and Inbox (B-205) wait on the shape.
+(message `516761e1`, item 2); Switchboard (SB-250) and Inbox (B-205) waited on the shape when CT-219 was filed.
 
 ## Done
 
@@ -33,7 +33,8 @@ fields are Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's
   `test/ops-digest.test.ts`, `test/rule-tolerance.test.ts` and `test/consistency.test.ts`; the spec section "Where a
   collector reads the daily digests", the descriptor bullet in `service.md`, the key in `interop.md` (eight keys) and
   the named-only list in `versioning.md`; two conformance rows (a product declaring its folders, a collector), the
-  register row and next free `FAC-SEM-169`. Fabric (CO-503) and Project Observatory (OBS-330) are its first consumers.
+  register row and next free `FAC-SEM-169`. Its first consumers are announced (board message `2ed505f2`): Fabric's
+  CO-503 and Project Observatory's OBS-330.
 - `conformance.md`: the reference module row, three rows (a product folding its log, a reader of digests, a host
   serving `retro-after-work`), the register rows `FAC-SEM-166` and `FAC-SEM-167`, next free `FAC-SEM-168` (the state before OD-9; `FAC-SEM-169`
   since OD-9);
@@ -47,7 +48,7 @@ fields are Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's
   one (`ipc.work:home`), `_` for products that write snake case, `/` (the coordinator's decision of 2026-11-05) because
   Fabric logs MCP methods as `mcp.<method>` (`mcp.tools/list`; thread `f7758225`, message `1c191cf7`); the 175 names
   Fabric checked in a week of its log fit. `FAC-SEM-167` applies `hasHomePath` too, so `/` lets no home folder in.
-- A day with no hour of its own has no daily digest (OD-5; Fabric Inbox answers `404`, message `f74763e1`);
+- A day with no hour of its own has no daily digest (OD-5; answering `404` is announced, board message `f74763e1`);
   `foldDay` returns null for it. `hours` stays 1 to 24.
 - A product's own call refused for its own missing source slot (DEC-0149, in progress: "Starting without the
   instance") counts `unknown`, never `failed` (OD-3), so it never makes a rise; a host that relays calls counts an error
@@ -120,11 +121,13 @@ says "not run" and the folds are the coordinator's or the product's to run. Anyt
 repository; read again before relying on a line. Vendoring the vectors from the contract's release tag is every
 product's obligation.
 
-- **Fabric**: (a) `passioncode-ai/fabric` origin/main `a6f0ffda`, latest release v0.3.15. (b) CO-503 (the collector)
-  and CO-509 (the digest's owed items, by 2026-11-18) are announced (board messages `2ed505f2`, `449b3e7e`,
-  `fefb0266`); neither row was found in its `docs/evidence/backlog.md` at `a6f0ffda` or at the head of any of its 22
-  remote branches when read. (c) Not run (the round-4 readers reported its daily fold differing on 2 of the 4 day
-  vectors at this commit).
+- **Fabric**: (a) `passioncode-ai/fabric` origin/main `a6f0ffda`, latest prerelease v0.3.15. (b) Its CO rows live in
+  the carry-over ledger `docs/evidence/specs/2026-08-16-software-fabric-carryover.md` at `a6f0ffda` (its
+  `docs/evidence/backlog.md` points there): CO-500 "closed" (Fabric reads its own log every hour and every day); CO-502
+  "open" (`retro-after-work`; its row says "the daily digest counts retros asked and written"); CO-503 "open" (the
+  daily digest goes to Project Observatory; target the organization slice, 2026-11-21, P-27). CO-509 is announced
+  (board messages `449b3e7e`, `fefb0266`) and is not in the ledger, whose next free id is `CO-507`. (c) Not run (the
+  round-4 readers reported its daily fold differing on 2 of the 4 day vectors at this commit).
 - **Fabric Inbox**: (a) release tag v0.95.0 (`6fed640`); `passioncode-ai/fabric-inbox` origin/main `71a3edd6`, where
   its rows were read. (b) B-212 "in review (0.95.0)", shipped in the v0.95.0 tag through PR #413; B-213 "open; due
   2026-11-16"; B-210 "open; due 2026-11-16 (Fabric's side 2026-11-18)", narrowed by PR #414 to the Mac app's own
@@ -138,8 +141,9 @@ product's obligation.
   the next release after 0.7.12, announced, board message `157e65b4`); SB-251 to SB-254 and SB-256 are not about
   digests. (c) Not run.
 - **Project Observatory**: (a) `passioncode-ai/project-observatory-dashboard` origin/main `4116b3ac`, latest release
-  v0.33.1. (b) OBS-330 "open" (accepting the daily digest as a record kind) and OBS-331 "open" (the daily review of
-  lessons and digests; it counts retros written itself). (c) No fold to run.
+  v0.33.1. (b) OBS-330 "open": "Accept Fabric's daily digest of its own operations log as a project record kind";
+  OBS-331 "open": "A daily review of what every agent learned: once a day, read the lessons (`observatory_lesson`) and
+  digests of every project ...". (c) No fold to run.
 - **The Fabric Agent Adapter**: (a) `passioncode-ai/fabric-agent-adapter` origin/main `d51aa73f`, latest release
   v0.64.0. (b) FAA-206, as its row states at v0.64.0: "open 2026-11-04: P1. Part 1 in 0.64.0, target 2026-11-13: done
   2026-11-05 on `agent/faa-0.64.0`" (the retro reminder), "part 2 waits on the digest form in the contract (CT-219)".
@@ -150,6 +154,9 @@ product's obligation.
   `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the adapter
   kit's copies in agents built on it, and any other vendored table) add `fabric-ops-digest/0.1`, as DEC-0149 asks for
   `fabric-source`.
+- **At landing** (DEC-0151 lands before this branch and narrows the `sk-` shape): on the merged tree, add `FAC-SEM-167`
+  pass cases for `queue.task-assigned-to-worker`, `work.desk-booking-confirmed` and `ui.disk-usage-refreshed-hourly`,
+  which the `sk-` shape before DEC-0151 reads as keys.
 
 ## Open
 
@@ -187,12 +194,26 @@ product's obligation.
   to repositories, commits, rows and fold results) and `foldDay`'s rises (each checked and matched to its hour's ops
   before it is summed). Also: "canonical caseless matching (NFD, case folded, NFC)" as the dir comparison's name,
   RW-1's "since the session began or the obligation last arose, whichever is later", and the declaration-only hint's
-  per-schema help link. Round 6 is next.
+  per-schema help link.
+- Round 6 at `1ed18a61` was not clean: the day's ops bound (`foldDay` folded two 4096-operation hours into 8192, which
+  the schema refuses; now a product keeps 4095 names plus one overflow name a day, and a day beyond 4096 operations has
+  no daily digest), Observatory facts (RW-4 and DEC-0153 claimed what Project Observatory counts and keys; now Not
+  decided here, and OBS-330 and OBS-331 quoted by their own text) and Fabric's rows (now quoted from its carry-over
+  ledger). Also: the fold inputs FAC-SEM-166 refuses (an operation twice in the previous hour's ops or in one hour's
+  risen) throw, the overflow message says "beyond 2^53 - 1", `foldDir` strips the code points HFS+ ignores first as
+  DEC-0149's `foldSegment` does, RW-1's "wrote no retro" judged by what the host observes, `FAC-SEM-167`'s credential
+  detector described as shared, and the dated-reading wording fixes. Round 7 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-6 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
+round 2 with coverage on `src/ops-digest.ts` (4175 tests; 232 of 232 statements, 181 of 181 branches);
+`pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`; `python3 docs/ux/lint.py`;
+`pnpm run privacy:check` (0 findings). No other repository's code was downloaded or run. The branch gate is owed: the
+15-minute load was 59.8.
 
 Round-5 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
 round 2 with coverage on `src/ops-digest.ts` (4173 tests; 220 of 220 statements, 177 of 177 branches);
@@ -244,6 +265,9 @@ and its per-file floors (109 files, 9846 tests passed, 1 skipped), each exit 0. 
 ## Next task
 
 The coordinator's blind readings of DEC-0153 on branch `agent/ct219-ops-digest-20261104`, until two clean rounds;
-then the pull request, the merge and the answer on thread `f7758225`. At landing, also: update the knowledge base's
+then the pull request, the merge and the answer on thread `f7758225`. That answer says in one sentence what RW-4's
+`ok` means (asks answered by a retro the host saw written, never a count of retros) and names Fabric's CO-502 wording
+("the daily digest counts retros asked and written"), so no view shows `ok` as retros written (CT-219's own row item (b) already says so
+since round 6). At landing, also: update the knowledge base's
 plans row for the contract (`fabric-workspace` `knowledge/plans.md`, its row at line 80 names neither OD-9 nor
 `FAC-SEM-168`), and confirm CT-221's row reserved on main (PR #242) stays once.
