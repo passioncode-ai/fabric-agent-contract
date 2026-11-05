@@ -21,7 +21,10 @@ export const SOURCE_FORMAT = "fabric-source/1";
 export const SLOT_KINDS: readonly string[] = ["secret", "config", "store", "endpoint"];
 /** A file path: the package's path grammar (`fabric-package.schema.json#/$defs/path`), as `#/$defs/file` repeats it. */
 export const SOURCE_FILE_PATH = /^(?![/~])(?![\s\S]*\\)(?![\s\S]*\/\/)(?!(?:[\s\S]*\/)?\.{1,2}(?:\/|$))[^\u0000-\u001f:]{1,256}(?<!\/)$/u;
-/** A path of `include` or `exclude`: a file, or with a trailing `/` a folder and everything under it (`#/$defs/path`). */
+/**
+ * A path of `include` or `exclude` (`#/$defs/path`): with a trailing `/` a folder and everything under it; without, in
+ * `include` one file, in `exclude` a file and everything beneath that name.
+ */
 export const SOURCE_PATH = /^(?![/~])(?![\s\S]*\\)(?![\s\S]*\/\/)(?!(?:[\s\S]*\/)?\.{1,2}(?:\/|$))[^\u0000-\u001f:]{1,256}$/u;
 
 /**
@@ -224,7 +227,7 @@ export function isSourcePath(manifest: unknown, path: unknown): boolean {
 
 /**
  * Whether a folder (a path ending in `/`) lies in the source: inside an `include` folder or one itself, with no
- * `.git` segment, inside no `exclude` folder.
+ * `.git` segment, inside no exclude folder and beneath no exclude entry without `/`.
  */
 function folderInSource(includes: PathList, excludes: PathList, written: string): boolean {
   // `excludes` is a folded list (`foldedList`): the folder is looked up in it folded, as the source test reads exclude.

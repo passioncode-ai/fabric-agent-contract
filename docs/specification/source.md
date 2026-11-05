@@ -46,16 +46,17 @@ installation fills.
 
 A path is the package's path grammar (`fabric-package.schema.json#/$defs/path`), plus a trailing `/` for a folder in
 `include` and `exclude`: relative (a leading `/` or `~` is refused), forward slashes, no `.` or
-`..` segment, no drive, no control character, no `:`. In `include` and `exclude` a path that ends in `/` names a folder
-and everything under it; any other path names one file. There are no globs. An entry outside the grammar (over 256
+`..` segment, no drive, no control character, no `:`. A path that ends in `/` names a folder and everything under it;
+in `include` any other path names one file, and in `exclude` any other path names a file and everything beneath that
+name. There are no globs. An entry outside the grammar (over 256
 code points, or with a `\`, a `//` or a `:`) is a schema problem and names, reaches and removes nothing. A file whose
 own path is outside the grammar is not source: it is never read and never exported, and no line names it. A `binaries`
 path names a file only; a
 store slot's `path` is written without a trailing slash and names the file or folder the agent keeps its store in.
 
-- **Default deny.** Only what `include` names is source; `exclude` carves holes in it. An `exclude` entry without `/`
-  names a file, and also leaves out everything beneath that name (a nested repository's files, or anything placed there
-  later), at export and in a patch. A path is in the grammar as written and in NFC: a path NFC lengthens past 256 code
+- **Default deny.** Only what `include` names is source; `exclude` carves holes in it, at export and in a patch (an
+  entry without `/` leaving out everything beneath its name, as above: a nested repository's files, or anything placed
+  there later). A path is in the grammar as written and in NFC: a path NFC lengthens past 256 code
   points is not source, and an entry NFC so lengthens is `FAC-SEM-157`. A file outside `include` is
   simply not source: it is not a finding, and a source export does not carry it. A file whose path an `exclude` entry
   names only once both are folded (below; `src/Private/notes.md` under `src/private/`) is not source either, in the
@@ -244,7 +245,8 @@ source manifest `fabric.source.json` or pass its folder; any other file is a sou
   address (no finding in a path, never printed), the folder it is under (`<a path that may hold a finding, under
   src/>`, `<a path whose name holds an e-mail address, under src/>`); a name Git lists that is not UTF-8 is a usage error
   naming its position in Git's list, never the name, only when its leading folders that decode lie in the source as a
-  whole: an `include` folder is that folder or holds it, and no `exclude` folder is it or holds it (`src/<bytes>.txt`
+  whole: an `include` folder is that folder or holds it, no `exclude` folder is it or holds it, and no `exclude` entry
+  without `/` names it or a folder above it (`src/<bytes>.txt`
   under an `include` of `src/`); any other such name is outside the source and skipped, even one under a folder an
   `include` only reaches into (`src/<bytes>/x.ts` under `src/a/`). A listed path that is a folder on disk is a nested
   repository only when Git listed it with a trailing `/` (an untracked repository), the index records it as a gitlink
@@ -264,7 +266,7 @@ source manifest `fabric.source.json` or pass its folder; any other file is a sou
   could not run (the note gives the error's code only, such as `ENOBUFS`), and when no `git` is found, it walks the folder: never into `.git`, into a folder (a dot-folder and
   `node_modules` included) only when an `include` path reaches into it (names it, with or without its trailing `/`, or
   something in it) or covers it, never into a folder outside the path grammar, never into a folder an `exclude` folder
-  is or holds unless an `include` path lies under it (so an unreadable excluded folder is no usage error); it reads
+  is or holds, or an `exclude` entry without `/` names or lies above, unless an `include` path lies under it (so an unreadable excluded folder is no usage error); it reads
   names as bytes, and a name that is not UTF-8 gets Git mode's rule: a usage error naming its folder and no part of the
   name (`cannot read a name in src/: it is not UTF-8`) when that folder lies in the source, otherwise skipped; a folder
   holding its own `.git` a nested
@@ -394,11 +396,13 @@ A source export is a local act: it publishes nothing and is always allowed.
 1. It reads a committed tree at a named commit, never the working copy, and takes only the source paths; a gitlink (a
    submodule) is never exported, and the check refuses one in the source (`nested-repository`).
 2. It runs the tree check with the operator's list and refuses on any blocking finding.
-3. It writes a directory holding a new Git repository with exactly one commit and no history from the home: author
-   and committer `Fabric source export <source-export@fabric.invalid>`, author and committer dates both the source
-   commit's committer date, with its time zone, the message `Source export`. The copy carries no link to the original.
-   A later export for a recipient that already holds an earlier export takes that export commit as its parent: it
-   brings no home commit and lands as a fast-forward, so no force-push is ever needed.
+3. It writes a directory holding a Git repository with one new commit, whose only parent, if any, is the earlier
+   export commit the recipient holds; no commit from the home: author and committer `Fabric source export
+   <source-export@fabric.invalid>`, author and committer dates both the source commit's committer date, with its time
+   zone, the message `Source export`. The copy carries no link to the original. A later export's input names the
+   earlier export commit (found in the earlier hand-over's receipt; none named means a parentless export). While the
+   recipient's branch still ends at that commit, the new export lands as a fast-forward; when it has moved, the export
+   goes to the recipient as a new branch (or pull request) for it to merge under its own rules; never a force-push.
 4. It rewrites no file. Cleanup happens at the source, which is then exported again; so the source's identity fields
    name the publisher, never a person or the operator's account (`provider.createdBy`, `provider.identity.subject`).
 5. It writes a receipt in the instance, never in the source: the source commit, the manifest's SHA-256, the counts of
@@ -410,18 +414,23 @@ owed by CT-207, is to be it, and the tree check is the contract's part.
 
 ## Handing over
 
-Handing a source export to anyone (creating a repository someone else can read, pushing a commit not already there to one
-that is not the source's home and that is public or another owner's, sending a file, changing its visibility; the line, with the source's home, is drawn below, after the departures) is
-an act of
-effect class `publish` (`schemas/common.schema.json`), and a person's act each time, which no standing grant authorises
+Every route of a source hand-over the list below counts (a source export handed to anyone, a push of a commit not
+already there to a repository that is not the home and that is public, another owner's, or readable by another person,
+a file sent, a visibility change, and the others; the line, with the source's home, is drawn below, after the
+departures) is an act of effect class `publish` (`schemas/common.schema.json`), and a person's act each time, which no standing grant authorises
 ([external effects](governance-and-roles.md#external-effects)). The hand-over action declares the gate `relayed`
 ([actions](service.md#actions), DEC-0121).
 
-**The rule.** A hand-over is taken only on the operator's word naming the agent, the source commit and the recipient.
-It is one synchronous call, never a job, so a job's step and [MJ-1](delegation.md#the-operators-mandate) do not reach
-it; CT-181 may add a job form later. The one period this section specifies runs until a service pins a contract
-revision carrying CT-181. In it the word comes from a T0 or T1 caller ([DL-25](delegation.md#trust-tiers)) in one of
-two forms, and in no other:
+**The rule.** A hand-over is taken only on the operator's word naming the agent, the target (the source commit, or
+the repository for the two organization acts below) and the recipient, in one of three forms and in no other: on a
+service's action, the decision with its exact target or the service's in-call elicitation (both below); outside a
+service's action, the stated word: the agent states the agent, the target and the recipient, and the operator's reply
+accepting that statement is the word. A stated word is consumed once, by the one act it names, and a relay carries it
+only under [OA-5](delegation.md#one-approval-binds-all-the-operators-agents). On a service's action the hand-over is one
+synchronous call, never a job, so a job's step and [MJ-1](delegation.md#the-operators-mandate) do not reach it; CT-181
+may add a job form later. The one period this section specifies runs until a service pins a contract revision carrying
+CT-181. In it the word on a service's action comes from a T0 or T1 caller ([DL-25](delegation.md#trust-tiers)) in one
+of two forms, and in no other:
 
 - a valid decision (DEC-0121 AP-2) whose `target` is the one exact string below; or
 - the service's own elicitation in the call's form: an MCP `elicitation/create` sent within the hand-over's `tools/call`,
@@ -445,8 +454,8 @@ token needs none ([DL-26](delegation.md#trust-tiers)).
   uses, beside the commit, so a caller builds the exact target from its own arguments. The required `target` is
   `<agent>@<commit>-><recipient>`: the agent's id is its package's `id` (a
   kebab-case name of at most 64 characters; a source not yet packed uses the `id` its package will carry), the commit
-  the full source commit (for a visibility change of an organization agent's private home, or its new readers outside
-  the organization, the repository as the action names it, in the commit's place), the recipient as the action names it. When that string exceeds the decision schema's 200
+  the full source commit (for an organization agent's private home made public by a visibility change, or given new
+  readers outside the organization, the repository as the action names it, in the commit's place), the recipient as the action names it. When that string exceeds the decision schema's 200
   characters, the `target` is `sha256:` and the lowercase hex SHA-256 of its UTF-8 bytes; the action computes the same
   string and compares it exactly. Naming the three in `instruction` is the relaying agent's duty under AP-3, and nothing
   checks it.
@@ -528,9 +537,10 @@ its owner holds are the owner's own. The owner's own commits, branches and relea
 a release that stays where the home's readers are, nor a deploy of the agent to a placement its owner holds (an
 organization's agent on that organization's placement included), whether the home is the operator's private repository,
 a public one or an organization's. A bundle a public page serves is the agent's output; serving the source tree, source
-maps or unbuilt files publicly, or to others, is a hand-over, and a prompt or resource that is a source file served
-verbatim, or a bundle built without minification, is the source tree served. The act the word names there is the
-deploy of a commit that serves source to others: one word per commit and audience. Serving the running agent to a team
+maps or unbuilt files publicly, or to anyone who cannot read the home, is a hand-over, and a prompt or resource that is
+a source file served verbatim, or a bundle built without minification, is the source tree served. The act the word
+names there is the deploy of a commit that serves source to anyone who cannot read the home: one word per commit and
+audience. Serving the running agent to a team
 (`peer`, client keys, the one-time code) gives no one the tree and is no hand-over; the prompts or resources it serves
 are its output, except a prompt or resource that is a source file served verbatim, or a bundle built without
 minification, which is the source tree served.
@@ -548,13 +558,15 @@ A source hand-over is the source reaching a place or a person it was not at. The
   (below; the files the pack step derives from the public source, `fabric.package.json`, signatures and checksums,
   count as already public, and nothing else does).
 
-A hand-over by push or by file carries a source export (one commit, no history from the home, the tree check passed),
-never another commit. A later export to the same recipient takes as its parent the export commit the recipient already
-holds ([source export](#source-export)), so it brings no home commit and lands as a fast-forward: no force-push is ever
-needed. An act on the whole repository of a personal agent (a transfer, a visibility change, access given to any other
-person) is not done: the source leaves only as a source export. A gate that would let such an act carry the history is
-not decided here. A personal agent's private home that already has readers outside the operator has them removed, or
-each later commit reaching them is a hand-over. An organization's acts on its own agent's whole repository are its own,
+A hand-over by push or by file carries a source export (one new commit, whose only parent, if any, is the earlier
+export commit the recipient holds; no commit from the home; the tree check passed), never another commit; a later
+export lands as a fast-forward or, when the recipient's branch has moved, as a new branch or pull request
+([source export](#source-export)), never by a force-push. An act on the whole repository of a personal agent's private
+home (a transfer, a visibility change, access given to any other person) is not done: the source leaves only as a
+source export. A public home's access and visibility are outside that rule. A gate that would let such an act carry the
+history is not decided here. Access the operator gave to a personal agent's private home before this rule stands as the
+operator's own act, so a commit reaching those readers is no hand-over; nothing here is retroactive, and an agent never
+gives new access. An organization's acts on its own agent's whole repository are its own,
 under its own release rules (the knowledge base's rules section 9), except two that take the word naming the
 repository: making a private organization agent's source public, and giving it new readers outside the organization (a
 transfer to another owner, access given outside the organization); the word accepts the history as it stands.
@@ -564,7 +576,7 @@ CI on the home's host, a service the owner runs) is no recipient while what it h
 owner and the processors acting for the owner; output it makes public (a public server, a Pages site) is a hand-over.
 Access the owning organization gives its own members to its own agent's home is no hand-over, since they are the home's
 readers; for a personal agent the owner is the operator, so any other person's access to a private home is an act on
-its whole repository, which is not done (above). Giving access to a public home is no hand-over: nothing unreadable
+the whole repository of a personal agent's private home, which is not done (above). Giving access to a public home is no hand-over: nothing unreadable
 becomes readable.
 
 What takes the word when a source becomes public: a personal agent's source made public for the first time (as a source
@@ -577,9 +589,11 @@ already public. A push, release or serving of what is already public, from a pub
 reaches no reader who could not read it already and is no hand-over, when an earlier act on the operator's word, or the
 owner's own act, made it public.
 
-Each hand-over needs the operator's word for that act, naming the agent, the source commit (for a visibility change of
-an organization agent's private home, or its new readers outside the organization, the repository as the action names
-it, in the commit's place) and the recipient; a local source export needs none. A copy moved within the operator's own
+Each hand-over needs the operator's word for that act, in one of the three forms (above), naming the agent, the target
+and the recipient: the target is the source commit, except for an organization agent's private home made public (a
+visibility change) or given new readers outside the organization, where it is the repository as the action names it;
+an organization's first public release from a private home names its source commit. A local source export needs
+none. A copy moved within the operator's own
 estate (here, the accounts and placements the operator alone holds) to a place that is not public and that no one
 outside the operator can read (a deploy to the operator's own placement, a private mirror the operator owns) has no
 recipient and is not a source hand-over; a push or copy elsewhere that is public, that another owner holds, or that
@@ -660,10 +674,10 @@ in its first answer or its doctor command.
 |---|---|---|
 | an agent's source repository with `fabric.source.json` | the manifest validates and passes `FAC-SEM-156` and `FAC-SEM-157`; its tree passes `FAC-SEM-158` | `pnpm --silent validate <dir> --kind source-tree`; the operator's tool with the operator's list |
 | a source check (the adapter's check and `export`) | answers the vectors' problems for every case (each kind of the tree check's table, `nested-repository`, `short-instance-string` and `no-include` included; lines split at LF and counted from 1, columns from 1 in UTF-16 code units; a finding in a file's own path with no line and no column), reads the operator's list from outside the tree, never prints a value it found | `fixtures/vectors/source-tree.json`; the tool's own test |
-| a source export (the adapter's `export`) | reads a committed tree, exports no gitlink, refuses on a blocking finding, writes one commit by the neutral author with no history and no link back, rewrites no file, writes its receipt in the instance without a found value, creates no repository and pushes nothing, runs no test as a condition | the tool's own test |
+| a source export (the adapter's `export`) | reads a committed tree, exports no gitlink, refuses on a blocking finding, writes one new commit, whose only parent, if any, is the earlier export commit the recipient holds; no commit from the home (a later export names the earlier export commit; when the recipient's branch has moved it goes as a new branch or pull request, never a force-push), by the neutral author with no link back, rewrites no file, writes its receipt in the instance without a found value, creates no repository and pushes nothing, runs no test as a condition | the tool's own test |
 | `pack` | writes the package's `secrets[]` from the source's secret slots and, unless it packs a copy without state, `state[]` from its store slots | `FAC-SEM-160`; the tool's own test |
-| an import of a patch | refuses the whole patch when a path is not source (read against the receiver's current manifest, `exclude` folded, a segment with `~` and a digit once an exclude exists) and holds, kept unapplied, any patch that changes `fabric.source.json` until the owner decides; refuses a patch path beneath a symbolic link in the receiver's tree, checked at apply time; applies at the source | `patchPathsAllowed` in the vectors; the tool's own test |
-| a hand-over (Fabric's "give as source", any tool) | gated as `publish`, a person's act each time; its action declares `relayed` and takes the hand-over only on the operator's word naming the agent, the source commit and the recipient, from a T0 or T1 caller as a valid decision with the exact `target` or the service's accepted elicitation naming the three, consumed when the effect begins, never by a mandate, as [handing over](#handing-over) specifies; a hand-over by push or by file carries a source export, never another commit; an act on the whole repository of a personal agent (a transfer, a visibility change, access given outside the owner) is not done | the tool's own test |
+| an import of a patch | refuses the whole patch when a path is not source (read against the receiver's current manifest, `exclude` folded, a segment with `~` and a digit once an exclude exists) and holds, kept unapplied, any patch that changes `fabric.source.json` until the owner decides; refuses a patch path beneath a symbolic link in the receiver's tree, checked at apply time; applies at the source | `patchPathsAllowed` in the vectors; the receiving tool's own test for the symbolic-link clause, which `patchPathsAllowed` cannot check |
+| a hand-over (Fabric's "give as source", any tool) | gated as `publish`, a person's act each time, on every route [handing over](#handing-over) counts; takes the hand-over only on the operator's word naming the agent, the target (the source commit, or the repository for an organization agent's private home made public or given new readers outside the organization) and the recipient, in one of three forms: on a service's action, which declares `relayed`, a valid decision with the exact `target` from a T0 or T1 caller or the service's accepted elicitation naming the three, consumed when the effect begins; outside a service's action, the stated word the operator's reply accepts, consumed once; never by a mandate; a hand-over by push or by file carries a source export (one new commit, whose only parent, if any, is the earlier export commit the recipient holds; no commit from the home), never another commit; an act on the whole repository of a personal agent's private home (a transfer, a visibility change, access given to any other person) is not done; an organization's own acts on its agent's repository are its own except those two | the tool's own test |
 | an agent started without its instance | starts, answers `degraded` with one `setup: true` entry per missing required slot (an `endpoint` included), a filled endpoint it cannot reach a failure without `setup`, refuses only what needs a missing slot, with its tool's own error naming the slot and no value | the agent's own test |
 
 ## Not decided here

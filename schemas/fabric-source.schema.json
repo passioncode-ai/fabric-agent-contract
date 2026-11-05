@@ -29,7 +29,7 @@
     },
     "exclude": {
       "type": "array",
-      "description": "Holes in include: a file inside one of these paths is not source, whatever include says. Each lies inside an include path and is not one (FAC-SEM-157).",
+      "description": "Holes in include: a file inside one of these paths is not source, whatever include says; a path ending in / names a folder and everything under it, any other names a file and everything beneath that name. Each lies inside an include path and is not one (FAC-SEM-157).",
       "items": {
         "$ref": "#/$defs/path"
       }

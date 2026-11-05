@@ -440,8 +440,9 @@ passes.
 check looks for before a **Source export**, kept on the operator's machine outside the source tree and never exported
 (`FAC-SEM-158`).
 
-**Source export**: An agent's **Source** at a named commit written as a new Git repository with one commit by
-`Fabric source export` and no history, after the tree check finds nothing blocking; local, publishing nothing, running
+**Source export**: An agent's **Source** at a named commit written as a Git repository holding one new commit by
+`Fabric source export`, whose only parent, if any, is the earlier export commit the recipient holds, and no commit from
+the home, after the tree check finds nothing blocking; local, publishing nothing, running
 no test as a condition, never a gitlink. Handing it to anyone is effect class `publish`, a person's act each time, on
 the operator's word for that act, never by a mandate, as [source](docs/specification/source.md#handing-over) specifies
 (DEC-0149). Not the peer share's Export (DEC-0147) and not
@@ -454,35 +455,39 @@ by another person (an organization's repository included, even one the operator 
 source files' content copied into a message, an issue, a gist or a thread outside the owner's; a package handed to
 another person (a colleague's copy), which carries the source; a personal agent's package or release published to a
 public registry, unless its home is already public (the files the pack step derives from the public source count as
-public, nothing else does). A hand-over by push or by file carries a source export (one commit, no history from the
-home, the tree check passed), never another commit; a later export to the same recipient takes the export commit it
-already holds as its parent, so it lands as a fast-forward and no force-push is ever needed. An act on the whole
-repository of a personal agent (a transfer, a visibility change, access given to any other person) is not done: the
-source leaves only as a source export, and outside readers it already has are removed, or each later commit reaching
-them is a hand-over. An organization's acts on its own agent's whole repository are its own, under its own release
-rules, except that making a private organization agent's source public (its first public release included; later ones
-from that home are its own) and giving it new readers outside the organization take the word naming the repository,
-which accepts the history as it stands. A processor acting for the owner under the owner's own account or host is no
-recipient while what it holds stays readable by no one but the owner and the processors acting for it; output it makes
-public is one. Access the owning organization gives its own members to its own agent's home is none, and giving access
-to a public home is none. What takes the word when a source becomes public: a personal agent's source made public for
-the first time and an organization agent's private source made public; an organization creating its own agent's home
-public is its own act, and a push, release or serving of what is already public, from a public home to any other
-public place (another owner's included), reaches no new reader and is none, when an earlier act on the word, or the
-owner's own act, made it public. The repository where the agent's owner keeps and develops its source is its home, not
-a recipient, and the owner's placements are the owner's own: the owner's own commits, branches and releases in the
-home, a release that stays where the home's readers are, and a deploy to a placement its owner holds (an organization's
-agent on that organization's placement included) are none; a bundle a public page serves is the agent's output, while
-serving the source tree, source maps or unbuilt files publicly, or to others, is a hand-over, the word naming the
-deploy of a commit that serves source to others (one word per commit and audience); a copy moved within the operator's
-own estate (here, the accounts and placements the operator alone holds) to a place that is not public and that no one
-outside the operator can read (a private mirror the operator owns) is none either. The home carve-out never lets a
-personal agent's source move into an organization's or a public repository, or onto an organization's or a team's
-placement or one other people can read, which stays one; serving the running agent to a team (`peer`, client keys)
-gives no one the tree, except a prompt or resource that is a source file served verbatim, or a bundle built without
-minification, which is the source tree served. It is one synchronous call of effect class `publish`, taken only on the
-operator's word for that act naming the agent, the source commit and the recipient (a decision with its exact target,
-or the service's in-call elicitation), never by a mandate or an `approval/1` before CT-181, as
+public, nothing else does). A hand-over by push or by file carries a source export (one new commit, whose only parent,
+if any, is the earlier export commit the recipient holds; no commit from the home; the tree check passed), never
+another commit; a later export lands as a fast-forward or, when the recipient's branch has moved, as a new branch or
+pull request, never by a force-push. An act on the whole repository of a personal agent's private home (a transfer, a
+visibility change, access given to any other person) is not done: the source leaves only as a source export; a public
+home's access and visibility are outside that rule, access the operator gave before the rule stands as the operator's
+own act (nothing is retroactive), and an agent never gives new access. An organization's acts on its own agent's whole
+repository are its own, under its own release rules, except two that take the word naming the repository: making a
+private organization agent's source public by a visibility change, and giving it new readers outside the organization
+(the word accepts the history as it stands); its first public release from a private home takes the word naming its
+source commit, and later ones from that home are its own. A processor acting for the owner under the owner's own account
+or host is no recipient while what it holds stays readable by no one but the owner and the processors acting for it;
+output it makes public is one. Access the owning organization gives its own members to its own agent's home is none,
+and giving access to a public home is none. What takes the word when a source becomes public: a personal agent's source
+made public for the first time and an organization agent's private source made public; an organization creating its
+own agent's home public is its own act, and a push, release or serving of what is already public, from a public home to
+any other public place (another owner's included), reaches no new reader and is none, when an earlier act on the word,
+or the owner's own act, made it public. The repository where the agent's owner keeps and develops its source is its
+home, not a recipient, and the owner's placements are the owner's own: the owner's own commits, branches and releases
+in the home, a release that stays where the home's readers are, and a deploy to a placement its owner holds (an
+organization's agent on that organization's placement included) are none; a bundle a public page serves is the agent's
+output, while serving the source tree, source maps or unbuilt files publicly, or to anyone who cannot read the home, is
+a hand-over, the word naming the deploy of a commit that serves source to anyone who cannot read the home (one word per
+commit and audience); a copy moved within the operator's own estate (here, the accounts and placements the operator
+alone holds) to a place that is not public and that no one outside the operator can read (a private mirror the operator
+owns) is none either. The home carve-out never lets a personal agent's source move into an organization's or a public
+repository, or onto an organization's or a team's placement or one other people can read, which stays one; serving the
+running agent to a team (`peer`, client keys) gives no one the tree, except a prompt or resource that is a source file
+served verbatim, or a bundle built without minification, which is the source tree served. It is taken only on the
+operator's word for that act naming the agent, the target (the source commit, or the repository for an organization's
+two acts above) and the recipient, in one of three forms: on a service's action, where the hand-over is one synchronous
+call of effect class `publish`, a decision with its exact target or the service's in-call elicitation; outside one, the
+stated word the operator's reply accepts, consumed once; never by a mandate or an `approval/1` before CT-181, as
 [source](docs/specification/source.md#handing-over) specifies (DEC-0149). *Avoid*: a bare "hand-over" for this meaning.
 
 **Package digest**: SHA-256 over the RFC 8785 form of a **Package** without its digest and signatures; through the
