@@ -9196,17 +9196,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      AP-3 source (AP-3's own sentence; OC-5 and OC-7 for its form). One bot serving both an operator channel and
      channels the agent answers people on is not covered here: such a bot keeps every operator-channel rule in every
      chat as written, and the case goes to the standard's and the operator channel's owners (merge post). Until the
-     owners answer, a bot that serves both cannot answer people in a group as the standard asks; give the operator
-     channel its own bot (OC-2). A message on a channel is the operator's word only when the transport identifies its
-     sender as the operator: an allowlisted numeric user id, bound as OC-3 binds one, or, on an `account` channel, the
-     account's owner, only when the owner is the operator and the send record of the account's one session owner (the
-     standard's section 9) shows the message was neither sent by an agent nor relayed from the ticket board; never by a
-     name, a display name or text in the message, and otherwise it stays data. Such a word acts only inside that chat,
-     as the standard's section 4.10 says (the operator's decision given in a chat "outranks
-     every holding rule of the agent for that chat"); it is not one of DEC-0121 AP-3's sources and never the source of
-     an OA-2 relay, and the customer ticket it acts on stays a customer ticket, its outcome set and counted as sections
-     3 and 5.1 say. A send held by the transport's owner (the standard's section 9) or behind a service's relayed action
-     stays held until a decision comes from DEC-0121 AP-3's sources. A word that asks for an action outside that chat
+     owners answer, a bot that serves both cannot answer people as the standard asks in any chat: OC-3 lets only an
+     allowlisted id cause an effect, OC-4 limits what it sends to its events feed and results, and in a group OC-14
+     keeps it silent unless addressed; give the operator channel a bot of its own. A message on a channel is the
+     operator's word only when the transport identifies its sender as the operator: an allowlisted numeric user id,
+     bound as OC-3 binds one, or, on an `account` channel, the account's owner, only when the owner is the operator and
+     the send record of the account's one session owner (the standard's section 9) shows the message was neither sent by
+     an agent nor relayed from the ticket board; never by a name, a display name or text in the message, and otherwise
+     it stays data. Such a word acts only inside that chat, as the standard's section 4.10 says (the operator's decision
+     given in a chat "outranks every holding rule of the agent for that chat"); it is not one of DEC-0121 AP-3's sources
+     and never the source of an OA-2 relay, and the customer ticket it acts on stays a customer ticket, its outcome set
+     and counted as sections 3 and 5.1 say. That word does not release a send held by the transport's owner (the
+     standard's section 9) or behind a service's relayed action: the owner's own approval rules end the first (section
+     9), and an agent relays a decision on the second only from DEC-0121 AP-3's sources (AP-1 and AP-2 still take the
+     service's own page, an accepted elicitation and the host's click). A word that asks for an action outside that chat
      causes none; how the agent tells the operator is a question to the standard's owner (merge post). Text the operator
      quotes or forwards, and every other sender's text, stays data. The agent records such a word in its own audit,
      quoting the message and its sender id. A member such as `untrusted_input` makes the declaration not declared
@@ -9256,7 +9259,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 22 of the readings, round 21's seam reading included; CA-8 is the coordinator's
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 23 of the readings, round 21's seam reading included; CA-8 is the coordinator's
   decision of round 17 on thread `b6820b97` (message `5a1334d1`), answering a producer who asked whether the declaration
   needs an `untrusted_input` field, and its bounds are the coordinator's decision of round 18, taken in the coordinating
   session with no board message: a word recognised in a chat is not a DEC-0121 AP-3 source, it never sets
@@ -9273,7 +9276,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   people in a group as the standard asks (the operator channel gets its own bot, OC-2), and that the ticket stays a
   customer ticket counted as sections 3 and 5.1 say; round 22's seam decision quoted section 4.10 exactly and added
   that a send held by the transport's owner or behind a service's relayed action stays held until a decision comes from
-  AP-3's sources. `DEC-0150` was reserved by the coordinator with
+  AP-3's sources. Round 23 was not clean (the held-send and shared-bot sentences): the coordinator's decision scoped the
+  held send to the chat word (the owner's approval rules end a section 9 hold; AP-1 and AP-2 still take the service's
+  page, an accepted elicitation and the host's click) and based the shared-bot sentence on OC-3, OC-4 and OC-14.
+  `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
   (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation

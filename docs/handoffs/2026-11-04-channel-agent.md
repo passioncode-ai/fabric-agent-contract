@@ -306,6 +306,17 @@ FAA-197, on the adapter's main).
   add that a send held by the transport's owner (section 9) or behind a service's relayed action stays held until a
   decision comes from AP-3's sources; a sibling note keeps DEC-0151's and DEC-0153's support-quality rows at the
   DEC-0153 step.
+- Round 23 of the readings (on `7a0b05b6`: unit pass with a risk and notes, product and seam one break each), with the
+  coordinator's decisions: the held-send sentence is scoped to the chat word (a section 9 hold ends under the owner's
+  approval rules; AP-1 and AP-2 still take the service's page, an accepted elicitation and the host's click); the
+  shared-bot sentence rests on OC-3, OC-4 and OC-14 and asks for a bot of the operator channel's own, and the merge
+  post's question adds OC-3 and OC-4; SCN-043 and FLW-29 name the chat as an `account` channel, the operator's own
+  account, whose session owner's hold stays under the owner's approval rules; three vectors pin `untrusted_input` at the
+  top, in a project and in a channel; stale comments in `src/channel-agent.ts` are reworded. From DEC-0151's round-16
+  product reading, the merge post drops two daily-payload items the standard owner's commit `86c49ec` answered (the
+  section 5.1 names, applied, board message `b840a16b`; the unit of `toPerson*`, turns), and the shared-channel quality
+  hold now lasts until the standard's section 11 accepts by period what `support-quality.md`'s observed-check paragraph
+  lists, not until DEC-0151 lands.
 
 ## The branch and its history
 
@@ -513,6 +524,14 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
+On round 23's change, each exit code read separately: `pnpm typecheck` 0; `pnpm run docs:check` 0 (markdownlint 0
+errors); `python3 docs/ux/lint.py` 0; `pnpm run privacy:check` 0 (0 findings); `pnpm vectors:check` 0 (29 vector files
+match their generators, after the channel-agent generator's `--write`); `pnpm vitest run test/channel-agent.test.ts
+test/consistency.test.ts test/operator-channel.test.ts` 0 (414 passed). Outside the handoffs, the old held-send wording
+stands only in DEC-0150's Source as round 22's history, and the old shared-bot wording nowhere in the specification or
+the register; `operator-channel.md` matches main. The coverage run is owed: the 15-minute load was 122.98 and free disk
+5.8 GB.
+
 On round 22's seam change (documents only), each exit code read separately: `pnpm run docs:check` 0 (markdownlint 0
 errors); `pnpm ux:lint` 0; `pnpm run privacy:check` 0 (0 findings); `pnpm vectors:check` 0; `pnpm vitest run
 test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts` 0 (408 passed); the old, widened
@@ -564,7 +583,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 22 (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 23 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -579,8 +598,8 @@ here), and adds:
 - only a manifest's `provider.extensions` is read: a declaration under the manifest's top-level `extensions` is
   `FAC-SEM-162` and not read;
 - `channel-agent-standard/2` is refused until a contract revision;
-- CA-8, the contract's own duty, for the standard's owner to fold into section 4 or reject (quoting
-  [the section](../specification/channel-agent.md#text-from-a-channel-is-data) at posting time), with its identification
+- CA-8, the contract's own duty, for the standard's owner to fold into section 4 or reject (quoting [the
+  section](../specification/channel-agent.md#text-from-a-channel-is-data) at posting time), with its identification
   bound, and one item of questions for the standard's owner: how the agent tells the operator about a request from the
   operator's word in a customer chat for an action outside that chat (CA-8 says only that it causes none); whether the
   operator's own message in a customer chat is ingested and counted (section 8.3's `items_seen` against
@@ -588,9 +607,9 @@ here), and adds:
   a customer's chat; whether on an `account` channel a message is the owner's word only when the account's owner is the
   operator and the send record of section 9's one session owner shows it was neither sent by an agent nor relayed from
   the ticket board; and one bot serving both an operator channel and channels the agent answers people on, for the
-  standard's and the operator channel's owners: where a binding code is accepted, how OC-12 and OC-14 to OC-16 apply to
-  customer chats, and the shared receiver's order of updates and its status (OC-17); until they answer, such a bot
-  keeps every operator-channel rule in every chat as written;
+  standard's and the operator channel's owners: where a binding code is accepted, how OC-3, OC-4, OC-12 and OC-14 to
+  OC-16 apply to customer chats, and the shared receiver's order of updates and its status (OC-17); until they answer,
+  such a bot keeps every operator-channel rule in every chat as written;
 - a budget above 0 without a spend record is `FAC-SEM-164`;
 - to be confirmed with the standard's owner: that `question_route.daily_cap` is the agent's per-project cap, below
   the desk's side-wide cap of section 6.4, which still binds;
@@ -609,13 +628,9 @@ here), and adds:
   ASCII and percent rules; every other string, a sentence that holds a URL included ("Please write to
   https://u:p@help.example/"), is read for key shapes only, so a password there is not found: is that gap acceptable
   for the standard's section 11 check;
-- the section 5.1 names are DEC-0151's ask (its CT-210 (d), quoted at posting time: `autonomy.answeredTickets`,
-  `stability.safeReplyTurns`, `stability.safeReplyTickets`, marked deferred); the coordinator posts it once; keep
-  `toPerson*` under `autonomy`;
-- to be asked of the standard's owner: section 5.1 counts `toPersonPolicy` and `toPersonInability` in tickets where
-  `/1` names no ticket unit (its autonomy counts are bounded by turns); which unit it means (DEC-0151, in progress, proposes one);
 - the coordinator asks the standard's owner to hold the observed per-project quality check for shared channels until
-  DEC-0151 (in progress) lands, since it reads missing there;
+  the standard's section 11 accepts by period what `support-quality.md`'s observed-check paragraph lists, since it reads
+  missing there;
 - for each live producer, the members its current declaration fails (`FAC-SEM-162`'s places), read again with
   `pnpm validate` on its manifest or well-known answer at posting time.
 

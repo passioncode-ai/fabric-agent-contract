@@ -57,7 +57,8 @@ function extensionsAt(doc: JsonObject, site: ChannelAgentSite): JsonObject | und
 }
 
 const schemaShape = (): ValidateFunction => {
-  // Verbose: a failed `oneOf` carries its branches, so a nullable member's line names its types and null.
+  // Verbose: each error carries `error.schema`, which the nullable detection, `not` and `propertyNames` read; a
+  // nullable member fails in one line, its value branch's, ending ", or null".
   shape ??= createValidatorSync({ verbose: true }).getSchema(`${SCHEMA_PREFIX}schemas/service-channel-agent-extension.schema.json`) as ValidateFunction;
   return shape;
 };
@@ -247,12 +248,14 @@ function allowed(error: { keyword: string; schema?: unknown; params?: Record<str
   // `not` says what the member takes: the none form's `until` only with `not_yet`, a language other than `none`.
   if (error.keyword === "not" && isObject(error.schema) && Array.isArray(error.schema.required)) return ` (${error.schema.required.join(", ")} only with not_yet)`;
   if (error.keyword === "not" && isObject(error.schema) && error.schema.const !== undefined) return ` (a value other than ${String(error.schema.const)})`;
-  // A failed type names the type the schema wants; a nullable member's `oneOf` names its types and null.
+  // A failed type names the type the schema wants; a nullable member fails in one line ending ", or null".
   if (error.keyword === "type" && (typeof params.type === "string" || Array.isArray(params.type))) {
     // At the four members that take the none form, a value of the wrong type (a null included) is told of it.
     const form = NONE_FORM_AT.test(at) ? ", or the none form {none: not_yet, until} / {none: not_used}" : "";
     return ` (${[params.type].flat().join(" or ")}${form})`;
   }
+  // A guard for a future non-nullable `oneOf`: schemaErrors drops a nullable member's `oneOf` line, so no line reaches
+  // this branch today.
   if (error.keyword === "oneOf") {
     const branches = error.schema;
     if (Array.isArray(branches)) {

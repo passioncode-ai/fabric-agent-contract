@@ -15344,6 +15344,444 @@
       }
     },
     {
+      "name": "an untrusted_input member at the top: not declared (CA-8)",
+      "site": "manifest",
+      "input": {
+        "provider": {
+          "extensions": {
+            "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1": {
+              "standard": "channel-agent-standard/1",
+              "projects": [
+                {
+                  "project": "project:example-support",
+                  "side": "example-side",
+                  "lead_agent": "support-bot",
+                  "adopted_at": "2026-11-10",
+                  "taxonomy": {
+                    "version": "2026-11-04",
+                    "codes": [
+                      {
+                        "code": "payments.refund",
+                        "label": "A refund"
+                      },
+                      {
+                        "code": "account.access",
+                        "label": "Access to an account"
+                      }
+                    ]
+                  },
+                  "tiers": [
+                    {
+                      "code": "premium",
+                      "label": "Premium",
+                      "rule": "open_orders > 10",
+                      "escalate": "at_once"
+                    }
+                  ],
+                  "question_route": {
+                    "capability": "operator.ask",
+                    "target": "operator-desk",
+                    "daily_cap": 10,
+                    "days": "mon-fri",
+                    "tz": "Europe/Warsaw",
+                    "send_at": "09:00",
+                    "expires": "P7D"
+                  },
+                  "gap_registry": {
+                    "owner": "support-bot",
+                    "capability": "gaps.record"
+                  },
+                  "channels": [
+                    {
+                      "id": "tg-dm",
+                      "kind": "telegram_dm",
+                      "replies_enabled": true,
+                      "decision": null,
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT1H",
+                      "holding_reply": true,
+                      "clarifying_question": true,
+                      "quiet_window": null,
+                      "late_answer_window": null,
+                      "items_seen_unit": "updates",
+                      "texts": {
+                        "holding": {
+                          "en": "I am checking this and will write back."
+                        },
+                        "final": {
+                          "en": "We could not confirm this; please write to our support."
+                        }
+                      }
+                    },
+                    {
+                      "id": "reviews",
+                      "kind": "store_review",
+                      "replies_enabled": false,
+                      "decision": "replies-off-reviews",
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT24H",
+                      "holding_reply": false,
+                      "clarifying_question": false,
+                      "items_seen_unit": "reviews",
+                      "texts": {}
+                    }
+                  ],
+                  "sources": [
+                    {
+                      "id": "docs",
+                      "owner": "docs-team",
+                      "read": "url",
+                      "cadence": "PT1H",
+                      "max_age": "PT2H"
+                    }
+                  ],
+                  "declined_sources": [
+                    {
+                      "id": "billing-export",
+                      "decision": "no-billing-export"
+                    }
+                  ],
+                  "handoff_queues": [
+                    {
+                      "id": "support-mail",
+                      "owner": "support-team",
+                      "limit": "P2D",
+                      "answered_signal": "none",
+                      "recommendation": "thread-0001"
+                    }
+                  ],
+                  "evals": {
+                    "suite": "evals/support",
+                    "judge_budget_usd": 2.5,
+                    "replay_budget_usd": 20,
+                    "spend_record": "support-evals"
+                  },
+                  "tickets": {
+                    "outbox": "ticket_outbox",
+                    "token_slot": "example-support/prod/SIGNAL_TICKETS_TOKEN",
+                    "pd_check": "pd-rules@1.2.0"
+                  },
+                  "recorded_decisions": [
+                    {
+                      "id": "replies-off-reviews",
+                      "date": "2026-11-01",
+                      "effect": "replies_off"
+                    }
+                  ]
+                }
+              ],
+              "untrusted_input": false
+            }
+          }
+        }
+      },
+      "findings": [
+        {
+          "code": "FAC-SEM-162",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1"
+        }
+      ],
+      "view": {
+        "declared": false,
+        "reported": true,
+        "errors": [
+          "FAC-SEM-162 at /: maxProperties (more members than the schema declares)"
+        ]
+      }
+    },
+    {
+      "name": "an untrusted_input member in a project: not declared (CA-8)",
+      "site": "manifest",
+      "input": {
+        "provider": {
+          "extensions": {
+            "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1": {
+              "standard": "channel-agent-standard/1",
+              "projects": [
+                {
+                  "project": "project:example-support",
+                  "side": "example-side",
+                  "lead_agent": "support-bot",
+                  "adopted_at": "2026-11-10",
+                  "taxonomy": {
+                    "version": "2026-11-04",
+                    "codes": [
+                      {
+                        "code": "payments.refund",
+                        "label": "A refund"
+                      },
+                      {
+                        "code": "account.access",
+                        "label": "Access to an account"
+                      }
+                    ]
+                  },
+                  "tiers": [
+                    {
+                      "code": "premium",
+                      "label": "Premium",
+                      "rule": "open_orders > 10",
+                      "escalate": "at_once"
+                    }
+                  ],
+                  "question_route": {
+                    "capability": "operator.ask",
+                    "target": "operator-desk",
+                    "daily_cap": 10,
+                    "days": "mon-fri",
+                    "tz": "Europe/Warsaw",
+                    "send_at": "09:00",
+                    "expires": "P7D"
+                  },
+                  "gap_registry": {
+                    "owner": "support-bot",
+                    "capability": "gaps.record"
+                  },
+                  "channels": [
+                    {
+                      "id": "tg-dm",
+                      "kind": "telegram_dm",
+                      "replies_enabled": true,
+                      "decision": null,
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT1H",
+                      "holding_reply": true,
+                      "clarifying_question": true,
+                      "quiet_window": null,
+                      "late_answer_window": null,
+                      "items_seen_unit": "updates",
+                      "texts": {
+                        "holding": {
+                          "en": "I am checking this and will write back."
+                        },
+                        "final": {
+                          "en": "We could not confirm this; please write to our support."
+                        }
+                      }
+                    },
+                    {
+                      "id": "reviews",
+                      "kind": "store_review",
+                      "replies_enabled": false,
+                      "decision": "replies-off-reviews",
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT24H",
+                      "holding_reply": false,
+                      "clarifying_question": false,
+                      "items_seen_unit": "reviews",
+                      "texts": {}
+                    }
+                  ],
+                  "sources": [
+                    {
+                      "id": "docs",
+                      "owner": "docs-team",
+                      "read": "url",
+                      "cadence": "PT1H",
+                      "max_age": "PT2H"
+                    }
+                  ],
+                  "declined_sources": [
+                    {
+                      "id": "billing-export",
+                      "decision": "no-billing-export"
+                    }
+                  ],
+                  "handoff_queues": [
+                    {
+                      "id": "support-mail",
+                      "owner": "support-team",
+                      "limit": "P2D",
+                      "answered_signal": "none",
+                      "recommendation": "thread-0001"
+                    }
+                  ],
+                  "evals": {
+                    "suite": "evals/support",
+                    "judge_budget_usd": 2.5,
+                    "replay_budget_usd": 20,
+                    "spend_record": "support-evals"
+                  },
+                  "tickets": {
+                    "outbox": "ticket_outbox",
+                    "token_slot": "example-support/prod/SIGNAL_TICKETS_TOKEN",
+                    "pd_check": "pd-rules@1.2.0"
+                  },
+                  "recorded_decisions": [
+                    {
+                      "id": "replies-off-reviews",
+                      "date": "2026-11-01",
+                      "effect": "replies_off"
+                    }
+                  ],
+                  "untrusted_input": false
+                }
+              ]
+            }
+          }
+        }
+      },
+      "findings": [
+        {
+          "code": "FAC-SEM-162",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1"
+        }
+      ],
+      "view": {
+        "declared": false,
+        "reported": true,
+        "errors": [
+          "FAC-SEM-162 at /projects/0: maxProperties (more members than the schema declares)"
+        ]
+      }
+    },
+    {
+      "name": "an untrusted_input member in a channel: not declared (CA-8)",
+      "site": "manifest",
+      "input": {
+        "provider": {
+          "extensions": {
+            "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1": {
+              "standard": "channel-agent-standard/1",
+              "projects": [
+                {
+                  "project": "project:example-support",
+                  "side": "example-side",
+                  "lead_agent": "support-bot",
+                  "adopted_at": "2026-11-10",
+                  "taxonomy": {
+                    "version": "2026-11-04",
+                    "codes": [
+                      {
+                        "code": "payments.refund",
+                        "label": "A refund"
+                      },
+                      {
+                        "code": "account.access",
+                        "label": "Access to an account"
+                      }
+                    ]
+                  },
+                  "tiers": [
+                    {
+                      "code": "premium",
+                      "label": "Premium",
+                      "rule": "open_orders > 10",
+                      "escalate": "at_once"
+                    }
+                  ],
+                  "question_route": {
+                    "capability": "operator.ask",
+                    "target": "operator-desk",
+                    "daily_cap": 10,
+                    "days": "mon-fri",
+                    "tz": "Europe/Warsaw",
+                    "send_at": "09:00",
+                    "expires": "P7D"
+                  },
+                  "gap_registry": {
+                    "owner": "support-bot",
+                    "capability": "gaps.record"
+                  },
+                  "channels": [
+                    {
+                      "id": "tg-dm",
+                      "kind": "telegram_dm",
+                      "replies_enabled": true,
+                      "decision": null,
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT1H",
+                      "holding_reply": true,
+                      "clarifying_question": true,
+                      "quiet_window": null,
+                      "late_answer_window": null,
+                      "items_seen_unit": "updates",
+                      "texts": {
+                        "holding": {
+                          "en": "I am checking this and will write back."
+                        },
+                        "final": {
+                          "en": "We could not confirm this; please write to our support."
+                        }
+                      },
+                      "untrusted_input": false
+                    },
+                    {
+                      "id": "reviews",
+                      "kind": "store_review",
+                      "replies_enabled": false,
+                      "decision": "replies-off-reviews",
+                      "final_limit": "P7D",
+                      "first_reply_limit": "PT24H",
+                      "holding_reply": false,
+                      "clarifying_question": false,
+                      "items_seen_unit": "reviews",
+                      "texts": {}
+                    }
+                  ],
+                  "sources": [
+                    {
+                      "id": "docs",
+                      "owner": "docs-team",
+                      "read": "url",
+                      "cadence": "PT1H",
+                      "max_age": "PT2H"
+                    }
+                  ],
+                  "declined_sources": [
+                    {
+                      "id": "billing-export",
+                      "decision": "no-billing-export"
+                    }
+                  ],
+                  "handoff_queues": [
+                    {
+                      "id": "support-mail",
+                      "owner": "support-team",
+                      "limit": "P2D",
+                      "answered_signal": "none",
+                      "recommendation": "thread-0001"
+                    }
+                  ],
+                  "evals": {
+                    "suite": "evals/support",
+                    "judge_budget_usd": 2.5,
+                    "replay_budget_usd": 20,
+                    "spend_record": "support-evals"
+                  },
+                  "tickets": {
+                    "outbox": "ticket_outbox",
+                    "token_slot": "example-support/prod/SIGNAL_TICKETS_TOKEN",
+                    "pd_check": "pd-rules@1.2.0"
+                  },
+                  "recorded_decisions": [
+                    {
+                      "id": "replies-off-reviews",
+                      "date": "2026-11-01",
+                      "effect": "replies_off"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "findings": [
+        {
+          "code": "FAC-SEM-162",
+          "instancePath": "/provider/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1channel-agent~10.1"
+        }
+      ],
+      "view": {
+        "declared": false,
+        "reported": true,
+        "errors": [
+          "FAC-SEM-162 at /projects/0/channels/0: maxProperties (more members than the schema declares)"
+        ]
+      }
+    },
+    {
       "name": "more than 64 credential places in the read declaration and more in a misplaced copy: each closes its own count",
       "site": "manifest",
       "input": {
