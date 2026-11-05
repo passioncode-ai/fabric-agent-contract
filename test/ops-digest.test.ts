@@ -5,8 +5,9 @@ import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
-import { type HourlyDigest, OP_NAME, OP_NAME_MAX, digestFoldersView, foldDay, foldHour, isRise, opsDigestRules, realDay, wholeHour } from "../src/ops-digest.js";
+import { type HourlyDigest, OP_NAME, OP_NAME_MAX, digestFoldersView, foldDay, foldDir, foldHour, isRise, opsDigestRules, realDay, wholeHour } from "../src/ops-digest.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
+import { hasHomePath } from "../src/activity-rules.js";
 import { VECTOR_FILE, buildOpsDigestVectors } from "../tools/vectors/ops-digest.js";
 import { main as runCli } from "../src/validate-cli.js";
 
@@ -95,20 +96,43 @@ describe("FAC-SEM-166, FAC-SEM-167 and FAC-SEM-168: the operations digests and w
     expect(found("ops-digest-hourly", value)).toEqual(["FAC-SEM-167 /ops/4/op", "FAC-SEM-167 /risen/1/op"]);
   });
 
-  it("refuses a segment home, users or Users before a slash, and passes its rename (OD-2)", () => {
-    for (const op of ["api.users/list", "ui.home/open", "route:home/feed", "fs.Users/list"]) {
+  // The examples OD-2, OD-9, the rule rows and DEC-0153 give of the home-folder detector's boundary: each one documented
+  // on the page and answered by hasHomePath as documented, so the text and the detector cannot drift apart.
+  const REFUSED = ["api.users/list", "api.get_users/list", "api.my_users/list", "ui.home/open", "users/digests", "my_users/digests", "my-users/digests", "a/~b"];
+  const PASSES = ["api.user/list", "api.get_user/list", "user-digests"];
+  it("refuses every documented example of the home-folder boundary and passes every documented rename (OD-2, OD-9)", () => {
+    const page = readFileSync(path.join(root, "docs/specification/ops-digest.md"), "utf8");
+    const decision = readFileSync(path.join(root, "docs/DECISIONS.md"), "utf8");
+    const dec = decision.slice(decision.indexOf("### DEC-0153:"));
+    for (const example of [...REFUSED, ...PASSES]) {
+      expect(page, example).toContain(`\`${example}\``);
+      expect(dec, example).toContain(`\`${example}\``);
+    }
+    for (const example of REFUSED) expect(hasHomePath(example), example).toBe(true);
+    for (const example of PASSES) expect(hasHomePath(example), example).toBe(false);
+    // As an operation's name, where the grammar takes it: FAC-SEM-167 for the refused, nothing for the renames.
+    for (const op of [...REFUSED, ...PASSES].filter((name) => OP_NAME.test(name))) {
       const value = hourlyOk();
       value.ops.push({ op, ok: 1, failed: 0, unknown: 0 });
       value.total.ok += 1;
-      expect(OP_NAME.test(op), op).toBe(true);
-      expect(found("ops-digest-hourly", value), op).toEqual(["FAC-SEM-167 /ops/4/op"]);
+      expect(found("ops-digest-hourly", value), op).toEqual(REFUSED.includes(op) ? ["FAC-SEM-167 /ops/4/op"] : []);
     }
-    for (const op of ["api.user/list", "ui.homepage/open", "route:feed/home", "fs.files/list"]) {
-      const value = hourlyOk();
-      value.ops.push({ op, ok: 1, failed: 0, unknown: 0 });
-      value.total.ok += 1;
-      expect(found("ops-digest-hourly", value), op).toEqual([]);
+    // As a dir, where the package-path grammar takes it: FAC-SEM-168 for the refused, nothing for the renames.
+    const key = EXTENSION_KEYS.opsDigest;
+    for (const dir of [...REFUSED, ...PASSES]) {
+      const value = { ...structuredClone(load("ops-digest-folders-ok.json").input), extensions: { [key]: [{ dir, source: "app" }] } };
+      const view = digestFoldersView(value);
+      if (!(view.declared && view.valid)) continue;
+      expect(view.usable, dir).toBe(!REFUSED.includes(dir));
     }
+  });
+
+  it("keeps the schema's operation name equal to OP_NAME and OP_NAME_MAX, with one copy of the grammar", () => {
+    const hourly = JSON.parse(readFileSync(path.join(root, "schemas/ops-digest-hourly.schema.json"), "utf8")) as Json;
+    expect(new RegExp(hourly.$defs.op.pattern).source).toBe(OP_NAME.source);
+    expect(hourly.$defs.op.maxLength).toBe(OP_NAME_MAX);
+    expect(hourly.$defs.opCount.properties.op).toEqual({ $ref: "#/$defs/op" });
+    expect(hourly.properties.risen.items.properties.op).toEqual({ $ref: "#/$defs/op" });
   });
 
   it("is not the rule of any other kind", () => {
@@ -148,6 +172,15 @@ describe("the reference folds", () => {
     const full = foldHour([{ op: "a", ok: max, failed: 0, unknown: 0 }], H, null);
     expect(full.total.ok).toBe(max);
     expect(() => foldDay("2026-11-04", [full, foldHour([{ op: "a", ok: 1, failed: 0, unknown: 0 }], "2026-11-04T02:00:00Z", null)])).toThrow(/2\^53/);
+  });
+  it("throws when a previous digest's failures give a rise a previous that is no count", () => {
+    const H = "2026-11-04T02:00:00Z";
+    for (const failed of [-40, 2.5]) {
+      const previous = { ...foldHour([], "2026-11-04T01:00:00Z", null), ops: [{ op: "x", ok: 0, failed, unknown: 0 }] } as HourlyDigest;
+      expect(() => foldHour([{ op: "x", ok: 0, failed: 12, unknown: 0 }], H, previous), String(failed)).toThrow(/2\^53/);
+    }
+    const clean = foldHour([{ op: "x", ok: 0, failed: 5, unknown: 0 }], "2026-11-04T01:00:00Z", null);
+    expect(foldHour([{ op: "x", ok: 0, failed: 12, unknown: 0 }], H, clean).risen).toEqual([{ op: "x", failed: 12, previous: 5 }]);
   });
   it("refuses an hour that is not whole and skips an hour it cannot read", () => {
     expect(() => foldHour([], "2026-11-04T17:30:00Z", null)).toThrow(/whole UTC hour/);
@@ -245,6 +278,16 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     ]);
     expect(found("service-descriptor", withFolders([{ dir: "user-digests", source: "app" }]))).toEqual([]);
     expect(evaluateSemanticRules("service-descriptor", value).find((f) => f.instancePath === `${at}/4/dir`)?.message).toContain("credential");
+  });
+
+  it("compares dirs under Unicode case folding after NFC, trailing dots and spaces dropped", () => {
+    const pairs: Array<[string, string]> = [["Straße", "STRASSE"], ["σασ", "ΣΑΣ"], ["café", "café"], ["digests.", "digests"], ["digests ", "digests"], ["a/Digests./b", "A/digests/B"]];
+    for (const [a, b] of pairs) {
+      expect(foldDir(a), `${a} ${b}`).toBe(foldDir(b));
+      expect(found("service-descriptor", withFolders([{ dir: a, source: "one" }, { dir: b, source: "two" }])), `${a} ${b}`).toEqual([`FAC-SEM-168 ${at}/1/dir`]);
+    }
+    expect(foldDir("digests/a")).not.toBe(foldDir("digests/b"));
+    expect(found("service-descriptor", withFolders([{ dir: "digests", source: "one" }, { dir: "digests/more", source: "two" }]))).toEqual([]);
   });
 
   it("is a descriptor's rule only, and a declaration's absence is no finding", () => {

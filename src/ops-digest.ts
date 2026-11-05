@@ -25,7 +25,7 @@ export const RISE_FACTOR = 2;
  * An operation's name (OD-2): segments of letters, digits and `_` joined by `.`, `:`, `/` or `-` (`mcp.tools/list`), so
  * no absolute path, URL, space, empty segment, `.` or `..` fits; `FAC-SEM-167` refuses a home folder the `/` would let in.
  */
-export const OP_NAME = /^[a-z][A-Za-z0-9_]*(?:[.:\/-][A-Za-z0-9_]+)*$/;
+export const OP_NAME = /^[a-z][A-Za-z0-9_]*(?:[.:/-][A-Za-z0-9_]+)*$/;
 export const OP_NAME_MAX = 64;
 
 const HOUR_MS = 3_600_000;
@@ -79,9 +79,13 @@ const iso = (at: number): string => new Date(at).toISOString();
 const byName = (a: { op: string }, b: { op: string }): number => (a.op < b.op ? -1 : 1);
 const sum = (ops: readonly Counters[]): Counters =>
   ops.reduce((t, c) => ({ ok: t.ok + c.ok, failed: t.failed + c.failed, unknown: t.unknown + c.unknown }), { ok: 0, failed: 0, unknown: 0 });
-/** A digest whose every count is still an integer from 0 to 2^53 - 1, or a throw: a sum that left it is no count. */
+/**
+ * A digest whose every count, an hourly rise's `previous` (taken from the previous digest) included, is still an
+ * integer from 0 to 2^53 - 1, or a throw: a sum that left it, or a previous digest's broken count, is no count.
+ */
 function safeCounts<T extends HourlyDigest | DailyDigest>(digest: T): T {
-  const counts = [digest.total, ...digest.ops].flatMap((c) => [c.ok, c.failed, c.unknown]).concat(digest.risen.map((r) => r.failed));
+  const counts = [digest.total, ...digest.ops].flatMap((c) => [c.ok, c.failed, c.unknown])
+    .concat(digest.risen.flatMap((r) => ("previous" in r ? [r.failed, r.previous] : [r.failed])));
   if (counts.some((n) => !Number.isSafeInteger(n) || n < 0)) throw new Error("a count is not an integer from 0 to 2^53 - 1");
   return digest;
 }
@@ -260,6 +264,13 @@ export function digestFoldersView(descriptor: unknown): DigestFoldersView {
   return { ...shape, usable: digestFoldersRules(descriptor as JsonObject).length === 0 };
 }
 
+/**
+ * A `dir` as a file system that folds case compares it: each segment as NFC, then upper case, then lower case (Unicode
+ * case folding, so `Straße` meets `STRASSE` and `σασ` meets `ΣΑΣ`), then NFC again, trailing dots and spaces dropped.
+ */
+export const foldDir = (dir: string): string =>
+  dir.split("/").map((segment) => segment.normalize("NFC").toUpperCase().toLowerCase().normalize("NFC").replace(/[. ]+$/, "")).join("/");
+
 const FOLDERS_PATH = `/extensions/${EXTENSION_KEYS.opsDigest.replace(/~/g, "~0").replace(/\//g, "~1")}`;
 const folderFinding = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-168", instancePath, message });
 
@@ -267,10 +278,17 @@ const folderFinding = (instancePath: string, message: string): Finding => ({ cod
  * FAC-SEM-168 on a service descriptor (kind `service-descriptor`) that carries the ops-digest key: a remote placement
  * (no folder on this machine), or a local one that names no `paths.data` for `dir` to be relative to; a value that is
  * not its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); a `source` named
- * twice; a `dir` named twice, compared case-folded (one folder under two labels would be sent twice); a `dir` that
- * holds a home folder (`hasHomePath`, which also refuses a segment `home`, `users` or `Users` before a `/`, as in
- * `users/digests`); a `dir` or a `source` shaped like a credential (`secretValue`). A collector reads the folders only
- * when this returns no finding (`digestFoldersView`'s `usable`), and treats any other declaration as not declared.
+ * twice; a `dir` named twice, compared under Unicode case folding after NFC, trailing dots and spaces dropped, segment
+ * by segment (one folder under two labels would be sent twice); a `dir` that holds a home folder (`hasHomePath`); a
+ * `dir` or a `source` shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users`
+ * or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
+ * and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either
+ * case) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after
+ * such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or
+ * after whitespace, a quote, `=`, `/` or `\`, followed by an optional name and then `/`, `\` or the end. So
+ * `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` are refused, and `user-digests` passes. A
+ * collector reads the folders only when this returns no finding (`digestFoldersView`'s `usable`), and treats any other
+ * declaration as not declared.
  */
 export function digestFoldersRules(descriptor: JsonObject): Finding[] {
   const view = digestFoldersShape(descriptor);
@@ -288,8 +306,8 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     const at = `${FOLDERS_PATH}/${index}`;
     if (seen.has(folder.source)) findings.push(folderFinding(`${at}/source`, `source ${folder.source} is named twice; each folder sends its own label`));
     seen.add(folder.source);
-    const folded = folder.dir.toLowerCase();
-    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `dir ${folder.dir} is named twice (compared case-folded); its lines would be sent twice`));
+    const folded = foldDir(folder.dir);
+    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `dir ${folder.dir} is named twice (compared under Unicode case folding after NFC, trailing dots and spaces dropped); its lines would be sent twice`));
     dirs.add(folded);
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
     if (secretValue(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));

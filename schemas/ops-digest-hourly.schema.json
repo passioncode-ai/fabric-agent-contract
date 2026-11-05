@@ -115,11 +115,7 @@
       ],
       "properties": {
         "op": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 64,
-          "pattern": "^[a-z][A-Za-z0-9_]*(?:[.:/-][A-Za-z0-9_]+)*$",
-          "description": "An operation's name (OD-2): a lower-case letter, then letters, digits and underscores in segments joined by '.', ':', '/' or '-' (mcp.tools/list), at most 64 characters. No absolute path, URL, space, empty segment, '.' or '..' fits; a credential's shape or a home folder is FAC-SEM-167."
+          "$ref": "#/$defs/op"
         },
         "ok": {
           "type": "integer",

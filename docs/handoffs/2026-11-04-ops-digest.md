@@ -4,7 +4,7 @@
 
 Draft CT-219 by its own decision: the shapes `ops.digest.hourly@1` and `ops.digest.daily@1` with semantic rules, the
 host obligation `retro-after-work`, fixtures, vectors, `pnpm validate` for both and the conformance rows. Names and
-fields are Fabric's ADR-0188 (commit `0d0e5922`); the reference implementation is Fabric's commit `e1eecec0`
+fields are Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's commit `e1eecec0`
 (`apps/desktop/src/shared/opsDigest.ts`, `apps/desktop/src/main/opsDigestRun.ts`). Asked on board thread `f7758225`
 (message `516761e1`, item 2); Switchboard (SB-250) and Inbox (B-205) wait on the shape.
 
@@ -16,7 +16,8 @@ fields are Fabric's ADR-0188 (commit `0d0e5922`); the reference implementation i
 - `schemas/ops-digest-hourly.schema.json`, `schemas/ops-digest-daily.schema.json` (closed; `pnpm validate` infers them
   by `schema`); `src/ops-digest.ts` (`foldHour`, `foldDay`, `isRise`, `FAC-SEM-166`, `FAC-SEM-167`) at 100 % branches;
   `tools/vectors/ops-digest.ts` and `fixtures/vectors/ops-digest.json` (10 hour and 4 day cases, expected values written
-  by hand); 3 positive, 9 negative and 13 semantic fixtures; `test/ops-digest.test.ts`.
+  by hand); 3 positive, 9 negative and 13 semantic fixtures (with OD-9 and rounds 1 and 2: 5 positive, 16 negative and 21
+  semantic fixtures named `ops-digest-*` or `service-*ops-digest*`, as `ls fixtures/<kind> | grep -c ops-digest` measures); `test/ops-digest.test.ts`.
 - Registered: `src/semantic-kinds.ts` (kinds `ops-digest-hourly`, `ops-digest-daily`), `src/semantic-rules.ts`,
   `tools/vectors/run.ts`, `vitest.config.ts` (include and a 100 % branch floor for `src/ops-digest.ts`),
   `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts` (149 schemas with
@@ -47,8 +48,9 @@ fields are Fabric's ADR-0188 (commit `0d0e5922`); the reference implementation i
   Fabric checked in a week of its log fit. `FAC-SEM-167` applies `hasHomePath` too, so `/` lets no home folder in.
 - A day with no hour of its own has no daily digest (OD-5; Fabric Inbox answers `404`, message `f74763e1`);
   `foldDay` returns null for it. `hours` stays 1 to 24.
-- A call refused because a source slot is missing (DEC-0149's setup state, in progress) counts `unknown`, never
-  `failed` (OD-3), so it never makes a rise.
+- A product's own call refused for its own missing source slot (DEC-0149, in progress: "Starting without the
+  instance") counts `unknown`, never `failed` (OD-3), so it never makes a rise; a host that relays calls counts an error
+  as it sees it.
 - `total` is an object of three counters (as ADR-0188 and Fabric give it), each the sum over `ops`.
 - The `@1` names are kept as Fabric writes them and are not entered in the protocol revision register (DEC-0067).
 - Retros asked and written are counted as the operation `retro-after-work` inside the digests, not as new members.
@@ -76,10 +78,13 @@ DEC-0149, DEC-0150 and DEC-0152 are on other branches. When DEC-0149, DEC-0150 a
 - The register in `conformance.md` lists `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168` after `FAC-SEM-165`, and
   next free `FAC-SEM-169`. `src/protocol-revisions.ts` and `versioning.md` hold `fabric-ops-digest/0.1` beside any
   revision another branch adds.
-- Whichever of DEC-0149 and DEC-0153 lands second drops "(DEC-0153, in progress)" from `source.md`'s setup-answer
-  sentence, and "in progress" from `ops-digest.md`'s OD-3 and from the DEC-0153 conformance row where it names
-  DEC-0149. DEC-0153's own decision text ("DEC-0149's setup state, in progress") is edited if DEC-0153 is still
-  Proposed, and annotated if it is already Accepted (the register is append-only).
+- Whichever of DEC-0149 and DEC-0153 lands second edits the live mirror lines: "(DEC-0153, in progress)" in
+  `source.md`'s setup-answer sentence (DEC-0149's branch), "in progress" in `ops-digest.md`'s OD-3 (where it reads "DEC-0149, in progress" before
+  "Starting without the instance"), and "in progress" in DEC-0153's item 4, which is edited if DEC-0153
+  is still Proposed and annotated if it is already Accepted (the register is append-only). No conformance row names
+  DEC-0149.
+- DEC-0151's handoff resolves its overlap with this branch for the support-quality rows of `conformance.md`, the spec
+  README and `docs/DOCMAP.md` under its heading "Against DEC-0153"; the second to land follows it.
 - DEC-0152 shares `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`, `docs/handoffs/README.md` and
   `conformance.md` (a different row).
 - DEC-0151 (branch `agent/sqd-fields-20261104`) narrows `SECRET_VALUE` in `src/secret-shape.ts`. `FAC-SEM-167` and
@@ -93,14 +98,27 @@ DEC-0149, DEC-0150 and DEC-0152 are on other branches. When DEC-0149, DEC-0150 a
 
 ## Consumers
 
-- Fabric (CO-503) collects the daily lines from the folders a descriptor names (OD-9) and sends them with `source` and
-  the descriptor's `id` and `instance`; Project Observatory (OBS-330) records them.
-- The Fabric Agent Adapter, at its next re-pin: `fabric-ops-digest/0.1` enters its twin protocol registers
-  `fabric_protocols.py` and `fabric-protocols.mjs`, which its `test/fixtures/contract/vendor_vectors.mjs` writes from
-  `PROTOCOL_REVISIONS` (the `register` of `feed-protocols-vectors.json`); and its retro counting follows RW-4 (`ok`
-  only for a retro written through a call it carries).
-- Fabric Switchboard (SB-250) and Fabric Inbox (B-205) write the digests; each with a local descriptor may declare
-  its folders (OD-9) and renames any operation `FAC-SEM-167` refuses (OD-2's examples) before writing.
+What ships, and what is owed (the spec README's maturity cell says the same):
+
+- Fabric writes the digests since `e1eecec0`, the shape's origin; the reference folds are this contract's
+  `src/ops-digest.ts`, since Fabric's daily fold answers 2 of the 4 day vectors differently. Fabric owes OD-5's
+  catch-up (announced in its 0.3.16) and RW-4's count (`ok` a lower bound; Project Observatory counts retros written,
+  board message `1a12d809`). Fabric also owes its operation names: some come unchecked from a client's JSON-RPC body
+  (`toolTrace.ts:127`, `toolOutcome.ts:118` in Fabric), so a name that fails `OP_NAME` or `FAC-SEM-167` is to be
+  counted under one fixed name such as `tool.other`, or one bad name drops the whole line.
+- The OD-9 collector is not built yet: Fabric took the role (board thread `f7758225`, message `2ed505f2`), its CO-503
+  row does not yet record it; it will send each day's first daily line once, with `source` and the optional
+  `service {id, instance}` Project Observatory (OBS-330) agreed (message `1a12d809`).
+- Fabric Inbox (B-205), Fabric Dashboards (FD-144) and Fabric Switchboard (SB-250) shipped digests before the
+  contract, with known departures, each now owed: the OD-3 outcome map, the OD-5 catch-up and the fold of a repeated
+  hour; each renames any operation `FAC-SEM-167` refuses (OD-2's examples). None of them has a local descriptor today:
+  Dashboards and Switchboard reach a collector through Fabric's list of known hosts (message `08458f55`), and the Inbox
+  Mac app plans one (its B-210). Those are arrangements outside this contract, not OD-9 declarations.
+- The Fabric Agent Adapter owes the obligation (FAA-206) and, at its next re-pin, enters `fabric-ops-digest/0.1` in its
+  twin protocol registers `fabric_protocols.py` and `fabric-protocols.mjs`, which its
+  `test/fixtures/contract/vendor_vectors.mjs` writes from `PROTOCOL_REVISIONS` (the `register` of
+  `feed-protocols-vectors.json`); its retro counting follows RW-4 (`ok` only for a retro written through a call it
+  carries, a hook observing the session's own tool call included).
 
 ## Open
 
@@ -110,12 +128,25 @@ DEC-0149, DEC-0150 and DEC-0152 are on other branches. When DEC-0149, DEC-0150 a
   operation names and dirs (`api.users/list`, `users/digests`), with one refused name dropping a whole line. Both are
   fixed in the round-1 batch, with the coordinator's decisions on the retro count (RW-4), the catch-up (OD-5, OD-6), the
   trigger (RW-1), the identity (OD-9) and the order (OD-3), and the unit tier's risks (`usable`, a dir named twice,
-  "no C0 control character", counts past 2^53 − 1, the op-path negative's counts). Round 2 is next.
+  "no C0 control character", counts past 2^53 − 1, the op-path negative's counts).
+- Round 2 at `6bb6ce04` was not clean: the product tier found the detector boundary described wrongly (it refuses
+  after any non-alphanumeric character, `_` and `-` included, and has a dashed and a `~` form) and the spec README's
+  maturity cell crediting the products beyond what they ship. Both are fixed in the round-2 batch: the boundary stated
+  exactly in all eight places with a test pinning every example, the maturity cell and the Consumers above rewritten,
+  and the coordinator's decisions (the OD-3 outcome map, `hours` as hours folded, the collector's caught-up day, the
+  identity and the products without a descriptor, the retro's end and hour, why there is no scenario) and the unit and
+  seam risks (dir folding under NFC and Unicode case, `previous` checked, one copy of the op grammar). Round 3 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-2 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run` on the 10 files of OD-9 plus
+`test/activity-rules.test.ts` (11 files, 4168 tests); `test/ops-digest.test.ts` with coverage on `src/ops-digest.ts`
+(61 tests, 163 of 163 branches); `pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`;
+`python3 docs/ux/lint.py`; `pnpm run privacy:check` (0 findings); `pnpm validate` on every `ops-digest` positive and
+semantic fixture (each its expected codes). The full gate is owed: free disk was 5 GB (the 15-minute load was 43.9).
 
 Round-1 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run` on the same 10 files as OD-9 (4079
 tests); on a scratch merge of `main`, DEC-0151 (`69db2177`) and this branch, `vitest run test/ops-digest.test.ts
