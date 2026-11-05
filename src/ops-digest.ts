@@ -276,7 +276,7 @@ export function opsDigestRules(kind: string, value: JsonObject): Finding[] | und
       if (failed !== null && previous !== null && !isRise(failed, previous)) window(at, `${failed} failures against ${previous} is no rise: at least ${RISE_MIN_FAILED} and ${RISE_FACTOR} times the hour before (none counts as one)`);
     } else {
       const risenHours = count(entry.hours);
-      if (risenHours !== null && hours !== null && risenHours > hours) window(`${at}/hours`, `${shown(op, "this operation")} rose in at most the day's ${hours} hours`);
+      if (risenHours !== null && hours !== null && risenHours > hours) window(`${at}/hours`, `${shown(op, "this operation")} rose in ${risenHours} hours; the day folds ${hours}`);
       if (failed !== null && risenHours !== null && failed < RISE_MIN_FAILED * risenHours) window(`${at}/failed`, `${risenHours} hours of rises hold at least ${RISE_MIN_FAILED * risenHours} failures`);
       if (failed !== null && countedFailed !== null && failed > countedFailed) window(`${at}/failed`, `the rises' failures are at most the day's failures of ${shown(op, "this operation")}, ${countedFailed}`);
     }
@@ -333,8 +333,8 @@ const NUSKHURI = /[\u2d00-\u2d25]/gu;
 const toMkhedruli = (letter: string): string => String.fromCodePoint((letter.codePointAt(0) as number) - 0x2d00 + 0x10d0);
 /** Code points HFS+ ignores in a name, stripped before the fold exactly as DEC-0149's `foldSegment` strips them. */
 const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
-/** The same class without the global flag, for a stateless test. */
-const HFS_IGNORABLE_ONE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/u;
+/** A dir a message may name: printable ASCII only (U+0020 to U+007E). */
+const PRINTABLE_ASCII = /^[\x20-\x7e]+$/;
 /**
  * A `dir` as a file system that folds case compares it, canonical caseless as DEC-0149's fold: each segment with the
  * code points HFS+ ignores removed (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F, U+FEFF), then as NFD,
@@ -394,15 +394,14 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     if (seen.has(folder.source)) findings.push(folderFinding(`${at}/source`, `${shown(folder.source, "this source")} is named twice as a source; each folder sends its own label`));
     seen.add(folder.source);
     const folded = foldDir(folder.dir);
-    // "this dir" also when the dir holds a code point HFS+ ignores (a bidirectional control among them), so no invisible
-    // control reaches a reader's output.
-    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `${hiddenClass.has(folded) || HFS_IGNORABLE_ONE.test(folder.dir) ? "this dir" : folder.dir} is named twice as a dir (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
+    // The message names the dir only when it is printable ASCII (and its class holds nothing hidden); otherwise "this dir".
+    if (dirs.has(folded)) findings.push(folderFinding(`${at}/dir`, `${hiddenClass.has(folded) || !PRINTABLE_ASCII.test(folder.dir) ? "this dir" : folder.dir} is named twice as a dir (compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped); its lines would be sent twice`));
     dirs.add(folded);
     if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
     // A segment made only of dots, spaces and code points HFS+ ignores folds to nothing; a tool that trims or folds names
     // as the fold does (Win32 path handling drops trailing dots and spaces; a reader that strips those code points
     // before joining) may read it as empty, '.' or '..', outside paths.data. Refused, the safe direction.
-    if (folder.dir.split("/").some((segment) => foldDir(segment) === "")) findings.push(folderFinding(`${at}/dir`, "a dir segment folds to nothing (only dots, spaces or code points a file system may ignore); a tool may read it as '.' or '..', outside the product's data folder"));
+    if (folder.dir.split("/").some((segment) => foldDir(segment) === "")) findings.push(folderFinding(`${at}/dir`, "a dir segment folds to nothing (only dots, spaces or code points a file system may ignore); a tool may read it as empty, '.' or '..', another folder than the one declared (outside paths.data when it leads)"));
     const bare = folder.dir.replace(HFS_IGNORABLE, "");
     if (secretValue(folder.dir) || secretValue(bare)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));
     else if (hasHomePath(folder.dir) || hasHomePath(bare)) findings.push(folderFinding(`${at}/dir`, "a dir holds a home folder; it is relative to the product's data folder"));

@@ -462,7 +462,7 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
         const result = runCli([file, "--schema", "service-ops-digest-extension.schema.json"]);
         expect(result.code, name).toBe(0);
         expect(result.out, name).toContain("hint/declaration-only");
-        expect(result.out, name).toContain("FAC-SEM-168 runs only on the declaration inside a service descriptor");
+        expect(result.out, name).toContain("FAC-SEM-168 runs only on the declaration inside a service descriptor's extensions (the placement and paths.data, a source or a dir named twice, a dir with a segment that folds to nothing, a home folder in a dir, a dir or source shaped like a credential); check the descriptor to run it");
         const json = JSON.parse(runCli([file, "--schema", "service-ops-digest-extension.schema.json", "--json"]).out) as { notes?: Array<{ rule: string; help: string }>; problems: Array<{ rule: string; help: string }> };
         const hint = [...(json.notes ?? []), ...json.problems].find((note) => note.rule === "hint/declaration-only");
         expect(hint?.help, name).toBe("docs/specification/ops-digest.md#where-a-collector-reads-the-daily-digests");
@@ -536,9 +536,19 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     for (const dir of [[".", "\u200c", "."].join(""), ". ", ["..", "\u200d"].join(""), ["a/", ".", "\u200c", ".", "/b"].join("")]) {
       const findings = evaluateSemanticRules("service-descriptor", withFolders([{ dir, source: "app" }])).filter((f) => f.code === "FAC-SEM-168");
       expect(findings.map((f) => f.instancePath), JSON.stringify(dir)).toEqual([`${at}/0/dir`]);
-      expect(findings[0]?.message).toBe("a dir segment folds to nothing (only dots, spaces or code points a file system may ignore); a tool may read it as '.' or '..', outside the product's data folder");
+      expect(findings[0]?.message).toBe("a dir segment folds to nothing (only dots, spaces or code points a file system may ignore); a tool may read it as empty, '.' or '..', another folder than the one declared (outside paths.data when it leads)");
     }
     expect(found("service-descriptor", withFolders([{ dir: "a.", source: "app" }]))).toEqual([]);
+  });
+
+  it("names a duplicate dir only when it is printable ASCII", () => {
+    for (const code of [0x2066, 0x2067, 0x2068, 0x2069, 0x061c, 0x0085, 0x009b, 0x007f]) {
+      const mark = String.fromCodePoint(code);
+      const findings = evaluateSemanticRules("service-descriptor", withFolders([{ dir: `a${mark}digests`, source: "one" }, { dir: `A${mark}DIGESTS`, source: "two" }])).filter((f) => f.code === "FAC-SEM-168");
+      for (const f of findings) expect(f.message, code.toString(16)).not.toContain(mark);
+      if (findings.some((f) => f.message.includes("named twice"))) expect(findings.some((f) => f.message.startsWith("this dir is named twice")), code.toString(16)).toBe(true);
+    }
+    expect(evaluateSemanticRules("service-descriptor", withFolders([{ dir: "digests", source: "one" }, { dir: "Digests", source: "two" }])).map((f) => f.message).join(" ")).toContain("Digests is named twice as a dir");
   });
 
   it("never prints a dir holding a code point HFS+ ignores in a duplicate message", () => {

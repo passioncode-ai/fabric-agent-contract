@@ -9030,7 +9030,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-04
 - **Status:** Proposed (draft on branch `agent/ct219-ops-digest-20261104`; accepted on merge of its pull request after
-  the coordinator's blind readings). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168`, a
+  the coordinator's blind readings, which reached round 14 on 2026-11-05; the acceptance edit is the first item of the
+  handoff's Next task). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168`, a
   descriptor extension, a reference module and vectors, and a host obligation. Additive: nothing that validated before
   changes.
 - **Context:** the operator asked on 2026-11-04 that every product's log be read every hour and every day, and that
@@ -9286,6 +9287,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reads as `..` on HFS+) refused; round 13 at `db110586` was not clean: the segment rule's stated mechanism (a reader
   measured on a scratch HFS+ volume that `.`, U+200C, `.` is created as its own folder and never resolves to `..`, so
   that parenthesis of round 12 is withdrawn; the refusal stays, the safe direction, for the reason item 9 now gives) and
-  its four lists (the rule now named in each), and its batch is folded in;
+  its four lists (the rule now named in each), and its batch is folded in; round 14 at `95823e35` was not clean: CT-220's
+  DEC-0150 clause at landing, the acceptance edit missing, copies of `HOME_PATH`'s users and control characters in the
+  duplicate message (a dir is now named only when it is printable ASCII), and its batch is folded in;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

@@ -82,28 +82,34 @@ text among them, fails it.
   value of it: no identifier, count or credential. `FAC-SEM-167` also refuses a name the shared credential detector
   reads as a credential: a provider key's shape, in either case and anywhere in the name: `sk-` followed by 16 or more
   letters, digits, `_` or `-` (so inside any word ending in sk: `task-`, `risk-`, `mask-` and the like), `gh[pousr]_`
-  followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more letters, digits or `-`, `AKIA` followed by 16 letters or digits, `glpat-` followed by 20 or more letters, digits, `_` or `-`; a JWT (`eyJ` and 2 or more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any number of them, case-sensitive); a value starting with `bearer` in either case, whitespace and one more character other than a line break (as JavaScript's `.` reads it); or a run of 40 or more letters, digits, `_`, `-`
-  or `/` (so across segments joined by `-` or `/`) that mixes upper case, lower case and a digit. `JWT_SHAPE`, `SECRET_VALUE` and `longSecret` (together `secretValue`) in [`src/secret-shape.ts`](../../src/secret-shape.ts) are the definition. So
-  `ops.risk-assessment-completed` and `queue.task-assigned-to-worker` are refused and `work.session-end-task-back`
-  passes, until DEC-0151's narrowing of the `sk-` shape lands.
+  followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more letters, digits or `-`, `AKIA`
+  followed by 16 letters or digits, `glpat-` followed by 20 or more letters, digits, `_` or `-`; a JWT (`eyJ` and 2 or
+  more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any number of them, case-sensitive); a value
+  starting with `bearer` in either case, whitespace and one more character other than a line break (as JavaScript's
+  `.` reads it); or a run of 40 or more letters, digits, `_`, `-` or `/` (so across segments joined by `-` or `/`)
+  that mixes upper case, lower case and a digit. `JWT_SHAPE`, `SECRET_VALUE` and `longSecret` (together `secretValue`)
+  in [`src/secret-shape.ts`](../../src/secret-shape.ts) are the definition. So `ops.risk-assessment-completed` and
+  `queue.task-assigned-to-worker` are refused and `work.session-end-task-back` passes, until DEC-0151's narrowing of
+  the `sk-` shape lands.
 - **OD-3, counting.** Every record the product's log takes is counted, by `op` and outcome, in the hour it happened,
   before the log decides whether to write or only count it (a sampled success is counted too). The outcome `ok` counts
   as `ok`, `failed` as `failed`, any other as `unknown`. A product whose log uses its own outcome words maps each one
   to `ok` (the operation did what it was asked), `failed` (it tried and did not, by a fault) or `unknown` (a setup
   answer, a policy or permission refusal, a skip, a missing slot, or a word it did not place), and publishes that map
   in its own documentation; the map is not in the digest. A product's own call refused because its own source slot is
-  missing (DEC-0149, in progress: "Starting without the instance", the setup state of DEC-0044) is a setup answer,
-  not a failure: it counts as `unknown`, never `failed`, so a person's unfinished setup never makes a rise. A host
-  that relays calls counts an error as it sees it: a relayed error cannot tell setup from failure (DEC-0149). `total` is each counter's sum over `ops`. Each
-  `op` is named once in `ops` and at most once in `risen`. A count, and every sum, is an integer from 0 to 2^53 − 1; a
-  product that would write a larger one writes no digest for that hour (the reference folds throw). `ops` and `risen`
-  hold at most 4096 operations each: a product keeps at most 4095 named operations per UTC day plus its one fixed
-  overflow name, under which it counts the rest (their counts kept), so both its hourly and its daily lines validate;
-  it publishes that overflow name with its outcome map. A day that would fold more than 4096 operations, or whose hours
-  hold a name OD-2 refuses (its grammar, or `FAC-SEM-167`), has no daily digest, and an hour of more than 4096 operations, or holding a name
-  OD-2 refuses (its grammar, or `FAC-SEM-167`), has no hourly digest (the reference `foldDay` and `foldHour` throw), since
-  a line every reader skips is never written. A finding or a fold's error names a value shaped like a credential or
-  holding a home folder only by its place, never by the value.
+  missing (DEC-0149, in progress: "Starting without the instance", the setup state of DEC-0044) is a setup answer, not
+  a failure: it counts as `unknown`, never `failed`, so a person's unfinished setup never makes a rise. A host that
+  relays calls counts an error as it sees it: a relayed error cannot tell setup from failure (DEC-0149). `total` is
+  each counter's sum over `ops`. Each `op` is named once in `ops` and at most once in `risen`. A count, and every sum,
+  is an integer from 0 to 2^53 − 1; a product that would write a larger one writes no digest for that hour (the
+  reference folds throw). `ops` and `risen` hold at most 4096 operations each: a product keeps at most 4095 named
+  operations per UTC day plus its one fixed overflow name, under which it counts the rest (their counts kept), so both
+  its hourly and its daily lines validate; it publishes that overflow name with its outcome map. A day that would fold
+  more than 4096 operations, or whose hours hold a name OD-2 refuses (its grammar, or `FAC-SEM-167`), has no daily
+  digest, and an hour of more than 4096 operations, or holding a name OD-2 refuses (its grammar, or `FAC-SEM-167`),
+  has no hourly digest (the reference `foldDay` and `foldHour` throw), since a line every reader skips is never
+  written. A finding or a fold's error names a value shaped like a credential or holding a home folder only by its
+  place, never by the value.
 - **The order.** `ops` is sorted by `op` in code-unit order (the order of JavaScript's `<` on strings); an hourly
   `risen` is in the order of `ops`; a daily `risen` is sorted by `failed`, the most first, then by `op` in code-unit
   order. The reference folds write this order and the vectors compare in it. `FAC-SEM-166` does not check order, and a
@@ -149,23 +155,32 @@ its own `.json` file) and tells the two apart by `schema`.
     or `~`, no drive letter or other `:`, no backslash, no `.` or `..` segment, no C0 control character, no `//` and
     no trailing `/`, at most 256 characters (the grammar of a package path, `fabric-package.schema.json#/$defs/path`,
     which a package's state relative to the data folder also uses). It holds the product's `daily-YYYY-MM.jsonl` files
-    (OD-6); a collector reads those files in `<paths.data>/<dir>` and nothing else there.  A `dir` segment made only of dots, spaces and code points HFS+ ignores is refused: it folds (`foldDir`'s fold of one segment: those code points removed, case folded, trailing dots and spaces dropped) to nothing, and a tool that trims or folds names as the fold does (Win32 path handling drops trailing dots and spaces; a reader that strips those code points before joining) may read it as empty, `.` or `..`, outside `paths.data`. Each `dir` is named once,
-    compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped, segment by segment (a folder
-    under two labels would be sent twice). The home-folder and credential detectors read `dir` both as written and with
-    the code points HFS+ ignores removed, for their findings and for hiding a class of dirs that fold alike in messages.
-    The home-folder detector applies to `dir`: `hasHomePath` refuses a value in
-    which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or
-    digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or
-    `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-`
-    stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in
-    which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then
-    `/`, `\` or the end. So `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` are refused, and `user-digests` and `a/~1/x` pass (`a/~1/x` passes the detector; `~` is outside OD-2's grammar, so it is no operation name).
+    (OD-6); a collector reads those files in `<paths.data>/<dir>` and nothing else there. A `dir` segment made only of
+    dots, spaces and code points HFS+ ignores is refused: it folds (`foldDir`'s fold of one segment: those code points
+    removed, case folded, trailing dots and spaces dropped) to nothing, and a tool that trims or folds names as the
+    fold does (Win32 path handling drops trailing dots and spaces; a reader that strips those code points before
+    joining) may read it as empty, `.` or `..`, outside `paths.data`. Each `dir` is named once, compared under
+    canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian
+    Nuskhuri onto Mkhedruli), trailing dots and spaces dropped, segment by segment (a folder under two labels would be
+    sent twice). The home-folder and credential detectors read `dir` both as written and with the code points HFS+
+    ignores removed, for their findings and for hiding a class of dirs that fold alike in messages. The home-folder
+    detector applies to `dir`: `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start,
+    right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right
+    after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F`
+    or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the
+    start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~`
+    stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`,
+    followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`,
+    `\` or the end. So `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` are refused, and
+    `user-digests` and `a/~1/x` pass (`a/~1/x` passes the detector; `~` is outside OD-2's grammar, so it is no
+    operation name).
   - `source` is `^[a-z][a-z0-9-]{0,31}$`: the label the collector sends with each daily digest it reads in `dir`.
     `app` is the conventional label of a product's one folder; each label is named once in the list.
 - **Local only.** Only a descriptor whose placement is `local` (an absent `placement` is `local`) carries the key, and
   it names `paths.data`; a remote descriptor has no folder on this machine. A declared `dir` holds only the declaring
   instance's own digests: relaying a remote instance's digests through a local folder (a server's lines fetched by a
-  desktop app) is outside this contract. The key in any document other than a service descriptor is unread and unreported; on a remote service descriptor it is a `FAC-SEM-168` finding.
+  desktop app) is outside this contract. The key in any document other than a service descriptor is unread and
+  unreported; on a remote service descriptor it is a `FAC-SEM-168` finding.
 - **The digests stay as written.** The declaration only says where a collector on the same machine reads the daily
   lines and which label it sends with them. The lines are read as OD-6 says (a line it cannot read skipped, never
   stopping at one) and sent as they are, with their label, never rewritten; OD-7 holds for everything sent. A
@@ -214,12 +229,13 @@ A product with one folder of digests, `digests` in its data folder, writes in it
   for it is no learning proposal and changes no revision.
 - **RW-4, how it is counted.** The host counts each time the obligation arose as one record of the operation
   `retro-after-work` in its operations digests (OD-3), in the hour the record is resolved (the retro answered, or
-  `unknown` at the session's end): `ok` only when it observes a lesson or an `insight/1` line written through a call it
-  carries (its own tool call, or a host hook that observes the session's own tool call), `failed` when such a call was
-  refused (a lesson the memory refused), `unknown` otherwise: a retro written elsewhere, a line saying there is nothing
-  to say, or none, at the session's end. Retros asked are the three counters' sum; `ok` counts the asks answered by a
-  retro the host saw written. One retro may answer several asks, so `ok` is not a count of retros and no bound on
-  them; counting the retros written is Project Observatory's (Not decided here). Nothing of the retro's text enters the digest.
+  `unknown` at the session's end): `ok` only when it observes a lesson or an `insight/1` line written through a call
+  it carries (its own tool call, or a host hook that observes the session's own tool call), `failed` when such a call
+  was refused (a lesson the memory refused), `unknown` otherwise: a retro written elsewhere, a line saying there is
+  nothing to say, or none, at the session's end. Retros asked are the three counters' sum; `ok` counts the asks
+  answered by a retro the host saw written. One retro may answer several asks, so `ok` is not a count of retros and no
+  bound on them; counting the retros written is Project Observatory's (Not decided here). Nothing of the retro's text
+  enters the digest.
 
 ## Semantic rules
 
