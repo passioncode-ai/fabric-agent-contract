@@ -473,8 +473,9 @@ function misplaced(doc: JsonObject, budget: Budget): Finding[] {
 }
 
 /**
- * The first DETECTOR_CODE_POINTS code points of a string, which is all the detector reads: a scan over UTF-16 units that
- * slices without an array and never splits a surrogate pair. The walk computes it once per string and passes it on.
+ * The first DETECTOR_CODE_POINTS code points of a string, which is all the detector reads: a `u`-flag regular expression
+ * takes them in one pass (a surrogate pair is one character, so none is ever split; a lone surrogate is one too) without
+ * building an array. The walk cuts each string once and passes the head on.
  */
 function head(text: string): string {
   if (text.length <= DETECTOR_CODE_POINTS) return text;

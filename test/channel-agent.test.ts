@@ -981,6 +981,31 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(Buffer.byteLength(JSON.stringify(english), "utf8")).toBeLessThan(2_097_152);
     expect(channelAgentRules(english, "well-known").some((f) => f.message.includes("UTF-16 units of reading"))).toBe(true);
   });
+  it("cuts the head at 4097 code points with the u flag: a pair is never split, and a key within them is found", () => {
+    expect(detectorCost("\u{1F600}".repeat(4097))).toBe(8194);
+    expect(detectorCost("\u{1F600}".repeat(5000))).toBe(8194);
+    // A key past UTF-16 unit 4097 but within 4097 code points is read and found.
+    const key = ["sk", "-", "Q7r2".repeat(5)].join("");
+    const text = `${"\u{1F600}".repeat(2100)}${key}`;
+    expect(text.length).toBeGreaterThan(4097);
+    const p0 = value.projects[0];
+    const channel = { ...p0.channels[0], texts: { holding: { en: text }, final: p0.channels[0].texts.final } };
+    const found = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [channel, p0.channels[1]] }] } } }, "well-known");
+    expect(found.map((f) => `${f.code} ${f.instancePath}`)).toEqual([`FAC-SEM-165 ${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/channels/0/texts/holding/*`]);
+  });
+  it("keeps its floors equal to the shared detector's: each provider prefix's run and the long run", () => {
+    const source = SECRET_VALUE.source;
+    const floors = new Map([...source.matchAll(/(sk-|gh\[pousr\]_|xox\[abposr\]-|AKIA|glpat-)\[[^\]]+\]\{(\d+),?\}/g)].map((m) => [m[1], Number(m[2])]));
+    expect(floors.get("sk-")).toBe(SK_FLOOR);
+    expect(PREFIX_FLOORS.map(([prefix, floor]) => [prefix.source, floor])).toEqual([
+      ["gh[pousr]_", floors.get("gh[pousr]_")],
+      ["xox[abposr]-", floors.get("xox[abposr]-")],
+      ["akia", floors.get("AKIA")],
+      ["glpat-", floors.get("glpat-")]
+    ]);
+    const longRun = /const LONG_RUN = \/\[[^\]]+\]\{(\d+),\}\/g;/.exec(read("src/secret-shape.ts"));
+    expect(Number(longRun?.[1])).toBe(LONG_RUN_FLOOR);
+  });
   it("holds each of the page's cost terms to detectorCost, exactly", () => {
     const page = read("docs/specification/channel-agent.md");
     const terms: Array<[string, number, string]> = [

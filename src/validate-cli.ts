@@ -247,7 +247,6 @@ const HINT_HELP = {
   "hint/reader-pending": "docs/specification/provider.md",
   "hint/declaration-only": "docs/specification/channel-agent.md#what-is-checked",
 } as const;
-/** A hint: where it is, which hint, what it says. */
 /** A hint: where it is, which hint, what it says, and its own help link where the rule's is not the one (DEC-0153's form). */
 type Hint = [string, keyof typeof HINT_HELP, string, string?];
 
