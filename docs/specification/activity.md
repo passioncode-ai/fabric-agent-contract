@@ -337,9 +337,10 @@ within its device, so every receiver keys streams by device as well. `seq` numbe
 by 1, with no reuse.
 
 **The epoch is issued by the organization server**, never chosen by the collector. Each enrollment
-returns a `streamEpoch` greater than every epoch issued to that device before
-([devices](devices.md#enrollment)), and every collector on the device uses it from then on. A
-collector that loses its persisted counter — a reinstall, a reset — MUST re-enroll the device. It
+returns a `streamEpoch` greater than every epoch issued to that device before (a renewal repeated under
+DEC-0148 gets the epoch that renewal issued) ([devices](devices.md#enrollment)), and every collector on the device uses it from then on. A
+collector that loses its persisted counter (a reinstall, a reset) MUST re-enroll the device (a node whose renewed
+certificate is still unpresented presents it first, so the re-enrollment is not a repeat: DEC-0148). It
 then starts again at seq 1 under the new epoch, which is not evidence of tampering. A collector that
 still holds buffered events of an earlier epoch may finish sending them.
 

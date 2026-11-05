@@ -1,0 +1,14 @@
+{
+  "description": "A repeat refused (the device was revoked since, or the server's policy): a refusal is allowed; no finding.",
+  "kind": "device-renewal",
+  "expect": [],
+  "input": {
+    "latest": {
+      "certificate": "MIIB-renewed-certificate",
+      "renewed": true,
+      "notAfter": "2026-11-09T08:30:05Z"
+    },
+    "at": "2026-11-02T08:31:00Z",
+    "response": {}
+  }
+}
