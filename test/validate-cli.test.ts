@@ -2215,6 +2215,20 @@ describe("an agent's source (DEC-0149)", () => {
     expect(found(tree.out).some((line) => line.includes("FAC-SEM-158") && line.includes("nested-repository"))).toBe(true);
   });
 
+  it("stays in Git mode when Git lists only a gitlink at the manifest's path under the source, and reports it", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), ".gitignore": "src/\nLICENSE\n", LICENSE: "x", "src/a.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", ".gitignore").status).toBe(0);
+    expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${"2".repeat(40)},fabric.source.json`).status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).not.toContain("note/walk");
+    const nested = found(result.out).filter((line) => line.includes("FAC-SEM-158") && line.includes("nested-repository"));
+    expect(nested).toHaveLength(1);
+    expect(nested[0]).toContain("remove the nested repository or gitlink at that path");
+    expect(nested[0]).not.toContain("name it in exclude");
+  });
+
   it("reads a folder's manifest even when it unchecks itself: FAC-SEM-157 and FAC-SEM-158 on fabric.source.json", () => {
     const home = ["", "home", "jdoe", "notes"].join("/");
     const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], unchecked: [{ path: "fabric.source.json", reason: `kept in ${home}` }] }), LICENSE: "x", "src/a.ts": "x" });

@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 54 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 55 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9049,7 +9049,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   credential file names read folded; the manifest under unchecked; round 53 not clean: the tree check's own unchecked
   list skipped the manifest; an organization's own repositories; a personal agent's visibility change; a package to
   earlier readers; round 54 not clean: CREDENTIAL_FILE missed U+2028/U+2029 names; the lead's old opening clause; public
-  release unqualified), cited by round number because their heads were on the review branch, which is not
+  release unqualified; round 55 not clean: a gitlink at the manifest's path under exclude; earlier collaborators
+  outside the home; a personal private home's visibility change), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9397,6 +9398,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       holds"; the scoping and package sentences read "from a private home", so an agent whose home is already public and
       that has no manifest is untouched; a personal agent's private home's visibility change, like a transfer, needs the
       operator's own explicit permission, which is outside this contract, and the contract's tools do not perform it.
+      Decided by the coordinator in round 55: a nested repository at the manifest's path is in the source before any
+      `exclude` is read, and its message gives the remedy (remove it), since `exclude` cannot remove the manifest; a
+      `paths` value that is not a list is refused whole as `paths`; round 52's answer on earlier collaborators stands,
+      stated once in the lead: they count as the home's readers only inside the home itself, so a copy in another
+      place, even one the owner holds and they can read, is a hand-over; a personal agent's private home changing
+      visibility or gaining outside readers is not done by an agent on its own, and with the operator's explicit
+      permission for that act it is the operator's own act under his own rule, and no act of this contract (round 55:
+      this restates round 54's sentence); the contract's tools do not perform it.
       The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9522,7 +9531,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 54 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 55 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9542,5 +9551,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   credential file names read folded; the manifest under unchecked; round 53 not clean: the tree check's own unchecked
   list skipped the manifest; an organization's own repositories; a personal agent's visibility change; a package to
   earlier readers; round 54 not clean: CREDENTIAL_FILE missed U+2028/U+2029 names; the lead's old opening clause; public
-  release unqualified), cited by round number (their heads were on the review branch, not kept at landing),
+  release unqualified; round 55 not clean: a gitlink at the manifest's path under exclude; earlier collaborators
+  outside the home; a personal private home's visibility change), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

@@ -333,7 +333,9 @@ export function uncheckedTest(manifest: unknown): (path: unknown) => boolean {
 /**
  * Whether a nested repository at `path` (a folder, named without a trailing `/`: a submodule's gitlink, a folder holding
  * its own `.git`) lies in the source: an `include` path reaches it or into it, and no `exclude` path names it or a
- * folder around it. Leaving it out takes `exclude`; its own tree is checked as its own source.
+ * folder around it. Leaving it out takes `exclude`; its own tree is checked as its own source. At the manifest's own
+ * path (`fabric.source.json`) it always lies in the source, before any `exclude` is read, as `sourcePathTest` reads the
+ * manifest: `exclude` cannot remove the manifest, so the only remedy is to remove the nested repository or gitlink there.
  */
 export function nestedInSource(manifest: unknown, written: unknown): boolean {
   return nestedTest(manifest)(written);
@@ -350,10 +352,11 @@ export function nestedTest(manifest: unknown): (written: unknown) => boolean {
     // In the grammar as a file system reads it (`inGrammar`), as sourcePathTest reads a path.
     if (typeof stored !== "string" || !inGrammar(stored) || inGit(stored)) return false;
     const path = nfc(stored);
+    // The manifest is always source, before any exclude is read: a nested repository at its path is always in it.
+    if (path === SOURCE_FILE) return true;
     const folder = `${path}/`;
     // An include path names it, lies under it (its folder is one of that entry's prefixes) or covers it.
-    // The manifest is always source, so a nested repository at its path is always reached.
-    const reached = path === SOURCE_FILE || include.files.has(path) || include.reaches.has(folder) || folderPrefixes(folder).some((prefix) => include.folders.has(prefix));
+    const reached = include.files.has(path) || include.reaches.has(folder) || folderPrefixes(folder).some((prefix) => include.folders.has(prefix));
     const folded = foldPath(path);
     return reached && !exclude.files.has(folded) && !excludesFolder(exclude, `${folded}/`);
   };
@@ -384,7 +387,9 @@ export function patchPathsAllowed(manifest: unknown, paths: readonly unknown[]):
     return folded === SOURCE_FILE || credentialFile(path as string) || (anyExclude && folded.split("/").some((segment) => SHORT_NAME.test(segment)));
   };
   // A refused path that is not a string is named by its index, never shown.
-  return (Array.isArray(paths) ? paths : []).flatMap((path, index): string[] => (refused(path) ? [typeof path === "string" ? show(path) : `paths[${index}]`] : []));
+  // A value that is not a list is refused whole, by its name.
+  if (!Array.isArray(paths)) return ["paths"];
+  return paths.flatMap((path, index): string[] => (refused(path) ? [typeof path === "string" ? show(path) : `paths[${index}]`] : []));
 }
 /** A folded segment that may be a Windows 8.3 short name: a `~` followed by a digit anywhere (`PRIVAT~1.MD`). */
 const SHORT_NAME = /~[0-9]/u;
@@ -1210,7 +1215,10 @@ export function checkSourceTree(value: unknown): Finding[] {
     // address is labelled by its index.
     const label = problem.file === undefined ? undefined : named.has(problem.file) || labelledByIndex(pathOf) || pathHoldsFinding(pathOf) ? `files[${problem.file}]` : pathOf;
     const where = label === undefined ? "" : problem.line !== undefined ? `${label} line ${problem.line}, column ${problem.column}: ` : inPath(problem) ? `${label}, its path: ` : `${label}: `;
-    const said = problem.kind !== "credential" || !inPath(problem) ? MESSAGES[problem.kind]
+    // At the manifest's path exclude cannot help (the manifest is always source): the remedy is to remove what is there.
+    const said = problem.kind === "nested-repository" && nfc(pathOf) === SOURCE_FILE
+      ? "a nested repository (a submodule's gitlink or a folder holding its own .git) at the manifest's own path: exclude cannot remove the manifest, so remove the nested repository or gitlink at that path"
+      : problem.kind !== "credential" || !inPath(problem) ? MESSAGES[problem.kind]
       : credentialFile(pathOf) ? "a credential file by its name (.env, a private key, a token file) is never source"
         : "the file's path holds a value shaped like a credential, which never travels in a source";
     const entry = problem.entry === undefined ? "" : ` (entry ${problem.entry} of the operator's list)`;

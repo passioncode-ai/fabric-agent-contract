@@ -416,7 +416,9 @@ describe("which files are source", () => {
   });
 
   it("refuses a patch's paths given as anything but a list", () => {
-    expect(patchPathsAllowed(manifest, "src/main.ts" as unknown as string[])).toEqual([]);
+    // A value that is not a list is refused whole, by its name.
+    expect(patchPathsAllowed(manifest, "src/main.ts" as unknown as string[])).toEqual(["paths"]);
+    expect(patchPathsAllowed(manifest, null as unknown as string[])).toEqual(["paths"]);
     // A refused path that is not a string is named by its index, never shown.
     expect(patchPathsAllowed(manifest, [3, "src/main.ts", { key: "sk-x" }, null])).toEqual(["paths[0]", "paths[2]", "paths[3]"]);
   });
