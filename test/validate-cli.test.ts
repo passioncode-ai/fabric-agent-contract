@@ -2201,6 +2201,20 @@ describe("an agent's source (DEC-0149)", () => {
     expect(found(tree.out).filter((line) => line.includes("FAC-SEM-157") && line.includes("/manifest/include/0"))).toHaveLength(1);
   });
 
+  it("reads a gitlink recorded at the manifest's path as a nested repository, which blocks", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "LICENSE", "src/a.ts").status).toBe(0);
+    expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${"1".repeat(40)},fabric.source.json`).status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(found(result.out).some((line) => line.includes("FAC-SEM-158") && line.includes("nested-repository"))).toBe(true);
+    const document = one("tree.json", { manifest: { include: ["src/", "LICENSE"] }, files: [{ path: "LICENSE", text: "x" }, { path: "src/a.ts", text: "x" }, { path: "fabric.source.json", nestedRepository: true }] });
+    const tree = run(document, "--kind", "source-tree");
+    expect(tree.code).toBe(1);
+    expect(found(tree.out).some((line) => line.includes("FAC-SEM-158") && line.includes("nested-repository"))).toBe(true);
+  });
+
   it("reads a folder's manifest even when it unchecks itself: FAC-SEM-157 and FAC-SEM-158 on fabric.source.json", () => {
     const home = ["", "home", "jdoe", "notes"].join("/");
     const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], unchecked: [{ path: "fabric.source.json", reason: `kept in ${home}` }] }), LICENSE: "x", "src/a.ts": "x" });

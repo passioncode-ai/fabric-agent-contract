@@ -352,7 +352,8 @@ export function nestedTest(manifest: unknown): (written: unknown) => boolean {
     const path = nfc(stored);
     const folder = `${path}/`;
     // An include path names it, lies under it (its folder is one of that entry's prefixes) or covers it.
-    const reached = include.files.has(path) || include.reaches.has(folder) || folderPrefixes(folder).some((prefix) => include.folders.has(prefix));
+    // The manifest is always source, so a nested repository at its path is always reached.
+    const reached = path === SOURCE_FILE || include.files.has(path) || include.reaches.has(folder) || folderPrefixes(folder).some((prefix) => include.folders.has(prefix));
     const folded = foldPath(path);
     return reached && !exclude.files.has(folded) && !excludesFolder(exclude, `${folded}/`);
   };
@@ -382,7 +383,8 @@ export function patchPathsAllowed(manifest: unknown, paths: readonly unknown[]):
     // A credential file by its name, read as the tree check reads it, is never source: an import never writes one.
     return folded === SOURCE_FILE || credentialFile(path as string) || (anyExclude && folded.split("/").some((segment) => SHORT_NAME.test(segment)));
   };
-  return (Array.isArray(paths) ? paths : []).filter(refused).map((path) => show(path));
+  // A refused path that is not a string is named by its index, never shown.
+  return (Array.isArray(paths) ? paths : []).flatMap((path, index): string[] => (refused(path) ? [typeof path === "string" ? show(path) : `paths[${index}]`] : []));
 }
 /** A folded segment that may be a Windows 8.3 short name: a `~` followed by a digit anywhere (`PRIVAT~1.MD`). */
 const SHORT_NAME = /~[0-9]/u;
@@ -405,9 +407,10 @@ export interface SourceProblem { kind: SourceFindingKind; file?: number; line?: 
 /**
  * Files that are credentials by their name: the names the adapter's `pack` refuses to carry (`fabric_package.py`
  * `SECRET_FILE`, with its `SECRET_FILE_OK` exceptions), and the kits' token and credential files (`service.token`,
- * `board.credential`).
+ * `board.credential`). A name's runs read any character but a line feed, as `TOKEN_FILE` does, so a name holding U+2028
+ * or U+2029 (which the path grammar admits) still matches.
  */
-export const CREDENTIAL_FILE = /^(?:\.env(?:\.[^\n\r\u2028\u2029]+)?|[^\n\r\u2028\u2029]*\.(?:pem|key|p12|pfx|jks|keystore)|id_(?:rsa|dsa|ecdsa|ed25519)|\.(?:npmrc|netrc|pypirc))$/;
+export const CREDENTIAL_FILE = /^(?:\.env(?:\.[^\n]+)?|[^\n]*\.(?:pem|key|p12|pfx|jks|keystore)|id_(?:rsa|dsa|ecdsa|ed25519)|\.(?:npmrc|netrc|pypirc))$/;
 export const CREDENTIAL_FILE_OK = /^\.env\.(?:example|sample|template)$/;
 /** The kits' token and credential files, Python's `.` (anything but LF) before the extension: the adapter's `TOKEN_FILE`. */
 export const TOKEN_FILE = /^[^\n]+\.(?:token|credential)$/;
