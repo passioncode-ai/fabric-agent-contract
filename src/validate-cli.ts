@@ -24,7 +24,7 @@ import { ruleHelp } from "./rule-codes.js";
 import { documentKindsOf, isSemanticKind } from "./semantic-kinds.js";
 import { evaluateSemanticRules } from "./semantic-rules.js";
 import { PACKAGE_FILE } from "./package-rules.js";
-import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, excludedFolderTest, foldOnlyExcludeTest, foldPath, foldSegment, inGrammar, isDotGitSegment, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
+import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, excludedFolderTest, foldOnlyExcludeTest, foldPath, foldSegment, inGrammar, isManifestGrammarFinding, isDotGitSegment, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
 import { createValidatorSync, formatSchemaErrors } from "./validator.js";
 
 export interface Problem { file: string; path: string; rule: string; message: string; help?: string }
@@ -1104,7 +1104,8 @@ function checkSourceFolderAs(run: Run, folder: string): void {
     return foldedGitlinks.some((link) => (folded.endsWith("/") ? `${link}/`.startsWith(folded) : link === folded || link.startsWith(`${folded}/`)));
   };
   const listed = (((manifest as JsonObject).exclude as string[] | undefined) ?? []).filter((entry) => inGrammar(entry, true) && (excludesGitlink(entry) || presentWithoutLink(folder, entry)));
-  const findings = evaluateSemanticRules("source-tree", { manifest, files, listed });
+  // The manifest's own check already said its entries outside the grammar: the tree run does not say them twice.
+  const findings = evaluateSemanticRules("source-tree", { manifest, files, listed }).filter((finding) => !isManifestGrammarFinding(finding));
   const inPath = new Set(findings.flatMap((finding) => {
     const at = /^\/files\/(\d+)\/path$/.exec(finding.instancePath);
     return at === null ? [] : [Number(at[1])];

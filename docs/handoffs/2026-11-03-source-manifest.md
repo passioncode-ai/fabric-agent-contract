@@ -326,7 +326,14 @@ source, what never travels with it, the check before a source export, and how a 
   and a Git-mode and walk CLI test), an entry outside the grammar left to the schema in `FAC-SEM-157` and never called
   unused, the index sentence scoped to Git mode and its no-include-file fallback walk, the release rule and its two
   exceptions stated once, a package's target, the receipt's recipient, the home-path wording, and the merge note for
-  DEC-0153's `foldDir`; round 47 (not clean: paths stored in NFD, the `binaries` and `missing` loops, an organization's later public release, a private mirror) answered as decided: `inGrammar` holds as written, in NFC and in NFD, with no segment made only of dots, spaces and code points HFS+ ignores (a table test, a CLI test over three segments of 80 `é` stored in NFD in Git mode, without git and in a folder Git refuses, alone and as a nested repository, and a patch test), the `binaries` and `missing` loops skip an entry outside the grammar, `FAC-SEM-157` names the cause, vectors pin an exclude entry outside the grammar as never unused, `HFS_IGNORABLE` exported for DEC-0153, and the round's decisions below; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  DEC-0153's `foldDir`; round 47 (not clean: paths stored in NFD, the `binaries` and `missing` loops, an organization's later public release, a private mirror) answered as decided: `inGrammar` holds as written, in NFC and in NFD, with no segment made only of dots, spaces and code points HFS+ ignores (a table test, a CLI test over three segments of 80 `é` stored in NFD in Git mode, without git and in a folder Git refuses, alone and as a nested repository, and a patch test), the `binaries` and `missing` loops skip an entry outside the grammar, `FAC-SEM-157` names the cause, vectors pin an exclude entry outside the grammar as never unused, `HFS_IGNORABLE` exported for DEC-0153, and the round's decisions below; round 48 (not clean: the lead's readers, the
+  grammar's `FAC-SEM-157` statement, CT-194's visibility sentence; exclude fails closed; the CT-109 register is
+  DEC-0149's landing step) answered as decided: an exclude entry outside the grammar removes its widest reading
+  (`foldedList` with `widest`, tests over `isSourcePath`, `patchPathsAllowed`, the walk's folder tests and a vector),
+  `FAC-SEM-157` said in a tree document too (the folder run keeps saying it once, on `fabric.source.json`), the global
+  `HFS_IGNORABLE` private again with `HFS_IGNORABLE_CHAR` and `stripHfsIgnorable` exported, the fourth home-path
+  boundary named in `src/activity-rules.ts`, activity.md and CT-109's row, the DEC-0150 second-lander steps written
+  out, and the round's decisions below; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -422,6 +429,18 @@ source, what never travels with it, the check before a source export, and how a 
   - `.git` in every form a case-insensitive or Windows file system resolves to it is never source, and a patch path an
     `exclude` entry names under ASCII case folding is refused, since on such a file system the two spellings are one
     file and the rule is otherwise bypassed.
+- Round 48, decided by the coordinator under the operator's recorded rules:
+  - the route list's lead: a copy is no hand-over only when it stays in a place the home's owner holds and only the
+    home's readers can read it (the owning organization's members for its own agent, and, for a personal agent's
+    private home, the collaborators given access before DEC-0149 was accepted); a repository or placement another owner
+    holds stays a hand-over (round 47's lead narrowed);
+  - an exclude entry outside the grammar fails closed and removes its widest reading; an include entry so read names
+    nothing; `FAC-SEM-157` says it once by its cause, in a tree document too;
+  - an agent without `fabric.source.json` is handed over or released from a private home only once it has one;
+  - a package handed over or published holds only committed source paths besides `fabric.package.json`, a vendored
+    file travelling only as a committed path listed in `binaries`;
+  - a hand-over by file of a local export records the recipient and the export commit in that export's receipt;
+  - the CT-109 register's fourth boundary lands with DEC-0149 itself.
 - Round 47, decided by the coordinator under the operator's recorded rules:
   - `inGrammar` holds as written, in NFC and in NFD, one rule for a path read from disk and a manifest entry alike, and
     a path with a segment made only of dots, spaces and code points HFS+ ignores is outside it (it folds to nothing,
@@ -432,7 +451,8 @@ source, what never travels with it, the check before a source export, and how a 
   - the not-done clause covers an act on the whole repository of a personal agent's private home or of any copy of it
     within the operator's estate that carries its history (a private mirror);
   - the route list's lead: a route is a hand-over only when the source reaches someone who could not already read the
-    home, and a release is a source export or a package (serving and copied content are never a release);
+    home (round 48 narrowed who), and a release is a source export or a package (serving and copied content are never
+    a release);
   - a package holds only source paths that passed that commit's tree check, besides the files the pack step writes
     (`fabric.package.json`); built files travel only as committed source paths;
   - a local export with no recipient records none and is parentless; an export keeps file modes and symbolic links as
@@ -565,6 +585,25 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Checks actually run
 
+Round 48's fixes were checked on the working tree over head `3d86e462` (this note's commit holds the same tree, plus
+this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files with 10224 passed
+and 3 skipped under the coverage floors, `ux:lint`, `docs:check` passed with 0 markdownlint errors, `privacy:check` with
+0 findings), run under the shared lock with the 15-minute load at 27.6 and 17 GB free, and `pnpm exec tsx
+tools/vectors/run.ts` (exit 0, 29 files match); before it, the targeted coverage run over `source-rules`,
+`validate-cli`, `validate-cli-faults`, `rule-tolerance`, `positive-sweep`, `schema-compilation` and `activity-rules`
+(exit 0: 3287 passed, 2 skipped; `src/source-rules.ts` at 100 % of its branches, `src/validate-cli.ts` at 99.48 %). A
+first `docs:check` caught the folder run naming `FAC-SEM-157` in `src/validate-cli.ts` (G-13, one code one checker); the
+filter now calls `isManifestGrammarFinding` from `src/source-rules.ts`. `grep -c SOURCE_HOME_PATHS
+src/activity-rules.ts docs/specification/activity.md` prints 1 and 1, and the old "three" sentence prints nothing in
+`src/activity-rules.ts`. No U+2014 in the added lines. Narrowed phrases, counted with `grep -c` over the files round 47
+counted plus activity.md and `src/activity-rules.ts`: the old lead's list of readers, the old CT-194 visibility
+sentence, the old schema-only grammar sentence, the old exclude message, the old CT-109 landing note and the DEC-0150
+"tell its lander" bullet give 0; the earlier rounds' records stand as round 47 counted them. PR #628 at `78e080d2`
+(round 48 merged the knowledge base's main `567b37b8`, its item 8 kept as main has it): `source hand-over` in 4, 3
+and 3 lines of agents-first, principles and rules, `own estate` once on each, item 9 once and item 8 once, the old
+lead's readers 0 times; the knowledge base's `npm test` (exit 0, 172 passed) and `npm run verify:content` (exit 0,
+backlog 0 errors).
+
 Round 47's fixes were checked on the working tree over head `941643a7` (this note's commit holds the same tree, plus
 this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files with 10219 passed
 and 3 skipped under the coverage floors, `ux:lint`, `docs:check` with 0 errors, `privacy:check` with 0 findings), run
@@ -575,8 +614,8 @@ under the shared lock with the 15-minute load at 39.0 and 17 GB free, and `pnpm 
 test fails with the NFD half of `inGrammar` removed (checked by reverting it on a copy, then restored). No U+2014 in
 the added lines. Narrowed phrases, counted with `grep -c` over source.md, `conformance.md`, `package.md`,
 `CONTEXT.md`, `docs/DECISIONS.md`, `docs/backlog.md`, this note, `docs/ux/scenarios.md`, the code, tests and vectors
-of the tree check, and the knowledge base's agents-first, principles, rules and roadmap: the later release without
-"public", the old not-done clause without the private mirror, the old package line in package.md, the old walk sentence
+of the tree check, and the knowledge base's agents-first, principles, rules and roadmap: an organization's release
+phrase without "public", the old not-done clause without the private mirror, the old package line in package.md, the old walk sentence
 in SCN-054, the deleted review branch in RM-36 and the withdrawn file-system mechanism for a dotted segment give 0;
 the earlier rounds' phrases stay where round 46 counted them, each a record of its round, and the old grammar reading
 stays only in round 46's records, each annotated with round 47's. PR #628 at `d31747a8` (round 47 merged the knowledge
@@ -822,7 +861,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 47 into `d31747a8` (the PR's head), which carries main's `c219a724`,
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 48 into `78e080d2` (the PR's head), which carries main's `567b37b8` (its item 8 changed again),
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). Refresh PR #235 (DEC-0148) against `main`: it is CONFLICTING on the backlog tail; keep both sides
    in id order. Then merge the current `origin/main` (with #236, CT-215 and CT-216; re-measure its head at landing) into the fresh branch
@@ -843,11 +882,13 @@ remaining steps, in order:
    read) on that head, with its output in the PR. That head is the one that merges; nothing merges before this step.
 6. Pair PR #628 only with a contract head that carries the same round of the readings (the round named in DEC-0149's
    status line and in the PR's last commit), and re-read the pair on the round-40 and round-41 points before landing.
-   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main: if it is
-   behind, merge main into it, keeping main's item 8 and the PR's item 9. Then merge PR #628, fetch the knowledge base
+   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`567b37b8` at
+   round 48, merged into the PR as `78e080d2`): if it is behind, merge main into it (never a rebase or a force-push),
+   keeping main's item 8 as main has it and the PR's item 9, and set the round named in RM-36's "Restated 2026-11-05"
+   line to the landing round. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `d31747a8`, which carries the knowledge base's main, they print 4, 3 and 3
+   `knowledge/rules.md`; at PR #628's head `78e080d2`, which carries the knowledge base's main, they print 4, 3 and 3
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in
@@ -868,9 +909,13 @@ the operator gave before the rule stands as the operator's own act (DEC-0149 ite
 (probe)", its evidence the round-35 probe (a manifest listing its own key-holding file under `unchecked` exits 0 under
 `--kind source-tree`, exit 1 without that entry), asking the checker to refuse such an entry.
 
-Right after the merge: close CT-211 with the three greps' outputs; check fabric-workspace's RM-36 entry on its main (PR #628 carries, since round 47, the dated line under "Decided
+Right after the merge: close CT-211 with the three greps' outputs; add the contract's row in the knowledge base's
+`knowledge/products.md` for the release that carries DEC-0149, with the release decision (the version tag, as DEC-0150's
+`v0.1.0+2026-11-05.2` was); check fabric-workspace's RM-36 entry on its main (PR #628 carries, since round 47, the dated line under "Decided
 2026-11-03" restating the export: one new commit whose only parent, if any, is the earlier export commit the recipient
-holds, and no commit from the home; and a "Waiting on" line naming no branch), update its summary row's state and its
+holds, and no commit from the home; and a "Waiting on" line naming no branch), rewrite that "Waiting on" line to the
+adapter's FAA-188 part 2 (the contract's CT-207) and Fabric's "give as source" action (CT-208) alone, DEC-0149 having
+landed, update its summary row's state and its
 knowledge page for the agent source (`knowledge/`),
 publish with `node scripts/workspace.mjs sync` from a Fabric checkout, post DEC-0149 to threads `21ac4057` and
 `0a8776f2` with CT-207 and CT-208, and file the Fabric Dashboards request on its attention and degraded counts of agents
@@ -924,12 +969,19 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   floors") now fails on one.
 - `fixtures/catalogue.json`: all three branches add entries; add the comma where they meet.
 - Whichever of DEC-0149 and DEC-0153 lands second makes `foldDir` in `src/ops-digest.ts` read `(dir) => foldPath(dir)`
-  (this branch's fold, NFD first and the Georgian step included) and removes the constants it then leaves unused, keeping
-  `HFS_IGNORABLE` imported from `src/source-rules.ts` if `hiddenDir` still uses it (exported there since round 47);
-  `pnpm typecheck` must exit 0.
-- The CT-109 register row ("three home-path rules draw three boundaries"): whichever of DEC-0149 and DEC-0153 lands
-  second rewrites it to name four boundaries, the fourth the tree check's `SOURCE_HOME_PATHS` in
-  `src/source-rules.ts` (the home-path forms of the adapter's check, `FAC-SEM-158`), so the register stays true.
+  (this branch's fold, NFD first and the Georgian step included) and removes the constants it then leaves unused; if
+  `hiddenDir` still needs the code points HFS+ ignores, it imports `stripHfsIgnorable` or the non-global
+  `HFS_IGNORABLE_CHAR` from `src/source-rules.ts` (round 48: the global `HFS_IGNORABLE` stays private there, since a
+  shared global pattern keeps `lastIndex` between `test` calls); `pnpm typecheck` must exit 0.
+- The CT-109 register lands with DEC-0149 itself, not with whichever lands second: `SOURCE_HOME_PATHS`
+  (`src/source-rules.ts`) is the fourth home-path boundary as soon as DEC-0149 is on main, and DEC-0153 adds none
+  (`FAC-SEM-167` and `FAC-SEM-168` reuse `hasHomePath`). This branch already names it in the two places: the scope
+  comment in `src/activity-rules.ts` and activity.md's "Its scope (CT-109)", each saying "Changing any of the four",
+  and in the backlog's CT-109 row. Check on the landed tree: `grep -c SOURCE_HOME_PATHS src/activity-rules.ts
+  docs/specification/activity.md` prints at least 1 for each, and `grep -n 'Changing any of the three'
+  src/activity-rules.ts` prints nothing. DEC-0153's lander keeps only its source.md sentence on `hasHomePath`;
+  DEC-0153's own handoff (its lines 184 to 186 when this was written) still says the register lands second and needs
+  the same correction, which its own fixer makes.
 - `docs/specification/conformance.md`: keep this branch's actions row and append the channel row after it. In the
   reserved-codes paragraph keep this branch's `FAC-SEM-161` sentence, add DEC-0150's sentence on `FAC-SEM-162` to
   `FAC-SEM-165` (receipts SEM-0162 to SEM-0165), and drop the sentence saying codes are reserved by open branches;
@@ -957,10 +1009,34 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   Under (b), carry as an open item what a headless launched session does with any job's `input_required`. A relaunched
   session carries the request's idempotency key under the same caller identity.
   Check with `grep '^| CT-215 ' docs/backlog.md | grep -c 'source hand-over'`, which prints 1 after the merge.
-- If DEC-0150 lands before this branch, whichever of the two lands second switches `src/channel-agent.ts` `keyShaped`
-  from `JWT_SHAPE.test` to `hasJwt` (this branch brings `hasJwt`); CT-212 stays unchanged. If DEC-0150 is on main at
-  step 2, do what its handoff gives the second lander: `keyShaped` to `hasJwt`, rewrite DEC-0150's "in progress"
-  sentence about DEC-0149's `sk-` sentence, and keep SCN-054 and SCN-055 with its grep.
+- DEC-0150 is on main (PR #243, `1016f0ec`), so this branch lands second and does every step DEC-0150's handoff
+  (`docs/handoffs/2026-11-04-channel-agent.md`, "Merging beside the branch of CT-194") gives the second lander, each
+  with its check:
+  - `src/channel-agent.ts` `keyShaped` from `JWT_SHAPE.test` to `hasJwt`, and `JWT_SHAPE` dropped from its import of
+    `./secret-shape.js` (`noUnusedLocals`); CT-212 unchanged. Check: `grep -c 'JWT_SHAPE' src/channel-agent.ts`
+    prints 0 and `pnpm typecheck` exits 0.
+  - The in-progress sentence (`channel-agent.md` at its lines 308 and 309 on main) states DEC-0149's tree check as
+    current: "any `sk-` at a word start followed by 16 or more name characters, in any case" (`FAC-SEM-158`), with no
+    "in progress" for DEC-0149. Check: `grep -c 'DEC-0149 in progress\|DEC-0149.s source tree check, in progress'
+    docs/specification/channel-agent.md` prints 0.
+  - The bare `--schema service-channel-agent-extension.schema.json` path runs instance-free: the switch ORs that
+    schema into `formatSchemaErrors`' `instanceFree` option only, never into `sourceCheck`; the second sentence of
+    `hint/declaration-only` reads "A bare declaration's lines may name a map key as written (a language tag shaped like
+    a credential included) and print one line per item, since widths are not checked first here."; and its five
+    dependents change in the same step: `readerHints`' text and its comment in `src/validate-cli.ts`, the 'may name its
+    members as written' assertion in `test/validate-cli.test.ts`, `channel-agent.md` "Where it is declared", SCN-002's
+    errors line in `docs/ux/scenarios.md`, and CT-209's "Owed as a follow-up" text in `docs/backlog.md`, marked done
+    in the landing change. Check: a declaration with `texts.final["sk-Latn-150-u-ca-gregory"] = 5` prints a hint
+    naming map keys, and `grep -n 'as written'` on the page and in the scenarios matches the landed output.
+  - The collapse assertion in `test/validate-cli.test.ts`: a bare declaration with an undeclared member whose name is
+    an `sk-` key built at run time, at the top and under a channel, prints "has a member the schema does not define"
+    at its object, exits 1 and never contains the name.
+  - `src/validator.ts` at its line 96: its comment names the bare channel-agent path among the instance-free ones.
+  - The schema count 148 in `test/schema-compilation.test.ts`, in its three places (the title, `toHaveLength` and the
+    Set size): check `grep -c 148 test/schema-compilation.test.ts` prints 3 (151 with DEC-0153 too, set by hand by the
+    last lander).
+  - SCN-054 and SCN-055 both kept: `grep -c '^### SCN-05[45]' docs/ux/scenarios.md` prints 2, and SCR-03 lists
+    "SCN-001, SCN-002, SCN-054, SCN-055".
 - Whoever lands second of DEC-0149 and DEC-0151 keeps DEC-0151's "cannot export its source" and `channel-agent.md`'s
   "would still block a source export" as written: they agree with `source.md`'s registry-alias paragraph.
 - `source.md` says "(DEC-0151, in progress)" and "(DEC-0153, in progress)". Whichever of DEC-0149 and DEC-0153 lands
@@ -980,9 +1056,16 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   lines may print)"); keep it when main's rows are merged in.
 - At the DEC-0150 step, `docs/ux/screens.md` SCR-03 keeps "SCN-001, SCN-002, SCN-054, SCN-055", and `CONTEXT.md` and
   `docs/ux/scenarios.md` change on both sides: keep both.
-- At the DEC-0150 step, tell its lander: an exportable channel agent keeps its declaration in the served well-known
-  document (the instance), or takes `token_slot` and the per-project entries from slots, since both are installation
-  strings in [source](../specification/source.md#installation-strings)'s sense and would otherwise block a source export.
+- Landing edit (DEC-0150 is on main, so there is no lander to tell): CT-224's row in `docs/backlog.md` gains the two
+  remedies, an exportable channel agent keeping its declaration in the served well-known document (the instance), or
+  taking `token_slot` and the per-project entries from slots, since both are installation strings in
+  [source](../specification/source.md#installation-strings)'s sense and would otherwise block a source export, linked
+  in the row's own form (`specification/source.md#installation-strings`). Check: `grep '^| CT-224 ' docs/backlog.md |
+  grep -c 'source.md#installation-strings'` prints 1.
+- At landing, carry two corrections of DEC-0150's landing post: its FAA-197 item quotes two phrases that are not on
+  the landed `channel-agent.md` ("acts only inside that chat as section 4.10 says" and "no AP-3 or OA-2 source", each
+  `grep -c` 0 on main at `1016f0ec`), so the post quotes CA-8 as the page stands; and its merge post's "together with
+  `fabric-source`" becomes true only when DEC-0149 lands, which this landing makes true (say so in DEC-0149's post).
 - At landing, file a row in the knowledge base for its owner: `knowledge/authority.md` still says an outage is told
   after more than 5 minutes of a service being unavailable or degraded, while `service.md` cites Fabric Dashboards'
   FD-76 (15 minutes, unavailability only).

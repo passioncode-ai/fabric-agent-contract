@@ -31,7 +31,14 @@ export const SOURCE_PATH = /^(?![/~])(?![\s\S]*\\)(?![\s\S]*\/\/)(?!(?:[\s\S]*\/
  * Code points HFS+ ignores in a name (Git's `is_hfs_dotgit`): the zero-width joiners and marks, the bidirectional
  * embeddings and overrides, the deprecated format characters and the byte-order mark.
  */
-export const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
+const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
+/**
+ * The same code points for a consumer, without the global flag (a global pattern keeps `lastIndex` between `test` calls,
+ * so a shared one would answer differently each time): `HFS_IGNORABLE_CHAR.test(name)` asks whether a name holds one, and
+ * `stripHfsIgnorable(name)` removes every one.
+ */
+export const HFS_IGNORABLE_CHAR = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/u;
+export const stripHfsIgnorable = (text: string): string => text.replace(HFS_IGNORABLE, "");
 /** ASCII case folding only, as Git's `strncasecmp` and a case-insensitive file system's ASCII names read it. */
 export const asciiFold = (text: string): string => text.replace(/[A-Z]/g, (letter) => letter.toLowerCase());
 /**
@@ -92,13 +99,32 @@ export const FOLD_UNICODE = "17.0";
 /** A path folded segment by segment (`foldSegment`); a folder's trailing `/` is kept. */
 export const foldPath = (path: string): string => path.split("/").map(foldSegment).join("/");
 /**
- * A list of `exclude` paths indexed in their folded form: an entry in the path grammar as written, folded only then, so
- * an entry the fold shortens (`a/.../`) still removes what it names. Looked up with `foldedCovers`.
+ * A list of paths indexed in their folded form: an entry in the path grammar (`inGrammar`), folded only then. With
+ * `widest` (for `exclude`, which fails closed) an entry in the schema's grammar as written that is outside the grammar
+ * as a file system may read it still removes its widest reading: with a segment made only of dots, spaces and code
+ * points HFS+ ignores, the folded folder before its first such segment (`src/secrets/.../` removes `src/secrets/`, and
+ * one whose first segment is such removes everything, `all`); lengthened past 256 code points by NFC or NFD, the entry
+ * folded as written. `FAC-SEM-157` still says such an entry once. An `include` entry outside the grammar names nothing
+ * (it fails closed the other way). Looked up with `foldedCovers`.
  */
-const foldedList = (value: unknown): PathList => {
-  const entries = strings(value).map(([entry]) => entry).filter((entry) => inGrammar(entry, true)).map(nfc).map(foldPath);
-  return { files: new Set(entries.filter((entry) => !entry.endsWith("/"))), folders: new Set(entries.filter((entry) => entry.endsWith("/"))), reaches: new Set() };
+const foldedList = (value: unknown, widest = false): PathList => {
+  const entries: string[] = [];
+  let all = false;
+  for (const [entry] of strings(value)) {
+    if (inGrammar(entry, true)) entries.push(foldPath(nfc(entry)));
+    else if (widest && SOURCE_PATH.test(entry)) {
+      const written = nfc(entry);
+      const segments = (written.endsWith("/") ? written.slice(0, -1) : written).split("/");
+      const empty = segments.findIndex((segment) => foldSegment(segment) === "");
+      if (empty === 0) all = true;
+      else entries.push(empty < 0 ? foldPath(written) : `${segments.slice(0, empty).map(foldSegment).join("/")}/`);
+    }
+  }
+  return { files: new Set(entries.filter((entry) => !entry.endsWith("/"))), folders: new Set(entries.filter((entry) => entry.endsWith("/"))), reaches: new Set(), all };
 };
+/** Whether a folded exclude list removes a folded folder path (ending in `/`): it or a folder holding it, or an entry without `/` above it. */
+const excludesFolder = (list: PathList, folded: string): boolean =>
+  list.all === true || folderPrefixes(folded).some((prefix) => list.folders.has(prefix) || list.files.has(prefix.slice(0, -1)));
 
 /** Every prefix of a path that ends in `/`: the folders it lies in, the path itself when it is a folder. */
 const folderPrefixes = (path: string): string[] => {
@@ -110,7 +136,7 @@ const folderPrefixes = (path: string): string[] => {
  * A list of paths, indexed so a path is looked up rather than compared with every entry: its files exactly, its folders
  * (entries ending in `/`) by each folder the path lies in, and every folder an entry lies in or is (`reaches`).
  */
-interface PathList { files: Set<string>; folders: Set<string>; reaches: Set<string> }
+interface PathList { files: Set<string>; folders: Set<string>; reaches: Set<string>; all?: boolean }
 /**
  * Only entries in the path grammar (at most 256 code points) are indexed: an entry outside it (longer, or with a `\`,
  * a `//`, a `:`) can neither equal nor be a folder of a path in the grammar, so it names, reaches and removes nothing,
@@ -136,7 +162,7 @@ const listCovers = (list: PathList, written: string): boolean => written.length 
  * placed there later).
  */
 const excludeCoversNfc = (list: PathList, path: string): boolean =>
-  list.files.has(path) || folderPrefixes(path).some((folder) => list.folders.has(folder) || list.files.has(folder.slice(0, -1)));
+  list.all === true || list.files.has(path) || folderPrefixes(path).some((folder) => list.folders.has(folder) || list.files.has(folder.slice(0, -1)));
 /** Whether a folded exclude list (`foldedList`) names a path: the path folded the same way, then looked up. */
 const foldedCovers = (list: PathList, written: string): boolean => written.length <= 512 && excludeCoversNfc(list, foldPath(nfc(written)));
 
@@ -166,7 +192,7 @@ export function sourcePathTest(manifest: unknown): (path: unknown) => boolean {
   const include = pathList(source.include);
   // `exclude` is read folded (`foldSegment`): on a case-insensitive file system `src/Secrets/` is `src/secrets/`, so
   // what an exclude entry names under any spelling stays out (it fails closed); `include` is read as written.
-  const exclude = foldedList(source.exclude);
+  const exclude = foldedList(source.exclude, true);
   return (path) => {
     // A path is in the grammar as a file system reads it (`inGrammar`): one NFC or NFD lengthens past it is no source.
     if (typeof path !== "string" || !inGrammar(path) || inGit(path)) return false;
@@ -207,13 +233,13 @@ export function foldOnlyExcludeTest(manifest: unknown): (path: unknown) => numbe
  */
 export function excludedFolderTest(manifest: unknown): (folder: string) => boolean {
   const source = isObject(manifest) ? manifest : {};
-  const exclude = foldedList(source.exclude);
+  const exclude = foldedList(source.exclude, true);
   // Every folder an include path lies in, indexed once: a folder is looked up, never compared with every include. Only
   // entries in the path grammar are indexed, as pathList does: a longer one would cost the square of its length.
   const under = new Set(strings(source.include).map(([path]) => path).filter((path) => inGrammar(path, true)).map(nfc).flatMap((path) => folderPrefixes(path)));
   return (written) => {
     const folder = nfc(written);
-    return folderPrefixes(`${foldPath(folder)}/`).some((prefix) => exclude.folders.has(prefix) || exclude.files.has(prefix.slice(0, -1))) && !under.has(`${folder}/`);
+    return excludesFolder(exclude, `${foldPath(folder)}/`) && !under.has(`${folder}/`);
   };
 }
 
@@ -224,9 +250,9 @@ export function excludedFolderTest(manifest: unknown): (folder: string) => boole
 export function sourceFolderTest(manifest: unknown): (folder: string) => boolean {
   const source = isObject(manifest) ? manifest : {};
   const include = pathList(source.include);
-  const exclude = foldedList(source.exclude);
+  const exclude = foldedList(source.exclude, true);
   const held = (list: PathList, folder: string) => folderPrefixes(`${folder}/`).some((prefix) => list.folders.has(prefix));
-  const heldBeneath = (folder: string) => folderPrefixes(`${folder}/`).some((prefix) => exclude.folders.has(prefix) || exclude.files.has(prefix.slice(0, -1)));
+  const heldBeneath = (folder: string) => excludesFolder(exclude, `${folder}/`);
   return (written) => {
     if (written === "" || written.length > 512 || !inGrammar(written, true)) return false;
     const folder = nfc(written);
@@ -251,7 +277,7 @@ function folderInSource(includes: PathList, excludes: PathList, written: string)
   const folder = nfc(written);
   return inGrammar(written, true) && !inGit(folder.slice(0, -1)) &&
     folderPrefixes(folder).some((prefix) => includes.folders.has(prefix)) &&
-    !folderPrefixes(foldPath(folder)).some((prefix) => excludes.folders.has(prefix) || excludes.files.has(prefix.slice(0, -1)));
+    !excludesFolder(excludes, foldPath(folder));
 }
 
 /**
@@ -289,7 +315,7 @@ export function nestedInSource(manifest: unknown, written: unknown): boolean {
 export function nestedTest(manifest: unknown): (written: unknown) => boolean {
   const source = isObject(manifest) ? manifest : {};
   const include = pathList(source.include, true);
-  const exclude = foldedList(source.exclude);
+  const exclude = foldedList(source.exclude, true);
   return (written) => {
     // `git ls-files --others` names an untracked repository with a trailing `/`.
     const stored = typeof written === "string" && written.endsWith("/") ? written.slice(0, -1) : written;
@@ -300,7 +326,7 @@ export function nestedTest(manifest: unknown): (written: unknown) => boolean {
     // An include path names it, lies under it (its folder is one of that entry's prefixes) or covers it.
     const reached = include.files.has(path) || include.reaches.has(folder) || folderPrefixes(folder).some((prefix) => include.folders.has(prefix));
     const folded = foldPath(path);
-    return reached && !exclude.files.has(folded) && !folderPrefixes(`${folded}/`).some((prefix) => exclude.folders.has(prefix) || exclude.files.has(prefix.slice(0, -1)));
+    return reached && !exclude.files.has(folded) && !excludesFolder(exclude, `${folded}/`);
   };
 }
 
@@ -1125,10 +1151,13 @@ export const labelledByIndex = (path: unknown): boolean => typeof path === "stri
  */
 export function checkSourceTree(value: unknown): Finding[] {
   const problems = sourceTreeProblems(value);
+  // The manifest's entries outside the grammar are said here too (FAC-SEM-157), so a tree document is never silent on
+  // them; a folder's run says them on its fabric.source.json and drops these.
+  const grammar = grammarFindings(isObject(value) ? value.manifest : undefined, "/manifest");
   const files = isObject(value) && Array.isArray(value.files) ? value.files : [];
   const inPath = (problem: SourceProblem) => problem.file !== undefined && problem.line === undefined && problem.kind !== "binary" && problem.kind !== "nested-repository";
   const named = new Set(problems.filter(inPath).map((problem) => problem.file));
-  return problems.map((problem): Finding => {
+  const found = problems.map((problem): Finding => {
     const blocking = BLOCKING_KINDS.includes(problem.kind);
     const pathOf = problem.file === undefined ? "" : show((files[problem.file] as JsonObject).path);
     // One path policy, as the checker's file column: a path that holds a finding (a long run read per segment) or an
@@ -1151,6 +1180,7 @@ export function checkSourceTree(value: unknown): Finding[] {
     const message = `${where}${problem.kind}: ${said}${entry}${include}${exclude}`;
     return blocking ? { code: "FAC-SEM-158", instancePath, message } : { code: "FAC-SEM-159", instancePath, message, severity: "accepted" };
   });
+  return [...grammar, ...found];
 }
 // #endregion source-tree-check
 
@@ -1204,6 +1234,28 @@ function slotFindings(value: JsonObject): Finding[] {
 /** Why an entry in the grammar as written is outside it as a file system reads it: the form that lengthens it, or a segment. */
 const outsideCause = (path: string): string =>
   !SOURCE_PATH.test(nfc(path)) ? "NFC lengthens past 256 code points" : !SOURCE_PATH.test(path.normalize("NFD")) ? "NFD lengthens past 256 code points" : "with a segment made only of dots, spaces and code points HFS+ ignores";
+/**
+ * FAC-SEM-157's grammar clause, for one entry of `include`, `exclude` or `binaries`: an entry in the schema's grammar as
+ * written that is outside it as a file system may read it (`inGrammar`) is said once, by its cause. An `include` or
+ * `binaries` entry so read names nothing; an `exclude` entry fails closed and removes its widest reading (`foldedList`).
+ * `at` prefixes the instance path (`/manifest` for a tree document).
+ */
+const grammarFinding = (member: "include" | "exclude" | "binaries", path: string, index: number, at = ""): Finding[] => {
+  if (!SOURCE_PATH.test(path) || inGrammar(path, true)) return [];
+  const cause = outsideCause(path);
+  const effect = member !== "exclude" ? "names, reaches and removes nothing"
+    : cause.startsWith("with") ? "still removes what lies beneath the folder before that segment (everything, when it is the first)"
+      : "still removes what it names, folded as written";
+  return [{ code: "FAC-SEM-157", instancePath: `${at}/${member}/${index}`, message: `${member}[${index}] is an entry ${cause}, so it ${effect}` }];
+};
+/**
+ * Whether a tree check finding is the manifest's grammar clause (`grammarFinding`): a folder's run, which says it on its
+ * `fabric.source.json`, drops these from the tree run so the entry is said once.
+ */
+export const isManifestGrammarFinding = (finding: Finding): boolean => finding.code === "FAC-SEM-157";
+/** The grammar clause over a manifest's three path lists, for the tree check's document route (`checkSourceTree`). */
+const grammarFindings = (manifest: unknown, at: string): Finding[] =>
+  isObject(manifest) ? (["include", "exclude", "binaries"] as const).flatMap((member) => strings(manifest[member]).flatMap(([path, index]) => grammarFinding(member, path, index, at))) : [];
 
 /**
  * FAC-SEM-157: each path is listed once in its list; no listed path has a `.git` segment; an `exclude` path lies inside
@@ -1221,20 +1273,20 @@ function pathFindings(value: JsonObject): Finding[] {
       seen.add(path);
       if (inGit(path)) flag(`/${member}/${index}`, `${member}[${index}] lies in .git, which is never source`);
       // In the schema's grammar as written, yet outside it as a file system reads it (`inGrammar`): said once, by its cause.
-      if (SOURCE_PATH.test(path) && !inGrammar(path, true)) flag(`/${member}/${index}`, `${member}[${index}] is an entry ${outsideCause(path)}, so it names, reaches and removes nothing`);
+      findings.push(...grammarFinding(member, path, index));
     }
   }
   // Each list is indexed once: a path is looked up by itself and by each folder it lies in. `include` and `exclude` are
   // compared folded, as the source test reads exclude (an exclude spelt `SRC/gen/` removes `src/gen/`).
   const includes = pathList(value.include);
   const foldedIncludes = foldedList(value.include);
-  const excludes = foldedList(value.exclude);
+  const excludes = foldedList(value.exclude, true);
   const isSource = sourcePathTest(value);
   // An entry outside the path grammar (over 256 code points) lies in no folder an index holds: its prefixes are not built.
   const prefixesOf = (written: string): string[] => (inGrammar(written, true) ? folderPrefixes(foldPath(nfc(written))) : []);
   for (const [written, index] of include) {
     const path = foldPath(nfc(written));
-    const dead = prefixesOf(written).some((folder) => folder !== path && (excludes.folders.has(folder) || excludes.files.has(folder.slice(0, -1))));
+    const dead = excludes.all === true || prefixesOf(written).some((folder) => folder !== path && (excludes.folders.has(folder) || excludes.files.has(folder.slice(0, -1))));
     if (dead) flag(`/include/${index}`, `include[${index}] lies inside an exclude path, so it names nothing`);
   }
   // Every include path, folded, so an exclude entry an include lies beneath is said once, on the include.

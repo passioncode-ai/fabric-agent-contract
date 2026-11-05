@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 47 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 48 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9040,7 +9040,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   a link; round 43 not clean: whole-repository word text, CONTEXT team serving; round 44 not clean: target forms, word
   forms, export parent, existing readers, public home; round 45 not clean: NFC nested repository; stale DEC/backlog/
   scenario wording, elicitation target, later org release; round 46 not clean: grammar readers, organization later
-  public release; round 47 not clean: NFD-stored paths, binaries/missing, later public release, private mirror), cited by round number because their heads were on the review branch, which is not
+  public release; round 47 not clean: NFD-stored paths, binaries/missing, later public release, private mirror; round 48 not clean: the
+  lead's readers, the grammar's FAC-SEM-157 statement, CT-194's visibility sentence; exclude fails closed; CT-109
+  register is DEC-0149's landing step), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9324,7 +9326,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       and copied content are never a release, so they keep their own rule); a package holds only source paths that
       passed that commit's tree check, besides the files the pack step writes (`fabric.package.json`), built files
       travelling only as committed source paths; a local export with no recipient records none and is parentless; an
-      export keeps file modes and symbolic links as committed. Handing it to
+      export keeps file modes and symbolic links as committed.
+      Decided by the coordinator in round 48: the route list's lead (round 47's reading narrowed) says a copy is no
+      hand-over only when it stays in a place the home's owner holds and only the home's readers can read it (the owning
+      organization's members for its own agent, and, for a personal agent's private home, the collaborators given access
+      before DEC-0149 was accepted), and a repository or placement another owner holds stays a hand-over; an `exclude`
+      entry outside the grammar as a file system may read it fails closed, still removing its widest reading (the
+      folder before its first segment made only of dots, spaces and code points HFS+ ignores, everything when that is
+      its first segment, or, lengthened only, the entry folded as written), while an `include` entry so read names
+      nothing; `FAC-SEM-157` says such an entry once by its cause, in a tree document too; an agent without
+      `fabric.source.json` is handed over or released from a private home only once it has one, since every carrier
+      needs the tree check; a package handed over or published holds only committed source paths besides
+      `fabric.package.json`, so a vendored file travels only as a committed path listed in `binaries`; a hand-over by
+      file of a local export records the recipient and the export commit in that export's receipt; the CT-109
+      register's fourth home-path boundary, `SOURCE_HOME_PATHS`, lands with this decision. Handing it to
       anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9450,7 +9465,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 47 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 48 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9461,5 +9476,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   link; round 43 not clean: whole-repository word text, CONTEXT team serving; round 44 not clean: target forms, word
   forms, export parent, existing readers, public home; round 45 not clean: NFC nested repository; stale DEC/backlog/
   scenario wording, elicitation target, later org release; round 46 not clean: grammar readers, organization later
-  public release; round 47 not clean: NFD-stored paths, binaries/missing, later public release, private mirror), cited by round number (their heads were on the review branch, not kept at landing),
+  public release; round 47 not clean: NFD-stored paths, binaries/missing, later public release, private mirror; round 48 not clean: the
+  lead's readers, the grammar's FAC-SEM-157 statement, CT-194's visibility sentence; exclude fails closed; CT-109
+  register is DEC-0149's landing step), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

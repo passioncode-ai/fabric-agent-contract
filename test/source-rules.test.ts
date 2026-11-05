@@ -24,6 +24,7 @@ import {
   WARNING_KINDS,
   checkSourceTree,
   FOLD_UNICODE,
+  HFS_IGNORABLE_CHAR,
   excludedFolderTest,
   foldOnlyExcludeTest,
   foldSegment,
@@ -39,7 +40,8 @@ import {
   sourceFolderTest,
   sourcePackageFindings,
   sourceRules,
-  sourceTreeProblems
+  sourceTreeProblems,
+  stripHfsIgnorable
 } from "../src/source-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { buildSourceTreeVectors } from "../tools/vectors/source-tree.js";
@@ -367,7 +369,7 @@ describe("which files are source", () => {
     expect([...`src/${long}/`].length).toBeLessThanOrEqual(256);
     expect([...`src/${long}/`.normalize("NFC")].length).toBeGreaterThan(256);
     expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [`src/${long}/`] })).toEqual([
-      { code: "FAC-SEM-157", instancePath: "/exclude/0", message: "exclude[0] is an entry NFC lengthens past 256 code points, so it names, reaches and removes nothing" }
+      { code: "FAC-SEM-157", instancePath: "/exclude/0", message: "exclude[0] is an entry NFC lengthens past 256 code points, so it still removes what it names, folded as written" }
     ]);
     expect(isSourcePath({ include: ["src/"] }, `src/${long}/x`)).toBe(false);
     expect(isSourcePath({ include: ["src/"] }, `src/${"\u0958".repeat(10)}/x`)).toBe(true);
@@ -942,7 +944,7 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
       expect(nestedInSource({ include: ["src/"] }, `src/${segment}`), JSON.stringify(segment)).toBe(false);
       expect(includeIndex(["src/"]).reaches(`src/${segment}/`), JSON.stringify(segment)).toBe(false);
       expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [`src/${segment}/`] }), JSON.stringify(segment)).toEqual([
-        { code: "FAC-SEM-157", instancePath: "/exclude/0", message: "exclude[0] is an entry with a segment made only of dots, spaces and code points HFS+ ignores, so it names, reaches and removes nothing" }
+        { code: "FAC-SEM-157", instancePath: "/exclude/0", message: "exclude[0] is an entry with a segment made only of dots, spaces and code points HFS+ ignores, so it still removes what lies beneath the folder before that segment (everything, when it is the first)" }
       ]);
     }
     // A name ending in a dot keeps a letter: it is in the grammar.
@@ -953,8 +955,51 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
     // An entry NFD lengthens is said by that cause.
     const nfd = `src/${"\u00e9".repeat(130)}/`;
     expect(sourceRules("source-manifest", { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [nfd] })).toEqual([
-      { code: "FAC-SEM-157", instancePath: "/exclude/0", message: "exclude[0] is an entry NFD lengthens past 256 code points, so it names, reaches and removes nothing" }
+      { code: "FAC-SEM-157", instancePath: "/exclude/0", message: "exclude[0] is an entry NFD lengthens past 256 code points, so it still removes what it names, folded as written" }
     ]);
+  });
+
+  it("reads an exclude entry outside the grammar at its widest, so it fails closed; an include entry so read names nothing", () => {
+    for (const entry of ["src/secrets/.../", "src/secrets/.\u200c./", "src/Secrets/. /x/", "src/secrets/..."]) {
+      const manifest = { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [entry] };
+      expect(isSourcePath(manifest, "src/secrets/key.txt"), entry).toBe(false);
+      expect(isSourcePath(manifest, "src/secrets/deep/key.txt"), entry).toBe(false);
+      expect(isSourcePath(manifest, "src/main.ts"), entry).toBe(true);
+      expect(patchPathsAllowed(manifest, ["src/secrets/key.txt", "src/SECRETS/k", "src/main.ts"]), entry).toEqual(["src/secrets/key.txt", "src/SECRETS/k"]);
+      expect(excludedFolderTest(manifest)("src/secrets"), entry).toBe(true);
+      expect(sourceFolderTest(manifest)("src/secrets"), entry).toBe(false);
+      expect(nestedInSource(manifest, "src/secrets/inner"), entry).toBe(false);
+      expect(isUncheckedPath({ ...manifest, unchecked: [{ path: "src/secrets/x/", reason: "r" }] }, "src/secrets/x/a"), entry).toBe(false);
+      const findings = sourceRules("source-manifest", { ...manifest, include: ["src/", "LICENSE", "src/secrets/pub.md"] }) ?? [];
+      expect(findings.map((finding) => finding.instancePath).sort(), entry).toEqual(["/exclude/0", "/include/2"]);
+    }
+    // A first segment made only of dots removes everything but the manifest itself.
+    const everything = { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: [".../"] };
+    expect(isSourcePath(everything, "src/main.ts")).toBe(false);
+    expect(isSourcePath(everything, "LICENSE")).toBe(false);
+    expect(isSourcePath(everything, "fabric.source.json")).toBe(true);
+    expect(excludedFolderTest(everything)("lib")).toBe(true);
+    expect((sourceRules("source-manifest", everything) ?? []).map((finding) => finding.instancePath).sort()).toEqual(["/exclude/0", "/include/0", "/include/1"]);
+    // A length-only cause: the entry folded as written, so a walk does not enter the folder it names.
+    const long = { format: "fabric-source/1", include: ["src/"], exclude: [`SRC/${"\u00e9".repeat(130)}/`] };
+    expect(excludedFolderTest(long)(`src/${"\u00e9".repeat(130)}`)).toBe(true);
+    expect(excludedFolderTest(long)("src/other")).toBe(false);
+    // A backslashed entry is the schema's alone: it removes nothing.
+    expect(isSourcePath({ include: ["src/"], exclude: ["src\\secrets/"] }, "src/secrets/key.txt")).toBe(true);
+    // An include entry outside the grammar names nothing.
+    expect(isSourcePath({ include: ["src/.../", "lib/"] }, "src/a.ts")).toBe(false);
+    expect(isSourcePath({ include: ["src/.../", "lib/"] }, "lib/a.ts")).toBe(true);
+    // The tree document route says the manifest's entries outside the grammar too.
+    const tree = sourceRules("source-tree", { manifest: { include: ["src/.../", "LICENSE"], exclude: ["LICENSE/.../"], binaries: ["src/..\u200d/x.png"] }, files: [{ path: "LICENSE", text: "x" }] }) ?? [];
+    expect(tree.filter((finding) => finding.code === "FAC-SEM-157").map((finding) => finding.instancePath)).toEqual(["/manifest/include/0", "/manifest/exclude/0", "/manifest/binaries/0"]);
+    expect(sourceRules("source-tree", { manifest: [], files: [] })?.filter((finding) => finding.code === "FAC-SEM-157")).toEqual([]);
+  });
+
+  it("strips the code points HFS+ ignores, and asks for one without a global pattern's state", () => {
+    expect(stripHfsIgnorable("a\u200cb\ufeffc\u202ad")).toBe("abcd");
+    expect(HFS_IGNORABLE_CHAR.test("x\u200dy")).toBe(true);
+    expect(HFS_IGNORABLE_CHAR.test("x\u200dy")).toBe(true);
+    expect(HFS_IGNORABLE_CHAR.test("plain")).toBe(false);
   });
 
   it("reads a path of 129 to 256 code points outside the BMP as in the grammar, in every list", () => {

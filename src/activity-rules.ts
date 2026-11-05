@@ -54,9 +54,11 @@ export const PERSON_PREFIXES: readonly string[] = ["employ", "productiv", "asses
  * and FAC-SEM-138 (`src/credentials.ts`). It reads values that may hold ordinary words, so it matches only the user-name
  * segment form, and the dash form only after a character that is not an ASCII letter or digit: `my-users-list` passes.
  * The `sourceKey` schema pattern (`activity-common`) repeats its dash clause over the key's alphabet, and a test in
- * `test/activity-rules.test.ts` pins that the two refuse the same keys. Two other rules draw other boundaries: the
+ * `test/activity-rules.test.ts` pins that the two refuse the same keys. Three other rules draw other boundaries: the
  * device-common `detail` pattern refuses the dash form after any character (one line of free text with no path at all),
- * and FAC-SEM-103's own pattern in `src/proposal-rules.ts` has no dash form. Changing any of the three is a decision.
+ * FAC-SEM-103's own pattern in `src/proposal-rules.ts` has no dash form, and the source tree check's `SOURCE_HOME_PATHS`
+ * in `src/source-rules.ts` (FAC-SEM-158, DEC-0149) reads the home-path forms of the adapter's check over a source tree
+ * (docs/specification/source.md#home-folders). Changing any of the four is a decision.
  */
 const SLASH = String.raw`(?:[\/\\]|%(?:25)?2[fF])`;
 export const HOME_PATH: readonly RegExp[] = [

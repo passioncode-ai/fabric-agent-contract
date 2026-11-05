@@ -2189,6 +2189,18 @@ describe("an agent's source (DEC-0149)", () => {
     }
   });
 
+  it("reads an exclude entry outside the grammar at its widest and says it once, in a folder and in a tree document", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/secrets/.../"] }), LICENSE: "x", "src/a.ts": "x", "src/secrets/key.ts": `"${key}"` });
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(found(result.out).filter((line) => line.includes("FAC-SEM-157"))).toHaveLength(1);
+    expect(result.out).not.toContain("credential");
+    const document = one("tree.json", { manifest: { include: ["src/.../", "LICENSE"] }, files: [{ path: "LICENSE", text: "x" }] });
+    const tree = run(document, "--kind", "source-tree");
+    expect(tree.code).toBe(1);
+    expect(found(tree.out).filter((line) => line.includes("FAC-SEM-157") && line.includes("/manifest/include/0"))).toHaveLength(1);
+  });
+
   it("gives a file the same files[<index>] in Git mode and in a walk when a name before it is stored in NFD", () => {
     const home = ["", "home", "jdoe", "notes"].join("/");
     const files = { "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/e\u0301.ts": "x", "src/f.ts": `const notes = "${home}";` };

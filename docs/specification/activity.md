@@ -284,7 +284,10 @@ refused.
 dash form only after a character that is not an ASCII letter or digit and `my-users-list` passes, while a device's
 one-line `detail` refuses the dash form after any character ([devices](devices.md#check-in)) and `FAC-SEM-103` matches
 only a home folder that starts a path in slash form ([proposals](proposals.md)); the `sourceKey` pattern repeats its
-dash clause over the key's alphabet, and `test/activity-rules.test.ts` pins that the two refuse the same keys.
+dash clause over the key's alphabet, and `test/activity-rules.test.ts` pins that the two refuse the same keys. The
+fourth boundary is the source tree check's `SOURCE_HOME_PATHS` (`FAC-SEM-158`, DEC-0149), which reads the home-path
+forms of the adapter's check over a source tree ([source](source.md#home-folders)). Changing any of the four is a
+decision.
 
 **`HOME_PATH` is defence in depth, not the control.** A path wrapped in base64, hashed without a key,
 or encoded in any other way is undetectable by design; no pattern can find a name it cannot read. The
