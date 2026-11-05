@@ -52,16 +52,17 @@ const inGit = (path: string): boolean => path.split("/").some(isDotGitSegment);
  */
 const nfc = (path: string): string => path.normalize("NFC");
 /**
- * One path segment as a case-insensitive file system may resolve it, for `exclude` and a patch's paths: the code points
- * HFS+ ignores removed, NFC, then lower case, upper case and lower case again (so `ß`, `ẞ` and `ss`, `ſ` and `s`, the
- * Kelvin sign and `k`, the Angstrom sign and `å`, the final sigma and `σ` meet: lower case first brings the capital
- * sharp s to `ß`, which upper case then spells `SS`), NFC again, then any trailing run of dots and spaces dropped
+ * One path segment as a case-insensitive file system may resolve it, for `exclude` and a patch's paths: canonical
+ * caseless matching. The code points HFS+ ignores removed, NFD (so the case mappings meet a letter apart from its
+ * marks: `ᾼ͂` and `ᾷ` meet, which APFS joins), then lower case, upper case and lower case again (so `ß`, `ẞ` and `ss`,
+ * `ſ` and `s`, the Kelvin sign and `k`, the Angstrom sign and `å`, the final sigma and `σ` meet: lower case first brings
+ * the capital sharp s to `ß`, which upper case then spells `SS`), NFC, then any trailing run of dots and spaces dropped
  * (NTFS). The case mappings are the runtime's (Node's ICU; Unicode 17.0 when this was written, `FOLD_UNICODE`); the
  * fold is idempotent and keeps every pair of the case mappings together, and it folds more than APFS does in places
  * (`ı` and `i`), which refuses more: the safe side.
  */
 export const foldSegment = (segment: string): string =>
-  segment.replace(HFS_IGNORABLE, "").normalize("NFC").toLowerCase().toUpperCase().toLowerCase().normalize("NFC").replace(/[ .]+$/u, "");
+  segment.replace(HFS_IGNORABLE, "").normalize("NFD").toLowerCase().toUpperCase().toLowerCase().normalize("NFC").replace(/[ .]+$/u, "");
 /** The Unicode version whose case mappings the fold and the vectors were written with (Node's ICU). */
 export const FOLD_UNICODE = "17.0";
 /** A path folded segment by segment (`foldSegment`); a folder's trailing `/` is kept. */

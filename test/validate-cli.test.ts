@@ -2005,6 +2005,31 @@ describe("an agent's source (DEC-0149)", () => {
     expect(inGit.out).not.toContain("Private");
   });
 
+  it("names a fold-only file in both modes and the paths under a fold-excluded folder in Git mode only, a read file's index the same", () => {
+    const files = {
+      "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/Secret.ts", "src/private/"] }),
+      LICENSE: "x", "src/secret.ts": "x", "src/Private/x.md": "x", "src/z.ts": "x"
+    };
+    const committed = folder(files);
+    expect(gitIn(committed, "init", "-q").status).toBe(0);
+    expect(gitIn(committed, "add", "-A").status).toBe(0);
+    const folded = (out: string) => lines(out).filter((line) => line.includes("excluded-by-fold")).map((line) => line.split("  ").slice(0, 2));
+    const inGit = run(committed, "--kind", "source-tree");
+    const walked = run(folder(files), "--kind", "source-tree");
+    expect(inGit.code).toBe(0);
+    expect(walked.code).toBe(0);
+    // Read files: LICENSE, fabric.source.json, src/z.ts take 0 to 2 in both modes; fold-only paths follow them.
+    expect(folded(walked.out)).toEqual([["files[3]", "/files/3/path"]]);
+    expect(folded(inGit.out)).toEqual([["files[3]", "/files/3/path"], ["files[4]", "/files/4/path"]]);
+  });
+
+  it.skipIf(process.platform === "win32")("calls unused a folder entry whose last segment is a file", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/gen/", "src/a.ts"] }), LICENSE: "x", "src/a.ts": "x", "src/gen": "x" });
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(0);
+    expect(lines(result.out).filter((line) => line.includes("unused-exclude")).map((line) => line.split("  ")[1])).toEqual(["/manifest/exclude/0"]);
+  });
+
   it.skipIf(process.platform === "win32")("never calls unused an entry that keeps a link out or leaves files out only under the fold, in Git mode and in a walk", () => {
     const outside = folder({ "x.ts": "x" });
     const files = {

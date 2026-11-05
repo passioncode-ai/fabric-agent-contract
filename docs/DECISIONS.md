@@ -9030,11 +9030,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 39 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 40 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
-  short names with an extension, unused-exclude, opt-in scope, owner's manifest patch), cited by round number because their heads were on the review branch, which is not
+  short names with an extension, unused-exclude, opt-in scope, owner's manifest patch; round 40 not clean: canonical
+  caseless fold), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9211,7 +9212,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       made it public (the operator's recorded practice has agents release public skill sets themselves); mechanics are
       "adapted file by file" when the result does not run as the agent, carries none of its manifest, identity, data,
       keys or private names, and each file is changed into the product's own interfaces in the product's own change,
-      and in doubt the move is a hand-over and takes the word. Handing it to
+      and in doubt the move is a hand-over and takes the word. Decided by the coordinator in round 40 on the same ground
+      (one principle: making a source public for the first time always takes the word): a processor counts only while
+      what it holds stays readable by no one outside the owner, and output it makes public or readable by others (a
+      public server, a Pages site) is a hand-over; a personal agent's home created public is the visibility change and
+      takes the word, the already-public carve-out covering only a source an earlier act on the word, or the operator's
+      own act, made public; a personal agent's package or release on a public registry is a hand-over unless its home is
+      already public, the files the pack step derives from the public source (`fabric.package.json`, signatures,
+      checksums) counting as public and nothing else; an act on the whole repository (a transfer, a visibility change,
+      access given outside the owner) hands over the history too, which no tree check reads, so the history privacy
+      gate (the knowledge base's rules section 9, `--history`) runs before it; and an organization's release of its
+      agent to a public registry is its own act only when the agent's home is already public, a private organization
+      agent's first public release taking the word like a visibility change. Handing it to
       anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       source commit and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9240,7 +9252,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       coordinator in round 38: one patch could drop an `exclude` and a later one land in the folder it left out).
       Restated in round 39, decided by the coordinator after the unit reading wrote `app/PAẞWORDS/token.txt` over an
       excluded `app/passwords/token.txt` with `git apply` on APFS and found short names with an extension passing: the
-      fold is NFC, then lower, upper and lower case, then NFC (lower case first brings the capital sharp s to `ß`, and
+      fold (as restated in round 40) is canonical caseless matching, NFD, then lower, upper and lower case, then NFC (lower case first brings the capital sharp s to `ß`, and
       the readers' sweep found no class that disagrees with Unicode full case folding), with the HFS+ ignorable code
       points removed and trailing dots and spaces dropped, following the runtime's case mappings (Node's ICU, Unicode
       17.0 when the vectors were written, the case pairs carried in the vectors; it also joins the dotless `ı` with `i`
@@ -9248,7 +9260,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       by a digit is refused when any `exclude` entry exists; and an import never applies a change to
       `fabric.source.json`, whoever sends it: such a patch is refused whole and held, kept unapplied, until the owner
       decides, and the owner changes the manifest by a commit at the source, which then governs every later patch
-      (round 38's wording, which limited the hold to an outsider's patch, left two answers for the owner's own patch).
+      (round 38's wording, which limited the hold to an outsider's patch, left two answers for the owner's own patch). Restated in round 40, decided by the coordinator after the unit
+      reading found `ᾼ͂` (U+1FBC U+0342) and `ᾷ` (U+1FB7), one inode on APFS, folding apart, so that a patch to
+      `app/ᾼ͂/token.txt` passed an excluded `app/ᾷ/` and the export read `app/ᾼ͂/notes.md`: case mappings applied to NFC
+      text split a letter that carries U+0345 and another mark, so the fold is canonical caseless matching, NFD before
+      the case mappings (the reader measured no split among 55,020 APFS collision pairs, and idempotence on every code
+      point).
   14. **Starting without the instance (§5.8):** an agent started with an empty data folder and no slot filled starts;
       a service answers `status: degraded` with one `degraded[]` entry per missing required slot, its `source` the
       slot's name, each `setup: true` (DEC-0044's setup state), an `endpoint` included; a `store` slot is never a setup
@@ -9316,10 +9333,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 39 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 40 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
   and from its seam reading `files[<index>]` differing between Git mode and a walk, `unused-exclude` on a
-  case-sensitive volume and the manifest's own rules reading `exclude` literally), cited by round number (their heads were on the review branch, not kept at landing),
+  case-sensitive volume and the manifest's own rules reading `exclude` literally; round 40 not clean: canonical caseless
+  fold), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

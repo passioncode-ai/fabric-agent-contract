@@ -24,7 +24,7 @@ source, what never travels with it, the check before a source export, and how a 
   `source-tree`, `source-package`, `fabric-source/1` in the protocol register; `pnpm --silent validate <dir> --kind
   source-tree` (Git mode with Git's location variables removed and no read through a link, a walk otherwise with a note
   saying why, folder-relative output that never repeats a found value) and the pair in `pnpm validate <dir>`;
-  `fixtures/vectors/source-tree.json` (71 tree cases, 10 patch cases and a `constants` block written from the module's
+  `fixtures/vectors/source-tree.json` (75 tree cases, 15 patch cases and a `constants` block written from the module's
   exports) from `tools/vectors/source-tree.ts`;
   2 positive and 19 negative schema fixtures, 27 semantic fixtures.
 - [source](../specification/source.md) (new), the register (`FAC-SEM-156` to `FAC-SEM-160`; next free `FAC-SEM-162`;
@@ -264,7 +264,15 @@ source, what never travels with it, the check before a source export, and how a 
   lines, the manifest hold named in CT-207 and source.md's conformance row, `FAC-SEM-157` and `folderInSource` reading
   `exclude` folded (tests for `SRC/gen/` and for an include under `src/Cache/`), the fold described as coded (it joins
   the dotless `ı` with `i` and `I`), `listed` in the input signature, `SEMANTIC_KINDS` and the vectors' about, and PR #628
-  merged with the knowledge base's main again; vectors 74 tree and 13 patch cases; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  merged with the knowledge base's main again; vectors 74 tree and 13 patch cases; round 40 (not clean: the unit tier
+  found `ᾼ͂` and `ᾷ`, one inode on APFS, folding apart, since case mappings over NFC text split a letter that carries
+  U+0345 and another mark, so a patch to `app/ᾼ͂/token.txt` passed an excluded `app/ᾷ/` and the export read
+  `app/ᾼ͂/notes.md`) answered as the coordinator decided: canonical caseless matching, NFD before the case mappings,
+  with a property test over marked sequences against an NFD and case-mapping oracle (the round-39 fold split 3 groups of
+  it), the measured pairs pinned, multi-code-point `FOLD_PAIRS` and patch and tree vectors; the comments, source.md and
+  SCN-054 saying which fold-only paths each mode lists (a walk a fold-only file, Git mode also the paths under a
+  fold-excluded folder), with a test; a folder entry whose last segment is a file is unused, tested; and the product
+  decisions below; vectors 75 tree and 15 patch cases; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -353,6 +361,18 @@ source, what never travels with it, the check before a source export, and how a 
   - `.git` in every form a case-insensitive or Windows file system resolves to it is never source, and a patch path an
     `exclude` entry names under ASCII case folding is refused, since on such a file system the two spellings are one
     file and the rule is otherwise bypassed.
+- Round 40, decided by the coordinator under the operator's recorded rules (one principle: making a source public for
+  the first time always takes the word):
+  - a processor is no recipient only while what it holds stays readable by no one outside the owner; output it makes
+    public or readable by others (a public server, a Pages site) is a hand-over;
+  - a personal agent's home created public is the visibility change and takes the word; the already-public carve-out
+    covers only a source an earlier act on the word, or the operator's own act, made public;
+  - a personal agent's package or release on a public registry is a hand-over unless its home is already public; the
+    files the pack step derives from the public source count as public, nothing else does;
+  - an act on the whole repository hands over the history, which no tree check reads, so the history privacy gate
+    (the knowledge base's rules section 9, `--history`) runs before it;
+  - an organization's release of its agent to a public registry is its own act only when the agent's home is already
+    public; a private organization agent's first public release takes the word.
 - Round 39, decided by the coordinator under the operator's recorded rules:
   - the fold lower-cases first, so the capital sharp s meets `ss` (the readers' sweep found no class disagreeing with
     Unicode full case folding with lower, upper, lower), and any `~` followed by a digit is a possible short name;
@@ -393,6 +413,21 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 40's fixes were checked on the working tree over head `fed1e080` (this note's commit holds the same tree), each
+exit code read on its own: `pnpm typecheck` (exit 0); `pnpm vitest run --testTimeout=60000 --coverage
+--coverage.include=src/source-rules.ts --coverage.include=src/validate-cli.ts` over `source-rules`, `validate-cli`,
+`validate-cli-faults`, `rule-tolerance` and `positive-sweep` (exit 0: 3166 passed, 2 skipped; `src/source-rules.ts` at
+100 % of its branches, its floor; `src/validate-cli.ts` at 99.47 % over these files against its 99.4 floor);
+`secret-shape`, `consistency` and `semantic-kinds` (exit 0, 34 passed); the property test over marked sequences finds
+no split (the round-39 fold, NFC before the case mappings, splits 3 groups of the Greek block's sequences alone);
+`pnpm exec tsx tools/vectors/run.ts` (exit 0, 29 files match; `source-tree.json` 75 tree and 15 patch cases, 25
+`FOLD_PAIRS`); `pnpm run docs:check` (exit 0, 0 errors); `python3 docs/ux/lint.py` (exit 0); `ORG_INDEX=... pnpm run
+privacy:check` (exit 0, 0 findings); no U+2014 in the added lines. The branch gate is owed: the 15-minute load stayed
+above 45 (60 to 71 during this round; `/` held 18 to 22 GB). PR #628 at `833c16a6` (the knowledge base's main merged in first,
+cleanly): `source hand-over` in 4, 3 and 3 lines of agents-first, principles and rules, `own estate` once on each,
+`^9\. \*\*A source hand-over` once and `^8\. \*\*No person in the chat` once; the knowledge base's `npm test` (exit
+0, 172 passed) and `npm run verify:content` (exit 0, backlog 0 errors).
 
 Round 39's fixes, with its seam add-on, were checked on the working tree over head `3f9481fb` (this note's commit holds
 the same tree), each exit code read on its own: `pnpm typecheck` (exit 0); `pnpm vitest run --testTimeout=60000
@@ -519,7 +554,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again at `6d0a304d`, which GitHub then read as mergeable,
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 40 before `833c16a6`, which GitHub read as mergeable,
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). Refresh PR #235 (DEC-0148) against `main`: it is CONFLICTING on the backlog tail; keep both sides
    in id order. Then merge the current `origin/main` (with #236, CT-215 and CT-216; re-measure its head at landing) into the fresh branch
@@ -542,7 +577,7 @@ remaining steps, in order:
    behind, merge main into it, keeping main's item 8 and the PR's item 9. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `6d0a304d`, which carries the knowledge base's main, they print 4, 3 and 3
+   `knowledge/rules.md`; at PR #628's head `833c16a6`, which carries the knowledge base's main, they print 4, 3 and 3
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in

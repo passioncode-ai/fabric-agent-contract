@@ -288,6 +288,36 @@ describe("which files are source", () => {
     ]);
   });
 
+  it("folds marked sequences together whenever the case mappings over NFD join them (canonical caseless matching)", () => {
+    // Node has no casefold: the oracle is NFD of lower case of upper case of NFD, which joins what full case folding
+    // joins for these letters and marks.
+    const oracle = (text: string) => text.normalize("NFD").toUpperCase().toLowerCase().normalize("NFD");
+    const bases = ["a", "A", "\u03b1", "\u0391", "\u03b7", "\u0397", "\u03c9", "\u03a9", "\u03b9", "\u0399", "e", "E", "i", "I", "\u0131", "o", "O", "\u03c5", "\u03a5"];
+    const marks = Array.from({ length: 0x70 }, (_, at) => String.fromCodePoint(0x300 + at));
+    const sequences: string[] = [];
+    for (const base of bases) for (const first of marks) {
+      sequences.push(base + first);
+      for (const second of marks) sequences.push(base + first + second);
+    }
+    for (let code = 0x1f00; code <= 0x1fff; code += 1) for (const mark of ["", "\u0342", "\u0345", "\u0301", "\u0308"]) sequences.push(String.fromCodePoint(code) + mark);
+    const byOracle = new Map<string, string>();
+    let split = 0;
+    for (const sequence of sequences) {
+      const key = oracle(sequence);
+      const folded = foldSegment(sequence);
+      const seen = byOracle.get(key);
+      if (seen === undefined) byOracle.set(key, folded);
+      else if (seen !== folded) split += 1;
+    }
+    expect(split).toBe(0);
+    // The pairs the unit reading measured on APFS (one inode each).
+    for (const [one, other] of [["\u1fbc\u0342", "\u1fb7"], ["\u0391\u0342\u0345", "\u1fb7"], ["\u1fcc\u0342", "\u1fc7"], ["\u1ffc\u0342", "\u1ff7"], ["\u1fc3\u0342", "\u1fc7"], ["\u1ff3\u0342", "\u1ff7"]]) {
+      expect(foldSegment(one as string), one).toBe(foldSegment(other as string));
+    }
+    expect(patchPathsAllowed({ include: ["app/"], exclude: ["app/\u1fb7/"] }, ["app/\u1fbc\u0342/token.txt"])).toEqual(["app/\u1fbc\u0342/token.txt"]);
+    expect(isSourcePath({ include: ["app/"], exclude: ["app/\u1fb7/"] }, "app/\u1fbc\u0342/notes.md")).toBe(false);
+  }, 180_000);
+
   it("names the exclude entry that leaves a path out only once folded, the first that writes it", () => {
     const value = { include: ["app/"], exclude: ["app/x.ts", "app/Private/", "app/PRIVATE/", "app/private/a.ts"] };
     const test = foldOnlyExcludeTest(value);

@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for an agent's source tree (DEC-0149), written by tools/vectors/source-tree.ts, never by hand. `tree`: sourceTreeProblems({manifest, files, instanceStrings?, listed?}) answers each place the instance shows through as {kind, file?, line?, column?, entry?, include?, exclude?} (a file marked nestedRepository: true is a folder holding another repository, a submodule's gitlink or its own .git, read by its path only; a file marked link: true is a symbolic link whose text is its target, link-outside when that target is absolute, climbs above the root or is no source path, and never a licence): file is the index in files; a finding in a file's path has no line; line and column count from 1, the column in UTF-16 code units where the match begins (for a home path, where its name begins). Blocking kinds (FAC-SEM-158): home-path (a home folder with a name, in the forms and with the neutral names of the Fabric Agent Adapter's check; ~ never), credential (a value shaped like one, or a file that is one by its name), binary (not listed in binaries), nested-repository (a nested repository no exclude path names), instance-string (an entry of the operator's list, without regard to case under Unicode simple case folding, the entry and the text each also in NFC: as written, percent-encoded, form-encoded with + for a space, JSON-escaped, JSON-escaped with \\/ for /, or JSON-escaped with every character outside ASCII as \\uXXXX), missing (an include path with no file), short-instance-string, no-include. Warnings (FAC-SEM-159): email (not in publicAddresses, not at an RFC 2606 name), link-outside (a relative Markdown link, or a symbolic link, whose target is not source; a link's target is read literally), no-license, excluded-by-fold (a file an exclude entry names only once folded: never read), unused-exclude (an exclude entry naming nothing listed). Problems come in the order: the list's refused entries, then no-include, then each file in order (its path, then each line: home-path, credential, instance-string, email, link-outside), then excluded-by-fold (a file an exclude entry names only once both are folded: never read, said by its index and the entry's), then missing, then unused-exclude (only when the input carries listed, every path the tree holds, a folder with a trailing /: an exclude entry, read folded, that names none of them), then no-license. A file that is not source (outside include, inside exclude, in .git) is not read; a .git segment is read as Git's is_hfs_dotgit and is_ntfs_dotgit read it (ASCII case folded, the code points HFS+ ignores removed, trailing dots and spaces dropped, or GIT~1), and paths are compared in Unicode NFC. `patches`: patchPathsAllowed(manifest, paths) answers the paths that are not source, in the order given, and also a path an exclude entry names once both are folded per segment (HFS+ ignorable code points removed, NFC, Unicode full case folding, NFC, trailing dots and spaces dropped), a segment shaped like an 8.3 short name when any exclude entry exists, and the manifest itself in any spelling; the manifest is the receiver's current one. Exclude entries are read folded the same way everywhere. The fold is the runtime's case mappings (Node's ICU at the Unicode version constants.FOLD_UNICODE names): NFC, then lower, upper and lower case, then NFC, which also joins the dotless i with i and I (Unicode full case folding keeps them apart; the join refuses more); constants.FOLD_PAIRS holds segments and their folds. A segment with ~ followed by a digit is refused in a patch when any exclude entry exists. An exclude entry an excluded-by-fold line names is never unused-exclude.",
+  "about": "Vectors for an agent's source tree (DEC-0149), written by tools/vectors/source-tree.ts, never by hand. `tree`: sourceTreeProblems({manifest, files, instanceStrings?, listed?}) answers each place the instance shows through as {kind, file?, line?, column?, entry?, include?, exclude?} (a file marked nestedRepository: true is a folder holding another repository, a submodule's gitlink or its own .git, read by its path only; a file marked link: true is a symbolic link whose text is its target, link-outside when that target is absolute, climbs above the root or is no source path, and never a licence): file is the index in files; a finding in a file's path has no line; line and column count from 1, the column in UTF-16 code units where the match begins (for a home path, where its name begins). Blocking kinds (FAC-SEM-158): home-path (a home folder with a name, in the forms and with the neutral names of the Fabric Agent Adapter's check; ~ never), credential (a value shaped like one, or a file that is one by its name), binary (not listed in binaries), nested-repository (a nested repository no exclude path names), instance-string (an entry of the operator's list, without regard to case under Unicode simple case folding, the entry and the text each also in NFC: as written, percent-encoded, form-encoded with + for a space, JSON-escaped, JSON-escaped with \\/ for /, or JSON-escaped with every character outside ASCII as \\uXXXX), missing (an include path with no file), short-instance-string, no-include. Warnings (FAC-SEM-159): email (not in publicAddresses, not at an RFC 2606 name), link-outside (a relative Markdown link, or a symbolic link, whose target is not source; a link's target is read literally), no-license, excluded-by-fold (a file an exclude entry names only once folded: never read), unused-exclude (an exclude entry naming nothing listed). Problems come in the order: the list's refused entries, then no-include, then each file in order (its path, then each line: home-path, credential, instance-string, email, link-outside), then excluded-by-fold (a file an exclude entry names only once both are folded: never read, said by its index and the entry's), then missing, then unused-exclude (only when the input carries listed, every path the tree holds, a folder with a trailing /: an exclude entry, read folded, that names none of them), then no-license. A file that is not source (outside include, inside exclude, in .git) is not read; a .git segment is read as Git's is_hfs_dotgit and is_ntfs_dotgit read it (ASCII case folded, the code points HFS+ ignores removed, trailing dots and spaces dropped, or GIT~1), and paths are compared in Unicode NFC. `patches`: patchPathsAllowed(manifest, paths) answers the paths that are not source, in the order given, and also a path an exclude entry names once both are folded per segment (HFS+ ignorable code points removed, NFC, Unicode full case folding, NFC, trailing dots and spaces dropped), a segment shaped like an 8.3 short name when any exclude entry exists, and the manifest itself in any spelling; the manifest is the receiver's current one. Exclude entries are read folded the same way everywhere. The fold is the runtime's case mappings (Node's ICU at the Unicode version constants.FOLD_UNICODE names): canonical caseless matching (NFD before the case mappings): NFD, then lower, upper and lower case, then NFC, which also joins the dotless i with i and I (Unicode full case folding keeps them apart; the join refuses more); constants.FOLD_PAIRS holds segments and their folds. A segment with ~ followed by a digit is refused in a patch when any exclude entry exists. An exclude entry an excluded-by-fold line names is never unused-exclude.",
   "constants": {
     "about": "The constants a port of the tree check holds equal to the reference's, written from src/source-rules.ts's exports (test/source-rules.test.ts holds the block to them): the neutral home names, the synthetic words, the home-folder patterns, the credential-file name patterns, the tree check's own provider-key shapes (KEY_SHAPE_SOURCES, unbounded, kept apart from the shared detector) and the URL rule's pattern (URL_SECRET_VALUE), each pattern as its source and flags.",
     "NEUTRAL_HOMES": [
@@ -181,6 +181,34 @@
       [
         "PRIVAT~1.MD",
         "privat~1.md"
+      ],
+      [
+        "ᾼ͂",
+        "ᾶι"
+      ],
+      [
+        "ᾷ",
+        "ᾶι"
+      ],
+      [
+        "ᾼ͂",
+        "ᾶι"
+      ],
+      [
+        "ῌ͂",
+        "ῆι"
+      ],
+      [
+        "ῇ",
+        "ῆι"
+      ],
+      [
+        "ῼ͂",
+        "ῶι"
+      ],
+      [
+        "ῷ",
+        "ῶι"
       ]
     ]
   },
@@ -4085,6 +4113,58 @@
       ]
     },
     {
+      "name": "a file under a letter with ypogegrammeni and perispomeni is never read under an exclude spelt precomposed",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/ᾷ/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "src/ᾼ͂/notes.md",
+            "text": "kept out"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "excluded-by-fold",
+          "file": 4,
+          "exclude": 0
+        }
+      ]
+    },
+    {
       "name": "a file the exclude names only in another letter case is never read",
       "input": {
         "manifest": {
@@ -4473,6 +4553,55 @@
       "expected": [
         "app/passwords/x",
         "app/paßwords/y"
+      ]
+    },
+    {
+      "name": "a letter carrying ypogegrammeni and another mark meets its precomposed form (canonical caseless matching)",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "app/"
+          ],
+          "exclude": [
+            "app/ᾷ/"
+          ]
+        },
+        "paths": [
+          "app/ᾼ͂/token.txt",
+          "app/ᾼ͂/x",
+          "app/ᾷ/y",
+          "app/main.ts"
+        ]
+      },
+      "expected": [
+        "app/ᾼ͂/token.txt",
+        "app/ᾼ͂/x",
+        "app/ᾷ/y"
+      ]
+    },
+    {
+      "name": "the eta and omega forms with ypogegrammeni and perispomeni meet",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "app/"
+          ],
+          "exclude": [
+            "app/ῇ/",
+            "app/ῷ/"
+          ]
+        },
+        "paths": [
+          "app/ῌ͂/x",
+          "app/ῼ͂/y",
+          "app/main.ts"
+        ]
+      },
+      "expected": [
+        "app/ῌ͂/x",
+        "app/ῼ͂/y"
       ]
     },
     {

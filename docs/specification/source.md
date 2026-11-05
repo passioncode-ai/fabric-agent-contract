@@ -66,7 +66,8 @@ store slot's `path` is written without a trailing slash and names the file or fo
   dropped (`.git.`, or `.git` and a space), and as the NTFS short name `GIT~1` (`isDotGitSegment`).
 - **`exclude` is read folded.** A case-insensitive file system (APFS, NTFS) resolves several spellings to one file,
   so an `exclude` entry and every path asked about are compared segment by segment after one fold (`foldSegment`):
-  the code points HFS+ ignores removed, NFC, then lower case, upper case and lower case again (lower case first brings
+  canonical caseless matching: the code points HFS+ ignores removed, NFD (so the case mappings meet a letter apart from
+  its marks, and `ᾼ͂` meets `ᾷ`, which APFS joins), then lower case, upper case and lower case again (lower case first brings
   the capital sharp s `ẞ` to `ß`, which upper case spells `SS`), NFC again, and any trailing run of dots and spaces
   dropped. The case mappings are the runtime's: Node's ICU, at Unicode 17.0 when the vectors were written
   (`FOLD_UNICODE`; another Unicode version may differ on a few code points, Python 16 on 28 by the readers' count), and
@@ -165,7 +166,7 @@ to the source; the check also ignores any file that `isSourcePath` does not read
 | `no-include` | `FAC-SEM-158` | a manifest with no `include` path |
 | `email` | `FAC-SEM-159` | an address matching the e-mail pattern of `src/node-summary.ts` with its local part bounded to 64 characters, read from each `@`, not in `publicAddresses` (compared without regard to case), not at an RFC 2606 name (`example.com`, `example.org`, `example.net` and names under them, or a domain ending `.invalid`, `.test` or `.example`), not followed by `:` (an SSH remote, `git@host:owner/repo`), not ending in an image's extension (`png`, `jpg`, `jpeg`, `gif`, `svg`, `webp`, `ico`: `user@2x.png` is an asset's name) and not inside a URL the `credential` kind reports, as written or once the line's JSON escapes are undone |
 | `link-outside` | `FAC-SEM-159` | in a Markdown file (`.md`, `.mdx`, `.markdown`), a relative link `](target)` (a target and a title hold no `]`, and at most 2048 characters each) (no scheme, not `#…`, not `//…`) whose target, resolved against the file's folder (from the root when it starts with `/`, without its `#` or `?` part), is above the root or is neither a source path nor a folder holding a source file; and a symbolic link in the source whose target (its text) is absolute, climbs above the root or is no source path, resolved literally against the link's folder (split on `/`, `#` and `?` kept as path characters, nothing percent-decoded), the root and a folder holding source being inside; said at line 1, column 1, after line 1's other findings in this table's order and once per line (a link whose target holds a Markdown link outside gets one) |
-| `excluded-by-fold` | `FAC-SEM-159` | a file inside an `include` path that no `exclude` entry names as written but one names once both are folded ([paths](#paths)): it is not source and never read; the line names the file by its index (`files[<index>]`, never its path, since a name may be shaped like a credential) and the entry (`exclude[<i>]`). The [checker](#the-checker) keeps such a path from Git's list by its path only; a walk never enters a folder the fold leaves out, so it reads nothing there and says nothing |
+| `excluded-by-fold` | `FAC-SEM-159` | a file inside an `include` path that no `exclude` entry names as written but one names once both are folded ([paths](#paths)): it is not source and never read; the line names the file by its index (`files[<index>]`, never its path, since a name may be shaped like a credential) and the entry (`exclude[<i>]`). The [checker](#the-checker) keeps such a path from Git's list by its path only; a walk names a fold-only file but never enters a folder the fold leaves out, so it reads nothing there and says nothing of it, while Git mode names the paths under such a folder too: these lines and their indexes depend on the mode, a read file's index does not |
 | `unused-exclude` | `FAC-SEM-159` | an `exclude` entry that names no file or folder the tree holds, read folded as [paths](#paths) says; reported only when the input carries `listed` (every path the tree holds, source or not, a folder written with a trailing `/`), which the [checker](#the-checker) fills with each `exclude` entry it finds in the folder, each segment matched under the fold against the names its folder holds, an intermediate folder never a symbolic link and the last segment anything (a link it keeps out included, never followed); never said of an entry an `excluded-by-fold` line names |
 | `no-license` | `FAC-SEM-159` | no source file at the root named `LICENSE`, `LICENCE` or `COPYING`, with an extension or none, in any letter case; a licence that is a symbolic link does not count, since a source export carries the link, not the terms, an `unchecked` link included (it is passed as a link with no text) |
 
@@ -338,10 +339,11 @@ none, except that an address followed by `:` is still an address, since the path
 as `.`, in its problems, notes, usage errors and `--json` output alike. `files[<index>]` counts from 0 the files the
 checker read and handed to the tree check (the source files, `fabric.source.json` among them, `unchecked` files and
 nested repositories in the source; a nested repository outside the source takes no index, in either mode), in the UTF-16 code-unit order of their paths, in Git mode and in a walk alike
-(`a-b/k.ts` comes before `a/k.ts`, since `-` sorts before `/`). A path Git lists that is left out only under the fold
-(`excluded-by-fold`, Git mode only) is never read and takes an index after every file read, in the same order, so a
-read file's index is the same in both modes; it is always named `files[<index>]`, never by its path, since a name may
-be shaped like a credential. The checker prints nothing more about that list. It reads no list of installation strings: that
+(`a-b/k.ts` comes before `a/k.ts`, since `-` sorts before `/`). A path left out only under the fold
+(`excluded-by-fold`) is never read and takes an index after every file read, in the same order, so a
+read file's index is the same in both modes; which such paths there are depends on the mode (a walk lists a fold-only
+file but never enters a folder the fold leaves out, Git mode lists the paths under such a folder too). It is always
+named `files[<index>]`, never by its path, since a name may be shaped like a credential. The checker prints nothing more about that list. It reads no list of installation strings: that
 part of the check runs in the operator's own tool, with the operator's list.
 
 `pnpm validate <dir>` checks a folder holding `fabric.source.json` beside `fabric.package.json` as a pair
@@ -524,17 +526,25 @@ knowledge base's [agents-first](https://github.com/passioncode-ai/fabric-workspa
 item 9, "A source hand-over takes the operator's word on that act", reads), each such push its own hand-over; a
 transfer; a visibility change; access given to another person; a file sent to another person or to a place outside the
 owner's. A processor acting for the owner under the owner's own account or host (a model provider used in the owner's
-session, CI on the home's host, a service the owner runs) is no recipient. A package handed to another person (a
+session, CI on the home's host, a service the owner runs) is no recipient while what it holds stays readable by no one
+outside the owner; output it makes public, or readable by others (a public server, a Pages site), is a hand-over. A package handed to another person (a
 colleague's copy, [package](package.md#state)'s v4 §6 Path 3) carries the source and is a hand-over, and so is a
-personal agent's package or release published to a public registry. Access the owning organization gives its own members to its own agent's home is no hand-over, since they are the
+personal agent's package or release published to a public registry, unless its home is already public (below); the
+files the pack step derives from the public source (`fabric.package.json`, signatures, checksums) count as already
+public, and nothing else does. Access the owning organization gives its own members to its own agent's home is no hand-over, since they are the
 home's readers; access given to anyone outside the owner is one, and for a personal agent the owner is the operator,
 so any other person's access is one. An organization's agent released by the organization to a public registry is the
-organization's own release, not a hand-over. A push or release of what is already public, from a public home to
-another public place of the same owner (a mirror, a marketplace repository, a public registry), reaches no reader who
-could not read it already and is no hand-over: the hand-over that made the source public was the visibility change.
+organization's own act only when the agent's home is already public; a private organization agent's first public
+release makes its source public and takes the word, like a visibility change: making a source public for the first
+time always takes the word. A push or release of what is already public, from a public home to another public place of
+the same owner (a mirror, a marketplace repository, a public registry), reaches no reader who could not read it already
+and is no hand-over: the hand-over that made the source public was the visibility change. That carve-out covers only a
+source some earlier act on the operator's word, or the operator's own act, made public; a personal agent's home created
+public is that visibility change, a hand-over that takes the word.
 Each needs the operator's word for that act, naming the agent, the source
 commit and the recipient; for an act that hands over the whole repository (a transfer, a visibility change, access
-given) the word names the repository instead of one commit. A local source export needs none. A copy moved within the operator's own estate (here, the accounts and placements the
+given outside the owner) the word names the repository instead of one commit, and the act hands over the history too,
+which no tree check reads, so the history privacy gate (the knowledge base's rules section 9, `--history`) runs first. A local source export needs none. A copy moved within the operator's own estate (here, the accounts and placements the
 operator alone holds) to a place that is not public and that no one outside the operator can read (a deploy to the
 operator's own placement, a private mirror the operator owns) has no recipient and is not a source hand-over; a push
 or copy elsewhere that is public, that another owner holds, or that another person is given access to, is one. The
@@ -555,7 +565,7 @@ Fabric's (CT-208).
 A patch back from an exported copy applies only when every path it touches is a source path; otherwise it is refused
 whole. It applies at the source, never at an exported copy. On a case-insensitive file system two spellings of a path
 are one file, so a patch path is also refused when an `exclude` entry names it once both are folded the same way per
-segment ([paths](#paths): the code points HFS+ ignores removed, NFC, lower, upper and lower case, NFC, trailing dots and
+segment ([paths](#paths), canonical caseless matching: the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, trailing dots and
 spaces dropped): `app/PRIVATE/x`, `app/ſecrets/x` (a long s), `app/Keys/k` (the Kelvin sign) and `app/PAẞWORDS/x` (the
 capital sharp s) are refused when `app/private/`, `app/secrets/`, `app/keys/` and `app/passwords/` are excluded. When any
 `exclude` entry exists, a segment in which `~` is followed by a digit, which may be a Windows 8.3 short name
@@ -616,7 +626,7 @@ in its first answer or its doctor command.
 | a source export (the adapter's `export`) | reads a committed tree, exports no gitlink, refuses on a blocking finding, writes one commit by the neutral author with no history and no link back, rewrites no file, writes its receipt in the instance without a found value, creates no repository and pushes nothing, runs no test as a condition | the tool's own test |
 | `pack` | writes the package's `secrets[]` from the source's secret slots and, unless it packs a copy without state, `state[]` from its store slots | `FAC-SEM-160`; the tool's own test |
 | an import of a patch | refuses the whole patch when a path is not source (read against the receiver's current manifest, `exclude` folded, a segment with `~` and a digit once an exclude exists) and holds, kept unapplied, any patch that changes `fabric.source.json` until the owner decides; applies at the source | `patchPathsAllowed` in the vectors; the tool's own test |
-| a hand-over (Fabric's "give as source", any tool) | gated as `publish`, a person's act each time; its action declares `relayed` and takes the hand-over only on the operator's word naming the agent, the source commit and the recipient, from a T0 or T1 caller as a valid decision with the exact `target` or the service's accepted elicitation naming the three, consumed when the effect begins, never by a mandate, as [handing over](#handing-over) specifies | the tool's own test |
+| a hand-over (Fabric's "give as source", any tool) | gated as `publish`, a person's act each time; its action declares `relayed` and takes the hand-over only on the operator's word naming the agent, the source commit and the recipient, from a T0 or T1 caller as a valid decision with the exact `target` or the service's accepted elicitation naming the three, consumed when the effect begins, never by a mandate, as [handing over](#handing-over) specifies; before an act on the whole repository (a transfer, a visibility change, access given outside the owner) it runs the history privacy gate, since such an act hands over the history, which no tree check reads | the tool's own test |
 | an agent started without its instance | starts, answers `degraded` with one `setup: true` entry per missing required slot (an `endpoint` included), a filled endpoint it cannot reach a failure without `setup`, refuses only what needs a missing slot, with its tool's own error naming the slot and no value | the agent's own test |
 
 ## Not decided here

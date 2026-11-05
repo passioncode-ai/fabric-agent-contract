@@ -452,8 +452,10 @@ anyone; a push of a commit not already in it to a repository that is not the age
 another owner holds (an organization's repository included, even one the operator administers), each such push its
 own; a transfer; a visibility change; access given to another person; a file sent to another person or to a place outside the owner's (a processor acting
 for the owner under the owner's own account or host, such as a model provider in the owner's session or CI on the
-home's host, is no recipient); a package handed to another person
-(a colleague's copy), which carries the source; a personal agent's package or release published to a public registry.
+home's host, is no recipient while what it holds stays readable by no one outside the owner; output it makes public or
+readable by others is one); a package handed to another person
+(a colleague's copy), which carries the source; a personal agent's package or release published to a public registry, unless its home is already public (the files
+the pack step derives from the public source count as public, nothing else does).
 The repository where the agent's owner keeps and develops its source is its home, not a recipient, and the owner's
 placements are the owner's own: the owner's own commits, branches and releases in the home, a release that stays where
 the home's readers are, and a deploy to a placement its owner holds (an organization's agent on that organization's
@@ -465,8 +467,11 @@ organization's or a public repository, or onto an organization's or a team's pla
 which stays one; serving the running agent to a team (`peer`, client keys) gives no one the tree and is none. Access the
 owning organization gives its own members to its own agent's home is none (they are the home's readers), access given
 to anyone outside the owner is one (for a personal agent, anyone but the operator), and an organization's agent
-released by the organization to a public registry is the organization's own release; a push or release of what is
-already public, from a public home to another public place of the same owner, reaches no new reader and is none. It is
+released by the organization to a public registry is the organization's own act only when its home is already
+public (making a source public for the first time always takes the word, a personal agent's home created public
+included); a push or release of what is already public, from a public home to another public place of the same owner,
+reaches no new reader and is none. An act on the whole repository hands over its history too, so the history privacy
+gate runs first. It is
 one synchronous call of effect class `publish`, taken only on the operator's word for that act naming the agent, the
 source commit (the repository, for an act on the whole repository) and the recipient (a decision with its exact
 target, or the service's in-call elicitation), never by a mandate or an `approval/1` before CT-181, as
