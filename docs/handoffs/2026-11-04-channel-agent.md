@@ -24,7 +24,7 @@ FAA-197, on the adapter's main).
   [`test/channel-agent.test.ts`](../../test/channel-agent.test.ts).
 - The page [channel agent](../specification/channel-agent.md); rows in the specification index, the extension keys
   (interop.md), support-quality.md's pointer, conformance.md (register, reference modules, the channel agent's row),
-  DOCMAP, CONTEXT (Channel agent); DEC-0150 (Proposed); CT-209; the standard's copy
+  DOCMAP, CONTEXT (Channel agent); DEC-0150 (Accepted, merged 2026-11-05); CT-209; the standard's copy
   [`docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`](../evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md)
   (the standard owner's neutral copy, round 4, kept byte for byte) and its row in
   `docs/evidence/sources.md`.
@@ -487,6 +487,15 @@ FAA-197, on the adapter's main).
   `Hint` takes DEC-0153's form, a fourth element for its own help link; the channel-agent line passes
   `docs/specification/channel-agent.md#what-is-checked` and the notes read `help ?? HINT_HELP[rule]`, so the DEC-0153
   note above is true at this head. A vector pins a declaration that is a number (reached at 16, `FAC-SEM-162`).
+- Rounds 38 and 39 of the readings were clean on unit, product and seam at `f0feccbd`: DEC-0150 is accepted. The
+  landing (2026-11-05) merged main at `08e24572` (DEC-0148, PR #235): `docs/DECISIONS.md` holds DEC-0148 then DEC-0150
+  and the next free id `DEC-0154`, conformance.md the next free rule code `FAC-SEM-169` (both read from the CAS refs on
+  origin), the register rows `FAC-SEM-155` then `162` to `165`, and its "reserved by open branches" sentence is dropped;
+  the backlog rows run CT-200 to CT-225 in id order. Landing edits: CT-220 gains CA-8's bound; CT-224 (the
+  installation-valued row DEC-0149 owes) and CT-225 (what rounds 38 and 39 left, none blocking) are filed, after checking
+  every remote head (CT-222 on DEC-0153's branch, CT-223 here); DEC-0150 reads Accepted; CT-209 is done, its release tag
+  written at release. A post-clean commit holds only tests, vectors, comments and wording the clean rounds held for
+  landing.
 
 ## The branch and its history
 
@@ -906,9 +915,9 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 37 (unit, seam,
-product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
-and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
+Rounds 38 and 39 were clean and the landing commits are on the branch: the coordinator opens and merges the pull request
+and releases, then posts the merge on thread `b6820b97`, and writes the release tag into CT-209 and this handoff's index
+row. The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
 narrowings in [channel agent](../specification/channel-agent.md#narrowings-against-the-standard) (not copies kept
 here), and adds:

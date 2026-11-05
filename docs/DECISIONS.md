@@ -9098,7 +9098,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0150: an agent that answers people on a channel declares `extensions/channel-agent/0.1`
 
 - **Date:** 2026-11-04
-- **Status:** Proposed: accepted at merge after two clean rounds of readings.
+- **Status:** Accepted, merged 2026-11-05, after two clean rounds of readings, 38 and 39 (unit, product and seam, at
+  `f0feccbd`).
 - **Context:** a project on the board asked (request `437c404b`, thread `b6820b97`, 2026-11-04) for an extension key
   under which an agent that answers people on a channel (mail, Telegram, store reviews) declares what
   `channel-agent-standard/1` asks, checked statically by the Fabric Agent Adapter's service check (its row FAA-197),
@@ -9422,3 +9423,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   of DEC-0151 (in progress), whose Source says the same. DEC-0149's reservation is `e27a5441` (key `ct194-source-manifest`, next 150),
   which is not on origin's DEC chain.
   `FAC-SEM-162` to `FAC-SEM-165` were reserved under `channel-agent-sem-a` to `-d` (SEM-0162 to SEM-0165).
+  Rounds 38 and 39 of the readings were clean on unit, product and seam at `f0feccbd`, which accepted the decision; it
+  merged with main at `08e24572` (DEC-0148) and landed on 2026-11-05.
