@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 51 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 52 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9045,7 +9045,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   register is DEC-0149's landing step; round 49 not clean: the lead's routes still said 'another person'; vendored
   files and binaries; boundary copies at DEC-0149's landing; widest reading made literal; round 50 not clean: the widest reading stopped at the first
   segment; devices.md's strictest claim; the chain still named #235 as open; round 51 not clean: devices.md still ranked the boundaries; the
-  Done vector count), cited by round number because their heads were on the review branch, which is not
+  Done vector count; round 52 not clean: item 12's 'handing it to anyone'; pre-DEC-0149 readers outside the home;
+  credential file names read folded; the manifest under unchecked), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9177,7 +9178,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       recipient holds, and no commit from the home, author and committer `Fabric source export
       <source-export@fabric.invalid>`, the source commit's committer date, the message `Source export`; it rewrites no
       file (so the source's identity fields name the publisher, never a person or the operator's account), carries no
-      link to the original, publishes nothing, and writes a receipt in the instance (source commit, the recipient, the manifest's
+      link to the original, publishes nothing, creates no hosted or remote repository and never pushes, and writes a receipt in the instance (source commit, the recipient, the manifest's
       SHA-256, counts by kind, the new commit), never a value found. Author and committer dates are both the source
       commit's committer date, with its time zone; the receipt records the recipient and the export commit, the next
       export to that recipient reads its parent from it (fetched from the recipient's repository), and an export that
@@ -9185,7 +9186,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       branch or pull request, never a force-push (rounds 43 to 45). It does not run the source's tests and does not
       refuse on them (Q9); a tool may offer a test run beside it. The adapter's `export`, owed by CT-207, is to be the
       implementation; this repository ships the check.
-  12. **Handing over (Q8, option P3):** a local source export is not a transfer and is always allowed, and a copy moved
+  12. **Handing over (Q8, option P3):** A source hand-over (a route source.md's Handing over counts) is effect class
+      `publish`, a person's act each time, which no standing grant authorises (the item's operative rule, placed here
+      in round 52; the dated chain below records how each route was decided). A local source export is not a transfer and is always allowed, and a copy moved
       within the operator's own estate (the accounts and placements the operator alone holds) to a place that is not
       public and that no one outside the operator can read is not a hand-over, while a push or copy elsewhere that is public,
       that another owner holds, or that another person is given access to (round 49: anyone who could not already read
@@ -9290,7 +9293,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       recipient's branch still ends there, otherwise as a new branch or pull request for the recipient to merge under its
       own rules, never a force-push (the recipient's history is the recipient's); access the operator gave to a personal
       agent's private home before DEC-0149 was accepted stands as the operator's own act, so a commit reaching those readers is no
-      hand-over, nothing is retroactive and an agent never gives new access (an inventory of such homes is filed at
+      hand-over (round 52: in the home only), nothing is retroactive and an agent never gives new access (an inventory of such homes is filed at
       landing for the operator to review, as information, not a gate); the whole-repository rule covers a personal
       agent's private home only, a public home's access and visibility being outside it; and serving is a hand-over to
       anyone who cannot read the home. Decided by the coordinator in round 45 on the same ground, removing second
@@ -9367,8 +9370,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       the same line as DEC-0153's.
       Decided by the coordinator in round 51: the lead's filter is bound to its place condition, so a route that stays
       in a place the home's owner holds and reaches only those who could already read the home is no hand-over, while a
-      place another owner holds stays one even when only earlier readers can read it; devices.md ranks no boundary. Handing it to
-      anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
+      place another owner holds stays one even when only earlier readers can read it; devices.md ranks no boundary.
+      Decided by the coordinator in round 52: the item's operative rule leads it (a source hand-over, a route source.md's
+      Handing over counts, is effect class `publish`); a commit reaching readers given access before DEC-0149 is no
+      hand-over in that home only; a credential file's name is read folded as a `.git` segment is; no `unchecked`
+      entry names the manifest; a hand-over by push or by file, a package or a public release carries a source export
+      or a package and so needs the manifest, while a visibility change or new readers take the word and accept the
+      history; every later public release of a personal agent from a private home is its own hand-over; a source export
+      creates no hosted or remote repository and never pushes. The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
       `actionDecision` table apply except where source.md gives another answer; CT-181 owns bringing the departures
@@ -9493,7 +9502,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 51 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 52 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9509,5 +9518,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   register is DEC-0149's landing step; round 49 not clean: the lead's routes still said 'another person'; vendored
   files and binaries; boundary copies at DEC-0149's landing; widest reading made literal; round 50 not clean: the widest reading stopped at the first
   segment; devices.md's strictest claim; the chain still named #235 as open; round 51 not clean: devices.md still ranked the boundaries; the
-  Done vector count), cited by round number (their heads were on the review branch, not kept at landing),
+  Done vector count; round 52 not clean: item 12's 'handing it to anyone'; pre-DEC-0149 readers outside the home;
+  credential file names read folded; the manifest under unchecked), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

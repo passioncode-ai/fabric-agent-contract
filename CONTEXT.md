@@ -144,9 +144,7 @@ for 24 hours. A service takes a
 authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
 `decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1` (`actionDecision`,
 [service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121). A **Source hand-over** takes a decision only
-with its exact target ([source](docs/specification/source.md#handing-over), DEC-0149). An agent without
-`fabric.source.json` is handed over, or released publicly from a private home, only once it has one, since every
-carrier needs the tree check; the manifest stays opt-in otherwise.
+with its exact target ([source](docs/specification/source.md#handing-over), DEC-0149). A hand-over by push or by file, a package, or a public release carries a source export or a package, which needs the tree check, so an agent without `fabric.source.json` takes those routes only once it has one; a visibility change or new readers take the word and accept the history as it stands; the manifest stays opt-in otherwise.
 
 **Mandate**: The operator's instruction for one task, carried with the task down a chain of the operator's agents
 (`mandate/1`): the task, the operator's words verbatim, when they were given, an expiry within 7 days, a scope

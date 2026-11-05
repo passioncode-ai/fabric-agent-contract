@@ -18,9 +18,7 @@ and questions §6), and the board threads `21ac4057` and `0a8776f2`, where the o
 
 Every kind of agent: a serving agent, a consumer agent and a skill set. The manifest, the tree check, the source export
 and the import bind a repository with a `fabric.source.json`; one without has none of them. The hand-over rule
-([handing over](#handing-over)) binds every agent's source, with a manifest or without one, and since every carrier
-of a hand-over needs the tree check, an agent without `fabric.source.json` is handed over, or released publicly from a private
-home, only once it has one; the manifest stays opt-in otherwise (an organization's private agent packed for its own
+([handing over](#handing-over)) binds every agent's source, with a manifest or without one, and a hand-over by push or by file, a package, or a public release carries a source export or a package, which needs the tree check, so an agent without `fabric.source.json` takes those routes only once it has one; a visibility change or new readers take the word and accept the history as it stands; the manifest stays opt-in otherwise (an organization's private agent packed for its own
 private registry needs none). The Fabric Agent Adapter's templates are to write one for every new agent (owed by
 CT-207); requiring it of every agent is a later decision (DEC-0149 item 3).
 
@@ -123,7 +121,11 @@ file of the source or a folder in it (`FAC-SEM-157`, which also refuses one list
 plain words. A file under an `unchecked` path is read by its path only: a home folder, an installation string or a
 credential file by its name in that path is still a finding (a credential file is never source, unchecked or not), and
 its content is never read, so it holds no line finding, no `binary` finding and no warning. It still counts as present
-for `missing` and `no-license`.
+for `missing` and `no-license`. A credential file's name is read folded the way a `.git` segment is: the code points
+HFS+ ignores removed, ASCII case folded and any trailing run of dots and spaces dropped, so `KEY.PEM`, `.ENV`,
+`ID_RSA`, `svc.TOKEN`, `.env.` and `key.pem.` are credential files, unchecked, listed in `binaries` or not. No
+`unchecked` entry names `fabric.source.json`, in any spelling under the fold: the manifest always travels and is always
+read, so `FAC-SEM-157` refuses such an entry and the tree check reads the manifest whatever `unchecked` says.
 
 The Fabric Agent Adapter retires its `.fabric-source-ignore` when it adopts this decision (CT-207), each entry mapped
 as follows: a path of plain source goes to `unchecked` with its reason; a file that is a credential by its name goes to
@@ -413,7 +415,8 @@ packed in place, so the usual route to that check is the package folder's own co
 
 ## Source export
 
-A source export is a local act: it publishes nothing and is always allowed.
+A source export is a local act: it publishes nothing, creates no hosted or remote repository and never pushes, and is
+always allowed.
 
 1. It reads a committed tree at a named commit, never the working copy, and takes only the source paths; a gitlink (a
    submodule) is never exported, and the check refuses one in the source (`nested-repository`).
@@ -599,8 +602,7 @@ A transfer of a personal agent's home, public or private, is not done either: th
 permission for any transfer of a personal agent, and that permission is outside this contract. A public home's access
 and visibility are outside the rule above, and making a public personal home private is no hand-over. A gate that
 would let such an act carry the history is not decided here. Access the operator gave to a personal agent's private
-home before DEC-0149 was accepted (on its merge date, written here at landing) stands as the operator's own act, so a
-commit reaching those readers is no hand-over; nothing here is retroactive, and an agent never gives new access. An
+home before DEC-0149 was accepted (on its merge date, written here at landing) stands as the operator's own act, so a commit reaching those readers in that home is no hand-over; nothing here is retroactive, and an agent never gives new access. An
 organization's acts on its own agent's whole repository are its own, under its own release rules (the knowledge base's
 rules section 9), except two that take the word naming the repository: making a private organization agent's source
 public by a visibility change, and giving it new readers outside the organization (a transfer to another owner, access
@@ -619,7 +621,7 @@ the whole repository of a personal agent's private home, which is not done (abov
 becomes readable.
 
 What takes the word when a source becomes public: a personal agent's source made public for the first time (as a source
-export, a public repository created for it included; its own repository is never made public, as above), and an
+export, a public repository created for it included; its own repository is never made public, as above), and every later public release of a personal agent from a private home (each new commit is its own hand-over), and an
 organization agent's private source made public (a visibility change, or its first public release from a private home;
 later public releases from that home under its release rules are the organization's own act). An organization creating
 its own agent's home public is the organization's own act, no hand-over, and so is its release of an agent whose home is
@@ -702,7 +704,7 @@ in its first answer or its doctor command.
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-156"></a>`FAC-SEM-156` | `source-manifest` | a slot is named once, and neither its name nor its purpose nor the manifest's description is shaped like a credential; a store path is declared once (DEC-0149) |
-| <a id="fac-sem-157"></a>`FAC-SEM-157` | `source-manifest` | a path is listed once in `include`, `exclude`, `binaries` and `unchecked`; none of the first three has a `.git` segment, in any form [paths](#paths) reads as `.git`; an `include` path lies inside no `exclude` folder and beneath no `exclude` entry without `/`; an entry NFC or NFD lengthens past 256 code points, or one with a segment made only of dots, spaces and code points HFS+ ignores, is said (once, by its cause; an `exclude` one still removes its widest reading, [paths](#paths)); an `exclude` path lies inside an `include` folder and is not an `include` path; a `binaries` path is a file of the source; an `unchecked` path is a file of the source or a folder in it (DEC-0149) |
+| <a id="fac-sem-157"></a>`FAC-SEM-157` | `source-manifest` | a path is listed once in `include`, `exclude`, `binaries` and `unchecked`; none of the first three has a `.git` segment, in any form [paths](#paths) reads as `.git`; an `include` path lies inside no `exclude` folder and beneath no `exclude` entry without `/`; an entry NFC or NFD lengthens past 256 code points, or one with a segment made only of dots, spaces and code points HFS+ ignores, is said (once, by its cause; an `exclude` one still removes its widest reading, [paths](#paths)); an `exclude` path lies inside an `include` folder and is not an `include` path; a `binaries` path is a file of the source; an `unchecked` path is a file of the source or a folder in it, and never `fabric.source.json` in any spelling under the fold (DEC-0149) |
 | <a id="fac-sem-158"></a>`FAC-SEM-158` | `source-tree` | a source tree holds no home folder with a person's name, no credential (a value in a line or a path, or a file by its name), no binary file `binaries` does not list, no nested repository and no installation string; every `include` path names a file; the list's entries are well-formed strings of at least 3 characters and the manifest names an `include` path (DEC-0149) |
 | <a id="fac-sem-159"></a>`FAC-SEM-159` | `source-tree` | accepted: an e-mail address not in `publicAddresses`, a relative Markdown link out of the source, no licence file at the root, an `exclude` entry that names nothing the tree holds, a file an `exclude` entry names only once folded (DEC-0149) |
 | <a id="fac-sem-160"></a>`FAC-SEM-160` | `source-package` | a package's `secrets[]` are the source's `secret` slots by name and `optional`, and, when its `state[]` holds any entry, its `state[]` paths the source's `store` slots' paths, as sets (DEC-0149) |
@@ -713,7 +715,7 @@ in its first answer or its doctor command.
 |---|---|---|
 | an agent's source repository with `fabric.source.json` | the manifest validates and passes `FAC-SEM-156` and `FAC-SEM-157`; its tree passes `FAC-SEM-158` | `pnpm --silent validate <dir> --kind source-tree`; the operator's tool with the operator's list |
 | a source check (the adapter's check and `export`) | answers the vectors' problems for every case (each kind of the tree check's table, `nested-repository`, `short-instance-string` and `no-include` included; lines split at LF and counted from 1, columns from 1 in UTF-16 code units; a finding in a file's own path with no line and no column), reads the operator's list from outside the tree, never prints a value it found | `fixtures/vectors/source-tree.json`; the tool's own test |
-| a source export (the adapter's `export`) | reads a committed tree, exports no gitlink, refuses on a blocking finding, writes one new commit, whose only parent, if any, is the earlier export commit the recipient holds; no commit from the home (its receipt records the recipient and the export commit, from which the next export reads its parent, fetched from the recipient's repository; an export that cannot land as a fast-forward goes as a new branch or pull request, never a force-push; a local export with no recipient records none and is parentless, and a hand-over of it by push or by file records the recipient and the export commit in its receipt), by the neutral author with no link back, keeps file modes and symbolic links as committed, rewrites no file, writes its receipt in the instance (the recipient among it) without a found value, creates no repository and pushes nothing, runs no test as a condition | the tool's own test |
+| a source export (the adapter's `export`) | reads a committed tree, exports no gitlink, refuses on a blocking finding, writes one new commit, whose only parent, if any, is the earlier export commit the recipient holds; no commit from the home (its receipt records the recipient and the export commit, from which the next export reads its parent, fetched from the recipient's repository; an export that cannot land as a fast-forward goes as a new branch or pull request, never a force-push; a local export with no recipient records none and is parentless, and a hand-over of it by push or by file records the recipient and the export commit in its receipt), by the neutral author with no link back, keeps file modes and symbolic links as committed, rewrites no file, writes its receipt in the instance (the recipient among it) without a found value, creates no hosted or remote repository and never pushes, runs no test as a condition | the tool's own test |
 | `pack` | writes the package's `secrets[]` from the source's secret slots and, unless it packs a copy without state, `state[]` from its store slots | `FAC-SEM-160`; the tool's own test |
 | an import of a patch | refuses the whole patch when a path is not source (read against the receiver's current manifest, `exclude` folded, a segment with `~` and a digit once an exclude exists, a path outside the grammar as [paths](#paths) reads it, a segment made only of dots, spaces and code points HFS+ ignores among them) and holds, kept unapplied, any patch that changes `fabric.source.json` until the owner decides; refuses a patch path beneath a symbolic link in the receiver's tree, checked at apply time; applies at the source | `patchPathsAllowed` in the vectors; the receiving tool's own test for the symbolic-link clause, which `patchPathsAllowed` cannot check |
 | a hand-over (Fabric's "give as source", any tool) | gated as `publish`, a person's act each time, on every route [handing over](#handing-over) counts; takes the hand-over only on the operator's word naming the agent, the target (the source commit, or the repository for an organization agent's private home made public or given new readers outside the organization) and the recipient, in one of three forms: on a service's action, which declares `relayed`, a valid decision with the exact `target` from a T0 or T1 caller or the service's accepted elicitation naming the three, consumed when the effect begins; outside a service's action, the stated word the operator's reply accepts, consumed once; never by a mandate; a hand-over by push or by file carries a source export (one new commit, whose only parent, if any, is the earlier export commit the recipient holds; no commit from the home), never another commit; an act on the whole repository of a personal agent's private home, or of any copy of it within the operator's estate that carries its history (a private mirror), such as a visibility change or access given to any other person, is not done, nor is a transfer of a personal agent's home, public or private; an organization's own acts on its agent's repository are its own except those two, and its later public release from a private home, by any route, takes no word; every public release from a private home carries only the source export or a package packed from that source commit holding only source paths that passed the tree check; a package handed over or published to a public registry names as its target the source commit it was packed from and holds only source paths that passed that commit's tree check, besides the files the pack step writes (`fabric.package.json`); built files travel only as committed source paths; material already public needs no word by any route | the tool's own test |

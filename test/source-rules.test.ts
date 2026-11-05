@@ -23,6 +23,7 @@ import {
   SOURCE_PATH,
   WARNING_KINDS,
   checkSourceTree,
+  credentialFileName,
   FOLD_UNICODE,
   HFS_IGNORABLE_CHAR,
   excludedFolderTest,
@@ -1039,6 +1040,26 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
     const tree = sourceRules("source-tree", { manifest: { include: ["src/.../", "LICENSE"], exclude: ["LICENSE/.../"], binaries: ["src/..\u200d/x.png"] }, files: [{ path: "LICENSE", text: "x" }] }) ?? [];
     expect(tree.filter((finding) => finding.code === "FAC-SEM-157").map((finding) => finding.instancePath)).toEqual(["/manifest/include/0", "/manifest/exclude/0", "/manifest/binaries/0"]);
     expect(sourceRules("source-tree", { manifest: [], files: [] })?.filter((finding) => finding.code === "FAC-SEM-157")).toEqual([]);
+  });
+
+  it("refuses an unchecked entry that names the manifest in any spelling, which always travels and is always read", () => {
+    const reasonKey = ["sk", "-", "proj-", "A1b2".repeat(8)].join("");
+    for (const spelling of ["fabric.source.json", "FABRIC.SOURCE.JSON", "Fabric.Source.Json"]) {
+      const value = { format: "fabric-source/1", include: ["src/", "LICENSE"], unchecked: [{ path: "src/a.ts", reason: reasonKey }, { path: spelling, reason: "r" }] };
+      const findings = sourceRules("source-manifest", value) ?? [];
+      const atManifest = findings.filter((finding) => finding.instancePath === "/unchecked/1/path");
+      expect(atManifest.map((finding) => finding.message), spelling).toEqual(["unchecked[1] names fabric.source.json, which always travels and is always read, so it is never unchecked"]);
+      expect(findings.some((finding) => finding.message.includes(reasonKey)), spelling).toBe(false);
+      expect(isUncheckedPath(value, "fabric.source.json"), spelling).toBe(false);
+    }
+    expect(isUncheckedPath({ include: ["src/"], unchecked: [{ path: "src/a.ts", reason: "r" }] }, "src/a.ts")).toBe(true);
+  });
+
+  it("reads a credential file's name folded: case, ignorable code points and trailing dots and spaces", () => {
+    for (const name of ["KEY.PEM", ".ENV", "ID_RSA", "svc.TOKEN", "store.P12", ".env.", ".env ", "key.pem.", ".e\u200cnv"]) {
+      expect(credentialFileName(name), name).toMatch(/^(?:\.env|key\.pem|id_rsa|svc\.token|store\.p12)$/u);
+    }
+    expect(credentialFileName(".ENV.EXAMPLE")).toBe(".env.example");
   });
 
   it("strips the code points HFS+ ignores, and asks for one without a global pattern's state", () => {

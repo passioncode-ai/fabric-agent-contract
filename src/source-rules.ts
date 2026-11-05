@@ -326,7 +326,8 @@ export function isUncheckedPath(manifest: unknown, path: unknown): boolean {
 export function uncheckedTest(manifest: unknown): (path: unknown) => boolean {
   const isSource = sourcePathTest(manifest);
   const unchecked = pathList(uncheckedPaths(manifest).map(([entry]) => entry));
-  return (path) => isSource(path) && listCovers(unchecked, path as string);
+  // The manifest always travels and is always read: no unchecked entry covers it (FAC-SEM-157 refuses one that names it).
+  return (path) => isSource(path) && nfc(path as string) !== SOURCE_FILE && listCovers(unchecked, path as string);
 }
 
 /**
@@ -407,8 +408,15 @@ export const CREDENTIAL_FILE = /^(?:\.env(?:\.[^\n\r\u2028\u2029]+)?|[^\n\r\u202
 export const CREDENTIAL_FILE_OK = /^\.env\.(?:example|sample|template)$/;
 /** The kits' token and credential files, Python's `.` (anything but LF) before the extension: the adapter's `TOKEN_FILE`. */
 export const TOKEN_FILE = /^[^\n]+\.(?:token|credential)$/;
+/**
+ * A file's name as the three patterns read it, folded the way `isDotGitSegment` reads a segment: the code points HFS+
+ * ignores removed, ASCII case folded, any trailing run of dots and spaces dropped, so `KEY.PEM`, `.ENV`, `ID_RSA`,
+ * `svc.TOKEN`, `.env.`, `key.pem.` and `.e` U+200C `nv` are credential files as a case-insensitive or Windows file
+ * system resolves them.
+ */
+export const credentialFileName = (name: string): string => asciiFold(name.replace(HFS_IGNORABLE, "")).replace(/[ .]+$/u, "");
 const credentialFile = (path: string): boolean => {
-  const name = path.slice(path.lastIndexOf("/") + 1);
+  const name = credentialFileName(path.slice(path.lastIndexOf("/") + 1));
   return (CREDENTIAL_FILE.test(name) && !CREDENTIAL_FILE_OK.test(name)) || TOKEN_FILE.test(name);
 };
 
@@ -1345,6 +1353,11 @@ function pathFindings(value: JsonObject): Finding[] {
   for (const [path, index] of uncheckedPaths(value)) {
     if (unchecked.has(path)) flag(`/unchecked/${index}/path`, `unchecked[${index}] is listed twice`);
     unchecked.add(path);
+    // The manifest, in any spelling under the fold, always travels and is always read: it is never unchecked.
+    if (!path.endsWith("/") && inGrammar(path) && foldPath(nfc(path)) === SOURCE_FILE) {
+      flag(`/unchecked/${index}/path`, `unchecked[${index}] names ${SOURCE_FILE}, which always travels and is always read, so it is never unchecked`);
+      continue;
+    }
     if (!(path.endsWith("/") ? folderInSource(includes, excludes, path) : isSource(path))) flag(`/unchecked/${index}/path`, `unchecked[${index}] is not in the source`);
   }
   return findings;
