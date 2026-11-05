@@ -736,10 +736,10 @@ flowchart TD
 
 - **Traces:** ST-035 (JTBD-07, JRN-06/#3)
 - **Goal:** a step the operator would take on a dashboard happens when they tell their agent, recorded as their decision
-- **Entry points:** the operator's chat with their agent; a service's `operator-decision-required`; a job waiting for a choice
+- **Entry points:** the operator's chat with their agent; a service's `operator-decision-required`; a job waiting for a choice; a word the operator gives in a customer chat a channel agent answers (DEC-0150 CA-8)
 - **Success exit:** the service took the action as the operator's decision, and its audit names the agent that relayed it
 - **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the object when the operator named one, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision.
-- **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121); the one page-only step is the operator's move of a board slot until its twin ships (DEC-0140, SCN-051).
+- **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121); the one page-only step is the operator's move of a board slot until its twin ships (DEC-0140, SCN-051). A word the operator gives in a customer chat a channel agent answers, reaching a service action: rejected, because a word given in a customer chat reaches no service action (DEC-0150 CA-8, SCN-043).
 - **Flow:**
 
 ```mermaid
@@ -754,6 +754,9 @@ flowchart TD
   Q --> O
   D -->|invalid| I[decision-invalid; the agent asks again]
   D -->|valid| R[Taken as the operator's; audited with the agent]
+  O -->|in a customer chat| W[Word in a customer chat]
+  W -->|account channel| K[CA-8 on an account channel, the operator's own account, every other session of it the operator's own, no business bot connected, the message not marked offline or scheduled, and the send record showing it not sent through the session owner: acts inside that chat only; a send the account's session owner holds stays held under the owner's approval rules, and the chat word does not release it; a request outside the chat causes no action and is recorded in the agent's audit]
+  W -->|a group the agent's own bot answers, not the operator channel's bot| B[CA-8, the operator's allowlisted id bound in a private chat with that bot, sender_chat unset, not marked offline or scheduled: acts inside that chat only; the agent's own hold is lifted; a request outside the chat causes no action and is recorded in the agent's audit]
 ```
 
 - **Screens traversed:** SCR-30 the operator's agent and the service's audit row.

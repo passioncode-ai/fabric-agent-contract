@@ -9094,3 +9094,334 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (the devices row), `docs/DOCMAP.md` (the devices row); DEC-0100 and
   DEC-0102 annotated; backlog CT-200, CT-202 and CT-203 filed.
 - **Source:** CT-200; the first organization server's request `38014539` (thread `1dcd7fda`) and its 0.5.0.
+
+### DEC-0150: an agent that answers people on a channel declares `extensions/channel-agent/0.1`
+
+- **Date:** 2026-11-04
+- **Status:** Accepted, merged 2026-11-05, after two clean rounds of readings, 38 and 39 (unit, product and seam, at
+  `f0feccbd`).
+- **Context:** a project on the board asked (request `437c404b`, thread `b6820b97`, 2026-11-04) for an extension key
+  under which an agent that answers people on a channel (mail, Telegram, store reviews) declares what
+  `channel-agent-standard/1` asks, checked statically by the Fabric Agent Adapter's service check (its row FAA-197),
+  with the schema in this contract. The standard is owned outside this repository; its section 13.6 gives the declaration's
+  fields and section 11 where it is declared and what is checked of it. Its v1 release candidate, round 4, the standard
+  owner's neutral copy received on board thread `b6820b97`, is kept byte for byte in
+  [`docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`](evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md).
+- **Decision:** [channel agent](specification/channel-agent.md):
+  1. CA-1. The key is `https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1`
+     (`EXTENSION_KEYS.channelAgent`, G-08). A reader reads it under `provider.extensions` of the agent's manifest, or,
+     for a service with no manifest, under `extensions` of its `/.well-known/fabric-service` answer (section 11), and
+     nowhere else; the key under a manifest's own `extensions` or a capability's is reported, and its value is still
+     read for credentials where it stands. A service with a manifest declares only in its manifest, and a reader of
+     such a service ignores a declaration in its well-known answer; a reader knows a service has a manifest from its
+     descriptor's `fabricManifest` (or the registry's provider entry), and with only a well-known answer in hand it
+     reads that answer's declaration. The same rules run on kind `manifest` and kind
+     `service-well-known`, and on no other kind. A reader treats an invalid value as not declared
+     and reports it (`FAC-SEM-162`).
+  2. CA-2. The shape is `service-channel-agent-extension.schema.json`, one file with no reference to another:
+     `{standard: "channel-agent-standard/1", projects[]}`, each project with the members of section 13.6. `project` is
+     `project:<slug>`, the project registry's id, with the registry alias pattern unchanged
+     (`^project:[a-z0-9][a-z0-9._-]{0,127}$`, the memory capability's pattern; DEC-0151, in progress on CT-210, proposes the
+     same `projectAlias`): the registry's
+     name, not an id the agent invents, so the run-of-digits rule does not bind it; an alias of the Fabric Project
+     compared as written (identifiers.md),
+     where `question_route.target` is the canonical Fabric Project id. Four members keep another owner's grammar:
+     `question_route.target` the board's project id, `gap_registry.capability` a capability name, `evals.spend_record`
+     the usage report's limit id and a queue's `recommendation` the board's `opaqueId`. `side` is `^[a-z0-9-]{1,32}$`; the side and a category code take the standard's patterns, and a channel's id
+     (`^[a-z0-9][a-z0-9_-]{0,63}$`) and a tier code (`^[a-z0-9_]{1,32}$`) this contract's, where the standard gives none,
+     each with no run of 7 or more digits; a time zone is an IANA name of one to three segments; a tier's `rule`
+     is `<fact> > <integer>` or `<fact> >= <integer>`, the integer at most 15 digits, and `escalate` is `at_once` or
+     `ladder`; the question route's capability is `team.ask` or `operator.ask`; budgets are numbers in USD as the usage
+     report's limits, except that 0 is allowed here and means no budget, and a budget above 0 is spent under the
+     usage-report limit `spend_record` names (DEC-0027); `token_slot` is `<project>/<env>/<NAME>`, `<project>` the vault
+     project's name `^[a-z0-9][a-z0-9._-]{0,127}$` (not `project:<slug>`), `<env>` `^[a-z][a-z0-9-]{0,31}$` and `NAME`
+     `^[A-Z][A-Z0-9_]{0,63}$`; durations are ISO 8601 in days, hours, minutes and seconds, above zero, except a source's
+     `cadence`, where zero means the source is read on every question (its `max_age` stays above zero, since the signal
+     server reports a source's age against it); `question_route.daily_cap` is to be read as the agent's declared
+     per-project cap, below the desk's side-wide cap of section 6.4, which still binds (to be confirmed with the
+     standard's owner on thread `b6820b97` at merge); ids admit no `@`,
+     slash, space or run of 7 or more digits (section 13.2's `id_looks_personal`), and the two paths (`evals.suite`,
+     `tickets.outbox`) are relative to the agent's repository (no leading `/`, `~` or scheme, a drive letter included,
+     and no `..` segment), so sources and queues carry ids and ages only; a queue's
+     `recommendation` is the board's opaque thread id (`^[A-Za-z0-9_-]{8,128}$`); a text is 1 to 4096 code points and
+     its language at most 35 characters. Every
+     member section 13.6 shows is required where the standard says present: `null` is taken only by a channel's
+     `decision`, `quiet_window` and `late_answer_window` and by `evals.spend_record`, and refused everywhere else. A
+     required member a project does not have takes the standard's none form (its owner's round 4 of section 13.6,
+     accepted on thread `b6820b97`), `{"none": "not_yet", "until": "YYYY-MM-DD"}` or `{"none": "not_used"}`, at four
+     members only: the question route, the gap registry, `tickets.pd_check` (a string or the form) and a channel's
+     `texts.final`; the form is closed, `until` a full date that goes with `not_yet` only, and a text's language is
+     never named `none`, so the form cannot pass for a text elsewhere. A
+     checker refuses, before the schema runs and with each limit read from the schema, an array longer than its
+     `maxItems`, a map wider than its `maxProperties`, any closed object with more members than the schema declares,
+     and a string value or a member name over 4096 code points;
+     a value the schema still cannot run on is one finding, "the value is too large to check". Its finding names at most
+     ten failed keywords with their places and counts the rest, a missing declared member named beside its place; in a
+     place, a member name the schema does not declare, a text's language and a number that is no index of a declared
+     array, and any numeric key of an object, are written `*`; beside each failed keyword the place names the schema's
+     own limit (values, pattern, length in code points, count, bound, format, the type alone for a failed type, and for
+     a nullable member one line, its value branch's, ending in ", or null", `additionalProperties` that only declared
+     members are taken, `propertyNames` the names a map takes, `not` what the member takes instead, any other `oneOf`
+     its forms; at the four members that take the none form a failed type, a `null` included, names the form beside the
+     type; only at a channel's `texts` or `texts/holding` does a member named `none` add that only `texts.final` takes
+     the none form). The finding
+     points to the declaration's grammars.
+  3. CA-3. `FAC-SEM-163`: a project, a category code, a tier code, a channel, a source (read or declined), a hand-off
+     queue and a recorded decision appear once; a channel with replies off names a decision, and a channel's decision
+     is one `recorded_decisions` lists (section 11: recorded decisions present for every channel held by one). It
+     names at most 64 places per declaration, then one finding at the key counting the rest.
+  4. CA-4. `FAC-SEM-164`: a channel with a holding reply declares its holding text and one that replies its final text,
+     both only when its replies are on, since a channel with replies off owes no texts (section 11: holding and final
+     texts present); a store review asks no clarifying question (sections 4.7, 10); no
+     text and no tier's label is blank or carries U+2014 (section 2.4's send checks); a queue whose answered signal is
+     `none` names its
+     recommendation (section 7.5); a budget above 0 names its spend record, since without one it reads 0 (sections 5
+     and 11). A final text in the none form owes nothing (only an absent one is found), except `{"none": "not_used"}`
+     beside a holding reply when its replies are on, which is found (a holding reply obliges a final reply, section 6); a recommendation on a
+     queue whose answered signal is not `none` is found too (the reader keeps the declaration declared; `pnpm validate` still reports it and exits 1; a reader does not read it). It names at most
+     64 places per document and then one finding at the key counting the rest; past 64 a place is counted, never built.
+  5. CA-5. `FAC-SEM-165`: no member name and no string of the declaration is shaped like a credential, by shape, with
+     `FAC-SEM-101`'s detector on a string's first 4097 code points (today an ordinary name of `sk-` and 16 or more
+     letters, digits, `_` or `-`, in any case, such as the valid channel id `sk-support-desk-faq-answers-2026-v2`, is
+     found too; DEC-0151, in progress, proposes to narrow that to a digit with an upper-case letter and 16, or a digit and 32; the
+     shared detector stays as it is, and an id does not start with `sk-`; the finding on a member name or on a value of
+     an id's member that starts with `sk-` says it is read as a key and asks for a rename, by role: never under a
+     channel's `texts` or its language-keyed maps, nor at a label). Three places read narrower, each only when the value
+     matches its own grammar, keyed on the place and not on a holder's name: a project's token slot of the slot's
+     grammar segment by segment, its eval suite and outbox of the relative path grammar by the detector's path-aware
+     reading (`secretArgument`, `secretUrl`), and a queue's recommendation of the board's `opaqueId` grammar by a
+     provider key's and a JWT's shapes only; anything else is read whole. The rule reads at most 1 000 000 UTF-16 units for
+     one document, every copy of the declaration in it sharing them: the walk charges once: every value the reading reaches costs 16 (`VISIT_COST`): a name or a string 16 plus its detector cost, each array or object 16 (the declaration itself and empty ones included), and each number, boolean or null 16 (walking containers outside the reading is linear in the document's size and outside the budget),
+     beside what `detectorCost` counts, a bound any port's detector may need, in UTF-16 units, what every pass reads (an astral character is two): the string's UTF-16 units;
+     from each `eyJ`, its base64url run, `eyJ` included, and when it ends at a `.`, the dot and the run after it; from
+     each `sk-`, in any case, at a boundary (the start, a character other than a letter or a digit, `%XX`, `%25XX`,
+     `\xHH`, `\uHHHH`, a two- or three-digit octal escape, a backslash escape, or a colour sequence with any number of
+     parameter characters (digits, `;`, `:`) whose ESC is raw or escaped in either case, `\33` included), its three
+     characters included, up to 255 UTF-16 units (these forms only: a form ending in a letter or a digit, such as a CSI
+     with a private parameter or another final, `\U00000041` or `%u0041`, is charged as a non-boundary, and a port that
+     decodes it before a boundary-bound reading is outside the bound); after every `sk-` away from a boundary, up to 16 UTF-16 units after it (the run the shape needs); after every other provider prefix, anywhere and in any case
+     (`gh?_`, `xox?-`, `AKIA`, `glpat-`), up to its floor (20, 10, 16 and 20 UTF-16 units), what a near miss is reread before it fails; beside them the shared detector's long-run floor of 40: in each of three partitions (the base64 class; without `=`; without `=` and `/`), for each maximal run shorter than 40, min(length, 39) per code point (a URL's values too); and, for every string (a string read as a URL included, since `secretUrl` runs the argument reading first), 4 (`ARG_PIECE_COST`) for each white space, `=`, `/` and `\` the argument reading may split at (each a bound any detector may need, whatever boundary or case its own shapes take); and, for a string read as a URL, 128 once for its two parses, whether it parses or the parser throws, and, on the names and values a WHATWG URL parse yields: 128 per query or fragment piece, its
+     name's and value's UTF-16 units, 4 for each `&` of the search and the hash, the value's `eyJ` term, `sk-` term, provider-prefix floors and long-run term, and the triangular number n(n+1)/2 of the
+     length of a name holding an upper-case letter when its value is not empty. Once it is spent, nothing more is read and every further member collapses; one finding per
+     document then says that reading the declarations for credentials takes more than 1000000 UTF-16 units of reading,
+     that a reader treats the declaration as not declared and that fewer or shorter texts or names fix it (at a
+     misplaced copy, that the copy is not read and should be removed), at the copy where the budget ran out (never at a read declaration read
+     whole); the 64 places are a cap per document (a copy names a place only while the document's total is under 64),
+     and past it each copy counts its own places and closes them at that copy: the read declaration's count at its key
+     holds only its own places, and a misplaced copy's overflow is closed at that copy. The read
+     declaration is judged only by the findings under its own path: a misplaced copy's credential, or the budget
+     running out in a copy, is found at that copy and leaves the read declaration's answer as it is. A reader treats a
+     declaration with `FAC-SEM-165` or `FAC-SEM-163` as not declared, as it does one with `FAC-SEM-162`, keeps one with
+     only `FAC-SEM-164` declared and shows those findings to its author, and never displays a credential-shaped value
+     (`channelAgentView`, with the same `declared`, `reported` and `errors` as `connectionsView`, `errors` always present: `declared: false, reported: false,
+     errors: []` with no key,
+     `declared: false, reported: true` with the findings, `declared: true` with the obligations; every line is
+     `<code> at <place>: <reason>`, the reason the finding's message without the decision it cites, identical lines
+     once; a host that shows the view to an author also runs the rules, since the view judges only the read
+     declaration: `FAC-SEM-162 at <place>: <keyword> (<limit>)` for each schema place of an invalid
+     declaration, `FAC-SEM-165 at <place>` for each credential place, and, for a manifest whose only copy is
+     misplaced, `FAC-SEM-162 at <place>` where that copy stands; at most 64 schema places, then
+     `FAC-SEM-162 at /: and N more`). No finding's message carries a declared value and no rule's place echoes
+     instance data: a place writes a declared name, an index of a declared array, else `*` (an undeclared name, a
+     numeric object key, a text's language), in `FAC-SEM-162`, `FAC-SEM-164` and `FAC-SEM-165` alike; a member whose
+     name is not plain (letters, digits, `_` and `-`, at most 64, no run of 7 digits once `-` and `_` are left out) or
+     is shaped like a credential collapses its place, so it and every member below it are placed at its nearest plain
+     ancestor, and so does a member more than 64 levels down; `FAC-SEM-165` names at most 64 places and counts the rest. The walk keeps an
+     explicit stack of one frame per container and builds a place only when it reports one, so its time grows with the
+     value's size. A string is read as a URL (`secretUrl` and `detectorCost`'s URL terms) only when its head, once its
+     leading C0 controls and spaces are stripped and ASCII tab, line feed and carriage return removed (as the URL parser
+     does), opens with a scheme, is ASCII only and holds no percent-escape of a byte at or above 0x80; any other string
+     is read by the value and argument shapes only, with no URL parse, since host processing of a long label outside
+     ASCII, written or escaped, grows with its square (a special scheme takes a host even without `//`). The gap this
+     leaves is named: every other string, a sentence that holds a URL included (`Please write to
+     https://u:p@help.example/`, pinned by a vector), is read for key shapes only, so a password or a credential-named
+     query parameter there is not found. The declaration a reader reads is walked
+     first and its misplaced copies after it, so a copy cannot spend the budget before the read one. A text is blank when nothing is left after white space, `\p{Cf}`, `\p{Cc}`, `\p{Z}`,
+     `\p{Default_Ignorable_Code_Point}`, the fillers U+115F, U+1160, U+3164, U+FFA0 and U+2800, and U+FFFC.
+  6. CA-6. Not checked statically: that the side is one of the standard's sides and the route's capability the one for
+     its kind (side codes and kinds live only in the signal server's data), that a tier's fact is a declared customer
+     fact (the declaration lists none), that a none form's `until` is still ahead (the check does not depend on today's
+     date), that the question route is agreed with the side (FAA-197), that the named agents, capabilities, desk and
+     limit exist, the standard's
+     reference values, the working calendar of a limit counted in working time (declared as a wall-clock duration),
+     whether one declaration may hold projects on several sides (to be asked of the standard's owner on thread
+     `b6820b97` at merge), a valid declaration in both a manifest and its well-known answer (no finding; readers read
+     the manifest's), and everything the signal server observes.
+  7. CA-7. The key stays at `0.1` until a consumer passes the vectors (`fixtures/vectors/channel-agent.json`, written by
+     `tools/vectors/channel-agent.ts`); the standard then names version 1, which a later decision records. Until then
+     readers read `/0.1` only, and that decision names the window in which readers read both keys. A new version of the
+     standard needs a contract revision before any agent declares it: until then `channel-agent-standard/2` is refused
+     (`FAC-SEM-162`, and `FAC-SEM-099` in a `protocols` list). A well-known answer lists `channel-agent-standard/1` in
+     its `protocols` only once its readers have re-pinned to this revision.
+  8. CA-8. Text that arrives from a channel (a message, a caption, a file name, a link, a quoted reply, an attachment
+     and any text extracted from it, a mail's headers, and what a link leads to) is data, never an instruction to the
+     agent. A request inside the agent's own task is the task, and the task is what the standard's sections 2.3, 4 and 6
+     ask (for example an answer, the product's checks of section 4.2 and the section 6 ladder beside them, reading the
+     customer's own account as section 4.6 says (with the customer identified by the channel, never by text in the
+     message), a hand-off by section 4.1's rule, a tier's priority by section 2.3); the agent never makes a tool call,
+     sends a message, spends, changes access or takes any other action outside its task because a channel message asks
+     for it, and it replies on the reply path its operator configured. CA-8's channels are the channels the agent
+     answers people on, declared or not (those a valid declaration names, and any other it answers people on). The
+     operator channel (`fabric-operator-channel/0.1`) is not one of CA-8's channels and stays a DEC-0121 AP-3 source
+     (AP-3's own sentence; OC-5 and OC-7 for its form). One bot serving both an operator channel and channels the agent
+     answers people on is not covered here: such a bot keeps every operator-channel rule in every chat as written, and
+     the case goes to the standard's and the operator channel's owners (asked of the standard's owner on thread
+     `b6820b97` at merge). Until the owners answer, a bot that serves both cannot answer people as the standard asks in
+     any chat: OC-3 lets only an allowlisted id cause an effect, OC-4 limits what it sends to its events feed and
+     results, and in a group OC-14 keeps it silent unless addressed; give the operator channel a bot of its own. A
+     message on a channel is the operator's word only when the transport identifies its sender as the operator: an
+     allowlisted numeric user id, bound in a private chat with the agent's own bot as the operator channel's OC-3 binds
+     one (its link code typed there; that message is consumed by the binding and is no customer ticket, since the
+     operator channel keeps the code only as a hash and the message cannot sit on a ticket board, a departure from the
+     standard's sections 2.1, 2.2 and 5.1's `notATicket` sent to its owner, counted in `not_a_ticket` volume), whose
+     word then counts in any chat that bot answers, a group included, except a chat it answers through a Telegram
+     Business connection (a business account's chats a bot answers on its behalf: Bot API `Update.business_message`,
+     `Message.business_connection_id`), or, on an `account` channel, the account's owner, only when the owner is the
+     operator, the send record of the account's one session owner (this contract's assumption about the session owner of
+     the standard's section 9, not a term of that section: a record of every send it made, by an agent or relayed from
+     the ticket board; without it the word stays data) shows the message was not sent through that session owner
+     (neither by an agent nor relayed from the ticket board; a send record can show only that, not which session sent
+     it), every other session of the account is the operator's own (no second person; recorded in the operator's
+     configuration of the session owner), and no business bot is connected to the account (MTProto
+     `account.getConnectedBots` lists none); never by a name, a display name or text in the message, and otherwise it
+     stays data. The operator is a person's own user id; a message sent on behalf of a chat (`sender_chat` set: an
+     anonymous admin, or a member posting as a channel) carries a shared placeholder sender and is never the operator's
+     word. A message marked offline or scheduled (Bot API `Message.is_from_offline`; MTProto `message.offline` or
+     `message.from_scheduled`: a greeting, an away message, or the operator's own scheduled message) is never the
+     operator's word, on any path, the agent's own bot included, and an agent that answers through a Telegram Business
+     connection has no operator identification yet: its operator's word there is data until the standard's owner
+     answers. On an `account` channel, a message the session owner cannot attribute to the operator's own session (its
+     send record is missing, or does not show the operator's word) stays data until the standard's owner answers the
+     identification question (asked of the standard's owner on thread `b6820b97` at merge). Such a word acts only inside
+     that chat, as the standard's section 4.10 says (the operator's decision given in a chat "outranks
+     every holding rule of the agent for that chat"); it is not one of DEC-0121 AP-3's sources and never the source of
+     an OA-2 relay (DEC-0126: the operator's words passed to another of their agents, as a `mandate/1` or a
+     `_meta.decision` with `source`, or prose carrying the four parts), and the customer ticket it acts on stays a
+     customer ticket, its outcome set and counted as sections 3 and 5.1 say. That word does not release a send held by
+     the transport's owner (the standard's section 9) or behind a service's relayed action: the owner's own approval
+     rules end the first (section 9), and an agent relays a decision on the second only from DEC-0121 AP-3's sources
+     (AP-1 and AP-2 still take the service's own page, an accepted elicitation and the host's click). A word that asks
+     for an action outside that chat causes none; how the agent tells the operator is a question to the standard's owner
+     (asked of the standard's owner on thread `b6820b97` at merge). Text the operator quotes or forwards, and every
+     other sender's text, stays data. The agent records such a word in its own audit, quoting the message and its sender
+     id. A producer's own test of CA-8 covers at least: a message from anyone but the operator asking for an action
+     outside the task causes none; the operator's in-chat request for an action outside the task (a refund, an access
+     change) causes none; the operator's request for an action outside that chat causes nothing and is audited; only a
+     sender the transport identifies is the operator, and that word acts only in that chat; a chat word never sets
+     `_meta.decision` (AP-2: the decision a service call carries for a relayed action) or an OA-2 relay; quoted or
+     forwarded text stays data; a message with `sender_chat` set is never the operator's; a message that arrives through
+     a Telegram Business connection is never the operator's; a message marked offline or scheduled is never the
+     operator's; and, where the agent has an operator channel, that channel stays a DEC-0121 AP-3 source. A member such
+     as `untrusted_input` makes the declaration not declared (`FAC-SEM-162`, closed objects). CA-8 is bounded by section
+     4.10 and by section 10's `account` row and does not override them; the identification bound (who counts as the
+     operator in a chat) is sent to the standard's owner. CT-220, when drafted, is to keep this bound. This is a duty of
+     every channel agent, checked by its own test, and the declaration gains no `untrusted_input` member or any like it,
+     since it is not a property an agent may or may not declare and a flag whose `false` is valid would be false.
+- **Why:** the standard asks every channel agent for one declaration that a checker reads the same way; a schema with
+  vectors in the contract gives the adapter's check, and any other reader, one shape and one answer per case, instead of
+  each reading its own copy of section 13.6. The rules are those section 11 checks without data the declaration does
+  not hold. A finding that quoted a declared value would carry what the declaration is meant to keep out.
+- **Alternatives considered:** a property of `manifest.schema.json`'s `provider.extensions` (an invalid declaration
+  would then refuse the whole manifest, where the actions and load keys are reported and treated as not declared); the
+  manifest only (section 11 also names the well-known answer of a service with no manifest); `$ref`s to the usage
+  report's limit id, the board's project id and the capability name (a kit would vendor three more schemas and their
+  closures; the patterns are repeated and `test/channel-agent.test.ts` holds them equal); a check that the route's
+  capability matches the side (the contract cannot know which side is whose); flagging an address in a declared text (a
+  final reply may name where to write, section 6.6); Ajv's schema paths in the finding (relative to a `$ref`'s target,
+  so two members read the same).
+- **Compatibility:** additive: a new extension key, which a reader that does not know it ignores, and four rules that
+  read only a manifest or a well-known answer that carries it. No existing schema changes; `rawValues` in
+  `src/secret-shape.ts` appends in place (the same lines as CT-194's branch), which changes no answer;
+  `channel-agent-standard/1` joins the protocol register as a schema `const`. `contractVersion` stays `0.1.0`. The
+  standard's section 5.1 publishes `support-quality-daily/1` per project, where `/1` keeps one channel of four per
+  event, with members `/1` does not have, and defers them itself until every reader of the feed takes that schema, as
+  round 4 reads; the owner's master since `86c49ec` renames `autonomy.answered` to `autonomy.answeredTickets`, and
+  `stability.fallbackTurns` and `fallbackTickets` to `stability.safeReplyTurns` and `safeReplyTickets`, and takes
+  `toPerson*` in turns (board message `b840a16b`). That schema and the mapping of the seven channel kinds to `/1`'s four
+  channels are what DEC-0151 (CT-210, in progress) proposes; until it lands an agent following section 5.1 emits
+  payloads this contract refuses. An agent declaring several projects publishes no per-project `support.quality_daily`
+  on a shared channel; under DEC-0151's rule 1 such a channel is withheld from DEC-0151's landing until its feed's
+  readers adopt, so the standard's observed per-project quality check reads missing there until the standard's section
+  11 accepts that withholding by period. Declarations published before this revision are read under these grammars; what
+  they narrow against the standard's section 13.6 is the one list in [channel
+  agent](specification/channel-agent.md#narrowings-against-the-standard), held to the schema.
+- **Consequences / affects:** `src/extensions.ts`, `src/channel-agent.ts`, `src/semantic-rules.ts`,
+  `src/protocol-revisions.ts`, `schemas/service-channel-agent-extension.schema.json`, `tools/vectors/channel-agent.ts`,
+  `tools/vectors/run.ts`, `fixtures/vectors/channel-agent.json`, `fixtures/positive/service-channel-agent-extension.json`,
+  `fixtures/positive/manifest-channel-agent.json`, `fixtures/positive/service-well-known-channel-agent.json`,
+  `fixtures/negative/service-channel-agent-extension-*` and their catalogue rows,
+  `fixtures/semantic/manifest-channel-agent-*`, `fixtures/semantic/service-well-known-channel-agent-*`,
+  `test/channel-agent.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`,
+  `test/consistency.test.ts` (G-08's key list), `vitest.config.ts` (the module's floor), `src/secret-shape.ts`
+  (`rawValues`), `fixtures/semantic/manifest-channel-agent-nulls.json`, `src/validate-cli.ts` and
+  `test/validate-cli.test.ts` (`hint/declaration-only`), `docs/specification/service.md` (the well-known answer's
+  extensions), `docs/specification/identifiers.md` (compared as written), `docs/ux/scenarios.md` (SCN-002, SCN-043's alternative paths, SCN-055), `docs/ux/screens.md` (SCR-03), `docs/ux/flows.md` (FLW-29);
+  `docs/specification/channel-agent.md`, `docs/specification/README.md`, `interop.md` (the extension keys), `support-quality.md` (the
+  pointer), `conformance.md` (the register, the reference modules, the channel agent's rows), `docs/DOCMAP.md`,
+  `CONTEXT.md` (Channel agent), `docs/evidence/sources.md`,
+  `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
+  `docs/handoffs/2026-11-04-channel-agent.md`.
+- **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 37 of the readings, round 21's seam reading included; CA-8 is the coordinator's
+  decision of round 17 on thread `b6820b97` (message `5a1334d1`), answering a producer who asked whether the declaration
+  needs an `untrusted_input` field, and its bounds are the coordinator's decision of round 18, taken in the coordinating
+  session with no board message: a word recognised in a chat is not a DEC-0121 AP-3 source, it never sets
+  `_meta.decision` (AP-2) or starts a mandate (MD-1), on an `account` channel it is the owner's word only with the
+  session owner's send record, and it is recorded in the agent's own audit, quoting the message and its sender id. Round 19's coordinator decision
+  set CA-8's channels and kept the operator channel as an AP-3 source; round 20's set the scope (declared or not, one
+  wording for a bot that serves both), that a chat word is no OA-2 relay source and that CT-220 keeps this bound; round
+  21's shrank CA-8 to what the standard and AP-3 already support and sent the rest to the standard's owner as questions
+  (how the agent tells the operator about an out-of-chat request, whether the operator's message is counted, privacy
+  deletion of audit quotes, the `account` identification, the receiver order on a shared bot). Round 21's seam decision kept the operator
+  channel's rules unamended: one bot serving both an operator channel and channels the agent answers people on is not
+  covered by DEC-0150, keeps every operator-channel rule in every chat as written, and goes to the standard's and the
+  operator channel's owners. Round 22's decision added that until the owners answer a bot that serves both cannot answer
+  people in a group as the standard asks (the operator channel gets its own bot, OC-2), and that the ticket stays a
+  customer ticket counted as sections 3 and 5.1 say; round 22's seam decision quoted section 4.10 exactly and added
+  that a send held by the transport's owner or behind a service's relayed action stays held until a decision comes from
+  AP-3's sources. Round 23 was not clean (the held-send and shared-bot sentences): the coordinator's decision scoped the
+  held send to the chat word (the owner's approval rules end a section 9 hold; AP-1 and AP-2 still take the service's
+  page, an accepted elicitation and the host's click) and based the shared-bot sentence on OC-3, OC-4 and OC-14.
+  Round 24 was not clean (the merge post cited a paragraph main lacks): the coordinator's decision quotes the list in
+  the post, states round 4's section 5.1 as round 4's beside the owner's later master, and says a shared channel stays
+  withheld after DEC-0151 lands until its readers adopt.
+  Round 25 was clean; round 26 was not (the DEC-0153 sibling line went stale when DEC-0153 added OD-9, a ninth
+  extension key and a third schema): the coordinator's decision rewrote the merge notes against DEC-0153 at `ada7c23d`
+  and folded round 25's deferred landing edits.
+  Round 27 was clean; round 28 was not clean: the bot path in a private chat (SCN-043 and FLW-29); the coordinator's
+  decision moved it to a group, added the `sender_chat` and identification sentences, the wider channel text and a
+  producer's minimum test cases to CA-8, and the long-run near-miss term to CA-5's cost.
+  Round 29 was not clean (adoption paraphrase and the bare-path landing step): the coordinator's decision has adoption
+  rows quote the page's minimum-cases sentence verbatim, completes the bare-path landing step, charges the long-run term
+  in three partitions, and widens the minimum cases, the task and the identification sentences.
+  Round 30 was not clean (OA-2 and `_meta.decision` undefined on the page): the coordinator's decision defines and
+  links both, adds the `account` condition that every other session of the account is the operator's own, binds the
+  operator's user id in a private chat with the agent's own bot, and charges the argument reading's pieces.
+  Round 31 was not clean (URL strings uncharged and the bot-path clause): the coordinator's decision charges the
+  argument pieces on every string, separates where the operator's id is bound from where the word counts, adds the
+  Telegram Business conditions and the in-chat request outside the task, and names section 2.3 in the task.
+  Round 32 was not clean (astral text and `head()`): the coordinator's decision counts the budget in UTF-16 units (an
+  astral character is two), cuts each string's head once without an array, charges each `&` of a URL's search and
+  hash, and excepts a chat answered through a Telegram Business connection from the bot's word.
+  Round 33 was not clean (URL parse uncharged): the coordinator's decision charges 128 once for every string read as a
+  URL, parsed or not, counts only a string's head, and names the offline marker and the link-code departure.
+  Round 34 was not clean (the Narrowings size bullet and the offline rule in SCN-043 and FLW-29): the coordinator's
+  decision states the size charge as item 4 does, makes a message marked offline or scheduled never the operator's on
+  any path, names the link-code departure from sections 2.1, 2.2 and 5.1, and charges each container the reading enters.
+  Round 35's unit reading was not clean (the vectors' text against the container charge): the coordinator's decision
+  states one charge for every value the reading reaches; round 37 was not clean (the sample count and the cap sentence):
+  the cap sentence is simplified, Lao and Khmer join the measured samples, and an unpinned memory claim is dropped.
+  Round 35 was not clean (budget versus 2 MiB cap outside Latin script) and round 36 was not clean (per-script cost
+  figures): the coordinators' decisions state the cap once (Latin-script prose stays under the 2 MiB cap at the budget,
+  escaped or not; prose in any other script can exceed it, as written or escaped as `\uXXXX`. Keep a large declaration
+  in the manifest and measure the answer's bytes.) and the per-script costs as a test measures them, and name the send
+  record as this contract's assumption.
+  `DEC-0150` was reserved by the coordinator with
+  `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
+  (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
+  (`d3da4336`) to next 152 in one commit, `ee67e35e` (key `support-quality-v2-dec`), the reservation
+  of DEC-0151 (in progress), whose Source says the same. DEC-0149's reservation is `e27a5441` (key `ct194-source-manifest`, next 150),
+  which is not on origin's DEC chain.
+  `FAC-SEM-162` to `FAC-SEM-165` were reserved under `channel-agent-sem-a` to `-d` (SEM-0162 to SEM-0165).
+  Rounds 38 and 39 of the readings were clean on unit, product and seam at `f0feccbd`, which accepted the decision; it
+  merged with main at `08e24572` (DEC-0148) and landed on 2026-11-05.

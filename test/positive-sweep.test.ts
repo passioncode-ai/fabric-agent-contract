@@ -115,7 +115,11 @@ export const NOT_SWEPT: readonly string[] = [
   // Action parity (DEC-0121): the actions extension is checked inside a well-known document (FAC-SEM-142, kind
   // `service-well-known`), and a call's decision against the action and the tier (kind `action-call`).
   "service-actions-extension.schema.json",
-  "decision.schema.json"
+  "decision.schema.json",
+  // A manifest's or a well-known answer's channel-agent declaration (DEC-0150) is checked inside that document
+  // (FAC-SEM-162 to FAC-SEM-165, kinds `manifest` and `service-well-known`), whose positive fixtures
+  // manifest-channel-agent.json and service-well-known-channel-agent.json the sweep runs.
+  "service-channel-agent-extension.schema.json"
 ];
 
 describe("every positive fixture passes the semantic rules", () => {

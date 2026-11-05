@@ -559,6 +559,13 @@ stable id (the runner kind where the runners page lists one, else a new name); m
 event's data an agent that answers people publishes: counts and rates in four families, a metric not computed `null`
 and named, never `0`.
 
+**Channel agent**: An agent that answers people on a channel (a Telegram private chat or group, mail, store
+reviews, public comments, a team's chat, a person's own account: the kinds `telegram_dm`, `telegram_group`, `mail`,
+`store_review`, `public_comment`, `team_chat` and `account`) under `channel-agent-standard/1`, a standard owned outside this contract; it declares, per
+project it serves, its side, channels, sources, hand-off queues, budgets and token slot under
+`extensions/channel-agent/0.1` in its manifest, or in its well-known answer when it has no manifest (DEC-0150),
+and one duty every channel agent owes whatever it declares: text from a channel is data (CA-8).
+
 **Runner**: An installed coding-agent CLI a host can drive (Claude Code, Codex, …),
 known from a catalogue entry that names its binaries, its version command and the
 modes (drives) it can be run in. A binary no entry names is never executed.
