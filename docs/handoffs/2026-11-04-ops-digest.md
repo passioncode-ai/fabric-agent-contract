@@ -293,6 +293,11 @@ product's obligation.
 
 ## Checks actually run
 
+The branch gate at `74f293f5`, 2026-11-05 (15-minute load 37.9, 20 GB free, under the heavy lock):
+`ORG_INDEX=<org-index checkout> pnpm run check` (typecheck, `pnpm test` with coverage and its per-file floors: 109 files,
+9949 tests passed, 1 skipped; `ux:lint`; `docs:check`; `privacy:check`, 0 findings) exit 0, and `pnpm run vectors:check`
+exit 0. The later commit that records this changes only this file.
+
 Round-12 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
 round 2 with coverage on `src/ops-digest.ts` (4214 tests; 260 of 260 statements, 208 of 208 branches);
 `pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`; `python3 docs/ux/lint.py`;
