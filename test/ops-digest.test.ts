@@ -5,11 +5,13 @@ import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
-import { type HourlyDigest, OP_NAME, OP_NAME_MAX, foldDay, foldHour, isRise, opsDigestRules, realDay, wholeHour } from "../src/ops-digest.js";
+import { type HourlyDigest, OP_NAME, OP_NAME_MAX, digestFoldersView, foldDay, foldHour, isRise, opsDigestRules, realDay, wholeHour } from "../src/ops-digest.js";
+import { EXTENSION_KEYS } from "../src/extensions.js";
 import { VECTOR_FILE, buildOpsDigestVectors } from "../tools/vectors/ops-digest.js";
 import { main as runCli } from "../src/validate-cli.js";
 
-// DEC-0153: ops.digest.hourly@1 and ops.digest.daily@1, FAC-SEM-166 and FAC-SEM-167, the reference folds and vectors.
+// DEC-0153: ops.digest.hourly@1 and ops.digest.daily@1, FAC-SEM-166 and FAC-SEM-167, the reference folds and vectors;
+// extensions/ops-digest/0.1 in a local descriptor and FAC-SEM-168 (OD-9).
 type Json = Record<string, any>;
 const root = projectRoot();
 const dir = path.join(root, "fixtures/semantic");
@@ -21,7 +23,7 @@ const vectors = JSON.parse(readFileSync(path.join(root, VECTOR_FILE), "utf8")) a
 const validator = await createValidator();
 const valid = (schema: string, value: unknown) => validateDocument(validator, `${SCHEMA_PREFIX}schemas/${schema}`, value).valid;
 
-describe("FAC-SEM-166 and FAC-SEM-167: the operations digests", () => {
+describe("FAC-SEM-166, FAC-SEM-167 and FAC-SEM-168: the operations digests and where they are", () => {
   it.each(readdirSync(dir).filter((name) => name.startsWith("ops-digest-")))("%s yields exactly its expected codes", (name) => {
     const fixture = load(name);
     expect([...new Set(evaluateSemanticRules(fixture.kind, fixture.input).map((f) => f.code))]).toEqual(fixture.expect);
@@ -150,6 +152,75 @@ describe("pnpm validate reads a digest by its schema member", () => {
       const result = runCli([file]);
       expect(result.code).toBe(1);
       expect(result.out).toContain("FAC-SEM-166");
+    } finally {
+      rmSync(scratch, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => {
+  const key = EXTENSION_KEYS.opsDigest;
+  const at = `/extensions/${key.replace(/~/g, "~0").replace(/\//g, "~1")}`;
+  const descriptor = () => structuredClone(load("ops-digest-folders-ok.json").input) as Json;
+  const withFolders = (folders: unknown, placement?: string): Json => ({ ...descriptor(), ...(placement ? { placement } : {}), extensions: { [key]: folders } });
+  // A long mixed-case run that secretValue reads as a credential, as test/descriptor-rules.test.ts builds one.
+  const fake = ["Ex4mpleN0tARealKey", "ButShapedLikeOne", "AbCdEf012345"].join("");
+
+  it("spells the key once, under the contract's host and path", () => {
+    expect(key).toBe("https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1");
+  });
+
+  it("reads a declaration, an invalid one and none", () => {
+    for (const none of [null, "x", { extensions: [] }, { extensions: {} }, { extensions: { [`${key}x`]: [] } }]) expect(digestFoldersView(none)).toEqual({ declared: false });
+    expect(digestFoldersView(descriptor())).toEqual({ declared: true, valid: true, folders: descriptor().extensions[key] });
+    expect(digestFoldersView({ extensions: { [key]: {} } })).toEqual({ declared: true, valid: false, errors: ["/ type"] });
+    expect(digestFoldersView({ extensions: { [key]: [{ dir: "../x", source: "app" }] } })).toEqual({ declared: true, valid: false, errors: ["/0/dir pattern"] });
+  });
+
+  it("refuses the key on a remote placement or with no data folder, beside an invalid value too", () => {
+    expect(found("service-descriptor", withFolders([{ dir: "digests", source: "app" }], "local"))).toEqual([]);
+    expect(found("service-descriptor", withFolders([{ dir: "digests", source: "app" }], "remote")).filter((f) => f.startsWith("FAC-SEM-168"))).toEqual([`FAC-SEM-168 ${at}`]);
+    expect(found("service-descriptor", withFolders([], "remote")).filter((f) => f.startsWith("FAC-SEM-168"))).toEqual([`FAC-SEM-168 ${at}`, `FAC-SEM-168 ${at}`]);
+    expect(found("service-descriptor", withFolders("digests"))).toEqual([`FAC-SEM-168 ${at}`]);
+    const { paths: _paths, ...pathless } = withFolders([{ dir: "digests", source: "app" }]);
+    expect(found("service-descriptor", pathless)).toEqual([`FAC-SEM-168 ${at}`]);
+    expect(found("service-descriptor", { ...pathless, paths: { data: 7, logs: [] } }).filter((f) => f.startsWith("FAC-SEM-168"))).toEqual([`FAC-SEM-168 ${at}`]);
+  });
+
+  it("names each source once and refuses a home folder or a credential in dir and source", () => {
+    const value = withFolders([
+      { dir: "digests", source: "app" },
+      { dir: "workers/digests", source: "app" },
+      { dir: "Users/jdoe/digests", source: "home" },
+      { dir: fake, source: "secret" },
+      { dir: `Users/jdoe/${fake}`, source: "both" },
+      { dir: "digests", source: "sk-abcdefghijklmnop0123" }
+    ]);
+    expect(found("service-descriptor", value)).toEqual([
+      `FAC-SEM-168 ${at}/1/source`,
+      `FAC-SEM-168 ${at}/2/dir`,
+      `FAC-SEM-168 ${at}/3/dir`,
+      `FAC-SEM-168 ${at}/4/dir`,
+      `FAC-SEM-168 ${at}/5/source`
+    ]);
+    expect(evaluateSemanticRules("service-descriptor", value).find((f) => f.instancePath === `${at}/4/dir`)?.message).toContain("credential");
+  });
+
+  it("is a descriptor's rule only, and a declaration's absence is no finding", () => {
+    expect(found("service-well-known", { extensions: { [key]: "digests" } }).filter((f) => f.startsWith("FAC-SEM-168"))).toEqual([]);
+    const { extensions: _dropped, ...bare } = descriptor();
+    expect(found("service-descriptor", bare)).toEqual([]);
+  });
+
+  it("pnpm validate passes the descriptor that says where its digests are, and names FAC-SEM-168 in one that breaks it", () => {
+    expect(runCli([path.join(root, "fixtures/positive/service-descriptor-ops-digest.json"), "--json"]).code).toBe(0);
+    const scratch = mkdtempSync(path.join(tmpdir(), "fac-ops-digest-"));
+    try {
+      const file = path.join(scratch, "descriptor.json");
+      writeFileSync(file, JSON.stringify(load("ops-digest-folders-source-twice.json").input));
+      const result = runCli([file]);
+      expect(result.code).toBe(1);
+      expect(result.out).toContain("FAC-SEM-168");
     } finally {
       rmSync(scratch, { recursive: true, force: true });
     }

@@ -1068,5 +1068,14 @@
   {"name": "ops-digest-hourly-negative-count", "schema": "ops-digest-hourly.schema.json", "path": "negative/ops-digest-hourly-negative-count.json", "valid": false, "keyword": "minimum"},
   {"name": "ops-digest-daily-hours-25", "schema": "ops-digest-daily.schema.json", "path": "negative/ops-digest-daily-hours-25.json", "valid": false, "keyword": "maximum"},
   {"name": "ops-digest-daily-day-time", "schema": "ops-digest-daily.schema.json", "path": "negative/ops-digest-daily-day-time.json", "valid": false, "keyword": "pattern"},
-  {"name": "ops-digest-daily-schema-slash", "schema": "ops-digest-daily.schema.json", "path": "negative/ops-digest-daily-schema-slash.json", "valid": false, "keyword": "const"}
+  {"name": "ops-digest-daily-schema-slash", "schema": "ops-digest-daily.schema.json", "path": "negative/ops-digest-daily-schema-slash.json", "valid": false, "keyword": "const"},
+  {"name": "service-ops-digest-extension", "schema": "service-ops-digest-extension.schema.json", "path": "positive/service-ops-digest-extension.json", "valid": true},
+  {"name": "service-descriptor-ops-digest", "schema": "service-descriptor.schema.json", "path": "positive/service-descriptor-ops-digest.json", "valid": true},
+  {"name": "service-ops-digest-extension-absolute-dir", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-absolute-dir.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-ops-digest-extension-parent-dir", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-parent-dir.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-ops-digest-extension-drive-dir", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-drive-dir.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-ops-digest-extension-home-dir", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-home-dir.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-ops-digest-extension-upper-source", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-upper-source.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-ops-digest-extension-empty", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-empty.json", "valid": false, "keyword": "minItems"},
+  {"name": "service-ops-digest-extension-extra-member", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-extra-member.json", "valid": false, "keyword": "additionalProperties"}
 ]

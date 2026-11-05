@@ -19,7 +19,20 @@ fields are Fabric's ADR-0188 (commit `0d0e5922`); the reference implementation i
   by hand); 3 positive, 9 negative and 13 semantic fixtures; `test/ops-digest.test.ts`.
 - Registered: `src/semantic-kinds.ts` (kinds `ops-digest-hourly`, `ops-digest-daily`), `src/semantic-rules.ts`,
   `tools/vectors/run.ts`, `vitest.config.ts` (include and a 100 % branch floor for `src/ops-digest.ts`),
-  `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts` (148 schemas).
+  `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts` (149 schemas with
+  OD-9's).
+- OD-9, a change made in review (board thread `f7758225`: Fabric proposed a top-level descriptor member
+  `opsDigests: [{dir, source}]`; the descriptor schema is closed, so the contract answered that the lawful place is
+  `extensions`): the extension key `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1`
+  (`EXTENSION_KEYS.opsDigest`, protocol `fabric-ops-digest/0.1` in `NAMED_ONLY`), its value 1 to 8 closed
+  `{dir, source}` (`schemas/service-ops-digest-extension.schema.json`, `dir` in the package-path grammar of
+  `fabric-package.schema.json#/$defs/path`, relative to `paths.data`); `FAC-SEM-168` (receipt SEM-0168, kind
+  `service-descriptor`) with `digestFoldersView` and `digestFoldersRules` in `src/ops-digest.ts`; 2 positive and 7
+  negative fixtures with catalogue rows, 6 semantic fixtures (`ops-digest-folders-*`), tests in
+  `test/ops-digest.test.ts`, `test/rule-tolerance.test.ts` and `test/consistency.test.ts`; the spec section "Where a
+  collector reads the daily digests", the descriptor bullet in `service.md`, the key in `interop.md` (eight keys) and
+  the named-only list in `versioning.md`; two conformance rows (a product declaring its folders, a collector), the
+  register row and next free `FAC-SEM-169`. Fabric (CO-503) and Project Observatory (OBS-330) are its first consumers.
 - `conformance.md`: the reference module row, three rows (a product folding its log, a reader of digests, a host
   serving `retro-after-work`), the register rows `FAC-SEM-166` and `FAC-SEM-167`, next free `FAC-SEM-168`;
   `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (Operations digest, Retro after work); backlog
@@ -42,18 +55,27 @@ fields are Fabric's ADR-0188 (commit `0d0e5922`); the reference implementation i
 - A daily rise is checked as at least 10 failures per hour it rose and at most the day's failures of its op; an
   hourly rise must equal the hour's failures of its op.
 - Vectors were added (the backlog row asks for them; the folds are what every product reimplements).
+- OD-9's `dir` reuses the package-path grammar rather than a new one; a local descriptor with the key must name
+  `paths.data` (`FAC-SEM-168`), since `dir` is relative to it. Tests, not vectors, pin `FAC-SEM-168`: the reader is
+  a shape check plus four list checks, and the semantic fixtures carry its cases.
 
 ## Siblings on the same registers
 
 DEC-0149, DEC-0150 and DEC-0152 are on other branches. When DEC-0149, DEC-0150 and DEC-0153 are all on `main`:
 
-- `test/schema-compilation.test.ts` counts 150 schemas. Each branch writes 148 and git merges the equal lines
-  silently; whichever lands last sets 150 by hand.
+- `test/schema-compilation.test.ts` counts 151 schemas (146 on `main`, one for DEC-0149, one for DEC-0150, three
+  for DEC-0153). This branch writes 149, DEC-0149's 147 and DEC-0150's 147; whichever lands last sets 151 by hand.
+- DEC-0150 (branch `agent/channel-agent-ext-v3-20261104`) adds the extension key `channel-agent/0.1` too: the second
+  to land keeps both constants in `src/extensions.ts` and `test/consistency.test.ts` (and the test's title), both rows
+  in `interop.md`'s key table, and writes "nine extension keys" there. Its rule codes end at `FAC-SEM-165`, so the
+  register's next free stays `FAC-SEM-169`.
 - `vitest.config.ts` keeps one coverage `include` line holding every branch's files, plus `src/ops-digest.ts`'s
   100 % branch floor.
 - `test/positive-sweep.test.ts`'s sources list holds both `source-rules` and `ops-digest`; `test/rule-tolerance.test.ts`
   holds both branches' kinds, separated by a comma; so do the last rows of `fixtures/catalogue.json`.
-- The register in `conformance.md` lists `FAC-SEM-166` and `FAC-SEM-167` after `FAC-SEM-165`.
+- The register in `conformance.md` lists `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168` after `FAC-SEM-165`, and
+  next free `FAC-SEM-169`. `src/protocol-revisions.ts` and `versioning.md` hold `fabric-ops-digest/0.1` beside any
+  revision another branch adds.
 - Whichever of DEC-0149 and DEC-0153 lands second drops "(DEC-0153, in progress)" from `source.md`'s setup-answer
   sentence, and "in progress" from `ops-digest.md`'s OD-3 and from the DEC-0153 conformance row where it names
   DEC-0149. DEC-0153's own decision text ("DEC-0149's setup state, in progress") is edited if DEC-0153 is still
@@ -69,6 +91,18 @@ DEC-0149, DEC-0150 and DEC-0152 are on other branches. When DEC-0149, DEC-0150 a
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+OD-9, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run` on `test/ops-digest.test.ts`,
+`test/consistency.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`,
+`test/rule-tolerance.test.ts`, `test/protocol-revisions.test.ts`, `test/fixtures.test.ts`,
+`test/semantic-kinds.test.ts`, `test/validate-cli.test.ts` and `test/docs-check.test.ts` (10 files, 4070 tests), and
+`src/ops-digest.ts` at 100 % branches over its own tests; `pnpm exec tsx tools/vectors/run.ts` (29 files);
+`pnpm run docs:check`; `python3 docs/ux/lint.py`; `pnpm run privacy:check` (0 findings); `pnpm validate` on each new
+fixture (positive exit 0, each negative exit 1 with its keyword, each semantic fixture its expected `FAC-SEM-168`).
+The full gate (`pnpm check` with coverage) is owed: the machine's 15-minute load was above 45 and its free disk below
+8 GB when OD-9 was committed.
+
+Before OD-9:
 
 On this branch's tree after the coordinator's changes, 2026-11-05: `pnpm typecheck`, `pnpm run docs:check`,
 `pnpm ux:lint`, `pnpm run privacy:check` (0 findings), `pnpm vectors:check` (29 files) and `pnpm test` with coverage

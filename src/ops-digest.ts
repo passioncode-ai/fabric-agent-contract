@@ -1,6 +1,10 @@
+import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { type Finding, type JsonObject, indexed, isObject } from "./findings.js";
 import { hasHomePath } from "./activity-rules.js";
+import { SCHEMA_PREFIX } from "./contract.js";
+import { EXTENSION_KEYS } from "./extensions.js";
 import { secretValue } from "./secret-shape.js";
+import { createValidatorSync } from "./validator.js";
 
 // #region ops-digest, docs: docs/specification/ops-digest.md
 /**
@@ -8,7 +12,8 @@ import { secretValue } from "./secret-shape.js";
  * hour it happened, one `ops.digest.hourly@1` line per closed hour and one `ops.digest.daily@1` line per closed UTC day.
  * Counts only: no log line, no path, no identifier. A failure count that rose against the hour before is a rise (OD-4).
  * `foldHour` and `foldDay` are the reference folds; `opsDigestRules` is `FAC-SEM-166` (the window and the arithmetic) and
- * `FAC-SEM-167` (no credential and no home folder in an operation's name).
+ * `FAC-SEM-167` (no credential and no home folder in an operation's name). `digestFoldersView` reads where a local
+ * descriptor says its daily digests are (extensions/ops-digest/0.1, OD-9), and `digestFoldersRules` is `FAC-SEM-168`.
  */
 export const OPS_DIGEST_HOURLY = "ops.digest.hourly@1";
 export const OPS_DIGEST_DAILY = "ops.digest.daily@1";
@@ -203,6 +208,63 @@ export function opsDigestRules(kind: string, value: JsonObject): Finding[] | und
       if (failed !== null && countedFailed !== null && failed > countedFailed) window(`${at}/failed`, `the rises' failures are at most the day's failures of ${op}, ${countedFailed}`);
     }
   }
+  return findings;
+}
+
+// --- Where a collector reads the daily digests (DEC-0153 OD-9) ---
+
+/** One folder of the ops-digest extension: `dir` inside the product's data folder, and the label sent with its lines. */
+export interface DigestFolder { dir: string; source: string }
+
+/** What a collector reads of a descriptor's ops-digest declaration: the folders, or why it is not declared. */
+export type DigestFoldersView =
+  | { declared: false }
+  | { declared: true; valid: false; errors: string[] }
+  | { declared: true; valid: true; folders: DigestFolder[] };
+
+let foldersShape: ValidateFunction | undefined;
+
+/** The reader of extensions/ops-digest/0.1 in a service descriptor, as `actionsView` is for actions: the shape only. */
+export function digestFoldersView(descriptor: unknown): DigestFoldersView {
+  const extensions = isObject(descriptor) && isObject(descriptor.extensions) ? descriptor.extensions : undefined;
+  if (extensions === undefined || !Object.hasOwn(extensions, EXTENSION_KEYS.opsDigest)) return { declared: false };
+  foldersShape ??= createValidatorSync().getSchema(`${SCHEMA_PREFIX}schemas/service-ops-digest-extension.schema.json`) as ValidateFunction;
+  const value = extensions[EXTENSION_KEYS.opsDigest];
+  if (foldersShape(value) !== true) {
+    return { declared: true, valid: false, errors: (foldersShape.errors as ErrorObject[]).map((error) => `${error.instancePath || "/"} ${error.keyword}`) };
+  }
+  return { declared: true, valid: true, folders: value as DigestFolder[] };
+}
+
+const FOLDERS_PATH = `/extensions/${EXTENSION_KEYS.opsDigest.replace(/~/g, "~0").replace(/\//g, "~1")}`;
+const folderFinding = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-168", instancePath, message });
+
+/**
+ * FAC-SEM-168 on a service descriptor (kind `service-descriptor`) that carries the ops-digest key: a remote placement
+ * (no folder on this machine), or a local one that names no `paths.data` for `dir` to be relative to; a value that is
+ * not its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); a `source` named
+ * twice; a `dir` that holds a home folder (`hasHomePath`); a `dir` or a `source` shaped like a credential
+ * (`secretValue`). A collector reads a declaration with any of these as not declared.
+ */
+export function digestFoldersRules(descriptor: JsonObject): Finding[] {
+  const view = digestFoldersView(descriptor);
+  if (!view.declared) return [];
+  const findings: Finding[] = [];
+  if (descriptor.placement === "remote") findings.push(folderFinding(FOLDERS_PATH, "a remote placement has no folder on this machine; the ops-digest key is a local descriptor's (DEC-0153 OD-9)"));
+  else if (!(isObject(descriptor.paths) && typeof descriptor.paths.data === "string")) findings.push(folderFinding(FOLDERS_PATH, "a dir is relative to paths.data, which this descriptor does not name (DEC-0153 OD-9)"));
+  if (!view.valid) {
+    findings.push(folderFinding(FOLDERS_PATH, `the ops-digest declaration is invalid (${view.errors.join("; ")}); a reader treats it as not declared and reports it (DEC-0153 OD-9)`));
+    return findings;
+  }
+  const seen = new Set<string>();
+  view.folders.forEach((folder, index) => {
+    const at = `${FOLDERS_PATH}/${index}`;
+    if (seen.has(folder.source)) findings.push(folderFinding(`${at}/source`, `source ${folder.source} is named twice; each folder sends its own label`));
+    seen.add(folder.source);
+    if (secretValue(folder.source)) findings.push(folderFinding(`${at}/source`, "a source is shaped like a credential; it is a label, never a value"));
+    if (secretValue(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir is shaped like a credential; it names a folder, never a value"));
+    else if (hasHomePath(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir holds a home folder; it is relative to the product's data folder"));
+  });
   return findings;
 }
 // #endregion ops-digest

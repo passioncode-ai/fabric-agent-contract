@@ -144,6 +144,10 @@ claims no port (`FAC-SEM-010`). Vectors: [`fixtures/vectors/app-descriptor.json`
 - Only two commands are defined: `doctor` and `update`. A host MUST NOT run any other
   command a descriptor lists.
 - A host MUST preserve and ignore unknown `extensions`.
+- A local descriptor MAY say where a collector on the same machine reads its daily operations digests, under
+  `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1`: 1 to 8 `{dir, source}`, `dir` a folder
+  inside `paths.data` and `source` the label sent with its lines ([operations digests](ops-digest.md#where-a-collector-reads-the-daily-digests),
+  OD-9, DEC-0153; `FAC-SEM-168`). A remote descriptor carries none.
 - `installedBy` says who installed the instance (DEC-0061): the installer and its version as a string, as before, or
   `{by, role?, tool}`. `by` is `person` — a person ran the installer or had their coding agent run it — with `role`
   `operator` (the person who uses this machine) or `administrator` (an organization's administrator); `node` — Project

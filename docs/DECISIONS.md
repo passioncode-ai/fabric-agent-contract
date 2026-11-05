@@ -9030,8 +9030,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-04
 - **Status:** Proposed (draft on branch `agent/ct219-ops-digest-20261104`; accepted on merge of its pull request after
-  the coordinator's blind readings). New schemas, rule codes `FAC-SEM-166` and `FAC-SEM-167`, a reference module and
-  vectors, and a host obligation. Additive: nothing that validated before changes.
+  the coordinator's blind readings). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168`, a
+  descriptor extension, a reference module and vectors, and a host obligation. Additive: nothing that validated before
+  changes.
 - **Context:** the operator asked on 2026-11-04 that every product's log be read every hour and every day, and that
   every agent close its work with a retro whose lessons are kept centrally; Fabric recorded the split in its ADR-0188
   (commit `0d0e5922`) and relayed the contract's part on board thread `f7758225` (message `516761e1`, item 2 of its
@@ -9077,10 +9078,24 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   8. **Reference and vectors.** `foldHour`, `foldDay`, `isRise` and the rules in `src/ops-digest.ts`; vectors in
      `fixtures/vectors/ops-digest.json`; `pnpm validate` tells the two digests apart by `schema` (kinds
      `ops-digest-hourly`, `ops-digest-daily`).
+  9. **Where a collector reads the daily digests (OD-9), a change made in review.** A local service descriptor MAY carry
+     the extension key `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1` (protocol
+     `fabric-ops-digest/0.1`, named only in the register), whose value is 1 to 8 closed `{dir, source}`
+     (`schemas/service-ops-digest-extension.schema.json`): `dir` a folder inside `paths.data`, relative to it, in the
+     grammar of a package path (no leading `/` or `~`, no drive, no backslash, no `.` or `..` segment), holding the
+     product's `daily-YYYY-MM.jsonl` files (OD-6); `source` the label (`^[a-z][a-z0-9-]{0,31}$`, `app` by convention)
+     a collector on the same machine sends with each daily line it reads there. The digests stay as written (OD-6,
+     OD-7); the key only says where to read and which label to send. `FAC-SEM-168` (kind `service-descriptor`) refuses
+     the key on a remote placement or on a local one without `paths.data`, a value that is not its schema's, a `source`
+     named twice, a `dir` holding a home folder (`hasHomePath`) and a `dir` or `source` shaped like a credential
+     (`secretValue`); a collector reads a declaration with a finding as not declared and reports it. `digestFoldersView`
+     and `digestFoldersRules` in `src/ops-digest.ts` are the reference.
 - **Why:** one shape lets one reader (Fabric's review queue, Project Observatory's daily reading) read every product's
   digests; the shape is the one already written, so the first producer moves nothing. A name grammar that holds no empty
   segment, `.`, `..` or leading `/` keeps absolute paths and URLs out by construction, and the home-folder detector the
-  relative home paths `/` would let in. Counting the
+  relative home paths `/` would let in. The folder a collector reads is declared where the product already says what it
+  is (its descriptor), in the place the closed descriptor schema keeps for what it does not name (`extensions`), and
+  relative to the data folder, so no home path travels in it. Counting the
   retro as an operation puts "asked" and "written" in the digest the host already writes, without a member the closed
   shape lacks.
 - **Alternatives considered:** `<name>/<revision>` names (`ops-digest-hourly/1`, as DEC-0067 spells every protocol:
@@ -9094,8 +9109,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (Fabric's written months would fail, and the home-folder detector closes what `/` opens); a daily digest of zero
   hours for an empty day (a reader could not tell a day the product did not run from a day it ran and counted
   nothing in no hour, which OD-1 makes impossible); a refused call for a missing slot counted `failed` (a person's
-  unfinished setup would read as an outage and make rises).
-- **Compatibility:** additive: two new schemas, two new kinds and two new rule codes. Fabric's digests at `e1eecec0`
+  unfinished setup would read as an outage and make rises); a top-level descriptor member `opsDigests` for OD-9, as
+  Fabric proposed (the descriptor schema is closed, `additionalProperties: false`, so every reader pinned before would
+  refuse the descriptor; an extension key is what the closed schema keeps for this); an absolute `dir` (it would carry
+  the home folder, and a folder outside the product's data folder is not the product's to name).
+- **Compatibility:** additive: three new schemas, two new kinds, three new rule codes, one extension key and its
+  named-only protocol `fabric-ops-digest/0.1`; a descriptor without the key validates as before, and a host preserves
+  the key as it does any extension. Fabric's digests at `e1eecec0`
   validate as written (its test's names, `x` and `y` included); its daily fold sorts rises by failures then name and
   keeps the first line of an hour, as `foldDay` does. A product that names an operation outside OD-2's grammar
   (another separator, an upper-case first letter) renames it before it writes digests. `contractVersion` stays `0.1.0`.
@@ -9103,11 +9123,19 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `src/ops-digest.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `tools/vectors/ops-digest.ts`,
   `tools/vectors/run.ts`, `fixtures/vectors/ops-digest.json`, `fixtures/positive/ops-digest-*.json`,
   `fixtures/negative/ops-digest-*.json` with their catalogue rows, `fixtures/semantic/ops-digest-*.json`, `src/activity-rules.ts` (its `hasHomePath`, read),
+  and for OD-9 `schemas/service-ops-digest-extension.schema.json`, `src/extensions.ts`, `src/protocol-revisions.ts`,
+  `fixtures/positive/service-descriptor-ops-digest.json`, `fixtures/positive/service-ops-digest-extension.json`,
+  `fixtures/negative/service-ops-digest-extension-*.json`, `fixtures/semantic/ops-digest-folders-*.json`,
+  `test/consistency.test.ts`, `docs/specification/service.md`, `docs/specification/interop.md`,
+  `docs/specification/versioning.md`;
   `test/ops-digest.test.ts`, `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
   `test/schema-compilation.test.ts`, `vitest.config.ts`; `docs/specification/ops-digest.md`, `conformance.md` (the
   reference module, the producer, reader and host rows, the register), `docs/specification/README.md`,
-  `docs/DOCMAP.md`, `CONTEXT.md`; backlog CT-219; handoff `docs/handoffs/2026-11-04-ops-digest.md`.
+  `docs/DOCMAP.md`, `CONTEXT.md`; backlog CT-219; handoff `docs/handoffs/2026-11-04-ops-digest.md`. The first
+  consumers of OD-9 are Fabric (CO-503, which collects the daily lines from the folders a descriptor names) and Project
+  Observatory (OBS-330, which records them with their `source`); how they do it is theirs.
 - **Source:** the operator's word of 2026-11-04, relayed by Fabric on board thread `f7758225` (message `516761e1`),
   and the thread's answers on the draft (messages `1c191cf7`, the `/` in MCP method names, and `f74763e1`, the day with
-  no hour), decided by the coordinator;
+  no hour), decided by the coordinator; OD-9 is a change made in review on the same thread, where Fabric proposed a
+  top-level `opsDigests: [{dir, source}]` and the contract answered that the lawful place is `extensions`;
   Fabric ADR-0188 at commit `0d0e5922`; the reference implementation at Fabric commit `e1eecec0`; backlog CT-219.

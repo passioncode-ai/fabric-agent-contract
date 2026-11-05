@@ -9,7 +9,8 @@ export const EXTENSION_KEYS = {
   dashboard: `${EXTENSION_BASE}dashboard/0.1`,
   connections: `${EXTENSION_BASE}connections/0.1`,
   load: `${EXTENSION_BASE}load/0.1`,
-  actions: `${EXTENSION_BASE}actions/0.1`
+  actions: `${EXTENSION_BASE}actions/0.1`,
+  opsDigest: `${EXTENSION_BASE}ops-digest/0.1`
 } as const;
 
 const KNOWN = new Set<string>(Object.values(EXTENSION_KEYS));

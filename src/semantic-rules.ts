@@ -40,7 +40,7 @@ import { nodeEnrollmentRules } from "./node-enrollments.js";
 import { orgAuthorityRules } from "./org-authority.js";
 import { orgExchangeRules } from "./org-exchange.js";
 import { orgAdaptationRules } from "./org-adaptation.js";
-import { opsDigestRules } from "./ops-digest.js";
+import { digestFoldersRules, opsDigestRules } from "./ops-digest.js";
 import { orgMembershipRules } from "./org-membership.js";
 import { shareRegistrationRules } from "./share-registration.js";
 import { nodeSummaryRules } from "./node-summary.js";
@@ -205,7 +205,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "service-well-known") findings.push(...loadExtensionRules(value));
   if (kind === "service-well-known") findings.push(...actionsExtensionRules(value));
   if (kind === "service-well-known") findings.push(...embeddedProtocolsFindings(value.protocols, "/protocols"));
-  if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value), ...descriptorPeerRules(value));
+  if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value), ...descriptorPeerRules(value), ...digestFoldersRules(value));
   if (kind === "manifest") findings.push(...declaredServers(kind, value), ...commandLines(kind, value));
   if (kind === "service-usage") findings.push(...usageRules(value), ...usageLimits(value));
   if (kind === "support-quality-daily") findings.push(...supportQualityRules(value));

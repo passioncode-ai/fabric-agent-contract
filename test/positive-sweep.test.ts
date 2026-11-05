@@ -115,7 +115,10 @@ export const NOT_SWEPT: readonly string[] = [
   // Action parity (DEC-0121): the actions extension is checked inside a well-known document (FAC-SEM-142, kind
   // `service-well-known`), and a call's decision against the action and the tier (kind `action-call`).
   "service-actions-extension.schema.json",
-  "decision.schema.json"
+  "decision.schema.json",
+  // Where a collector reads the daily operations digests (DEC-0153 OD-9): checked inside a descriptor (FAC-SEM-168, kind
+  // `service-descriptor`), whose positive fixture with the key is swept.
+  "service-ops-digest-extension.schema.json"
 ];
 
 describe("every positive fixture passes the semantic rules", () => {

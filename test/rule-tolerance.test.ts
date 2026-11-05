@@ -124,6 +124,14 @@ describe("activity and device rules tolerate malformed input", () => {
       expect(() => evaluateSemanticRules("service-peer-request", { descriptor: { peer: { maxDataClass: value } }, dataClass: value, sent: true })).not.toThrow();
     }
     expect(() => evaluateSemanticRules("service-peer-request", { descriptor: { peer: { maxDataClass: "toString" } }, dataClass: "valueOf", sent: true })).not.toThrow();
+    // The ops-digest key (FAC-SEM-168, DEC-0153 OD-9) holding every wrong shape, entries of the wrong type among them.
+    const opsDigest = "https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1";
+    for (const value of WRONG) {
+      for (const placement of ["local", "remote", value]) {
+        expect(() => evaluateSemanticRules("service-descriptor", { placement, extensions: { [opsDigest]: value } })).not.toThrow();
+        expect(() => evaluateSemanticRules("service-descriptor", { placement, extensions: { [opsDigest]: [value, { dir: value, source: value }, { dir: "digests", source: "app" }] } })).not.toThrow();
+      }
+    }
   });
 });
 

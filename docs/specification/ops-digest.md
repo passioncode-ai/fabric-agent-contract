@@ -1,12 +1,14 @@
 # Operations digests and the retro after work
 
-DEC-0153 · rule codes `FAC-SEM-166`, `FAC-SEM-167` · schemas
+DEC-0153 · rule codes `FAC-SEM-166`, `FAC-SEM-167`, `FAC-SEM-168` · schemas
 [`ops-digest-hourly.schema.json`](../../schemas/ops-digest-hourly.schema.json),
-[`ops-digest-daily.schema.json`](../../schemas/ops-digest-daily.schema.json) · code
+[`ops-digest-daily.schema.json`](../../schemas/ops-digest-daily.schema.json),
+[`service-ops-digest-extension.schema.json`](../../schemas/service-ops-digest-extension.schema.json) · code
 [`src/ops-digest.ts`](../../src/ops-digest.ts) · vectors [`ops-digest.json`](../../fixtures/vectors/ops-digest.json)
 (written by [`tools/vectors/ops-digest.ts`](../../tools/vectors/ops-digest.ts)) · tests
 [`test/ops-digest.test.ts`](../../test/ops-digest.test.ts) · fixtures `fixtures/positive/ops-digest-*`,
-`fixtures/negative/ops-digest-*`, `fixtures/semantic/ops-digest-*`
+`fixtures/negative/ops-digest-*`, `fixtures/semantic/ops-digest-*`, `fixtures/positive/service-descriptor-ops-digest.json`,
+`fixtures/positive/service-ops-digest-extension.json`, `fixtures/negative/service-ops-digest-extension-*`
 
 A product keeps its own operations log on its own machine, and reads it itself: every hour it folds the hour's records
 into one `ops.digest.hourly@1` line, and every UTC day the day's hourly lines into one `ops.digest.daily@1` line.
@@ -84,6 +86,42 @@ register ([versioning](versioning.md#protocol-revisions)), because nothing negot
 naming a revision it does not read skips that line (OD-6). `pnpm validate` reads one digest at a time (a line saved as
 its own `.json` file) and tells the two apart by `schema`.
 
+## Where a collector reads the daily digests
+
+- **OD-9, the declaration.** A product whose daily digests a collector on the same machine reads says where they are
+  in its own [service descriptor](service.md#descriptor), under the extension key
+  `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1` (protocol `fabric-ops-digest/0.1`, named
+  in the [register](versioning.md#protocol-revisions) and pinned by no schema): a list of 1 to 8 closed objects
+  `{dir, source}` ([`service-ops-digest-extension.schema.json`](../../schemas/service-ops-digest-extension.schema.json)).
+  - `dir` is a folder inside the product's data folder (`paths.data`), relative to it: forward slashes, no leading `/`
+    or `~`, no drive letter, no backslash, no `.` or `..` segment, no control character, at most 256 characters (the
+    grammar of a package path, `fabric-package.schema.json#/$defs/path`, which a package's state relative to the data
+    folder also uses). It holds the product's `daily-YYYY-MM.jsonl` files (OD-6); a collector reads those files in
+    `<paths.data>/<dir>` and nothing else there.
+  - `source` is `^[a-z][a-z0-9-]{0,31}$`: the label the collector sends with each daily digest it reads in `dir`.
+    `app` is the conventional label of a product's one folder; each label is named once in the list.
+- **Local only.** Only a descriptor whose placement is `local` (an absent `placement` is `local`) carries the key, and
+  it names `paths.data`; a remote descriptor has no folder on this machine.
+- **The digests stay as written.** The declaration only says where a collector on the same machine reads the daily
+  lines and which label it sends with them. The lines are read as OD-6 says (a line it cannot read skipped, never
+  stopping at one) and sent as they are, with their label, never rewritten; OD-7 holds for everything sent.
+- **`FAC-SEM-168`** checks a descriptor that carries the key: a remote placement, or a local one without
+  `paths.data`; a value that is not the schema's; a `source` named twice; a `dir` that holds a home folder
+  (`hasHomePath`, the detector `FAC-SEM-167` uses), and a `dir` or `source` shaped like a credential (`secretValue`).
+  A collector treats a declaration with a `FAC-SEM-168` finding as not declared and reports it, as a host treats an
+  invalid load key ([agent network](agent-network.md#load), `FAC-SEM-133`). `digestFoldersView` in
+  [`src/ops-digest.ts`](../../src/ops-digest.ts) is the reader of the shape and `digestFoldersRules` the rule.
+
+A product with one folder of digests, `digests` in its data folder, writes in its descriptor:
+
+```json
+"extensions": {
+  "https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1": [
+    { "dir": "digests", "source": "app" }
+  ]
+}
+```
+
 ## The retro after work, `retro-after-work`
 
 - **RW-1, when it arises.** A host's obligation `retro-after-work` arises for a session each time it releases a claim
@@ -107,6 +145,7 @@ its own `.json` file) and tells the two apart by `schema`.
 |---|---|---|
 | <a id="fac-sem-166"></a>`FAC-SEM-166` | `ops-digest-hourly`, `ops-digest-daily` | an hourly digest's `from` and `to` are whole UTC hours of real days, one hour apart, and a daily digest's `day` a real UTC day; each `op` once in `ops` and once in `risen`; `total` each counter's sum over `ops`; every `risen` op counted in `ops`; an hourly rise names the hour's failures of its op and is a rise by OD-4 against its `previous`; a daily rise is in at most the day's `hours`, with at least 10 failures an hour it rose and at most the day's failures of its op (DEC-0153) |
 | <a id="fac-sem-167"></a>`FAC-SEM-167` | `ops-digest-hourly`, `ops-digest-daily` | no `op`, in `ops` or in `risen`, is shaped like a credential (`secretValue` of [`src/secret-shape.ts`](../../src/secret-shape.ts)) or holds a home folder (`hasHomePath` of [`src/activity-rules.ts`](../../src/activity-rules.ts)) (DEC-0153) |
+| <a id="fac-sem-168"></a>`FAC-SEM-168` | `service-descriptor` | a descriptor that carries the ops-digest key (`extensions/ops-digest/0.1`) is a `local` one that names `paths.data`; its value is valid against `service-ops-digest-extension.schema.json` (a reader treats an invalid one as not declared and reports it); each `source` is named once; no `dir` holds a home folder (`hasHomePath`) and no `dir` or `source` is shaped like a credential (`secretValue`) (DEC-0153 OD-9) |
 
 ## Not decided here
 
@@ -114,5 +153,7 @@ its own `.json` file) and tells the two apart by `schema`.
 - The members ADR-0188 §1 also names for the hourly fold (sessions started and left, board requests waiting): a count
   of events MAY be an operation of `ops` (as RW-4's retros are); a gauge such as requests waiting has no `@1` home (the
   schemas are closed) and needs its own decision.
-- How a daily digest travels to Project Observatory (ADR-0188 §3), and how Observatory reads every product's digests.
+- How a daily digest travels to Project Observatory (ADR-0188 §3), and how Observatory reads every product's digests:
+  OD-9 says only where a collector on the same machine reads the daily lines and which label it sends; who collects,
+  how often and over which call is the collector's and Observatory's.
 - `pnpm validate` reading a `.jsonl` file whole.
