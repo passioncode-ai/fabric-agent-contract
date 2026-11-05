@@ -438,6 +438,13 @@ FAA-197, on the adapter's main).
   one query name; the two-million case takes the least of five runs; comments say UTF-16 units where the budget counts
   them; the bare hint's link is asserted. Watch item for the nightly host: tiny strings read at 2.4 to 3.2 times prose
   stay within 2x + 20 ms only by the 20 ms slack.
+- Round 35 of the readings (on `644dcbe6`: product one break) was not clean: the page and SCN-055 said the credential
+  budget always binds before the 2 MiB well-known cap, which is false outside Latin script (CJK prose of 760 000 units
+  is 2 292 326 bytes, Russian with `\uXXXX` escapes 449 922 units is 2 347 303 bytes, both read as declared). With the
+  coordinator's decisions: both now say the budget binds before the cap for Latin-script prose only, and to measure the
+  answer's bytes; the Narrowings size bullet gives both costs (Latin about 12 to 14 per unit, Cyrillic or CJK about 2 or
+  less, measured 1.84 and 1.52); the send record is named as this contract's assumption about the session owner of
+  section 9, on the page, in item 8, the row and the merge post's identification question.
 
 ## The branch and its history
 
@@ -700,6 +707,12 @@ reader joins on `project:<slug>` once the feed's readers have adopted it). The l
 
 ## Checks actually run
 
+On round 35's change (documents only, no code moved), each exit code read separately: `pnpm typecheck` 0; `pnpm vitest
+run --testTimeout=60000 test/channel-agent.test.ts test/consistency.test.ts test/validate-cli.test.ts` 0 (2085 passed);
+`pnpm vectors:check` 0 (29 vector files match their generators); `pnpm run docs:check` 0 (markdownlint 0 errors);
+`python3 docs/ux/lint.py` 0; `pnpm run privacy:check` with the organization index 0 (0 findings); no U+2014 in the added
+lines; `operator-channel.md` matches main. The coverage run is owed: the 15-minute load was 77.13.
+
 On round 34's change, each exit code read separately: `pnpm typecheck` 0; `pnpm vitest run --testTimeout=60000
 test/channel-agent.test.ts test/consistency.test.ts test/operator-channel.test.ts test/validate-cli.test.ts` 0 three
 times (2120 passed each time); `pnpm vectors:check` 0 (29 vector files match their generators, after the channel-agent
@@ -828,7 +841,7 @@ neutralisation prints nothing. No U+2014 in the added text.
 
 ## Next task
 
-The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 34 (unit, seam,
+The coordinator's blind readings of branch `agent/channel-agent-ext-v3-20261104` after the fixes of rounds 1 to 35 (unit, seam,
 product), until two consecutive rounds are clean, as DEC-0150's Status asks; fix what blocks, as ordinary commits on that branch. Then open the pull request
 and merge it, which accepts DEC-0150, and post the merge on thread `b6820b97` (the coordinator posts it). The post
 quotes, at posting time, the page's [grammar](../specification/channel-agent.md#grammar) and the one list of
@@ -853,14 +866,15 @@ here), and adds:
   (F-4) joins section 13.6 (until it does, the closed channel object refuses it); whether privacy deletion (section
   13.5) reaches the agent's audit quotes of the operator's words in a customer's chat; whether on an `account` channel a
   message is the owner's word only when the account's owner is the operator, the send record of section 9's one session
-  owner shows it was not sent through that session owner (a send record can show only "not sent through the session
-  owner", not which session sent it), and every other session of the account is the operator's own; that a channel other
-  than an `account` channel that the agent's own bot does not answer has no operator identification yet, so section 4.10
-  does not apply on it until the owner answers, and which kind a group or a private chat answered through an account
-  declares; whether the session owner must compare the account's live sessions with the operator's recorded
-  configuration before a word counts; whether the operator's later words in the private chat with the agent's own bot
-  are a ticket and counted (the link-code message is consumed by the binding, counted in `not_a_ticket` volume, a
-  departure from sections 2.1, 2.2 and 5.1's `notATicket`); whether the owner wants the operator's scheduled words
+  owner (this contract's assumption, not a term of section 9: a record of every send it made, by an agent or relayed
+  from the ticket board) shows it was not sent through that session owner (a send record can show only "not sent through
+  the session owner", not which session sent it), and every other session of the account is the operator's own; that a
+  channel other than an `account` channel that the agent's own bot does not answer has no operator identification yet,
+  so section 4.10 does not apply on it until the owner answers, and which kind a group or a private chat answered
+  through an account declares; whether the session owner must compare the account's live sessions with the operator's
+  recorded configuration before a word counts; whether the operator's later words in the private chat with the agent's
+  own bot are a ticket and counted (the link-code message is consumed by the binding, counted in `not_a_ticket` volume,
+  a departure from sections 2.1, 2.2 and 5.1's `notATicket`); whether the owner wants the operator's scheduled words
   counted later (CA-8 counts no message marked offline or scheduled, on any path); how a Telegram Business connection
   identifies the operator, and that messages Telegram Business sends by itself (a greeting, an away message) never
   count; whether section 10's `account` row "holding rules" include the session owner's section 9 hold or only the

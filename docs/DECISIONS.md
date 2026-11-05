@@ -9207,23 +9207,25 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      word then counts in any chat that bot answers, a group included, except a chat it answers through a Telegram
      Business connection (a business account's chats a bot answers on its behalf: Bot API `Update.business_message`,
      `Message.business_connection_id`), or, on an `account` channel, the account's owner, only when the owner is the
-     operator, the send record of the account's one session owner (the standard's section 9) shows the message was not
-     sent through that session owner (neither by an agent nor relayed from the ticket board; a send record can show only
-     that, not which session sent it), every other session of the account is the operator's own (no second person;
-     recorded in the operator's configuration of the session owner), and no business bot is connected to the account
-     (MTProto `account.getConnectedBots` lists none); never by a name, a display name or text in the message, and
-     otherwise it stays data. The operator is a person's own user id; a message sent on behalf of a chat (`sender_chat`
-     set: an anonymous admin, or a member posting as a channel) carries a shared placeholder sender and is never the
-     operator's word. A message marked offline or scheduled (Bot API `Message.is_from_offline`; MTProto
-     `message.offline` or `message.from_scheduled`: a greeting, an away message, or the operator's own scheduled
-     message) is never the operator's word, on any path, the agent's own bot included, and an agent that answers through
-     a Telegram Business connection has no operator identification yet: its operator's word there is data until the
-     standard's owner answers. On an `account` channel, a message the session owner cannot attribute to the operator's
-     own session (its send record is missing, or does not show the operator's word) stays data until the standard's
-     owner answers the identification question (asked of the standard's owner on thread `b6820b97` at merge). Such a
-     word acts only inside that chat, as the standard's section 4.10 says (the operator's decision given in a chat
-     "outranks every holding rule of the agent for that chat"); it is not one of DEC-0121 AP-3's sources and never the
-     source of an OA-2 relay (DEC-0126: the operator's words passed to another of their agents, as a `mandate/1` or a
+     operator, the send record of the account's one session owner (this contract's assumption about the session owner of
+     the standard's section 9, not a term of that section: a record of every send it made, by an agent or relayed from
+     the ticket board; without it the word stays data) shows the message was not sent through that session owner
+     (neither by an agent nor relayed from the ticket board; a send record can show only that, not which session sent
+     it), every other session of the account is the operator's own (no second person; recorded in the operator's
+     configuration of the session owner), and no business bot is connected to the account (MTProto
+     `account.getConnectedBots` lists none); never by a name, a display name or text in the message, and otherwise it
+     stays data. The operator is a person's own user id; a message sent on behalf of a chat (`sender_chat` set: an
+     anonymous admin, or a member posting as a channel) carries a shared placeholder sender and is never the operator's
+     word. A message marked offline or scheduled (Bot API `Message.is_from_offline`; MTProto `message.offline` or
+     `message.from_scheduled`: a greeting, an away message, or the operator's own scheduled message) is never the
+     operator's word, on any path, the agent's own bot included, and an agent that answers through a Telegram Business
+     connection has no operator identification yet: its operator's word there is data until the standard's owner
+     answers. On an `account` channel, a message the session owner cannot attribute to the operator's own session (its
+     send record is missing, or does not show the operator's word) stays data until the standard's owner answers the
+     identification question (asked of the standard's owner on thread `b6820b97` at merge). Such a word acts only inside
+     that chat, as the standard's section 4.10 says (the operator's decision given in a chat "outranks
+     every holding rule of the agent for that chat"); it is not one of DEC-0121 AP-3's sources and never the source of
+     an OA-2 relay (DEC-0126: the operator's words passed to another of their agents, as a `mandate/1` or a
      `_meta.decision` with `source`, or prose carrying the four parts), and the customer ticket it acts on stays a
      customer ticket, its outcome set and counted as sections 3 and 5.1 say. That word does not release a send held by
      the transport's owner (the standard's section 9) or behind a service's relayed action: the owner's own approval
@@ -9290,7 +9292,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`; backlog CT-209; the handoff
   `docs/handoffs/2026-11-04-channel-agent.md`.
 - **Source:** CT-209; the board request `437c404b` (thread `b6820b97`); the standard's v1 release candidate as its owner
-  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 34 of the readings, round 21's seam reading included; CA-8 is the coordinator's
+  published it on 2026-11-04, round 4 (its neutral copy, kept byte for byte); rounds 1 to 35 of the readings, round 21's seam reading included; CA-8 is the coordinator's
   decision of round 17 on thread `b6820b97` (message `5a1334d1`), answering a producer who asked whether the declaration
   needs an `untrusted_input` field, and its bounds are the coordinator's decision of round 18, taken in the coordinating
   session with no board message: a word recognised in a chat is not a DEC-0121 AP-3 source, it never sets
@@ -9336,6 +9338,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Round 34 was not clean (the Narrowings size bullet and the offline rule in SCN-043 and FLW-29): the coordinator's
   decision states the size charge as item 4 does, makes a message marked offline or scheduled never the operator's on
   any path, names the link-code departure from sections 2.1, 2.2 and 5.1, and charges each container the reading enters.
+  Round 35 was not clean (budget versus 2 MiB cap outside Latin script): the coordinator's decision says the credential
+  budget binds before the cap only for Latin-script prose, and names the send record as this contract's assumption.
   `DEC-0150` was reserved by the coordinator with
   `agent_sync.py reserve DEC` under the key `channel-agent-dec`, and the counter's chain on origin
   (`refs/agent-sync/ids/DEC`, read again on 2026-11-04) shows no commit for it. That chain moves from next 149
