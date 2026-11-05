@@ -215,10 +215,22 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
     const result = validateDocument(ajv, schemaId, value);
     expect(result.valid, JSON.stringify(result.errors)).toBe(true);
     expect(paths(value)).toEqual([]);
-    for (const name of ["nobody2Dropped.turns", "outcomes.9expired", "outcomes.expired-", "Outcomes.expired", "outcomes."]) {
+    for (const name of ["9nobodyDropped.turns", "1arrived", "outcomes.9expired", "outcomes.expired-", "Outcomes.expired", "outcomes."]) {
       const refused = Object.assign(ok(), { notMeasured: [name] });
       expect(validateDocument(ajv, schemaId, refused).valid, name).toBe(false);
     }
+  });
+  it("accepts a no-reply day that names both first-reply percentiles in notMeasured, under the schema and FAC-SEM-126, and admits a digit after the first letter of either segment (DEC-0151, message 6a4e3757)", async () => {
+    const ajv = await createValidator();
+    const value = positive("support-quality-daily-no-reply.json");
+    expect(value.notMeasured).toEqual(expect.arrayContaining(["nobodyDropped.firstReplyP50Ms", "nobodyDropped.firstReplyP90Ms"]));
+    expect(value.nobodyDropped.firstReplyP50Ms).toBeNull();
+    expect(value.nobodyDropped.firstReplyP90Ms).toBeNull();
+    const result = validateDocument(ajv, schemaId, value);
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+    expect(paths(value)).toEqual([]);
+    for (const name of ["family2.metric", "top9", "a1.b2_c"]) expect(validateDocument(ajv, schemaId, Object.assign(ok(), { notMeasured: [name] })).valid, name).toBe(true);
+    for (const name of ["9nobodyDropped.answeredLater", "nobodyDropped.9turns", "_a.b", "a.b.c"]) expect(validateDocument(ajv, schemaId, Object.assign(ok(), { notMeasured: [name] })).valid, name).toBe(false);
   });
   it("maps each of the channel agent standard's seven channel kinds onto one of /1's four channels, adding none", () => {
     const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;

@@ -9079,8 +9079,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      is a finding, and naming a top-level member that is no metric (`project`, `day`, `kind`, a family) is a finding
      whose message says it is not a metric. An absent member is one the producer does not carry, read as unknown,
      never as `0`. No sum among the counts is checked: the channel agent standard's section 5 states none.
-  3. A metric name in `notMeasured` may carry digits (`^[a-z][A-Za-z]{0,63}(\.[a-z][A-Za-z0-9_]{0,63})?$`); the
-     family part and everything else of the pattern stay as they were (CT-129).
+  3. A name in `notMeasured` may carry digits after the first letter of either part
+     (`^[a-z][A-Za-z0-9]{0,63}(\.[a-z][A-Za-z0-9_]{0,63})?$`): each part still starts with a lower-case letter, and
+     everything else of the pattern stays as it was (CT-129; the producer's X-4, board message `6a4e3757`, thread
+     `b6820b97`). So a no-reply day that names both `nobodyDropped.firstReplyP50Ms` and `firstReplyP90Ms`, as
+     FAC-SEM-126 asks, passes the schema it names (`fixtures/positive/support-quality-daily-no-reply.json`), and a
+     part that starts with a digit is refused (`fixtures/negative/support-quality-daily-not-measured-digit-first.json`,
+     `-family-digit-first.json`).
   4. A producer carries the new members, `project` among them, and names a metric with a digit in `notMeasured`, only
      once every reader of its feed it knows of has adopted DEC-0151, as DEC-0144 asks of the calibration: a reader on
      an older copy refuses either. In the meantime each unmeasured first-reply metric (`firstReplyP50Ms` and/or
@@ -9172,7 +9177,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   as that table has them (v2's `stability.fallbackTurns` counts turns a fallback model answered, so the same name would
   carry another meaning).
 - **Compatibility:** a widening of a closed object: a `/1` payload without the new members validates and reads as
-  before, and `pnpm validate` reports the same for every existing support-quality fixture. A reader that validates
+  before, and item 3's pattern is a widening too: every name the earlier pattern accepted it accepts, so every
+  earlier valid document stays valid, and `pnpm validate` reports the same for every existing support-quality fixture. A reader that validates
   against an older copy refuses a day that carries a new member or a metric name with a digit, and keeps the event's
   `text` (DEC-0070); a reader that only parses ignores the counts, but if it keys by channel and day it keeps one
   project's day and drops the other's, so per-project publishing waits for every reader, parse-only ones included
@@ -9240,8 +9246,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/semantic/package-secret-shaped-name.json`, `fixtures/semantic/estate-secret-value-as-slot.json`,
   `test/package.test.ts`, `test/estate-record.test.ts`,
   `fixtures/positive/service-events-page-support-quality-sk-slug.json`;
-  `fixtures/positive/support-quality-daily-tickets.json`, `-first-reply-unmeasured.json` and `-project.json`,
-  `fixtures/positive/service-events-page-support-quality-projects.json`, six `fixtures/negative/support-quality-daily-*`
+  `fixtures/positive/support-quality-daily-tickets.json`, `-first-reply-unmeasured.json`, `-no-reply.json` and `-project.json`,
+  `fixtures/positive/service-events-page-support-quality-projects.json`, seven `fixtures/negative/support-quality-daily-*`
   with their `fixtures/catalogue.json` rows, seven
   `fixtures/semantic/support-quality-daily-*`; `docs/specification/support-quality.md`, `docs/specification/conformance.md`
   (the producer and reader rows), `docs/specification/identifiers.md`, `docs/specification/profiles.md`,
@@ -9249,4 +9255,4 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   DEC-0144 and DEC-0044 annotated; `docs/backlog.md` (CT-210, CT-129, CT-103, CT-73, CT-213, CT-188's note);
   `docs/handoffs/2026-11-04-support-quality-tickets.md`.
 - **Source:** CT-210, CT-129; the board request `74105ca1` (thread `b6820b97`); DEC-0151 reserved by git CAS (key
-  `support-quality-v2-dec`, counter commit `ee67e35`). Readings: Rounds 1 to 13 found breaks, each fixed: round 8 the per-day attribution of an absent `project`; round 9 one rule for it (no `project` before adoption, `project` on every event after, a day without it never attributed); round 10 rule 1's trigger the day's tickets and calibration per side; round 11 the observed check by period, only projects whose tickets enter `/1`, merged legacy days kept from reruns before adoption, one-way adoption; round 12 adoption marked by the first day that names `project`, rule 9 per project, the colour boundary's `:` and `\33`; round 13 DEC-0144's calibration carry-forward per project and a weak `sk-` alias still a credential in a DEC-0149 source tree; round 14 AT-15 vectors for the canonical case, the `sk-` strength and the word start, the no-alias exception in every copy of rule 2, rule 9's "unnamed", the interim message, and the registry's alias rule as the operator's open question; before round 15, on a producer's board messages, the ticket count `autonomy.answered` renamed `autonomy.answeredTickets`, since v2's `autonomy.answered` counts turns (`5a1334d1`), and `stability.fallbackTurns` and `fallbackTickets` renamed `stability.safeReplyTurns` and `safeReplyTickets`, since v2's `stability.fallbackTurns` counts turns a fallback model answered (`24cf4f25`); two consecutive clean rounds are still owed.
+  `support-quality-v2-dec`, counter commit `ee67e35`). Readings: Rounds 1 to 13 found breaks, each fixed: round 8 the per-day attribution of an absent `project`; round 9 one rule for it (no `project` before adoption, `project` on every event after, a day without it never attributed); round 10 rule 1's trigger the day's tickets and calibration per side; round 11 the observed check by period, only projects whose tickets enter `/1`, merged legacy days kept from reruns before adoption, one-way adoption; round 12 adoption marked by the first day that names `project`, rule 9 per project, the colour boundary's `:` and `\33`; round 13 DEC-0144's calibration carry-forward per project and a weak `sk-` alias still a credential in a DEC-0149 source tree; round 14 AT-15 vectors for the canonical case, the `sk-` strength and the word start, the no-alias exception in every copy of rule 2, rule 9's "unnamed", the interim message, and the registry's alias rule as the operator's open question; before round 15, on a producer's board messages, the `notMeasured` pattern admits a digit after the first letter of either part (X-4, `6a4e3757`), the ticket count `autonomy.answered` renamed `autonomy.answeredTickets`, since v2's `autonomy.answered` counts turns (`5a1334d1`), and `stability.fallbackTurns` and `fallbackTickets` renamed `stability.safeReplyTurns` and `safeReplyTickets`, since v2's `stability.fallbackTurns` counts turns a fallback model answered (`24cf4f25`); two consecutive clean rounds are still owed.

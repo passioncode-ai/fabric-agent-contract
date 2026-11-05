@@ -61,7 +61,7 @@
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "pattern": "^[a-z][A-Za-z]{0,63}(\\.[a-z][A-Za-z0-9_]{0,63})?$"
+        "pattern": "^[a-z][A-Za-z0-9]{0,63}(\\.[a-z][A-Za-z0-9_]{0,63})?$"
       },
       "description": "Each metric not computed, as family.metric (a metric name may carry digits, as nobodyDropped.firstReplyP50Ms does), a top-level count by its own name (arrived, ended, notATicket), or checks when no check was judged. At most 32 names (DEC-0070): a producer that would name more leaves out the optional members it did not measure."
     },

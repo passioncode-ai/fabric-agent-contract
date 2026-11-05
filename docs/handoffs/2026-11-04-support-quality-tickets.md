@@ -12,7 +12,7 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   `arrived`, `ended`, `notATicket`, `project` (`project:<slug>`), `open {handedOpen, questionOpen, awaitingCustomer,
   awaitingApproval}`, `outcomes {handoffsClosedByPerson, referred, answeredElsewhere, noReplyOwed, customerSilent,
   expiredByDecision, expired, unanswered, firstReplyLate, promotions}`, `autonomy.answeredTickets`, `stability.safeReplyTurns`
-  and `safeReplyTickets`; the `notMeasured` pattern admits digits in the metric part only; the channel agent standard's
+  and `safeReplyTickets`; the `notMeasured` pattern admits digits after the first letter of either part; the channel agent standard's
   seven channel kinds mapped onto `/1`'s four channels.
 - `src/support-quality-rules.ts`: FAC-SEM-126's not-measured rule over the new members (one helper serves the families,
   the top-level counts and `calibration.helped`, with the same messages); a top-level name that is no metric (`project`,
@@ -236,6 +236,15 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   `modelCalls.recovered > 0` (a fallback model answered; the same unit and window), while `/1`'s count is the channel
   agent standard's section 5.1 row, a safe reply after the checker refused twice in a row. Same unit, another meaning,
   so `/1` renames; Compatibility's rule reads "`/1` never reuses a v2 field name with another meaning or unit".
+- Before round 15, third (the coordinator's decision on the producer's X-4, board message `6a4e3757`): the
+  `notMeasured` item pattern becomes `^[a-z][A-Za-z0-9]{0,63}(\.[a-z][A-Za-z0-9_]{0,63})?$`, a digit after the first
+  letter of either part, so a no-reply day naming both `nobodyDropped.firstReplyP50Ms` and `firstReplyP90Ms` passes
+  the schema and FAC-SEM-126 (`fixtures/positive/support-quality-daily-no-reply.json` and its test); a part that
+  starts with a digit is refused (the existing `negative/support-quality-daily-not-measured-digit-first.json` and a new
+  `-family-digit-first.json`, both in the catalogue). DEC-0151 item 3, Compatibility (a widening: every earlier valid
+  document stays valid), Source, the page and CT-210 say so.
+- The channel agent standard's owner applied CT-210 (d)'s section 5.1 renames at the standard's main `86c49ec` (board
+  message `b840a16b`); the rest of (d) follows after 2026-11-06 (recorded in CT-210).
 - The collision check, by name, of every other new DEC-0151 member against the v2 fields: the evidence is the
   channel agent standard's section 5.1 table (DEC-0150's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`
   at `388f2b42`), which marks every member new except `autonomy.answered` and
@@ -506,6 +515,12 @@ as history and are not edited.
   left to the channel agent standard (support-quality.md, "Not decided here").
 
 ## Checks actually run
+
+After the `notMeasured` pattern change (the commit that carries this entry), each exit code read separately: `pnpm
+exec tsc --noEmit -p .` 0; `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0; `pnpm privacy:check` with the
+organization's index 0; `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files match); `vitest run` on the same 16
+touched or dependent test files 0 (3308 passed, 1 skipped). The full run with coverage is owed: the 15-minute load was
+45.37, at the 45 the heavy-run rule allows (9 GB free). No U+2014 in the lines added since `d1b905ee`.
 
 After the `stability.safeReplyTurns` rename (the commit that carries this entry), each exit code read separately:
 `pnpm exec tsc --noEmit -p .` 0; `python3 docs/ux/lint.py` 0; `pnpm run docs:check` 0; `pnpm privacy:check` with the
