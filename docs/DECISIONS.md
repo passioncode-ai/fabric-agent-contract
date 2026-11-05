@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 45 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 46 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9039,7 +9039,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   round 42 not clean: history gate scope, KB item 5, and from its unit reading the Georgian join and a folder entry over
   a link; round 43 not clean: whole-repository word text, CONTEXT team serving; round 44 not clean: target forms, word
   forms, export parent, existing readers, public home; round 45 not clean: NFC nested repository; stale DEC/backlog/
-  scenario wording, elicitation target, later org release), cited by round number because their heads were on the review branch, which is not
+  scenario wording, elicitation target, later org release; round 46 not clean: grammar readers, organization later
+  release), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9170,7 +9171,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       recipient holds, and no commit from the home, author and committer `Fabric source export
       <source-export@fabric.invalid>`, the source commit's committer date, the message `Source export`; it rewrites no
       file (so the source's identity fields name the publisher, never a person or the operator's account), carries no
-      link to the original, publishes nothing, and writes a receipt in the instance (source commit, the manifest's
+      link to the original, publishes nothing, and writes a receipt in the instance (source commit, the recipient, the manifest's
       SHA-256, counts by kind, the new commit), never a value found. Author and committer dates are both the source
       commit's committer date, with its time zone; the receipt records the recipient and the export commit, the next
       export to that recipient reads its parent from it (fetched from the recipient's repository), and an export that
@@ -9286,7 +9287,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       landing for the operator to review, as information, not a gate); the whole-repository rule covers a personal
       agent's private home only, a public home's access and visibility being outside it; and serving is a hand-over to
       anyone who cannot read the home. Decided by the coordinator in round 45 on the same ground, removing second
-      statements that had gone stale: an organization's later public release from its private home by push takes no
+      statements that had gone stale: an organization's later public release from its private home by push (round 46: by
+      any route) takes no
       word and still carries a source export whose parent is the earlier export commit, so the home's history stays
       back (its release rules govern its own releases, and the export keeps the history out); the export's receipt
       records the recipient and the export commit, from which the next export reads its parent, its objects fetched
@@ -9296,7 +9298,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       personal agent's home, public or private, is not done, since the operator's rule asks his explicit permission for
       any transfer of a personal agent and that permission is outside this contract, while making a public personal
       home private is none; and material already public needs no word by any route (one clause for every route).
-      Handing it to
+      Decided by the coordinator in round 46, one rule stated once: an organization agent's private home's first public
+      release, by any route, takes the word naming its source commit, and every later public release from that home,
+      by any route, is the organization's own act; every release from a private home, first or later, carries only the
+      source export (by push or by file) or, on a registry, a package packed from that source commit holding only source
+      paths that passed the tree check (so no route carries the home's history); a package handed over or published
+      names as its target the source commit it was packed from; the two exceptions (an organization's later release and
+      material already public) are stated once, in the lead of the route list, so they cover every route; the export's
+      receipt names the recipient; and every reader takes a path in the grammar as written and in NFC through one helper,
+      `inGrammar`, since a reader that skipped NFC printed `excluded-by-fold` in Git mode only. Handing it to
       anyone is effect class `publish`, a person's act each time, which no standing grant authorises. The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9422,7 +9432,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 45 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 46 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9432,5 +9442,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   not clean: history gate scope, KB item 5, and from its unit reading the Georgian join and a folder entry over a
   link; round 43 not clean: whole-repository word text, CONTEXT team serving; round 44 not clean: target forms, word
   forms, export parent, existing readers, public home; round 45 not clean: NFC nested repository; stale DEC/backlog/
-  scenario wording, elicitation target, later org release), cited by round number (their heads were on the review branch, not kept at landing),
+  scenario wording, elicitation target, later org release; round 46 not clean: grammar readers, organization later
+  release), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

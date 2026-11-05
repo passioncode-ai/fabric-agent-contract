@@ -27,6 +27,8 @@ import {
   excludedFolderTest,
   foldOnlyExcludeTest,
   foldSegment,
+  inGrammar,
+  includeIndex,
   isSourcePath,
   isUncheckedPath,
   longRunAt,
@@ -885,9 +887,35 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
     expect(folded.map((finding) => finding.message)).toContain("slot slots[1] is declared twice");
   });
 
-  it("reads an entry outside the path grammar as naming nothing: an exclude path that removes nothing", () => {
+  it("leaves an exclude entry outside the path grammar to the schema: FAC-SEM-157 says nothing more of it", () => {
     const findings = check({ ...manifest, include: ["src/", "LICENSE"], exclude: ["src\\vendor/"], binaries: [] });
-    expect(findings.map((finding) => [finding.code, finding.message])).toEqual([["FAC-SEM-157", "exclude[0] lies inside no include folder, so it removes nothing"]]);
+    expect(findings).toEqual([]);
+  });
+
+  it("reads every path through one grammar check, as written and in NFC, in every reader", () => {
+    const long = `src/${Array.from({ length: 4 }, () => "\u0958".repeat(60)).join("/")}`;
+    const short = `src/${"\u0958".repeat(10)}`;
+    const control = "src/plain";
+    expect(inGrammar(long)).toBe(false);
+    expect(inGrammar(short)).toBe(true);
+    expect(inGrammar(`${long}/`, true)).toBe(false);
+    const value = { format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: ["SRC/zz/"] };
+    const index = includeIndex(["src/"]);
+    for (const [path, expected] of [[long, false], [short, true], [control, true]] as const) {
+      expect(isSourcePath(value, `${path}/x.ts`), path).toBe(expected && [...`${path}/x.ts`.normalize("NFC")].length <= 256);
+      expect(nestedInSource(value, path), path).toBe(expected);
+      expect(index.covers(`${path}/x.ts`), path).toBe(expected);
+      expect(index.reaches(`${path}/`), path).toBe(expected);
+      expect(sourceFolderTest(value)(path), path).toBe(expected);
+    }
+    // foldOnlyExcludeTest: a path NFC lengthens past the grammar is no source, never an excluded-by-fold line.
+    const foldOnly = foldOnlyExcludeTest({ include: ["src/"], exclude: [`SRC/${"\u0958".repeat(60)}/`] });
+    expect(foldOnly(`${long}/x`)).toBe(-1);
+    expect(foldOnly(`src/${"\u0958".repeat(60)}/x`)).toBe(0);
+    // An exclude entry NFC lengthens is said once (FAC-SEM-157) and never also unused-exclude.
+    const tree = sourceTreeProblems({ manifest: { include: ["src/", "LICENSE"], exclude: [`${long}/`] }, files: [{ path: "LICENSE", text: "x" }, { path: "src/a.ts", text: "x" }], listed: [] });
+    expect(tree.map((problem) => problem.kind)).toEqual([]);
+    expect(sourceRules("source-manifest", value)).toEqual([]);
   });
 
   it("reads a path of 129 to 256 code points outside the BMP as in the grammar, in every list", () => {

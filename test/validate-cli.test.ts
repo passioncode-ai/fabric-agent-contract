@@ -2108,6 +2108,21 @@ describe("an agent's source (DEC-0149)", () => {
     }
   });
 
+  it("never says excluded-by-fold of a path NFC lengthens past the grammar, in Git mode or in a walk", () => {
+    const segment = "\u0958".repeat(60);
+    const long = `src/${[segment, segment, segment, segment].join("/")}/x.md`;
+    const files = { "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: [`SRC/${segment}/`] }), LICENSE: "x", "src/a.ts": "x", [long]: "x" };
+    const committed = folder(files);
+    expect(gitIn(committed, "init", "-q").status).toBe(0);
+    expect(gitIn(committed, "add", "-A").status).toBe(0);
+    const shape = (out: string) => found(out).map((line) => line.split("  ").slice(0, 3));
+    const inGit = run(committed, "--kind", "source-tree");
+    const walked = run(folder(files), "--kind", "source-tree");
+    expect(inGit.code).toBe(walked.code);
+    expect(inGit.out).not.toContain("excluded-by-fold");
+    expect(shape(inGit.out)).toEqual(shape(walked.out));
+  });
+
   it("never reads a folder NFC lengthens past the grammar as a nested repository, in Git mode or in a walk", () => {
     const long = `src/${Array.from({ length: 4 }, () => "\u0958".repeat(60)).join("/")}`;
     const address = ["dev", "acme-example.io"].join("@");

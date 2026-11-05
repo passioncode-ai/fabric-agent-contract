@@ -443,22 +443,23 @@ check looks for before a **Source export**, kept on the operator's machine outsi
 **Source export**: An agent's **Source** at a named commit written as a Git repository holding one new commit by
 `Fabric source export`, whose only parent, if any, is the earlier export commit the recipient holds, and no commit from
 the home, after the tree check finds nothing blocking; local, publishing nothing, running
-no test as a condition, never a gitlink. Handing it to anyone is effect class `publish`, a person's act each time, on
-the operator's word for that act, never by a mandate, as [source](docs/specification/source.md#handing-over) specifies
-(DEC-0149). Not the peer share's Export (DEC-0147) and not
+no test as a condition, never a gitlink. Handing it over is a source hand-over where
+[source](docs/specification/source.md#handing-over) counts one (`publish`, on the operator's word), except an
+organization's later release from its private home and material already public (DEC-0149). Not the peer share's Export (DEC-0147) and not
 a proposal's `export` destination (`FAC-SEM-103`).
 
 **Source hand-over**: An agent's source reaching a place or a person it was not at; the routes include, among others,
-a **Source export** handed to anyone or sent as a file to another person or a place outside the owner's; a push of a
+the ones below, each a hand-over except, on every route, an organization's later public release from its private home
+(its own act) and material already public: a **Source export** handed to anyone or sent as a file to another person or a place outside the owner's; a push of a
 commit not already there to a repository that is not the agent's home and that is public, another owner's, or readable
-by another person (an organization's repository included, even one the operator administers), each such push its own,
-except an organization's later release, which is its own act and still carries a source export; source files' content copied into a message, an issue, a gist or a thread outside the owner's; a package handed to
+by another person (an organization's repository included, even one the operator administers), each such push its own; source files' content copied into a message, an issue, a gist or a thread outside the owner's; a package handed to
 another person (a colleague's copy), which carries the source; a personal agent's package or release published to a
 public registry, unless its home is already public (the files the pack step derives from the public source count as
 public, nothing else does). A hand-over by push or by file carries a source export (one new commit, whose only parent,
 if any, is the earlier export commit the recipient holds; no commit from the home; the tree check passed), never
 another commit; the export's receipt records the recipient and the export commit, from which the next export reads its
-parent, and an export that cannot land as a fast-forward goes as a new branch or pull request, never by a force-push.
+parent, and an export that cannot land as a fast-forward goes as a new branch or pull request, never by a force-push; a package handed over or published names as its target the source commit it was packed
+from and holds only source paths that passed that commit's tree check.
 An act on the whole repository of a personal agent's private home (a visibility change, access given to any other
 person) is not done: the source leaves only as a source export; a transfer of a personal agent's home, public or
 private, is not done either (the operator's own permission for it is outside this contract); a public home's access and
@@ -466,9 +467,10 @@ visibility are outside that rule, making a public personal home private is none,
 DEC-0149 was accepted stands as the operator's own act (nothing is retroactive), and an agent never gives new access. An organization's acts on its own agent's whole
 repository are its own, under its own release rules, except two that take the word naming the repository: making a
 private organization agent's source public by a visibility change, and giving it new readers outside the organization
-(the word accepts the history as it stands); its first public release from a private home takes the word naming its
-source commit, and a later one from that home by push takes no word and still carries a source export whose parent is
-the earlier export commit. A processor acting for the owner under the owner's own account
+(the word accepts the history as it stands); its first public release from a private home, by any route, takes the word naming
+its source commit, every later one by any route is its own act, and every release from a private home carries only the
+source export (its parent the earlier export commit) or a package packed from that source commit holding only source
+paths that passed the tree check. A processor acting for the owner under the owner's own account
 or host is no recipient while what it holds stays readable by no one but the owner and the processors acting for it;
 output it makes public is one. Access the owning organization gives its own members to its own agent's home is none,
 and giving access to a public home is none. What takes the word when a source becomes public: a personal agent's source
