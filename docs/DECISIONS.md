@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0148` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0154` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -9050,7 +9050,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      every count an integer from 0 to 2^53 − 1, at most 4096 operations and rises: a product keeps at most 4095 named
      operations per UTC day plus its one fixed overflow name, under which it counts the rest (their counts kept), so
      both its hourly and its daily lines validate; a day that would fold more than 4096 operations has no daily digest,
-     and an hour of more than 4096 operations or holding a name OD-2 refuses has no hourly digest (the reference
+     and a day whose hours hold a name FAC-SEM-167 refuses has none either, and an hour of more than 4096 operations or
+     holding a name OD-2 refuses (its grammar, or FAC-SEM-167) has no hourly digest (the reference
      `foldDay` and `foldHour` throw: a reference fold never writes a line every reader skips). A finding or a fold's
      error names a value shaped like a credential or holding a home folder only by its place.
   2. **The window (OD-1).** `from` and `to` are whole UTC hours in RFC 3339 with `Z`, with or without the `.000` that
@@ -9088,7 +9089,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      that relays calls counts an error as it sees it, since a relayed error cannot tell setup from failure (DEC-0149).
      `total` is each counter's sum. A rise is at least 10
      failures in the hour and at least twice the hour before's, an hour before with none (or not closed) counting as
-     one. `FAC-SEM-166` checks the window, each `op` once, the sums, and every rise against its own digest: an hourly
+     one. `FAC-SEM-166` checks the window, each `op` once in `ops` and at most once in `risen`, the sums, and every rise against its own digest: an hourly
      rise names the hour's failures of its op and passes OD-4 against its `previous`; a daily rise is in at most
      `hours` hours, with at least 10 failures an hour and at most the day's failures of its op; a rise missing from
      `risen` needs the hour before, so `FAC-SEM-166` cannot see it and the vectors check it. **The order:** `ops`
@@ -9181,7 +9182,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   twin protocol registers (`fabric_protocols.py`, `fabric-protocols.mjs`), which its tests hold equal to the register
   `vendor_vectors.mjs` writes into `feed-protocols-vectors.json` (the twins are kept by hand). Fabric's digests at
   `e1eecec0` validate as written (its test's names, `x` and `y` included). The reference folds are
-  `src/ops-digest.ts`. Each product's adoption is tracked in its own rows; the CT-219 handoff's
+  `src/ops-digest.ts`. ADR-0188 §5's "retros written" is not a digest count here (RW-4); Fabric's CO-502 view is to read
+  `ok` as asks answered (the CT-219 handoff's answer on thread `f7758225` says so). Each product's adoption is tracked in its own rows; the CT-219 handoff's
   Consumers list records what was read at a date, and vendoring the vectors from the release tag is each product's
   obligation. At their next re-pin, the consumers that vendor a protocol table (a deployment template's
   `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the adapter
@@ -9238,6 +9240,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   "beyond 4096", now OD-3's 4095 names a day plus one overflow name) and `FAC-SEM-167`'s description (now the shared
   detector's shapes as it applies them, the `sk-` shape inside `task-` and its kin included until DEC-0151 lands), and
   its batch is folded in; round 7's unit and seam readings passed, with risks folded (the `foldHour` bound, the secret
-  echo: no finding or error copies a credential-shaped or home-folder value);
+  echo: no finding or error copies a credential-shaped or home-folder value); round 8 at `b96e73d4` was not clean: the
+  reference folds against FAC-SEM-167 (they now refuse a name it refuses, so they never write a line every reader
+  skips), the `from` echo and the daily `hours` (hours folded, never uptime), and its batch is folded in, with OD-1's
+  rebuilt day of names, OD-3's published overflow name and "at most once in `risen`";
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.

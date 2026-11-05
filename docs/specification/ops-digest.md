@@ -35,7 +35,7 @@ no claim about any product's code; what each product's code was read to do, at a
 |---|---|
 | `schema` | `ops.digest.daily@1` |
 | `day` | the UTC day, `YYYY-MM-DD` |
-| `hours` | how many hourly digests of the day were folded, 1 to 24 (24 when the product ran all day) |
+| `hours` | how many hourly digests of the day were folded, 1 to 24 (hours folded, never uptime: OD-1) |
 | `ops`, `total` | as in the hourly digest, summed over the day's hours |
 | `risen` | each operation that rose in some hour of the day: `{op, hours, failed}`, the hours it rose in and the failures of those hours, the most failures first |
 
@@ -55,7 +55,8 @@ text among them, fails it.
   written when it closes, at the next run, compared with the hour just before when that is the last hour written, else
   with none (a gap); a product that cannot keep it writes
   nothing for that hour, never a partial line, since a restart in the same hour would leave two lines and readers keep
-  the first. At start a product reads its last hourly line back for `previous`, and writes every closed hour it kept,
+  the first. At start a product reads its last hourly line back for `previous`, rebuilds the day's named operations
+  from that day's hourly lines (so a restart never names more than OD-3 allows), and writes every closed hour it kept,
   the hour it stopped in included, before it folds any closed day (OD-5): otherwise that day's daily line loses that
   hour for good.
 - **OD-2, an operation's name.** `op` is a short identifier: a lower-case letter, then letters, digits and `_` in
@@ -82,13 +83,14 @@ text among them, fails it.
   missing (DEC-0149, in progress: "Starting without the instance", the setup state of DEC-0044) is a setup answer,
   not a failure: it counts as `unknown`, never `failed`, so a person's unfinished setup never makes a rise. A host
   that relays calls counts an error as it sees it: a relayed error cannot tell setup from failure (DEC-0149). `total` is each counter's sum over `ops`. Each
-  `op` is named once in `ops` and once in `risen`. A count, and every sum, is an integer from 0 to 2^53 − 1; a
+  `op` is named once in `ops` and at most once in `risen`. A count, and every sum, is an integer from 0 to 2^53 − 1; a
   product that would write a larger one writes no digest for that hour (the reference folds throw). `ops` and `risen`
   hold at most 4096 operations each: a product keeps at most 4095 named operations per UTC day plus its one fixed
-  overflow name, under which it counts the rest (their counts kept), so both its hourly and its daily lines validate. A
-  day that would fold more than 4096 operations has no daily digest, and an hour of more than 4096 operations, or one
-  holding a name OD-2's grammar refuses, has no hourly digest (the reference `foldDay` and `foldHour` throw), since a
-  line every reader skips is never written. A finding or a fold's error names a value shaped like a credential or
+  overflow name, under which it counts the rest (their counts kept), so both its hourly and its daily lines validate;
+  it publishes that overflow name with its outcome map. A day that would fold more than 4096 operations, or whose hours
+  hold a name `FAC-SEM-167` refuses, has no daily digest, and an hour of more than 4096 operations, or holding a name
+  OD-2 refuses (its grammar, or `FAC-SEM-167`), has no hourly digest (the reference `foldDay` and `foldHour` throw), since
+  a line every reader skips is never written. A finding or a fold's error names a value shaped like a credential or
   holding a home folder only by its place, never by the value.
 - **The order.** `ops` is sorted by `op` in code-unit order (the order of JavaScript's `<` on strings); an hourly
   `risen` is in the order of `ops`; a daily `risen` is sorted by `failed`, the most first, then by `op` in code-unit
@@ -207,7 +209,7 @@ A product with one folder of digests, `digests` in its data folder, writes in it
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-166"></a>`FAC-SEM-166` | `ops-digest-hourly`, `ops-digest-daily` | an hourly digest's `from` and `to` are whole UTC hours of real days, one hour apart, and a daily digest's `day` a real UTC day; each `op` once in `ops` and once in `risen`; `total` each counter's sum over `ops`; every `risen` op counted in `ops`; an hourly rise names the hour's failures of its op and is a rise by OD-4 against its `previous`; a daily rise is in at most the day's `hours`, with at least 10 failures an hour it rose and at most the day's failures of its op (DEC-0153) |
+| <a id="fac-sem-166"></a>`FAC-SEM-166` | `ops-digest-hourly`, `ops-digest-daily` | an hourly digest's `from` and `to` are whole UTC hours of real days, one hour apart, and a daily digest's `day` a real UTC day; each `op` once in `ops` and at most once in `risen`; `total` each counter's sum over `ops`; every `risen` op counted in `ops`; an hourly rise names the hour's failures of its op and is a rise by OD-4 against its `previous`; a daily rise is in at most the day's `hours`, with at least 10 failures an hour it rose and at most the day's failures of its op (DEC-0153) |
 | <a id="fac-sem-167"></a>`FAC-SEM-167` | `ops-digest-hourly`, `ops-digest-daily` | no `op`, in `ops` or in `risen`, is shaped like a credential (`secretValue` of [`src/secret-shape.ts`](../../src/secret-shape.ts), the shared detector: a provider key's shape (`sk-`, `gh[pousr]_`, `xox?-`, `AKIA`, `glpat-`), a JWT (`eyJ` and two more dotted segments), a value starting with `Bearer` and a space, or a run of 40 or more letters, digits, `_`, `-` or `/` (so across segments joined by `-` or `/`) that mixes upper case, lower case and a digit. On the shared detector as it stands, the `sk-` shape also matches inside `ask-`, `task-`, `desk-` and `disk-` (so `queue.task-assigned-to-worker` is refused) until DEC-0151's narrowing lands) or holds a home folder (`hasHomePath` of [`src/activity-rules.ts`](../../src/activity-rules.ts)). `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`, `api.my_users/list` and `ui.home/open` fail and `api.user/list` and `api.get_user/list` pass. One refused name fails the whole line, which every reader skips (DEC-0153) |
 | <a id="fac-sem-168"></a>`FAC-SEM-168` | `service-descriptor` | a descriptor that carries the ops-digest key (`extensions/ops-digest/0.1`) is a `local` one that names `paths.data`; its value is valid against `service-ops-digest-extension.schema.json` (a reader treats an invalid one as not declared and reports it); each `source` is named once and each `dir` once, compared under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped; no `dir` holds a home folder (`hasHomePath`) and no `dir` or `source` is shaped like a credential (`secretValue`). `hasHomePath` refuses a value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `users/digests`, `my_users/digests`, `my-users/digests` and `a/~b` fail and `user-digests` and `a/~1/x` pass. One finding refuses the whole declaration, which a collector reads as not declared (DEC-0153 OD-9) |
 

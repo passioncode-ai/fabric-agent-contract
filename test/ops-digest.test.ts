@@ -218,7 +218,7 @@ describe("the reference folds", () => {
       expect(() => foldHour([{ op: "a", ok: 1, failed: 0, unknown: 0 }], "2026-11-04T01:00:00Z", previous)).toThrow(/^a is named twice/);
       const secretTwice = { ...previous, ops: [{ op, ok: 0, failed: 0, unknown: 0 }, { op, ok: 0, failed: 0, unknown: 0 }] } as HourlyDigest;
       expect(() => foldHour([], "2026-11-04T01:00:00Z", secretTwice)).toThrow(/^the operation at 1 is named twice/);
-      if (op === slack) expect(() => foldHour([{ op, ok: -1, failed: 0, unknown: 0 }], "2026-11-04T01:00:00Z", null)).toThrow(/^a count of the operation at 0 is not/);
+      if (op === slack) expect(() => foldHour([{ op, ok: -1, failed: 0, unknown: 0 }], "2026-11-04T01:00:00Z", null)).toThrow(/^the operation at 0 is refused by FAC-SEM-167/);
     }
     const key = EXTENSION_KEYS.opsDigest;
     const descriptor = { ...structuredClone(load("ops-digest-folders-ok.json").input), extensions: { [key]: [{ dir: slack, source: "one" }, { dir: slack, source: "two" }, { dir: "digests", source: slack }, { dir: "other", source: slack }] } };
@@ -226,8 +226,44 @@ describe("the reference folds", () => {
     expect(findings.some((f) => f.message.includes("this dir is named twice as a dir"))).toBe(true);
     expect(findings.some((f) => f.message.includes("this source is named twice as a source"))).toBe(true);
     for (const f of findings) expect(f.message).not.toContain(slack);
+    // A dir that collides with a hidden first-seen dir is hidden too, and the other way round.
+    const fake = ["Ex4mpleN0tARealKey", "ButShapedLikeOne", "AbCdEf012345"].join("");
+    for (const pair of [[fake, fake.toLowerCase()], [fake.toLowerCase(), fake]]) {
+      const collide = { ...descriptor, extensions: { [key]: [{ dir: pair[0], source: "one" }, { dir: pair[1], source: "two" }] } };
+      const messages = evaluateSemanticRules("service-descriptor", collide).filter((f) => f.code === "FAC-SEM-168").map((f) => f.message);
+      expect(messages.some((m) => m.startsWith("this dir is named twice as a dir")), pair[1]).toBe(true);
+      for (const m of messages) expect(m.toLowerCase()).not.toContain(fake.toLowerCase());
+    }
     expect(found("service-descriptor", { ...descriptor, extensions: { [key]: [{ dir: "digests", source: "app" }, { dir: "Digests", source: "app" }] } }).length).toBe(2);
     expect(evaluateSemanticRules("service-descriptor", { ...descriptor, extensions: { [key]: [{ dir: "digests", source: "app" }, { dir: "Digests", source: "app" }] } }).map((f) => f.message).join(" ")).toContain("Digests is named twice as a dir");
+  });
+
+  it("applies OD-2 in full: a name FAC-SEM-167 refuses makes no hourly and no daily digest, and is never echoed", () => {
+    const slack = ["xo", "xb-", "notareal-0123"].join("");
+    const H = "2026-11-04T01:00:00Z";
+    for (const op of ["ui.home/open", "queue.task-assigned-to-worker", slack]) {
+      expect(OP_NAME.test(op), op).toBe(true);
+      let message = "";
+      try { foldHour([{ op: "board.tick", ok: 1, failed: 0, unknown: 0 }, { op, ok: 0, failed: 12, unknown: 0 }], H, null); } catch (e) { message = (e as Error).message; }
+      expect(message, op).toBe("the operation at 1 is refused by FAC-SEM-167: no hourly digest (OD-3)");
+      // A digest written elsewhere with that name: the day refuses it in ops and in risen.
+      const hour = { schema: "ops.digest.hourly@1", from: "2026-11-04T01:00:00.000Z", to: "2026-11-04T02:00:00.000Z", ops: [{ op, ok: 0, failed: 12, unknown: 0 }], total: { ok: 0, failed: 12, unknown: 0 }, risen: [{ op, failed: 12, previous: 0 }] } as HourlyDigest;
+      for (const input of [hour, { ...hour, ops: [{ op: "board.tick", ok: 0, failed: 12, unknown: 0 }] } as HourlyDigest]) {
+        let daily = "";
+        try { foldDay("2026-11-04", [input]); } catch (e) { daily = (e as Error).message; }
+        expect(daily, op).toMatch(/^the operation at 0 of 2026-11-04T01:00:00.000Z's (ops|risen) is refused by FAC-SEM-167: no daily digest \(OD-3\)$/);
+        expect(daily).not.toContain(op);
+      }
+    }
+  });
+
+  it("never echoes a credential-shaped or home-folder from", () => {
+    for (const from of [["home", "jdoe", "x"].join("/"), ["xo", "xb-", "notareal-0123"].join("")]) {
+      let message = "";
+      try { foldHour([], from, null); } catch (e) { message = (e as Error).message; }
+      expect(message).toBe("from is not a whole UTC hour");
+    }
+    expect(() => foldHour([], "soon", null)).toThrow(/^soon is not a whole UTC hour/);
   });
 
   it("throws when a previous digest's failures give a rise a previous that is no count", () => {

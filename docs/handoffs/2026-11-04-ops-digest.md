@@ -130,7 +130,8 @@ product's obligation.
   "open" (`retro-after-work`; its row says "the daily digest counts retros asked and written"); CO-503 "open" ("The
   daily digest goes to Observatory"; target the organization slice, 2026-11-21, P-27). CO-509 is announced
   (board messages `449b3e7e`, `fefb0266`) and is not in the ledger, whose next free id is `CO-507`. (c) Not run (the
-  round-4 readers reported its daily fold differing on 2 of the 4 day vectors at this commit).
+  round-4 readers reported its daily fold differing on 2 of the 4 day vectors at this commit, against this branch's
+  `fixtures/vectors/ops-digest.json`, blob `c5a0a84489ec`, unchanged since `21bb0246`).
 - **Fabric Inbox**: (a) release tag v0.95.0 (`6fed640`); `passioncode-ai/fabric-inbox` origin/main `71a3edd6`, where
   its rows were read. (b) B-212 "in review (0.95.0)", shipped in the v0.95.0 tag through PR #413; B-213 "open; due
   2026-11-16"; B-210 "open; due 2026-11-16 (Fabric's side 2026-11-18)", narrowed by PR #414 to the Mac app's own
@@ -147,19 +148,20 @@ product's obligation.
   v0.33.1. (b) OBS-330 "open": "Accept Fabric's daily digest of its own operations log as a project record kind";
   OBS-331 "open": "A daily review of what every agent learned: once a day, read the lessons (`observatory_lesson`) and
   digests of every project ...". (c) No fold to run.
-- **The Fabric Agent Adapter**: (a) `passioncode-ai/fabric-agent-adapter` origin/main `d51aa73f`, latest release
-  v0.64.0. (b) FAA-206, as its row states at v0.64.0: "open 2026-11-04: P1. Part 1 in 0.64.0, target 2026-11-13: done
-  2026-11-05 on `agent/faa-0.64.0`" (the retro reminder), "part 2 waits on the digest form in the contract (CT-219)".
-  (c) No fold yet. At its next re-pin `fabric-ops-digest/0.1` enters its twin registers `fabric_protocols.py` and
-  `fabric-protocols.mjs`, which its tests hold equal to the register `vendor_vectors.mjs` writes into
-  `feed-protocols-vectors.json` (the twins are kept by hand).
+- **The Fabric Agent Adapter**: (a) `passioncode-ai/fabric-agent-adapter` tag v0.65.0 (`3606bf89`), read with `git show`
+  on 2026-11-05, nothing run. (b) FAA-206, as its row states at that tag: "open 2026-11-04: P1. Part 1 released in 0.64.0
+  on 2026-11-05 (`8eec4815`, tag `v0.64.0`) ... part 2 waits on the digest form in the contract (CT-219, a draft by
+  2026-11-10), its date named the day the form lands. ..." (c) No fold yet. At its next re-pin `fabric-ops-digest/0.1`
+  enters its twin registers `fabric_protocols.py` and `fabric-protocols.mjs`, which its tests hold equal to the register
+  `vendor_vectors.mjs` writes into `feed-protocols-vectors.json` (the twins are kept by hand).
 - **Protocol tables**: at their next re-pin, the consumers that vendor a protocol table (a deployment template's
   `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the adapter
   kit's copies in agents built on it, and any other vendored table) add `fabric-ops-digest/0.1`, as DEC-0149 asks for
   `fabric-source`.
 - **At landing** (DEC-0151 lands before this branch and narrows the `sk-` shape): on the merged tree, add `FAC-SEM-167`
   pass cases for `queue.task-assigned-to-worker`, `work.desk-booking-confirmed` and `ui.disk-usage-refreshed-hourly`,
-  which the `sk-` shape before DEC-0151 reads as keys. CT-222 (filed on this branch, the next free CT above every
+  which the `sk-` shape before DEC-0151 reads as keys, and move `queue.task-assigned-to-worker` out of the
+  refused names of the test "applies OD-2 in full" in `test/ops-digest.test.ts` (it folds on the merged tree). CT-222 (filed on this branch, the next free CT above every
   branch and main when written) widens `SECRET_VALUE` for underscore-form provider prefixes, `AIza` keys and `hf_`
   tokens, owned by DEC-0151's detector, with tests from split literals.
 - **At landing, the fold:** on the merged tree with DEC-0149, `foldDir` calls DEC-0149's `foldPath` (one
@@ -227,12 +229,25 @@ product's obligation.
   digest for more than 4096 operations or a name `OP_NAME` refuses), its docstring names the adjoining previous hour,
   no finding of FAC-SEM-166 or FAC-SEM-168 and no fold error copies a value shaped like a credential or holding a home
   folder (it names the place, as `src/descriptor-rules.ts` does), DEC-0153 says "lower, upper and lower case" for the
-  fold, and CT-222 is filed. Round 8 is next.
+  fold, and CT-222 is filed.
+- Round 8 at `b96e73d4` was not clean: the reference folds against FAC-SEM-167 (they wrote a line every reader skips
+  for a name FAC-SEM-167 refuses; now `foldHour` and `foldDay` refuse it too, for ops and risen, naming only the place),
+  the `from` echo (now hidden like any credential-shaped or home-folder value) and the daily `hours` ("hours folded,
+  never uptime: OD-1"). Also: OD-1's restart rebuilds the day's named operations, OD-3's overflow name is published with
+  the outcome map, "at most once in `risen`", the on-request case in the producer row, the next free DEC marker written
+  from CAS (`DEC-0154`), Compatibility on ADR-0188 §5's "retros written", the adapter line read at v0.65.0, and the
+  duplicate-dir message hidden when either dir is. Round 9 is next.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
 
 ## Checks actually run
+
+Round-8 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of
+round 2 with coverage on `src/ops-digest.ts` (4210 tests; 253 of 253 statements, 204 of 204 branches);
+`pnpm exec tsx tools/vectors/run.ts` (29 files); `pnpm run docs:check`; `python3 docs/ux/lint.py`;
+`pnpm run privacy:check` (0 findings). The DEC counter read on origin (`refs/agent-sync/ids/DEC`) is next 154. The
+branch gate is owed: the 15-minute load was 85.9.
 
 Round-7 risks, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the 11 files of round
 2 (ops-digest, consistency and validate-cli among them) with coverage on `src/ops-digest.ts` (4208 tests; 241 of 241
