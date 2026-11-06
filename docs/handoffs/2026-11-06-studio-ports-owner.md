@@ -41,6 +41,8 @@ Proposed DEC on its own branch, and files the rest.
 - `device.hostLabel` sits in the request's closed `device` object, so a server pinned before refuses it at its schema
   (as DEC-0094's `file`); a node sends it only to an organization that turned it on.
 - Fabric Inbox's row is the coordinator's corrected wording of 2026-11-06 (its PR #421).
+- The claim's `<account>` is the numeric uid on macOS and Linux and the SID on Windows, never the login name, and
+  the ignore rule compares the file's owner uid (owner SID) with it (the coordinator's correction of 2026-11-06).
 
 ## Open
 

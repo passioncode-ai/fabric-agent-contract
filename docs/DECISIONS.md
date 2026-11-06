@@ -9752,11 +9752,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. **A port recorded per OS account (HA-1, G1).** A local service's port is recorded per OS account, in the
      service's own state and in its descriptor's `origin`. The installer chooses it free on the host: no process
      listens on it, no descriptor of this account declares it, and no other account's claim names it. It writes this
-     account's claim `.passioncode-ports.<service-id>.<account>.json` in the host's shared sticky folder
+     account's claim `.passioncode-ports.<service-id>.<account>.json` (`<account>` the numeric uid on macOS and
+     Linux, the SID on Windows, never the login name, which can be renamed) in the host's shared sticky folder
      (`/Users/Shared` on macOS, `/var/tmp` on Linux, `%ProgramData%\PassionCode\port-claims` on Windows), owned by that
      account and holding only `{schema, service, account, ports, updatedAt}` (`schema` `passioncode-port-claim/1`), and
-     removes it at uninstall. A claim whose owner is not the account it names, or of an account no longer on the host,
-     is ignored. A claim grants nothing: it keeps two installers from one port, and who may receive a credential is
+     removes it at uninstall. A claim whose file owner (uid, or SID on Windows) is not the `account` it names, or of an
+     account no longer on the host, is ignored. A claim grants nothing: it keeps two installers from one port, and who may receive a credential is
      item 2's. A host with one OS account MAY keep a service's historical default port. A client takes the port only
      from the descriptor or the service's record; a formula over the uid (Fabric's hub, CO-505) is only an allowed
      default, when the port it gives is recorded, claimed and checked free. `FAC-SEM-010` is unchanged: it checks one

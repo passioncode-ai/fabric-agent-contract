@@ -556,16 +556,16 @@ at uninstall:
 
 | | |
 |---|---|
-| File | `.passioncode-ports.<service-id>.<account>.json`, `<service-id>` the descriptor's `id`, `<account>` the OS account's login name |
+| File | `.passioncode-ports.<service-id>.<account>.json`, `<service-id>` the descriptor's `id`, `<account>` the OS account's numeric uid on macOS and Linux, its SID on Windows (a login name can be renamed, and is not what the owner check compares) |
 | Folder | the host's shared sticky folder: `/Users/Shared` (macOS), `/var/tmp` (Linux), `%ProgramData%\PassionCode\port-claims` (Windows) |
 | Owner | the account the file names |
-| Content | only `{schema, service, account, ports, updatedAt}`: `schema` `passioncode-port-claim/1`, `service` the `id`, `account` the login name, `ports` every port this account's instances of the service hold, `updatedAt` an RFC 3339 UTC time |
+| Content | only `{schema, service, account, ports, updatedAt}`: `schema` `passioncode-port-claim/1`, `service` the `id`, `account` the same uid (a string of digits) or SID, `ports` every port this account's instances of the service hold, `updatedAt` an RFC 3339 UTC time |
 
 ```json
-{"schema": "passioncode-port-claim/1", "service": "example-agent", "account": "ops", "ports": [47320], "updatedAt": "2026-11-06T09:00:00Z"}
+{"schema": "passioncode-port-claim/1", "service": "example-agent", "account": "502", "ports": [47320], "updatedAt": "2026-11-06T09:00:00Z"}
 ```
 
-- A reader ignores a claim whose file owner is not the account it names, and a claim of an account no longer on the
+- A reader ignores a claim whose file owner (its owner uid; on Windows its owner SID) is not the `account` it names, and a claim of an account no longer on the
   host.
 - **A claim grants nothing.** It only keeps two installers from choosing one port; who may receive a credential is
   HA-2's check, never a claim.

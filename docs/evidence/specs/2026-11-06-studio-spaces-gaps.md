@@ -61,8 +61,9 @@ loopback; that assumption is the root of G1 to G3.
 - **Decided (DEC-0154 HA-1).** The port is recorded per account, in the service's own state and the descriptor's
   `origin`; the installer chooses it free on the host (not listening, in no descriptor of the account, in no other
   account's claim) and writes a claim `.passioncode-ports.<service-id>.<account>.json` in the host's shared sticky
-  folder, owned by the account it names, holding only `{schema, service, account, ports, updatedAt}`. A claim of the
-  wrong owner, or of an account no longer on the host, is ignored, and a claim grants nothing. A host with one account
+  folder (`<account>` the numeric uid, or the SID on Windows, never a login name that can be renamed), owned by that
+  account, holding only `{schema, service, account, ports, updatedAt}`. A claim whose file owner uid (owner SID) is not
+  its `account`, or of an account no longer on the host, is ignored, and a claim grants nothing. A host with one account
   may keep its historical default; a client reads the port only from the descriptor or the service's record; a uid
   formula is only an allowed default when recorded and checked. The first proposal, a reserved band for hubs and one
   band per account, was not taken: every product would have to compute it, and it says nothing about who listens.
