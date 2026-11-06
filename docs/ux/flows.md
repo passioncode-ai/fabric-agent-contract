@@ -414,7 +414,7 @@ flowchart TD
 
 - **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired; SCR-19 answered; SCR-32 success when the operator moves the slot that answers the request (DEC-0140).
 
-### FLW-17: A second copy of a service starts while one runs
+### FLW-17: A second copy of a service starts, or another account's listener holds its port
 
 - **Traces:** ST-021 (JTBD-03, JRN-02/#3)
 - **Goal:** a second copy changes nothing, and what the operator sees says what happened, never an outage
@@ -432,7 +432,7 @@ flowchart TD
   M -->|supervised| W[Wait up to 300 s, touching nothing]
   W -->|holder leaves| T[Takes the lock and runs]
   W -->|wait runs out| X
-  X --> V[Screen: Service card with a second copy]
+  X --> V[Screen: Service card, a second copy or another account's listener]
   C --> V
   W --> V
   P[Host probes the service's port] --> O{Who owns the listener?}

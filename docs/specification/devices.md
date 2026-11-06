@@ -230,7 +230,8 @@ or a virtual machine given its secret) and that organizations with no code on th
 
   On macOS and Linux: owner root, mode `0444`, its folder owned by root with mode `0755`. On Windows: Administrators
   full control, Users read, no inherited write, on the file and its folder. Every account reads it, none but the
-  administrator can write it.
+  administrator can write it. On Windows the same step also creates the port claims folder
+  ([service](service.md#ha-1) HA-1).
 - **Never in a backup.** The setup step MUST exclude the file from the computer's backups: on macOS
   `tmutil addexclusion -p` on the file; on Linux the exclusion list of the computer's backup tool; on Windows the
   `FilesNotToBackup` registry list. It is not in a snapshot or a machine pack either. That a restore never carries it

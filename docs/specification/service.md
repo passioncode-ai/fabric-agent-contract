@@ -545,12 +545,13 @@ The Host and Origin guard does not tell them apart, so a computer with more than
 - **The browser's cookies.** Browsers do not isolate cookies by port ([RFC 6265](https://www.rfc-editor.org/rfc/rfc6265)
   section 8.5): a page served on `127.0.0.1` by another account's process, once the person's browser visits it,
   receives the cookies a dashboard set on `127.0.0.1`. The bound is the operator session's lifetime (12 hours idle,
-  7 days at most, [below](#operator-session-lifetime)) and the dashboard's refusal of another account's peer (HA-2),
+  7 days at most, [above](#operator-session-lifetime)) and the dashboard's refusal of another account's peer (HA-2),
   which keeps that page from using the cookie on the dashboard; what stays is a cookie value read by another account's
   page. Fabric Dashboards reported on thread `1fe66e6e` that its own window keeps the dashboard's session out of the
   person's browser. The appearance and owner cookies ([Fabric's button](fabric-button.md),
-  [embedded dashboard](embedded-dashboard.md)) are shared across accounts too, accepted because they carry no
-  credential.
+  [embedded dashboard](embedded-dashboard.md)) are shared across accounts too, and another account's page can set them,
+  which changes appearance and the button only ([Fabric's button](fabric-button.md) FB-6); accepted because they carry
+  no credential.
 - **A coding agent's bearer.** A client the contract does not reach, reconnecting after the port changed hands, sends
   what it holds. The bound is the session bearer's lifetime ([session handoff](session-handoff.md) SH-9) and the
   rotation HA-2 asks for.
@@ -565,9 +566,11 @@ this contract; the machine is "the computer".
 <a id="counted-os-accounts"></a>
 
 **Counted OS accounts.** A counted OS account is an OS account a person or an organization signs in with, or runs
-Fabric or an agent service under. Root, SYSTEM and the system's service accounts are not counted: on macOS the accounts
-with a uid under 500 or a name starting with `_`; on Linux the accounts with a uid below `UID_MIN` of `/etc/login.defs`
-or a `nologin` shell; on Windows the built-in and service accounts. "A computer with one counted OS account" and "a
+Fabric or an agent service under. The count fails toward more: an account that runs Fabric or an agent service, or has
+a services directory, is counted whatever its shell, uid or name. Only an account that does neither is left out by
+these tests: root, SYSTEM and the system's service accounts, that is on macOS the accounts with a uid under 500 or a
+name starting with `_`; on Linux the accounts with a uid below `UID_MIN` of `/etc/login.defs` or a `nologin` shell; on
+Windows the built-in and service accounts. "A computer with one counted OS account" and "a
 computer with more than one" count only these. A listener one of the uncounted accounts owns is still `foreign-user`
 under HA-2. An installer and a door read the count at every start, never once at install, so an account added later
 is seen at the next start. A local service runs under the counted account whose services directory declares it.
@@ -602,13 +605,22 @@ removes its ports from the claim:
   and a claim of an account no longer on the computer.
 - **A claim grants nothing.** It only keeps two installers from choosing one port; who may receive a credential is
   HA-2's check, never a claim.
-- An installer, or a node that installed the service, writes a missing claim at the service's next start, so a
-  computer installed before this decision catches up without a reinstall.
+- An installer, or a node that installed the service, rewrites its claim at every start of the service, not only
+  when the file is missing: a file's age in `/var/tmp` decides whether `systemd-tmpfiles` removes it, and a rewrite
+  also lets a computer installed before this decision catch up without a reinstall. Losing a claim costs only a
+  collision warning: the claim grants nothing, and the listener's check (HA-2) is what protects a credential.
 - **A squatted claim path.** When a file of the claim's name exists and another account owns it, the installer cannot
   write its claim: it records the port in its own state and descriptor anyway, reports the squatted path (a note, never
   a refusal, since claims grant nothing), and chooses its port by the listener and descriptor tests alone.
-- **The Windows claims folder.** Users may create files in it, the creator owner has full control of its own files,
-  and no account may write or delete another's: the sticky folder's meaning on macOS and Linux.
+- **The Windows claims folder.** The administrator's setup step, run with administrator rights, the one that writes
+  the host label's secret ([devices](devices.md#the-host-label)), creates `%ProgramData%\PassionCode\port-claims`
+  and sets its ACL: Users may create files in it, the creator owner has full control of its own files, and no account
+  may write or delete another's, the sticky folder's meaning on macOS and Linux. An installer running as an ordinary
+  account that finds the folder missing, or with another ACL, records its port anyway and reports it, as for a squatted
+  path; it never creates the folder or changes its ACL itself.
+- **The Linux folder's limits.** `/var/tmp` was agreed on the board and stays, with two known limits: `systemd-tmpfiles`
+  may age a claim out, and a unit with `PrivateTmp` sees its own `/var/tmp`. So an installer, or the node, rewrites its
+  claim at every start, and CT-228's reference covers a claim aged out.
 - An instance removes only its own ports from the claim at uninstall, and deletes the file when none remain.
 - An ephemeral port that the listener protects with a proof (a fresh challenge answered with an HMAC, as below) needs
   no claim: nothing records it, and a client finds it only through the record the service writes.

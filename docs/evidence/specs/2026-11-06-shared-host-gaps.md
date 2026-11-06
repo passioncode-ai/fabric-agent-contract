@@ -1,31 +1,31 @@
 # Several OS accounts on one computer: the contract's gaps
 
 A spec of 2026-11-06 for backlog CT-228 to CT-241 and [DEC-0154](../../DECISIONS.md) (proposed). It answers the
-operator's request of 2026-11-05, relayed on board thread `1fe66e6e`: read the organization's plan for a shared host,
+operator's request of 2026-11-05, relayed on board thread `1fe66e6e`: read the organization's plan for a shared computer,
 compare it with the contract, and write a spec per gap.
 
 Sources, each at a commit:
 
-- The organization's plan for a shared host, in the workspace repository at commit `12125977` (its README, access,
+- The organization's plan for a shared computer, in the workspace repository at commit `12125977` (its README, access,
   placement and runbook pages), with the knowledge base's plans, integration and rules pages at the same commit. Cited
   as `plan:<page>:<line>`.
 - Fabric's hub port per account (its CO-505): fabric commit `9500ed25`, `apps/desktop/src/main/hub.ts:36-77`
   (`userHubPort`, `hubPort`, `checkPortUnclaimed`).
 - This contract at `1016f0ec`, cited as `<path>:<line>`.
 
-The host has three OS accounts, named here by role (`plan:README.md:28`): an administrator's account, holding no
+The computer has three OS accounts, named here by role (`plan:README.md:28`): an administrator's account, holding no
 keys; the operator's own account; and an account an organization owns whole, with virtual machines under them.
 
 ## What the plan expects of the contract
 
 The plan names no contract row in its owner table (`plan:README.md:169-176`). Its expectations reach the contract
 through the products: Fabric, Fabric Dashboards and Switchboard run under each OS account with a port per account
-(`plan:README.md:122-128`, CO-505); loopback is one per host, not one per account, so every account reaches every
+(`plan:README.md:122-128`, CO-505); loopback is one per computer, not one per account, so every account reaches every
 service the others listen with on `127.0.0.1` (`plan:access.md:17-19`); Fabric tokens carry what must cross between
 accounts (`plan:README.md:87-89`); the organization's account is a machine of that organization, the operator's own
 account never is (`plan:README.md:56-58`, `:81-85`); a virtual machine is a machine like any other (`plan:plans.md:21-31`);
 services run in each account's container runtime (`plan:README.md:85`); and the contract's full gate runs on the
-operator's account of that host (`plan:placement.md:16`). The contract's local placement assumed one OS account per
+operator's account of that computer (`plan:placement.md:16`). The contract's local placement assumed one OS account per
 loopback; that assumption is the root of G1 to G3.
 
 | # | Gap | Priority | Where it goes |
@@ -40,7 +40,7 @@ loopback; that assumption is the root of G1 to G3.
 | G8 | Supervisor rules assume a person logged in | medium | CT-234 |
 | G9 | A service in a per-account container has no descriptor form | low | CT-235, with CT-132 |
 | G10 | No estate-level singleton for pollers and schedulers | low | CT-236 |
-| G11 | The contract's own gate can pass on a shared host with the privacy step skipped | medium | CT-237 |
+| G11 | The contract's own gate can pass on a shared computer with the privacy step skipped | medium | CT-237 |
 
 ## G1. Ports when several OS accounts share one loopback
 
@@ -57,16 +57,22 @@ loopback; that assumption is the root of G1 to G3.
 - **The consequence.** Two accounts can claim one port without either installer seeing it; the second fails to bind,
   or a host reaches the other account's copy of the same agent, whose well-known document answers the same
   `id.instance`, so `FAC-SEM-009` passes and the token is sent.
-- **Decided (DEC-0154 HA-1).** The port is recorded per account, in the service's own state and the descriptor's
-  `origin`; the installer chooses it free on the host (not listening, in no descriptor of the account, in no other
-  account's claim) and writes a claim `.passioncode-ports.<service-id>.<account>.json` in the host's shared sticky
-  folder (`<account>` the numeric uid, or the SID on Windows, never a login name that can be renamed), owned by that
-  account, holding only `{schema, service, account, ports, updatedAt}`. A claim whose file owner uid (owner SID) is not
-  its `account`, or of an account no longer on the host, is ignored, and a claim grants nothing. A host with one account
-  may keep its historical default; a client reads the port only from the descriptor or the service's record; a uid
-  formula is only an allowed default when recorded and checked. The first proposal, a reserved band for hubs and one
-  band per account, was not taken: every product would have to compute it, and it says nothing about who listens.
-- **Acceptance (CT-228).** The claim file's schema and a reference for the choice with vectors; the products' rows
+- **Decided (DEC-0154 HA-1).** The port is recorded per counted account, in the service's own state and the
+  descriptor's `origin`. An installer keeps the port its own `id.instance` records when that instance's listener holds
+  it or nothing does; it chooses a new port, free on the computer (not listening, in no other `id.instance`'s
+  descriptor, in no other account's claim), only when none is recorded or another holder has it. It writes a claim
+  `.passioncode-ports.<service-id>.<account>.json` in the computer's shared sticky folder (`<account>` the numeric uid,
+  or the SID on Windows, never a login name that can be renamed), owned by that account, holding only
+  `{schema, service, account, ports, updatedAt}`, and rewrites a missing one at every start. A claim whose file owner
+  uid (owner SID) is not its `account`, or of an account no longer on the computer, is ignored, and a claim grants
+  nothing. When the claim's path is held by another owner, the installer records its port anyway and reports the
+  squatted path; at uninstall an instance removes only its own ports and deletes the file when none remain. A computer
+  with one counted account keeps its historical default port and writes its claim too; a client reads the port only
+  from the descriptor or the service's record; a uid formula is only an allowed default when recorded and checked. The
+  first proposal, a reserved band for hubs and one band per account, was not taken: every product would have to
+  compute it, and it says nothing about who listens.
+- **Acceptance (CT-228).** The claim file's schema and a reference for the choice with vectors (a port kept, a port
+  chosen, a squatted path, an absent account's claim, a claim aged out of a temporary folder); the products' rows
   (Fabric CO-513, the adapter FAA-225, Project Observatory OBS-354) green against them.
 
 ## G2. The listener's owner, before a token
@@ -93,14 +99,14 @@ loopback; that assumption is the root of G1 to G3.
 ## G3. T0 over TCP loopback
 
 - **The plan.** Accounts are separated, Fabric tokens carry what crosses (`plan:README.md:87-89`); a guest of a virtual
-  machine reaches the host's loopback through its gateway unless a packet filter closes it (`plan:access.md:27`,
+  machine reaches the computer's loopback through its gateway unless a packet filter closes it (`plan:access.md:27`,
   `:44-52`).
 - **The contract before DEC-0154.** T0 is a caller on loopback under the owner's OS account (`delegation.md:470`); a
   callee requires no token from it (DL-26); a loopback caller of another account is T2 (`delegation.md:526`), but the
   local floor (bind `127.0.0.1`, the Host and Origin guard) cannot tell accounts apart.
-- **Decided (DEC-0154 HA-3).** On a host with several accounts a token-free loopback door is T0 only when it checks
+- **Decided (DEC-0154 HA-3).** On a computer with several accounts a token-free loopback door is T0 only when it checks
   the peer's account (Project Observatory's local channel, DEC-0075, is the example); a forwarder of a virtual machine
-  or container is a relay and its callers are T2; since it runs as the guest's owner, a host whose guests reach its
+  or container is a relay and its callers are T2; since it runs as the guest's owner, a computer whose guests reach its
   loopback closes the path or admits no token-free caller on TCP.
 
 ## G4. A POSIX owner check of token files (CT-230)
@@ -117,14 +123,14 @@ loopback; that assumption is the root of G1 to G3.
 
 ## G5. A device is an OS account or a virtual machine (CT-231)
 
-- **The plan.** The host joins the organization only through the organization's account and the virtual machines
+- **The plan.** The computer joins the organization only through the organization's account and the virtual machines
   under it (`plan:README.md:56-58`); a virtual machine is a machine like any other (`plan:plans.md:21-22`); one node
   identity per machine (`plan:integration.md:115`).
 - **The contract.** A device is a computer (`devices.md:14`); a machine is a device enrolled in the estate
   (`estate-record.md:86`); an agent runs on one machine once per context (`contexts.md:68-80`, `FAC-SEM-074`).
 - **Decided in principle (DEC-0154 HA-4).** Each counted OS account and each virtual machine is its own device; the
-  host label is the only value the contract defines for telling one organization that two of its devices share a host.
-- **Needed.** The estate's definitions, `FAC-SEM-074` per node, whether a virtual machine records its host beyond the
+  host label is the only value the contract defines for telling one organization that two of its devices share a computer.
+- **Needed.** The estate's definitions, `FAC-SEM-074` per node, whether a virtual machine records its computer beyond the
   label (default: not), a node-summary fixture of a second account that carries nothing of the first.
 
 ## G6. A mode for an account an organization owns whole (CT-232)
@@ -145,16 +151,16 @@ loopback; that assumption is the root of G1 to G3.
   counters or enrollments to another computer, so a restored copy could renew by the key on record while the original
   still runs.
 - **Needed.** A restore never carries the machine id, the device keys, enrollment certificates and keys, stream epochs
-  and counters, the hub key or the host secret; the new computer joins anew; a server that sees two presenters of one
+  and counters, the hub key or the computer's secret; the new computer joins anew; a server that sees two presenters of one
   certificate revokes it. Fabric's CO-515 is the same rule.
 
 ## G8. Services of an account with no open session (CT-234)
 
-- **The plan.** The working accounts have no graphical session (`plan:README.md:34`) on an always-on host.
+- **The plan.** The working accounts have no graphical session (`plan:README.md:34`) on an always-on computer.
 - **The contract.** launchd with `RunAtLoad` and `KeepAlive`, systemd user units, the Task Scheduler running only when
   the user is logged on (`service.md:684`); no launchd domain, no lingering, no rule for an account not logged in.
 - **Needed.** The domain (`gui/<uid>` where a person logs in; otherwise a domain or daemon that runs without a login,
-  or the node as supervisor), `loginctl enable-linger` on an always-on host, and `down` with a named reason when the
+  or the node as supervisor), `loginctl enable-linger` on an always-on computer, and `down` with a named reason when the
   account's domain does not exist. The adapter's FAA-228 waits for it.
 
 ## G9. A service in a per-account container (CT-235)
@@ -164,32 +170,32 @@ loopback; that assumption is the root of G1 to G3.
 - **Needed.** A container runtime as supervisor, where `service.lock` lives, and the origin as the forwarded
   `127.0.0.1` port (the forwarder runs as the owning account, HA-3). Decided with CT-132.
 
-## G10. One host per singleton (CT-236)
+## G10. One computer per singleton (CT-236)
 
-- **The plan.** Every singleton (a bot polling a token, a scheduler, a publisher, a gateway) has exactly one host
+- **The plan.** Every singleton (a bot polling a token, a scheduler, a publisher, a gateway) has exactly one computer
   (`plan:placement.md:3-5`, `:33`); a cutover moves one agent at a time (`plan:runbook.md:61`).
 - **The contract.** `service.lock` gives one copy per computer (`service.md:683`); a placement is once per machine and
   context (`FAC-SEM-074`); nothing limits an agent to one machine of the estate.
 - **Needed.** Project Observatory's placement record `observatory-placement/1` as a readable norm for singletons, in a
   decision of the second wave; the schema stays `/1`, additive.
 
-## G11. The contract's own gate on a shared host (CT-237)
+## G11. The contract's own gate on a shared computer (CT-237)
 
 - **The contract.** `pnpm check` runs typecheck, test, the UX lint, the docs check and the privacy check; the privacy
   check runs only where the denylist exists and otherwise skips and passes (`src/privacy-check.ts:21-25`,
   `src/privacy-plan.ts:32`); leases and ids are refs on `origin`, while the run journal on the `fs` plane stays on the
   machine that wrote it.
-- **Needed.** The gate names the host that ran it and fails rather than skips on an operator's machine without the
+- **Needed.** The gate names the computer that ran it and fails rather than skips on an operator's machine without the
   denylist; the prerequisites (pnpm, python3, the org-index sibling, the denylist restored, `gh` signed in) and the
   journal per machine are written in `AGENTS.md`.
 
 ## Filed from the readings of DEC-0154
 
-- CT-238: on a host with one counted account, a token-free door still admits that account's own guests through a
+- CT-238: on a computer with one counted account, a token-free door still admits that account's own guests through a
   forwarder (an accepted gap of HA-3).
 - CT-239: the device-policy member that turns the host label on; until it lands a node sends none.
 - CT-240: every positive and negative fixture named by exactly one catalogue row (a gap older than DEC-0154).
-- CT-241: the organization's "these devices share a host" display and its scenario.
+- CT-241: the organization's "these devices share a computer" display and its scenario.
 
 ## Already covered
 

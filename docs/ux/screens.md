@@ -25,7 +25,7 @@
 | SCR-17 | Usage by grant | FLW-14 | disabled | proposed | `test/spend-policy.test.ts` |
 | SCR-18 | Restore preview and report | FLW-15 | disabled | proposed | `test/settings-backup.test.ts` |
 | SCR-19 | Project board thread | FLW-16 | disabled | proposed | `test/comms-rules.test.ts` |
-| SCR-20 | Service card with a second copy | FLW-17 | disabled | proposed | none yet |
+| SCR-20 | Service card: a second copy or another account's listener | FLW-17 | disabled | proposed | none yet |
 | SCR-21 | Project listing setting | FLW-18 | disabled | proposed | `test/comms-tools.test.ts` |
 | SCR-22 | Add a machine | FLW-19 | disabled | proposed | `test/pairing.test.ts` |
 | SCR-23 | My network's machines | FLW-20, FLW-26, FLW-27 | disabled | proposed | `test/ceremonies.test.ts` |
@@ -265,7 +265,7 @@
 - **Resources:** project-comms specification, Request lifecycle
 - **Status:** proposed
 
-### SCR-20: Service card with a second copy
+### SCR-20: Service card: a second copy or another account's listener
 
 - **Used by:** FLW-17
 - **Purpose:** a host's card for a service shows a second copy honestly, never as an outage and as two copies where the supervisor's pid shows one; and shows another OS account's listener on the service's port (or one whose owner the computer will not tell) as `foreign-user`, never as the service.

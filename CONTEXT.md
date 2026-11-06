@@ -644,12 +644,13 @@ cells of agent × skill × project × UTC day × outcome, with no person dimensi
 their user id or by a device bound to them — when and why, readable by that subject.
 
 **Device**: One counted OS account of a computer, or a virtual machine, enrolled with an organization server under
-`fabric-device/0.1` (DEC-0031; DEC-0154, proposed; what an estate machine is on such a host is CT-231):
+`fabric-device/0.1` (DEC-0031; DEC-0154, proposed; what an estate machine is on such a computer is CT-231):
 a key-bound short-lived certificate (the key in hardware, a platform store or a file, as `key.storage` states) that also attributes everything it sends, a server-issued
 stream epoch, signed policy layers and periodic check-ins.
 
 **Counted OS account**: An OS account a person or an organization signs in with, or runs Fabric or an agent service
-under; root, SYSTEM and the system's service accounts are not counted ([service](docs/specification/service.md#counted-os-accounts),
+under; an account that runs either, or has a services directory, always counts, and only an account that does neither
+(root, SYSTEM, the system's service accounts) is left out ([service](docs/specification/service.md#counted-os-accounts),
 DEC-0154, proposed). "A computer with more than one counted OS account" counts only these.
 
 **Port claim**: A `passioncode-port-claim/1` file `.passioncode-ports.<service-id>.<account>.json` in the computer's

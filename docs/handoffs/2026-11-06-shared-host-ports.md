@@ -3,18 +3,21 @@
 ## Objective
 
 Answer the operator's request of 2026-11-05, relayed on board thread `1fe66e6e`: read the organization's plan for a
-shared host on which several OS accounts work, compare it with the contract, write a spec per gap, file the rows and
+shared computer on which several OS accounts work, compare it with the contract, write a spec per gap, file the rows and
 close them in waves. This run drafts the first wave's decision (G1 to G3 and the host label the board agreed) as a
 Proposed DEC on its own branch, and files the rest.
 
 ## Done
 
 - [DEC-0154](../DECISIONS.md), Status Proposed: counted OS accounts (who counts, read at every start); HA-1 (a port
-  recorded per counted account, chosen free on the host, with a claim `.passioncode-ports.<service-id>.<account>.json`
-  naming the account by uid or SID, written at the next start when missing, removed at uninstall, granting nothing);
+  recorded per counted account: kept when this instance's listener holds it or nothing does, chosen anew, free on the
+  computer, only when none is recorded or another holder has it; a one-account computer keeps its historical default;
+  a claim `.passioncode-ports.<service-id>.<account>.json` naming the account by uid or SID, rewritten at every start
+  when missing; the port recorded anyway when the claim's path is squatted; at uninstall cleared of this instance's ports only, granting
+  nothing);
   HA-2 (the listener's owner checked before any credential and before "healthy", the host state `foreign-user` ordered
   before `foreign`, who checks when the client cannot, a server's refusal of another account's peer, rotation, the
-  PKCE loopback redirect, the browser-cookie residue); HA-3 (no token-free loopback door on a host with several counted
+  PKCE loopback redirect, the browser-cookie residue); HA-3 (no token-free loopback door on a computer with several counted
   accounts; forwarders are relays; the single-account gap accepted, CT-238); HA-4 (each counted account and each
   virtual machine is its own device; `device.hostLabel`, its secret kept out of backups, its read rule failing closed,
   sent only once a policy member turns it on, CT-239).
@@ -36,7 +39,7 @@ Proposed DEC on its own branch, and files the rest.
   narrowed. UX: SCN-056 in `docs/ux/scenarios.md`, SCR-20's `foreign-user` state in `docs/ux/screens.md`, FLW-17's
   screens in `docs/ux/flows.md`. RFC 8252's row in `docs/evidence/sources.md`, and RFC 6265's existing row read again (its section 8.5 was already pinned for DEC-0059).
 - The gap list as a tracked spec: [2026-11-06-shared-host-gaps.md](../evidence/specs/2026-11-06-shared-host-gaps.md),
-  the shared host's accounts by role only.
+  the shared computer's accounts by role only.
 - Backlog CT-228 (the DEC) and CT-229 to CT-241 (the state-order vector file, G4 to G11, the single-account forwarder
   gap, the policy member, the fixture catalogue, the organization's display).
 - Ids: DEC-0154 reserved by compare-and-swap on origin (under this run's own reservation key); no rule code reserved.
@@ -60,6 +63,17 @@ Proposed DEC on its own branch, and files the rest.
   recorded port), and the A2A sentence on loopback reach (rewritten, with `profiles.md`). Seam passed, with follow-ups
   R1 to R7 folded in. The branch merged GitHub main `1c141418` (PR #245) first. The spec and this handoff were renamed
   to `2026-11-06-shared-host-gaps.md` and `2026-11-06-shared-host-ports.md`.
+- Round 3 at `feef4e4d`: not clean. Product failed on five breaks: "host" still meaning the computer in `CONTEXT.md`,
+  two conformance rows, the backlog rows, this spec and this handoff (now "computer", file names and "host label"
+  kept); the display's wording ("these devices share a computer"); HA-1 restated as decided in the spec's G1 and this
+  handoff; SCN-056's expected result against the cookie residue (and an open browser tab as an alt path); and the
+  account count failing toward fewer (an account that runs Fabric or an agent service, or has a services directory,
+  now always counts). Risks folded: the unproven `org_<base32>` parenthesis removed, `foreign` reported `down` on any
+  computer, the Linux folder's limits (claims rewritten at every start), the Windows claims folder created by the setup
+  step; SCR-20 and FLW-17 retitled; the appearance cookies' write named. Unit passed (39 vectors and 2816 generated
+  inputs against an independent model, 27 of 27 mutants killed), with two notes folded: the negative fixture differs
+  from the positive only in its padding bits (`...wR`), and the fixture's `org.id` is described as "at least 128
+  random bits" with no encoding named.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -88,8 +102,10 @@ Proposed DEC on its own branch, and files the rest.
   `vitest.config.ts`'s coverage `include` is the union (`src/host-label.ts` and `src/validator.ts` both); the watcher
   sentence in `service.md`: DEC-0149 rewrites it to "only when an agent has been unavailable (down, not merely
   degraded) for more than 15 minutes", and whichever of DEC-0149 and DEC-0154 lands second makes it read "unavailable
-  (down or foreign-user, not merely degraded)"; CT-232 cites DEC-0149's `source.md` sentence on an OS account an
-  organization owns whole.
+  (down or foreign-user, not merely degraded)"; when DEC-0149 lands, CT-232 cites its sentence on an OS account an
+  organization owns whole (on DEC-0149's branch, `source.md` and `contexts.md`; not cited before it lands). This is a
+  landing edit made by whichever of DEC-0149 and DEC-0154 lands second; after both, `grep '^| CT-232 ' docs/backlog.md |
+  grep -c source.md` prints 1.
 - DEC-0151 and DEC-0152: the same register rules (DECISIONS tail in id order, markers from the counters, backlog in id
   order, handoffs newest first).
 
@@ -110,7 +126,7 @@ Project Observatory); tell thread `1fe66e6e` the same day (Fabric Dashboards' FD
 
 On this branch's head before the push: `pnpm typecheck`, `pnpm vectors:check`, the touched tests, `pnpm run
 docs:check`, `python3 docs/ux/lint.py`, `pnpm privacy:check`, the em dash check on the added lines and the full gate
-`pnpm run check`, each with exit 0. The gate after round 2's batch: 111 test files, 10518 tests passed and 1 skipped,
+`pnpm run check`, each with exit 0. The gate after round 3's batch: 111 test files, 10518 tests passed and 1 skipped,
 branches 98.92% (12567 of 12703), 31 vector files matching their generators, the UX lint passed (40 stories, 34
 flows, 34 screens, 55 scenarios), documentation checks passed, markdownlint 0 errors, privacy 0 findings; no em dash on
 an added line.

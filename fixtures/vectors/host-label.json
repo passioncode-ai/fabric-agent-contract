@@ -544,7 +544,7 @@
       }
     },
     {
-      "name": "a 128-bit organization id, as a server that turns the label on issues it",
+      "name": "an organization id of at least 128 random bits, as a server that turns the label on issues it",
       "input": {
         "platform": "posix",
         "secret": {
