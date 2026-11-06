@@ -241,7 +241,8 @@ A home folder is a finding when it carries a person's name, in the forms the Fab
 - Git Bash's `/c/Users/<name>` and WSL's `/mnt/c/Users/<name>`;
 - `C:\Users\<name>`, with either separator (a JSON-escaped backslash included) and a drive letter in either case;
 - the dashed forms a tool makes of a path (DEC-0105): `-Users-<name>`, `-home-<name>`, `-var-home-<name>`,
-  `-mnt-c-Users-<name>`, `-c-Users-<name>` and `C--Users-<name>`, never after a letter, a digit or a dash (`--home-dir` is a flag);
+  `-mnt-c-Users-<name>` and `-c-Users-<name>`, never after a letter, a digit or a dash (`--home-dir` is a flag), and
+  `C--Users-<name>`, never after a letter or a digit (so `-C--Users-<name>` is one);
 - the URL-encoded `%2FUsers%2F<name>`, `%2Fhome%2F<name>` and `%5CUsers%5C<name>`.
 
 The name is not a finding when it is one character (`/Users/a`, a placeholder) or one of the neutral names
@@ -306,7 +307,8 @@ source manifest `fabric.source.json` or pass its folder; any other file is a sou
   something in it) or covers it, never into a folder outside the path grammar, never into a folder an `exclude` folder
   is or holds, or an `exclude` entry without `/` names or lies above, unless an `include` path lies under it (so an unreadable excluded folder is no usage error); it reads
   names as bytes, and a name that is not UTF-8 gets Git mode's rule: a usage error naming its folder and no part of the
-  name (`cannot read a name in src/: it is not UTF-8`) when that folder lies in the source, otherwise skipped; a folder
+  name (`cannot read a name in src/: it is not UTF-8`, or `cannot read a name in ./: it is not UTF-8` for a name
+  directly in the root) when that folder lies in the source, otherwise skipped; a folder
   holding its own `.git` a nested
   repository. When Git was there and did not list the folder, a `note/walk` line says why, naming no folder. In Git
   mode a listed path outside the grammar is dropped before any look at the file system, so neither mode reads it or

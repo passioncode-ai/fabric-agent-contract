@@ -918,7 +918,9 @@ export const NEUTRAL_HOMES: readonly string[] = [
  * A home folder with a name, in the forms the adapter's `HOME_PATHS` reads (DEC-0149 item 8): `/home/<name>` and
  * `/var/home/<name>`; `/Users/<name>` with a capital U (`/users/…` is a web route); Git Bash's `/c/Users/<name>` and WSL's
  * `/mnt/c/Users/<name>`; `C:\Users\<name>` with either separator, a JSON-escaped one included, any drive letter in
- * either case; DEC-0105's dashed forms, never after a dash (`--home-dir` is a flag); the URL-encoded ones. The name is
+ * either case; DEC-0105's dashed forms, `-Users-`, `-home-`, `-var-home-`, `-mnt-c-Users-` and `-c-Users-` never after a
+ * letter, a digit or a dash (`--home-dir` is a flag) and `C--Users-` never after a letter or a digit (so `-C--Users-<name>`
+ * is one); the URL-encoded ones. The name is
  * each pattern's last group, at the end of its match. This is narrower than `hasHomePath` in `src/activity-rules.ts`,
  * the scanner for values that hold no path at all: a source holds `~/` and neutral homes, and they are portable.
  */

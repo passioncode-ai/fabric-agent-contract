@@ -223,7 +223,7 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   merely `degraded`) for more than 15 minutes, once per case, and says it is back after 15 minutes well; a `degraded`
   answer opens no message, so setup entries are left out (fabric-dashboards `docs/backlog.md` FD-76, ADR-0010, released
   in 0.7.15, read at `ebffd16`); a watcher MUST NOT message the operator for an entry with `setup: true`.
-  An agent with a source manifest reports its missing slots as such entries, as
+  An agent with a source manifest reports its missing slots as `setup: true` entries, as
   [starting without the instance](source.md#starting-without-the-instance) says (DEC-0149).
 - `summary` carries at most six tiles for a host card; a tile with `attention: true`
   asks for the operator.

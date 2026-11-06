@@ -490,7 +490,13 @@ source, what never travels with it, the check before a source export, and how a 
   follow a shorter `down`), the clause kept on lines 115 and 128; the merge notes re-measured at `9161796d` with
   `service.md`'s resolution and checks; DEC-0154 at CT-228 to CT-243 and its file list dated; step 6 running the
   knowledge base's checks after an in-place edit of PR #628 and naming its head as re-measured; CT-214's row on what
-  opens an episode; the shared block pasted again (76 lines); round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  opens an episode; the shared block pasted again (76 lines); round 76 (not clean: unit FAIL, source.md and the
+  `SOURCE_HOME_PATHS` comment saying every dashed home form is never a finding after a dash, while `C--Users-<name>`
+  is one after a dash; product FAIL, the knowledge base saying each episode sends one failure and one recovery
+  message; seam PASS) answered as decided in item DO: the dashed forms' prose and comment follow the patterns (the
+  code and vectors unchanged); the knowledge base says what FD sends for an episode at `a0bc160` and names a `down`
+  within the 15-minute calm as a continuation, as do the fourth landing row and CT-214's row; source.md shows the
+  root form of the non-UTF-8 name line; `service.md` says missing slots are reported as `setup: true` entries; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -500,8 +506,8 @@ source, what never travels with it, the check before a source export, and how a 
 
 - The row that makes the check refuse an `unchecked` entry covering a credential finding, the inventory row, the
   row for deterministic timeout tests of validate-cli's ignored and staged listings (round 65, item CN) and the row
-  deciding whether Fabric Dashboards counting a degraded continuation of a `down` episode toward its 15 minutes
-  conforms (round 67, item CW) are filed at landing; the enforcing row's id goes into SCN-054 step 3, and all four
+  deciding whether Fabric Dashboards counting a degraded continuation, or a `down` within the 15-minute calm, toward
+  its 15 minutes conforms (round 67, item CW; round 76) are filed at landing; the enforcing row's id goes into SCN-054 step 3, and all four
   ids are written here, in the landing change (CT ids pending).
 - A structured marker for a refusal that is a setup answer (a missing slot) is left open: by DEC-0149's choice the tool
   error carries none, so a caller or host that sees only the error cannot tell a setup answer from a failure. It is for
@@ -841,6 +847,15 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 76's fix (item DO: source.md, service.md, a comment in `src/source-rules.ts`, this note, `docs/DECISIONS.md`,
+`docs/backlog.md` and the knowledge base's PR) was checked on the working tree over head `9cbc91ba`: the shared block still occurs once in this note,
+byte for byte; `pnpm typecheck` (exit 0), `pnpm vitest run test/source-rules.test.ts` (247 passed), `pnpm run
+docs:check` (0 errors), `python3 docs/ux/lint.py` (exit 0), `ORG_INDEX=... pnpm run privacy:check` (0 findings). The
+knowledge base's PR is at `d2a6d9f4`: the joined-text count of the old message sentence prints 0, "proposed for FD"
+is on lines 115 and 128, `source hand-over` in 4, 4 and 5 lines and `own estate` once on each page; its `npm test`
+(exit 0, 172 passed) and `npm run verify:content` (0 errors). No gate ran: only a comment changed in code since
+round 68's. No U+2014 in the added lines.
 
 Round 75's fix (item DN: this note, `docs/DECISIONS.md`, `docs/backlog.md` and the knowledge base's PR) was checked
 on the working tree over head `b714bceb`: the shared block (76 lines) occurs once in this note, byte for byte; `git
@@ -1547,12 +1562,15 @@ git does not answer in time" and "walks with a note when the gitlink listing tim
 floor, and Windows has no floor), and its decision a test seam beside `gitLimits` (`src/validate-cli.ts` line 644)
 that answers `ETIMEDOUT` to a chosen call; the code is not changed in this landing (round 65, item CN). At landing,
 file a fourth backlog row under the next id above that one (CT-248 or above, re-measured the same way): "Decide
-whether Fabric Dashboards counting a degraded continuation of a `down` episode toward its 15 minutes conforms", its
-sources fabric-dashboards main `a0bc160` `src/core/outage-alerts.ts` lines 112 to 123 and 159 to 160 and the rule
+whether Fabric Dashboards counting a degraded continuation, or a `down` within the 15-minute calm, counted toward
+the 15 minutes from the episode's first `down` look, conforms", its sources fabric-dashboards main `a0bc160`
+`src/core/outage-alerts.ts` lines 112 to 129 and 156 to 160 and the rule
 in `service.md` that a watcher messages the operator only when an agent has been unavailable for more than 15
 minutes (round 67, item CW: within one run of the service, the same `startedAt`, a `down` of 1 minute followed by 14
 minutes of a failing source, one not marked `setup: true`, sends the failure message at 15 minutes; after a restart
-that source is in the new start baseline and no message is sent, the same file's lines 109 and 114, round 68, DE). The lander writes all four rows' ids (the inventory row, the enforcing row, the timeout-test
+that source is in the new start baseline and no message is sent, the same file's lines 109 and 114, round 68, DE;
+and a `down` that returns within the 15-minute calm continues the episode from its first `down` look, lines 119 to
+129 and 156 to 160, round 76). The lander writes all four rows' ids (the inventory row, the enforcing row, the timeout-test
 row and this row) into this note's Open line, in the landing change. The release notes of the landing carry one more
 item: a plain `pnpm validate <dir>` skips a `.json` file that is a FIFO, a socket or a device with a `note/skipped`
 line saying it is not a file, and a `fabric.source.json` that is a symbolic link the same way (SCN-002's errors line).
