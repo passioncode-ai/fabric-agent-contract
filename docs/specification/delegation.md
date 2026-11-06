@@ -415,7 +415,7 @@ context of its own.
 This is the contract's **local-placement profile** for how the meter reads a grant (DEC-0041; Fabric ADR-0144
 [amendment 1](https://github.com/passioncode-ai/fabric/blob/92cb5124e4f9e8db2314acf439e4a1f903541cc2/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md#amendment-1--2026-10-11-how-the-meter-reads-a-grant-the-call-and-task-windows),
 and [amendment 2](https://github.com/passioncode-ai/fabric/blob/217aff4dfbd6989122fc9135cc362d904d1ec838/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md#amendment-2--2026-10-11-the-task-windows-key-a-vault-slot-released-under-a-grant)
-for the task window's key): a meter in the hub's OS account reads the hub's own record of the grant,
+for the task window's key): a meter in the hub's OS account (DEC-0154, proposed) reads the hub's own record of the grant,
 not a second store and not a call to the hub, so a check within a token's lifetime still works while the hub is
 closed.
 

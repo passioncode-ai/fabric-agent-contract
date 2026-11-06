@@ -663,11 +663,13 @@ whose owner cannot be told; ordered after `down` and before `foreign`, it wins o
 is sent to it (HA-2, DEC-0154, proposed).
 
 **Host label**: The label of the computer: `device.hostLabel`, an HMAC of the computer's administrator-owned secret
-over the organization's id, the same for every device of one organization on one computer; organizations with no code
+over the organization's id, the same for every device of one organization on one computer (two counted OS accounts
+of it, or a virtual machine given its secret); organizations with no code
 on the computer cannot link it (HA-4, [devices](docs/specification/devices.md#the-host-label), DEC-0154, proposed). In
-this contract "host" never means the computer. The one exception is the name
-"host label", which labels a computer. Names and paths already fixed keep their spelling (the enrollment purpose
-`agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`).
+this contract's specification, schemas and glossary, "host" never means the computer. The exceptions are the name
+"host label", which labels a computer, and names and paths already fixed, which keep their spelling (the enrollment
+purpose `agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`). The registers keep the
+words they were written in.
 
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that
 order, and a locked key is never overridden by a lower layer.

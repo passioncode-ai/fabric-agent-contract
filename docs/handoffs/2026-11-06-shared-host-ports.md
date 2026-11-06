@@ -239,6 +239,22 @@ Proposed DEC on its own branch, and files the rest.
   W80 addendum: the shared knowledge-base block replaced with its current text (76 lines: PR #628 named without a
   hash, a clause count other than 0 or 2 treated as the mismatch, a re-check at once when the other lander has no
   such PR, an edit from outside the two landers to a knowledge-base row).
+- Round 17 at `832dc557`: clean on all three tiers (unit `ad0a8cdd`, product `a70fbc53`, seam `a6a81bde`).
+- Round 18 at `832dc557`: not clean (unit and seam passed; product found one break). Open backlog rows still used
+  "host" for a server machine (CT-185's mailbox moving "to another host") and for a proxy (CT-04's "TLS-terminating
+  host"). W81 folded: CT-185 "another server", CT-04 "a TLS-terminating proxy", CT-70 "an IPv6 address as its host",
+  the other open rows' uses read as a program, a URL's host or a verb; the host rule scoped, in the same words in its
+  four copies: "In this contract's specification, schemas and glossary, "host" never means the computer. The
+  exceptions are the name "host label", which labels a computer, and names and paths already fixed, which keep their
+  spelling (...). The registers keep the words they were written in."; the acceptance step's sweep reads the open
+  backlog rows too. The risks of rounds 17 and 18: HA-2's order covers the states read from the listener and its
+  answer, a host's own states that the listener does not decide may come first with no answer read as the
+  service's (Fabric Dashboards at `a0bc160`), and CT-229 names that precedence; the glossary's host label carries
+  the devices page's parenthesis; FD-159's Linux part done in 0.8.27 (PR #349); `service-ops-digest-extension`'s
+  title among three descriptions; SB-278 waits for the tag, and the acceptance step tags a release and posts it;
+  annotated lines for DEC-0015, DEC-0057, DEC-0123 and DEC-0153 with their check; the TLS clause of the
+  Consequences; CT-231 names the node and hub readers "on the same machine", CT-232 the whole-harness readers; the
+  digest rows cite DEC-0154; `delegation.md`'s meter marked; the gap spec says CT-242 and CT-243 came later.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -365,6 +381,34 @@ Proposed DEC on its own branch, and files the rest.
   Re-read too the citations that carry no marker: `devices.md`'s "a server pinned before DEC-0154", the comments in
   `src/semantic-rules.ts`, `tools/vectors/host-label.ts`'s "DEC-0154's text" (its line 9), and the generator's and
   vectors' "DEC-0154 item 4".
+- **Annotated lines.** Each line goes after the entry's last `- **Annotated` line, or after its Status when it has
+  none, with the acceptance date in place of `<YYYY-MM-DD>`; under DEC-0015, DEC-0057, DEC-0123 and DEC-0153 in turn:
+
+  ```text
+  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (one copy per counted OS account under `service.lock` in that account's services directory, or an app's own single-instance guard; the port claim, HA-1).
+  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (one copy and `service.lock` per OS account, an app's own single-instance guard in place of the lock, the port claim rebuilt after the guard, HA-1).
+  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (PL-3: the listener's owner is checked before a raw loopback address is opened; another account's, or one that cannot be told, is `foreign-user` and nothing opens, HA-2).
+  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (OD-9: a collector in the same OS account reads the daily digests; CT-243).
+  ```
+
+  Each prints 1, in bash or zsh:
+
+  ```sh
+  for d in 'DEC-0015 ' 'DEC-0057 ' 'DEC-0123:' 'DEC-0153:'; do
+    awk -v h="### $d" 'index($0, h) == 1 {f=1; next} /^### /{f=0} f' docs/DECISIONS.md \
+      | grep -c '^- \*\*Annotated ([0-9-]*):\*\* amended by DEC-0154 ('
+  done
+  ```
+
+- **Sweep.** Re-read every use of "host" in the specification, the schemas, the glossary and the open backlog rows;
+  none may mean the computer or a server machine (the host rule; the registers' done rows and decisions keep their
+  words). The lists to read:
+
+  ```sh
+  git grep -n -i -w -E 'hosts?' -- docs/specification schemas CONTEXT.md | grep -v -E 'host label|hostLabel|agent-host'
+  grep -E '^\| CT-' docs/backlog.md | grep -v -E '\| (done|closed|superseded)[ :,]' | grep -o -i -E '.{0,40}\bhosts?\b.{0,40}'
+  ```
+
 - **Adopters.** In `docs/specification/README.md` name the owed adopters on the devices row (Project Observatory's node
   and setup step, the first organization server) and the services row (Fabric, Fabric Dashboards, Switchboard, Fabric
   Inbox, the adapter's kits, the PassionCode launcher, Project Observatory).
@@ -372,6 +416,10 @@ Proposed DEC on its own branch, and files the rest.
   knowledge-base clause rule below says, for DEC-0154's lander. The check after both land runs only once DEC-0154's
   own knowledge-base PR for the clause has merged; when the clause check prints 0, or the PR is closed unmerged, it
   runs nothing.
+- **Release.** Right after the merge, an annotated tag `v0.1.0+<YYYY-MM-DD>` (`.2`, `.3` after the date for a second
+  or third release that day) on the merge commit, once its gate and `pnpm vectors:check` passed, with a GitHub release
+  whose notes list the decisions since the previous release ([versioning](../specification/versioning.md#releases)).
+  Post the tag on thread `1fe66e6e`: Switchboard's SB-278 (the port claim) waits for it.
 - **The board.** Tell thread `1fe66e6e` the same day (Fabric Dashboards' FD-159 and Fabric's server build on it), and in
   that message ask Fabric Dashboards for a row that its watcher (FD-76's successor) counts `foreign` and
   `foreign-user` as unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card only.

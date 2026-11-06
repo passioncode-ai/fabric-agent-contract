@@ -1,6 +1,6 @@
 # Several OS accounts on one computer: the contract's gaps
 
-A spec of 2026-11-06 for backlog CT-228 to CT-241 and [DEC-0154](../../DECISIONS.md) (proposed). It answers the
+A spec of 2026-11-06 for backlog CT-228 to CT-241 and [DEC-0154](../../DECISIONS.md) (proposed); CT-242 and CT-243 were filed later, from the readings, and are not in its gap list. It answers the
 operator's request of 2026-11-05, relayed on board thread `1fe66e6e`: read the organization's plan for a shared computer,
 compare it with the contract, and write a spec per gap.
 

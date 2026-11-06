@@ -207,10 +207,11 @@ passes the small-order check (DEC-0045).
 
 ### The host label
 
-DEC-0154 item 4 (HA-4), proposed. The **host label** is the label of the computer. In this contract "host" never means
-the computer. The one exception is the name "host label", which labels a
-computer. Names and paths already fixed keep their spelling (the enrollment purpose
-`agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`). An enrollment request MAY carry `device.hostLabel`: an opaque value that is the same for every device of one
+DEC-0154 item 4 (HA-4), proposed. The **host label** is the label of the computer. In this contract's specification,
+schemas and glossary, "host" never means the computer. The exceptions are the name "host label", which labels a
+computer, and names and paths already fixed, which keep their spelling (the enrollment purpose `agent-host`, file
+names such as `docs/handoffs/2026-11-06-shared-host-ports.md`). The registers keep the words they were written in.
+An enrollment request MAY carry `device.hostLabel`: an opaque value that is the same for every device of one
 organization on one computer (two counted OS accounts of it, or a virtual machine given its secret) and that
 organizations with no code on the computer cannot link.
 

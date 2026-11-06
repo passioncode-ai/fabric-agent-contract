@@ -562,9 +562,10 @@ The Host and Origin guard does not tell them apart, so a computer with more than
 
 DEC-0154, proposed. On one computer each counted OS account runs its own copy of a service, with its own services
 directory, tokens and descriptors, and every account (and every guest whose traffic a forwarder relays) reaches every
-port on `127.0.0.1`. In this contract "host" never means the computer. The one
-exception is the name "host label", which labels a computer. Names and paths already fixed keep their spelling (the enrollment purpose
-`agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`).
+port on `127.0.0.1`. In this contract's specification, schemas and glossary, "host" never means the computer. The
+exceptions are the name "host label", which labels a computer, and names and paths already fixed, which keep their
+spelling (the enrollment purpose `agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`).
+The registers keep the words they were written in.
 
 <a id="counted-os-accounts"></a>
 
@@ -664,10 +665,14 @@ an HMAC under a key in an owner-only file; Switchboard reported on thread `1fe66
   `foreign-user` on a computer with one counted account too; so does an owner the client cannot tell (a process it
   cannot open, a client without access to the socket table). A client that can see its own account's sockets always
   tells its own listener.
-- The order of a local service's states: `down`, then `foreign-user`, then `foreign` (`FAC-SEM-009`), then the
-  well-known `status`. `foreign-user` is decided before the well-known document is read and wins over any answer,
-  `ready` included. A host's own further states (a second copy shown as `duplicate`, under [One copy](#one-copy)) come
-  after these.
+- The order of a local service's states read from the listener and its answer: `down`, then `foreign-user`, then
+  `foreign` (`FAC-SEM-009`), then the well-known `status`. "`foreign-user` is decided before the well-known document
+  is read" means it outranks any answer, `ready` included, and no credential is sent to read one. A host's own states
+  that the listener does not decide may come before this order, provided no answer is read as the service's: an
+  invalid descriptor, a conflict over a claim or a port, its own stop or start in flight, a service its supervisor
+  stopped (Fabric Dashboards at `a0bc160`, `packages/service-host/src/state.ts` lines 31 to 48 and `look.ts` lines 91
+  to 105). A host's own further states (a second copy shown as `duplicate`, under [One copy](#one-copy)) come after
+  these.
 - A reader that meets a state it does not know treats it as not ready: it sends nothing and shows the service as not
   serving. A watcher counts `foreign` and `foreign-user` as unavailable, as it counts `down`: the service serves nothing.
 
