@@ -9469,8 +9469,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       or `foreign-user`) and Fabric Dashboards' released fact (FD-76 counts `down`; `foreign` and `foreign-user` are
       owed, DEC-0154) as two sentences, with a negative check; relay.md cites DEC-0149 and service.md for the rule and
       FD-76 only for `down`; the contract PR merges first and PR #628 straight after, in one session, with a check that
-      the old watcher sentence is gone; a changed CT-244 id is found with `git grep`. Round 65's product reading failed
-      (item CJ); its seam reading passed.
+      the old watcher sentence is gone; a changed CT-244 id is found with `git grep`; Git mode's first listing is "a file
+      under one, even one an exclude entry removes", as the code reads it; deterministic timeout tests are a row filed
+      at landing, the code unchanged. Round 65's product reading failed (item CJ); its unit and seam readings passed.
       The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the

@@ -414,11 +414,13 @@ source, what never travels with it, the check before a source export, and how a 
   98.95 %), and items CG to CI (the landing's target phrase quoted with backticks and `foreign` added, a positive check
   on `service.md`, the `contexts.md` clause placed on this branch); round 65 (not clean: product FAIL, item CJ, the
   landing's watcher phrase claiming FD-76 counts `foreign` and `foreign-user`; seam PASS, its full test run 10262 green;
-  unit reading still running when this was written) answered as decided: the landing target as two sentences, the
+  unit PASS, its risk on E12's title closed in the same round) answered as decided: the landing target as two sentences, the
   contract's rule and FD-76's released fact for `down`, with a negative check and the one-line reformat; relay.md's rule
   cited to DEC-0149 and service.md; the contract PR first and PR #628 straight after as a mandatory order, with a check
   that main's old watcher sentence is gone (item CL); CT-244's place list replaced by `git grep -n CT-244` (item CK);
-  authority.md's two episode lines in PR #628 naming what FD-76 counts today; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  authority.md's two episode lines in PR #628 naming what FD-76 counts today; Git mode's first listing read as "a file
+  under one, even one an `exclude` entry removes" in source.md and the walk trigger's comment (item CM, as `index.covers`
+  and E12 read it); the timeout branches' coverage left to a third landing row (item CN); round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -433,9 +435,10 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Open
 
-- The row that makes the check refuse an `unchecked` entry covering a credential finding, and the inventory row, are
-  filed at landing; the enforcing row's id goes into SCN-054 step 3, and both ids are written here, in the landing
-  change (CT ids pending).
+- The row that makes the check refuse an `unchecked` entry covering a credential finding, the inventory row and the
+  row for deterministic timeout tests of validate-cli's ignored and staged listings (round 65, item CN) are filed at
+  landing; the enforcing row's id goes into SCN-054 step 3, and all three ids are written here, in the landing change
+  (CT ids pending).
 - A structured marker for a refusal that is a setup answer (a missing slot) is left open: by DEC-0149's choice the tool
   error carries none, so a caller or host that sees only the error cannot tell a setup answer from a failure. It is for
   CT-208 (Fabric) and CT-219 (not on this branch; on main or its own branch at landing) to take up.
@@ -766,6 +769,13 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Items CM and CN (two wordings, one comment and a landing row; no code changed) were checked on the working tree over
+head `2116f32f` (this note's commit holds the same tree, plus this paragraph): `pnpm typecheck` (exit 0), `pnpm vitest
+run test/validate-cli.test.ts test/consistency.test.ts` (exit 0, 1858 passed, 2 skipped), `pnpm run docs:check` (0
+errors), `python3 docs/ux/lint.py` (exit 0) and `ORG_INDEX=... pnpm run privacy:check` (0 findings). The full branch
+gate was not run: the disk held 5 GB free, under the 8 GB the heavy lock asks for, and the 15-minute load stood at
+50.5. No U+2014 in the added lines. The knowledge base's PR is unchanged at `cb9924aa`.
 
 Round 65's fixes (items CJ to CL, documentation and one test title) were checked on the working tree over head
 `ccf8f01b` (this note's commit holds the same tree, plus this paragraph): `pnpm typecheck` (exit 0), `pnpm
@@ -1345,8 +1355,15 @@ the operator gave before the rule stands as the operator's own act (DEC-0149 ite
 same way: "`unchecked` covering a credential finding exits 0
 (probe)", its evidence the round-35 probe (a manifest listing its own key-holding file under `unchecked` exits 0 under
 `--kind source-tree`, exit 1 without that entry), asking the checker to refuse such an entry. The lander writes the enforcing row's CT id
-into SCN-054 step 3, where it says the enforcing row is filed at landing, and both rows' ids (this row and the
-inventory row) into this note's Open line, in the landing change. The release notes of the landing carry one more
+into SCN-054 step 3, where it says the enforcing row is filed at landing. At landing, file a third backlog row under
+the next id above that one (CT-247 or above, re-measured the same way): "Deterministic timeout tests for
+validate-cli's ignored and staged listings", its evidence the two timeout branches at `src/validate-cli.ts` lines 779
+and 790, whose coverage depends on how fast the stub Git answers in `test/validate-cli.test.ts` lines 1383 to 1407
+and 2783 to 2804 (the tests stay green either way; the full run covers 774 of 775 branches of that file, above its
+floor, and Windows has no floor), and its decision a test seam beside `gitLimits` (`src/validate-cli.ts` line 644)
+that answers `ETIMEDOUT` to a chosen call; the code is not changed in this landing (round 65, item CN). The lander
+writes all three rows' ids (the inventory row, the enforcing row and this row) into this note's Open line, in the
+landing change. The release notes of the landing carry one more
 item: a plain `pnpm validate <dir>` skips a `.json` file that is a FIFO, a socket or a device with a `note/skipped`
 line saying it is not a file, and a `fabric.source.json` that is a symbolic link the same way (SCN-002's errors line).
 
