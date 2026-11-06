@@ -60,6 +60,7 @@ function cases(): Json[] {
     ["an organization id that is an address", posix(secret("root", COUNTING), "ops@example.org"), FAULT],
     ["an organization id that starts with a separator", posix(secret("root", COUNTING), "-org"), FAULT],
     ["an empty organization id", posix(secret("root", COUNTING), ""), FAULT],
+    ["an organization id that is not a string", posix(secret("root", COUNTING), 7), FAULT],
     ["bytes not in lower-case hex", posix(secret("root", COUNTING.toUpperCase())), FAULT],
     ["an odd number of hex digits", posix(secret("root", `${COUNTING}0`)), FAULT],
     ["exactly 1024 bytes, the cap: no label", posix(secret("root", "00".repeat(1024))), { none: "secret-size" }],

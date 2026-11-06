@@ -228,8 +228,10 @@ or a virtual machine given its secret) and that organizations with no code on th
   | Linux | `/etc/passioncode/host-label.key` |
   | Windows | `%ProgramData%\PassionCode\host-label.key` |
 
-  On macOS and Linux: owner root, mode `0444`, its folder owned by root with mode `0755`. On Windows: Administrators
-  full control, Users read, no inherited write, on the file and its folder. Every account reads it, none but the
+  On macOS and Linux: owner root, mode `0444`, its folder owned by root with mode `0755`. On Windows: owner
+  Administrators (or SYSTEM), set explicitly, for example with `icacls /setowner`, since an elevated step can leave the
+  user who ran it as owner and the node would then send no label; Administrators full control, Users read, no
+  inherited write, on the file and its folder. Every account reads it, none but the
   administrator can write it. On Windows the same step also creates the port claims folder
   ([service](service.md#ha-1) HA-1).
 - **Never in a backup.** The setup step MUST exclude the file from the computer's backups: on macOS

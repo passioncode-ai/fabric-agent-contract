@@ -9871,7 +9871,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      unguessable and unique across organization servers with overwhelming probability. The secret is 32 random bytes in one file per computer
      (`/Library/Application Support/PassionCode/host-label.key` on macOS, `/etc/passioncode/host-label.key` on Linux,
      `%ProgramData%\PassionCode\host-label.key` on Windows): on macOS and Linux owner root, mode `0444`, its folder
-     root's with mode `0755`; on Windows Administrators full control, Users read, no inherited write. An administrator's
+     root's with mode `0755`; on Windows owner Administrators (or SYSTEM), set explicitly (for example `icacls
+     /setowner`), since an elevated step can leave the user as owner and the label would silently not be sent,
+     Administrators full control, Users read, no inherited write. An administrator's
      setup step creates it and MUST exclude it from the computer's backups (macOS `tmutil addexclusion -p`; Linux the
      computer's backup tool's exclusion list; Windows the `FilesNotToBackup` registry list); it is never in a snapshot
      or a machine pack, and that a restore never carries it is owed by CT-233. On Windows the same step creates item
@@ -10089,6 +10091,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   local services, 127.0.0.1 on that computer", and the `semantic-rules.ts` comment, about a remote placement's machine,
   keeps "computer"; product found the same break), and its batch, with the acceptance-day edit of the knowledge
   base's `authority.md` (W72) and W74 (the cookie-scope exception to "host" stated, ED-8's bold scope pinned by a test
-  beside FB-6's, the handoff's references, One copy's guard), is folded in; the two UI lines passed the operator's copy check
+  beside FB-6's, the handoff's references, One copy's guard), is folded in; round 11's unit reading passed (65 of 69 mutants, 3 equivalent),
+  and W75 (a vector for an `org.id` that is not a string; the Windows owner of the secret set explicitly) is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

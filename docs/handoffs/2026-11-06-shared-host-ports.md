@@ -36,7 +36,7 @@ Proposed DEC on its own branch, and files the rest.
   rewritten PL-2 and PL-3 row (`conformance.md:251`: a loopback address opened only after the listener's owner check).
 - The host label's reference `src/host-label.ts` (`hostLabel`: link, owner per platform, mode, size), its generator
   `tools/vectors/host-label.ts` (Node's own HMAC, not importing the reference), vectors
-  `fixtures/vectors/host-label.json` (57 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
+  `fixtures/vectors/host-label.json` (58 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
   schema's `opaqueId`), a coverage floor of 100 in `vitest.config.ts`; the optional schema member `device.hostLabel` in
   `schemas/device-enrollment.schema.json` with a positive and a negative fixture; `service.id`'s description in
   `schemas/service-well-known.schema.json`.
@@ -167,6 +167,10 @@ Proposed DEC on its own branch, and files the rest.
   stated in `service.md` and the DEC; ED-8's bold scope pinned by a test beside FB-6's (it fails when ED-8's scope is
   changed); the DEC-0149 line range; order 2's references made explicit; G10's "per OS account (per data
   directory)"; the Done list for `service.md` and the files around it; One copy's first sentence naming the guard.
+- Round 11's unit reading passed (0 breaks; 65 of 69 mutants killed, 3 equivalent). W75 folded: a vector for an
+  organization id that is not a string (the `typeof orgId` check removed fails `test/host-label.test.ts`, 2 tests),
+  and the Windows owner of the computer's secret set explicitly (Administrators or SYSTEM, for example `icacls
+  /setowner`) in `devices.md`, DEC item 4 and the setup step's conformance row.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -338,6 +342,10 @@ After round 11's seam batch (W72, W73) the full gate did not run (7 GB free, und
 After W74 the full gate did not run either (7 GB free); the same checks ran with exit 0, the vitest set with
 `test/service-supervisor.test.ts` added and the new ED-8 test in `test/delegation-sealed.test.ts`, which was seen to
 fail when ED-8's bold scope was changed.
+
+After W75 the full gate ran under the heavy lock (10 GB free, a 15-minute load of 35.7): exit 0, 111 test files,
+10538 tests passed and 1 skipped, branches 98.92% (12567 of 12703), 31 vector files matching their generators, the UX
+lint passed, documentation checks passed, markdownlint 0 errors, privacy 0 findings; no em dash on an added line.
 
 ## Next task
 
