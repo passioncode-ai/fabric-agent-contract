@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 65 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 66 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9057,7 +9057,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   section 7 and rules section 9; round 60 clean; round 61 not clean: principles section 7's shorter exception list,
   the handoff's chain of open branches; round 62 not clean: relay.md's watcher sentence against service.md's; round 63 not clean: the
   watcher's states named three times; round 64 not clean: authority.md's watcher state, the outage report, CT-244's
-  wording, "host" for a computer; round 65 not clean: the landing's watcher phrase widening FD-76's released fact), cited by round number because their heads were on the review branch, which is not
+  wording, "host" for a computer; round 65 not clean: the landing's watcher phrase widening FD-76's released fact; round 66 not clean: the first Git-mode
+  listing naming a file only, authority.md's start baseline), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9470,10 +9471,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       owed, DEC-0154) as two sentences, with a negative check; relay.md cites DEC-0149 and service.md for the rule and
       FD-76 only for `down`; the contract PR merges first and PR #628 straight after, in one session, with a check that
       the old watcher sentence is gone; a changed CT-244 id is found with `git grep`; Git mode's first listing is "a file
-      under one, even one an exclude entry removes", as the code reads it; deterministic timeout tests are a row filed
+      under one, even one an exclude entry removes", as the code reads it (round 66 made it "a listed path under one (a
+      file or a nested repository)", item CS); deterministic timeout tests are a row filed
       at landing, the code unchanged; the landing changes only the subject and the list of states of the watcher text's
       first sentence, keeps the rest and adds FD-76's fact after it, and its two checks quote their patterns so no shell
       runs them, run on probe files. Round 65's product reading failed (item CJ); its unit and seam readings passed.
+      Decided by the coordinator in round 66: the first listing that keeps Git mode is a listed path under an include
+      path (a file or a nested repository), even one an exclude entry removes, as `index.covers` reads it, the code
+      unchanged and CLI test E13 added; the knowledge base's authority.md says the start baseline keeps an episode a
+      `down` opened open on a degraded source outside it and stays the fallback for a service that sends no `setup`
+      flag; the landing's second sentence and relay.md say FD-76 opens an episode only for `down` and keeps it open
+      on such a source; the negative landing check reads the joined text. Round 66's unit reading failed (item CS),
+      its product reading failed (item CQ) and its seam reading passed.
       The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9604,7 +9613,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 65 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 66 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9632,5 +9641,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   section 7 and rules section 9; round 60 clean; round 61 not clean: principles section 7's shorter exception list,
   the handoff's chain of open branches; round 62 not clean: relay.md's watcher sentence against service.md's; round 63 not clean: the
   watcher's states named three times; round 64 not clean: authority.md's watcher state, the outage report, CT-244's
-  wording, "host" for a computer; round 65 not clean: the landing's watcher phrase widening FD-76's released fact), cited by round number (their heads were on the review branch, not kept at landing),
+  wording, "host" for a computer; round 65 not clean: the landing's watcher phrase widening FD-76's released fact; round 66 not clean: the first Git-mode
+  listing naming a file only, authority.md's start baseline), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

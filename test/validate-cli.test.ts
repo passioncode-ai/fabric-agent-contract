@@ -2267,6 +2267,20 @@ describe("an agent's source (DEC-0149)", () => {
     expect(lines.some((line) => line.includes("no-license"))).toBe(true);
   });
 
+  it.skipIf(process.platform === "win32")("keeps Git mode when src/vendor, a gitlink lying under the include folder src/, is excluded (E13)", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/vendor"] }), ".gitignore": "LICENSE\n", LICENSE: "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "fabric.source.json", ".gitignore").status).toBe(0);
+    expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${"3".repeat(40)},src/vendor`).status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).not.toContain("note/walk");
+    const lines = found(result.out);
+    // A nested repository under an include path keeps Git mode as a file does, even one an exclude entry removes.
+    expect(lines.filter((line) => line.includes("missing")).map((line) => line.split("  ")[1])).toEqual(["/manifest/include/0", "/manifest/include/1"]);
+    expect(lines.some((line) => line.includes("no-license"))).toBe(true);
+  });
+
   it("stays in Git mode when Git lists only a gitlink at the manifest's path under the source, and reports it", () => {
     const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), ".gitignore": "src/\nLICENSE\n", LICENSE: "x", "src/a.ts": "x" });
     expect(gitIn(dir, "init", "-q").status).toBe(0);

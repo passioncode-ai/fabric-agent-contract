@@ -795,8 +795,8 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
   for (const name of linked) gitlinks.add(name);
   const listedAsFolder = new Set(names.filter((name) => name.endsWith("/")).map((name) => name.slice(0, -1)));
   const paths = [...new Set(names.map((name) => (name.endsWith("/") ? name.slice(0, -1) : name)))].sort(pathOrder);
-  // Walked only when Git lists nothing under any include path: a file under one, even one an exclude entry removes; a
-  // nested repository in the source; or a listed path an include entry lies beneath that no exclude entry removes (isNested is true for any such path, a
+  // Walked only when Git lists nothing under any include path: a listed path under one (a file or a nested repository),
+  // even one an exclude entry removes; a nested repository in the source; or a listed path an include entry lies beneath that no exclude entry removes (isNested is true for any such path, a
   // plain file included: a tracked file docs under include docs/guide.md keeps Git mode and leaves that entry missing;
   // with exclude docs it does not count, and the run walks). The manifest's own name counts
   // only as a gitlink: listed as a file, it is no file under an include path.

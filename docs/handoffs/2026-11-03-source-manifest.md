@@ -418,11 +418,18 @@ source, what never travels with it, the check before a source export, and how a 
   contract's rule and FD-76's released fact for `down`, with a negative check and the one-line reformat; relay.md's rule
   cited to DEC-0149 and service.md; the contract PR first and PR #628 straight after as a mandatory order, with a check
   that main's old watcher sentence is gone (item CL); CT-244's place list replaced by `git grep -n CT-244` (item CK);
-  authority.md's two episode lines in PR #628 naming what FD-76 counts today; Git mode's first listing read as "a file
-  under one, even one an `exclude` entry removes" in source.md and the walk trigger's comment (item CM, as `index.covers`
-  and E12 read it); the timeout branches' coverage left to a third landing row (item CN); the landing edit limited to
+  authority.md's two episode lines in PR #628 naming what FD-76 counts today; Git mode's first listing read as "a listed
+  path under one (a file or a nested repository), even one an `exclude` entry removes" in source.md and the walk
+  trigger's comment (item CM, as `index.covers` and E12 read it; round 66's CS added the nested repository and E13); the timeout branches' coverage left to a third landing row (item CN); the landing edit limited to
   the first sentence's subject and list of states, the rest kept and FD-76's fact added after it (item CP, from DEC-0154's
-  round-7 product reading); both checks quoted so no shell expands them and run on probe files (item CO); round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  round-7 product reading); both checks quoted so no shell expands them and run on probe files (item CO; round 66's CU reads the negative one over
+  the joined text); round 66 (not clean: unit FAIL, item CS, the first listing named a file where `index.covers` counts
+  any listed path, a nested repository included; product FAIL, item CQ, authority.md said the start baseline no longer
+  decides anything; seam PASS) answered as decided: the first listing names a listed path, a file or a nested
+  repository, with CLI test E13; authority.md says the baseline keeps a `down` episode open on a degraded source
+  outside it and stays the fallback for a service that sends no `setup` flag (PR #628); the landing's second sentence
+  says FD-76 opens an episode only for `down` and keeps it open on such a source (item CR), in relay.md too; the
+  negative check reads the joined text (item CU), run in `bash` or `zsh` (item CT); round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -539,9 +546,11 @@ source, what never travels with it, the check before a source export, and how a 
     list of states (to "`down`, `foreign` or `foreign-user`, not merely `degraded`", on one line) of the first sentence
     of DEC-0149's watcher text in `service.md`, keeps the rest of it (once per case, back after 15 minutes well, a
     `degraded` answer opening no message, setup entries left out, the FD-76 and ADR-0010 references, the MUST NOT for
-    `setup: true`), and adds after them "Fabric Dashboards' watcher does so for `down` since FD-76 (0.7.15, `ebffd16`);
-    counting `foreign` and `foreign-user` is owed (DEC-0154).", the landed text and its two checks being in the chain
-    paragraph below (round 65, CP and CO; CJ: FD-76 counts only `down`, fabric-dashboards
+    `setup: true`), and adds after them "Fabric Dashboards' watcher opens an episode only for `down` since FD-76 (0.7.15,
+    `ebffd16`) and keeps it open while a degraded source outside its start baseline stays; counting `foreign` and
+    `foreign-user` is owed (DEC-0154).", the landed text and its two checks being in the chain paragraph below (round
+    66, CR: the second sentence says what FD's watcher does, `src/core/outage-alerts.ts` lines 90 to 92 and 112 to 117;
+    CU: the negative check reads the joined text; round 65, CP and CO; CJ: FD-76 counts only `down`, fabric-dashboards
     main `a0bc160`, `src/core/outage-alerts.ts` lines 115 to 119, so the released fact is not widened; round 64, CH: `foreign`
     added by DEC-0154's W14; round 63: then `relay.md` and `conformance.md` follow `service.md` by themselves, pointing at its
     definition);
@@ -774,6 +783,20 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 66's fixes (items CQ to CU) were checked on the working tree over head `7fc6032e` (this note's commit holds the
+same tree, plus this paragraph and the knowledge base's head): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0:
+typecheck, 114 test files with 10263 passed and 3 skipped under the coverage floors, `src/validate-cli.ts` at 774 of
+775 branches and `src/source-rules.ts` at 760 of 760, `ux:lint`, `docs:check` with 0 markdownlint errors,
+`privacy:check` with 0 findings), run under the shared lock with the 15-minute load at 37.0 and 11 GB free. E13 passes,
+and with `|| index.covers(name)` taken out of the walk trigger for one run E12 and E13 fail (the code restored). The
+two landing checks, taken from this note and run with `bash -c` and `zsh -c` on probe copies of `service.md`: the
+positive prints 1 on the landed text; the negative prints 0 on the landed text and 1 on the widened claim on one line,
+with a line break before "(`down`", and with one before "unavailable"; on this branch they print 0 and 1. No
+U+2014 in the added lines. The knowledge base's PR is at `772811fc` (main `6d0dd180` unmoved): `no longer decides`
+0 times in authority.md, `source hand-over` in 4, 4 and 5 lines of agents-first, principles and rules, `own estate`
+once on each, item 9 once and item 8 once; its `npm test` (exit 0, 172 passed) and `npm run verify:content` (0
+errors).
 
 Items CO and CP (the handoff only) were checked on the working tree over head `346f030d` (this note's commit holds the
 same tree, plus this paragraph): the two landing checks, taken from this note by `grep -o` and run with `bash -c` and
@@ -1301,7 +1324,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 65 into `8cd61f27`, which carries main's `6d0dd180` (the PR's head `cb9924aa`),
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 65 into `8cd61f27`, which carries main's `6d0dd180` (the PR's head `772811fc`),
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). PR #235 (DEC-0148) and DEC-0150 are already on main (`1016f0ec` when re-measured in round
    50), so nothing is refreshed for them. Merge the current `origin/main` (re-measured at landing; `1c141418` as of round 61, or later) into the fresh branch
@@ -1343,7 +1366,7 @@ remaining steps, in order:
    `git show origin/main:docs/specification/service.md | grep -c 'stays degraded for more than 5 minutes'` prints 0.
    Then merge PR #628, fetch the knowledge base checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `cb9924aa`, which carries the knowledge base's main, they print 4, 4 and 5
+   `knowledge/rules.md`; at PR #628's head `772811fc`, which carries the knowledge base's main, they print 4, 4 and 5
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38 and principles
    section 7 and rules section 9 their two named exceptions in round 59), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
@@ -1430,7 +1453,9 @@ Dashboards' watcher" becomes "A watcher") and its list of states ("`down`, not m
 minutes well, a `degraded` answer opening no message, setup entries left out, the FD-76 and ADR-0010 references, and
 the MUST NOT for an entry with `setup: true`. After them it adds the second sentence, Fabric Dashboards' released fact
 (round 65, CJ and CP; `foreign` from DEC-0154's W14: a service whose port another program holds serves nothing; FD-76
-counts only `down`, fabric-dashboards main `a0bc160`, `src/core/outage-alerts.ts` lines 115 to 119). The landed text,
+counts only `down`, fabric-dashboards main `a0bc160`, `src/core/outage-alerts.ts` lines 115 to 119; round 66, CR: it
+opens an episode only for `down` and keeps it open while a degraded source outside its start baseline stays, the same
+file's lines 90 to 92 and 112 to 117, its test `test/outage-alerts.test.ts` lines 61 to 67). The landed text,
 with the phrase "unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)" on one line of `service.md`
 (a `grep` reads one line):
 
@@ -1438,23 +1463,25 @@ with the phrase "unavailable (`down`, `foreign` or `foreign-user`, not merely `d
 A watcher messages the operator only when an agent has been unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)
 for more than 15 minutes, once per case, and says it is back after 15 minutes well; a `degraded` answer opens no message, so
 setup entries are left out (fabric-dashboards `docs/backlog.md` FD-76, ADR-0010, released in 0.7.15, read at `ebffd16`); a
-watcher MUST NOT message the operator for an entry with `setup: true`. Fabric Dashboards' watcher does so for `down` since
-FD-76 (0.7.15, `ebffd16`); counting `foreign` and `foreign-user` is owed (DEC-0154).
+watcher MUST NOT message the operator for an entry with `setup: true`. Fabric Dashboards' watcher opens an episode only
+for `down` since FD-76 (0.7.15, `ebffd16`) and keeps it open while a degraded source outside its start baseline stays;
+counting `foreign` and `foreign-user` is owed (DEC-0154).
 ```
 
-Checks after both land, run from the contract's root (each command takes its pattern as written, with no shell
-expansion inside it: single quotes, or `$'...'` where the pattern holds a single quote):
+Checks after both land, run in `bash` or `zsh` from the contract's root:
 
 - the phrase once, as DEC-0154's handoff checks (its W4):
   `` grep -c -F 'unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)' docs/specification/service.md ``
   prints 1;
-- the widened claim absent:
-  `` grep -c -F $'Fabric Dashboards\' watcher messages the operator only when an agent has been unavailable (`down`, `foreign`' docs/specification/service.md ``
+- the widened claim absent, read over the text joined into one line so that no line break hides it (round 66, CU):
+  `tr '\n' ' ' < docs/specification/service.md | tr -s ' ' | grep -cF "Fabric Dashboards' watcher messages the operator only when"`
   prints 0.
 
-Both were run in round 65 (item CO) under `bash` and `zsh` on two probe copies of `service.md`: one with the landed text
-above (the first prints 1, the second 0) and one with the widened claim, whose subject is still Fabric Dashboards'
-watcher (the first prints 1, the second 1); on this branch's `service.md` both print 0. After that one edit `relay.md`'s
+Both were run in round 66 under `bash` and `zsh` from the root of probe copies of `service.md`. The first prints 1 on
+the landed text above. The second prints 0 on the landed text and 1 on each wrong landing: the widened claim (its
+subject still Fabric Dashboards' watcher) on one line, with a line break before "(`down`", and with a line break
+before "unavailable". On this branch's `service.md`, before the landing, the first prints 0 and the second 1 (DEC-0149's
+sentence, which the landing changes). After that one edit `relay.md`'s
 machine-report paragraph and `conformance.md`'s watcher row follow `service.md` by themselves: since round 63 they name
 no state and point at the definition in `service.md`. Every head here is re-measured at landing.
 
@@ -1644,11 +1671,12 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   the landed `channel-agent.md` ("acts only inside that chat as section 4.10 says" and "no AP-3 or OA-2 source", each
   `grep -c` 0 on main at `1016f0ec`), so the post quotes CA-8 as the page stands; and its merge post's "together with
   `fabric-source`" becomes true only when DEC-0149 lands, which this landing makes true (say so in DEC-0149's post).
-- Done in PR #628 (rounds 63 to 65): `knowledge/authority.md`'s outage-watcher lines point at the contract's
+- Done in PR #628 (rounds 63 to 66): `knowledge/authority.md`'s outage-watcher lines point at the contract's
   `service.md` for what unavailable means (an episode opens only for an agent unavailable, as `service.md` defines it,
   for more than 15 minutes; a `degraded` answer opens none), keeping `down` only as the dated fact of FD-76's release
-  and saying, in both episode lines, that FD-76 counts `down` today and FD's watcher owes `foreign` and `foreign-user`
-  (DEC-0154),
+  and saying, in both episode lines, that FD-76 opens an episode only for `down` today and keeps it open while a
+  degraded source outside its start baseline stays, and that FD's watcher owes `foreign` and `foreign-user` (DEC-0154);
+  the start baseline stays the fallback for a service that sends no `setup` flag (round 66, CQ),
   so the one landing edit to `service.md` covers the knowledge base too; the service's own outage report stays at 5
   minutes or more, as the copy agent writes it today. No knowledge base row is filed for it at landing.
 - At the DEC-0150 step, confirm DEC-0150's lander filed the backlog row (`grep -c 'installation-valued'
