@@ -509,7 +509,7 @@ usable without document-level horizontal scrolling: 360, or the larger `minWidth
 keeps for the page when its own panes grow.
 
 **Appearance carrier**: The cookie `fabric_appearance` (`v=1&scheme=…&theme=…`) a host sets for a
-dashboard's host so the page shows the operator's colour scheme and theme (DEC-0036, ED-8). A cookie
+dashboard page's host so the page shows the operator's colour scheme and theme (DEC-0036, ED-8). A cookie
 is not isolated by port, so it is per host (the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that
 computer) in a shared cookie store and per service where the host
 gives each service its own store; a page applies only the fields it declares in `appearance`
@@ -662,10 +662,12 @@ service; it keeps two accounts' installers from one port and grants nothing (HA-
 whose owner cannot be told; ordered after `down` and before `foreign`, it wins over any well-known answer, and nothing
 is sent to it (HA-2, DEC-0154, proposed).
 
-**Host label**: The label of the computer (in this name only, "host" means the computer): `device.hostLabel`, an HMAC
-of the computer's administrator-owned secret over the organization's id, the same for every device of one organization
-on one computer; organizations with no code on the computer cannot link it (HA-4,
-[devices](docs/specification/devices.md#the-host-label), DEC-0154, proposed).
+**Host label**: The label of the computer: `device.hostLabel`, an HMAC of the computer's administrator-owned secret
+over the organization's id, the same for every device of one organization on one computer; organizations with no code
+on the computer cannot link it (HA-4, [devices](docs/specification/devices.md#the-host-label), DEC-0154, proposed).
+"Host" means the program that shows and calls services, never the computer, except in the name "host label"; where a
+URL's host is meant, the text says so: a URL's, an origin's or a page's host, a host name, the `Host` header, or a
+cookie's host scope ("per host", "scoped to a host", ED-8, FB-6, RFC 6265).
 
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that
 order, and a locked key is never overridden by a lower layer.

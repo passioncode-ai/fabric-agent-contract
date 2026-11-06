@@ -128,7 +128,8 @@ declares no port for `FAC-SEM-010`. Vectors: [`fixtures/vectors/app-descriptor.j
   `fsync`, rename) with mode `0600`.
 - `channels.local` MAY name where a client reaches the service's local channel (`{protocol, path | pipe}`; Project
   Observatory's node, [local channel](local-channel.md), DEC-0075); a client never computes that path.
-- `id` and `instance` together MUST be unique on the machine. A second copy of the same
+- `id` and `instance` together MUST be unique within one OS account's services directory (one copy per counted OS
+  account on the computer, DEC-0154). A second copy of the same
   service (a preview, a branch build) MUST be a second `instance`, never a second `id`.
 - `placement` is `local` (the default when absent) or `remote`. Every rule in this document
   applies to a local placement; [Remote placement](#remote-placement) states what changes for a
@@ -561,9 +562,10 @@ The Host and Origin guard does not tell them apart, so a computer with more than
 
 DEC-0154, proposed. On one computer each counted OS account runs its own copy of a service, with its own services
 directory, tokens and descriptors, and every account (and every guest whose traffic a forwarder relays) reaches every
-port on `127.0.0.1`. In this section "host" means only the program that shows and calls services, as everywhere in
-this contract, and the machine is "the computer". Two exceptions: in the name "host label" (HA-4), "host" is the
-computer; and in a cookie's scope, "per host" (ED-8, FB-6, RFC 6265), it is the URL's host name.
+port on `127.0.0.1`. The machine is "the computer". "Host" means the program that shows and calls services, never the
+computer, except in the name "host label"; where a URL's host is meant, the text says so: a URL's, an origin's or a
+page's host, a host name, the `Host` header, or a cookie's host scope ("per host", "scoped to a host", ED-8, FB-6, RFC
+6265).
 
 <a id="counted-os-accounts"></a>
 
@@ -1060,7 +1062,7 @@ defaulted or refused. Applying it is the operator's decision, taken on the page 
 
 ## Surfaces
 
-A tool that holds no per-session state is offered as a service's MCP surface, one copy on the machine under its
+A tool that holds no per-session state is offered as a service's MCP surface, one copy per OS account on the computer under its
 supervisor, rather than as a stdio server each session starts (LC-19, [profiles](profiles.md#where-a-stdio-server-is-declared)).
 
 | Caller | Surface |

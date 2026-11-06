@@ -79,7 +79,7 @@ in the cookie store the page reads, with the attributes of the appearance carrie
 `SameSite=Strict`, not `HttpOnly`, `Secure` on `https`). Its scope is ED-8's (DEC-0059): **per host in a shared
 cookie store; per service where the host gives each service its own store** (here "per host" is the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that computer). A cookie is not isolated by port
 (RFC 6265 §8.5), so in a shared store an `owner=host` written for one local service hides the button of every
-local service on that host; a host that draws its own button over only some pages gives each service its own store
+local service on that host (the page's host); a host that draws its own button over only some pages gives each service its own store
 (Fabric Dashboards: the partition `persist:svc-<key>`). It is a session cookie, with no `Max-Age` and no
 `Expires` (DEC-0045), so an `owner=host` written while the host showed the page never hides the page's button
 in a plain browser tab later, where no host draws one (FB-1). Its value is form-encoded:

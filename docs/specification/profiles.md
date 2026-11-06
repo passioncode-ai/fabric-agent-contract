@@ -41,7 +41,7 @@ static gateway credential. Stdio environment values use secret references only.
 - `session` means every session the host starts, and `FAC-SEM-056` refuses it. A host MUST NOT write a declared stdio
   server into a runtime's user-wide MCP configuration, whatever the scope says.
 
-A server that holds no per-session state SHOULD NOT be a stdio server at all: it runs once on the machine as a
+A server that holds no per-session state SHOULD NOT be a stdio server at all: it runs once per OS account on the computer as a
 [service](service.md) whose MCP surface is `streamable-http`, under its supervisor and the machine's lifecycle broker,
 with its well-known document as the health check. One copy per session is right only for a server that holds that
 session's state, such as a browser or a project index. On 2026-10-11 about 35 sessions each held their own copies of

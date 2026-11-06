@@ -9748,7 +9748,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   same break as W54, the full suite of 10530 green); round 10 at `23fd509d` was not clean (unit passed, seam passed,
   product found one break, W63); round 11 at `bbb5b956` was not clean (seam found one break, W73; product found the same break); round 12 at `3c1ea1f8`
   was not clean (unit passed, 79 of 86 mutants, 5 equivalent, the rest closed by W76 (g); product found three breaks,
-  W76 (a) to (c); seam found three breaks, the same as W76 (a), (c) and (f)); their batches are folded in (Source). A reference module and vectors, one optional schema
+  W76 (a) to (c); seam found three breaks, the same as W76 (a), (c) and (f)); round 13 at `545ba274` was not clean (unit
+  passed; product found one break and seam three, W77 (a) to (c)); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9762,9 +9763,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   DL-25). Loopback is one per computer, so any account, and any guest a forwarder relays, reaches every port. The gaps
   are G1 to G11 of the spec [`2026-11-06-shared-host-gaps.md`](evidence/specs/2026-11-06-shared-host-gaps.md); this
   decision takes G1 to G3 and the host label the board agreed, and files the rest. Fabric's hub already chooses a port
-  per account by a uid formula (its CO-505). In this decision "host" means the program that shows and calls services,
-  as everywhere in this contract, and the machine is "the computer"; only the name "host label" keeps "host" for the
-  computer, and a cookie's scope (ED-8, FB-6, RFC 6265) keeps it for the URL's host name.
+  per account by a uid formula (its CO-505).
+  The machine is "the computer". "Host" means the program that shows and calls services, never the computer, except
+  in the name "host label"; where a URL's host is meant, the text says so: a URL's, an origin's or a page's host, a
+  host name, the `Host` header, or a cookie's host scope ("per host", "scoped to a host", ED-8, FB-6, RFC 6265).
 - **Decision:** [Several OS accounts on one computer](specification/service.md#several-os-accounts-on-one-computer)
   and [the host label](specification/devices.md#the-host-label):
   0. **Counted OS accounts.** A counted OS account is one a person or an organization signs in with, or runs Fabric or
@@ -9949,10 +9951,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     second sentence describes FD's released watcher (FD-76: an episode only for `down`, kept open while a failing
     source outside its start baseline stays); whether that degraded continuation fits the first sentence is decided
     separately, with DEC-0149's landing row.
-    On acceptance day, if DEC-0149's knowledge-base PR #628 is merged, the knowledge base's `knowledge/authority.md`
-    (fabric-workspace) says "is owed by FD's watcher (contract DEC-0154)" where it said "is proposed for FD's watcher
-    in contract DEC-0154"; if #628 is not merged, DEC-0149's lander writes "owed" directly before merging it. After
-    both land, in either order, `grep -c 'proposed for FD'` prints 0 and `grep -c 'owed by FD'` prints 2 there.
+    The knowledge base's `knowledge/authority.md` (fabric-workspace) clause "counting `foreign` and `foreign-user` is
+    proposed for FD's watcher in contract DEC-0154" becomes "counting `foreign` and `foreign-user` is owed by FD's
+    watcher under contract DEC-0154" (twice): DEC-0154's lander checks right after its contract PR merges and edits
+    the knowledge base when the clause is there; DEC-0149's lander checks at its steps 6 and 6b; the second lander
+    checks that `grep -c 'proposed for FD'` prints 0 and the full new clause appears twice; if DEC-0154 is withdrawn,
+    its withdrawer files a knowledge-base row to drop the clause. The steps and their interleavings are in the
+    handoff's acceptance step, in the same words as DEC-0149's.
   - Fabric Inbox: B-217 open, after this decision (its PR #421, rows B-217 to B-220): its desktop connect step sends a
     new agent key to the hub's loopback callback; on macOS and Linux another account's listener reads today as no
     listener (safe, for the wrong reason), and on Windows, where the process tables show every account's processes,
@@ -10101,6 +10106,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   knowledge-base step; unit passed, 79 of 86 mutants, 5 equivalent), and W76 (both exceptions named, "once per OS
   account on the computer", block names instead of line numbers, the cookie note worded as "here 'per host' is the
   URL's host", the Windows folder's owner set explicitly, the knowledge-base step by whether DEC-0149's #628 is merged,
-  a vector for a link and an `org.id` that is not a string, a stale note corrected) is folded in; the two UI lines passed the operator's copy check
+  a vector for a link and an `org.id` that is not a string, a stale note corrected) is folded in; round 13 at
+  `545ba274` was not clean (product and seam: `id.instance` unique "on the machine", a service once "on the machine",
+  and a host vocabulary rule whose closed set of exceptions made other readings of "host" false; unit passed), and W77
+  (unique within one OS account's services directory, once per OS account on the computer, one host rule in the same
+  words in every copy with the lines it covers reworded, the knowledge-base step after DEC-0154's merge per the rule
+  shared with DEC-0149, five Windows vectors, the "proposed" markers listed, `service.id`'s description and the
+  reference-module row) is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

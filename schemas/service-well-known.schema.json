@@ -32,7 +32,7 @@
       "properties": {
         "id": {
           "$ref": "service-common.schema.json#/$defs/serviceId",
-          "description": "The service's id; it equals the descriptor's, or a host reports the port's holder as foreign (FAC-SEM-009, docs/specification/service.md#well-known-document); a listener of another OS account is foreign-user whatever it answers (DEC-0154 HA-2)."
+          "description": "The service's id; it equals the descriptor's, or a host reports the port's holder as foreign (FAC-SEM-009, docs/specification/service.md#well-known-document); a listener of another OS account, or one whose owner cannot be told, is foreign-user whatever it answers (DEC-0154 HA-2)."
         },
         "instance": {
           "$ref": "service-common.schema.json#/$defs/instance",

@@ -207,10 +207,12 @@ passes the small-order check (DEC-0045).
 
 ### The host label
 
-DEC-0154 item 4 (HA-4), proposed. The **host label** is the label of the computer: in its name, and only there, "host"
-means the computer, not the program this contract calls a host. An enrollment request MAY carry `device.hostLabel`:
-an opaque value that is the same for every device of one organization on one computer (two counted OS accounts of it,
-or a virtual machine given its secret) and that organizations with no code on the computer cannot link.
+DEC-0154 item 4 (HA-4), proposed. The **host label** is the label of the computer. "Host" means the program that shows
+and calls services, never the computer, except in the name "host label"; where a URL's host is meant, the text says
+so: a URL's, an origin's or a page's host, a host name, the `Host` header, or a cookie's host scope ("per host",
+"scoped to a host", ED-8, FB-6, RFC 6265). An enrollment request MAY carry `device.hostLabel`: an opaque value that is
+the same for every device of one organization on one computer (two counted OS accounts of it, or a virtual machine
+given its secret) and that organizations with no code on the computer cannot link.
 
 - **The value.** HMAC-SHA-256 keyed with the computer's secret over the UTF-8 bytes of `fabric-host-label/1` followed
   directly by the enrollment's `org.id`, its first 16 bytes in base64url without padding: 22 characters (schema
