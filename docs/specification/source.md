@@ -294,9 +294,10 @@ source manifest `fabric.source.json` or pass its folder; any other file is a sou
   others it lists, reads as `missing`: a source export reads the committed tree, where it is absent too. A staged change that differs from the work tree, or anything
   not yet committed, can still differ from what a source export reads, which is the committed tree at a named commit.
 - **Walk mode.** When Git refuses the folder, ignores it (`git check-ignore -q .`), lists no file under any `include`
-  path (three listings keep Git mode: a listed path under one (a file or a nested repository), even one an `exclude`
-  entry removes; a nested repository in the source; and a listed path an `include` entry lies beneath that no `exclude` entry removes; the third leaves that entry
-  `missing`), fails its second call (`ls-files
+  path (three listings keep Git mode: a listed path under one (a file, a symbolic link or a nested repository), even
+  one an `exclude` entry removes, `fabric.source.json` included when an `include` entry names it; a nested repository
+  in the source; and a listed path an `include` entry lies beneath that no `exclude` entry removes; in the second and
+  third the manifest's own path counts only as a gitlink, and the third leaves that entry `missing`), fails its second call (`ls-files
   --stage`, which lists the gitlinks) as it fails its first, does not answer within 60 seconds (a
   `.gitignore` that is a FIFO stalls Git until then, and the run then walks with a note) or
   could not run (the note gives the error's code only, such as `ENOBUFS`), and when no `git` is found, it walks the folder: never into `.git`, into a folder (a dot-folder and

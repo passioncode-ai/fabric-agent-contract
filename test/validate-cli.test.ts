@@ -2267,7 +2267,7 @@ describe("an agent's source (DEC-0149)", () => {
     expect(lines.some((line) => line.includes("no-license"))).toBe(true);
   });
 
-  it.skipIf(process.platform === "win32")("keeps Git mode when src/vendor, a gitlink lying under the include folder src/, is excluded (E13)", () => {
+  it("keeps Git mode when src/vendor, a gitlink lying under the include folder src/, is excluded (E13)", () => {
     const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/vendor"] }), ".gitignore": "LICENSE\n", LICENSE: "x" });
     expect(gitIn(dir, "init", "-q").status).toBe(0);
     expect(gitIn(dir, "add", "fabric.source.json", ".gitignore").status).toBe(0);
@@ -2278,6 +2278,19 @@ describe("an agent's source (DEC-0149)", () => {
     const lines = found(result.out);
     // A nested repository under an include path keeps Git mode as a file does, even one an exclude entry removes.
     expect(lines.filter((line) => line.includes("missing")).map((line) => line.split("  ")[1])).toEqual(["/manifest/include/0", "/manifest/include/1"]);
+    expect(lines.some((line) => line.includes("no-license"))).toBe(true);
+  });
+
+  it("keeps Git mode when the only listed path an include entry names is the tracked manifest itself", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["fabric.source.json", "LICENSE"] }), ".gitignore": "LICENSE\n", LICENSE: "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "fabric.source.json").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).not.toContain("note/walk");
+    const lines = found(result.out);
+    // index.covers has no exception for the manifest: include[0] names it, so it keeps Git mode; LICENSE, ignored, is include[1].
+    expect(lines.filter((line) => line.includes("missing")).map((line) => line.split("  ")[1])).toEqual(["/manifest/include/1"]);
     expect(lines.some((line) => line.includes("no-license"))).toBe(true);
   });
 
