@@ -562,7 +562,8 @@ The Host and Origin guard does not tell them apart, so a computer with more than
 DEC-0154, proposed. On one computer each counted OS account runs its own copy of a service, with its own services
 directory, tokens and descriptors, and every account (and every guest whose traffic a forwarder relays) reaches every
 port on `127.0.0.1`. In this section "host" means only the program that shows and calls services, as everywhere in
-this contract; the machine is "the computer".
+this contract, and the machine is "the computer"; the one exception is a cookie's scope (ED-8, FB-6, RFC 6265), where
+"host" is the URL's host name.
 
 <a id="counted-os-accounts"></a>
 
@@ -902,7 +903,8 @@ is (DEC-0032).
 
 ### One copy
 
-A copy that does not hold `service.lock` touches nothing: it binds no port, writes no file, resumes no job and starts
+A copy that does not hold its guard against a second copy (`service.lock`, or an app's own single-instance guard)
+touches nothing: it binds no port, writes no file, resumes no job and starts
 no scheduler; it may read the lock to learn the holder's pid (DEC-0015, DEC-0057). An app (`lifecycle.manager:
 "person"`) or an app's part MAY guard against a second copy with its own single-instance guard instead of
 `service.lock`; that guard is what HA-1's claim rewrite waits for (DEC-0154, proposed).

@@ -321,6 +321,13 @@ describe("F-B-318 — the button cookie lives in the page's partition for the se
     expect(fb6).not.toMatch(/on the service origin/);
     expect(fb6).toMatch(/session cookie/);
   });
+  it("states the same bold scope in ED-8 as in FB-6, so the two cannot drift apart (DEC-0154 W74)", () => {
+    const scope = (text: string) => /\*\*(per\s+host[^*]*)\*\*/.exec(text)?.[1]?.replace(/\s+/g, " ") ?? "";
+    const fb6 = /\*\*FB-6 \u2014 [\s\S]*?(?=\*\*FB-7)/.exec(read("docs/specification/fabric-button.md"))?.[0] ?? "";
+    const ed8 = /\*\*ED-8 \u2014 [\s\S]*?(?=\*\*ED-9)/.exec(read("docs/specification/embedded-dashboard.md"))?.[0] ?? "";
+    expect(scope(ed8)).toBe("per host in a shared cookie store; per service where the host gives each service its own store");
+    expect(scope(fb6)).toBe(scope(ed8));
+  });
 });
 
 describe("TRUST-TIERS — proof starts at the machine boundary (Fabric ADR-0144 amendment 4)", () => {

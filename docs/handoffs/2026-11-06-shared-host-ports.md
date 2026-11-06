@@ -22,8 +22,12 @@ Proposed DEC on its own branch, and files the rest.
   virtual machine is its own device; `device.hostLabel`, its secret kept out of backups, its read rule failing closed,
   sent only once a policy member turns it on, CT-239).
 - [service.md](../specification/service.md#several-os-accounts-on-one-computer): the new section, the port claim's
-  pointer, `FAC-SEM-009`'s neighbour, the threat model and the cookie residue, the trust anchor, the Install and
-  Uninstall rows. [delegation.md](../specification/delegation.md#trust-tiers): the header, DL-25's T0 row, the relay
+  pointer, `FAC-SEM-009`'s neighbour, the threat model and the cookie residue, the trust anchor, the Install,
+  Uninstall, One copy and Start rows, the One copy section, the directories table and `FAC-SEM-010`'s register row;
+  [provider.md](../specification/provider.md) and [relay.md](../specification/relay.md): a loopback address under
+  HA-2; [embedded-dashboard.md](../specification/embedded-dashboard.md): ED-8's cookie scope explained;
+  `schemas/service-descriptor.schema.json`: `paths.data`'s description; `src/semantic-rules.ts`: `FAC-SEM-010`'s
+  comment. [delegation.md](../specification/delegation.md#trust-tiers): the header, DL-25's T0 row, the relay
   paragraph and the accepted gap. [devices.md](../specification/devices.md#the-host-label): the device definition, the
   host label, UE's linkable list. [contexts.md](../specification/contexts.md): `org.id` with 128 random bits where the
   label is on. [node-summary.md](../specification/node-summary.md): a `foreign` or `foreign-user` service reported
@@ -159,6 +163,10 @@ Proposed DEC on its own branch, and files the rest.
   stated (ED-8 itself too), and `test/delegation-sealed.test.ts` pins "per host" again. The comment in
   `src/semantic-rules.ts` keeps "another computer" (a remote placement's machine). FB-6's bold scope equals ED-8's
   (checked in Python: True). Unit and product of round 11 were still running.
+- Round 11's product reading failed on the same break as W73. W74 folded: the cookie-scope exception to "host"
+  stated in `service.md` and the DEC; ED-8's bold scope pinned by a test beside FB-6's (it fails when ED-8's scope is
+  changed); the DEC-0149 line range; order 2's references made explicit; G10's "per OS account (per data
+  directory)"; the Done list for `service.md` and the files around it; One copy's first sentence naming the guard.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -221,7 +229,7 @@ Proposed DEC on its own branch, and files the rest.
   landing edit made by whichever of DEC-0149 and DEC-0154 lands second; after both,
   `grep '^| CT-232 ' docs/backlog.md | grep -o source.md | wc -l` prints 1 (it counts occurrences, not lines).
 - The two landing orders for the watcher sentence, as DEC-0149's handoff writes them at `1bd70e54`
-  (`docs/handoffs/2026-11-03-source-manifest.md`, lines 1523 to 1575); its texts and commands are copied here and
+  (`docs/handoffs/2026-11-03-source-manifest.md`, lines 1523 to 1577); its texts and commands are copied here and
   match byte for byte once both are joined with `tr '\n' ' ' | tr -s ' '`.
   - **Order 1: DEC-0154 lands first, DEC-0149 second.** Until DEC-0149 lands, main keeps the old watcher sentence
     (`degraded`, 5 minutes) beside HA-2; that sentence was false before DEC-0154 and is closed by DEC-0149's landing,
@@ -251,7 +259,8 @@ Proposed DEC on its own branch, and files the rest.
 
     DEC-0154's lander then changes only the list of states (to "`down`, `foreign` or `foreign-user`, not merely
     `degraded`", on one line) and adds "; counting `foreign` and `foreign-user` is owed (DEC-0154)" before the second
-    sentence's full stop, which gives the landed text above, and runs the two checks above: 1, then 0.
+    sentence's full stop, which gives order 1's landed text (the first `text` block of this note, lines 205 to 211 of
+    this file), and runs order 1's two checks (the first `sh` block, lines 219 and 220): 1, then 0.
   - All of these checks were run with `bash -c` and `zsh -c` on trial files built from the two landed texts. Order 1:
     the two checks print 1 and 0 on its text; 1 and 1 on the widened claim (its subject still Fabric Dashboards'
     watcher) on one line; 0 and 1 with a line break before its parenthesis of states; 1 and 1 with one before
@@ -326,6 +335,9 @@ After round 11's seam batch (W72, W73) the full gate did not run (7 GB free, und
 `pnpm run docs:check`, `python3 docs/ux/lint.py`, `pnpm privacy:check` (0 findings), the em dash check (0) and
 `pnpm vitest run` over `test/delegation-sealed.test.ts`, `test/embedded-dashboard.test.ts`, `test/docs-check.test.ts`,
 `test/consistency.test.ts` and `test/sources-ledger.test.ts` (151 tests) ran with exit 0.
+After W74 the full gate did not run either (7 GB free); the same checks ran with exit 0, the vitest set with
+`test/service-supervisor.test.ts` added and the new ED-8 test in `test/delegation-sealed.test.ts`, which was seen to
+fail when ED-8's bold scope was changed.
 
 ## Next task
 

@@ -9746,8 +9746,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   passed; unit did not run, since W39 changes the vectors); round 9 at `7ce5cc67` was not clean (unit passed, 319 of
   376 mutants killed and 53 equivalent, the rest closed by W55; product found two breaks, W53 and W54; seam found the
   same break as W54, the full suite of 10530 green); round 10 at `23fd509d` was not clean (unit passed, seam passed,
-  product found one break, W63); round 11 at `bbb5b956` was not clean (seam found one break, W73); their batches are folded in
-  (Source). A reference module and vectors, one optional schema
+  product found one break, W63); round 11 at `bbb5b956` was not clean (seam found one break, W73; product found the same break); their batches are
+  folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9763,7 +9763,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   decision takes G1 to G3 and the host label the board agreed, and files the rest. Fabric's hub already chooses a port
   per account by a uid formula (its CO-505). In this decision "host" means the program that shows and calls services,
   as everywhere in this contract, and the machine is "the computer"; only the name "host label" keeps "host" for the
-  computer.
+  computer, and a cookie's scope (ED-8, FB-6, RFC 6265) keeps it for the URL's host name.
 - **Decision:** [Several OS accounts on one computer](specification/service.md#several-os-accounts-on-one-computer)
   and [the host label](specification/devices.md#the-host-label):
   0. **Counted OS accounts.** A counted OS account is one a person or an organization signs in with, or runs Fabric or
@@ -10087,7 +10087,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   RFC 6265 section 8.5, not the machine, so W66, W71 and W8 wrongly changed it to "computer" in FB-6, ED-8's open
   question, CONTEXT and the RFC 6265 row; "per host" is restored there with "the URL's host, RFC 6265 section 8.5; for
   local services, 127.0.0.1 on that computer", and the `semantic-rules.ts` comment, about a remote placement's machine,
-  keeps "computer"), and its batch, with the acceptance-day edit of the knowledge base's `authority.md` (W72), is
-  folded in; the two UI lines passed the operator's copy check
+  keeps "computer"; product found the same break), and its batch, with the acceptance-day edit of the knowledge
+  base's `authority.md` (W72) and W74 (the cookie-scope exception to "host" stated, ED-8's bold scope pinned by a test
+  beside FB-6's, the handoff's references, One copy's guard), is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

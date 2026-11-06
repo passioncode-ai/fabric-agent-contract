@@ -179,7 +179,7 @@ loopback; that assumption is the root of G1 to G3.
 
 - **The plan.** Every singleton (a bot polling a token, a scheduler, a publisher, a gateway) has exactly one computer
   (`plan:placement.md:3-5`, `:33`); a cutover moves one agent at a time (`plan:runbook.md:61`).
-- **The contract.** `service.lock` gives one copy per computer (`service.md:683`); a placement is once per machine and
+- **The contract.** `service.lock` gives one copy per OS account (per data directory) (`service.md:683`); a placement is once per machine and
   context (`FAC-SEM-074`); nothing limits an agent to one machine of the estate.
 - **Needed.** Project Observatory's placement record `observatory-placement/1` as a readable norm for singletons, in a
   decision of the second wave; the schema stays `/1`, additive.
