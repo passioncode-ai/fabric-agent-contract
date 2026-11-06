@@ -32,13 +32,15 @@ Proposed DEC on its own branch, and files the rest.
   rewritten PL-2 and PL-3 row (`conformance.md:251`: a loopback address opened only after the listener's owner check).
 - The host label's reference `src/host-label.ts` (`hostLabel`: link, owner per platform, mode, size), its generator
   `tools/vectors/host-label.ts` (Node's own HMAC, not importing the reference), vectors
-  `fixtures/vectors/host-label.json` (55 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
+  `fixtures/vectors/host-label.json` (57 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
   schema's `opaqueId`), a coverage floor of 100 in `vitest.config.ts`; the optional schema member `device.hostLabel` in
   `schemas/device-enrollment.schema.json` with a positive and a negative fixture; `service.id`'s description in
   `schemas/service-well-known.schema.json`.
 - `CONTEXT.md`: Device redefined; Counted OS account, Port claim, `foreign-user` and Host label added; Trust tier
-  narrowed. UX: SCN-056 in `docs/ux/scenarios.md`, SCR-20's `foreign-user` state in `docs/ux/screens.md`, FLW-17's
-  screens in `docs/ux/flows.md`. RFC 8252's row in `docs/evidence/sources.md`, and RFC 6265's existing row read again (its section 8.5 was already pinned for DEC-0059).
+  narrowed. UX: SCN-056 and SCN-044's alt path in `docs/ux/scenarios.md`; SCR-20's and SCR-30's `foreign-user`
+  states in `docs/ux/screens.md`; FLW-17 and FLW-30 in `docs/ux/flows.md`; ST-021 and ST-036 in
+  `docs/ux/foundation.md`; FL-7 in `docs/specification/fabric-button.md`; the note in
+  `docs/guides/connecting-compatible-agents.md`. RFC 8252's row in `docs/evidence/sources.md`, and RFC 6265's existing row read again (its section 8.5 was already pinned for DEC-0059).
 - The gap list as a tracked spec: [2026-11-06-shared-host-gaps.md](../evidence/specs/2026-11-06-shared-host-gaps.md),
   the shared computer's accounts by role only.
 - Backlog CT-228 (the DEC) and CT-229 to CT-242 (the state-order vector file, G4 to G11, the single-account forwarder
@@ -139,6 +141,14 @@ Proposed DEC on its own branch, and files the rest.
   matched byte for byte after `tr '\n' ' ' | tr -s ' '`; the negative check's exit status 1 and no `set -e`; the
   POSIX meaning of `writableByOthers` and `folderOk`; CT-229's PL-3 fallback test; SCR-30's states and elements; an
   app's own guard in One copy; "declaration" for `FAC-SEM-010`; CT-242 for Fabric's link-back screen.
+- Round 10 at `23fd509d`: not clean. Unit passed (U1 folded: two vectors, "on Windows, owned by an account: no label"
+  and "metadata passes, hex not a string"; the mutants Windows administrators `{administrators, system, other}` and the
+  `typeof hex` check after the size check each fail `test/host-label.test.ts`). Seam passed. Product failed on W63 (the
+  Lifecycle table's One copy row still bound every service to `service.lock`; it now lets an app or an app's part guard
+  with its own single-instance guard, and the directories table and `paths.data` say `service.lock` is there for a
+  service that takes it). W64 to W70 folded: the affects and Compatibility lists, the two UI lines in item 2, "computer"
+  in FB's and CONTEXT's cookie scope and a comment, HA-2 pointers in `provider.md` and `relay.md`, the CT-232 check
+  counting occurrences, both landing orders.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -198,11 +208,18 @@ Proposed DEC on its own branch, and files the rest.
   "unavailable" (1). DEC-0149 points `relay.md` and `conformance.md` to
   `service.md`'s definition of "unavailable", so one edit in `service.md` suffices; when DEC-0149 lands, CT-232 cites its sentence on an OS account an
   organization owns whole (on DEC-0149's branch, `source.md` and `contexts.md`; not cited before it lands). This is a
-  landing edit made by whichever of DEC-0149 and DEC-0154 lands second; after both, `grep '^| CT-232 ' docs/backlog.md |
-  grep -c source.md` prints 1.
-- DEC-0154 may land first. Then, until DEC-0149 lands, main keeps the old watcher sentence (`degraded`, 5 minutes)
-  beside HA-2. That sentence was false before DEC-0154 and is closed by DEC-0149's landing; the first lander makes no
-  separate edit for it.
+  landing edit made by whichever of DEC-0149 and DEC-0154 lands second; after both,
+  `grep '^| CT-232 ' docs/backlog.md | grep -o source.md | wc -l` prints 1 (it counts occurrences, not lines).
+- The two landing orders for the watcher sentence; the landed text and the checks above are the same in both.
+  - DEC-0154 lands first. Until DEC-0149 lands, main keeps the old watcher sentence (`degraded`, 5 minutes) beside
+    HA-2. That sentence was false before DEC-0154 and is closed by DEC-0149's landing; DEC-0154's lander makes no
+    separate edit for it, and DEC-0149's lander then writes the whole landed text above.
+  - DEC-0149 lands first. Its lander changes the subject to "A watcher" and adds the second sentence about FD-76
+    without the tail "; counting `foreign` and `foreign-user` is owed (DEC-0154)", and the list of states stays
+    "(`down`, not merely `degraded`)". DEC-0154's lander then only changes the list of states to "(`down`, `foreign` or
+    `foreign-user`, not merely `degraded`)" and appends that tail. This order is written from the coordinator's
+    description (W70); it is to be checked against the text DEC-0149's fixer pushes as DB, which was not on DEC-0149's
+    branch at `d9c29245` when this was written.
 - DEC-0151 and DEC-0152: the same register rules (DECISIONS tail in id order, markers from the counters, backlog in id
   order, handoffs newest first).
 
@@ -256,6 +273,13 @@ After round 9's batch (W51 to W62) the full gate ran under the heavy lock (11 GB
 exit 0, 111 test files, 10534 tests passed and 1 skipped, branches 98.92% (12567 of 12703), 31 vector files matching
 their generators, the UX lint passed (40 stories, 34 flows, 34 screens, 55 scenarios), documentation checks passed,
 markdownlint 0 errors, privacy 0 findings; no em dash on an added line.
+
+After round 10's batch (W63 to W70) the full gate ran under the heavy lock (9 GB free, a 15-minute load of 34.9):
+the first run failed one test, `test/delegation-sealed.test.ts` ("states the scope and the lifetime in FB-6"), which
+pinned FB-6's old "per host" wording; the test now pins "per computer" (W66), and the second run exited 0: 111 test
+files, 10536 tests passed and 1 skipped, branches 98.92% (12567 of 12703), 31 vector files matching their generators,
+the UX lint passed, documentation checks passed, markdownlint 0 errors, privacy 0 findings; no em dash on an added
+line.
 
 ## Next task
 

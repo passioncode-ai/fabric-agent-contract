@@ -82,7 +82,9 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
   nothing more: `https://` and a host name or a bracketed IP literal, or — for a relay on the same machine — `http://`
   on a loopback literal, 127.0.0.0/8 or `[::1]`; either with an optional port up to 65535, and no path, user information
   or anything after it. A name such as `localhost` is refused over http: a name resolves somewhere a literal cannot
-  (DEC-0066; vectors `relayOrigin`).
+  (DEC-0066; vectors `relayOrigin`). A client checks the owner of a loopback relay's listener before it sends a
+  credential there ([service](service.md#ha-2) HA-2, DEC-0154, proposed); the `auth` signature over the relay's own
+  nonce is not a reusable credential, so a relay held by another account learns nothing it can replay.
 - **Frames** are UTF-8 JSON text frames of at most 1 MiB, each with `{v: 1, type, id}`
   ([`relay-frame.schema.json`](../../schemas/relay-frame.schema.json)).
   - Unknown members are ignored.

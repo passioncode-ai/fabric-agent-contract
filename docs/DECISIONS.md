@@ -9745,7 +9745,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   of 107 mutants, the rest closed by W39); round 8 at `7fbe27f0` was not clean (product found one break, W40; seam
   passed; unit did not run, since W39 changes the vectors); round 9 at `7ce5cc67` was not clean (unit passed, 319 of
   376 mutants killed and 53 equivalent, the rest closed by W55; product found two breaks, W53 and W54; seam found the
-  same break as W54, the full suite of 10530 green); their batches are folded in (Source). A reference module and vectors, one optional schema
+  same break as W54, the full suite of 10530 green); round 10 at `23fd509d` was not clean (unit passed, seam passed,
+  product found one break, W63); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9797,7 +9798,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      or the node that installs the service, chooses the port, writes the descriptor and then rebuilds the claim
      atomically from all this service's descriptors in the account, as at start (the short window between choosing the port and
      writing the claim is accepted: its cost is a collision warning); at every start only the service itself (or
-     the app), never launchd, systemd, the Task Scheduler or the node, which cannot take its lock, rewrites it, after it holds its guard against a second copy (`service.lock` for a service with a descriptor; an app, `lifecycle.manager: "person"`, or an app's part: its own guard, even when its descriptor names an origin),
+     the app), never launchd, systemd, the Task Scheduler or the node, which cannot take its lock, rewrites it, after it holds its guard against a second copy (`service.lock` for a service with a descriptor; an app, `lifecycle.manager: "person"`, or an app's part: its own single-instance guard, which it MAY use instead of `service.lock`, even when its descriptor names an origin),
      rebuilt from this service's descriptors in the account, or, for an app without a descriptor origin or an app's part, from the port it records in its own state, read after it has written its new liveness file (or it would read an old port or none), with the ports of every instance the account records, written atomically (a temporary file, then a rename),
      not only when it is missing, because a file's age decides `systemd-tmpfiles`' cleaning and a computer installed
      before catches up; at uninstall, after the descriptor is deleted, the claim is rebuilt the same way from the
@@ -9821,7 +9822,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      control channel answers a fresh challenge with an HMAC). No listener is `down`. A listener of another account
      (root, SYSTEM and service accounts included), or one whose owner cannot be told (a process the client cannot
      open, a client without access to the socket table), is the new host state `foreign-user`: no credential is sent
-     and nothing it answers is read as the service's. A client that can see its own account's sockets always tells its
+     and nothing it answers is read as the service's. A host shows it with one of two lines, as SCR-20 in
+     `docs/ux/screens.md` records: "Another account on this computer is using this service's port; nothing was sent to it." for another account's listener, and "This computer would not say who is using this service's port; nothing was sent to it." for an owner that cannot be told.
+     A client that can see its own account's sockets always tells its
      own listener. The order is `down`, `foreign-user`, `foreign`, then the well-known `status`; `foreign-user` is
      decided before the well-known document is read and wins over every answer, `ready` included; a reader treats a
      state it does not know as not ready; a watcher counts `foreign` and `foreign-user` as unavailable, as it counts `down`; a node
@@ -9920,9 +9923,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   nothing; a reader pinned before shows whatever it does with a value it does not know. `device.hostLabel` is
   optional; the request's `device` object is closed, so a server pinned before refuses an enrollment that carries it
   at its schema, as one pinned before DEC-0094 refused `file`, and a node sends it only once the owed device-policy
-  member (CT-239) turns it on (how a node learns a server's pin is CT-67). `schemas/service-well-known.schema.json`
-  and `schemas/device-enrollment.schema.json` change bytes (a description, and the new member), so a consumer that
-  vendors them re-pins. The product rows, as each product reported them on thread `1fe66e6e` on 2026-11-06 (a reading
+  member (CT-239) turns it on (how a node learns a server's pin is CT-67). `schemas/service-well-known.schema.json`,
+  `schemas/service-descriptor.schema.json` and `schemas/device-enrollment.schema.json` change bytes (two descriptions,
+  and the new member), so a consumer that vendors them re-pins. An app (`lifecycle.manager: "person"`) or an app's
+  part is no longer bound to take `service.lock`: it MAY guard against a second copy with its own single-instance
+  guard. The product rows, as each product reported them on thread `1fe66e6e` on 2026-11-06 (a reading
   of the board, not of their code):
   - Fabric: CO-505 (the hub's port per account by a uid formula) reported in its main; CO-513 (its bundled stack's
     ports 54320 to 54329 are fixed, to be recorded per account) open; CO-514 (its MCP server checks only that the hub's
@@ -9934,7 +9939,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     FD-159 (Linux, its PR #349; an owner it cannot tell refused; Windows) open, due at this decision's acceptance.
     Owed: its watcher (FD-76's successor) counts `foreign` and `foreign-user` as unavailable; asked on `1fe66e6e` on acceptance day.
     Asked the same day: its card's own `foreign-user` line (its `i18n.ts:128`) uses, or is checked against, this
-    decision's two lines, and a line for an owner that cannot be told is added (part of FD-159). The landing text's
+    decision's two lines (item 2; SCR-20 in `docs/ux/screens.md`), and a line for an owner that cannot be told is
+    added (part of FD-159). The landing text's
     second sentence describes FD's released watcher (FD-76: an episode only for `down`, kept open while a failing
     source outside its start baseline stays); whether that degraded continuation fits the first sentence is decided
     separately, with DEC-0149's landing row.
@@ -9961,7 +9967,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     already checks the peer's uid (DEC-0075).
 - **Consequences / affects:** `docs/specification/service.md` (the port claim's pointer, `FAC-SEM-009`'s neighbour,
   the threat model and its two residues, the trust anchor, PL-3, the new section with counted accounts and HA-1 to
-  HA-3, the Install and Uninstall rows, the caller table, the A2A paragraph), `docs/specification/delegation.md` (the
+  HA-3, the Install, Uninstall, One copy and Start rows, the One copy section, the directories table, the caller
+  table, the A2A paragraph, `FAC-SEM-010`'s register row), `docs/specification/provider.md` (a loopback `run.mcp.url`
+  under HA-2), `docs/specification/relay.md` (a loopback relay under HA-2), `docs/guides/connecting-compatible-agents.md`
+  (the note on HA-1 to HA-3), `src/semantic-rules.ts` (`FAC-SEM-010`'s comment), `test/delegation-sealed.test.ts` (FB-6's "computer"), `docs/handoffs/README.md`,
+  `schemas/service-descriptor.schema.json` (`paths.data`'s description), `docs/specification/delegation.md` (the
   header, DL-25's T0 row, the relay paragraph and the accepted gap, the open item on `surfaces.mcp.auth`),
   `docs/specification/profiles.md` (the loopback card), `docs/specification/session-handoff.md` (SH-9's pointer),
   `docs/specification/devices.md` (the device definition, the host label, `machine.mode` `A`, UE's linkable list),
@@ -10061,6 +10071,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   coordinator's decisions W51, W52 and W56 to W62 (DEC-0149's CV sentence in the landing text, the negative check's
   exit status, the POSIX meaning of `writableByOthers` and `folderOk`, CT-229's PL-3 fallback test, SCR-30's states
   and elements, an app's own guard in One copy, "declaration" for `FAC-SEM-010`, and CT-242 for Fabric's link-back
-  screen), is folded in; the two UI lines passed the operator's copy check
+  screen), is folded in; round 10 at `23fd509d` was not clean (product: W63, the Lifecycle table's One copy row still
+  binding every service to `service.lock`; unit and seam passed), and its batch, with the coordinator's decisions W64 to
+  W70 (the affects and Compatibility lists, the two UI lines quoted in item 2, "computer" in the cookie scope of FB and
+  CONTEXT, HA-2 pointers in `provider.md` and `relay.md`, two vectors and their mutants, the CT-232 check counting
+  occurrences, and both landing orders with DEC-0149), is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.
