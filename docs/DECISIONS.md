@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 62 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 63 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9055,7 +9055,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the patch's full fold missing from the requirement rows; round 58 not clean: a flat
   wording in conformance.md's hand-over row; round 59 not clean: flat wordings in the knowledge base's principles
   section 7 and rules section 9; round 60 clean; round 61 not clean: principles section 7's shorter exception list,
-  the handoff's chain of open branches; round 62 not clean: relay.md's watcher sentence against service.md's), cited by round number because their heads were on the review branch, which is not
+  the handoff's chain of open branches; round 62 not clean: relay.md's watcher sentence against service.md's; round 63 not clean: the
+  watcher's states named three times), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9451,6 +9452,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       entry shows on the hub's well-known document and the dashboard; a degraded entry opens no message, only an agent
       unavailable for more than 15 minutes does), so a move's wait on reports is seen on the dashboard and CT-244 owes a
       rule for messaging that failure; conformance.md's watcher row says the same, with the FD-76 pointer.
+      Decided by the coordinator in round 63: relay.md and conformance.md name no watcher state and point at service.md's
+      definition of unavailable, so the one landing edit to service.md carries both; the hub's entry shows where the hub
+      shows its state (its well-known document and the dashboard under `fabric-service/0.1`, otherwise SCR-23 for
+      Fabric's hub); CT-244 keeps its id and starts from the operator's recorded rule that a failure lasting over 15
+      minutes is messaged; "Git hosting service" where "host" meant it.
       The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9568,7 +9574,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`jwtSpans` and `hasJwt`); `test/validate-cli-git-links.test.ts`, `test/validate-cli-walk-names.test.ts`, `test/consistency.test.ts`
   (round 61: listed here); `tools/vectors/run.ts`; `src/activity-rules.ts` and `src/proposal-rules.ts` (the fourth
   home-path boundary in their scope comments); `docs/specification/contexts.md` (an organization context instance and
-  an enrolled machine), `devices.md` and `activity.md` (the four home-path boundaries); `vitest.config.ts` (the floors, `src/validator.ts` added); `docs/specification/source.md` (new), `docs/guides/connecting-compatible-agents.md` (the inference row and the pair),
+  an enrolled machine), `devices.md` and `activity.md` (the four home-path boundaries); `relay.md` (a hub's machine-report entry and
+  the watcher, round 62, pointing at service.md's definition since round 63); `conformance.md`'s watcher row; CT-244
+  filed (a rule for messaging a hub's machine-report failure); `vitest.config.ts` (the floors, `src/validator.ts` added); `docs/specification/source.md` (new), `docs/guides/connecting-compatible-agents.md` (the inference row and the pair),
   `package.md` (secrets and state from the source's slots, a copy without state), `proposals.md` (a private agent's
   source), `delegation.md` (MD-5, MD-6, DL-18's order of checks, DL-26's exception, OA-5), `governance-and-roles.md` (external effects), `identifiers.md` (the hand-over's `target` compared exactly), `conformance.md` (the register,
   the reference module, the readers' rows), `docs/specification/README.md`, `README.md` (Build an agent),
@@ -9579,7 +9587,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 62 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 63 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9605,5 +9613,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the patch's full fold missing from the requirement rows; round 58 not clean: a flat
   wording in conformance.md's hand-over row; round 59 not clean: flat wordings in the knowledge base's principles
   section 7 and rules section 9; round 60 clean; round 61 not clean: principles section 7's shorter exception list,
-  the handoff's chain of open branches; round 62 not clean: relay.md's watcher sentence against service.md's), cited by round number (their heads were on the review branch, not kept at landing),
+  the handoff's chain of open branches; round 62 not clean: relay.md's watcher sentence against service.md's; round 63 not clean: the
+  watcher's states named three times), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

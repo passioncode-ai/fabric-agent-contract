@@ -624,8 +624,8 @@ is the organization's own act. Every public release from a private home, first o
 push or by file, its parent the earlier export commit, so the home's history stays back) or, on a registry, a package
 packed from that source commit holding only source paths that passed the tree check.
 
-A processor acting for the owner under the owner's own account or host (a model provider used in the owner's session,
-CI on the home's host, a service the owner runs) is no recipient while what it holds stays readable by no one but the
+A processor acting for the owner under the owner's own account or Git hosting service (a model provider used in the owner's session,
+CI on the home's Git hosting service, a service the owner runs) is no recipient while what it holds stays readable by no one but the
 owner and the processors acting for the owner; output it makes public (a public server, a Pages site) is a hand-over.
 Access the owning organization gives its own members to its own agent's home is no hand-over, since they are the home's
 readers; for a personal agent the owner is the operator, so any access newly given to another person (beyond the access given before DEC-0149 was accepted) to a private home, or to a copy of it within the operator's estate that carries its history (a private mirror), is an act on

@@ -469,7 +469,7 @@ private organization agent's source public by a visibility change, and giving it
 its source commit, every later one by any route is its own act, and every public release from a private home carries only the
 source export (its parent the earlier export commit) or a package packed from that source commit holding only source
 paths that passed the tree check. A processor acting for the owner under the owner's own account
-or host is no recipient while what it holds stays readable by no one but the owner and the processors acting for it;
+or Git hosting service is no recipient while what it holds stays readable by no one but the owner and the processors acting for it;
 output it makes public is one. Access the owning organization gives its own members to its own agent's home is none,
 and giving access to a public home is none. What takes the word when a source becomes public: a personal agent's source
 made public for the first time (as a source export, a public repository created for it included; its own repository's
