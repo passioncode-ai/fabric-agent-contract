@@ -42,11 +42,11 @@ const FAULT: HostLabelAnswer = { fault: "input-invalid" };
  * `{platform, secret: {link, owner, writableByOthers, folderOk, hex}, orgId}`: `platform` is `posix` (macOS, Linux) or
  * `windows`; `link` whether the path is a symbolic link (on Windows a reparse point); `owner` is `root` (uid 0),
  * `administrators` (the Windows Administrators group), `system` (Windows SYSTEM) or `other`; `writableByOthers` whether
- * anyone but the platform's administrator may write the file (on POSIX anyone but root: a group or other write bit;
- * on Windows an ACE granting write to a SID other than Administrators or SYSTEM, so the prescribed "Administrators
- * full control" on a file SYSTEM owns passes); `folderOk` whether its folder is owned by the administrator and
- * writable by no one but the platform's administrator (on POSIX root
- * and `0755`; on Windows the ACL devices.md gives); `hex` the file's bytes in lower-case hex; `orgId` the enrollment's
+ * anyone but the platform's administrator may write the file (on POSIX any write permission, mode bits or an ACL
+ * entry, for anyone but root; on Windows an ACE granting write to a SID other than Administrators or SYSTEM, so the
+ * prescribed "Administrators full control" on a file SYSTEM owns passes); `folderOk` whether its folder is owned by the
+ * administrator and writable by no one but the platform's administrator (on POSIX owned by root and writable by no one
+ * but root, `0755` as set up; on Windows the ACL devices.md gives); `hex` the file's bytes in lower-case hex; `orgId` the enrollment's
  * `org.id`. A fault in the shape of the platform, the owner name, a flag or `org.id` outranks every `none`; the size of
  * the bytes is read only after the link, the owner and the mode. `hex` is read only when the metadata passes, so it may be absent or empty when it does not; up to 1024
  * bytes it is checked for size, above that it is a fault. Answers `{hostLabel}`, or `{none}` naming the first reason the

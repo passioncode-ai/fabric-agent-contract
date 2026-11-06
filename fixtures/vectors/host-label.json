@@ -731,6 +731,73 @@
       }
     },
     {
+      "name": "a folder that fails, no bytes read",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": false,
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": false
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-mode"
+      }
+    },
+    {
+      "name": "a folder that fails and bytes that are not hex: the mode decides, the bytes are never read",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": false,
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": false,
+          "hex": "zz"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-mode"
+      }
+    },
+    {
+      "name": "system named on a POSIX platform: not its administrator",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": false,
+          "owner": "system",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-owner"
+      }
+    },
+    {
+      "name": "passing metadata and 32 bytes that are not hex",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": false,
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
       "name": "passing metadata and no bytes",
       "input": {
         "platform": "posix",

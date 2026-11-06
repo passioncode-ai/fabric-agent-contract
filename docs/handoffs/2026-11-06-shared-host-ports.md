@@ -32,7 +32,7 @@ Proposed DEC on its own branch, and files the rest.
   rewritten PL-2 and PL-3 row (`conformance.md:251`: a loopback address opened only after the listener's owner check).
 - The host label's reference `src/host-label.ts` (`hostLabel`: link, owner per platform, mode, size), its generator
   `tools/vectors/host-label.ts` (Node's own HMAC, not importing the reference), vectors
-  `fixtures/vectors/host-label.json` (51 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
+  `fixtures/vectors/host-label.json` (55 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
   schema's `opaqueId`), a coverage floor of 100 in `vitest.config.ts`; the optional schema member `device.hostLabel` in
   `schemas/device-enrollment.schema.json` with a positive and a negative fixture; `service.id`'s description in
   `schemas/service-well-known.schema.json`.
@@ -41,8 +41,8 @@ Proposed DEC on its own branch, and files the rest.
   screens in `docs/ux/flows.md`. RFC 8252's row in `docs/evidence/sources.md`, and RFC 6265's existing row read again (its section 8.5 was already pinned for DEC-0059).
 - The gap list as a tracked spec: [2026-11-06-shared-host-gaps.md](../evidence/specs/2026-11-06-shared-host-gaps.md),
   the shared computer's accounts by role only.
-- Backlog CT-228 (the DEC) and CT-229 to CT-241 (the state-order vector file, G4 to G11, the single-account forwarder
-  gap, the policy member, the fixture catalogue, the organization's display).
+- Backlog CT-228 (the DEC) and CT-229 to CT-242 (the state-order vector file, G4 to G11, the single-account forwarder
+  gap, the policy member, the fixture catalogue, the organization's display, Fabric's link-back screen).
 - Ids: DEC-0154 reserved by compare-and-swap on origin (under this run's own reservation key); no rule code reserved.
   `DECISIONS.md`'s marker reads `DEC-0155`, `conformance.md`'s stays `FAC-SEM-169`, equal to the counters.
 
@@ -129,6 +129,16 @@ Proposed DEC on its own branch, and files the rest.
   (`service.lock` for a service with a descriptor, an app's own guard; this service's descriptors, or an app's own
   state after its liveness file), the uninstall from the remaining instances' state only, SCR-30's coverage owed by
   CT-229, and "this service's descriptors in the account".
+- Round 9 at `7ce5cc67`: not clean. Unit passed (376 mutants: 319 killed, 53 equivalent, the rest closed by W55's
+  four vectors: a failing folder with no bytes read, a failing folder before bytes that are not hex, `system` named on
+  a POSIX platform, passing metadata and 32 bytes that are not hex; each mutant tried fails `test/host-label.test.ts`:
+  `!folderOk` after the hex check, the hex check between the mode flags, the hex pattern after the size, `system` as a
+  POSIX administrator). Product failed on W53 (G1's rebuild still in its wording from before W46 and W50) and
+  W54 (W40 not in ST-036 and FLW-30: the remote `https` origin opens as before). Seam failed on the same break as W54
+  (the full suite of 10530 tests green). W51, W52 and W55 to W62 folded: the landing text with DEC-0149's CV sentence,
+  matched byte for byte after `tr '\n' ' ' | tr -s ' '`; the negative check's exit status 1 and no `set -e`; the
+  POSIX meaning of `writableByOthers` and `folderOk`; CT-229's PL-3 fallback test; SCR-30's states and elements; an
+  app's own guard in One copy; "declaration" for `FAC-SEM-010`; CT-242 for Fabric's link-back screen.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -149,38 +159,43 @@ Proposed DEC on its own branch, and files the rest.
 ## Merge notes, per sibling branch
 
 - CT-227 (`agent/ct219-receipt-20261106`), which lands first so this branch's hosted run is not red for its reason:
-  the backlog tail reads CT-227 then CT-228 to CT-241; the handoffs README stays newest first, DEC-0154's row above
+  the backlog tail reads CT-227 then CT-228 to CT-242; the handoffs README stays newest first, DEC-0154's row above
   DEC-0153's. Done: main `1c141418` (PR #245) is merged into this branch.
 - DEC-0149 (`agent/ct194-source-manifest-v2-20261104`): its landing backlog rows take ids above the highest on
   main and on open branches (DEC-0149 already holds CT-244), re-measured at landing; the DECISIONS tail in id order; the next-free markers re-read
   from `refs/agent-sync/ids` at landing; the backlog tail in id order; the handoffs README newest first;
   `vitest.config.ts`'s coverage `include` is the union (`src/host-label.ts` and `src/validator.ts` both); the watcher
   sentence in `service.md`: DEC-0149 rewrites it (its `service.md` line 222), and whichever of DEC-0149 and DEC-0154
-  lands second makes it read as below, the same as DEC-0149's CR. The first sentence is DEC-0149's, rewritten: only its
+  lands second makes it read as below, the same as DEC-0149's CV. The first sentence is DEC-0149's, rewritten: only its
   subject ("Fabric Dashboards' watcher" becomes "A watcher") and its list of states change, and every other part of it
-  stays where it is. The second sentence is new and follows it. The whole final text, with no part left out (the
-  target phrase stands on one line, without a line break, or the positive check counts 0):
+  stays where it is. The second sentence is new and follows it; it describes Fabric Dashboards' released watcher. The
+  whole landed text, with no part left out and nothing quoted before it, the same as the block in DEC-0149's handoff
+  once both are joined with `tr '\n' ' ' | tr -s ' '` (the target phrase stands on one line of `service.md`, or the
+  positive check counts 0):
 
-  > a failure. A watcher messages the operator only when an agent has been unavailable (`down`, `foreign` or
-  > `foreign-user`, not merely `degraded`) for more than 15 minutes, once per case, and says it is back after 15
-  > minutes well; a `degraded` answer opens no message, so setup entries are left out (fabric-dashboards
-  > `docs/backlog.md` FD-76, ADR-0010, released in 0.7.15, read at `ebffd16`); a watcher MUST NOT message the operator
-  > for an entry with `setup: true`. Fabric Dashboards' watcher opens an episode only for `down` since FD-76 (0.7.15,
-  > `ebffd16`) and keeps it open while a degraded source outside its start baseline stays; counting `foreign` and
-  > `foreign-user` is owed (DEC-0154).
+  ```text
+  A watcher messages the operator only when an agent has been unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)
+  for more than 15 minutes, once per case, and says it is back after 15 minutes well; a `degraded` answer opens no message, so
+  setup entries are left out (fabric-dashboards `docs/backlog.md` FD-76, ADR-0010, released in 0.7.15, read at `ebffd16`); a
+  watcher MUST NOT message the operator for an entry with `setup: true`. Fabric Dashboards' watcher opens an episode only
+  for `down` since FD-76 (0.7.15, `ebffd16`) and keeps it open while a failing source (one not marked `setup: true`)
+  outside its start baseline stays, so its failure message at 15 minutes may name that source; counting `foreign` and
+  `foreign-user` is owed (DEC-0154).
+  ```
 
   After both land, run in bash or zsh: the first command prints 1 and the second prints 0 (the released watcher
   reports only `down`). The second reads the file as one line, so a line break anywhere in a wrong landing is still
-  found:
+  found. When it prints 0 it also exits with status 1 (`grep -c` with no match), so do not run it under `set -e`:
 
   ```sh
   grep -c -F 'unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)' docs/specification/service.md
   tr '\n' ' ' < docs/specification/service.md | tr -s ' ' | grep -cF "Fabric Dashboards' watcher messages the operator only when"
   ```
 
-  Both were run, in bash and in zsh, on four trial files before they were written here: the target text (the first
-  prints 1, the second 0); the forbidden sentence on one line (the second prints 1); the forbidden sentence broken
-  before its parenthesis of states (1); and the forbidden sentence broken before "unavailable" (1). DEC-0149 points `relay.md` and `conformance.md` to
+  Both were run, in bash and in zsh, on four trial files before they were written here: the landed text above (the
+  first prints 1, the second 0 with exit status 1); the forbidden sentence on one line (the second prints 1); the
+  forbidden sentence broken before its parenthesis of states (1); and the forbidden sentence broken before
+  "unavailable" (1). DEC-0149 points `relay.md` and `conformance.md` to
   `service.md`'s definition of "unavailable", so one edit in `service.md` suffices; when DEC-0149 lands, CT-232 cites its sentence on an OS account an
   organization owns whole (on DEC-0149's branch, `source.md` and `contexts.md`; not cited before it lands). This is a
   landing edit made by whichever of DEC-0149 and DEC-0154 lands second; after both, `grep '^| CT-232 ' docs/backlog.md |
@@ -207,7 +222,7 @@ FD-159).
 
 - The coordinator's next blind readings of DEC-0154.
 - CT-228's owed parts: the claim file's schema and a port-choice reference with vectors.
-- CT-229 to CT-241, each with its evidence and acceptance in the backlog; G10 is a decision of the second wave.
+- CT-229 to CT-242, each with its evidence and acceptance in the backlog; G10 is a decision of the second wave.
 
 ## Checks actually run
 
@@ -236,6 +251,11 @@ above 45. `pnpm typecheck`, `pnpm vectors:check` (31 files), `pnpm run docs:chec
 `test/descriptor-rules.test.ts` (1336 tests) ran with exit 0. W39's mutants (the mode flag's type check after the
 link; `!folderOk` before the link; `!folderOk` before the owner) each fail `test/host-label.test.ts` and were
 reverted.
+
+After round 9's batch (W51 to W62) the full gate ran under the heavy lock (11 GB free, a 15-minute load of 39.3):
+exit 0, 111 test files, 10534 tests passed and 1 skipped, branches 98.92% (12567 of 12703), 31 vector files matching
+their generators, the UX lint passed (40 stories, 34 flows, 34 screens, 55 scenarios), documentation checks passed,
+markdownlint 0 errors, privacy 0 findings; no em dash on an added line.
 
 ## Next task
 

@@ -782,12 +782,14 @@ flowchart TD
   O --> P{page shown}
   P -->|yes| D[Page in Fabric Dashboards, signed in]
   P -->|no| F[Failure reported; no browser]
-  S -->|not_installed or unsupported| W{Listener's owner, HA-2}
+  S -->|not_installed or unsupported| A{Loopback address?}
+  A -->|remote https origin| B
+  A -->|loopback| W{Listener's owner, HA-2}
   W -->|this account| B[Service's own address from its descriptor, in the browser]
   W -->|another account, or cannot be told| N[foreign-user: nothing opens; the line on SCR-30 through an agent, where Fabric shows the link through FL-7]
 ```
 
-- **Screens traversed:** SCR-30 the operator's agent; the service's page in Fabric Dashboards; SCR-30 `foreign-user` (the line for that case, nothing opened).
+- **Screens traversed:** SCR-30 the operator's agent; the service's page in Fabric Dashboards; SCR-30 `foreign-user` (the line for that case, nothing opened) when entered through an agent; Fabric's surface for the link back (no SCR yet, CT-242) when entered through FL-7.
 
 ### FLW-31: The operator's task, from one agent to the agents it engages
 

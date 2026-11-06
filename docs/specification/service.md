@@ -133,10 +133,10 @@ declares no port for `FAC-SEM-010`. Vectors: [`fixtures/vectors/app-descriptor.j
 - `placement` is `local` (the default when absent) or `remote`. Every rule in this document
   applies to a local placement; [Remote placement](#remote-placement) states what changes for a
   remote one.
-- For a local placement `origin` MUST be `http://127.0.0.1:<port>`; only an app's descriptor may omit it (above). **A port is a claim:**
+- For a local placement `origin` MUST be `http://127.0.0.1:<port>`; only an app's descriptor may omit it (above). **A port is a declaration:**
   before writing, an installer MUST read every descriptor in the directory and refuse a port
   that another local `id.instance` already declares. Semantic rule `FAC-SEM-010` checks a
-  directory; a remote origin claims no port here. The directory shows only this OS account's descriptors, while
+  directory; a remote origin declares no port here. The directory shows only this OS account's descriptors, while
   loopback is one per computer: the port is also kept or chosen free on the computer, recorded and claimed as
   [Several OS accounts on one computer](#several-os-accounts-on-one-computer) says (HA-1, DEC-0154, proposed), which keeps
   two [counted OS accounts](#counted-os-accounts) from one port.
@@ -735,7 +735,7 @@ at the same paths. Only reachability, supervision and the trust anchor change (D
 | Trust anchor | loopback and the Host/Origin guard; the listener's owner ([HA-2](#ha-2)) | the origin's TLS certificate and the service token |
 | Supervisor | launchd (macOS), systemd (Linux), Task Scheduler (Windows), Project Observatory's node (any system), or `lifecycle.manager: "none"` | its platform; `lifecycle.manager: "none"` |
 | Well-known document | unauthenticated, under 100 ms | the token is required |
-| Port claim (`FAC-SEM-010`) | yes | no; `id.instance` stays unique |
+| Port declaration (`FAC-SEM-010`) | yes | no; `id.instance` stays unique |
 | Commands | `doctor`, `update` | `doctor` only |
 | Session cookie | `HttpOnly; SameSite=Strict` | `__Host-` name, `Secure; HttpOnly; SameSite=Strict; Path=/` |
 
@@ -903,7 +903,9 @@ is (DEC-0032).
 ### One copy
 
 A copy that does not hold `service.lock` touches nothing: it binds no port, writes no file, resumes no job and starts
-no scheduler; it may read the lock to learn the holder's pid (DEC-0015, DEC-0057).
+no scheduler; it may read the lock to learn the holder's pid (DEC-0015, DEC-0057). An app (`lifecycle.manager:
+"person"`) or an app's part MAY guard against a second copy with its own single-instance guard instead of
+`service.lock`; that guard is what HA-1's claim rewrite waits for (DEC-0154, proposed).
 
 - **Started by hand,** a copy that finds the lock held tries once and exits 75 at once, printing one sentence naming
   the holder's pid. When it cannot learn the pid (the lock records none yet, or cannot be read), the sentence says the
@@ -1289,7 +1291,7 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-009"></a>`FAC-SEM-009` | `service-observation` | the well-known identity matches the descriptor |
-| <a id="fac-sem-010"></a>`FAC-SEM-010` | `service-directory` | no two local descriptors claim one port (an app's descriptor without an origin claims none, DEC-0069); no two descriptors claim one `id.instance` |
+| <a id="fac-sem-010"></a>`FAC-SEM-010` | `service-directory` | no two local descriptors declare one port (an app's descriptor without an origin declares none, DEC-0069); no two descriptors declare one `id.instance` |
 | <a id="fac-sem-011"></a>`FAC-SEM-011` | `service-well-known` | `ready` carries no degraded source |
 | <a id="fac-sem-012"></a>`FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or home-relative executable path in `localPath`'s grammar: `/…` or `~/…`, and on Windows `C:\…`, `C:/…` or `~\…` (DEC-0032); never a network share |
 | <a id="fac-sem-024"></a>`FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no local supervisor field (`label`, `plist`, `unit`, `task`) |

@@ -9743,7 +9743,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   W16 and W17; seam found the same break as W17, the full suite of 10524 green); round 7 at
   `8a9373a1` was not clean (product found two breaks, W27 and W28; seam found the same break as W27; unit passed, 101
   of 107 mutants, the rest closed by W39); round 8 at `7fbe27f0` was not clean (product found one break, W40; seam
-  passed; unit did not run, since W39 changes the vectors); their batches are folded in (Source). A reference module and vectors, one optional schema
+  passed; unit did not run, since W39 changes the vectors); round 9 at `7ce5cc67` was not clean (unit passed, 319 of
+  376 mutants killed and 53 equivalent, the rest closed by W55; product found two breaks, W53 and W54; seam found the
+  same break as W54, the full suite of 10530 green); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9932,7 +9934,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     FD-159 (Linux, its PR #349; an owner it cannot tell refused; Windows) open, due at this decision's acceptance.
     Owed: its watcher (FD-76's successor) counts `foreign` and `foreign-user` as unavailable; asked on `1fe66e6e` on acceptance day.
     Asked the same day: its card's own `foreign-user` line (its `i18n.ts:128`) uses, or is checked against, this
-    decision's two lines, and a line for an owner that cannot be told is added (part of FD-159).
+    decision's two lines, and a line for an owner that cannot be told is added (part of FD-159). The landing text's
+    second sentence describes FD's released watcher (FD-76: an episode only for `down`, kept open while a failing
+    source outside its start baseline stays); whether that degraded continuation fits the first sentence is decided
+    separately, with DEC-0149's landing row.
   - Fabric Inbox: B-217 open, after this decision (its PR #421, rows B-217 to B-220): its desktop connect step sends a
     new agent key to the hub's loopback callback; on macOS and Linux another account's listener reads today as no
     listener (safe, for the wrong reason), and on Windows, where the process tables show every account's processes,
@@ -9974,7 +9979,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   elements and `foreign-user` state; SCR-30's `foreign-user` line), `docs/ux/flows.md` (FLW-17's branch and screens; FLW-30's owner check before
   the raw address), `docs/specification/fabric-button.md` (FL-7's owner check),
   `docs/evidence/sources.md` (RFC 8252's row, RFC 6265's row read again), `docs/DOCMAP.md`, `docs/backlog.md` (CT-228
-  to CT-241), the spec `docs/evidence/specs/2026-11-06-shared-host-gaps.md` and the handoff
+  to CT-242), the spec `docs/evidence/specs/2026-11-06-shared-host-gaps.md` and the handoff
   `docs/handoffs/2026-11-06-shared-host-ports.md`.
 - **Not decided here:** the claim file's schema and a reference for the port choice (CT-228); the contract's own vector
   file of the state order (CT-229); a POSIX owner check of the services directory, the descriptors and the token files
@@ -10050,6 +10055,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and its batch, with the coordinator's decisions W38 and W41 to W50 (the landing text in full and its one-line checks,
   ST-036's and FLW-30's `foreign-user` paths, "declares no port for `FAC-SEM-010`", the guard and the port source told
   apart, the uninstall from the remaining instances' state, "this service's descriptors in the account"), is folded
-  in; the two UI lines passed the operator's copy check
+  in; round 9 at `7ce5cc67` was not clean (product: W53, the spec's G1 still rebuilding in its wording from
+  before W46 and W50, and W54, W40 not carried into ST-036 and FLW-30; seam: the same break as W54, 10530 tests
+  green; unit passed, 319 of 376 mutants, 53 equivalent, the rest closed by four vectors, W55), and its batch, with the
+  coordinator's decisions W51, W52 and W56 to W62 (DEC-0149's CV sentence in the landing text, the negative check's
+  exit status, the POSIX meaning of `writableByOthers` and `folderOk`, CT-229's PL-3 fallback test, SCR-30's states
+  and elements, an app's own guard in One copy, "declaration" for `FAC-SEM-010`, and CT-242 for Fabric's link-back
+  screen), is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

@@ -239,8 +239,10 @@ or a virtual machine given its secret) and that organizations with no code on th
   then carries it in its own snapshots.
 - **A node reads it only when it passes, metadata first.** The path is not a symbolic link (on Windows a reparse
   point); the file is owned by the administrator (root on macOS and Linux; the Administrators group or SYSTEM on
-  Windows); it is writable by no one but the platform's administrator (root on POSIX; Administrators or SYSTEM on
-  Windows); its folder is the administrator's and writable by no one but the platform's administrator; and only
+  Windows); it is writable by no one but the platform's administrator (on POSIX no write permission, mode bits or an
+  ACL entry, for anyone but root; on Windows Administrators or SYSTEM); its folder is the administrator's and writable
+  by no one but the platform's administrator (on POSIX owned by root and writable by no one but root, `0755` as set
+  up); and only
   then its bytes, exactly 32. Otherwise the node sends no `hostLabel`, and never one computed from another key (a
   node key included). A malformed input to that decision (a platform, an owner name, a flag or an `org.id` that is not
   its shape) is a fault before the link, the owner or the mode is looked at: a fault outranks every reason for no label.
