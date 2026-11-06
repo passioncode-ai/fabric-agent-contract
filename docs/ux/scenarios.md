@@ -804,7 +804,7 @@ independent agent author and P-02 project operator.
 - **Alt paths:** a browser tab on my dashboard is open when the port changes hands -> its next request carries the cookie it holds to the other listener; my own dashboard, back on a recorded port, refuses another account's peer, and the session ends within its lifetime. No listener at all -> `down`, as before. The listener is mine but names another service -> `foreign`. A listener owned by root or a system service account (a launch daemon, a rootful container proxy) -> `foreign-user` too, on a computer with one account.
 - **UI elements:** the service card's state and its one line.
 - **States covered:** error, success
-- **Errors & recovery:** another account's listener: reinstall my service onto a free port, which its installer records and claims (HA-1), or stop the other account's copy; the card then shows my service's own state. An owner that cannot be told: retry later, check the computer's own processes for what holds the port, or reinstall onto a free recorded port (HA-1).
+- **Errors & recovery:** another account's listener: reinstall my service onto a free port, which its installer records and claims (HA-1), or stop the other account's copy; the card then shows my service's own state. A listener owned by root or a system service account: find the system process or container that holds the port, or reinstall onto a free recorded port (HA-1). An owner that cannot be told: retry later, check the computer's own processes for what holds the port, or reinstall onto a free recorded port (HA-1).
 - **Status:** draft
 - **Coverage:** service specification, Several OS accounts on one computer (HA-1, HA-2); the state-order vectors owed by CT-229
 - **Product:** unobserved

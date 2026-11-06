@@ -609,7 +609,9 @@ removes its ports from the claim:
 - **Who writes the claim.** The installer, or the node that installs the service, writes the claim at install. At
   every start the service itself, or what starts it (launchd, systemd, the Task Scheduler, a service wrapper), rewrites
   it, not only when the file is missing: a file's age in `/var/tmp` decides whether `systemd-tmpfiles` removes it, and a rewrite
-  also lets a computer installed before this decision catch up without a reinstall. Losing a claim costs only a
+  also lets a computer installed before this decision catch up without a reinstall. Since one claim holds the ports of
+  every instance of the service in the account, a rewrite writes the ports of all the instances this account records
+  (read from its descriptors), never only its own. Losing a claim costs only a
   collision warning: the claim grants nothing, and the listener's check (HA-2) is what protects a credential.
 - **A squatted claim path.** When a file of the claim's name exists and another account owns it, the installer cannot
   write its claim: it records the port in its own state and descriptor anyway, reports the squatted path (a note, never
@@ -620,7 +622,9 @@ removes its ports from the claim:
   may write or delete another's, the sticky folder's meaning on macOS and Linux. That step is part of the first
   installation of a Fabric node on Windows, whose installer asks once for elevation. An installer or a service running
   as an ordinary account that finds the folder missing, or with another ACL, records its port anyway and reports it
-  once, until the folder appears, not at every start; it never creates the folder or changes its ACL itself.
+  once, until the folder appears or its ACL is right, not at every start: a short line in the service's own health
+  report or its log, never interface text (its wording and where it shows are owed by CT-228). It never creates the
+  folder or changes its ACL itself.
 - **The Linux folder's limits.** `/var/tmp` was agreed on the board and stays, with two known limits: `systemd-tmpfiles`
   may age a claim out, and a unit with `PrivateTmp` sees its own `/var/tmp`. So the service, or what starts it, rewrites
   the claim at every start, and CT-228's reference covers a claim aged out.

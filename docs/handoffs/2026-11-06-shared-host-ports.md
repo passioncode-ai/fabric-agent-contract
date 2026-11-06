@@ -81,6 +81,13 @@ Proposed DEC on its own branch, and files the rest.
   hex check moved before the mode check, is now killed by two vectors, V14: "writable by another account, no bytes
   read" and "a folder not the administrator's, an oversized file"). V3 to V13, the coordinator's decisions, are folded
   in.
+- Round 5 at `190ee95e`: not clean. Product failed on three breaks: FLW-17's goal ("never an outage") and ST-021's
+  story did not cover another account's listener (ST-021 widened, FLW-17's goal, entry points, success exit, task
+  analysis and traces now cover it), SCR-20's elements and resources (the listener's owner decides first, HA-2 named),
+  and the guide's note scoped HA-1 and HA-2 to a computer with several accounts (they hold on every computer; HA-3 on
+  a shared one). W4 to W8 folded: the positive landing check, a claim rewritten with every instance's ports, the
+  Windows folder's report (once for a missing folder or another ACL, in the health report or log), SCN-056's recovery
+  for a root or system listener, and "same computer" in the RFC 6265 row.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -107,9 +114,11 @@ Proposed DEC on its own branch, and files the rest.
   main and on open branches (DEC-0149 already holds CT-244), re-measured at landing; the DECISIONS tail in id order; the next-free markers re-read
   from `refs/agent-sync/ids` at landing; the backlog tail in id order; the handoffs README newest first;
   `vitest.config.ts`'s coverage `include` is the union (`src/host-label.ts` and `src/validator.ts` both); the watcher
-  sentence in `service.md`: DEC-0149 rewrites it to "only when an agent has been unavailable (down, not merely
-  degraded) for more than 15 minutes", and whichever of DEC-0149 and DEC-0154 lands second makes it read "unavailable
-  (down or foreign-user, not merely degraded)". DEC-0149 points `relay.md` and `conformance.md` to `service.md`'s
+  sentence in `service.md`: DEC-0149 rewrites it to "only when an agent has been unavailable (`down`, not merely
+  `degraded`) for more than 15 minutes" (its `service.md` line 222), and whichever of DEC-0149 and DEC-0154 lands
+  second makes it read "unavailable (`down` or `foreign-user`, not merely `degraded`)"; after both land,
+  ``grep -c 'unavailable (`down` or `foreign-user`, not merely `degraded`)' docs/specification/service.md`` prints 1.
+  DEC-0149 points `relay.md` and `conformance.md` to `service.md`'s
   definition of "unavailable", so one edit in `service.md` suffices; after both land,
   ``grep -n 'unavailable (`down`)' docs/specification/relay.md docs/specification/conformance.md`` prints nothing, and if it prints anything for the
   second lander, that lander fixes those lines too; when DEC-0149 lands, CT-232 cites its sentence on an OS account an
@@ -143,7 +152,9 @@ run; what ran, each with exit 0: `pnpm typecheck`, `pnpm vectors:check` (31 file
 `pnpm vitest run` over `test/host-label.test.ts`, `test/vectors-runner.test.ts`, `test/sources-ledger.test.ts`,
 `test/fixtures.test.ts`, `test/consistency.test.ts`, `test/guide-examples.test.ts`,
 `test/spec-required-members.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts` and
-`test/docs-check.test.ts` (1430 tests). V14's mutant (the hex check moved before the mode check) was tried and fails
+`test/docs-check.test.ts` (1430 tests). After round 5's batch the full gate did not run either (7 GB free, a
+15-minute load of 55); the same checks ran with exit 0, the vitest set without the schema-compilation and positive
+sweep files (1236 tests). V14's mutant (the hex check moved before the mode check) was tried and fails
 `test/host-label.test.ts` (2 tests), then reverted.
 
 ## Next task

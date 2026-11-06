@@ -524,9 +524,9 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Status:** draft
 - **Product:** unobserved
 
-### ST-021: Operator sees what a second copy of a service did
+### ST-021: Operator sees what a second copy of a service did, or that another account holds its port
 
-- **Story:** As P-02, I want a second copy of a running service to leave the first one alone and to say what it did, so that a duplicate start never costs me an outage or a restart loop.
+- **Story:** As P-02, I want a second copy of a running service to leave the first one alone and to say what it did, and a listener of another OS account on my service's port to be shown as such, with nothing sent to it and never shown as my service, so that a duplicate start never costs me an outage or a restart loop and a foreign listener never receives my credentials (DEC-0154).
 - **Traces:** JTBD-03, JRN-02/#3
 - **Acceptance criteria:**
   - Given a service running, when I start a second copy by hand, then it exits at once with one sentence naming the running copy's pid (or saying it is unknown) and changes nothing.
