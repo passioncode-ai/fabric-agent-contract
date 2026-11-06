@@ -2294,6 +2294,30 @@ describe("an agent's source (DEC-0149)", () => {
     expect(lines.some((line) => line.includes("no-license"))).toBe(true);
   });
 
+  it("keeps Git mode when src/vendor, an untracked nested repository under the include folder src/, is excluded", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/vendor"] }), ".gitignore": "LICENSE\n", LICENSE: "x", "src/vendor/a.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(path.join(dir, "src/vendor"), "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "fabric.source.json", ".gitignore").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).not.toContain("note/walk");
+    // Git lists the untracked repository as src/vendor/: index.covers counts it, as it counts a file or a gitlink.
+    expect(found(result.out).filter((line) => line.includes("missing")).map((line) => line.split("  ")[1])).toEqual(["/manifest/include/0", "/manifest/include/1"]);
+  });
+
+  it.skipIf(process.platform === "win32")("keeps Git mode when src/link, a tracked symbolic link and the only path under the include folder src/, is excluded", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/link"] }), ".gitignore": "LICENSE\n", LICENSE: "x" });
+    mkdirSync(path.join(dir, "src"));
+    symlinkSync("../LICENSE", path.join(dir, "src/link"));
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "fabric.source.json", ".gitignore", "src/link").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).not.toContain("note/walk");
+    expect(found(result.out).filter((line) => line.includes("missing")).map((line) => line.split("  ")[1])).toEqual(["/manifest/include/0", "/manifest/include/1"]);
+  });
+
   it("stays in Git mode when Git lists only a gitlink at the manifest's path under the source, and reports it", () => {
     const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), ".gitignore": "src/\nLICENSE\n", LICENSE: "x", "src/a.ts": "x" });
     expect(gitIn(dir, "init", "-q").status).toBe(0);

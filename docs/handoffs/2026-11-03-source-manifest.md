@@ -438,7 +438,15 @@ source, what never travels with it, the check before a source export, and how a 
   Windows (item CY); the first Git-mode listing names a file, a symbolic link or a nested repository and counts the
   manifest when an `include` entry names it, the second and third counting the manifest's own path only as a gitlink,
   in source.md and the walk trigger's comment, with a CLI test where the tracked manifest is the only listed path an
-  `include` entry names (item CZ); round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  `include` entry names (item CZ); round 68 (not clean: seam FAIL, item DA, the timeout-test row cited
+  test lines that had moved; product PASS; unit PASS, its finding taken as item DF) answered as decided: the row names
+  both timeout tests by title (item DA); both landing orders written with their landed texts and checks, DEC-0149's
+  landing always changing the subject and adding FD-76's sentence, the second lander the list of states and the clause
+  on what DEC-0154 owes (item DB); authority.md citing FD's test lines 175 and 176 and `outage-alerts.ts` lines 115 to
+  117 and 160 (item DC, PR #628); DEC-0154's branch at CT-228 to CT-242 (item DD); the fourth row's example within one
+  run, a restart putting the source in the baseline (item DE); CT-232's check counting occurrences; CLI tests for an
+  excluded untracked nested repository and an excluded tracked symbolic link, and the third Git-mode listing read as
+  "a listed path an `include` entry names as a folder or lies beneath" (item DF); round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -551,15 +559,16 @@ source, what never travels with it, the check before a source export, and how a 
     message (service.md's watcher rule); a rule for messaging it is owed (CT-244).
 - Round 61, decided by the coordinator under the operator's recorded rules:
   - principles section 7 and rules section 9 name the same exceptions, whose home is item 9;
-  - CT-227 has landed (main `1c141418`); DEC-0154 is the open branch after DEC-0151 and DEC-0152, and whichever of
-    DEC-0149 and DEC-0154 lands second changes only the subject ("Fabric Dashboards' watcher" to "A watcher") and the
-    list of states (to "`down`, `foreign` or `foreign-user`, not merely `degraded`", on one line) of the first sentence
-    of DEC-0149's watcher text in `service.md`, keeps the rest of it (once per case, back after 15 minutes well, a
+  - CT-227 has landed (main `1c141418`); DEC-0154 is the open branch after DEC-0151 and DEC-0152; DEC-0149's landing
+    always changes the subject of the first sentence of its watcher text in `service.md` ("Fabric Dashboards' watcher"
+    to "A watcher"), and whichever of DEC-0149 and DEC-0154 lands second changes its list of states (to "`down`,
+    `foreign` or `foreign-user`, not merely `degraded`", on one line; round 68, DB: both orders, each with its landed
+    text and checks, are in the chain paragraph below); either keeps the rest of that sentence (once per case, back after 15 minutes well, a
     `degraded` answer opening no message, setup entries left out, the FD-76 and ADR-0010 references, the MUST NOT for
-    `setup: true`), and adds after them "Fabric Dashboards' watcher opens an episode only for `down` since FD-76 (0.7.15,
+    `setup: true`), and DEC-0149's landing adds after them "Fabric Dashboards' watcher opens an episode only for `down` since FD-76 (0.7.15,
     `ebffd16`) and keeps it open while a failing source (one not marked `setup: true`) outside its start baseline
-    stays, so its failure message at 15 minutes may name that source; counting `foreign` and `foreign-user` is owed
-    (DEC-0154).", the landed text and its two checks being in the chain paragraph below (round 67, CV: FD leaves out
+    stays, so its failure message at 15 minutes may name that source", to which the second lander adds "; counting
+    `foreign` and `foreign-user` is owed (DEC-0154)" (round 67, CV: FD leaves out
     `setup: true` sources from the baseline and from holding the episode, fabric-dashboards main `a0bc160`,
     `src/core/outage-alerts.ts` lines 105 and 114, `test/outage-alerts.test.ts` lines 170 to 176; round 66, CR: the second sentence says what FD's watcher does, `src/core/outage-alerts.ts` lines 90 to 92 and 112 to 117;
     CU: the negative check reads the joined text; round 65, CP and CO; CJ: FD-76 counts only `down`, fabric-dashboards
@@ -795,6 +804,20 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 68's fixes (items DA to DF) were checked on the working tree over head `d9c29245` (this note's commit holds the
+same tree, plus this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0:
+typecheck, 114 test files with 10266 passed and 3 skipped under the coverage floors, `src/validate-cli.ts` at 774 of
+775 branches and `src/source-rules.ts` at 760 of 760, `ux:lint`, `docs:check` with 0 markdownlint errors,
+`privacy:check` with 0 findings), run under the shared lock with the 15-minute load at 34.1 and 9 GB free. The two new CLI tests pass; with `|| index.covers(name)` replaced by
+`|| (index.covers(name) && !listedAsFolder.has(name))` for one run the untracked nested repository's test fails, and
+with it taken out the symbolic link's test fails too (the code restored; only comments differ in
+`src/validate-cli.ts`). The landing checks of both orders, taken from this note and run with `bash -c` and `zsh -c`
+on probe copies of `service.md` built from its two landed texts, print what the chain paragraph says.
+`grep -c '2783 to 2804'` on this note prints 0. No U+2014 in the added lines. The knowledge base's PR is at
+`3d34d543` (it merged the knowledge base's main `ec85914a` as `20463491`, item 8 as main has it): `source
+hand-over` in 4, 4 and 5 lines of agents-first, principles and rules, `own estate` once on each, item 9 once and item
+8 once, `no longer decides` 0 times; its `npm test` (exit 0, 172 passed) and `npm run verify:content` (0 errors).
 
 Round 67's fixes (items CV to CZ) were checked on the working tree over head `968466e0` (this note's commit holds the
 same tree, plus this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files
@@ -1351,7 +1374,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 65 into `8cd61f27`, which carries main's `6d0dd180` (the PR's head `d007e776`),
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 68 into `20463491`, which carries main's `ec85914a` (the PR's head `3d34d543`),
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). PR #235 (DEC-0148) and DEC-0150 are already on main (`1016f0ec` when re-measured in round
    50), so nothing is refreshed for them. Merge the current `origin/main` (re-measured at landing; `1c141418` as of round 61, or later) into the fresh branch
@@ -1382,8 +1405,8 @@ remaining steps, in order:
 6. Pair PR #628 only with a contract head that carries the same round of the readings (the round named in DEC-0149's
    status line and in RM-36's "Restated 2026-11-05" line in the PR's `knowledge/roadmap.md`, not its last commit,
    which may be a merge of main), and re-read the pair on the round-40 and round-41 points before landing.
-   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`6d0dd180` at
-   round 65, merged into the PR as `8cd61f27`): if it is behind, merge main into it (never a rebase or a force-push),
+   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`ec85914a` at
+   round 68, merged into the PR as `20463491`): if it is behind, merge main into it (never a rebase or a force-push),
    keeping main's item 8 as main has it and the PR's item 9, and set the round named in RM-36's "Restated 2026-11-05"
    line to the landing round. The order of the two merges is mandatory (round 65, CJ and CL): the contract PR first,
    then PR #628 straight after, one after the other in the same landing session, since PR #628 points at `service.md`'s
@@ -1393,7 +1416,7 @@ remaining steps, in order:
    `git show origin/main:docs/specification/service.md | grep -c 'stays degraded for more than 5 minutes'` prints 0.
    Then merge PR #628, fetch the knowledge base checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `d007e776`, which carries the knowledge base's main, they print 4, 4 and 5
+   `knowledge/rules.md`; at PR #628's head `3d34d543`, which carries the knowledge base's main, they print 4, 4 and 5
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38 and principles
    section 7 and rules section 9 their two named exceptions in round 59), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
@@ -1408,7 +1431,7 @@ remaining steps, in order:
 At landing, write DEC-0149's merge date into source.md's line paragraph where it says "on its merge date, written here
 at landing" (and in DEC-0149 item 12's round-45 sentence). At landing, file a backlog row (an id above the highest in use or
 leased at landing, on main and on every open branch, this branch's own CT-244 included, re-measured then: CT-227 is
-main's since `1c141418`, DEC-0154's branch holds CT-228 to CT-241, and this branch holds CT-244, which keeps its id,
+main's since `1c141418`, DEC-0154's branch holds CT-228 to CT-242 (round 68, re-measured at landing), and this branch holds CT-244, which keeps its id,
 so this row is CT-245 or above, re-measured) to inventory the personal agent
 homes, and any copy of them within the operator's estate (private mirrors, second private repositories), that people
 outside the operator can read, for the operator to review: information, not a gate, since access
@@ -1419,16 +1442,18 @@ same way: "`unchecked` covering a credential finding exits 0
 into SCN-054 step 3, where it says the enforcing row is filed at landing. At landing, file a third backlog row under
 the next id above that one (CT-247 or above, re-measured the same way): "Deterministic timeout tests for
 validate-cli's ignored and staged listings", its evidence the two timeout branches at `src/validate-cli.ts` lines 779
-and 790, whose coverage depends on how fast the stub Git answers in `test/validate-cli.test.ts` lines 1383 to 1407
-and 2783 to 2804 (the tests stay green either way; the full run covers 774 of 775 branches of that file, above its
+and 790, whose coverage depends on how fast the stub Git answers in the tests "walks the folder, saying why, when
+git does not answer in time" and "walks with a note when the gitlink listing times out or cannot run" in
+`test/validate-cli.test.ts`, named by title since line numbers move (round 68, DA) (the tests stay green either way; the full run covers 774 of 775 branches of that file, above its
 floor, and Windows has no floor), and its decision a test seam beside `gitLimits` (`src/validate-cli.ts` line 644)
 that answers `ETIMEDOUT` to a chosen call; the code is not changed in this landing (round 65, item CN). At landing,
 file a fourth backlog row under the next id above that one (CT-248 or above, re-measured the same way): "Decide
 whether Fabric Dashboards counting a degraded continuation of a `down` episode toward its 15 minutes conforms", its
 sources fabric-dashboards main `a0bc160` `src/core/outage-alerts.ts` lines 112 to 123 and 159 to 160 and the rule
 in `service.md` that a watcher messages the operator only when an agent has been unavailable for more than 15
-minutes (round 67, item CW: a `down` of 1 minute followed by 14 minutes of a failing source sends the failure
-message at 15 minutes). The lander writes all four rows' ids (the inventory row, the enforcing row, the timeout-test
+minutes (round 67, item CW: within one run of the service, the same `startedAt`, a `down` of 1 minute followed by 14
+minutes of a failing source, one not marked `setup: true`, sends the failure message at 15 minutes; after a restart
+that source is in the new start baseline and no message is sent, the same file's lines 109 and 114, round 68, DE). The lander writes all four rows' ids (the inventory row, the enforcing row, the timeout-test
 row and this row) into this note's Open line, in the landing change. The release notes of the landing carry one more
 item: a plain `pnpm validate <dir>` skips a `.json` file that is a FIFO, a socket or a device with a `note/skipped`
 line saying it is not a file, and a `fabric.source.json` that is a symbolic link the same way (SCN-002's errors line).
@@ -1464,7 +1489,7 @@ this landing meets. The chain of the open branches that touch the same registers
 (`agent/ct217-board-same-turn-20261104`, head `d760f756` when written: `docs/DECISIONS.md`,
 `docs/specification/conformance.md`, `docs/DOCMAP.md`, `docs/backlog.md`, the handoffs index), then
 `agent/studio-ports-owner-20261106` (DEC-0154, head `190ee95e` in round 64, re-measured at landing; it merged main
-`1c141418` and holds CT-228 to CT-241). DEC-0154 touches `CONTEXT.md`, `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`,
+`1c141418` and holds CT-228 to CT-242, re-measured at landing). DEC-0154 touches `CONTEXT.md`, `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`,
 `docs/evidence/sources.md`, `docs/guides/connecting-compatible-agents.md`, `docs/handoffs/README.md`,
 `docs/specification/conformance.md`, `contexts.md`,
 `connections.md`, `delegation.md`, `devices.md`, `node-summary.md`, `profiles.md`, `service.md`, `session-handoff.md`, `docs/ux` (flows,
@@ -1478,21 +1503,27 @@ fourteen files as with main `1c141418` (measured with `git merge-tree` in round 
 file of its own; where its lines meet this landing's: the coverage `include` of `vitest.config.ts` (the union keeps
 `src/host-label.ts`, `src/validator.ts`, `src/channel-agent.ts` and `src/ops-digest.ts`), the handoffs README row, and
 the tails of `docs/DECISIONS.md` (ordered through DEC-0154) and `docs/backlog.md` (in id order). DEC-0154's handoff also
-names the watcher sentence in `service.md`: whichever of DEC-0149 and DEC-0154 lands second changes only two things in
-the first sentence of DEC-0149's watcher text (`service.md` lines 222 to 225 on this branch), its subject ("Fabric
+names the watcher sentence in `service.md`, DEC-0149's watcher text (`service.md` lines 222 to 225 on this branch).
+DEC-0154's handoff describes only the order in which DEC-0149 lands second, so both orders are written here, each with
+its landed text and its checks (round 68, DB). In both, the first sentence keeps everything but its subject and its
+list of states as it is: once per case, back after 15 minutes well, a `degraded` answer opening no message, setup
+entries left out, the FD-76 and ADR-0010 references, and the MUST NOT for an entry with `setup: true`; and the second
+sentence, Fabric Dashboards' released fact, follows them (round 65, CJ and CP; `foreign` from DEC-0154's W14: a
+service whose port another program holds serves nothing; FD-76 counts only `down`, fabric-dashboards main `a0bc160`,
+`src/core/outage-alerts.ts` lines 115 to 119; round 66, CR: it opens an episode only for `down` and keeps it open
+while a source outside its start baseline stays degraded, the same file's lines 90 to 92 and 112 to 117, its test
+`test/outage-alerts.test.ts` lines 61 to 67; round 67, CV: a source marked `setup: true` is left out of the baseline
+and never holds the episode, the same file's lines 105 and 114, its test's lines 170 to 176; within one run of the
+service, a `down` of 1 minute followed by 14 minutes of a failing source, one not marked `setup: true`, still sends
+the failure message at 15 minutes, naming that source). The phrase each positive check reads stays on one line of
+`service.md` (a `grep` reads one line). All checks run in `bash` or `zsh` from the contract's root; a check that
+prints 0 exits with code 1, as `grep -c` does when nothing matches, so do not run them under `set -e` (round 67,
+CX).
+
+**Order 1: DEC-0154 lands first, DEC-0149 second.** DEC-0149's landing changes the first sentence's subject ("Fabric
 Dashboards' watcher" becomes "A watcher") and its list of states ("`down`, not merely `degraded`" becomes "`down`,
-`foreign` or `foreign-user`, not merely `degraded`"), and keeps the rest of it as it is: once per case, back after 15
-minutes well, a `degraded` answer opening no message, setup entries left out, the FD-76 and ADR-0010 references, and
-the MUST NOT for an entry with `setup: true`. After them it adds the second sentence, Fabric Dashboards' released fact
-(round 65, CJ and CP; `foreign` from DEC-0154's W14: a service whose port another program holds serves nothing; FD-76
-counts only `down`, fabric-dashboards main `a0bc160`, `src/core/outage-alerts.ts` lines 115 to 119; round 66, CR: it
-opens an episode only for `down` and keeps it open while a degraded source outside its start baseline stays, the same
-file's lines 90 to 92 and 112 to 117, its test `test/outage-alerts.test.ts` lines 61 to 67; round 67, CV: a source
-marked `setup: true` is left out of the baseline and never holds the episode, the same file's lines 105 and 114, its
-test's lines 170 to 176, and a `down` of 1 minute followed by 14 minutes of such a failing source still sends the
-failure message at 15 minutes, naming that source). The landed text,
-with the phrase "unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)" on one line of `service.md`
-(a `grep` reads one line):
+`foreign` or `foreign-user`, not merely `degraded`") and adds the second sentence with its clause on `foreign` and
+`foreign-user`. The landed text:
 
 ```text
 A watcher messages the operator only when an agent has been unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)
@@ -1504,22 +1535,48 @@ outside its start baseline stays, so its failure message at 15 minutes may name 
 `foreign-user` is owed (DEC-0154).
 ```
 
-Checks after both land, run in `bash` or `zsh` from the contract's root:
+Checks after DEC-0149 lands:
 
 - the phrase once, as DEC-0154's handoff checks (its W4):
   `` grep -c -F 'unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)' docs/specification/service.md ``
   prints 1;
 - the widened claim absent, read over the text joined into one line so that no line break hides it (round 66, CU):
   `tr '\n' ' ' < docs/specification/service.md | tr -s ' ' | grep -cF "Fabric Dashboards' watcher messages the operator only when"`
-  prints 0 and exits with code 1, as `grep -c` does when nothing matches, so do not run it under `set -e` (round
-  67, CX); the positive check prints 1 and exits 0.
+  prints 0.
 
-Both were run in round 66, and again in round 67 on the landed text above, under `bash` and `zsh` from the root of
-probe copies of `service.md`. The first prints 1 on
-the landed text above. The second prints 0 on the landed text and 1 on each wrong landing: the widened claim (its
-subject still Fabric Dashboards' watcher) on one line, with a line break before "(`down`", and with a line break
-before "unavailable". On this branch's `service.md`, before the landing, the first prints 0 and the second 1 (DEC-0149's
-sentence, which the landing changes). After that one edit `relay.md`'s
+**Order 2: DEC-0149 lands first, DEC-0154 second.** DEC-0149's own landing changes only the first sentence's subject
+("Fabric Dashboards' watcher" becomes "A watcher"), keeps its list of states "`down`, not merely `degraded`" on one
+line, and adds the second sentence without the clause on `foreign` and `foreign-user`. The landed text:
+
+```text
+A watcher messages the operator only when an agent has been unavailable (`down`, not merely `degraded`)
+for more than 15 minutes, once per case, and says it is back after 15 minutes well; a `degraded` answer opens no message, so
+setup entries are left out (fabric-dashboards `docs/backlog.md` FD-76, ADR-0010, released in 0.7.15, read at `ebffd16`); a
+watcher MUST NOT message the operator for an entry with `setup: true`. Fabric Dashboards' watcher opens an episode only
+for `down` since FD-76 (0.7.15, `ebffd16`) and keeps it open while a failing source (one not marked `setup: true`)
+outside its start baseline stays, so its failure message at 15 minutes may name that source.
+```
+
+Checks after DEC-0149 lands:
+
+- the phrase once: `` grep -c -F 'unavailable (`down`, not merely `degraded`)' docs/specification/service.md `` prints 1;
+- the widened claim absent: the same joined-text check as in order 1 prints 0;
+- no clause on what DEC-0154 owes yet: `tr '\n' ' ' < docs/specification/service.md | tr -s ' ' | grep -cF 'is owed (DEC-0154)'` prints 0.
+
+Later DEC-0154's lander changes only the list of states (to "`down`, `foreign` or `foreign-user`, not merely
+`degraded`", on one line) and adds "; counting `foreign` and `foreign-user` is owed (DEC-0154)" before the second
+sentence's full stop, which gives order 1's landed text, and runs order 1's two checks. The coordinator passes this
+order to DEC-0154 separately.
+
+All these checks were run in round 68, taken from this note and run with `bash -c` and `zsh -c` from the root of
+probe copies of `service.md` built from the two landed texts above. Order 1: the positive and the negative print 1
+and 0 on its landed text, 1 and 1 on the widened claim (its subject still Fabric Dashboards' watcher) on one line, 0
+and 1 with a line break before "(`down`", and 1 and 1 with one before "unavailable". Order 2: on its landed text the
+three checks print 1, 0 and 0; on the same text with the subject still Fabric Dashboards' watcher they print 1, 1 and
+0; with the clause on what DEC-0154 owes added too early, 1, 0 and 1; and DEC-0154's later edit of order 2's landed
+text gives order 1's text word for word (its line breaks may differ), where order 1's checks print 1 and 0. On this
+branch's `service.md`, before the landing, order 1's checks print 0 and 1, and order 2's 0, 1 and 0 (DEC-0149's
+sentence, which the landing changes, holds the phrase across two lines). After that one edit `relay.md`'s
 machine-report paragraph and `conformance.md`'s watcher row follow `service.md` by themselves: since round 63 they name
 no state and point at the definition in `service.md`. Every head here is re-measured at landing.
 
@@ -1702,14 +1759,15 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
 - With DEC-0154 (its seam reading): whichever of DEC-0149 and DEC-0154 lands second adds to CT-232's row in
   `docs/backlog.md` a link to source.md's sentence on an OS account an organization owns whole (in "Handing over", the
   sentence on a machine enrolled in an organization); the clause is on this branch in source.md and `contexts.md` (its
-  "One instance per context on a machine" part, line 73). Check after both land: CT-232's row names `source.md` once.
+  "One instance per context on a machine" part, line 73). Check after both land, counting occurrences:
+  `grep '^| CT-232 ' docs/backlog.md | grep -o source.md | wc -l` prints 1.
 - CT-244 keeps its id at landing. If it ever had to change, run `git grep -n CT-244` on the landing tree and change
   every place it prints (round 65, CK: a fixed list goes stale).
 - At landing, carry two corrections of DEC-0150's landing post: its FAA-197 item quotes two phrases that are not on
   the landed `channel-agent.md` ("acts only inside that chat as section 4.10 says" and "no AP-3 or OA-2 source", each
   `grep -c` 0 on main at `1016f0ec`), so the post quotes CA-8 as the page stands; and its merge post's "together with
   `fabric-source`" becomes true only when DEC-0149 lands, which this landing makes true (say so in DEC-0149's post).
-- Done in PR #628 (rounds 63 to 67): `knowledge/authority.md`'s outage-watcher lines point at the contract's
+- Done in PR #628 (rounds 63 to 68): `knowledge/authority.md`'s outage-watcher lines point at the contract's
   `service.md` for what unavailable means (an episode opens only for an agent unavailable, as `service.md` defines it,
   for more than 15 minutes; a `degraded` answer opens none), keeping `down` only as the dated fact of FD-76's release
   and saying, in both episode lines, that FD-76 opens an episode only for `down` today and keeps it open while a

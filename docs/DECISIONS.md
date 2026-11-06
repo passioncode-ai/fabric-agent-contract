@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 67 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 68 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9059,7 +9059,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   watcher's states named three times; round 64 not clean: authority.md's watcher state, the outage report, CT-244's
   wording, "host" for a computer; round 65 not clean: the landing's watcher phrase widening FD-76's released fact; round 66 not clean: the first Git-mode
   listing naming a file only, authority.md's start baseline; round 67 not clean: the landing's second sentence
-  naming every degraded source), cited by round number because their heads were on the review branch, which is not
+  naming every degraded source; round 68 not clean: a landing row citing moved test lines), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9494,6 +9494,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       manifest's own path only as a gitlink, the code unchanged and a CLI test added. Round 67's product reading passed
       (its risks became items CV and CW), its unit reading passed (its risks became items CY and CZ), and its seam
       reading failed (item CV).
+      Decided by the coordinator in round 68: the landing rows name tests by title; both landing orders are written
+      out, DEC-0149's landing always changing the watcher sentence's subject to "A watcher" and adding FD-76's sentence,
+      and the second of DEC-0149 and DEC-0154 changing the list of states and adding the clause on what DEC-0154 owes;
+      FD-76's held episode is within one run of a service (a restart puts the source in the new baseline); the third
+      Git-mode listing is a listed path an include entry names as a folder or lies beneath, as `nestedTest` reads it,
+      the code unchanged and two CLI tests added. Round 68's seam reading failed (item DA); its product and unit
+      readings passed.
       The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9624,7 +9631,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 67 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 68 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9654,5 +9661,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   watcher's states named three times; round 64 not clean: authority.md's watcher state, the outage report, CT-244's
   wording, "host" for a computer; round 65 not clean: the landing's watcher phrase widening FD-76's released fact; round 66 not clean: the first Git-mode
   listing naming a file only, authority.md's start baseline; round 67 not clean: the landing's second sentence
-  naming every degraded source), cited by round number (their heads were on the review branch, not kept at landing),
+  naming every degraded source; round 68 not clean: a landing row citing moved test lines), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.
