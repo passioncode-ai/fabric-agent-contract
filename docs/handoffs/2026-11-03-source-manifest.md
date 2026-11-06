@@ -480,7 +480,9 @@ source, what never travels with it, the check before a source export, and how a 
   answered as decided in item DM: the block, pasted again from the shared file, has the lander that makes the edit run
   that check once its edit is on the knowledge base's main, says what to do on a mismatch and under `set -e`, starts
   the first window at the later of the two merges and covers any other order; step 6b runs the check as the block
-  assigns it, and a deferred PR #628 merge reruns step 6's status check first; round 75 (not clean: unit PASS; product FAIL, the knowledge
+  assigns it, and a deferred PR #628 merge reruns step 6's status check first; round 74 (clean: unit, product and
+  seam PASS at `b714bceb`, the first clean round since round 63; round 75 not being clean, the count starts again);
+  round 75 (not clean: unit PASS; product FAIL, the knowledge
   base's lead and episode lines saying Fabric Dashboards' watcher messages only after 15 minutes unavailable; seam
   FAIL, the merge with DEC-0154's `9161796d` conflicting in fifteen files, `service.md`'s rule table new) answered as
   decided in item DN: PR #628 states the contract's rule and FD-76's released fact apart (an episode opens at the

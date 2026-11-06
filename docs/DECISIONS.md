@@ -9062,7 +9062,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   naming every degraded source; round 68 not clean: a landing row citing moved test lines; round 69 not clean: authority.md's
   clause on what DEC-0154 owes; round 70 not clean: who changes that clause in order 1; round 71 not clean: an interleaving where
   nobody changes it; round 72 not clean: DEC-0150's Status form, "the same words"; round 73 not clean: who runs the
-  check after both land; round 75 not clean: the knowledge base's watcher lead, a new conflicting file),
+  check after both land; round 74 clean, the first since round 63, at `b714bceb`; round 75 not clean: the knowledge
+  base's watcher lead, a new conflicting file, so the count of clean rounds starts again),
   cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
@@ -9538,6 +9539,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       merge reruns step 6's status check first. Round 73's unit reading passed; its product and seam readings failed on
       who runs the check after both land (DEC-0154's lander could run it while step 6b's knowledge-base PR was open);
       fixed by item DM.
+      Round 74, at `b714bceb`: the unit, product and seam readings all passed, the first clean round since the run of
+      not clean rounds that began at round 63; round 75 was not clean, so the count of clean rounds starts again.
       Decided by the coordinator in round 75: the knowledge base's PR #628 states the contract's rule (a message only
       for an agent unavailable, as `service.md` defines it, for more than 15 minutes) and FD-76's released fact apart
       (an episode opens only for `down`, at its first `down` look, and stays open on a failing source outside its start
@@ -9710,6 +9713,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   naming every degraded source; round 68 not clean: a landing row citing moved test lines; round 69 not clean: authority.md's
   clause on what DEC-0154 owes; round 70 not clean: who changes that clause in order 1; round 71 not clean: an interleaving where
   nobody changes it; round 72 not clean: DEC-0150's Status form, "the same words"; round 73 not clean: who runs the
-  check after both land; round 75 not clean: the knowledge base's watcher lead, a new conflicting file),
+  check after both land; round 74 clean, the first since round 63, at `b714bceb`; round 75 not clean: the knowledge
+  base's watcher lead, a new conflicting file, so the count of clean rounds starts again),
   cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.
