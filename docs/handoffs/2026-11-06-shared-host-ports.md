@@ -152,6 +152,13 @@ Proposed DEC on its own branch, and files the rest.
 - W71 after round 10: `embedded-dashboard.md`'s open question says "computer-scoped" and "on that computer" (ED-8),
   as W66 did for FB-6; the two landing orders are copied from DEC-0149's handoff at `1bd70e54` (texts and commands
   byte for byte after joining) and run on trial files in bash and zsh, replacing the description written from W70.
+- Round 11 at `bbb5b956`: seam failed on one break, W73. In ED-8 and RFC 6265 section 8.5 a cookie's "host" is the
+  URL's host, not the machine, so "per computer" is wrong for a remote `https` origin. W66, W71 and W8 are partly
+  rolled back: FB-6, ED-8's open question, CONTEXT's Appearance carrier and the RFC 6265 row say "per host" again,
+  with "(the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that computer)" where the scope is
+  stated (ED-8 itself too), and `test/delegation-sealed.test.ts` pins "per host" again. The comment in
+  `src/semantic-rules.ts` keeps "another computer" (a remote placement's machine). FB-6's bold scope equals ED-8's
+  (checked in Python: True). Unit and product of round 11 were still running.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -259,7 +266,10 @@ Proposed DEC on its own branch, and files the rest.
 At acceptance: set the Status, rewrite this handoff's row in the README, and in `docs/specification/README.md` name
 the owed adopters on the devices row (Project Observatory's node and setup step, the first organization server) and
 the services row (Fabric, Fabric Dashboards, Switchboard, Fabric Inbox, the adapter's kits, the PassionCode launcher,
-Project Observatory); tell thread `1fe66e6e` the same day (Fabric Dashboards' FD-159 and Fabric's server build on it),
+Project Observatory); in the knowledge base (fabric-workspace `knowledge/authority.md`, lines 115 and 128 at the
+time of writing), replace DEC-0149's "counting `foreign` and `foreign-user` is proposed for FD's watcher in contract
+DEC-0154" with the accepted wording, such as "is owed by FD's watcher (contract DEC-0154)", and check that
+`grep -c 'proposed for FD' knowledge/authority.md` prints 0; tell thread `1fe66e6e` the same day (Fabric Dashboards' FD-159 and Fabric's server build on it),
 and in that message ask Fabric Dashboards for a row that its watcher (FD-76's successor) counts `foreign` and
 `foreign-user` as unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card only.
 Ask in the same message that its card's own `foreign-user` line (its `i18n.ts:128`, its own wording today) use this
@@ -311,6 +321,11 @@ pinned FB-6's old "per host" wording; the test now pins "per computer" (W66), an
 files, 10536 tests passed and 1 skipped, branches 98.92% (12567 of 12703), 31 vector files matching their generators,
 the UX lint passed, documentation checks passed, markdownlint 0 errors, privacy 0 findings; no em dash on an added
 line.
+
+After round 11's seam batch (W72, W73) the full gate did not run (7 GB free, under 8 GB). `pnpm typecheck`,
+`pnpm run docs:check`, `python3 docs/ux/lint.py`, `pnpm privacy:check` (0 findings), the em dash check (0) and
+`pnpm vitest run` over `test/delegation-sealed.test.ts`, `test/embedded-dashboard.test.ts`, `test/docs-check.test.ts`,
+`test/consistency.test.ts` and `test/sources-ledger.test.ts` (151 tests) ran with exit 0.
 
 ## Next task
 

@@ -9746,7 +9746,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   passed; unit did not run, since W39 changes the vectors); round 9 at `7ce5cc67` was not clean (unit passed, 319 of
   376 mutants killed and 53 equivalent, the rest closed by W55; product found two breaks, W53 and W54; seam found the
   same break as W54, the full suite of 10530 green); round 10 at `23fd509d` was not clean (unit passed, seam passed,
-  product found one break, W63); their batches are folded in (Source). A reference module and vectors, one optional schema
+  product found one break, W63); round 11 at `bbb5b956` was not clean (seam found one break, W73); their batches are folded in
+  (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9944,6 +9945,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     second sentence describes FD's released watcher (FD-76: an episode only for `down`, kept open while a failing
     source outside its start baseline stays); whether that degraded continuation fits the first sentence is decided
     separately, with DEC-0149's landing row.
+    On acceptance day the knowledge base's `knowledge/authority.md` (fabric-workspace), where DEC-0149 writes that
+    counting `foreign` and `foreign-user` "is proposed for FD's watcher in contract DEC-0154", says instead that it is
+    owed by FD's watcher (contract DEC-0154); then `grep -c 'proposed for FD' knowledge/authority.md` prints 0.
   - Fabric Inbox: B-217 open, after this decision (its PR #421, rows B-217 to B-220): its desktop connect step sends a
     new agent key to the hub's loopback callback; on macOS and Linux another account's listener reads today as no
     listener (safe, for the wrong reason), and on Windows, where the process tables show every account's processes,
@@ -9970,8 +9974,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   HA-3, the Install, Uninstall, One copy and Start rows, the One copy section, the directories table, the caller
   table, the A2A paragraph, `FAC-SEM-010`'s register row), `docs/specification/provider.md` (a loopback `run.mcp.url`
   under HA-2), `docs/specification/relay.md` (a loopback relay under HA-2), `docs/guides/connecting-compatible-agents.md`
-  (the note on HA-1 to HA-3), `src/semantic-rules.ts` (`FAC-SEM-010`'s comment), `test/delegation-sealed.test.ts` (FB-6's "computer"), `docs/specification/embedded-dashboard.md` (ED-8's
-  "computer" in its open questions), `docs/handoffs/README.md`,
+  (the note on HA-1 to HA-3), `src/semantic-rules.ts` (`FAC-SEM-010`'s comment), `test/delegation-sealed.test.ts` (its FB-6 comment; the pinned "per host" kept),
+  `docs/specification/embedded-dashboard.md` and `docs/specification/fabric-button.md` (ED-8's and FB-6's cookie
+  scope: "per host" kept, with "the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that
+  computer"), `docs/evidence/sources.md` (the RFC 6265 row's note), `docs/handoffs/README.md`,
   `schemas/service-descriptor.schema.json` (`paths.data`'s description), `docs/specification/delegation.md` (the
   header, DL-25's T0 row, the relay paragraph and the accepted gap, the open item on `surfaces.mcp.auth`),
   `docs/specification/profiles.md` (the loopback card), `docs/specification/session-handoff.md` (SH-9's pointer),
@@ -10076,6 +10082,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   binding every service to `service.lock`; unit and seam passed), and its batch, with the coordinator's decisions W64 to
   W70 (the affects and Compatibility lists, the two UI lines quoted in item 2, "computer" in the cookie scope of FB and
   CONTEXT, HA-2 pointers in `provider.md` and `relay.md`, two vectors and their mutants, the CT-232 check counting
-  occurrences, and both landing orders with DEC-0149), is folded in; the two UI lines passed the operator's copy check
+  occurrences, and both landing orders with DEC-0149), is folded in; W71 copied both landing orders from DEC-0149's handoff at
+  `1bd70e54`; round 11 at `bbb5b956` was not clean (seam: W73, the cookie scope's "host" is the URL's host in ED-8 and
+  RFC 6265 section 8.5, not the machine, so W66, W71 and W8 wrongly changed it to "computer" in FB-6, ED-8's open
+  question, CONTEXT and the RFC 6265 row; "per host" is restored there with "the URL's host, RFC 6265 section 8.5; for
+  local services, 127.0.0.1 on that computer", and the `semantic-rules.ts` comment, about a remote placement's machine,
+  keeps "computer"), and its batch, with the acceptance-day edit of the knowledge base's `authority.md` (W72), is
+  folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.
