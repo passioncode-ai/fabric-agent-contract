@@ -425,7 +425,7 @@ documents it ships, as its `fabric.source.json` (`fabric-source/1`) names them; 
 
 **Instance**: What belongs to one installation of an agent and never travels with its **Source**: its records, logs,
 keys, the names of the people and clients it works for, private paths and its configuration, reached through its
-**Source slots**.
+**Source slots**. *Avoid*: "instance" for a running instance (a context instance, a service instance) in this sense.
 
 **Source slot**: A named place an installation fills, declared in the source manifest without a value (not a board's
 responder slot, DEC-0140): `secret` (a key read
@@ -489,7 +489,7 @@ owns) is none either. The home carve-out never lets a personal agent's source mo
 repository, or onto an organization's or a team's placement or one that anyone who could not already read the home can read, which stays one; an `org:<orgId>` context instance on a
 machine the operator holds, run under a share grant (DEC-0082, DEC-0086), is the owner's placement serving the
 organization and no hand-over, while a placement on a machine, registry or repository the organization holds is one
-(a machine the operator holds stays his when it is enrolled in an organization (enrollment gives the organization a device record, not the machine); an OS account or machine the organization owns whole (its org-cloud machine, or an account such as an organization's own macOS user on a shared host) is the organization's); serving the
+(a machine the operator holds stays his when it is enrolled in an organization (enrollment gives the organization a device record, not the machine); an OS account or machine the organization owns whole (its org-cloud machine, or an account such as an organization's own macOS user on a shared computer) is the organization's); serving the
 running agent to a team (`peer`, client keys) gives no one the tree, except a prompt or resource that is a source file
 served verbatim, or a bundle built without minification, which is the source tree served. It is taken only on the
 operator's word for that act naming the agent, the target (the source commit, or the repository for an organization's

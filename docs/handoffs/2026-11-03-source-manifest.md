@@ -393,7 +393,13 @@ source, what never travels with it, the check before a source export, and how a 
   decided: principles section 7 and rules section 9 give the same full list of exceptions with a scoped parenthetical,
   the chain restated from the branches' diffs (CT-227 landed in `1c141418`, DEC-0154 at `cbc425d7` with its watcher
   rule), the manifest-at-a-folder sentence and a git-links test, a CLI test of Git mode kept for a listed file under an
-  include entry, the unchecked-folder and pre-index walk wordings, and the affects list; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  include entry, the unchecked-folder and pre-index walk wordings, and the affects list; round 62 (not clean: relay.md's
+  watcher sentence against service.md's) answered as decided: relay.md restated from service.md (on a lease of its own,
+  the expired one from 2026-10-23 taken over through agent-sync, never reaped), CT-244 filed, CT-214's closure naming
+  relay.md, the watcher conformance row with the FD-76 pointer, the Git-mode test strengthened (it fails when a plain
+  listed file stops counting), the chain re-read at DEC-0154's `feef4e4d`, the expected red set of four, and the
+  round-48 and round-49 annotations, and from DEC-0154's seam reading: "on a shared computer" (host being the
+  program), the CT-232 landing edit and DEC-0154's head `feef4e4d`; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -492,6 +498,9 @@ source, what never travels with it, the check before a source export, and how a 
   - `.git` in every form a case-insensitive or Windows file system resolves to it is never source, and a patch path an
     `exclude` entry names under ASCII case folding is refused, since on such a file system the two spellings are one
     file and the rule is otherwise bypassed.
+- Round 62, decided by the coordinator under the operator's recorded rules:
+  - a hub's machine-report failure shows on its well-known document and the dashboard; a degraded entry opens no
+    message (service.md's watcher rule); a rule for messaging it is owed (CT-244).
 - Round 61, decided by the coordinator under the operator's recorded rules:
   - principles section 7 and rules section 9 name the same exceptions, whose home is item 9;
   - CT-227 has landed (main `1c141418`); DEC-0154 is the open branch after DEC-0151 and DEC-0152, and whichever of
@@ -566,7 +575,7 @@ source, what never travels with it, the check before a source export, and how a 
     organization's export pushed to its own private repository, readable only by its members, is no hand-over;
   - an exclude entry's widest reading is the union of the readings; `FAC-SEM-157`'s cause and effect come from the same
     segment index, the segment before a length cause; an include equal to or under what it removes is said once;
-  - the manifest is required only to hand an agent over or release it publicly from a private home; a package rule
+  - the manifest is required only to hand an agent over or release it publicly from a private home (round 52: the routes that carry a source export or a package; opt-in otherwise); a package rule
     binds a package handed over, or published to a public registry from a private home; a vendored file travels only as a committed source
     path, a binary one also listed in `binaries`;
   - a local export records the recipient and the export commit when handed over by push or by file;
@@ -578,7 +587,7 @@ source, what never travels with it, the check before a source export, and how a 
     holds stays a hand-over (round 47's lead narrowed);
   - an exclude entry outside the grammar fails closed and removes its widest reading; an include entry so read names
     nothing; `FAC-SEM-157` says it once by its cause, in a tree document too;
-  - an agent without `fabric.source.json` is handed over or released publicly from a private home only once it has one;
+  - an agent without `fabric.source.json` is handed over or released publicly from a private home only once it has one (round 52: the routes that carry a source export or a package; opt-in otherwise);
   - a package handed over, or published to a public registry from a private home, holds only committed source paths besides `fabric.package.json`, a vendored
     file travelling only as a committed source path (a binary one also listed in `binaries`);
   - a hand-over by push or by file of a local export records the recipient and the export commit in that export's receipt;
@@ -726,6 +735,22 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 62's fixes were checked on the working tree over head `5aeaeb3e` (this note's commit holds the same tree, plus
+this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files with 10260 passed
+and 3 skipped under the coverage floors, `ux:lint`, `docs:check` passed with 0 markdownlint errors, `privacy:check` with
+0 findings), run under the shared lock with the 15-minute load at 40.8 and 8 GB free, and `pnpm exec tsx
+tools/vectors/run.ts` (exit 0, 29 files match); before it `pnpm typecheck` (exit 0), `pnpm vectors:check` (exit 0) and
+the targeted coverage run over `source-rules`, `validate-cli`, `validate-cli-git-links`, `secret-shape`,
+`schema-compilation`, `consistency`, `validate-cli-faults`, `rule-tolerance` and `positive-sweep` (exit 0: 3264
+passed, 2 skipped; `src/source-rules.ts` at 100 % of its branches, `src/validate-cli.ts` at 99.48 %). The strengthened
+Git-mode test fails when the walk trigger stops counting a plain listed file (one run with that clause narrowed to
+gitlinks and listed folders: a walk note appears) and passes on this tree. `relay.md` was edited under a lease of this
+run (the expired one from 2026-10-23 was taken over by `agent_sync.py acquire`, not reaped). No U+2014 in the added
+lines. The knowledge base's PR is at `d4b5af69` (round 62 merged the knowledge base's main `46c43697` as
+`803f35c7`, item 8 as main has it): `source hand-over` in 4, 4 and 5 lines of agents-first, principles and rules,
+`own estate` once on each, item 9 once and item 8 once; the knowledge base's `npm test` (exit 0, 172 passed) and `npm
+run verify:content` (exit 0, backlog 0 errors).
 
 Round 61's fixes were checked on the working tree over head `b4615d2d` (this note's commit holds the same tree, plus
 this paragraph and the follow-ups' wording): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114
@@ -1174,7 +1199,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 61 into `9a3980fd` (the PR's head), which carries main's `ffb122e2`,
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 62 into `803f35c7`, which carries main's `46c43697` (the PR's head `d4b5af69`),
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). PR #235 (DEC-0148) and DEC-0150 are already on main (`1016f0ec` when re-measured in round
    50), so nothing is refreshed for them. Merge the current `origin/main` (re-measured at landing; `1c141418` as of round 61, or later) into the fresh branch
@@ -1194,9 +1219,10 @@ remaining steps, in order:
    `test/channel-agent.test.ts` on main) to those harnesses.
 4. Run the next rounds of the readings (unit, seam, product) on that merge until two clean rounds; the chain with
    DEC-0151 is re-gated after it refreshes (DEC-0151 now reads the `sk-` test keys; DEC-0150 is on main). The landing
-   merges main `1c141418`, which holds CT-227's rewrite of the timing tests in `test/channel-agent.test.ts`, so the
-   re-gate's expected channel-agent failures (the DEC-0151-dependent tests, whose names may have changed) are
-   re-measured on that tree, and nothing else is red; hosted CI on main should be green since PR #245 (run
+   merges main `1c141418`, which holds CT-227's rewrite of the timing tests in `test/channel-agent.test.ts`; with
+   DEC-0151 merged, the re-gate's expected red set is exactly four tests, all DEC-0151's: the two channel-agent `sk-`
+   tests (`test/channel-agent.test.ts` near its lines 1003 and 1184 in round 62) and the two ops-digest tests, re-measured
+   on that tree, and nothing else is red; hosted CI on main should be green since PR #245 (run
    42139472645 on its branch).
 5. Make the acceptance edit on the PR branch, as DEC-0147 did (DEC-0149's status line, CT-194 done, this handoff's
    status and the `docs/handoffs/README.md` row); then run the merge gate (`pnpm run check`, each part's exit code
@@ -1204,13 +1230,13 @@ remaining steps, in order:
 6. Pair PR #628 only with a contract head that carries the same round of the readings (the round named in DEC-0149's
    status line and in RM-36's "Restated 2026-11-05" line in the PR's `knowledge/roadmap.md`, not its last commit,
    which may be a merge of main), and re-read the pair on the round-40 and round-41 points before landing.
-   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`ffb122e2` at
-   round 61, merged into the PR as `9a3980fd`): if it is behind, merge main into it (never a rebase or a force-push),
+   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`46c43697` at
+   round 62, merged into the PR as `803f35c7`): if it is behind, merge main into it (never a rebase or a force-push),
    keeping main's item 8 as main has it and the PR's item 9, and set the round named in RM-36's "Restated 2026-11-05"
    line to the landing round. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `9a3980fd`, which carries the knowledge base's main, they print 4, 4 and 5
+   `knowledge/rules.md`; at PR #628's head `d4b5af69`, which carries the knowledge base's main, they print 4, 4 and 5
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38 and principles
    section 7 and rules section 9 their two named exceptions in round 59), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
@@ -1227,7 +1253,8 @@ remaining steps, in order:
 At landing, write DEC-0149's merge date into source.md's line paragraph where it says "on its merge date, written here
 at landing" (and in DEC-0149 item 12's round-45 sentence). At landing, file a backlog row (an id above the highest in use or
 leased at landing, re-measured then; rows on open branches count as in use: CT-227 is main's since `1c141418` and
-DEC-0154's branch at `cbc425d7` holds CT-228 to CT-241, so this row is CT-242 or above as of round 61) to inventory the personal agent
+DEC-0154's branch (`feef4e4d` in round 62, re-measured at landing) holds CT-228 to CT-241, so this row is CT-242 or above
+as of round 62) to inventory the personal agent
 homes, and any copy of them within the operator's estate (private mirrors, second private repositories), that people
 outside the operator can read, for the operator to review: information, not a gate, since access
 the operator gave before the rule stands as the operator's own act (DEC-0149 item 12, round 44). At landing, also file a backlog row under the next id above that one (CT-243 or above as of round 61), re-measured the
@@ -1237,7 +1264,7 @@ same way: "`unchecked` covering a credential finding exits 0
 into SCN-054 step 3, where it says the enforcing row is filed at landing, and both rows' ids (this row and the
 inventory row) into this note's Open line, in the landing change. The release notes of the landing carry one more
 item: a plain `pnpm validate <dir>` skips a `.json` file that is a FIFO, a socket or a device with a `note/skipped`
-line saying it is not a file (SCN-002's errors line).
+line saying it is not a file, and a `fabric.source.json` that is a symbolic link the same way (SCN-002's errors line).
 
 Right after the merge: close CT-211 with the three greps' outputs; add the contract's row in the knowledge base's
 `knowledge/products.md` for the release that carries DEC-0149, with the release decision (the version tag, as DEC-0150's
@@ -1263,21 +1290,28 @@ PR #236 is merged (main has moved since; its Test row in `AGENTS.md` now says Li
 (DEC-0148) and DEC-0150 (`origin/agent/channel-agent-ext-v3-20261104`) are merged into main, which was `1016f0ec` when
 re-measured in round 50. DEC-0153 has landed too: PR #244 merged 2026-11-06 into main `eac1a594`, released as
 `v0.1.0+2026-11-06.1`. CT-227 (`agent/ct219-receipt-20261106`) has landed too: PR #245 merged into main `1c141418`
-(DEC-0153's receipts), and its edits to `docs/backlog.md` (CT-219's row and the CT-227 row), `docs/handoffs/README.md`
-and `test/channel-agent.test.ts` (the timing tests rewritten) are main's lines this landing meets. The chain of the open
-branches that touch the same registers, read from their diffs against `1c141418`, is DEC-0149 (this branch), then
-`origin/agent/sqd-fields-20261104` (DEC-0151), then DEC-0152 (head `d760f756` when written: `docs/DECISIONS.md`,
+(DEC-0153's receipts), and its edits to `docs/backlog.md` (CT-219's row and the CT-227 row), `docs/handoffs/README.md`,
+`docs/handoffs/2026-11-04-ops-digest.md` and `test/channel-agent.test.ts` (the timing tests rewritten) are main's lines
+this landing meets. The chain of the open branches that touch the same registers, read from their diffs against
+`1c141418`, is DEC-0149 (this branch), then `origin/agent/sqd-fields-20261104` (DEC-0151), then DEC-0152
+(`agent/ct217-board-same-turn-20261104`, head `d760f756` when written: `docs/DECISIONS.md`,
 `docs/specification/conformance.md`, `docs/DOCMAP.md`, `docs/backlog.md`, the handoffs index), then
-`agent/studio-ports-owner-20261106` (DEC-0154, head `cbc425d7`; it holds CT-228 to CT-241). DEC-0154 touches
-`CONTEXT.md`, `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`, `docs/evidence/sources.md`,
-`docs/handoffs/README.md`, `docs/specification/conformance.md`, `contexts.md`, `delegation.md`, `devices.md`,
-`node-summary.md`, `service.md`, `docs/ux` (SCN-056, SCR-20, FLW-17), `fixtures/catalogue.json` (rows inserted
-mid-file, so no comma step), `schemas/device-enrollment.schema.json`, `schemas/service-well-known.schema.json`,
-`src/host-label.ts`, `tools/vectors/run.ts` and `vitest.config.ts`; re-measure the list with `git diff --name-only`
-at landing. Its two real conflicts with this landing are the coverage `include` of `vitest.config.ts` (the union keeps
-`src/host-label.ts`, `src/validator.ts`, `src/channel-agent.ts` and `src/ops-digest.ts`) and the handoffs README row.
-DEC-0154's handoff also names the watcher sentence in `service.md`: whichever of DEC-0149 and DEC-0154 lands second
-makes Fabric Dashboards' watcher sentence read "unavailable (down or foreign-user, not merely degraded)". Every head
+`agent/studio-ports-owner-20261106` (DEC-0154, head `feef4e4d`, which merged main `1c141418`; it holds CT-228 to
+CT-241). DEC-0154 touches `CONTEXT.md`, `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`,
+`docs/evidence/sources.md`, `docs/handoffs/README.md`, `docs/specification/conformance.md`, `contexts.md`,
+`delegation.md`, `devices.md`, `node-summary.md`, `profiles.md`, `service.md`, `session-handoff.md`, `docs/ux` (flows,
+foundation, scenarios SCN-056, screens SCR-20), `fixtures/catalogue.json` (rows inserted mid-file, so no comma step),
+`schemas/device-enrollment.schema.json`, `schemas/service-well-known.schema.json`, `tools/vectors/run.ts` and
+`vitest.config.ts`, and adds `docs/evidence/specs/2026-11-06-shared-host-gaps.md`,
+`docs/handoffs/2026-11-06-shared-host-ports.md`, `src/host-label.ts`, `test/host-label.test.ts`,
+`tools/vectors/host-label.ts`, `fixtures/vectors/host-label.json` and two device-enrollment fixtures; re-measure the
+list with `git diff --name-only` at landing. A three-way merge of this branch with `feef4e4d` conflicts in the same
+fourteen files as with main `1c141418` (measured with `git merge-tree` in round 62), so DEC-0154 adds no conflicting
+file of its own; where its lines meet this landing's: the coverage `include` of `vitest.config.ts` (the union keeps
+`src/host-label.ts`, `src/validator.ts`, `src/channel-agent.ts` and `src/ops-digest.ts`), the handoffs README row, and
+the tails of `docs/DECISIONS.md` (ordered through DEC-0154) and `docs/backlog.md` (in id order). DEC-0154's handoff also
+names the watcher sentence in `service.md`: whichever of DEC-0149 and DEC-0154 lands second makes Fabric Dashboards'
+watcher sentence read "unavailable (down or foreign-user, not merely degraded)". Every head
 here is re-measured at landing.
 
 ### DEC-0153 is on main: the steps of this landing's merge
@@ -1456,6 +1490,9 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   [source](../specification/source.md#installation-strings)'s sense and would otherwise block a source export, linked
   in the row's own form (`specification/source.md#installation-strings`). Check: `grep '^| CT-224 ' docs/backlog.md |
   grep -c 'source.md#installation-strings'` prints 1.
+- With DEC-0154 (its seam reading): whichever of DEC-0149 and DEC-0154 lands second adds to CT-232's row in
+  `docs/backlog.md` a link to source.md's sentence on an OS account an organization owns whole (in "Handing over", the
+  sentence on a machine enrolled in an organization). Check after both land: CT-232's row names `source.md` once.
 - At landing, carry two corrections of DEC-0150's landing post: its FAA-197 item quotes two phrases that are not on
   the landed `channel-agent.md` ("acts only inside that chat as section 4.10 says" and "no AP-3 or OA-2 source", each
   `grep -c` 0 on main at `1016f0ec`), so the post quotes CA-8 as the page stands; and its merge post's "together with

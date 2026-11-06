@@ -605,7 +605,11 @@ which it shows the operator its state, so DL-15's switch, a move's step 6 and it
 `source` is `machine-report`; it is a setup state (`setup: true`, its reason "sign the revision that lists this
 machine's key") while the hub's new `#kem` waits only for a revision the hub drafted and the person has not signed, and
 a failure otherwise (a private half it cannot read, or one that does not match the listed key: "replace this
-machine's key"), which a watcher reports after 5 minutes (DEC-0146). Fabric's hub, which serves no well-known document
+machine's key"). Either entry shows on the hub's well-known document and in the dashboard; a watcher does not message
+the operator for a `degraded` entry, only for an agent unavailable (`down`) for more than 15 minutes
+([service](service.md#well-known-document), DEC-0149, Fabric Dashboards' FD-76), so a move's wait on reports (DL-15,
+step 6) is now seen on the dashboard, not messaged; whether a hub's machine-report failure is messaged is owed by a
+rule not yet written (CT-244). Fabric's hub, which serves no well-known document
 today, shows it on its own machine's row in My network's machines (SCR-23, a setup note while only the person's signature is missing, its error state otherwise). A recipient acknowledges
 (`ack`) and drops a body it verified whose payload type it does not know ([Messages](#messages), DEC-0146), so a hub
 not yet on DEC-0132 that does so drops a report and its mailbox does not fill with them (no Fabric reads a relay mailbox today; its 0.4.0 reader does so, Fabric's PL-12, CO-452); the machine hears nothing back either way, since a report is never answered.

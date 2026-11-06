@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 61 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 62 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9055,7 +9055,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the patch's full fold missing from the requirement rows; round 58 not clean: a flat
   wording in conformance.md's hand-over row; round 59 not clean: flat wordings in the knowledge base's principles
   section 7 and rules section 9; round 60 clean; round 61 not clean: principles section 7's shorter exception list,
-  the handoff's chain of open branches), cited by round number because their heads were on the review branch, which is not
+  the handoff's chain of open branches; round 62 not clean: relay.md's watcher sentence against service.md's), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9203,7 +9203,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       within the operator's own estate (the accounts and placements the operator alone holds) to a place that is not
       public and that no one outside the operator can read is not a hand-over, while a push or copy elsewhere that is public,
       that another owner holds, or that another person is given access to (round 49: anyone who could not already read
-      the home, since the round-48 lead filters every route), is one (for a personal agent, an organization's repository is
+      the home, since the round-48 lead filters every route; earlier collaborators included: they count as the home's
+      readers only inside the home itself), is one (for a personal agent, an organization's repository is
       another owner's even when the operator administers it, while an organization's own repositories are its own agent's
       owner's places (round 53), as the knowledge base's agents-first item 9, "A source
       hand-over takes the operator's word on that act", reads); the operator's standing
@@ -9358,7 +9359,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       folder before its first segment made only of dots, spaces and code points HFS+ ignores, everything when that is
       its first segment, or, lengthened only, the entry folded as written), while an `include` entry so read names
       nothing; `FAC-SEM-157` says such an entry once by its cause, in a tree document too; an agent without
-      `fabric.source.json` is handed over or released publicly from a private home only once it has one, since every carrier
+      `fabric.source.json` is handed over or released publicly from a private home only once it has one (round 52: the routes that carry a source export or a package; opt-in otherwise), since every carrier
       needs the tree check; a package handed over, or published to a public registry from a private home, holds only committed source paths besides
       `fabric.package.json`, so a vendored file travels only as a committed source path (a binary one also listed in `binaries`); a hand-over by push or by
       file of a local export records the recipient and the export commit in that export's receipt; the CT-109
@@ -9369,7 +9370,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       readings (the folder before its first segment that folds to nothing, its parent too when that segment holds two
       or more dots, each also as a file without a trailing `/`), its cause and effect read from that same segment
       before a length cause, and an include equal to or under what it removes said once at the include; the opt-in
-      manifest is required only for a hand-over or a public release from a private home, and a package rule only for a
+      manifest is required only for a hand-over or a public release from a private home (round 52: the routes that carry a source export or a package; opt-in otherwise), and a package rule only for a
       package handed over, or published to a public registry from a private home, a vendored file travelling only as a committed source path
       (a binary one also listed in `binaries`); a local export records the recipient when handed over by push or by
       file; every copy that counts the home-path boundaries counts four at DEC-0149's landing.
@@ -9446,6 +9447,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       where a folder sits at its path and stops with "not a file", and reports a nested repository where the index
       records a gitlink there over a file; FAC-SEM-157's "always travels and is always read" speaks of a manifest that
       is a file; Git mode is kept for a listed file at a path an include entry lies beneath, leaving that entry missing.
+      Decided by the coordinator in round 62: relay.md's machine-report failure follows service.md's watcher rule (the
+      entry shows on the hub's well-known document and the dashboard; a degraded entry opens no message, only an agent
+      unavailable for more than 15 minutes does), so a move's wait on reports is seen on the dashboard and CT-244 owes a
+      rule for messaging that failure; conformance.md's watcher row says the same, with the FD-76 pointer.
       The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9574,7 +9579,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 61 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 62 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9600,5 +9605,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the patch's full fold missing from the requirement rows; round 58 not clean: a flat
   wording in conformance.md's hand-over row; round 59 not clean: flat wordings in the knowledge base's principles
   section 7 and rules section 9; round 60 clean; round 61 not clean: principles section 7's shorter exception list,
-  the handoff's chain of open branches), cited by round number (their heads were on the review branch, not kept at landing),
+  the handoff's chain of open branches; round 62 not clean: relay.md's watcher sentence against service.md's), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

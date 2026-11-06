@@ -2232,14 +2232,16 @@ describe("an agent's source (DEC-0149)", () => {
   });
 
   it("keeps Git mode for a listed file at a path an include entry lies beneath, which leaves that entry missing", () => {
-    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["docs/guide.md", "build/", "LICENSE"] }), ".gitignore": "build/\n", LICENSE: "x", docs: "a tracked file named docs", "build/out.txt": "x" });
+    // The file docs alone keeps Git mode: LICENSE is ignored and not added, build/ is ignored, so nothing else Git lists
+    // lies under an include path.
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["docs/guide.md", "build/", "LICENSE"] }), ".gitignore": "build/\nLICENSE\n", LICENSE: "x", docs: "a tracked file named docs", "build/out.txt": "x" });
     expect(gitIn(dir, "init", "-q").status).toBe(0);
-    expect(gitIn(dir, "add", "fabric.source.json", ".gitignore", "LICENSE", "docs").status).toBe(0);
+    expect(gitIn(dir, "add", "fabric.source.json", ".gitignore", "docs").status).toBe(0);
     const result = run(dir, "--kind", "source-tree");
     expect(result.code).toBe(1);
     expect(result.out).not.toContain("note/walk");
     const missing = found(result.out).filter((line) => line.includes("missing"));
-    expect(missing.map((line) => line.split("  ")[1]).sort()).toEqual(["/manifest/include/0", "/manifest/include/1"]);
+    expect(missing.map((line) => line.split("  ")[1]).sort()).toEqual(["/manifest/include/0", "/manifest/include/1", "/manifest/include/2"]);
   });
 
   it("stays in Git mode when Git lists only a gitlink at the manifest's path under the source, and reports it", () => {
