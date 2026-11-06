@@ -693,30 +693,16 @@ and its per-file floors (109 files, 9846 tests passed, 1 skipped), each exit 0. 
 
 ## Next task
 
-DEC-0153 is accepted on its branch and the pull request is open. After it, in this order:
+DEC-0153 is landed and released; this handoff has no step left of its own.
 
-1. The merge: once the pull request's checks read green on its head (the landing merge of `origin/main` is in it, and
-   the gate ran on that merged head), merge it as the history does. Never force-push.
-2. Compare `gh pr view <N> --json mergedAt` with 2026-11-06, the date the acceptance wrote; if the UTC day differs,
-   correct it in DEC-0153's Status, CT-219's receipt and the handoffs README row. Then CT-219's receipt and the README
-   row read "accepted <date>, #N; merged <date>". The commit lands on `main` as a fast-forward after `pnpm run check`
-   exits 0 (the repository's local gate: the knowledge base's `knowledge/rules.md`, line 29; `AGENTS.md`), or through
-   a receipt pull request.
-3. The release, tagged as the history does; watch its run to success, then write the tag into CT-219's receipt and the
-   handoffs README row as "merged <date>, #N; released <tag>", landed on `main` the same way.
-4. The answer on board thread `f7758225`. It says in one sentence what RW-4's `ok` means (asks answered by a retro the
-   host saw written, never a count of retros) and names Fabric's CO-502 wording ("the daily digest counts retros asked
-   and written"), so no view shows `ok` as retros written (CT-219's own row item (b) already says so since round 6);
-   states, in our words, OD-3's bound against Switchboard's SB-257 (SB-257 reads a per-line bound of 4096 operations,
-   with the rest counted under one fixed name; OD-3 bounds 4095 named operations per UTC day plus one overflow name);
-   and names the release tag, so the products vendor the vectors from it (the hour vectors grew by one case in round
-   23). Re-read the rows it quotes on the day it is sent.
-5. The knowledge base rows in `fabric-workspace`: in `knowledge/plans.md`, the contract's row at line 80 replaces PR
-   #240 with this decision's pull request, adds OD-9 and `FAC-SEM-168`, and its Due cell becomes "merged <date>, #N;
-   released <tag>" (no "draft by"); the Contract row of `knowledge/products.md` (line 21) gets the new tag, the `main`
-   commit the tag points at, and "through DEC-0153" with whatever is still unlanded named (today "DEC-0149, DEC-0151
-   and DEC-0152 still on branches"); the Contract row of `knowledge/roadmap.md` (line 70) gets the new tag and the
-   same "through DEC-0153" with the same unlanded qualifier; confirm CT-221's row reserved on main (PR #242) stays
-   once. Then publish (`node scripts/workspace.mjs sync` from a Fabric checkout) or leave it to the scheduled sync.
-6. Relay the section "Left to the landers of DEC-0149 and DEC-0151" to those branches' owners (the coordinator carries
-   it), so the sibling that lands next runs its steps and checks.
+- Merged: PR #244 on 2026-11-06 00:18:40 UTC (merge commit `eac1a594`), the same UTC day the acceptance wrote.
+- Released: `v0.1.0+2026-11-06.1` at `eac1a594`, published 2026-11-06 00:19:35 UTC.
+- CI on `main` at `eac1a594` (run 42136000768, dispatched for the release): Linux Node 22 passed; Linux Node 24,
+  macOS and Windows failed in `test/channel-agent.test.ts` only (DEC-0150's timing tests: the CPU clock's resolution on
+  Windows and the astral-text bound under coverage), none in this decision's files. Its fix is CT-227.
+- Board: answered on thread `f7758225` (message `060f222c`) with the tag, RW-4's `ok`, OD-3 against SB-257 and the
+  vectors' one new hour case.
+- Knowledge base: the contract's rows in `knowledge/plans.md`, `knowledge/products.md` and `knowledge/roadmap.md` move
+  to the tag in fabric-workspace (branch `agent/contract-dec0153-release-20261106`).
+- Relay: the section "Left to the landers of DEC-0149 and DEC-0151" goes to those branches' owners; the lander of
+  either runs its steps and checks on the tree that holds both.
