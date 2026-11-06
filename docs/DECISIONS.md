@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 55 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 56 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9050,7 +9050,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   list skipped the manifest; an organization's own repositories; a personal agent's visibility change; a package to
   earlier readers; round 54 not clean: CREDENTIAL_FILE missed U+2028/U+2029 names; the lead's old opening clause; public
   release unqualified; round 55 not clean: a gitlink at the manifest's path under exclude; earlier collaborators
-  outside the home; a personal private home's visibility change), cited by round number because their heads were on the review branch, which is not
+  outside the home; a personal private home's visibility change; round 56 not clean: the manifest's path
+  read two ways; flat wordings beside round 55's sentence), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9123,7 +9124,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
        `*.token` and `*.credential`), unchecked or not;
      - `binary` (marked binary and not in `binaries`, Q12); `nested-repository` (a submodule's gitlink or a folder
        holding its own `.git` in the source: it would export as a link to another repository, or not at all; `exclude`
-       names it, and it is checked in its own tree); `instance-string` (an entry found under Unicode simple case
+       names it, and it is checked in its own tree; round 56: at fabric.source.json's own path, such as a gitlink the
+       index records there, exclude cannot remove it, since the manifest is always source: the line says to remove it);
+       `instance-string` (an entry found under Unicode simple case
        folding, the entry and the text also in NFC, as written, percent-encoded, form-encoded with `+`, JSON-escaped,
        with `\/`, or with `\uXXXX`); `short-instance-string` (an entry that is not a well-formed string of at least 3
        characters, refused as input); `missing` (an `include` path with no file); `no-include`.
@@ -9345,7 +9348,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       Decided by the coordinator in round 48: the route list's lead (round 47's reading narrowed) says a copy is no
       hand-over only when it stays in a place the home's owner holds and only the home's readers can read it (the owning
       organization's members for its own agent, and, for a personal agent's private home, the collaborators given access
-      before DEC-0149 was accepted), and a repository or placement another owner holds stays a hand-over; an `exclude`
+      before DEC-0149 was accepted (round 55: only inside the home itself)), and a repository or placement another owner
+      holds stays a hand-over; an `exclude`
       entry outside the grammar as a file system may read it fails closed, still removing its widest reading (the
       folder before its first segment made only of dots, spaces and code points HFS+ ignores, everything when that is
       its first segment, or, lengthened only, the entry folded as written), while an `include` entry so read names
@@ -9382,7 +9386,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       Handing over counts, is effect class `publish`); a commit reaching readers given access before DEC-0149 is no
       hand-over in that home only; a credential file's name is read folded as a `.git` segment is; no `unchecked`
       entry names the manifest; a hand-over by push or by file, a package handed over or published to a public registry or a public release (round 54: from a private home) carries a source export
-      or a package and so needs the manifest, while an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home neither is done; every later public release of a personal agent from a private home is its own hand-over; a source export
+      or a package and so needs the manifest, while an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home an agent does neither on its own (with the operator's explicit permission for that act it is his own act, no act of this contract); every later public release of a personal agent from a private home is its own hand-over; a source export
       creates no hosted or remote repository and never pushes.
       Decided by the coordinator in round 53: the tree check skips a file as unchecked only where `uncheckedTest` does,
       so the manifest is always read, and never as binary (`FAC-SEM-157` refuses a `binaries` entry naming it); a patch
@@ -9406,6 +9410,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       visibility or gaining outside readers is not done by an agent on its own, and with the operator's explicit
       permission for that act it is the operator's own act under his own rule, and no act of this contract (round 55:
       this restates round 54's sentence); the contract's tools do not perform it.
+      Decided by the coordinator in round 56: one reading of "at the manifest's path" (`atManifestPath`: one trailing
+      `/` dropped, NFC) in the nested-repository test and its message; a patch also refuses a credential file's name
+      under the full fold, while the tree check keeps its ASCII reading for parity with the adapter; a sparse `paths`
+      list's holes are refused by index; a personal agent's private home is not made public by an agent, and an agent
+      does neither of the organization's two acts on it on its own; the adapter's pack for an organization is a hand-over
+      the word gate covers.
       The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9531,7 +9541,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 55 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 56 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9552,5 +9562,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   list skipped the manifest; an organization's own repositories; a personal agent's visibility change; a package to
   earlier readers; round 54 not clean: CREDENTIAL_FILE missed U+2028/U+2029 names; the lead's old opening clause; public
   release unqualified; round 55 not clean: a gitlink at the manifest's path under exclude; earlier collaborators
-  outside the home; a personal private home's visibility change), cited by round number (their heads were on the review branch, not kept at landing),
+  outside the home; a personal private home's visibility change; round 56 not clean: the manifest's path
+  read two ways; flat wordings beside round 55's sentence), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

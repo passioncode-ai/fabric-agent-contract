@@ -341,6 +341,13 @@ export function nestedInSource(manifest: unknown, written: unknown): boolean {
   return nestedTest(manifest)(written);
 }
 
+/**
+ * Whether a raw path names the manifest's own path: one trailing `/` dropped (`git ls-files --others` names an
+ * untracked repository so), NFC, then compared with `fabric.source.json`. The nested-repository test and the tree
+ * check's message read it the same way.
+ */
+export const atManifestPath = (written: unknown): boolean =>
+  typeof written === "string" && nfc(written.endsWith("/") ? written.slice(0, -1) : written) === SOURCE_FILE;
 /** `nestedInSource` as a predicate built once for many paths. */
 export function nestedTest(manifest: unknown): (written: unknown) => boolean {
   const source = isObject(manifest) ? manifest : {};
@@ -351,9 +358,9 @@ export function nestedTest(manifest: unknown): (written: unknown) => boolean {
     const stored = typeof written === "string" && written.endsWith("/") ? written.slice(0, -1) : written;
     // In the grammar as a file system reads it (`inGrammar`), as sourcePathTest reads a path.
     if (typeof stored !== "string" || !inGrammar(stored) || inGit(stored)) return false;
-    const path = nfc(stored);
     // The manifest is always source, before any exclude is read: a nested repository at its path is always in it.
-    if (path === SOURCE_FILE) return true;
+    if (atManifestPath(written)) return true;
+    const path = nfc(stored);
     const folder = `${path}/`;
     // An include path names it, lies under it (its folder is one of that entry's prefixes) or covers it.
     const reached = include.files.has(path) || include.reaches.has(folder) || folderPrefixes(folder).some((prefix) => include.folders.has(prefix));
@@ -383,13 +390,15 @@ export function patchPathsAllowed(manifest: unknown, paths: readonly unknown[]):
   const refused = (path: unknown): boolean => {
     if (!isSource(path)) return true;
     const folded = foldPath(nfc(path as string));
-    // A credential file by its name, read as the tree check reads it, is never source: an import never writes one.
-    return folded === SOURCE_FILE || credentialFile(path as string) || (anyExclude && folded.split("/").some((segment) => SHORT_NAME.test(segment)));
+    // A credential file by its name, read as the tree check reads it, is never source: an import never writes one. A
+    // patch also refuses one under the full fold (`foldSegment`: the Kelvin sign, a long s), so it fails closed.
+    return folded === SOURCE_FILE || credentialFile(path as string) || credentialFileFolded(path as string) || (anyExclude && folded.split("/").some((segment) => SHORT_NAME.test(segment)));
   };
   // A refused path that is not a string is named by its index, never shown.
   // A value that is not a list is refused whole, by its name.
   if (!Array.isArray(paths)) return ["paths"];
-  return paths.flatMap((path, index): string[] => (refused(path) ? [typeof path === "string" ? show(path) : `paths[${index}]`] : []));
+  // `Array.from` visits every index, so a hole in a sparse list is a refused entry, never skipped.
+  return Array.from(paths).flatMap((path, index): string[] => (refused(path) ? [typeof path === "string" ? show(path) : `paths[${index}]`] : []));
 }
 /** A folded segment that may be a Windows 8.3 short name: a `~` followed by a digit anywhere (`PRIVAT~1.MD`). */
 const SHORT_NAME = /~[0-9]/u;
@@ -428,6 +437,12 @@ export const TOKEN_FILE = /^[^\n]+\.(?:token|credential)$/;
 export const credentialFileName = (name: string): string => asciiFold(name.replace(HFS_IGNORABLE, "")).replace(/[ .]+$/u, "");
 // The patterns read the folded name; the exceptions (`.env.example` and its kin) match only the name as written, in lower
 // case, so `.ENV.EXAMPLE` or `.env.example.` is a credential file again: the exceptions fail closed.
+/** A file name read under the full fold (`foldSegment`), for a patch only: the tree check keeps its ASCII reading. */
+const credentialFileFolded = (path: string): boolean => {
+  const written = path.slice(path.lastIndexOf("/") + 1);
+  const name = foldSegment(written);
+  return (CREDENTIAL_FILE.test(name) && !CREDENTIAL_FILE_OK.test(written)) || TOKEN_FILE.test(name);
+};
 const credentialFile = (path: string): boolean => {
   const written = path.slice(path.lastIndexOf("/") + 1);
   const name = credentialFileName(written);
@@ -1216,7 +1231,7 @@ export function checkSourceTree(value: unknown): Finding[] {
     const label = problem.file === undefined ? undefined : named.has(problem.file) || labelledByIndex(pathOf) || pathHoldsFinding(pathOf) ? `files[${problem.file}]` : pathOf;
     const where = label === undefined ? "" : problem.line !== undefined ? `${label} line ${problem.line}, column ${problem.column}: ` : inPath(problem) ? `${label}, its path: ` : `${label}: `;
     // At the manifest's path exclude cannot help (the manifest is always source): the remedy is to remove what is there.
-    const said = problem.kind === "nested-repository" && nfc(pathOf) === SOURCE_FILE
+    const said = problem.kind === "nested-repository" && problem.file !== undefined && atManifestPath((files[problem.file] as JsonObject).path)
       ? "a nested repository (a submodule's gitlink or a folder holding its own .git) at the manifest's own path: exclude cannot remove the manifest, so remove the nested repository or gitlink at that path"
       : problem.kind !== "credential" || !inPath(problem) ? MESSAGES[problem.kind]
       : credentialFile(pathOf) ? "a credential file by its name (.env, a private key, a token file) is never source"

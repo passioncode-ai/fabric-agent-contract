@@ -24,7 +24,7 @@ import { ruleHelp } from "./rule-codes.js";
 import { documentKindsOf, isSemanticKind } from "./semantic-kinds.js";
 import { evaluateSemanticRules } from "./semantic-rules.js";
 import { PACKAGE_FILE } from "./package-rules.js";
-import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, excludedFolderTest, foldOnlyExcludeTest, foldPath, foldSegment, inGrammar, isManifestGrammarFinding, isDotGitSegment, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
+import { type IncludeIndex, PATH_READ_LIMIT, SOURCE_FILE, atManifestPath, excludedFolderTest, foldOnlyExcludeTest, foldPath, foldSegment, inGrammar, isManifestGrammarFinding, isDotGitSegment, sourceFolderTest, findingAt, longRunAt, includeIndex, labelledByIndex, masked, messageLead, nestedTest, pathHoldsFinding, sourcePathTest, uncheckedTest, wordHoldsFinding } from "./source-rules.js";
 import { createValidatorSync, formatSchemaErrors } from "./validator.js";
 
 export interface Problem { file: string; path: string; rule: string; message: string; help?: string }
@@ -1098,8 +1098,9 @@ function checkSourceFolderAs(run: Run, folder: string): void {
   // Each exclude entry the folder holds, found by reading each folder's names and matching each segment under the fold,
   // an intermediate folder never a symbolic link, is listed, so an entry that names nothing is said (unused-exclude, accepted); nothing is read and no name is printed.
   // An entry excluding a gitlink as nestedTest reads it is used: a bare entry naming it or a folder it lies in, an entry
-  // ending in `/` naming a folder it lies in or is.
-  const foldedGitlinks = [...gitlinks].filter((name) => inGrammar(name)).map((name) => foldPath(name.normalize("NFC")));
+  // ending in `/` naming a folder it lies in or is. A gitlink at the manifest's own path is excepted: exclude cannot
+  // remove the manifest, so no entry is used by it.
+  const foldedGitlinks = [...gitlinks].filter((name) => inGrammar(name) && !atManifestPath(name)).map((name) => foldPath(name.normalize("NFC")));
   const excludesGitlink = (entry: string): boolean => {
     const folded = foldPath(entry.normalize("NFC"));
     return foldedGitlinks.some((link) => (folded.endsWith("/") ? `${link}/`.startsWith(folded) : link === folded || link.startsWith(`${folded}/`)));

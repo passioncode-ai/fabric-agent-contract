@@ -18,7 +18,7 @@ and questions §6), and the board threads `21ac4057` and `0a8776f2`, where the o
 
 Every kind of agent: a serving agent, a consumer agent and a skill set. The manifest, the tree check, the source export
 and the import bind a repository with a `fabric.source.json`; one without has none of them. The hand-over rule
-([handing over](#handing-over)) binds every agent's source, with a manifest or without one, and a hand-over by push or by file, a package handed over, or published to a public registry from a private home, or a public release from a private home carries a source export or a package, which needs the tree check, so an agent without `fabric.source.json` takes those routes only once it has one; an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home neither is done; the manifest stays opt-in otherwise (an organization's private agent packed for its own
+([handing over](#handing-over)) binds every agent's source, with a manifest or without one, and a hand-over by push or by file, a package handed over, or published to a public registry from a private home, or a public release from a private home carries a source export or a package, which needs the tree check, so an agent without `fabric.source.json` takes those routes only once it has one; an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home an agent does neither on its own (with the operator's explicit permission for that act it is his own act, no act of this contract); the manifest stays opt-in otherwise (an organization's private agent packed for its own
 private registry, readable only by its members, needs none). The Fabric Agent Adapter's templates are to write one for every new agent (owed by
 CT-207); requiring it of every agent is a later decision (DEC-0149 item 3).
 
@@ -433,7 +433,7 @@ always allowed.
    original. The export's receipt records the recipient and the export commit; the next export to that recipient reads
    its parent from that receipt (none recorded means a parentless export). A local export with no recipient records
    none and is parentless; when such an export is then handed over by push or by file, the hand-over action (the adapter's,
-   owed by CT-207) records the recipient and the export commit in that export's receipt, one record per recipient, so the next export to that recipient finds its parent. The parent's objects come from the recipient's repository, fetched for that
+   CT-207, or Fabric's "give as source", CT-208) records the recipient and the export commit in that export's receipt, one record per recipient, so the next export to that recipient finds its parent. The parent's objects come from the recipient's repository, fetched for that
    one commit; when they cannot be fetched, the export carries no parent and goes as below. An export that can land as
    a fast-forward (the recipient's branch still ends at its parent) does; any other (a moved branch, or a parentless
    export into a non-empty branch) goes to the recipient as a new branch or pull request for it to merge under its own
@@ -627,7 +627,7 @@ the whole repository of a personal agent's private home, which is not done (abov
 becomes readable.
 
 What takes the word when a source becomes public: a personal agent's source made public for the first time (as a source
-export, a public repository created for it included; its own repository is never made public, as above: that is not done by an agent on its own; with the operator's explicit permission for that act it is the operator's own act under his own rule, and no act of this contract; the contract's tools do not perform it), and every later public release of a personal agent from a private home (each new commit is its own hand-over), and an
+export, a public repository created for it included; its own repository is not made public by an agent, as above: that is not done by an agent on its own; with the operator's explicit permission for that act it is the operator's own act under his own rule, and no act of this contract; the contract's tools do not perform it), and every later public release of a personal agent from a private home (each new commit is its own hand-over), and an
 organization agent's private source made public (a visibility change, or its first public release from a private home;
 later public releases from that home under its release rules are the organization's own act). An organization creating
 its own agent's home public is the organization's own act, no hand-over, and so is its release of an agent whose home is
@@ -669,7 +669,9 @@ symbolic link in the receiver's tree is refused whole, as `git apply` refuses on
 time, since the path list alone cannot tell. A patch path outside the grammar as [paths](#paths) reads it (NFC or NFD
 past 256 code points, or a segment made only of dots, spaces and code points HFS+ ignores) is refused, so an import never writes one.
 A patch path whose file name is a credential file, read as the tree check reads it (`src/.env`, `src/KEY.PEM`,
-`src/.ENV.EXAMPLE`), is refused too: an import never writes a credential file.
+`src/.ENV.EXAMPLE`), is refused too: an import never writes a credential file. A patch also reads the name under the
+full fold (`foldSegment`: the Kelvin sign, a long s), so `src/x.` K-sign `ey` or `src/id_r` long-s `a` is refused too; the
+tree check keeps its ASCII reading, held equal to the adapter's check.
 
 A patch is always checked against the receiver's current source manifest, never against a manifest the patch brings:
 one patch could rewrite `fabric.source.json` to drop an `exclude`, and a later one land in the folder it left out. An
@@ -677,7 +679,8 @@ import never applies a change to `fabric.source.json`, whoever sends it: such a 
 is kept unapplied where the owner can read it, until the owner decides; the owner changes the manifest by a commit at
 the source, which then governs every later patch. `patchPathsAllowed(manifest, paths)`, given the receiver's manifest,
 answers every path refused, the manifest in any spelling among them; a path that is not a string is refused and named
-`paths[<index>]`, never shown, and a `paths` value that is not a list is refused whole and named `paths`.
+`paths[<index>]`, never shown (a hole in a sparse list included), and a `paths` value that is not a list is refused whole
+and named `paths`. Either label may equal a refused path's own name; any non-empty answer refuses the patch whole.
 
 ## Starting without the instance
 

@@ -25,6 +25,7 @@ import {
   checkSourceTree,
   credentialFileName,
   FOLD_UNICODE,
+  atManifestPath,
   HFS_IGNORABLE_CHAR,
   excludedFolderTest,
   foldOnlyExcludeTest,
@@ -419,6 +420,9 @@ describe("which files are source", () => {
     // A value that is not a list is refused whole, by its name.
     expect(patchPathsAllowed(manifest, "src/main.ts" as unknown as string[])).toEqual(["paths"]);
     expect(patchPathsAllowed(manifest, null as unknown as string[])).toEqual(["paths"]);
+    // A hole in a sparse list is visited and refused by its index.
+    const sparse: unknown[] = ["src/main.ts"]; sparse[2] = "src/b.ts";
+    expect(patchPathsAllowed(manifest, sparse)).toEqual(["paths[1]"]);
     // A refused path that is not a string is named by its index, never shown.
     expect(patchPathsAllowed(manifest, [3, "src/main.ts", { key: "sk-x" }, null])).toEqual(["paths[0]", "paths[2]", "paths[3]"]);
   });
@@ -1066,6 +1070,17 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
     const home = ["", "home", "jdoe", "agent"].join("/");
     const tree = sourceTreeProblems({ manifest: { include: ["src/", "LICENSE"], binaries: ["fabric.source.json"], unchecked: [{ path: "fabric.source.json", reason: "r" }] }, files: [{ path: "LICENSE", text: "x" }, { path: "src/a.ts", text: "x" }, { path: "fabric.source.json", text: `{"note": "${home}"}`, binary: true }] });
     expect(tree.map((problem) => [problem.kind, problem.file])).toEqual([["home-path", 2]]);
+  });
+
+  it("reads a nested repository at the manifest's path with a trailing slash the same way, with the remove remedy", () => {
+    const findings = sourceRules("source-tree", { manifest: { include: ["src/", "LICENSE"], exclude: ["fabric.source.json"] }, files: [{ path: "LICENSE", text: "x" }, { path: "src/a.ts", text: "x" }, { path: "fabric.source.json/", nestedRepository: true }] }) ?? [];
+    const nested = findings.filter((finding) => finding.code === "FAC-SEM-158" && finding.message.includes("nested-repository"));
+    expect(nested).toHaveLength(1);
+    expect(nested[0]?.message).toContain("remove the nested repository or gitlink at that path");
+    expect(nested[0]?.message).not.toContain("name it in exclude");
+    expect(atManifestPath("fabric.source.json/")).toBe(true);
+    expect(atManifestPath("fabric.source.json//")).toBe(false);
+    expect(atManifestPath(3)).toBe(false);
   });
 
   it("refuses a patch path whose name is a credential file, read as the tree check reads it", () => {
