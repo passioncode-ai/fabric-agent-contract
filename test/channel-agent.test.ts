@@ -21,27 +21,61 @@ const valid = vectors.declarations.find((v) => v.name === "one project, every me
 const value = valid.provider.extensions[KEY] as Json;
 
 // Time is the test thread's own processor time (process.threadCpuUsage, Node 23.9 and later; process.cpuUsage where it
-// is not available), the least of three runs after a warm one, held against prose read to the budget in the same run: a
-// ratio, so a loaded machine or the coverage run slows both sides alike.
+// is not available), the least of three samples after a warm run, held against prose read to the budget in the same
+// run or against the same shape at another size: a ratio, so a loaded machine or the coverage run slows both sides alike.
 const threadClock = (previous?: NodeJS.CpuUsage): NodeJS.CpuUsage => {
   const threaded = (process as unknown as { threadCpuUsage?: (previous?: NodeJS.CpuUsage) => NodeJS.CpuUsage }).threadCpuUsage;
   return threaded === undefined ? process.cpuUsage(previous) : threaded.call(process, previous);
 };
+const clockMs = (): number => {
+  const now = threadClock();
+  return (now.user + now.system) / 1000;
+};
+// CT-227: the clock's step, the least change it shows between two of its own changes: about 1 microsecond on Linux and
+// macOS, about 15.6 ms on Windows, where a run shorter than a step reads 0 or one whole step.
+const CLOCK_STEP_MS = ((): number => {
+  let step = Number.POSITIVE_INFINITY;
+  for (let i = 0; i < 3; i += 1) {
+    // Wait for a change, so the step timed next starts on one, then time it to the change after.
+    const start = clockMs();
+    let first = start;
+    while (first === start) first = clockMs();
+    let second = first;
+    while (second === first) second = clockMs();
+    step = Math.min(step, second - first);
+  }
+  return step;
+})();
+// A sample repeats its work until it spans at least 25 steps of the clock (and 5 ms), so the step is at most 4 % of it,
+// and reports the time of one run: a fine clock times one run of every case here, a coarse one many.
+const SAMPLE_MS = Math.max(5, 25 * CLOCK_STEP_MS);
 const cpuMs = (work: () => unknown): number => {
-  const started = threadClock();
-  work();
-  const spent = threadClock(started);
-  return (spent.user + spent.system) / 1000;
+  const started = clockMs();
+  let runs = 0;
+  let spent = 0;
+  do {
+    work();
+    runs += 1;
+    spent = clockMs() - started;
+  } while (spent < SAMPLE_MS);
+  return spent / runs;
 };
 const least = (work: () => unknown): number => {
   work();
   return Math.min(cpuMs(work), cpuMs(work), cpuMs(work));
 };
-/** The least of `runs` timed runs after a warm one, for a case that flaked under load with three. */
+/** The least of `runs` samples after a warm run, for a case that flaked under load with three. */
 const leastOf = (work: () => unknown, runs: number): number => {
   work();
   return Math.min(...Array.from({ length: runs }, () => cpuMs(work)));
 };
+/**
+ * How many times longer the large input takes than the small one, the least of five samples on each side. A step of
+ * 4x in size takes about 4x when the work is linear and 16x when it is quadratic: most tests hold it under 8, the
+ * geometric middle, a bound no constant factor of the runner moves (CT-227); a size the budget stops is held tighter.
+ */
+const growth = (small: () => unknown, large: () => unknown): number => leastOf(large, 5) / Math.max(leastOf(small, 5), CLOCK_STEP_MS);
+
 // The baseline's prose holds no base64 run for runRereads to charge: its letters are outside ASCII. It pays 4096 code
 // points, the visit and its spaces' argument pieces (about 7036 a string), so the budget stops it after about 142
 // strings and 245 still spend the budget. A prose of ASCII words now costs about eleven times as much a string (44,036
@@ -369,7 +403,8 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const early = channelAgentRules({ extensions: { [KEY]: { ...value, extra: `${key}${"a ".repeat(2100)}` } } }, "well-known");
     expect(early.filter((f) => f.code === "FAC-SEM-165").length).toBe(1);
   });
-  it("names at most SECRET_FINDINGS places and a path at most PATH_DEPTH deep, in time linear in the input", { timeout: 60_000 }, () => {
+  // CT-227: where the clock steps 15.6 ms each sample spans about 0.4 s, so this takes about half a minute there.
+  it("names at most SECRET_FINDINGS places and a path at most PATH_DEPTH deep, in time linear in the input", { timeout: 120_000 }, () => {
     const bearer = ["Bearer", "w".repeat(24)].join(" ");
     const key = ["sk", "-", "E5".repeat(12)].join("");
     const valueChain = (depth: number) => {
@@ -382,49 +417,23 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       for (let i = 1; i < depth; i += 1) node = { [key]: node };
       return node;
     };
-    // The test's own thread's processor time (process.threadCpuUsage, Node 23.9 and later), so the collector's helper
-    // threads and other files' work do not count; process.cpuUsage where the thread's is not available.
-    const clock = (previous?: NodeJS.CpuUsage): NodeJS.CpuUsage => {
-      const threaded = (process as unknown as { threadCpuUsage?: (previous?: NodeJS.CpuUsage) => NodeJS.CpuUsage }).threadCpuUsage;
-      return threaded === undefined ? process.cpuUsage(previous) : threaded.call(process, previous);
-    };
-    const run = (chain: Json) => {
-      const doc = { extensions: { [KEY]: { standard: "channel-agent-standard/1", projects: [chain] } } };
-      const before = clock();
-      const found = channelAgentRules(doc, "well-known");
-      const spent = clock(before);
-      return { found, micros: spent.user + spent.system };
-    };
-    // Five runs at each size after one warm run of each, summed, so a moment of another process does not read as growth.
-    const summed = (chain: Json) => {
-      const runs = [run(chain), run(chain), run(chain), run(chain), run(chain)];
-      return { found: runs[0]?.found ?? [], micros: runs.reduce((sum, r) => sum + r.micros, 0) };
-    };
-    // The least of three summed totals per size, as least() takes the least of three runs: one slow moment under
-    // parallel load cannot read as growth.
-    const total = (chain: Json) => {
-      const totals = [summed(chain), summed(chain), summed(chain)];
-      return totals.reduce((best, t) => (t.micros < best.micros ? t : best));
-    };
+    const doc = (chain: Json) => ({ extensions: { [KEY]: { standard: "channel-agent-standard/1", projects: [chain] } } });
+    const rules = (chain: Json) => channelAgentRules(doc(chain), "well-known");
     for (const build of [valueChain, nameChain]) {
       const smallChain = build(8000);
       const largeChain = build(32000);
-      run(smallChain);
-      run(largeChain);
-      const small = total(smallChain);
-      const large = total(largeChain);
-      const secret = large.found.filter((f) => f.code === "FAC-SEM-165");
+      const found = rules(largeChain);
+      const secret = found.filter((f) => f.code === "FAC-SEM-165");
       // The places, the count of the rest, and, past SECRET_BUDGET code points, the finding that the rest was not read.
       expect(secret.slice(0, SECRET_FINDINGS + 1).at(-1)?.message).toMatch(/^and [0-9]+ more /);
       expect(secret.length - SECRET_FINDINGS - 1).toBe(secret.at(-1)?.message.includes("UTF-16 units of reading") ? 1 : 0);
-      const characters = large.found.reduce((sum, f) => sum + f.instancePath.length, 0);
+      const characters = found.reduce((sum, f) => sum + f.instancePath.length, 0);
       expect(characters).toBeLessThan((SECRET_FINDINGS + 2) * (CHANNEL_AGENT_PATHS["well-known"].length + 2 * PATH_DEPTH + 16));
-      expect(Math.max(...large.found.map((f) => f.instancePath.split("/").length))).toBeLessThanOrEqual(CHANNEL_AGENT_PATHS["well-known"].split("/").length + PATH_DEPTH);
+      expect(Math.max(...found.map((f) => f.instancePath.split("/").length))).toBeLessThanOrEqual(CHANNEL_AGENT_PATHS["well-known"].split("/").length + PATH_DEPTH);
       // A 4x step in size costs about 4x in time: never the quadratic 16x. Both chains run out of the budget at both
       // sizes, so this pair times the checks that walk the whole value (oversize, widths, schema) with the reading
       // stopped at the budget, not the reading itself.
-      const ratio = large.micros / Math.max(small.micros, 1);
-      expect(ratio).toBeLessThan(6);
+      expect(growth(() => rules(smallChain), () => rules(largeChain)), build.name).toBeLessThan(6);
     }
     // A chain cheap enough to stay under the budget at both sizes (about 36 a level: the name `a`, its visit, its runs
     // and the object entered), so the walk and the reading themselves are timed.
@@ -435,12 +444,8 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     };
     const smallCheap = cheapChain(6000);
     const largeCheap = cheapChain(24000);
-    run(smallCheap);
-    run(largeCheap);
-    const small = total(smallCheap);
-    const large = total(largeCheap);
-    expect(large.found.some((f) => f.message.includes("UTF-16 units of reading"))).toBe(false);
-    expect(large.micros / Math.max(small.micros, 1)).toBeLessThan(6);
+    expect(rules(largeCheap).some((f) => f.message.includes("UTF-16 units of reading"))).toBe(false);
+    expect(growth(() => rules(smallCheap), () => rules(largeCheap))).toBeLessThan(6);
   });
   it("refuses a string or a name over 4096 code points before the schema runs, with no run of it in the finding", { timeout: 60_000 }, () => {
     const base = JSON.parse(read("fixtures/positive/service-well-known-channel-agent.json")) as Json;
@@ -578,14 +583,19 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   });
   it("charges each name or string its call, so two million empty strings are not read past the budget", { timeout: 60_000 }, () => {
     expect(VISIT_COST).toBe(16);
-    const doc = { extensions: { [KEY]: { ...value, extra: Array(2_000_000).fill("") } } };
+    const of = (n: number, item: unknown) => ({ extensions: { [KEY]: { ...value, extra: Array(n).fill(item) } } });
+    const doc = of(2_000_000, "");
     const timed = () => channelAgentRules(doc, "well-known");
-    // The least of five runs: with three it flaked once under load (77.48 against 73.12).
-    expect(leastOf(timed, 5)).toBeLessThan(5 * proseBaseline() + 20);
+    // The finding below shows the budget stops the reading at both sizes, so what grows is the walk outside it, linear
+    // in the document: 4x the strings take about 4x, never the quadratic 16x. CT-227: against 5x prose plus 20 ms this
+    // read 125 against 95 on Windows, the walk's cost per item against prose's being the runner's constant, not a rule.
+    const quarter = of(500_000, "");
+    expect(growth(() => channelAgentRules(quarter, "well-known"), timed)).toBeLessThan(8);
     // Two million numbers: each costs VISIT_COST too, so the reading stops at the budget, held to the same bound.
-    const zeros = { extensions: { [KEY]: { ...value, extra: Array(2_000_000).fill(0) } } };
+    const zeros = of(2_000_000, 0);
+    const quarterZeros = of(500_000, 0);
     expect(channelAgentRules(zeros, "well-known").some((f) => f.message.includes("UTF-16 units of reading"))).toBe(true);
-    expect(leastOf(() => channelAgentRules(zeros, "well-known"), 5)).toBeLessThan(5 * proseBaseline() + 20);
+    expect(growth(() => channelAgentRules(quarterZeros, "well-known"), () => channelAgentRules(zeros, "well-known"))).toBeLessThan(8);
     const found = timed();
     expect(found.filter((f) => f.message.includes("UTF-16 units of reading")).length).toBe(1);
   });
@@ -620,22 +630,14 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     // At a boundary the count runs from the s of `sk-`, its three characters included.
     expect(bare("sk-a")).toBe(8);
   });
-  it("reads a query of many pieces about as fast as prose of the same size", () => {
+  it("reads a query of many pieces about as fast as prose of the same size", { timeout: 60_000 }, () => {
     const query = `https://a.example/?${"a=b&".repeat(1100)}`.slice(0, 4096);
-    const prose = PROSE;
-    // The test thread's own processor time, so another file's work does not count.
-    const thread = (process as unknown as { threadCpuUsage?: (previous?: NodeJS.CpuUsage) => NodeJS.CpuUsage }).threadCpuUsage;
-    const clock = (previous?: NodeJS.CpuUsage): NodeJS.CpuUsage => (thread === undefined ? process.cpuUsage(previous) : thread.call(process, previous));
     const time = (text: string) => {
-      const started = clock();
-      channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array.from({ length: 300 }, () => text) } } }, "well-known");
-      const spent = clock(started);
-      return (spent.user + spent.system) / 1000;
+      const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 300 }, () => text) } } };
+      return least(() => channelAgentRules(doc, "well-known"));
     };
-    time(prose);
-    time(query);
-    const baseline = Math.min(time(prose), time(prose), time(prose));
-    expect(Math.min(time(query), time(query), time(query))).toBeLessThan(2 * baseline + 20);
+    const baseline = time(PROSE);
+    expect(time(query)).toBeLessThan(2 * baseline + 20);
   });
   it("charges a member's name once, so the budget's edge falls where the count says", () => {
     const bearer = ["Bearer", "z".repeat(24)].join(" ");
@@ -653,27 +655,18 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(at(under).map((f) => [f.instancePath, f.message.includes("UTF-16 units of reading")])).toEqual([[`${CHANNEL_AGENT_PATHS["well-known"]}/*/*`, false]]);
     expect(at(under + 1).map((f) => f.message.includes("UTF-16 units of reading"))).toEqual([true]);
   });
-  it("counts the URL terms on the names and values a WHATWG URL parse yields", () => {
+  it("counts the URL terms on the names and values a WHATWG URL parse yields", { timeout: 60_000 }, () => {
     const tab = `https://a.example/?q=${"ey\tJ".repeat(1000)}`;
     expect(detectorCost(tab)).toBeGreaterThanOrEqual(1_500_000);
     const sk = `https://a.example/?q=${"-%73k-".repeat(600)}`;
     expect(detectorCost(sk)).toBeGreaterThanOrEqual(sk.length + 500 * 255);
-    const thread = (process as unknown as { threadCpuUsage?: (previous?: NodeJS.CpuUsage) => NodeJS.CpuUsage }).threadCpuUsage;
-    const clock = (previous?: NodeJS.CpuUsage): NodeJS.CpuUsage => (thread === undefined ? process.cpuUsage(previous) : thread.call(process, previous));
     const time = (text: string) => {
-      const started = clock();
-      channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array.from({ length: 300 }, () => text) } } }, "well-known");
-      const spent = clock(started);
-      return (spent.user + spent.system) / 1000;
+      const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 300 }, () => text) } } };
+      return least(() => channelAgentRules(doc, "well-known"));
     };
-    const prose = PROSE;
     const shapes = [tab.slice(0, 4096), `https://a.example/#q=${"ey\rJ".repeat(1000)}`.slice(0, 4096), `https://a.example/#q=${"ey\nJ".repeat(1000)}`.slice(0, 4096), sk.slice(0, 4096)];
-    time(prose);
-    const baseline = Math.min(time(prose), time(prose), time(prose));
-    for (const shape of shapes) {
-      time(shape);
-      expect(Math.min(time(shape), time(shape), time(shape)), JSON.stringify(shape.slice(0, 30))).toBeLessThan(2 * baseline + 20);
-    }
+    const baseline = time(PROSE);
+    for (const shape of shapes) expect(time(shape), JSON.stringify(shape.slice(0, 30))).toBeLessThan(2 * baseline + 20);
   });
   it("counts UTF-16 units, an astral character two, and reads astral text about as fast as prose", { timeout: 60_000 }, () => {
     const astral = "\u{1F600}".repeat(2000);
@@ -685,16 +678,26 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(leastOf(() => channelAgentRules(extra, "well-known"), 5)).toBeLessThan(2 * baseline + 20);
     // A schema-valid declaration: each channel's texts maps hold 64 languages of that text.
     const languages = Array.from({ length: 64 }, (_, i) => `${"abc"[Math.floor(i / 26)]}${String.fromCharCode(97 + (i % 26))}`);
-    const many = Object.fromEntries(languages.map((language) => [language, wide]));
     const p0 = value.projects[0];
-    const channels = p0.channels.map((channel: Json) => ({ ...channel, texts: { holding: many, final: many } }));
-    const valid = { extensions: { [KEY]: { ...value, projects: [{ ...p0, channels }] } } };
-    expect(channelAgentRules(valid, "well-known").filter((f) => f.code === "FAC-SEM-162")).toEqual([]);
-    expect(leastOf(() => channelAgentRules(valid, "well-known"), 5)).toBeLessThan(2 * baseline + 20);
+    const validOf = (text: string) => {
+      const many = Object.fromEntries(languages.map((language) => [language, text]));
+      const channels = p0.channels.map((channel: Json) => ({ ...channel, texts: { holding: many, final: many } }));
+      return { extensions: { [KEY]: { ...value, projects: [{ ...p0, channels }] } } };
+    };
+    const valid = validOf(wide);
+    const quarter = validOf("\u{1F600}".repeat(1024));
+    for (const doc of [valid, quarter]) expect(channelAgentRules(doc, "well-known").filter((f) => f.code === "FAC-SEM-162")).toEqual([]);
+    // The schema counts every text's code points whole, outside the budget, so this declaration is held to its own
+    // quarter: texts four times as long take at most about four times as long when the work is linear in a text's
+    // length, never the quadratic sixteen.
+    // CT-227: against 2x prose plus 20 ms it read 3.3 times prose on macOS and 3.2 times under coverage on Linux, the
+    // schema's cost per character against prose's being the runner's constant, not a rule.
+    expect(growth(() => channelAgentRules(quarter, "well-known"), () => channelAgentRules(valid, "well-known"))).toBeLessThan(8);
   });
   // Timing catches a term that grows faster than the input (a quadratic reread, a parse per piece); the exact assertions
-  // beside it guard the constant-factor terms, which a timing bound of 2x prose plus 20 ms cannot see.
-  it("charges PIECE_COST once for every string read as a URL, parsed or not, and counts only the head", { timeout: 60_000 }, () => {
+  // beside it guard the constant-factor terms, which no timing bound can see on every runner (CT-227).
+  // CT-227: where the clock steps 15.6 ms each sample spans about 0.4 s, so this takes about half a minute there.
+  it("charges PIECE_COST once for every string read as a URL, parsed or not, and counts only the head", { timeout: 120_000 }, () => {
     expect(detectorCost("ws:")).toBe(3 + 3 * 4 + PIECE_COST);
     const page = read("docs/specification/channel-agent.md").replace(/\s+/g, " ");
     expect(page).toContain("`ws:` costs 3, 3 x 4 and 128: 143");
@@ -704,41 +707,51 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const long = `https://a.example/?q=${"b".repeat(4979)}`;
     expect(long.length).toBe(5000);
     expect(detectorCost(long)).toBe(detectorCost(long.slice(0, 4097), true));
-    const baseline = proseBaseline();
     for (const text of ["ws:", "ws:?", "ftp:", "http:", "x:"]) {
-      // 40 000 copies: the uncharged form would read the whole budget, so the charge is what stops it in time.
-      const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 40_000 }, () => text) } } };
-      expect(channelAgentRules(doc, "well-known").some((f) => f.message.includes("UTF-16 units of reading")), text).toBe(true);
-      expect(least(() => channelAgentRules(doc, "well-known")), text).toBeLessThan(2 * baseline + 20);
+      // 40 000 copies: the uncharged form would read the whole budget, so the charge (held exactly above) is what stops
+      // it. Both sizes stop at the budget, so 4x the copies take about the same time (the walk outside the budget is a
+      // small part here), where a reading past the budget, or the uncharged form (`ws:` 31 a copy, so 10 000 copies read
+      // whole and 40 000 about 32 000), takes three to four times as long. CT-227: against 2x prose plus 20 ms `ws:` read
+      // 93 against 52 on Windows, a URL parse's cost against prose's being the runner's constant, not a rule.
+      const of = (n: number) => ({ extensions: { [KEY]: { ...value, extra: Array.from({ length: n }, () => text) } } });
+      const doc = of(40_000);
+      const quarter = of(10_000);
+      for (const d of [doc, quarter]) expect(channelAgentRules(d, "well-known").some((f) => f.message.includes("UTF-16 units of reading")), text).toBe(true);
+      expect(growth(() => channelAgentRules(quarter, "well-known"), () => channelAgentRules(doc, "well-known")), text).toBeLessThan(2);
     }
     // A schema-valid declaration: 12 projects of 32 channels, each texts map 64 languages of `ws:`.
     const languages = Array.from({ length: 64 }, (_, i) => `${"abc"[Math.floor(i / 26)]}${String.fromCharCode(97 + (i % 26))}`);
     const many = Object.fromEntries(languages.map((language) => [language, "ws:"]));
     const p0 = value.projects[0];
     const dm = p0.channels[0] as Json;
-    const projects = Array.from({ length: 12 }, (_, i) => ({ ...p0, project: `project:example-${i}`, channels: Array.from({ length: 32 }, (_, j) => ({ ...dm, id: `c${j}`, texts: { holding: many, final: many } })) }));
-    const wide = { extensions: { [KEY]: { ...value, projects } } };
-    expect(channelAgentRules(wide, "well-known").filter((f) => f.code === "FAC-SEM-162" || f.code === "FAC-SEM-163")).toEqual([]);
-    expect(least(() => channelAgentRules(wide, "well-known"))).toBeLessThan(2 * baseline + 20);
+    const wideOf = (n: number) => ({ extensions: { [KEY]: { ...value, projects: Array.from({ length: n }, (_, i) => ({ ...p0, project: `project:example-${i}`, channels: Array.from({ length: 32 }, (_, j) => ({ ...dm, id: `c${j}`, texts: { holding: many, final: many } })) })) } } });
+    const wide = wideOf(12);
+    const narrow = wideOf(3);
+    for (const doc of [wide, narrow]) expect(channelAgentRules(doc, "well-known").filter((f) => f.code === "FAC-SEM-162" || f.code === "FAC-SEM-163")).toEqual([]);
+    // The schema reads all of it, outside the budget: 4x the projects take at most about 4x, never the quadratic 16x.
+    // CT-227: it read 3.2 times prose on a laptop, the schema's cost per text against prose's being the runner's constant.
+    expect(growth(() => channelAgentRules(narrow, "well-known"), () => channelAgentRules(wide, "well-known"))).toBeLessThan(8);
   });
   it("charges each array or object the reading enters, so wrapping cannot be read for free", { timeout: 60_000 }, () => {
-    const baseline = proseBaseline();
-    const wrapped = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 66_000 }, () => [[[[[""]]]]]) } } };
-    expect(channelAgentRules(wrapped, "well-known").some((f) => f.message.includes("UTF-16 units of reading"))).toBe(true);
-    expect(leastOf(() => channelAgentRules(wrapped, "well-known"), 5)).toBeLessThan(2 * baseline + 20);
-    const empty = { extensions: { [KEY]: { ...value, extra: Array(2_000_000).fill([]) } } };
-    expect(channelAgentRules(empty, "well-known").some((f) => f.message.includes("UTF-16 units of reading"))).toBe(true);
-    expect(leastOf(() => channelAgentRules(empty, "well-known"), 5)).toBeLessThan(5 * baseline + 20);
+    // Each pair stops at the budget at both sizes (the findings), so what grows is the walk outside it, linear in the
+    // document: 4x the items take about 4x, never the quadratic 16x. CT-227: against 2x prose plus 20 ms the wrapped
+    // document read 62 against 52 on Windows, the walk's cost per container against prose's being the runner's constant.
+    const wrappedOf = (n: number) => ({ extensions: { [KEY]: { ...value, extra: Array.from({ length: n }, () => [[[[[""]]]]]) } } });
+    const wrapped = wrappedOf(66_000);
+    const wrappedQuarter = wrappedOf(16_500);
+    const emptyOf = (n: number) => ({ extensions: { [KEY]: { ...value, extra: Array(n).fill([]) } } });
+    const empty = emptyOf(2_000_000);
+    const emptyQuarter = emptyOf(500_000);
+    for (const [small, large] of [[wrappedQuarter, wrapped], [emptyQuarter, empty]]) {
+      for (const doc of [small, large]) expect(channelAgentRules(doc, "well-known").some((f) => f.message.includes("UTF-16 units of reading"))).toBe(true);
+      expect(growth(() => channelAgentRules(small, "well-known"), () => channelAgentRules(large, "well-known"))).toBeLessThan(8);
+    }
   });
   it("grows linearly in the pieces under one query name, rawValues appending in place", { timeout: 60_000 }, () => {
     // A copying append (a new array per piece) makes this quadratic: 4x the pieces would cost about 16x the time.
     const small = `x:?${"a&".repeat(512)}`;
     const large = `x:?${"a&".repeat(2047)}`;
-    const time = (text: string) => leastOf(() => {
-      for (let i = 0; i < 40; i += 1) detectorCost(text);
-    }, 5);
-    const ratio = time(large) / Math.max(time(small), 0.001);
-    expect(ratio).toBeLessThan(8);
+    expect(growth(() => detectorCost(small), () => detectorCost(large))).toBeLessThan(8);
   });
   it("reads many pieces under one query name in time, rawValues appending in place", { timeout: 60_000 }, () => {
     const text = `x:?${"a&".repeat(2040)}`;
@@ -793,7 +806,8 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const unread = channelAgentView({ extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [heavy, p0.channels[1]] }] } } }, "well-known");
     expect(unread).toEqual({ declared: false, reported: true, errors: ["FAC-SEM-165 at /: reading the declarations for credentials takes more than 1000000 UTF-16 units of reading; a reader treats the declaration as not declared; declare fewer or shorter texts or names"] });
   });
-  it("reads a string as a URL only when its head, tab and line breaks removed, is ASCII with no high escape and opens with a scheme", { timeout: 60_000 }, () => {
+  // CT-227: where the clock steps 15.6 ms each sample spans about 0.4 s, so this takes about half a minute there.
+  it("reads a string as a URL only when its head, tab and line breaks removed, is ASCII with no high escape and opens with a scheme", { timeout: 120_000 }, () => {
     expect(readAsUrl("https://a.example/?q=1")).toBe(true);
     expect(readAsUrl("mailto:someone")).toBe(true);
     expect(readAsUrl("https://a.example")).toBe(true);
@@ -815,28 +829,18 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(bare(host)).toBe(4088);
     // A scheme that does not parse (an invalid port) is read by the other shapes only.
     expect(bare("http://a.example:99999/?q=a")).toBe(27);
-    const thread = (process as unknown as { threadCpuUsage?: (previous?: NodeJS.CpuUsage) => NodeJS.CpuUsage }).threadCpuUsage;
-    const clock = (previous?: NodeJS.CpuUsage): NodeJS.CpuUsage => (thread === undefined ? process.cpuUsage(previous) : thread.call(process, previous));
+    // The least of five samples on each side, so a slow moment under load (the coverage run included) cannot read as a cost.
     const time = (text: string) => {
-      const started = clock();
-      channelAgentRules({ extensions: { [KEY]: { ...value, extra: Array.from({ length: 300 }, () => text) } } }, "well-known");
-      const spent = clock(started);
-      return (spent.user + spent.system) / 1000;
+      const doc = { extensions: { [KEY]: { ...value, extra: Array.from({ length: 300 }, () => text) } } };
+      return leastOf(() => channelAgentRules(doc, "well-known"), 5);
     };
-    const prose = PROSE;
-    time(prose);
-    // The least of five runs on each side, so a slow moment under load (the coverage run included) cannot read as a cost.
-    const leastOf = (text: string) => Math.min(time(text), time(text), time(text), time(text), time(text));
-    const baseline = leastOf(prose);
+    const baseline = time(PROSE);
     // A special scheme takes a host without `//`, and a percent-escaped host is decoded before host processing: none is parsed.
     const wide = Array.from({ length: 4091 }, (_, i) => String.fromCodePoint(0x4e00 + i)).join("");
     const special = ["http:", "http:/", "http:\\\\", "https:/\t/", "HTTP:", "ws:"].map((scheme) => `${scheme}${wide}`);
     const escaped = `http://a.${Array.from({ length: 453 }, (_, i) => encodeURIComponent(String.fromCodePoint(0x4e00 + i))).join("")}`;
     for (const text of [...special, escaped]) expect(readAsUrl(text), text.slice(0, 9)).toBe(false);
-    for (const text of [host, "x", ...special, escaped]) {
-      time(text);
-      expect(leastOf(text), text.slice(0, 12)).toBeLessThan(2 * baseline + 20);
-    }
+    for (const text of [host, "x", ...special, escaped]) expect(time(text), text.slice(0, 12)).toBeLessThan(2 * baseline + 20);
   });
   it("answers no key as connectionsView does: not declared and not reported", () => {
     expect(channelAgentView({ extensions: {} }, "well-known")).toEqual({ declared: false, reported: false, errors: [] });
