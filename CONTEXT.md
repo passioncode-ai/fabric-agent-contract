@@ -460,9 +460,9 @@ another commit; the export's receipt records the recipient and the export commit
 parent, and an export that cannot land as a fast-forward goes as a new branch or pull request, never by a force-push; a package handed over, or published to a public registry from a private home, names as its target the source commit it was packed
 from and holds only source paths that passed that commit's tree check, besides the files the pack step writes (`fabric.package.json`); built files travel only as committed source paths.
 An act on the whole repository of a personal agent's private home, or of any copy of it within the operator's estate that carries its history (a private mirror), such as a visibility change or access given to any other person, is not done by an agent on its own; with the operator's explicit permission for that act it is the operator's own act under his own rule, and no act of this contract; the contract's tools do not perform it; the source leaves only as a source export; a transfer of a personal agent's home, public or
-private, is not done either (the operator's own permission for it is outside this contract); a public home's access and
+private, is not done by an agent on its own either (the operator's own permission for it is outside this contract); a public home's access and
 visibility are outside that rule, making a public personal home private is none, access the operator gave before
-DEC-0149 was accepted stands as the operator's own act (nothing is retroactive), and an agent never gives new access. An organization's acts on its own agent's whole
+DEC-0149 was accepted stands as the operator's own act (nothing is retroactive), and an agent never gives new access on its own (with the operator's explicit permission for that act it is his own act, no act of this contract). An organization's acts on its own agent's whole
 repository are its own, under its own release rules, except two that take the word naming the repository: making a
 private organization agent's source public by a visibility change, and giving it new readers outside the organization
 (the word accepts the history as it stands); its first public release from a private home, by any route, takes the word naming
@@ -472,7 +472,8 @@ paths that passed the tree check. A processor acting for the owner under the own
 or host is no recipient while what it holds stays readable by no one but the owner and the processors acting for it;
 output it makes public is one. Access the owning organization gives its own members to its own agent's home is none,
 and giving access to a public home is none. What takes the word when a source becomes public: a personal agent's source
-made public for the first time, and every later public release of a personal agent from a private home (each new
+made public for the first time (as a source export, a public repository created for it included; its own repository's
+visibility is not changed by an agent on its own, above), and every later public release of a personal agent from a private home (each new
 commit is its own hand-over), and an organization agent's private source made public; an organization creating its
 own agent's home public is its own act, and a push, release or serving of what is already public, from a public home to
 any other public place (another owner's included), reaches no new reader and is none, when an earlier act on the word,

@@ -2215,6 +2215,22 @@ describe("an agent's source (DEC-0149)", () => {
     expect(found(tree.out).some((line) => line.includes("FAC-SEM-158") && line.includes("nested-repository"))).toBe(true);
   });
 
+  it("never lets a gitlink at the manifest's path use an exclude entry: unused-exclude for fabric.source.json/, none for the bare name", () => {
+    for (const [entry, unused] of [["fabric.source.json/", true], ["fabric.source.json", false]] as const) {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: [entry] }), LICENSE: "x", "src/a.ts": "x" });
+      expect(gitIn(dir, "init", "-q").status).toBe(0);
+      expect(gitIn(dir, "add", "LICENSE", "src/a.ts").status).toBe(0);
+      expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${"3".repeat(40)},fabric.source.json`).status).toBe(0);
+      const result = run(dir, "--kind", "source-tree");
+      const lines = found(result.out);
+      const nested = lines.filter((line) => line.includes("FAC-SEM-158") && line.includes("nested-repository"));
+      expect(nested, entry).toHaveLength(1);
+      expect(nested[0], entry).toContain("remove the nested repository or gitlink at that path");
+      const unusedLines = lines.filter((line) => line.includes("FAC-SEM-159") && line.includes("unused-exclude"));
+      expect(unusedLines.map((line) => line.split("  ")[1]), entry).toEqual(unused ? ["/manifest/exclude/0"] : []);
+    }
+  });
+
   it("stays in Git mode when Git lists only a gitlink at the manifest's path under the source, and reports it", () => {
     const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), ".gitignore": "src/\nLICENSE\n", LICENSE: "x", "src/a.ts": "x" });
     expect(gitIn(dir, "init", "-q").status).toBe(0);

@@ -102,7 +102,7 @@ independent agent author and P-02 project operator.
 - **Alt paths:** author keeps an older protocol revision -> the line names the revision the contract supports rather than translating it; a misspelt extension key, which the schema accepts -> a `hint/extension-key` line names the nearest key the contract defines (the same name and version under another host or path, or one within three edits), else points at the list of keys.
 - **UI elements:** problem line, instance path, rule, recovery message, help link, `--json` report.
 - **States covered:** error, success
-- **Errors & recovery:** a file that is not JSON -> a `json` line with the parser's message; an unknown `--schema` or `--kind` -> exit 2 with the usage; an unreadable file -> exit 2 naming the file and the error.
+- **Errors & recovery:** a file that is not JSON -> a `json` line with the parser's message; an unknown `--schema` or `--kind` -> exit 2 with the usage; an unreadable file -> exit 2 naming the file and the error. A `.json` file in a folder that is a FIFO, a socket or a device is skipped by a plain `pnpm validate <dir>` with a `note/skipped` line saying it is not a file, never opened (DEC-0149).
 - **Status:** validated
 - **Coverage:** `test/validate-cli.test.ts` (negative fixtures exit 1 with their keyword; semantic fixtures report their codes; one line per planted mistake; usage errors exit 2), `test/schema-errors.test.ts`, `test/profile-branches.test.ts`
 - **Product:** unobserved

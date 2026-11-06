@@ -67,7 +67,9 @@ would need a rule reconciling it with the fields, and a checker would have to ch
 
 ## One instance per context on a machine
 
-An agent runs on one machine once per context. In the estate record, a placement (`machines[].packages[]`) gains an
+An agent runs on one machine once per context. An `org:<orgId>` instance on a machine the operator holds is the
+owner's placement serving the organization, so it is no source hand-over, while a placement on a machine, registry or
+repository the organization holds is one ([source](source.md#handing-over), DEC-0149). In the estate record, a placement (`machines[].packages[]`) gains an
 optional `context` (absent means `personal`) and an optional `grant`, the id of the share grant it runs under; a secret
 placement (`machines[].secrets[]`) gains `context` too, so a slot fills one instance. The rules are the estate
 record's ([machines](estate-record.md#machines), [semantic rules](estate-record.md#semantic-rules)):

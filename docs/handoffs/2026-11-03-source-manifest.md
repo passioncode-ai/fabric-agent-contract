@@ -376,7 +376,12 @@ source, what never travels with it, the check before a source export, and how a 
   `atManifestPath` read by `nestedTest` and the message (a test and a tree vector with a trailing slash), the gitlink
   exception in `excludesGitlink`, a patch's full-fold credential reading (two patch vectors), `Array.from` over a
   sparse list, the flat wordings qualified, SCN-054 and item 8 on the manifest's path, the inventory and CT-207 rows,
-  and DEC-0153's landed steps written as steps of this landing's merge; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  and DEC-0153's landed steps written as steps of this landing's merge; round 57 (not clean: flat access wordings;
+  the patch's full fold missing from the requirement rows) answered as decided: every access, visibility and transfer
+  wording qualified ("on its own", with the operator's permission his own act), the three requirement rows extended,
+  an org context instance on the owner's machine (source.md, contexts.md, the knowledge base's item 9), the vectors'
+  credential clause, a Git-mode CLI test of the gitlink exception (failing with round 55's `src/validate-cli.ts`),
+  SCN-002's skipped-file line and the merge notes; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -392,7 +397,8 @@ source, what never travels with it, the check before a source export, and how a 
 ## Open
 
 - The row that makes the check refuse an `unchecked` entry covering a credential finding, and the inventory row, are
-  filed at landing; their CT ids are written here and in SCN-054 step 3 in the landing change (CT ids pending).
+  filed at landing; the enforcing row's id goes into SCN-054 step 3, and both ids are written here, in the landing
+  change (CT ids pending).
 - A structured marker for a refusal that is a setup answer (a missing slot) is left open: by DEC-0149's choice the tool
   error carries none, so a caller or host that sees only the error cannot tell a setup answer from a failure. It is for
   CT-208 (Fabric) and CT-219 (not on this branch; on main or its own branch at landing) to take up.
@@ -474,6 +480,11 @@ source, what never travels with it, the check before a source export, and how a 
   - `.git` in every form a case-insensitive or Windows file system resolves to it is never source, and a patch path an
     `exclude` entry names under ASCII case folding is refused, since on such a file system the two spellings are one
     file and the rule is otherwise bypassed.
+- Round 57, decided by the coordinator under the operator's recorded rules:
+  - an agent never gives new access, changes a personal private home's visibility or transfers a personal home on its
+    own; with the operator's explicit permission for that act it is his own act, no act of this contract;
+  - an `org:<orgId>` context instance on a machine the operator holds is the owner's placement serving the
+    organization, no hand-over; a placement the organization holds is one.
 - Round 56, decided by the coordinator under the operator's recorded rules:
   - the manifest's path is read one way (one trailing `/` dropped, NFC) wherever a nested repository is judged;
   - a patch refuses a credential file's name under the full fold too; the tree check keeps its ASCII reading;
@@ -688,6 +699,21 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 57's fixes were checked on the working tree over head `4c96b4b2` (this note's commit holds the same tree, plus
+this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files with 10254 passed
+and 3 skipped under the coverage floors, `ux:lint`, `docs:check` passed with 0 markdownlint errors, `privacy:check` with
+0 findings), run under the shared lock with the 15-minute load at 34.8 and 12 GB free, and `pnpm exec tsx
+tools/vectors/run.ts` (exit 0, 29 files match; `source-tree.json` 89 tree and 32 patch cases); before it `pnpm
+typecheck` (exit 0), `pnpm vectors:write` then `pnpm vectors:check` (exit 0) and the targeted coverage run over
+`source-rules`, `validate-cli`, `secret-shape`, `schema-compilation`, `consistency`, `validate-cli-faults`,
+`rule-tolerance` and `positive-sweep` (exit 0: 3257 passed, 2 skipped; `src/source-rules.ts` at 100 % of its branches,
+`src/validate-cli.ts` at 99.48 %). The new Git-mode test of the gitlink exception fails with `028acfe7`'s
+`src/validate-cli.ts` put back for one run (no unused-exclude line where one is expected) and passes on this tree. No
+U+2014 in the added lines. The knowledge base's PR is at `26eec366` (round 57 merged the knowledge base's main
+`83af1b98`, which holds `c4ccd33c`, item 8 as main has it): `source hand-over` in 4, 3 and 3 lines of agents-first,
+principles and rules, `own estate` once on each, item 9 once and item 8 once; the knowledge base's `npm test` (exit
+0, 172 passed) and `npm run verify:content` (exit 0, backlog 0 errors).
 
 Round 56's fixes were checked on the working tree over head `028acfe7` (this note's commit holds the same tree, plus
 this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files with 10253 passed
@@ -1078,7 +1104,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 56 into `f11ab60e` (the PR's head), which carries main's `8128b6b4`,
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 57 into `26eec366` (the PR's head), which carries main's `83af1b98`,
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). PR #235 (DEC-0148) and DEC-0150 are already on main (`1016f0ec` when re-measured in round
    50), so nothing is refreshed for them. Merge the current `origin/main` (re-measure its head at landing) into the fresh branch
@@ -1103,13 +1129,13 @@ remaining steps, in order:
 6. Pair PR #628 only with a contract head that carries the same round of the readings (the round named in DEC-0149's
    status line and in RM-36's "Restated 2026-11-05" line in the PR's `knowledge/roadmap.md`, not its last commit,
    which may be a merge of main), and re-read the pair on the round-40 and round-41 points before landing.
-   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`8128b6b4` at
-   round 56, merged into the PR as `f11ab60e`): if it is behind, merge main into it (never a rebase or a force-push),
+   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`83af1b98` at
+   round 57, merged into the PR as `26eec366`): if it is behind, merge main into it (never a rebase or a force-push),
    keeping main's item 8 as main has it and the PR's item 9, and set the round named in RM-36's "Restated 2026-11-05"
    line to the landing round. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `f11ab60e`, which carries the knowledge base's main, they print 4, 3 and 3
+   `knowledge/rules.md`; at PR #628's head `26eec366`, which carries the knowledge base's main, they print 4, 3 and 3
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in
@@ -1129,9 +1155,11 @@ homes, and any copy of them within the operator's estate (private mirrors, secon
 outside the operator can read, for the operator to review: information, not a gate, since access
 the operator gave before the rule stands as the operator's own act (DEC-0149 item 12, round 44). At landing, also file a backlog row under the next free CT id then: "`unchecked` covering a credential finding exits 0
 (probe)", its evidence the round-35 probe (a manifest listing its own key-holding file under `unchecked` exits 0 under
-`--kind source-tree`, exit 1 without that entry), asking the checker to refuse such an entry. The lander writes the CT ids it files
-there (this row and the inventory row) into SCN-054 step 3, where it says the enforcing row is filed at landing, and
-into this note's Open line, in the landing change.
+`--kind source-tree`, exit 1 without that entry), asking the checker to refuse such an entry. The lander writes the enforcing row's CT id
+into SCN-054 step 3, where it says the enforcing row is filed at landing, and both rows' ids (this row and the
+inventory row) into this note's Open line, in the landing change. The release notes of the landing carry one more
+item: a plain `pnpm validate <dir>` skips a `.json` file that is a FIFO, a socket or a device with a `note/skipped`
+line saying it is not a file (SCN-002's errors line).
 
 Right after the merge: close CT-211 with the three greps' outputs; add the contract's row in the knowledge base's
 `knowledge/products.md` for the release that carries DEC-0149, with the release decision (the version tag, as DEC-0150's
@@ -1168,8 +1196,9 @@ with `origin/main`, read from the section "Left to the landers of DEC-0149 and D
 (`docs/handoffs/2026-11-04-ops-digest.md` at `eac1a594`), which gives each with its check:
 
 1. The fold: `foldDir = (dir) => foldPath(dir)` in `src/ops-digest.ts`, deleting `NUSKHURI`, `toMkhedruli` and the
-   local copy of the code points HFS+ ignores there; its test of that class takes `HFS_IGNORABLE_CHAR.test` from
-   `./source-rules.js` (exported here since round 48); the parity comment in `test/ops-digest.test.ts` reworded.
+   local copy of the code points HFS+ ignores there; the parity comment in `test/ops-digest.test.ts` reworded. The
+   merge post then says that `src/ops-digest.ts` imports `./source-rules.js`, so a consumer copying `ops-digest.ts`
+   needs `source-rules.ts` beside it.
 2. The JWT test: `digestFoldersRules` calls `hasJwt` in place of `JWT_SHAPE.test`, the import dropped, and the OD-2
    and `FAC-SEM-167` sentences of `ops-digest.md` name `hasJwt`.
 3. The mirror lines: every in-progress marker after a DEC-0149 citation on main dropped (ops-digest.md, the comments
@@ -1220,7 +1249,9 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
 - Textual conflicts with DEC-0153's landed tree are expected in the scope comments of `src/activity-rules.ts` and
   `src/proposal-rules.ts` (both end "Changing any of them is a decision." on both branches, and this branch names
   `SOURCE_HOME_PATHS` as the fourth boundary before it): take DEC-0149's side; and in `test/rule-tolerance.test.ts` and
-  `test/positive-sweep.test.ts`, where both sides add cases: keep both.
+  `test/positive-sweep.test.ts`, where both sides add cases: keep both. In `test/rule-tolerance.test.ts` DEC-0149's
+  `"source-package"` entry takes a trailing comma before main's ops-digest entries; in `test/positive-sweep.test.ts`
+  the one-line sources array becomes one list, main's list plus `"source-rules"`.
 - The adapter's `SECRET_FILE` and `TOKEN_FILE` (CT-207) are to read a file's name folded as the contract's credential
   files are since round 52 (the code points HFS+ ignores removed, ASCII case folded, any trailing run of dots and spaces
   dropped), so `KEY.PEM` or `.env.` blocks there too, while `SECRET_FILE_OK` matches only the name as written, in lower
