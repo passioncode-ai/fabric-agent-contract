@@ -830,10 +830,9 @@ source, what never travels with it, the check before a source export, and how a 
 Round 72's fix (item DL: this note, `docs/DECISIONS.md` and `docs/backlog.md`) was checked on the working tree over
 head `0e055e8d`: the knowledge-base clause block occurs once in this note, byte for byte as the shared file holds it;
 no line names DEC-0150's and DEC-0153's Status lines as one form; `python3 docs/ux/lint.py` (exit 0) and
-`ORG_INDEX=... pnpm run privacy:check` (0 findings). `pnpm run docs:check` reports two MD018 errors, both inside the
-pasted block, on its two lines that begin with PR #628's number, which markdownlint reads as a heading without a
-space; the block is not changed here, as the coordinator asked, and its owner reflows it for both handoffs. No gate
-ran: no code changed since round 68's. No U+2014 in the added lines.
+`ORG_INDEX=... pnpm run privacy:check` (0 findings). The first paste drew two MD018 errors in `pnpm run
+docs:check` on two block lines beginning with PR #628's number; the block's owner reflowed it and set its heading to
+`###`, and the block pasted again from the shared file passes `pnpm run docs:check` (0 errors). No gate ran: no code changed since round 68's. No U+2014 in the added lines.
 
 Round 71's fix (item DK: this note, `docs/DECISIONS.md`, `docs/backlog.md`, source.md's Walk mode sentence and the
 walk trigger's comment; no code changed since `1bd70e54`) was checked on the working tree over head `1f9e56e2`: step
@@ -1645,7 +1644,7 @@ sentence, which the landing changes, holds the phrase across two lines). After t
 machine-report paragraph and `conformance.md`'s watcher row follow `service.md` by themselves: since round 63 they name
 no state and point at the definition in `service.md`. Every head here is re-measured at landing.
 
-#### The knowledge-base clause rule (the same block in DEC-0149's and DEC-0154's handoffs)
+### The knowledge-base clause rule (the same block in DEC-0149's and DEC-0154's handoffs)
 
 This block is byte-identical in `docs/handoffs/2026-11-03-source-manifest.md` (DEC-0149) and
 `docs/handoffs/2026-11-06-shared-host-ports.md` (DEC-0154); a change to one is made to both.
@@ -1653,10 +1652,10 @@ This block is byte-identical in `docs/handoffs/2026-11-03-source-manifest.md` (D
 Rule: each lander checks after its own write, so whichever lander finishes second sees the
 other's result; the edit depends on the text, so a second run changes nothing.
 
-The clause sits at `knowledge/authority.md:115` and `:128` (PR #628 at `30ac6c55`).
-From: "counting `foreign` and `foreign-user` is proposed for FD's watcher in contract
-DEC-0154". To: "counting `foreign` and `foreign-user` is owed by FD's watcher under contract
-DEC-0154" (no inner parentheses: the clause sits inside a bracket that closes right after it).
+The clause sits at `knowledge/authority.md:115` and `:128` (PR #628 at `30ac6c55`). From:
+"counting `foreign` and `foreign-user` is proposed for FD's watcher in contract DEC-0154". To:
+"counting `foreign` and `foreign-user` is owed by FD's watcher under contract DEC-0154" (no
+inner parentheses: the clause sits inside a bracket that closes right after it).
 
 Status check, in the contract checkout. It matches any Status line in DEC-0154's block that
 starts with `- **Status:** Accepted`, as DEC-0150's (`Accepted, merged <date>, ...`) and
@@ -1676,20 +1675,20 @@ git fetch origin && git show origin/main:knowledge/authority.md | grep -c 'propo
 
 A knowledge-base PR for the clause branches from the knowledge base's main, carries only the
 two replacements, and runs `npm test` and `npm run verify:content`. Right before merging it,
-the lander runs the clause check again: if it prints 0, the other lander already made the
-edit, and the lander closes its PR unmerged.
+the lander runs the clause check again: if it prints 0, the other lander already made the edit,
+and the lander closes its PR unmerged.
 
-DEC-0149's lander: step 6 runs the status check before merging #628 (1: change both clauses on
-#628, then merge; 0: merge as is). Step 6b, right after #628 merges, runs the status check and
-the clause check; 1 and 2: a knowledge-base PR for the clause; otherwise nothing.
+DEC-0149's lander: step 6 runs the status check before merging PR #628 (1: change both clauses
+on PR #628, then merge; 0: merge as is). Step 6b, right after PR #628 merges, runs the status
+check and the clause check; 1 and 2: a knowledge-base PR for the clause; otherwise nothing.
 
 DEC-0154's lander: its Status starts with `- **Status:** Accepted`, written
 `- **Status:** Accepted <YYYY-MM-DD>, ...`; nothing merges before that Status edit, so its
-contract PR merges only once accepted. Right after its
-contract PR merges it runs the clause check; 2: a knowledge-base PR for the clause; 0: nothing.
+contract PR merges only once accepted. Right after its contract PR merges it runs the clause
+check; 2: a knowledge-base PR for the clause; 0: nothing.
 
-Each lander runs the check after both land as its last step when the other has already
-landed: DEC-0149's lander when the status check printed 1 in step 6b, DEC-0154's lander when
+Each lander runs the check after both land as its last step when the other has already landed:
+DEC-0149's lander when the status check printed 1 in step 6b, DEC-0154's lander when
 `gh pr view 628 --repo passioncode-ai/fabric-workspace --json state --jq .state` prints
 `MERGED`. Run it in `bash` and in `zsh`:
 
@@ -1701,14 +1700,14 @@ git show origin/main:knowledge/authority.md \
 
 The first prints 0 and the second prints 2.
 
-Interleavings: DEC-0154 merges and its clause check prints 0 (#628 not merged); then, if
-DEC-0149's step 6 ran before that merge, #628 merges with "proposed" and step 6b sees 1 and 2
-and edits, and if step 6 ran after it, step 6 changes #628 and #628 merges already owed; or
-#628 merges, step 6b sees 0 and does nothing, then DEC-0154 merges and its clause check sees 2
-and edits; or both open a knowledge-base PR at once, and the re-check before merging closes the
-second. Two windows are named and close: from DEC-0154's contract merge until a knowledge-base
-PR merges, the knowledge base says "proposed" for an accepted DEC-0154; in the other order the
-knowledge base names a DEC-0154 the contract's main does not carry yet.
+Interleavings: DEC-0154 merges and its clause check prints 0 (PR #628 not merged); then, if
+DEC-0149's step 6 ran before that merge, PR #628 merges with "proposed" and step 6b sees 1 and
+2 and edits, and if step 6 ran after it, step 6 changes PR #628 and PR #628 merges already
+owed; or PR #628 merges, step 6b sees 0 and does nothing, then DEC-0154 merges and its clause
+check sees 2 and edits; or both open a knowledge-base PR at once, and the re-check before
+merging closes the second. Two windows are named and close: from DEC-0154's contract merge
+until a knowledge-base PR merges, the knowledge base says "proposed" for an accepted DEC-0154;
+in the other order the knowledge base names a DEC-0154 the contract's main does not carry yet.
 
 Withdrawal: if DEC-0154 is withdrawn instead of accepted, its withdrawer files a knowledge-base
 row to drop the "proposed for FD" clause from `authority.md:115` and `:128`; neither lander
