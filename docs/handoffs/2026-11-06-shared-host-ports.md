@@ -36,7 +36,7 @@ Proposed DEC on its own branch, and files the rest.
   rewritten PL-2 and PL-3 row (`conformance.md:251`: a loopback address opened only after the listener's owner check).
 - The host label's reference `src/host-label.ts` (`hostLabel`: link, owner per platform, mode, size), its generator
   `tools/vectors/host-label.ts` (Node's own HMAC, not importing the reference), vectors
-  `fixtures/vectors/host-label.json` (64 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
+  `fixtures/vectors/host-label.json` (68 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
   schema's `opaqueId`), a coverage floor of 100 in `vitest.config.ts`; the optional schema member `device.hostLabel` in
   `schemas/device-enrollment.schema.json` with a positive and a negative fixture; `service.id`'s description in
   `schemas/service-well-known.schema.json`.
@@ -189,9 +189,20 @@ Proposed DEC on its own branch, and files the rest.
   host scope named as such), with the lines it covers reworded where needed (`CONTEXT.md`'s Appearance carrier,
   FB-6's "on that host (the page's host)", the RFC 6265 row and `interop.md`'s "host name"); the knowledge-base step
   per the shared rule with DEC-0149 (after DEC-0154's merge, both clauses quoted, the second lander's check, the
-  interleavings and the withdrawal); the order 2 reference named by its bullet; five Windows vectors (64 cases), so
+  interleavings and the withdrawal); the order 2 reference named by its bullet; five Windows vectors (68 cases), so
   platform-conditional mutants of the link, mode, size and `org.id` checks each fail `test/host-label.test.ts`; the
   "proposed" markers listed for acceptance; `service.id`'s description and the reference-module row.
+- Round 14 at `d6138063`: not clean on all three tiers. The host rule listed the forms in which a URL's host is named,
+  a closed list that `signing.md`, `estate-record.md`, `entitlement.md` and others broke; a service's `instance`, the
+  overview and the stateless-server sentence still spoke of copies "on a machine"; "proposed" markers were split
+  across lines, and three citations had none; unit's risk: three posix-only hex mutants survived. W78 folded: the rule
+  is purely negative, byte-identical in `service.md`, the DEC, `CONTEXT.md` and `devices.md` ("In this contract
+  'host' never means the computer; ..."); the sweep of `hosts?` found one use meaning a machine (`peer-share.md`'s "moves to another
+  host", now "another server"; `session-handoff.md`'s "On a POSIX host" stays, read as the host program on a POSIX
+  system, which writes the folder);
+  `instance` and the overview per OS account, "the lifecycle broker"; the split markers joined and a multi-line
+  finder added; the shared knowledge-base block pasted byte for byte as its own subsection; four Windows hex vectors
+  (68 cases; one more than the three asked, since the `typeof hex` mutant needed a Windows case of its own).
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -298,63 +309,100 @@ Proposed DEC on its own branch, and files the rest.
 
 ## Acceptance step
 
-- **Status.** The Status line takes the form `- **Status:** Accepted <YYYY-MM-DD>, ...` (the form DEC-0150 and DEC-0153
-  use, which DEC-0149's status check matches). Rewrite this handoff's row in the README.
+- **Status.** The Status line is written `- **Status:** Accepted <YYYY-MM-DD>, ...`, as the knowledge-base clause rule
+  below requires. Rewrite this handoff's row in the README.
 - **"proposed" markers.** Every "DEC-0154, proposed" (and "DEC-0154 (proposed)", "DEC-0154 item 4, proposed") in the
-  specification changes at acceptance. Find them with
-  `git grep -n proposed -- docs/specification docs/guides docs/DOCMAP.md CONTEXT.md schemas src tools | grep DEC-0154`;
-  at this head they are in `CONTEXT.md`, `docs/DOCMAP.md`, `docs/guides/connecting-compatible-agents.md`,
-  `conformance.md`, `connections.md`, `contexts.md`, `delegation.md`, `devices.md`, `fabric-button.md`,
-  `node-summary.md`, `profiles.md`, `relay.md`, `service.md`, `session-handoff.md`,
-  `schemas/device-enrollment.schema.json`, `src/host-label.ts` and `tools/vectors/host-label.ts`, and, after the merge
-  with DEC-0149, its `relay.md` line too.
+  specification changes at acceptance. Find them on one line with
+  `git grep -n proposed -- docs/specification docs/guides docs/DOCMAP.md CONTEXT.md schemas src tools | grep DEC-0154`,
+  and any a line break splits with
+  `perl -0777 -ne 'print "$ARGV\n" if /DEC-0154[,\s(]+(?:item\s+4,\s*)?\n\s*proposed/' $(git ls-files docs/specification docs/guides docs/DOCMAP.md CONTEXT.md schemas src tools)`
+  (it prints nothing at this head). At this head they are in `CONTEXT.md`, `docs/DOCMAP.md`,
+  `docs/guides/connecting-compatible-agents.md`, `conformance.md`, `connections.md`, `contexts.md`, `delegation.md`,
+  `devices.md`, `fabric-button.md`, `node-summary.md`, `profiles.md`, `provider.md`, `relay.md`, `service.md`,
+  `session-handoff.md`, `schemas/device-enrollment.schema.json`, `schemas/service-well-known.schema.json`,
+  `src/host-label.ts` and `tools/vectors/host-label.ts`, and, after the merge with DEC-0149, its `relay.md` line too.
+  Re-read too the citations that carry no marker: `devices.md`'s "a server pinned before DEC-0154", the comments in
+  `src/semantic-rules.ts`, and the generator's and vectors' "DEC-0154 item 4".
 - **Adopters.** In `docs/specification/README.md` name the owed adopters on the devices row (Project Observatory's node
   and setup step, the first organization server) and the services row (Fabric, Fabric Dashboards, Switchboard, Fabric
   Inbox, the adapter's kits, the PassionCode launcher, Project Observatory).
-- **The knowledge-base step, right after DEC-0154's contract PR merges** (not when the Status is set), the same rule
-  DEC-0149's handoff carries in the same words. Each lander checks after its own write, so whichever finishes second
-  sees the other's result; the edit is conditional on the text, so running it twice changes nothing. The status check
-  (DEC-0154's Status anywhere in its block on the contract's main):
-
-  ```sh
-  git fetch origin && git show origin/main:docs/DECISIONS.md \
-    | awk '/^### DEC-0154:/{f=1;next} /^### /{f=0} f' \
-    | grep -c '^- \*\*Status:\*\* Accepted'
-  ```
-
-  The knowledge-base clause check, in the knowledge base's checkout after `git fetch origin`:
-
-  ```sh
-  git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'
-  ```
-
-  The exact clauses, each occurring twice (`authority.md` lines 115 and 128 at #628's head `30ac6c55`). From:
-  "counting `foreign` and `foreign-user` is proposed for FD's watcher in contract DEC-0154". To: "counting `foreign` and `foreign-user` is owed by FD's watcher under contract DEC-0154" (no inner parentheses: the clause sits inside a bracket that closes right after it, so a
-  "(contract DEC-0154)" form would end in "))").
-  - DEC-0154's lander: right after DEC-0154's contract PR merges, run the clause check. It prints 2: change both
-    clauses on the knowledge base's main through a knowledge-base PR (a branch from its main, the two replacements
-    only, its own checks, merge). It prints 0: nothing (#628 is not merged yet, and DEC-0149's step 6b will see
-    DEC-0154 on main; or the clause is already owed).
-  - DEC-0149's lander: at its step 6, before merging #628, runs the status check: 1, it changes both clauses on #628
-    before merging; 0, it merges #628 as is. At its step 6b, right after #628 merges, it runs the status check and the
-    clause check again: status 1 and clause 2, it changes both clauses on the knowledge base's main through a
-    knowledge-base PR; otherwise nothing.
-  - After both land, in either order or interleaving, the second lander runs on the knowledge base's main, in bash or
-    zsh: `grep -c 'proposed for FD' knowledge/authority.md` prints 0, and
-    ``grep -cF "counting \`foreign\` and \`foreign-user\` is owed by FD's watcher under contract DEC-0154" knowledge/authority.md`` prints 2.
-  - The interleavings, traced: DEC-0154 merges, clause check 0 (no #628), then DEC-0149 merges #628 and at 6b sees
-    status 1 and clause 2, so DEC-0149's lander edits; DEC-0149 merges #628 and at 6b sees status 0, so nothing, then
-    DEC-0154 merges and its clause check prints 2, so DEC-0154's lander edits; a Status set on DEC-0154's branch while
-    #628 is unmerged decides nothing, since the step runs after DEC-0154's merge; both editing at once, each PR is the
-    same two replacements, and the second finds 0 and closes.
-  - Withdrawal: if DEC-0154 is withdrawn instead of accepted, its withdrawer files a knowledge-base row to drop the
-    "proposed for FD" clause from `authority.md` lines 115 and 128; neither lander edits it.
+- **The knowledge-base step**, right after DEC-0154's contract PR merges, not when the Status is set: as the
+  knowledge-base clause rule below says, for DEC-0154's lander.
 - **The board.** Tell thread `1fe66e6e` the same day (Fabric Dashboards' FD-159 and Fabric's server build on it), and in
   that message ask Fabric Dashboards for a row that its watcher (FD-76's successor) counts `foreign` and
   `foreign-user` as unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card only.
   Ask in the same message that its card's own `foreign-user` line (its `i18n.ts:128`, its own wording today) use this
   decision's two lines or be checked against them, and that a line for an owner that cannot be told be added (part
   of FD-159).
+
+### The knowledge-base clause rule (the same block in DEC-0149's and DEC-0154's handoffs)
+
+This block is byte-identical in `docs/handoffs/2026-11-03-source-manifest.md` (DEC-0149) and
+`docs/handoffs/2026-11-06-shared-host-ports.md` (DEC-0154); a change to one is made to both.
+
+Rule: each lander checks after its own write, so whichever lander finishes second sees the
+other's result; the edit depends on the text, so a second run changes nothing.
+
+The clause sits at `knowledge/authority.md:115` and `:128` (PR #628 at `30ac6c55`). From:
+"counting `foreign` and `foreign-user` is proposed for FD's watcher in contract DEC-0154". To:
+"counting `foreign` and `foreign-user` is owed by FD's watcher under contract DEC-0154" (no
+inner parentheses: the clause sits inside a bracket that closes right after it).
+
+Status check, in the contract checkout. It matches any Status line in DEC-0154's block that
+starts with `- **Status:** Accepted`, as DEC-0150's (`Accepted, merged <date>, ...`) and
+DEC-0153's (`Accepted <date>, ...`) on main both do:
+
+```sh
+git fetch origin && git show origin/main:docs/DECISIONS.md \
+  | awk '/^### DEC-0154:/{f=1;next} /^### /{f=0} f' \
+  | grep -c '^- \*\*Status:\*\* Accepted'
+```
+
+Clause check, in the knowledge base checkout:
+
+```sh
+git fetch origin && git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'
+```
+
+A knowledge-base PR for the clause branches from the knowledge base's main, carries only the
+two replacements, and runs `npm test` and `npm run verify:content`. Right before merging it,
+the lander runs the clause check again: if it prints 0, the other lander already made the edit,
+and the lander closes its PR unmerged.
+
+DEC-0149's lander: step 6 runs the status check before merging PR #628 (1: change both clauses
+on PR #628, then merge; 0: merge as is). Step 6b, right after PR #628 merges, runs the status
+check and the clause check; 1 and 2: a knowledge-base PR for the clause; otherwise nothing.
+
+DEC-0154's lander: its Status starts with `- **Status:** Accepted`, written
+`- **Status:** Accepted <YYYY-MM-DD>, ...`; nothing merges before that Status edit, so its
+contract PR merges only once accepted. Right after its contract PR merges it runs the clause
+check; 2: a knowledge-base PR for the clause; 0: nothing.
+
+Each lander runs the check after both land as its last step when the other has already landed:
+DEC-0149's lander when the status check printed 1 in step 6b, DEC-0154's lander when
+`gh pr view 628 --repo passioncode-ai/fabric-workspace --json state --jq .state` prints
+`MERGED`. Run it in `bash` and in `zsh`:
+
+```sh
+git fetch origin && git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'
+git show origin/main:knowledge/authority.md \
+  | grep -cF "counting \`foreign\` and \`foreign-user\` is owed by FD's watcher under contract DEC-0154"
+```
+
+The first prints 0 and the second prints 2.
+
+Interleavings: DEC-0154 merges and its clause check prints 0 (PR #628 not merged); then, if
+DEC-0149's step 6 ran before that merge, PR #628 merges with "proposed" and step 6b sees 1 and
+2 and edits, and if step 6 ran after it, step 6 changes PR #628 and PR #628 merges already
+owed; or PR #628 merges, step 6b sees 0 and does nothing, then DEC-0154 merges and its clause
+check sees 2 and edits; or both open a knowledge-base PR at once, and the re-check before
+merging closes the second. Two windows are named and close: from DEC-0154's contract merge
+until a knowledge-base PR merges, the knowledge base says "proposed" for an accepted DEC-0154;
+in the other order the knowledge base names a DEC-0154 the contract's main does not carry yet.
+
+Withdrawal: if DEC-0154 is withdrawn instead of accepted, its withdrawer files a knowledge-base
+row to drop the "proposed for FD" clause from `authority.md:115` and `:128`; neither lander
+edits it.
 
 ## Open
 
@@ -424,6 +472,12 @@ lint passed, documentation checks passed, markdownlint 0 errors, privacy 0 findi
 knowledge-base step's status check and clause checks were run in bash and zsh on trial files: the status check prints
 1 on a DEC-0154 block whose Status is Accepted and 0 on a Proposed one (another block's Accepted line not counted); on
 a trial `authority.md` with both clauses proposed the checks print 2 and 0, and with both owed 0 and 2.
+
+After W78 the full gate ran under the heavy lock (8 GB free, a 15-minute load of 42.7): exit 0, 111 test files,
+10548 tests passed and 1 skipped, branches 98.92% (12567 of 12703), 31 vector files matching their generators, the UX
+lint passed, documentation checks passed, markdownlint 0 errors (the pasted knowledge-base block included), privacy 0
+findings; no em dash on an added line. The three posix-only hex mutants at `src/host-label.ts` line 67 (length, pattern
+and `typeof hex` checks made posix-only) each fail `test/host-label.test.ts`.
 
 ## Next task
 

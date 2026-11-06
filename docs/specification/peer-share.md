@@ -299,7 +299,7 @@ whatever the mailbox said.
 
 ## Not decided here
 
-The mailbox's HTTP routes (CT-185), and the signed record it leaves when it moves to another host; a recipient's second machine
+The mailbox's HTTP routes (CT-185), and the signed record it leaves when it moves to another server; a recipient's second machine
 (until an estate carries a share between its own machines); sealing the sender's labels; using the mailbox for sealed
 transport between one person's own machines when no relay is deployed. Who pays for a share's use and how a meter
 reads it (CT-187): spend-policy rule 1 refuses a source that is neither the project's own key nor another agent's

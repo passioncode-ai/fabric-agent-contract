@@ -12,7 +12,7 @@ placement) or online at an `https` origin (a **remote** placement, [below](#remo
 state, answers other agents, and usually shows a dashboard. This extension says how a
 service is found, how it reports that it is alive, how it is started and stopped, how
 an operator is let into its dashboard, and how it reports what it did. It lets a host
-such as Fabric Dashboards watch every service on a machine without knowing any of them
+such as Fabric Dashboards watch every service of its OS account without knowing any of them
 in advance.
 
 The extension key is `https://fabric.passioncode.ai/agent-contract/extensions/service/0.1`.
@@ -81,7 +81,7 @@ The smallest descriptor a local service installs, here for a service supervised 
 |---|---|---|
 | `protocol` | yes | `"fabric-service/0.1"` |
 | `id` | yes | the service's slug, `^[a-z][a-z0-9-]{1,62}$`, the same on every machine |
-| `instance` | yes | which copy on this machine, `default` for the first |
+| `instance` | yes | which copy in this OS account's services directory, `default` for the first |
 | `name` | yes | what a host shows, at most 80 characters |
 | `auth` | yes | `tokenFile`, where the token is; optionally the `header` it travels in and its `scheme` (below) |
 | `lifecycle` | yes | the one supervisor (`manager`) and its own names: launchd's `label` and `plist`, systemd's `unit`, the Task Scheduler's `task`, an app's `app` |
@@ -129,7 +129,7 @@ declares no port for `FAC-SEM-010`. Vectors: [`fixtures/vectors/app-descriptor.j
 - `channels.local` MAY name where a client reaches the service's local channel (`{protocol, path | pipe}`; Project
   Observatory's node, [local channel](local-channel.md), DEC-0075); a client never computes that path.
 - `id` and `instance` together MUST be unique within one OS account's services directory (one copy per counted OS
-  account on the computer, DEC-0154). A second copy of the same
+  account on the computer, DEC-0154, proposed). A second copy of the same
   service (a preview, a branch build) MUST be a second `instance`, never a second `id`.
 - `placement` is `local` (the default when absent) or `remote`. Every rule in this document
   applies to a local placement; [Remote placement](#remote-placement) states what changes for a
@@ -501,8 +501,8 @@ login](#operator-login)); a raw address opens a browser that has no session and 
   There the agent or the host opens the page's own address, which it reads from the service's descriptor on that
   computer (`origin` plus the path): a remote `https` origin as before, and
   a loopback address only after checking the listener's owner by [HA-2](#ha-2)'s sources: a listener of another
-  account, or one whose owner cannot be told, is reported as `foreign-user` and the address is not opened (DEC-0154,
-  proposed). An installed host that did not open the page is not absent: the failure is
+  account, or one whose owner cannot be told, is reported as `foreign-user` and the address is not opened
+  (DEC-0154, proposed). An installed host that did not open the page is not absent: the failure is
   reported to the person, and the browser does not replace it.
 - **PL-4, where the link travels.** A tool answer that names a page for a person MUST carry the open_link in a member
   named `open_link`; a raw address beside it (`http_url`, or an existing `dashboard_url`) is the diagnostic of PL-3,
@@ -562,10 +562,8 @@ The Host and Origin guard does not tell them apart, so a computer with more than
 
 DEC-0154, proposed. On one computer each counted OS account runs its own copy of a service, with its own services
 directory, tokens and descriptors, and every account (and every guest whose traffic a forwarder relays) reaches every
-port on `127.0.0.1`. The machine is "the computer". "Host" means the program that shows and calls services, never the
-computer, except in the name "host label"; where a URL's host is meant, the text says so: a URL's, an origin's or a
-page's host, a host name, the `Host` header, or a cookie's host scope ("per host", "scoped to a host", ED-8, FB-6, RFC
-6265).
+port on `127.0.0.1`. In this contract "host" never means the computer; the computer is called the computer. The one
+exception is the name "host label", which labels a computer.
 
 <a id="counted-os-accounts"></a>
 

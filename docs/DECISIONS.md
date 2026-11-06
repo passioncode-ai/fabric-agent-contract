@@ -9749,7 +9749,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   product found one break, W63); round 11 at `bbb5b956` was not clean (seam found one break, W73; product found the same break); round 12 at `3c1ea1f8`
   was not clean (unit passed, 79 of 86 mutants, 5 equivalent, the rest closed by W76 (g); product found three breaks,
   W76 (a) to (c); seam found three breaks, the same as W76 (a), (c) and (f)); round 13 at `545ba274` was not clean (unit
-  passed; product found one break and seam three, W77 (a) to (c)); their batches are folded in (Source). A reference module and vectors, one optional schema
+  passed; product found one break and seam three, W77 (a) to (c)); round 14 at `d6138063` was not clean on all three
+  tiers (W78 (a) to (c), and a unit risk, W78 (e)); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9764,9 +9765,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   are G1 to G11 of the spec [`2026-11-06-shared-host-gaps.md`](evidence/specs/2026-11-06-shared-host-gaps.md); this
   decision takes G1 to G3 and the host label the board agreed, and files the rest. Fabric's hub already chooses a port
   per account by a uid formula (its CO-505).
-  The machine is "the computer". "Host" means the program that shows and calls services, never the computer, except
-  in the name "host label"; where a URL's host is meant, the text says so: a URL's, an origin's or a page's host, a
-  host name, the `Host` header, or a cookie's host scope ("per host", "scoped to a host", ED-8, FB-6, RFC 6265).
+  In this contract "host" never means the computer; the computer is called the computer. The one exception is the
+  name "host label", which labels a computer.
 - **Decision:** [Several OS accounts on one computer](specification/service.md#several-os-accounts-on-one-computer)
   and [the host label](specification/devices.md#the-host-label):
   0. **Counted OS accounts.** A counted OS account is one a person or an organization signs in with, or runs Fabric or
@@ -9954,10 +9954,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     The knowledge base's `knowledge/authority.md` (fabric-workspace) clause "counting `foreign` and `foreign-user` is
     proposed for FD's watcher in contract DEC-0154" becomes "counting `foreign` and `foreign-user` is owed by FD's
     watcher under contract DEC-0154" (twice): DEC-0154's lander checks right after its contract PR merges and edits
-    the knowledge base when the clause is there; DEC-0149's lander checks at its steps 6 and 6b; the second lander
-    checks that `grep -c 'proposed for FD'` prints 0 and the full new clause appears twice; if DEC-0154 is withdrawn,
-    its withdrawer files a knowledge-base row to drop the clause. The steps and their interleavings are in the
-    handoff's acceptance step, in the same words as DEC-0149's.
+    the knowledge base when the clause is there; DEC-0149's lander checks at its steps 6 and 6b; the lander that lands
+    second checks that `grep -c 'proposed for FD'` prints 0 and the full new clause appears twice; if DEC-0154 is
+    withdrawn, its withdrawer files a knowledge-base row to drop the clause. The steps and their interleavings are one
+    block, byte-identical in both handoffs ("The knowledge-base clause rule" in DEC-0154's and DEC-0149's).
   - Fabric Inbox: B-217 open, after this decision (its PR #421, rows B-217 to B-220): its desktop connect step sends a
     new agent key to the hub's loopback callback; on macOS and Linux another account's listener reads today as no
     listener (safe, for the wrong reason), and on Windows, where the process tables show every account's processes,
@@ -10112,6 +10112,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (unique within one OS account's services directory, once per OS account on the computer, one host rule in the same
   words in every copy with the lines it covers reworded, the knowledge-base step after DEC-0154's merge per the rule
   shared with DEC-0149, five Windows vectors, the "proposed" markers listed, `service.id`'s description and the
-  reference-module row) is folded in; the two UI lines passed the operator's copy check
+  reference-module row) is folded in; round 14 at `d6138063` was not clean on all three tiers (a host rule that listed
+  the forms in which a URL's host is named, a closed list other pages broke; a service's copies and what a host
+  watches still "on a machine"; "proposed" markers split across lines and citations without one; unit: three
+  posix-only hex mutants), and W78 (a purely negative host rule in the same words in every copy, "host" for a computer
+  replaced where it was meant, copies and watching per OS account, the markers joined and listed with a multi-line
+  finder, the shared knowledge-base block pasted byte for byte, four Windows hex vectors) is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

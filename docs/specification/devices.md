@@ -207,12 +207,11 @@ passes the small-order check (DEC-0045).
 
 ### The host label
 
-DEC-0154 item 4 (HA-4), proposed. The **host label** is the label of the computer. "Host" means the program that shows
-and calls services, never the computer, except in the name "host label"; where a URL's host is meant, the text says
-so: a URL's, an origin's or a page's host, a host name, the `Host` header, or a cookie's host scope ("per host",
-"scoped to a host", ED-8, FB-6, RFC 6265). An enrollment request MAY carry `device.hostLabel`: an opaque value that is
-the same for every device of one organization on one computer (two counted OS accounts of it, or a virtual machine
-given its secret) and that organizations with no code on the computer cannot link.
+DEC-0154 item 4 (HA-4), proposed. The **host label** is the label of the computer. In this contract "host" never means
+the computer; the computer is called the computer. The one exception is the name "host label", which labels a
+computer. An enrollment request MAY carry `device.hostLabel`: an opaque value that is the same for every device of one
+organization on one computer (two counted OS accounts of it, or a virtual machine given its secret) and that
+organizations with no code on the computer cannot link.
 
 - **The value.** HMAC-SHA-256 keyed with the computer's secret over the UTF-8 bytes of `fabric-host-label/1` followed
   directly by the enrollment's `org.id`, its first 16 bytes in base64url without padding: 22 characters (schema
@@ -673,7 +672,7 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   coding-agent versions and the hook count in a mode `C` node summary (DEC-0118); within one organization, the
   [host label](#the-host-label) its devices on one computer share, by design and only after its notice, and any label of
   that computer, which an organization's code on any counted account of the computer, or in a virtual machine given the secret,
-  can compute for every organization (DEC-0154); an agent the person shares into two
+  can compute for every organization (DEC-0154, proposed); an agent the person shares into two
   organizations shows the same `agentRef` (the person's own choice); the relay operator reads `org:<orgId>` in the estate
   record until per-context relay sessions (the operator's questions 1 to 4, taken at their defaults); an operator that
   runs two of a machine's relays (an estate's and an organization's, or two organizations', DEC-0134) sees that

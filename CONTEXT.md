@@ -364,8 +364,8 @@ A `relayed` action from a T0 or T1 caller carries the operator's decision (**Rel
 Over the relay a node places a sender in T1 from the estate record it applied (`relayCallerTier`, DEC-0106); over the
 estate's relay a sender that is not T1 is T2 and its call is refused, and `unknown-state` is a denial, not T2 (DL-28,
 DEC-0106, the wording DEC-0137). On a computer with more than one **Counted OS account**, a token-free loopback door places
-a caller in T0 only after checking the peer's OS account, and a port forwarder's callers are T2 (HA-3, DEC-0154,
-proposed).
+a caller in T0 only after checking the peer's OS account, and a port forwarder's callers are T2
+(HA-3, DEC-0154, proposed).
 
 **Adaptation plan**: What a person moves into an organization they join: projects, history, results and schedules.
 The plan's draft and the inventory it is chosen from stay in the person's Fabric; only its organization part, what the
@@ -664,10 +664,9 @@ is sent to it (HA-2, DEC-0154, proposed).
 
 **Host label**: The label of the computer: `device.hostLabel`, an HMAC of the computer's administrator-owned secret
 over the organization's id, the same for every device of one organization on one computer; organizations with no code
-on the computer cannot link it (HA-4, [devices](docs/specification/devices.md#the-host-label), DEC-0154, proposed).
-"Host" means the program that shows and calls services, never the computer, except in the name "host label"; where a
-URL's host is meant, the text says so: a URL's, an origin's or a page's host, a host name, the `Host` header, or a
-cookie's host scope ("per host", "scoped to a host", ED-8, FB-6, RFC 6265).
+on the computer cannot link it (HA-4, [devices](docs/specification/devices.md#the-host-label), DEC-0154, proposed). In
+this contract "host" never means the computer; the computer is called the computer. The one exception is the name
+"host label", which labels a computer.
 
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that
 order, and a locked key is never overridden by a lower layer.
