@@ -784,7 +784,7 @@ flowchart TD
   P -->|no| F[Failure reported; no browser]
   S -->|not_installed or unsupported| W{Listener's owner, HA-2}
   W -->|this account| B[Service's own address from its descriptor, in the browser]
-  W -->|another account, or cannot be told| N[foreign-user: nothing opens; the card's line for that case]
+  W -->|another account, or cannot be told| N[foreign-user: nothing opens; SCR-30 shows the line for that case]
 ```
 
 - **Screens traversed:** SCR-30 the operator's agent; the service's page in Fabric Dashboards.

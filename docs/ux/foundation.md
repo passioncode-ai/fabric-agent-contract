@@ -720,7 +720,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given Fabric Dashboards is installed, when an agent, a tool answer or a completion message hands me a service's page, then it hands me the `open_link` and the page opens in Fabric Dashboards (PL-1, DEC-0123).
   - Given Fabric Dashboards is installed but did not open the page, then I am told it failed and no browser opens in its place (PL-3).
   - Given Fabric Dashboards is not installed, or cannot run on my system, then the page opens at the service's own address, read from its descriptor (PL-3).
-  - Given Fabric Dashboards is not installed, or cannot run on my system, and the listener on the service's port is another OS account's or its owner cannot be told, then nothing opens and I see the line the service card shows for that case (`foreign-user`, HA-2, DEC-0154).
+  - Given Fabric Dashboards is not installed, or cannot run on my system, and the listener on the service's port is another OS account's or its owner cannot be told, then nothing opens and the agent's reply (SCR-30) shows the line for that case (`foreign-user`, HA-2, DEC-0154).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

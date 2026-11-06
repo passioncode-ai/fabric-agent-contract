@@ -79,7 +79,7 @@ Proposed DEC on its own branch, and files the rest.
   generator and the vectors; two cases renamed "the same computer in another organization" and "another computer in
   the same organization"); seam failed on V1. Unit passed (38 of 40 mutants killed, one equivalent; the other, the
   hex check moved before the mode check, is now killed by two vectors, V14: "writable by another account, no bytes
-  read" and "a folder not the administrator's, an oversized file"). V3 to V13, the coordinator's decisions, are folded
+  read" (renamed in round 6: "writable by anyone but the platform's administrator, no bytes read") and "a folder not the administrator's, an oversized file"). V3 to V13, the coordinator's decisions, are folded
   in.
 - Round 5 at `190ee95e`: not clean. Product failed on three breaks: FLW-17's goal ("never an outage") and ST-021's
   story did not cover another account's listener (ST-021 widened, FLW-17's goal, entry points, success exit, task
@@ -112,6 +112,10 @@ Proposed DEC on its own branch, and files the rest.
   claim from what remains). W29 to W33 folded: DEC-0149's sentence kept whole at landing, the installer's order
   (descriptor, then the claim rebuilt from all descriptors, the short window accepted), the Fabric Dashboards ask for
   its card's line, FLW-30's traces, the account count read by the service, an installer and a door only.
+- Round 7's seam reading: failed on the same break as W27, closed at `c77e67f5`. W34 to W37 folded: an app rebuilds
+  its claim after writing its new liveness file, and the guard and the source share the wording "an app without a
+  descriptor origin, or an app's part"; SCR-30 shows the `foreign-user` line when no card exists (FLW-30 points to it);
+  a round-4 vector's later name; DEC-0154 may land first.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -160,6 +164,9 @@ Proposed DEC on its own branch, and files the rest.
   organization owns whole (on DEC-0149's branch, `source.md` and `contexts.md`; not cited before it lands). This is a
   landing edit made by whichever of DEC-0149 and DEC-0154 lands second; after both, `grep '^| CT-232 ' docs/backlog.md |
   grep -c source.md` prints 1.
+- DEC-0154 may land first. Then, until DEC-0149 lands, main keeps the old watcher sentence (`degraded`, 5 minutes)
+  beside HA-2. That sentence was false before DEC-0154 and is closed by DEC-0149's landing; the first lander makes no
+  separate edit for it.
 - DEC-0151 and DEC-0152: the same register rules (DECISIONS tail in id order, markers from the counters, backlog in id
   order, handoffs newest first).
 
@@ -195,6 +202,10 @@ after the owner check) each fail it too; V14's mutant (the hex check before the 
 After round 7's batch the full gate did not run (4 GB free, a 15-minute load of 48); `pnpm typecheck`,
 `pnpm vectors:check`, `pnpm run docs:check`, `python3 docs/ux/lint.py`, `pnpm privacy:check` (0 findings), the em dash
 check (0) and the targeted vitest set (1242 tests) ran with exit 0.
+After the seam batch of round 7 (W34 to W37), on the coordinator's instruction no full gate ran (low disk);
+`pnpm typecheck`, `pnpm vectors:check`, `pnpm run docs:check`, `python3 docs/ux/lint.py`, `pnpm privacy:check` (0
+findings), the em dash check (0) and `pnpm vitest run` over `test/docs-check.test.ts`, `test/consistency.test.ts`,
+`test/host-label.test.ts` and `test/fixtures.test.ts` (1198 tests) ran with exit 0.
 
 ## Next task
 
