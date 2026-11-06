@@ -403,7 +403,10 @@ source, what never travels with it, the check before a source export, and how a 
   relay.md and conformance.md point at service.md's definition, the hub's entry shown where the hub shows its state
   (SCR-23 for Fabric's hub), CT-244 keeping its id and starting from the operator's recorded rule, the landing's rows at
   CT-245 and CT-246 or above, "Git hosting service", authority.md restated in PR #628, and the chain at DEC-0154's
-  `66e44c3d`; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  `66e44c3d`; round 64 (not clean: authority.md still named the watcher's state; the service's own outage report; CT-244's
+  wording; "host" for a computer) answered as decided: authority.md points at `service.md` in PR #628, the copy
+  agent's report back at 5 minutes or more, CT-244 aligned with relay.md (SCR-23, DL-15 and step 6 apart), "a
+  computer's name" and "computer names", and DEC-0154 at `190ee95e` with the guide; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -502,6 +505,10 @@ source, what never travels with it, the check before a source export, and how a 
   - `.git` in every form a case-insensitive or Windows file system resolves to it is never source, and a patch path an
     `exclude` entry names under ASCII case folding is refused, since on such a file system the two spellings are one
     file and the rule is otherwise bypassed.
+- Round 64, decided by the coordinator under the operator's recorded rules:
+  - the knowledge base's authority.md points at the contract's service.md for what unavailable means; the service's own
+    outage report is outside the watcher's rule;
+  - "host" names a program; a computer is named as such ("a computer's name", "computer names").
 - Round 63, decided by the coordinator under the operator's recorded rules:
   - relay.md and conformance.md name no watcher state; they point at service.md's definition (one landing edit there);
   - CT-244 keeps its id; the landing's rows start above every id in use on main and on open branches, CT-244 included.
@@ -743,6 +750,19 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 64's fixes (documentation only) were checked on the working tree over head `cb5471dd` (this note's commit holds
+the same tree, plus this paragraph): `pnpm typecheck` (exit 0), `pnpm vectors:check` (exit 0, 29 files match), the
+targeted coverage run over `source-rules`, `validate-cli`, `validate-cli-git-links`, `secret-shape`,
+`schema-compilation`, `consistency`, `validate-cli-faults`, `rule-tolerance` and `positive-sweep` (exit 0: 3264
+passed, 2 skipped; `src/source-rules.ts` at 100 % of its branches, `src/validate-cli.ts` at 99.48 %), `pnpm run
+docs:check` (exit 0, 0 errors), `python3 docs/ux/lint.py` (exit 0) and `ORG_INDEX=... pnpm run privacy:check` (exit
+0, 0 findings). The full branch gate was not run: the 15-minute load stood at 54.8, above 45 (8 GB free). CT-244's row
+names SCR-23 once and no longer says the wait is seen on the dashboard only. No U+2014 in the added lines. The knowledge
+base's PR is at `fc100a11` (main `46c43697` unmoved): `source hand-over` in 4, 4 and 5 lines of agents-first,
+principles and rules, `own estate` once on each, item 9 once and item 8 once; authority.md names no watcher state
+outside the dated FD-76 fact; the knowledge base's `npm test` (exit 0, 172 passed) and `npm run verify:content` (exit
+0, backlog 0 errors).
 
 Round 63's fixes (documentation only) were checked on the working tree over head `c08cdf5a` (this note's commit holds
 the same tree, plus this paragraph): `pnpm typecheck` (exit 0), `pnpm vectors:check` (exit 0, 29 files match), the
@@ -1219,7 +1239,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 62 into `803f35c7`, which carries main's `46c43697` (the PR's head `72574c84`),
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 62 into `803f35c7`, which carries main's `46c43697` (the PR's head `fc100a11`),
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). PR #235 (DEC-0148) and DEC-0150 are already on main (`1016f0ec` when re-measured in round
    50), so nothing is refreshed for them. Merge the current `origin/main` (re-measured at landing; `1c141418` as of round 61, or later) into the fresh branch
@@ -1256,7 +1276,7 @@ remaining steps, in order:
    line to the landing round. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `72574c84`, which carries the knowledge base's main, they print 4, 4 and 5
+   `knowledge/rules.md`; at PR #628's head `fc100a11`, which carries the knowledge base's main, they print 4, 4 and 5
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38 and principles
    section 7 and rules section 9 their two named exceptions in round 59), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
@@ -1316,9 +1336,10 @@ this landing meets. The chain of the open branches that touch the same registers
 `1c141418`, is DEC-0149 (this branch), then `origin/agent/sqd-fields-20261104` (DEC-0151), then DEC-0152
 (`agent/ct217-board-same-turn-20261104`, head `d760f756` when written: `docs/DECISIONS.md`,
 `docs/specification/conformance.md`, `docs/DOCMAP.md`, `docs/backlog.md`, the handoffs index), then
-`agent/studio-ports-owner-20261106` (DEC-0154, head `66e44c3d` in round 63, re-measured at landing; it merged main
+`agent/studio-ports-owner-20261106` (DEC-0154, head `190ee95e` in round 64, re-measured at landing; it merged main
 `1c141418` and holds CT-228 to CT-241). DEC-0154 touches `CONTEXT.md`, `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`,
-`docs/evidence/sources.md`, `docs/handoffs/README.md`, `docs/specification/conformance.md`, `contexts.md`,
+`docs/evidence/sources.md`, `docs/guides/connecting-compatible-agents.md`, `docs/handoffs/README.md`,
+`docs/specification/conformance.md`, `contexts.md`,
 `connections.md`, `delegation.md`, `devices.md`, `node-summary.md`, `profiles.md`, `service.md`, `session-handoff.md`, `docs/ux` (flows,
 foundation, scenarios SCN-056, screens SCR-20), `fixtures/catalogue.json` (rows inserted mid-file, so no comma step),
 `schemas/device-enrollment.schema.json`, `schemas/service-well-known.schema.json`, `tools/vectors/run.ts` and
@@ -1522,9 +1543,11 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   the landed `channel-agent.md` ("acts only inside that chat as section 4.10 says" and "no AP-3 or OA-2 source", each
   `grep -c` 0 on main at `1016f0ec`), so the post quotes CA-8 as the page stands; and its merge post's "together with
   `fabric-source`" becomes true only when DEC-0149 lands, which this landing makes true (say so in DEC-0149's post).
-- Done in PR #628 (round 63): `knowledge/authority.md`'s outage-watcher lines now follow Fabric Dashboards' FD-76 as
-  `service.md` restates it (an episode opens only for an agent unavailable for more than 15 minutes; a `degraded`
-  answer opens none), so no knowledge base row is filed for it at landing.
+- Done in PR #628 (rounds 63 and 64): `knowledge/authority.md`'s outage-watcher lines point at the contract's
+  `service.md` for what unavailable means (an episode opens only for an agent unavailable, as `service.md` defines it,
+  for more than 15 minutes; a `degraded` answer opens none), keeping `down` only as the dated fact of FD-76's release,
+  so the one landing edit to `service.md` covers the knowledge base too; the service's own outage report stays at 5
+  minutes or more, as the copy agent writes it today. No knowledge base row is filed for it at landing.
 - At the DEC-0150 step, confirm DEC-0150's lander filed the backlog row (`grep -c 'installation-valued'
   docs/backlog.md` prints 1 on the merged tree) on how a channel
   declaration's installation-valued members (`tickets.token_slot`'s vault project and env, `evals.spend_record`, the

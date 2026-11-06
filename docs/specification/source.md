@@ -173,7 +173,7 @@ credential, a home folder with a name, an e-mail address) by its place (`slots[<
 
 ## Installation strings
 
-The operator's own strings (accounts, people, the operator's label, private projects, hosts, chat ids) live on the
+The operator's own strings (accounts, people, the operator's label, private projects, computer names, chat ids) live on the
 operator's machine, outside the source tree, as plain text. They are never in the source and never exported: carrying them would
 publish exactly what the check exists to keep home. Keyed digests are not used, because a substring and an encoded
 form would need their own tokenization rules.

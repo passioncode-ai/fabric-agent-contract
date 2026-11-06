@@ -437,7 +437,7 @@ one the agent cannot create under its data folder is a failure. A package's `sec
 (`FAC-SEM-160`), except that an absent or empty `state[]` is a copy packed without state (a colleague's copy) and
 passes.
 
-**Installation string**: One of the operator's own strings (an account, a person, a private project, a host) the tree
+**Installation string**: One of the operator's own strings (an account, a person, a private project, a computer's name) the tree
 check looks for before a **Source export**, kept on the operator's machine outside the source tree and never exported
 (`FAC-SEM-158`).
 
