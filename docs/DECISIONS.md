@@ -9910,7 +9910,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/negative/device-enrollment-host-label-padding-bits.json` with their catalogue rows,
   `test/host-label.test.ts`, `vitest.config.ts`, `CONTEXT.md` (Device, Counted OS account, Port claim, `foreign-user`,
   Host label, Trust tier), `docs/ux/scenarios.md` (SCN-056), `docs/ux/screens.md` (SCR-20's `foreign-user` state),
-  `docs/ux/flows.md` (FLW-17's screens), `docs/evidence/sources.md` (RFC 8252's and RFC 6265's rows), `docs/DOCMAP.md`,
+  `docs/ux/flows.md` (FLW-17's screens), `docs/evidence/sources.md` (RFC 8252's row, RFC 6265's row read again), `docs/DOCMAP.md`,
   `docs/backlog.md` (CT-228 to CT-241), the spec `docs/evidence/specs/2026-11-06-studio-spaces-gaps.md` and the handoff
   `docs/handoffs/2026-11-06-studio-ports-owner.md`.
 - **Not decided here:** the claim file's schema and a reference for the port choice (CT-228); the contract's own vector

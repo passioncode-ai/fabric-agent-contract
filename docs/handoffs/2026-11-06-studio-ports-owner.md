@@ -34,7 +34,7 @@ Proposed DEC on its own branch, and files the rest.
   `schemas/service-well-known.schema.json`.
 - `CONTEXT.md`: Device redefined; Counted OS account, Port claim, `foreign-user` and Host label added; Trust tier
   narrowed. UX: SCN-056 in `docs/ux/scenarios.md`, SCR-20's `foreign-user` state in `docs/ux/screens.md`, FLW-17's
-  screens in `docs/ux/flows.md`. RFC 8252's and RFC 6265's rows in `docs/evidence/sources.md`.
+  screens in `docs/ux/flows.md`. RFC 8252's row in `docs/evidence/sources.md`, and RFC 6265's existing row read again (its section 8.5 was already pinned for DEC-0059).
 - The gap list as a tracked spec: [2026-11-06-studio-spaces-gaps.md](../evidence/specs/2026-11-06-studio-spaces-gaps.md),
   the shared host's accounts by role only.
 - Backlog CT-228 (the DEC) and CT-229 to CT-241 (the state-order vector file, G4 to G11, the single-account forwarder
