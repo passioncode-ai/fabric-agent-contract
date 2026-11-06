@@ -31,7 +31,7 @@ Proposed DEC on its own branch, and files the rest.
   client, host-state reader, receiving surface, host handing a credential, token-free door, node, setup step).
 - The host label's reference `src/host-label.ts` (`hostLabel`: link, owner per platform, mode, size), its generator
   `tools/vectors/host-label.ts` (Node's own HMAC, not importing the reference), vectors
-  `fixtures/vectors/host-label.json` (41 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
+  `fixtures/vectors/host-label.json` (45 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
   schema's `opaqueId`), a coverage floor of 100 in `vitest.config.ts`; the optional schema member `device.hostLabel` in
   `schemas/device-enrollment.schema.json` with a positive and a negative fixture; `service.id`'s description in
   `schemas/service-well-known.schema.json`.
@@ -87,7 +87,15 @@ Proposed DEC on its own branch, and files the rest.
   and the guide's note scoped HA-1 and HA-2 to a computer with several accounts (they hold on every computer; HA-3 on
   a shared one). W4 to W8 folded: the positive landing check, a claim rewritten with every instance's ports, the
   Windows folder's report (once for a missing folder or another ACL, in the health report or log), SCN-056's recovery
-  for a root or system listener, and "same computer" in the RFC 6265 row.
+  for a root or system listener, and "same computer" in the RFC 6265 row. Unit passed (156 mutants, 4 survivors, the
+  shape checks moved after the link or the mode; W10 adds four vectors in which a fault outranks every reason for no
+  label, and each such move now fails `test/host-label.test.ts`; W11 defines `writableByOthers` as anyone but the
+  platform's administrator in the reference, the vectors' about, `devices.md` and DEC item 4). Seam passed (0 breaks,
+  the full suite of 10520 tests green; risks closed by W3, W4, W12: the claim's rewrite at start rebuilt from the
+  account's descriptors, atomic and after `service.lock`, in HA-1, the Lifecycle table and CT-228; and W13: SHOULD in
+  the conformance row). W14, from DEC-0149's seam reading: `foreign` is unavailable too (a watcher counts `foreign`
+  and `foreign-user` as unavailable, as node summaries and connections already report both as `down`), in HA-2, DEC
+  item 2, the owed Fabric Dashboards row and the landing target.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -116,8 +124,8 @@ Proposed DEC on its own branch, and files the rest.
   `vitest.config.ts`'s coverage `include` is the union (`src/host-label.ts` and `src/validator.ts` both); the watcher
   sentence in `service.md`: DEC-0149 rewrites it to "only when an agent has been unavailable (`down`, not merely
   `degraded`) for more than 15 minutes" (its `service.md` line 222), and whichever of DEC-0149 and DEC-0154 lands
-  second makes it read "unavailable (`down` or `foreign-user`, not merely `degraded`)"; after both land,
-  ``grep -c 'unavailable (`down` or `foreign-user`, not merely `degraded`)' docs/specification/service.md`` prints 1.
+  second makes it read "unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)"; after both land,
+  ``grep -c 'unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)' docs/specification/service.md`` prints 1.
   DEC-0149 points `relay.md` and `conformance.md` to `service.md`'s
   definition of "unavailable", so one edit in `service.md` suffices; after both land,
   ``grep -n 'unavailable (`down`)' docs/specification/relay.md docs/specification/conformance.md`` prints nothing, and if it prints anything for the
@@ -134,8 +142,8 @@ At acceptance: set the Status, rewrite this handoff's row in the README, and in 
 the owed adopters on the devices row (Project Observatory's node and setup step, the first organization server) and
 the services row (Fabric, Fabric Dashboards, Switchboard, Fabric Inbox, the adapter's kits, the PassionCode launcher,
 Project Observatory); tell thread `1fe66e6e` the same day (Fabric Dashboards' FD-159 and Fabric's server build on it),
-and in that message ask Fabric Dashboards for a row that its watcher (FD-76's successor) counts `foreign-user` as
-unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card only.
+and in that message ask Fabric Dashboards for a row that its watcher (FD-76's successor) counts `foreign` and
+`foreign-user` as unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card only.
 
 ## Open
 
@@ -145,19 +153,13 @@ unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state 
 
 ## Checks actually run
 
-The full gate `pnpm run check` last ran after round 3's batch, at `66e44c3d`, with exit 0: 111 test files, 10518
-tests passed and 1 skipped, branches 98.92% (12567 of 12703), 31 vector files matching their generators, the UX lint
-passed (40 stories, 34 flows, 34 screens, 55 scenarios), documentation checks passed, markdownlint 0 errors, privacy 0
-findings. After round 4's batch the computer had 7 GB free, under the 8 GB the gate needs, so the full gate did not
-run; what ran, each with exit 0: `pnpm typecheck`, `pnpm vectors:check` (31 files), `pnpm run docs:check`,
-`python3 docs/ux/lint.py`, `pnpm privacy:check` (0 findings), the em dash check on the added lines (0), and
-`pnpm vitest run` over `test/host-label.test.ts`, `test/vectors-runner.test.ts`, `test/sources-ledger.test.ts`,
-`test/fixtures.test.ts`, `test/consistency.test.ts`, `test/guide-examples.test.ts`,
-`test/spec-required-members.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts` and
-`test/docs-check.test.ts` (1430 tests). After round 5's batch the full gate did not run either (7 GB free, a
-15-minute load of 55); the same checks ran with exit 0, the vitest set without the schema-compilation and positive
-sweep files (1236 tests). V14's mutant (the hex check moved before the mode check) was tried and fails
-`test/host-label.test.ts` (2 tests), then reverted.
+The full gate `pnpm run check` after round 5's batch (W1 to W14), at this branch's head, under the heavy lock (free
+disk 9 GB, 15-minute load 41.5): exit 0, 111 test files, 10524 tests passed and 1 skipped, branches 98.92% (12567 of
+12703), 31 vector files matching their generators, the UX lint passed (40 stories, 34 flows, 34 screens, 55
+scenarios), documentation checks passed, markdownlint 0 errors, privacy 0 findings; no em dash on an added line. After
+rounds 4 and 5's first batch the gate did not run (7 GB free); targeted checks ran then. W10's mutants (each of the
+platform, owner-name and `org.id` checks moved after the link check or after the mode check, six moves) each fail
+`test/host-label.test.ts` and were reverted; V14's mutant (the hex check before the mode check) fails it too.
 
 ## Next task
 

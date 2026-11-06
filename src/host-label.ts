@@ -42,10 +42,12 @@ const FAULT: HostLabelAnswer = { fault: "input-invalid" };
  * `{platform, secret: {link, owner, writableByOthers, folderOk, hex}, orgId}`: `platform` is `posix` (macOS, Linux) or
  * `windows`; `link` whether the path is a symbolic link (on Windows a reparse point); `owner` is `root` (uid 0),
  * `administrators` (the Windows Administrators group), `system` (Windows SYSTEM) or `other`; `writableByOthers` whether
- * any account but the owner can write the file (a POSIX group or other write bit; a Windows ACE granting write to
- * another SID); `folderOk` whether its folder is owned by the administrator and writable by no one else (on POSIX root
+ * anyone but the platform's administrator may write the file (on POSIX anyone but root: a group or other write bit;
+ * on Windows an ACE granting write to a SID other than Administrators or SYSTEM, so the prescribed "Administrators
+ * full control" on a file SYSTEM owns passes); `folderOk` whether its folder is owned by the administrator and writable by no one else (on POSIX root
  * and `0755`; on Windows the ACL devices.md gives); `hex` the file's bytes in lower-case hex; `orgId` the enrollment's
- * `org.id`. `hex` is read only when the metadata passes, so it may be absent or empty when it does not; up to 1024
+ * `org.id`. A malformed input (a platform, an owner name, a flag or an `org.id` that is not this shape) is a fault
+ * before anything else: a fault outranks every `none`. `hex` is read only when the metadata passes, so it may be absent or empty when it does not; up to 1024
  * bytes it is checked for size, above that it is a fault. Answers `{hostLabel}`, or `{none}` naming the first reason the
  * node sends no label (the link, then the owner, then the mode, then the size), or `{fault}`.
  */

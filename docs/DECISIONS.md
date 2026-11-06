@@ -9737,7 +9737,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the seam reading passed); round 3 at `feef4e4d` was not clean (unit passed, seam passed with no break, its risks
   becoming S1 to S8, product found five breaks); round 4 at `66e44c3d` was not clean (product found two breaks, V1 and
   V2, seam one, V1; unit passed, 38 of 40 mutants killed, one equivalent and one becoming V14); round 5 at
-  `190ee95e` was not clean (product found three breaks, W1 to W3); their batches are folded in (Source). A reference module and vectors, one optional schema
+  `190ee95e` was not clean (product found three breaks, W1 to W3; unit passed, 156 mutants, 4 survivors, closed by
+  W10; seam passed with 0 breaks, the full suite of 10520 tests green, its risks closed by W3, W4, W12 and W13); their
+  batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9787,7 +9789,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      owned by that account and holding only `{schema, service, account, ports, updatedAt}` (`schema`
      `passioncode-port-claim/1`; several recorded ports of one service or part in one claim's `ports`). The installer,
      or the node that installs the service, writes the claim at install; at every start the service itself, or what
-     starts it, rewrites it with the ports of every instance the account records, not only when it is missing, because a file's age decides `systemd-tmpfiles`' cleaning
+     starts it, rewrites it, after it holds `service.lock`, rebuilt from this account's descriptors with the ports of
+     every instance the account records and written atomically (a temporary file, then a rename), not only when it is
+     missing, because a file's age decides `systemd-tmpfiles`' cleaning
      and a computer installed before catches up; at uninstall, after the
      descriptor, it removes this instance's ports from the claim and deletes the file only when none remain. A claim
      whose file owner (uid, or SID on Windows) is not the `account` it names, or of an account no longer on the
@@ -9811,7 +9815,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and nothing it answers is read as the service's. A client that can see its own account's sockets always tells its
      own listener. The order is `down`, `foreign-user`, `foreign`, then the well-known `status`; `foreign-user` is
      decided before the well-known document is read and wins over every answer, `ready` included; a reader treats a
-     state it does not know as not ready; a watcher counts `foreign-user` as unavailable, as it counts `down`; a node
+     state it does not know as not ready; a watcher counts `foreign` and `foreign-user` as unavailable, as it counts `down`; a node
      reports a `foreign` or `foreign-user` service as `down` in its node summary. The sources: on macOS the TCP socket
      table (`netstat -anv -p tcp`, or `sysctl net.inet.tcp.pcblist64` in the process), which names another account's
      socket where a list of the account's own sockets (`lsof -u` of the current user) cannot tell an empty port from
@@ -9860,9 +9864,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      1's claims folder. A virtual machine MAY be given its
      computer's secret at creation, and then carries it in its own snapshots. A node decides by the file's metadata
      before it reads a byte, and uses it only when the path is no symbolic link, the owner is the administrator (root;
-     on Windows Administrators or SYSTEM), no other account can write it, its folder is the administrator's and
+     on Windows Administrators or SYSTEM), no account but the platform's administrator (root on POSIX; Administrators or SYSTEM on Windows) may write it, its folder is the administrator's and
      writable by no one else, and it is exactly 32 bytes; otherwise it sends no `hostLabel`, never falling back to
-     another key. A node sends the label only once a device-policy member turns it on for that organization, a member
+     another key. A malformed input (platform, owner name, `org.id`) is a fault before the link, owner and mode are
+     looked at: a fault outranks every reason for no label. A node sends the label only once a device-policy member turns it on for that organization, a member
      owed by CT-239. An organization shows it only after its notice says so. A label is per organization, so
      organizations with no code on the computer cannot link their labels; an organization's code on any counted
      account of the computer, or in a virtual machine given the secret, can compute every organization's label for
@@ -9917,7 +9922,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - Fabric Dashboards: listens on no TCP port (an owner-only socket or named pipe), so item 1 does not apply to it;
     FD-156 (the owner check on macOS, 0.8.25) and FD-158 (`foreign-user`, 0.8.26, commit `53a62f9`) reported done;
     FD-159 (Linux, its PR #349; an owner it cannot tell refused; Windows) open, due at this decision's acceptance.
-    Owed: its watcher (FD-76's successor) counts `foreign-user` as unavailable; asked on `1fe66e6e` on acceptance day.
+    Owed: its watcher (FD-76's successor) counts `foreign` and `foreign-user` as unavailable; asked on `1fe66e6e` on acceptance day.
   - Fabric Inbox: B-217 open, after this decision (its PR #421, rows B-217 to B-220): its desktop connect step sends a
     new agent key to the hub's loopback callback; on macOS and Linux another account's listener reads today as no
     listener (safe, for the wrong reason), and on Windows, where the process tables show every account's processes,
@@ -10009,6 +10014,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   resources; W3, the guide's note scoping HA-1 and HA-2 to a shared computer), and its batch, with the coordinator's
   decisions on the landing check, a claim rewritten with every instance's ports, the Windows folder's one report for a
   missing folder or another ACL, SCN-056's recovery for a root or system listener and "same computer" in the RFC 6265
-  row, is folded in; the two UI lines passed the operator's copy check
+  row, is folded in; round 5's unit reading passed (156 mutants, 4 survivors: the shape checks moved after the link or
+  the mode, now killed by four vectors in which a fault outranks every reason for no label, W10; and `writableByOthers`
+  defined as anyone but the platform's administrator, W11); its seam reading passed (0 breaks, 10520 tests green; risks
+  closed by W3, W4, the claim's rewrite rebuilt, atomic and after the lock, W12, and the conformance row's SHOULD,
+  W13); and from DEC-0149's seam reading, `foreign` counted unavailable beside `foreign-user` (W14); the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

@@ -239,9 +239,11 @@ or a virtual machine given its secret) and that organizations with no code on th
   then carries it in its own snapshots.
 - **A node reads it only when it passes, metadata first.** The path is not a symbolic link (on Windows a reparse
   point); the file is owned by the administrator (root on macOS and Linux; the Administrators group or SYSTEM on
-  Windows); no other account can write it; its folder is the administrator's and writable by no one else; and only
+  Windows); no account but the platform's administrator (root on POSIX; Administrators or SYSTEM on Windows) may write it; its folder is the administrator's and writable by no one else; and only
   then its bytes, exactly 32. Otherwise the node sends no `hostLabel`, and never one computed from another key (a
-  node key included). The label is not a credential and proves nothing: it is what the node says, shown as such.
+  node key included). A malformed input to that decision (a platform, an owner name or an `org.id` that is not its
+  shape) is a fault before the link, the owner or the mode is looked at: a fault outranks every reason for no label.
+  The label is not a credential and proves nothing: it is what the node says, shown as such.
 - **What an organization does with it.** It shows the label only after its notice says so, and only as "these
   devices share a computer". A label is per organization, so an organization with no code on the computer cannot link
   its labels with another's (DEC-0128); an organization's code running on any counted account of the computer, or in

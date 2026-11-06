@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for the host label (DEC-0154 item 4), written by tools/vectors/host-label.ts, never by hand. hostLabel(input): input is {platform, secret: {link, owner, writableByOthers, folderOk, hex}, orgId}: platform posix or windows; link whether the path is a symbolic link (a reparse point); owner root (uid 0), administrators (the Windows Administrators group), system (Windows SYSTEM) or other, the administrator being root on posix and administrators or system on windows; writableByOthers whether any account but the owner can write the file; folderOk whether its folder is the administrator's and writable by no one else; hex the file's bytes in lower-case hex, read only when the metadata passes (so absent or empty otherwise), up to 1024 bytes checked for size and a fault above; orgId the enrollment's org.id. The answer is {hostLabel}: HMAC-SHA-256 keyed with the 32-byte secret over the UTF-8 bytes of fabric-host-label/1 followed directly by orgId, its first 16 bytes in base64url without padding; or {none: secret-link | secret-owner | secret-mode | secret-size}, the first reason in that order, the node sending no label; or {fault: input-invalid}.",
+  "about": "Vectors for the host label (DEC-0154 item 4), written by tools/vectors/host-label.ts, never by hand. hostLabel(input): input is {platform, secret: {link, owner, writableByOthers, folderOk, hex}, orgId}: platform posix or windows; link whether the path is a symbolic link (a reparse point); owner root (uid 0), administrators (the Windows Administrators group), system (Windows SYSTEM) or other, the administrator being root on posix and administrators or system on windows; writableByOthers whether anyone but the platform's administrator (root on posix; administrators or system on windows) may write the file; folderOk whether its folder is the administrator's and writable by no one else; hex the file's bytes in lower-case hex, read only when the metadata passes (so absent or empty otherwise), up to 1024 bytes checked for size and a fault above; orgId the enrollment's org.id. The answer is {hostLabel}: HMAC-SHA-256 keyed with the 32-byte secret over the UTF-8 bytes of fabric-host-label/1 followed directly by orgId, its first 16 bytes in base64url without padding; or {none: secret-link | secret-owner | secret-mode | secret-size}, the first reason in that order, the node sending no label; or {fault: input-invalid}, which outranks every none: a malformed platform, owner name, flag or orgId is a fault before link, owner and mode are looked at.",
   "cases": [
     {
       "name": "a root-owned secret of 32 bytes",
@@ -472,6 +472,74 @@
           "hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
         },
         "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "a link and a malformed organization id: the fault outranks the link",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": true,
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "ops@example.org"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "a link and an owner this reference does not name: the fault outranks the link",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": true,
+          "owner": "wheel",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "a link and a platform this reference does not name: the fault outranks the link",
+      "input": {
+        "platform": "darwin",
+        "secret": {
+          "link": true,
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "a mode that fails and a malformed organization id: the fault outranks the mode",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": false,
+          "owner": "root",
+          "writableByOthers": true,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "-org"
       },
       "expected": {
         "fault": "input-invalid"
