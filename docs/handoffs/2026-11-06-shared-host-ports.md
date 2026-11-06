@@ -597,6 +597,15 @@ consistency tests (47) passed again; the block's Python count is 1. `git grep -n
 schemas CONTEXT.md` and `git grep -n -e 'host that terminates TLS' -e 'TLS-terminating host' -- CONTEXT.md
 docs/specification src schemas` print nothing; the host rule's four copies hash the same once joined.
 
+After W81 the full gate did not run: the machine's 15-minute load stood at 88 (the threshold is 45). Typecheck, the
+documentation checks (markdownlint 0 errors), the UX lint, vectors (31 files), privacy (0 findings), the
+delegation-sealed, page-links, ops-digest, host-label, docs-check, sources-ledger and consistency tests (365) and 14
+further test files that read the edited pages and rows (2236 tests, among them local-channel, node-summary,
+positive-sweep and rule-tolerance) passed. The annotated-line check printed 1 four times in bash and in zsh on a trial
+copy of `DECISIONS.md` carrying the four lines, and 0 four times on this head. The four copies of the host rule hash
+the same once joined; the split-marker finder prints nothing; the shared block's Python count is 1. The SH-2 line is
+still the one added line with U+2014.
+
 ## Next task
 
 The coordinator's next blind readings of DEC-0154 at this branch's head.
