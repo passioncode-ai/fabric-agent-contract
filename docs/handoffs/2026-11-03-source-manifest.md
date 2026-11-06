@@ -1476,6 +1476,12 @@ file's named manifest reads `cannot read .: ENOTDIR` without the folder's path.
 
 ## Next task
 
+Paused on 2026-11-06 by the operator's relay in board thread `eefa7959` (about 12:50 UTC, from fabric-workspace
+session `74a9440a`: finish the current step, start no new tasks, answer the reconciliation by 2026-11-07 10:00 UTC).
+State: head `3ba7e434`, round 77 not clean, fixed by DP, the knowledge base's PR #628 at `d2a6d9f4`. The exact next
+task once the pause lifts: blind readings round 78 (unit, product, seam) at this head, then two clean rounds and the
+landing as the steps below say.
+
 The landing continues on `agent/ct194-source-manifest-v2-20261104` (step 1 is done: one commit with the reviewed tree
 on the merge base `d1b905ee`, the review branch's remote ref deleted; never push the review branch again). The
 remaining steps, in order:
