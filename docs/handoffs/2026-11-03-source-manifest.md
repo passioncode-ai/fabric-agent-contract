@@ -814,7 +814,7 @@ typecheck, 114 test files with 10266 passed and 3 skipped under the coverage flo
 with it taken out the symbolic link's test fails too (the code restored; only comments differ in
 `src/validate-cli.ts`). The landing checks of both orders, taken from this note and run with `bash -c` and `zsh -c`
 on probe copies of `service.md` built from its two landed texts, print what the chain paragraph says.
-`grep -c '2783 to 2804'` on this note prints 0. No U+2014 in the added lines. The knowledge base's PR is at
+Item DA's check (the old line range of the second timeout test, counted with `grep -c` on this note) prints 0. No U+2014 in the added lines. The knowledge base's PR is at
 `3d34d543` (it merged the knowledge base's main `ec85914a` as `20463491`, item 8 as main has it): `source
 hand-over` in 4, 4 and 5 lines of agents-first, principles and rules, `own estate` once on each, item 9 once and item
 8 once, `no longer decides` 0 times; its `npm test` (exit 0, 172 passed) and `npm run verify:content` (0 errors).
