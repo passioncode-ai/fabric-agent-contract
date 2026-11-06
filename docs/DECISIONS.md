@@ -9917,6 +9917,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - Fabric Dashboards: listens on no TCP port (an owner-only socket or named pipe), so item 1 does not apply to it;
     FD-156 (the owner check on macOS, 0.8.25) and FD-158 (`foreign-user`, 0.8.26, commit `53a62f9`) reported done;
     FD-159 (Linux, its PR #349; an owner it cannot tell refused; Windows) open, due at this decision's acceptance.
+    Owed: its watcher (FD-76's successor) counts `foreign-user` as unavailable; asked on `1fe66e6e` on acceptance day.
   - Fabric Inbox: B-217 open, after this decision (its PR #421, rows B-217 to B-220): its desktop connect step sends a
     new agent key to the hub's loopback callback; on macOS and Linux another account's listener reads today as no
     listener (safe, for the wrong reason), and on Windows, where the process tables show every account's processes,

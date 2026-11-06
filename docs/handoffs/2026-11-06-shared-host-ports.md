@@ -133,7 +133,9 @@ Proposed DEC on its own branch, and files the rest.
 At acceptance: set the Status, rewrite this handoff's row in the README, and in `docs/specification/README.md` name
 the owed adopters on the devices row (Project Observatory's node and setup step, the first organization server) and
 the services row (Fabric, Fabric Dashboards, Switchboard, Fabric Inbox, the adapter's kits, the PassionCode launcher,
-Project Observatory); tell thread `1fe66e6e` the same day (Fabric Dashboards' FD-159 and Fabric's server build on it).
+Project Observatory); tell thread `1fe66e6e` the same day (Fabric Dashboards' FD-159 and Fabric's server build on it),
+and in that message ask Fabric Dashboards for a row that its watcher (FD-76's successor) counts `foreign-user` as
+unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card only.
 
 ## Open
 
