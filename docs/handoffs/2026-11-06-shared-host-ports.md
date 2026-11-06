@@ -13,8 +13,8 @@ Proposed DEC on its own branch, and files the rest.
   recorded per counted account: kept when this instance's listener holds it or nothing does, chosen anew, free on the
   computer, only when none is recorded or another holder has it; a one-account computer keeps its historical default;
   a claim `.passioncode-ports.<service-id>.<account>.json` naming the account by uid or SID, rewritten at every start,
-  not only when it is missing; the port recorded anyway when the claim's path is squatted; at uninstall cleared of this instance's ports only, granting
-  nothing);
+  not only when it is missing; the port recorded anyway when the claim's path is squatted; at uninstall it rebuilds the claim from what remains,
+  granting nothing);
   HA-2 (the listener's owner checked before any credential and before "healthy", the host state `foreign-user` ordered
   before `foreign`, who checks when the client cannot, a server's refusal of another account's peer, rotation, the
   PKCE loopback redirect, the browser-cookie residue); HA-3 (no token-free loopback door on a computer with several counted
@@ -105,6 +105,13 @@ Proposed DEC on its own branch, and files the rest.
   moves a port in the rotation trigger, only the service itself rewrites the claim (never what starts it), the
   uninstall rebuilds the claim from what remains, `writableByOthers` and `folderOk` as writable by anyone but the
   platform's administrator, the fault's scope, and the relay and conformance check dropped.
+- Round 7 at `8a9373a1`: not clean. Product failed on W27 (the negative landing check could never fail: inside
+  double quotes the shell ran `down` and `foreign` as commands; both checks are now in a fenced block, the negative
+  one with `grep -cF` and escaped backticks, and both were run on trial files) and W28 (the uninstall still read as
+  removing an instance's ports in `conformance.md`, the spec's G1, this handoff and `service.md`; it now rebuilds the
+  claim from what remains). W29 to W33 folded: DEC-0149's sentence kept whole at landing, the installer's order
+  (descriptor, then the claim rebuilt from all descriptors, the short window accepted), the Fabric Dashboards ask for
+  its card's line, FLW-30's traces, the account count read by the service, an installer and a door only.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -132,15 +139,23 @@ Proposed DEC on its own branch, and files the rest.
   from `refs/agent-sync/ids` at landing; the backlog tail in id order; the handoffs README newest first;
   `vitest.config.ts`'s coverage `include` is the union (`src/host-label.ts` and `src/validator.ts` both); the watcher
   sentence in `service.md`: DEC-0149 rewrites it (its `service.md` line 222), and whichever of DEC-0149 and DEC-0154
-  lands second makes it read, as two sentences, the same as DEC-0149's handoff (CJ): "A watcher messages the operator
-  only when an agent has been unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`) for more than 15
-  minutes. Fabric Dashboards' watcher does so for `down` since FD-76 (0.7.15, `ebffd16`); counting `foreign` and
-  `foreign-user` is owed (DEC-0154)." The target phrase stands on one line, without a line break, or the check counts
-  0; after both land,
-  ``grep -c 'unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)' docs/specification/service.md``
-  prints 1, and
-  ``grep -c "Fabric Dashboards' watcher messages the operator only when an agent has been unavailable (`down`, `foreign`" docs/specification/service.md``
-  prints 0 (the released watcher reports only `down`). DEC-0149 points `relay.md` and `conformance.md` to
+  lands second makes it read as follows. Only the subject and the list of states in DEC-0149's first sentence change;
+  every other part of DEC-0149's sentence stays where it is ("once per case, and says it is back after 15 minutes
+  well; a `degraded` answer opens no message, so setup entries are left out (FD-76, ADR-0010 ...); a watcher MUST NOT
+  message the operator for an entry with `setup: true`"), and a second sentence follows them: "A watcher messages the
+  operator only when an agent has been unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`) for
+  more than 15 minutes, ... . Fabric Dashboards' watcher does so for `down` since FD-76 (0.7.15, `ebffd16`); counting
+  `foreign` and `foreign-user` is owed (DEC-0154)." The target phrase stands on one line, without a line break, or
+  the check counts 0. After both land, the first command prints 1 and the second prints 0 (the released watcher
+  reports only `down`):
+
+  ```sh
+  grep -c 'unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)' docs/specification/service.md
+  grep -cF "Fabric Dashboards' watcher messages the operator only when an agent has been unavailable (\`down\`, \`foreign\`" docs/specification/service.md
+  ```
+
+  Both were run on trial files before they were written here: the first prints 1 on a file holding the target phrase
+  on one line; the second prints 1 on a file holding the forbidden sentence and 0 on one holding the target. DEC-0149 points `relay.md` and `conformance.md` to
   `service.md`'s definition of "unavailable", so one edit in `service.md` suffices; when DEC-0149 lands, CT-232 cites its sentence on an OS account an
   organization owns whole (on DEC-0149's branch, `source.md` and `contexts.md`; not cited before it lands). This is a
   landing edit made by whichever of DEC-0149 and DEC-0154 lands second; after both, `grep '^| CT-232 ' docs/backlog.md |
@@ -156,6 +171,9 @@ the services row (Fabric, Fabric Dashboards, Switchboard, Fabric Inbox, the adap
 Project Observatory); tell thread `1fe66e6e` the same day (Fabric Dashboards' FD-159 and Fabric's server build on it),
 and in that message ask Fabric Dashboards for a row that its watcher (FD-76's successor) counts `foreign` and
 `foreign-user` as unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card only.
+Ask in the same message that its card's own `foreign-user` line (its `i18n.ts:128`, its own wording today) use this
+decision's two lines or be checked against them, and that a line for an owner that cannot be told be added (part of
+FD-159).
 
 ## Open
 
@@ -173,6 +191,10 @@ rounds 4 and 5's first batch the gate did not run (7 GB free); targeted checks r
 platform, owner-name and `org.id` checks moved after the link check or after the mode check, six moves) each fail
 `test/host-label.test.ts` and were reverted; W15's mutants (the flags' type check moved after the link check or
 after the owner check) each fail it too; V14's mutant (the hex check before the mode check) fails it too.
+
+After round 7's batch the full gate did not run (4 GB free, a 15-minute load of 48); `pnpm typecheck`,
+`pnpm vectors:check`, `pnpm run docs:check`, `python3 docs/ux/lint.py`, `pnpm privacy:check` (0 findings), the em dash
+check (0) and the targeted vitest set (1242 tests) ran with exit 0.
 
 ## Next task
 

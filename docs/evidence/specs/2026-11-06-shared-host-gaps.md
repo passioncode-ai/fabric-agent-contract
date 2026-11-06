@@ -70,7 +70,7 @@ loopback; that assumption is the root of G1 to G3.
   with another ACL reports that once and records its port anyway. A claim whose file owner
   uid (owner SID) is not its `account`, or of an account no longer on the computer, is ignored, and a claim grants
   nothing. When the claim's path is held by another owner, the installer records its port anyway and reports the
-  squatted path; at uninstall an instance removes only its own ports and deletes the file when none remain. A computer
+  squatted path; at uninstall it rebuilds the claim from what remains, deleting the file when no port remains. A computer
   with one counted account keeps its historical default port and writes its claim too; a client reads the port only
   from the descriptor or the service's record; a uid formula is only an allowed default when recorded and checked. The
   first proposal, a reserved band for hubs and one band per account, was not taken: every product would have to

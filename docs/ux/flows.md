@@ -767,7 +767,7 @@ flowchart TD
 
 ### FLW-30: A service's page, from the link to the host
 
-- **Traces:** ST-036 (JTBD-06, JRN-05/#3)
+- **Traces:** ST-036 (JTBD-06, JRN-05/#3); SCN-044, DEC-0154
 - **Goal:** the operator opens a service's page inside Fabric Dashboards, signed in by it
 - **Entry points:** an agent's answer, a tool answer's `open_link`, a completion message, an event's notification, Fabric's link back (FL-7)
 - **Success exit:** the page shows in Fabric Dashboards; where the host cannot run, at the service's own address

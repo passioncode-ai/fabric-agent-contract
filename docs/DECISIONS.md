@@ -9740,8 +9740,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `190ee95e` was not clean (product found three breaks, W1 to W3; unit passed, 156 mutants, 4 survivors, closed by
   W10; seam passed with 0 breaks, the full suite of 10520 tests green, its risks closed by W3, W4, W12 and W13); round 6 at
   `d47295d5` was not clean (unit passed, 65 of 67 mutants killed, the rest closed by W15; product found two breaks,
-  W16 and W17; seam found the same break as W17, the full suite of 10524 green); their batches are folded in
-  (Source). A reference module and vectors, one optional schema
+  W16 and W17; seam found the same break as W17, the full suite of 10524 green); round 7 at
+  `8a9373a1` was not clean (product found two breaks, W27 and W28); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9766,9 +9766,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      neither, root, SYSTEM and the system's service accounts (macOS: a uid under 500 or a name starting with `_`;
      Linux: a uid below `UID_MIN` of `/etc/login.defs` or a `nologin` shell; Windows: the built-in and service
      accounts), and a listener one of those owns is still `foreign-user` (item 2). "A computer
-     with one counted OS account" and "a computer with more than one" count only these, and the count is read at every
-     start by the service itself or what starts it (launchd, systemd, the Task Scheduler, a service wrapper), and by a
-     door at its own start, never once at install. A local service runs under the counted account whose
+     with one counted OS account" and "a computer with more than one" count only these, and the count is read by the
+     service itself at every start, by an installer when it installs and by a door at its own start (launchd, systemd,
+     the Task Scheduler and other launchers do not read it), never once at install for good. A local service runs under the counted account whose
      services directory declares it.
   1. **A port recorded per OS account (HA-1, G1).** A local service's port is recorded per counted OS account, in the
      service's own state and in its descriptor's `origin`. An installer keeps the port its own `id.instance` already
@@ -9790,7 +9790,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      health report or log, never creating it or changing its ACL),
      owned by that account and holding only `{schema, service, account, ports, updatedAt}` (`schema`
      `passioncode-port-claim/1`; several recorded ports of one service or part in one claim's `ports`). The installer,
-     or the node that installs the service, writes the claim at install; at every start only the service itself (or
+     or the node that installs the service, chooses the port, writes the descriptor and then rebuilds the claim
+     atomically from all the account's descriptors, as at start (the short window between choosing the port and
+     writing the claim is accepted: its cost is a collision warning); at every start only the service itself (or
      the app), never launchd, systemd, the Task Scheduler or the node, which cannot take its lock, rewrites it, after it holds `service.lock` (an app without a descriptor, or an app's part: after its own single-copy guard),
      rebuilt from this account's descriptors, or, for an app without a descriptor origin or an app's part, from the port it records in its own state (its liveness file or own state), with the ports of every instance the account records, written atomically (a temporary file, then a rename),
      not only when it is missing, because a file's age decides `systemd-tmpfiles`' cleaning and a computer installed
@@ -9927,6 +9929,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     FD-156 (the owner check on macOS, 0.8.25) and FD-158 (`foreign-user`, 0.8.26, commit `53a62f9`) reported done;
     FD-159 (Linux, its PR #349; an owner it cannot tell refused; Windows) open, due at this decision's acceptance.
     Owed: its watcher (FD-76's successor) counts `foreign` and `foreign-user` as unavailable; asked on `1fe66e6e` on acceptance day.
+    Asked the same day: its card's own `foreign-user` line (its `i18n.ts:128`) uses, or is checked against, this
+    decision's two lines, and a line for an owner that cannot be told is added (part of FD-159).
   - Fabric Inbox: B-217 open, after this decision (its PR #421, rows B-217 to B-220): its desktop connect step sends a
     new agent key to the hub's loopback callback; on macOS and Linux another account's listener reads today as no
     listener (safe, for the wrong reason), and on Windows, where the process tables show every account's processes,
@@ -10031,6 +10035,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   no `service.lock` for such an app; 10524 tests green), and its batch, with the coordinator's decisions W18 to W26 (the
   landing phrase on one line as two sentences with a negative check, the G1 wording, who moves a port, only the service
   itself rewriting the claim, the uninstall's rebuild, `writableByOthers` and `folderOk` as writable by anyone but the
-  platform's administrator, the fault's scope, the relay check dropped), is folded in; the two UI lines passed the operator's copy check
+  platform's administrator, the fault's scope, the relay check dropped), is folded in; round 7 at `8a9373a1` was not clean (product: W27, a negative
+  landing check the shell could never fail, now in a fenced block with `grep -cF` and escaped backticks, run on trial
+  files; W28, the uninstall still stated as removing an instance's ports), and its batch, with the coordinator's
+  decisions W29 to W33 (DEC-0149's sentence kept whole at landing, the installer's order and its accepted window, the
+  ask for Fabric Dashboards' card line, FLW-30's traces, the account count read by the service, an installer and a
+  door only), is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.
