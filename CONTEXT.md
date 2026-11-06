@@ -650,7 +650,7 @@ stream epoch, signed policy layers and periodic check-ins.
 
 **Counted OS account**: An OS account a person or an organization signs in with, or runs Fabric or an agent service
 under; an account that runs either, or has a services directory, always counts, and only an account that does neither
-(root, SYSTEM, the system's service accounts) is left out ([service](docs/specification/service.md#counted-os-accounts),
+(root, SYSTEM, the system's service accounts) is left out; the count is read at every start ([service](docs/specification/service.md#counted-os-accounts),
 DEC-0154, proposed). "A computer with more than one counted OS account" counts only these.
 
 **Port claim**: A `passioncode-port-claim/1` file `.passioncode-ports.<service-id>.<account>.json` in the computer's

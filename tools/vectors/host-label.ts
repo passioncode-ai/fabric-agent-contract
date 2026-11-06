@@ -18,7 +18,7 @@ import { projectRoot } from "../../src/contract.js";
 type Json = Record<string, unknown>;
 export const VECTOR_FILE = "fixtures/vectors/host-label.json";
 
-/** The bytes 0x00 to 0x1f: a fixed, readable host secret. */
+/** The bytes 0x00 to 0x1f: a fixed, readable secret of a computer. */
 const COUNTING = Array.from({ length: 32 }, (_, n) => n.toString(16).padStart(2, "0")).join("");
 const ALL_FF = "ff".repeat(32);
 
@@ -37,8 +37,8 @@ function cases(): Json[] {
   const windows = (s: Json, orgId: unknown = "org-7f3a") => ({ platform: "windows", secret: s, orgId });
   const list: Array<[string, unknown, Json]> = [
     ["a root-owned secret of 32 bytes", posix(secret("root", COUNTING)), label(COUNTING, "org-7f3a")],
-    ["the same host in another organization: another label", posix(secret("root", COUNTING), "org-b2c4"), label(COUNTING, "org-b2c4")],
-    ["another host in the same organization", posix(secret("root", ALL_FF)), label(ALL_FF, "org-7f3a")],
+    ["the same computer in another organization: another label", posix(secret("root", COUNTING), "org-b2c4"), label(COUNTING, "org-b2c4")],
+    ["another computer in the same organization", posix(secret("root", ALL_FF)), label(ALL_FF, "org-7f3a")],
     ["on Windows, owned by the Administrators group", windows(secret("administrators", COUNTING)), label(COUNTING, "org-7f3a")],
     ["on Windows, owned by SYSTEM", windows(secret("system", COUNTING)), label(COUNTING, "org-7f3a")],
     ["an organization id with every separator the pattern admits", posix(secret("root", COUNTING), "Acme.eu:prod~2-x_y"), label(COUNTING, "Acme.eu:prod~2-x_y")],
@@ -64,6 +64,8 @@ function cases(): Json[] {
     ["an odd number of hex digits", posix(secret("root", `${COUNTING}0`)), FAULT],
     ["exactly 1024 bytes, the cap: no label", posix(secret("root", "00".repeat(1024))), { none: "secret-size" }],
     ["1025 bytes, above the cap", posix(secret("root", "00".repeat(1025))), FAULT],
+    ["writable by another account, no bytes read", posix({ link: false, owner: "root", writableByOthers: true, folderOk: true }), { none: "secret-mode" }],
+    ["a folder not the administrator's, an oversized file", posix(secret("root", "00".repeat(4096), { folderOk: false })), { none: "secret-mode" }],
     ["a link, no bytes read", posix({ link: true, owner: "root", writableByOthers: false, folderOk: true }), { none: "secret-link" }],
     ["an oversized file behind a link: the link decides, the bytes are never read", posix(secret("root", "00".repeat(4096), { link: true })), { none: "secret-link" }],
     ["owned by an account, no bytes read", posix({ link: false, owner: "other", writableByOthers: false, folderOk: true, hex: "" }), { none: "secret-owner" }],

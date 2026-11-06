@@ -572,8 +572,9 @@ these tests: root, SYSTEM and the system's service accounts, that is on macOS th
 name starting with `_`; on Linux the accounts with a uid below `UID_MIN` of `/etc/login.defs` or a `nologin` shell; on
 Windows the built-in and service accounts. "A computer with one counted OS account" and "a
 computer with more than one" count only these. A listener one of the uncounted accounts owns is still `foreign-user`
-under HA-2. An installer and a door read the count at every start, never once at install, so an account added later
-is seen at the next start. A local service runs under the counted account whose services directory declares it.
+under HA-2. The count is read at every start by whatever starts: the service itself, or what starts it (launchd,
+systemd, the Task Scheduler, a service wrapper), and a door at its own start; never once at install, so an account
+added later is seen at the next start. A local service runs under the counted account whose services directory declares it.
 
 On a computer with one counted account a service keeps its port and HA-2's check finds the account's own services;
 what is new there is that an installer writes its claim (HA-1) and a client checks the listener (HA-2). HA-3 binds only
@@ -605,8 +606,9 @@ removes its ports from the claim:
   and a claim of an account no longer on the computer.
 - **A claim grants nothing.** It only keeps two installers from choosing one port; who may receive a credential is
   HA-2's check, never a claim.
-- An installer, or a node that installed the service, rewrites its claim at every start of the service, not only
-  when the file is missing: a file's age in `/var/tmp` decides whether `systemd-tmpfiles` removes it, and a rewrite
+- **Who writes the claim.** The installer, or the node that installs the service, writes the claim at install. At
+  every start the service itself, or what starts it (launchd, systemd, the Task Scheduler, a service wrapper), rewrites
+  it, not only when the file is missing: a file's age in `/var/tmp` decides whether `systemd-tmpfiles` removes it, and a rewrite
   also lets a computer installed before this decision catch up without a reinstall. Losing a claim costs only a
   collision warning: the claim grants nothing, and the listener's check (HA-2) is what protects a credential.
 - **A squatted claim path.** When a file of the claim's name exists and another account owns it, the installer cannot
@@ -615,12 +617,13 @@ removes its ports from the claim:
 - **The Windows claims folder.** The administrator's setup step, run with administrator rights, the one that writes
   the host label's secret ([devices](devices.md#the-host-label)), creates `%ProgramData%\PassionCode\port-claims`
   and sets its ACL: Users may create files in it, the creator owner has full control of its own files, and no account
-  may write or delete another's, the sticky folder's meaning on macOS and Linux. An installer running as an ordinary
-  account that finds the folder missing, or with another ACL, records its port anyway and reports it, as for a squatted
-  path; it never creates the folder or changes its ACL itself.
+  may write or delete another's, the sticky folder's meaning on macOS and Linux. That step is part of the first
+  installation of a Fabric node on Windows, whose installer asks once for elevation. An installer or a service running
+  as an ordinary account that finds the folder missing, or with another ACL, records its port anyway and reports it
+  once, until the folder appears, not at every start; it never creates the folder or changes its ACL itself.
 - **The Linux folder's limits.** `/var/tmp` was agreed on the board and stays, with two known limits: `systemd-tmpfiles`
-  may age a claim out, and a unit with `PrivateTmp` sees its own `/var/tmp`. So an installer, or the node, rewrites its
-  claim at every start, and CT-228's reference covers a claim aged out.
+  may age a claim out, and a unit with `PrivateTmp` sees its own `/var/tmp`. So the service, or what starts it, rewrites
+  the claim at every start, and CT-228's reference covers a claim aged out.
 - An instance removes only its own ports from the claim at uninstall, and deletes the file when none remain.
 - An ephemeral port that the listener protects with a proof (a fresh challenge answered with an HMAC, as below) needs
   no claim: nothing records it, and a client finds it only through the record the service writes.

@@ -9734,8 +9734,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Proposed 2026-11-06, a draft for the coordinator's blind readings (unit, seam, product). Round 1 at
   `25ba36f7` was not clean (the unit reading passed, the product reading found seven breaks and the seam reading one);
   round 2 at `cbc425d7` was not clean (the unit reading passed with one risk, the product reading found four breaks,
-  the seam reading passed); round 3 at `feef4e4d` was not clean (the product reading found five breaks); their batches
-  are folded in (Source). A reference module and vectors, one optional schema
+  the seam reading passed); round 3 at `feef4e4d` was not clean (unit passed, seam passed with no break, its risks
+  becoming S1 to S8, product found five breaks); round 4 at `66e44c3d` was not clean (product found two breaks, V1 and
+  V2, seam one, V1; unit passed, 38 of 40 mutants killed, one equivalent and one becoming V14); their batches are
+  folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9760,8 +9762,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      neither, root, SYSTEM and the system's service accounts (macOS: a uid under 500 or a name starting with `_`;
      Linux: a uid below `UID_MIN` of `/etc/login.defs` or a `nologin` shell; Windows: the built-in and service
      accounts), and a listener one of those owns is still `foreign-user` (item 2). "A computer
-     with one counted OS account" and "a computer with more than one" count only these, and an installer and a door
-     read the count at every start, never once at install. A local service runs under the counted account whose
+     with one counted OS account" and "a computer with more than one" count only these, and the count is read at every
+     start by the service itself or what starts it (launchd, systemd, the Task Scheduler, a service wrapper), and by a
+     door at its own start, never once at install. A local service runs under the counted account whose
      services directory declares it.
   1. **A port recorded per OS account (HA-1, G1).** A local service's port is recorded per counted OS account, in the
      service's own state and in its descriptor's `origin`. An installer keeps the port its own `id.instance` already
@@ -9776,12 +9779,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and Linux, the SID on Windows, never the login name, which can be renamed) in the computer's shared sticky folder
      (`/Users/Shared` on macOS; `/var/tmp` on Linux, agreed on the board, where `systemd-tmpfiles` may age a claim out
      and a unit with `PrivateTmp` sees its own folder; `%ProgramData%\PassionCode\port-claims` on Windows, created by
-     the administrator's setup step of item 4 with Users allowed to create files, the creator owner in full control of
-     its own files and no account allowed to write or delete another's; an installer that finds it missing or with
-     another ACL records its port anyway and reports it, never creating it or changing its ACL),
+     the administrator's setup step of item 4, part of a Fabric node's first installation on Windows whose installer
+     asks once for elevation, with Users allowed to create files, the creator owner in full control of its own files and
+     no account allowed to write or delete another's; an installer or a service that finds it missing or with another
+     ACL records its port anyway and reports it once, until the folder appears, never creating it or changing its ACL),
      owned by that account and holding only `{schema, service, account, ports, updatedAt}` (`schema`
-     `passioncode-port-claim/1`; several recorded ports of one service or part in one claim's `ports`). It rewrites
-     its claim at every start, not only when it is missing, because a file's age decides `systemd-tmpfiles`' cleaning
+     `passioncode-port-claim/1`; several recorded ports of one service or part in one claim's `ports`). The installer,
+     or the node that installs the service, writes the claim at install; at every start the service itself, or what
+     starts it, rewrites it, not only when it is missing, because a file's age decides `systemd-tmpfiles`' cleaning
      and a computer installed before catches up; at uninstall, after the
      descriptor, it removes this instance's ports from the claim and deletes the file only when none remain. A claim
      whose file owner (uid, or SID on Windows) is not the `account` it names, or of an account no longer on the
@@ -9818,7 +9823,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      instead; and on a computer with more than one counted account a local surface whose credential arrives from such
      a client (a dashboard a browser reaches, an MCP surface a coding agent reaches, a proxy coding agents call) MUST
      refuse a peer of another OS account before it reads the request; every other local service SHOULD. A service that
-     comes up on another port than its recorded one SHOULD rotate the secrets it issued to clients that reach it by
+     finds its recorded port held and comes up on another SHOULD rotate the secrets it issued to clients that reach it by
      port (Switchboard's SB-269). An authorization code bound to a PKCE `S256` challenge and sent to a loopback redirect
      (RFC 8252) is not a credential under this item: the app holding the listener and the verifier carries the check.
      Two residues are named, not closed. The browser's cookies: browsers do not isolate cookies by port (RFC 6265
@@ -9991,6 +9996,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   wording, HA-1 restated in the spec and the handoff, SCN-056's expected result against the cookie residue, and the
   count of accounts failing toward fewer), and its batch, with the coordinator's decisions on the `org_<base32>`
   parenthesis (removed for want of evidence), `foreign` mapped to `down` on any computer, the Linux folder's limits and
-  the Windows claims folder, is folded in; the two UI lines passed the operator's copy check
+  the Windows claims folder, is folded in; round 3's unit and seam readings passed (the seam's risks are folded as S1
+  to S8); round 4 at `66e44c3d` was not clean (product: V1, the claim rewritten at every start stated as "only when
+  missing" in the spec, the handoff and a conformance row, and V2, "host" for the computer in the reference, the
+  generator and the vectors; seam: V1; unit passed, 38 of 40 mutants killed, one equivalent, the other closed by two
+  vectors that fix the mode before the bytes, V14), and its batch, with the coordinator's decisions on who rewrites the
+  claim and reads the count, the rotation trigger, SCN-056's cookie bound per computer, the guide's note, the aged-out
+  claim, the Windows folder's elevation and its one report, and CT-229's mapping test, is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

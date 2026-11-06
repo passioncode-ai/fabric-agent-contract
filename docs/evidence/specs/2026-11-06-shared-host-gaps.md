@@ -57,13 +57,17 @@ loopback; that assumption is the root of G1 to G3.
 - **The consequence.** Two accounts can claim one port without either installer seeing it; the second fails to bind,
   or a host reaches the other account's copy of the same agent, whose well-known document answers the same
   `id.instance`, so `FAC-SEM-009` passes and the token is sent.
-- **Decided (DEC-0154 HA-1).** The port is recorded per counted account, in the service's own state and the
+- **Decided in DEC-0154 (proposed), HA-1.** The port is recorded per counted account, in the service's own state and the
   descriptor's `origin`. An installer keeps the port its own `id.instance` records when that instance's listener holds
   it or nothing does; it chooses a new port, free on the computer (not listening, in no other `id.instance`'s
   descriptor, in no other account's claim), only when none is recorded or another holder has it. It writes a claim
   `.passioncode-ports.<service-id>.<account>.json` in the computer's shared sticky folder (`<account>` the numeric uid,
   or the SID on Windows, never a login name that can be renamed), owned by that account, holding only
-  `{schema, service, account, ports, updatedAt}`, and rewrites a missing one at every start. A claim whose file owner
+  `{schema, service, account, ports, updatedAt}`; the installer writes it at install, and the service or what starts it
+  rewrites it at every start, not only when it is missing. On Windows the claims folder
+  `%ProgramData%\PassionCode\port-claims` is created, with its ACL, by the administrator's setup step of a Fabric
+  node's first installation (one elevation); a service that finds it missing reports that once and records its port
+  anyway. A claim whose file owner
   uid (owner SID) is not its `account`, or of an account no longer on the computer, is ignored, and a claim grants
   nothing. When the claim's path is held by another owner, the installer records its port anyway and reports the
   squatted path; at uninstall an instance removes only its own ports and deletes the file when none remain. A computer
@@ -85,7 +89,7 @@ loopback; that assumption is the root of G1 to G3.
   equivalent.
 - **The consequence.** Another account that holds the port while the service is down, or its own copy of the same
   agent, answers the same identity and receives the token.
-- **Decided (DEC-0154 HA-2).** Before any credential and before "healthy", the client establishes that the server end
+- **Decided in DEC-0154 (proposed), HA-2.** Before any credential and before "healthy", the client establishes that the server end
   of its connection is its own account's: from the socket table (macOS `netstat -anv -p tcp` or
   `sysctl net.inet.tcp.pcblist64`, never an own-account `lsof` alone; Linux the `uid` column of `/proc/net/tcp` and
   `tcp6`; Windows `GetExtendedTcpTable` and the owning process's token user), or by the listener's proof of a secret
@@ -104,7 +108,7 @@ loopback; that assumption is the root of G1 to G3.
 - **The contract before DEC-0154.** T0 is a caller on loopback under the owner's OS account (`delegation.md:470`); a
   callee requires no token from it (DL-26); a loopback caller of another account is T2 (`delegation.md:526`), but the
   local floor (bind `127.0.0.1`, the Host and Origin guard) cannot tell accounts apart.
-- **Decided (DEC-0154 HA-3).** On a computer with several accounts a token-free loopback door is T0 only when it checks
+- **Decided in DEC-0154 (proposed), HA-3.** On a computer with several accounts a token-free loopback door is T0 only when it checks
   the peer's account (Project Observatory's local channel, DEC-0075, is the example); a forwarder of a virtual machine
   or container is a relay and its callers are T2; since it runs as the guest's owner, a computer whose guests reach its
   loopback closes the path or admits no token-free caller on TCP.
@@ -128,7 +132,7 @@ loopback; that assumption is the root of G1 to G3.
   identity per machine (`plan:integration.md:115`).
 - **The contract.** A device is a computer (`devices.md:14`); a machine is a device enrolled in the estate
   (`estate-record.md:86`); an agent runs on one machine once per context (`contexts.md:68-80`, `FAC-SEM-074`).
-- **Decided in principle (DEC-0154 HA-4).** Each counted OS account and each virtual machine is its own device; the
+- **Decided in principle in DEC-0154 (proposed), HA-4.** Each counted OS account and each virtual machine is its own device; the
   host label is the only value the contract defines for telling one organization that two of its devices share a computer.
 - **Needed.** The estate's definitions, `FAC-SEM-074` per node, whether a virtual machine records its computer beyond the
   label (default: not), a node-summary fixture of a second account that carries nothing of the first.

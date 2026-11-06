@@ -4,12 +4,12 @@ import { isObject } from "./findings.js";
 // #region host-label, docs: docs/specification/devices.md#the-host-label
 /**
  * The host label (DEC-0154 item 4, proposed): what tells an organization that two of its devices (two counted OS
- * accounts of one computer, or a virtual machine and its host) run on one host, without naming the host. `hostLabel` is
- * the reference a node ports; it reads no file and never throws. The node reads the host secret file's metadata first
+ * accounts of one computer, or a virtual machine and its computer) run on one computer, without naming it. `hostLabel` is
+ * the reference a node ports; it reads no file and never throws. The node reads the computer's secret file's metadata first
  * (whether the path is a symbolic link, the file's owner and who else can write it, its folder's owner and mode) and
  * its bytes only when the metadata passes, and hands them over; malformed input is an answer.
  *
- * The label is HMAC-SHA-256 keyed with the host secret over the UTF-8 bytes of `fabric-host-label/1` followed directly
+ * The label is HMAC-SHA-256 keyed with the computer's secret over the UTF-8 bytes of `fabric-host-label/1` followed directly
  * by the organization's `org.id`, its first 16 bytes in base64url without padding (22 characters). A secret that is
  * reached through a symbolic link, is not owned by the system's administrator (root on macOS and Linux; the
  * Administrators group or SYSTEM on Windows), can be written by any other account, sits in a folder that is not the
@@ -19,7 +19,7 @@ import { isObject } from "./findings.js";
 
 /** The domain string the HMAC message starts with. */
 export const HOST_LABEL_DOMAIN = "fabric-host-label/1";
-/** The host secret's exact size in bytes. */
+/** The computer's secret's exact size in bytes. */
 export const HOST_SECRET_BYTES = 32;
 /** A label: 16 bytes in unpadded base64url, whose last character carries two bits. */
 export const HOST_LABEL = /^[A-Za-z0-9_-]{21}[AQgw]$/;

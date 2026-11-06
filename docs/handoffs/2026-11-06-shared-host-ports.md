@@ -12,8 +12,8 @@ Proposed DEC on its own branch, and files the rest.
 - [DEC-0154](../DECISIONS.md), Status Proposed: counted OS accounts (who counts, read at every start); HA-1 (a port
   recorded per counted account: kept when this instance's listener holds it or nothing does, chosen anew, free on the
   computer, only when none is recorded or another holder has it; a one-account computer keeps its historical default;
-  a claim `.passioncode-ports.<service-id>.<account>.json` naming the account by uid or SID, rewritten at every start
-  when missing; the port recorded anyway when the claim's path is squatted; at uninstall cleared of this instance's ports only, granting
+  a claim `.passioncode-ports.<service-id>.<account>.json` naming the account by uid or SID, rewritten at every start,
+  not only when it is missing; the port recorded anyway when the claim's path is squatted; at uninstall cleared of this instance's ports only, granting
   nothing);
   HA-2 (the listener's owner checked before any credential and before "healthy", the host state `foreign-user` ordered
   before `foreign`, who checks when the client cannot, a server's refusal of another account's peer, rotation, the
@@ -31,7 +31,7 @@ Proposed DEC on its own branch, and files the rest.
   client, host-state reader, receiving surface, host handing a credential, token-free door, node, setup step).
 - The host label's reference `src/host-label.ts` (`hostLabel`: link, owner per platform, mode, size), its generator
   `tools/vectors/host-label.ts` (Node's own HMAC, not importing the reference), vectors
-  `fixtures/vectors/host-label.json` (39 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
+  `fixtures/vectors/host-label.json` (41 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
   schema's `opaqueId`), a coverage floor of 100 in `vitest.config.ts`; the optional schema member `device.hostLabel` in
   `schemas/device-enrollment.schema.json` with a positive and a negative fixture; `service.id`'s description in
   `schemas/service-well-known.schema.json`.
@@ -73,7 +73,14 @@ Proposed DEC on its own branch, and files the rest.
   step; SCR-20 and FLW-17 retitled; the appearance cookies' write named. Unit passed (39 vectors and 2816 generated
   inputs against an independent model, 27 of 27 mutants killed), with two notes folded: the negative fixture differs
   from the positive only in its padding bits (`...wR`), and the fixture's `org.id` is described as "at least 128
-  random bits" with no encoding named.
+  random bits" with no encoding named. Seam passed with no break; its risks became S1 to S8, folded in.
+- Round 4 at `66e44c3d`: not clean. Product failed on V1 (the claim's rewrite at every start stated as "only when
+  missing" in the spec, this handoff and a conformance row) and V2 ("host" for the computer in the reference, the
+  generator and the vectors; two cases renamed "the same computer in another organization" and "another computer in
+  the same organization"); seam failed on V1. Unit passed (38 of 40 mutants killed, one equivalent; the other, the
+  hex check moved before the mode check, is now killed by two vectors, V14: "writable by another account, no bytes
+  read" and "a folder not the administrator's, an oversized file"). V3 to V13, the coordinator's decisions, are folded
+  in.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -96,13 +103,16 @@ Proposed DEC on its own branch, and files the rest.
 - CT-227 (`agent/ct219-receipt-20261106`), which lands first so this branch's hosted run is not red for its reason:
   the backlog tail reads CT-227 then CT-228 to CT-241; the handoffs README stays newest first, DEC-0154's row above
   DEC-0153's. Done: main `1c141418` (PR #245) is merged into this branch.
-- DEC-0149 (`agent/ct194-source-manifest-v2-20261104`): its two landing backlog rows take ids above CT-241 (its
-  handoff says CT-242 and CT-243, re-measured across open branches at landing); the DECISIONS tail in id order; the next-free markers re-read
+- DEC-0149 (`agent/ct194-source-manifest-v2-20261104`): its landing backlog rows take ids above the highest on
+  main and on open branches (DEC-0149 already holds CT-244), re-measured at landing; the DECISIONS tail in id order; the next-free markers re-read
   from `refs/agent-sync/ids` at landing; the backlog tail in id order; the handoffs README newest first;
   `vitest.config.ts`'s coverage `include` is the union (`src/host-label.ts` and `src/validator.ts` both); the watcher
   sentence in `service.md`: DEC-0149 rewrites it to "only when an agent has been unavailable (down, not merely
   degraded) for more than 15 minutes", and whichever of DEC-0149 and DEC-0154 lands second makes it read "unavailable
-  (down or foreign-user, not merely degraded)"; when DEC-0149 lands, CT-232 cites its sentence on an OS account an
+  (down or foreign-user, not merely degraded)". DEC-0149 points `relay.md` and `conformance.md` to `service.md`'s
+  definition of "unavailable", so one edit in `service.md` suffices; after both land,
+  ``grep -n 'unavailable (`down`)' docs/specification/relay.md docs/specification/conformance.md`` prints nothing, and if it prints anything for the
+  second lander, that lander fixes those lines too; when DEC-0149 lands, CT-232 cites its sentence on an OS account an
   organization owns whole (on DEC-0149's branch, `source.md` and `contexts.md`; not cited before it lands). This is a
   landing edit made by whichever of DEC-0149 and DEC-0154 lands second; after both, `grep '^| CT-232 ' docs/backlog.md |
   grep -c source.md` prints 1.
@@ -124,12 +134,17 @@ Project Observatory); tell thread `1fe66e6e` the same day (Fabric Dashboards' FD
 
 ## Checks actually run
 
-On this branch's head before the push: `pnpm typecheck`, `pnpm vectors:check`, the touched tests, `pnpm run
-docs:check`, `python3 docs/ux/lint.py`, `pnpm privacy:check`, the em dash check on the added lines and the full gate
-`pnpm run check`, each with exit 0. The gate after round 3's batch: 111 test files, 10518 tests passed and 1 skipped,
-branches 98.92% (12567 of 12703), 31 vector files matching their generators, the UX lint passed (40 stories, 34
-flows, 34 screens, 55 scenarios), documentation checks passed, markdownlint 0 errors, privacy 0 findings; no em dash on
-an added line.
+The full gate `pnpm run check` last ran after round 3's batch, at `66e44c3d`, with exit 0: 111 test files, 10518
+tests passed and 1 skipped, branches 98.92% (12567 of 12703), 31 vector files matching their generators, the UX lint
+passed (40 stories, 34 flows, 34 screens, 55 scenarios), documentation checks passed, markdownlint 0 errors, privacy 0
+findings. After round 4's batch the computer had 7 GB free, under the 8 GB the gate needs, so the full gate did not
+run; what ran, each with exit 0: `pnpm typecheck`, `pnpm vectors:check` (31 files), `pnpm run docs:check`,
+`python3 docs/ux/lint.py`, `pnpm privacy:check` (0 findings), the em dash check on the added lines (0), and
+`pnpm vitest run` over `test/host-label.test.ts`, `test/vectors-runner.test.ts`, `test/sources-ledger.test.ts`,
+`test/fixtures.test.ts`, `test/consistency.test.ts`, `test/guide-examples.test.ts`,
+`test/spec-required-members.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts` and
+`test/docs-check.test.ts` (1430 tests). V14's mutant (the hex check moved before the mode check) was tried and fails
+`test/host-label.test.ts` (2 tests), then reverted.
 
 ## Next task
 
