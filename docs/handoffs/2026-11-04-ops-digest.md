@@ -506,6 +506,16 @@ it, each on the tree that holds both, with its checks. Every check runs after th
 
 ## Checks actually run
 
+The landing, 2026-11-06. The commit of the held items of rounds 22 and 23 (`98ba4127`), each exit 0: `pnpm typecheck`;
+`pnpm vitest run --testTimeout=60000` on the six files of round 16 with coverage on `src/ops-digest.ts` (2047 tests;
+302 of 302 statements, 241 of 241 branches); `pnpm exec tsx tools/vectors/run.ts`; `pnpm run docs:check`; `python3
+docs/ux/lint.py`; `pnpm run privacy:check` (0 findings). Then the acceptance (`ee0cf9ee`) and the landing merge of
+`origin/main` at `1016f0ec` (`d5d66cfd`); `git merge-base --is-ancestor origin/main HEAD` exit 0. The branch gate on
+the merged head `d5d66cfd` (15-minute load 44.8, 8.6 GB free, under the heavy lock): `pnpm run check` (typecheck;
+`pnpm test`: 110 files, 10471 tests passed, 1 skipped, coverage floors held; `ux:lint`; `docs:check`, 262 Markdown
+files, 0 errors; `privacy:check`, 0 findings) exit 0, and `pnpm run vectors:check` (30 vector files) exit 0. This
+paragraph is the only change after it.
+
 Round-21 batch, 2026-11-05, each exit 0: `pnpm typecheck`; `pnpm vitest run --testTimeout=60000` on the six files of
 round 16 with coverage on `src/ops-digest.ts` (2044 tests; 298 of 298 statements, 238 of 238 branches); `pnpm exec tsx
 tools/vectors/run.ts`; `pnpm run docs:check`; `python3 docs/ux/lint.py`; `pnpm run privacy:check` (0 findings).
