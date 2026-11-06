@@ -1,6 +1,6 @@
 # Devices `fabric-device/0.1`
 
-DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per organization, `org.id` for contexts) DEC-0094 (a key in a file, idempotent rotation), DEC-0099 to DEC-0102, DEC-0103 (a closed organization) and DEC-0148 (a repeated renewal) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
+DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per organization, `org.id` for contexts) DEC-0094 (a key in a file, idempotent rotation), DEC-0099 to DEC-0102, DEC-0103 (a closed organization), DEC-0148 (a repeated renewal) and DEC-0154 (the host label, proposed) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
 `FAC-SEM-069`, `FAC-SEM-077`, `FAC-SEM-125`, `FAC-SEM-155` · schemas
 [`device-enrollment`](../../schemas/device-enrollment.schema.json),
 [`device-policy`](../../schemas/device-policy.schema.json),
@@ -12,7 +12,10 @@ DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per 
 [`device-common`](../../schemas/device-common.schema.json)
 
 A **device** is a computer on which collector nodes send [activity telemetry](activity.md) to an
-organization server. This protocol covers three things:
+organization server. Where several OS accounts share one computer, each OS account is its own device, and so is each
+virtual machine: its own `device.id`, keys and enrollments; the [host label](#the-host-label) is the only value that
+tells one organization that two of its devices share a host (DEC-0154, proposed; what this means for the estate's
+machines is CT-231). This protocol covers three things:
 
 - how a device is enrolled;
 - how it receives policy the organization signed;
@@ -201,6 +204,38 @@ P-256 public key — a device key, a policy root key, an offline root or delegat
 SEC 1 §3.2.2 before use: not the point at infinity, coordinates in range, on the curve
 ([`isValidP256Key`](../../src/p256.ts), vectors `fixtures/vectors/p256.json`). Every Ed25519 key still
 passes the small-order check (DEC-0045).
+
+### The host label
+
+DEC-0154 item 4 (HA-4), proposed. An enrollment request MAY carry `device.hostLabel`: an opaque value that is the same
+for every device of one organization on one host (two OS accounts of a computer, or a virtual machine given its host's
+secret) and that two organizations cannot link.
+
+- **The value.** HMAC-SHA-256 keyed with the host secret over the UTF-8 bytes of `fabric-host-label/1` followed
+  directly by the enrollment's `org.id`, its first 16 bytes in base64url without padding: 22 characters (schema
+  pattern). The reference is [`hostLabel`](../../src/host-label.ts); its vectors are
+  [`fixtures/vectors/host-label.json`](../../fixtures/vectors/host-label.json), written by
+  `tools/vectors/host-label.ts`.
+- **The host secret.** 32 random bytes in one file per host, created by an administrator's setup step:
+
+  | System | File |
+  |---|---|
+  | macOS | `/Library/Application Support/PassionCode/host-label.key` |
+  | Linux | `/etc/passioncode/host-label.key` |
+  | Windows | `%ProgramData%\PassionCode\host-label.key` |
+
+  Owner root (on Windows the Administrators group), mode `0444`; its folder `0755`, writable only by root. Every
+  account reads it, none can write it. It never leaves the host: not in a backup, a snapshot or a machine pack, and a
+  restore never carries it (CT-233). A virtual machine MAY be given its host's secret when it is created.
+- **A node reads it only when it is owned by root (Administrators) and exactly 32 bytes**; otherwise it sends no
+  `hostLabel`, and never one computed from another key (a node key included). The label is not a credential and
+  proves nothing: it is what the node says, shown as such.
+- **What an organization does with it.** It shows the label only after its notice says so, and only as "these
+  devices share a host". A label is per organization, so one organization's labels cannot be linked with another's
+  (DEC-0128).
+- **Sending it.** A server pinned before DEC-0154 refuses the member at its schema, as one pinned before DEC-0094
+  refused `file`; a node sends it only to an organization that turned it on, and how a node learns a server's pin is
+  CT-67's.
 
 <a id="transport"></a>
 
@@ -611,7 +646,8 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   an organization server keeps its device and key lookups per organization (`FAC-SEM-044`'s "device on record" is its
   own record, so one server hosting two organizations scopes it per organization), and each enrollment's `sequenceNum`
   is its own (UE-1); a token's `project`, `task` and actor ids in an organization's context are that context's;
-  coding-agent versions and the hook count in a mode `C` node summary (DEC-0118); an agent the person shares into two
+  coding-agent versions and the hook count in a mode `C` node summary (DEC-0118); within one organization, the
+  [host label](#the-host-label) its devices on one host share, by design and only after its notice (DEC-0154); an agent the person shares into two
   organizations shows the same `agentRef` (the person's own choice); the relay operator reads `org:<orgId>` in the estate
   record until per-context relay sessions (the operator's questions 1 to 4, taken at their defaults); an operator that
   runs two of a machine's relays (an estate's and an organization's, or two organizations', DEC-0134) sees that

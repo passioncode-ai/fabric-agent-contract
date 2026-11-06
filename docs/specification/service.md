@@ -136,7 +136,9 @@ claims no port (`FAC-SEM-010`). Vectors: [`fixtures/vectors/app-descriptor.json`
 - For a local placement `origin` MUST be `http://127.0.0.1:<port>`; only an app's descriptor may omit it (above). **A port is a claim:**
   before writing, an installer MUST read every descriptor in the directory and refuse a port
   that another local `id.instance` already declares. Semantic rule `FAC-SEM-010` checks a
-  directory; a remote origin claims no port here.
+  directory; a remote origin claims no port here. The directory shows only this OS account's descriptors, while
+  loopback is one per host: on a host with more than one OS account the port is also chosen free on the host, recorded
+  and claimed as [Several OS accounts on one host](#several-os-accounts-on-one-host) says (HA-1, DEC-0154, proposed).
 - Paths MAY start with `~/`, and on Windows with `~\`, `C:\` or `C:/` (DEC-0032); a command's executable
   follows the same grammar (`FAC-SEM-012`). Commands MUST be argument arrays; a shell string is
   invalid, as for the local runner ([profiles](profiles.md)). No argument carries a credential
@@ -210,7 +212,9 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   revision is refused with `schema-unsupported` ([versioning](versioning.md#protocol-revisions), DEC-0067).
 - `service.id` and `service.instance` MUST equal the descriptor's. A different answer
   means another program holds the port; a host MUST report it as `foreign` and MUST NOT
-  send it the descriptor's token (`FAC-SEM-009`).
+  send it the descriptor's token (`FAC-SEM-009`). A listener of another OS account, or one whose owner cannot be
+  told, is `foreign-user` before any of this is read, whatever it answers (HA-2, DEC-0154, proposed): an equal
+  identity stops a mistake, not another account holding the port.
 - `service.build` MUST carry a commit or a package digest, so a host can tell a restart
   onto new code from one onto old code.
 - `process.pid` and `process.startedAt` are the live process. A host compares the pid
@@ -529,7 +533,106 @@ These rules are the local placement's; a remote one replaces the first two
 
 Loopback reachability is not authorization: any process running as the same user can
 read the token file. This extension protects against a web page and against a mistake,
-not against a hostile process of the same user.
+not against a hostile process of the same user. Loopback is one per host, not one per OS account: a process of
+another OS account on the same host, and a guest a port forwarder relays onto loopback, reach every local service.
+The Host and Origin guard does not tell them apart, so a host with more than one OS account adds the checks of
+[Several OS accounts on one host](#several-os-accounts-on-one-host) (DEC-0154, proposed).
+
+## Several OS accounts on one host
+
+DEC-0154, proposed. A host is one computer; on it each OS account runs its own copy of a service, with its own services
+directory, tokens and descriptors, and every account (and every guest whose traffic a forwarder relays) reaches every
+port on `127.0.0.1`. On a host with one OS account a service MAY keep its historical default port and HA-2's check
+finds the account's own services; what is new there is that an installer writes its claim (HA-1) and a client checks
+the listener (HA-2). HA-3 binds only a host with more than one OS account.
+
+<a id="ha-1"></a>
+
+**HA-1, a port recorded per OS account.** A local service's port is recorded per OS account: in the service's own
+state and in its descriptor's `origin`. The installer chooses it free on the host: no process listens on
+`127.0.0.1:<port>`, no descriptor in this account's services directory declares it (`FAC-SEM-010`), and no port claim
+of another account names it. When it records a port it writes this account's **port claim**, and it removes the claim
+at uninstall:
+
+| | |
+|---|---|
+| File | `.passioncode-ports.<service-id>.<account>.json`, `<service-id>` the descriptor's `id`, `<account>` the OS account's login name |
+| Folder | the host's shared sticky folder: `/Users/Shared` (macOS), `/var/tmp` (Linux), `%ProgramData%\PassionCode\port-claims` (Windows) |
+| Owner | the account the file names |
+| Content | only `{schema, service, account, ports, updatedAt}`: `schema` `passioncode-port-claim/1`, `service` the `id`, `account` the login name, `ports` every port this account's instances of the service hold, `updatedAt` an RFC 3339 UTC time |
+
+```json
+{"schema": "passioncode-port-claim/1", "service": "example-agent", "account": "ops", "ports": [47320], "updatedAt": "2026-11-06T09:00:00Z"}
+```
+
+- A reader ignores a claim whose file owner is not the account it names, and a claim of an account no longer on the
+  host.
+- **A claim grants nothing.** It only keeps two installers from choosing one port; who may receive a credential is
+  HA-2's check, never a claim.
+- A host with one OS account MAY keep a service's historical default port.
+- A client takes a service's port only from its descriptor or the service's own record, never from a formula. A
+  formula over the account's uid (Fabric's hub, CO-505) is an allowed default only when the port it gives is recorded,
+  claimed and checked free as above.
+
+<a id="ha-2"></a>
+
+**HA-2, the listener's owner, and `foreign-user`.** Before a client sends any credential to
+`http://127.0.0.1:<port>` (a descriptor's token, a delegation token, a login code's request, a session cookie, a door's
+token), and before a host reports a local service healthy, it MUST establish that the server end of its connection
+belongs to a process of its own OS account, from the system's socket table (below), or by the listener proving, before
+any credential travels, that it holds a secret only this OS account can read (a fresh challenge answered with an HMAC
+under a key in an owner-only file, as Switchboard's control channel does):
+
+- No listener on the port is `down`, as before.
+- A listener of another OS account, or one whose owner cannot be told, is **`foreign-user`**: the client sends no
+  credential, and nothing the listener answers is read as the service's.
+- The order of a local service's states: `down`, then `foreign-user`, then `foreign` (`FAC-SEM-009`), then the
+  well-known `status`. `foreign-user` is decided before the well-known document is read and wins over any answer,
+  `ready` included. A host's own further states (a second copy shown as `duplicate`, under [One copy](#one-copy)) come
+  after these.
+- A reader that meets a state it does not know treats it as not ready: it sends nothing and shows the service as not
+  serving.
+
+How the owner is told, per system (the client looks at the server end of its own connection: local address
+`127.0.0.1:<port>`, remote address its own ephemeral port; where a source lists only listeners, the listener on the
+port):
+
+| System | Source |
+|---|---|
+| macOS | the TCP socket table, which names the owning process even for another account's socket: `netstat -anv -p tcp`, or `sysctl net.inet.tcp.pcblist64` read in the process; the owning process's uid from the process table. A list of this account's own sockets (`lsof -u` of the current user) finds an own listener, but alone it cannot tell an empty port from another account's, so when it finds none the socket table decides |
+| Linux | the `uid` column of the matching entry in `/proc/net/tcp` and `/proc/net/tcp6` |
+| Windows | `GetExtendedTcpTable` for the owning process id, then that process's token user, equal to the current user's; a process that cannot be opened is an owner that cannot be told |
+
+The well-known `process.pid` is never proof: any listener can name any pid.
+
+- **The server's side.** A local service SHOULD refuse a connection from a peer of another OS account before it reads
+  the request, telling the peer's owner by the same sources applied to the client end of the connection. It MUST when
+  its clients are other vendors' programs that cannot run the client's check (a local proxy that coding agents call,
+  as Switchboard's).
+- **Rotation.** A service that finds its recorded port held and comes up on another SHOULD rotate the secrets it
+  issued to clients that reach it by port, since a client that could not check may have sent them to the holder
+  (Switchboard's SB-269).
+- **A loopback redirect with PKCE is not a credential here.** An authorization code bound to a PKCE `S256` challenge
+  and sent to a loopback redirect (RFC 8252) is useless without the verifier; the app that holds the listener and the
+  verifier carries this check, not the browser that follows the redirect.
+
+The three state-precedence cases Fabric Dashboards pins at its commit `53a62f9` (`test-vectors/state-precedence.json`,
+FD-158) are: a listener of another OS account that answers `ready` with the descriptor's identity is `foreign-user`;
+a listener of another OS account that answers another identity is `foreign-user`, not `foreign`; a listener of this
+account that answers another identity is `foreign`. The contract's own vector file for them is CT-229.
+
+<a id="ha-3"></a>
+
+**HA-3, no token-free loopback door on a host with several accounts.** On a host with more than one OS account, a
+door that admits a caller on loopback without a token is not a T0 door ([delegation](delegation.md#trust-tiers) DL-25)
+unless it checks the peer's OS account as HA-2's server side does; Project Observatory's local channel, which checks
+the peer's uid on its socket ([local channel](local-channel.md#transport-and-who-may-connect), DEC-0075), is the existing
+example. A port forwarder of a virtual machine or a container (a Lima or Colima host agent, a user-mode gateway, an
+SSH tunnel) is a relay onto loopback: its callers are T2. A forwarder runs as the OS account that owns the guest, so
+the uid check does not catch that account's own guests; a host whose guests reach its loopback either closes that path
+or admits no token-free caller on TCP.
+
+The host label (HA-4) is in [devices](devices.md#the-host-label).
 
 ## Remote placement
 
@@ -541,7 +644,7 @@ at the same paths. Only reachability, supervision and the trust anchor change (D
 | | Local placement | Remote placement |
 |---|---|---|
 | `origin` | `http://127.0.0.1:<port>` | `https://<dns-name>[:<port>]` |
-| Trust anchor | loopback and the Host/Origin guard | the origin's TLS certificate and the service token |
+| Trust anchor | loopback and the Host/Origin guard; the listener's owner where several OS accounts share the host ([HA-2](#ha-2)) | the origin's TLS certificate and the service token |
 | Supervisor | launchd (macOS), systemd (Linux), Task Scheduler (Windows), Project Observatory's node (any system), or `lifecycle.manager: "none"` | its platform; `lifecycle.manager: "none"` |
 | Well-known document | unauthenticated, under 100 ms | the token is required |
 | Port claim (`FAC-SEM-010`) | yes | no; `id.instance` stays unique |

@@ -1,0 +1,268 @@
+{
+  "about": "Vectors for the host label (DEC-0154 item 4), written by tools/vectors/host-label.ts, never by hand. hostLabel(input): input is {secret: {owner, hex}, orgId}, owner root (uid 0), administrators (the Windows Administrators group) or other, hex the host secret file's bytes in lower-case hex, orgId the enrollment's org.id. The answer is {hostLabel}: HMAC-SHA-256 keyed with the 32-byte secret over the UTF-8 bytes of fabric-host-label/1 followed directly by orgId, its first 16 bytes in base64url without padding; or {none: secret-owner | secret-size}, the node sending no label; or {fault: input-invalid}.",
+  "cases": [
+    {
+      "name": "a root-owned secret of 32 bytes",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "hostLabel": "lT5ZXXcR0-QSVx-Ff88aJg"
+      }
+    },
+    {
+      "name": "the same host in another organization: another label, so two organizations cannot link it",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-b2c4"
+      },
+      "expected": {
+        "hostLabel": "G2DPBzeXy5HVfP7whzY8TQ"
+      }
+    },
+    {
+      "name": "another host in the same organization",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "hostLabel": "SW5UvPexz08Ylvvnm9xkNA"
+      }
+    },
+    {
+      "name": "on Windows, owned by the Administrators group",
+      "input": {
+        "secret": {
+          "owner": "administrators",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "hostLabel": "lT5ZXXcR0-QSVx-Ff88aJg"
+      }
+    },
+    {
+      "name": "an organization id with every separator the pattern admits",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "Acme.eu:prod~2-x_y"
+      },
+      "expected": {
+        "hostLabel": "LHiw6rH9yaljpusltzxfVw"
+      }
+    },
+    {
+      "name": "an organization id of 128 characters",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "oaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expected": {
+        "hostLabel": "FIGTnGI5Rzf2ffv9L_Avgw"
+      }
+    },
+    {
+      "name": "a secret owned by an account: no label, never another key's",
+      "input": {
+        "secret": {
+          "owner": "other",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-owner"
+      }
+    },
+    {
+      "name": "31 bytes: no label",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-size"
+      }
+    },
+    {
+      "name": "33 bytes: no label",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-size"
+      }
+    },
+    {
+      "name": "an empty file: no label",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": ""
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-size"
+      }
+    },
+    {
+      "name": "owned by an account and of the wrong size: the owner is named first",
+      "input": {
+        "secret": {
+          "owner": "other",
+          "hex": "00"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-owner"
+      }
+    },
+    {
+      "name": "an organization id of 129 characters",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "oaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "an organization id that is an address",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "ops@example.org"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "an organization id that starts with a separator",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "-org"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "an empty organization id",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": ""
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "bytes not in lower-case hex",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "an odd number of hex digits",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "a file far larger than a secret",
+      "input": {
+        "secret": {
+          "owner": "root",
+          "hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "an owner this reference does not name",
+      "input": {
+        "secret": {
+          "owner": "wheel",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "no secret",
+      "input": {
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "not an object",
+      "input": null,
+      "expected": {
+        "fault": "input-invalid"
+      }
+    }
+  ]
+}

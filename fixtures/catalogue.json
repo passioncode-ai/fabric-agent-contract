@@ -477,6 +477,8 @@
   {"name": "device-enrollment-request", "schema": "device-enrollment.schema.json", "path": "positive/device-enrollment-request.json", "valid": true},
   {"name": "device-enrollment-request-device-keys", "schema": "device-enrollment.schema.json", "path": "positive/device-enrollment-request-device-keys.json", "valid": true},
   {"name": "device-enrollment-request-file-key", "schema": "device-enrollment.schema.json", "path": "positive/device-enrollment-request-file-key.json", "valid": true},
+  {"name": "device-enrollment-request-host-label", "schema": "device-enrollment.schema.json", "path": "positive/device-enrollment-request-host-label.json", "valid": true},
+  {"name": "device-enrollment-host-label-padding-bits", "schema": "device-enrollment.schema.json", "path": "negative/device-enrollment-host-label-padding-bits.json", "valid": false, "keyword": "pattern"},
   {"name": "device-enrollment-file-key-not-exportable", "schema": "device-enrollment.schema.json", "path": "negative/device-enrollment-file-key-not-exportable.json", "valid": false, "keyword": "const"},
   {"name": "device-enrollment-hardware-key-exportable", "schema": "device-enrollment.schema.json", "path": "negative/device-enrollment-hardware-key-exportable.json", "valid": false, "keyword": "const"},
   {"name": "device-enrollment-file-key-attested", "schema": "device-enrollment.schema.json", "path": "negative/device-enrollment-file-key-attested.json", "valid": false, "keyword": "false schema"},

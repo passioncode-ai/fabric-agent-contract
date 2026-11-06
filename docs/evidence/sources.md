@@ -110,6 +110,7 @@ revision, not an implicit change to `0.1.0`.
 | Kimi Code CLI | 2.1.1 (`kimi --version` and `kimi --help`, run 2026-10-12) | `kimi --help` on the operator's machine | `-p, --prompt <prompt>` runs one prompt non-interactively; `--output-format` takes `text` or `stream-json`. The `kimi-stream-json` drive (DEC-0046). |
 | Long-term memory survey | arXiv `2512.13564v2` | <https://arxiv.org/abs/2512.13564v2> | Formation, evolution, retrieval and use are separate lifecycle concerns; Fabric makes each concern observable and policy-bound. |
 | Agent memory survey | arXiv `2603.10062v2` | <https://arxiv.org/abs/2603.10062v2> | Memory is classified by function and scope; Fabric adds authority, evidence and consistency boundaries needed by a multi-project platform. |
+| OAuth 2.0 for Native Apps (RFC 8252) | RFC 8252, BCP 212, October 2017 (immutable; retrieved 2026-11-06) | <https://www.rfc-editor.org/rfc/rfc8252> | §7.3 *Loopback Interface Redirection*: a native app receives the authorization code on a loopback redirect; §6 and §8.1 *Protecting the Authorization Code*: a public native client implements PKCE, so an intercepted code is useless without the verifier. DEC-0154 HA-2 therefore treats such a code as no credential: the app holding the listener and the verifier carries the owner check. |
 
 ## Compatibility rule
 

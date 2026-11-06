@@ -50,6 +50,11 @@
                 "linux",
                 "other"
               ]
+            },
+            "hostLabel": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{21}[AQgw]$",
+              "description": "DEC-0154 item 4 (proposed): the host label, HMAC-SHA-256 keyed with the host's secret over fabric-host-label/1 followed by org.id, its first 16 bytes in base64url without padding. Two devices of one organization on one host (two OS accounts, or a virtual machine given its host's secret) carry the same label; two organizations get unlinkable labels. Absent when the node has no usable host secret. Not a credential."
             }
           },
           "additionalProperties": false
