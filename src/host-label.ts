@@ -45,8 +45,9 @@ const FAULT: HostLabelAnswer = { fault: "input-invalid" };
  * any account but the owner can write the file (a POSIX group or other write bit; a Windows ACE granting write to
  * another SID); `folderOk` whether its folder is owned by the administrator and writable by no one else (on POSIX root
  * and `0755`; on Windows the ACL devices.md gives); `hex` the file's bytes in lower-case hex; `orgId` the enrollment's
- * `org.id`. Answers `{hostLabel}`, or `{none}` naming the first reason the node sends no label (the link, then the
- * owner, then the mode, then the size), or `{fault}`.
+ * `org.id`. `hex` is read only when the metadata passes, so it may be absent or empty when it does not; up to 1024
+ * bytes it is checked for size, above that it is a fault. Answers `{hostLabel}`, or `{none}` naming the first reason the
+ * node sends no label (the link, then the owner, then the mode, then the size), or `{fault}`.
  */
 export function hostLabel(input: unknown): HostLabelAnswer {
   if (!isObject(input) || !isObject(input.secret)) return FAULT;
@@ -55,11 +56,12 @@ export function hostLabel(input: unknown): HostLabelAnswer {
   if (platform !== "posix" && platform !== "windows") return FAULT;
   if (typeof link !== "boolean" || typeof writableByOthers !== "boolean" || typeof folderOk !== "boolean") return FAULT;
   if (typeof owner !== "string" || !OWNERS.has(owner)) return FAULT;
-  if (typeof hex !== "string" || hex.length > MAX_HEX || !HEX.test(hex)) return FAULT;
   if (typeof orgId !== "string" || !ORG_ID.test(orgId)) return FAULT;
+  // The metadata decides before any byte is read: a node that stops here has no bytes to hand over.
   if (link) return { none: "secret-link" };
   if (!ADMINISTRATOR[platform].has(owner)) return { none: "secret-owner" };
   if (writableByOthers || !folderOk) return { none: "secret-mode" };
+  if (typeof hex !== "string" || hex.length > MAX_HEX || !HEX.test(hex)) return FAULT;
   const secret = Buffer.from(hex, "hex");
   if (secret.length !== HOST_SECRET_BYTES) return { none: "secret-size" };
   const mac = createHmac("sha256", secret).update(Buffer.from(HOST_LABEL_DOMAIN + orgId, "utf8")).digest();

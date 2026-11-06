@@ -435,6 +435,10 @@ flowchart TD
   X --> V[Screen: Service card with a second copy]
   C --> V
   W --> V
+  P[Host probes the service's port] --> O{Who owns the listener?}
+  O -->|this account| V
+  O -->|another account, or cannot be told| F[foreign-user: nothing sent]
+  F --> V
 ```
 
 - **Screens traversed:** SCR-20 loading (the wait); SCR-20 error (exit 75); SCR-20 success (one copy runs); SCR-20 error `foreign-user` (another OS account's listener holds the port, SCN-056, DEC-0154).

@@ -15,7 +15,7 @@ A **device** is one [counted OS account](service.md#counted-os-accounts) of a co
 under `fabric-device/0.1`, on which collector nodes send [activity telemetry](activity.md) to an organization server.
 Two counted OS accounts of one computer are two devices, with their own `device.id`, keys and enrollments; the
 [host label](#the-host-label) is the only value the contract defines for telling one organization that two of its
-devices share a host (DEC-0154, proposed; what this means for the estate's machines is CT-231). This protocol covers three things:
+devices share a computer (DEC-0154, proposed; what this means for the estate's machines is CT-231). This protocol covers three things:
 
 - how a device is enrolled;
 - how it receives policy the organization signed;
@@ -207,16 +207,20 @@ passes the small-order check (DEC-0045).
 
 ### The host label
 
-DEC-0154 item 4 (HA-4), proposed. An enrollment request MAY carry `device.hostLabel`: an opaque value that is the same
-for every device of one organization on one host (two counted OS accounts of a computer, or a virtual machine given
-its host's secret) and that organizations with no code on the host cannot link.
+DEC-0154 item 4 (HA-4), proposed. The **host label** is the label of the computer: in its name, and only there, "host"
+means the computer, not the program this contract calls a host. An enrollment request MAY carry `device.hostLabel`:
+an opaque value that is the same for every device of one organization on one computer (two counted OS accounts of it,
+or a virtual machine given its secret) and that organizations with no code on the computer cannot link.
 
-- **The value.** HMAC-SHA-256 keyed with the host secret over the UTF-8 bytes of `fabric-host-label/1` followed
+- **The value.** HMAC-SHA-256 keyed with the computer's secret over the UTF-8 bytes of `fabric-host-label/1` followed
   directly by the enrollment's `org.id`, its first 16 bytes in base64url without padding: 22 characters (schema
   pattern). The reference is [`hostLabel`](../../src/host-label.ts); its vectors are
   [`fixtures/vectors/host-label.json`](../../fixtures/vectors/host-label.json), written by
   `tools/vectors/host-label.ts`.
-- **The host secret.** 32 random bytes in one file per host, created by an administrator's setup step:
+- **`org.id`.** A server that turns the label on issues `org.id` with at least 128 random bits, so it is unguessable
+  and unique across organization servers with overwhelming probability ([contexts](contexts.md)); otherwise two
+  organizations with one `org.id` would see one label for one computer.
+- **The computer's secret.** 32 random bytes in one file per computer, created by an administrator's setup step:
 
   | System | File |
   |---|---|
@@ -227,21 +231,21 @@ its host's secret) and that organizations with no code on the host cannot link.
   On macOS and Linux: owner root, mode `0444`, its folder owned by root with mode `0755`. On Windows: Administrators
   full control, Users read, no inherited write, on the file and its folder. Every account reads it, none but the
   administrator can write it.
-- **Never in a backup.** The setup step MUST exclude the file from the host's backups: on macOS
-  `tmutil addexclusion -p` on the file; on Linux the exclusion list of the host's backup tool; on Windows the
+- **Never in a backup.** The setup step MUST exclude the file from the computer's backups: on macOS
+  `tmutil addexclusion -p` on the file; on Linux the exclusion list of the computer's backup tool; on Windows the
   `FilesNotToBackup` registry list. It is not in a snapshot or a machine pack either. That a restore never carries it
-  is the restore's rule, owed by CT-233. A virtual machine MAY be given its host's secret when it is created, and then
-  carries it in its own snapshots.
+  is the restore's rule, owed by CT-233. A virtual machine MAY be given its computer's secret when it is created, and
+  then carries it in its own snapshots.
 - **A node reads it only when it passes, metadata first.** The path is not a symbolic link (on Windows a reparse
   point); the file is owned by the administrator (root on macOS and Linux; the Administrators group or SYSTEM on
   Windows); no other account can write it; its folder is the administrator's and writable by no one else; and only
   then its bytes, exactly 32. Otherwise the node sends no `hostLabel`, and never one computed from another key (a
   node key included). The label is not a credential and proves nothing: it is what the node says, shown as such.
 - **What an organization does with it.** It shows the label only after its notice says so, and only as "these
-  devices share a host". A label is per organization, so an organization with no code on the host cannot link its
-  labels with another's (DEC-0128); an organization's code running on any counted account of the host, or in a
-  virtual machine given the secret, reads the secret and can compute every organization's label for that host (named
-  in [unlinkable enrollments](#unlinkable-enrollments)).
+  devices share a computer". A label is per organization, so an organization with no code on the computer cannot link
+  its labels with another's (DEC-0128); an organization's code running on any counted account of the computer, or in
+  a virtual machine given the secret, reads the secret and can compute every organization's label for that computer
+  (named in [unlinkable enrollments](#unlinkable-enrollments)).
 - **Sending it.** A node sends `hostLabel` only once a device-policy member turns it on for that organization; that
   member is owed (CT-239), so until it lands a node sends none. A server pinned before DEC-0154 refuses the member at
   its schema, as one pinned before DEC-0094 refused `file`; how a node learns a server's pin is CT-67's.
@@ -455,7 +459,7 @@ DEC-0052). Each key is `{value, locked?}`. The layer's `source` is one of:
 | `models.credentials` | list of `{credentialRef, provider, credentialKind: "api-org", fingerprint, callers?, quota?, dataClasses}` | The organization's API keys a device may use — never a subscription, a seat or a person's own key (schema). `fingerprint` is `hmac-sha256:` of the key under the organization's salt, so a node recognises the slot that holds it, and so its provenance, without the policy carrying the key. `quota.usd` is a decimal string. |
 | `models.personal_key_sharing` | `allowed`, `forbidden` | Whether a person's own key may serve someone else's call. **Absent means forbidden** (`FAC-SEM-068`). |
 | `workspace.folders` | list of folder patterns | The organization's work folders, relative to the person's home directory, so a value never names a user (schema: no leading `/`, `\`, `~` or drive letter, no `..`); `*` matches one segment. |
-| `machine.mode` | `A`, `C` | `C`, the default: the organization manages only its own work on the machine, and `node-summary/1` lists the coding agents, the hook count, this context's own items and the items its baseline names ([node summary](node-summary.md#the-summary), DEC-0118). `A`: it administers the whole machine, taken only from an `mdm` layer; a `server` or `user` layer's `A` is ignored (`FAC-SEM-042`); `node-summary/1` then lists the whole harness (S8, DEC-0118). |
+| `machine.mode` | `A`, `C` | `C`, the default: the organization manages only its own work on the machine, and `node-summary/1` lists the coding agents, the hook count, this context's own items and the items its baseline names ([node summary](node-summary.md#the-summary), DEC-0118). `A`: it administers the whole machine, taken only from an `mdm` layer; a `server` or `user` layer's `A` is ignored (`FAC-SEM-042`); `node-summary/1` then lists the whole harness (S8, DEC-0118). On a computer with several counted OS accounts, until CT-232 decides, mode `A`'s harness is the enrolling counted account's (DEC-0154, proposed). |
 | `harness.baseline` | `{items: [{kind, name, minVersion?, digest?}]}`: `minVersion` only for a coding agent or a plugin, `digest` only for a skill or a plugin | DEC-0101: what every enrolled machine is expected to run, read only from the `mdm` and `server` layers (a `user` layer's value is ignored, DEC-0102); a node reports its drift from it in `node-summary/1` ([node summary](node-summary.md#the-baseline-and-the-drift)). Absent: no drift is reported. |
 | `repair.packages` | list of `{agentRef, digest}` | DEC-0101: the packages a `repair-request/1` may name, read only from the `mdm` and `server` layers (a `user` layer's value is ignored, DEC-0102). **Absent means no repair runs** (`FAC-SEM-129`). |
 
@@ -656,8 +660,8 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   own record, so one server hosting two organizations scopes it per organization), and each enrollment's `sequenceNum`
   is its own (UE-1); a token's `project`, `task` and actor ids in an organization's context are that context's;
   coding-agent versions and the hook count in a mode `C` node summary (DEC-0118); within one organization, the
-  [host label](#the-host-label) its devices on one host share, by design and only after its notice, and any label of
-  that host, which an organization's code on any counted account of the host, or in a virtual machine given the secret,
+  [host label](#the-host-label) its devices on one computer share, by design and only after its notice, and any label of
+  that computer, which an organization's code on any counted account of the computer, or in a virtual machine given the secret,
   can compute for every organization (DEC-0154); an agent the person shares into two
   organizations shows the same `agentRef` (the person's own choice); the relay operator reads `org:<orgId>` in the estate
   record until per-context relay sessions (the operator's questions 1 to 4, taken at their defaults); an operator that

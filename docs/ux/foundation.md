@@ -532,6 +532,8 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a service running, when I start a second copy by hand, then it exits at once with one sentence naming the running copy's pid (or saying it is unknown) and changes nothing.
   - Given a service running, when its supervisor starts a second copy marked as supervised, then that copy waits up to 300 s touching nothing, the running copy keeps answering, and the host never shows an outage.
   - Given launchd supervises it, then the host lists the waiting copy as two copies (`duplicate`); given the Task Scheduler, then the host shows the running copy as ready and nothing of the waiting one.
+  - Given another OS account on this computer listens on my service's port, when the host probes it, then the host shows `foreign-user` with the line "Another account on this computer is using this service's port; nothing was sent to it.", sends nothing and reads nothing it answers as my service's (DEC-0154).
+  - Given the computer will not say who owns the listener on my service's port, when the host probes it, then the host shows `foreign-user` with the line "This computer would not say who is using this service's port; nothing was sent to it." and sends nothing (DEC-0154).
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

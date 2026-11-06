@@ -467,7 +467,7 @@ Proof starts at the machine boundary (DEC-0045; Fabric ADR-0144
 
 | Tier | Who | Placed by |
 |---|---|---|
-| **T0** | the operator's own machine: a caller on loopback, running under the owner's OS account | the local placement's floor ([service](service.md#authentication-and-network)), which this profile does not change; on a host with more than one [counted OS account](service.md#counted-os-accounts), a token-free loopback door places a caller in T0 only when it checks the peer's OS account ([service](service.md#ha-3) HA-3, DEC-0154, proposed) |
+| **T0** | the operator's own machine: a caller on loopback, running under the owner's OS account | the local placement's floor ([service](service.md#authentication-and-network)), which this profile does not change; on a computer with more than one [counted OS account](service.md#counted-os-accounts), a token-free loopback door places a caller in T0 only when it checks the peer's OS account ([service](service.md#ha-3) HA-3, DEC-0154, proposed) |
 | **T1** | an enrolled machine of the same owner | its enrolment in the owner's estate (the estate record, DEC-0084); over the relay, `relayCallerTier` from the estate record the callee's node applied ([machine calls](machine-calls.md#the-t1-binding-over-the-relay), DEC-0106) |
 | **T2** | everything else: another person's machine (a share grant, `principalKind: external`), and any caller the callee cannot place in T0 or T1 (over the estate's relay a sender that is not T1 is T2 and its call is refused, and a sender `relayCallerTier` reads `unknown-state` is a denial rather than T2, DL-28, [machine calls](machine-calls.md#the-t1-binding-over-the-relay), DEC-0106) | the default: no placement |
 
@@ -475,7 +475,7 @@ A caller's tier is its origin's, not its connection's. A call relayed onto loopb
 a tunnel, a reverse proxy, or the hub forwarding (DL-10) a T2 caller's call — is T2 unless the relay proves the
 origin's tier, and the hub always attaches the delegation token of a T2 origin to what it forwards. A port forwarder
 of a virtual machine or a container is such a relay; it runs as the OS account that owns the guest, so a peer check
-alone does not catch that account's own guests (HA-3, DEC-0154, proposed). That is an accepted gap: on a host with one
+alone does not catch that account's own guests (HA-3, DEC-0154, proposed). That is an accepted gap: on a computer with one
 counted account a token-free door still admits the account's own guests through a forwarder (CT-238).
 
 **DL-26 — Inside the boundary the operator's instruction is the authority.** A callee MUST NOT require a
@@ -743,7 +743,8 @@ tests: [`test/delegation.test.ts`](../../test/delegation.test.ts), [`test/delega
 - A device approval (`method: device`): removed by DEC-0045 until a decision says which device signal it is
   and who signs it.
 - The binding that places a caller in T1 other than over the relay (DEC-0106 decides the relay's), and how a surface
-  that declares `surfaces.mcp.auth: "delegation"` admits a T0 or T1 caller that presents no token.
+  that declares `surfaces.mcp.auth: "delegation"` admits a T0 or T1 caller that presents no token; on a computer with more
+  than one counted OS account HA-3 applies ([service](service.md#ha-3), DEC-0154, proposed).
 - A grant check by a T0 or T1 callee called without a token: `grant-check-request` requires the `tokenJti` of
   the callee's own token, and the meter's token-less answer (Observatory's `slotsRequireGrant: when-token`) is
   the meter's (CT-30).

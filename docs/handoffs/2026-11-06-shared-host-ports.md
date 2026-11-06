@@ -1,4 +1,4 @@
-# 2026-11-06: several OS accounts on one host (CT-228, DEC-0154, proposed)
+# 2026-11-06: several OS accounts on one computer (CT-228, DEC-0154, proposed)
 
 ## Objective
 
@@ -18,7 +18,7 @@ Proposed DEC on its own branch, and files the rest.
   accounts; forwarders are relays; the single-account gap accepted, CT-238); HA-4 (each counted account and each
   virtual machine is its own device; `device.hostLabel`, its secret kept out of backups, its read rule failing closed,
   sent only once a policy member turns it on, CT-239).
-- [service.md](../specification/service.md#several-os-accounts-on-one-host): the new section, the port claim's
+- [service.md](../specification/service.md#several-os-accounts-on-one-computer): the new section, the port claim's
   pointer, `FAC-SEM-009`'s neighbour, the threat model and the cookie residue, the trust anchor, the Install and
   Uninstall rows. [delegation.md](../specification/delegation.md#trust-tiers): the header, DL-25's T0 row, the relay
   paragraph and the accepted gap. [devices.md](../specification/devices.md#the-host-label): the device definition, the
@@ -28,18 +28,18 @@ Proposed DEC on its own branch, and files the rest.
   client, host-state reader, receiving surface, host handing a credential, token-free door, node, setup step).
 - The host label's reference `src/host-label.ts` (`hostLabel`: link, owner per platform, mode, size), its generator
   `tools/vectors/host-label.ts` (Node's own HMAC, not importing the reference), vectors
-  `fixtures/vectors/host-label.json` (33 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
+  `fixtures/vectors/host-label.json` (39 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
   schema's `opaqueId`), a coverage floor of 100 in `vitest.config.ts`; the optional schema member `device.hostLabel` in
   `schemas/device-enrollment.schema.json` with a positive and a negative fixture; `service.id`'s description in
   `schemas/service-well-known.schema.json`.
 - `CONTEXT.md`: Device redefined; Counted OS account, Port claim, `foreign-user` and Host label added; Trust tier
   narrowed. UX: SCN-056 in `docs/ux/scenarios.md`, SCR-20's `foreign-user` state in `docs/ux/screens.md`, FLW-17's
   screens in `docs/ux/flows.md`. RFC 8252's row in `docs/evidence/sources.md`, and RFC 6265's existing row read again (its section 8.5 was already pinned for DEC-0059).
-- The gap list as a tracked spec: [2026-11-06-studio-spaces-gaps.md](../evidence/specs/2026-11-06-studio-spaces-gaps.md),
+- The gap list as a tracked spec: [2026-11-06-shared-host-gaps.md](../evidence/specs/2026-11-06-shared-host-gaps.md),
   the shared host's accounts by role only.
 - Backlog CT-228 (the DEC) and CT-229 to CT-241 (the state-order vector file, G4 to G11, the single-account forwarder
   gap, the policy member, the fixture catalogue, the organization's display).
-- Ids: DEC-0154 reserved by compare-and-swap on origin (key `studio-ports-owner-20261106`); no rule code reserved.
+- Ids: DEC-0154 reserved by compare-and-swap on origin (under this run's own reservation key); no rule code reserved.
   `DECISIONS.md`'s marker reads `DEC-0155`, `conformance.md`'s stays `FAC-SEM-169`, equal to the counters.
 
 ## Readings
@@ -52,6 +52,17 @@ Proposed DEC on its own branch, and files the rest.
   naming Fabric Dashboards, the plan's private details in the spec). Seam failed on one break (the Install and
   Uninstall rows) with risks (`org.id`'s randomness, the watcher, the organization's display, filed as CT-241). The
   coordinator's decisions on all of them are folded in at the next head.
+- Round 2 at `cbc425d7`: not clean. Unit passed with one risk (the bytes validated before the metadata: the reference
+  now decides by link, owner and mode first, a file up to 1024 bytes is answered by size, above that a fault). Product
+  failed on four breaks: "host" in two senses (the new text now says "computer" for the machine, the section is
+  renamed "Several OS accounts on one computer", and "host label" is defined once as the computer's label), one UI line
+  for two causes (two lines now), the free-port test moving existing ports (an installer now keeps its instance's
+  recorded port), and the A2A sentence on loopback reach (rewritten, with `profiles.md`). Seam passed, with follow-ups
+  R1 to R7 folded in. The branch merged GitHub main `1c141418` (PR #245) first. The spec and this handoff were renamed
+  to `2026-11-06-shared-host-gaps.md` and `2026-11-06-shared-host-ports.md`.
+- The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
+  sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
+  the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
 
 ## Decisions made in the draft
 
@@ -70,8 +81,9 @@ Proposed DEC on its own branch, and files the rest.
 
 - CT-227 (`agent/ct219-receipt-20261106`), which lands first so this branch's hosted run is not red for its reason:
   the backlog tail reads CT-227 then CT-228 to CT-241; the handoffs README stays newest first, DEC-0154's row above
-  DEC-0153's.
-- DEC-0149 (`agent/ct194-source-manifest-v2-20261104`): the DECISIONS tail in id order; the next-free markers re-read
+  DEC-0153's. Done: main `1c141418` (PR #245) is merged into this branch.
+- DEC-0149 (`agent/ct194-source-manifest-v2-20261104`): its two landing backlog rows take ids above CT-241 (its
+  handoff says CT-242 and CT-243, re-measured across open branches at landing); the DECISIONS tail in id order; the next-free markers re-read
   from `refs/agent-sync/ids` at landing; the backlog tail in id order; the handoffs README newest first;
   `vitest.config.ts`'s coverage `include` is the union (`src/host-label.ts` and `src/validator.ts` both); the watcher
   sentence in `service.md`: DEC-0149 rewrites it to "only when an agent has been unavailable (down, not merely
@@ -98,7 +110,7 @@ Project Observatory); tell thread `1fe66e6e` the same day (Fabric Dashboards' FD
 
 On this branch's head before the push: `pnpm typecheck`, `pnpm vectors:check`, the touched tests, `pnpm run
 docs:check`, `python3 docs/ux/lint.py`, `pnpm privacy:check`, the em dash check on the added lines and the full gate
-`pnpm run check`, each with exit 0. The gate after round 1's batch: 111 test files, 10512 tests passed and 1 skipped,
+`pnpm run check`, each with exit 0. The gate after round 2's batch: 111 test files, 10518 tests passed and 1 skipped,
 branches 98.92% (12567 of 12703), 31 vector files matching their generators, the UX lint passed (40 stories, 34
 flows, 34 screens, 55 scenarios), documentation checks passed, markdownlint 0 errors, privacy 0 findings; no em dash on
 an added line.

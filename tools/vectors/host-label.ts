@@ -62,7 +62,13 @@ function cases(): Json[] {
     ["an empty organization id", posix(secret("root", COUNTING), ""), FAULT],
     ["bytes not in lower-case hex", posix(secret("root", COUNTING.toUpperCase())), FAULT],
     ["an odd number of hex digits", posix(secret("root", `${COUNTING}0`)), FAULT],
-    ["a file far larger than a secret", posix(secret("root", "00".repeat(1025))), FAULT],
+    ["exactly 1024 bytes, the cap: no label", posix(secret("root", "00".repeat(1024))), { none: "secret-size" }],
+    ["1025 bytes, above the cap", posix(secret("root", "00".repeat(1025))), FAULT],
+    ["a link, no bytes read", posix({ link: true, owner: "root", writableByOthers: false, folderOk: true }), { none: "secret-link" }],
+    ["an oversized file behind a link: the link decides, the bytes are never read", posix(secret("root", "00".repeat(4096), { link: true })), { none: "secret-link" }],
+    ["owned by an account, no bytes read", posix({ link: false, owner: "other", writableByOthers: false, folderOk: true, hex: "" }), { none: "secret-owner" }],
+    ["passing metadata and no bytes", posix({ link: false, owner: "root", writableByOthers: false, folderOk: true }), FAULT],
+    ["a 128-bit organization id, as a server that turns the label on issues it", posix(secret("root", COUNTING), "org_7dk3q2zr2m4x5b6c3n5v7w2y4t"), label(COUNTING, "org_7dk3q2zr2m4x5b6c3n5v7w2y4t")],
     ["an owner this reference does not name", posix(secret("wheel", COUNTING)), FAULT],
     ["a platform this reference does not name", { platform: "darwin", secret: secret("root", COUNTING), orgId: "org-7f3a" }, FAULT],
     ["a flag that is not a boolean", posix(secret("root", COUNTING, { link: "no" })), FAULT],
@@ -76,7 +82,7 @@ function cases(): Json[] {
 /** The vectors as an object. */
 export function hostLabelVectors(): Json {
   return {
-    about: "Vectors for the host label (DEC-0154 item 4), written by tools/vectors/host-label.ts, never by hand. hostLabel(input): input is {platform, secret: {link, owner, writableByOthers, folderOk, hex}, orgId}: platform posix or windows; link whether the path is a symbolic link (a reparse point); owner root (uid 0), administrators (the Windows Administrators group), system (Windows SYSTEM) or other, the administrator being root on posix and administrators or system on windows; writableByOthers whether any account but the owner can write the file; folderOk whether its folder is the administrator's and writable by no one else; hex the file's bytes in lower-case hex; orgId the enrollment's org.id. The answer is {hostLabel}: HMAC-SHA-256 keyed with the 32-byte secret over the UTF-8 bytes of fabric-host-label/1 followed directly by orgId, its first 16 bytes in base64url without padding; or {none: secret-link | secret-owner | secret-mode | secret-size}, the first reason in that order, the node sending no label; or {fault: input-invalid}.",
+    about: "Vectors for the host label (DEC-0154 item 4), written by tools/vectors/host-label.ts, never by hand. hostLabel(input): input is {platform, secret: {link, owner, writableByOthers, folderOk, hex}, orgId}: platform posix or windows; link whether the path is a symbolic link (a reparse point); owner root (uid 0), administrators (the Windows Administrators group), system (Windows SYSTEM) or other, the administrator being root on posix and administrators or system on windows; writableByOthers whether any account but the owner can write the file; folderOk whether its folder is the administrator's and writable by no one else; hex the file's bytes in lower-case hex, read only when the metadata passes (so absent or empty otherwise), up to 1024 bytes checked for size and a fault above; orgId the enrollment's org.id. The answer is {hostLabel}: HMAC-SHA-256 keyed with the 32-byte secret over the UTF-8 bytes of fabric-host-label/1 followed directly by orgId, its first 16 bytes in base64url without padding; or {none: secret-link | secret-owner | secret-mode | secret-size}, the first reason in that order, the node sending no label; or {fault: input-invalid}.",
     cases: cases()
   };
 }

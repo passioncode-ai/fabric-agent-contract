@@ -2,12 +2,12 @@
   "protocol": "fabric-device/0.1",
   "kind": "enrollment-request",
   "org": {
-    "id": "org-7f3a"
+    "id": "org_7dk3q2zr2m4x5b6c3n5v7w2y4t"
   },
   "device": {
     "id": "dev-01j9a",
     "platform": "macos",
-    "hostLabel": "lT5ZXXcR0-QSVx-Ff88aJB"
+    "hostLabel": "F2vxq8HEPDwcwjdBtFx_wB"
   },
   "key": {
     "algorithm": "ecdsa-p256",

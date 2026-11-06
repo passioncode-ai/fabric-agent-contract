@@ -1,6 +1,6 @@
-# Several OS accounts on one host: the contract's gaps
+# Several OS accounts on one computer: the contract's gaps
 
-A spec of 2026-11-06 for backlog CT-228 to CT-237 and [DEC-0154](../../DECISIONS.md) (proposed). It answers the
+A spec of 2026-11-06 for backlog CT-228 to CT-241 and [DEC-0154](../../DECISIONS.md) (proposed). It answers the
 operator's request of 2026-11-05, relayed on board thread `1fe66e6e`: read the organization's plan for a shared host,
 compare it with the contract, and write a spec per gap.
 
@@ -84,7 +84,7 @@ loopback; that assumption is the root of G1 to G3.
   `sysctl net.inet.tcp.pcblist64`, never an own-account `lsof` alone; Linux the `uid` column of `/proc/net/tcp` and
   `tcp6`; Windows `GetExtendedTcpTable` and the owning process's token user), or by the listener's proof of a secret
   only this account reads. No listener is `down`; another account's listener, or an owner that cannot be told, is
-  `foreign-user`, ordered before `foreign` and winning over every answer. A server should refuse a peer of another
+  `foreign-user`, ordered before `foreign` and winning over every answer. On a computer with more than one counted account, a server should refuse a peer of another
   account before reading, and must when its clients are other vendors' programs; rotation when a service comes up on
   another port; a PKCE-bound code sent to a loopback redirect is not a credential here.
 - **Acceptance (CT-228, CT-229).** The state order's vector file with Fabric Dashboards' three cases at `53a62f9`;
