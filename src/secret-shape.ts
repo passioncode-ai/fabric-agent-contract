@@ -102,7 +102,11 @@ export function rawValues(query: string): Map<string, string[]> {
     if (piece === "") continue;
     const at = piece.indexOf("=");
     const name = [...new URLSearchParams(at < 0 ? piece : piece.slice(0, at)).keys()][0] ?? "";
-    values.set(name, [...(values.get(name) ?? []), at < 0 ? "" : decodeKeepingPlus(piece.slice(at + 1))]);
+    const value = at < 0 ? "" : decodeKeepingPlus(piece.slice(at + 1));
+    const list = values.get(name);
+    // Appended in place: a query of many pieces under one name costs one pass, not a copy per piece.
+    if (list === undefined) values.set(name, [value]);
+    else list.push(value);
   }
   return values;
 }

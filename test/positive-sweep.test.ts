@@ -116,6 +116,10 @@ export const NOT_SWEPT: readonly string[] = [
   // `service-well-known`), and a call's decision against the action and the tier (kind `action-call`).
   "service-actions-extension.schema.json",
   "decision.schema.json",
+  // A manifest's or a well-known answer's channel-agent declaration (DEC-0150) is checked inside that document
+  // (FAC-SEM-162 to FAC-SEM-165, kinds `manifest` and `service-well-known`), whose positive fixtures
+  // manifest-channel-agent.json and service-well-known-channel-agent.json the sweep runs.
+  "service-channel-agent-extension.schema.json",
   // Where a collector reads the daily operations digests (DEC-0153 OD-9): checked inside a descriptor (FAC-SEM-168, kind
   // `service-descriptor`), whose positive fixture with the key is swept.
   "service-ops-digest-extension.schema.json"

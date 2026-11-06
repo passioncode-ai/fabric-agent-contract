@@ -644,6 +644,24 @@ function rotation(value: JsonObject): Finding[] {
   return [{ code: "FAC-SEM-125", instancePath: "/response/certificate", message: "a repeated rotation request gets the certificate it was answered with, not a new one" }];
 }
 
+/**
+ * FAC-SEM-155 (DEC-0148): a renewal by the key on record is answered again with the certificate it was issued while that
+ * certificate is unpresented. `{latest, at, response}`: `latest` the device's latest certificate on record,
+ * `{certificate, renewed?, presented?, notAfter}` (`renewed` true when a renewal by the key on record issued it,
+ * `presented` true once the server accepted a request under its serial); `at` the server's clock when the request
+ * arrived; `response` the server's `{certificate}`, or no (or a null) `certificate` for a refusal. While `latest` was issued by a
+ * renewal, is unpresented and has not ended, a renewal is a repeat of it: answered with that certificate, byte for byte,
+ * or refused (a revoked device, a policy); never with another certificate. Otherwise it is a new renewal (DEC-0100).
+ */
+function renewal(value: JsonObject): Finding[] {
+  const latest = isObject(value.latest) ? value.latest : {};
+  const response = isObject(value.response) ? value.response : {};
+  const at = strictTime(value.at), end = strictTime(latest.notAfter);
+  const repeat = latest.renewed === true && latest.presented !== true && latest.certificate !== undefined && latest.certificate !== null && at < end;
+  if (!repeat || response.certificate === undefined || response.certificate === null || jsonEqual(latest.certificate, response.certificate)) return [];
+  return [{ code: "FAC-SEM-155", instancePath: "/response/certificate", message: "a renewal that arrives while the device's latest certificate was issued by a renewal, is unpresented and has not ended gets that certificate again, or a refusal, never another" }];
+}
+
 export function deviceRules(kind: string, value: unknown): Finding[] | undefined {
   if (!isObject(value)) return undefined;
   if (kind === "device-policy-update") return policyUpdate(value);
@@ -655,6 +673,7 @@ export function deviceRules(kind: string, value: unknown): Finding[] | undefined
   if (kind === "device-action") return deviceAction(value);
   if (kind === "device-root-certification") return rootCertification(value);
   if (kind === "device-rotation") return rotation(value);
+  if (kind === "device-renewal") return renewal(value);
   return undefined;
 }
 // #endregion device-rules

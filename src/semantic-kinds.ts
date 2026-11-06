@@ -57,6 +57,7 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "device-policy-update": wrap("current", "next", "trustedKeys", "at", "rootKeyId"),
   "device-request-signature": wrap("request", "publicBaseUrl", "certificates", "at", "answer", "clientCertificateSerial", "seen"),
   "device-root-certification": wrap("pinned", "root", "certification", "revocations", "at"),
+  "device-renewal": wrap("latest", "at", "response"),
   "device-rotation": wrap("answered", "request", "response"),
   "enroll-token": doc("enroll-token.schema.json"),
   entitlement: doc("entitlement.schema.json"),

@@ -258,6 +258,9 @@ function readerHints(schema: string | undefined, value: unknown, out: Hint[]): v
   // One rule name for every bare declaration; each bare declaration's line carries its own schema's page explicitly, so
   // it prints that page whichever value HINT_HELP's shared entry holds.
   if (schema === "service-ops-digest-extension.schema.json") out.push(["/", "hint/declaration-only", "FAC-SEM-168 runs only on the declaration inside a service descriptor's extensions (the placement and paths.data, a source or a dir named twice, a dir with a segment of only dots, spaces or ignorable code points, a dir holding a lone surrogate, a home folder in a dir, a dir or source shaped like a credential); check the descriptor to run it", OPS_DIGEST_HELP]);
+  // DEC-0150: a bare channel-agent declaration checks its shape only; its other rules read it inside its document.
+  // Until DEC-0149's instance-free schema lines land, this bare path prints the generic lines, so the hint says so.
+  if (schema === "service-channel-agent-extension.schema.json") out.push(["/", "hint/declaration-only", "FAC-SEM-163 to FAC-SEM-165 run only on a declaration inside a manifest's provider.extensions or a well-known answer's extensions; check that document to run them. A bare declaration's lines may name its members as written (a credential-shaped name included) and print one line per item, since widths are not checked first here", "docs/specification/channel-agent.md#what-is-checked"]);
   if (schema !== "provider.schema.json" || !isObject(value) || !isObject(value.run) || !isObject(value.run.mcp) || !isObject(value.run.mcp.stdio)) return;
   if (Object.hasOwn(value.run.mcp.stdio, "scope")) out.push(["/run/mcp/stdio/scope", "hint/reader-pending", "Fabric's registry does not accept run.mcp.stdio.scope yet (CT-27); leave it out and readers take on-demand"]);
 }

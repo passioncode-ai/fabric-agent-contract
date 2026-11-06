@@ -241,7 +241,9 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   ([connections](connections.md), DEC-0096), and, for a service that queues, its load under
   `https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` ([Load](#load), DEC-0104), and the actions its
   pages offer under `https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1` ([Actions](#actions),
-  DEC-0121).
+  DEC-0121), and, for a channel agent with no manifest, its declaration under
+  `https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1` ([channel agent](channel-agent.md),
+  DEC-0150).
 - `surfaces.operatorChannel` MAY name the path of the service's operator-channel status, which
   requires the service token ([operator channel](operator-channel.md) OC-9, DEC-0034). The
   channel's state never changes the service's `status` or `degraded` list.
