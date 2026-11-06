@@ -31,7 +31,7 @@ Proposed DEC on its own branch, and files the rest.
   client, host-state reader, receiving surface, host handing a credential, token-free door, node, setup step).
 - The host label's reference `src/host-label.ts` (`hostLabel`: link, owner per platform, mode, size), its generator
   `tools/vectors/host-label.ts` (Node's own HMAC, not importing the reference), vectors
-  `fixtures/vectors/host-label.json` (45 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
+  `fixtures/vectors/host-label.json` (47 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
   schema's `opaqueId`), a coverage floor of 100 in `vitest.config.ts`; the optional schema member `device.hostLabel` in
   `schemas/device-enrollment.schema.json` with a positive and a negative fixture; `service.id`'s description in
   `schemas/service-well-known.schema.json`.
@@ -96,6 +96,15 @@ Proposed DEC on its own branch, and files the rest.
   the conformance row). W14, from DEC-0149's seam reading: `foreign` is unavailable too (a watcher counts `foreign`
   and `foreign-user` as unavailable, as node summaries and connections already report both as `down`), in HA-2, DEC
   item 2, the owed Fabric Dashboards row and the landing target.
+- Round 6 at `d47295d5`: not clean. Unit passed (65 of 67 mutants killed; the rest closed by W15, two vectors in which
+  a flag that is not a boolean is a fault before the link and the owner). Product failed on W16 (PL-3's owner check
+  unknown to ST-036, FLW-30, SCN-044 and FL-7) and W17 (the claim's rebuild had no source for an app without a
+  descriptor origin or an app's part). Seam failed on the same break as W17 (no `service.lock` for such an app: its
+  own single-copy guard instead); the full suite of 10524 tests was green at `d47295d5`. W18 to W26 folded: the landing
+  phrase on one line and its two-sentence target with a negative check, "missing or with another ACL" in G1, who
+  moves a port in the rotation trigger, only the service itself rewrites the claim (never what starts it), the
+  uninstall rebuilds the claim from what remains, `writableByOthers` and `folderOk` as writable by anyone but the
+  platform's administrator, the fault's scope, and the relay and conformance check dropped.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -122,14 +131,17 @@ Proposed DEC on its own branch, and files the rest.
   main and on open branches (DEC-0149 already holds CT-244), re-measured at landing; the DECISIONS tail in id order; the next-free markers re-read
   from `refs/agent-sync/ids` at landing; the backlog tail in id order; the handoffs README newest first;
   `vitest.config.ts`'s coverage `include` is the union (`src/host-label.ts` and `src/validator.ts` both); the watcher
-  sentence in `service.md`: DEC-0149 rewrites it to "only when an agent has been unavailable (`down`, not merely
-  `degraded`) for more than 15 minutes" (its `service.md` line 222), and whichever of DEC-0149 and DEC-0154 lands
-  second makes it read "unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)"; after both land,
-  ``grep -c 'unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)' docs/specification/service.md`` prints 1.
-  DEC-0149 points `relay.md` and `conformance.md` to `service.md`'s
-  definition of "unavailable", so one edit in `service.md` suffices; after both land,
-  ``grep -n 'unavailable (`down`)' docs/specification/relay.md docs/specification/conformance.md`` prints nothing, and if it prints anything for the
-  second lander, that lander fixes those lines too; when DEC-0149 lands, CT-232 cites its sentence on an OS account an
+  sentence in `service.md`: DEC-0149 rewrites it (its `service.md` line 222), and whichever of DEC-0149 and DEC-0154
+  lands second makes it read, as two sentences, the same as DEC-0149's handoff (CJ): "A watcher messages the operator
+  only when an agent has been unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`) for more than 15
+  minutes. Fabric Dashboards' watcher does so for `down` since FD-76 (0.7.15, `ebffd16`); counting `foreign` and
+  `foreign-user` is owed (DEC-0154)." The target phrase stands on one line, without a line break, or the check counts
+  0; after both land,
+  ``grep -c 'unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)' docs/specification/service.md``
+  prints 1, and
+  ``grep -c "Fabric Dashboards' watcher messages the operator only when an agent has been unavailable (`down`, `foreign`" docs/specification/service.md``
+  prints 0 (the released watcher reports only `down`). DEC-0149 points `relay.md` and `conformance.md` to
+  `service.md`'s definition of "unavailable", so one edit in `service.md` suffices; when DEC-0149 lands, CT-232 cites its sentence on an OS account an
   organization owns whole (on DEC-0149's branch, `source.md` and `contexts.md`; not cited before it lands). This is a
   landing edit made by whichever of DEC-0149 and DEC-0154 lands second; after both, `grep '^| CT-232 ' docs/backlog.md |
   grep -c source.md` prints 1.
@@ -153,13 +165,14 @@ and in that message ask Fabric Dashboards for a row that its watcher (FD-76's su
 
 ## Checks actually run
 
-The full gate `pnpm run check` after round 5's batch (W1 to W14), at this branch's head, under the heavy lock (free
-disk 9 GB, 15-minute load 41.5): exit 0, 111 test files, 10524 tests passed and 1 skipped, branches 98.92% (12567 of
+The full gate `pnpm run check` after round 6's batch (W15 to W26), at this branch's head, under the heavy lock
+(free disk 8 GB, 15-minute load 38.1): exit 0, 111 test files, 10526 tests passed and 1 skipped, branches 98.92% (12567 of
 12703), 31 vector files matching their generators, the UX lint passed (40 stories, 34 flows, 34 screens, 55
 scenarios), documentation checks passed, markdownlint 0 errors, privacy 0 findings; no em dash on an added line. After
 rounds 4 and 5's first batch the gate did not run (7 GB free); targeted checks ran then. W10's mutants (each of the
 platform, owner-name and `org.id` checks moved after the link check or after the mode check, six moves) each fail
-`test/host-label.test.ts` and were reverted; V14's mutant (the hex check before the mode check) fails it too.
+`test/host-label.test.ts` and were reverted; W15's mutants (the flags' type check moved after the link check or
+after the owner check) each fail it too; V14's mutant (the hex check before the mode check) fails it too.
 
 ## Next task
 

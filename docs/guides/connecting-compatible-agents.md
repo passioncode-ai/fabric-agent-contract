@@ -74,8 +74,8 @@ A service runs once on the machine, under its supervisor (launchd, systemd, the 
 Observatory's node), and answers on `http://127.0.0.1:<port>`. Its installer writes the descriptor into the services
 folder; the running process serves the well-known document. A service with no capabilities needs no manifest.
 
-On every computer (DEC-0154, proposed): the installer records the port and writes a port claim, and the service, or
-what starts it, rewrites the claim at every start ([HA-1](../specification/service.md#ha-1)); every client checks
+On every computer (DEC-0154, proposed): the installer records the port and writes a port claim, and the service itself
+rewrites the claim at every start ([HA-1](../specification/service.md#ha-1)); every client checks
 that the listener on the port belongs to its own OS account before it sends a credential
 ([HA-2](../specification/service.md#ha-2)). On a computer with several
 [counted OS accounts](../specification/service.md#counted-os-accounts), each account runs its own copy of the

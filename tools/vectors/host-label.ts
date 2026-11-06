@@ -48,9 +48,9 @@ function cases(): Json[] {
     ["root named on Windows: not its administrator", windows(secret("root", COUNTING)), { none: "secret-owner" }],
     ["reached through a symbolic link: no label", posix(secret("root", COUNTING, { link: true })), { none: "secret-link" }],
     ["a link is named before an owner", posix(secret("other", COUNTING, { link: true })), { none: "secret-link" }],
-    ["writable by another account: no label", posix(secret("root", COUNTING, { writableByOthers: true })), { none: "secret-mode" }],
+    ["writable by anyone but the platform's administrator: no label", posix(secret("root", COUNTING, { writableByOthers: true })), { none: "secret-mode" }],
     ["in a folder another account can write, or not the administrator's: no label", posix(secret("root", COUNTING, { folderOk: false })), { none: "secret-mode" }],
-    ["on Windows, an ACE granting another SID write: no label", windows(secret("administrators", COUNTING, { writableByOthers: true })), { none: "secret-mode" }],
+    ["on Windows, an ACE granting write to a SID other than Administrators or SYSTEM: no label", windows(secret("administrators", COUNTING, { writableByOthers: true })), { none: "secret-mode" }],
     ["the owner is named before the mode", posix(secret("other", COUNTING, { writableByOthers: true })), { none: "secret-owner" }],
     ["31 bytes: no label", posix(secret("root", COUNTING.slice(0, 62))), { none: "secret-size" }],
     ["33 bytes: no label", posix(secret("root", `${COUNTING}20`)), { none: "secret-size" }],
@@ -68,7 +68,9 @@ function cases(): Json[] {
     ["a link and an owner this reference does not name: the fault outranks the link", posix(secret("wheel", COUNTING, { link: true })), FAULT],
     ["a link and a platform this reference does not name: the fault outranks the link", { platform: "darwin", secret: secret("root", COUNTING, { link: true }), orgId: "org-7f3a" }, FAULT],
     ["a mode that fails and a malformed organization id: the fault outranks the mode", posix(secret("root", COUNTING, { writableByOthers: true }), "-org"), FAULT],
-    ["writable by another account, no bytes read", posix({ link: false, owner: "root", writableByOthers: true, folderOk: true }), { none: "secret-mode" }],
+    ["a link and a folder flag that is not a boolean: the fault outranks the link", posix(secret("root", COUNTING, { link: true, folderOk: "yes" })), FAULT],
+    ["an owner not the administrator's and a mode flag that is not a boolean: the fault outranks the owner", posix(secret("other", COUNTING, { writableByOthers: 0 })), FAULT],
+    ["writable by anyone but the platform's administrator, no bytes read", posix({ link: false, owner: "root", writableByOthers: true, folderOk: true }), { none: "secret-mode" }],
     ["a folder not the administrator's, an oversized file", posix(secret("root", "00".repeat(4096), { folderOk: false })), { none: "secret-mode" }],
     ["a link, no bytes read", posix({ link: true, owner: "root", writableByOthers: false, folderOk: true }), { none: "secret-link" }],
     ["an oversized file behind a link: the link decides, the bytes are never read", posix(secret("root", "00".repeat(4096), { link: true })), { none: "secret-link" }],
@@ -88,7 +90,7 @@ function cases(): Json[] {
 /** The vectors as an object. */
 export function hostLabelVectors(): Json {
   return {
-    about: "Vectors for the host label (DEC-0154 item 4), written by tools/vectors/host-label.ts, never by hand. hostLabel(input): input is {platform, secret: {link, owner, writableByOthers, folderOk, hex}, orgId}: platform posix or windows; link whether the path is a symbolic link (a reparse point); owner root (uid 0), administrators (the Windows Administrators group), system (Windows SYSTEM) or other, the administrator being root on posix and administrators or system on windows; writableByOthers whether anyone but the platform's administrator (root on posix; administrators or system on windows) may write the file; folderOk whether its folder is the administrator's and writable by no one else; hex the file's bytes in lower-case hex, read only when the metadata passes (so absent or empty otherwise), up to 1024 bytes checked for size and a fault above; orgId the enrollment's org.id. The answer is {hostLabel}: HMAC-SHA-256 keyed with the 32-byte secret over the UTF-8 bytes of fabric-host-label/1 followed directly by orgId, its first 16 bytes in base64url without padding; or {none: secret-link | secret-owner | secret-mode | secret-size}, the first reason in that order, the node sending no label; or {fault: input-invalid}, which outranks every none: a malformed platform, owner name, flag or orgId is a fault before link, owner and mode are looked at.",
+    about: "Vectors for the host label (DEC-0154 item 4), written by tools/vectors/host-label.ts, never by hand. hostLabel(input): input is {platform, secret: {link, owner, writableByOthers, folderOk, hex}, orgId}: platform posix or windows; link whether the path is a symbolic link (a reparse point); owner root (uid 0), administrators (the Windows Administrators group), system (Windows SYSTEM) or other, the administrator being root on posix and administrators or system on windows; writableByOthers whether anyone but the platform's administrator (root on posix; administrators or system on windows) may write the file; folderOk whether its folder is the administrator's and writable by no one but the platform's administrator; hex the file's bytes in lower-case hex, read only when the metadata passes (so absent or empty otherwise), up to 1024 bytes checked for size and a fault above; orgId the enrollment's org.id. The answer is {hostLabel}: HMAC-SHA-256 keyed with the 32-byte secret over the UTF-8 bytes of fabric-host-label/1 followed directly by orgId, its first 16 bytes in base64url without padding; or {none: secret-link | secret-owner | secret-mode | secret-size}, the first reason in that order, the node sending no label; or {fault: input-invalid}: a fault in the shape of the platform, the owner name, a flag or orgId outranks every none; the size of the bytes is read only after link, owner and mode.",
     cases: cases()
   };
 }

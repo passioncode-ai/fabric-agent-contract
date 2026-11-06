@@ -771,7 +771,7 @@ flowchart TD
 - **Goal:** the operator opens a service's page inside Fabric Dashboards, signed in by it
 - **Entry points:** an agent's answer, a tool answer's `open_link`, a completion message, an event's notification, Fabric's link back (FL-7)
 - **Success exit:** the page shows in Fabric Dashboards; where the host cannot run, at the service's own address
-- **Task analysis:** the service or agent builds the `open_link` from the service's own `id.instance` and the page's path → the agent opens it through Fabric Dashboards with no browser fallback → the host shows the page and signs in.
+- **Task analysis:** the service or agent builds the `open_link` from the service's own `id.instance` and the page's path → the agent opens it through Fabric Dashboards with no browser fallback → the host shows the page and signs in. Where the host cannot run, the agent checks the listener's owner (HA-2) before it opens the raw address: `foreign-user`, or an owner that cannot be told, opens nothing.
 - **Rejected shape:** handing the operator `http://127.0.0.1:<port>/…` as the action, or an agent opening a browser because the host did not open the page: rejected, because a browser has no session and shows the page outside the host (DEC-0123).
 - **Flow:**
 
@@ -782,7 +782,9 @@ flowchart TD
   O --> P{page shown}
   P -->|yes| D[Page in Fabric Dashboards, signed in]
   P -->|no| F[Failure reported; no browser]
-  S -->|not_installed or unsupported| B[Service's own address from its descriptor, in the browser]
+  S -->|not_installed or unsupported| W{Listener's owner, HA-2}
+  W -->|this account| B[Service's own address from its descriptor, in the browser]
+  W -->|another account, or cannot be told| N[foreign-user: nothing opens; the card's line for that case]
 ```
 
 - **Screens traversed:** SCR-30 the operator's agent; the service's page in Fabric Dashboards.

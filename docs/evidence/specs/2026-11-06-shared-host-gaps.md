@@ -63,11 +63,11 @@ loopback; that assumption is the root of G1 to G3.
   descriptor, in no other account's claim), only when none is recorded or another holder has it. It writes a claim
   `.passioncode-ports.<service-id>.<account>.json` in the computer's shared sticky folder (`<account>` the numeric uid,
   or the SID on Windows, never a login name that can be renamed), owned by that account, holding only
-  `{schema, service, account, ports, updatedAt}`; the installer writes it at install, and the service or what starts it
-  rewrites it at every start, not only when it is missing. On Windows the claims folder
-  `%ProgramData%\PassionCode\port-claims` is created, with its ACL, by the administrator's setup step of a Fabric
-  node's first installation (one elevation); a service that finds it missing reports that once and records its port
-  anyway. A claim whose file owner
+  `{schema, service, account, ports, updatedAt}`; the installer writes it at install, and the service itself
+  rewrites it at every start, not only when it is missing, rebuilt from the account's descriptors and own state after
+  its lock. On Windows the claims folder `%ProgramData%\PassionCode\port-claims` is created, with its ACL, by the
+  administrator's setup step of a Fabric node's first installation (one elevation); a service that finds it missing or
+  with another ACL reports that once and records its port anyway. A claim whose file owner
   uid (owner SID) is not its `account`, or of an account no longer on the computer, is ignored, and a claim grants
   nothing. When the claim's path is held by another owner, the installer records its port anyway and reports the
   squatted path; at uninstall an instance removes only its own ports and deletes the file when none remain. A computer

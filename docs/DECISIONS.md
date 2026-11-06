@@ -9738,8 +9738,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   becoming S1 to S8, product found five breaks); round 4 at `66e44c3d` was not clean (product found two breaks, V1 and
   V2, seam one, V1; unit passed, 38 of 40 mutants killed, one equivalent and one becoming V14); round 5 at
   `190ee95e` was not clean (product found three breaks, W1 to W3; unit passed, 156 mutants, 4 survivors, closed by
-  W10; seam passed with 0 breaks, the full suite of 10520 tests green, its risks closed by W3, W4, W12 and W13); their
-  batches are folded in (Source). A reference module and vectors, one optional schema
+  W10; seam passed with 0 breaks, the full suite of 10520 tests green, its risks closed by W3, W4, W12 and W13); round 6 at
+  `d47295d5` was not clean (unit passed, 65 of 67 mutants killed, the rest closed by W15; product found two breaks,
+  W16 and W17; seam found the same break as W17, the full suite of 10524 green); their batches are folded in
+  (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9788,12 +9790,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      health report or log, never creating it or changing its ACL),
      owned by that account and holding only `{schema, service, account, ports, updatedAt}` (`schema`
      `passioncode-port-claim/1`; several recorded ports of one service or part in one claim's `ports`). The installer,
-     or the node that installs the service, writes the claim at install; at every start the service itself, or what
-     starts it, rewrites it, after it holds `service.lock`, rebuilt from this account's descriptors with the ports of
-     every instance the account records and written atomically (a temporary file, then a rename), not only when it is
-     missing, because a file's age decides `systemd-tmpfiles`' cleaning
-     and a computer installed before catches up; at uninstall, after the
-     descriptor, it removes this instance's ports from the claim and deletes the file only when none remain. A claim
+     or the node that installs the service, writes the claim at install; at every start only the service itself (or
+     the app), never launchd, systemd, the Task Scheduler or the node, which cannot take its lock, rewrites it, after it holds `service.lock` (an app without a descriptor, or an app's part: after its own single-copy guard),
+     rebuilt from this account's descriptors, or, for an app without a descriptor origin or an app's part, from the port it records in its own state (its liveness file or own state), with the ports of every instance the account records, written atomically (a temporary file, then a rename),
+     not only when it is missing, because a file's age decides `systemd-tmpfiles`' cleaning and a computer installed
+     before catches up; at uninstall, after the descriptor is deleted, the claim is rebuilt the same way from the
+     remaining descriptors and own state, never by a read-modify-write, and the file is deleted when no port
+     remains. A claim
      whose file owner (uid, or SID on Windows) is not the `account` it names, or of an account no longer on the
      computer, is ignored. When a file of the claim's name is owned by another account, the installer records its port
      in its own state and descriptor anyway, reports the squatted path (a note, never a refusal) and chooses by the
@@ -9828,7 +9831,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      instead; and on a computer with more than one counted account a local surface whose credential arrives from such
      a client (a dashboard a browser reaches, an MCP surface a coding agent reaches, a proxy coding agents call) MUST
      refuse a peer of another OS account before it reads the request; every other local service SHOULD. A service that
-     finds its recorded port held and comes up on another SHOULD rotate the secrets it issued to clients that reach it by
+     finds its recorded port held and comes up on another (the port moved by its installer at a reinstall, or by an
+     app that records its own port; a running service never writes its descriptor) SHOULD rotate the secrets it issued to clients that reach it by
      port (Switchboard's SB-269). An authorization code bound to a PKCE `S256` challenge and sent to a loopback redirect
      (RFC 8252) is not a credential under this item: the app holding the listener and the verifier carries the check.
      Two residues are named, not closed. The browser's cookies: browsers do not isolate cookies by port (RFC 6265
@@ -9864,10 +9868,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      1's claims folder. A virtual machine MAY be given its
      computer's secret at creation, and then carries it in its own snapshots. A node decides by the file's metadata
      before it reads a byte, and uses it only when the path is no symbolic link, the owner is the administrator (root;
-     on Windows Administrators or SYSTEM), no account but the platform's administrator (root on POSIX; Administrators or SYSTEM on Windows) may write it, its folder is the administrator's and
-     writable by no one else, and it is exactly 32 bytes; otherwise it sends no `hostLabel`, never falling back to
-     another key. A malformed input (platform, owner name, `org.id`) is a fault before the link, owner and mode are
-     looked at: a fault outranks every reason for no label. A node sends the label only once a device-policy member turns it on for that organization, a member
+     on Windows Administrators or SYSTEM), it is writable by no one but the platform's administrator, its folder is the
+     administrator's and writable by no one but the platform's administrator, and it is exactly 32 bytes; otherwise it sends no `hostLabel`, never falling back to
+     another key. A malformed input (platform, owner name, a flag, `org.id`) is a fault before the link, owner and mode
+     are looked at: a fault outranks every reason for no label. A node sends the label only once a device-policy member turns it on for that organization, a member
      owed by CT-239. An organization shows it only after its notice says so. A label is per organization, so
      organizations with no code on the computer cannot link their labels; an organization's code on any counted
      account of the computer, or in a virtual machine given the secret, can compute every organization's label for
@@ -9959,8 +9963,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/positive/device-enrollment-request-host-label.json`,
   `fixtures/negative/device-enrollment-host-label-padding-bits.json` with their catalogue rows,
   `test/host-label.test.ts`, `vitest.config.ts`, `CONTEXT.md` (Device, Counted OS account, Port claim, `foreign-user`,
-  Host label, Trust tier), `docs/ux/foundation.md` (ST-021's criteria), `docs/ux/scenarios.md` (SCN-056),
-  `docs/ux/screens.md` (SCR-20's purpose and `foreign-user` state), `docs/ux/flows.md` (FLW-17's branch and screens),
+  Host label, Trust tier), `docs/ux/foundation.md` (ST-021's story and criteria; ST-036's criterion for
+  `foreign-user`), `docs/ux/scenarios.md` (SCN-056; SCN-044's alt path), `docs/ux/screens.md` (SCR-20's purpose,
+  elements and `foreign-user` state), `docs/ux/flows.md` (FLW-17's branch and screens; FLW-30's owner check before
+  the raw address), `docs/specification/fabric-button.md` (FL-7's owner check),
   `docs/evidence/sources.md` (RFC 8252's row, RFC 6265's row read again), `docs/DOCMAP.md`, `docs/backlog.md` (CT-228
   to CT-241), the spec `docs/evidence/specs/2026-11-06-shared-host-gaps.md` and the handoff
   `docs/handoffs/2026-11-06-shared-host-ports.md`.
@@ -10018,6 +10024,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the mode, now killed by four vectors in which a fault outranks every reason for no label, W10; and `writableByOthers`
   defined as anyone but the platform's administrator, W11); its seam reading passed (0 breaks, 10520 tests green; risks
   closed by W3, W4, the claim's rewrite rebuilt, atomic and after the lock, W12, and the conformance row's SHOULD,
-  W13); and from DEC-0149's seam reading, `foreign` counted unavailable beside `foreign-user` (W14); the two UI lines passed the operator's copy check
+  W13); and from DEC-0149's seam reading, `foreign` counted unavailable beside `foreign-user` (W14); round 6 at
+  `d47295d5` was not clean (unit passed, 65 of 67 mutants, the rest closed by W15: a flag that is not a boolean is a
+  fault before the link and the owner; product: W16, PL-3's owner check unknown to ST-036, FLW-30, SCN-044 and FL-7,
+  and W17, no rebuild source for an app without a descriptor origin or an app's part; seam: the same break as W17, with
+  no `service.lock` for such an app; 10524 tests green), and its batch, with the coordinator's decisions W18 to W26 (the
+  landing phrase on one line as two sentences with a negative check, the G1 wording, who moves a port, only the service
+  itself rewriting the claim, the uninstall's rebuild, `writableByOthers` and `folderOk` as writable by anyone but the
+  platform's administrator, the fault's scope, the relay check dropped), is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

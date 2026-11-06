@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for the host label (DEC-0154 item 4), written by tools/vectors/host-label.ts, never by hand. hostLabel(input): input is {platform, secret: {link, owner, writableByOthers, folderOk, hex}, orgId}: platform posix or windows; link whether the path is a symbolic link (a reparse point); owner root (uid 0), administrators (the Windows Administrators group), system (Windows SYSTEM) or other, the administrator being root on posix and administrators or system on windows; writableByOthers whether anyone but the platform's administrator (root on posix; administrators or system on windows) may write the file; folderOk whether its folder is the administrator's and writable by no one else; hex the file's bytes in lower-case hex, read only when the metadata passes (so absent or empty otherwise), up to 1024 bytes checked for size and a fault above; orgId the enrollment's org.id. The answer is {hostLabel}: HMAC-SHA-256 keyed with the 32-byte secret over the UTF-8 bytes of fabric-host-label/1 followed directly by orgId, its first 16 bytes in base64url without padding; or {none: secret-link | secret-owner | secret-mode | secret-size}, the first reason in that order, the node sending no label; or {fault: input-invalid}, which outranks every none: a malformed platform, owner name, flag or orgId is a fault before link, owner and mode are looked at.",
+  "about": "Vectors for the host label (DEC-0154 item 4), written by tools/vectors/host-label.ts, never by hand. hostLabel(input): input is {platform, secret: {link, owner, writableByOthers, folderOk, hex}, orgId}: platform posix or windows; link whether the path is a symbolic link (a reparse point); owner root (uid 0), administrators (the Windows Administrators group), system (Windows SYSTEM) or other, the administrator being root on posix and administrators or system on windows; writableByOthers whether anyone but the platform's administrator (root on posix; administrators or system on windows) may write the file; folderOk whether its folder is the administrator's and writable by no one but the platform's administrator; hex the file's bytes in lower-case hex, read only when the metadata passes (so absent or empty otherwise), up to 1024 bytes checked for size and a fault above; orgId the enrollment's org.id. The answer is {hostLabel}: HMAC-SHA-256 keyed with the 32-byte secret over the UTF-8 bytes of fabric-host-label/1 followed directly by orgId, its first 16 bytes in base64url without padding; or {none: secret-link | secret-owner | secret-mode | secret-size}, the first reason in that order, the node sending no label; or {fault: input-invalid}: a fault in the shape of the platform, the owner name, a flag or orgId outranks every none; the size of the bytes is read only after link, owner and mode.",
   "cases": [
     {
       "name": "a root-owned secret of 32 bytes",
@@ -206,7 +206,7 @@
       }
     },
     {
-      "name": "writable by another account: no label",
+      "name": "writable by anyone but the platform's administrator: no label",
       "input": {
         "platform": "posix",
         "secret": {
@@ -240,7 +240,7 @@
       }
     },
     {
-      "name": "on Windows, an ACE granting another SID write: no label",
+      "name": "on Windows, an ACE granting write to a SID other than Administrators or SYSTEM: no label",
       "input": {
         "platform": "windows",
         "secret": {
@@ -546,7 +546,41 @@
       }
     },
     {
-      "name": "writable by another account, no bytes read",
+      "name": "a link and a folder flag that is not a boolean: the fault outranks the link",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": true,
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": "yes",
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "an owner not the administrator's and a mode flag that is not a boolean: the fault outranks the owner",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": false,
+          "owner": "other",
+          "writableByOthers": 0,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "writable by anyone but the platform's administrator, no bytes read",
       "input": {
         "platform": "posix",
         "secret": {

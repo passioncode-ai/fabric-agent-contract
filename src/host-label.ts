@@ -12,8 +12,8 @@ import { isObject } from "./findings.js";
  * The label is HMAC-SHA-256 keyed with the computer's secret over the UTF-8 bytes of `fabric-host-label/1` followed directly
  * by the organization's `org.id`, its first 16 bytes in base64url without padding (22 characters). A secret that is
  * reached through a symbolic link, is not owned by the system's administrator (root on macOS and Linux; the
- * Administrators group or SYSTEM on Windows), can be written by any other account, sits in a folder that is not the
- * administrator's or that another account can write, or is not exactly 32 bytes gives no label, never one computed
+ * Administrators group or SYSTEM on Windows), is writable by anyone but the platform's administrator, sits in a folder
+ * that is not the administrator's or that anyone but the platform's administrator can write, or is not exactly 32 bytes gives no label, never one computed
  * from another key.
  */
 
@@ -44,10 +44,11 @@ const FAULT: HostLabelAnswer = { fault: "input-invalid" };
  * `administrators` (the Windows Administrators group), `system` (Windows SYSTEM) or `other`; `writableByOthers` whether
  * anyone but the platform's administrator may write the file (on POSIX anyone but root: a group or other write bit;
  * on Windows an ACE granting write to a SID other than Administrators or SYSTEM, so the prescribed "Administrators
- * full control" on a file SYSTEM owns passes); `folderOk` whether its folder is owned by the administrator and writable by no one else (on POSIX root
+ * full control" on a file SYSTEM owns passes); `folderOk` whether its folder is owned by the administrator and
+ * writable by no one but the platform's administrator (on POSIX root
  * and `0755`; on Windows the ACL devices.md gives); `hex` the file's bytes in lower-case hex; `orgId` the enrollment's
- * `org.id`. A malformed input (a platform, an owner name, a flag or an `org.id` that is not this shape) is a fault
- * before anything else: a fault outranks every `none`. `hex` is read only when the metadata passes, so it may be absent or empty when it does not; up to 1024
+ * `org.id`. A fault in the shape of the platform, the owner name, a flag or `org.id` outranks every `none`; the size of
+ * the bytes is read only after the link, the owner and the mode. `hex` is read only when the metadata passes, so it may be absent or empty when it does not; up to 1024
  * bytes it is checked for size, above that it is a fault. Answers `{hostLabel}`, or `{none}` naming the first reason the
  * node sends no label (the link, then the owner, then the mode, then the size), or `{fault}`.
  */
