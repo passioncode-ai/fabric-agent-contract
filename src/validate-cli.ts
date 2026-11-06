@@ -797,11 +797,12 @@ function sourceCandidates(run: Run, folder: string, manifest: unknown, includes:
   const paths = [...new Set(names.map((name) => (name.endsWith("/") ? name.slice(0, -1) : name)))].sort(pathOrder);
   // Walked only when Git lists nothing under any include path: a listed path under one (a file, a symbolic link or a
   // nested repository), even one an exclude entry removes (index.covers, with no exception for the manifest: an include
-  // entry naming fabric.source.json covers it); a nested repository in the source; or a listed path an include entry
-  // names as a folder or lies beneath, that no exclude entry removes, as nestedTest reads it (isNested is true for any
-  // such path, a plain file included: a tracked file docs under include docs/guide.md, or a tracked file src under
-  // include src/, keeps Git mode and leaves that entry missing; with exclude docs it does not count, and the run
-  // walks). In these two isNested listings the manifest's own path counts only as a gitlink.
+  // entry naming fabric.source.json covers it); a gitlink at the manifest's own path (isNested is always true there,
+  // and it counts only as a gitlink: the one nested repository in the source the other two listings can miss); or a
+  // listed path other than the manifest's that an include entry names as a folder or lies beneath, that no exclude
+  // entry removes, as nestedTest reads it (isNested is true for any such path, a plain file included: a tracked file
+  // docs under include docs/guide.md, or a tracked file src under include src/, keeps Git mode and leaves that entry
+  // missing; with exclude docs it does not count, and the run walks).
   if (!paths.some((name) => (isNested(name) && (name.normalize("NFC") !== SOURCE_FILE || linked.has(name))) || index.covers(name))) {
     return walked("Git lists no file under an include path here");
   }
