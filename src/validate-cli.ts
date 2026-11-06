@@ -8,7 +8,8 @@
  * provider entry with its manifest, the entries with the services, and a source manifest with the package beside it
  * (DEC-0149). `--kind source-tree` on a folder reads its `fabric.source.json` and checks the source files under it.
  *
- * Each problem is one line, `file  path  rule  message  help`. Exit 0: no problem; 1: a problem; 2: a usage error
+ * Each problem is one line, `file  path  rule  message  help`. Exit 0 when there is no blocking problem (accepted lines
+ * may print); 1: a problem; 2: a usage error
  * (an unreadable file, an unknown `--schema` or `--kind`, a schema that cannot be inferred).
  */
 import { spawnSync } from "node:child_process";

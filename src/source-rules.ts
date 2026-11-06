@@ -1392,7 +1392,8 @@ function pathFindings(value: JsonObject): Finding[] {
   for (const [path, index] of uncheckedPaths(value)) {
     if (unchecked.has(path)) flag(`/unchecked/${index}/path`, `unchecked[${index}] is listed twice`);
     unchecked.add(path);
-    // The manifest, in any spelling under the fold, always travels and is always read: it is never unchecked.
+    // The manifest, in any spelling under the fold, always travels and is always read: it is never unchecked. This
+    // speaks of a manifest that is a file, the only manifest FAC-SEM-157 reads (a folder there stops the folder check).
     if (!path.endsWith("/") && inGrammar(path) && foldPath(nfc(path)) === SOURCE_FILE) {
       flag(`/unchecked/${index}/path`, `unchecked[${index}] names ${SOURCE_FILE}, which always travels and is always read, so it is never unchecked`);
       continue;

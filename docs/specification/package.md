@@ -148,7 +148,8 @@ receipts' `run` are DEC-0030's amendment (board item V4-RUN-RESULT); the signal'
 purpose. Absent or empty, nothing moves (v4 §6, Move). A copy for a colleague is packed without state (v4 §6 Path 3).
 Such a copy still carries the agent's source. [Source](source.md#handing-over)'s two tests apply word for word: a
 source hand-over is "a package handed to anyone who could not already read the home, or sent to a place outside the
-owner's", taken on the operator's word for that act; and "A package handed over, or published to a public registry
+owner's", under the lead's filter (a place another owner holds stays a hand-over), taken on the operator's word for
+that act; and "A package handed over, or published to a public registry
 from a private home, names as its target the source commit it was packed from and holds only source paths that passed
 that commit's tree check, besides the files the pack step writes (`fabric.package.json`); built files travel only as
 committed source paths." (DEC-0149).
