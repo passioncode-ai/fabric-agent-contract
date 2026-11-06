@@ -189,7 +189,8 @@ Dashboards' `link` tool returns, which shows the page inside Fabric Dashboards, 
 Fabric Dashboards cannot show it on that computer (`not_installed`, or `unsupported` on a system it does not ship for)
 does Fabric open the service's own address
 (its `https` origin, or `http://127.0.0.1:<port>`, with the path) in the browser, a local one only after checking the
-listener's owner ([service](service.md#ha-2) HA-2, DEC-0154, proposed): `foreign-user` opens nothing; an installed host that did not open
+listener's owner ([service](service.md#ha-2) HA-2, DEC-0154, proposed): on `foreign-user` Fabric opens nothing and
+reports it where it shows the link, with the line the service card shows for that case; an installed host that did not open
 the page is reported, not replaced ([service](service.md#page-links) PL-3, DEC-0123). Neither carries a token or a login code: signing in is the host's
 ([Operator login](service.md#operator-login)). The `fabric-dashboards://` grammar is Fabric Dashboards'; this
 profile only uses it.

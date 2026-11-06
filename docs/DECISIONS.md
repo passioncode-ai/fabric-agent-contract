@@ -9741,8 +9741,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   W10; seam passed with 0 breaks, the full suite of 10520 tests green, its risks closed by W3, W4, W12 and W13); round 6 at
   `d47295d5` was not clean (unit passed, 65 of 67 mutants killed, the rest closed by W15; product found two breaks,
   W16 and W17; seam found the same break as W17, the full suite of 10524 green); round 7 at
-  `8a9373a1` was not clean (product found two breaks, W27 and W28; seam found the same break as W27); their batches
-  are folded in (Source). A reference module and vectors, one optional schema
+  `8a9373a1` was not clean (product found two breaks, W27 and W28; seam found the same break as W27; unit passed, 101
+  of 107 mutants, the rest closed by W39); round 8 at `7fbe27f0` was not clean (product found one break, W40; seam
+  passed; unit did not run, since W39 changes the vectors); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9792,13 +9793,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      owned by that account and holding only `{schema, service, account, ports, updatedAt}` (`schema`
      `passioncode-port-claim/1`; several recorded ports of one service or part in one claim's `ports`). The installer,
      or the node that installs the service, chooses the port, writes the descriptor and then rebuilds the claim
-     atomically from all the account's descriptors, as at start (the short window between choosing the port and
+     atomically from all this service's descriptors in the account, as at start (the short window between choosing the port and
      writing the claim is accepted: its cost is a collision warning); at every start only the service itself (or
-     the app), never launchd, systemd, the Task Scheduler or the node, which cannot take its lock, rewrites it, after it holds `service.lock` (an app without a descriptor origin, or an app's part: after its own single-copy guard, and after it has written its new liveness file, or it would read an old port or none),
-     rebuilt from this account's descriptors, or, for an app without a descriptor origin or an app's part, from the port it records in its own state (its liveness file or own state), with the ports of every instance the account records, written atomically (a temporary file, then a rename),
+     the app), never launchd, systemd, the Task Scheduler or the node, which cannot take its lock, rewrites it, after it holds its guard against a second copy (`service.lock` for a service with a descriptor; an app, `lifecycle.manager: "person"`, or an app's part: its own guard, even when its descriptor names an origin),
+     rebuilt from this service's descriptors in the account, or, for an app without a descriptor origin or an app's part, from the port it records in its own state, read after it has written its new liveness file (or it would read an old port or none), with the ports of every instance the account records, written atomically (a temporary file, then a rename),
      not only when it is missing, because a file's age decides `systemd-tmpfiles`' cleaning and a computer installed
      before catches up; at uninstall, after the descriptor is deleted, the claim is rebuilt the same way from the
-     remaining descriptors and own state, never by a read-modify-write, and the file is deleted when no port
+     remaining descriptors and the own state of the instances that remain (never the removed one's), never by a read-modify-write, and the file is deleted when no port
      remains. A claim
      whose file owner (uid, or SID on Windows) is not the `account` it names, or of an account no longer on the
      computer, is ignored. When a file of the claim's name is owned by another account, the installer records its port
@@ -10043,6 +10044,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   ask for Fabric Dashboards' card line, FLW-30's traces, the account count read by the service, an installer and a
   door only), is folded in; round 7's seam reading failed on the same break as W27, and its risks W34 to W37 (an app
   rebuilding its claim after its new liveness file, one wording for an app without a descriptor origin or an app's
-  part, SCR-30's `foreign-user` line where no card exists, DEC-0154 able to land first) are folded in; the two UI lines passed the operator's copy check
+  part, SCR-30's `foreign-user` line where no card exists, DEC-0154 able to land first) are folded in; round 7's unit reading
+  passed (101 of 107 mutants; W39's vectors close the rest); round 8 at `7fbe27f0` was not clean (product: W40, PL-3's
+  owner check scoped to a loopback address, a remote `https` origin opening as before; seam passed; unit did not run),
+  and its batch, with the coordinator's decisions W38 and W41 to W50 (the landing text in full and its one-line checks,
+  ST-036's and FLW-30's `foreign-user` paths, "declares no port for `FAC-SEM-010`", the guard and the port source told
+  apart, the uninstall from the remaining instances' state, "this service's descriptors in the account"), is folded
+  in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

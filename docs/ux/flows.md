@@ -770,8 +770,8 @@ flowchart TD
 - **Traces:** ST-036 (JTBD-06, JRN-05/#3); SCN-044, DEC-0154
 - **Goal:** the operator opens a service's page inside Fabric Dashboards, signed in by it
 - **Entry points:** an agent's answer, a tool answer's `open_link`, a completion message, an event's notification, Fabric's link back (FL-7)
-- **Success exit:** the page shows in Fabric Dashboards; where the host cannot run, at the service's own address
-- **Task analysis:** the service or agent builds the `open_link` from the service's own `id.instance` and the page's path → the agent opens it through Fabric Dashboards with no browser fallback → the host shows the page and signs in. Where the host cannot run, the agent checks the listener's owner (HA-2) before it opens the raw address: `foreign-user`, or an owner that cannot be told, opens nothing.
+- **Success exit:** the page shows in Fabric Dashboards; where the host cannot run, at the service's own address, or, when the listener is another OS account's or its owner cannot be told, `foreign-user`: nothing opens and the line for that case is shown
+- **Task analysis:** the service or agent builds the `open_link` from the service's own `id.instance` and the page's path → the agent opens it through Fabric Dashboards with no browser fallback → the host shows the page and signs in. Where the host cannot run, the agent (or Fabric, for FL-7) checks the listener's owner (HA-2) before it opens a loopback address: `foreign-user`, or an owner that cannot be told, opens nothing. Entered through an agent, the line shows on SCR-30; entered through FL-7, Fabric shows it where it shows the link.
 - **Rejected shape:** handing the operator `http://127.0.0.1:<port>/…` as the action, or an agent opening a browser because the host did not open the page: rejected, because a browser has no session and shows the page outside the host (DEC-0123).
 - **Flow:**
 
@@ -784,10 +784,10 @@ flowchart TD
   P -->|no| F[Failure reported; no browser]
   S -->|not_installed or unsupported| W{Listener's owner, HA-2}
   W -->|this account| B[Service's own address from its descriptor, in the browser]
-  W -->|another account, or cannot be told| N[foreign-user: nothing opens; SCR-30 shows the line for that case]
+  W -->|another account, or cannot be told| N[foreign-user: nothing opens; the line on SCR-30 through an agent, where Fabric shows the link through FL-7]
 ```
 
-- **Screens traversed:** SCR-30 the operator's agent; the service's page in Fabric Dashboards.
+- **Screens traversed:** SCR-30 the operator's agent; the service's page in Fabric Dashboards; SCR-30 `foreign-user` (the line for that case, nothing opened).
 
 ### FLW-31: The operator's task, from one agent to the agents it engages
 

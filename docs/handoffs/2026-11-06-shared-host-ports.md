@@ -28,10 +28,11 @@ Proposed DEC on its own branch, and files the rest.
   host label, UE's linkable list. [contexts.md](../specification/contexts.md): `org.id` with 128 random bits where the
   label is on. [node-summary.md](../specification/node-summary.md): a `foreign` or `foreign-user` service reported
   `down`. [conformance.md](../specification/conformance.md): the reference module's row and eight rows (installer,
-  client, host-state reader, receiving surface, host handing a credential, token-free door, node, setup step).
+  client, host-state reader, receiving surface, host handing a credential, token-free door, node, setup step), and the
+  rewritten PL-2 and PL-3 row (`conformance.md:251`: a loopback address opened only after the listener's owner check).
 - The host label's reference `src/host-label.ts` (`hostLabel`: link, owner per platform, mode, size), its generator
   `tools/vectors/host-label.ts` (Node's own HMAC, not importing the reference), vectors
-  `fixtures/vectors/host-label.json` (47 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
+  `fixtures/vectors/host-label.json` (51 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
   schema's `opaqueId`), a coverage floor of 100 in `vitest.config.ts`; the optional schema member `device.hostLabel` in
   `schemas/device-enrollment.schema.json` with a positive and a negative fixture; `service.id`'s description in
   `schemas/service-well-known.schema.json`.
@@ -116,6 +117,18 @@ Proposed DEC on its own branch, and files the rest.
   its claim after writing its new liveness file, and the guard and the source share the wording "an app without a
   descriptor origin, or an app's part"; SCR-30 shows the `foreign-user` line when no card exists (FLW-30 points to it);
   a round-4 vector's later name; DEC-0154 may land first.
+- Round 7's unit reading: passed (101 of 107 mutants killed; the rest closed by W39's vectors: a mode flag that is not
+  a boolean behind a link, a link and a failing folder, an owner and a failing folder, an organization id starting with
+  a digit, and one vector renamed).
+- Round 8 at `7fbe27f0`: not clean. Product failed on W40 (PL-3's owner check scoped to a loopback address; a remote
+  `https` origin opens as before, as FL-7 says). Seam passed with 0 breaks. Unit did not run, since W39 changes the
+  vectors. W38 and W41 to W50 folded: the landing text in full with its second sentence from DEC-0149's CR and checks
+  that read the file as one line (run in bash and zsh on four trial files), ST-036's criterion for this account's
+  listener, FLW-30's `foreign-user` exit (on SCR-30 through an agent, where Fabric shows the link through FL-7), the
+  PL-2 and PL-3 row named in Done, "declares no port for `FAC-SEM-010`", the guard and the port source told apart
+  (`service.lock` for a service with a descriptor, an app's own guard; this service's descriptors, or an app's own
+  state after its liveness file), the uninstall from the remaining instances' state only, SCR-30's coverage owed by
+  CT-229, and "this service's descriptors in the account".
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -143,23 +156,31 @@ Proposed DEC on its own branch, and files the rest.
   from `refs/agent-sync/ids` at landing; the backlog tail in id order; the handoffs README newest first;
   `vitest.config.ts`'s coverage `include` is the union (`src/host-label.ts` and `src/validator.ts` both); the watcher
   sentence in `service.md`: DEC-0149 rewrites it (its `service.md` line 222), and whichever of DEC-0149 and DEC-0154
-  lands second makes it read as follows. Only the subject and the list of states in DEC-0149's first sentence change;
-  every other part of DEC-0149's sentence stays where it is ("once per case, and says it is back after 15 minutes
-  well; a `degraded` answer opens no message, so setup entries are left out (FD-76, ADR-0010 ...); a watcher MUST NOT
-  message the operator for an entry with `setup: true`"), and a second sentence follows them: "A watcher messages the
-  operator only when an agent has been unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`) for
-  more than 15 minutes, ... . Fabric Dashboards' watcher does so for `down` since FD-76 (0.7.15, `ebffd16`); counting
-  `foreign` and `foreign-user` is owed (DEC-0154)." The target phrase stands on one line, without a line break, or
-  the check counts 0. After both land, the first command prints 1 and the second prints 0 (the released watcher
-  reports only `down`):
+  lands second makes it read as below, the same as DEC-0149's CR. The first sentence is DEC-0149's, rewritten: only its
+  subject ("Fabric Dashboards' watcher" becomes "A watcher") and its list of states change, and every other part of it
+  stays where it is. The second sentence is new and follows it. The whole final text, with no part left out (the
+  target phrase stands on one line, without a line break, or the positive check counts 0):
+
+  > a failure. A watcher messages the operator only when an agent has been unavailable (`down`, `foreign` or
+  > `foreign-user`, not merely `degraded`) for more than 15 minutes, once per case, and says it is back after 15
+  > minutes well; a `degraded` answer opens no message, so setup entries are left out (fabric-dashboards
+  > `docs/backlog.md` FD-76, ADR-0010, released in 0.7.15, read at `ebffd16`); a watcher MUST NOT message the operator
+  > for an entry with `setup: true`. Fabric Dashboards' watcher opens an episode only for `down` since FD-76 (0.7.15,
+  > `ebffd16`) and keeps it open while a degraded source outside its start baseline stays; counting `foreign` and
+  > `foreign-user` is owed (DEC-0154).
+
+  After both land, run in bash or zsh: the first command prints 1 and the second prints 0 (the released watcher
+  reports only `down`). The second reads the file as one line, so a line break anywhere in a wrong landing is still
+  found:
 
   ```sh
-  grep -c 'unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)' docs/specification/service.md
-  grep -cF "Fabric Dashboards' watcher messages the operator only when an agent has been unavailable (\`down\`, \`foreign\`" docs/specification/service.md
+  grep -c -F 'unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)' docs/specification/service.md
+  tr '\n' ' ' < docs/specification/service.md | tr -s ' ' | grep -cF "Fabric Dashboards' watcher messages the operator only when"
   ```
 
-  Both were run on trial files before they were written here: the first prints 1 on a file holding the target phrase
-  on one line; the second prints 1 on a file holding the forbidden sentence and 0 on one holding the target. DEC-0149 points `relay.md` and `conformance.md` to
+  Both were run, in bash and in zsh, on four trial files before they were written here: the target text (the first
+  prints 1, the second 0); the forbidden sentence on one line (the second prints 1); the forbidden sentence broken
+  before its parenthesis of states (1); and the forbidden sentence broken before "unavailable" (1). DEC-0149 points `relay.md` and `conformance.md` to
   `service.md`'s definition of "unavailable", so one edit in `service.md` suffices; when DEC-0149 lands, CT-232 cites its sentence on an OS account an
   organization owns whole (on DEC-0149's branch, `source.md` and `contexts.md`; not cited before it lands). This is a
   landing edit made by whichever of DEC-0149 and DEC-0154 lands second; after both, `grep '^| CT-232 ' docs/backlog.md |
@@ -206,6 +227,15 @@ After the seam batch of round 7 (W34 to W37), on the coordinator's instruction n
 `pnpm typecheck`, `pnpm vectors:check`, `pnpm run docs:check`, `python3 docs/ux/lint.py`, `pnpm privacy:check` (0
 findings), the em dash check (0) and `pnpm vitest run` over `test/docs-check.test.ts`, `test/consistency.test.ts`,
 `test/host-label.test.ts` and `test/fixtures.test.ts` (1198 tests) ran with exit 0.
+
+After round 8's batch (W38 to W50) the full gate did not run: 10 GB were free, but the 15-minute load stood at 47.9,
+above 45. `pnpm typecheck`, `pnpm vectors:check` (31 files), `pnpm run docs:check`, `python3 docs/ux/lint.py`,
+`pnpm privacy:check` (0 findings), the em dash check (0) and `pnpm vitest run` over `test/host-label.test.ts`,
+`test/vectors-runner.test.ts`, `test/sources-ledger.test.ts`, `test/fixtures.test.ts`, `test/consistency.test.ts`,
+`test/guide-examples.test.ts`, `test/spec-required-members.test.ts`, `test/docs-check.test.ts` and
+`test/descriptor-rules.test.ts` (1336 tests) ran with exit 0. W39's mutants (the mode flag's type check after the
+link; `!folderOk` before the link; `!folderOk` before the owner) each fail `test/host-label.test.ts` and were
+reverted.
 
 ## Next task
 

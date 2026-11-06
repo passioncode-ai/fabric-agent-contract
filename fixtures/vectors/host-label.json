@@ -223,7 +223,7 @@
       }
     },
     {
-      "name": "in a folder another account can write, or not the administrator's: no label",
+      "name": "in a folder anyone but the platform's administrator can write, or not the administrator's: no label",
       "input": {
         "platform": "posix",
         "secret": {
@@ -577,6 +577,74 @@
       },
       "expected": {
         "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "a link and a mode flag that is not a boolean: the fault outranks the link",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": true,
+          "owner": "root",
+          "writableByOthers": "yes",
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "a link and a folder that fails: the link is named first",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": true,
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": false,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-link"
+      }
+    },
+    {
+      "name": "an owner not the administrator's and a folder that fails: the owner is named first",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": false,
+          "owner": "other",
+          "writableByOthers": false,
+          "folderOk": false,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-owner"
+      }
+    },
+    {
+      "name": "an organization id that starts with a digit",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": false,
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "9x"
+      },
+      "expected": {
+        "hostLabel": "pEpXBqVCQX54rStDty41iw"
       }
     },
     {
