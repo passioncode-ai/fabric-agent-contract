@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-11-04 operations digests and the retro after work](2026-11-04-ops-digest.md) | DEC-0153 (CT-219) | pending |
+| [2026-11-04 operations digests and the retro after work](2026-11-04-ops-digest.md) | DEC-0153 (CT-219; CT-222, CT-226 filed) | accepted 2026-11-06 |
 | [2026-11-02 a peer share's risks settled](2026-11-02-peer-share-risks.md) | DEC-0147 (CT-189; CT-201 filed) | merged 2026-11-02, #232; released `v0.1.0+2026-11-02.1` |
 | [2026-10-27 the machines' report, its open design questions](2026-10-27-machine-report-design.md) | DEC-0146 (CT-172) | merged 2026-10-30, #230; released `v0.1.0+2026-10-30.2` |
 | [2026-10-26 three decisions for the simple Fabric](2026-10-26-simple-fabric-decisions.md) | DEC-0140 (CT-174) | merged 2026-10-30, #217 `86f3ebad`; released `v0.1.0+2026-10-30.1` |

@@ -2,7 +2,7 @@
 
 ## Objective
 
-Draft CT-219 by its own decision: the shapes `ops.digest.hourly@1` and `ops.digest.daily@1` with semantic rules, the
+Deliver CT-219 by its own decision: the shapes `ops.digest.hourly@1` and `ops.digest.daily@1` with semantic rules, the
 host obligation `retro-after-work`, fixtures, vectors, `pnpm validate` for both and the conformance rows. Names and
 fields are Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's commit `e1eecec0`
 (`apps/desktop/src/shared/opsDigest.ts`, `apps/desktop/src/main/opsDigestRun.ts`). Asked on board thread `f7758225`
@@ -10,9 +10,10 @@ fields are Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's
 
 ## Done
 
-- DEC-0153 (Proposed), [operations digests](../specification/ops-digest.md): OD-1 to OD-8 (window, operation names,
-  counting, the rise, the daily fold, the files, nothing but counts, the operator told) and RW-1 to RW-4 (when the
-  retro arises, how it is asked, what fulfils it, how it is counted).
+- DEC-0153 (Accepted 2026-11-06, after clean rounds 22 and 23 at `f5302e3f`), [operations
+  digests](../specification/ops-digest.md): OD-1 to OD-8 (window, operation names, counting, the rise, the daily fold,
+  the files, nothing but counts, the operator told) and RW-1 to RW-4 (when the retro arises, how it is asked, what
+  fulfils it, how it is counted).
 - `schemas/ops-digest-hourly.schema.json`, `schemas/ops-digest-daily.schema.json` (closed; `pnpm validate` infers them
   by `schema`); `src/ops-digest.ts` (`foldHour`, `foldDay`, `isRise`, `FAC-SEM-166`, `FAC-SEM-167`) at 100 % branches;
   `tools/vectors/ops-digest.ts` and `fixtures/vectors/ops-digest.json` (11 hour and 4 day cases since round 23, expected values written
@@ -36,10 +37,9 @@ fields are Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's
   register row and next free `FAC-SEM-169`. Its first consumers are announced (board message `2ed505f2`): Fabric's
   CO-503 and Project Observatory's OBS-330.
 - `conformance.md`: the reference module row, three rows (a product folding its log, a reader of digests, a host
-  serving `retro-after-work`), the register rows `FAC-SEM-166` and `FAC-SEM-167`, next free `FAC-SEM-168` (the state before OD-9; `FAC-SEM-169`
-  since OD-9);
-  `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (Operations digest, Retro after work); backlog
-  CT-219 marked in progress.
+  serving `retro-after-work`), the register rows `FAC-SEM-166` and `FAC-SEM-167`, next free `FAC-SEM-168` (the state
+  before OD-9; `FAC-SEM-169` since OD-9); `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (Operations
+  digest, Retro after work); backlog CT-219 marked done at the acceptance (2026-11-06), with CT-222 and CT-226 filed.
 
 ## Decisions taken in the draft
 
@@ -97,12 +97,11 @@ branches. Landing this branch directly on `main` as it stands:
   `source.md`'s setup-answer sentence (DEC-0149's branch); every "(DEC-0149, in progress)" marker on this branch, in
   `ops-digest.md` (OD-3's two citations, the duplicate fold in OD-9, the `inGrammar` case under "Not decided here"),
   in the comments of `src/ops-digest.ts` (the fold's three doc comments and the segment check's comment) and in the
-  parity comment of `test/ops-digest.test.ts`; and "in progress" in DEC-0153's item 4, which is edited if DEC-0153 is
-  still Proposed and annotated if it is already Accepted (the register is append-only). No conformance row names
-  DEC-0149. Checks after both land: `git grep -n -E 'DEC-0153, in progress|DEC-0149, in progress' --
-  docs/specification src test` prints nothing; and when DEC-0153 was Accepted, DEC-0153's section in
-  `docs/DECISIONS.md` carries an Annotated line that names "Starting without the instance" as landed (an Annotated
-  line on another subject does not count).
+  parity comment of `test/ops-digest.test.ts`; and "in progress" in DEC-0153's item 4, which stays as written, since
+  DEC-0153 is Accepted, and gets an Annotated line (the register is append-only). No conformance row names DEC-0149.
+  Checks after both land: `git grep -n -E 'DEC-0153, in progress|DEC-0149, in progress' -- docs/specification src
+  test` prints nothing; and DEC-0153's section in `docs/DECISIONS.md` carries an Annotated line that names "Starting
+  without the instance" as landed (an Annotated line on another subject does not count).
 - DEC-0151's handoff resolves its overlap with this branch for the support-quality rows of `conformance.md`, the spec
   README and `docs/DOCMAP.md` under its heading "Against DEC-0153"; the second to land follows it.
 - DEC-0152 shares `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`, `docs/handoffs/README.md` and
@@ -208,18 +207,17 @@ vectors from the contract's release tag is every product's obligation.
   built from pieces as the refused case. Then, under the register's append-only rule (as the mirror line for item 4):
   OD-2 and the `FAC-SEM-167` row on the spec page are rewritten as DEC-0151's `SECRET_VALUE` reads the shapes,
   dropping "in either case" and "anywhere in the name" for the provider-prefix shapes (DEC-0151 reads them in
-  canonical case at a boundary); DEC-0153 item 3 is edited the same way only if DEC-0153 is still Proposed, else it
-  stays as written and an "Annotated (<date>)" line under DEC-0153 restates the detector's shapes as DEC-0151 reads
-  them (naming `hasJwt` if DEC-0149 has landed). The Source's history (round 7's sentence on DEC-0151) is never
-  rewritten. CT-222 (filed on this branch, the next free CT above every branch and main when written) widens
-  `SECRET_VALUE` for underscore-form provider prefixes, `AIza` keys and `hf_` tokens, owned by DEC-0151's detector,
-  with tests from split literals. The same rewrite reaches every place the page states the pre-DEC-0151 shapes: "in
-  either case and anywhere in the name", the `sk-` shape inside any word "ending in sk" (with its `task-`, `risk-`,
-  `mask-` examples), the `AKIA` shape followed by 16 letters or digits (DEC-0151 reads it after a boundary and in
-  upper case only), and "until DEC-0151". Check after both land: `grep -n -E 'until DEC-0151|in either case and
-  anywhere in the name|ending in sk|AKIA` followed by 16' docs/specification/ops-digest.md` prints nothing; DEC-0153's
-  section carries an Annotated line when DEC-0153 was Accepted; and the landing diff removes no line inside DEC-0153's
-  Decision items when it was Accepted.
+  canonical case at a boundary); DEC-0153 is Accepted, so its item 3 stays as written and an "Annotated (<date>)" line
+  under DEC-0153 restates the detector's shapes as DEC-0151 reads them (naming `hasJwt` if DEC-0149 has landed). The
+  Source's history (round 7's sentence on DEC-0151) is never rewritten. CT-222 (filed on this branch, the next free CT
+  above every branch and main when written) widens `SECRET_VALUE` for underscore-form provider prefixes, `AIza` keys
+  and `hf_` tokens, owned by DEC-0151's detector, with tests from split literals. The same rewrite reaches every place
+  the page states the pre-DEC-0151 shapes: "in either case and anywhere in the name", the `sk-` shape inside any word
+  "ending in sk" (with its `task-`, `risk-`, `mask-` examples), the `AKIA` shape followed by 16 letters or digits
+  (DEC-0151 reads it after a boundary and in upper case only), and "until DEC-0151". Check after both land: `grep -n
+  -E 'until DEC-0151|in either case and anywhere in the name|ending in sk|AKIA` followed by 16'
+  docs/specification/ops-digest.md` prints nothing; DEC-0153's section carries that Annotated line; and the landing
+  diff removes no line inside DEC-0153's Decision items.
 - **At landing, the fold:** whichever of DEC-0149 and DEC-0153 lands second does it, against DEC-0149 at `899b4710` or
   its head at landing (re-read that head and run the fold checks below against it; at `899b4710` DEC-0149 exports
   `HFS_IGNORABLE_CHAR` with no global flag and `stripHfsIgnorable` from `src/source-rules.ts` and keeps its global
@@ -328,13 +326,13 @@ it, each on the tree that holds both, with its checks. Every check runs after th
 
 ## Open
 
-- The coordinator's blind readings (unit, seam, product) on this branch, then the pull request. Round 1 at
-  `ada7c23d` was not clean: the seam tier found the credential sample `FAC-SEM-168`'s tests used no longer a key under
-  DEC-0151, and the product tier found the home-folder detector refusing `home`, `users` and `Users` segments in
-  operation names and dirs (`api.users/list`, `users/digests`), with one refused name dropping a whole line. Both are
-  fixed in the round-1 batch, with the coordinator's decisions on the retro count (RW-4), the catch-up (OD-5, OD-6), the
-  trigger (RW-1), the identity (OD-9) and the order (OD-3), and the unit tier's risks (`usable`, a dir named twice,
-  "no C0 control character", counts past 2^53 − 1, the op-path negative's counts).
+- The coordinator's blind readings (unit, seam, product) on this branch, rounds 1 to 23. Round 1 at `ada7c23d` was not
+  clean: the seam tier found the credential sample `FAC-SEM-168`'s tests used no longer a key under DEC-0151, and the
+  product tier found the home-folder detector refusing `home`, `users` and `Users` segments in operation names and
+  dirs (`api.users/list`, `users/digests`), with one refused name dropping a whole line. Both are fixed in the round-1
+  batch, with the coordinator's decisions on the retro count (RW-4), the catch-up (OD-5, OD-6), the trigger (RW-1),
+  the identity (OD-9) and the order (OD-3), and the unit tier's risks (`usable`, a dir named twice, "no C0 control
+  character", counts past 2^53 − 1, the op-path negative's counts).
 - Round 2 at `6bb6ce04` was not clean: the product tier found the detector boundary described wrongly (it refuses
   after any non-alphanumeric character, `_` and `-` included, and has a dashed and a `~` form) and the spec README's
   maturity cell crediting the products beyond what they ship. Both are fixed in the round-2 batch: the boundary stated
@@ -477,7 +475,7 @@ it, each on the tree that holds both, with its checks. Every check runs after th
   `--is-ancestor` check, the DEC-0151 line order-proof with its check, the products row's commit and unlanded list,
   the receipt commits' route on `main`, the README index row, the long run's remedy (a space or a dot inside a
   segment, not at its end), the folds' "is not an array" and an undefined `previous`, a `dir` holding a lone surrogate
-  refused, the hints landing line naming the dropped and kept comments, and the mirror lines' check. Round 20 is next.
+  refused, the hints landing line naming the dropped and kept comments, and the mirror lines' check.
 - Round 20 at `5b2fc3ed` was not clean (product; unit and seam passed, the seam tier's gates on both landing orders
   exiting 0): the lone surrogate was missing from three lists of what FAC-SEM-168 checks (the declaring product's
   conformance row, the extension schema's root description and the bare-declaration hint, now all naming it), and the
@@ -486,16 +484,22 @@ it, each on the tree that holds both, with its checks. Every check runs after th
   receipt keeps only the pull request number, the version list dropped from the re-read step, a stale "Round 11"
   sentence removed, `objects()` reading a sparse array's holes, the DEC-0151 line naming the lines to annotate and the
   test title to rename, the JWT landing line (`hasJwt` is only on DEC-0149's branch) and the fold line re-read against
-  DEC-0149's head at landing. Round 21 is next.
+  DEC-0149's head at landing.
 - Round 21 at `7e8a9429` was not clean (unit passed; product and seam each found one break, the seam tier's gates on
   both landing orders green): the handoff counted FAC-SEM-168's checks wrongly (now named one by one, with which the
   semantic fixtures carry), and the DEC-0151 landing line would have rewritten an Accepted decision's body (now under
-  the register's append-only rule: the spec page rewritten, DEC-0153 item 3 edited only while Proposed, else an
-  Annotated line). Also: the Consumers re-read runs `pnpm validate` on each OD-9 declarer's shipped descriptor,
-  Fabric's CO-509 named as its OD-5 departure, the fold landing line opening with its second lander, conformance's
-  declaring row naming `paths.data`, the hourly and daily schema descriptions naming each op once in ops and at most
-  once in risen, and the folds' worded errors for an odd `previous` and a `day` that is no real UTC day. Round 22 is
-  next.
+  the register's append-only rule: the spec page rewritten, DEC-0153 item 3 never rewritten once accepted, an
+  Annotated line instead). Also: the Consumers re-read runs `pnpm validate` on each OD-9 declarer's shipped
+  descriptor, Fabric's CO-509 named as its OD-5 departure, the fold landing line opening with its second lander,
+  conformance's declaring row naming `paths.data`, the hourly and daily schema descriptions naming each op once in ops
+  and at most once in risen, and the folds' worded errors for an odd `previous` and a `day` that is no real UTC day.
+- Rounds 22 and 23 at `f5302e3f` were clean (round 23: unit, product and seam each passed). What they held (vectors,
+  wording, comments and tests, no rule changed) is the landing commit: the hour vector "10 failures after 6: no rise"
+  and the 9-after-5 case renamed, FAC-SEM-166's total message for a sum beyond 2^53 - 1, a test pinning OD-9's dir to
+  the package path's grammar, the in-progress markers on every DEC-0149 citation, the duplicate fold's DEC-0149 parity
+  noted, the reference's error inputs named its choice, RW-2's channel, CONTEXT's OD-8, the Consumers re-read of
+  2026-11-06, the landing lines' checks, the block left to DEC-0149's and DEC-0151's landers, and CT-226 filed.
+  DEC-0153 was accepted on 2026-11-06.
 - The grammar of an `insight/1` line; the session and request counts ADR-0188 §1 also names (a gauge has no `@1`
   home); how the daily digest travels to Project Observatory; `pnpm validate` reading a `.jsonl` file whole. All are
   named under "Not decided here" on the spec page.
@@ -679,50 +683,30 @@ and its per-file floors (109 files, 9846 tests passed, 1 skipped), each exit 0. 
 
 ## Next task
 
-In this order, each step only after the one before:
+DEC-0153 is accepted on its branch and the pull request is open. After it, in this order:
 
-1. The coordinator's blind readings of DEC-0153 on branch `agent/ct219-ops-digest-20261104` (unit, seam, product),
-   until two consecutive clean rounds.
-2. Re-read the Consumers list above at the versions the knowledge base's roadmap names (read with `git ls-remote` and
-   `gh api` only) and update its dated lines, among them the SB-257 line ("closed 2026-11-05: released in v0.7.13" if
-   that is what the release shows), and re-read every product row the board answer below quotes, before the pull
-   request and the board answer. For each product the knowledge base's roadmap says declares OD-9 (Fabric Inbox
-   v0.98.0 today), read its shipped descriptor read-only (the file at its release tag, or its live well-known answer
-   or descriptor), run `pnpm validate` on it at the branch's head, and record the `FAC-SEM-168` result in the
-   Consumers list; a refusal becomes that product's row before the merge, asked for by a board message to its project.
-3. Open the pull request from that branch to `main`.
-4. The acceptance edit, in one commit on the branch, naming only facts that exist at its commit: DEC-0153's Status
-   becomes Accepted with the edit date; CT-219 is marked done with its closure receipt "accepted <date>, #N" (no
-   "merged" before the merge), no merge commit; the handoffs README index row reads "DEC-0153 (CT-219; CT-222 filed)"
-   with the cell "accepted <date>, #N". The same commit rewrites this handoff: Done and the Status words read
-   accepted, CT-219 is no longer "in progress", Open records the clean rounds and the head they read and drops "Round
-   N is next", and this Next task then starts at the landing merge. Its checks: `pnpm run docs:check` exits 0; `awk
-   '/^### DEC-0153/{f=1} f&&/^- \*\*Status:\*\*/{print; exit}' docs/DECISIONS.md` prints a line starting "-
-   **Status:** Accepted"; `grep -n "CT-219" docs/backlog.md` shows done; `grep -n -E 'Round [0-9]+ is next|DEC-0153
-   \(Proposed\)|marked in progress' docs/handoffs/2026-11-04-ops-digest.md` prints nothing.
-5. The landing merge and the gate: merge `origin/main` into the branch (a merge commit on the branch, never a
-   force-push), apply every "At landing" line above, and write both next-free markers from the CAS refs
-   (`refs/agent-sync/ids/`), never from this file. Check `git merge-base --is-ancestor origin/main <PR head>` exits 0,
-   then run the merge gate on that merged head (`pnpm run check` and `pnpm run vectors:check`, output in the pull
-   request), then merge the pull request.
-6. Compare `gh pr view <N> --json mergedAt` with the date the acceptance edit wrote; if the UTC day differs, correct
-   it in DEC-0153's Status, CT-219's receipt and the README row; then CT-219's receipt and the README row read
-   "accepted <date>, #N; merged <date>". The commit lands on `main` as a fast-forward after `pnpm run check` exits 0
-   (the repository's local gate: the knowledge base's `knowledge/rules.md`, line 29; `AGENTS.md`), or through a
-   receipt pull request.
-7. The release, tagged as the history does; watch its run to success, then write the tag into CT-219's receipt and the
-   handoffs README row as "merged <date>, #N; released <tag>", landed on `main` as a fast-forward after `pnpm run
-   check` exits 0 (the repository's local gate: `knowledge/rules.md`, line 29; `AGENTS.md`), or through a receipt pull
-   request.
-8. The answer on board thread `f7758225`. It says in one sentence what RW-4's `ok` means (asks answered by a retro the
+1. The merge: once the pull request's checks read green on its head (the landing merge of `origin/main` is in it, and
+   the gate ran on that merged head), merge it as the history does. Never force-push.
+2. Compare `gh pr view <N> --json mergedAt` with 2026-11-06, the date the acceptance wrote; if the UTC day differs,
+   correct it in DEC-0153's Status, CT-219's receipt and the handoffs README row. Then CT-219's receipt and the README
+   row read "accepted <date>, #N; merged <date>". The commit lands on `main` as a fast-forward after `pnpm run check`
+   exits 0 (the repository's local gate: the knowledge base's `knowledge/rules.md`, line 29; `AGENTS.md`), or through
+   a receipt pull request.
+3. The release, tagged as the history does; watch its run to success, then write the tag into CT-219's receipt and the
+   handoffs README row as "merged <date>, #N; released <tag>", landed on `main` the same way.
+4. The answer on board thread `f7758225`. It says in one sentence what RW-4's `ok` means (asks answered by a retro the
    host saw written, never a count of retros) and names Fabric's CO-502 wording ("the daily digest counts retros asked
-   and written"), so no view shows `ok` as retros written (CT-219's own row item (b) already says so since round 6),
-   and states, in our words, OD-3's bound against Switchboard's SB-257: SB-257 reads a per-line bound of 4096
-   operations, with the rest counted under one fixed name, and OD-3 bounds 4095 named operations per UTC day plus one
-   overflow name.
-9. The knowledge base rows in `fabric-workspace`: in `knowledge/plans.md`, the contract's row at line 80 replaces PR
+   and written"), so no view shows `ok` as retros written (CT-219's own row item (b) already says so since round 6);
+   states, in our words, OD-3's bound against Switchboard's SB-257 (SB-257 reads a per-line bound of 4096 operations,
+   with the rest counted under one fixed name; OD-3 bounds 4095 named operations per UTC day plus one overflow name);
+   and names the release tag, so the products vendor the vectors from it (the hour vectors grew by one case in round
+   23). Re-read the rows it quotes on the day it is sent.
+5. The knowledge base rows in `fabric-workspace`: in `knowledge/plans.md`, the contract's row at line 80 replaces PR
    #240 with this decision's pull request, adds OD-9 and `FAC-SEM-168`, and its Due cell becomes "merged <date>, #N;
    released <tag>" (no "draft by"); the Contract row of `knowledge/products.md` (line 21) gets the new tag, the `main`
    commit the tag points at, and "through DEC-0153" with whatever is still unlanded named (today "DEC-0149, DEC-0151
-   and DEC-0152 still on branches"); the Contract row of `knowledge/roadmap.md` (line 70) gets the new tag and
-   "through DEC-0153"; confirm CT-221's row reserved on main (PR #242) stays once.
+   and DEC-0152 still on branches"); the Contract row of `knowledge/roadmap.md` (line 70) gets the new tag and the
+   same "through DEC-0153" with the same unlanded qualifier; confirm CT-221's row reserved on main (PR #242) stays
+   once. Then publish (`node scripts/workspace.mjs sync` from a Fabric checkout) or leave it to the scheduled sync.
+6. Relay the section "Left to the landers of DEC-0149 and DEC-0151" to those branches' owners (the coordinator carries
+   it), so the sibling that lands next runs its steps and checks.
