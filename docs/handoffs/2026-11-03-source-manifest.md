@@ -464,7 +464,11 @@ source, what never travels with it, the check before a source export, and how a 
   after `git fetch origin`, step 6b after PR #628 merges, DEC-0154's knowledge base step after its contract merge, the
   clause "is owed by FD's watcher under contract DEC-0154", the check after both land run by the second lander in
   `bash` and `zsh`, the withdrawal sentence, and Git mode's second listing narrowed to a gitlink at the manifest's own
-  path in source.md and the walk trigger's comment; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  path in source.md and the walk trigger's comment; round 72 (not clean: unit, product and seam FAIL, step 6 giving DEC-0150's Status
+  form as "Accepted <date>" where main reads "Accepted, merged <date>", and, in the product reading, the claim that
+  both handoffs carried the rule in the same words) answered as decided in item DL: the knowledge-base clause rule as
+  one block, byte-identical with DEC-0154's handoff, in **Next task**, steps 6 and 6b and the Done note pointing at
+  it; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -822,6 +826,14 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 72's fix (item DL: this note, `docs/DECISIONS.md` and `docs/backlog.md`) was checked on the working tree over
+head `0e055e8d`: the knowledge-base clause block occurs once in this note, byte for byte as the shared file holds it;
+no line names DEC-0150's and DEC-0153's Status lines as one form; `python3 docs/ux/lint.py` (exit 0) and
+`ORG_INDEX=... pnpm run privacy:check` (0 findings). `pnpm run docs:check` reports two MD018 errors, both inside the
+pasted block, on its two lines that begin with PR #628's number, which markdownlint reads as a heading without a
+space; the block is not changed here, as the coordinator asked, and its owner reflows it for both handoffs. No gate
+ran: no code changed since round 68's. No U+2014 in the added lines.
 
 Round 71's fix (item DK: this note, `docs/DECISIONS.md`, `docs/backlog.md`, source.md's Walk mode sentence and the
 walk trigger's comment; no code changed since `1bd70e54`) was checked on the working tree over head `1f9e56e2`: step
@@ -1458,22 +1470,9 @@ remaining steps, in order:
    has landed. If main moved after step 5, merge it into the contract PR and re-run the merge gate before merging it.
    Merge the contract PR, fetch, and check that the old watcher sentence is gone from its main:
    `git show origin/main:docs/specification/service.md | grep -c 'stays degraded for more than 5 minutes'` prints 0.
-   Right before merging PR #628, run the status check in the contract's checkout (round 71, DK, the rule both
-   handoffs carry in the same words; it reads the Status line anywhere in DEC-0154's block, so an annotated line before
-   it does not hide it):
-
-   ```sh
-   git fetch origin && git show origin/main:docs/DECISIONS.md \
-     | awk '/^### DEC-0154:/{f=1;next} /^### /{f=0} f' \
-     | grep -c '^- \*\*Status:\*\* Accepted'
-   ```
-
-   It prints 1 once DEC-0154 is accepted (its Status line then takes the form `- **Status:** Accepted <YYYY-MM-DD>,
-   ...`, as DEC-0150's and DEC-0153's do on main) and 0 while DEC-0154 is proposed or absent. If it prints 1, change
-   both clauses on PR #628 (`knowledge/authority.md`, the two episode lines) from "counting `foreign` and
-   `foreign-user` is proposed for FD's watcher in contract DEC-0154" to "counting `foreign` and `foreign-user` is owed
-   by FD's watcher under contract DEC-0154" (no inner parentheses: each clause sits inside a bracket that closes right
-   after it), commit, push, and only then merge it. If it prints 0, merge PR #628 as it is. Then merge PR #628, fetch the knowledge base checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
+   Right before merging PR #628, run the status check of the knowledge-base clause rule below in the contract's
+   checkout: if it prints 1, change both clauses on PR #628 as the rule's From and To give them, commit and push; if
+   it prints 0, leave PR #628 as it is (round 71, DK; round 72, DL). Merge PR #628. Then, once PR #628 is merged, fetch the knowledge base checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
    `knowledge/rules.md`; at PR #628's head `30ac6c55`, which carries the knowledge base's main, they print 4, 4 and 5
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38 and principles
@@ -1483,16 +1482,10 @@ remaining steps, in order:
    the chat: no production step"): items 5 and 7 point to item 9, and principles section 7 and rules section 9 cite
    item 9.
 
-   **Step 6b**, right after PR #628 merges: run the status check above again, and in the knowledge base's checkout,
-   after `git fetch origin`, the clause check on the knowledge base's main:
-
-   ```sh
-   git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'
-   ```
-
-   If the status check prints 1 and the clause check prints 2, change both clauses on the knowledge base's main through
-   a knowledge base PR (a branch from its main, the two replacements only, its own checks, `npm test` and `npm run
-   verify:content`, then merge). Otherwise do nothing.
+   **Step 6b**, right after PR #628 merges: run the rule's status check again and its clause check; if they print 1
+   and 2, open a knowledge-base PR for the clause as the rule says (it re-runs the clause check before merging);
+   otherwise do nothing. When this step's status check printed 1, the last act is the rule's check after both land,
+   in `bash` and `zsh`: its first command prints 0 and its second 2.
 
    If PR #628 cannot merge in
    that session, record the wait and say that until it merges the contract names agents-first item 9, which the
@@ -1651,6 +1644,75 @@ branch's `service.md`, before the landing, order 1's checks print 0 and 1, and o
 sentence, which the landing changes, holds the phrase across two lines). After that one edit `relay.md`'s
 machine-report paragraph and `conformance.md`'s watcher row follow `service.md` by themselves: since round 63 they name
 no state and point at the definition in `service.md`. Every head here is re-measured at landing.
+
+#### The knowledge-base clause rule (the same block in DEC-0149's and DEC-0154's handoffs)
+
+This block is byte-identical in `docs/handoffs/2026-11-03-source-manifest.md` (DEC-0149) and
+`docs/handoffs/2026-11-06-shared-host-ports.md` (DEC-0154); a change to one is made to both.
+
+Rule: each lander checks after its own write, so whichever lander finishes second sees the
+other's result; the edit depends on the text, so a second run changes nothing.
+
+The clause sits at `knowledge/authority.md:115` and `:128` (PR #628 at `30ac6c55`).
+From: "counting `foreign` and `foreign-user` is proposed for FD's watcher in contract
+DEC-0154". To: "counting `foreign` and `foreign-user` is owed by FD's watcher under contract
+DEC-0154" (no inner parentheses: the clause sits inside a bracket that closes right after it).
+
+Status check, in the contract checkout. It matches any Status line in DEC-0154's block that
+starts with `- **Status:** Accepted`, as DEC-0150's (`Accepted, merged <date>, ...`) and
+DEC-0153's (`Accepted <date>, ...`) on main both do:
+
+```sh
+git fetch origin && git show origin/main:docs/DECISIONS.md \
+  | awk '/^### DEC-0154:/{f=1;next} /^### /{f=0} f' \
+  | grep -c '^- \*\*Status:\*\* Accepted'
+```
+
+Clause check, in the knowledge base checkout:
+
+```sh
+git fetch origin && git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'
+```
+
+A knowledge-base PR for the clause branches from the knowledge base's main, carries only the
+two replacements, and runs `npm test` and `npm run verify:content`. Right before merging it,
+the lander runs the clause check again: if it prints 0, the other lander already made the
+edit, and the lander closes its PR unmerged.
+
+DEC-0149's lander: step 6 runs the status check before merging #628 (1: change both clauses on
+#628, then merge; 0: merge as is). Step 6b, right after #628 merges, runs the status check and
+the clause check; 1 and 2: a knowledge-base PR for the clause; otherwise nothing.
+
+DEC-0154's lander: its Status starts with `- **Status:** Accepted`, written
+`- **Status:** Accepted <YYYY-MM-DD>, ...`; nothing merges before that Status edit, so its
+contract PR merges only once accepted. Right after its
+contract PR merges it runs the clause check; 2: a knowledge-base PR for the clause; 0: nothing.
+
+Each lander runs the check after both land as its last step when the other has already
+landed: DEC-0149's lander when the status check printed 1 in step 6b, DEC-0154's lander when
+`gh pr view 628 --repo passioncode-ai/fabric-workspace --json state --jq .state` prints
+`MERGED`. Run it in `bash` and in `zsh`:
+
+```sh
+git fetch origin && git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'
+git show origin/main:knowledge/authority.md \
+  | grep -cF "counting \`foreign\` and \`foreign-user\` is owed by FD's watcher under contract DEC-0154"
+```
+
+The first prints 0 and the second prints 2.
+
+Interleavings: DEC-0154 merges and its clause check prints 0 (#628 not merged); then, if
+DEC-0149's step 6 ran before that merge, #628 merges with "proposed" and step 6b sees 1 and 2
+and edits, and if step 6 ran after it, step 6 changes #628 and #628 merges already owed; or
+#628 merges, step 6b sees 0 and does nothing, then DEC-0154 merges and its clause check sees 2
+and edits; or both open a knowledge-base PR at once, and the re-check before merging closes the
+second. Two windows are named and close: from DEC-0154's contract merge until a knowledge-base
+PR merges, the knowledge base says "proposed" for an accepted DEC-0154; in the other order the
+knowledge base names a DEC-0154 the contract's main does not carry yet.
+
+Withdrawal: if DEC-0154 is withdrawn instead of accepted, its withdrawer files a knowledge-base
+row to drop the "proposed for FD" clause from `authority.md:115` and `:128`; neither lander
+edits it.
 
 ### DEC-0153 is on main: the steps of this landing's merge
 
@@ -1839,7 +1901,7 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   the landed `channel-agent.md` ("acts only inside that chat as section 4.10 says" and "no AP-3 or OA-2 source", each
   `grep -c` 0 on main at `1016f0ec`), so the post quotes CA-8 as the page stands; and its merge post's "together with
   `fabric-source`" becomes true only when DEC-0149 lands, which this landing makes true (say so in DEC-0149's post).
-- Done in PR #628 (rounds 63 to 71): `knowledge/authority.md`'s outage-watcher lines point at the contract's
+- Done in PR #628 (rounds 63 to 72): `knowledge/authority.md`'s outage-watcher lines point at the contract's
   `service.md` for what unavailable means (an episode opens only for an agent unavailable, as `service.md` defines it,
   for more than 15 minutes; a `degraded` answer opens none), keeping `down` only as the dated fact of FD-76's release
   and saying, in both episode lines, that FD-76 opens an episode only for `down` today and keeps it open while a
@@ -1848,31 +1910,10 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   DEC-0154 (round 69, DG: true while DEC-0154 is proposed, which in order 2 the contract's main does not even carry
   when PR #628 merges; who changes it, round 71, DK, below); the start baseline stays the fallback for a service that sends no `setup`
   flag (round 66, CQ). In both orders the knowledge base points at the definition in `service.md`, so the landing edits
-  to `service.md` need no edit there; only its clause on `foreign` changes, from "counting `foreign` and
-  `foreign-user` is proposed for FD's watcher in contract DEC-0154" to "counting `foreign` and `foreign-user` is owed
-  by FD's watcher under contract DEC-0154", each twice (`knowledge/authority.md` lines 115 and 128 at PR #628's
-  `30ac6c55`). "Proposed" is true while DEC-0154 is proposed. Who changes it follows the rule both handoffs carry in
-  the same words (round 71, DK): each lander checks after its own write, so whichever lander finishes second sees the
-  other's result, and the edit depends on the text, so running it twice changes nothing. DEC-0149's lander runs step
-  6 and step 6b above. DEC-0154's acceptance sets its Status line in the form `- **Status:** Accepted <YYYY-MM-DD>,
-  ...`, which the status check matches, and DEC-0154's knowledge base step now runs right after DEC-0154's contract PR
-  merges, not when its Status is set: it runs the clause check on the knowledge base's main and, when it prints 2,
-  changes both clauses through a knowledge base PR; when it prints 0 it does nothing (PR #628 is not merged yet, and
-  step 6b will see DEC-0154 on main; or the clause is already owed). The interleavings, traced: DEC-0154 merges, its
-  clause check prints 0 (no PR #628 yet), then DEC-0149 merges PR #628, and step 6b reads status 1 and clause 2, so
-  DEC-0149's lander edits; DEC-0149 merges PR #628, step 6b reads status 0 and does nothing, then DEC-0154 merges, its
-  clause check prints 2, so DEC-0154's lander edits; DEC-0154's Status set on its branch while PR #628 is unmerged no
-  longer decides anything, since its knowledge base step moved to after its merge; both edit at once: each PR holds
-  the same two replacements, and the second finds 0 and closes. Checks on PR #628 before its merge: while the status
-  check prints 0, `grep -c 'proposed for FD' knowledge/authority.md` prints 2 and the count of the owed clause 0; once
-  it prints 1, after the step 6 change, 0 and 2. The check after both land, in either order or interleaving, run by
-  whichever lander lands second, in `bash` and `zsh`, on the knowledge base's main after `git fetch origin`:
-  `git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'` prints 0 and
-  `` git show origin/main:knowledge/authority.md | grep -cF "counting \`foreign\` and \`foreign-user\` is owed by FD's watcher under contract DEC-0154" ``
-  prints 2. Withdrawal: if DEC-0154 is withdrawn instead of accepted, its withdrawer files a knowledge base row to drop
-  the "proposed for FD" clause from `knowledge/authority.md` (lines 115 and 128), and neither lander edits it. In
-  order 2, until DEC-0154 lands, the knowledge base names a DEC-0154 the contract's main does not carry yet (a risk the
-  coordinator accepted in round 70, closed by DEC-0154's acceptance); the service's own outage report stays at 5
+  to `service.md` need no edit there; only its clause on `foreign` changes, twice, from "proposed" to "owed".
+  "Proposed" is true while DEC-0154 is proposed. Who changes it, the exact clauses, the checks, the interleavings and
+  the withdrawal are in the knowledge-base clause rule in **Next task**, one block, byte-identical with DEC-0154's
+  handoff (round 69, DG; round 70, DI; round 71, DK; round 72, DL); the service's own outage report stays at 5
   minutes or more, as the copy agent writes it today. No knowledge base row is filed for it at landing.
 - At the DEC-0150 step, confirm DEC-0150's lander filed the backlog row (`grep -c 'installation-valued'
   docs/backlog.md` prints 1 on the merged tree) on how a channel
