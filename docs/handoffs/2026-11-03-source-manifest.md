@@ -412,7 +412,13 @@ source, what never travels with it, the check before a source export, and how a 
   `no-license`; E2 fails with the exclude check taken out of `nestedTest` for one run); round 64's seam reading: FAIL, its break in
   authority.md closed by item CA (PR #628 `fc100a11`), the full test run at `cb5471dd` green (10260 passed, branches at
   98.95 %), and items CG to CI (the landing's target phrase quoted with backticks and `foreign` added, a positive check
-  on `service.md`, the `contexts.md` clause placed on this branch); round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  on `service.md`, the `contexts.md` clause placed on this branch); round 65 (not clean: product FAIL, item CJ, the
+  landing's watcher phrase claiming FD-76 counts `foreign` and `foreign-user`; seam PASS, its full test run 10262 green;
+  unit reading still running when this was written) answered as decided: the landing target as two sentences, the
+  contract's rule and FD-76's released fact for `down`, with a negative check and the one-line reformat; relay.md's rule
+  cited to DEC-0149 and service.md; the contract PR first and PR #628 straight after as a mandatory order, with a check
+  that main's old watcher sentence is gone (item CL); CT-244's place list replaced by `git grep -n CT-244` (item CK);
+  authority.md's two episode lines in PR #628 naming what FD-76 counts today; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -524,7 +530,11 @@ source, what never travels with it, the check before a source export, and how a 
 - Round 61, decided by the coordinator under the operator's recorded rules:
   - principles section 7 and rules section 9 name the same exceptions, whose home is item 9;
   - CT-227 has landed (main `1c141418`); DEC-0154 is the open branch after DEC-0151 and DEC-0152, and whichever of
-    DEC-0149 and DEC-0154 lands second makes the watcher sentence read "unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)" (round 64, CH: `foreign`
+    DEC-0149 and DEC-0154 lands second writes the contract's rule and Fabric Dashboards' released fact as two sentences in
+    `service.md`, reformatted onto one line each at landing: "A watcher messages the operator only when an agent has been unavailable (`down`, `foreign` or `foreign-user`, not merely
+    `degraded`) for more than 15 minutes. Fabric Dashboards' watcher does so for `down` since FD-76 (0.7.15, `ebffd16`);
+    counting `foreign` and `foreign-user` is owed (DEC-0154)." (round 65, CJ: FD-76 counts only `down`, fabric-dashboards
+    main `a0bc160`, `src/core/outage-alerts.ts` lines 115 to 119, so the released fact is not widened; round 64, CH: `foreign`
     added by DEC-0154's W14; round 63: then `relay.md` and `conformance.md` follow `service.md` by themselves, pointing at its
     definition);
   - Git mode is kept for a listed file at a path an include entry lies beneath (the code fails closed and stays).
@@ -756,6 +766,21 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 65's fixes (items CJ to CL, documentation and one test title) were checked on the working tree over head
+`ccf8f01b` (this note's commit holds the same tree, plus this paragraph): `pnpm typecheck` (exit 0), `pnpm
+vectors:check` (exit 0, 29 files match), the targeted coverage run over `source-rules`, `validate-cli`,
+`validate-cli-git-links`, `secret-shape`, `schema-compilation`, `consistency`, `validate-cli-faults`, `rule-tolerance`
+and `positive-sweep` (3266 passed, 2 skipped; `src/source-rules.ts` at 100 % of its branches, `src/validate-cli.ts` at
+99.48 %; its exit code 1 comes only from the per-file floors of files this subset does not run), `pnpm run docs:check`
+(exit 0, 0 errors), `python3 docs/ux/lint.py` (exit 0) and `ORG_INDEX=... pnpm run privacy:check` (exit 0, 0
+findings). The full branch gate was not run: the disk held 7 GB free, under the 8 GB the heavy lock asks for, and the
+15-minute load stood at 40.9 (the 1-minute at 49.2). The round's seam reading ran the full test suite on its own tree
+(10262 passed). The negative check prints 0 on this branch's `service.md`, and `git grep -n CT-244` prints 21 lines.
+No U+2014 in the added lines. The knowledge base's PR is at `cb9924aa` (it merged the knowledge base's main
+`6d0dd180` as `8cd61f27`, item 8 as main has it): `source hand-over` in 4, 4 and 5 lines of agents-first, principles
+and rules, `own estate` once on each, item 9 once and item 8 once; the knowledge base's `npm test` (exit 0, 172
+passed) and `npm run verify:content` (0 errors).
 
 Items CF to CI were checked on the working tree over head `ba2cbd87` (this note's commit holds the same tree, plus
 this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files with 10262 passed
@@ -1255,7 +1280,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 62 into `803f35c7`, which carries main's `46c43697` (the PR's head `fc100a11`),
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 65 into `8cd61f27`, which carries main's `6d0dd180` (the PR's head `cb9924aa`),
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). PR #235 (DEC-0148) and DEC-0150 are already on main (`1016f0ec` when re-measured in round
    50), so nothing is refreshed for them. Merge the current `origin/main` (re-measured at landing; `1c141418` as of round 61, or later) into the fresh branch
@@ -1286,23 +1311,26 @@ remaining steps, in order:
 6. Pair PR #628 only with a contract head that carries the same round of the readings (the round named in DEC-0149's
    status line and in RM-36's "Restated 2026-11-05" line in the PR's `knowledge/roadmap.md`, not its last commit,
    which may be a merge of main), and re-read the pair on the round-40 and round-41 points before landing.
-   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`46c43697` at
-   round 62, merged into the PR as `803f35c7`): if it is behind, merge main into it (never a rebase or a force-push),
+   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`6d0dd180` at
+   round 65, merged into the PR as `8cd61f27`): if it is behind, merge main into it (never a rebase or a force-push),
    keeping main's item 8 as main has it and the PR's item 9, and set the round named in RM-36's "Restated 2026-11-05"
-   line to the landing round. Then merge PR #628, fetch the knowledge base
-   checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
+   line to the landing round. The order of the two merges is mandatory (round 65, CJ and CL): the contract PR first,
+   then PR #628 straight after, one after the other in the same landing session, since PR #628 points at `service.md`'s
+   definition of unavailable and at `source.md#handing-over`, which the contract's main carries only once the contract
+   has landed. If main moved after step 5, merge it into the contract PR and re-run the merge gate before merging it.
+   Merge the contract PR, fetch, and check that the old watcher sentence is gone from its main:
+   `git show origin/main:docs/specification/service.md | grep -c 'stays degraded for more than 5 minutes'` prints 0.
+   Then merge PR #628, fetch the knowledge base checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `fc100a11`, which carries the knowledge base's main, they print 4, 4 and 5
+   `knowledge/rules.md`; at PR #628's head `cb9924aa`, which carries the knowledge base's main, they print 4, 4 and 5
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38 and principles
    section 7 and rules section 9 their two named exceptions in round 59), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in
    the chat: no production step"): items 5 and 7 point to item 9, and principles section 7 and rules section 9 cite
-   item 9. Then merge the
-   contract PR straight after, in the same
-   landing session (PR #628's links point at `source.md#handing-over` on main). If main moved after step 5, merge it and
-   re-run the merge gate before merging PR #628. If the contract PR cannot merge in that session, do not merge PR #628
-   (or revert it at once) and record the wait.
+   item 9. If PR #628 cannot merge in
+   that session, record the wait and say that until it merges the contract names agents-first item 9, which the
+   knowledge base's main does not carry yet; merge it first thing in the next session.
 7. A human gate: asking GitHub to remove the review branch's unreachable commits and their cached views is the
    operator's (GitHub Support).
 
@@ -1367,10 +1395,17 @@ fourteen files as with main `1c141418` (measured with `git merge-tree` in round 
 file of its own; where its lines meet this landing's: the coverage `include` of `vitest.config.ts` (the union keeps
 `src/host-label.ts`, `src/validator.ts`, `src/channel-agent.ts` and `src/ops-digest.ts`), the handoffs README row, and
 the tails of `docs/DECISIONS.md` (ordered through DEC-0154) and `docs/backlog.md` (in id order). DEC-0154's handoff also
-names the watcher sentence in `service.md`: whichever of DEC-0149 and DEC-0154 lands second makes Fabric Dashboards'
-watcher sentence read "unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)" (`foreign` from DEC-0154's W14: a service whose port another program holds serves
-nothing). Check after both land: the count of that exact phrase in `docs/specification/service.md` is 1, as DEC-0154's
-handoff checks (its W4). After that one edit `relay.md`'s
+names the watcher sentence in `service.md`: whichever of DEC-0149 and DEC-0154 lands second replaces it with the
+contract's rule and Fabric Dashboards' released fact, written separately: "A watcher messages the operator only when an agent has been unavailable (`down`, `foreign` or `foreign-user`, not merely
+`degraded`) for more than 15 minutes. Fabric Dashboards' watcher does so for `down` since FD-76 (0.7.15, `ebffd16`);
+counting `foreign` and `foreign-user` is owed (DEC-0154)." (`foreign` from DEC-0154's W14: a
+service whose port another program holds serves nothing; FD-76 counts only `down`, fabric-dashboards main `a0bc160`,
+`src/core/outage-alerts.ts` lines 115 to 119, round 65's CJ). At landing reformat the phrase
+"unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)" onto one line of `service.md`, since a
+`grep` reads one line. Checks after both land: the count of that exact phrase in `docs/specification/service.md` is 1,
+as DEC-0154's handoff checks (its W4); and the widened claim is absent:
+`` grep -c "Fabric Dashboards' watcher messages the operator only when an agent has been unavailable (\`down\`, \`foreign\`" docs/specification/service.md ``
+prints 0. After that one edit `relay.md`'s
 machine-report paragraph and `conformance.md`'s watcher row follow `service.md` by themselves: since round 63 they name
 no state and point at the definition in `service.md`. Every head here is re-measured at landing.
 
@@ -1554,16 +1589,17 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   `docs/backlog.md` a link to source.md's sentence on an OS account an organization owns whole (in "Handing over", the
   sentence on a machine enrolled in an organization); the clause is on this branch in source.md and `contexts.md` (its
   "One instance per context on a machine" part, line 73). Check after both land: CT-232's row names `source.md` once.
-- CT-244 keeps its id at landing. If it ever had to change, every place naming it changes with it: `relay.md`'s
-  machine-report paragraph, DEC-0149's round-62 record, CT-194's row, CT-244's own row and this note's round-62
-  entries.
+- CT-244 keeps its id at landing. If it ever had to change, run `git grep -n CT-244` on the landing tree and change
+  every place it prints (round 65, CK: a fixed list goes stale).
 - At landing, carry two corrections of DEC-0150's landing post: its FAA-197 item quotes two phrases that are not on
   the landed `channel-agent.md` ("acts only inside that chat as section 4.10 says" and "no AP-3 or OA-2 source", each
   `grep -c` 0 on main at `1016f0ec`), so the post quotes CA-8 as the page stands; and its merge post's "together with
   `fabric-source`" becomes true only when DEC-0149 lands, which this landing makes true (say so in DEC-0149's post).
-- Done in PR #628 (rounds 63 and 64): `knowledge/authority.md`'s outage-watcher lines point at the contract's
+- Done in PR #628 (rounds 63 to 65): `knowledge/authority.md`'s outage-watcher lines point at the contract's
   `service.md` for what unavailable means (an episode opens only for an agent unavailable, as `service.md` defines it,
-  for more than 15 minutes; a `degraded` answer opens none), keeping `down` only as the dated fact of FD-76's release,
+  for more than 15 minutes; a `degraded` answer opens none), keeping `down` only as the dated fact of FD-76's release
+  and saying, in both episode lines, that FD-76 counts `down` today and FD's watcher owes `foreign` and `foreign-user`
+  (DEC-0154),
   so the one landing edit to `service.md` covers the knowledge base too; the service's own outage report stays at 5
   minutes or more, as the copy agent writes it today. No knowledge base row is filed for it at landing.
 - At the DEC-0150 step, confirm DEC-0150's lander filed the backlog row (`grep -c 'installation-valued'

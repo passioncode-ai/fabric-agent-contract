@@ -2254,7 +2254,7 @@ describe("an agent's source (DEC-0149)", () => {
     expect(found(result.out).filter((line) => line.includes("FAC-SEM-157") && line.includes("/include/0") && line.includes("include[0] lies inside an exclude path"))).toHaveLength(1);
   });
 
-  it("keeps Git mode when a tracked file under an include folder is excluded but others are listed (E12)", () => {
+  it("keeps Git mode when src/old.ts, tracked and lying under the include folder src/, is excluded (E12)", () => {
     const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/old.ts"] }), ".gitignore": "LICENSE\n", LICENSE: "x", "src/old.ts": "x" });
     expect(gitIn(dir, "init", "-q").status).toBe(0);
     expect(gitIn(dir, "add", "fabric.source.json", ".gitignore", "src/old.ts").status).toBe(0);
