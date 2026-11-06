@@ -509,6 +509,13 @@ edits it.
 - The coordinator's next blind readings of DEC-0154.
 - CT-228's owed parts: the claim file's schema and a port-choice reference with vectors.
 - CT-229 to CT-243, each with its evidence and acceptance in the backlog; G10 is a decision of the second wave.
+- An open question outside DEC-0154: the operator decided on 2026-11-06 (relayed in board thread `22876238`, message
+  `433ab602`) that agents of an organization call, and accept calls from, only agents of the same organization. The
+  contract writes it as a new decision together with provider-account isolation, not as DEC-0154. It conflicts with
+  [contexts](../specification/contexts.md) lines 10 and 11 (a person's own agents shared into two organizations on one
+  machine), with DEC-0086 (a share grant runs a sharer's agent in an organization's context) and with PS-3 of DEC-0142
+  (a credential shared with another person's estate, used outside any context). It waits for the operator's choice
+  between options (a) and (b) as posed in that thread.
 
 ## Checks actually run
 
@@ -609,3 +616,9 @@ still the one added line with U+2014.
 ## Next task
 
 The coordinator's next blind readings of DEC-0154 at this branch's head.
+
+Paused 2026-11-06 by the operator's relay in board thread `eefa7959` (about 12:50 UTC, from fabric-workspace session
+`74a9440a`: finish the current step, start no new tasks). State: head `c1cd93a2`; round 17 clean at `832dc557`; round
+18 not clean, fixed by W81; the full gate not run since W80 because the load was high. Exact next task once the pause
+lifts: run the full gate at this head under the heavy lock, then blind readings round 19 (unit, product, seam), then
+two clean rounds and the acceptance step.
