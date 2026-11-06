@@ -119,7 +119,10 @@ export const NOT_SWEPT: readonly string[] = [
   // A manifest's or a well-known answer's channel-agent declaration (DEC-0150) is checked inside that document
   // (FAC-SEM-162 to FAC-SEM-165, kinds `manifest` and `service-well-known`), whose positive fixtures
   // manifest-channel-agent.json and service-well-known-channel-agent.json the sweep runs.
-  "service-channel-agent-extension.schema.json"
+  "service-channel-agent-extension.schema.json",
+  // Where a collector reads the daily operations digests (DEC-0153 OD-9): checked inside a descriptor (FAC-SEM-168, kind
+  // `service-descriptor`), whose positive fixture with the key is swept.
+  "service-ops-digest-extension.schema.json"
 ];
 
 describe("every positive fixture passes the semantic rules", () => {
@@ -131,7 +134,7 @@ describe("every positive fixture passes the semantic rules", () => {
   });
 
   it("names only kinds a rule reads and schemas that exist, and sweeps a fixture of each", () => {
-    const sources = ["semantic-rules", "job-limits", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules", "node-summary", "agent-network", "credentials", "mandate", "org-membership", "org-authority", "org-exchange", "org-adaptation", "machine-report"]
+    const sources = ["semantic-rules", "job-limits", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules", "node-summary", "agent-network", "credentials", "mandate", "org-membership", "org-authority", "org-exchange", "org-adaptation", "ops-digest", "machine-report"]
       .map((name) => readFileSync(path.join(root, "src", `${name}.ts`), "utf8"))
       .join("\n");
     for (const [schema, kind] of Object.entries(KIND_OF_SCHEMA)) {

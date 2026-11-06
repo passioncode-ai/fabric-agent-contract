@@ -241,17 +241,23 @@ function profileHints(schema: string | undefined, value: unknown, out: Hint[]): 
     }
   });
 }
+/** The ops-digest declaration's own page, written once: the bare-declaration hint names it explicitly (DEC-0153 OD-9). */
+const OPS_DIGEST_HELP = "docs/specification/ops-digest.md#where-a-collector-reads-the-daily-digests";
 const HINT_HELP = {
   "hint/extension-key": "docs/specification/interop.md#extension-key",
   "hint/profile-version": "docs/specification/profiles.md",
   "hint/reader-pending": "docs/specification/provider.md",
-  "hint/declaration-only": "docs/specification/channel-agent.md#what-is-checked",
+  "hint/declaration-only": OPS_DIGEST_HELP,
 } as const;
-/** A hint: where it is, which hint, what it says, and its own help link where the rule's is not the one (DEC-0153's form). */
+/** A hint: where it is, which hint, what it says, and its own help link when it differs per schema. */
 type Hint = [string, keyof typeof HINT_HELP, string, string?];
 
 /** A member the schema allows but a reader the contract names does not accept yet (CT-27 for `run.mcp.stdio.scope`). */
 function readerHints(schema: string | undefined, value: unknown, out: Hint[]): void {
+  // DEC-0153 OD-9: a bare ops-digest declaration checks its shape only; FAC-SEM-168 reads it inside its descriptor.
+  // One rule name for every bare declaration; each bare declaration's line carries its own schema's page explicitly, so
+  // it prints that page whichever value HINT_HELP's shared entry holds.
+  if (schema === "service-ops-digest-extension.schema.json") out.push(["/", "hint/declaration-only", "FAC-SEM-168 runs only on the declaration inside a service descriptor's extensions (the placement and paths.data, a source or a dir named twice, a dir with a segment of only dots, spaces or ignorable code points, a dir holding a lone surrogate, a home folder in a dir, a dir or source shaped like a credential); check the descriptor to run it", OPS_DIGEST_HELP]);
   // DEC-0150: a bare channel-agent declaration checks its shape only; its other rules read it inside its document.
   // Until DEC-0149's instance-free schema lines land, this bare path prints the generic lines, so the hint says so.
   if (schema === "service-channel-agent-extension.schema.json") out.push(["/", "hint/declaration-only", "FAC-SEM-163 to FAC-SEM-165 run only on a declaration inside a manifest's provider.extensions or a well-known answer's extensions; check that document to run them. A bare declaration's lines may name its members as written (a credential-shaped name included) and print one line per item, since widths are not checked first here", "docs/specification/channel-agent.md#what-is-checked"]);

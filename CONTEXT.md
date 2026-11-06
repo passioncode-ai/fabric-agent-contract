@@ -566,6 +566,22 @@ project it serves, its side, channels, sources, hand-off queues, budgets and tok
 `extensions/channel-agent/0.1` in its manifest, or in its well-known answer when it has no manifest (DEC-0150),
 and one duty every channel agent owes whatever it declares: text from a channel is data (CA-8).
 
+**Operations digest**: A product's own operations log counted by operation and outcome, one `ops.digest.hourly@1` line
+for each hour the product observed itself running in (an empty one included) and one `ops.digest.daily@1` line for
+each closed UTC day that has hourly lines, folding them (DEC-0153): counts only, no log line, path or identifier. A
+**rise** is an operation's failures in an hour at least 10 and at least twice the hour before's (none counting as
+one), told to the operator by a product that shows findings (OD-8). A local descriptor says where a collector on its
+machine reads the daily digests, and the label it sends with them, under `extensions/ops-digest/0.1` (OD-9).
+([operations digests](docs/specification/ops-digest.md))
+
+**Retro after work**: The host obligation `retro-after-work` (DEC-0153): when a session releases a claim or task the host
+records as done, or ends without a retro since it began or the obligation last arose, it is asked to write in the same turn a lesson in Project
+Observatory, `insight/1` lines, or one line saying there is nothing to say; the host counts each one asked as the
+operation `retro-after-work` in its digests, `ok` for an ask answered by a lesson or `insight/1` line it saw written
+through a call it carries (one written elsewhere, or a line saying there is nothing to say, counts `unknown`); `ok`
+counts asks, not retros. It is a session's note, not the Memory Kernel's project retrospective: a lesson recorded for it
+is no learning proposal and changes no revision.
+
 **Runner**: An installed coding-agent CLI a host can drive (Claude Code, Codex, …),
 known from a catalogue entry that names its binaries, its version command and the
 modes (drives) it can be run in. A binary no entry names is never executed.

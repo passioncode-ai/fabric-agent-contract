@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-11-04 operations digests and the retro after work](2026-11-04-ops-digest.md) | DEC-0153 (CT-219; CT-222, CT-226 filed) | accepted 2026-11-06 |
 | [2026-11-04 an agent that answers people on a channel](2026-11-04-channel-agent.md) | DEC-0150, accepted (CT-209; CT-223, CT-224, CT-225 filed) | merged 2026-11-05 after rounds 38 and 39 were clean; released `v0.1.0+2026-11-05.2` |
 | [2026-11-02 a renewal repeated, not reissued](2026-11-02-renewal-repeat.md) | DEC-0148 (CT-200; CT-202, CT-203 filed) | merged 2026-11-05, #235; released `v0.1.0+2026-11-05.1` |
 | [2026-11-02 a peer share's risks settled](2026-11-02-peer-share-risks.md) | DEC-0147 (CT-189; CT-201 filed) | merged 2026-11-02, #232; released `v0.1.0+2026-11-02.1` |

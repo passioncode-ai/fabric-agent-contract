@@ -35,7 +35,9 @@ const KINDS = [
   // A machine's report to its hub, each lease once (FAC-SEM-152, DEC-0132).
   "machine-report",
   // An adaptation plan, each ref and request id once and every itemRef an item's (FAC-SEM-153, DEC-0138).
-  "org-adaptation"
+  "org-adaptation",
+  // An operations digest, its window, its sums and its rises (FAC-SEM-166), no credential as an operation (FAC-SEM-167, DEC-0153).
+  "ops-digest-hourly", "ops-digest-daily"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
@@ -57,7 +59,7 @@ const MEMBERS = [
   "leaseId", "scope", "unit", "rpId", "origins", "spentUsd", "amountUsd", "localRemainderUsd",
   "context", "pool", "days", "byProject", "generatedAt", "route", "admissions", "event", "candidates", "project", "capability",
   "entry", "manifest", "projects", "op", "observed", "settledBy", "summary", "principal", "finding", "affects", "thread",
-  "principalKind", "calls", "unpricedCalls", "costUsd", "grantId", "day",
+  "principalKind", "calls", "unpricedCalls", "costUsd", "grantId", "day", "ops", "total", "risen", "hours",
   "profiles", "models", "reads", "fallback", "choices", "policy", "resolved", "classes",
   "statement", "signature", "genesis", "purpose", "ceiling", "notBefore", "nonce", "uses", "hubKey", "deviceKeys",
   "subject", "order", "licence", "hosting", "support", "agents", "agentRef", "keys", "revoked", "notAfter", "issuer",
@@ -122,6 +124,14 @@ describe("activity and device rules tolerate malformed input", () => {
       expect(() => evaluateSemanticRules("service-peer-request", { descriptor: { peer: { maxDataClass: value } }, dataClass: value, sent: true })).not.toThrow();
     }
     expect(() => evaluateSemanticRules("service-peer-request", { descriptor: { peer: { maxDataClass: "toString" } }, dataClass: "valueOf", sent: true })).not.toThrow();
+    // The ops-digest key (FAC-SEM-168, DEC-0153 OD-9) holding every wrong shape, entries of the wrong type among them.
+    const opsDigest = "https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1";
+    for (const value of WRONG) {
+      for (const placement of ["local", "remote", value]) {
+        expect(() => evaluateSemanticRules("service-descriptor", { placement, extensions: { [opsDigest]: value } })).not.toThrow();
+        expect(() => evaluateSemanticRules("service-descriptor", { placement, extensions: { [opsDigest]: [value, { dir: value, source: value }, { dir: "digests", source: "app" }] } })).not.toThrow();
+      }
+    }
   });
 });
 

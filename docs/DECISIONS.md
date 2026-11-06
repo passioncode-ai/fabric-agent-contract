@@ -9425,3 +9425,305 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `FAC-SEM-162` to `FAC-SEM-165` were reserved under `channel-agent-sem-a` to `-d` (SEM-0162 to SEM-0165).
   Rounds 38 and 39 of the readings were clean on unit, product and seam at `f0feccbd`, which accepted the decision; it
   merged with main at `08e24572` (DEC-0148) and landed on 2026-11-05.
+
+### DEC-0153: operations digests, `ops.digest.hourly@1` and `ops.digest.daily@1`, and the retro after work
+
+- **Date:** 2026-11-04
+- **Status:** Accepted 2026-11-06, after clean rounds 22 and 23 at `f5302e3f` of the coordinator's blind readings
+  (unit, seam, product). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168`, a descriptor
+  extension, a reference module and vectors, and a host obligation. Additive: nothing that validated before changes.
+- **Context:** the operator asked on 2026-11-04 that every product's log be read every hour and every day, and that
+  every agent close its work with a retro whose lessons are kept centrally; Fabric recorded the split in its ADR-0188
+  (commit `0d0e5922`) and relayed the contract's part on board thread `f7758225` (message `516761e1`, item 2 of its
+  split). Fabric writes the two digests since commit `e1eecec0` (`apps/desktop/src/shared/opsDigest.ts`,
+  `apps/desktop/src/main/opsDigestRun.ts`), the shape's origin; every other product that writes digests needs the shape
+  pinned so one reader reads them all. Every statement in this decision about Fabric's code is about that commit;
+  what each product's code was read to do at a later date is in the CT-219 handoff, never here. Of those, only a product
+  with a local service descriptor can say where its daily digests are (OD-9); the others reach a collector by
+  arrangements outside this contract. ADR-0188 left open the format of `from`, `to` and
+  `day`, the grammar of `op` and `total` as the sum of `ops`.
+- **Decision:** [operations digests](specification/ops-digest.md):
+  1. **The shapes, as ADR-0188 names them.** `ops.digest.hourly@1` {`schema`, `from`, `to`, `ops`[{`op`, `ok`,
+     `failed`, `unknown`}], `total`{`ok`, `failed`, `unknown`}, `risen`[{`op`, `failed`, `previous`}]} and
+     `ops.digest.daily@1` {`schema`, `day`, `hours`, `ops`, `total`, `risen`[{`op`, `hours`, `failed`}]}, both closed,
+     every count an integer from 0 to 2^53 − 1, at most 4096 operations and rises: a product keeps at most 4095 named
+     operations per UTC day plus its one fixed overflow name, under which it counts the rest (their counts kept), so
+     both its hourly and its daily lines validate; a day that would fold more than 4096 operations has no daily
+     digest, and a day whose hours hold a name OD-2 refuses (its grammar, or FAC-SEM-167) has none either, and an hour
+     of more than 4096 operations or holding a name OD-2 refuses (its grammar, or FAC-SEM-167) has no hourly digest
+     (the reference `foldDay` and `foldHour` throw: a reference fold never writes a line every reader skips). A
+     finding or a fold's error names a value shaped like a credential, holding a home folder, or any value that is not
+     printable ASCII only by its place.
+  2. **The window (OD-1).** `from` and `to` are whole UTC hours in RFC 3339 with `Z`, with or without the `.000` that
+     `Date.prototype.toISOString` writes (Fabric writes it at `e1eecec0`), `to` one hour after `from`; `day` is
+     `YYYY-MM-DD` UTC; `hours` 1 to 24. A product that keeps the log writes one hourly line for each hour it observed
+     itself running in (a tick or a record inside the hour), an empty one included, never filling the hours from the
+     last written to now without observing them (round 4: a sleep is not a run), and folds each closed UTC day that
+     has hourly lines into one daily line (a day with none has no daily digest, OD-5). A product that keeps its
+     records elsewhere and answers on request writes each hourly line when that hour closes, as any writer does,
+     folding its stored records for that hour, with an empty line for an hour it observed itself running in (a tick it
+     records) and no stored record; its answer for a closed day folds the lines already written (one kind of writer,
+     decided in round 10). `hours` counts hourly lines folded, never uptime. An hour it did not run, or written as no
+     digest under OD-3, is a gap for the hour after it. The hour a product stops in is kept with its counts and
+     written when it closes, at the next run, compared with the hour just before when that is the last hour written,
+     else with none (a gap); a product that cannot keep it writes nothing for that hour, never a partial line, since a
+     restart in the same hour would leave two lines and readers keep the first. At start a product reads its last
+     hourly line back for `previous`, rebuilds the day's named operations from that day's hourly lines and the hour it
+     kept, and writes every closed hour it kept, the hour it stopped in included, before it folds any closed day
+     (OD-5); otherwise that day's daily line loses that hour for good.
+  3. **An operation's name (OD-2).** `^[a-z][A-Za-z0-9_]*(?:[.:/-][A-Za-z0-9_]+)*$`, at most 64 characters. `/` is a
+     separator because Fabric logs an MCP method as `mcp.<method>` (`mcp.tools/list`, `mcp.notifications/initialized`,
+     `mcp.notifications/cancelled`; board thread `f7758225`, message `1c191cf7`), and the 175 operation names Fabric
+     checked in a week of its own log all fit. No absolute path, URL, space, empty segment, `.` or `..` can;
+     `FAC-SEM-167` refuses a name shaped like a credential (`secretValue`, DEC-0044) or holding a home folder
+     (`hasHomePath`, the detector other rules use), so the `/` lets no home path through; `secretValue` is the shared
+     credential detector, which refuses a provider key's shape, in either case and anywhere in the name: `sk-`
+     followed by 16 or more letters, digits, `_` or `-` (so inside any word ending in sk: `task-`, `risk-`, `mask-`
+     and the like), `gh[pousr]_` followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more
+     letters, digits or `-`, `AKIA` followed by 16 letters or digits, `glpat-` followed by 20 or more letters, digits,
+     `_` or `-`; a JWT (`eyJ` and 2 or more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any
+     number of them, case-sensitive); a value starting with `bearer` in either case, whitespace and one more character
+     other than a line break (as JavaScript's `.` reads it); or a run of 40 or more letters, digits, `+`, `/`, `=`,
+     `_` or `-` (so across segments joined by `-` or `/`) that mixes upper case, lower case and a digit. `JWT_SHAPE`,
+     `SECRET_VALUE` and `longSecret` (together `secretValue`) in `src/secret-shape.ts` are the definition. So
+     `ops.risk-assessment-completed` and `queue.task-assigned-to-worker` are refused and `work.session-end-task-back`
+     passes, until DEC-0151's narrowing of the `sk-` shape lands. `hasHomePath` refuses a value in which `home`,
+     `users` or `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`,
+     `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in
+     either case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`,
+     `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII
+     letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double
+     or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters,
+     digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `api.users/list`, `api.get_users/list`,
+     `api.my_users/list` and `ui.home/open` are refused, and `api.user/list` and `api.get_user/list` pass (a dir's
+     examples are in item 9). One refused name fails the whole line, which every reader skips. The shared detector
+     stays (decided in review round 1, its boundary stated exactly in round 2), and a test pins every example on the
+     spec page and here.
+  4. **Counting and the rise (OD-3, OD-4).** Every record counted by `op` and outcome in its hour before any sampling;
+     an outcome other than `ok` and `failed` is `unknown`. A product whose log uses its own outcome words maps each to
+     `ok` (it did what it was asked), `failed` (it tried and did not, by a fault) or `unknown` (a setup answer, a
+     policy or permission refusal, a skip, a missing slot, or a word it did not place), and publishes the map in its
+     own documentation, not in the digest. A product's own call refused for its own missing source slot (DEC-0149,
+     in progress: "Starting without the instance") is `unknown`, never `failed`, so it never makes a rise; a host
+     that relays calls counts an error as it sees it, since a relayed error cannot tell setup from failure (DEC-0149).
+     `total` is each counter's sum. A product keeps at most 4095 named operations per UTC day plus its one fixed
+     overflow name, which it publishes with its outcome map (item 1). A rise is at least 10
+     failures in the hour and at least twice the hour before's, an hour before with none (or not closed) counting as
+     one. `FAC-SEM-166` checks the window, each `op` once in `ops` and at most once in `risen`, the sums, and every rise against its own digest: an hourly
+     rise names the hour's failures of its op and passes OD-4 against its `previous`; a daily rise is in at most
+     `hours` hours, with at least 10 failures an hour and at most the day's failures of its op; a rise missing from
+     `risen` needs the hour before, so `FAC-SEM-166` cannot see it and the vectors check it. **The order:** `ops`
+     sorted by `op` in code-unit order, an hourly `risen` in the order of `ops`, a daily `risen` by `failed` descending
+     then `op`, as `foldHour` and `foldDay` write and the vectors compare; `FAC-SEM-166` does not check order and a
+     reader reads both as sets keyed by `op`. A count or sum beyond 2^53 − 1 is no count: the reference folds throw.
+  5. **The daily fold and the files (OD-5, OD-6).** The day's hourly digests are folded once each (the first line of
+     an hour), and a day with no hour of its own has no daily digest: a producer writes none, and one that answers
+     for a day answers that it has none (`404` over HTTP, announced, board message `f74763e1`). **Catch-up:** a product
+     folds, once, at its next run, each closed UTC day that has hourly lines and no daily line, reading its hourly file
+     back; a reader and a collector take the first daily line of a day. Each digest is one JSON line appended to `hourly-YYYY-MM.jsonl` or `daily-YYYY-MM.jsonl` in the
+     product's own folder on its own machine; a reader skips a line it cannot read or of another revision and never
+     stops. The `@1` names stay as Fabric writes them and are not entered in the protocol revision register (DEC-0067):
+     nothing negotiates them, and a reader skips a revision it does not read.
+  6. **Nothing but counts (OD-7), and the operator told (OD-8).** No log line, path, identifier or text; a product
+     that shows findings shows each rise of its newest closed hour.
+  7. **`retro-after-work` (RW-1 to RW-4).** It arises at each release of a claim or task that the host records as
+     done (in coordination's terms, outcome success; each host's own claim vocabulary decides which act that is) and
+     when the session ends, only if the session wrote no retro since the session began or the obligation last arose,
+     whichever is later, the host judging "wrote no retro" by what it observes (RW-4); the host serves it with its other obligations as advice that holds nothing back;
+     it is fulfilled in the same turn by a lesson in Project Observatory (`observatory_lesson`, one class key each), by
+     `insight/1` lines, or by one line saying there is nothing to say; the host counts each time it arose as one record
+     of the operation `retro-after-work` in its digests, in the hour the record is resolved (answered, or `unknown` at
+     the end): `ok` only when it observes a lesson or an `insight/1` line written through a call it carries (its own
+     tool call, or a host hook observing the session's own tool call), `failed` when such a call is refused, `unknown`
+     otherwise, a retro written elsewhere and a line saying there is nothing to say included. Retros asked are the
+     sum; `ok` counts the asks answered by a retro the host saw written, and since one retro may answer several asks,
+     `ok` is not a count of retros and no bound on them; counting the retros written is Project Observatory's (Not
+     decided here).
+  8. **Reference and vectors.** `foldHour`, `foldDay`, `isRise` and the rules in `src/ops-digest.ts`; vectors in
+     `fixtures/vectors/ops-digest.json`; `pnpm validate` tells the two digests apart by `schema` (kinds
+     `ops-digest-hourly`, `ops-digest-daily`).
+  9. **Where a collector reads the daily digests (OD-9), a change made in review.** A local service descriptor MAY
+     carry the extension key `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1` (protocol
+     `fabric-ops-digest/0.1`, named only in the register), whose value is 1 to 8 closed `{dir, source}`
+     (`schemas/service-ops-digest-extension.schema.json`): `dir` a folder inside `paths.data`, relative to it, in the
+     grammar of a package path (no leading `/` or `~`, no drive, no backslash, no `.` or `..` segment), holding the
+     product's `daily-YYYY-MM.jsonl` files (OD-6); `source` the label (`^[a-z][a-z0-9-]{0,31}$`, `app` by convention)
+     a collector on the same machine sends with each daily line it reads there. The digests stay as written (OD-6,
+     OD-7); the key only says where to read and which label to send. `FAC-SEM-168` (kind `service-descriptor`) refuses
+     the key on a remote placement or on a local one without `paths.data`, a value that is not its schema's, a
+     `source` named twice, a `dir` named twice, compared under canonical caseless matching (the code points HFS+
+     ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri onto Mkhedruli), trailing dots and
+     spaces dropped (one folder under two labels would be sent twice), a `dir` segment that is empty once every
+     default-ignorable code point and its trailing dots and spaces are dropped (`..` + U+2060 among them; a tool that
+     trims or strips names, Win32 path handling dropping trailing dots and spaces or a reader stripping those code
+     points before joining, may read it as empty, `.` or `..`, another folder than the one declared, possibly outside
+     `paths.data`), a `dir` holding a lone surrogate (not well-formed Unicode, which no file system can name), a `dir`
+     holding a home folder (`hasHomePath`, with the boundary of item 3: `users/digests`, `my_users/digests`,
+     `my-users/digests` and `a/~b` fail, `user-digests` and `a/~1/x` pass) and a `dir` or `source` shaped like a
+     credential (`secretValue`), a `dir` read four ways: as written, with every default-ignorable code point removed,
+     and each of those with each segment's trailing dots and spaces dropped (a run of 40 or more letters, digits, `+`,
+     `/`, `=`, `_` or `-` that mixes upper case, lower case and a digit, across segments joined by `/` too, such as
+     `ApplicationSupport/MyProduct/Digests2026` or `Application+Support/MyProduct/Digests2026x`, is refused on
+     purpose, its finding saying why and that a space or a dot inside a segment, not at its end, breaks the run: the
+     credential detector's run includes `/` so that a base64 secret holding one is still found; a class of dirs whose
+     fold holds a home folder is hidden in messages, never refused); one finding refuses the whole declaration, which
+     a collector reads as not declared and reports. `digestFoldersView` (whose `usable` is true only when the rule has
+     no finding) and `digestFoldersRules` in `src/ops-digest.ts` are the reference. A collector takes each day's first
+     daily line whenever it first appears (a caught-up day included) and sends it once, with `source` and which
+     descriptor the line came from (its `id` and `instance`; an optional `service {id, instance}` beside `source` is
+     announced, board message `1a12d809`). The collector role is announced by Fabric (board thread `f7758225`, message
+     `2ed505f2`). A product without a local descriptor is outside this declaration, and a declared `dir` holds only
+     the declaring instance's own digests: relaying a remote instance's digests is outside this contract.
+- **Why:** one shape lets one reader read every product's digests; the shape is the one already written, so the first
+  producer's lines need no new member or format; the writing rules OD-1, OD-3 and OD-5 add (no filled hours across a
+  sleep, the 4095-name bound and its overflow name, the daily catch-up) are each product's to adopt in its own rows. A
+  name grammar that holds no empty segment, `.`, `..` or leading `/` keeps absolute paths and URLs out by
+  construction, and the home-folder detector the relative home paths `/` would let in. The folder a collector reads is
+  declared where the product already says what it is (its descriptor), in the place the closed descriptor schema keeps
+  for what it does not name (`extensions`), and relative to the data folder, so no home path travels in it. A host
+  counts `ok` only for a retro it sees written, because a retro written elsewhere is a claim it cannot check, and the
+  store that holds it can count it. A day that closed while the product was down still gets its daily line at the next
+  run when it has hourly lines (OD-5), so a reader never mistakes a restart for a silent day; a day with no hourly
+  line has none. An order written but not checked keeps every line written at the shape's origin valid and keeps
+  readers from depending on it. Mapping each product's outcome words keeps one meaning of `failed` across products,
+  and keeping the map out of the digest keeps OD-7. `hours` counts hourly lines folded, never uptime, because an hour
+  a product could not keep (OD-1) or wrote as no digest (OD-3) is not folded, and a restart can leave a gap. A
+  collector that sends a caught-up day once loses no day and doubles none. Writing the hour a product stops in only
+  when it closes, and never partly, keeps one line per hour, since readers keep the first; reading the last line back
+  keeps `previous` true across a restart. An hour written only when the product saw itself in it keeps a sleep from
+  reading as hours run with nothing failing. A `dir` that holds only its own instance's digests keeps one count per
+  instance; the 4096 bound with one overflow name keeps a busy hour's line valid and its totals whole. A line saying
+  there is nothing to say has no call a host can observe, so it is no `ok`. The end of a session raises the retro only
+  when none was written, so a retro the host saw written is not asked for twice; a record counted in the hour it is
+  resolved keeps every hour's counts closed when the hour closes. There is no scenario of its own for this decision:
+  it is a reporting format, the operator's view of it is each product's own (ADR-0188 §2), as DEC-0095's support
+  quality was; SCN-002 carries its `pnpm validate` path (the declaration-only hint on a bare declaration). Counting
+  the retro as an operation puts "asked" and "written" in the digest the host already writes, without a member the
+  closed shape lacks.
+- **Alternatives considered:** `<name>/<revision>` names (`ops-digest-hourly/1`, as DEC-0067 spells every protocol:
+  Fabric's files already say `@1`, and a rename would leave its written months unreadable for nothing negotiated);
+  `from` and `to` without the fraction only (Fabric writes `.000`, so its every line would fail); a `total` as one
+  number (ADR-0188 and Fabric give it per counter); open schemas, so a product may add members (a log line or a path
+  could ride in one, which OD-7 forbids; a member is added by a decision); retro counts as two new members of the
+  daily digest (the shape ADR-0188 names has none, and a closed `@1` cannot grow without a widening every reader must
+  take); a grammar of only `.` and `-` (Fabric's IPC operations are named `ipc.<channel>` with a `:`, as
+  `ipc.work:home`, and its MCP methods `mcp.<method>` with a `/`); a grammar without `/` with MCP methods renamed
+  (Fabric's written months would fail, and the home-folder detector closes what `/` opens); a daily digest of zero
+  hours for an empty day (a reader could not tell a day the product did not run from a day it ran and counted
+  nothing in no hour, which OD-1 makes impossible); a refused call for a missing slot counted `failed` (a person's
+  unfinished setup would read as an outage and make rises); a top-level descriptor member `opsDigests` for OD-9, as
+  Fabric proposed (the descriptor schema is closed, `additionalProperties: false`, so every reader pinned before would
+  refuse the descriptor; an extension key is what the closed schema keeps for this); an absolute `dir` (it would carry
+  the home folder, and a folder outside the product's data folder is not the product's to name).
+- **Compatibility:** additive: three new schemas, two new kinds, three new rule codes, one extension key and its
+  named-only protocol `fabric-ops-digest/0.1`; a descriptor without the key validates as before, and a host preserves
+  the key as it does any extension. The Fabric Agent Adapter enters `fabric-ops-digest/0.1` at its next re-pin in its
+  twin protocol registers (`fabric_protocols.py`, `fabric-protocols.mjs`), which its tests hold equal to the register
+  `vendor_vectors.mjs` writes into `feed-protocols-vectors.json` (the twins are kept by hand). Fabric's digests at
+  `e1eecec0` validate as written (its test's names, `x` and `y` included). The reference folds are
+  `src/ops-digest.ts`. ADR-0188 section 5's "retros written" is not a digest count here (RW-4): a view built on
+  Fabric's CO-502 ("the daily digest counts retros asked and written", `a6f0ffda`) reads `ok` as asks answered, which
+  the CT-219 handoff's answer on thread `f7758225` tells it. Each product's adoption is tracked in its own rows; the
+  CT-219 handoff's Consumers list records what was read at a date, and vendoring the vectors from the release tag is
+  each product's obligation. At their next re-pin, the consumers that vendor a protocol table (a deployment template's
+  `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the
+  adapter kit's copies in agents built on it, and any other vendored table) add `fabric-ops-digest/0.1`.
+  `schemas/device-common.schema.json`'s bytes change (its `detail` `$comment` only), so a consumer that vendors it
+  re-pins. A product that names an operation outside OD-2's grammar (another separator, an upper-case first letter) or
+  that FAC-SEM-167 refuses (a credential's shape, a home folder) renames it before it writes digests; lines already
+  written with such a name are skipped by every reader. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `schemas/ops-digest-hourly.schema.json`, `schemas/ops-digest-daily.schema.json`,
+  `src/ops-digest.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `tools/vectors/ops-digest.ts`,
+  `tools/vectors/run.ts`, `fixtures/vectors/ops-digest.json`, `fixtures/positive/ops-digest-*.json`,
+  `fixtures/negative/ops-digest-*.json` with their catalogue rows, `fixtures/semantic/ops-digest-*.json`, `src/activity-rules.ts` (its `hasHomePath`, read),
+  and for OD-9 `schemas/service-ops-digest-extension.schema.json`, `src/extensions.ts`, `src/protocol-revisions.ts`,
+  `fixtures/positive/service-descriptor-ops-digest.json`, `fixtures/positive/service-ops-digest-extension.json`,
+  `fixtures/negative/service-ops-digest-extension-*.json`, `fixtures/semantic/ops-digest-folders-*.json`,
+  `fixtures/semantic/ops-digest-hourly-op-users.json`, `docs/backlog.md`, `src/validate-cli.ts` (the declaration-only hint
+  on a bare declaration),
+  `test/consistency.test.ts`, `docs/specification/service.md`, `docs/specification/interop.md`,
+  `docs/specification/versioning.md`; and from review rounds 10 to 16 `docs/specification/activity.md` (the `HOME_PATH`
+  boundary and its scope), `src/activity-rules.ts` (the `HOME_PATH` docstring and scope comment), `src/proposal-rules.ts`
+  (its scope comment), `schemas/device-common.schema.json` (the `detail` `$comment`), `docs/ux/scenarios.md` (SCN-002)
+  and `docs/handoffs/README.md`;
+  `test/ops-digest.test.ts`, `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
+  `test/schema-compilation.test.ts`, `vitest.config.ts`; `docs/specification/ops-digest.md`, `conformance.md` (the
+  reference module, the producer, reader, declaring product, collector and host rows, the register), `docs/specification/README.md`,
+  `docs/DOCMAP.md`, `CONTEXT.md`; backlog CT-219; handoff `docs/handoffs/2026-11-04-ops-digest.md`. The first
+  consumers of OD-9 are announced as Fabric's CO-503 (collecting the daily lines) and Project Observatory's OBS-330
+  (recording them); how they do it is theirs.
+- **Not decided here:** which act of each host's claim vocabulary is "a release recorded as done" (RW-1); counting retros
+  written outside the host (Project Observatory's); the wire form in which a collector sends the descriptor's `id` and
+  `instance`; how a product without a local descriptor reaches a collector (outside this contract; a product's own
+  folder in its own local descriptor is an OD-9 declaration, a remote instance's folder fetched by a local app is not); the identity a relayed remote instance's lines are sent under, so that N relays are not N counts; a `dir` that NFC or
+  NFD grows past 256 code points (it passes `FAC-SEM-168`, DEC-0149's `inGrammar` refuses it); the other items on the
+  spec page's list.
+- **Source:** the operator's word of 2026-11-04, relayed by Fabric on board thread `f7758225` (message `516761e1`),
+  and the thread's answers on the draft (messages `1c191cf7`, the `/` in MCP method names, and `f74763e1`, the day with
+  no hour), decided by the coordinator; OD-9 is a change made in review on the same thread, where Fabric proposed a
+  top-level `opsDigests: [{dir, source}]` and the contract answered that the lawful place is `extensions`; round 1 of
+  the coordinator's blind readings at `ada7c23d` was not clean (the home-folder detector refusing `home`, `users` and
+  `Users` segments in operation names and dirs, and a credential sample that DEC-0151's narrowed detector no longer
+  reads as a key), and its batch, with the coordinator's decisions on the retro count, the catch-up, the trigger, the
+  identity and the order, is folded in; round 2 at `6bb6ce04` was not clean: the detector boundary (stated wrongly, now
+  stated exactly and pinned by a test) and the maturity claim (the spec README credited the products beyond what they
+  ship), and its batch, with the coordinator's decisions on the outcome map, the hours folded, the collector's caught-up
+  day, the identity and the products without a descriptor, the retro's end and hour, and why there is no scenario, is
+  folded in; round 3 at `be737b89` was not clean: product departures (the maturity claim and Compatibility omitted
+  some) and RW-4's undefined "moved on", and its batch, with the coordinator's decisions on the hour a product stops
+  in, `previous` read back, a declared `dir` holding only its instance's own digests, the 4096 bound and RW-4's `ok`
+  cases, is folded in; round 4 at `ddf5b684` was not clean: the Consumers list against product code (the products'
+  states were written as facts beyond their code), and its batch, with the coordinator's decisions on the sleep (an
+  hour written only when observed), the operation-shaped examples of OD-2, the protocol-table re-pin, the
+  declaration-only hint and the canonical caseless fold, is folded in; the Consumers list is now a dated reading of each
+  product's code; round 5 at `6eb61183` was not clean: the start order (a kept hour written before a day is folded),
+  RW-4's count (`ok` counts asks, not retros), product claims (removed from this decision and the spec, kept only as
+  the handoff's dated reading of each product's rows and folds) and `foldDay`'s rises (checked before they are
+  summed), and its batch is folded in; round 6 at `1ed18a61` was not clean: the day's ops bound (a day of more than
+  4096 operations has no daily digest; a product keeps 4095 names plus one overflow name a day), Observatory facts (no
+  claim about what Project Observatory counts or keys) and Fabric's rows (quoted from its carry-over ledger in the
+  handoff), and its batch is folded in; round 7 at `69b06d3f` was not clean: the producer row's bound (it read
+  "beyond 4096", now OD-3's 4095 names a day plus one overflow name) and `FAC-SEM-167`'s description (now the shared
+  detector's shapes as it applies them, the `sk-` shape inside `task-` and its kin included until DEC-0151 lands), and
+  its batch is folded in; round 7's unit and seam readings passed, with risks folded (the `foldHour` bound, the secret
+  echo: no finding or error copies a credential-shaped or home-folder value); round 8 at `b96e73d4` was not clean: the
+  reference folds against FAC-SEM-167 (they now refuse a name it refuses, so they never write a line every reader
+  skips), the `from` echo and the daily `hours` (hours folded, never uptime), and its batch is folded in, with OD-1's
+  rebuilt day of names, OD-3's published overflow name and "at most once in `risen`"; round 9 at `4b46cd05` was not
+  clean: the collision class leak (a duplicate dir named a value its class hides), `foldDay`'s grammar (it applied
+  FAC-SEM-167 but not OD-2's grammar) and Compatibility's present tense about Fabric, and its batch is folded in, with
+  OD-1's writers split by how they keep records (reverted in round 10) and the detector's shapes stated in words; round
+  10 at `281619f7` was not clean: the writer kinds half-applied (now one kind: every product writes an hourly line for
+  each hour it observed itself in, one that answers on request folding its stored records hour by hour) and the JWT
+  shape (now stated as `JWT_SHAPE` reads it, with `JWT_SHAPE`, `SECRET_VALUE` and `longSecret` the definition), and its
+  batch is folded in, with a `dir` read also with the code points HFS+ ignores removed; round 11 at `fcb1c55f` was not
+  clean: OD-9's remote descriptor sentence (the key outside a service descriptor is unread and unreported, on a remote
+  one a FAC-SEM-168 finding), and its batch is folded in, with the Why restated for one writer and the `bearer` shape
+  as the detector reads it; round 12 at `4e00da84` was not clean: a daily line promised for every day (now "each closed
+  UTC day that has hourly lines", since a day with none has no daily digest, OD-5), and its batch is folded in, with the
+  producer row's duties stated once, the `bearer` gloss's "other than a line break" and `HOME_PATH`'s boundary as the
+  operations digests page states it, and from its seam reading a `dir` segment that folds to nothing (`.`, U+200C, `.`
+  reads as `..` on HFS+) refused; round 13 at `db110586` was not clean: the segment rule's stated mechanism (a reader
+  measured on a scratch HFS+ volume that `.`, U+200C, `.` is created as its own folder and never resolves to `..`, so
+  that parenthesis of round 12 is withdrawn; the refusal stays, the safe direction, for the reason item 9 now gives) and
+  its four lists (the rule now named in each), and its batch is folded in; round 14 at `95823e35` was not clean: CT-220's
+  DEC-0150 clause at landing, the acceptance edit missing, copies of `HOME_PATH`'s users and control characters in the
+  duplicate message (a dir is now named only when it is printable ASCII), and its batch is folded in; round 15 at
+  `f1321b27` was not clean: the acceptance edit named a commit that does not exist yet, an operation's name echoed raw
+  in FAC-SEM-166's messages, and the home-folder check missing a dir whose segment ends in dots or spaces, and its batch
+  is folded in; round 16 at `6c54c1da` was not clean: the `inGrammar` recommendation without its docs (dropped; the
+  NFC/NFD length case is now under Not decided), the module's readings (a `dir` is now read four ways, every
+  default-ignorable code point removed in two of them) and the boundary owner (which landing rewrites the home-path
+  copies), and its batch is folded in; round 17 at `cc1fc853` was clean; round 18 at the same head was not clean: the
+  long-run alphabet (now letters, digits, `+`, `/`, `=`, `_` or `-`, as the detector reads it), the acceptance edit left
+  the handoff (it now rewrites it) and the knowledge base's plans row, and its batch, with what both rounds held (a
+  `dir` segment empty once its default-ignorable code points are dropped, the folds' worded errors, the long run's
+  reason and remedy, the help link written once), is folded in; round 19 at `dc6d0afc` was not clean: the Why still promised a daily
+  line for a day the product was down and claimed no change for the first producer (now scoped to the shape, with the
+  writing rules each product's to adopt), and its batch is folded in; round 20 at `5b2fc3ed` was not clean: the lone
+  surrogate missing from three lists of what FAC-SEM-168 checks, and the receipt fast-forward naming a weaker gate, and
+  its batch is folded in; round 21 at `7e8a9429` was not clean: the handoff's count of FAC-SEM-168's checks, and
+  the DEC-0151 landing line, which would have rewritten an Accepted body, and its batch is folded in; rounds 22 and 23 at `f5302e3f` were clean, and what they held (vectors, wording, comments and tests, no rule
+  changed) is in the landing commit;
+  Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
+  `src/ops-digest.ts`); backlog CT-219.
