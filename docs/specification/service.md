@@ -137,8 +137,9 @@ claims no port (`FAC-SEM-010`). Vectors: [`fixtures/vectors/app-descriptor.json`
   before writing, an installer MUST read every descriptor in the directory and refuse a port
   that another local `id.instance` already declares. Semantic rule `FAC-SEM-010` checks a
   directory; a remote origin claims no port here. The directory shows only this OS account's descriptors, while
-  loopback is one per host: on a host with more than one OS account the port is also chosen free on the host, recorded
-  and claimed as [Several OS accounts on one host](#several-os-accounts-on-one-host) says (HA-1, DEC-0154, proposed).
+  loopback is one per host: the port is also chosen free on the host, recorded and claimed as
+  [Several OS accounts on one host](#several-os-accounts-on-one-host) says (HA-1, DEC-0154, proposed), which keeps
+  two [counted OS accounts](#counted-os-accounts) from one port.
 - Paths MAY start with `~/`, and on Windows with `~\`, `C:\` or `C:/` (DEC-0032); a command's executable
   follows the same grammar (`FAC-SEM-012`). Commands MUST be argument arrays; a shell string is
   invalid, as for the local runner ([profiles](profiles.md)). No argument carries a credential
@@ -535,41 +536,63 @@ Loopback reachability is not authorization: any process running as the same user
 read the token file. This extension protects against a web page and against a mistake,
 not against a hostile process of the same user. Loopback is one per host, not one per OS account: a process of
 another OS account on the same host, and a guest a port forwarder relays onto loopback, reach every local service.
-The Host and Origin guard does not tell them apart, so a host with more than one OS account adds the checks of
-[Several OS accounts on one host](#several-os-accounts-on-one-host) (DEC-0154, proposed).
+The Host and Origin guard does not tell them apart, so a host with more than one
+[counted OS account](#counted-os-accounts) adds the checks of
+[Several OS accounts on one host](#several-os-accounts-on-one-host) (DEC-0154, proposed). Browsers do not isolate
+cookies by port ([RFC 6265](https://www.rfc-editor.org/rfc/rfc6265) section 8.5): a page served on `127.0.0.1` by
+another account's process, once the person's browser visits it, receives the cookies a dashboard set on
+`127.0.0.1`. That residue stays; its bound is the session's short lifetime and, where it ships, Fabric Dashboards'
+own window, which keeps the dashboard's session out of the person's browser.
 
 ## Several OS accounts on one host
 
-DEC-0154, proposed. A host is one computer; on it each OS account runs its own copy of a service, with its own services
-directory, tokens and descriptors, and every account (and every guest whose traffic a forwarder relays) reaches every
-port on `127.0.0.1`. On a host with one OS account a service MAY keep its historical default port and HA-2's check
-finds the account's own services; what is new there is that an installer writes its claim (HA-1) and a client checks
-the listener (HA-2). HA-3 binds only a host with more than one OS account.
+DEC-0154, proposed. A host is one computer; on it each counted OS account runs its own copy of a service, with its own
+services directory, tokens and descriptors, and every account (and every guest whose traffic a forwarder relays)
+reaches every port on `127.0.0.1`.
+
+<a id="counted-os-accounts"></a>
+
+**Counted OS accounts.** A counted OS account is an OS account a person or an organization signs in with, or runs
+Fabric or an agent service under. Root, SYSTEM and the system's service accounts are not counted: on macOS the accounts
+with a uid under 500 or a name starting with `_`; on Linux the accounts with a uid below `UID_MIN` of `/etc/login.defs`
+or a `nologin` shell; on Windows the built-in and service accounts. "A host with one OS account" and "a host with more
+than one OS account" in this section count only these. A listener one of the uncounted accounts owns is still
+`foreign-user` under HA-2. An installer and a door read the count at every start, never once at install, so an account
+added later is seen at the next start. A local service runs under the counted account whose services directory
+declares it.
+
+On a host with one counted account a service MAY keep its historical default port and HA-2's check finds the account's
+own services; what is new there is that an installer writes its claim (HA-1) and a client checks the listener (HA-2).
+HA-3 binds only a host with more than one counted account.
 
 <a id="ha-1"></a>
 
-**HA-1, a port recorded per OS account.** A local service's port is recorded per OS account: in the service's own
-state and in its descriptor's `origin`. The installer chooses it free on the host: no process listens on
+**HA-1, a port recorded per OS account.** A local service's port is recorded per counted OS account: in the service's
+own state and in its descriptor's `origin`. The installer chooses it free on the host: no process listens on
 `127.0.0.1:<port>`, no descriptor in this account's services directory declares it (`FAC-SEM-010`), and no port claim
 of another account names it. When it records a port it writes this account's **port claim**, and it removes the claim
 at uninstall:
 
 | | |
 |---|---|
-| File | `.passioncode-ports.<service-id>.<account>.json`, `<service-id>` the descriptor's `id`, `<account>` the OS account's numeric uid on macOS and Linux, its SID on Windows (a login name can be renamed, and is not what the owner check compares) |
+| File | `.passioncode-ports.<service-id>.<account>.json`, `<service-id>` the descriptor's `id`; an app without a descriptor: its reverse-DNS bundle identifier under its own domain, stable across versions; an app with separately recorded parts: that identifier plus `.<part>`, one claim per part (Fabric's hub and its local stack: `ai.passioncode.desktop.hub`, `ai.passioncode.desktop.stack`); `<account>` the OS account's numeric uid on macOS and Linux, its SID on Windows (a login name can be renamed, and is not what the owner check compares) |
 | Folder | the host's shared sticky folder: `/Users/Shared` (macOS), `/var/tmp` (Linux), `%ProgramData%\PassionCode\port-claims` (Windows) |
 | Owner | the account the file names |
-| Content | only `{schema, service, account, ports, updatedAt}`: `schema` `passioncode-port-claim/1`, `service` the `id`, `account` the same uid (a string of digits) or SID, `ports` every port this account's instances of the service hold, `updatedAt` an RFC 3339 UTC time |
+| Content | only `{schema, service, account, ports, updatedAt}`: `schema` `passioncode-port-claim/1`, `service` the `id`, `account` the same uid (a string of digits) or SID, `ports` every port this account's instances of the service (or the app's part) record, in one claim, `updatedAt` an RFC 3339 UTC time |
 
 ```json
-{"schema": "passioncode-port-claim/1", "service": "example-agent", "account": "502", "ports": [47320], "updatedAt": "2026-11-06T09:00:00Z"}
+{"schema": "passioncode-port-claim/1", "service": "example-agent", "account": "504", "ports": [48210], "updatedAt": "2026-11-06T09:00:00Z"}
 ```
 
-- A reader ignores a claim whose file owner (its owner uid; on Windows its owner SID) is not the `account` it names, and a claim of an account no longer on the
-  host.
+- A reader ignores a claim whose file owner (its owner uid; on Windows its owner SID) is not the `account` it names,
+  and a claim of an account no longer on the host.
 - **A claim grants nothing.** It only keeps two installers from choosing one port; who may receive a credential is
   HA-2's check, never a claim.
-- A host with one OS account MAY keep a service's historical default port.
+- An installer, or a node that installed the service, writes a missing claim at the service's next start, so a host
+  installed before this decision catches up without a reinstall.
+- An ephemeral port that the listener protects with a proof (a fresh challenge answered with an HMAC, as below) needs
+  no claim: nothing records it, and a client finds it only through the record the service writes.
+- A host with one counted account MAY keep a service's historical default port.
 - A client takes a service's port only from its descriptor or the service's own record, never from a formula. A
   formula over the account's uid (Fabric's hub, CO-505) is an allowed default only when the port it gives is recorded,
   claimed and checked free as above.
@@ -581,17 +604,19 @@ at uninstall:
 token), and before a host reports a local service healthy, it MUST establish that the server end of its connection
 belongs to a process of its own OS account, from the system's socket table (below), or by the listener proving, before
 any credential travels, that it holds a secret only this OS account can read (a fresh challenge answered with an HMAC
-under a key in an owner-only file, as Switchboard's control channel does):
+under a key in an owner-only file; Switchboard reported on thread `1fe66e6e` that its control channel does so):
 
 - No listener on the port is `down`, as before.
 - A listener of another OS account, or one whose owner cannot be told, is **`foreign-user`**: the client sends no
-  credential, and nothing the listener answers is read as the service's.
+  credential, and nothing the listener answers is read as the service's. A listener owned by root, SYSTEM or a service
+  account (a rootful container proxy, a launch daemon, a task run as SYSTEM) is another account's, so it reads
+  `foreign-user` on a host with one counted account too.
 - The order of a local service's states: `down`, then `foreign-user`, then `foreign` (`FAC-SEM-009`), then the
   well-known `status`. `foreign-user` is decided before the well-known document is read and wins over any answer,
   `ready` included. A host's own further states (a second copy shown as `duplicate`, under [One copy](#one-copy)) come
   after these.
 - A reader that meets a state it does not know treats it as not ready: it sends nothing and shows the service as not
-  serving.
+  serving. A watcher counts `foreign-user` as unavailable, as it counts `down`: the service serves nothing.
 
 How the owner is told, per system (the client looks at the server end of its own connection: local address
 `127.0.0.1:<port>`, remote address its own ephemeral port; where a source lists only listeners, the listener on the
@@ -605,32 +630,41 @@ port):
 
 The well-known `process.pid` is never proof: any listener can name any pid.
 
-- **The server's side.** A local service SHOULD refuse a connection from a peer of another OS account before it reads
-  the request, telling the peer's owner by the same sources applied to the client end of the connection. It MUST when
-  its clients are other vendors' programs that cannot run the client's check (a local proxy that coding agents call,
-  as Switchboard's).
+- **Who checks when the client cannot.** A client the contract does not reach (a browser, a coding agent, another
+  vendor's program) cannot run this check, so it is carried by the side that hands the credential over or receives it:
+  - the host checks the listener before it mints a login code for a person's browser ([Operator login](#operator-login))
+    and before it writes an `mcp.json` or hands a session bearer to a coding agent
+    ([session handoff](session-handoff.md) SH-9);
+  - on a host with more than one counted account, a local surface whose credential arrives from such a client MUST
+    refuse a connection from a peer of another OS account before it reads the request, telling the peer's owner by the
+    same sources applied to the client end of the connection: a dashboard a browser reaches, an MCP surface a coding
+    agent reaches, a proxy that coding agents call. Every other local service SHOULD.
 - **Rotation.** A service that finds its recorded port held and comes up on another SHOULD rotate the secrets it
   issued to clients that reach it by port, since a client that could not check may have sent them to the holder
-  (Switchboard's SB-269).
+  (Switchboard's row SB-269).
 - **A loopback redirect with PKCE is not a credential here.** An authorization code bound to a PKCE `S256` challenge
-  and sent to a loopback redirect (RFC 8252) is useless without the verifier; the app that holds the listener and the
-  verifier carries this check, not the browser that follows the redirect.
+  and sent to a loopback redirect ([RFC 8252](https://www.rfc-editor.org/rfc/rfc8252)) is useless without the
+  verifier; the app that holds the listener and the verifier carries this check, not the browser that follows the
+  redirect.
 
-The three state-precedence cases Fabric Dashboards pins at its commit `53a62f9` (`test-vectors/state-precedence.json`,
-FD-158) are: a listener of another OS account that answers `ready` with the descriptor's identity is `foreign-user`;
-a listener of another OS account that answers another identity is `foreign-user`, not `foreign`; a listener of this
-account that answers another identity is `foreign`. The contract's own vector file for them is CT-229.
+As Fabric Dashboards reported on thread `1fe66e6e` (message `262523cc`), its commit `53a62f9` pins three
+state-precedence cases (`test-vectors/state-precedence.json`, FD-158): a listener of another OS account that answers
+`ready` with the descriptor's identity is `foreign-user`; a listener of another OS account that answers another
+identity is `foreign-user`, not `foreign`; a listener of this account that answers another identity is `foreign`. The
+contract's own vector file for them is CT-229.
 
 <a id="ha-3"></a>
 
-**HA-3, no token-free loopback door on a host with several accounts.** On a host with more than one OS account, a
-door that admits a caller on loopback without a token is not a T0 door ([delegation](delegation.md#trust-tiers) DL-25)
-unless it checks the peer's OS account as HA-2's server side does; Project Observatory's local channel, which checks
-the peer's uid on its socket ([local channel](local-channel.md#transport-and-who-may-connect), DEC-0075), is the existing
-example. A port forwarder of a virtual machine or a container (a Lima or Colima host agent, a user-mode gateway, an
-SSH tunnel) is a relay onto loopback: its callers are T2. A forwarder runs as the OS account that owns the guest, so
-the uid check does not catch that account's own guests; a host whose guests reach its loopback either closes that path
-or admits no token-free caller on TCP.
+**HA-3, no token-free loopback door on a host with several accounts.** On a host with more than one counted OS
+account, a door that admits a caller on loopback without a token is not a T0 door
+([delegation](delegation.md#trust-tiers) DL-25) unless it checks the peer's OS account as HA-2's server side does.
+Project Observatory's local channel is the same check on another transport: it checks the peer's uid on its socket or
+named pipe ([local channel](local-channel.md#transport-and-who-may-connect), DEC-0075). A port forwarder of a virtual
+machine or a container (a Lima or Colima host agent, a user-mode gateway, an SSH tunnel) is a relay onto loopback: its
+callers are T2. A forwarder runs as the OS account that owns the guest, so the uid check does not catch that account's
+own guests; a host whose guests reach its loopback either closes that path or admits no token-free caller on TCP.
+**An accepted gap:** on a host with one counted account, a token-free door still admits that account's own guests
+through a forwarder, since no uid check can tell them apart; CT-238 records it.
 
 The host label (HA-4) is in [devices](devices.md#the-host-label).
 
@@ -644,7 +678,7 @@ at the same paths. Only reachability, supervision and the trust anchor change (D
 | | Local placement | Remote placement |
 |---|---|---|
 | `origin` | `http://127.0.0.1:<port>` | `https://<dns-name>[:<port>]` |
-| Trust anchor | loopback and the Host/Origin guard; the listener's owner where several OS accounts share the host ([HA-2](#ha-2)) | the origin's TLS certificate and the service token |
+| Trust anchor | loopback and the Host/Origin guard; the listener's owner ([HA-2](#ha-2)) | the origin's TLS certificate and the service token |
 | Supervisor | launchd (macOS), systemd (Linux), Task Scheduler (Windows), Project Observatory's node (any system), or `lifecycle.manager: "none"` | its platform; `lifecycle.manager: "none"` |
 | Well-known document | unauthenticated, under 100 ms | the token is required |
 | Port claim (`FAC-SEM-010`) | yes | no; `id.instance` stays unique |
@@ -789,12 +823,12 @@ These rules are a local placement's; a remote one is supervised by its platform 
 |---|---|
 | One copy | Before any side effect (binding its port, resuming jobs, starting a scheduler, migrating a store), a service MUST take an exclusive lock on `service.lock` in its data directory. A copy that does not hold the lock MUST NOT perform a side effect; when it does not get the lock it prints one sentence naming the holder's pid and exits with status 75. A copy its supervisor started, and marked so, MAY wait for the lock first, at most 300 s ([One copy](#one-copy), DEC-0057). Binding a port is not a lock. |
 | Supervisor | One per operating system (DEC-0032), named by `lifecycle.manager`; the file a writer writes for it carries the supervisor marker ([One copy](#one-copy), DEC-0057). **macOS — `launchd`** (`label`, `plist`): `RunAtLoad` true, `KeepAlive` true, `ThrottleInterval` 10, `ExitTimeOut` above the drain time; the marker `FABRIC_SERVICE_SUPERVISOR=launchd` in `EnvironmentVariables`. **Linux — `systemd`** (`unit`): a user unit under `~/.config/systemd/user/`, run with `systemctl --user`, `Restart=always`, `RestartSec=10`, `TimeoutStopSec` above the drain time, `WantedBy=default.target`; the marker `Environment=FABRIC_SERVICE_SUPERVISOR=systemd`. **Windows — `task-scheduler`** (`task`, a full task path such as `\PassionCode\example-agent.default`): a per-user Scheduled Task created without administrator rights, a logon trigger, restart on failure every minute, no execution time limit, run only when the user is logged on, `MultipleInstancesPolicy` `IgnoreNew` (recommended); the marker `--fabric-supervisor task-scheduler` in the action's `Arguments`, because a task's action carries no environment. **Any system — `node`**: Project Observatory's node (`node.lifecycle`) supervises the services it starts as its children and honours the same wait and exit; the marker `FABRIC_SERVICE_SUPERVISOR=node` or `--fabric-supervisor node`, which the node sets when it starts a child. The descriptor names it `lifecycle.manager: "node"` and nothing else: the node keeps its children in its own record, so there is no supervisor file and no `label`, `plist`, `unit` or `task` (DEC-0061). The node restarts a child that exits, no sooner than 10 s after the child's last start, as `ThrottleInterval` and `RestartSec` do. **No supervisor — `person`**: an app a person installs and starts ([an app's descriptor](#an-apps-descriptor), DEC-0069); no supervisor file and no marker. A descriptor names one supervisor: `label` and `plist` are refused beside `systemd`, `task-scheduler`, `node` and `person`, `unit` and `task` beside any other manager (DEC-0032, DEC-0057, DEC-0061, DEC-0069). No supervisor file carries a secret. |
-| Install | Write the supervisor file and the descriptor, start the service through its supervisor, then poll the well-known document until `service.id` matches, for at most 40 seconds. launchd: write the plist, `bootout` and wait until the job is unloaded, `bootstrap` (retrying the transient I/O error). systemd: write the unit, `systemctl --user daemon-reload`, `enable --now`. Task Scheduler: register the per-user task with the Supervisor row's settings, then run it. Node: the node installs the package (v4 §6 Path 2: the publisher signature against the pinned key, the digest, no network at install), writes the descriptor with `lifecycle.manager: "node"`, starts the service as its child with the marker and polls as above (DEC-0061). |
+| Install | For a local placement, first choose and claim the port as [HA-1](#ha-1) says (DEC-0154, proposed). Write the supervisor file and the descriptor, start the service through its supervisor, then poll, for at most 40 seconds, until the listener on the port is this OS account's ([HA-2](#ha-2)) and the well-known document's `service.id` matches; a listener of another account is `foreign-user`, never a successful install. launchd: write the plist, `bootout` and wait until the job is unloaded, `bootstrap` (retrying the transient I/O error). systemd: write the unit, `systemctl --user daemon-reload`, `enable --now`. Task Scheduler: register the per-user task with the Supervisor row's settings, then run it. Node: the node installs the package (v4 §6 Path 2: the publisher signature against the pinned key, the digest, no network at install), writes the descriptor with `lifecycle.manager: "node"`, starts the service as its child with the marker and polls as above (DEC-0061). |
 | Stop | `SIGTERM` drains in-flight work and exits; interrupted work resumes on the next start. |
 | Off | A host stops a service so that it stays off across logins, and starts it so that it comes back after one: launchd `bootout` then `disable`, start `enable` then `bootstrap`; systemd `systemctl --user disable --now`, start `enable --now`, restart `restart`; Task Scheduler end then disable the task, start enable then run it, restart end then run. Node: a host asks the node to start (`node.lifecycle.ensure_running`), to stop so that the service stays off until it is started again, and to restart (DEC-0061). A host reads state from the supervisor (`launchctl print`, `systemctl --user show -p ActiveState,SubState,MainPID,UnitFileState`, the task's state and last run; from the node, whether the child is kept on, whether it runs and its pid, which a host compares with the well-known `process.pid` as it compares systemd's `MainPID`). A host MUST NOT start a service process itself, and MUST NOT stop or signal a node's child or write a supervisor file for it. The node's operations' names and schemas are Project Observatory's (its row OBS-79); this row fixes what each does. |
 | Code | Code runs from an immutable release directory. An upgrade writes the new release, rewrites the supervisor file (plist, unit or task) to run it, and restarts the service through its supervisor: launchd reinstalls as the Install row does (`bootout`, wait, `bootstrap`); systemd `systemctl --user daemon-reload`, then `restart`; Task Scheduler re-registers the task, then ends and runs it; the node points its record of the child at the new release and restarts the child. |
 | State | Data and configuration, logs and cache live in the service's own directories for its system ([below](#directories-per-system)) — never inside the service's own code checkout or a release directory. A repository that exists to version the data itself (a registry, a plan) is a store, not code, and is allowed; the descriptor's `source.repository` tells the two apart. Writes are atomic; logs rotate. |
-| Uninstall | A service that keeps settings backups takes the final one first ([below](#settings-backup)). Then remove its supervision: launchd `bootout` (waiting until the job is gone) and delete the plist; systemd `systemctl --user disable --now`, delete the unit, `daemon-reload`; Task Scheduler end and delete the task; the node stops the child and removes it from its record, so it never starts again. Then delete the descriptor. Data stays unless the operator asks to purge it. |
+| Uninstall | A service that keeps settings backups takes the final one first ([below](#settings-backup)). Then remove its supervision: launchd `bootout` (waiting until the job is gone) and delete the plist; systemd `systemctl --user disable --now`, delete the unit, `daemon-reload`; Task Scheduler end and delete the task; the node stops the child and removes it from its record, so it never starts again. Then delete the descriptor, and then this account's port claim (HA-1, DEC-0154, proposed). Data stays unless the operator asks to purge it. |
 | Settings | A service whose store holds operator decisions SHOULD keep settings backups outside its data directory ([Settings backup](#settings-backup), DEC-0025). |
 
 ### Directories per system

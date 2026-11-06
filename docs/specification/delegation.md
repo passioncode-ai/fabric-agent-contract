@@ -2,7 +2,7 @@
 
 DEC-0039, DEC-0041, DEC-0043, DEC-0045, DEC-0055, DEC-0060, DEC-0066, DEC-0082, DEC-0084, DEC-0090 ([the partner
 channel](partner-channel.md)), DEC-0099, DEC-0104, DEC-0106, DEC-0107, DEC-0111, DEC-0121, DEC-0125, DEC-0126, DEC-0128, DEC-0130,
-DEC-0132, DEC-0136, DEC-0137, DEC-0141 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
+DEC-0132, DEC-0136, DEC-0137, DEC-0141, DEC-0154 (proposed) · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
 · schemas [`delegation-token`](../../schemas/delegation-token.schema.json),
 [`delegation-jwks`](../../schemas/delegation-jwks.schema.json), [`approval`](../../schemas/approval.schema.json),
 [`delegation-refusal`](../../schemas/delegation-refusal.schema.json),
@@ -467,7 +467,7 @@ Proof starts at the machine boundary (DEC-0045; Fabric ADR-0144
 
 | Tier | Who | Placed by |
 |---|---|---|
-| **T0** | the operator's own machine: a caller on loopback, running under the owner's OS account | the local placement's floor ([service](service.md#authentication-and-network)), which this profile does not change; on a host with more than one OS account, a token-free loopback door places a caller in T0 only when it checks the peer's OS account ([service](service.md#ha-3) HA-3, DEC-0154, proposed) |
+| **T0** | the operator's own machine: a caller on loopback, running under the owner's OS account | the local placement's floor ([service](service.md#authentication-and-network)), which this profile does not change; on a host with more than one [counted OS account](service.md#counted-os-accounts), a token-free loopback door places a caller in T0 only when it checks the peer's OS account ([service](service.md#ha-3) HA-3, DEC-0154, proposed) |
 | **T1** | an enrolled machine of the same owner | its enrolment in the owner's estate (the estate record, DEC-0084); over the relay, `relayCallerTier` from the estate record the callee's node applied ([machine calls](machine-calls.md#the-t1-binding-over-the-relay), DEC-0106) |
 | **T2** | everything else: another person's machine (a share grant, `principalKind: external`), and any caller the callee cannot place in T0 or T1 (over the estate's relay a sender that is not T1 is T2 and its call is refused, and a sender `relayCallerTier` reads `unknown-state` is a denial rather than T2, DL-28, [machine calls](machine-calls.md#the-t1-binding-over-the-relay), DEC-0106) | the default: no placement |
 
@@ -475,7 +475,8 @@ A caller's tier is its origin's, not its connection's. A call relayed onto loopb
 a tunnel, a reverse proxy, or the hub forwarding (DL-10) a T2 caller's call — is T2 unless the relay proves the
 origin's tier, and the hub always attaches the delegation token of a T2 origin to what it forwards. A port forwarder
 of a virtual machine or a container is such a relay; it runs as the OS account that owns the guest, so a peer check
-alone does not catch that account's own guests (HA-3, DEC-0154, proposed).
+alone does not catch that account's own guests (HA-3, DEC-0154, proposed). That is an accepted gap: on a host with one
+counted account a token-free door still admits the account's own guests through a forwarder (CT-238).
 
 **DL-26 — Inside the boundary the operator's instruction is the authority.** A callee MUST NOT require a
 delegation token, an `approval/1` or a grant record from a T0 or T1 caller, and no local call waits on the hub.

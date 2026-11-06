@@ -6,27 +6,26 @@ compare it with the contract, and write a spec per gap.
 
 Sources, each at a commit:
 
-- The plan: fabric-workspace `docs/plans/2026-11-04-studio-spaces/` (`README.md`, `access.md`, `placement.md`,
-  `runbook.md`) at `12125977`, with `knowledge/plans.md`, `knowledge/integration.md` and `knowledge/rules.md` at the
-  same commit. Cited as `WS:<file>:<line>`.
+- The organization's plan for a shared host, in the workspace repository at commit `12125977` (its README, access,
+  placement and runbook pages), with the knowledge base's plans, integration and rules pages at the same commit. Cited
+  as `plan:<page>:<line>`.
 - Fabric's hub port per account (its CO-505): fabric commit `9500ed25`, `apps/desktop/src/main/hub.ts:36-77`
   (`userHubPort`, `hubPort`, `checkPortUnclaimed`).
 - This contract at `1016f0ec`, cited as `<path>:<line>`.
 
-The host has three OS accounts, named here by role and uid as the plan measured them (`WS:README.md:28`): an
-administrator's account (uid 501, holding no keys), the operator's own account (uid 502) and an account an
-organization owns whole (uid 503), with virtual machines under them.
+The host has three OS accounts, named here by role (`plan:README.md:28`): an administrator's account, holding no
+keys; the operator's own account; and an account an organization owns whole, with virtual machines under them.
 
 ## What the plan expects of the contract
 
-The plan names no contract row in its owner table (`WS:README.md:169-176`). Its expectations reach the contract
+The plan names no contract row in its owner table (`plan:README.md:169-176`). Its expectations reach the contract
 through the products: Fabric, Fabric Dashboards and Switchboard run under each OS account with a port per account
-(`WS:README.md:122-128`, CO-505); loopback is one per host, not one per account, so every account reaches every
-service the others listen with on `127.0.0.1` (`WS:access.md:17-19`); Fabric tokens carry what must cross between
-accounts (`WS:README.md:87-89`); the organization's account is a machine of that organization, the operator's own
-account never is (`WS:README.md:56-58`, `:81-85`); a virtual machine is a machine like any other (`WS:plans.md:21-31`);
-services run in each account's container runtime (`WS:README.md:85`); and the contract's full gate runs on the
-operator's account of that host (`WS:placement.md:16`). The contract's local placement assumed one OS account per
+(`plan:README.md:122-128`, CO-505); loopback is one per host, not one per account, so every account reaches every
+service the others listen with on `127.0.0.1` (`plan:access.md:17-19`); Fabric tokens carry what must cross between
+accounts (`plan:README.md:87-89`); the organization's account is a machine of that organization, the operator's own
+account never is (`plan:README.md:56-58`, `:81-85`); a virtual machine is a machine like any other (`plan:plans.md:21-31`);
+services run in each account's container runtime (`plan:README.md:85`); and the contract's full gate runs on the
+operator's account of that host (`plan:placement.md:16`). The contract's local placement assumed one OS account per
 loopback; that assumption is the root of G1 to G3.
 
 | # | Gap | Priority | Where it goes |
@@ -45,10 +44,10 @@ loopback; that assumption is the root of G1 to G3.
 
 ## G1. Ports when several OS accounts share one loopback
 
-- **The plan.** Each account runs its own Fabric, Fabric Dashboards and Switchboard (`WS:README.md:122-128`); the
-  hub's port per account is CO-505's `47070 + (uid - 501)` on macOS (`WS:README.md:124-127`, `WS:runbook.md:31`); the
-  same agents run as copies in two accounts (`WS:placement.md:40`).
-- **Fabric.** `hub.ts:66-77`: from uid 501 on macOS and 1000 on Linux, at most 100 accounts, Windows and an unknown uid
+- **The plan.** Each account runs its own Fabric, Fabric Dashboards and Switchboard (`plan:README.md:122-128`); the
+  hub's port per account is CO-505's formula over the account's uid (`plan:README.md:124-127`, `plan:runbook.md:31`); the
+  same agents run as copies in two accounts (`plan:placement.md:40`).
+- **Fabric.** `hub.ts:66-77`: an offset from the first ordinary uid on macOS and on Linux, at most 100 accounts, Windows and an unknown uid
   keep 47070; `FABRIC_HUB_PORT` overrides; Fabric refuses a hub port a registered agent claims, but reads only its own
   account's descriptors.
 - **The contract before DEC-0154.** A local origin is `http://127.0.0.1:<port>` and a port is a claim: an installer
@@ -72,7 +71,7 @@ loopback; that assumption is the root of G1 to G3.
 
 ## G2. The listener's owner, before a token
 
-- **The plan.** Any account reaches every service another listens with on `127.0.0.1` (`WS:access.md:17-19`).
+- **The plan.** Any account reaches every service another listens with on `127.0.0.1` (`plan:access.md:17-19`).
 - **The contract before DEC-0154.** A host compares the well-known identity with the descriptor's and refuses a
   `foreign` answer (`service.md:207-209`, `FAC-SEM-009`); the trust anchor is loopback and the Host and Origin guard
   (`service.md:540`); the threat model names only the same user (`service.md:526-528`). The local channel checks the
@@ -93,8 +92,8 @@ loopback; that assumption is the root of G1 to G3.
 
 ## G3. T0 over TCP loopback
 
-- **The plan.** Accounts are separated, Fabric tokens carry what crosses (`WS:README.md:87-89`); a guest of a virtual
-  machine reaches the host's loopback through its gateway unless a packet filter closes it (`WS:access.md:27`,
+- **The plan.** Accounts are separated, Fabric tokens carry what crosses (`plan:README.md:87-89`); a guest of a virtual
+  machine reaches the host's loopback through its gateway unless a packet filter closes it (`plan:access.md:27`,
   `:44-52`).
 - **The contract before DEC-0154.** T0 is a caller on loopback under the owner's OS account (`delegation.md:470`); a
   callee requires no token from it (DL-26); a loopback caller of another account is T2 (`delegation.md:526`), but the
@@ -119,12 +118,12 @@ loopback; that assumption is the root of G1 to G3.
 ## G5. A device is an OS account or a virtual machine (CT-231)
 
 - **The plan.** The host joins the organization only through the organization's account and the virtual machines
-  under it (`WS:README.md:56-58`); a virtual machine is a machine like any other (`WS:plans.md:21-22`); one node
-  identity per machine (`WS:integration.md:115`).
+  under it (`plan:README.md:56-58`); a virtual machine is a machine like any other (`plan:plans.md:21-22`); one node
+  identity per machine (`plan:integration.md:115`).
 - **The contract.** A device is a computer (`devices.md:14`); a machine is a device enrolled in the estate
   (`estate-record.md:86`); an agent runs on one machine once per context (`contexts.md:68-80`, `FAC-SEM-074`).
-- **Decided in principle (DEC-0154 HA-4).** Each OS account and each virtual machine is its own device; the host label
-  is the only value that tells one organization two of its devices share a host.
+- **Decided in principle (DEC-0154 HA-4).** Each counted OS account and each virtual machine is its own device; the
+  host label is the only value the contract defines for telling one organization that two of its devices share a host.
 - **Needed.** The estate's definitions, `FAC-SEM-074` per node, whether a virtual machine records its host beyond the
   label (default: not), a node-summary fixture of a second account that carries nothing of the first.
 
@@ -140,7 +139,7 @@ loopback; that assumption is the root of G1 to G3.
 ## G7. A restore carries no node identity (CT-233)
 
 - **The plan.** The operator's account is restored from another computer's machine pack as a new machine with its own
-  device id (`WS:runbook.md:12`, `:26-27`).
+  device id (`plan:runbook.md:12`, `:26-27`).
 - **The contract.** Adding a machine and replacing a key are ceremonies (`ceremonies.md:105`, `:268-273`); a file-held
   device key is exportable (`devices.md:66-67`); nothing forbids a restore from carrying a node's id, keys, epochs,
   counters or enrollments to another computer, so a restored copy could renew by the key on record while the original
@@ -151,7 +150,7 @@ loopback; that assumption is the root of G1 to G3.
 
 ## G8. Services of an account with no open session (CT-234)
 
-- **The plan.** The working accounts have no graphical session (`WS:README.md:34`) on an always-on host.
+- **The plan.** The working accounts have no graphical session (`plan:README.md:34`) on an always-on host.
 - **The contract.** launchd with `RunAtLoad` and `KeepAlive`, systemd user units, the Task Scheduler running only when
   the user is logged on (`service.md:684`); no launchd domain, no lingering, no rule for an account not logged in.
 - **Needed.** The domain (`gui/<uid>` where a person logs in; otherwise a domain or daemon that runs without a login,
@@ -168,7 +167,7 @@ loopback; that assumption is the root of G1 to G3.
 ## G10. One host per singleton (CT-236)
 
 - **The plan.** Every singleton (a bot polling a token, a scheduler, a publisher, a gateway) has exactly one host
-  (`WS:placement.md:3-5`, `:33`); a cutover moves one agent at a time (`WS:runbook.md:61`).
+  (`plan:placement.md:3-5`, `:33`); a cutover moves one agent at a time (`plan:runbook.md:61`).
 - **The contract.** `service.lock` gives one copy per computer (`service.md:683`); a placement is once per machine and
   context (`FAC-SEM-074`); nothing limits an agent to one machine of the estate.
 - **Needed.** Project Observatory's placement record `observatory-placement/1` as a readable norm for singletons, in a
@@ -177,12 +176,20 @@ loopback; that assumption is the root of G1 to G3.
 ## G11. The contract's own gate on a shared host (CT-237)
 
 - **The contract.** `pnpm check` runs typecheck, test, the UX lint, the docs check and the privacy check; the privacy
-  check runs only where the denylist exists and otherwise skips and passes (`src/privacy-check.ts:21`,
+  check runs only where the denylist exists and otherwise skips and passes (`src/privacy-check.ts:21-25`,
   `src/privacy-plan.ts:32`); leases and ids are refs on `origin`, while the run journal on the `fs` plane stays on the
   machine that wrote it.
 - **Needed.** The gate names the host that ran it and fails rather than skips on an operator's machine without the
   denylist; the prerequisites (pnpm, python3, the org-index sibling, the denylist restored, `gh` signed in) and the
   journal per machine are written in `AGENTS.md`.
+
+## Filed from the readings of DEC-0154
+
+- CT-238: on a host with one counted account, a token-free door still admits that account's own guests through a
+  forwarder (an accepted gap of HA-3).
+- CT-239: the device-policy member that turns the host label on; until it lands a node sends none.
+- CT-240: every positive and negative fixture named by exactly one catalogue row (a gap older than DEC-0154).
+- CT-241: the organization's "these devices share a host" display and its scenario.
 
 ## Already covered
 

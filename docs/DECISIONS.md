@@ -9731,102 +9731,145 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0154: several OS accounts on one host: recorded ports, the listener's owner, no token-free loopback door, the host label
 
 - **Date:** 2026-11-06
-- **Status:** Proposed 2026-11-06, a draft for the coordinator's blind readings (unit, seam, product). A reference
-  module and vectors, one optional schema member, a new host state and new obligations for installers, clients, local
-  services, token-free loopback doors and nodes; no rule code. Backlog CT-228.
+- **Status:** Proposed 2026-11-06, a draft for the coordinator's blind readings (unit, seam, product). Round 1 at
+  `25ba36f7` was not clean: the unit reading passed, the product reading found seven breaks and the seam reading one;
+  their batch is folded in (Source). A reference module and vectors, one optional schema member, a new host state and
+  new obligations for installers, hosts, clients, local services, token-free loopback doors, nodes and an
+  administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
-  the organization's plan for a shared Mac host on which several OS accounts work side by side (fabric-workspace
-  `docs/plans/2026-11-04-studio-spaces/` at `12125977`): an administrator's account, the operator's own account and an
-  account an organization owns whole, each running its own Fabric, Fabric Dashboards and Switchboard, and virtual
-  machines under them. The contract's local placement assumed one OS account per loopback: the services directory is
-  under the account's home and shows only that account's port claims ([service](specification/service.md#descriptor),
-  `FAC-SEM-010`), the identity check of the well-known document stops a mistake but not another account holding the
-  port (`FAC-SEM-009`), and T0 is "a caller on loopback, running under the owner's OS account" with no means to tell
-  accounts apart on TCP ([delegation](specification/delegation.md#trust-tiers) DL-25). Loopback is one per host, so any
-  account, and any guest a forwarder relays, reaches every port. The gaps are G1 to G11 of the spec
-  [`2026-11-06-studio-spaces-gaps.md`](evidence/specs/2026-11-06-studio-spaces-gaps.md); this decision takes G1 to G3
-  and the host label the board agreed, and files the rest. Fabric's hub already chooses a port per account by a uid
-  formula (its CO-505).
+  the organization's plan for a shared host on which several OS accounts work side by side: an administrator's
+  account, the operator's own account and an account an organization owns whole, each running its own Fabric, Fabric
+  Dashboards and Switchboard, and virtual machines under them. The contract's local placement assumed one OS account
+  per loopback: the services directory is under the account's home and shows only that account's port claims
+  ([service](specification/service.md#descriptor), `FAC-SEM-010`), the identity check of the well-known document stops
+  a mistake but not another account holding the port (`FAC-SEM-009`), and T0 is "a caller on loopback, running under
+  the owner's OS account" with no means to tell accounts apart on TCP ([delegation](specification/delegation.md#trust-tiers)
+  DL-25). Loopback is one per host, so any account, and any guest a forwarder relays, reaches every port. The gaps are
+  G1 to G11 of the spec [`2026-11-06-studio-spaces-gaps.md`](evidence/specs/2026-11-06-studio-spaces-gaps.md); this
+  decision takes G1 to G3 and the host label the board agreed, and files the rest. Fabric's hub already chooses a port
+  per account by a uid formula (its CO-505).
 - **Decision:** [Several OS accounts on one host](specification/service.md#several-os-accounts-on-one-host) and
   [the host label](specification/devices.md#the-host-label):
-  1. **A port recorded per OS account (HA-1, G1).** A local service's port is recorded per OS account, in the
+  0. **Counted OS accounts.** A counted OS account is one a person or an organization signs in with, or runs Fabric or
+     an agent service under. Root, SYSTEM and the system's service accounts are not counted (macOS: a uid under 500
+     or a name starting with `_`; Linux: a uid below `UID_MIN` of `/etc/login.defs` or a `nologin` shell; Windows: the
+     built-in and service accounts), but a listener one of them owns is still `foreign-user` (item 2). "A host with
+     one OS account" and "a host with more than one" count only these, and an installer and a door read the count at
+     every start, never once at install. A local service runs under the counted account whose services directory
+     declares it.
+  1. **A port recorded per OS account (HA-1, G1).** A local service's port is recorded per counted OS account, in the
      service's own state and in its descriptor's `origin`. The installer chooses it free on the host: no process
      listens on it, no descriptor of this account declares it, and no other account's claim names it. It writes this
-     account's claim `.passioncode-ports.<service-id>.<account>.json` (`<account>` the numeric uid on macOS and
-     Linux, the SID on Windows, never the login name, which can be renamed) in the host's shared sticky folder
-     (`/Users/Shared` on macOS, `/var/tmp` on Linux, `%ProgramData%\PassionCode\port-claims` on Windows), owned by that
-     account and holding only `{schema, service, account, ports, updatedAt}` (`schema` `passioncode-port-claim/1`), and
-     removes it at uninstall. A claim whose file owner (uid, or SID on Windows) is not the `account` it names, or of an
-     account no longer on the host, is ignored. A claim grants nothing: it keeps two installers from one port, and who may receive a credential is
-     item 2's. A host with one OS account MAY keep a service's historical default port. A client takes the port only
-     from the descriptor or the service's record; a formula over the uid (Fabric's hub, CO-505) is only an allowed
-     default, when the port it gives is recorded, claimed and checked free. `FAC-SEM-010` is unchanged: it checks one
-     directory.
+     account's claim `.passioncode-ports.<service-id>.<account>.json` (`<service-id>` the descriptor's `id`, or for an
+     app without a descriptor its reverse-DNS bundle identifier under its own domain, stable across versions, and for an
+     app with separately recorded parts that identifier plus `.<part>`, one claim per part, as Fabric's hub and local
+     stack, `ai.passioncode.desktop.hub` and `ai.passioncode.desktop.stack`;
+     `<account>` the numeric uid on macOS and Linux, the SID on Windows, never the login name, which can be renamed)
+     in the host's shared sticky folder (`/Users/Shared` on macOS, `/var/tmp` on Linux,
+     `%ProgramData%\PassionCode\port-claims` on Windows), owned by that account and holding only
+     `{schema, service, account, ports, updatedAt}` (`schema` `passioncode-port-claim/1`; several recorded ports of one
+     service or part in one claim's `ports`); it writes a missing claim at the service's next start, so a host installed
+     before catches up, and removes the claim at uninstall after the descriptor. A claim whose file owner (uid, or SID
+     on Windows) is not the `account` it names, or of an account no longer on the host, is ignored. A claim grants
+     nothing: it keeps two installers from one port, and who may receive a credential is item 2's. An ephemeral port
+     the listener protects with a proof (an HMAC answer to a fresh challenge) needs no claim. A host with one counted
+     account MAY keep a service's historical default port, and writes its claim too. A client takes the port only from
+     the descriptor or the service's record; a formula over the uid (Fabric's hub, CO-505) is only an allowed default,
+     when the port it gives is recorded, claimed and checked free. The install polls until the listener is this
+     account's and `service.id` matches; a listener of another account is never a successful install. `FAC-SEM-010` is
+     unchanged: it checks one directory.
   2. **The listener's owner, and `foreign-user` (HA-2, G2).** Before a client sends any credential to
      `http://127.0.0.1:<port>`, and before a host reports a local service healthy, it establishes that the server end
      of its connection belongs to its own OS account: from the system's socket table, or by the listener proving
-     before any credential travels that it holds a secret only this account can read (Switchboard's control channel
-     answers a fresh challenge with an HMAC). No listener is `down`. A listener of another account, or one whose owner
-     cannot be told, is the new host state `foreign-user`: no credential is sent and nothing it answers is read as the
-     service's. The order is `down`, `foreign-user`, `foreign`, then the well-known `status`; `foreign-user` is decided
-     before the well-known document is read and wins over every answer, `ready` included; a reader treats a state it
-     does not know as not ready. The sources: on macOS the TCP socket table (`netstat -anv -p tcp`, or `sysctl
-     net.inet.tcp.pcblist64` in the process), which names another account's socket where a list of the account's own
-     sockets (`lsof -u` of the current user) cannot tell an empty port from another account's; on Linux the `uid`
-     column of `/proc/net/tcp` and `/proc/net/tcp6`; on Windows `GetExtendedTcpTable`, then the owning process's token
-     user. The well-known `process.pid` is never proof. A local service SHOULD refuse a connection from a peer of
-     another OS account before it reads the request, and MUST when its clients are other vendors' programs that cannot
-     run the client's check (Switchboard's proxy, called by coding agents). A service that comes up on another port
-     than its recorded one SHOULD rotate the secrets it issued to clients that reach it by port (Switchboard's SB-269).
-     An authorization code bound to a PKCE `S256` challenge and sent to a loopback redirect (RFC 8252) is not a
-     credential under this item: the app holding the listener and the verifier carries the check.
-  3. **No token-free loopback door on a host with several accounts (HA-3, G3).** On a host with more than one OS
-     account, a door that admits a loopback caller without a token is not a T0 door (DL-25) unless it checks the
-     peer's OS account as item 2's server side does; Project Observatory's local channel (DEC-0075), which checks the
-     peer's uid on its socket, is the existing example. A port forwarder of a virtual machine or container (a Lima or
+     before any credential travels that it holds a secret only this account can read (Switchboard reported that its
+     control channel answers a fresh challenge with an HMAC). No listener is `down`. A listener of another account
+     (root, SYSTEM and service accounts included), or one whose owner cannot be told, is the new host state
+     `foreign-user`: no credential is sent and nothing it answers is read as the service's. The order is `down`,
+     `foreign-user`, `foreign`, then the well-known `status`; `foreign-user` is decided before the well-known document
+     is read and wins over every answer, `ready` included; a reader treats a state it does not know as not ready; a
+     watcher counts `foreign-user` as unavailable, as it counts `down`; a node reports a `foreign` or `foreign-user`
+     service as `down` in its node summary. The sources: on macOS the TCP socket table (`netstat -anv -p tcp`, or
+     `sysctl net.inet.tcp.pcblist64` in the process), which names another account's socket where a list of the
+     account's own sockets (`lsof -u` of the current user) cannot tell an empty port from another account's; on Linux
+     the `uid` column of `/proc/net/tcp` and `/proc/net/tcp6`; on Windows `GetExtendedTcpTable`, then the owning
+     process's token user. The well-known `process.pid` is never proof. When the client is one the contract does not
+     reach (a browser, a coding agent, another vendor's program), the check is carried by the side that hands the
+     credential over or receives it: the host checks the listener before it mints a login code and before it writes an
+     `mcp.json` or hands a session bearer to a coding agent (SH-9); and on a host with more than one counted account a
+     local surface whose credential arrives from such a client (a dashboard a browser reaches, an MCP surface a coding
+     agent reaches, a proxy coding agents call) MUST refuse a peer of another OS account before it reads the request;
+     every other local service SHOULD. A service that comes up on another port than its recorded one SHOULD rotate the
+     secrets it issued to clients that reach it by port (Switchboard's SB-269). An authorization code bound to a PKCE
+     `S256` challenge and sent to a loopback redirect (RFC 8252) is not a credential under this item: the app holding
+     the listener and the verifier carries the check. The browser-cookie residue is named, not closed: browsers do not
+     isolate cookies by port (RFC 6265 section 8.5), so a `127.0.0.1` page of another account the person's browser
+     visits receives a local dashboard's cookies; the bound is the session's short lifetime and, where it ships,
+     Fabric Dashboards' own window.
+  3. **No token-free loopback door on a host with several accounts (HA-3, G3).** On a host with more than one counted
+     OS account, a door that admits a loopback caller without a token is not a T0 door (DL-25) unless it checks the
+     peer's OS account as item 2's server side does; Project Observatory's local channel (DEC-0075) is the same check
+     on another transport (a socket or named pipe). A port forwarder of a virtual machine or container (a Lima or
      Colima host agent, a user-mode gateway, an SSH tunnel) is a relay onto loopback, its callers T2; since it runs as
      the account that owns the guest, a host whose guests reach its loopback closes that path or admits no token-free
-     caller on TCP.
-  4. **The host label (HA-4).** Each OS account and each virtual machine is its own device, with its own id, keys and
-     enrollments (G5, the workspace's answer on the thread). An enrollment request MAY carry `device.hostLabel`:
-     HMAC-SHA-256 keyed with the host secret over the UTF-8 bytes of `fabric-host-label/1` followed directly by the
-     organization's `org.id`, its first 16 bytes in base64url without padding. The host secret is 32 random bytes in
-     one file per host (`/Library/Application Support/PassionCode/host-label.key` on macOS,
-     `/etc/passioncode/host-label.key` on Linux, `%ProgramData%\PassionCode\host-label.key` on Windows), owner root
-     (Windows: Administrators), mode `0444`, its folder `0755` and writable only by root, created by an administrator's
-     setup step, never in a backup, a snapshot or a machine pack and never carried by a restore. A node reads it only
-     when it is owned by root and exactly 32 bytes; otherwise it sends no `hostLabel`, never falling back to a node
-     key. A virtual machine MAY be given its host's secret at creation. An organization shows the label only after its
-     notice says so. A label is per organization, so one organization's labels cannot be linked with another's. The
-     label is not a credential. Reference `src/host-label.ts` `hostLabel`; vectors `fixtures/vectors/host-label.json`,
-     written by `tools/vectors/host-label.ts` with Node's HMAC; schema member `device.hostLabel` (optional, pattern
+     caller on TCP. An accepted gap: on a host with one counted account a token-free door still admits that account's
+     own guests through a forwarder (CT-238).
+  4. **The host label (HA-4).** Each counted OS account and each virtual machine is its own device, with its own id,
+     keys and enrollments (G5, the workspace's answer on the thread). An enrollment request MAY carry
+     `device.hostLabel`: HMAC-SHA-256 keyed with the host secret over the UTF-8 bytes of `fabric-host-label/1` followed
+     directly by the organization's `org.id`, its first 16 bytes in base64url without padding. A server that turns the
+     label on issues `org.id` with at least 128 random bits, so it is unguessable and unique across organization
+     servers with overwhelming probability (the first organization server's `org_<base32>` ids are of this kind). The
+     host secret is 32 random bytes in one file per host (`/Library/Application Support/PassionCode/host-label.key` on
+     macOS, `/etc/passioncode/host-label.key` on Linux, `%ProgramData%\PassionCode\host-label.key` on Windows): on
+     macOS and Linux owner root, mode `0444`, its folder root's with mode `0755`; on Windows Administrators full
+     control, Users read, no inherited write. An administrator's setup step creates it and MUST exclude it from the
+     host's backups (macOS `tmutil addexclusion -p`; Linux the host's backup tool's exclusion list; Windows the
+     `FilesNotToBackup` registry list); it is never in a snapshot or a machine pack, and that a restore never carries it
+     is owed by CT-233. A virtual machine MAY be given its host's secret at creation, and then carries it in its own
+     snapshots. A node reads the file's metadata before its bytes and uses it only when the path is no symbolic link,
+     the owner is the administrator (root; on Windows Administrators or SYSTEM), no other account can write it, its
+     folder is the administrator's and writable by no one else, and it is exactly 32 bytes; otherwise it sends no
+     `hostLabel`, never falling back to another key. A node sends the label only once a device-policy member turns it
+     on for that organization, a member owed by CT-239. An organization shows it only after its notice says so. A label
+     is per organization, so organizations with no code on the host cannot link their labels; an organization's code
+     on any counted account of the host, or in a virtual machine given the secret, can compute every organization's
+     label for that host (named in devices.md's unlinkable enrollments). The label is not a credential. Reference
+     `src/host-label.ts` `hostLabel`; vectors `fixtures/vectors/host-label.json`, written by
+     `tools/vectors/host-label.ts` with Node's HMAC; schema member `device.hostLabel` (optional, pattern
      `^[A-Za-z0-9_-]{21}[AQgw]$`).
 - **Why:** a port recorded per account and claimed in a folder every account reads lets two accounts' installers avoid
   each other without a band any product must compute, and keeps the descriptor the one place a client reads; a claim
   is advisory because any account can write a file, so the security sits in the owner check, which the operating
-  system answers and no listener can forge. A state of its own, before `foreign`, keeps a listener of another account
-  from ever reading as the service, however well it imitates the service's identity, and lets a host tell the person
-  why. A server-side refusal is the only protection when the client is a program the contract does not reach. A
-  token-free door is safe only where its peers are the owner's, which a loopback socket proves only by its owner. The
-  host label is keyed by a secret no account can change and per organization, so it tells one organization what it
-  needs (these devices share a host) and links nothing across organizations (DEC-0128).
+  system answers and no listener can forge. Naming an account by uid or SID keeps the owner check comparing what the
+  system reports. A state of its own, before `foreign`, keeps a listener of another account from ever reading as the
+  service, however well it imitates the service's identity, and lets a host tell the person why. A client the
+  contract does not reach cannot check, so the host that hands it a credential, and the surface that receives one,
+  check instead. A token-free door is safe only where its peers are the owner's, which a loopback socket proves only
+  by its owner. Counting only accounts people and agents use keeps a system's service accounts from making every
+  computer a shared host, while their listeners still read as another account's. The host label is keyed by a secret
+  no ordinary account can change and is per organization, so it tells one organization what it needs (these devices
+  share a host) and links nothing across organizations that have no code on the host (DEC-0128).
 - **Alternatives considered:** a reserved port band for Fabric's hubs and a band per account for every service
   (the spec's first proposal for G1: every product would have to compute it, and a band names nothing about who
   listens); a bind probe alone (a probe at install time says nothing about who holds the port later); a proof of
   possession as the only check (Switchboard uses one on its control channel and it is admitted as one way to
   establish the owner; it cannot serve a client that is another vendor's program); an own-list `lsof` as the macOS
-  source (it cannot tell an empty port from another account's); a hash of the host name as the label (linkable across
-  organizations and guessable); a label keyed by the node's own key (each account's node has its own key, so two
-  accounts would never share a label).
-- **Compatibility:** additive for a host with one OS account: a descriptor, a well-known document and a port are
-  unchanged; a service MAY keep its historical default port; the client's check finds every service of the account
-  its own. `foreign-user` is a new state: [service](specification/service.md) defined no rule for a host state a reader
-  does not know, and this decision adds that a reader treats it as not ready, sending nothing; a reader pinned before
-  shows whatever it does with a value it does not know. `device.hostLabel` is optional; the request's `device` object
-  is closed, so a server pinned before refuses an enrollment that carries it at its schema, as one pinned before
-  DEC-0094 refused `file`, and a node sends it only to an organization that turned it on (how a node learns a server's
-  pin is CT-67). The product rows, as each product reported them on thread `1fe66e6e` on 2026-11-06 (a reading of
-  the board, not of their code):
+  source (it cannot tell an empty port from another account's); the login name in the claim (it can be renamed, and
+  the owner check compares a uid); a hash of the host name as the label (linkable across organizations and
+  guessable); a label keyed by the node's own key (each account's node has its own key, so two accounts would never
+  share a label).
+- **Compatibility:** additive for a host with one counted OS account, with one honest exception: a descriptor, a
+  well-known document and a port are unchanged, a service MAY keep its historical default port, and the client's check
+  finds every service of the account its own, but a port held by root, SYSTEM or a service account (a rootful container
+  proxy, a launch daemon, a task run as SYSTEM) now reads `foreign-user` where it read the service's answer before.
+  `foreign-user` is a new state: [service](specification/service.md) defined no rule for a host state a reader does not
+  know, and this decision adds that a reader treats it as not ready, sending nothing; a reader pinned before shows
+  whatever it does with a value it does not know. `device.hostLabel` is optional; the request's `device` object is
+  closed, so a server pinned before refuses an enrollment that carries it at its schema, as one pinned before DEC-0094
+  refused `file`, and a node sends it only once the owed device-policy member (CT-239) turns it on (how a node learns a
+  server's pin is CT-67). `schemas/service-well-known.schema.json` and `schemas/device-enrollment.schema.json` change
+  bytes (a description, and the new member), so a consumer that vendors them re-pins. The product rows, as each
+  product reported them on thread `1fe66e6e` on 2026-11-06 (a reading of the board, not of their code):
   - Fabric: CO-505 (the hub's port per account by a uid formula) reported in its main; CO-513 (its bundled stack's
     ports 54320 to 54329 are fixed, to be recorded per account) open; CO-514 (its MCP server checks only that the hub's
     recorded pid is alive) open; CO-515 (a restore carries no node identity, CT-233) open.
@@ -9844,23 +9887,32 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     checker sends the token with no owner check, its hub client trusts the recorded pid), FAA-227 (no refusal of
     another account's peer) open; FAA-228 (launchd's `gui/<uid>` domain) waits for CT-234; its token-file reader
     already refuses a symlink, a foreign owner and loose modes (G4 for the kit).
-  - The first organization server: VES-LOOPBACK-OWNER open: its app grant sends no bearer on loopback, and its `onboard --check` and its
-    administrator's agents do not check the listener's owner yet.
+  - The first organization server: VES-LOOPBACK-OWNER open: its app grant sends no bearer on loopback, and its
+    `onboard --check` and its administrator's agents do not check the listener's owner yet.
   - The PassionCode launcher: listens on no port; PC-152 (the owner check in its doctor) open.
+  - A Fabric server that reads host states through Fabric Dashboards, in its own words: it listens on no port, sends no
+    token to loopback, and reads `foreign-user` and any state it does not know as not ready (its 0.17.0 and 0.18.0).
+  - With no objection to the claim's `<service-id>` (thread `1fe66e6e`, message `38aaf2fe`): Fabric (CO-513, CO-514),
+    Project Observatory (one claim holding all its ports, OBS-354, OBS-355, OBS-357) and Fabric Inbox (B-220).
   - Project Observatory: OBS-354 (the recorded port and its claims, claims of absent accounts ignored, shown by
     `project-observatory full ports show --json`) open; OBS-355 (its state renamed `foreign-user`) open; OBS-357 (the
     host secret file written by the administrator's setup step, its own local place id kept local) open; its local
     channel already checks the peer's uid (DEC-0075).
 - **Consequences / affects:** `docs/specification/service.md` (the port claim's pointer, `FAC-SEM-009`'s neighbour,
-  the threat model, the trust anchor, the new section with HA-1 to HA-3), `docs/specification/delegation.md` (DL-25's
-  T0 row and the relay paragraph), `docs/specification/devices.md` (the device sentence, the host label, UE's linkable
-  list), `docs/specification/conformance.md` (the reference module's row and five client and reader rows),
-  `schemas/device-enrollment.schema.json`, `src/host-label.ts`, `tools/vectors/host-label.ts`, `tools/vectors/run.ts`,
+  the threat model and the cookie residue, the trust anchor, the new section with counted accounts and HA-1 to HA-3,
+  the Install and Uninstall rows), `docs/specification/delegation.md` (the header, DL-25's T0 row, the relay paragraph
+  and the accepted gap), `docs/specification/devices.md` (the device definition, the host label, UE's linkable list),
+  `docs/specification/contexts.md` (`org.id` for the host label), `docs/specification/node-summary.md` (a `foreign` or
+  `foreign-user` service reported `down`), `docs/specification/conformance.md` (the reference module's row and eight
+  client, host, reader and setup rows), `schemas/device-enrollment.schema.json`, `schemas/service-well-known.schema.json`
+  (`service.id`'s description), `src/host-label.ts`, `tools/vectors/host-label.ts`, `tools/vectors/run.ts`,
   `fixtures/vectors/host-label.json`, `fixtures/positive/device-enrollment-request-host-label.json`,
   `fixtures/negative/device-enrollment-host-label-padding-bits.json` with their catalogue rows,
-  `test/host-label.test.ts`, `vitest.config.ts`, `docs/evidence/sources.md` (RFC 8252's row), `docs/DOCMAP.md`,
-  `docs/backlog.md` (CT-228 to CT-237), the spec
-  `docs/evidence/specs/2026-11-06-studio-spaces-gaps.md` and the handoff `docs/handoffs/2026-11-06-studio-ports-owner.md`.
+  `test/host-label.test.ts`, `vitest.config.ts`, `CONTEXT.md` (Device, Counted OS account, Port claim, `foreign-user`,
+  Host label, Trust tier), `docs/ux/scenarios.md` (SCN-056), `docs/ux/screens.md` (SCR-20's `foreign-user` state),
+  `docs/ux/flows.md` (FLW-17's screens), `docs/evidence/sources.md` (RFC 8252's and RFC 6265's rows), `docs/DOCMAP.md`,
+  `docs/backlog.md` (CT-228 to CT-241), the spec `docs/evidence/specs/2026-11-06-studio-spaces-gaps.md` and the handoff
+  `docs/handoffs/2026-11-06-studio-ports-owner.md`.
 - **Not decided here:** the claim file's schema and a reference for the port choice (CT-228); the contract's own vector
   file of the state order (CT-229); a POSIX owner check of the services directory, the descriptors and the token files
   (G4, CT-230); what a machine of the estate is when it is an OS account or a virtual machine, and `FAC-SEM-074` per
@@ -9869,13 +9921,24 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   session, the launchd domain and systemd lingering (G8, CT-234); containerized local services (G9, CT-235, with
   CT-132); one host per singleton through the placement record `observatory-placement/1` as a readable norm (G10,
   CT-236, a decision of the second wave; the schema stays `/1`, additive); the contract's own gate on a shared host
-  (G11, CT-237). Calls between two accounts of one host go through the organization's relay or tokens, never the
-  tailnet (the workspace's answer).
+  (G11, CT-237); a token-free door and a single account's own guests (CT-238); the device-policy member that turns the
+  host label on (CT-239); the organization's "these devices share a host" display and its scenario (CT-241). Calls
+  between two accounts of one host go through the organization's relay or tokens, never the tailnet (the workspace's
+  answer).
 - **Source:** the operator's request of 2026-11-05 relayed on board thread `1fe66e6e`; the contract's gap list
   (research of 2026-11-06, kept as the spec above); the thread's rounds of 2026-11-05 and 2026-11-06, answered by the
   contract in messages `db8090d1`, `d6035cae`, `14b4dc86` (item 1's text is Project Observatory's message `054d53fd`,
   with the absent account and "a claim grants nothing" added there, one name for the client's refusal and the host
   state, "an owner that cannot be told" refused, and the check before "healthy" from the launcher's message
   `c9a1a188`), `262523cc` (Fabric Dashboards' three state-precedence cases at `53a62f9`), `28d9ab82` and `d3b8f308`
-  (the host label, agreed by the first organization server in `30762429` and by Project Observatory, with its paths) and `99cedce5` (the product
-  rows); decided by the coordinator; backlog CT-228.
+  (the host label, agreed by the first organization server in `30762429` and by Project Observatory, with its paths)
+  and `99cedce5` (the product rows); the board's answers on the claim's `<service-id>` (the descriptor's `id`, an app's
+  reverse-DNS bundle identifier, the `.<part>` suffix for an app's separately recorded parts in message `38aaf2fe`,
+  several ports in one claim, no claim for a proof-protected ephemeral port), with no objection from the launcher, the adapter, the first organization server, Switchboard or Fabric Dashboards; the
+  coordinator's correction of the claim's account to a uid or SID; round 1 of the coordinator's blind readings at
+  `25ba36f7` was not clean (the product reading's seven breaks: an undefined account count, the clients the contract
+  does not reach, the host label's unlinkability, the secret in backups, the UX scenario, the glossary and three rows
+  without acceptance; the seam reading's break: the Install and Uninstall rows), and its batch, with the coordinator's
+  decisions on system-account listeners, single-account forwarders, the claim catch-up, the sending signal, the
+  product facts framed as reports, the read rule failing closed and `org.id`'s randomness, is folded in; decided by the
+  coordinator; backlog CT-228.

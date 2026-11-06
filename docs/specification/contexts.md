@@ -42,7 +42,9 @@ A device's enrollment names its organization by `org.id`, an opaque id (`activit
 DEC-0031). `orgId`'s pattern is the part of that set a context can name, so every valid organization context can name an
 enrollment; an `org.id` that holds `.`, `:` or `~` can be enrolled but is no context, so nothing of a context is routed to
 it (the vectors carry `org.example`). So **an organization server that takes part in contexts MUST issue its `org.id`
-within `[A-Za-z0-9][A-Za-z0-9_-]{0,127}`** (DEC-0082; [devices](devices.md#enrollment)).
+within `[A-Za-z0-9][A-Za-z0-9_-]{0,127}`** (DEC-0082; [devices](devices.md#enrollment)). A server that turns the
+[host label](devices.md#the-host-label) on also issues `org.id` with at least 128 random bits, so that it is
+unguessable and unique across organization servers with overwhelming probability (DEC-0154, proposed).
 
 Fabric Switchboard uses the same form for its pool's context attribute (its SB-109, the pilot's answer of 2026-10-13).
 

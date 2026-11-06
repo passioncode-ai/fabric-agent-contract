@@ -32,6 +32,7 @@
 | SCN-024 | Restore settings after the data directory was lost | settings | P-02 | ST-019, FLW-15 | draft | not audited |
 | SCN-025 | Follow a request on the Project board to its result, or to outcome_unknown | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
 | SCN-026 | A second copy of a service starts, by hand or by its supervisor | service | P-02 | ST-021, FLW-17 | draft | not audited |
+| SCN-056 | Another OS account on this computer holds my service's port | service | P-02 | ST-021, FLW-17 | draft | not audited |
 | SCN-027 | The operator unlists a Project: it leaves the directory, and a sender that knows its id still reaches it | project-board | P-02 | ST-022, FLW-18 | draft | not audited |
 | SCN-051 | The operator makes another session the Project's main one, and the host shows when it changes hands again | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
 | SCN-028 | Add a second machine from afar: compare the code, sign with the passkey | network | P-02 | ST-023, FLW-19 | draft | not audited |
@@ -786,6 +787,26 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** the plist says launchd and the arguments say task-scheduler -> the copy exits 75 at once naming both markers, without trying the lock; the operator fixes the supervisor file.
 - **Status:** draft
 - **Coverage:** service specification, One copy; `src/service-supervisor.ts`; `test/service-supervisor.test.ts`, `fixtures/semantic/service-lock-*.json`
+- **Product:** unobserved
+
+### SCN-056: Another OS account on this computer holds my service's port
+
+- **Persona:** P-02
+- **Feature:** service
+- **Traces:** ST-021, FLW-17 (JTBD-03, JRN-02/#3); DEC-0154 HA-1 and HA-2
+- **Entry point:** the host's card for a local service (Fabric Dashboards, Fabric), on a computer where several OS accounts work
+- **Preconditions:** my service is installed with a recorded port; another OS account on the same computer runs a listener on that port (its own copy of the agent, or anything else)
+- **Steps:**
+  1. The host probes my service -> before it reads the well-known answer or sends a token, it reads who owns the listener on the port.
+  2. The listener is another account's, or its owner cannot be told -> the card shows `foreign-user` with one line: "Another account on this computer is using this service's port; nothing was sent to it."
+  3. The other listener answers `ready` with my service's own identity -> the card still shows `foreign-user`; the identity is not read as mine.
+- **Expected result:** nothing of mine (token, login code, cookie) reaches the other account, and I see why my service is not serving.
+- **Alt paths:** no listener at all -> `down`, as before. The listener is mine but names another service -> `foreign`. A listener owned by root or a system service account (a launch daemon, a rootful container proxy) -> `foreign-user` too, on a computer with one account.
+- **UI elements:** the service card's state and its one line.
+- **States covered:** error, success
+- **Errors & recovery:** reinstall my service onto a free port, which its installer records and claims (HA-1), or stop the other account's copy; the card then shows my service's own state.
+- **Status:** draft
+- **Coverage:** service specification, Several OS accounts on one host (HA-1, HA-2); the state-order vectors owed by CT-229
 - **Product:** unobserved
 
 ## Network

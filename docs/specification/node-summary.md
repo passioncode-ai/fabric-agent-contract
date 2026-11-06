@@ -27,7 +27,7 @@ DEC-0056 signs, so it carries no signature of its own. Over the relay it would n
 | `harness.mcpServers` | each MCP server the coding agents load: `name`, `source` (`user`, `project`, `local`, `plugin`, `managed`, `other`), `transport`, `health` |
 | `harness.skills`, `harness.plugins` | each by name and source, a skill's digest, a plugin's version and digest |
 | `harness.hooks` | how many hooks the coding agents load, never their commands |
-| `services` | the agent services placed in this summary's context, and no other: `key` (`id.instance`), `state`, `protocols`, an A2A card digest, the MCP endpoint as published |
+| `services` | the agent services placed in this summary's context, and no other: `key` (`id.instance`), `state`, `protocols`, an A2A card digest, the MCP endpoint as published; a service the node's host reads as `foreign` or `foreign-user` is reported `down`, since it serves nothing (DEC-0154, proposed) |
 | `drift` | how the harness differs from the organization's baseline, under the policy revision that carried it |
 
 **How much it lists** (DEC-0118, answering CT-92). It follows `machine.mode` ([device policy](devices.md#policy)):

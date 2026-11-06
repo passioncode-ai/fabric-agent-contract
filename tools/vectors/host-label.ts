@@ -31,28 +31,43 @@ function label(hex: string, orgId: string): Json {
 const FAULT = { fault: "input-invalid" };
 
 function cases(): Json[] {
-  const secret = (owner: string, hex: string) => ({ owner, hex });
+  /** A secret file's metadata and bytes as a node reads them; the defaults are a well-kept POSIX file. */
+  const secret = (owner: string, hex: string, more: Json = {}) => ({ link: false, owner, writableByOthers: false, folderOk: true, hex, ...more });
+  const posix = (s: Json, orgId: unknown = "org-7f3a") => ({ platform: "posix", secret: s, orgId });
+  const windows = (s: Json, orgId: unknown = "org-7f3a") => ({ platform: "windows", secret: s, orgId });
   const list: Array<[string, unknown, Json]> = [
-    ["a root-owned secret of 32 bytes", { secret: secret("root", COUNTING), orgId: "org-7f3a" }, label(COUNTING, "org-7f3a")],
-    ["the same host in another organization: another label, so two organizations cannot link it", { secret: secret("root", COUNTING), orgId: "org-b2c4" }, label(COUNTING, "org-b2c4")],
-    ["another host in the same organization", { secret: secret("root", ALL_FF), orgId: "org-7f3a" }, label(ALL_FF, "org-7f3a")],
-    ["on Windows, owned by the Administrators group", { secret: secret("administrators", COUNTING), orgId: "org-7f3a" }, label(COUNTING, "org-7f3a")],
-    ["an organization id with every separator the pattern admits", { secret: secret("root", COUNTING), orgId: "Acme.eu:prod~2-x_y" }, label(COUNTING, "Acme.eu:prod~2-x_y")],
-    ["an organization id of 128 characters", { secret: secret("root", COUNTING), orgId: `o${"a".repeat(127)}` }, label(COUNTING, `o${"a".repeat(127)}`)],
-    ["a secret owned by an account: no label, never another key's", { secret: secret("other", COUNTING), orgId: "org-7f3a" }, { none: "secret-owner" }],
-    ["31 bytes: no label", { secret: secret("root", COUNTING.slice(0, 62)), orgId: "org-7f3a" }, { none: "secret-size" }],
-    ["33 bytes: no label", { secret: secret("root", `${COUNTING}20`), orgId: "org-7f3a" }, { none: "secret-size" }],
-    ["an empty file: no label", { secret: secret("root", ""), orgId: "org-7f3a" }, { none: "secret-size" }],
-    ["owned by an account and of the wrong size: the owner is named first", { secret: secret("other", "00"), orgId: "org-7f3a" }, { none: "secret-owner" }],
-    ["an organization id of 129 characters", { secret: secret("root", COUNTING), orgId: `o${"a".repeat(128)}` }, FAULT],
-    ["an organization id that is an address", { secret: secret("root", COUNTING), orgId: "ops@example.org" }, FAULT],
-    ["an organization id that starts with a separator", { secret: secret("root", COUNTING), orgId: "-org" }, FAULT],
-    ["an empty organization id", { secret: secret("root", COUNTING), orgId: "" }, FAULT],
-    ["bytes not in lower-case hex", { secret: secret("root", COUNTING.toUpperCase()), orgId: "org-7f3a" }, FAULT],
-    ["an odd number of hex digits", { secret: secret("root", `${COUNTING}0`), orgId: "org-7f3a" }, FAULT],
-    ["a file far larger than a secret", { secret: secret("root", "00".repeat(1025)), orgId: "org-7f3a" }, FAULT],
-    ["an owner this reference does not name", { secret: secret("wheel", COUNTING), orgId: "org-7f3a" }, FAULT],
-    ["no secret", { orgId: "org-7f3a" }, FAULT],
+    ["a root-owned secret of 32 bytes", posix(secret("root", COUNTING)), label(COUNTING, "org-7f3a")],
+    ["the same host in another organization: another label", posix(secret("root", COUNTING), "org-b2c4"), label(COUNTING, "org-b2c4")],
+    ["another host in the same organization", posix(secret("root", ALL_FF)), label(ALL_FF, "org-7f3a")],
+    ["on Windows, owned by the Administrators group", windows(secret("administrators", COUNTING)), label(COUNTING, "org-7f3a")],
+    ["on Windows, owned by SYSTEM", windows(secret("system", COUNTING)), label(COUNTING, "org-7f3a")],
+    ["an organization id with every separator the pattern admits", posix(secret("root", COUNTING), "Acme.eu:prod~2-x_y"), label(COUNTING, "Acme.eu:prod~2-x_y")],
+    ["an organization id of 128 characters", posix(secret("root", COUNTING), `o${"a".repeat(127)}`), label(COUNTING, `o${"a".repeat(127)}`)],
+    ["a secret owned by an account: no label, never another key's", posix(secret("other", COUNTING)), { none: "secret-owner" }],
+    ["administrators named on a POSIX platform: not its administrator", posix(secret("administrators", COUNTING)), { none: "secret-owner" }],
+    ["root named on Windows: not its administrator", windows(secret("root", COUNTING)), { none: "secret-owner" }],
+    ["reached through a symbolic link: no label", posix(secret("root", COUNTING, { link: true })), { none: "secret-link" }],
+    ["a link is named before an owner", posix(secret("other", COUNTING, { link: true })), { none: "secret-link" }],
+    ["writable by another account: no label", posix(secret("root", COUNTING, { writableByOthers: true })), { none: "secret-mode" }],
+    ["in a folder another account can write, or not the administrator's: no label", posix(secret("root", COUNTING, { folderOk: false })), { none: "secret-mode" }],
+    ["on Windows, an ACE granting another SID write: no label", windows(secret("administrators", COUNTING, { writableByOthers: true })), { none: "secret-mode" }],
+    ["the owner is named before the mode", posix(secret("other", COUNTING, { writableByOthers: true })), { none: "secret-owner" }],
+    ["31 bytes: no label", posix(secret("root", COUNTING.slice(0, 62))), { none: "secret-size" }],
+    ["33 bytes: no label", posix(secret("root", `${COUNTING}20`)), { none: "secret-size" }],
+    ["an empty file: no label", posix(secret("root", "")), { none: "secret-size" }],
+    ["the mode is named before the size", posix(secret("root", "00", { folderOk: false })), { none: "secret-mode" }],
+    ["an organization id of 129 characters", posix(secret("root", COUNTING), `o${"a".repeat(128)}`), FAULT],
+    ["an organization id that is an address", posix(secret("root", COUNTING), "ops@example.org"), FAULT],
+    ["an organization id that starts with a separator", posix(secret("root", COUNTING), "-org"), FAULT],
+    ["an empty organization id", posix(secret("root", COUNTING), ""), FAULT],
+    ["bytes not in lower-case hex", posix(secret("root", COUNTING.toUpperCase())), FAULT],
+    ["an odd number of hex digits", posix(secret("root", `${COUNTING}0`)), FAULT],
+    ["a file far larger than a secret", posix(secret("root", "00".repeat(1025))), FAULT],
+    ["an owner this reference does not name", posix(secret("wheel", COUNTING)), FAULT],
+    ["a platform this reference does not name", { platform: "darwin", secret: secret("root", COUNTING), orgId: "org-7f3a" }, FAULT],
+    ["a flag that is not a boolean", posix(secret("root", COUNTING, { link: "no" })), FAULT],
+    ["no folder flag", posix({ link: false, owner: "root", writableByOthers: false, hex: COUNTING }), FAULT],
+    ["no secret", { platform: "posix", orgId: "org-7f3a" }, FAULT],
     ["not an object", null, FAULT]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected }));
@@ -61,7 +76,7 @@ function cases(): Json[] {
 /** The vectors as an object. */
 export function hostLabelVectors(): Json {
   return {
-    about: "Vectors for the host label (DEC-0154 item 4), written by tools/vectors/host-label.ts, never by hand. hostLabel(input): input is {secret: {owner, hex}, orgId}, owner root (uid 0), administrators (the Windows Administrators group) or other, hex the host secret file's bytes in lower-case hex, orgId the enrollment's org.id. The answer is {hostLabel}: HMAC-SHA-256 keyed with the 32-byte secret over the UTF-8 bytes of fabric-host-label/1 followed directly by orgId, its first 16 bytes in base64url without padding; or {none: secret-owner | secret-size}, the node sending no label; or {fault: input-invalid}.",
+    about: "Vectors for the host label (DEC-0154 item 4), written by tools/vectors/host-label.ts, never by hand. hostLabel(input): input is {platform, secret: {link, owner, writableByOthers, folderOk, hex}, orgId}: platform posix or windows; link whether the path is a symbolic link (a reparse point); owner root (uid 0), administrators (the Windows Administrators group), system (Windows SYSTEM) or other, the administrator being root on posix and administrators or system on windows; writableByOthers whether any account but the owner can write the file; folderOk whether its folder is the administrator's and writable by no one else; hex the file's bytes in lower-case hex; orgId the enrollment's org.id. The answer is {hostLabel}: HMAC-SHA-256 keyed with the 32-byte secret over the UTF-8 bytes of fabric-host-label/1 followed directly by orgId, its first 16 bytes in base64url without padding; or {none: secret-link | secret-owner | secret-mode | secret-size}, the first reason in that order, the node sending no label; or {fault: input-invalid}.",
     cases: cases()
   };
 }

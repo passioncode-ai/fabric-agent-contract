@@ -1,11 +1,15 @@
 {
-  "about": "Vectors for the host label (DEC-0154 item 4), written by tools/vectors/host-label.ts, never by hand. hostLabel(input): input is {secret: {owner, hex}, orgId}, owner root (uid 0), administrators (the Windows Administrators group) or other, hex the host secret file's bytes in lower-case hex, orgId the enrollment's org.id. The answer is {hostLabel}: HMAC-SHA-256 keyed with the 32-byte secret over the UTF-8 bytes of fabric-host-label/1 followed directly by orgId, its first 16 bytes in base64url without padding; or {none: secret-owner | secret-size}, the node sending no label; or {fault: input-invalid}.",
+  "about": "Vectors for the host label (DEC-0154 item 4), written by tools/vectors/host-label.ts, never by hand. hostLabel(input): input is {platform, secret: {link, owner, writableByOthers, folderOk, hex}, orgId}: platform posix or windows; link whether the path is a symbolic link (a reparse point); owner root (uid 0), administrators (the Windows Administrators group), system (Windows SYSTEM) or other, the administrator being root on posix and administrators or system on windows; writableByOthers whether any account but the owner can write the file; folderOk whether its folder is the administrator's and writable by no one else; hex the file's bytes in lower-case hex; orgId the enrollment's org.id. The answer is {hostLabel}: HMAC-SHA-256 keyed with the 32-byte secret over the UTF-8 bytes of fabric-host-label/1 followed directly by orgId, its first 16 bytes in base64url without padding; or {none: secret-link | secret-owner | secret-mode | secret-size}, the first reason in that order, the node sending no label; or {fault: input-invalid}.",
   "cases": [
     {
       "name": "a root-owned secret of 32 bytes",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
         },
         "orgId": "org-7f3a"
@@ -15,10 +19,14 @@
       }
     },
     {
-      "name": "the same host in another organization: another label, so two organizations cannot link it",
+      "name": "the same host in another organization: another label",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
         },
         "orgId": "org-b2c4"
@@ -30,8 +38,12 @@
     {
       "name": "another host in the same organization",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         },
         "orgId": "org-7f3a"
@@ -43,8 +55,29 @@
     {
       "name": "on Windows, owned by the Administrators group",
       "input": {
+        "platform": "windows",
         "secret": {
+          "link": false,
           "owner": "administrators",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "hostLabel": "lT5ZXXcR0-QSVx-Ff88aJg"
+      }
+    },
+    {
+      "name": "on Windows, owned by SYSTEM",
+      "input": {
+        "platform": "windows",
+        "secret": {
+          "link": false,
+          "owner": "system",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
         },
         "orgId": "org-7f3a"
@@ -56,8 +89,12 @@
     {
       "name": "an organization id with every separator the pattern admits",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
         },
         "orgId": "Acme.eu:prod~2-x_y"
@@ -69,8 +106,12 @@
     {
       "name": "an organization id of 128 characters",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
         },
         "orgId": "oaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -82,8 +123,148 @@
     {
       "name": "a secret owned by an account: no label, never another key's",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "other",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-owner"
+      }
+    },
+    {
+      "name": "administrators named on a POSIX platform: not its administrator",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": false,
+          "owner": "administrators",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-owner"
+      }
+    },
+    {
+      "name": "root named on Windows: not its administrator",
+      "input": {
+        "platform": "windows",
+        "secret": {
+          "link": false,
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-owner"
+      }
+    },
+    {
+      "name": "reached through a symbolic link: no label",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": true,
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-link"
+      }
+    },
+    {
+      "name": "a link is named before an owner",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": true,
+          "owner": "other",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-link"
+      }
+    },
+    {
+      "name": "writable by another account: no label",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": false,
+          "owner": "root",
+          "writableByOthers": true,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-mode"
+      }
+    },
+    {
+      "name": "in a folder another account can write, or not the administrator's: no label",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": false,
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": false,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-mode"
+      }
+    },
+    {
+      "name": "on Windows, an ACE granting another SID write: no label",
+      "input": {
+        "platform": "windows",
+        "secret": {
+          "link": false,
+          "owner": "administrators",
+          "writableByOthers": true,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "none": "secret-mode"
+      }
+    },
+    {
+      "name": "the owner is named before the mode",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": false,
+          "owner": "other",
+          "writableByOthers": true,
+          "folderOk": true,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
         },
         "orgId": "org-7f3a"
@@ -95,8 +276,12 @@
     {
       "name": "31 bytes: no label",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e"
         },
         "orgId": "org-7f3a"
@@ -108,8 +293,12 @@
     {
       "name": "33 bytes: no label",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"
         },
         "orgId": "org-7f3a"
@@ -121,8 +310,12 @@
     {
       "name": "an empty file: no label",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": ""
         },
         "orgId": "org-7f3a"
@@ -132,23 +325,31 @@
       }
     },
     {
-      "name": "owned by an account and of the wrong size: the owner is named first",
+      "name": "the mode is named before the size",
       "input": {
+        "platform": "posix",
         "secret": {
-          "owner": "other",
+          "link": false,
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": false,
           "hex": "00"
         },
         "orgId": "org-7f3a"
       },
       "expected": {
-        "none": "secret-owner"
+        "none": "secret-mode"
       }
     },
     {
       "name": "an organization id of 129 characters",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
         },
         "orgId": "oaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -160,8 +361,12 @@
     {
       "name": "an organization id that is an address",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
         },
         "orgId": "ops@example.org"
@@ -173,8 +378,12 @@
     {
       "name": "an organization id that starts with a separator",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
         },
         "orgId": "-org"
@@ -186,8 +395,12 @@
     {
       "name": "an empty organization id",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
         },
         "orgId": ""
@@ -199,8 +412,12 @@
     {
       "name": "bytes not in lower-case hex",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
         },
         "orgId": "org-7f3a"
@@ -212,8 +429,12 @@
     {
       "name": "an odd number of hex digits",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0"
         },
         "orgId": "org-7f3a"
@@ -225,8 +446,12 @@
     {
       "name": "a file far larger than a secret",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
           "hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
         },
         "orgId": "org-7f3a"
@@ -238,8 +463,62 @@
     {
       "name": "an owner this reference does not name",
       "input": {
+        "platform": "posix",
         "secret": {
+          "link": false,
           "owner": "wheel",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "a platform this reference does not name",
+      "input": {
+        "platform": "darwin",
+        "secret": {
+          "link": false,
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "a flag that is not a boolean",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": "no",
+          "owner": "root",
+          "writableByOthers": false,
+          "folderOk": true,
+          "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "orgId": "org-7f3a"
+      },
+      "expected": {
+        "fault": "input-invalid"
+      }
+    },
+    {
+      "name": "no folder flag",
+      "input": {
+        "platform": "posix",
+        "secret": {
+          "link": false,
+          "owner": "root",
+          "writableByOthers": false,
           "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
         },
         "orgId": "org-7f3a"
@@ -251,6 +530,7 @@
     {
       "name": "no secret",
       "input": {
+        "platform": "posix",
         "orgId": "org-7f3a"
       },
       "expected": {

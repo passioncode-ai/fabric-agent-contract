@@ -270,9 +270,9 @@
 - **Used by:** FLW-17
 - **Purpose:** a host's card for a service shows a second copy honestly: never as an outage, and as two copies where the supervisor's pid shows one.
 - **Elements:** the service's state from its well-known document; under launchd a "two copies" (`duplicate`) mark with both pids; the second copy's one sentence in its log (primary action: none; the operator removes the duplicate install).
-- **States:** loading — a supervised copy waits for the lock (launchd: `duplicate`; Task Scheduler: the holder `ready`, the wait not visible); error — the second copy exited 75 naming the holder, the holder unknown, or the markers; success — one copy runs and answers.
-- **Coverage:** `src/service-supervisor.ts`, `test/service-supervisor.test.ts`, `fixtures/semantic/service-lock-*.json`
-- **Scenarios:** SCN-026
+- **States:** loading: a supervised copy waits for the lock (launchd: `duplicate`; Task Scheduler: the holder `ready`, the wait not visible); error: the second copy exited 75 naming the holder, the holder unknown, or the markers; error: `foreign-user`: another OS account's listener holds the port, or its owner cannot be told, with the line "Another account on this computer is using this service's port; nothing was sent to it." (DEC-0154 HA-2); success: one copy runs and answers.
+- **Coverage:** `src/service-supervisor.ts`, `test/service-supervisor.test.ts`, `fixtures/semantic/service-lock-*.json`; `foreign-user`: the state-order vectors owed by CT-229
+- **Scenarios:** SCN-026, SCN-056
 - **Resources:** service specification, One copy
 - **Status:** proposed
 

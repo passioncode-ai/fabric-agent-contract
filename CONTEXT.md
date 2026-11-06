@@ -363,7 +363,9 @@ operator's own machine, **T1** an enrolled machine of the same owner, **T2** eve
 A `relayed` action from a T0 or T1 caller carries the operator's decision (**Relayed decision**, DEC-0121).
 Over the relay a node places a sender in T1 from the estate record it applied (`relayCallerTier`, DEC-0106); over the
 estate's relay a sender that is not T1 is T2 and its call is refused, and `unknown-state` is a denial, not T2 (DL-28,
-DEC-0106, the wording DEC-0137).
+DEC-0106, the wording DEC-0137). On a host with more than one **Counted OS account**, a token-free loopback door places
+a caller in T0 only after checking the peer's OS account, and a port forwarder's callers are T2 (HA-3, DEC-0154,
+proposed).
 
 **Adaptation plan**: What a person moves into an organization they join: projects, history, results and schedules.
 The plan's draft and the inventory it is chosen from stay in the person's Fabric; only its organization part, what the
@@ -641,9 +643,26 @@ cells of agent × skill × project × UTC day × outcome, with no person dimensi
 **Access log**: An `access-log/1` document: who read which scope of one subject's data — keyed by
 their user id or by a device bound to them — when and why, readable by that subject.
 
-**Device**: A computer enrolled with an organization server under `fabric-device/0.1` (DEC-0031):
+**Device**: One counted OS account of a computer, or a virtual machine, enrolled with an organization server under
+`fabric-device/0.1` (DEC-0031; DEC-0154, proposed; what an estate machine is on such a host is CT-231):
 a key-bound short-lived certificate (the key in hardware, a platform store or a file, as `key.storage` states) that also attributes everything it sends, a server-issued
 stream epoch, signed policy layers and periodic check-ins.
+
+**Counted OS account**: An OS account a person or an organization signs in with, or runs Fabric or an agent service
+under; root, SYSTEM and the system's service accounts are not counted ([service](docs/specification/service.md#counted-os-accounts),
+DEC-0154, proposed). "A host with more than one OS account" counts only these.
+
+**Port claim**: A `passioncode-port-claim/1` file `.passioncode-ports.<service-id>.<account>.json` in the host's shared
+sticky folder, owned by the account it names by uid (SID on Windows), listing the ports that account records for a
+service; it keeps two accounts' installers from one port and grants nothing (HA-1, DEC-0154, proposed).
+
+**`foreign-user`**: The state of a local service whose port is held by a listener of another OS account, or by one
+whose owner cannot be told; ordered after `down` and before `foreign`, it wins over any well-known answer, and nothing
+is sent to it (HA-2, DEC-0154, proposed).
+
+**Host label**: `device.hostLabel`, an HMAC of the host's root-owned secret over the organization's id, the same for
+every device of one organization on one host; organizations with no code on the host cannot link it (HA-4,
+[devices](docs/specification/devices.md#the-host-label), DEC-0154, proposed).
 
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that
 order, and a locked key is never overridden by a lower layer.
