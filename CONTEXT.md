@@ -486,7 +486,10 @@ a hand-over, the word naming the deploy of a commit that serves source to anyone
 commit and audience); a copy moved within the operator's own estate (here, the accounts and placements the operator
 alone holds) to a place that is not public and that no one outside the operator can read (a private mirror the operator
 owns) is none either. The home carve-out never lets a personal agent's source move into an organization's or a public
-repository, or onto an organization's or a team's placement or one that anyone who could not already read the home can read, which stays one; serving the
+repository, or onto an organization's or a team's placement or one that anyone who could not already read the home can read, which stays one; an `org:<orgId>` context instance on a
+machine the operator holds, run under a share grant (DEC-0082, DEC-0086), is the owner's placement serving the
+organization and no hand-over, while a placement on a machine, registry or repository the organization holds is one
+(a machine the operator holds stays his when it is enrolled in an organization (enrollment gives the organization a device record, not the machine); an OS account or machine the organization owns whole (its org-cloud machine, or an account such as an organization's own macOS user on a shared host) is the organization's); serving the
 running agent to a team (`peer`, client keys) gives no one the tree, except a prompt or resource that is a source file
 served verbatim, or a bundle built without minification, which is the source tree served. It is taken only on the
 operator's word for that act naming the agent, the target (the source commit, or the repository for an organization's

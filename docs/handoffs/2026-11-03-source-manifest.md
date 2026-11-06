@@ -25,7 +25,7 @@ source, what never travels with it, the check before a source export, and how a 
   `source-tree`, `source-package`, `fabric-source/1` in the protocol register; `pnpm --silent validate <dir> --kind
   source-tree` (Git mode with Git's location variables removed and no read through a link, a walk otherwise with a note
   saying why, folder-relative output that never repeats a found value) and the pair in `pnpm validate <dir>`;
-  `fixtures/vectors/source-tree.json` (89 tree cases, 32 patch cases and a `constants` block written from the module's
+  `fixtures/vectors/source-tree.json` (90 tree cases, 32 patch cases and a `constants` block written from the module's
   exports) from `tools/vectors/source-tree.ts`;
   2 positive and 19 negative schema fixtures, 27 semantic fixtures.
 - [source](../specification/source.md) (new), the register (`FAC-SEM-156` to `FAC-SEM-160`; next free `FAC-SEM-162` on this branch when this line was written, the landed marker set at the acceptance edit;
@@ -381,7 +381,11 @@ source, what never travels with it, the check before a source export, and how a 
   wording qualified ("on its own", with the operator's permission his own act), the three requirement rows extended,
   an org context instance on the owner's machine (source.md, contexts.md, the knowledge base's item 9), the vectors'
   credential clause, a Git-mode CLI test of the gitlink exception (failing with round 55's `src/validate-cli.ts`),
-  SCN-002's skipped-file line and the merge notes; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  SCN-002's skipped-file line and the merge notes; round 58 (not clean: a flat wording in conformance.md's hand-over
+  row) answered as decided: that row qualified and the living pages swept again, the enrolled-machine clause in
+  source.md, contexts.md, `CONTEXT.md` and the knowledge base's item 9, a unit test of a sparse list's hole, the
+  manifest-as-text sentence qualified, a tree vector of an unused folder exclude over the manifest's path, and the
+  ops-digest landing step; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -480,6 +484,10 @@ source, what never travels with it, the check before a source export, and how a 
   - `.git` in every form a case-insensitive or Windows file system resolves to it is never source, and a patch path an
     `exclude` entry names under ASCII case folding is refused, since on such a file system the two spellings are one
     file and the rule is otherwise bypassed.
+- Round 58, decided by the coordinator under the operator's recorded rules:
+  - every flat wording on the living pages about a personal home's access, visibility or transfer is qualified;
+  - a machine the operator holds stays his when it is enrolled in an organization; an OS account or machine the
+    organization owns whole is the organization's.
 - Round 57, decided by the coordinator under the operator's recorded rules:
   - an agent never gives new access, changes a personal private home's visibility or transfers a personal home on its
     own; with the operator's explicit permission for that act it is his own act, no act of this contract;
@@ -699,6 +707,21 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 58's fixes were checked on the working tree over head `068f47ad` (this note's commit holds the same tree, plus
+this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files with 10256 passed
+and 3 skipped under the coverage floors, `ux:lint`, `docs:check` passed with 0 markdownlint errors, `privacy:check` with
+0 findings), run under the shared lock with the 15-minute load at 30.4 and 13 GB free, and `pnpm exec tsx
+tools/vectors/run.ts` (exit 0, 29 files match; `source-tree.json` 90 tree and 32 patch cases); before it `pnpm
+typecheck` (exit 0), `pnpm vectors:write` then `pnpm vectors:check` (exit 0) and the targeted coverage run over
+`source-rules`, `validate-cli`, `secret-shape`, `schema-compilation`, `consistency`, `validate-cli-faults`,
+`rule-tolerance` and `positive-sweep` (exit 0: 3259 passed, 2 skipped; `src/source-rules.ts` at 100 % of its branches,
+`src/validate-cli.ts` at 99.48 %). The sparse-list unit test fails with `Array.from` replaced by a plain `flatMap` for
+one run (an empty answer where one index is expected) and passes on this tree. No U+2014 in the added lines. The
+knowledge base's PR is at `20b00209` (round 58 merged the knowledge base's main `f9ed924f`, item 8 as main has it):
+`source hand-over` in 4, 3 and 3 lines of agents-first, principles and rules, `own estate` once on each, item 9 once
+and item 8 once; the knowledge base's `npm test` (exit 0, 172 passed) and `npm run verify:content` (exit 0, backlog 0
+errors).
 
 Round 57's fixes were checked on the working tree over head `4c96b4b2` (this note's commit holds the same tree, plus
 this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files with 10254 passed
@@ -1104,7 +1127,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 57 into `26eec366` (the PR's head), which carries main's `83af1b98`,
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 58 into `20b00209` (the PR's head), which carries main's `f9ed924f`,
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). PR #235 (DEC-0148) and DEC-0150 are already on main (`1016f0ec` when re-measured in round
    50), so nothing is refreshed for them. Merge the current `origin/main` (re-measure its head at landing) into the fresh branch
@@ -1129,13 +1152,13 @@ remaining steps, in order:
 6. Pair PR #628 only with a contract head that carries the same round of the readings (the round named in DEC-0149's
    status line and in RM-36's "Restated 2026-11-05" line in the PR's `knowledge/roadmap.md`, not its last commit,
    which may be a merge of main), and re-read the pair on the round-40 and round-41 points before landing.
-   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`83af1b98` at
-   round 57, merged into the PR as `26eec366`): if it is behind, merge main into it (never a rebase or a force-push),
+   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`f9ed924f` at
+   round 58, merged into the PR as `20b00209`): if it is behind, merge main into it (never a rebase or a force-push),
    keeping main's item 8 as main has it and the PR's item 9, and set the round named in RM-36's "Restated 2026-11-05"
    line to the landing round. Then merge PR #628, fetch the knowledge base
    checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `26eec366`, which carries the knowledge base's main, they print 4, 3 and 3
+   `knowledge/rules.md`; at PR #628's head `20b00209`, which carries the knowledge base's main, they print 4, 3 and 3
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
    agents-first item 9, "A source hand-over takes the operator's word on that act" (main's own item 8 is "No person in
@@ -1198,7 +1221,8 @@ with `origin/main`, read from the section "Left to the landers of DEC-0149 and D
 1. The fold: `foldDir = (dir) => foldPath(dir)` in `src/ops-digest.ts`, deleting `NUSKHURI`, `toMkhedruli` and the
    local copy of the code points HFS+ ignores there; the parity comment in `test/ops-digest.test.ts` reworded. The
    merge post then says that `src/ops-digest.ts` imports `./source-rules.js`, so a consumer copying `ops-digest.ts`
-   needs `source-rules.ts` beside it.
+   needs `source-rules.ts` beside it. After the fold step, `ops-digest.md` says the fold is `source-rules`' `foldPath`
+   (`src/ops-digest.ts` imports `./source-rules.js`).
 2. The JWT test: `digestFoldersRules` calls `hasJwt` in place of `JWT_SHAPE.test`, the import dropped, and the OD-2
    and `FAC-SEM-167` sentences of `ops-digest.md` name `hasJwt`.
 3. The mirror lines: every in-progress marker after a DEC-0149 citation on main dropped (ops-digest.md, the comments
@@ -1211,7 +1235,7 @@ with `origin/main`, read from the section "Left to the landers of DEC-0149 and D
 5. The schema count in `test/schema-compilation.test.ts`: 151 (150 on main with DEC-0153, one for DEC-0149).
 
 The bullets below that still say "whichever lands second" for DEC-0153 are these steps; this branch does not merge
-main in round 56, so they are done at the landing merge. DEC-0150 and DEC-0151 reserved DEC-0150, DEC-0151 and FAC-SEM-162 to FAC-SEM-165.
+main before its landing merge, so they are done there. DEC-0150 and DEC-0151 reserved DEC-0150, DEC-0151 and FAC-SEM-162 to FAC-SEM-165.
 The channel-agent branch adds `schemas/service-channel-agent-extension.schema.json` and edits `src/semantic-rules.ts`,
 `src/protocol-revisions.ts`, `vitest.config.ts`, `fixtures/catalogue.json` and `src/secret-shape.ts` (`rawValues` only);
 the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds no schema, and edits

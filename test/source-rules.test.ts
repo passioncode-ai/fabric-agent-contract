@@ -420,11 +420,14 @@ describe("which files are source", () => {
     // A value that is not a list is refused whole, by its name.
     expect(patchPathsAllowed(manifest, "src/main.ts" as unknown as string[])).toEqual(["paths"]);
     expect(patchPathsAllowed(manifest, null as unknown as string[])).toEqual(["paths"]);
-    // A hole in a sparse list is visited and refused by its index.
-    const sparse: unknown[] = ["src/main.ts"]; sparse[2] = "src/b.ts";
-    expect(patchPathsAllowed(manifest, sparse)).toEqual(["paths[1]"]);
     // A refused path that is not a string is named by its index, never shown.
     expect(patchPathsAllowed(manifest, [3, "src/main.ts", { key: "sk-x" }, null])).toEqual(["paths[0]", "paths[2]", "paths[3]"]);
+  });
+
+  it("refuses a hole in a sparse paths list by its index (every index is visited, as Array.from does)", () => {
+    const sparse: unknown[] = ["src/main.ts"];
+    sparse[2] = "src/a.ts";
+    expect(patchPathsAllowed(manifest, sparse)).toEqual(["paths[1]"]);
   });
 });
 

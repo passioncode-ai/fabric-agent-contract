@@ -127,7 +127,8 @@ HFS+ ignores removed, ASCII case folded and any trailing run of dots and spaces 
 exceptions (`.env.example`, `.env.sample`, `.env.template`) match only the name as written, in lower case, so
 `.ENV.EXAMPLE`, `.env.example.` or `.env.sample` and a space is a credential file again: the exceptions fail closed. A
 Keynote presentation (`.key`) is a credential file by the pack's list too; leave it out of the source with `exclude`. The
-manifest is never binary either: the tree check reads it as text whatever a caller marks, and `FAC-SEM-157` refuses a
+manifest is never binary either: the tree check reads it as text whatever a caller marks (unless a gitlink sits at its
+path, which blocks on its own as a `nested-repository`), and `FAC-SEM-157` refuses a
 `binaries` entry that names it in any spelling. No
 `unchecked` entry names `fabric.source.json`, in any spelling under the fold: the manifest always travels and is always
 read, so `FAC-SEM-157` refuses such an entry and the tree check reads the manifest whatever `unchecked` says.
@@ -627,7 +628,7 @@ the whole repository of a personal agent's private home, which is not done by an
 becomes readable.
 
 What takes the word when a source becomes public: a personal agent's source made public for the first time (as a source
-export, a public repository created for it included; its own repository is not made public by an agent, as above: that is not done by an agent on its own; with the operator's explicit permission for that act it is the operator's own act under his own rule, and no act of this contract; the contract's tools do not perform it), and every later public release of a personal agent from a private home (each new commit is its own hand-over), and an
+export, a public repository created for it included; its own repository's visibility is not changed by an agent on its own, above), and every later public release of a personal agent from a private home (each new commit is its own hand-over), and an
 organization agent's private source made public (a visibility change, or its first public release from a private home;
 later public releases from that home under its release rules are the organization's own act). An organization creating
 its own agent's home public is the organization's own act, no hand-over, and so is its release of an agent whose home is
@@ -645,7 +646,7 @@ none. A copy moved within the operator's own
 estate (here, the accounts and placements the operator alone holds) to a place that is not public and that no one
 outside the operator can read (a deploy to the operator's own placement, a private mirror the operator owns) has no
 recipient and is not a source hand-over; a push or copy elsewhere that is public, that another owner holds, or that anyone who could not already read the home can read (earlier collaborators included: they count as the home's readers only inside the home itself, as the lead says), is one, except what is already public as just said. The home carve-out never lets a personal
-agent's source move into an organization's or a public repository, or onto an organization's or a team's placement or one that anyone who could not already read the home can read: that move stays a source hand-over. An `org:<orgId>` context instance on a machine the operator holds, run under a share grant (DEC-0082, DEC-0086), is the owner's placement serving the organization: the source stays in the owner's places, so it is no hand-over; a placement on a machine, registry or repository the organization holds is a hand-over ([contexts](contexts.md#one-instance-per-context-on-a-machine)).
+agent's source move into an organization's or a public repository, or onto an organization's or a team's placement or one that anyone who could not already read the home can read: that move stays a source hand-over. An `org:<orgId>` context instance on a machine the operator holds, run under a share grant (DEC-0082, DEC-0086), is the owner's placement serving the organization: the source stays in the owner's places, so it is no hand-over; a placement on a machine, registry or repository the organization holds is a hand-over ([contexts](contexts.md#one-instance-per-context-on-a-machine)). A machine the operator holds stays his when it is enrolled in an organization (enrollment gives the organization a device record, not the machine); an OS account or machine the organization owns whole (its org-cloud machine, or an account such as an organization's own macOS user on a shared host) is the organization's.
 
 Every agent follows the same rule, private or not, and a private agent is never handed over on anything less. Under
 [one approval for all the operator's agents](delegation.md#one-approval-binds-all-the-operators-agents) (DEC-0126) a
