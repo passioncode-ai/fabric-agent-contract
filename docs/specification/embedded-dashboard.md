@@ -154,8 +154,8 @@ schema, and so does this repository's checker (`FAC-SEM-080`). A rule a tool can
 
 - The host's picker: where a host lets the operator choose a scheme and a theme. Fabric Dashboards owns
   that screen.
-- A per-service choice for pages that share a cookie store: there one host-scoped cookie serves every
-  service on that host (ED-8), so a per-service choice needs another carrier, such as a cookie name per
+- A per-service choice for pages that share a cookie store: there one computer-scoped cookie serves every
+  service on that computer (ED-8), so a per-service choice needs another carrier, such as a cookie name per
   service or a message to the page. A host that gives each service its own store already has one.
 - Themes defined by the operator (their own colours) beyond choosing an id; a later revision may
   add an `accent` field to the carrier.

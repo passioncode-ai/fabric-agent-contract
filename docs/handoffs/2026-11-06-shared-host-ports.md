@@ -149,6 +149,9 @@ Proposed DEC on its own branch, and files the rest.
   service that takes it). W64 to W70 folded: the affects and Compatibility lists, the two UI lines in item 2, "computer"
   in FB's and CONTEXT's cookie scope and a comment, HA-2 pointers in `provider.md` and `relay.md`, the CT-232 check
   counting occurrences, both landing orders.
+- W71 after round 10: `embedded-dashboard.md`'s open question says "computer-scoped" and "on that computer" (ED-8),
+  as W66 did for FB-6; the two landing orders are copied from DEC-0149's handoff at `1bd70e54` (texts and commands
+  byte for byte after joining) and run on trial files in bash and zsh, replacing the description written from W70.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -210,16 +213,44 @@ Proposed DEC on its own branch, and files the rest.
   organization owns whole (on DEC-0149's branch, `source.md` and `contexts.md`; not cited before it lands). This is a
   landing edit made by whichever of DEC-0149 and DEC-0154 lands second; after both,
   `grep '^| CT-232 ' docs/backlog.md | grep -o source.md | wc -l` prints 1 (it counts occurrences, not lines).
-- The two landing orders for the watcher sentence; the landed text and the checks above are the same in both.
-  - DEC-0154 lands first. Until DEC-0149 lands, main keeps the old watcher sentence (`degraded`, 5 minutes) beside
-    HA-2. That sentence was false before DEC-0154 and is closed by DEC-0149's landing; DEC-0154's lander makes no
-    separate edit for it, and DEC-0149's lander then writes the whole landed text above.
-  - DEC-0149 lands first. Its lander changes the subject to "A watcher" and adds the second sentence about FD-76
-    without the tail "; counting `foreign` and `foreign-user` is owed (DEC-0154)", and the list of states stays
-    "(`down`, not merely `degraded`)". DEC-0154's lander then only changes the list of states to "(`down`, `foreign` or
-    `foreign-user`, not merely `degraded`)" and appends that tail. This order is written from the coordinator's
-    description (W70); it is to be checked against the text DEC-0149's fixer pushes as DB, which was not on DEC-0149's
-    branch at `d9c29245` when this was written.
+- The two landing orders for the watcher sentence, as DEC-0149's handoff writes them at `1bd70e54`
+  (`docs/handoffs/2026-11-03-source-manifest.md`, lines 1523 to 1575); its texts and commands are copied here and
+  match byte for byte once both are joined with `tr '\n' ' ' | tr -s ' '`.
+  - **Order 1: DEC-0154 lands first, DEC-0149 second.** Until DEC-0149 lands, main keeps the old watcher sentence
+    (`degraded`, 5 minutes) beside HA-2; that sentence was false before DEC-0154 and is closed by DEC-0149's landing,
+    and DEC-0154's lander makes no separate edit for it. DEC-0149's landing then writes the landed text above (its
+    order 1 text), and the two checks above run after it: 1, then 0.
+  - **Order 2: DEC-0149 lands first, DEC-0154 second.** DEC-0149's own landing changes only the first sentence's
+    subject ("Fabric Dashboards' watcher" becomes "A watcher"), keeps its list of states "`down`, not merely
+    `degraded`" on one line, and adds the second sentence without the clause on `foreign` and `foreign-user`. The
+    landed text then:
+
+    ```text
+    A watcher messages the operator only when an agent has been unavailable (`down`, not merely `degraded`)
+    for more than 15 minutes, once per case, and says it is back after 15 minutes well; a `degraded` answer opens no message, so
+    setup entries are left out (fabric-dashboards `docs/backlog.md` FD-76, ADR-0010, released in 0.7.15, read at `ebffd16`); a
+    watcher MUST NOT message the operator for an entry with `setup: true`. Fabric Dashboards' watcher opens an episode only
+    for `down` since FD-76 (0.7.15, `ebffd16`) and keeps it open while a failing source (one not marked `setup: true`)
+    outside its start baseline stays, so its failure message at 15 minutes may name that source.
+    ```
+
+    Checks after DEC-0149 lands, which print 1, 0 and 0:
+
+    ```sh
+    grep -c -F 'unavailable (`down`, not merely `degraded`)' docs/specification/service.md
+    tr '\n' ' ' < docs/specification/service.md | tr -s ' ' | grep -cF "Fabric Dashboards' watcher messages the operator only when"
+    tr '\n' ' ' < docs/specification/service.md | tr -s ' ' | grep -cF 'is owed (DEC-0154)'
+    ```
+
+    DEC-0154's lander then changes only the list of states (to "`down`, `foreign` or `foreign-user`, not merely
+    `degraded`", on one line) and adds "; counting `foreign` and `foreign-user` is owed (DEC-0154)" before the second
+    sentence's full stop, which gives the landed text above, and runs the two checks above: 1, then 0.
+  - All of these checks were run with `bash -c` and `zsh -c` on trial files built from the two landed texts. Order 1:
+    the two checks print 1 and 0 on its text; 1 and 1 on the widened claim (its subject still Fabric Dashboards'
+    watcher) on one line; 0 and 1 with a line break before its parenthesis of states; 1 and 1 with one before
+    "unavailable". Order 2: the three checks print 1, 0 and 0 on its text; 1, 1 and 0 with the subject still Fabric
+    Dashboards' watcher; 1, 0 and 1 with the clause on what DEC-0154 owes added too early; and DEC-0154's later edit
+    of order 2's text gives order 1's text word for word once joined, where order 1's checks print 1 and 0.
 - DEC-0151 and DEC-0152: the same register rules (DECISIONS tail in id order, markers from the counters, backlog in id
   order, handoffs newest first).
 

@@ -9970,7 +9970,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   HA-3, the Install, Uninstall, One copy and Start rows, the One copy section, the directories table, the caller
   table, the A2A paragraph, `FAC-SEM-010`'s register row), `docs/specification/provider.md` (a loopback `run.mcp.url`
   under HA-2), `docs/specification/relay.md` (a loopback relay under HA-2), `docs/guides/connecting-compatible-agents.md`
-  (the note on HA-1 to HA-3), `src/semantic-rules.ts` (`FAC-SEM-010`'s comment), `test/delegation-sealed.test.ts` (FB-6's "computer"), `docs/handoffs/README.md`,
+  (the note on HA-1 to HA-3), `src/semantic-rules.ts` (`FAC-SEM-010`'s comment), `test/delegation-sealed.test.ts` (FB-6's "computer"), `docs/specification/embedded-dashboard.md` (ED-8's
+  "computer" in its open questions), `docs/handoffs/README.md`,
   `schemas/service-descriptor.schema.json` (`paths.data`'s description), `docs/specification/delegation.md` (the
   header, DL-25's T0 row, the relay paragraph and the accepted gap, the open item on `surfaces.mcp.auth`),
   `docs/specification/profiles.md` (the loopback card), `docs/specification/session-handoff.md` (SH-9's pointer),
