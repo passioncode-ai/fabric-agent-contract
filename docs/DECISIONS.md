@@ -9504,8 +9504,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       readings passed.
       Decided by the coordinator in round 69: the knowledge base's authority.md says counting `foreign` and
       `foreign-user` is proposed for FD's watcher in contract DEC-0154, true in either landing order; DEC-0154's own
-      step changes it on its acceptance day. Round 69's product reading failed (item DG); its unit and seam readings
-      are still running.
+      step changes it on its acceptance day; DEC-0154's handoff describes both landing orders with the same landed texts
+      and checks. Round 69's product reading failed (item DG); its unit and seam readings passed.
       The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the

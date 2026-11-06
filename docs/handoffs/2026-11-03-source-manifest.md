@@ -448,8 +448,9 @@ source, what never travels with it, the check before a source export, and how a 
   excluded untracked nested repository and an excluded tracked symbolic link, and the third Git-mode listing read as
   "a listed path an `include` entry names as a folder or lies beneath" (item DF); round 69 (not clean: product FAIL, item DG, authority.md said FD's
   watcher owes `foreign` and `foreign-user` under DEC-0154, false in order 2 when PR #628 merges before DEC-0154 lands;
-  unit and seam readings still running when this was written) answered as decided: "proposed for FD's watcher in
-  contract DEC-0154", changed by DEC-0154's own step on its acceptance day; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  unit PASS; seam PASS) answered as decided: "proposed for FD's watcher in
+  contract DEC-0154", changed by DEC-0154's own step on its acceptance day; DEC-0154's handoff named as describing both
+  orders, byte-identical after joining (item DH); round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -1514,8 +1515,9 @@ file of its own; where its lines meet this landing's: the coverage `include` of 
 `src/host-label.ts`, `src/validator.ts`, `src/channel-agent.ts` and `src/ops-digest.ts`), the handoffs README row, and
 the tails of `docs/DECISIONS.md` (ordered through DEC-0154) and `docs/backlog.md` (in id order). DEC-0154's handoff also
 names the watcher sentence in `service.md`, DEC-0149's watcher text (`service.md` lines 222 to 225 on this branch).
-DEC-0154's handoff describes only the order in which DEC-0149 lands second, so both orders are written here, each with
-its landed text and its checks (round 68, DB). In both, the first sentence keeps everything but its subject and its
+Both orders are written here, each with its landed text and its checks (round 68, DB); DEC-0154's handoff describes
+both orders with the same landed texts and checks (byte-identical after joining; DEC-0154 at `7272832f`, round 69,
+DH). In both, the first sentence keeps everything but its subject and its
 list of states as it is: once per case, back after 15 minutes well, a `degraded` answer opening no message, setup
 entries left out, the FD-76 and ADR-0010 references, and the MUST NOT for an entry with `setup: true`; and the second
 sentence, Fabric Dashboards' released fact, follows them (round 65, CJ and CP; `foreign` from DEC-0154's W14: a
@@ -1575,8 +1577,7 @@ Checks after DEC-0149 lands:
 
 Later DEC-0154's lander changes only the list of states (to "`down`, `foreign` or `foreign-user`, not merely
 `degraded`", on one line) and adds "; counting `foreign` and `foreign-user` is owed (DEC-0154)" before the second
-sentence's full stop, which gives order 1's landed text, and runs order 1's two checks. The coordinator passes this
-order to DEC-0154 separately.
+sentence's full stop, which gives order 1's landed text, and runs order 1's two checks.
 
 All these checks were run in round 68, taken from this note and run with `bash -c` and `zsh -c` from the root of
 probe copies of `service.md` built from the two landed texts above. Order 1: the positive and the negative print 1
