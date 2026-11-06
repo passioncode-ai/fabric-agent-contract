@@ -178,7 +178,7 @@
       }
     },
     {
-      "name": "one short of twice the hour before: no rise",
+      "name": "9 failures after 5: below the minimum of 10 (and short of twice), no rise",
       "input": {
         "counts": [
           {
@@ -224,6 +224,58 @@
         "total": {
           "ok": 0,
           "failed": 9,
+          "unknown": 0
+        },
+        "risen": []
+      }
+    },
+    {
+      "name": "10 failures after 6: at least 10 but short of twice the hour before, no rise",
+      "input": {
+        "counts": [
+          {
+            "op": "cycle.receipt",
+            "ok": 0,
+            "failed": 10,
+            "unknown": 0
+          }
+        ],
+        "from": "2026-11-04T17:00:00.000Z",
+        "previous": {
+          "schema": "ops.digest.hourly@1",
+          "from": "2026-11-04T16:00:00.000Z",
+          "to": "2026-11-04T17:00:00.000Z",
+          "ops": [
+            {
+              "op": "cycle.receipt",
+              "ok": 0,
+              "failed": 6,
+              "unknown": 0
+            }
+          ],
+          "total": {
+            "ok": 0,
+            "failed": 6,
+            "unknown": 0
+          },
+          "risen": []
+        }
+      },
+      "expected": {
+        "schema": "ops.digest.hourly@1",
+        "from": "2026-11-04T17:00:00.000Z",
+        "to": "2026-11-04T18:00:00.000Z",
+        "ops": [
+          {
+            "op": "cycle.receipt",
+            "ok": 0,
+            "failed": 10,
+            "unknown": 0
+          }
+        ],
+        "total": {
+          "ok": 0,
+          "failed": 10,
           "unknown": 0
         },
         "risen": []

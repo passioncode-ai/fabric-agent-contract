@@ -283,7 +283,10 @@ export function opsDigestRules(kind: string, value: JsonObject): Finding[] | und
   if (total !== null && Array.isArray(value.ops)) {
     for (const counter of COUNTERS) {
       const want = totals[counter];
-      if (want !== null && count(total[counter]) !== null && total[counter] !== want) window(`/total/${counter}`, `total.${counter} is the sum of ops' ${counter}, ${want}`);
+      if (want === null || count(total[counter]) === null) continue;
+      // A sum of safe counts can pass 2^53 - 1; then no total can equal it, and the message says so rather than print it.
+      if (!Number.isSafeInteger(want)) window(`/total/${counter}`, `the sum of ops' ${counter} is beyond 2^53 - 1, so no total.${counter} can be it`);
+      else if (total[counter] !== want) window(`/total/${counter}`, `total.${counter} is the sum of ops' ${counter}, ${want}`);
     }
   }
 
@@ -361,17 +364,21 @@ export function digestFoldersView(descriptor: unknown): DigestFoldersView {
 
 /**
  * Georgian Nuskhuri (U+2D00 to U+2D25), where the case mappings leave Asomtavruli (U+10A0 to U+10C5), mapped onto
- * Mkhedruli (U+10D0 to U+10F5), since HFS+ joins Asomtavruli with Mkhedruli; as DEC-0149's `foldSegment` maps it.
+ * Mkhedruli (U+10D0 to U+10F5), since HFS+ joins Asomtavruli with Mkhedruli; as DEC-0149's `foldSegment` maps it
+ * (DEC-0149, in progress).
  */
 const NUSKHURI = /[\u2d00-\u2d25]/gu;
 const toMkhedruli = (letter: string): string => String.fromCodePoint((letter.codePointAt(0) as number) - 0x2d00 + 0x10d0);
-/** Code points HFS+ ignores in a name, stripped before the fold exactly as DEC-0149's `foldSegment` strips them. */
+/**
+ * Code points HFS+ ignores in a name, stripped before the fold exactly as DEC-0149's `foldSegment` strips them
+ * (DEC-0149, in progress); only these, not every default-ignorable code point, for parity with DEC-0149's fold.
+ */
 const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
 /**
- * A `dir` as a file system that folds case compares it, canonical caseless as DEC-0149's fold: each segment with the
- * code points HFS+ ignores removed (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F, U+FEFF), then as NFD,
- * then lower, upper and lower case, then NFC, then Georgian Nuskhuri mapped onto Mkhedruli (so Asomtavruli meets
- * Mkhedruli, as HFS+ joins them), trailing dots and spaces dropped. So `Straße` meets `STRASSE` and
+ * A `dir` as a file system that folds case compares it, canonical caseless as DEC-0149's fold (DEC-0149, in progress):
+ * each segment with the code points HFS+ ignores removed (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F,
+ * U+FEFF), then as NFD, then lower, upper and lower case, then NFC, then Georgian Nuskhuri mapped onto Mkhedruli (so
+ * Asomtavruli meets Mkhedruli, as HFS+ joins them), trailing dots and spaces dropped. So `Straße` meets `STRASSE` and
  * `Straẞe`, `σασ` meets `ΣΑΣ`, and a letter with U+0345 and another accent meets its precomposed form, which an
  * NFC-first fold splits. It also joins the dotless `ı` with `i` (and `I`): two dirs a file system may keep apart are
  * read as one, the safe direction, since the worst it does is a `FAC-SEM-168` finding on two folders.
@@ -463,7 +470,7 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     // A segment made only of dots, spaces and default-ignorable code points (those HFS+ ignores among them) is empty once
     // they are dropped; a tool that trims or strips names (Win32 path handling drops trailing dots and spaces; a reader
     // that strips ignorable code points before joining) may read it as empty, '.' or '..', another folder than the one
-    // declared, possibly outside paths.data. Refused, the safe direction. The fold for duplicates is DEC-0149's, apart.
+    // declared, possibly outside paths.data. Refused, the safe direction. The fold for duplicates is DEC-0149's (DEC-0149, in progress), apart.
     if (folder.dir.split("/").some(emptySegment)) findings.push(folderFinding(`${at}/dir`, EMPTY_SEGMENT));
     // A lone surrogate is no character a file system can name: the dir names no folder at all.
     if (LONE_SURROGATE.test(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir holds a lone surrogate, which no file system can name; write it as well-formed Unicode"));

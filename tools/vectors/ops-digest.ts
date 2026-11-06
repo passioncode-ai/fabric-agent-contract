@@ -28,6 +28,7 @@ const H15 = "2026-11-04T15:00:00.000Z";
 
 function hourCases(): Json[] {
   const before5 = hour(H16, H17, [c("cycle.receipt", 0, 5, 0)], t(0, 5, 0), []);
+  const before6 = hour(H16, H17, [c("cycle.receipt", 0, 6, 0)], t(0, 6, 0), []);
   const list: Array<[string, Json, Json]> = [
     ["counts by operation and outcome, sorted by name, with the hour's window and totals",
       { counts: [c("ipc.work:home", 5, 0, 0), c("board.tick", 3, 2, 0), c("mcp.unparsed", 0, 0, 1)], from: H17, previous: null },
@@ -41,9 +42,12 @@ function hourCases(): Json[] {
     ["twice the hour before and at least 10: a rise",
       { counts: [c("cycle.receipt", 0, 10, 0)], from: H17, previous: before5 },
       hour(H17, H18, [c("cycle.receipt", 0, 10, 0)], t(0, 10, 0), [{ op: "cycle.receipt", failed: 10, previous: 5 }])],
-    ["one short of twice the hour before: no rise",
+    ["9 failures after 5: below the minimum of 10 (and short of twice), no rise",
       { counts: [c("cycle.receipt", 0, 9, 0)], from: H17, previous: before5 },
       hour(H17, H18, [c("cycle.receipt", 0, 9, 0)], t(0, 9, 0), [])],
+    ["10 failures after 6: at least 10 but short of twice the hour before, no rise",
+      { counts: [c("cycle.receipt", 0, 10, 0)], from: H17, previous: before6 },
+      hour(H17, H18, [c("cycle.receipt", 0, 10, 0)], t(0, 10, 0), [])],
     ["9 failures with none the hour before: below the minimum, no rise",
       { counts: [c("x", 0, 9, 0)], from: H17, previous: null },
       hour(H17, H18, [c("x", 0, 9, 0)], t(0, 9, 0), [])],

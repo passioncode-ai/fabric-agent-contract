@@ -17,8 +17,10 @@ against the hour before is a rise, which a product that shows findings tells its
 close its work with a retro, `retro-after-work`, which the host asks for and counts. The split of who keeps and reads
 what is Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's commit `e1eecec0`, and this page is the
 shape every product writes, so one reader reads them all. The reference folds are this contract's
-[`src/ops-digest.ts`](../../src/ops-digest.ts) with its vectors. This page makes no claim about any product's code;
-what each product's code was read to do, at a date, is in the CT-219 handoff.
+[`src/ops-digest.ts`](../../src/ops-digest.ts) with its vectors; their errors on inputs no digest holds (a list that
+is not an array, an item that is not an object, a `from` or `day` that is not a string) are the reference's choice,
+not this page's rule. This page makes no claim about any product's code; what each product's code was read to do, at a
+date, is in the CT-219 handoff.
 
 ## The hourly digest, `ops.digest.hourly@1`
 
@@ -82,13 +84,13 @@ text among them, fails it.
   value of it: no identifier, count or credential. `FAC-SEM-167` also refuses a name the shared credential detector
   reads as a credential: a provider key's shape, in either case and anywhere in the name: `sk-` followed by 16 or more
   letters, digits, `_` or `-` (so inside any word ending in sk: `task-`, `risk-`, `mask-` and the like), `gh[pousr]_`
-  followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more letters, digits or `-`, `AKIA`
-  followed by 16 letters or digits, `glpat-` followed by 20 or more letters, digits, `_` or `-`; a JWT (`eyJ` and 2 or
-  more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any number of them, case-sensitive); a value
-  starting with `bearer` in either case, whitespace and one more character other than a line break (as JavaScript's
-  `.` reads it); or a run of 40 or more letters, digits, `+`, `/`, `=`, `_` or `-` (so across segments joined by `-`
-  or `/`) that mixes upper case, lower case and a digit. `JWT_SHAPE`, `SECRET_VALUE` and `longSecret` (together
-  `secretValue`) in [`src/secret-shape.ts`](../../src/secret-shape.ts) are the definition. So
+  followed by 20 or more letters or digits, `xox[abposr]-` followed by 10 or more letters, digits or `-`,
+  `AKIA` followed by 16 letters or digits, `glpat-` followed by 20 or more letters, digits, `_` or `-`; a JWT (`eyJ`
+  and 2 or more letters, digits, `_` or `-`, a `.`, 2 or more of them, a `.`, then any number of them,
+  case-sensitive); a value starting with `bearer` in either case, whitespace and one more character other than a line
+  break (as JavaScript's `.` reads it); or a run of 40 or more letters, digits, `+`, `/`, `=`, `_` or `-` (so across
+  segments joined by `-` or `/`) that mixes upper case, lower case and a digit. `JWT_SHAPE`, `SECRET_VALUE` and
+  `longSecret` (together `secretValue`) in [`src/secret-shape.ts`](../../src/secret-shape.ts) are the definition. So
   `ops.risk-assessment-completed` and `queue.task-assigned-to-worker` are refused and `work.session-end-task-back`
   passes, until DEC-0151's narrowing of the `sk-` shape lands.
 - **OD-3, counting.** Every record the product's log takes is counted, by `op` and outcome, in the hour it happened,
@@ -99,10 +101,10 @@ text among them, fails it.
   in its own documentation; the map is not in the digest. A product's own call refused because its own source slot is
   missing (DEC-0149, in progress: "Starting without the instance", the setup state of DEC-0044) is a setup answer, not
   a failure: it counts as `unknown`, never `failed`, so a person's unfinished setup never makes a rise. A host that
-  relays calls counts an error as it sees it: a relayed error cannot tell setup from failure (DEC-0149). `total` is
-  each counter's sum over `ops`. Each `op` is named once in `ops` and at most once in `risen`. A count, and every sum,
-  is an integer from 0 to 2^53 − 1; a product that would write a larger one writes no digest for that hour (the
-  reference folds throw). `ops` and `risen` hold at most 4096 operations each: a product keeps at most 4095 named
+  relays calls counts an error as it sees it: a relayed error cannot tell setup from failure (DEC-0149, in progress).
+  `total` is each counter's sum over `ops`. Each `op` is named once in `ops` and at most once in `risen`. A count, and
+  every sum, is an integer from 0 to 2^53 − 1; a product that would write a larger one writes no digest for that hour
+  (the reference folds throw). `ops` and `risen` hold at most 4096 operations each: a product keeps at most 4095 named
   operations per UTC day plus its one fixed overflow name, under which it counts the rest (their counts kept), so both
   its hourly and its daily lines validate; it publishes that overflow name with its outcome map. A day that would fold
   more than 4096 operations, or whose hours hold a name OD-2 refuses (its grammar, or `FAC-SEM-167`), has no daily
@@ -160,29 +162,30 @@ its own `.json` file) and tells the two apart by `schema`.
     spaces are dropped is refused (`..` + U+2060, `a/..` + U+200B + `/b`, a lone U+2060): a tool that trims or strips
     names (Win32 path handling drops trailing dots and spaces; a reader that strips those code points before joining)
     may read it as empty, `.` or `..`, another folder than the one declared, possibly outside `paths.data`. The fold
-    for duplicates below is DEC-0149's, apart from this check. Each `dir` is named once, compared under canonical
-    caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC, Georgian Nuskhuri
-    onto Mkhedruli), trailing dots and spaces dropped, segment by segment (a folder under two labels would be sent
-    twice). The home-folder and credential detectors read `dir` four ways: as written, with every default-ignorable
-    code point removed (the code points HFS+ ignores among them), and each of those with each segment's trailing dots
-    and spaces dropped (so `users./alice`, `Users /Alice`, `x` + U+200E + `users./alice` and `users` + U+2060 +
-    `/alice` hold home folders); a run of 40 or more letters, digits, `+`, `/`, `=`, `_` or `-` that mixes upper case,
-    lower case and a digit, across segments joined by `/` too (`ApplicationSupport/MyProduct/Digests2026`,
-    `Application+Support/MyProduct/Digests2026x`), is refused on purpose, since the credential detector's run includes
-    `/` so that a base64 secret holding one is still found; its finding says so and that a space or a dot inside a
-    segment (not at its end) breaks the run. A `dir` holding a lone surrogate (not well-formed Unicode:
-    `String.prototype.isWellFormed` rejects it) names no folder a file system can hold and is refused. For hiding a
-    class of dirs in a message the dir's fold counts too (`USERS/alice` folds to a home folder: it is hidden, never
-    refused). The home-folder detector applies to `dir`: `hasHomePath` refuses a value in which `home`, `users` or
-    `Users` stands at the start, right after any character that is not an ASCII letter or digit (`_`, `-`, `.`, `:`
-    and `/` included) or right after `%2F` or `%252F`, and is followed by `/`, `\`, `%2F` or `%252F` (`F` in either
-    case, here and in the `%2F` or `%252F` before) and then an ASCII letter, digit or `_`; in which `-home-`,
-    `-users-` or `-Users-` stands at the start or after such a non-alphanumeric character and is followed by an ASCII
-    letter or digit; or in which `~` stands at the start or after whitespace as JavaScript's `\s` reads it, a double
-    or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII letter or `_`, then ASCII letters,
-    digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `users/digests`, `my_users/digests`, `my-users/digests`
-    and `a/~b` are refused, and `user-digests` and `a/~1/x` pass (`a/~1/x` passes the detector; `~` is outside OD-2's
-    grammar, so it is no operation name).
+    for duplicates below is DEC-0149's (DEC-0149, in progress), apart from this check; it drops only the code points
+    HFS+ ignores, not every default-ignorable one, for parity with DEC-0149's fold. Each `dir` is named once, compared
+    under canonical caseless matching (the code points HFS+ ignores removed, NFD, lower, upper and lower case, NFC,
+    Georgian Nuskhuri onto Mkhedruli), trailing dots and spaces dropped, segment by segment (a folder under two labels
+    would be sent twice). The home-folder and credential detectors read `dir` four ways: as written, with every
+    default-ignorable code point removed (the code points HFS+ ignores among them), and each of those with each
+    segment's trailing dots and spaces dropped (so `users./alice`, `Users /Alice`, `x` + U+200E + `users./alice` and
+    `users` + U+2060 + `/alice` hold home folders); a run of 40 or more letters, digits, `+`, `/`, `=`, `_` or `-`
+    that mixes upper case, lower case and a digit, across segments joined by `/` too
+    (`ApplicationSupport/MyProduct/Digests2026`, `Application+Support/MyProduct/Digests2026x`), is refused on purpose,
+    since the credential detector's run includes `/` so that a base64 secret holding one is still found; its finding
+    says so and that a space or a dot inside a segment (not at its end) breaks the run. A `dir` holding a lone
+    surrogate (not well-formed Unicode: `String.prototype.isWellFormed` rejects it) names no folder a file system can
+    hold and is refused. For hiding a class of dirs in a message the dir's fold counts too (`USERS/alice` folds to a
+    home folder: it is hidden, never refused). The home-folder detector applies to `dir`: `hasHomePath` refuses a
+    value in which `home`, `users` or `Users` stands at the start, right after any character that is not an ASCII
+    letter or digit (`_`, `-`, `.`, `:` and `/` included) or right after `%2F` or `%252F`, and is followed by `/`,
+    `\`, `%2F` or `%252F` (`F` in either case, here and in the `%2F` or `%252F` before) and then an ASCII letter,
+    digit or `_`; in which `-home-`, `-users-` or `-Users-` stands at the start or after such a non-alphanumeric
+    character and is followed by an ASCII letter or digit; or in which `~` stands at the start or after whitespace as
+    JavaScript's `\s` reads it, a double or single quote, `=`, `/` or `\`, followed by an optional name (an ASCII
+    letter or `_`, then ASCII letters, digits, `_`, `.` or `-`) and then `/`, `\` or the end. So `users/digests`,
+    `my_users/digests`, `my-users/digests` and `a/~b` are refused, and `user-digests` and `a/~1/x` pass (`a/~1/x`
+    passes the detector; `~` is outside OD-2's grammar, so it is no operation name).
   - `source` is `^[a-z][a-z0-9-]{0,31}$`: the label the collector sends with each daily digest it reads in `dir`.
     `app` is the conventional label of a product's one folder; each label is named once in the list.
 - **Local only.** Only a descriptor whose placement is `local` (an absent `placement` is `local`) carries the key, and
@@ -229,8 +232,8 @@ A product with one folder of digests, `digests` in its data folder, writes in it
   retro since the session began or the obligation last arose, whichever is later; the host judges "wrote no retro" by
   what it observes (RW-4). One retro answers every
   time it arose since the session's last retro.
-- **RW-2, how it is asked.** The host serves it among the obligations it hands a session, naming it
-  `retro-after-work`: write the retro in the same turn as the release, or before the session ends.
+- **RW-2, how it is asked.** The host serves it among the obligations it hands a session, through each host's own
+  channel, naming it `retro-after-work`: write the retro in the same turn as the release, or before the session ends.
   It is advice: it never holds a release or an end back.
 - **RW-3, what fulfils it.** Any of: one or more lessons recorded in Project Observatory (`observatory_lesson`, one
   class key per lesson) saying what went wrong and what would have prevented it; one or more `insight/1` lines with
@@ -278,5 +281,5 @@ A product with one folder of digests, `digests` in its data folder, writes in it
   relayed remote instance's, outside this contract.
 - The identity a relayed remote instance's lines are sent under, so that N relays are not N counts.
 - A `dir` that NFC or NFD grows past 256 code points: a `dir` of 256 precomposed `ä` (U+00E4) passes `FAC-SEM-168`,
-  though DEC-0149's `inGrammar` refuses it (its probe, `test/ops-digest.test.ts` "passes a dir of 256 precomposed code
-  points that NFD doubles": no finding).
+  though `inGrammar` (DEC-0149, in progress) refuses it (its probe, `test/ops-digest.test.ts` "passes a dir of 256
+  precomposed code points that NFD doubles": no finding).

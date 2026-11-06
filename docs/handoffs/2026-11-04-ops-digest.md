@@ -15,7 +15,7 @@ fields are Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's
   retro arises, how it is asked, what fulfils it, how it is counted).
 - `schemas/ops-digest-hourly.schema.json`, `schemas/ops-digest-daily.schema.json` (closed; `pnpm validate` infers them
   by `schema`); `src/ops-digest.ts` (`foldHour`, `foldDay`, `isRise`, `FAC-SEM-166`, `FAC-SEM-167`) at 100 % branches;
-  `tools/vectors/ops-digest.ts` and `fixtures/vectors/ops-digest.json` (10 hour and 4 day cases, expected values written
+  `tools/vectors/ops-digest.ts` and `fixtures/vectors/ops-digest.json` (11 hour and 4 day cases since round 23, expected values written
   by hand); 3 positive, 9 negative and 13 semantic fixtures (with OD-9 and rounds 1 and 2: 5 positive, 16 negative and 21
   semantic fixtures named `ops-digest-*` or `service-*ops-digest*`, as `ls fixtures/<kind> | grep -c ops-digest` measures); `test/ops-digest.test.ts`.
 - Registered: `src/semantic-kinds.ts` (kinds `ops-digest-hourly`, `ops-digest-daily`), `src/semantic-rules.ts`,
@@ -29,7 +29,7 @@ fields are Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's
   `{dir, source}` (`schemas/service-ops-digest-extension.schema.json`, `dir` in the package-path grammar of
   `fabric-package.schema.json#/$defs/path`, relative to `paths.data`); `FAC-SEM-168` (receipt SEM-0168, kind
   `service-descriptor`) with `digestFoldersView` and `digestFoldersRules` in `src/ops-digest.ts`; 2 positive and 7
-  negative fixtures with catalogue rows, 6 semantic fixtures (`ops-digest-folders-*`), tests in
+  negative fixtures with catalogue rows, 7 semantic fixtures (`ops-digest-folders-*`), tests in
   `test/ops-digest.test.ts`, `test/rule-tolerance.test.ts` and `test/consistency.test.ts`; the spec section "Where a
   collector reads the daily digests", the descriptor bullet in `service.md`, the key in `interop.md` (eight keys) and
   the named-only list in `versioning.md`; two conformance rows (a product declaring its folders, a collector), the
@@ -94,11 +94,15 @@ branches. Landing this branch directly on `main` as it stands:
   next free `FAC-SEM-169`. `src/protocol-revisions.ts` and `versioning.md` hold `fabric-ops-digest/0.1` beside any
   revision another branch adds.
 - Whichever of DEC-0149 and DEC-0153 lands second edits the live mirror lines: "(DEC-0153, in progress)" in
-  `source.md`'s setup-answer sentence (DEC-0149's branch), "in progress" in `ops-digest.md`'s OD-3 (where it reads
-  "DEC-0149, in progress" before "Starting without the instance"), and "in progress" in DEC-0153's item 4, which is
-  edited if DEC-0153 is still Proposed and annotated if it is already Accepted (the register is append-only). No
-  conformance row names DEC-0149. Check after both land: `git grep -n -E 'DEC-0153, in progress|DEC-0149, in progress'
-  -- docs/specification` prints nothing.
+  `source.md`'s setup-answer sentence (DEC-0149's branch); every "(DEC-0149, in progress)" marker on this branch, in
+  `ops-digest.md` (OD-3's two citations, the duplicate fold in OD-9, the `inGrammar` case under "Not decided here"),
+  in the comments of `src/ops-digest.ts` (the fold's three doc comments and the segment check's comment) and in the
+  parity comment of `test/ops-digest.test.ts`; and "in progress" in DEC-0153's item 4, which is edited if DEC-0153 is
+  still Proposed and annotated if it is already Accepted (the register is append-only). No conformance row names
+  DEC-0149. Checks after both land: `git grep -n -E 'DEC-0153, in progress|DEC-0149, in progress' --
+  docs/specification src test` prints nothing; and when DEC-0153 was Accepted, DEC-0153's section in
+  `docs/DECISIONS.md` carries an Annotated line that names "Starting without the instance" as landed (an Annotated
+  line on another subject does not count).
 - DEC-0151's handoff resolves its overlap with this branch for the support-quality rows of `conformance.md`, the spec
   README and `docs/DOCMAP.md` under its heading "Against DEC-0153"; the second to land follows it.
 - DEC-0152 shares `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`, `docs/handoffs/README.md` and
@@ -124,14 +128,14 @@ branches. Landing this branch directly on `main` as it stands:
 
 ## Consumers
 
-A dated reading, read-only with `git ls-remote` and `gh api` on 2026-11-05, and nothing else: for each product (a) the
-repository and the commit or tag read, (b) the product's own rows that track adoption, quoted by their status, and (c)
-how the product's own `foldHour` and `foldDay` answer `fixtures/vectors/ops-digest.json` at that commit. (c) was not
-run in this session: running a product's downloaded code was refused by the session's permission rules, so each line
-says "not run" and the folds are the coordinator's or the product's to run. Anything agreed on the board is written
-"announced (board <message>)". No other claim about a product's behaviour is made here or anywhere in this
-repository; read again before relying on a line. Vendoring the vectors from the contract's release tag is every
-product's obligation.
+A dated reading, read-only with `git ls-remote` and `gh api` on 2026-11-05 and again on 2026-11-06 before the pull
+request, and nothing else: for each product (a) the repository and the commit or tag read, (b) the product's own rows
+that track adoption, quoted by their status, and (c) how the product's own `foldHour` and `foldDay` answer
+`fixtures/vectors/ops-digest.json` at that commit. (c) was not run in this session: running a product's downloaded
+code was refused by the session's permission rules, so each line says "not run" and the folds are the coordinator's or
+the product's to run. Anything agreed on the board is written "announced (board <message>)". No other claim about a
+product's behaviour is made here or anywhere in this repository; read again before relying on a line. Vendoring the
+vectors from the contract's release tag is every product's obligation.
 
 - **Fabric**: (a) `passioncode-ai/fabric` origin/main `a6f0ffda`, latest prerelease v0.3.15. (b) Its CO rows live in
   the carry-over ledger `docs/evidence/specs/2026-08-16-software-fabric-carryover.md` at `a6f0ffda` (its
@@ -143,34 +147,52 @@ product's obligation.
   that after a gap longer than a day the earlier day's daily digest is never written. That is Fabric's OD-5 departure:
   OD-5's catch-up writes a daily line for each closed UTC day that has hourly lines. (c) Not run (the round-4 readers
   reported its daily fold differing on 2 of the 4 day vectors at this commit, against this branch's
-  `fixtures/vectors/ops-digest.json`, blob `c5a0a84489ec`, unchanged since `21bb0246`).
+  `fixtures/vectors/ops-digest.json`, blob `c5a0a84489ec`, unchanged since `21bb0246`). Re-read 2026-11-06 (read only,
+  nothing run): the latest prerelease is v0.3.16 (tag commit `bcead0ef`), and origin/main is `7fcbd647`. At the
+  v0.3.16 tag CO-509 reads "narrowed 2026-11-05": a closed day with hourly lines and no daily line is folded once at
+  the next start (DEC-0153 OD-5), the stop hour, `previous` at start, the 4096 bound, `OP_NAME` and the hours the Mac
+  slept still open there. At `7fcbd647` it is narrowed again: the stop hour kept, `previous` from the last hourly
+  line, 4095 names a day plus `ops.overflow`, OD-2's grammar held locally, the hours the Mac slept not written; still
+  open there: the journal's counts, and `OP_NAME` and `OP_NAME_MAX` imported from the contract's tag once it carries
+  DEC-0153. The vector file gained one hour case in round 23 (blob `bd05f2abcfb0`), so Fabric's vendored copy is one
+  case behind until it re-vendors from the tag.
 - **Fabric Inbox**: (a) release tag v0.95.0 (`6fed640`); `passioncode-ai/fabric-inbox` origin/main `71a3edd6`, where
   its rows were read. (b) B-212 "in review (0.95.0)", shipped in the v0.95.0 tag through PR #413; B-213 "open; due
   2026-11-16"; B-210 "open; due 2026-11-16 (Fabric's side 2026-11-18)", narrowed by PR #414 to the Mac app's own
   folder (announced, board message `17613e30`). (c) Not run. Re-read 2026-11-05 18:37Z (read only, nothing run): the
   latest release is v0.96.0 (16:17Z); PR #417, "the Mac app's digests keep the stop hour, and its descriptor names
   their folder (B-213, B-210, 0.98.0)", is open, so OD-1 and OD-3 (B-213) and OD-9 (B-210) for 0.98.0 are the board's
-  claim (reply `132e7e91` on `f7758225`) until that release exists.
+  claim (reply `132e7e91` on `f7758225`) until that release exists. Re-read 2026-11-06 (read only, nothing run):
+  release v0.98.0 (`eb672c82`) carries `desktop/fabric-descriptor.cjs`, whose `buildDescriptor` writes a `local`
+  descriptor with `paths.data` and the ops-digest key with one folder, `{dir: "digests", source: "mac-app"}`. That
+  object, rebuilt by hand from `buildDescriptor`'s literal with neutral paths (its code not run), passes `pnpm
+  validate --schema service-descriptor.schema.json` with no finding (exit 0, no `FAC-SEM-168`); the fallback route,
+  the same declaration placed into this repository's `fixtures/positive/service-descriptor-ops-digest.json` in place
+  of its folders, also exits 0. Latest release v0.99.0.
 - **Fabric Dashboards**: (a) `passioncode-ai/fabric-dashboards` origin/main `9b9085bd`, latest release v0.8.23 (main
   two commits ahead). (b) FD-144 "done 2026-11-04, merged through PR #319, #323 and #324, released in 0.8.21"; FD-153 "done 2026-11-05,
   merged through PR #333, released in 0.8.23". (c) Not run.
-- **Fabric Switchboard**: (a) `passioncode-ai/fabric-switchboard` origin/main `32f94cea`, latest release v0.7.11.
-  (b) SB-250 "closed 2026-11-05: released in v0.7.11"; SB-255 "in review 2026-11-05, branch `sb-254-crash-restart`"
+- **Fabric Switchboard**: (a) `passioncode-ai/fabric-switchboard` origin/main `32f94cea`, latest release v0.7.11. (b)
+  SB-250 "closed 2026-11-05: released in v0.7.11"; SB-255 "in review 2026-11-05, branch `sb-254-crash-restart`"
   (merged to main in PR #403); SB-257 "in review 2026-11-05, branch `sb-257-stop-hour`" (merged to main in PR #405;
   the next release after 0.7.12, announced, board message `157e65b4`); SB-251 to SB-254 and SB-256 are not about
   digests. (c) Not run. Re-read 2026-11-05 18:37Z (read only, nothing run): v0.7.12 (published 16:19Z, `e6da46ff`) is
   an ancestor of `32f94cea` and contains `ba0f6cb` (PR #403); v0.7.13 (published 18:09Z, `1ac3ccd3`) contains
-  `32f94ce` (PR #405, SB-257's OD-1 work), as the board reply `36e22447` on `f7758225` says.
+  `32f94ce` (PR #405, SB-257's OD-1 work), as the board reply `36e22447` on `f7758225` says. Re-read 2026-11-06 (read
+  only): origin/main `2f77e903`, latest release v0.7.16; SB-257 reads "closed 2026-11-05: released in v0.7.13" (PR
+  #405, PR #408, release PR #410).
 - **Project Observatory**: (a) `passioncode-ai/project-observatory-dashboard` origin/main `4116b3ac`, latest release
   v0.33.1. (b) OBS-330 "open": "Accept Fabric's daily digest of its own operations log as a project record kind";
   OBS-331 "open": "A daily review of what every agent learned: once a day, read the lessons (`observatory_lesson`) and
   digests of every project ...". (c) No fold to run.
-- **The Fabric Agent Adapter**: (a) `passioncode-ai/fabric-agent-adapter` tag v0.65.0 (`3606bf89`), read with `git show`
-  on 2026-11-05, nothing run. (b) FAA-206, as its row states at that tag: "open 2026-11-04: P1. Part 1 released in 0.64.0
-  on 2026-11-05 (`8eec4815`, tag `v0.64.0`) ... part 2 waits on the digest form in the contract (CT-219, a draft by
-  2026-11-10), its date named the day the form lands. ..." (c) No fold yet. At its next re-pin `fabric-ops-digest/0.1`
-  enters its twin registers `fabric_protocols.py` and `fabric-protocols.mjs`, which its tests hold equal to the register
-  `vendor_vectors.mjs` writes into `feed-protocols-vectors.json` (the twins are kept by hand).
+- **The Fabric Agent Adapter**: (a) `passioncode-ai/fabric-agent-adapter` tag v0.65.0 (`3606bf89`), read with `git
+  show` on 2026-11-05, nothing run. (b) FAA-206, as its row states at that tag: "open 2026-11-04: P1. Part 1 released
+  in 0.64.0 on 2026-11-05 (`8eec4815`, tag `v0.64.0`) ... part 2 waits on the digest form in the contract (CT-219, a
+  draft by 2026-11-10), its date named the day the form lands. ..." (c) No fold yet. At its next re-pin
+  `fabric-ops-digest/0.1` enters its twin registers `fabric_protocols.py` and `fabric-protocols.mjs`, which its tests
+  hold equal to the register `vendor_vectors.mjs` writes into `feed-protocols-vectors.json` (the twins are kept by
+  hand). Re-read 2026-11-06 (read only): tag v0.67.0 (`f810583f`), FAA-206 still "open 2026-11-04: P1", part 2 waiting
+  on the digest form at the contract's tag.
 - **Protocol tables**: at their next re-pin, the consumers that vendor a protocol table (a deployment template's
   `src/fabric/fabric-protocols.mjs`, Fabric Dashboards' `test/fixtures/sample-service/fabric_protocols.py`, the adapter
   kit's copies in agents built on it, and any other vendored table) add `fabric-ops-digest/0.1`, as DEC-0149 asks for
@@ -191,9 +213,13 @@ product's obligation.
   them (naming `hasJwt` if DEC-0149 has landed). The Source's history (round 7's sentence on DEC-0151) is never
   rewritten. CT-222 (filed on this branch, the next free CT above every branch and main when written) widens
   `SECRET_VALUE` for underscore-form provider prefixes, `AIza` keys and `hf_` tokens, owned by DEC-0151's detector,
-  with tests from split literals. Check after both land: `grep -n -E 'until DEC-0151|in either case and anywhere in
-  the name' docs/specification/ops-digest.md` prints nothing; DEC-0153's section carries an Annotated line when
-  DEC-0153 was Accepted; and the landing diff removes no line inside DEC-0153's Decision items when it was Accepted.
+  with tests from split literals. The same rewrite reaches every place the page states the pre-DEC-0151 shapes: "in
+  either case and anywhere in the name", the `sk-` shape inside any word "ending in sk" (with its `task-`, `risk-`,
+  `mask-` examples), the `AKIA` shape followed by 16 letters or digits (DEC-0151 reads it after a boundary and in
+  upper case only), and "until DEC-0151". Check after both land: `grep -n -E 'until DEC-0151|in either case and
+  anywhere in the name|ending in sk|AKIA` followed by 16' docs/specification/ops-digest.md` prints nothing; DEC-0153's
+  section carries an Annotated line when DEC-0153 was Accepted; and the landing diff removes no line inside DEC-0153's
+  Decision items when it was Accepted.
 - **At landing, the fold:** whichever of DEC-0149 and DEC-0153 lands second does it, against DEC-0149 at `899b4710` or
   its head at landing (re-read that head and run the fold checks below against it; at `899b4710` DEC-0149 exports
   `HFS_IGNORABLE_CHAR` with no global flag and `stripHfsIgnorable` from `src/source-rules.ts` and keeps its global
@@ -203,13 +229,18 @@ product's obligation.
   test of the HFS+ class takes `HFS_IGNORABLE_CHAR.test` from `./source-rules.js`, importing only what is used.
   Checks: `pnpm typecheck` exits 0, `grep -c 'u200c-\\u200f' src/ops-digest.ts` prints 0, and the parity test in
   `test/ops-digest.test.ts` (DEC-0149's `FOLD_PAIRS` at `d4cc1e16` copied as written, plus the HFS+ samples) keeps
-  holding. The segment check stays local: DEC-0149's `inGrammar` is not swapped in, and the NFC/NFD length case it
-  would add is recorded as undecided (spec page "Not decided here", Open).
+  holding. The same commit rewords the parity comment in `test/ops-digest.test.ts` (it says the parity holds "until
+  the merged tree makes foldDir call its foldPath"; on that tree it is one implementation, so the comment says the
+  pairs pin DEC-0149's fold as `foldDir` calls it). The segment check stays local: DEC-0149's `inGrammar` is not
+  swapped in, and the NFC/NFD length case it would add is recorded as undecided (spec page "Not decided here", Open).
 - **At landing, the JWT test:** `hasJwt` is exported from `src/secret-shape.ts` only on DEC-0149's branch (at
   `b2fdbf92`), not on `main`. Whichever of DEC-0149 and DEC-0153 lands second switches the long-run check in
   `digestFoldersRules` (`src/ops-digest.ts`, `JWT_SHAPE.test(reading)`) to `hasJwt(reading)` and drops the `JWT_SHAPE`
-  import there if unused; it adds nothing to CT-212 (whose list names other files). Check after both land: `grep -c
-  'JWT_SHAPE' src/ops-digest.ts` prints 0.
+  import there if unused; it adds nothing to CT-212 (whose list names other files). The same lander rewords the spec
+  sentence that names the definition, in OD-2 and in the `FAC-SEM-167` row of `ops-digest.md` ("`JWT_SHAPE`,
+  `SECRET_VALUE` and `longSecret` (together `secretValue`) ... are the definition"), to name `hasJwt` in place of
+  `JWT_SHAPE`, and DEC-0153 item 3 gets the same through its Annotated line. Checks after both land: `grep -c
+  'JWT_SHAPE' src/ops-digest.ts docs/specification/ops-digest.md` prints 0 for each.
 - **At landing, the home-path boundaries:** DEC-0149 at `899b4710` (or its head at landing) rewrites the copies that
   count the home-path boundaries (`devices.md`, `proposals.md`, `src/proposal-rules.ts`, `activity.md` "Its scope" and
   the scope comment in `src/activity-rules.ts`) for four boundaries, `SOURCE_HOME_PATHS` among them; the device-common
@@ -248,6 +279,52 @@ product's obligation.
   it silently), and `grep -c 'defines nine extension keys' docs/specification/interop.md` prints 1; DEC-0153's client
   rows in `conformance.md` are five (DEC-0151's handoff says three; follow five), and `grep -c "^| a .*| DEC-0153"
   docs/specification/conformance.md` prints 5.
+
+## Left to the landers of DEC-0149 and DEC-0151
+
+DEC-0153 lands first (order a), so these steps of the "At landing" lines above fall to the sibling that lands after
+it, each on the tree that holds both, with its checks. Every check runs after that landing.
+
+**DEC-0149's lander** (branch `agent/ct194-source-manifest-v2-20261104`, read at `899b4710` and `b2fdbf92`):
+
+1. The fold: `foldDir = (dir) => foldPath(dir)` in `src/ops-digest.ts`; delete `NUSKHURI`, `toMkhedruli` and the
+   local `HFS_IGNORABLE` there; a test of the HFS+ class takes `HFS_IGNORABLE_CHAR.test` from `./source-rules.js`;
+   reword the parity comment in `test/ops-digest.test.ts` (the pairs now pin DEC-0149's fold as `foldDir` calls
+   it). Checks: `pnpm typecheck` exits 0; `grep -c 'u200c-\\u200f' src/ops-digest.ts` prints 0; the parity test
+   keeps holding.
+2. The JWT test: in `digestFoldersRules` (`src/ops-digest.ts`), `JWT_SHAPE.test(reading)` becomes
+   `hasJwt(reading)`, the unused import dropped; the definition sentence in OD-2 and in the `FAC-SEM-167` row of
+   `ops-digest.md` names `hasJwt` in place of `JWT_SHAPE`. Check: `grep -c 'JWT_SHAPE' src/ops-digest.ts
+   docs/specification/ops-digest.md` prints 0 for each.
+3. The mirror lines: drop the in-progress marker after every DEC-0149 citation on this branch (`ops-digest.md`
+   OD-3 twice, OD-9's duplicate fold, the `inGrammar` case under "Not decided here"; the comments of
+   `src/ops-digest.ts`; the parity comment of `test/ops-digest.test.ts`) and the DEC-0153 marker in `source.md`'s
+   setup-answer sentence; DEC-0153 is Accepted, so its item 4 stays as written and an "Annotated (<date>)" line under
+   DEC-0153 says that DEC-0149's "Starting without the instance" has landed. Checks: the mirror grep of the
+   "Siblings" section prints nothing for `docs/specification`, `src` and `test`; DEC-0153's section carries that
+   Annotated line.
+4. The home-path glosses: `source.md`'s sentence, its twin in the `SOURCE_HOME_PATHS` docstring and the comment
+   above the `hasHomePath` assertions in `test/source-rules.test.ts` stop calling `hasHomePath` the scanner for
+   values that hold no path at all; in the scope comments of `src/activity-rules.ts` and `src/proposal-rules.ts`
+   keep DEC-0149's side. Checks: the three greps of "At landing, the home-path boundaries".
+5. The schema count in `test/schema-compilation.test.ts`: 151 with both (150 on DEC-0153's landed tree).
+
+**DEC-0151's lander** (branch `agent/sqd-fields-20261104`, read at `69db2177`):
+
+1. The re-pins in `test/ops-digest.test.ts`: `FAC-SEM-167` pass cases for `queue.task-assigned-to-worker`,
+   `work.desk-booking-confirmed` and `ui.disk-usage-refreshed-hourly`; `queue.task-assigned-to-worker` moved out of
+   the refused names of "applies OD-2 in full"; the test whose title ends "(until DEC-0151), the JWT, akia" renamed,
+   its rows re-pinned (`ops.risk-assessment-completed` refused only before DEC-0151, `work.session-end-task-back`
+   passing, lower-case `akia` passing, an upper-case `AKIA` sample from pieces refused). Check: `pnpm vitest run
+   test/ops-digest.test.ts` exits 0.
+2. The page: OD-2 and the `FAC-SEM-167` row of `ops-digest.md` restated as DEC-0151's `SECRET_VALUE` reads the
+   shapes (canonical case, at a boundary). Check: the grep of "At landing, DEC-0151's narrowed detector" on
+   `docs/specification/ops-digest.md` prints nothing.
+3. The register: DEC-0153 is Accepted, so its item 3 stays as written and an "Annotated (<date>)" line under DEC-0153
+   restates the shapes as DEC-0151 reads them (naming `hasJwt` if DEC-0149 has landed). Checks: DEC-0153's section
+   carries that line; the landing diff removes no line inside DEC-0153's Decision items.
+4. `conformance.md` keeps DEC-0153's five client rows. Check: `grep -c "^| a .*| DEC-0153"
+   docs/specification/conformance.md` prints 5.
 
 ## Open
 
@@ -410,7 +487,7 @@ product's obligation.
   sentence removed, `objects()` reading a sparse array's holes, the DEC-0151 line naming the lines to annotate and the
   test title to rename, the JWT landing line (`hasJwt` is only on DEC-0149's branch) and the fold line re-read against
   DEC-0149's head at landing. Round 21 is next.
-- - Round 21 at `7e8a9429` was not clean (unit passed; product and seam each found one break, the seam tier's gates on
+- Round 21 at `7e8a9429` was not clean (unit passed; product and seam each found one break, the seam tier's gates on
   both landing orders green): the handoff counted FAC-SEM-168's checks wrongly (now named one by one, with which the
   semantic fixtures carry), and the DEC-0151 landing line would have rewritten an Accepted decision's body (now under
   the register's append-only rule: the spec page rewritten, DEC-0153 item 3 edited only while Proposed, else an

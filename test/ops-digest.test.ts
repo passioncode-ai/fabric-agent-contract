@@ -55,6 +55,13 @@ describe("FAC-SEM-166, FAC-SEM-167 and FAC-SEM-168: the operations digests and w
     expect(found("ops-digest-hourly", value)).toEqual(["FAC-SEM-166 /risen/0/op"]);
   });
 
+  it("says a total's sum is beyond 2^53 - 1 when safe counts add past it, never printing the sum", () => {
+    const max = Number.MAX_SAFE_INTEGER;
+    const value = { schema: "ops.digest.hourly@1", from: "2026-11-04T17:00:00Z", to: "2026-11-04T18:00:00Z", ops: [{ op: "a", ok: max, failed: 0, unknown: 0 }, { op: "b", ok: 1, failed: 0, unknown: 0 }], total: { ok: max, failed: 0, unknown: 0 }, risen: [] };
+    const findings = opsDigestRules("ops-digest-hourly", value) ?? [];
+    expect(findings.map((f) => `${f.instancePath} ${f.message}`)).toEqual(["/total/ok the sum of ops' ok is beyond 2^53 - 1, so no total.ok can be it"]);
+  });
+
   it("checks an hour's rise against its own counts and OD-4", () => {
     const value = hourlyOk();
     value.risen = [{ op: "cycle.receipt", failed: 13, previous: 5 }, { op: "cycle.receipt", failed: 12, previous: 5 }, { op: 7 }];
@@ -134,6 +141,15 @@ describe("FAC-SEM-166, FAC-SEM-167 and FAC-SEM-168: the operations digests and w
     expect(hourly.$defs.op.maxLength).toBe(OP_NAME_MAX);
     expect(hourly.$defs.opCount.properties.op).toEqual({ $ref: "#/$defs/op" });
     expect(hourly.properties.risen.items.properties.op).toEqual({ $ref: "#/$defs/op" });
+  });
+
+  it("keeps OD-9's dir grammar the package path's: the extension's dir resolves to fabric-package $defs.path", async () => {
+    const schema = (name: string) => JSON.parse(readFileSync(path.join(root, "schemas", name), "utf8")) as Json;
+    const dirSchema = schema("service-ops-digest-extension.schema.json").$defs.folder.properties.dir as Json;
+    expect(dirSchema.$ref).toBe("fabric-package.schema.json#/$defs/path");
+    expect(dirSchema.pattern).toBeUndefined();
+    const resolved = (await createValidator()).getSchema(`${SCHEMA_PREFIX}schemas/fabric-package.schema.json#/$defs/path`)?.schema as Json;
+    expect(resolved.pattern).toBe(schema("fabric-package.schema.json").$defs.path.pattern);
   });
 
   it("is not the rule of any other kind", () => {
@@ -480,7 +496,8 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     }
   });
 
-  // Parity with DEC-0149's fold until the merged tree makes foldDir call its foldPath (one implementation): its
+  // Parity with DEC-0149's fold (DEC-0149, in progress) until the merged tree makes foldDir call its foldPath (one
+  // implementation): its
   // FOLD_PAIRS (fixtures/vectors/source-tree.json on its branch at d4cc1e16, Unicode 17.0), copied as written, and the
   // HFS+ samples its next step adds (U+200C, U+FEFF, U+202A removed; Asomtavruli, Nuskhuri and Mkhedruli joined).
   const DEC_0149_FOLD_PAIRS: Array<[string, string]> = [
