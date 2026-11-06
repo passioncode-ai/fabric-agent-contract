@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 73 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 75 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9062,7 +9062,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   naming every degraded source; round 68 not clean: a landing row citing moved test lines; round 69 not clean: authority.md's
   clause on what DEC-0154 owes; round 70 not clean: who changes that clause in order 1; round 71 not clean: an interleaving where
   nobody changes it; round 72 not clean: DEC-0150's Status form, "the same words"; round 73 not clean: who runs the
-  check after both land), cited by round number because their heads were on the review branch, which is not
+  check after both land; round 75 not clean: the knowledge base's watcher lead, a new conflicting file),
+  cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9537,6 +9538,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       merge reruns step 6's status check first. Round 73's unit reading passed; its product and seam readings failed on
       who runs the check after both land (DEC-0154's lander could run it while step 6b's knowledge-base PR was open);
       fixed by item DM.
+      Decided by the coordinator in round 75: the knowledge base's PR #628 states the contract's rule (a message only
+      for an agent unavailable, as `service.md` defines it, for more than 15 minutes) and FD-76's released fact apart
+      (an episode opens only for `down`, at its first `down` look, and stays open on a failing source outside its start
+      baseline, so the 15-minute message may follow a shorter `down`), its clause on `foreign` kept on lines 115 and 128;
+      the merge with DEC-0154 at `9161796d` conflicts in fifteen files, `service.md`'s rule table resolved with
+      FAC-SEM-142 from DEC-0149 and FAC-SEM-143 from DEC-0154; the shared block treats a clause count other than 0 or 2
+      as a mismatch and sends an outside edit to a knowledge base row. Round 75's unit reading passed; its product
+      reading failed on the knowledge base's watcher lead and its seam reading on the new conflicting file; fixed by
+      item DN.
       The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9667,7 +9677,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 73 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 75 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9700,5 +9710,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   naming every degraded source; round 68 not clean: a landing row citing moved test lines; round 69 not clean: authority.md's
   clause on what DEC-0154 owes; round 70 not clean: who changes that clause in order 1; round 71 not clean: an interleaving where
   nobody changes it; round 72 not clean: DEC-0150's Status form, "the same words"; round 73 not clean: who runs the
-  check after both land), cited by round number (their heads were on the review branch, not kept at landing),
+  check after both land; round 75 not clean: the knowledge base's watcher lead, a new conflicting file),
+  cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

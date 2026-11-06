@@ -315,7 +315,14 @@ source, what never travels with it, the check before a source export, and how a 
   taking the earlier export commit as its parent; an organization's first public release and new outside readers
   taking the word; serving named per commit and audience; a patch beneath a symbolic link refused at apply time; the
   stated word outside a service's action (knowledge base item 9); OA-5's clause led by "not a human step"; export dates
-  with their time zone; round 45 (not clean: a nested repository read without NFC, stale wording in DEC-0149, the
+  with their time zone; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
+  (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
+  match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
+  name): `FAC-SEM-157` reads a bare entry naming an include folder as an include path, `folderInSource` keeps an
+  `unchecked` folder beneath a bare entry out of the source, and an entry that excludes a gitlink as `nestedTest`
+  reads it (bare over it or a folder holding it, ending in `/` over a folder holding it or itself) is used, each
+  tested; source.md says the index is read whenever Git answers; round 45 (not clean: a nested repository read without NFC, stale wording in DEC-0149, the
   backlog and SCN-054, the elicitation's target, and an organization's later public release) answered as decided: `nestedTest`
   and the CLI's gitlink and `listed` reads apply the grammar in NFC (tests: a nested folder NFC lengthens past the
   grammar is no nested repository in either mode, with the same lines); `FAC-SEM-157` says an include beneath an
@@ -443,7 +450,7 @@ source, what never travels with it, the check before a source export, and how a 
   both timeout tests by title (item DA); both landing orders written with their landed texts and checks, DEC-0149's
   landing always changing the subject and adding FD-76's sentence, the second lander the list of states and the clause
   on what DEC-0154 owes (item DB); authority.md citing FD's test lines 175 and 176 and `outage-alerts.ts` lines 115 to
-  117 and 160 (item DC, PR #628); DEC-0154's branch at CT-228 to CT-242 (item DD); the fourth row's example within one
+  117 and 160 (item DC, PR #628); DEC-0154's branch at CT-228 to CT-242 (item DD; CT-243 since round 75); the fourth row's example within one
   run, a restart putting the source in the baseline (item DE); CT-232's check counting occurrences; CLI tests for an
   excluded untracked nested repository and an excluded tracked symbolic link, and the third Git-mode listing read as
   "a listed path an `include` entry names as a folder or lies beneath" (item DF); round 69 (not clean: product FAIL, item DG, authority.md said FD's
@@ -473,14 +480,15 @@ source, what never travels with it, the check before a source export, and how a 
   answered as decided in item DM: the block, pasted again from the shared file, has the lander that makes the edit run
   that check once its edit is on the knowledge base's main, says what to do on a mismatch and under `set -e`, starts
   the first window at the later of the two merges and covers any other order; step 6b runs the check as the block
-  assigns it, and a deferred PR #628 merge reruns step 6's status check first; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
-  answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
-  (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
-  match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
-  name): `FAC-SEM-157` reads a bare entry naming an include folder as an include path, `folderInSource` keeps an
-  `unchecked` folder beneath a bare entry out of the source, and an entry that excludes a gitlink as `nestedTest`
-  reads it (bare over it or a folder holding it, ending in `/` over a folder holding it or itself) is used, each
-  tested; source.md says the index is read whenever Git answers; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  assigns it, and a deferred PR #628 merge reruns step 6's status check first; round 75 (not clean: unit PASS; product FAIL, the knowledge
+  base's lead and episode lines saying Fabric Dashboards' watcher messages only after 15 minutes unavailable; seam
+  FAIL, the merge with DEC-0154's `9161796d` conflicting in fifteen files, `service.md`'s rule table new) answered as
+  decided in item DN: PR #628 states the contract's rule and FD-76's released fact apart (an episode opens at the
+  first `down` look and stays open on a failing source outside the start baseline, so the 15-minute message may
+  follow a shorter `down`), the clause kept on lines 115 and 128; the merge notes re-measured at `9161796d` with
+  `service.md`'s resolution and checks; DEC-0154 at CT-228 to CT-243 and its file list dated; step 6 running the
+  knowledge base's checks after an in-place edit of PR #628 and naming its head as re-measured; CT-214's row on what
+  opens an episode; the shared block pasted again (76 lines); round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -831,6 +839,17 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 75's fix (item DN: this note, `docs/DECISIONS.md`, `docs/backlog.md` and the knowledge base's PR) was checked
+on the working tree over head `b714bceb`: the shared block (76 lines) occurs once in this note, byte for byte; `git
+merge-tree --write-tree --name-only` of `b714bceb` with `9161796d` lists fifteen conflicting files, with main
+`1c141418` fourteen, `service.md` being the new one; on that merge's `service.md` resolved as written above, the
+CT-181 sentence count prints 1 and the conflict-marker count 0; `pnpm run docs:check` (0 errors), `python3
+docs/ux/lint.py` (exit 0), `ORG_INDEX=... pnpm run privacy:check` (0 findings). The knowledge base's PR is at
+`a778f02b` (it merged its main `80d46916` as `5bec3daf`): the joined-text count of the old watcher wording prints 0,
+"proposed for FD" is on lines 115 and 128, `source hand-over` in 4, 4 and 5 lines of agents-first, principles and
+rules, `own estate` once on each, item 9 once and item 8 once; its `npm test` (exit 0, 172 passed) and `npm run
+verify:content` (0 errors). No gate ran: no code changed since round 68's. No U+2014 in the added lines.
 
 Round 73's fix (item DM: this note, `docs/DECISIONS.md` and `docs/backlog.md`) was checked on the working tree over
 head `7988cf65`: the knowledge-base clause block (74 lines) occurs once in this note, byte for byte as the shared file
@@ -1439,7 +1458,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 69 into `af17975f`, which carries main's `959f897c` (the PR's head `30ac6c55`),
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 75 into `5bec3daf`, which carries main's `80d46916` (the PR's head `a778f02b`),
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). PR #235 (DEC-0148) and DEC-0150 are already on main (`1016f0ec` when re-measured in round
    50), so nothing is refreshed for them. Merge the current `origin/main` (re-measured at landing; `1c141418` as of round 61, or later) into the fresh branch
@@ -1470,8 +1489,8 @@ remaining steps, in order:
 6. Pair PR #628 only with a contract head that carries the same round of the readings (the round named in DEC-0149's
    status line and in RM-36's "Restated 2026-11-05" line in the PR's `knowledge/roadmap.md`, not its last commit,
    which may be a merge of main), and re-read the pair on the round-40 and round-41 points before landing.
-   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`959f897c` at
-   round 69, merged into the PR as `af17975f`): if it is behind, merge main into it (never a rebase or a force-push),
+   First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`80d46916` at
+   round 75, merged into the PR as `5bec3daf`): if it is behind, merge main into it (never a rebase or a force-push),
    keeping main's item 8 as main has it and the PR's item 9, and set the round named in RM-36's "Restated 2026-11-05"
    line to the landing round. The order of the two merges is mandatory (round 65, CJ and CL): the contract PR first,
    then PR #628 straight after, one after the other in the same landing session, since PR #628 points at `service.md`'s
@@ -1480,10 +1499,12 @@ remaining steps, in order:
    Merge the contract PR, fetch, and check that the old watcher sentence is gone from its main:
    `git show origin/main:docs/specification/service.md | grep -c 'stays degraded for more than 5 minutes'` prints 0.
    Right before merging PR #628, run the status check of the knowledge-base clause rule below in the contract's
-   checkout: if it prints 1, change both clauses on PR #628 as the rule's From and To give them, commit and push; if
-   it prints 0, leave PR #628 as it is (round 71, DK; round 72, DL). Merge PR #628. Then, once PR #628 is merged, fetch the knowledge base checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
+   checkout: if it prints 1, change both clauses on PR #628 as the rule's From and To give them, commit, run the
+   knowledge base's `npm test` and `npm run verify:content` on that head (round 75), and push; if it prints 0, leave
+   PR #628 as it is (round 71, DK; round 72, DL). Merge PR #628. Then, once PR #628 is merged, fetch the knowledge base checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head `30ac6c55`, which carries the knowledge base's main, they print 4, 4 and 5
+   `knowledge/rules.md`; at PR #628's head, re-measured at landing (`a778f02b` in round 75, which carries the
+   knowledge base's main `80d46916`; when that main has moved, merge it in first), they print 4, 4 and 5
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38 and principles
    section 7 and rules section 9 their two named exceptions in round 59), and `grep -c 'own estate'` on the same three pages
    (1 each), and `grep -c '^9\. \*\*A source hand-over'` on agents-first (1 line). There the rule's home is
@@ -1507,7 +1528,7 @@ remaining steps, in order:
 At landing, write DEC-0149's merge date into source.md's line paragraph where it says "on its merge date, written here
 at landing" (and in DEC-0149 item 12's round-45 sentence). At landing, file a backlog row (an id above the highest in use or
 leased at landing, on main and on every open branch, this branch's own CT-244 included, re-measured then: CT-227 is
-main's since `1c141418`, DEC-0154's branch holds CT-228 to CT-242 (round 68, re-measured at landing), and this branch holds CT-244, which keeps its id,
+main's since `1c141418`, DEC-0154's branch holds CT-228 to CT-243 (round 75, re-measured at landing), and this branch holds CT-244, which keeps its id,
 so this row is CT-245 or above, re-measured) to inventory the personal agent
 homes, and any copy of them within the operator's estate (private mirrors, second private repositories), that people
 outside the operator can read, for the operator to review: information, not a gate, since access
@@ -1564,21 +1585,30 @@ this landing meets. The chain of the open branches that touch the same registers
 `1c141418`, is DEC-0149 (this branch), then `origin/agent/sqd-fields-20261104` (DEC-0151), then DEC-0152
 (`agent/ct217-board-same-turn-20261104`, head `d760f756` when written: `docs/DECISIONS.md`,
 `docs/specification/conformance.md`, `docs/DOCMAP.md`, `docs/backlog.md`, the handoffs index), then
-`agent/studio-ports-owner-20261106` (DEC-0154, head `190ee95e` in round 64, re-measured at landing; it merged main
-`1c141418` and holds CT-228 to CT-242, re-measured at landing). DEC-0154 touches `CONTEXT.md`, `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`,
-`docs/evidence/sources.md`, `docs/guides/connecting-compatible-agents.md`, `docs/handoffs/README.md`,
-`docs/specification/conformance.md`, `contexts.md`,
-`connections.md`, `delegation.md`, `devices.md`, `node-summary.md`, `profiles.md`, `service.md`, `session-handoff.md`, `docs/ux` (flows,
-foundation, scenarios SCN-056, screens SCR-20), `fixtures/catalogue.json` (rows inserted mid-file, so no comma step),
-`schemas/device-enrollment.schema.json`, `schemas/service-well-known.schema.json`, `tools/vectors/run.ts` and
-`vitest.config.ts`, and adds `docs/evidence/specs/2026-11-06-shared-host-gaps.md`,
-`docs/handoffs/2026-11-06-shared-host-ports.md`, `src/host-label.ts`, `test/host-label.test.ts`,
-`tools/vectors/host-label.ts`, `fixtures/vectors/host-label.json` and two device-enrollment fixtures; re-measure the
-list with `git diff --name-only` at landing. A three-way merge of this branch with `feef4e4d` conflicts in the same
-fourteen files as with main `1c141418` (measured with `git merge-tree` in round 62), so DEC-0154 adds no conflicting
-file of its own; where its lines meet this landing's: the coverage `include` of `vitest.config.ts` (the union keeps
-`src/host-label.ts`, `src/validator.ts`, `src/channel-agent.ts` and `src/ops-digest.ts`), the handoffs README row, and
-the tails of `docs/DECISIONS.md` (ordered through DEC-0154) and `docs/backlog.md` (in id order). DEC-0154's handoff also
+`agent/studio-ports-owner-20261106` (DEC-0154, head `9161796d` in round 75, re-measured at landing; it merged main
+`1c141418` and holds CT-228 to CT-243, re-measured at landing). DEC-0154's file list, measured on 2026-11-06 at
+`9161796d` against its merge base `1c141418` with `git diff --name-only` (45 files, re-measured at landing): it touches
+`CONTEXT.md`, `docs/DECISIONS.md`, `docs/DOCMAP.md`, `docs/backlog.md`, `docs/evidence/sources.md`,
+`docs/guides/connecting-compatible-agents.md`, `docs/handoffs/README.md`, the specification pages `activity.md`,
+`conformance.md`, `connections.md`, `contexts.md`, `delegation.md`, `devices.md`, `embedded-dashboard.md`,
+`fabric-button.md`, `folder-attribution.md`, `interop.md`, `node-summary.md`, `ops-digest.md`, `peer-share.md`,
+`profiles.md`, `provider.md`, `relay.md`, `service.md` and `session-handoff.md`, `docs/ux` (flows, foundation,
+scenarios, screens), `fixtures/catalogue.json`, `schemas/device-enrollment.schema.json`,
+`schemas/service-descriptor.schema.json`, `schemas/service-well-known.schema.json`, `src/semantic-rules.ts`,
+`test/delegation-sealed.test.ts`, `tools/vectors/run.ts` and `vitest.config.ts`, and adds
+`docs/evidence/specs/2026-11-06-shared-host-gaps.md`, `docs/handoffs/2026-11-06-shared-host-ports.md`,
+`src/host-label.ts`, `test/host-label.test.ts`, `tools/vectors/host-label.ts`, `fixtures/vectors/host-label.json`
+and two device-enrollment fixtures. A three-way merge of this branch (`b714bceb`) with `9161796d` conflicts in
+fifteen files, measured with `git merge-tree` on 2026-11-06 in round 75 (re-measured at landing): the fourteen it
+shares with main `1c141418` and `docs/specification/service.md`, whose rule table holds rows both sides rewrote,
+DEC-0149 the FAC-SEM-142 row and DEC-0154 the adjacent FAC-SEM-143 row (DEC-0154's next head rewrites FAC-SEM-143
+again, so the conflict stays). Its resolution: FAC-SEM-142 takes DEC-0149's side (the source hand-over exception)
+and FAC-SEM-143 takes DEC-0154's side; on the resolved file
+`grep -c 'out of this rule until a service pins a contract revision carrying CT-181' docs/specification/service.md`
+prints 1 and `grep -c '^<<<<<<<' docs/specification/service.md` prints 0 (both run on a resolution of the round-75
+merge-tree). Where its lines meet this landing's elsewhere: the coverage `include` of `vitest.config.ts` (the union
+keeps `src/host-label.ts`, `src/validator.ts`, `src/channel-agent.ts` and `src/ops-digest.ts`), the handoffs README
+row, and the tails of `docs/DECISIONS.md` (ordered through DEC-0154) and `docs/backlog.md` (in id order). DEC-0154's handoff also
 names the watcher sentence in `service.md`, DEC-0149's watcher text (`service.md` lines 222 to 225 on this branch).
 Both orders are written here, each with its landed text and its checks (round 68, DB); DEC-0154's handoff describes
 both orders with the same landed texts and checks (byte-identical after joining, at DEC-0154's head when last measured, `3c1ea1f8` in round 70's seam reading;
@@ -1664,10 +1694,10 @@ This block is byte-identical in `docs/handoffs/2026-11-03-source-manifest.md` (D
 Rule: each lander checks after its own write, so whichever lander finishes second sees the
 other's result; the edit depends on the text, so a second run changes nothing.
 
-The clause sits at `knowledge/authority.md:115` and `:128` (PR #628 at `30ac6c55`). From:
-"counting `foreign` and `foreign-user` is proposed for FD's watcher in contract DEC-0154". To:
-"counting `foreign` and `foreign-user` is owed by FD's watcher under contract DEC-0154" (no
-inner parentheses: the clause sits inside a bracket that closes right after it).
+The clause sits at `knowledge/authority.md:115` and `:128` (PR #628). From: "counting `foreign`
+and `foreign-user` is proposed for FD's watcher in contract DEC-0154". To: "counting `foreign`
+and `foreign-user` is owed by FD's watcher under contract DEC-0154" (no inner parentheses: the
+clause sits inside a bracket that closes right after it).
 
 Status check, in the contract checkout. It matches any Status line in DEC-0154's block that
 starts with `- **Status:** Accepted`, as DEC-0150's (`Accepted, merged <date>, ...`) and
@@ -1679,7 +1709,8 @@ git fetch origin && git show origin/main:docs/DECISIONS.md \
   | grep -c '^- \*\*Status:\*\* Accepted'
 ```
 
-Clause check, in the knowledge base checkout:
+Clause check, in the knowledge base checkout. A count other than 0 or 2 means someone else
+edited the clause; the lander treats it as the mismatch below:
 
 ```sh
 git fetch origin && git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'
@@ -1714,7 +1745,8 @@ git show origin/main:knowledge/authority.md \
 The first prints 0 and the second prints 2. The first `grep -c` exits 1 when it prints 0, so
 these commands are not run under `set -e`. If the check prints anything else, the lander
 records the mismatch in its handoff and runs the check again once the other lander's
-knowledge-base PR for the clause is merged or closed.
+knowledge-base PR for the clause is merged or closed, or at once when the other lander has no
+such PR; an edit from outside the two landers goes to a knowledge-base row.
 
 Interleavings: DEC-0154 merges and its clause check prints 0 (PR #628 not merged); then, if
 DEC-0149's step 6 ran before that merge, PR #628 merges with "proposed" and step 6b sees 1 and
