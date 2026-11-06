@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 58 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 59 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9053,7 +9053,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   outside the home; a personal private home's visibility change; round 56 not clean: the manifest's path
   read two ways; flat wordings beside round 55's sentence; round 57 not clean: flat access wordings;
   the patch's full fold missing from the requirement rows; round 58 not clean: a flat
-  wording in conformance.md's hand-over row), cited by round number because their heads were on the review branch, which is not
+  wording in conformance.md's hand-over row; round 59 not clean: flat wordings in the knowledge base's principles
+  section 7 and rules section 9), cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
@@ -9415,7 +9416,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       Decided by the coordinator in round 56: one reading of "at the manifest's path" (`atManifestPath`: one trailing
       `/` dropped, NFC) in the nested-repository test and its message; a patch also refuses a credential file's name
       under the full fold, while the tree check keeps its ASCII reading for parity with the adapter; a sparse `paths`
-      list's holes are refused by index; a personal agent's private home is not made public by an agent, and an agent
+      list's holes are refused by index; a personal agent's private home is not made public by an agent (superseded by round 57), and an agent
       does neither of the organization's two acts on it on its own; the adapter's pack for an organization is a hand-over
       the word gate covers.
       Decided by the coordinator in round 57: an agent never gives new access on its own, and a transfer or an act on
@@ -9428,7 +9429,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       visibility or transfer is qualified (conformance.md's hand-over row included); a machine the operator holds stays
       his when it is enrolled in an organization (enrollment gives the organization a device record, not the machine),
       while an OS account or machine the organization owns whole is the organization's; the manifest is read as text
-      unless a gitlink sits at its path, which blocks on its own.
+      (unless a nested repository, a gitlink or a folder holding its own .git, sits at its path, which blocks on its own
+      as nested-repository; a walk cannot read a manifest there at all and stops with "not a file").
+      Decided by the coordinator in round 59: the knowledge base's principles section 7 and rules section 9 read with
+      the operator's own rule (never moved, published or listed without his explicit permission for that act, which
+      makes it his own act, no act of this contract), naming the same two exceptions; a gitlink outside the manifest's
+      path is listed both as its name and as its folder, as the checker reads it, so a folder exclude entry over it is
+      used.
       The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9554,7 +9561,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 58 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 59 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9578,5 +9585,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   outside the home; a personal private home's visibility change; round 56 not clean: the manifest's path
   read two ways; flat wordings beside round 55's sentence; round 57 not clean: flat access wordings;
   the patch's full fold missing from the requirement rows; round 58 not clean: a flat
-  wording in conformance.md's hand-over row), cited by round number (their heads were on the review branch, not kept at landing),
+  wording in conformance.md's hand-over row; round 59 not clean: flat wordings in the knowledge base's principles
+  section 7 and rules section 9), cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.

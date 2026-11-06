@@ -127,11 +127,12 @@ HFS+ ignores removed, ASCII case folded and any trailing run of dots and spaces 
 exceptions (`.env.example`, `.env.sample`, `.env.template`) match only the name as written, in lower case, so
 `.ENV.EXAMPLE`, `.env.example.` or `.env.sample` and a space is a credential file again: the exceptions fail closed. A
 Keynote presentation (`.key`) is a credential file by the pack's list too; leave it out of the source with `exclude`. The
-manifest is never binary either: the tree check reads it as text whatever a caller marks (unless a gitlink sits at its
-path, which blocks on its own as a `nested-repository`), and `FAC-SEM-157` refuses a
+manifest is never binary either: the tree check reads it as text whatever a caller marks (unless a nested repository, a
+gitlink or a folder holding its own `.git`, sits at its path, which blocks on its own as `nested-repository`; a walk
+cannot read a manifest there at all and stops with "not a file"), and `FAC-SEM-157` refuses a
 `binaries` entry that names it in any spelling. No
-`unchecked` entry names `fabric.source.json`, in any spelling under the fold: the manifest always travels and is always
-read, so `FAC-SEM-157` refuses such an entry and the tree check reads the manifest whatever `unchecked` says.
+`unchecked` entry names `fabric.source.json`, in any spelling under the fold: the manifest is always source and, a nested repository at its
+path aside (above), always read, so `FAC-SEM-157` refuses such an entry and the tree check reads the manifest whatever `unchecked` says.
 
 The Fabric Agent Adapter retires its `.fabric-source-ignore` when it adopts this decision (CT-207), each entry mapped
 as follows: a path of plain source goes to `unchecked` with its reason; a file that is a credential by its name goes to
@@ -183,7 +184,7 @@ source-tree JSON document passed as a file (`pnpm validate <file> --kind source-
 ## The tree check
 
 `checkSourceTree` (kind `source-tree`) reads `{manifest, files: [{path, text?, binary?, nestedRepository?, link?}],
-instanceStrings?, listed?}` (`listed`: the paths the tree holds that an `exclude` entry can name, source or not: a file, a symbolic link, a nested repository (a gitlink the index records in Git mode, with its folder or without it; a folder holding its own `.git` in a walk), and a folder written with a trailing `/`, for `unused-exclude`); `nestedRepository: true` marks a folder that holds another repository (a submodule's gitlink, a
+instanceStrings?, listed?}` (`listed`: the paths the tree holds that an `exclude` entry can name, source or not: a file, a symbolic link, a nested repository (a gitlink the index records in Git mode, with its folder or without it; a folder holding its own `.git` in a walk), and a folder written with a trailing `/`, for `unused-exclude`; a gitlink outside the manifest's path is listed both as its name and as its folder, so a folder `exclude` entry such as `src/vendor/` is used by a gitlink at `src/vendor` even with no folder in the work tree, as the checker reads it); `nestedRepository: true` marks a folder that holds another repository (a submodule's gitlink, a
 folder holding its own `.git`), read by its path only; `link: true` marks a symbolic link, its target as `text`, read with
 `link-outside`'s rule and never a licence.
 `sourceTreeProblems` gives the same answer as structured problems, which the vectors pin. The caller restricts `files`

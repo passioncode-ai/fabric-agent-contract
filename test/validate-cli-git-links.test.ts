@@ -32,4 +32,19 @@ describe.skipIf(process.platform === "win32")("a link at a listed path that may 
     expect(result.out).not.toContain("note/walk");
     expect(asked.filter((file) => file.includes(`${path.sep}vendor${path.sep}lib${path.sep}`))).toEqual([]);
   });
+
+  it("lists a gitlink as its name and its folder, so a folder exclude entry over it is used with no work-tree folder", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "fac-git-links-vendor-"));
+    writeFileSync(path.join(dir, "fabric.source.json"), JSON.stringify({ format: "fabric-source/1", include: ["src/", "LICENSE"], exclude: ["src/vendor/"] }));
+    writeFileSync(path.join(dir, "LICENSE"), "x");
+    mkdirSync(path.join(dir, "src"));
+    writeFileSync(path.join(dir, "src/a.ts"), "x");
+    expect(spawnSync("git", ["init", "-q"], { cwd: dir }).status).toBe(0);
+    expect(spawnSync("git", ["add", "LICENSE", "src/a.ts"], { cwd: dir }).status).toBe(0);
+    expect(spawnSync("git", ["update-index", "--add", "--cacheinfo", `160000,${"4".repeat(40)},src/vendor`], { cwd: dir }).status).toBe(0);
+    const result = main([dir, "--kind", "source-tree"]);
+    expect(result.out).not.toContain("unused-exclude");
+    expect(result.out).not.toContain("nested-repository");
+    expect(result.out).not.toContain("note/walk");
+  });
 });
