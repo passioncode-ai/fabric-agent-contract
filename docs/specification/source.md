@@ -191,7 +191,9 @@ instanceStrings?, listed?}` (`listed`: the paths the tree holds that an `exclude
 folder holding its own `.git`), read by its path only; `link: true` marks a symbolic link, its target as `text`, read with
 `link-outside`'s rule and never a licence.
 `sourceTreeProblems` gives the same answer as structured problems, which the vectors pin. The caller restricts `files`
-to the source; the check also ignores any file that `isSourcePath` does not read as source. A file whose `binary` is
+to the source; the check also ignores any file that `isSourcePath` does not read as source, except a file inside an
+`include` path that an `exclude` entry names only once both are folded, which gets an `excluded-by-fold` line and is
+never read. A file whose `binary` is
 `true` has no text read, and a file under an `unchecked` path is read by its path only.
 
 | Kind | Code | Finding |
@@ -307,8 +309,8 @@ source manifest `fabric.source.json` or pass its folder; any other file is a sou
   something in it) or covers it, never into a folder outside the path grammar, never into a folder an `exclude` folder
   is or holds, or an `exclude` entry without `/` names or lies above, unless an `include` path lies under it (so an unreadable excluded folder is no usage error); it reads
   names as bytes, and a name that is not UTF-8 gets Git mode's rule: a usage error naming its folder and no part of the
-  name (`cannot read a name in src/: it is not UTF-8`, or `cannot read a name in ./: it is not UTF-8` for a name
-  directly in the root) when that folder lies in the source, otherwise skipped; a folder
+  name (`cannot read a name in src/: it is not UTF-8`) when that folder lies in the source, otherwise skipped (a
+  name directly in the root is always outside the source, so it is skipped); a folder
   holding its own `.git` a nested
   repository. When Git was there and did not list the folder, a `note/walk` line says why, naming no folder. In Git
   mode a listed path outside the grammar is dropped before any look at the file system, so neither mode reads it or
@@ -357,7 +359,7 @@ fabric.source.json: EACCES`) from a folder that holds no manifest; a manifest th
 socket, a device) or that is a symbolic link, a dangling one included, is never opened or read through (`cannot read
 fabric.source.json: not a file`; `lstat` is asked first, and only an absent entry is "the folder holds none"; the folder of a
 named `fabric.source.json` that does not resolve to a directory, links followed, such as an absent one or a dangling
-link, is `cannot read .: ENOENT`, while a link to a real folder that holds no manifest holds none, named directly or
+link, is `cannot read .: ENOENT`, and a file at that place is `cannot read .: ENOTDIR`, while a link to a real folder that holds no manifest holds none, named directly or
 through its manifest's name; a folder named directly that is absent keeps its basename, `cannot read gone: ENOENT`,
 and a dangling link named directly reads "not a file"), and neither is any source document
 named on its own that is not one. A FIFO, a socket or a device under a source path is not a source file, in Git mode and
@@ -700,7 +702,8 @@ An agent started with an empty data folder and no slot filled starts. A service 
 required slot, whose `source` is the slot's name, each with `setup: true` (the setup state of DEC-0044: it waits for a
 person), an `endpoint` slot included. A `store` slot is never a setup state: a store absent at the first start is
 created, and one the agent cannot create under its data folder is a failure entry. A filled `endpoint` the agent cannot reach is
-a failure, an entry without `setup`. A missing slot is always reported by the slot's name with `setup: true`, an
+a failure, an entry without `setup`. A missing slot is always reported by the slot's name with `setup: true`, within
+the 64-entry cap (below), an
 `endpoint` included, so a host never reads a setup state as a failing connection. Only a filled `endpoint` that fails,
 when the agent's own code knows it backs a declared [connection](connections.md), is reported under that connection's
 id, without `setup`: a real failure of that connection. The agent's code owns that mapping from slot to connection;

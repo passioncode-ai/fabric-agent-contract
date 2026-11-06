@@ -496,7 +496,13 @@ source, what never travels with it, the check before a source export, and how a 
   message; seam PASS) answered as decided in item DO: the dashed forms' prose and comment follow the patterns (the
   code and vectors unchanged); the knowledge base says what FD sends for an episode at `a0bc160` and names a `down`
   within the 15-minute calm as a continuation, as do the fourth landing row and CT-214's row; source.md shows the
-  root form of the non-UTF-8 name line; `service.md` says missing slots are reported as `setup: true` entries; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  root form of the non-UTF-8 name line; `service.md` says missing slots are reported as `setup: true` entries;
+  round 77 (not clean: unit FAIL, source.md saying a named manifest's folder that is no directory always reads
+  `ENOENT`, while a file there reads `ENOTDIR`; product PASS; seam FAIL, `service.md`'s "missing slots" wording
+  false for optional and store slots) answered as decided in item DP: `service.md` names each missing required slot,
+  source.md names `ENOTDIR`, drops round 76's root example (a non-UTF-8 name directly in the root is always outside
+  the source and skipped), qualifies the slot name by the 64-entry cap and names `excluded-by-fold` as the exception
+  to `isSourcePath`; a fifth landing row candidate on a neutral home name before punctuation; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -847,6 +853,12 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 77's fix (item DP: source.md, service.md, this note, `docs/DECISIONS.md` and `docs/backlog.md`; no code
+changed) was checked on the working tree over head `c5a2e710`: the shared block still occurs once in this note, byte for
+byte; `pnpm typecheck` (exit 0), `pnpm run docs:check` (0 errors), `python3 docs/ux/lint.py` (exit 0),
+`ORG_INDEX=... pnpm run privacy:check` (0 findings); in `service.md` the required-slot sentence counts 1 and the old
+"missing slots" wording 0. The knowledge base is unchanged at `d2a6d9f4`. No U+2014 in the added lines.
 
 Round 76's fix (item DO: source.md, service.md, a comment in `src/source-rules.ts`, this note, `docs/DECISIONS.md`,
 `docs/backlog.md` and the knowledge base's PR) was checked on the working tree over head `9cbc91ba`: the shared block still occurs once in this note,
@@ -1570,7 +1582,11 @@ minutes (round 67, item CW: within one run of the service, the same `startedAt`,
 minutes of a failing source, one not marked `setup: true`, sends the failure message at 15 minutes; after a restart
 that source is in the new start baseline and no message is sent, the same file's lines 109 and 114, round 68, DE;
 and a `down` that returns within the 15-minute calm continues the episode from its first `down` look, lines 119 to
-129 and 156 to 160, round 76). The lander writes all four rows' ids (the inventory row, the enforcing row, the timeout-test
+129 and 156 to 160, round 76). A candidate for a fifth row at landing (round 77, a unit reading's risk, no code
+changed now): a neutral home name followed by sentence punctuation is a blocking finding, since the name group of
+`SOURCE_HOME_PATHS` takes the trailing `.` (`/home/user.` gives `home-path`, `src/source-rules.ts` lines 928 to
+938); the row first checks parity with the adapter's `HOME_PATHS`, and notes as a minor item that `FAC-SEM-157`'s
+"listed twice" compares entries as written, not in NFC. The lander writes all four rows' ids (the inventory row, the enforcing row, the timeout-test
 row and this row) into this note's Open line, in the landing change. The release notes of the landing carry one more
 item: a plain `pnpm validate <dir>` skips a `.json` file that is a FIFO, a socket or a device with a `note/skipped`
 line saying it is not a file, and a `fabric.source.json` that is a symbolic link the same way (SCN-002's errors line).

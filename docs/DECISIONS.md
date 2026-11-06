@@ -9030,7 +9030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 76 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 77 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9064,7 +9064,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   nobody changes it; round 72 not clean: DEC-0150's Status form, "the same words"; round 73 not clean: who runs the
   check after both land; round 74 clean, the first since round 63, at `b714bceb`; round 75 not clean: the knowledge
   base's watcher lead, a new conflicting file, so the count of clean rounds starts again; round 76 not clean: the
-  dashed home form, the knowledge base's messages),
+  dashed home form, the knowledge base's messages; round 77 not clean: `ENOTDIR`, the required-slot wording),
   cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
@@ -9559,6 +9559,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       calm as a second continuation, as the fourth landing row and CT-214 do; the root form of the non-UTF-8 name
       line is shown; missing slots are reported as `setup: true` entries. Round 76's unit reading failed on the dashed
       form and its product reading on the knowledge base's messages; its seam reading passed; fixed by item DO.
+      Decided by the coordinator in round 77: `service.md` says an agent reports each missing required slot as a
+      `setup: true` entry; source.md says a file at a named manifest's folder reads `cannot read .: ENOTDIR`, a
+      non-UTF-8 name directly in the root is always outside the source and skipped (round 76's root example
+      withdrawn), a missing slot is reported by its name within the 64-entry cap, and a file excluded only by fold
+      gets an `excluded-by-fold` line; a neutral home name before sentence punctuation is a candidate landing row.
+      Round 77's unit reading failed (`ENOTDIR`), its product reading passed and its seam reading failed (the
+      required-slot wording); fixed by item DP.
       The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
@@ -9689,7 +9696,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 76 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 77 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9724,6 +9731,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   nobody changes it; round 72 not clean: DEC-0150's Status form, "the same words"; round 73 not clean: who runs the
   check after both land; round 74 clean, the first since round 63, at `b714bceb`; round 75 not clean: the knowledge
   base's watcher lead, a new conflicting file, so the count of clean rounds starts again; round 76 not clean: the
-  dashed home form, the knowledge base's messages),
+  dashed home form, the knowledge base's messages; round 77 not clean: `ENOTDIR`, the required-slot wording),
   cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.
