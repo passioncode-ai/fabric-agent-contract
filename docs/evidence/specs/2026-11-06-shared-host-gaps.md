@@ -98,8 +98,9 @@ loopback; that assumption is the root of G1 to G3.
   `foreign-user`, ordered before `foreign` and winning over every answer. On a computer with more than one counted account, a server should refuse a peer of another
   account before reading, and must when its clients are other vendors' programs; rotation when a service comes up on
   another port; a PKCE-bound code sent to a loopback redirect is not a credential here.
-- **Acceptance (CT-228, CT-229).** The state order's vector file with Fabric Dashboards' three cases at `53a62f9`;
-  each client's own test with a listener of a second account.
+- **Acceptance (CT-228, CT-229).** The state order's vector file with the cases of Fabric Dashboards'
+  state-precedence file (the three FD-158 cases its commit `53a62f9` adds and its older `foreign` case); each
+  client's own test with a listener of a second account.
 
 ## G3. T0 over TCP loopback
 

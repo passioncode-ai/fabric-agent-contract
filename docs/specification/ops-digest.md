@@ -148,8 +148,8 @@ its own `.json` file) and tells the two apart by `schema`.
 
 ## Where a collector reads the daily digests
 
-- **OD-9, the declaration.** A product whose daily digests a collector in the same OS account reads says where they are
-  in its own [service descriptor](service.md#descriptor), under the extension key
+- **OD-9, the declaration.** A product whose daily digests a collector in the same OS account (DEC-0154, proposed)
+  reads says where they are in its own [service descriptor](service.md#descriptor), under the extension key
   `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1` (protocol `fabric-ops-digest/0.1`, named
   in the [register](versioning.md#protocol-revisions) and pinned by no schema): a list of 1 to 8 closed objects
   `{dir, source}` ([`service-ops-digest-extension.schema.json`](../../schemas/service-ops-digest-extension.schema.json)).
@@ -193,8 +193,8 @@ its own `.json` file) and tells the two apart by `schema`.
   instance's own digests: relaying a remote instance's digests through a local folder (a server's lines fetched by a
   desktop app) is outside this contract. The key in any document other than a service descriptor is unread and
   unreported; on a remote service descriptor it is a `FAC-SEM-168` finding.
-- **The digests stay as written.** The declaration only says where a collector in the same OS account reads the daily
-  lines and which label it sends with them. The lines are read as OD-6 says (a line it cannot read skipped, never
+- **The digests stay as written.** The declaration only says where a collector in the same OS account
+  (DEC-0154, proposed) reads the daily lines and which label it sends with them. The lines are read as OD-6 says (a line it cannot read skipped, never
   stopping at one) and sent as they are, with their label, never rewritten; OD-7 holds for everything sent. A
   collector takes each day's first daily line whenever it first appears, a day a product caught up at its next run
   (OD-5) included, and sends it once. Beside `source` it sends which descriptor the line came from (its `id` and
@@ -267,7 +267,8 @@ A product with one folder of digests, `digests` in its data folder, writes in it
   of events MAY be an operation of `ops` (as RW-4's retros are); a gauge such as requests waiting has no `@1` home (the
   schemas are closed) and needs its own decision.
 - How a daily digest travels to Project Observatory (ADR-0188 §3), and how Observatory reads every product's digests:
-  OD-9 says only where a collector in the same OS account reads the daily lines and which label it sends; who collects,
+  OD-9 says only where a collector in the same OS account (DEC-0154, proposed) reads the daily lines and which label
+  it sends; who collects,
   how often and over which call is the collector's and Observatory's.
 - `pnpm validate` reading a `.jsonl` file whole.
 - Which act of each host's claim vocabulary is "a release recorded as done" for RW-1: each host names its own.

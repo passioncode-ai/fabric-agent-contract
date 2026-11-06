@@ -221,6 +221,24 @@ Proposed DEC on its own branch, and files the rest.
   (`service.md`, OD-9 and its bullets) and CT-243 for two accounts' copies of one product; the comment per OS
   account's services directory; the finder for any split and the re-read list; `(64 cases)` for round 13;
   `packages/service-host/test-vectors/state-precedence.json`.
+- Round 16 at `9161796d`: not clean (unit passed; product and seam found breaks). FAC-SEM-143's register row was
+  narrower than its check; the readers of a digest collector's scope (the extension schema's title, two conformance
+  rows, the specification README, `CONTEXT.md`) still said "machine"; the TLS twins (`CONTEXT.md`'s device request
+  signature, `src/http-signature.ts`'s comment) still said "host", so W79's "the remaining hosts reworded" was not
+  true; risks: names fixed before the rule (`agent-host`), stale lists in the Consequences, Not decided here and the
+  Open list, readers of one copy per computer (`delegation.md`'s meter, `node-summary.md`'s harness, SCN-056's alt
+  path) and the FD-158 cases misattributed. W80 folded: the row names PL's list of local hosts as the check writes it
+  (and the merge note above for DEC-0149's adjacent `FAC-SEM-142` row); every collector reader says "a collector in
+  the same OS account" and OD-9's narrowed lines carry "(DEC-0154, proposed)"; both TLS twins reworded; the host rule
+  in its four copies adds "Names and paths already fixed keep their spelling (the enrollment purpose `agent-host`,
+  file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`)", CT-231 naming `agent-host`; the DEC's
+  Consequences name every page this decision touched (CT-228 to CT-243) and Not decided here CT-243; the Open list
+  CT-229 to CT-243; a meter in the hub's OS account, the enrolling account's harness (until CT-232), one counted
+  account in SCN-056; `53a62f9` adds three FD-158 cases and the file's older case is the `foreign` one, CT-229's
+  acceptance "Fabric Dashboards' file holds these cases"; W79's summary in the DEC names the pages it reworded. The
+  W80 addendum: the shared knowledge-base block replaced with its current text (76 lines: PR #628 named without a
+  hash, a clause count other than 0 or 2 treated as the mismatch, a re-check at once when the other lander has no
+  such PR, an edit from outside the two landers to a knowledge-base row).
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -322,6 +340,11 @@ Proposed DEC on its own branch, and files the rest.
     "unavailable". Order 2: the three checks print 1, 0 and 0 on its text; 1, 1 and 0 with the subject still Fabric
     Dashboards' watcher; 1, 0 and 1 with the clause on what DEC-0154 owes added too early; and DEC-0154's later edit
     of order 2's text gives order 1's text word for word once joined, where order 1's checks print 1 and 0.
+- DEC-0149 and the rule register in `service.md`: the rows of `FAC-SEM-143` and `FAC-SEM-142` stand next to each
+  other and both branches change them, so a merge conflicts there (`git merge-tree` against `b714bceb`). Keep both
+  rows: `FAC-SEM-143` as DEC-0154 writes it (a link not a raw address whose host is a local one as PL's check lists
+  it), and `FAC-SEM-142` as DEC-0149 writes it (its source hand-over exception, out of the rule until a service pins
+  a revision carrying CT-181). Neither row's text is merged into the other.
 - DEC-0151 and DEC-0152: the same register rules (DECISIONS tail in id order, markers from the counters, backlog in id
   order, handoffs newest first).
 
@@ -336,7 +359,7 @@ Proposed DEC on its own branch, and files the rest.
   `perl -0777 -ne 'while(/DEC-0154([\s\S]{0,40}?)proposed/g){ if($1 =~ /\n/){print "$ARGV\n"; last} }' $(git ls-files docs/specification docs/guides docs/DOCMAP.md CONTEXT.md schemas src tools)`
   (it prints nothing at this head). At this head they are in `CONTEXT.md`, `docs/DOCMAP.md`,
   `docs/guides/connecting-compatible-agents.md`, `conformance.md`, `connections.md`, `contexts.md`, `delegation.md`,
-  `devices.md`, `fabric-button.md`, `node-summary.md`, `profiles.md`, `provider.md`, `relay.md`, `service.md`,
+  `devices.md`, `fabric-button.md`, `node-summary.md`, `ops-digest.md`, `profiles.md`, `provider.md`, `relay.md`, `service.md`,
   `session-handoff.md`, `schemas/device-enrollment.schema.json`, `schemas/service-well-known.schema.json`,
   `src/host-label.ts` and `tools/vectors/host-label.ts`.
   Re-read too the citations that carry no marker: `devices.md`'s "a server pinned before DEC-0154", the comments in
@@ -364,10 +387,10 @@ This block is byte-identical in `docs/handoffs/2026-11-03-source-manifest.md` (D
 Rule: each lander checks after its own write, so whichever lander finishes second sees the
 other's result; the edit depends on the text, so a second run changes nothing.
 
-The clause sits at `knowledge/authority.md:115` and `:128` (PR #628 at `30ac6c55`). From:
-"counting `foreign` and `foreign-user` is proposed for FD's watcher in contract DEC-0154". To:
-"counting `foreign` and `foreign-user` is owed by FD's watcher under contract DEC-0154" (no
-inner parentheses: the clause sits inside a bracket that closes right after it).
+The clause sits at `knowledge/authority.md:115` and `:128` (PR #628). From: "counting `foreign`
+and `foreign-user` is proposed for FD's watcher in contract DEC-0154". To: "counting `foreign`
+and `foreign-user` is owed by FD's watcher under contract DEC-0154" (no inner parentheses: the
+clause sits inside a bracket that closes right after it).
 
 Status check, in the contract checkout. It matches any Status line in DEC-0154's block that
 starts with `- **Status:** Accepted`, as DEC-0150's (`Accepted, merged <date>, ...`) and
@@ -379,7 +402,8 @@ git fetch origin && git show origin/main:docs/DECISIONS.md \
   | grep -c '^- \*\*Status:\*\* Accepted'
 ```
 
-Clause check, in the knowledge base checkout:
+Clause check, in the knowledge base checkout. A count other than 0 or 2 means someone else
+edited the clause; the lander treats it as the mismatch below:
 
 ```sh
 git fetch origin && git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'
@@ -414,7 +438,8 @@ git show origin/main:knowledge/authority.md \
 The first prints 0 and the second prints 2. The first `grep -c` exits 1 when it prints 0, so
 these commands are not run under `set -e`. If the check prints anything else, the lander
 records the mismatch in its handoff and runs the check again once the other lander's
-knowledge-base PR for the clause is merged or closed.
+knowledge-base PR for the clause is merged or closed, or at once when the other lander has no
+such PR; an edit from outside the two landers goes to a knowledge-base row.
 
 Interleavings: DEC-0154 merges and its clause check prints 0 (PR #628 not merged); then, if
 DEC-0149's step 6 ran before that merge, PR #628 merges with "proposed" and step 6b sees 1 and
@@ -435,7 +460,7 @@ edits it.
 
 - The coordinator's next blind readings of DEC-0154.
 - CT-228's owed parts: the claim file's schema and a port-choice reference with vectors.
-- CT-229 to CT-242, each with its evidence and acceptance in the backlog; G10 is a decision of the second wave.
+- CT-229 to CT-243, each with its evidence and acceptance in the backlog; G10 is a decision of the second wave.
 
 ## Checks actually run
 
@@ -505,6 +530,24 @@ After W78 the full gate ran under the heavy lock (8 GB free, a 15-minute load of
 lint passed, documentation checks passed, markdownlint 0 errors (the pasted knowledge-base block included), privacy 0
 findings; no em dash on an added line. The three posix-only hex mutants at `src/host-label.ts` line 67 (length, pattern
 and `typeof hex` checks made posix-only) each fail `test/host-label.test.ts`.
+
+After W79 the full gate ran under the heavy lock (10 GB free, a 15-minute load of 36.8): exit 0, 111 test files,
+10548 tests passed and 1 skipped, branches 98.92% (12567 of 12703), 31 vector files matching their generators, the UX
+lint passed, documentation checks passed, markdownlint 0 errors over 264 files, privacy 0 findings. One added line
+carries U+2014: `session-handoff.md`'s SH-2 line, whose existing bold label (the dashed form of SH-1 to SH-13) is
+re-added with the line's new wording; no other added line carries one. The new multi-line finder prints nothing at
+that head and names a trial file with a split marker.
+
+After W80 typecheck, documentation checks, the UX lint, vectors (31 files), privacy (0 findings) and the
+page-links, ops-digest, http-signature, host-label and delegation-sealed tests (515 tests) passed; with 7 GB free
+`pnpm test:fast` ran under the heavy lock (111 files, 10548 passed, 1 skipped), and with 10 GB free and a 15-minute
+load of 40.1 the full gate ran under it: exit 0, 111 test files, 10548 tests passed and 1 skipped, branches 98.92%
+(12567 of 12703), the UX lint passed, documentation checks passed, markdownlint 0 errors, privacy 0 findings. The
+SH-2 line is still the one added line with U+2014. After the addendum replaced the shared block (text only),
+markdownlint (0 errors), the documentation checks, privacy (0 findings) and the docs-check, sources-ledger and
+consistency tests (47) passed again; the block's Python count is 1. `git grep -n -E "collector on (its|the same) machine|on the product's own machine" -- docs/specification
+schemas CONTEXT.md` and `git grep -n -e 'host that terminates TLS' -e 'TLS-terminating host' -- CONTEXT.md
+docs/specification src schemas` print nothing; the host rule's four copies hash the same once joined.
 
 ## Next task
 

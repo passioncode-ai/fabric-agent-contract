@@ -151,7 +151,7 @@ declares no port for `FAC-SEM-010`. Vectors: [`fixtures/vectors/app-descriptor.j
 - A local descriptor MAY say where a collector in the same OS account reads its daily operations digests, under
   `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1`: 1 to 8 `{dir, source}`, `dir` a folder
   inside `paths.data` and `source` the label sent with its lines ([operations digests](ops-digest.md#where-a-collector-reads-the-daily-digests),
-  OD-9, DEC-0153; `FAC-SEM-168`). A remote descriptor carries none.
+  OD-9, DEC-0153; the same OS account per DEC-0154, proposed; `FAC-SEM-168`). A remote descriptor carries none.
 - `installedBy` says who installed the instance (DEC-0061): the installer and its version as a string, as before, or
   `{by, role?, tool}`. `by` is `person` — a person ran the installer or had their coding agent run it — with `role`
   `operator` (the person who uses this machine) or `administrator` (an organization's administrator); `node` — Project
@@ -563,7 +563,8 @@ The Host and Origin guard does not tell them apart, so a computer with more than
 DEC-0154, proposed. On one computer each counted OS account runs its own copy of a service, with its own services
 directory, tokens and descriptors, and every account (and every guest whose traffic a forwarder relays) reaches every
 port on `127.0.0.1`. In this contract "host" never means the computer. The one
-exception is the name "host label", which labels a computer.
+exception is the name "host label", which labels a computer. Names and paths already fixed keep their spelling (the enrollment purpose
+`agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`).
 
 <a id="counted-os-accounts"></a>
 
@@ -702,11 +703,12 @@ The well-known `process.pid` is never proof: any listener can name any pid.
   verifier; the app that holds the listener and the verifier carries this check, not the browser that follows the
   redirect.
 
-As Fabric Dashboards reported on thread `1fe66e6e` (message `262523cc`), its commit `53a62f9` pins three
-state-precedence cases (`packages/service-host/test-vectors/state-precedence.json`, FD-158): a listener of another
-OS account that answers `ready` with the descriptor's identity is `foreign-user`; a listener of another OS account
-that answers another identity is `foreign-user`, not `foreign`; a listener of this account that answers another
-identity is `foreign`. The contract's own vector file for them is CT-229.
+As Fabric Dashboards reported on thread `1fe66e6e` (message `262523cc`), its commit `53a62f9` adds three FD-158
+cases to its state-precedence file (`packages/service-host/test-vectors/state-precedence.json`): a listener of
+another OS account that answers `ready` as this agent is `foreign-user`; a listener of another OS account that
+answers as another agent is `foreign-user`, not `foreign`; a port nobody holds stays `down`. The file also holds an
+older case, another Fabric service answering on the port, which is the `foreign` case (a listener of this account
+that answers another identity). The contract's own vector file for these states is CT-229.
 
 <a id="ha-3"></a>
 
@@ -1309,5 +1311,5 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | <a id="fac-sem-087"></a>`FAC-SEM-087` | `service-runner` | the runner's kind is in the node's catalogue; a subscription names its vendor's runner; the declared credential kind is one of the four and equals the one the node derived; a service offered to others runs on no subscription, declared, derived or in its usage report |
 | <a id="fac-sem-088"></a>`FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
 | <a id="fac-sem-101"></a>`FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
-| <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address whose host is a loopback address, and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
+| <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address whose host is a local one as PL's [check](#links-to-a-services-pages) lists it (`127.0.0.0/8`, `[::1]`, the IPv4-mapped `[::ffff:127.x.y.z]`, `localhost` and names under it, and the unspecified `0.0.0.0` and `[::]` a wildcard bind reports), and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
 | <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121) |

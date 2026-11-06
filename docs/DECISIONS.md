@@ -9751,7 +9751,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   W76 (a) to (c); seam found three breaks, the same as W76 (a), (c) and (f)); round 13 at `545ba274` was not clean (unit
   passed; product found one break and seam three, W77 (a) to (c)); round 14 at `d6138063` was not clean on all three
   tiers (W78 (a) to (c), and a unit risk, W78 (e)); round 15 at `df98d10c` was not clean (unit passed; product
-  and seam found breaks, W79 (a) to (j)); their batches are folded in (Source). A reference module and vectors, one optional schema
+  and seam found breaks, W79 (a) to (j)); round 16 at `9161796d` was not clean (unit passed; product and seam found
+  breaks, W80 (a) to (c), with risks W80 (d) to (g)); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9767,7 +9768,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   decision takes G1 to G3 and the host label the board agreed, and files the rest. Fabric's hub already chooses a port
   per account by a uid formula (its CO-505).
   In this contract "host" never means the computer. The one exception is the
-  name "host label", which labels a computer.
+  name "host label", which labels a computer. Names and paths already fixed keep their spelling (the enrollment purpose
+  `agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`).
 - **Decision:** [Several OS accounts on one computer](specification/service.md#several-os-accounts-on-one-computer)
   and [the host label](specification/devices.md#the-host-label):
   0. **Counted OS accounts.** A counted OS account is one a person or an organization signs in with, or runs Fabric or
@@ -10008,7 +10010,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   elements and `foreign-user` state; SCR-30's `foreign-user` line), `docs/ux/flows.md` (FLW-17's branch and screens; FLW-30's owner check before
   the raw address), `docs/specification/fabric-button.md` (FL-7's owner check),
   `docs/evidence/sources.md` (RFC 8252's row, RFC 6265's row read again), `docs/DOCMAP.md`, `docs/backlog.md` (CT-228
-  to CT-242), the spec `docs/evidence/specs/2026-11-06-shared-host-gaps.md` and the handoff
+  to CT-243), "host" for a computer or a server reworded where the rule needs it: `docs/specification/activity.md`
+  and `src/http-signature.ts` (a TLS-terminating proxy), `docs/specification/folder-attribution.md` (Git hosting
+  services), `docs/specification/interop.md` (a host name), `docs/specification/peer-share.md` (another server),
+  FAC-SEM-143's row (PL's list of local hosts); a collector of operations digests in the same OS account:
+  `docs/specification/ops-digest.md` (OD-9 and its bullets), `docs/specification/service.md`'s ops-digest pointer
+  (its line 151), `schemas/service-ops-digest-extension.schema.json`'s title, `docs/specification/conformance.md`'s
+  two digest rows, `docs/specification/README.md`'s row and `CONTEXT.md`'s Operations digest; a meter in the hub's
+  OS account (`delegation.md`), the enrolling account's harness (`node-summary.md`), SH-2's POSIX system
+  (`session-handoff.md`); `fixtures/catalogue.json` (the host-label fixtures' rows), the spec `docs/evidence/specs/2026-11-06-shared-host-gaps.md` and the handoff
   `docs/handoffs/2026-11-06-shared-host-ports.md`.
 - **Not decided here:** the claim file's schema and a reference for the port choice (CT-228); the contract's own vector
   file of the state order (CT-229); a POSIX owner check of the services directory, the descriptors and the token files
@@ -10020,7 +10030,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   placement record `observatory-placement/1` as a readable norm (G10, CT-236, a decision of the second wave; the schema
   stays `/1`, additive); the contract's own gate on a shared computer (G11, CT-237); a token-free door and a single
   account's own guests (CT-238); the device-policy member that turns the host label on (CT-239); the organization's
-  "these devices share a computer" display and its scenario (CT-241). Calls between two accounts of one computer go
+  "these devices share a computer" display and its scenario (CT-241); how a collector or a sink tells two accounts'
+  copies of one product apart in the operations digests (CT-243). Calls between two accounts of one computer go
   through the organization's relay or tokens, never the tailnet (the workspace's answer).
 - **Source:** the operator's request of 2026-11-05 relayed on board thread `1fe66e6e`; the contract's gap list
   (research of 2026-11-06, kept as the spec above); the thread's rounds of 2026-11-05 and 2026-11-06, answered by the
@@ -10123,8 +10134,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `df98d10c` was not clean (unit passed; product and seam: the shared knowledge-base block had changed, more uses of
   "host" for a computer or a server, a self-referential host rule, the multi-line finder, the vectors' path), and W79
   (the current shared block, the after-both check by the lander that makes the edit once it is on the knowledge
-  base's main, the host rule without "the computer is called the computer", the remaining hosts reworded, digests
-  read in the same OS account and CT-243, the FAC-SEM-010 comment, a finder for any split, the vectors' full path) is
-  folded in; the two UI lines passed the operator's copy check
+  base's main, the host rule without "the computer is called the computer", the hosts the readings named reworded
+  (`service.md`, `devices.md`, `activity.md`, `session-handoff.md`, FAC-SEM-143's row, `folder-attribution.md`),
+  digests read in the same OS account and CT-243, the FAC-SEM-010 comment, a finder for any split, the vectors' full
+  path) is folded in; round 16 at `9161796d` was not clean (unit passed; product and seam: FAC-SEM-143's row narrower
+  than its check, collector readers and TLS twins still on "the machine" or a "host", stale lists, the FD-158 cases
+  misattributed), and W80 (the row with PL's list of local hosts, every collector reader and TLS twin reworded and
+  OD-9 marked, names already fixed keeping their spelling in the host rule, the Consequences and Not decided lists,
+  a meter in the hub's OS account and the enrolling account's harness, the FD-158 cases as Fabric Dashboards' file
+  holds them, the shared knowledge-base block's current text) is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

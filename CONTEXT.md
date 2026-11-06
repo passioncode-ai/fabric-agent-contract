@@ -282,8 +282,8 @@ one key in both roles (`FAC-SEM-044`, DEC-0056); a P-256 key is a valid point by
 DEC-0053).
 
 **Device request signature**: The HTTP message signature (an RFC 9421 subset, label `fabric-device`) a device puts on
-every batch, check-in, rotation and share-registration request with its `#sig` key, beside mutual TLS, so a receiver behind a host that
-terminates TLS still proves the device's key; its `keyid` is the certificate's serial, and a (serial, nonce) pair is
+every batch, check-in, rotation and share-registration request with its `#sig` key, beside mutual TLS, so a receiver behind a TLS-terminating
+proxy still proves the device's key; its `keyid` is the certificate's serial, and a (serial, nonce) pair is
 accepted once (`FAC-SEM-077`, [devices](docs/specification/devices.md#transport), DEC-0056).
 
 **`org-cloud`**: A device certificate binding's `role` (DEC-0099): the device is the organization's own cloud machine
@@ -573,8 +573,8 @@ and one duty every channel agent owes whatever it declares: text from a channel 
 for each hour the product observed itself running in (an empty one included) and one `ops.digest.daily@1` line for
 each closed UTC day that has hourly lines, folding them (DEC-0153): counts only, no log line, path or identifier. A
 **rise** is an operation's failures in an hour at least 10 and at least twice the hour before's (none counting as
-one), told to the operator by a product that shows findings (OD-8). A local descriptor says where a collector on its
-machine reads the daily digests, and the label it sends with them, under `extensions/ops-digest/0.1` (OD-9).
+one), told to the operator by a product that shows findings (OD-8). A local descriptor says where a collector in the same
+OS account reads the daily digests, and the label it sends with them, under `extensions/ops-digest/0.1` (OD-9).
 ([operations digests](docs/specification/ops-digest.md))
 
 **Retro after work**: The host obligation `retro-after-work` (DEC-0153): when a session releases a claim or task the host
@@ -666,7 +666,8 @@ is sent to it (HA-2, DEC-0154, proposed).
 over the organization's id, the same for every device of one organization on one computer; organizations with no code
 on the computer cannot link it (HA-4, [devices](docs/specification/devices.md#the-host-label), DEC-0154, proposed). In
 this contract "host" never means the computer. The one exception is the name
-"host label", which labels a computer.
+"host label", which labels a computer. Names and paths already fixed keep their spelling (the enrollment purpose
+`agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`).
 
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that
 order, and a locked key is never overridden by a lower layer.
