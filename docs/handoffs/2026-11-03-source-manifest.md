@@ -406,7 +406,13 @@ source, what never travels with it, the check before a source export, and how a 
   `66e44c3d`; round 64 (not clean: authority.md still named the watcher's state; the service's own outage report; CT-244's
   wording; "host" for a computer) answered as decided: authority.md points at `service.md` in PR #628, the copy
   agent's report back at 5 minutes or more, CT-244 aligned with relay.md (SCR-23, DL-15 and step 6 apart), "a
-  computer's name" and "computer names", and DEC-0154 at `190ee95e` with the guide; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  computer's name" and "computer names", and DEC-0154 at `190ee95e` with the guide; round 63's unit reading: PASS, its one risk closed
+  by item CF (the Git-mode text says "that no exclude entry removes", as `nestedTest` reads it; the code stays; CLI
+  tests E2, a walk with `FAC-SEM-157` on include[0], and E12, Git mode with include[0] and include[1] missing and
+  `no-license`; E2 fails with the exclude check taken out of `nestedTest` for one run); round 64's seam reading: FAIL, its break in
+  authority.md closed by item CA (PR #628 `fc100a11`), the full test run at `cb5471dd` green (10260 passed, branches at
+  98.95 %), and items CG to CI (the landing's target phrase quoted with backticks and `foreign` added, a positive check
+  on `service.md`, the `contexts.md` clause placed on this branch); round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -518,8 +524,8 @@ source, what never travels with it, the check before a source export, and how a 
 - Round 61, decided by the coordinator under the operator's recorded rules:
   - principles section 7 and rules section 9 name the same exceptions, whose home is item 9;
   - CT-227 has landed (main `1c141418`); DEC-0154 is the open branch after DEC-0151 and DEC-0152, and whichever of
-    DEC-0149 and DEC-0154 lands second makes the watcher sentence read "unavailable (down or foreign-user, not merely
-    degraded)" (round 63: then `relay.md` and `conformance.md` follow `service.md` by themselves, pointing at its
+    DEC-0149 and DEC-0154 lands second makes the watcher sentence read "unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)" (round 64, CH: `foreign`
+    added by DEC-0154's W14; round 63: then `relay.md` and `conformance.md` follow `service.md` by themselves, pointing at its
     definition);
   - Git mode is kept for a listed file at a path an include entry lies beneath (the code fails closed and stays).
 - Round 59, decided by the coordinator under the operator's recorded rules:
@@ -750,6 +756,16 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Items CF to CI were checked on the working tree over head `ba2cbd87` (this note's commit holds the same tree, plus
+this paragraph): the branch gate, `ORG_INDEX=... pnpm run check` (exit 0: typecheck, 114 test files with 10262 passed
+and 3 skipped under the coverage floors, `ux:lint`, `docs:check` passed with 0 markdownlint errors, `privacy:check` with
+0 findings), run under the shared lock with the 15-minute load at 41.9 and 9 GB free, and `pnpm exec tsx
+tools/vectors/run.ts` (exit 0, 29 files match); before it `pnpm typecheck` (exit 0) and the targeted coverage run
+with the two new tests (3266 passed; one run at a 15-minute load near 54 read `src/validate-cli.ts` at 99.22 % of its
+branches, under its floor, and a second run read 99.48 %, the same four branches uncovered as before, so the dip was a
+timing branch under load). E2 failed with the exclude check removed from `nestedTest` for one run and passed with it
+restored.
 
 Round 64's fixes (documentation only) were checked on the working tree over head `cb5471dd` (this note's commit holds
 the same tree, plus this paragraph): `pnpm typecheck` (exit 0), `pnpm vectors:check` (exit 0, 29 files match), the
@@ -1352,7 +1368,9 @@ file of its own; where its lines meet this landing's: the coverage `include` of 
 `src/host-label.ts`, `src/validator.ts`, `src/channel-agent.ts` and `src/ops-digest.ts`), the handoffs README row, and
 the tails of `docs/DECISIONS.md` (ordered through DEC-0154) and `docs/backlog.md` (in id order). DEC-0154's handoff also
 names the watcher sentence in `service.md`: whichever of DEC-0149 and DEC-0154 lands second makes Fabric Dashboards'
-watcher sentence read "unavailable (down or foreign-user, not merely degraded)". After that one edit `relay.md`'s
+watcher sentence read "unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)" (`foreign` from DEC-0154's W14: a service whose port another program holds serves
+nothing). Check after both land: the count of that exact phrase in `docs/specification/service.md` is 1, as DEC-0154's
+handoff checks (its W4). After that one edit `relay.md`'s
 machine-report paragraph and `conformance.md`'s watcher row follow `service.md` by themselves: since round 63 they name
 no state and point at the definition in `service.md`. Every head here is re-measured at landing.
 
@@ -1534,8 +1552,8 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   grep -c 'source.md#installation-strings'` prints 1.
 - With DEC-0154 (its seam reading): whichever of DEC-0149 and DEC-0154 lands second adds to CT-232's row in
   `docs/backlog.md` a link to source.md's sentence on an OS account an organization owns whole (in "Handing over", the
-  sentence on a machine enrolled in an organization); DEC-0154 also cites the same clause in `contexts.md` (its "One
-  instance per context on a machine" part). Check after both land: CT-232's row names `source.md` once.
+  sentence on a machine enrolled in an organization); the clause is on this branch in source.md and `contexts.md` (its
+  "One instance per context on a machine" part, line 73). Check after both land: CT-232's row names `source.md` once.
 - CT-244 keeps its id at landing. If it ever had to change, every place naming it changes with it: `relay.md`'s
   machine-report paragraph, DEC-0149's round-62 record, CT-194's row, CT-244's own row and this note's round-62
   entries.

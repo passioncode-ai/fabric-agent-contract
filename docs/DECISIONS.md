@@ -9460,7 +9460,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       minutes is messaged; "Git hosting service" where "host" meant it.
       Decided by the coordinator in round 64: CT-244's row says where the wait on reports is seen as relay.md does;
       "host" for a computer becomes "a computer's name" (installation strings); the knowledge base's authority.md points
-      at service.md's definition.
+      at service.md's definition. Round 63's unit reading passed; its one risk (the text said any listed path an include
+      entry lies beneath keeps Git mode, while the code requires that no exclude entry removes it) is closed by the
+      coordinator's item CF: the text follows the code, which stays, and two CLI tests pin both trees.
+      Round 64's seam reading failed on authority.md, closed by item CA in the knowledge base; the landing's watcher
+      phrase gains `foreign` (DEC-0154's W14) and a positive check.
       The hand-over action
       declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
       target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
