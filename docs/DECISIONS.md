@@ -9746,8 +9746,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   passed; unit did not run, since W39 changes the vectors); round 9 at `7ce5cc67` was not clean (unit passed, 319 of
   376 mutants killed and 53 equivalent, the rest closed by W55; product found two breaks, W53 and W54; seam found the
   same break as W54, the full suite of 10530 green); round 10 at `23fd509d` was not clean (unit passed, seam passed,
-  product found one break, W63); round 11 at `bbb5b956` was not clean (seam found one break, W73; product found the same break); their batches are
-  folded in (Source). A reference module and vectors, one optional schema
+  product found one break, W63); round 11 at `bbb5b956` was not clean (seam found one break, W73; product found the same break); round 12 at `3c1ea1f8`
+  was not clean (unit passed, 79 of 86 mutants, 5 equivalent, the rest closed by W76 (g); product found three breaks,
+  W76 (a) to (c); seam found three breaks, the same as W76 (a), (c) and (f)); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9873,7 +9874,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `%ProgramData%\PassionCode\host-label.key` on Windows): on macOS and Linux owner root, mode `0444`, its folder
      root's with mode `0755`; on Windows owner Administrators (or SYSTEM), set explicitly (for example `icacls
      /setowner`), since an elevated step can leave the user as owner and the label would silently not be sent,
-     Administrators full control, Users read, no inherited write. An administrator's
+     the folder `%ProgramData%\PassionCode` with the same explicit owner (or `folderOk` fails), Administrators full
+     control, Users read, no inherited write. An administrator's
      setup step creates it and MUST exclude it from the computer's backups (macOS `tmutil addexclusion -p`; Linux the
      computer's backup tool's exclusion list; Windows the `FilesNotToBackup` registry list); it is never in a snapshot
      or a machine pack, and that a restore never carries it is owed by CT-233. On Windows the same step creates item
@@ -9947,9 +9949,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     second sentence describes FD's released watcher (FD-76: an episode only for `down`, kept open while a failing
     source outside its start baseline stays); whether that degraded continuation fits the first sentence is decided
     separately, with DEC-0149's landing row.
-    On acceptance day the knowledge base's `knowledge/authority.md` (fabric-workspace), where DEC-0149 writes that
-    counting `foreign` and `foreign-user` "is proposed for FD's watcher in contract DEC-0154", says instead that it is
-    owed by FD's watcher (contract DEC-0154); then `grep -c 'proposed for FD' knowledge/authority.md` prints 0.
+    On acceptance day, if DEC-0149's knowledge-base PR #628 is merged, the knowledge base's `knowledge/authority.md`
+    (fabric-workspace) says "is owed by FD's watcher (contract DEC-0154)" where it said "is proposed for FD's watcher
+    in contract DEC-0154"; if #628 is not merged, DEC-0149's lander writes "owed" directly before merging it. After
+    both land, in either order, `grep -c 'proposed for FD'` prints 0 and `grep -c 'owed by FD'` prints 2 there.
   - Fabric Inbox: B-217 open, after this decision (its PR #421, rows B-217 to B-220): its desktop connect step sends a
     new agent key to the hub's loopback callback; on macOS and Linux another account's listener reads today as no
     listener (safe, for the wrong reason), and on Windows, where the process tables show every account's processes,
@@ -9993,7 +9996,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/positive/device-enrollment-request-host-label.json`,
   `fixtures/negative/device-enrollment-host-label-padding-bits.json` with their catalogue rows,
   `test/host-label.test.ts`, `vitest.config.ts`, `CONTEXT.md` (Device, Counted OS account, Port claim, `foreign-user`,
-  Host label, Trust tier), `docs/ux/foundation.md` (ST-021's story and criteria; ST-036's criterion for
+  Host label, Trust tier, Appearance carrier), `docs/ux/foundation.md` (ST-021's story and criteria; ST-036's criterion for
   `foreign-user`), `docs/ux/scenarios.md` (SCN-056; SCN-044's alt path), `docs/ux/screens.md` (SCR-20's purpose,
   elements and `foreign-user` state; SCR-30's `foreign-user` line), `docs/ux/flows.md` (FLW-17's branch and screens; FLW-30's owner check before
   the raw address), `docs/specification/fabric-button.md` (FL-7's owner check),
@@ -10092,6 +10095,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   keeps "computer"; product found the same break), and its batch, with the acceptance-day edit of the knowledge
   base's `authority.md` (W72) and W74 (the cookie-scope exception to "host" stated, ED-8's bold scope pinned by a test
   beside FB-6's, the handoff's references, One copy's guard), is folded in; round 11's unit reading passed (65 of 69 mutants, 3 equivalent),
-  and W75 (a vector for an `org.id` that is not a string; the Windows owner of the secret set explicitly) is folded in; the two UI lines passed the operator's copy check
+  and W75 (a vector for an `org.id` that is not a string; the Windows owner of the secret set explicitly) is folded in;
+  round 12 at `3c1ea1f8` was not clean (product: the "host" rule in `service.md` naming one exception where there are
+  two, the guide's "once on the machine", and line numbers in the handoff that went stale; seam: those and the
+  knowledge-base step; unit passed, 79 of 86 mutants, 5 equivalent), and W76 (both exceptions named, "once per OS
+  account on the computer", block names instead of line numbers, the cookie note worded as "here 'per host' is the
+  URL's host", the Windows folder's owner set explicitly, the knowledge-base step by whether DEC-0149's #628 is merged,
+  a vector for a link and an `org.id` that is not a string, a stale note corrected) is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

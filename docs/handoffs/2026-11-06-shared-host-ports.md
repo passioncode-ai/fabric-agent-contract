@@ -36,7 +36,7 @@ Proposed DEC on its own branch, and files the rest.
   rewritten PL-2 and PL-3 row (`conformance.md:251`: a loopback address opened only after the listener's owner check).
 - The host label's reference `src/host-label.ts` (`hostLabel`: link, owner per platform, mode, size), its generator
   `tools/vectors/host-label.ts` (Node's own HMAC, not importing the reference), vectors
-  `fixtures/vectors/host-label.json` (58 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
+  `fixtures/vectors/host-label.json` (59 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
   schema's `opaqueId`), a coverage floor of 100 in `vitest.config.ts`; the optional schema member `device.hostLabel` in
   `schemas/device-enrollment.schema.json` with a positive and a negative fixture; `service.id`'s description in
   `schemas/service-well-known.schema.json`.
@@ -171,6 +171,15 @@ Proposed DEC on its own branch, and files the rest.
   organization id that is not a string (the `typeof orgId` check removed fails `test/host-label.test.ts`, 2 tests),
   and the Windows owner of the computer's secret set explicitly (Administrators or SYSTEM, for example `icacls
   /setowner`) in `devices.md`, DEC item 4 and the setup step's conformance row.
+- Round 12 at `3c1ea1f8`: not clean. Unit passed (86 mutants, 79 killed, 5 equivalent; the rest closed by W76 (g), a
+  vector for a link and an organization id that is not a string; moving the `typeof orgId` check after the link fails
+  `test/host-label.test.ts`). Product failed on three breaks: `service.md` named one exception to "host means the
+  program" where there are two ("host label" and a cookie's "per host"); the guide's "runs once on the machine"; line
+  numbers in this handoff that had gone stale. Seam failed on three breaks, the same as W76 (a), (c) and (f). W76
+  folded all of them, with the cookie note worded as "here 'per host' is the URL's host" in ED-8, FB-6 and the
+  RFC 6265 row, the Windows folder `%ProgramData%\PassionCode` given the same explicit owner as the file, the
+  knowledge-base step depending on whether DEC-0149's #628 is merged (both orders end with no "proposed for FD" and
+  two "owed by FD"), and the round-10 note on the FB-6 test corrected.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -263,8 +272,8 @@ Proposed DEC on its own branch, and files the rest.
 
     DEC-0154's lander then changes only the list of states (to "`down`, `foreign` or `foreign-user`, not merely
     `degraded`", on one line) and adds "; counting `foreign` and `foreign-user` is owed (DEC-0154)" before the second
-    sentence's full stop, which gives order 1's landed text (the first `text` block of this note, lines 205 to 211 of
-    this file), and runs order 1's two checks (the first `sh` block, lines 219 and 220): 1, then 0.
+    sentence's full stop, which gives order 1's landed text (the first `text` block of this note), and runs order 1's two
+    checks (the first `sh` block of this note): 1, then 0.
   - All of these checks were run with `bash -c` and `zsh -c` on trial files built from the two landed texts. Order 1:
     the two checks print 1 and 0 on its text; 1 and 1 on the widened claim (its subject still Fabric Dashboards'
     watcher) on one line; 0 and 1 with a line break before its parenthesis of states; 1 and 1 with one before
@@ -279,10 +288,12 @@ Proposed DEC on its own branch, and files the rest.
 At acceptance: set the Status, rewrite this handoff's row in the README, and in `docs/specification/README.md` name
 the owed adopters on the devices row (Project Observatory's node and setup step, the first organization server) and
 the services row (Fabric, Fabric Dashboards, Switchboard, Fabric Inbox, the adapter's kits, the PassionCode launcher,
-Project Observatory); in the knowledge base (fabric-workspace `knowledge/authority.md`, lines 115 and 128 at the
-time of writing), replace DEC-0149's "counting `foreign` and `foreign-user` is proposed for FD's watcher in contract
-DEC-0154" with the accepted wording, such as "is owed by FD's watcher (contract DEC-0154)", and check that
-`grep -c 'proposed for FD' knowledge/authority.md` prints 0; tell thread `1fe66e6e` the same day (Fabric Dashboards' FD-159 and Fabric's server build on it),
+Project Observatory); in the knowledge base (fabric-workspace `knowledge/authority.md`), depending on whether
+DEC-0149's knowledge-base PR #628 is already merged: if the knowledge base's main already says "counting `foreign`
+and `foreign-user` is proposed for FD's watcher in contract DEC-0154", replace it with "is owed by FD's watcher
+(contract DEC-0154)"; if #628 is not merged yet, do nothing here, since DEC-0149's lander writes "owed" directly at its
+step 6, before #628 is merged (its item DI). After both have landed, in either order, `grep -c 'proposed for FD'
+knowledge/authority.md` prints 0 and `grep -c 'owed by FD' knowledge/authority.md` prints 2; tell thread `1fe66e6e` the same day (Fabric Dashboards' FD-159 and Fabric's server build on it),
 and in that message ask Fabric Dashboards for a row that its watcher (FD-76's successor) counts `foreign` and
 `foreign-user` as unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card only.
 Ask in the same message that its card's own `foreign-user` line (its `i18n.ts:128`, its own wording today) use this
@@ -330,7 +341,7 @@ markdownlint 0 errors, privacy 0 findings; no em dash on an added line.
 
 After round 10's batch (W63 to W70) the full gate ran under the heavy lock (9 GB free, a 15-minute load of 34.9):
 the first run failed one test, `test/delegation-sealed.test.ts` ("states the scope and the lifetime in FB-6"), which
-pinned FB-6's old "per host" wording; the test now pins "per computer" (W66), and the second run exited 0: 111 test
+pinned FB-6's old "per host" wording; the test now pins "per computer" (W66; reverted to "per host" in W73), and the second run exited 0: 111 test
 files, 10536 tests passed and 1 skipped, branches 98.92% (12567 of 12703), 31 vector files matching their generators,
 the UX lint passed, documentation checks passed, markdownlint 0 errors, privacy 0 findings; no em dash on an added
 line.
@@ -345,6 +356,10 @@ fail when ED-8's bold scope was changed.
 
 After W75 the full gate ran under the heavy lock (10 GB free, a 15-minute load of 35.7): exit 0, 111 test files,
 10538 tests passed and 1 skipped, branches 98.92% (12567 of 12703), 31 vector files matching their generators, the UX
+lint passed, documentation checks passed, markdownlint 0 errors, privacy 0 findings; no em dash on an added line.
+
+After W76 the full gate ran under the heavy lock (9 GB free, a 15-minute load of 43.8): exit 0, 111 test files,
+10539 tests passed and 1 skipped, branches 98.92% (12567 of 12703), 31 vector files matching their generators, the UX
 lint passed, documentation checks passed, markdownlint 0 errors, privacy 0 findings; no em dash on an added line.
 
 ## Next task

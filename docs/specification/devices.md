@@ -230,7 +230,8 @@ or a virtual machine given its secret) and that organizations with no code on th
 
   On macOS and Linux: owner root, mode `0444`, its folder owned by root with mode `0755`. On Windows: owner
   Administrators (or SYSTEM), set explicitly, for example with `icacls /setowner`, since an elevated step can leave the
-  user who ran it as owner and the node would then send no label; Administrators full control, Users read, no
+  user who ran it as owner and the node would then send no label; the folder `%ProgramData%\PassionCode` gets the
+  same explicit owner, or `folderOk` fails and no label is sent; Administrators full control, Users read, no
   inherited write, on the file and its folder. Every account reads it, none but the
   administrator can write it. On Windows the same step also creates the port claims folder
   ([service](service.md#ha-1) HA-1).

@@ -70,7 +70,7 @@ run; a new binding revision is required ([profiles](../specification/profiles.md
 
 ## A local MCP service
 
-A service runs once on the machine, under its supervisor (launchd, systemd, the Task Scheduler or Project
+A service runs once per OS account on the computer, under its supervisor (launchd, systemd, the Task Scheduler or Project
 Observatory's node), and answers on `http://127.0.0.1:<port>`. Its installer writes the descriptor into the services
 folder; the running process serves the well-known document. A service with no capabilities needs no manifest.
 

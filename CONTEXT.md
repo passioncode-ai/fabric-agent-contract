@@ -510,7 +510,8 @@ keeps for the page when its own panes grow.
 
 **Appearance carrier**: The cookie `fabric_appearance` (`v=1&scheme=…&theme=…`) a host sets for a
 dashboard's host so the page shows the operator's colour scheme and theme (DEC-0036, ED-8). A cookie
-is not isolated by port, so it is per host (the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that computer) in a shared cookie store and per service where the host
+is not isolated by port, so it is per host (the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that
+computer) in a shared cookie store and per service where the host
 gives each service its own store; a page applies only the fields it declares in `appearance`
 (DEC-0059, ED-6). It carries no secret and no identity.
 

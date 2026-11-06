@@ -80,7 +80,7 @@ carry the choice to the page as the cookie `fabric_appearance`, set for the page
 store the page reads, with path `/`, `SameSite=Strict`, not `HttpOnly` (the page's script reads it) and
 `Secure` on an `https` origin. A cookie is scoped to a host, not to an origin: "cookies do not provide
 isolation by port" (RFC 6265 §8.5, [sources](../evidence/sources.md)). So the appearance cookie is **per
-host in a shared cookie store; per service where the host gives each service its own store** (the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that computer) (DEC-0059).
+host in a shared cookie store; per service where the host gives each service its own store** (here "per host" is the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that computer) (DEC-0059).
 Every local service on `127.0.0.1` that shares one store reads the same cookie, and any of them can
 overwrite it. Fabric Dashboards gives each service its own store, the partition `persist:svc-<key>`, so
 there it is per service. Its value is form-encoded:
@@ -155,7 +155,7 @@ schema, and so does this repository's checker (`FAC-SEM-080`). A rule a tool can
 - The host's picker: where a host lets the operator choose a scheme and a theme. Fabric Dashboards owns
   that screen.
 - A per-service choice for pages that share a cookie store: there one host-scoped cookie serves every
-  service on that host (the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that computer) (ED-8), so a per-service choice needs another carrier, such as a cookie name per
+  service on that host (ED-8; the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that computer), so a per-service choice needs another carrier, such as a cookie name per
   service or a message to the page. A host that gives each service its own store already has one.
 - Themes defined by the operator (their own colours) beyond choosing an id; a later revision may
   add an `accent` field to the carrier.
