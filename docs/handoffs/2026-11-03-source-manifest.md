@@ -450,7 +450,14 @@ source, what never travels with it, the check before a source export, and how a 
   watcher owes `foreign` and `foreign-user` under DEC-0154, false in order 2 when PR #628 merges before DEC-0154 lands;
   unit PASS; seam PASS) answered as decided: "proposed for FD's watcher in
   contract DEC-0154", changed by DEC-0154's own step on its acceptance day; DEC-0154's handoff named as describing both
-  orders, byte-identical after joining (item DH); round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  orders, byte-identical after joining (item DH); round 70 (not clean: product FAIL, item DI, in order 1 DEC-0154's
+  acceptance step finds no clause on the knowledge base's main to change, and PR #628 later brings "proposed" after
+  DEC-0154 is accepted; unit PASS; seam FAIL, the same break) answered as decided: at step 6,
+  right before merging PR #628, DEC-0154's Status line on the contract's main is checked, and if it reads Accepted
+  the two clauses on PR #628 become "owed by FD's watcher (contract DEC-0154)" before the merge; after both land,
+  in either order, the knowledge base's main reads "owed" twice and "proposed" never; "proposed" said true while
+  DEC-0154 is proposed, the checks on PR #628 made conditional on DEC-0154's status, and DEC-0154's handoff compared at
+  its head when last measured; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -808,6 +815,14 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 70's fix (item DI and the seam reading's three points, this note and `docs/DECISIONS.md` only) was checked on
+the working tree over head `0308224c`: step 6's status command, taken from this note and run with `bash -c` and `zsh
+-c`, prints 1 for DEC-0150 and DEC-0153 on the contract's main and 0 for DEC-0154 there and at its branch's
+`7272832f`; on a copy of the knowledge base's `authority.md` at PR #628's `30ac6c55`, the step 6 change turns the two
+one-line clauses into "owed", where the two checks print 0 and 2 (2 and 0 before it); `pnpm run docs:check` (0
+errors), `ORG_INDEX=... pnpm run privacy:check` (0 findings), the knowledge base's `npm test` (exit 0, 172 passed).
+No gate ran: no code changed since round 68's. No U+2014 in the added lines.
 
 Round 69's fix (item DG, the knowledge base and this note) was checked on the knowledge base's PR at `30ac6c55` (it
 merged the knowledge base's main `959f897c` as `af17975f`, item 8 as main has it): the two checks above print 2 and
@@ -1425,7 +1440,15 @@ remaining steps, in order:
    has landed. If main moved after step 5, merge it into the contract PR and re-run the merge gate before merging it.
    Merge the contract PR, fetch, and check that the old watcher sentence is gone from its main:
    `git show origin/main:docs/specification/service.md | grep -c 'stays degraded for more than 5 minutes'` prints 0.
-   Then merge PR #628, fetch the knowledge base checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
+   Right before merging PR #628, check whether DEC-0154 is accepted on the contract's main (round 70, DI):
+   `git show origin/main:docs/DECISIONS.md | grep -A3 '^### DEC-0154:' | grep -c '^- \*\*Status:\*\* Accepted'`
+   prints 1 once it is (the form DEC-0150's and DEC-0153's Status lines take on main, where the same command prints 1
+   for each) and 0 while DEC-0154 is proposed or absent. If it prints 1 (order 1, DEC-0154 accepted at its merge),
+   change both clauses on PR #628 (`knowledge/authority.md`, the two episode lines) from "counting `foreign` and
+   `foreign-user` is proposed for FD's watcher in contract DEC-0154" to "counting `foreign` and `foreign-user` is owed
+   by FD's watcher (contract DEC-0154)", commit, push, and only then merge it: DEC-0154's acceptance step found no such
+   clause on the knowledge base's main to change. If it prints 0 (order 2), "proposed" stays, and DEC-0154's acceptance
+   step changes it. Then merge PR #628, fetch the knowledge base checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
    `knowledge/rules.md`; at PR #628's head `30ac6c55`, which carries the knowledge base's main, they print 4, 4 and 5
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38 and principles
@@ -1516,8 +1539,8 @@ file of its own; where its lines meet this landing's: the coverage `include` of 
 the tails of `docs/DECISIONS.md` (ordered through DEC-0154) and `docs/backlog.md` (in id order). DEC-0154's handoff also
 names the watcher sentence in `service.md`, DEC-0149's watcher text (`service.md` lines 222 to 225 on this branch).
 Both orders are written here, each with its landed text and its checks (round 68, DB); DEC-0154's handoff describes
-both orders with the same landed texts and checks (byte-identical after joining; DEC-0154 at `7272832f`, round 69,
-DH). In both, the first sentence keeps everything but its subject and its
+both orders with the same landed texts and checks (byte-identical after joining, at DEC-0154's head when last measured, `3c1ea1f8` in round 70's seam reading;
+re-measured at landing; round 69, DH, and round 70). In both, the first sentence keeps everything but its subject and its
 list of states as it is: once per case, back after 15 minutes well, a `degraded` answer opening no message, setup
 entries left out, the FD-76 and ADR-0010 references, and the MUST NOT for an entry with `setup: true`; and the second
 sentence, Fabric Dashboards' released fact, follows them (round 65, CJ and CP; `foreign` from DEC-0154's W14: a
@@ -1778,18 +1801,27 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   the landed `channel-agent.md` ("acts only inside that chat as section 4.10 says" and "no AP-3 or OA-2 source", each
   `grep -c` 0 on main at `1016f0ec`), so the post quotes CA-8 as the page stands; and its merge post's "together with
   `fabric-source`" becomes true only when DEC-0149 lands, which this landing makes true (say so in DEC-0149's post).
-- Done in PR #628 (rounds 63 to 69): `knowledge/authority.md`'s outage-watcher lines point at the contract's
+- Done in PR #628 (rounds 63 to 70): `knowledge/authority.md`'s outage-watcher lines point at the contract's
   `service.md` for what unavailable means (an episode opens only for an agent unavailable, as `service.md` defines it,
   for more than 15 minutes; a `degraded` answer opens none), keeping `down` only as the dated fact of FD-76's release
   and saying, in both episode lines, that FD-76 opens an episode only for `down` today and keeps it open while a
   failing source (one not marked `setup: true`) outside its start baseline stays, its failure message at 15 minutes
   possibly naming that source, and that counting `foreign` and `foreign-user` is proposed for FD's watcher in contract
-  DEC-0154 (round 69, DG: true in either landing order, since in order 2 the contract's main carries neither DEC-0154
-  nor `foreign-user` when PR #628 merges); the start baseline stays the fallback for a service that sends no `setup`
+  DEC-0154 (round 69, DG: true while DEC-0154 is proposed, which in order 2 the contract's main does not even carry
+  when PR #628 merges; who changes it depends on the landing order, round 70, DI); the start baseline stays the fallback for a service that sends no `setup`
   flag (round 66, CQ). In both orders the knowledge base points at the definition in `service.md`, so the landing edits
-  to `service.md` need no edit there; only its clause on `foreign` changes, from "proposed" to its accepted form, on
-  the day DEC-0154 is accepted, by DEC-0154's own step. Checks on the knowledge base's PR: `grep -c 'proposed for FD'
-  knowledge/authority.md` prints 2 and `grep -c 'owed by FD' knowledge/authority.md` prints 0; the service's own outage report stays at 5
+  to `service.md` need no edit there; only its clause on `foreign` changes, from "proposed" to "counting `foreign`
+  and `foreign-user` is owed by FD's watcher (contract DEC-0154)". "Proposed" is true while DEC-0154 is proposed, and
+  who changes it depends on the order (round 70, DI): in order 1 DEC-0154 is accepted at its merge, before PR #628
+  merges, so DEC-0149's lander changes both clauses on PR #628 at step 6, right before merging it; in order 2
+  DEC-0154's acceptance step changes them on the knowledge base's main. Checks on PR #628, by the order: while
+  DEC-0154 is not accepted on the contract's main, `grep -c 'proposed for FD' knowledge/authority.md` prints 2 and
+  `grep -c 'owed by FD' knowledge/authority.md` prints 0; once it is accepted (order 1), after the step 6 change and
+  before the merge, the same two commands print 0 and 2. Checks after both land, in either order:
+  `git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'` prints 0 and
+  `git show origin/main:knowledge/authority.md | grep -c 'owed by FD'` prints 2. In order 2,
+  until DEC-0154 lands, the knowledge base names a DEC-0154 the contract's main does not carry yet (a risk the
+  coordinator accepted in round 70, closed by DEC-0154's acceptance); the service's own outage report stays at 5
   minutes or more, as the copy agent writes it today. No knowledge base row is filed for it at landing.
 - At the DEC-0150 step, confirm DEC-0150's lander filed the backlog row (`grep -c 'installation-valued'
   docs/backlog.md` prints 1 on the merged tree) on how a channel
