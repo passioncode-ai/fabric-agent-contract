@@ -468,7 +468,12 @@ source, what never travels with it, the check before a source export, and how a 
   form as "Accepted <date>" where main reads "Accepted, merged <date>", and, in the product reading, the claim that
   both handoffs carried the rule in the same words) answered as decided in item DL: the knowledge-base clause rule as
   one block, byte-identical with DEC-0154's handoff, in **Next task**, steps 6 and 6b and the Done note pointing at
-  it; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  it; round 73 (not clean: unit PASS; product and seam FAIL, the block letting DEC-0154's
+  lander run the check after both land while step 6b's knowledge-base PR was still open, so it printed 2 and 0)
+  answered as decided in item DM: the block, pasted again from the shared file, has the lander that makes the edit run
+  that check once its edit is on the knowledge base's main, says what to do on a mismatch and under `set -e`, starts
+  the first window at the later of the two merges and covers any other order; step 6b runs the check as the block
+  assigns it, and a deferred PR #628 merge reruns step 6's status check first; round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -826,6 +831,11 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Round 73's fix (item DM: this note, `docs/DECISIONS.md` and `docs/backlog.md`) was checked on the working tree over
+head `7988cf65`: the knowledge-base clause block (74 lines) occurs once in this note, byte for byte as the shared file
+holds it; `pnpm run docs:check` (0 errors), `python3 docs/ux/lint.py` (exit 0) and `ORG_INDEX=... pnpm run
+privacy:check` (0 findings). No gate ran: no code changed since round 68's. No U+2014 in the added lines.
 
 Round 72's fix (item DL: this note, `docs/DECISIONS.md` and `docs/backlog.md`) was checked on the working tree over
 head `0e055e8d`: the knowledge-base clause block occurs once in this note, byte for byte as the shared file holds it;
@@ -1483,12 +1493,14 @@ remaining steps, in order:
 
    **Step 6b**, right after PR #628 merges: run the rule's status check again and its clause check; if they print 1
    and 2, open a knowledge-base PR for the clause as the rule says (it re-runs the clause check before merging);
-   otherwise do nothing. When this step's status check printed 1, the last act is the rule's check after both land,
-   in `bash` and `zsh`: its first command prints 0 and its second 2.
+   otherwise do nothing. The rule's check after both land, in `bash` and `zsh`, is the last act of the lander that
+   made the edit, as the rule assigns it: here, right after PR #628 merges when step 6 changed it, or right after this
+   step's knowledge-base PR for the clause merges; with no edit made here, nothing runs (round 73, DM).
 
    If PR #628 cannot merge in
    that session, record the wait and say that until it merges the contract names agents-first item 9, which the
-   knowledge base's main does not carry yet; merge it first thing in the next session.
+   knowledge base's main does not carry yet; merge it first thing in the next session, running step 6's status check
+   again right before that deferred merge (and changing both clauses on PR #628 if it prints 1), then step 6b.
 7. A human gate: asking GitHub to remove the review branch's unreachable commits and their cached views is the
    operator's (GitHub Support).
 
@@ -1687,10 +1699,11 @@ DEC-0154's lander: its Status starts with `- **Status:** Accepted`, written
 contract PR merges only once accepted. Right after its contract PR merges it runs the clause
 check; 2: a knowledge-base PR for the clause; 0: nothing.
 
-Each lander runs the check after both land as its last step when the other has already landed:
-DEC-0149's lander when the status check printed 1 in step 6b, DEC-0154's lander when
-`gh pr view 628 --repo passioncode-ai/fabric-workspace --json state --jq .state` prints
-`MERGED`. Run it in `bash` and in `zsh`:
+The lander that makes the edit runs the check after both land, as its last step, once its edit
+is on the knowledge base's main: DEC-0149's lander after PR #628 merges when step 6 changed it,
+or after its knowledge-base PR for the clause merges; DEC-0154's lander after its
+knowledge-base PR for the clause merges. A lander that closes its PR unmerged, or makes no
+edit, runs nothing. Run it in `bash` and in `zsh`:
 
 ```sh
 git fetch origin && git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'
@@ -1698,16 +1711,21 @@ git show origin/main:knowledge/authority.md \
   | grep -cF "counting \`foreign\` and \`foreign-user\` is owed by FD's watcher under contract DEC-0154"
 ```
 
-The first prints 0 and the second prints 2.
+The first prints 0 and the second prints 2. The first `grep -c` exits 1 when it prints 0, so
+these commands are not run under `set -e`. If the check prints anything else, the lander
+records the mismatch in its handoff and runs the check again once the other lander's
+knowledge-base PR for the clause is merged or closed.
 
 Interleavings: DEC-0154 merges and its clause check prints 0 (PR #628 not merged); then, if
 DEC-0149's step 6 ran before that merge, PR #628 merges with "proposed" and step 6b sees 1 and
 2 and edits, and if step 6 ran after it, step 6 changes PR #628 and PR #628 merges already
 owed; or PR #628 merges, step 6b sees 0 and does nothing, then DEC-0154 merges and its clause
 check sees 2 and edits; or both open a knowledge-base PR at once, and the re-check before
-merging closes the second. Two windows are named and close: from DEC-0154's contract merge
-until a knowledge-base PR merges, the knowledge base says "proposed" for an accepted DEC-0154;
-in the other order the knowledge base names a DEC-0154 the contract's main does not carry yet.
+merging closes the second. In any other order, or if both re-checks race and both PRs merge,
+the text still ends owed twice, since a second edit changes nothing. Two windows are named and
+close: from the later of DEC-0154's contract merge and PR #628's merge until a knowledge-base
+PR merges, the knowledge base says "proposed" for an accepted DEC-0154; in the other order the
+knowledge base names a DEC-0154 the contract's main does not carry yet.
 
 Withdrawal: if DEC-0154 is withdrawn instead of accepted, its withdrawer files a knowledge-base
 row to drop the "proposed for FD" clause from `authority.md:115` and `:128`; neither lander
@@ -1907,7 +1925,7 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   failing source (one not marked `setup: true`) outside its start baseline stays, its failure message at 15 minutes
   possibly naming that source, and that counting `foreign` and `foreign-user` is proposed for FD's watcher in contract
   DEC-0154 (round 69, DG: true while DEC-0154 is proposed, which in order 2 the contract's main does not even carry
-  when PR #628 merges; who changes it, round 71, DK, below); the start baseline stays the fallback for a service that sends no `setup`
+  when PR #628 merges; who changes it, round 71, DK, in the rule in **Next task** above); the start baseline stays the fallback for a service that sends no `setup`
   flag (round 66, CQ). In both orders the knowledge base points at the definition in `service.md`, so the landing edits
   to `service.md` need no edit there; only its clause on `foreign` changes, twice, from "proposed" to "owed".
   "Proposed" is true while DEC-0154 is proposed. Who changes it, the exact clauses, the checks, the interleavings and
