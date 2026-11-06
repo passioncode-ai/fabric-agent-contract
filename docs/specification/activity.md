@@ -360,7 +360,7 @@ Schemas: [`activity-batch.schema.json`](../../schemas/activity-batch.schema.json
 [`activity-batch-ack.schema.json`](../../schemas/activity-batch-ack.schema.json).
 
 A device sends `{protocol, device.id, batchId?, sent, events[1..1000]}` over its enrolled
-mutual-TLS channel, signed with an HTTP message signature that a receiver behind a TLS-terminating host verifies
+mutual-TLS channel, signed with an HTTP message signature that a receiver behind a TLS-terminating proxy verifies
 instead ([devices, transport](devices.md#transport), DEC-0056). **The receiver attributes the batch to the client
 certificate** — or to the certificate the verified signature names — not to the body:
 

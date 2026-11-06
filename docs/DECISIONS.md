@@ -9750,7 +9750,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   was not clean (unit passed, 79 of 86 mutants, 5 equivalent, the rest closed by W76 (g); product found three breaks,
   W76 (a) to (c); seam found three breaks, the same as W76 (a), (c) and (f)); round 13 at `545ba274` was not clean (unit
   passed; product found one break and seam three, W77 (a) to (c)); round 14 at `d6138063` was not clean on all three
-  tiers (W78 (a) to (c), and a unit risk, W78 (e)); their batches are folded in (Source). A reference module and vectors, one optional schema
+  tiers (W78 (a) to (c), and a unit risk, W78 (e)); round 15 at `df98d10c` was not clean (unit passed; product
+  and seam found breaks, W79 (a) to (j)); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9765,7 +9766,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   are G1 to G11 of the spec [`2026-11-06-shared-host-gaps.md`](evidence/specs/2026-11-06-shared-host-gaps.md); this
   decision takes G1 to G3 and the host label the board agreed, and files the rest. Fabric's hub already chooses a port
   per account by a uid formula (its CO-505).
-  In this contract "host" never means the computer; the computer is called the computer. The one exception is the
+  In this contract "host" never means the computer. The one exception is the
   name "host label", which labels a computer.
 - **Decision:** [Several OS accounts on one computer](specification/service.md#several-os-accounts-on-one-computer)
   and [the host label](specification/devices.md#the-host-label):
@@ -9954,8 +9955,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     The knowledge base's `knowledge/authority.md` (fabric-workspace) clause "counting `foreign` and `foreign-user` is
     proposed for FD's watcher in contract DEC-0154" becomes "counting `foreign` and `foreign-user` is owed by FD's
     watcher under contract DEC-0154" (twice): DEC-0154's lander checks right after its contract PR merges and edits
-    the knowledge base when the clause is there; DEC-0149's lander checks at its steps 6 and 6b; the lander that lands
-    second checks that `grep -c 'proposed for FD'` prints 0 and the full new clause appears twice; if DEC-0154 is
+    the knowledge base when the clause is there; DEC-0149's lander checks at its steps 6 and 6b; the lander that makes
+    the edit checks, once its edit is on the knowledge base's main, that `grep -c 'proposed for FD'` prints 0 and the
+    full new clause appears twice, and a lander that makes no edit runs nothing; if DEC-0154 is
     withdrawn, its withdrawer files a knowledge-base row to drop the clause. The steps and their interleavings are one
     block, byte-identical in both handoffs ("The knowledge-base clause rule" in DEC-0154's and DEC-0149's).
   - Fabric Inbox: B-217 open, after this decision (its PR #421, rows B-217 to B-220): its desktop connect step sends a
@@ -10117,6 +10119,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   watches still "on a machine"; "proposed" markers split across lines and citations without one; unit: three
   posix-only hex mutants), and W78 (a purely negative host rule in the same words in every copy, "host" for a computer
   replaced where it was meant, copies and watching per OS account, the markers joined and listed with a multi-line
-  finder, the shared knowledge-base block pasted byte for byte, four Windows hex vectors) is folded in; the two UI lines passed the operator's copy check
+  finder, the shared knowledge-base block pasted byte for byte, four Windows hex vectors) is folded in; round 15 at
+  `df98d10c` was not clean (unit passed; product and seam: the shared knowledge-base block had changed, more uses of
+  "host" for a computer or a server, a self-referential host rule, the multi-line finder, the vectors' path), and W79
+  (the current shared block, the after-both check by the lander that makes the edit once it is on the knowledge
+  base's main, the host rule without "the computer is called the computer", the remaining hosts reworded, digests
+  read in the same OS account and CT-243, the FAC-SEM-010 comment, a finder for any split, the vectors' full path) is
+  folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

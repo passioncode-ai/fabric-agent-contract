@@ -665,7 +665,7 @@ is sent to it (HA-2, DEC-0154, proposed).
 **Host label**: The label of the computer: `device.hostLabel`, an HMAC of the computer's administrator-owned secret
 over the organization's id, the same for every device of one organization on one computer; organizations with no code
 on the computer cannot link it (HA-4, [devices](docs/specification/devices.md#the-host-label), DEC-0154, proposed). In
-this contract "host" never means the computer; the computer is called the computer. The one exception is the name
+this contract "host" never means the computer. The one exception is the name
 "host label", which labels a computer.
 
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that

@@ -240,7 +240,7 @@ function serviceClaims(value: JsonObject): Finding[] {
   const byKey = new Set<string>();
   descriptors.forEach((descriptor, index) => {
     const key = serviceKey(descriptor);
-    // DEC-0019: a port is a declaration on THIS computer, so only local placements declare one. A remote
+    // DEC-0019: a port is a declaration in one OS account's services directory, so only local placements declare one. A remote
     // origin's port belongs to another computer and collides with nothing here. The message below says "claimed" in
     // DEC-0019's sense of a declaration, not a DEC-0154 port claim; it is the rule's text a user sees, kept as it is.
     // DEC-0069: an app's descriptor may carry no origin (its live origin is in its liveness file), so it declares no port

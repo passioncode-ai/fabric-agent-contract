@@ -47,8 +47,9 @@ Proposed DEC on its own branch, and files the rest.
   `docs/guides/connecting-compatible-agents.md`. RFC 8252's row in `docs/evidence/sources.md`, and RFC 6265's existing row read again (its section 8.5 was already pinned for DEC-0059).
 - The gap list as a tracked spec: [2026-11-06-shared-host-gaps.md](../evidence/specs/2026-11-06-shared-host-gaps.md),
   the shared computer's accounts by role only.
-- Backlog CT-228 (the DEC) and CT-229 to CT-242 (the state-order vector file, G4 to G11, the single-account forwarder
-  gap, the policy member, the fixture catalogue, the organization's display, Fabric's link-back screen).
+- Backlog CT-228 (the DEC) and CT-229 to CT-243 (the state-order vector file, G4 to G11, the single-account forwarder
+  gap, the policy member, the fixture catalogue, the organization's display, Fabric's link-back screen, two accounts'
+  copies of one product in the operations digests).
 - Ids: DEC-0154 reserved by compare-and-swap on origin (under this run's own reservation key); no rule code reserved.
   `DECISIONS.md`'s marker reads `DEC-0155`, `conformance.md`'s stays `FAC-SEM-169`, equal to the counters.
 
@@ -189,7 +190,7 @@ Proposed DEC on its own branch, and files the rest.
   host scope named as such), with the lines it covers reworded where needed (`CONTEXT.md`'s Appearance carrier,
   FB-6's "on that host (the page's host)", the RFC 6265 row and `interop.md`'s "host name"); the knowledge-base step
   per the shared rule with DEC-0149 (after DEC-0154's merge, both clauses quoted, the second lander's check, the
-  interleavings and the withdrawal); the order 2 reference named by its bullet; five Windows vectors (68 cases), so
+  interleavings and the withdrawal); the order 2 reference named by its bullet; five Windows vectors (64 cases), so
   platform-conditional mutants of the link, mode, size and `org.id` checks each fail `test/host-label.test.ts`; the
   "proposed" markers listed for acceptance; `service.id`'s description and the reference-module row.
 - Round 14 at `d6138063`: not clean on all three tiers. The host rule listed the forms in which a URL's host is named,
@@ -198,11 +199,28 @@ Proposed DEC on its own branch, and files the rest.
   across lines, and three citations had none; unit's risk: three posix-only hex mutants survived. W78 folded: the rule
   is purely negative, byte-identical in `service.md`, the DEC, `CONTEXT.md` and `devices.md` ("In this contract
   'host' never means the computer; ..."); the sweep of `hosts?` found one use meaning a machine (`peer-share.md`'s "moves to another
-  host", now "another server"; `session-handoff.md`'s "On a POSIX host" stays, read as the host program on a POSIX
-  system, which writes the folder);
+  host", now "another server"; `session-handoff.md`'s "On a POSIX host" stayed, read as the host program on a POSIX
+  system, which writes the folder); W79 extended the sweep: `service.md`'s "a `personal` host" is "a service whose
+  `custody` is `personal`", `devices.md`'s and `activity.md`'s TLS-terminating hosts are "a TLS-terminating proxy"
+  or "a server that terminates TLS (a platform's load balancer)", `session-handoff.md`'s SH-2 reads "When the host
+  runs on a POSIX system", FAC-SEM-143's row "an address whose host is a loopback address" and
+  `folder-attribution.md`'s "Git hosting services that serve";
   `instance` and the overview per OS account, "the lifecycle broker"; the split markers joined and a multi-line
   finder added; the shared knowledge-base block pasted byte for byte as its own subsection; four Windows hex vectors
   (68 cases; one more than the three asked, since the `typeof hex` mutant needed a Windows case of its own).
+- Round 15 at `df98d10c`: not clean (unit passed; product and seam found breaks). The shared knowledge-base block had
+  changed (the after-both check by the lander that makes the edit, once its edit is on the knowledge base's main);
+  the host rule still said "the computer is called the computer"; "host" still named a computer or a server in
+  `service.md`, `devices.md`, `activity.md`, `session-handoff.md`, FAC-SEM-143's row and `folder-attribution.md`;
+  a digests collector "on the same machine"; the FAC-SEM-010 comment's "THIS computer"; a multi-line finder that
+  missed other splits; the round 13 count; a `relay.md` line that does not exist; the vectors' short path. W79
+  folded: the current block pasted byte for byte (from the heading `### The knowledge-base clause rule` on) and the
+  acceptance step's bullet agreeing with it, the DEC's summary saying who runs the after-both check; the rule reads
+  "In this contract "host" never means the computer. The one exception is the name "host label", which labels a
+  computer.", byte-identical in its four copies; the sweep line above extended; a collector in the same OS account
+  (`service.md`, OD-9 and its bullets) and CT-243 for two accounts' copies of one product; the comment per OS
+  account's services directory; the finder for any split and the re-read list; `(64 cases)` for round 13;
+  `packages/service-host/test-vectors/state-precedence.json`.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -223,7 +241,7 @@ Proposed DEC on its own branch, and files the rest.
 ## Merge notes, per sibling branch
 
 - CT-227 (`agent/ct219-receipt-20261106`), which lands first so this branch's hosted run is not red for its reason:
-  the backlog tail reads CT-227 then CT-228 to CT-242; the handoffs README stays newest first, DEC-0154's row above
+  the backlog tail reads CT-227 then CT-228 to CT-243; the handoffs README stays newest first, DEC-0154's row above
   DEC-0153's. Done: main `1c141418` (PR #245) is merged into this branch.
 - DEC-0149 (`agent/ct194-source-manifest-v2-20261104`): its landing backlog rows take ids above the highest on
   main and on open branches (DEC-0149 already holds CT-244), re-measured at landing; the DECISIONS tail in id order; the next-free markers re-read
@@ -314,20 +332,23 @@ Proposed DEC on its own branch, and files the rest.
 - **"proposed" markers.** Every "DEC-0154, proposed" (and "DEC-0154 (proposed)", "DEC-0154 item 4, proposed") in the
   specification changes at acceptance. Find them on one line with
   `git grep -n proposed -- docs/specification docs/guides docs/DOCMAP.md CONTEXT.md schemas src tools | grep DEC-0154`,
-  and any a line break splits with
-  `perl -0777 -ne 'print "$ARGV\n" if /DEC-0154[,\s(]+(?:item\s+4,\s*)?\n\s*proposed/' $(git ls-files docs/specification docs/guides docs/DOCMAP.md CONTEXT.md schemas src tools)`
+  and any that a line break splits with
+  `perl -0777 -ne 'while(/DEC-0154([\s\S]{0,40}?)proposed/g){ if($1 =~ /\n/){print "$ARGV\n"; last} }' $(git ls-files docs/specification docs/guides docs/DOCMAP.md CONTEXT.md schemas src tools)`
   (it prints nothing at this head). At this head they are in `CONTEXT.md`, `docs/DOCMAP.md`,
   `docs/guides/connecting-compatible-agents.md`, `conformance.md`, `connections.md`, `contexts.md`, `delegation.md`,
   `devices.md`, `fabric-button.md`, `node-summary.md`, `profiles.md`, `provider.md`, `relay.md`, `service.md`,
   `session-handoff.md`, `schemas/device-enrollment.schema.json`, `schemas/service-well-known.schema.json`,
-  `src/host-label.ts` and `tools/vectors/host-label.ts`, and, after the merge with DEC-0149, its `relay.md` line too.
+  `src/host-label.ts` and `tools/vectors/host-label.ts`.
   Re-read too the citations that carry no marker: `devices.md`'s "a server pinned before DEC-0154", the comments in
-  `src/semantic-rules.ts`, and the generator's and vectors' "DEC-0154 item 4".
+  `src/semantic-rules.ts`, `tools/vectors/host-label.ts`'s "DEC-0154's text" (its line 9), and the generator's and
+  vectors' "DEC-0154 item 4".
 - **Adopters.** In `docs/specification/README.md` name the owed adopters on the devices row (Project Observatory's node
   and setup step, the first organization server) and the services row (Fabric, Fabric Dashboards, Switchboard, Fabric
   Inbox, the adapter's kits, the PassionCode launcher, Project Observatory).
 - **The knowledge-base step**, right after DEC-0154's contract PR merges, not when the Status is set: as the
-  knowledge-base clause rule below says, for DEC-0154's lander.
+  knowledge-base clause rule below says, for DEC-0154's lander. The check after both land runs only once DEC-0154's
+  own knowledge-base PR for the clause has merged; when the clause check prints 0, or the PR is closed unmerged, it
+  runs nothing.
 - **The board.** Tell thread `1fe66e6e` the same day (Fabric Dashboards' FD-159 and Fabric's server build on it), and in
   that message ask Fabric Dashboards for a row that its watcher (FD-76's successor) counts `foreign` and
   `foreign-user` as unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card only.
@@ -378,10 +399,11 @@ DEC-0154's lander: its Status starts with `- **Status:** Accepted`, written
 contract PR merges only once accepted. Right after its contract PR merges it runs the clause
 check; 2: a knowledge-base PR for the clause; 0: nothing.
 
-Each lander runs the check after both land as its last step when the other has already landed:
-DEC-0149's lander when the status check printed 1 in step 6b, DEC-0154's lander when
-`gh pr view 628 --repo passioncode-ai/fabric-workspace --json state --jq .state` prints
-`MERGED`. Run it in `bash` and in `zsh`:
+The lander that makes the edit runs the check after both land, as its last step, once its edit
+is on the knowledge base's main: DEC-0149's lander after PR #628 merges when step 6 changed it,
+or after its knowledge-base PR for the clause merges; DEC-0154's lander after its
+knowledge-base PR for the clause merges. A lander that closes its PR unmerged, or makes no
+edit, runs nothing. Run it in `bash` and in `zsh`:
 
 ```sh
 git fetch origin && git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'
@@ -389,16 +411,21 @@ git show origin/main:knowledge/authority.md \
   | grep -cF "counting \`foreign\` and \`foreign-user\` is owed by FD's watcher under contract DEC-0154"
 ```
 
-The first prints 0 and the second prints 2.
+The first prints 0 and the second prints 2. The first `grep -c` exits 1 when it prints 0, so
+these commands are not run under `set -e`. If the check prints anything else, the lander
+records the mismatch in its handoff and runs the check again once the other lander's
+knowledge-base PR for the clause is merged or closed.
 
 Interleavings: DEC-0154 merges and its clause check prints 0 (PR #628 not merged); then, if
 DEC-0149's step 6 ran before that merge, PR #628 merges with "proposed" and step 6b sees 1 and
 2 and edits, and if step 6 ran after it, step 6 changes PR #628 and PR #628 merges already
 owed; or PR #628 merges, step 6b sees 0 and does nothing, then DEC-0154 merges and its clause
 check sees 2 and edits; or both open a knowledge-base PR at once, and the re-check before
-merging closes the second. Two windows are named and close: from DEC-0154's contract merge
-until a knowledge-base PR merges, the knowledge base says "proposed" for an accepted DEC-0154;
-in the other order the knowledge base names a DEC-0154 the contract's main does not carry yet.
+merging closes the second. In any other order, or if both re-checks race and both PRs merge,
+the text still ends owed twice, since a second edit changes nothing. Two windows are named and
+close: from the later of DEC-0154's contract merge and PR #628's merge until a knowledge-base
+PR merges, the knowledge base says "proposed" for an accepted DEC-0154; in the other order the
+knowledge base names a DEC-0154 the contract's main does not carry yet.
 
 Withdrawal: if DEC-0154 is withdrawn instead of accepted, its withdrawer files a knowledge-base
 row to drop the "proposed for FD" clause from `authority.md:115` and `:128`; neither lander

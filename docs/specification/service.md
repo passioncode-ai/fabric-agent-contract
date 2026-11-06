@@ -148,7 +148,7 @@ declares no port for `FAC-SEM-010`. Vectors: [`fixtures/vectors/app-descriptor.j
 - Only two commands are defined: `doctor` and `update`. A host MUST NOT run any other
   command a descriptor lists.
 - A host MUST preserve and ignore unknown `extensions`.
-- A local descriptor MAY say where a collector on the same machine reads its daily operations digests, under
+- A local descriptor MAY say where a collector in the same OS account reads its daily operations digests, under
   `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1`: 1 to 8 `{dir, source}`, `dir` a folder
   inside `paths.data` and `source` the label sent with its lines ([operations digests](ops-digest.md#where-a-collector-reads-the-daily-digests),
   OD-9, DEC-0153; `FAC-SEM-168`). A remote descriptor carries none.
@@ -562,7 +562,7 @@ The Host and Origin guard does not tell them apart, so a computer with more than
 
 DEC-0154, proposed. On one computer each counted OS account runs its own copy of a service, with its own services
 directory, tokens and descriptors, and every account (and every guest whose traffic a forwarder relays) reaches every
-port on `127.0.0.1`. In this contract "host" never means the computer; the computer is called the computer. The one
+port on `127.0.0.1`. In this contract "host" never means the computer. The one
 exception is the name "host label", which labels a computer.
 
 <a id="counted-os-accounts"></a>
@@ -703,10 +703,10 @@ The well-known `process.pid` is never proof: any listener can name any pid.
   redirect.
 
 As Fabric Dashboards reported on thread `1fe66e6e` (message `262523cc`), its commit `53a62f9` pins three
-state-precedence cases (`test-vectors/state-precedence.json`, FD-158): a listener of another OS account that answers
-`ready` with the descriptor's identity is `foreign-user`; a listener of another OS account that answers another
-identity is `foreign-user`, not `foreign`; a listener of this account that answers another identity is `foreign`. The
-contract's own vector file for them is CT-229.
+state-precedence cases (`packages/service-host/test-vectors/state-precedence.json`, FD-158): a listener of another
+OS account that answers `ready` with the descriptor's identity is `foreign-user`; a listener of another OS account
+that answers another identity is `foreign-user`, not `foreign`; a listener of this account that answers another
+identity is `foreign`. The contract's own vector file for them is CT-229.
 
 <a id="ha-3"></a>
 
@@ -832,7 +832,7 @@ operator's subscription is refused. Read beside its usage report, a service offe
   organization's listing does ([estate record](estate-record.md), DEC-0055), and the caller presents its own
   credential at `endpoint` — a delegation token ([delegation](delegation.md), DEC-0039) or a guest's through the relay.
   The descriptor's token stays the host's: others never receive it ([MCP credentials](#mcp-credentials), DEC-0024).
-- `custody` and `residency` are shown beside the service. Which data an organization lets reach a `personal` host, and
+- `custody` and `residency` are shown beside the service. Which data an organization lets reach a service whose `custody` is `personal`, and
   whether a caller's residency requirement admits a service's, are the organization's placement policy and the
   caller's, not this descriptor's rules (DEC-0061, *Not decided*).
 
@@ -1309,5 +1309,5 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | <a id="fac-sem-087"></a>`FAC-SEM-087` | `service-runner` | the runner's kind is in the node's catalogue; a subscription names its vendor's runner; the declared credential kind is one of the four and equals the one the node derived; a service offered to others runs on no subscription, declared, derived or in its usage report |
 | <a id="fac-sem-088"></a>`FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
 | <a id="fac-sem-101"></a>`FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
-| <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address on a local host, and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
+| <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address whose host is a loopback address, and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
 | <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121) |

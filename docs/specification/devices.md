@@ -117,7 +117,7 @@ context names it, so nothing of a context is routed to it.
 The certificate is **short-lived**: at most 30 days (`FAC-SEM-044`), and SHOULD be 7. Its binding
 names the organization and device of the request, and the signed-in user for an SSO enrollment
 (`FAC-SEM-044`). Every later request (batches, check-ins, rotation and share registrations) is made over mutual TLS with it and carries an
-HTTP message signature made with the device's key, which a receiver behind a host that terminates TLS verifies instead
+HTTP message signature made with the device's key, which a receiver behind a TLS-terminating proxy verifies instead
 ([transport](#transport), DEC-0056).
 
 **An enrolled device id is proven, not claimed.** A request for a `device.id` the server already
@@ -208,7 +208,7 @@ passes the small-order check (DEC-0045).
 ### The host label
 
 DEC-0154 item 4 (HA-4), proposed. The **host label** is the label of the computer. In this contract "host" never means
-the computer; the computer is called the computer. The one exception is the name "host label", which labels a
+the computer. The one exception is the name "host label", which labels a
 computer. An enrollment request MAY carry `device.hostLabel`: an opaque value that is the same for every device of one
 organization on one computer (two counted OS accounts of it, or a virtual machine given its secret) and that
 organizations with no code on the computer cannot link.
@@ -264,8 +264,8 @@ organizations with no code on the computer cannot link.
 
 ## Transport
 
-DEC-0056, agreed with the first organization server (its ADR-0007, amended 2026-10-12 at its commit `7a47447`). A host
-that terminates TLS — a platform's load balancer — never sees a client certificate, so mutual TLS alone cannot prove
+DEC-0056, agreed with the first organization server (its ADR-0007, amended 2026-10-12 at its commit `7a47447`). A server
+that terminates TLS (a platform's load balancer) never sees a client certificate, so mutual TLS alone cannot prove
 the device's key there. **A device signs every batch, check-in, rotation and share-registration request with an HTTP message signature**
 ([RFC 9421](https://www.rfc-editor.org/rfc/rfc9421), a subset), beside mutual TLS, not instead of it. Enrollment is
 unchanged: its proof travels in `Authorization` ([enrollment](#enrollment)).
@@ -284,7 +284,7 @@ A relay admits only an ES256 `#sig` key; this binding also admits Ed25519.
 - An invalid signature over a valid mutual-TLS session is refused with the signature step's code: the session does not
   excuse it.
 - An unsigned request — no `fabric-device` member in either field — is accepted only by a receiver that sees the client
-  certificate, and only while that certificate is known, not revoked and valid; a receiver behind a TLS-terminating host
+  certificate, and only while that certificate is known, not revoked and valid; a receiver behind a TLS-terminating proxy
   refuses it as `signature-missing`.
 
 | Part | Value |
@@ -837,7 +837,7 @@ Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the 
   organization server adopts DEC-0031.
 - A response signature: the server signing its answers (DEC-0056). A device trusts the TLS channel and the signed policy
   and key sets.
-- How a receiver behind a TLS-terminating host learns of a certificate's revocation beyond its own records (DEC-0056).
+- How a receiver behind a TLS-terminating proxy learns of a certificate's revocation beyond its own records (DEC-0056).
 - What a receiver does when a reported `records.estateRecord.digest` shows a fork of the estate record (DEC-0056): the hub
   over the relay or through its own node's `machine.report` (DEC-0132, DEC-0146), or an organization server toward a node that has not adopted DEC-0128's UE-2.
 - RFC 9421's successor drafts and its `Accept-Signature` field (DEC-0056).

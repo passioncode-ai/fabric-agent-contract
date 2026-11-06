@@ -35,7 +35,7 @@ The manifest's schema is
 ancestor of the folder holds `.git`. The folder is a folder, not a link to one. It is the host's material, not
 the project's, and a copy committed to a repository would be a stale copy of a moving store.
 
-**SH-2 — Modes.** On a POSIX host the folder is `0700` and every file in it `0600`: the files may hold a
+**SH-2 — Modes.** When the host runs on a POSIX system the folder is `0700` and every file in it `0600`: the files may hold a
 credential, and a listable folder still publishes the session ids. On Windows access is the profile's ACL and the
 modes are not checked.
 
