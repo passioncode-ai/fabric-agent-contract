@@ -420,7 +420,9 @@ source, what never travels with it, the check before a source export, and how a 
   that main's old watcher sentence is gone (item CL); CT-244's place list replaced by `git grep -n CT-244` (item CK);
   authority.md's two episode lines in PR #628 naming what FD-76 counts today; Git mode's first listing read as "a file
   under one, even one an `exclude` entry removes" in source.md and the walk trigger's comment (item CM, as `index.covers`
-  and E12 read it); the timeout branches' coverage left to a third landing row (item CN); round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
+  and E12 read it); the timeout branches' coverage left to a third landing row (item CN); the landing edit limited to
+  the first sentence's subject and list of states, the rest kept and FD-76's fact added after it (item CP, from DEC-0154's
+  round-7 product reading); both checks quoted so no shell expands them and run on probe files (item CO); round 44 (not clean: target forms, word forms, export parent, existing readers, public home)
   answered as the coordinator decided (below), with the Paths section stating the include and exclude entry rule once
   (and the schema's description, the `SOURCE_PATH` and `folderInSource` comments and the walk's folder wording to
   match) and the vectors' patch sentence naming the Georgian step; and from round 43's unit reading (round 42's bare entry leaving out what lies beneath its
@@ -533,10 +535,13 @@ source, what never travels with it, the check before a source export, and how a 
 - Round 61, decided by the coordinator under the operator's recorded rules:
   - principles section 7 and rules section 9 name the same exceptions, whose home is item 9;
   - CT-227 has landed (main `1c141418`); DEC-0154 is the open branch after DEC-0151 and DEC-0152, and whichever of
-    DEC-0149 and DEC-0154 lands second writes the contract's rule and Fabric Dashboards' released fact as two sentences in
-    `service.md`, reformatted onto one line each at landing: "A watcher messages the operator only when an agent has been unavailable (`down`, `foreign` or `foreign-user`, not merely
-    `degraded`) for more than 15 minutes. Fabric Dashboards' watcher does so for `down` since FD-76 (0.7.15, `ebffd16`);
-    counting `foreign` and `foreign-user` is owed (DEC-0154)." (round 65, CJ: FD-76 counts only `down`, fabric-dashboards
+    DEC-0149 and DEC-0154 lands second changes only the subject ("Fabric Dashboards' watcher" to "A watcher") and the
+    list of states (to "`down`, `foreign` or `foreign-user`, not merely `degraded`", on one line) of the first sentence
+    of DEC-0149's watcher text in `service.md`, keeps the rest of it (once per case, back after 15 minutes well, a
+    `degraded` answer opening no message, setup entries left out, the FD-76 and ADR-0010 references, the MUST NOT for
+    `setup: true`), and adds after them "Fabric Dashboards' watcher does so for `down` since FD-76 (0.7.15, `ebffd16`);
+    counting `foreign` and `foreign-user` is owed (DEC-0154).", the landed text and its two checks being in the chain
+    paragraph below (round 65, CP and CO; CJ: FD-76 counts only `down`, fabric-dashboards
     main `a0bc160`, `src/core/outage-alerts.ts` lines 115 to 119, so the released fact is not widened; round 64, CH: `foreign`
     added by DEC-0154's W14; round 63: then `relay.md` and `conformance.md` follow `service.md` by themselves, pointing at its
     definition);
@@ -769,6 +774,12 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+Items CO and CP (the handoff only) were checked on the working tree over head `346f030d` (this note's commit holds the
+same tree, plus this paragraph): the two landing checks, taken from this note by `grep -o` and run with `bash -c` and
+`zsh -c` from the root of two probe copies of `service.md`, print 1 and 0 on the landed text and 1 and 1 on the
+widened claim, and 0 and 0 on this branch; `pnpm run docs:check` (0 errors) and `ORG_INDEX=... pnpm run
+privacy:check` (0 findings). The full branch gate was not run (the disk under 8 GB free). No U+2014 in the added lines.
 
 Items CM and CN (two wordings, one comment and a landing row; no code changed) were checked on the working tree over
 head `2116f32f` (this note's commit holds the same tree, plus this paragraph): `pnpm typecheck` (exit 0), `pnpm vitest
@@ -1412,17 +1423,38 @@ fourteen files as with main `1c141418` (measured with `git merge-tree` in round 
 file of its own; where its lines meet this landing's: the coverage `include` of `vitest.config.ts` (the union keeps
 `src/host-label.ts`, `src/validator.ts`, `src/channel-agent.ts` and `src/ops-digest.ts`), the handoffs README row, and
 the tails of `docs/DECISIONS.md` (ordered through DEC-0154) and `docs/backlog.md` (in id order). DEC-0154's handoff also
-names the watcher sentence in `service.md`: whichever of DEC-0149 and DEC-0154 lands second replaces it with the
-contract's rule and Fabric Dashboards' released fact, written separately: "A watcher messages the operator only when an agent has been unavailable (`down`, `foreign` or `foreign-user`, not merely
-`degraded`) for more than 15 minutes. Fabric Dashboards' watcher does so for `down` since FD-76 (0.7.15, `ebffd16`);
-counting `foreign` and `foreign-user` is owed (DEC-0154)." (`foreign` from DEC-0154's W14: a
-service whose port another program holds serves nothing; FD-76 counts only `down`, fabric-dashboards main `a0bc160`,
-`src/core/outage-alerts.ts` lines 115 to 119, round 65's CJ). At landing reformat the phrase
-"unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)" onto one line of `service.md`, since a
-`grep` reads one line. Checks after both land: the count of that exact phrase in `docs/specification/service.md` is 1,
-as DEC-0154's handoff checks (its W4); and the widened claim is absent:
-`` grep -c "Fabric Dashboards' watcher messages the operator only when an agent has been unavailable (\`down\`, \`foreign\`" docs/specification/service.md ``
-prints 0. After that one edit `relay.md`'s
+names the watcher sentence in `service.md`: whichever of DEC-0149 and DEC-0154 lands second changes only two things in
+the first sentence of DEC-0149's watcher text (`service.md` lines 222 to 225 on this branch), its subject ("Fabric
+Dashboards' watcher" becomes "A watcher") and its list of states ("`down`, not merely `degraded`" becomes "`down`,
+`foreign` or `foreign-user`, not merely `degraded`"), and keeps the rest of it as it is: once per case, back after 15
+minutes well, a `degraded` answer opening no message, setup entries left out, the FD-76 and ADR-0010 references, and
+the MUST NOT for an entry with `setup: true`. After them it adds the second sentence, Fabric Dashboards' released fact
+(round 65, CJ and CP; `foreign` from DEC-0154's W14: a service whose port another program holds serves nothing; FD-76
+counts only `down`, fabric-dashboards main `a0bc160`, `src/core/outage-alerts.ts` lines 115 to 119). The landed text,
+with the phrase "unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)" on one line of `service.md`
+(a `grep` reads one line):
+
+```text
+A watcher messages the operator only when an agent has been unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)
+for more than 15 minutes, once per case, and says it is back after 15 minutes well; a `degraded` answer opens no message, so
+setup entries are left out (fabric-dashboards `docs/backlog.md` FD-76, ADR-0010, released in 0.7.15, read at `ebffd16`); a
+watcher MUST NOT message the operator for an entry with `setup: true`. Fabric Dashboards' watcher does so for `down` since
+FD-76 (0.7.15, `ebffd16`); counting `foreign` and `foreign-user` is owed (DEC-0154).
+```
+
+Checks after both land, run from the contract's root (each command takes its pattern as written, with no shell
+expansion inside it: single quotes, or `$'...'` where the pattern holds a single quote):
+
+- the phrase once, as DEC-0154's handoff checks (its W4):
+  `` grep -c -F 'unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`)' docs/specification/service.md ``
+  prints 1;
+- the widened claim absent:
+  `` grep -c -F $'Fabric Dashboards\' watcher messages the operator only when an agent has been unavailable (`down`, `foreign`' docs/specification/service.md ``
+  prints 0.
+
+Both were run in round 65 (item CO) under `bash` and `zsh` on two probe copies of `service.md`: one with the landed text
+above (the first prints 1, the second 0) and one with the widened claim, whose subject is still Fabric Dashboards'
+watcher (the first prints 1, the second 1); on this branch's `service.md` both print 0. After that one edit `relay.md`'s
 machine-report paragraph and `conformance.md`'s watcher row follow `service.md` by themselves: since round 63 they name
 no state and point at the definition in `service.md`. Every head here is re-measured at landing.
 
