@@ -1012,8 +1012,11 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
   });
   it("keeps its floors equal to the shared detector's: each provider prefix's run and the long run", () => {
     const source = SECRET_VALUE.source;
-    const floors = new Map([...source.matchAll(/(sk-|gh\[pousr\]_|xox\[abposr\]-|AKIA|glpat-)\[[^\]]+\]\{(\d+),?\}/g)].map((m) => [m[1], Number(m[2])]));
-    expect(floors.get("sk-")).toBe(SK_FLOOR);
+    const floors = new Map([...source.matchAll(/(gh\[pousr\]_|xox\[abposr\]-|AKIA|glpat-)\[[^\]]+\]\{(\d+),?\}/g)].map((m) => [m[1], Number(m[2])]));
+    // DEC-0151's `sk-` branch takes 16 or more with an upper-case letter, else 32 or more: its floor is the smaller.
+    const sk = /sk-\(\?=[^)]*\)\(\?:\(\?=[^)]*\)\[[^\]]+\]\{(\d+),\}\|\[[^\]]+\]\{(\d+),\}\)/.exec(source);
+    expect(sk).not.toBeNull();
+    expect(Math.min(Number(sk?.[1]), Number(sk?.[2]))).toBe(SK_FLOOR);
     expect(PREFIX_FLOORS.map(([prefix, floor]) => [prefix.source, floor])).toEqual([
       ["gh[pousr]_", floors.get("gh[pousr]_")],
       ["xox[abposr]-", floors.get("xox[abposr]-")],
@@ -1188,14 +1191,15 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(parsed).toEqual(vector.input);
     expect(channelAgentRules(parsed).map((f) => ({ code: f.code, instancePath: f.instancePath }))).toEqual(vector.findings);
   });
-  it("reads a language tag that starts with sk- and 16 or more characters as a key, and sk-SK as a tag", () => {
+  it("reads a language tag that starts with sk- and 16 or more characters with a digit as a key, and sk-SK as a tag", () => {
     const p0 = value.projects[0];
     const tagged = (language: string) => channelAgentRules({ extensions: { [KEY]: { ...value, projects: [{ ...p0, channels: [{ ...p0.channels[0], texts: { holding: p0.channels[0].texts.holding, final: { [language]: "Please write to our support." } } }, p0.channels[1]] }] } } }, "well-known").map((f) => `${f.code} ${f.instancePath}`);
     expect(tagged("sk")).toEqual([]);
     expect(tagged("sk-SK")).toEqual([]);
-    for (const long of [["sk", "Latn-SK-u-ca-gregory"].join("-"), ["sk", "Latn-150-u-ca-gregory"].join("-")]) {
-      expect(tagged(long), long).toEqual([`FAC-SEM-165 ${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/channels/0/texts/final`]);
-    }
+    // DEC-0151: a digit-free tag is no key; one with a digit and an upper-case letter still is.
+    expect(tagged(["sk", "Latn-SK-u-ca-gregory"].join("-"))).toEqual([]);
+    const long = ["sk", "Latn-150-u-ca-gregory"].join("-");
+    expect(tagged(long), long).toEqual([`FAC-SEM-165 ${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/channels/0/texts/final`]);
   });
   it("asks for a rename by role: a text keyed id gets none, a channel id keeps it", () => {
     const p0 = value.projects[0];
@@ -1242,9 +1246,10 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(view.errors).toEqual(["FAC-SEM-162 at /projects/0/channels/0/texts: maxProperties (more members than the schema declares; only texts.final takes the none form (Narrowings))"]);
   });
   // The boundary forms the cost model recognises before an `sk-` (ESCAPE_BEFORE, ESC_BEFORE, colourBefore), checked
-  // both ways: the cost charges a boundary `sk-` after each, and the shared detector finds a key after each. Once DEC-0151
-  // lands, its lander adds every boundary form its detector's comment lists, so the two cannot drift.
-  const BOUNDARY_FORMS = ["", " ", "/", "%2F", "%252F", "\\x2F", "\\u002F", "\\057", "\\57", "\\n", "\u001b[31m", "\u001b[m", "\\x1b[0m", "\\x1B[1;31m", "\\033[0m", "\\u001b[0m", "\\u001B[0m", "\\e[0m", "\u001b[38:5:1m", "\\x1b[38:5:1m", "\\33[1m"];
+  // both ways: the cost charges a boundary `sk-` after each, and the shared detector finds a key after each. They include
+  // every boundary form DEC-0151's detector comment lists (src/secret-shape.ts), so the two cannot drift.
+  const BOUNDARY_FORMS = ["", " ", "/", "%2F", "%252F", "\\x2F", "\\u002F", "\\057", "\\57", "\\n", "\u001b[31m", "\u001b[m", "\\x1b[0m", "\\x1B[1;31m", "\\033[0m", "\\u001b[0m", "\\u001B[0m", "\\e[0m", "\u001b[38:5:1m", "\\x1b[38:5:1m", "\\33[1m",
+    "%22", "%2522", "\\t", "\\r", "\\\"", "\\'", "\\b", "\\f", "\\v", "\\0", "\\a", "\\e", "\\042", "\\x22", "\\u0022"];
   it("charges a boundary sk- after every form the cost model recognises, and the detector finds a key after each", () => {
     const key = ["sk", "-", "Q7r2".repeat(5)].join("");
     for (const form of BOUNDARY_FORMS) {
@@ -1258,6 +1263,12 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     }
     // Away from a boundary the run is charged up to SK_FLOOR after the `sk-`.
     expect(bare(`a${key}`)).toBe(1 + key.length + SK_FLOOR);
+  });
+  it("names a project by the same registry alias pattern support-quality-daily/1 keys a day by (DEC-0151)", () => {
+    const support = JSON.parse(read("schemas/support-quality-daily.schema.json")) as Json;
+    const pattern = JSON.stringify(schema).match(/"project":\{"type":"string","pattern":"([^"]+)"/)?.[1];
+    expect(pattern).toBeDefined();
+    expect(JSON.parse(`"${pattern}"`)).toBe(((support.$defs as Json).projectAlias as Json).pattern);
   });
   it("tells the author of an id that starts with sk- to rename it", () => {
     const id = "sk-support-desk-faq-answers-2026-v2";

@@ -252,7 +252,11 @@ describe("DEC-0151: the ticket counts of the channel agent standard in support-q
     expect(start).toBeGreaterThan(0);
     const section = page.slice(start, page.indexOf("## Semantic rules"));
     const rows = [...section.matchAll(/^\| `([a-z_]+)` \| `([a-z]+)` \|/gm)].map((match) => [match[1], match[2]]);
-    expect(rows.map(([kind]) => kind).sort()).toEqual(["account", "mail", "public_comment", "store_review", "team_chat", "telegram_dm", "telegram_group"]);
+    // The kinds are the channel agent declaration's own (DEC-0150), read from its schema, not a list kept here.
+    const declaration = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/service-channel-agent-extension.schema.json"), "utf8")) as Json;
+    const kinds = [...(declaration.$defs.channel.properties.kind.enum as string[])].sort();
+    expect(kinds).toHaveLength(7);
+    expect(rows.map(([kind]) => kind).sort()).toEqual(kinds);
     for (const [, channel] of rows) expect(schema.properties.channel.enum).toContain(channel);
   });
   it("keys two projects' days on one channel apart by project, the registry's project:<slug> (DEC-0151)", async () => {

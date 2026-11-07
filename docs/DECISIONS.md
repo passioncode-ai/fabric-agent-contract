@@ -9850,6 +9850,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-11-04
 - **Status:** Accepted, merged 2026-11-05, after two clean rounds of readings, 38 and 39 (unit, product and seam, at
   `f0feccbd`).
+- **Annotated (2026-11-07):** DEC-0151 has merged. CA-2's parenthetical (DEC-0151 in progress proposes the same
+  `projectAlias`) now holds as decided: `support-quality-daily/1` keys a day by the same alias. CA-5's detector is
+  DEC-0151's: a provider prefix counts at a word start in its canonical case, and an `sk-` run needs a digit with an
+  upper-case letter and 16 or more characters, or a digit and 32 or more; the advice to rename an id that starts with
+  `sk-` stays true, since a strong `sk-` run at a value's start is still found (the page's language-tag example
+  `sk-Latn-SK-u-ca-gregory` is no longer a key). The Compatibility's payload sentence is answered by DEC-0151 (its
+  ticket counts, its project rules and the channel kinds table on the support quality page; the escalation counts stay
+  in turns). The Source's counter sentence agrees with DEC-0151's Source: `ee67e35e` (key `support-quality-v2-dec`,
+  next 152) is DEC-0151's reservation and `d3da4336` (next 149) the value before it; DEC-0149's own reservation is
+  `e27a5441` (key `ct194-source-manifest`, next 150).
 - **Context:** a project on the board asked (request `437c404b`, thread `b6820b97`, 2026-11-04) for an extension key
   under which an agent that answers people on a channel (mail, Telegram, store reviews) declares what
   `channel-agent-standard/1` asks, checked statically by the Fabric Agent Adapter's service check (its row FAA-197),
@@ -10182,7 +10192,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Proposed: accepted at merge after two clean rounds of readings. A widening of DEC-0095's closed schema
   at the same revision, by the path DEC-0144 took. Consumer adoption: CT-210. Closes CT-129 (item 3) on merge.
 - **Context:** the channel agent standard's v1 release candidate, received on the board (thread `b6820b97`; the copy
-  DEC-0150 adds, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`), asks every agent that answers
+  DEC-0150 added, [`2026-11-04-channel-agent-standard-v1-rc.md`](evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md)), asks every agent that answers
   people to publish `support.quality_daily` as `support-quality-daily/1` over the day's tickets (its section 5): what
   arrived and ended, what is open at the cutoff, each outcome and two marks, the answered tickets and the fallbacks of
   the checker (the model that gates an answer before it is sent). `/1` has no member for them, and its schema is
@@ -10287,7 +10297,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      agent's declaration is refused while it holds that entry, so the agent leaves it out until the registry changes the
      alias, and that project's channels still count
      for item 6's rule 1. It keeps that project's days and, once the
-     registry changes the alias, publishes them naming the new alias. A weak `sk-` slug alias (`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`, `project:sk-harbor-customer-care`) passes `FAC-SEM-101` and `FAC-SEM-165`, but DEC-0149 (in progress) reads it as a `FAC-SEM-158` credential in a source tree, its tree check keeping its own unbounded, case-insensitive key shapes: once DEC-0149 lands, a channel agent declaring such a project in `fabric-agent.json` cannot export its source (checked with DEC-0149's `checkSourceTree` at `8dd4d04f`). Whether the registry issues an alias with a provider prefix at a word start is the operator's open question until the registry's owner records a rule (CT-210 (g)); the agent never renames an alias.
+     registry changes the alias, publishes them naming the new alias. A weak `sk-` slug alias (`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`, `project:sk-harbor-customer-care`) passes `FAC-SEM-101` and `FAC-SEM-165`, but DEC-0149 (merged 2026-11-07, `v0.1.0+2026-11-07.2`) reads it as a `FAC-SEM-158` credential in a source tree, its tree check keeping its own unbounded, case-insensitive key shapes: a channel agent declaring such a project in `fabric-agent.json` cannot export its source (checked with DEC-0149's `checkSourceTree` at `8dd4d04f`). Whether the registry issues an alias with a provider prefix at a word start is the operator's open question until the registry's owner records a rule (CT-210 (g)); the agent never renames an alias.
 - **Why:** the channel agent standard's daily report counts tickets on its signal server and checks each agent's feed
   against it; one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that
   home before any producer may send them. The digit fixes a rule the schema made impossible to keep. The registry
@@ -10498,6 +10508,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (unit, seam, product). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168`, a descriptor
   extension, a reference module and vectors, and a host obligation. Additive: nothing that validated before changes.
 - **Annotated (2026-11-07):** amended by DEC-0154 (OD-9: a collector in the same OS account reads the daily digests; CT-243).
+- **Annotated (2026-11-07):** DEC-0151 has landed, so `FAC-SEM-167` reads the shapes as DEC-0151's `SECRET_VALUE` does: a provider prefix in its canonical case at a word start (the name's start, after a character that is no ASCII letter or digit, or after an escape), `sk-` with a digit and an upper-case letter and 16 or more characters, or a digit and 32 or more, within 256 characters, `AKIA` with 16 upper-case letters or digits; the JWT read through `hasJwt`, `Bearer` and the long run unchanged. Item 3's "in either case and anywhere in the name" and its `sk-` shape inside a word ending in sk no longer hold: `ops.risk-assessment-completed`, `queue.task-assigned-to-worker`, `work.desk-booking-confirmed` and `ui.disk-usage-refreshed-hourly` pass, and a lower-case `akia` tail does too (the page's OD-2 and `FAC-SEM-167` row, and `test/ops-digest.test.ts`, say so). "Until DEC-0151 lands" in item 3 and in the round-7 Source sentence is history.
 - **Annotated (2026-11-07):** DEC-0149 has landed: its "Starting without the instance", which item 4 cites as in progress, is on `main` (a call refused for the product's own missing source slot is `unknown`, never `failed`), and `foldDir` in `src/ops-digest.ts` is DEC-0149's `foldPath`; item 3's `JWT_SHAPE` is read through `hasJwt` (`src/secret-shape.ts`, one pass, the same matches).
 - **Context:** the operator asked on 2026-11-04 that every product's log be read every hour and every day, and that
   every agent close its work with a retro whose lessons are kept centrally; Fabric recorded the split in its ADR-0188

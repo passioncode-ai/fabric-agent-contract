@@ -266,6 +266,32 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   (the rule and its test changed together; DEC-0151's Compatibility quote still holds as a substring); the merge list
   names `source.md`'s two "(DEC-0151, in progress)" sentences at DEC-0149's `47d66a15`, adds DEC-0153 and DEC-0152, and
   refreshes its figures; the closing check spans lines.
+- Before round 16 (2026-11-07): main `8791cce0` (DEC-0148 to DEC-0155 merged and released, DEC-0150 among them, so
+  the merge gate holds) merged into this branch. Conflicts resolved: DEC-0151 placed between DEC-0150 and DEC-0152,
+  the next-free line `DEC-0156`; `src/secret-shape.ts` keeps DEC-0149's JWT scanner (`jwtSpans`, `hasJwt`) and this
+  branch's comment and `SECRET_VALUE`; `test/secret-shape.test.ts` holds both sides' tests; support quality's "Not
+  decided here" drops main's in-progress bullet on section 5.1; the row files keep both sides in id order. Then the
+  list in "When DEC-0150 and DEC-0151 meet on main" and DEC-0150's own list (its handoff, "When DEC-0150 and DEC-0151
+  (in progress) land") were applied: `channel-agent.md` (the alias parenthetical, the join sentence with "a payload
+  with no project is not attributed to any project", item 4's `sk-` sentence, the language-tag sentence, the daily
+  payload bullet as a pointer naming the three renamed members and the turns unit), `identifiers.md` (the two
+  `project:<slug>` bullets merged into one, DEC-0149 as landed), `source.md` (both in-progress sentences stated as
+  current, and the weak `sk-` slug alias sentence), the support quality page (DEC-0149 as landed, the standard's copy
+  linked twice), `docs/evidence/sources.md`, CT-209, the `shaped` comment and `flag`'s `/^sk-/` without `i` in
+  `src/channel-agent.ts`, DEC-0151's Context link, and one Annotated line under DEC-0150 for CA-2, CA-5, the
+  Compatibility and the Source counter. Tests: `test/channel-agent.test.ts` reads the `sk-` floor from DEC-0151's
+  branch (the smaller of 16 and 32), restates the language-tag test (`sk-Latn-SK-u-ca-gregory` passes,
+  `sk-Latn-150-u-ca-gregory` stays a key), extends `BOUNDARY_FORMS` with every boundary form the detector's comment
+  lists (`%22`, `%2522`, the backslash, octal, `\x` and `\u` escapes), and asserts the declaration's `project` pattern
+  equals `$defs/projectAlias`; `test/support-quality.test.ts` reads the seven kinds from the declaration schema's enum.
+  DEC-0153's own list for DEC-0151's lander (its handoff, "DEC-0151's lander") was applied too: OD-2 and the
+  `FAC-SEM-167` row restated as DEC-0151 reads the shapes, an Annotated line under DEC-0153, and
+  `test/ops-digest.test.ts` re-pinned (an `sk-` key built from pieces replaces `queue.task-assigned-to-worker` among
+  the refused names; `ops.risk-assessment-completed`, `queue.task-assigned-to-worker`, `work.desk-booking-confirmed`,
+  `ui.disk-usage-refreshed-hourly` and a lower-case `akia` pass, an upper-case `AKIA` from pieces is refused). The
+  closing checks: the in-progress reading over `docs`, `src` and `test` prints nothing; inside DEC-0150 it prints only
+  CA-2, CA-5, the Compatibility and the Source line, with the Annotated line beside them; the third and fourth checks
+  print nothing; `grep -c "^| a .*| DEC-0153" docs/specification/conformance.md` prints 5.
 - The collision check, by name, of every other new DEC-0151 member against the v2 fields: the evidence is the
   channel agent standard's section 5.1 table (DEC-0150's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`
   at `388f2b42`), which marks every member new except `autonomy.answered` and

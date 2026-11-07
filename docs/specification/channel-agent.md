@@ -161,12 +161,12 @@ schema cannot drift apart.
 ### What the members mean
 
 `project` is the project's id in the project registry, `project:<slug>`, with the registry alias pattern unchanged,
-`^project:[a-z0-9][a-z0-9._-]{0,127}$` (the memory capability's pattern; DEC-0151, in progress on CT-210, proposes the
-same `projectAlias`): a registry
+`^project:[a-z0-9][a-z0-9._-]{0,127}$` (the memory capability's pattern; `support-quality-daily/1` uses the same
+`projectAlias`, DEC-0151): a registry
 alias is the registry's name, not an id the agent invents, so the run-of-digits rule of an id does not bind it. It is an
 alias of the Fabric Project, compared as written ([identifiers](identifiers.md)), while `question_route.target` is the canonical Fabric Project id the board
-addresses. DEC-0151 (CT-210, in progress) proposes the same alias for `support-quality-daily` payloads; once it lands
-and a feed's readers have adopted it, a reader joins a declaration to the payloads that carry `project:<slug>`. A project
+addresses. Once DEC-0151 has landed and a feed's readers have adopted it, a reader joins a declaration to the payloads
+that carry `project:<slug>`; a payload with no project is not attributed to any project. A project
 whose registry alias the detector reads as a credential (`FAC-SEM-165`) cannot be declared: the agent leaves that
 project's entry out until the registry changes the alias. A queue's `recommendation` is the board thread's id, an opaque id as the board
 writes it (`^[A-Za-z0-9_-]{8,128}$`, the board's `opaqueId`), which the run-of-digits rule of an id does not bind.
@@ -304,15 +304,15 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    Past it, each copy counts its own places and closes them at that copy: the read declaration's "and N more" at its key
    counts only its own places past 64, and a misplaced copy's overflow gets its own closing finding at that copy, so the
    view (which reads the read declaration alone) and the rules agree, and a vector pins both. The read declaration is walked first, with the whole budget, so its own reading never depends on a copy. Inside an object the walk takes members in ECMAScript own-property order: array-index keys (canonical decimal integers 0 to 4294967294, no leading zero) ascending, then the rest in document order (a vector pins it, carrying its document as JSON text in `inputText`). Being by shape, the detector also finds an ordinary hyphenated name
-   that starts with `sk-`: today any `sk-` followed by 16 or more letters, digits, `_` or `-`, in any case, such as the
-   valid channel id `sk-support-desk-faq-answers-2026-v2` (a test pins it). DEC-0151, in progress, proposes to narrow
-   that to a digit with an upper-case letter and 16, or a digit and 32; either way, do not start an id with `sk-`, for a
-   second reason too: DEC-0149's source tree check
+   that starts with `sk-`: since DEC-0151, an `sk-` at a word start in its canonical case followed by a run of letters,
+   digits, `_` or `-` that holds a digit and an upper-case letter with 16 or more characters, or a digit with 32 or
+   more, such as the valid channel id `sk-support-desk-faq-answers-2026-v2` (a test pins it). Do not start an id with
+   `sk-`, for a second reason too: DEC-0149's source tree check
    reads any `sk-` at a word start followed by 16 or more name characters, in any case (`FAC-SEM-158`), so a weak
    `sk-` id that `FAC-SEM-165` would accept under DEC-0151 would still block a source export. The
    finding on a member name, or on a value whose member takes an id (`id`, `code`, `lead_agent`, `owner`, `decision`,
    `answered_signal`, `target`, `spend_record`, `project`, `side`), that starts with `sk-` says so: an id that starts
-   with `sk-` is read as a key; rename it. A text's language tag that starts with `sk-` and has 16 or more characters after it (such as `sk-Latn-SK-u-ca-gregory`) is read as a key under the current detector, so write `sk` or `sk-SK` (a test pins `sk`, `sk-SK`, `sk-Latn-SK-u-ca-gregory` and `sk-Latn-150-u-ca-gregory`); DEC-0151's narrowing, in progress, clears such a tag only when it holds no digit (`sk-Latn-150-u-ca-gregory` stays a key), so the advice stays. The advice goes by role, not by key: never under a channel's `texts` or its
+   with `sk-` is read as a key; rename it. A text's language tag that starts with `sk-` and has 16 or more characters after it is read as a key when it holds a digit and an upper-case letter (such as `sk-Latn-150-u-ca-gregory`); one without a digit (`sk-Latn-SK-u-ca-gregory`) is not, since DEC-0151. Write `sk` or `sk-SK` (a test pins `sk`, `sk-SK`, `sk-Latn-SK-u-ca-gregory` and `sk-Latn-150-u-ca-gregory`). The advice goes by role, not by key: never under a channel's `texts` or its
    language-keyed maps (`holding`, `final`), so a text keyed `id`, `code`, `owner`, `target`, `project` or `side` (a
    language tag) gets the vault-slot sentence alone, and so does a label. In a final text's none form, a place writes
    `none` and `until` as the schema's names; in a language map a language is still `*`.
@@ -497,19 +497,16 @@ existing fixture validates and checks as before. `contractVersion` stays `0.1.0`
   standard needs a contract revision before any agent declares it: until then `channel-agent-standard/2` is refused
   (`FAC-SEM-162` in a declaration, and `FAC-SEM-099` in a `protocols` list that names it).
 - **The daily quality payload.** The standard's section 5.1 publishes [`support-quality-daily/1`](support-quality.md)
-  per project, where `/1` keeps one channel of four per event, with members `/1` does not have (`arrived`, `ended`,
-  `open.*`, the outcomes, `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets`, `notATicket`),
-  as round 4 reads; the owner's master since `86c49ec` renames `autonomy.answered` to `autonomy.answeredTickets`, and
-  `stability.fallbackTurns` and `fallbackTickets` to `stability.safeReplyTurns` and `safeReplyTickets`, and takes
-  `toPerson*` in turns (board message `b840a16b`). Round 4's section 5.1 defers only the fields it marks new: "publish
-  them once every reader of the feed takes that schema", and counts `toPersonPolicy` and `toPersonInability` in tickets,
-  where `/1` names no ticket unit (its autonomy counts are bounded by turns). That schema and how the seven channel
-  kinds here map to `/1`'s four channels (`chat`, `mail`, `reviews`, `community`) are what DEC-0151, in progress on
-  CT-210, proposes. Until it lands, an agent following section 5.1 emits payloads this contract refuses. An agent
-  declaring several projects publishes no per-project `support.quality_daily` on a channel they share, because a `/1`
-  reader keeps one event per service, channel and day; under DEC-0151's rule 1 such a channel is withheld from
-  DEC-0151's landing until its feed's readers adopt, so the standard's observed per-project quality check reads missing
-  for a shared channel until the standard's section 11 accepts that withholding by period.
+  per project, with members `/1` lacked before DEC-0151 (`arrived`, `ended`, `open.*`, the outcomes,
+  `autonomy.answeredTickets`, `stability.safeReplyTurns` and `stability.safeReplyTickets`, `notATicket`): the copy
+  received on 2026-11-04 named them `autonomy.answered` and `stability.fallbackTurns`; the standard renamed them at the
+  owner's commit `86c49ec`. DEC-0151 decides that payload: its [ticket counts](support-quality.md#the-ticket-counts-dec-0151),
+  its [project](support-quality.md#the-project-dec-0151) and how the seven channel kinds here map to `/1`'s four channels
+  ([the channel kinds table](support-quality.md#the-channel-agent-standards-channel-kinds-dec-0151)). The escalation
+  counts (`autonomy.toPersonPolicy`, `toPersonInability`) stay in turns. An agent declaring several projects publishes
+  no per-project `support.quality_daily` on a channel they share until its feed's readers adopt, because under
+  DEC-0151's rule 1 such a channel is withheld; the standard's observed per-project quality check reads missing for a
+  shared channel until the standard's section 11 accepts that withholding by period.
 - **Declarations published before this revision.** A declaration an agent published before this revision is read under
   these grammars; `pnpm validate` on its manifest or well-known answer shows which members it fails.
 

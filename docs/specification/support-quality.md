@@ -60,7 +60,7 @@ agent's channel agent declaration is refused while it holds that entry, so the a
 registry changes the alias (the agent never invents one), and that project's channels
 still count for rule 1 of [the project](#the-project-dec-0151), which also says what becomes of its kept days. Such a producer checks its alias
 against the shared detector (or validates its events page) before publishing, because the payload's own check
-(FAC-SEM-126) does not run `FAC-SEM-101`. A weak `sk-` slug alias (`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`, `project:sk-harbor-customer-care`) passes `FAC-SEM-101` and `FAC-SEM-165`, but DEC-0149 (in progress) reads it as a `FAC-SEM-158` credential in a source tree, its tree check keeping its own unbounded, case-insensitive key shapes: once DEC-0149 lands, a channel agent declaring such a project in `fabric-agent.json` cannot export its source (checked with DEC-0149's `checkSourceTree` at `8dd4d04f`: one FAC-SEM-158 finding at `fabric-agent.json` for each such alias, none for `project:helpdesk-customer-support`). Whether the registry issues an alias with a provider prefix at a word start is the operator's open question until the registry's owner records a rule (CT-210 (g)); the agent never renames an alias.
+(FAC-SEM-126) does not run `FAC-SEM-101`. A weak `sk-` slug alias (`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`, `project:sk-harbor-customer-care`) passes `FAC-SEM-101` and `FAC-SEM-165`, but DEC-0149 reads it as a `FAC-SEM-158` credential in a source tree, its tree check keeping its own unbounded, case-insensitive key shapes: a channel agent declaring such a project in `fabric-agent.json` cannot export its source (checked with DEC-0149's `checkSourceTree` at `8dd4d04f`: one FAC-SEM-158 finding at `fabric-agent.json` for each such alias, none for `project:helpdesk-customer-support`). Whether the registry issues an alias with a provider prefix at a word start is the operator's open question until the registry's owner records a rule (CT-210 (g)); the agent never renames an alias.
 The feed is pulled, so a producer cannot know its readers' pins (DEC-0070): it carries `calibration` and
 `calibrationChecks` once every reader of its feed it knows of has adopted DEC-0144. A reader that validates against an
 older copy of the schema (closed) refuses that day's `value` whole and keeps the event's `text`, so the day's numbers
@@ -72,7 +72,7 @@ It fits `data.value`'s two levels (`test/support-quality.test.ts` carries it ins
 ### The ticket counts (DEC-0151)
 
 The channel agent standard's daily loop (its release candidate received on the board, thread `b6820b97`, section 5;
-the copy DEC-0150 adds, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`) counts **tickets**, a
+the copy DEC-0150 added, [`2026-11-04-channel-agent-standard-v1-rc.md`](../evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md)) counts **tickets**, a
 customer's request from arrival to its one outcome, beside the turns the families above count. DEC-0151 gives those
 counts a `/1` home: `arrived`, `ended`, `notATicket` and the `project` they are of at the top level, `open` and `outcomes` as members of their
 own, and `autonomy.answeredTickets`, `stability.safeReplyTurns` and `stability.safeReplyTickets` in the families they belong to.
@@ -135,7 +135,7 @@ DEC-0151 item 6, its Compatibility and CT-210 point here; where they repeat a ru
    taken from the channel agent declaration or from the signal server; it never combines a day without `project` with
    other days across services or channels under the standard's side rule, and keeps such a day out of side summaries.
 6. **Calibration** (DEC-0144), per side (a side as the channel agent standard's section 1 defines it,
-   `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md` (added by DEC-0150)): With `project` (DEC-0151), a project's event carries the latest calibration of the side whose judge and rubric judge its tickets, on every day it still holds for (DEC-0144's carry-forward), whether or not anything was judged that day; a project of a side with no calibration carries none, and a producer with no declaration carries its calibration likewise on each project's event. A reader reads calibration per project's event, never summing or copying it across projects.
+   [`2026-11-04-channel-agent-standard-v1-rc.md`](../evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md), added by DEC-0150): With `project` (DEC-0151), a project's event carries the latest calibration of the side whose judge and rubric judge its tickets, on every day it still holds for (DEC-0144's carry-forward), whether or not anything was judged that day; a project of a side with no calibration carries none, and a producer with no declaration carries its calibration likewise on each project's event. A reader reads calibration per project's event, never summing or copying it across projects.
 7. **An alias read as a credential**: the paragraph on credentials under [the payload](#the-payload) holds the rule.
 8. **Adoption is one-way** per producer: once every reader of its feed it knows of has adopted, it names `project`
    from then on; a reader that appears later on an older copy is that reader's to update, and the producer does not
