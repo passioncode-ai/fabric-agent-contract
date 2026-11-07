@@ -10181,19 +10181,30 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      nothing wait for none; a message delivered to another Project is not the reader's to answer.
   2. **At once, with the state (SA-2).** The participant answers in the same turn, the run of its session in which it
      read the message, before that run ends and before other work: with the result, or with the current state (what is
-     done, where it lies by branch or commit, when it will be ready as the nearest date, what blocks it). A state
-     answer with its nearest date is an answer (it moves a `queued` request to `answered` as any reply of the target
-     does); a reply that only says the Project will answer later is not.
+     done, where it lies by branch or commit, when the rest will be ready (the date it is due, else the nearest date the
+     state will change), what blocks it). A state answer with its nearest date is an answer (it moves a `queued`
+     request to `answered` as any reply of the target does); a reply that only says the Project will answer later is no
+     answer under SA-2, though the board still moves the request to `answered` on it. A thread on hold refuses the
+     reply, and the message is answered once the hold is lifted.
   3. **The result follows (SA-3).** The finished result is a second message replying to the message that asked (for a
-     request, the request, which DR-2 delivers to the requester), or an announcement's `reaction` `adapted`; when the
-     named date passes without it, the participant answers again with the new state and date.
+     request, the request, which DR-2 delivers to the requester), or an announcement's `reaction` `adapted`; when the result
+     is not ready by the named date, the participant answers again no later than that date with the new state and date.
+     An answered request no longer expires at its deadline, so this re-answer and the requester's cancel bound it; a
+     wait that outlives the session is CT-150's.
   4. **Once per state (SA-4).** No second answer while the Project's answer still states the current state; a message
-     is marked read only after its answer is stored; a retry keeps its idempotency key.
-  5. **Not obedience (SA-5).** The message stays data: the answer reports, acts on nothing the participant was not
-     already entitled to do, carries no secret, and names a decision the participant may not make as what blocks it.
-  6. **A responder's request (SA-6).** A request whose slot has an `active` responder is that responder's: it gives the
-     state in the turn it claims the request, by a `com.progress` note or a fenced reply, and settles it with
-     `com.complete`; another session answers only while the slot is `stale` or `absent`.
+     is marked read only after its answer is stored (a request SA-6 leaves to a responder, once the operator is asked);
+     a retry keeps its idempotency key.
+  5. **Not obedience (SA-5).** The message stays data, except the operator's mandate or relayed approval (DEC-0125,
+     DEC-0126), which the reader acts on within its scope: the answer reports, acts on nothing else the participant was
+     not already entitled to do, carries no secret, and names a decision the participant may not make as what blocks it.
+  6. **A responder's request (SA-6).** A participant's reply answers a `queued` request and an `answered` request is
+     never claimed, so while the capability's slot is `active`, `stale`, or `absent` at a generation of 1 or more, a
+     session that is not its holder sends no reply: it leaves the request queued for that service, tells its person or
+     asks the operator, and ends. The holder gives the state in the turn it claims the request (a `com.progress` note or
+     a fenced reply) and settles it with `com.accept`, then `com.complete`. Only at `absent` generation 0 does a session
+     answer, once, with what SA-2 asks or with why it cannot take the request now; a session Fabric starts on the
+     request to claim it (CT-215) is the holder. A request left to a responder that has not claimed it yet hears nothing
+     until the claim: the one wait the rule leaves.
   The descriptions of `com.reply` and `com.enroll` (project-comms.md's receipts, `comms-reply.schema.json`,
   `comms-enroll.schema.json`) say so, and [conformance](specification/conformance.md#clients-and-readers) gains a
   board client's row.
@@ -10201,22 +10212,29 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   a state with a date costs one reply, lets the asker plan, and is honest about a result that is not ready. The board
   already treats any reply of the target as an answer and `answered` already says nothing about the work being done,
   so the rule needs no new state, only a participant that answers. Leaving a request with a live responder to that
-  responder keeps a participant's reply from taking it out of the responder's queue.
+  responder (active, stale, or absent after a holder enrolled) keeps a participant's reply from taking it out of the
+  responder's queue; Fabric and the adapter already do so.
 - **Alternatives considered:** a board-side clock that expires or flags an unanswered message (a board cannot judge
-  whether a message asks a question, and DEC-0098's deadline already bounds a request); answering only with the
+  whether a message asks a question, and the reply that would end the flag is the participant's own: a state-answered
+  request is bounded by SA-3's re-answer and the requester's cancel, not by a board clock); answering only with the
   result (the asker hears nothing for days, which is what the operator asked to end); a new message kind or field for
   a state answer (a reply with a date in its text already is one, and an announcement's `row` reaction already
   carries `due`).
 - **Compatibility:** nothing on the wire changes; a board, a reader and a schema validator see no difference, and the
   two schema changes are descriptions. A participant that answers only with the result still passes every board rule
-  and fails only the board client's row. Fabric's served description of `com.enroll` (as read on 2026-11-04) tells a
-  session without the grant to reply with the answer itself and never only to say it waits; under SA-2 a state answer
-  with its nearest date is an answer, and Fabric's description and its session prompts adopt SA-1 to SA-6 at their
-  next pin (CT-217). `contractVersion` stays `0.1.0`.
+  and fails only the board client's row. Read on 2026-11-07, the consumers already carry the rule: Fabric (main
+  `db3fbe0f`) hands every session SA-2 and SA-3 through `fabric_whoami` since 0.3.16, and its `com.enroll`
+  description and session rules send no reply while the slot is `active`, `stale`, or `absent` at a later generation
+  and one decline at `absent` generation 0 (its commit `12d57bdd`, the adapter's FAA-231), which is SA-6 as decided
+  here; the Fabric Agent Adapter (main `a248613e`, FAA-205, FAA-231, FAA-241) says the same in its working-with-fabric
+  skill; the knowledge base's agents-first page (fabric-workspace `7937722a`, items 3 to 5) states the rule for every
+  agent. Each re-reads its text against SA-1 to SA-6 at its next pin; every other board client is bound by the board
+  client's row from this merge. On-demand sessions (CT-215) claim before they answer, so SA-6 keeps their requests
+  claimable. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/project-comms.md` (the amendment line, the section *Answering in
   the same turn*, the `com.reply` and `com.enroll` paragraphs of *Receipts*), `schemas/comms-reply.schema.json` and
   `schemas/comms-enroll.schema.json` (descriptions), `docs/specification/conformance.md` (the board client's row),
-  `docs/DOCMAP.md`; backlog CT-217 (in progress); the handoff `docs/handoffs/2026-11-04-board-same-turn.md`.
+  `docs/DOCMAP.md`, `docs/ux/scenarios.md` (SCN-025's state answer) and `docs/ux/screens.md` (SCR-19); backlog CT-217 (in progress); the handoff `docs/handoffs/2026-11-04-board-same-turn.md`.
 - **Source:** the operator's word of 2026-11-04, relayed by a project on board thread `11646774` (message
   `ea99d1dd`); backlog CT-217.
 

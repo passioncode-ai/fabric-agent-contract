@@ -21,28 +21,34 @@ blocks it); the finished result follows as a second message; a state answer with
 
 ## Open
 
-- Blind readings of the draft (unit, seam, product), then the operator's acceptance of DEC-0152 on merge.
-- After merge: Fabric adopts SA-1 to SA-6 in its served `com.enroll` description, its session prompts
-  (`fabric_whoami`) and its sweep reminder; the adapter's working-with-fabric skill and kits adopt the board client's
-  row; the knowledge base's agents-first page states the rule for the estate. Each at its next pin, under CT-217.
+- Blind readings until two consecutive rounds are clean, then merge and a release tag.
+- After merge: each consumer re-reads its text against SA-1 to SA-6 at its next pin, under CT-217. Read on 2026-11-07,
+  Fabric (`db3fbe0f`) already hands SA-2 and SA-3 to every session and keeps SA-6's slot condition (no reply while the
+  slot is active, stale, or absent at a later generation); the adapter (`a248613e`, FAA-205, FAA-231, FAA-241) and the
+  knowledge base's agents-first page (`7937722a`, items 3 to 5) say the same.
 
 ## Decisions
 
 - No semantic rule code and no new schema member: the rule is a participant's behaviour, which no document the
   checker reads carries, so it is prose (SA-1 to SA-6) plus a conformance row checked by the agent's own test.
-- A request whose slot has an `active` responder is left to that responder (SA-6), so a participant's state reply does
-  not move it to `answered` and out of the responder's queue.
+- A request whose capability's slot is `active`, `stale`, or `absent` at a generation of 1 or more is left to that
+  service (SA-6), so a participant's state reply does not move it to `answered` and out of the responder's queue; only
+  at `absent` generation 0 does a session answer, once. Round 1 of the readings (2026-11-07) moved SA-6 from "answers
+  while `stale` or `absent`" to this, the rule Fabric and the adapter already ship.
 - A message is marked read only after its answer is stored (SA-4), so an unanswered message stays unread to its
   Project.
 
 ## Checks actually run
 
-From the worktree on the draft head: `pnpm typecheck`, `pnpm docs:check`, `pnpm ux:lint`, `pnpm privacy:check`, and
-the test run named in the pull request or the coordinator's report (exit codes there); no U+2014 in the added lines
-(`git diff origin/main | grep` on U+2014 printed nothing).
+- 2026-11-04, the draft head `d760f756`: `pnpm typecheck`, `pnpm docs:check`, `pnpm ux:lint`, `pnpm privacy:check`; no
+  exit codes were recorded.
+- 2026-11-07, merged with main at `41784daf`: `pnpm run check` 116 of 117 test files passed, one test timed out at
+  5000 ms under machine load (CT-204), `pnpm vectors:check` 32 files match; round 1 of the blind readings (unit, seam,
+  product) failed on SA-6, Compatibility, SA-5's mandate exception and SA-3's wording, all folded in the next commit.
+- No U+2014 in the added lines (`git diff origin/main | grep '^+' | grep -c` on U+2014 prints 0).
 
 ## Next task
 
-The coordinator runs blind readings of branch `agent/ct217-board-same-turn-20261104` (unit, seam and product tiers)
-against CT-217 and DEC-0152, answers any finding on the branch, and opens the pull request once two consecutive rounds
-are clean.
+Round 2 of the blind readings (unit, seam, product) on the head after round 1's fixes; once two consecutive rounds are
+clean and `pnpm run check` exits 0, open the pull request, merge it, tag the release, and tell Fabric, the adapter and
+the knowledge base on board thread `eefa7959`.
