@@ -108,10 +108,9 @@ channel agent standard's section 5.1 says that `/1` takes `autonomy.toPersonPoli
 and the observed check below holds. The first holds in the standard's master since its owner's commit `86c49ec`
 (section 5.1 says turns); the second is still owed.
 
-The channel agent standard's observed check (its section 11) is to accept (CT-210 (d), owed by its owner until its text lands) what the wait withholds (support quality, the
-ticket counts), by period, the period being the event's day: a producer's adoption is marked by its first published day
-that names `project` (a project under rule 9 never names one and stays in the pre-adoption form). Until that day, a day without `project`, a withheld channel, and a producer whose only named project is
-alias-withheld at adoption (it has no first named day); from adoption on, a project withheld because its alias is read as a credential, until the registry renames it, and then that project's kept days, published late under the new alias. Rule 3 of [the project](#the-project-dec-0151) says how a reader keeps a
+The channel agent standard's observed check (its section 11) is to accept (CT-210 (d), owed by its owner until its text lands) what the wait withholds, by period, the period being the event's day: a producer's adoption is marked by its first published day
+that names `project` (a project under rule 9 never names one and stays in the pre-adoption form). It accepts, until that day: a day without `project`, a withheld channel, and a producer whose only named project is
+alias-withheld at adoption (it has no first named day); and from adoption on: a project withheld because its alias is read as a credential, until the registry renames it, and then that project's kept days, published late under the new alias. Rule 3 of [the project](#the-project-dec-0151) says how a reader keeps a
 day without `project`.
 
 ### The project (DEC-0151)

@@ -316,6 +316,12 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   names DEC-0151; a test that an upper-case `SK-` id gets no rename advice. Filed to CT-267: an AT-15 case whose inner
   key takes the 32-character branch, so a port without the inner retry fails it. Left as a risk: DEC-0150's cost model
   charges 255 units per boundary `sk-` where the look-ahead may probe 259 (a constant factor, predating this branch).
+- Round 19 (on `071addf5`): clean on all three tiers, the first clean round. Its risks folded after it (so round 20
+  reads the new head): the closing grep reads `docs/specification` (`-r`); the session-handoff copy's comment names its
+  vendor as secret-shape.ts does; the sources row names the owner's commit `86c49ec` that support quality relies on; the
+  observed-check paragraph says what the check accepts in each period; CT-210 (a) takes a day's ticket counts from one
+  source while both are published. Left as risks: no connections test pins the two detector differences (CT-73,
+  CT-213), the mixed state until each port re-syncs (CT-210 (e)), the days withheld at merge (CT-210 (f)).
 - The collision check, by name, of every other new DEC-0151 member against the v2 fields: the evidence is the
   channel agent standard's section 5.1 table (DEC-0150's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`
   at `388f2b42`), which marks every member new except `autonomy.answered` and
@@ -735,8 +741,8 @@ the added lines.
 
 ## Next task
 
-Round 19 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers (round 18 was not clean on
-the product tier), until two consecutive rounds are clean, with the full coverage run at low load; open the pull
+Round 20 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers (round 19 was clean on all
+three tiers; a clean round 20 accepts it), until two consecutive rounds are clean, with the full coverage run at low load; open the pull
 request (DEC-0150 is on main, so the merge gate holds) and merge. The landing commit, before the merge:
 
 - DEC-0151's Status Accepted with its clean rounds; CT-129 closed with its receipt; CT-210's first step done; and every
@@ -750,7 +756,7 @@ request (DEC-0150 is on main, so the merge gate holds) and merge. The landing co
   landed") set to the merge date, so the append-only register keeps a true date.
 - The knowledge base (fabric-workspace `knowledge/roadmap.md`): AS-01 and the Agent assessment sentence ("publishes one
   `support.quality_daily` per channel and closed day") both say per channel, project once adopted, and closed day.
-- Closing check on the landing commit: `grep -nE 'DEC-0151 \(proposed|DEC-0151, proposed|branch \`agent/sqd-fields-20261104\`'
+- Closing check on the landing commit: `grep -rnE 'DEC-0151 \(proposed|DEC-0151, proposed|branch \`agent/sqd-fields-20261104\`'
   docs/backlog.md docs/handoffs/README.md docs/specification CONTEXT.md` prints nothing, and `grep -n -A2 '^### DEC-0151'
   docs/DECISIONS.md` shows the Status Accepted, `grep -c 'DEC-0151 (proposed' docs/DECISIONS.md` prints 0, and `awk '/^### DEC-0151/,/^### DEC-0152/' docs/DECISIONS.md | grep -c
   'still owed'` prints 0.
