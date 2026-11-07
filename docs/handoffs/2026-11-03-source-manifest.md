@@ -1558,10 +1558,18 @@ session `74a9440a`), and resumed on 2026-11-07 by the operator's own word in the
 `18f8d487`, `v0.1.0+2026-11-07.1`); main `40a0ddb8` is merged into this branch at `b963d6a6` (step 2's merge done,
 its checks in Checks actually run). Round 78 at `d9ffe3f5` was not clean, fixed by item DQ; round 79 at `9c0ffbe0` was
 not clean, fixed by item DR; round 80 at `78bb901d` was not clean, fixed by item DS. Rounds 81 and 82 at `d03ae791` were
-clean on all three tiers (unit, product, seam), so DEC-0149 is accepted on 2026-11-07 (PR #251) and the landing is in
-progress: steps 1 to 4 are done, step 5's acceptance edit is this change (its merge gate waits for 8 GB of free disk, see
-Checks actually run), and steps 6 and 7 remain. The exact next task: step 5's precondition on PR #250 and its merge
-gate on this head, the contract PR's merge, then steps 6 and 7 below. After the landing post, once the coordinator
+clean on all three tiers (unit, product, seam), so DEC-0149 is accepted on 2026-11-07 (PR #251).
+
+Landed 2026-11-07: hosted CI run 42356946852 green on all four jobs (the merge gate's parts; the full local gate did not
+run, the disk being under 8 GB free); step 5's precondition met by carrying PR #250's Annotated line under DEC-0154;
+PR #251 merged (main `fabb7a90`), the knowledge base's PR #628 merged straight after (`3c5f4bfc`), its clauses changed
+at step 6, and the check after both land printed 0 and 2 in bash and in zsh; tag `v0.1.0+2026-11-07.2` and its GitHub
+release; CT-211 closed with the three greps (4, 4 and 5; `own estate` 1 on each); posts on `21ac4057` (`85f7eb67`) and
+`0a8776f2` (`8e133f3b`); the Fabric Dashboards request on setup-only agents' counts sent on `1fe66e6e` (request
+`d061cadc`, its row id to be written into CT-208); the knowledge base's other pages (products, RM-36, integration,
+CT-258 in authority.md) in a knowledge-base PR of their own. Left: step 7 (the operator's: asking GitHub Support to
+remove the review branch's unreachable commits), the publish by the scheduled sync, and the consumers' re-pins. After
+the landing post, once the coordinator
 answers, `git show origin/main:knowledge/north-star.md | grep -c 'DEC-0149 and DEC-0154'` on the knowledge base's main
 prints 0 (DEC-0154's knowledge-base post, message `f83a171c` on `eefa7959`, asked the coordinator to drop DEC-0149 from
 `north-star.md` 262 and 521 once DEC-0149 lands).
