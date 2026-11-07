@@ -383,8 +383,14 @@ Proposed DEC on its own branch, and files the rest.
   `foreign-user` is owed (DEC-0154).
   ```
 
-  After both land, run in bash or zsh: the first command prints 1 and the second prints 0 (the released watcher
-  reports only `down`). The second reads the file as one line, so a line break anywhere in a wrong landing is still
+  Since Fabric Dashboards 0.8.30 (FD-159, `e23551e8`, 2026-11-07) counts `foreign` and `foreign-user` as unavailable,
+  DEC-0149's round 79 (item DR) restates the second sentence: "Fabric Dashboards' watcher opens an episode for `down`
+  since FD-76 (0.7.15, `ebffd16`), and for `foreign` and `foreign-user` since FD-159 (0.8.30, `e23551e8`), and keeps it
+  open while a failing source (one not marked `setup: true`) outside its start baseline stays, so its failure message
+  at 15 minutes may name that source." The two checks below are unchanged.
+
+  After both land, run in bash or zsh: the first command prints 1 and the second prints 0 (the contract's rule names
+  "A watcher", so Fabric Dashboards' widened claim stays absent). The second reads the file as one line, so a line break anywhere in a wrong landing is still
   found. When it prints 0 it also exits with status 1 (`grep -c` with no match), so do not run it under `set -e`:
 
   ```sh
@@ -531,7 +537,9 @@ Proposed DEC on its own branch, and files the rest.
 - **The knowledge base's pages.** Right after the release below (the post needs its tag), post on thread `eefa7959` the corrections of
   fabric-workspace `knowledge/` (the coordinator edits those pages). The pages to read are what this prints on the
   knowledge base's main at that time, every line of it, not a list fixed here:
-  `git fetch origin && git grep -n -E 'DEC-0154|CT-22[89]|CT-23[0-9]|CT-24[0-3]' origin/main -- 'knowledge/*.md' | grep -v -e 'proposed for FD' -e "owed by FD's watcher under contract DEC-0154"`
+  `git fetch origin && git grep -n -E 'DEC-0154|CT-22[89]|CT-23[0-9]|CT-24[0-3]' origin/main -- 'knowledge/*.md' | grep -v -e 'proposed for FD' -e "owed by FD's watcher under contract DEC-0154"` (run once, at `60c630db`; since
+  DEC-0149's round 79 the clause rule's To text is "done by FD's watcher since its 0.8.30, FD-159", so a rerun filters
+  that text in place of the "owed" text)
   (in a fabric-workspace clone); `authority.md`'s two clause lines are the knowledge-base clause rule's below, never
   posted here. Each line it prints is made true for the moment after the landing: DEC-0154 accepted, on
   the contract's main, with the date and the tag; a row of CT-228 to CT-243 open on main; a line number into this
@@ -575,9 +583,10 @@ This block is byte-identical in `docs/handoffs/2026-11-03-source-manifest.md` (D
 Rule: each lander checks after its own write, so whichever lander finishes second sees the
 other's result; the edit depends on the text, so a second run changes nothing.
 
-The clause sits at `knowledge/authority.md:115` and `:128` (PR #628). From: "counting `foreign`
+The clause sits twice in `knowledge/authority.md` (PR #628; lines 115 and 128 at `d2a6d9f4`, which
+move when the knowledge base's main is merged in, so the clause check finds them by text). From: "counting `foreign`
 and `foreign-user` is proposed for FD's watcher in contract DEC-0154". To: "counting `foreign`
-and `foreign-user` is owed by FD's watcher under contract DEC-0154" (no inner parentheses: the
+and `foreign-user` is done by FD's watcher since its 0.8.30, FD-159, under contract DEC-0154" (no inner parentheses: the
 clause sits inside a bracket that closes right after it).
 
 Status check, in the contract checkout. It matches any Status line in DEC-0154's block that
@@ -620,11 +629,12 @@ edit, runs nothing. Run it in `bash` and in `zsh`:
 ```sh
 git fetch origin && git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'
 git show origin/main:knowledge/authority.md \
-  | grep -cF "counting \`foreign\` and \`foreign-user\` is owed by FD's watcher under contract DEC-0154"
+  | grep -cF "counting \`foreign\` and \`foreign-user\` is done by FD's watcher since its 0.8.30, FD-159, under contract DEC-0154"
 ```
 
 The first prints 0 and the second prints 2. The first `grep -c` exits 1 when it prints 0, so
-these commands are not run under `set -e`. If the check prints anything else, the lander
+these commands are not run under `set -e`; every check in this block runs with `set -o pipefail`
+(`setopt pipefail` in zsh), so a `git show` that fails fails the line instead of printing 0. If the check prints anything else, the lander
 records the mismatch in its handoff and runs the check again once the other lander's
 knowledge-base PR for the clause is merged or closed, or at once when the other lander has no
 such PR; an edit from outside the two landers goes to a knowledge-base row.
@@ -632,16 +642,16 @@ such PR; an edit from outside the two landers goes to a knowledge-base row.
 Interleavings: DEC-0154 merges and its clause check prints 0 (PR #628 not merged); then, if
 DEC-0149's step 6 ran before that merge, PR #628 merges with "proposed" and step 6b sees 1 and
 2 and edits, and if step 6 ran after it, step 6 changes PR #628 and PR #628 merges already
-owed; or PR #628 merges, step 6b sees 0 and does nothing, then DEC-0154 merges and its clause
+done; or PR #628 merges, step 6b sees 0 and does nothing, then DEC-0154 merges and its clause
 check sees 2 and edits; or both open a knowledge-base PR at once, and the re-check before
 merging closes the second. In any other order, or if both re-checks race and both PRs merge,
-the text still ends owed twice, since a second edit changes nothing. Two windows are named and
+the text still ends done twice, since a second edit changes nothing. Two windows are named and
 close: from the later of DEC-0154's contract merge and PR #628's merge until a knowledge-base
 PR merges, the knowledge base says "proposed" for an accepted DEC-0154; in the other order the
 knowledge base names a DEC-0154 the contract's main does not carry yet.
 
 Withdrawal: if DEC-0154 is withdrawn instead of accepted, its withdrawer files a knowledge-base
-row to drop the "proposed for FD" clause from `authority.md:115` and `:128`; neither lander
+row to drop the "proposed for FD" clause from both places in `authority.md`; neither lander
 edits it.
 
 ## Open

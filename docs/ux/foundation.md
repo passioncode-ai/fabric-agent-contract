@@ -734,6 +734,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given the research would cost more than an amount I named, or reach a capability, an effect or a project my words do not name, when the research agent is called, then it refuses with the part not covered and only that part is put to me.
   - Given I approve a change in one agent's chat and another of my agents holds the key, when the first relays my words verbatim with when and where I said them and the scope, from one of my own projects or sessions, then the second acts without asking me again and records my words and where I said them (DEC-0126 OA-1 to OA-7).
   - Given a sign-in, a consent, a payment, a secret typed in or handed out, spend above a limit, a passkey signature or a comparison of codes with another person or the choice to share without one, then my mandate never covers it and the step comes to me.
+  - Given an agent of mine is to be handed over as source, then my mandate never covers it: the hand-over is taken only on my word for that act, as [source](../specification/source.md#handing-over) specifies (DEC-0149, MD-6).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

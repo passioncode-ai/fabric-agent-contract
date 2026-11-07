@@ -496,10 +496,10 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     }
   });
 
-  // Parity with DEC-0149's fold (DEC-0149, in progress) until the merged tree makes foldDir call its foldPath (one
-  // implementation): its
-  // FOLD_PAIRS (fixtures/vectors/source-tree.json on its branch at d4cc1e16, Unicode 17.0), copied as written, and the
-  // HFS+ samples its next step adds (U+200C, U+FEFF, U+202A removed; Asomtavruli, Nuskhuri and Mkhedruli joined).
+  // DEC-0149's fold as foldDir calls it (foldDir is foldPath from src/source-rules.ts, one implementation): these pairs
+  // pin it at this seam: the vector's FOLD_PAIRS (fixtures/vectors/source-tree.json, Unicode 17.0) as they stood at
+  // `d4cc1e16`, 26 of today's 30 (its four Georgian pairs are pinned by test/source-rules.test.ts against the vector),
+  // and the HFS+ samples (U+200C, U+FEFF, U+202A removed; Asomtavruli, Nuskhuri and Mkhedruli joined).
   const DEC_0149_FOLD_PAIRS: Array<[string, string]> = [
     ["PA\u1e9eWORDS", "passwords"], ["pa\u00dfwords", "passwords"], ["PASSWORDS", "passwords"], ["\u017fecrets", "secrets"],
     ["\u212aeys", "keys"], ["\u212b", "\u00e5"], ["\u00c5", "\u00e5"], ["\u03a3x", "\u03c3x"], ["\u03c2x", "\u03c3x"],
@@ -596,6 +596,9 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     // A provider key keeps the short message.
     const key2 = ["gh", "p_", "ABCDEFGHIJKLMNOPQRSTUV"].join("");
     expect(evaluateSemanticRules("service-descriptor", withFolders([{ dir: key2, source: "app" }])).filter((f) => f.code === "FAC-SEM-168").map((f) => f.message)).toEqual(["a dir is shaped like a credential; it names a folder, never a value"]);
+    // A dir shaped only as a JWT (no provider prefix, no long run) keeps the short message too: `hasJwt` decides it.
+    const jwt = ["ey", "J", "abc", ".def", ".ghi"].join("");
+    expect(evaluateSemanticRules("service-descriptor", withFolders([{ dir: jwt, source: "app" }])).filter((f) => f.code === "FAC-SEM-168").map((f) => f.message)).toEqual(["a dir is shaped like a credential; it names a folder, never a value"]);
   });
 
   it("names a duplicate dir only when it is printable ASCII", () => {

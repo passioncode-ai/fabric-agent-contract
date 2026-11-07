@@ -3,7 +3,8 @@ import { type Finding, type JsonObject, indexed, isObject } from "./findings.js"
 import { hasHomePath } from "./activity-rules.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
-import { JWT_SHAPE, SECRET_VALUE, secretValue } from "./secret-shape.js";
+import { SECRET_VALUE, hasJwt, secretValue } from "./secret-shape.js";
+import { foldPath } from "./source-rules.js";
 import { createValidatorSync } from "./validator.js";
 
 // #region ops-digest, docs: docs/specification/ops-digest.md
@@ -363,19 +364,8 @@ export function digestFoldersView(descriptor: unknown): DigestFoldersView {
 }
 
 /**
- * Georgian Nuskhuri (U+2D00 to U+2D25), where the case mappings leave Asomtavruli (U+10A0 to U+10C5), mapped onto
- * Mkhedruli (U+10D0 to U+10F5), since HFS+ joins Asomtavruli with Mkhedruli; as DEC-0149's `foldSegment` maps it
- * (DEC-0149, in progress).
- */
-const NUSKHURI = /[\u2d00-\u2d25]/gu;
-const toMkhedruli = (letter: string): string => String.fromCodePoint((letter.codePointAt(0) as number) - 0x2d00 + 0x10d0);
-/**
- * Code points HFS+ ignores in a name, stripped before the fold exactly as DEC-0149's `foldSegment` strips them
- * (DEC-0149, in progress); only these, not every default-ignorable code point, for parity with DEC-0149's fold.
- */
-const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
-/**
- * A `dir` as a file system that folds case compares it, canonical caseless as DEC-0149's fold (DEC-0149, in progress):
+ * A `dir` as a file system that folds case compares it, canonical caseless as `foldPath` in `src/source-rules.ts`
+ * reads it (DEC-0149's fold, one implementation):
  * each segment with the code points HFS+ ignores removed (U+200C to U+200F, U+202A to U+202E, U+206A to U+206F,
  * U+FEFF), then as NFD, then lower, upper and lower case, then NFC, then Georgian Nuskhuri mapped onto Mkhedruli (so
  * Asomtavruli meets Mkhedruli, as HFS+ joins them), trailing dots and spaces dropped. So `Straße` meets `STRASSE` and
@@ -383,8 +373,7 @@ const HFS_IGNORABLE = /[\u200c-\u200f\u202a-\u202e\u206a-\u206f\ufeff]/gu;
  * NFC-first fold splits. It also joins the dotless `ı` with `i` (and `I`): two dirs a file system may keep apart are
  * read as one, the safe direction, since the worst it does is a `FAC-SEM-168` finding on two folders.
  */
-export const foldDir = (dir: string): string =>
-  dir.split("/").map((segment) => segment.replace(HFS_IGNORABLE, "").normalize("NFD").toLowerCase().toUpperCase().toLowerCase().normalize("NFC").replace(NUSKHURI, toMkhedruli).replace(/[. ]+$/, "")).join("/");
+export const foldDir = (dir: string): string => foldPath(dir);
 
 const FOLDERS_PATH = `/extensions/${EXTENSION_KEYS.opsDigest.replace(/~/g, "~0").replace(/\//g, "~1")}`;
 const folderFinding = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-168", instancePath, message });
@@ -470,14 +459,14 @@ export function digestFoldersRules(descriptor: JsonObject): Finding[] {
     // A segment made only of dots, spaces and default-ignorable code points (those HFS+ ignores among them) is empty once
     // they are dropped; a tool that trims or strips names (Win32 path handling drops trailing dots and spaces; a reader
     // that strips ignorable code points before joining) may read it as empty, '.' or '..', another folder than the one
-    // declared, possibly outside paths.data. Refused, the safe direction. The fold for duplicates is DEC-0149's (DEC-0149, in progress), apart.
+    // declared, possibly outside paths.data. Refused, the safe direction. The fold for duplicates is DEC-0149's, apart.
     if (folder.dir.split("/").some(emptySegment)) findings.push(folderFinding(`${at}/dir`, EMPTY_SEGMENT));
     // A lone surrogate is no character a file system can name: the dir names no folder at all.
     if (LONE_SURROGATE.test(folder.dir)) findings.push(folderFinding(`${at}/dir`, "a dir holds a lone surrogate, which no file system can name; write it as well-formed Unicode"));
     const readings = dirReadings(folder.dir);
     if (readings.some(secretValue)) {
       // When only the long run makes it a key (no provider prefix, no JWT, no bearer), the message says why and how to fix it.
-      const runOnly = !readings.some((reading) => JWT_SHAPE.test(reading) || SECRET_VALUE.test(reading));
+      const runOnly = !readings.some((reading) => hasJwt(reading) || SECRET_VALUE.test(reading));
       findings.push(folderFinding(`${at}/dir`, runOnly ? LONG_RUN_DIR : "a dir is shaped like a credential; it names a folder, never a value"));
     }
     else if (readings.some(hasHomePath)) findings.push(folderFinding(`${at}/dir`, "a dir holds a home folder; it is relative to the product's data folder"));

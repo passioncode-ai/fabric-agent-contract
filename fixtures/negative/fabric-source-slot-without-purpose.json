@@ -1,0 +1,13 @@
+{
+  "format": "fabric-source/1",
+  "include": [
+    "src/",
+    "README.md"
+  ],
+  "slots": [
+    {
+      "name": "MAIL_OAUTH",
+      "kind": "secret"
+    }
+  ]
+}

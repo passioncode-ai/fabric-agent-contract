@@ -153,3 +153,21 @@ describe("pin:check: the pin is a commit of the contract's history", () => {
     expect(pinHistory("ca4cca7ad93183cdbd8c82084004222e6ba0383b", projectRoot()).state).toBe("on-history");
   });
 });
+
+describe("the coverage floors (DEC-0149)", () => {
+  // A floor whose key matches no included file is never measured, so it passes silently: every key must be a file the
+  // coverage include reaches, and a file that exists.
+  it("name only files the coverage include reaches", async () => {
+    const config = (await import("../vitest.config.js")).default as { test: { coverage: { include: string[]; thresholds: Record<string, unknown> } } };
+    const { include, thresholds } = config.test.coverage;
+    const asPattern = (glob: string) => new RegExp(`^${glob.split("*").map((part) => part.replace(/[.+?^${}()|[\]\\]/g, "\\$&")).join("[^/]*")}$`);
+    const patterns = include.map(asPattern);
+    const files = Object.keys(thresholds).filter((key) => key.includes("/"));
+    expect(files.length).toBeGreaterThan(0);
+    const unmatched = files.filter((file) => !patterns.some((pattern) => pattern.test(file)));
+    expect(unmatched).toEqual([]);
+    for (const file of files) await expect(readFile(path.join(projectRoot(), file), "utf8"), file).resolves.toBeTypeOf("string");
+    // The check itself: a key no glob reaches is caught.
+    expect(patterns.some((pattern) => pattern.test("src/no-such-module.ts"))).toBe(false);
+  });
+});

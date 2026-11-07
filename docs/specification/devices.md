@@ -715,10 +715,13 @@ to a node pinned at or after DEC-0102, or to one that ignores unknown members;
 characters with no path in it (schema `device-common#/$defs/detail`, F-B-104): no slash, backslash or
 tilde at the start of a word anywhere in the line, no drive letter, no URL-encoded slash, and no home
 directory in its slash or dash form (`Users/<name>`, `-Users-<name>-`), before or after a line or paragraph separator
-(U+2028, U+2029; DEC-0097). It MUST NOT name a username or carry content. This pattern draws the strictest of the
-contract's three home-path boundaries (CT-109): a line with no path at all, so it refuses the dash form after any
-character (`my-users-list` too), where `HOME_PATH` ([activity](activity.md#no-content-no-person)) refuses it only after a
-character that is not an ASCII letter or digit and `FAC-SEM-103` ([proposals](proposals.md)) has no dash form.
+(U+2028, U+2029; DEC-0097). It MUST NOT name a username or carry content. This pattern draws one of the contract's
+four home-path boundaries (CT-109): a line with no path at all, so it refuses the dash form after any
+character (`my-users-list` too). The boundaries read different forms: `HOME_PATH` ([activity](activity.md#no-content-no-person)) refuses the dash form
+only after a character that is not an ASCII letter or digit, `FAC-SEM-103` ([proposals](proposals.md)) has no dash form, and the
+source tree check's `SOURCE_HOME_PATHS` (`FAC-SEM-158`, [source](source.md#home-folders)) reads the home-path forms of
+the adapter's check over a source tree, among them the URL-encoded backslash form `%5CUsers%5C<name>`, which this
+pattern accepts (a probe of the pattern on `path %5CUsers%5Cbob` answers true).
 
 <a id="health"></a>
 

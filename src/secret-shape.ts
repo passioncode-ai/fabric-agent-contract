@@ -53,6 +53,38 @@ export function credentialName(name: string): boolean {
 
 /** A JWT or JWS anywhere in a value: three base64url segments, the first a JSON object's `eyJ`. */
 export const JWT_SHAPE = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]*/;
+/** A base64url character: what the three segments of `JWT_SHAPE` are made of. */
+const isUrlBase64 = (code: number): boolean =>
+  (code >= 0x41 && code <= 0x5a) || (code >= 0x61 && code <= 0x7a) || (code >= 0x30 && code <= 0x39) || code === 0x2d || code === 0x5f;
+/** The end of the run of base64url characters starting at `from`. */
+const runEnd = (text: string, from: number): number => {
+  let end = from;
+  while (end < text.length && isUrlBase64(text.charCodeAt(end))) end += 1;
+  return end;
+};
+/**
+ * The spans `JWT_SHAPE` matches in a text, leftmost and not overlapping as a global regex finds them, read in one pass
+ * (the regex backtracks from every `eyJ` of a long run, quadratic in it): every `eyJ` of one run shares that run's end,
+ * so only its first is tried, and a match ends where its third segment's run ends. `first` stops at the first match.
+ */
+export function jwtSpans(text: string, first = false): Array<[number, number]> {
+  const spans: Array<[number, number]> = [];
+  let from = 0;
+  for (let at = text.indexOf("eyJ", from); at >= 0; at = text.indexOf("eyJ", from)) {
+    const one = runEnd(text, at + 3);
+    from = one;
+    if (one - at - 3 < 2 || text[one] !== ".") continue;
+    const two = runEnd(text, one + 1);
+    if (two - one - 1 < 2 || text[two] !== ".") continue;
+    const three = runEnd(text, two + 1);
+    spans.push([at, three]);
+    if (first) break;
+    from = three;
+  }
+  return spans;
+}
+/** Whether `JWT_SHAPE` matches anywhere in a text, read in one pass. */
+export const hasJwt = (text: string): boolean => jwtSpans(text, true).length > 0;
 /** A value that says it is a credential, or a provider key's shape (OpenAI, GitHub, Slack, AWS, GitLab). */
 export const SECRET_VALUE = /(^bearer\s.+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,})/i;
 /**
@@ -62,7 +94,7 @@ export const SECRET_VALUE = /(^bearer\s.+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-
 const LONG_RUN = /[A-Za-z0-9+/=_-]{40,}/g;
 export const longSecret = (value: string) => (value.match(LONG_RUN) ?? []).some((run) => /[a-z]/.test(run) && /[A-Z]/.test(run) && /[0-9]/.test(run));
 /** Whether a value could be a credential: a JWT anywhere, a provider key or `Bearer …`, or a long secret-shaped run. */
-export const secretValue = (value: string): boolean => JWT_SHAPE.test(value) || SECRET_VALUE.test(value) || longSecret(value);
+export const secretValue = (value: string): boolean => hasJwt(value) || SECRET_VALUE.test(value) || longSecret(value);
 
 /**
  * `Bearer <token>` inside a longer value (`--header=Authorization: Bearer …`): a token of 12 or more token characters
@@ -84,7 +116,7 @@ const pathLike = (piece: string): boolean =>
  * between path separators, so a folder path holding a session id is not taken for a key.
  */
 export const secretArgument = (value: string): boolean =>
-  JWT_SHAPE.test(value) || SECRET_VALUE.test(value) || BEARER_INSIDE.test(value) ||
+  hasJwt(value) || SECRET_VALUE.test(value) || BEARER_INSIDE.test(value) ||
   value.split(/[\s=]/).some((piece) => (pathLike(piece) ? piece.split(/[\\/]/).some((part) => longSecret(part)) : longSecret(piece)));
 
 /** Percent-decode and keep `+` as `+`: `URLSearchParams` turns a raw `+` into a space, which would split a base64 run. */

@@ -2,7 +2,7 @@ import type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, indexed, isObject } from "./findings.js";
-import { JWT_SHAPE, SECRET_VALUE, rawValues, secretArgument, secretUrl, secretValue } from "./secret-shape.js";
+import { SECRET_VALUE, hasJwt, rawValues, secretArgument, secretUrl, secretValue } from "./secret-shape.js";
 import { createValidatorSync } from "./validator.js";
 
 // #region channel-agent (docs: docs/specification/channel-agent.md)
@@ -516,10 +516,12 @@ function readAsUrlRead(head: string): boolean {
 /** The detector's URL reading where `readAsUrl` admits the string, its argument reading otherwise (no URL parse), on a
  * string already cut to its head. */
 const urlReadingRead = (read: string): boolean => (readAsUrlRead(read) ? secretUrl(read) : secretArgument(read));
-/** Only a provider key's or a JWT's shape: a board thread's id is a long mixed run by design. */
+/** Only a provider key's or a JWT's shape: a board thread's id is a long mixed run by design. Its one caller admits
+ * only an `OPAQUE_ID` (no dot), which a JWT never is, so the JWT test is a defence for a wider id form, not a live
+ * branch today. */
 const keyShaped = (text: string): boolean => {
   const read = head(text);
-  return JWT_SHAPE.test(read) || SECRET_VALUE.test(read);
+  return hasJwt(read) || SECRET_VALUE.test(read);
 };
 /** Whether a member name may stand in a path as written (CA-5). */
 const plainName = (name: string): boolean => NAME_CHARACTERS.test(name) && !/[0-9]{7}/.test(name.replace(/[-_]/g, "")) && !shaped(name);

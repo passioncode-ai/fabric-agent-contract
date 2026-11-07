@@ -1,0 +1,44 @@
+{
+  "description": "An exclude path equal to an include path would remove it whole (FAC-SEM-157, DEC-0149).",
+  "kind": "source-manifest",
+  "expect": [
+    "FAC-SEM-157"
+  ],
+  "input": {
+    "format": "fabric-source/1",
+    "include": [
+      "src/",
+      "docs/",
+      "README.md",
+      "LICENSE"
+    ],
+    "exclude": [
+      "README.md"
+    ],
+    "binaries": [
+      "docs/icon.png"
+    ],
+    "publicAddresses": [
+      "support@inbox-digest.example"
+    ],
+    "slots": [
+      {
+        "name": "MAIL_OAUTH",
+        "kind": "secret",
+        "purpose": "reads the mailbox the digest covers"
+      },
+      {
+        "name": "DIGEST_JOURNAL",
+        "kind": "store",
+        "purpose": "the digests written so far",
+        "path": "journal.sqlite"
+      },
+      {
+        "name": "KNOWLEDGE_BASE",
+        "kind": "endpoint",
+        "purpose": "the operator's knowledge base",
+        "optional": true
+      }
+    ]
+  }
+}
