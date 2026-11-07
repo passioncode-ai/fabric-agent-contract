@@ -230,8 +230,16 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   up — a key not entered, a model not chosen — and is not an outage (DEC-0044). It still names `source` and
   `reason`, the reason says what the person does, and it still makes the service `degraded`. A watcher MUST NOT open
   an outage alert for it; it shows the entry as waiting for a person. An entry without `setup`, or with `false`, is
-  a failure. Fabric Dashboards' watcher messages the operator when a source stays degraded for more than 5 minutes
-  (fabric-workspace `knowledge/authority.md`, *Telling the operator about outages*, 2026-10-11).
+  a failure. A watcher messages the operator only when an agent has been
+  unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`) for more than 15 minutes, once per case, and
+  says it is back after 15 minutes well; a `degraded` answer opens no message, so setup entries are left out (fabric-dashboards
+  `docs/backlog.md` FD-76, ADR-0010, released in 0.7.15, read at `ebffd16`); a watcher MUST NOT message the operator
+  for an entry with `setup: true`. Fabric Dashboards' watcher opens an episode for `down` since FD-76 (0.7.15,
+  `ebffd16`), and for `foreign` and `foreign-user` since FD-159 (0.8.30, `e23551e8`), and keeps it open while a failing
+  source (one not marked `setup: true`) outside its start baseline stays, so its failure message at 15 minutes may name
+  that source.
+  An agent with a source manifest reports each missing required slot as a `setup: true` entry, as
+  [starting without the instance](source.md#starting-without-the-instance) says (DEC-0149).
 - `summary` carries at most six tiles for a host card; a tile with `attention: true`
   asks for the operator.
 - `update.available` is a newer version the service knows about, or `null`.
@@ -1214,7 +1222,7 @@ Every button a person has, the person's agent has (except the operator's move of
   `at` until 24 hours later (an `approval/1`'s lifetime, DL-17), and no more than 60 seconds ahead of the service's
   clock (DEC-0047); inside that window it covers repeated calls of that action on the object `target` names, or on any
   object when it names none, and a service whose action acts on one object passes that object to `actionDecision`
-  (DEC-0121). Without a decision the
+  (DEC-0121). A source hand-over departs from AP-2 as [source](source.md#handing-over) specifies (DEC-0149). Without a decision the
   service refuses `operator-decision-required`, which tells the agent to ask the operator and call again with the
   answer; an invalid one is `decision-invalid` (DEC-0121). An accepted `approval/1` is the approver's decision at any
   tier (DL-18; DL-26 lets a T0 or T1 caller present one); a T2 caller without one is refused `approval-required` with
@@ -1301,7 +1309,7 @@ reference's under `FAC-SEM-142`. A refusal is DL-19's ([delegation](delegation.m
 `structuredContent` (DEC-0121). A reader pinned before DEC-0121 ignores the extension key and `_meta.decision`; the
 behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from then an older caller that calls a
 `relayed` action without a decision is refused `operator-decision-required` until its kit relays decisions (CT-124)
-(DEC-0121).
+(DEC-0121). A source hand-over departs from this table as [source](source.md#handing-over) specifies (DEC-0149).
 
 ## Semantic rules
 
@@ -1325,4 +1333,4 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | <a id="fac-sem-088"></a>`FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
 | <a id="fac-sem-101"></a>`FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
 | <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address whose host is a local one as PL's [check](#links-to-a-services-pages) lists it (`127.0.0.0/8`, `[::1]`, the IPv4-mapped `[::ffff:127.x.y.z]`, `localhost` and names under it, and the unspecified `0.0.0.0` and `[::]` a wildcard bind reports), and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
-| <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121) |
+| <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121), except a source hand-over ([source](source.md#handing-over)), out of this rule until a service pins a contract revision carrying CT-181: `--kind action-call` cannot tell a hand-over and is not run on a hand-over's calls until then |

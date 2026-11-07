@@ -143,7 +143,9 @@ for 24 hours. A service takes a
 `relayed` action from a T0 or T1 caller that carries a valid one as the operator's act, records the caller it
 authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
 `decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1` (`actionDecision`,
-[service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121).
+[service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121). A **Source hand-over** takes a decision only
+with its exact target ([source](docs/specification/source.md#handing-over), DEC-0149). A hand-over by push or by file, a package handed over, or published to a public registry from a private home, or a public release from a private home carries a source export or a package, which needs the tree check, so an agent without `fabric.source.json` takes those routes only once it has one; an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home an agent does neither on its own (with the operator's explicit permission for that act it is his own act, no act of this contract); the manifest stays opt-in otherwise (an organization's private agent packed for its own private registry, readable
+only by its members, needs none).
 
 **Mandate**: The operator's instruction for one task, carried with the task down a chain of the operator's agents
 (`mandate/1`): the task, the operator's words verbatim, when they were given, an expiry within 7 days, a scope
@@ -153,6 +155,7 @@ from T0 or T1 (by the agent before it, where it authenticated its caller's agent
 not cover, so the operator is asked again for that alone; a T2 caller's mandate changes nothing, beyond the estate a
 delegation token carries the authority. A job's step is read under the job's capability (MJ-1, DEC-0141; `actionDecision`'s
 `mandateCapability`) (`mandateCovers`, [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
+A mandate never covers a **Source hand-over** ([source](docs/specification/source.md#handing-over), DEC-0149).
 
 **Relayed approval**: The operator's approval, given in one agent's session, carried to another of their agents by a
 relay: the words verbatim, when and where they were said (`source`: the project, and the session or the board thread)
@@ -418,6 +421,85 @@ requires, cost presets, the **Result signal**, the state that moves, the evals r
 
 **agentRef**: `urn:fabric:agent:<publisher>:<id>`, the name of one agent across its versions, derived from its
 package and never chosen. A placement names an agent by it and keeps it when it moves (`FAC-SEM-066`, DEC-0050).
+
+**Source**: What of an agent can be handed to someone else: its code, skills, prompts, schemas, tests and the
+documents it ships, as its `fabric.source.json` (`fabric-source/1`) names them; default deny, `.git` never, its
+`unchecked` paths travelling unread (DEC-0149, [source](docs/specification/source.md)).
+
+**Instance**: What belongs to one installation of an agent and never travels with its **Source**: its records, logs,
+keys, the names of the people and clients it works for, private paths and its configuration, reached through its
+**Source slots**. *Avoid*: "instance" for a running instance (a context instance, a service instance) in this sense.
+
+**Source slot**: A named place an installation fills, declared in the source manifest without a value (not a board's
+responder slot, DEC-0140): `secret` (a key read
+by name), `config` (a non-secret setting, the operator's or publisher's identity included), `store` (a data store under
+the data folder) or `endpoint` (the operator's infrastructure by role). A required slot left empty is a setup state
+(`setup: true`) of the agent, reported by the slot's name (an `endpoint` too; only a filled endpoint that fails may
+be reported under the connection it backs); a `store` slot is never a setup state: a store absent at the first start is created, and
+one the agent cannot create under its data folder is a failure. A package's `secrets[]` are its secret slots and its `state[]` its store slots
+(`FAC-SEM-160`), except that an absent or empty `state[]` is a copy packed without state (a colleague's copy) and
+passes.
+
+**Installation string**: One of the operator's own strings (an account, a person, a private project, a computer's name) the tree
+check looks for before a **Source export**, kept on the operator's machine outside the source tree and never exported
+(`FAC-SEM-158`).
+
+**Source export**: An agent's **Source** at a named commit written as a Git repository holding one new commit by
+`Fabric source export`, whose only parent, if any, is the earlier export commit the recipient holds, and no commit from
+the home, after the tree check finds nothing blocking; local, publishing nothing, running
+no test as a condition, never a gitlink. Handing it over is a source hand-over where
+[source](docs/specification/source.md#handing-over) counts one (`publish`, on the operator's word), except an
+organization's later public release from its private home and material already public (DEC-0149). Not the peer share's Export (DEC-0147) and not
+a proposal's `export` destination (`FAC-SEM-103`).
+
+**Source hand-over**: An agent's source reaching a place or a person it was not at; a route is a hand-over when the source reaches someone who could not already read the home, or a place another owner holds: a copy is none only when it stays in a place the home's owner holds and only the home's readers can read it (the owning organization's members for its own agent; for a personal agent's private home, the collaborators given access before DEC-0149 was accepted count as the home's readers only inside the home itself, so a copy in another place, even one the owner holds and they can read, is a hand-over), and a repository or placement another owner holds stays a hand-over; a release is a source export or a package, and serving and copied content are never a release, so they keep their own rule. The routes include, among others,
+the ones below, each a hand-over except, on every route, an organization's later public release from its private home
+(its own act) and material already public; the lead filters every route, beside those two exceptions: a route that stays in a place the home's owner holds and reaches only those who could already read the home is no hand-over (an organization's export pushed to its own private repository, readable only by its members, is none), and a place another owner holds stays a hand-over even when only earlier readers can read it (a personal agent's export pushed to a collaborator's own private repository is one, whenever that collaborator was given access). The routes: a **Source export** handed to anyone who could not already read the home or sent as a file to such a person or to a place outside the owner's; a push of a
+commit not already there to a repository that is not the agent's home and that is public, another owner's, or readable by anyone who could not already read the home (for a personal agent, an organization's repository is another owner's even when the operator administers it; an organization's own repositories are its own agent's owner's places), each such push its own; source files' content copied into a message, an issue, a gist or a thread outside the owner's, or into one the owner holds that anyone who could not already read the home can read; a package handed to anyone who could not already read the home, or sent to a place outside the owner's (a colleague's copy), which carries the source; a personal agent's package or release published to a
+public registry, unless its home is already public (the files the pack step derives from the public source count as
+public, nothing else does). A hand-over by push or by file carries a source export (one new commit, whose only parent,
+if any, is the earlier export commit the recipient holds; no commit from the home; the tree check passed), never
+another commit; the export's receipt records the recipient and the export commit, from which the next export reads its
+parent, and an export that cannot land as a fast-forward goes as a new branch or pull request, never by a force-push; a package handed over, or published to a public registry from a private home, names as its target the source commit it was packed
+from and holds only source paths that passed that commit's tree check, besides the files the pack step writes (`fabric.package.json`); built files travel only as committed source paths.
+An act on the whole repository of a personal agent's private home, or of any copy of it within the operator's estate that carries its history (a private mirror), such as a visibility change or access given to any other person, is not done by an agent on its own; with the operator's explicit permission for that act it is the operator's own act under his own rule, and no act of this contract; the contract's tools do not perform it; the source leaves only as a source export; a transfer of a personal agent's home, public or
+private, is not done by an agent on its own either (the operator's own permission for it is outside this contract); a public home's access and
+visibility are outside that rule, making a public personal home private is none, access the operator gave before
+DEC-0149 was accepted stands as the operator's own act (nothing is retroactive), and an agent never gives new access on its own (with the operator's explicit permission for that act it is his own act, no act of this contract). An organization's acts on its own agent's whole
+repository are its own, under its own release rules, except two that take the word naming the repository: making a
+private organization agent's source public by a visibility change, and giving it new readers outside the organization
+(the word accepts the history as it stands); its first public release from a private home, by any route, takes the word naming
+its source commit, every later one by any route is its own act, and every public release from a private home carries only the
+source export (its parent the earlier export commit) or a package packed from that source commit holding only source
+paths that passed the tree check. A processor acting for the owner under the owner's own account
+or Git hosting service is no recipient while what it holds stays readable by no one but the owner and the processors acting for it;
+output it makes public is one. Access the owning organization gives its own members to its own agent's home is none,
+and giving access to a public home is none. What takes the word when a source becomes public: a personal agent's source
+made public for the first time (as a source export, a public repository created for it included; its own repository's
+visibility is not changed by an agent on its own, above), and every later public release of a personal agent from a private home (each new
+commit is its own hand-over), and an organization agent's private source made public; an organization creating its
+own agent's home public is its own act, and a push, release or serving of what is already public, from a public home to
+any other public place (another owner's included), reaches no new reader and is none, when an earlier act on the word,
+or the owner's own act, made it public; material already public needs no word by any route. The repository where the agent's owner keeps and develops its source is its
+home, not a recipient, and the owner's placements are the owner's own: the owner's own commits, branches and releases
+in the home, a release that stays where the home's readers are, and a deploy to a placement its owner holds (an
+organization's agent on that organization's placement included) are none; a bundle a public page serves is the agent's
+output, while serving the source tree, source maps or unbuilt files publicly, or to anyone who cannot read the home, is
+a hand-over, the word naming the deploy of a commit that serves source to anyone who cannot read the home (one word per
+commit and audience); a copy moved within the operator's own estate (here, the accounts and placements the operator
+alone holds) to a place that is not public and that no one outside the operator can read (a private mirror the operator
+owns) is none either. The home carve-out never lets a personal agent's source move into an organization's or a public
+repository, or onto an organization's or a team's placement or one that anyone who could not already read the home can read, which stays one; an `org:<orgId>` context instance on a
+machine the operator holds, run under a share grant (DEC-0082, DEC-0086), is the owner's placement serving the
+organization and no hand-over, while a placement on a machine, registry or repository the organization holds is one
+(a machine the operator holds stays his when it is enrolled in an organization (enrollment gives the organization a device record, not the machine); an OS account or machine the organization owns whole (its org-cloud machine, or an account such as an organization's own macOS user on a shared computer) is the organization's); serving the
+running agent to a team (`peer`, client keys) gives no one the tree, except a prompt or resource that is a source file
+served verbatim, or a bundle built without minification, which is the source tree served. It is taken only on the
+operator's word for that act naming the agent, the target (the source commit, or the repository for an organization's
+two acts above) and the recipient, in one of three forms: on a service's action, where the hand-over is one synchronous
+call of effect class `publish`, a decision with its exact target or the service's in-call elicitation; outside one, the
+stated word the operator's reply accepts, consumed once; never by a mandate or an `approval/1` before CT-181, as
+[source](docs/specification/source.md#handing-over) specifies (DEC-0149). *Avoid*: a bare "hand-over" for this meaning.
 
 **Package digest**: SHA-256 over the RFC 8785 form of a **Package** without its digest and signatures; through the
 listed files it covers the whole folder, and a countersignature does not change it (DEC-0050).
@@ -849,7 +931,16 @@ value (DEC-0142 PS-10).
 
 **Proposal**: A change proposed to a project's manager or the CEO (`fabric-proposal/1`): a rule, an agent, a skill, a
 listing or a fix, with evidence by reference; a rule is approved by a person, nothing applies itself, and nothing
-about a private agent leaves (DEC-0072, [proposals](docs/specification/proposals.md)).
+about a private agent leaves as a proposal (DEC-0072, [proposals](docs/specification/proposals.md)); handing over its
+**Source export** goes only by a **Source hand-over** (DEC-0149). The operator's standing permission of 2026-10-12 lets
+a private agent's mechanics move into a product (the knowledge base's roadmap records it in its D5 row: "the broker's
+mechanics go into `node.lifecycle`, with a standing permission in his global instructions"); the contract reads it as
+rewriting them file by file into the product's own source through that product's own change, private data
+stripped. It is unchanged and needs no word per act; the agent's source as such (its tree, or a whole copy under any
+name) moving into an organization's or a public repository stays a **Source hand-over**. Mechanics are adapted file by
+file when the result does not run as the agent, carries none of its manifest, identity, data, keys or private names,
+and each file is changed into the product's own interfaces in the product's own change; in doubt the move is a hand-over
+and takes the word, as [source](docs/specification/source.md#handing-over) draws the line.
 
 **Protocol revision**: `<name>/<revision>`, the version every document names (DEC-0009); a receiver accepts N and N−1
 of the contract's register, lists them in `protocols`, and refuses another with `schema-unsupported` (DEC-0067,

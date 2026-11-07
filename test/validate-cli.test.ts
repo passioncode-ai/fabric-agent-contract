@@ -1,10 +1,13 @@
 import { spawnSync } from "node:child_process";
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, symlinkSync, truncateSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
 import { loadSchemasSync, projectRoot } from "../src/contract.js";
-import { blindProtocols, inferSchema, main, nearestKey } from "../src/validate-cli.js";
+import { blindProtocols, gitExecutable, gitLimits, gitNames, gitlinkNames, inferSchema, jsonErrorAt, main, nearestKey, shownPath, shownPointer } from "../src/validate-cli.js";
+import { evaluateSemanticRules } from "../src/semantic-rules.js";
+import { includeIndex, longRunAt } from "../src/source-rules.js";
 
 // REQ-01 (contract review 2026-10-21): `pnpm validate` is an author's first check. It infers the schema, runs the
 // schema and the semantic rules that read the document, prints one line per problem (path, rule, message, help)
@@ -29,6 +32,17 @@ function folder(files: Record<string, unknown>): string {
 }
 const one = (name: string, value: unknown) => path.join(folder({ [name]: value }), name);
 const run = (...args: string[]) => main(args);
+/** This process's processor time in ms, and one call's: repeated until a trial lasts 20 ms, the best of three trials. */
+const cpuMs = (): number => { const used = process.cpuUsage(); return (used.user + used.system) / 1000; };
+const cpuOf = (call: () => unknown): number => {
+  call();
+  return Math.min(...[0, 1, 2].map(() => {
+    const started = cpuMs();
+    let calls = 0;
+    do { call(); calls += 1; } while (cpuMs() - started < 20);
+    return (cpuMs() - started) / calls;
+  }));
+};
 
 describe("every positive fixture passes", () => {
   it.each(catalogue.filter((entry) => entry.valid))("$name", (entry) => {
@@ -42,12 +56,47 @@ describe("every positive fixture passes", () => {
     const result = run(fixture("positive/service-channel-agent-extension.json"), "--schema", "service-channel-agent-extension.schema.json");
     expect(result.code).toBe(0);
     expect(result.out).toContain("hint/declaration-only");
-    expect(result.out).toContain("may name its members as written");
+    expect(result.out).toContain("may name a map key as written");
     expect(result.out).toMatch(/ {2}\/ {2}hint\/declaration-only/);
     // The hint carries this schema's own help page, so a later merge cannot point it elsewhere.
     expect(result.out).toContain("docs/specification/channel-agent.md#what-is-checked");
     const json = run(fixture("positive/service-channel-agent-extension.json"), "--schema", "service-channel-agent-extension.schema.json", "--json");
     expect(json.out).toContain("docs/specification/channel-agent.md#what-is-checked");
+  });
+
+  it("a bare channel-agent declaration names a map key in its place and hints so (DEC-0150, DEC-0149's instance-free lines)", () => {
+    const declaration = json("positive/service-channel-agent-extension.json");
+    declaration.projects[0].channels[0].texts.final["sk-Latn-150-u-ca-gregory"] = 5;
+    const result = run(one("declaration.json", declaration), "--schema", "service-channel-agent-extension.schema.json");
+    expect(result.code).toBe(1);
+    expect(result.out).toContain("/projects/0/channels/0/texts/final/sk-Latn-150-u-ca-gregory");
+    expect(result.out).toContain("may name a map key as written");
+  });
+
+  it("a bare channel-agent declaration never prints an undeclared member's name (DEC-0150, DEC-0149's instance-free lines)", () => {
+    // A provider key's shape built at run time, so no source line holds it.
+    const name = ["sk", "-", "Ex4mpleN0tARealKey0000"].join("");
+    for (const at of ["top", "channel"] as const) {
+      const declaration = json("positive/service-channel-agent-extension.json");
+      if (at === "top") declaration[name] = 1;
+      else declaration.projects[0].channels[0][name] = 1;
+      runAndCheck(declaration, at);
+    }
+    // Nor through an extension hint: a member holding `extensions`, or an extension key carrying the name.
+    const holding = json("positive/service-channel-agent-extension.json");
+    holding[name] = { extensions: { "https://fabric.passioncode.ai/extensions/x": 1 } };
+    runAndCheck(holding, "top");
+    const keyed = json("positive/service-channel-agent-extension.json");
+    keyed.extensions = { [`https://fabric.passioncode.ai/extensions/${name}`]: 1 };
+    runAndCheck(keyed, "top");
+    function runAndCheck(declaration: Record<string, any>, at: "top" | "channel"): void {
+      const result = run(one("declaration.json", declaration), "--schema", "service-channel-agent-extension.schema.json");
+      expect(result.code, at).toBe(1);
+      expect(result.out, at).toContain("has a member the schema does not define");
+      expect(result.out, at).toContain(at === "top" ? "declaration.json  /  schema/additionalProperties" : "/projects/0/channels/0  schema/additionalProperties");
+      expect(result.out, at).not.toContain(name);
+      expect(run(one("declaration.json", declaration), "--schema", "service-channel-agent-extension.schema.json", "--json").out, at).not.toContain(name);
+    }
   });
 
   it("a provider entry with run.mcp.stdio.scope gets the reader-pending hint and still passes (CT-27)", () => {
@@ -385,7 +434,7 @@ describe("a folder is checked file by file and as pairs", () => {
     const result = run(folder({ "notes.json": { hello: "world" } }));
     expect(result.code).toBe(2);
     expect(result.out).toContain("cannot tell which schema");
-    expect(run(folder({ "readme.txt": "x" }))).toEqual({ code: 2, out: expect.stringContaining("no .json file") });
+    expect(run(folder({ "readme.txt": "x" }))).toEqual({ code: 2, out: expect.stringContaining("no readable .json file") });
   });
 });
 
@@ -606,11 +655,11 @@ describe("the second unit and product readings' cases (contract review 2026-10-2
     expect(version.problems).toEqual([expect.objectContaining({ help: "docs/specification/versioning.md" })]);
   });
 
-  it("an empty folder after a target that failed still says it holds no .json file", () => {
+  it("an empty folder after a target that failed still says it holds no readable .json file", () => {
     const empty = folder({});
     const result = run(path.join(empty, "missing.json"), empty);
     expect(result.code).toBe(2);
-    expect(result.out).toContain("holds no .json file");
+    expect(result.out).toContain("holds no readable .json file");
   });
 });
 
@@ -776,6 +825,27 @@ describe("the fourth seam and product readings' cases: a consumer's folder as au
     expect(result.out).toContain(`the installed ${at} is read as the manifest, not the folder's fabric-agent.json`);
     expect(result.out).toContain("FAC-SEM-020");
   });
+
+  it.skipIf(process.platform === "win32")("an installed manifest that is a FIFO is never read: a note says so, without waiting on it", () => {
+    const installed = folder({ "x.txt": "x" });
+    const at = path.join(installed, "fabric-agent.json");
+    expect(spawnSync("mkfifo", [at]).status).toBe(0);
+    const dir = folder({ "example-agent.default.json": { ...descriptor(), fabricManifest: at }, "fabric-agent.json": manifest() });
+    // In a child process bounded by the parent's timeout: a read of the FIFO would block this test process too.
+    const script = path.join(folder({ "x.txt": "x" }), "pair.ts");
+    writeFileSync(script, [
+      `import { main } from ${JSON.stringify(pathToFileURL(path.join(root, "src/validate-cli.ts")).href)};`,
+      "const start = performance.now();",
+      `const result = main([${JSON.stringify(dir)}]);`,
+      "process.stdout.write(JSON.stringify({ ...result, ms: performance.now() - start }));"
+    ].join("\n"));
+    const child = spawnSync(process.execPath, [path.join(root, "node_modules/tsx/dist/cli.mjs"), script], { encoding: "utf8", timeout: 60_000 });
+    expect(child.error).toBeUndefined();
+    const result = JSON.parse(child.stdout) as { code: number; out: string; ms: number };
+    // A read of the FIFO would wait forever; the bound only proves the run did not, so it is wide for a loaded machine.
+    expect(result.ms).toBeLessThan(20_000);
+    expect(result.out).toContain(`${at} is not a file, so no manifest was read`);
+  }, 120_000);
 
   it("a manifest the descriptor names under another file name is the folder's only manifest", () => {
     const result = run(folder({ "example-agent.default.json": { ...descriptor(), fabricManifest: "~/no-such-folder/custom-name.json" }, "fabric-agent.json": manifest() }));
@@ -1026,5 +1096,2143 @@ describe("the sixth readings' cases (contract review 2026-10-21)", () => {
     }
     const top = run(folder({ "example-agent.default.json": service("example-agent", "~\\no-such-folder\\fabric-agent.json", 47195), "fabric-agent.json": manifestFor("example-agent.default"), "other/fabric-agent.json": manifestFor("other.default") }));
     expect(top.out).toContain("so the folder's fabric-agent.json is read");
+  });
+});
+
+// DEC-0149: an agent's source. `--kind source-tree` on a folder reads its fabric.source.json and checks the source
+// files under it; a folder holding fabric.source.json beside fabric.package.json is checked as a pair (FAC-SEM-160).
+describe("an agent's source (DEC-0149)", () => {
+  const sourceManifest = (extra: Record<string, unknown> = {}) => ({ format: "fabric-source/1", include: ["src/", "docs/", "README.md", "LICENSE"], ...extra });
+  // Assembled here, so no line of this file is shaped like a credential.
+  const key = ["sk", "-", "A1".repeat(12)].join("");
+  const lines = (out: string) => out.split("\n").filter((line) => line !== "");
+  /** The lines that are not the note saying the folder was walked. */
+  const found = (out: string) => lines(out).filter((line) => !line.includes("  note/walk  "));
+  const cells = (out: string, count = 3) => found(out).map((line) => line.split("  ").slice(0, count));
+  // Git by its absolute path, as the checker finds it: on Windows a bare `git` is looked up in the working folder first,
+  // so a folder holding a `git.exe` (the test that plants one) would run that file.
+  const gitPath = gitExecutable() ?? "git";
+  const gitIn = (dir: string, ...args: string[]) =>
+    spawnSync(gitPath, ["-c", "user.name=Example", "-c", "user.email=agent@example.invalid", "-c", "commit.gpgsign=false", "-c", "protocol.file.allow=always", ...args], { cwd: dir, encoding: "utf8" });
+
+  it("checks the source files of a folder, naming each by its path in the folder, and leaves the rest unread", () => {
+    const dir = folder({
+      "fabric.source.json": sourceManifest({ binaries: ["docs/icon.png"], unchecked: [{ path: "src/vectors/", reason: "synthetic test vectors" }] }),
+      LICENSE: "terms",
+      "README.md": "# Agent\n\nAsk someone@mail.org.",
+      "src/main.ts": "export const name = \"agent\";",
+      "src/keys.ts": `const key = "${key}";`,
+      "src/vectors/keys.json": `{"key": "${key}"}`,
+      "docs/guide.md": "# Guide",
+      "docs/diagram.bin": "\u0000\u0001",
+      "node_modules/x/index.js": `const key = "${key}";`,
+      "tests/run.ts": `const key = "${key}";`,
+      ".git/config": `const key = "${key}";`
+    });
+    writeFileSync(path.join(dir, "docs/icon.png"), Buffer.from([0x89, 0x50, 0x00, 0x01]));
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(cells(result.out)).toEqual([
+      ["docs/diagram.bin", "/files/2", "FAC-SEM-158"],
+      ["src/keys.ts", "/files/6", "FAC-SEM-158"],
+      ["README.md", "/files/1", "FAC-SEM-159 (accepted)"]
+    ]);
+    const out = found(result.out);
+    expect(out[1]).toContain("src/keys.ts line 1, column 14: credential: ");
+    expect(out[2]).toContain("README.md line 3, column 5: email: ");
+    // Outside a Git work tree the checker says it walked the folder, and why, without naming it.
+    expect(lines(result.out).filter((line) => line.includes("note/walk"))).toEqual([".  /  note/walk  git ls-files refused the folder (exit 128), so the folder's files were walked"]);
+    expect(result.out).not.toContain(key);
+    expect(result.out).not.toContain(dir);
+    for (const unread of ["node_modules", "tests/run.ts", "vectors/keys.json"]) expect(result.out).not.toContain(unread);
+    const parsed = JSON.parse(run(dir, "--kind", "source-tree", "--json").out) as { files: Array<{ file: string; kinds: string[] }> };
+    expect(parsed.files).toEqual([{ file: "fabric.source.json", schema: "fabric-source.schema.json", kinds: ["source-manifest"] }, { file: ".", schema: null, kinds: ["source-tree"] }]);
+  });
+
+  it.skipIf(process.platform === "win32")("reads a symbolic link as the path it names, and skips what is no file (a FIFO)", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/main.ts": "x" });
+    symlinkSync("/Users/jdoe", path.join(dir, "src/data"));
+    expect(spawnSync("mkfifo", [path.join(dir, "src/pipe")]).status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    // The link's target is read as text (a home path) and with link-outside's rule (an absolute target).
+    expect(cells(result.out)).toEqual([["src/data", "/files/2", "FAC-SEM-158"], ["src/data", "/files/2", "FAC-SEM-159 (accepted)"]]);
+    expect(result.out).toContain("src/data line 1, column 1: link-outside: a link to a path outside the source: a source export does not carry its target");
+    expect(result.out).toContain("src/data line 1, column 8: home-path: ");
+  });
+
+  it("never prints the folder or a value found in a path: a file whose path holds a finding is files[<index>]", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["docs/", "LICENSE"] }), LICENSE: "x", "docs/C--Users-jdoe-notes.md": "Notes by /home/jdoe.", [`docs/${key}.md`]: "notes" });
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(cells(result.out)).toEqual([["files[1]", "/files/1/path", "FAC-SEM-158"], ["files[1]", "/files/1", "FAC-SEM-158"], ["files[2]", "/files/2/path", "FAC-SEM-158"]]);
+    expect(found(result.out)[2]).toContain("files[2], its path: credential: the file's path holds a value shaped like a credential");
+    const json = run(dir, "--kind", "source-tree", "--json").out;
+    for (const out of [result.out, json]) {
+      expect(out.split(key).length - 1).toBe(0);
+      expect(out).not.toContain("jdoe");
+      expect(out).not.toContain(dir);
+    }
+  });
+
+  it("reads what Git would commit in a work tree: an ignored file under include is not read, an untracked one is", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", ".gitignore": "src/.env\n", "src/.env": "MAILBOX=inbox", "src/new.ts": `"${key}"`, "src/.cache/x.ts": `"${key}"` });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(lines(result.out).map((line) => line.split("  ").slice(0, 3))).toEqual([["src/.cache/x.ts", "/files/2", "FAC-SEM-158"], ["src/new.ts", "/files/3", "FAC-SEM-158"]]);
+    // A tracked file deleted from the work tree is not in the tree as it is.
+    expect(gitIn(dir, "add", "src/new.ts").status).toBe(0);
+    rmSync(path.join(dir, "src/new.ts"));
+    expect(lines(run(dir, "--kind", "source-tree").out).map((line) => line.split("  ")[0])).toEqual(["src/.cache/x.ts"]);
+    writeFileSync(path.join(dir, "src/new.ts"), `"${key}"`);
+    // Outside Git the same folder is walked: the credential file by its name is read, and so is a dot-folder an include folder covers.
+    rmSync(path.join(dir, ".git"), { recursive: true, force: true });
+    expect(found(run(dir, "--kind", "source-tree").out).map((line) => line.split("  ")[0])).toEqual(["src/.cache/x.ts", "files[3]", "src/new.ts"]);
+  });
+
+  it("labels a file whose path holds a finding files[<index>] in the file column too, walked or in Git, text or JSON", () => {
+    // A 44-character mixed-case run and an e-mail address, assembled here.
+    const longRun = Array.from({ length: 11 }, (_, index) => `Qm${index % 10}z`).join("");
+    expect(longRun).toHaveLength(44);
+    const address = ["someone", "mail.org"].join("@");
+    for (const git of [false, true]) {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", [`src/${longRun}.js`]: `// ${address}` });
+      if (git) expect(gitIn(dir, "init", "-q").status).toBe(0);
+      for (const out of [run(dir, "--kind", "source-tree").out, run(dir, "--kind", "source-tree", "--json").out]) {
+        expect(out).not.toContain(longRun);
+        expect(out).toContain("files[");
+        expect(out).not.toContain(dir);
+      }
+    }
+  });
+
+  it("counts files[<index>] from 0 in the code-unit order of the paths read, the same in a walk and in Git mode", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["a/", "a-b/", "LICENSE"] }), LICENSE: "x", "a/k.ts": `"${key}"`, "a-b/k.ts": `"${key}"`, "a/-Users-jdoe-x.md": "x" });
+    const walkedOut = run(dir, "--kind", "source-tree").out;
+    // LICENSE (0), a-b/k.ts (1), a/-Users-jdoe-x.md (2), a/k.ts (3), fabric.source.json (4): '-' sorts before '/'.
+    expect(cells(walkedOut)).toEqual([["a-b/k.ts", "/files/1", "FAC-SEM-158"], ["files[2]", "/files/2/path", "FAC-SEM-158"], ["a/k.ts", "/files/3", "FAC-SEM-158"]]);
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(cells(run(dir, "--kind", "source-tree").out)).toEqual(cells(walkedOut));
+  });
+
+  it("walks a folder Git ignores, saying why, so its files are read and no include path reads as missing", () => {
+    const parent = folder({ ".gitignore": "agent/\n", "agent/fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), "agent/LICENSE": "x", "agent/src/a.ts": "const data = \"/home/jdoe\";" });
+    expect(gitIn(parent, "init", "-q").status).toBe(0);
+    const result = run(path.join(parent, "agent"), "--kind", "source-tree");
+    expect(lines(result.out).map((line) => line.split("  ").slice(0, 3))).toEqual([["src/a.ts", "/files/2", "FAC-SEM-158"], [".", "/", "note/walk"]]);
+    expect(result.out).toContain("Git ignores this folder, so the folder's files were walked");
+    expect(result.out).not.toContain("missing");
+    // A Git work tree that lists nothing under an include path is walked too.
+    const empty = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), ".gitignore": "src/\nLICENSE\n", LICENSE: "x", "src/a.ts": "x" });
+    expect(gitIn(empty, "init", "-q").status).toBe(0);
+    expect(run(empty, "--kind", "source-tree").out).toContain("Git lists no file under an include path here, so the folder's files were walked");
+  });
+
+  it("reports a nested repository in the source, a submodule in Git mode and a folder holding .git in a walk, unless excluded", () => {
+    const inner = folder({ "lib.ts": "export {};" });
+    expect(gitIn(inner, "init", "-q").status).toBe(0);
+    expect(gitIn(inner, "add", ".").status).toBe(0);
+    expect(gitIn(inner, "commit", "-qm", "lib").status).toBe(0);
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/main.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "submodule", "add", "-q", inner, "src/lib").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(cells(result.out)).toEqual([["src/lib", "/files/2", "FAC-SEM-158"]]);
+    expect(result.out).toContain("src/lib: nested-repository: ");
+    writeFileSync(path.join(dir, "fabric.source.json"), JSON.stringify(sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/lib/"] })));
+    expect(run(dir, "--kind", "source-tree")).toEqual({ code: 0, out: "" });
+    const walked = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/main.ts": "x", "src/vendor/.git/HEAD": "ref: refs/heads/main", "src/vendor/a.ts": `"${key}"` });
+    expect(cells(run(walked, "--kind", "source-tree").out)).toEqual([["src/vendor", "/files/3", "FAC-SEM-158"]]);
+  });
+
+  it.skipIf(process.platform === "win32")("never reads through a symbolic link in Git mode: a tracked folder replaced by a link to an outside folder", () => {
+    const outside = folder({ "a.ts": `"${key}"` });
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/lib/a.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", ".").status).toBe(0);
+    rmSync(path.join(dir, "src/lib"), { recursive: true, force: true });
+    symlinkSync(outside, path.join(dir, "src/lib"));
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.out).not.toContain("credential");
+    expect(result.out).not.toContain("src/lib/a.ts");
+  });
+
+  it("walks the folder without a note when no git can be found", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": `"${key}"` });
+    const saved = process.env.PATH;
+    process.env.PATH = "";
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect(lines(result.out).map((line) => line.split("  ").slice(0, 3))).toEqual([["src/a.ts", "/files/2", "FAC-SEM-158"]]);
+    } finally {
+      process.env.PATH = saved;
+    }
+  });
+
+  it("reports an untracked repository inside the source in Git mode, listed by Git with a trailing slash", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/main.ts": "x", "src/inner/lib.ts": "export {};" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const inner = path.join(dir, "src/inner");
+    expect(gitIn(inner, "init", "-q").status).toBe(0);
+    expect(gitIn(inner, "add", ".").status).toBe(0);
+    expect(gitIn(inner, "commit", "-qm", "inner").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(cells(result.out)).toEqual([["src/inner", "/files/2", "FAC-SEM-158"]]);
+    expect(result.out).toContain("nested-repository");
+  });
+
+  it("stays in Git mode when Git lists only a nested repository under the include paths", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["sub/"] }), "sub/lib.ts": "export {};" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const inner = path.join(dir, "sub");
+    expect(gitIn(inner, "init", "-q").status).toBe(0);
+    expect(gitIn(inner, "add", ".").status).toBe(0);
+    expect(gitIn(inner, "commit", "-qm", "inner").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.out).not.toContain("note/walk");
+    expect(cells(result.out)).toEqual([["sub", "/files/1", "FAC-SEM-158"], ["fabric.source.json", "/manifest/include/0", "FAC-SEM-158"], ["fabric.source.json", "/files", "FAC-SEM-159 (accepted)"]]);
+  });
+
+  it("reports a nested repository an include path names without its trailing slash, in a walk and in Git mode alike", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE", "vendor/lib"] }), LICENSE: "x", "src/a.ts": "x", "vendor/lib/lib.ts": "export {};" });
+    const inner = path.join(dir, "vendor/lib");
+    expect(gitIn(inner, "init", "-q").status).toBe(0);
+    expect(gitIn(inner, "add", ".").status).toBe(0);
+    expect(gitIn(inner, "commit", "-qm", "inner").status).toBe(0);
+    const walked = run(dir, "--kind", "source-tree");
+    expect(walked.code).toBe(1);
+    // The repository is no file of the tree, so the include path naming it is also missing.
+    expect(found(walked.out)).toEqual([
+      expect.stringMatching(/^vendor\/lib {2}\/files\/3 {2}FAC-SEM-158 {2}vendor\/lib: nested-repository: /),
+      expect.stringMatching(/^fabric\.source\.json {2}\/manifest\/include\/2 {2}FAC-SEM-158 {2}missing: /)
+    ]);
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const tracked = run(dir, "--kind", "source-tree");
+    expect(tracked.out).not.toContain("note/walk");
+    expect(found(tracked.out)).toEqual(found(walked.out));
+  });
+
+  it.skipIf(process.platform === "win32")("never runs a git from the checked folder: PATH's empty element is not the folder", () => {
+    const real = gitExecutable() as string;
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", ".gitignore": "src/ignored.ts\n", "src/ignored.ts": `"${key}"`, "src/a.ts": "x", git: "#!/bin/sh\necho ran > \"$PWD/marker\"\nexit 1\n" });
+    chmodSync(path.join(dir, "git"), 0o755);
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const saved = process.env.PATH;
+    process.env.PATH = `:${path.dirname(real)}`;
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect(existsSync(path.join(dir, "marker"))).toBe(false);
+      // Git mode: the ignored file is not read and no walk note is printed.
+      expect(result.out).toBe("");
+    } finally {
+      process.env.PATH = saved;
+    }
+  });
+
+  it.skipIf(process.platform !== "win32")("never runs a git.exe from the checked folder on Windows", () => {
+    const real = gitExecutable() as string;
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", ".gitignore": "src/ignored.ts\n", "src/ignored.ts": `"${key}"`, "src/a.ts": "x", "git.exe": "not a program" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const saved = process.env.PATH;
+    process.env.PATH = `;${path.dirname(real)}`;
+    try {
+      expect(run(dir, "--kind", "source-tree").out).toBe("");
+    } finally {
+      process.env.PATH = saved;
+    }
+  });
+
+  it("finds git only in PATH's absolute folders, the POSIX defaults when PATH is unset, none on Windows then", () => {
+    expect(gitExecutable({ PATH: "relative/bin::./bin" }, "linux")).toBeUndefined();
+    expect(gitExecutable({}, "win32")).toBeUndefined();
+    expect(gitExecutable({ PATH: path.join(scratch, "no-such-folder") }, "linux")).toBeUndefined();
+    const fake = folder({ "git.exe": "x", "sub/git": "x" });
+    expect(gitExecutable({ Path: `relative;${fake}` }, "win32")).toBe(path.join(fake, "git.exe"));
+    // A git that is a folder, or not executable, is passed over.
+    mkdirSync(path.join(fake, "dir/git"), { recursive: true });
+    expect(gitExecutable({ PATH: `${path.join(fake, "dir")}:${path.join(fake, "sub")}` }, "linux")).toBeUndefined();
+    const defaults = gitExecutable({}, "linux");
+    expect(defaults === undefined || ["/bin/git", "/usr/bin/git"].includes(defaults)).toBe(true);
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("reports a tracked file it cannot reach in Git mode as a usage error, by its path in the folder", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/locked/b.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", ".").status).toBe(0);
+    chmodSync(path.join(dir, "src/locked"), 0o000);
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code).toBe(2);
+      expect(result.out).toContain("usage error: cannot read src/locked/b.ts: EACCES");
+      expect(result.out).not.toContain(dir);
+    } finally {
+      chmodSync(path.join(dir, "src/locked"), 0o755);
+    }
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("never reaches a tracked path outside the source in Git mode, so a locked one is no usage error", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x", "private/notes.md": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", ".").status).toBe(0);
+    chmodSync(path.join(dir, "private"), 0o000);
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect([0, 1]).toContain(result.code);
+      expect(result.out).not.toContain("usage error");
+      expect(result.out).not.toContain("note/walk");
+    } finally {
+      chmodSync(path.join(dir, "private"), 0o755);
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("tells a git that could not run from one that refused the folder, by its error code only", () => {
+    const stub = folder({ git: "#!/bin/sh\nprintf '%0100d' 0\n" });
+    chmodSync(path.join(stub, "git"), 0o755);
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
+    const saved = { path: process.env.PATH, maxBuffer: gitLimits.maxBuffer };
+    process.env.PATH = stub;
+    gitLimits.maxBuffer = 10;
+    try {
+      expect(run(dir, "--kind", "source-tree").out).toContain("git ls-files could not run (ENOBUFS), so the folder's files were walked");
+    } finally {
+      process.env.PATH = saved.path;
+      gitLimits.maxBuffer = saved.maxBuffer;
+    }
+  }, 60_000);
+
+  it("labels a file whose path holds an address by its index in a folder and as a document alike, printing no address", () => {
+    const address = ["someone", "@", "mail.org"].join("");
+    const files: Record<string, string> = { LICENSE: "x", [`src/${address}.md`]: "See /home/jdoe.", "src/a.ts": "x" };
+    const manifest = sourceManifest({ include: ["src/", "LICENSE"] });
+    const dir = folder({ "fabric.source.json": manifest, ...files });
+    const all = { "fabric.source.json": JSON.stringify(manifest), ...files } as Record<string, string>;
+    const doc = folder({ "tree.json": { manifest, files: Object.keys(all).sort().map((name) => ({ path: name, text: all[name] })) } });
+    const labels = (out: string) => (JSON.parse(out) as { problems: Array<{ path: string; rule: string; message: string }> }).problems.map((problem) => [problem.path, problem.rule, problem.message]);
+    const folderOut = run(dir, "--kind", "source-tree", "--json").out;
+    const documentOut = run(path.join(doc, "tree.json"), "--kind", "source-tree", "--json").out;
+    expect(labels(documentOut)).toEqual(labels(folderOut));
+    expect(labels(folderOut)[0]?.[2]).toMatch(/^files\[\d+\] line 1, column 11: home-path: /);
+    for (const out of [folderOut, documentOut, run(dir, "--kind", "source-tree").out]) expect(out).not.toContain(address);
+  });
+
+  it("labels a tree the same way as a folder and as a document, and names a document by its basename's place", () => {
+    const files: Record<string, string> = { LICENSE: "x", "docs/someone@mail.org.md": "notes", "src/a.ts": "const data = \"/home/jdoe\";", "src/-Users-jdoe-x.md": "x" };
+    const manifest = sourceManifest({ include: ["src/", "docs/", "LICENSE"] });
+    const dir = folder({ "fabric.source.json": manifest, ...files });
+    const all = { "fabric.source.json": JSON.stringify(manifest), ...files } as Record<string, string>;
+    const tree = { manifest, files: Object.keys(all).sort().map((name) => ({ path: name, text: all[name] })) };
+    const messages = (out: string) => found(out).map((line) => line.split("  ").slice(1, 4));
+    const doc = folder({ "tree.json": tree });
+    expect(messages(run(path.join(doc, "tree.json"), "--kind", "source-tree").out)).toEqual(messages(run(dir, "--kind", "source-tree").out));
+    const keyed = folder({ [`${key}.json`]: tree });
+    const out = run(path.join(keyed, `${key}.json`), "--kind", "source-tree").out;
+    expect(out.split(key).length - 1).toBe(0);
+    expect(out).toContain("<a path that may hold a finding, under .>");
+  });
+
+  it.skipIf(process.platform === "win32")("walks the folder, saying why, when git does not answer in time", () => {
+    // A git that would answer only after a minute: the run must not wait for it (a bound wide enough for a loaded machine).
+    const stub = folder({ git: "#!/bin/sh\nexec /bin/sleep 60\n" });
+    chmodSync(path.join(stub, "git"), 0o755);
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "const data = \"/home/jdoe\";" });
+    const saved = { path: process.env.PATH, timeout: gitLimits.timeoutMs };
+    process.env.PATH = stub;
+    gitLimits.timeoutMs = 300;
+    try {
+      const started = performance.now();
+      const result = run(dir, "--kind", "source-tree");
+      expect(performance.now() - started).toBeLessThan(20_000);
+      expect(lines(result.out).map((line) => line.split("  ").slice(0, 3))).toEqual([["src/a.ts", "/files/2", "FAC-SEM-158"], [".", "/", "note/walk"]]);
+      expect(result.out).toContain("git did not answer within 0.3 s, so the folder's files were walked");
+      // A git that lists at once and does not answer whether the folder is ignored is walked past too.
+      writeFileSync(path.join(stub, "git"), "#!/bin/sh\ncase \"$3\" in ls-files) printf 'src/a.ts\\0'; exit 0;; esac\nexec /bin/sleep 5\n");
+      // Long enough for the quick listing under load, so it is the second command that times out.
+      gitLimits.timeoutMs = 2000;
+      const second = run(dir, "--kind", "source-tree");
+      expect(second.out).toContain("git did not answer within 2 s, so the folder's files were walked");
+    } finally {
+      process.env.PATH = saved.path;
+      gitLimits.timeoutMs = saved.timeout;
+    }
+  }, 120_000);
+
+  it.skipIf(process.platform === "win32")("runs Git with the folder's own file-system monitor off", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const hook = path.join(scratch, `fsmonitor-${counter}.sh`);
+    const marker = `${hook}.ran`;
+    writeFileSync(hook, `#!/bin/sh\necho ran > "${marker}"\nexit 1\n`);
+    chmodSync(hook, 0o755);
+    expect(gitIn(dir, "config", "core.fsmonitor", hook).status).toBe(0);
+    expect(run(dir, "--kind", "source-tree").code).toBe(0);
+    expect(existsSync(marker)).toBe(false);
+  });
+
+  it("names a credential-shaped member of the manifest by its place in a schema error", () => {
+    const dir = folder({ "fabric.source.json": { ...sourceManifest({ include: ["src/", "LICENSE"] }), [key]: true }, LICENSE: "x", "src/a.ts": "x" });
+    for (const out of [run(dir, "--kind", "source-tree").out, run(dir, "--kind", "source-tree", "--json").out]) {
+      expect(out).toContain("schema/additionalProperties");
+      expect(out.split(key).length - 1).toBe(0);
+    }
+  });
+
+  it("runs Git on the folder's own repository whatever Git location the environment names", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": `"${key}"` });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const other = folder({ "x.txt": "x" });
+    expect(gitIn(other, "init", "-q").status).toBe(0);
+    const saved = { dir: process.env.GIT_DIR, config: process.env.GIT_CONFIG_GLOBAL, common: process.env.GIT_COMMON_DIR };
+    process.env.GIT_DIR = path.join(other, ".git");
+    process.env.GIT_CONFIG_GLOBAL = path.join(other, "no-such-config");
+    process.env.GIT_COMMON_DIR = path.join(other, ".git");
+    try {
+      expect(cells(run(dir, "--kind", "source-tree").out)).toEqual([["src/a.ts", "/files/2", "FAC-SEM-158"]]);
+      expect(run(dir, "--kind", "source-tree").out).not.toContain("note/walk");
+    } finally {
+      if (saved.dir === undefined) delete process.env.GIT_DIR; else process.env.GIT_DIR = saved.dir;
+      if (saved.config === undefined) delete process.env.GIT_CONFIG_GLOBAL; else process.env.GIT_CONFIG_GLOBAL = saved.config;
+      if (saved.common === undefined) delete process.env.GIT_COMMON_DIR; else process.env.GIT_COMMON_DIR = saved.common;
+    }
+  });
+
+  it("names the manifest for a finding about it, and a clean folder prints only the walk note", () => {
+    const clean = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "terms", "src/main.ts": "x" });
+    const result = run(clean, "--kind", "source-tree");
+    expect(result.code).toBe(0);
+    expect(found(result.out)).toEqual([]);
+    const missing = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE", "docs/"] }), LICENSE: "terms", "src/main.ts": "x" });
+    const missed = run(missing, "--kind", "source-tree");
+    expect(missed.code).toBe(1);
+    expect(found(missed.out)).toEqual([expect.stringMatching(/^fabric\.source\.json {2}\/manifest\/include\/2 {2}FAC-SEM-158 {2}missing: /)]);
+  });
+
+  it("refuses a folder without fabric.source.json, and reports a manifest that is not JSON or not a manifest, by its name", () => {
+    const none = run(folder({ "README.md": "x" }), "--kind", "source-tree");
+    expect(none.code).toBe(2);
+    expect(none.out).toContain("usage error: --kind source-tree reads a folder's fabric.source.json; the folder holds none");
+    const brokenDir = folder({ "fabric.source.json": "{", LICENSE: "x" });
+    const broken = run(brokenDir, "--kind", "source-tree");
+    expect(broken.code).toBe(1);
+    expect(broken.out).toMatch(/^fabric\.source\.json {2}\/ {2}json {2}the file is not JSON/);
+    expect(broken.out).not.toContain(brokenDir);
+    for (const value of [JSON.stringify("x"), { format: "fabric-source/1", include: "src/" }, { format: "fabric-source/1", include: [3, "src/"] }]) {
+      const result = run(folder({ "fabric.source.json": value, LICENSE: "x", "src/a.ts": "x" }), "--kind", "source-tree");
+      expect(result.code, JSON.stringify(value)).toBe(1);
+      expect(result.out, JSON.stringify(value)).toContain("fabric.source.json  ");
+      expect(result.out, JSON.stringify(value)).toContain("schema/");
+    }
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("reports a file or a folder of the source it cannot read as a usage error, by its path in the folder", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x", "src/locked/b.ts": "x" });
+    chmodSync(path.join(dir, "src/a.ts"), 0o000);
+    chmodSync(path.join(dir, "src/locked"), 0o000);
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code).toBe(2);
+      expect(result.out).toContain("usage error: cannot read src/a.ts: EACCES");
+      expect(result.out).toContain("usage error: cannot read src/locked/: EACCES");
+      expect(result.out).not.toContain(dir);
+    } finally {
+      chmodSync(path.join(dir, "src/a.ts"), 0o644);
+      chmodSync(path.join(dir, "src/locked"), 0o755);
+    }
+    // A file or folder whose own name holds a finding, or an e-mail address (no finding in a path, never printed), is
+    // named by its place, never by the name.
+    const named = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/-Users-jdoe-notes.md": "x", "src/ok/.env/b.ts": "x", "src/to/someone@mail.org/b.ts": "x" });
+    const locked = ["src/-Users-jdoe-notes.md", "src/ok/.env", "src/to/someone@mail.org"];
+    for (const name of locked) chmodSync(path.join(named, name), 0o000);
+    try {
+      for (const git of [false, true]) {
+        if (git) expect(gitIn(named, "init", "-q").status).toBe(0);
+        const result = run(named, "--kind", "source-tree");
+        expect(result.code).toBe(2);
+        expect(result.out).toContain("usage error: cannot read <a path that may hold a finding, under src/>: EACCES");
+        if (!git) {
+          expect(result.out).toContain("usage error: cannot read <a path that may hold a finding, under src/ok/>: EACCES");
+          expect(result.out).toContain("usage error: cannot read <a path whose name holds an e-mail address, under src/to/>: EACCES");
+        }
+        for (const value of ["jdoe", ".env", "mail.org", named]) expect(result.out).not.toContain(value);
+      }
+    } finally {
+      chmodSync(path.join(named, "src/-Users-jdoe-notes.md"), 0o644);
+      for (const name of locked.slice(1)) chmodSync(path.join(named, name), 0o755);
+    }
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("prints no e-mail address held in a path, in a usage error or a document's name", () => {
+    const address = ["jane.doe", "@", "acme.io"].join("");
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", [`src/${address}.md`]: "x" });
+    chmodSync(path.join(dir, `src/${address}.md`), 0o000);
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code).toBe(2);
+      expect(result.out).toContain("usage error: cannot read <a path whose name holds an e-mail address, under src/>: EACCES");
+      expect(result.out).not.toContain("acme.io");
+    } finally {
+      chmodSync(path.join(dir, `src/${address}.md`), 0o644);
+    }
+    const doc = folder({ [`${address}.json`]: { manifest: { include: ["a.txt"] }, files: [{ path: "a.txt", text: "/home/jdoe" }] } });
+    for (const out of [run(path.join(doc, `${address}.json`), "--kind", "source-tree").out, run(path.join(doc, `${address}.json`), "--kind", "source-tree", "--json").out]) {
+      expect(out).toContain("<a path whose name holds an e-mail address, under .>");
+      expect(out).not.toContain("acme.io");
+    }
+  });
+
+  it("walks into a path of 129 to 256 code points outside the BMP and reads it", () => {
+    const face = String.fromCodePoint(0x1f600);
+    const name = `docs/${face.repeat(60)}/${face.repeat(60)}/${face.repeat(20)}.md`;
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["docs/", "LICENSE"] }), LICENSE: "x", [name]: "/home/jdoe" });
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).toContain("FAC-SEM-158");
+    expect(result.out).toContain("home-path");
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("places a path whose segment holds an address followed by a colon, and never enters a folder outside the grammar", () => {
+    const address = ["jane.doe", "@", "acme.io"].join("");
+    expect(shownPath(`docs/${address}:x/a.md`)).toBe("<a path whose name holds an e-mail address, under docs/>");
+    // A folder outside the path grammar (a ":") is not entered, so an unreadable one is no usage error.
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["docs/", "LICENSE"] }), LICENSE: "x", "docs/a.md": "x", [`docs/${address}:x/a.md`]: "x" });
+    chmodSync(path.join(dir, `docs/${address}:x`), 0o000);
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code).toBe(0);
+      expect(result.out).not.toContain("usage error");
+      expect(result.out).not.toContain("acme.io");
+    } finally {
+      chmodSync(path.join(dir, `docs/${address}:x`), 0o755);
+    }
+  });
+
+  it("prints the message of a file whose path holds an asset name or an RFC 2606 address as the tree check reads it", () => {
+    const names = [["src/user", "@2x.png"].join(""), ["src/info", "@example.com"].join(""), ["src/ops", "@corp.example/f.ts"].join("")];
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", ...Object.fromEntries(names.map((name) => [name, "see /home/jdoe"])) });
+    const messages = found(run(dir, "--kind", "source-tree").out).map((line) => line.split("  ").slice(0, 4));
+    expect(messages.map((cells) => cells[0])).toEqual([...names].sort());
+    for (const [file, , , message] of messages) expect(message).toMatch(new RegExp(`^${(file as string).replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")} line 1, column 11: home-path: `));
+  });
+
+  it("names a path-valued argument by its place when it holds an address before a colon, in each rule that prints one", () => {
+    const address = ["jane.doe", "@", "acme.io"].join("");
+    const store = `data/${address}:x`;
+    const twice = sourceManifest({ include: ["src/", "LICENSE"], slots: [{ name: "A", kind: "store", purpose: "a", path: store }, { name: "B", kind: "store", purpose: "b", path: store }] });
+    const dir = folder({ "fabric.source.json": twice, LICENSE: "x", "src/a.ts": "x" });
+    const lone = folder({ "m.json": twice });
+    // In a folder the manifest fails its schema (the path grammar has no `:`) and is reported alone; the rule runs on
+    // the document named with its kind.
+    const folderOut = run(dir, "--kind", "source-tree").out;
+    expect(folderOut).toContain("schema/");
+    expect(folderOut).not.toContain("declared twice");
+    for (const out of [folderOut, run(path.join(lone, "m.json"), "--kind", "source-manifest").out]) expect(out).not.toContain("acme.io");
+    expect(run(path.join(lone, "m.json"), "--kind", "source-manifest").out).toContain("store path slots[1].path is declared twice");
+    const pair = folder({ "pair.json": { source: sourceManifest({ slots: [{ name: "D", kind: "store", purpose: "d", path: `db/${address}:y` }] }), package: { ...json("positive/fabric-package-agent.json"), secrets: [], state: [{ path: `st/${address}:z`, purpose: "s" }] } } });
+    const out = run(path.join(pair, "pair.json"), "--kind", "source-package").out;
+    expect(out).toContain("slots[0].path is not in the package's state[]");
+    expect(out).toContain("state state[0] is no store slot of the source");
+    expect(out).not.toContain("acme.io");
+  });
+
+  it("neither covers nor enters a path outside the grammar, and keeps an in-grammar path outside the BMP as source", () => {
+    const index = includeIndex(["src/"]);
+    expect(index.covers(`src/${"x".repeat(300)}`)).toBe(false);
+    expect(index.reaches(`src/${"x".repeat(300)}/`)).toBe(false);
+    const face = String.fromCodePoint(0x1f600);
+    const astral = `src/${face.repeat(98)}/${face.repeat(98)}`;
+    expect([...astral].length).toBe(201);
+    expect(index.covers(astral)).toBe(true);
+    expect(index.reaches(`src/${face.repeat(98)}/`)).toBe(true);
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("is no usage error for an unreadable folder whose path runs past the grammar", () => {
+    const long = `src/${"d".repeat(200)}/${"e".repeat(100)}`;
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x", [`${long}/f.ts`]: "x" });
+    chmodSync(path.join(dir, long), 0o000);
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code).toBe(0);
+      expect(result.out).not.toContain("usage error");
+    } finally {
+      chmodSync(path.join(dir, long), 0o755);
+    }
+  });
+
+  it("reads a file whose own path is outside the grammar as no source, the same in a walk and in Git mode", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x", "src/a:b": "/home/jdoe" });
+    const walked = run(dir, "--kind", "source-tree");
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const tracked = run(dir, "--kind", "source-tree");
+    expect(walked.code).toBe(0);
+    expect(tracked.out).toBe(walked.out.split("\n").filter((line) => !line.includes("note/walk")).join("\n"));
+    expect(tracked.out).toBe("");
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("is no usage error in Git mode for an unreadable folder outside the grammar", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x", "src/x:y/f.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", ".").status).toBe(0);
+    chmodSync(path.join(dir, "src/x:y"), 0o000);
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code).toBe(0);
+      expect(result.out).not.toContain("usage error");
+    } finally {
+      chmodSync(path.join(dir, "src/x:y"), 0o755);
+    }
+  });
+
+  it("reads a pointer's member as a message's word, its trailing punctuation stripped", () => {
+    const member = ["carol", "@", "corp.io:"].join("");
+    const dir = folder({ "fabric.source.json": { [member]: {} } });
+    for (const out of [run(path.join(dir, "fabric.source.json"), "--schema", "device-policy").out, run(path.join(dir, "fabric.source.json"), "--schema", "device-policy", "--json").out]) {
+      expect(out).not.toContain("corp.io");
+    }
+    expect(shownPointer(`/${member}/x`)).toBe("/<a member whose name holds a finding>");
+    // A member holding an address before a colon and more text is read with the path rule, as a path value is.
+    const scoped = `${["carol", "@", "corp.io"].join("")}:x`;
+    const other = folder({ "fabric.source.json": { scope: { [scoped]: {} }, [scoped]: 1 } });
+    for (const out of [run(path.join(other, "fabric.source.json"), "--schema", "credential-request").out, run(path.join(other, "fabric.source.json"), "--schema", "credential-request", "--json").out]) {
+      expect(out).not.toContain("corp.io");
+    }
+    expect(shownPointer(`/scope/${scoped}`)).toBe("/scope/<a member whose name holds a finding>");
+  });
+
+  it("puts no member name that holds a finding in a problem's path, and gives the closed source manifest no extension hint", () => {
+    const home = ["/Users/", "jdoe", "/x"].join("");
+    const nearMiss = "https://fabric.passioncode.ai/agent-contract/extension/service/0.1";
+    const dir = folder({ "fabric.source.json": { ...sourceManifest({ include: ["src/", "LICENSE"] }), [key]: { extensions: { [nearMiss]: 1 } }, [home]: { extensions: { [nearMiss]: 1 } } }, LICENSE: "x", "src/a.ts": "x" });
+    for (const out of [run(dir, "--kind", "source-tree").out, run(dir, "--kind", "source-tree", "--json").out]) {
+      expect(out).not.toContain("hint/extension-key");
+      expect(out).not.toContain("jdoe");
+      for (let start = 0; start + 8 <= key.length; start += 1) expect(out).not.toContain(key.slice(start, start + 8));
+    }
+    expect(shownPointer("/slots/0/name")).toBe("/slots/0/name");
+    expect(shownPointer(`/a/${key}/extensions`)).toBe("/a/<a member whose name holds a finding>");
+    expect(shownPointer(`/${home.replace(/\//g, "~1")}/extensions`)).toBe("/<a member whose name holds a finding>");
+    expect(shownPointer(`/cfg/API_KEY=${"Ab1".repeat(5)}/${"Cd2".repeat(9)}`)).toBe("/cfg/<a member whose name holds a finding>");
+  });
+
+  it("finds where strict JSON stops reading as JSON.parse refuses it, without its message", () => {
+    const cases = ['{"a": /home/samx}', "{", "", "[1,]", '{"a" 1}', '"\\x"', '"\\u12G4"', "01", "-", "1.", "1e", "tru", "nul", "[1 2]", '{"a":1,}', '{"a":1} x', '"a\u0001"', '"a', "[", '{"a":[1,{"b":null}]}', " true ", "-0.5e+3", '"\\u00e9\\n"', "\ufeff{}", "{,}", "{}", " [ ] ", "false", "fals", '{"a":[]}'];
+    for (const text of cases) {
+      let valid = true;
+      try { JSON.parse(text); } catch { valid = false; }
+      const at = jsonErrorAt(text);
+      expect(at === undefined, text).toBe(valid);
+    }
+    expect(jsonErrorAt('{"a": /home/samx}')).toBe(6);
+    expect(jsonErrorAt("{")).toBe(1);
+    expect(jsonErrorAt('{"a":1} x')).toBe(8);
+    expect(jsonErrorAt("[".repeat(200_000))).toBeUndefined();
+    expect(jsonErrorAt('"\\u12')).toBe(5);
+  });
+
+  it("prints no instance data in a schema or parse message of a source check, in either form", () => {
+    const letters = "abcdefghijklmnopqrstuvwxyz".repeat(2).slice(0, 43);
+    const runs = (text: string) => Array.from({ length: text.length - 7 }, (_, start) => text.slice(start, start + 8));
+    const memberDir = folder({ "fabric.source.json": { ...sourceManifest({ include: ["src/", "LICENSE"] }), [`"d": "${letters}"`]: true }, LICENSE: "x", "src/a.ts": "x" });
+    for (const out of [run(memberDir, "--kind", "source-tree").out, run(memberDir, "--kind", "source-tree", "--json").out]) {
+      expect(out).toContain("has a member the schema does not define");
+      for (const part of runs(letters)) expect(out).not.toContain(part);
+    }
+    const docDir = folder({ "doc.json": '{"a": /home/samx}' });
+    for (const out of [run(path.join(docDir, "doc.json"), "--kind", "source-tree").out, run(path.join(docDir, "doc.json"), "--kind", "source-tree", "--json").out]) {
+      expect(out).not.toContain("samx");
+      expect(out).toContain("it stops reading at line 1, column");
+    }
+  });
+
+  it("prints none of the credential, home-folder or address values a manifest holds, whatever member carries them", () => {
+    const home = ["/Users/", "samx", "/notes"].join("");
+    const address = ["someone", "@", "mail.org"].join("");
+    const values = [key, home, address, `Bearer ${["abcdef", "1234567890xyz"].join("")}`];
+    const manifests = values.flatMap((value) => [
+      { ...sourceManifest({ include: ["src/", "LICENSE"] }), [value]: { extensions: { "https://fabric.passioncode.ai/agent-contract/extension/service/0.1": 1 } } },
+      { ...sourceManifest({ include: ["src/", "LICENSE", value] }), description: value },
+      { ...sourceManifest({ include: ["src/", "LICENSE"] }), unchecked: [{ path: value, reason: value }], publicAddresses: [value] },
+      { ...sourceManifest({ include: ["src/", "LICENSE"] }), slots: [{ name: value, kind: "store", purpose: value, path: value }, { name: value, kind: "store", purpose: value, path: value }] },
+      { ...sourceManifest({ include: ["src/", "LICENSE"] }), exclude: [value], binaries: [value], slots: [{ name: "A", kind: value, purpose: "p" }] }
+    ]);
+    const secretParts = (value: string) => (value === home ? ["samx"] : value === address ? [address, "someone@"] : Array.from({ length: value.length - 7 }, (_, start) => value.slice(start, start + 8)).filter((part) => /[0-9]/.test(part)));
+    for (const manifest of manifests) {
+      const dir = folder({ "fabric.source.json": manifest, LICENSE: "x", "src/a.ts": "x" });
+      for (const out of [run(dir, "--kind", "source-tree").out, run(dir, "--kind", "source-tree", "--json").out]) {
+        for (const value of values) for (const part of secretParts(value)) expect(out, `${JSON.stringify(manifest).slice(0, 80)} ${part}`).not.toContain(part);
+      }
+    }
+  });
+
+  it("checks the folder of a fabric.source.json named on its own, and names any other file by its basename", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": `"${key}"` });
+    const manifestRun = run(path.join(dir, "fabric.source.json"), "--kind", "source-tree");
+    expect(manifestRun.code).toBe(1);
+    expect(cells(manifestRun.out)).toEqual([["src/a.ts", "/files/2", "FAC-SEM-158"]]);
+    expect(manifestRun.out).not.toContain(dir);
+    const documentDir = folder({ "tree.json": { manifest: { include: ["a.txt"] }, files: [{ path: "a.txt", text: "/home/jdoe" }] }, "broken.json": "{" });
+    const documentRun = run(path.join(documentDir, "tree.json"), "--kind", "source-tree");
+    expect(documentRun.code).toBe(1);
+    expect(documentRun.out).toMatch(/^tree\.json {2}\/files\/0 {2}FAC-SEM-158 {2}/);
+    expect(documentRun.out).not.toContain(documentDir);
+    const brokenRun = run(path.join(documentDir, "broken.json"), "--kind", "source-tree", "--json");
+    expect(brokenRun.out).toContain("broken.json");
+    expect(brokenRun.out).not.toContain(documentDir);
+    const lockedDir = folder({ "locked.json": "{}" });
+    if (process.platform !== "win32" && process.getuid?.() !== 0) {
+      chmodSync(path.join(lockedDir, "locked.json"), 0o000);
+      try {
+        const lockedRun = run(path.join(lockedDir, "locked.json"), "--kind", "source-tree");
+        expect(lockedRun.code).toBe(2);
+        expect(lockedRun.out).toContain("usage error: cannot read locked.json: EACCES");
+        expect(lockedRun.out).not.toContain(lockedDir);
+      } finally {
+        chmodSync(path.join(lockedDir, "locked.json"), 0o644);
+      }
+    }
+  });
+
+  it("keeps the caller's GIT_CEILING_DIRECTORIES: a plain folder inside a parent repository under that fence is walked", () => {
+    const parent = folder({ "agent/fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), "agent/LICENSE": "x", "agent/src/a.ts": "const data = \"/home/jdoe\";" });
+    expect(gitIn(parent, "init", "-q").status).toBe(0);
+    const saved = process.env.GIT_CEILING_DIRECTORIES;
+    process.env.GIT_CEILING_DIRECTORIES = realpathSync(parent);
+    try {
+      const result = run(path.join(parent, "agent"), "--kind", "source-tree");
+      expect(lines(result.out).map((line) => line.split("  ").slice(0, 3))).toEqual([["src/a.ts", "/files/2", "FAC-SEM-158"], [".", "/", "note/walk"]]);
+      expect(result.out).toContain("git ls-files refused the folder (exit 128)");
+    } finally {
+      if (saved === undefined) delete process.env.GIT_CEILING_DIRECTORIES; else process.env.GIT_CEILING_DIRECTORIES = saved;
+    }
+    // Without the fence the same folder is in the parent's work tree: Git mode, no note.
+    expect(run(path.join(parent, "agent"), "--kind", "source-tree").out).not.toContain("note/walk");
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("names the folder itself as . when its walk cannot list it", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
+    chmodSync(dir, 0o311);
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code).toBe(2);
+      expect(result.out).toContain("usage error: cannot read .: EACCES");
+      expect(result.out).not.toContain(dir);
+    } finally {
+      chmodSync(dir, 0o755);
+    }
+  }, 30_000);
+
+  it.skipIf(process.platform === "win32")("names fabric.source.json, not the folder, when only the manifest cannot be reached", () => {
+    const dir = folder({ LICENSE: "x", "src/a.ts": "x" });
+    symlinkSync("fabric.source.json", path.join(dir, "fabric.source.json"));
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(2);
+    // An entry that lstat finds but that is no regular file (a link looping on itself) is "not a file".
+    expect(result.out).toContain("usage error: cannot read fabric.source.json: not a file");
+    expect(result.out).not.toContain("holds none");
+    expect(result.out).not.toContain(dir);
+  });
+
+  it("names a source check's target that is not there by its basename, and any other by its path as before", () => {
+    const parent = folder({ "x.txt": "x" });
+    for (const [target, args, name] of [
+      [path.join(parent, "no-such-agent"), ["--kind", "source-tree"], "no-such-agent"],
+      [path.join(parent, "gone.json"), ["--kind", "source-manifest"], "gone.json"],
+      [path.join(parent, "gone.json"), ["--kind", "source-package"], "gone.json"],
+      [path.join(parent, "gone.json"), ["--schema", "fabric-source"], "gone.json"],
+      [path.join(parent, "fabric.source.json"), [], "fabric.source.json"]
+    ] as const) {
+      const result = run(target, ...args);
+      expect(result.code).toBe(2);
+      expect(result.out).toContain(`usage error: cannot read ${name}: ENOENT`);
+      expect(result.out).not.toContain(parent);
+    }
+    // A manifest named under --kind source-tree checks its folder, as the folder route does.
+    const named = run(path.join(parent, "fabric.source.json"), "--kind", "source-tree");
+    expect(named.code).toBe(2);
+    expect(named.out).toContain("the folder holds none");
+    expect(named.out).not.toContain(parent);
+    // Outside a source check the full path, byte for byte as before DEC-0149.
+    const gone = path.join(parent, "gone.json");
+    expect(run(gone)).toEqual({ code: 2, out: `usage error: cannot read ${gone}: ENOENT\n` });
+    expect(JSON.parse(run(gone, "--json").out).usage).toEqual([`cannot read ${gone}: ENOENT`]);
+    expect(run(gone, "--schema", "service-descriptor").out).toContain(`cannot read ${gone}: ENOENT`);
+  });
+
+  it("names a document whose closest schema is the source manifest's by its basename when it cannot tell", () => {
+    const target = one("thing.json", { format: "fabric-source/1" });
+    for (const out of [run(target).out, run(target, "--json").out]) {
+      expect(out).toContain("cannot tell which schema thing.json follows: its members match fabric-source.schema.json (missing include)");
+      expect(out).not.toContain(path.dirname(target));
+    }
+    expect(run(target).code).toBe(2);
+  });
+
+  it("checks the pair in a folder under --kind source-package too, and drops the note that it holds none", () => {
+    const manifest = JSON.parse(readFileSync(fixture("positive/fabric-source-agent.json"), "utf8").replace('"MAIL_OAUTH"', '"OTHER_KEY"')) as unknown;
+    const dir = folder({ "fabric.source.json": manifest, "fabric.package.json": json("positive/fabric-package-agent.json") });
+    const result = run(dir, "--kind", "source-package");
+    expect(result.code).toBe(1);
+    expect(result.out).toContain("the source's secret slot OTHER_KEY is not in the package's secrets[]");
+    expect(result.out).not.toContain("note/pair");
+    // A folder holding the manifest alone says so of the folder, and exits 0: no pair passed, none was checked.
+    const alone = folder({ "fabric.source.json": manifest });
+    const lone = run(alone, "--kind", "source-package");
+    expect(lone.code).toBe(0);
+    expect(lone.out).toContain("the folder holds no fabric.package.json beside fabric.source.json, so no pair was checked (FAC-SEM-160)");
+    expect(lone.out).not.toContain("the document holds no");
+  });
+
+  it("notes a package beside the manifest that the folder run skipped, so no pair is read as passed", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["LICENSE"] }), "fabric.package.json": { not: "a package" } });
+    const result = run(dir);
+    expect(result.out).toContain("note/skipped");
+    expect(result.out).toContain("the fabric.package.json beside fabric.source.json was not read as a package, so no pair was checked (FAC-SEM-160)");
+  });
+
+  it.skipIf(process.platform === "win32")("notes a package entry beside the manifest that was not read, by lstat, in both folder runs", () => {
+    const manifest = sourceManifest({ include: ["LICENSE"] });
+    const notRead = "the fabric.package.json beside fabric.source.json was not read as a package, so no pair was checked (FAC-SEM-160)";
+    // A dangling link, in a plain run.
+    const dangling = folder({ "fabric.source.json": manifest });
+    symlinkSync(path.join(dangling, "gone.json"), path.join(dangling, "fabric.package.json"));
+    expect(run(dangling).out).toContain(notRead);
+    // A link to a real package, under --kind source-package: never read through it.
+    const target = folder({ "p.json": json("positive/fabric-package-agent.json") });
+    const linked = folder({ "fabric.source.json": manifest });
+    symlinkSync(path.join(target, "p.json"), path.join(linked, "fabric.package.json"));
+    const linkedRun = run(linked, "--kind", "source-package");
+    const linkedOut = linkedRun.out;
+    expect(linkedRun.code).toBe(2);
+    expect(linkedOut).toContain(notRead);
+    expect(linkedOut).not.toContain("holds no");
+    // A FIFO and an unparseable file, under --kind source-package.
+    const fifo = folder({ "fabric.source.json": manifest });
+    expect(spawnSync("mkfifo", [path.join(fifo, "fabric.package.json")]).status).toBe(0);
+    const unparseable = folder({ "fabric.source.json": manifest, "fabric.package.json": "{ not json" });
+    for (const [dir, code] of [[fifo, 0], [unparseable, 1]] as const) {
+      const result = run(dir, "--kind", "source-package");
+      const out = result.out;
+      expect(result.code, dir).toBe(code);
+      expect(out, dir).toContain(notRead);
+      expect(out, dir).not.toContain("holds no");
+    }
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("names an unreadable source document in a folder run by its path in the folder", () => {
+    const parent = folder({ "-Users-jdoe-x/fabric.source.json": sourceManifest({ include: ["LICENSE"] }), "-Users-jdoe-x/fabric.package.json": json("positive/fabric-package-agent.json") });
+    const dir = path.join(parent, "-Users-jdoe-x");
+    chmodSync(path.join(dir, "fabric.package.json"), 0o000);
+    try {
+      const out = run(dir, "--kind", "source-package").out;
+      expect(out).toContain("cannot read fabric.package.json: EACCES");
+      expect(out).toContain("the fabric.package.json beside fabric.source.json was not read as a package");
+      // The usage line names the file by its path in the folder; a folder run with another source kind prints the
+      // folder resolved to an absolute path in its file column, as the ordinary validator does.
+      const usage = out.split("\n").filter((line) => line.startsWith("usage error:"));
+      expect(usage).toEqual(["usage error: cannot read fabric.package.json: EACCES"]);
+      expect(out).not.toContain("<a value the tree check reads");
+    } finally {
+      chmodSync(path.join(dir, "fabric.package.json"), 0o644);
+    }
+  });
+
+  it("a folder named relatively under --kind source-package is printed resolved to an absolute path in its problem lines", () => {
+    const parent = folder({ "agent/fabric.source.json": sourceManifest({ include: ["LICENSE"] }), "agent/LICENSE": "x", "agent/fabric.package.json": json("positive/fabric-package-agent.json") });
+    const before = { cwd: process.env.INIT_CWD, event: process.env.npm_lifecycle_event };
+    process.env.INIT_CWD = parent;
+    process.env.npm_lifecycle_event = "validate";
+    try {
+      const result = run("./agent", "--kind", "source-package");
+      expect(result.code).toBe(1);
+      const problems = result.out.split("\n").filter((line) => line.includes("FAC-SEM-160"));
+      expect(problems.length).toBeGreaterThan(0);
+      for (const line of problems) expect(line.startsWith(path.join(parent, "agent", "fabric.source.json") + "  ")).toBe(true);
+    } finally {
+      for (const [name, value] of [["INIT_CWD", before.cwd], ["npm_lifecycle_event", before.event]] as const) {
+        if (value === undefined) delete process.env[name];
+        else process.env[name] = value;
+      }
+    }
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("names an unreadable subfolder and an empty folder in a folder run with another source kind by their absolute paths", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["LICENSE"] }), "sub/x.json": {} });
+    const sub = path.join(dir, "sub");
+    chmodSync(sub, 0o000);
+    try {
+      for (const kind of ["source-manifest", "source-package"]) {
+        const result = run(dir, "--kind", kind);
+        expect(result.code, kind).toBe(2);
+        const usage = result.out.split("\n").filter((line) => line.startsWith("usage error:"));
+        expect(usage, kind).toContain(`usage error: cannot read ${sub}: EACCES`);
+      }
+    } finally {
+      chmodSync(sub, 0o755);
+    }
+    const top = folder({ "fabric.source.json": sourceManifest({ include: ["LICENSE"] }) });
+    chmodSync(top, 0o000);
+    try {
+      for (const kind of ["source-manifest", "source-package"]) {
+        const result = run(top, "--kind", kind);
+        expect(result.code, kind).toBe(2);
+        expect(result.out.split("\n").filter((line) => line.startsWith("usage error:")), kind).toEqual([`usage error: cannot read ${top}: EACCES`]);
+      }
+    } finally {
+      chmodSync(top, 0o755);
+    }
+    const empty = folder({});
+    for (const kind of ["source-manifest", "source-package"]) {
+      const result = run(empty, "--kind", kind);
+      expect(result.code, kind).toBe(2);
+      expect(result.out, kind).toContain(`usage error: ${empty} holds no readable .json file`);
+    }
+  });
+
+  it("checks a manifest's extra member only where its schema runs, never under --kind source-manifest alone", () => {
+    const dir = folder({ "fabric.source.json": { ...sourceManifest({ include: ["LICENSE"] }), colour: "blue" }, LICENSE: "x" });
+    const manifestOnly = run(dir, "--kind", "source-manifest");
+    expect(manifestOnly.code).toBe(0);
+    expect(manifestOnly.out).not.toContain("has a member the schema does not define");
+    for (const args of [["--kind", "source-manifest", "--schema", "fabric-source"], [], ["--kind", "source-tree"]]) {
+      const result = run(dir, ...args);
+      expect(result.code, args.join(" ")).toBe(1);
+      expect(result.out, args.join(" ")).toContain("has a member the schema does not define");
+      expect(result.out, args.join(" ")).toContain("additionalProperties");
+      expect(result.out, args.join(" ")).not.toContain("colour");
+    }
+    // An exclude entry outside the grammar as written (a backslash) is the schema's to say: under --kind source-manifest
+    // alone the schema does not run, so the run exits 0 and no semantic rule says it a second time.
+    const slashed = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src\\vendor/"] }), LICENSE: "x", "src/a.ts": "x" });
+    const slashedOnly = run(slashed, "--kind", "source-manifest");
+    expect(slashedOnly.code).toBe(0);
+    expect(found(slashedOnly.out)).toEqual([]);
+    expect(run(slashed, "--kind", "source-manifest", "--schema", "fabric-source").code).toBe(1);
+    // A value that is no object is FAC-SEM-000 under --kind source-manifest too: in a folder and as a named file.
+    const array = folder({ "fabric.source.json": [] });
+    const seven = one("seven.json", 7);
+    for (const target of [array, seven]) {
+      const result = run(target, "--kind", "source-manifest");
+      expect(result.code, target).toBe(1);
+      expect(result.out.split("\n").filter((line) => line.includes("FAC-SEM-000")), target).toHaveLength(1);
+      expect(result.out, target).toContain("value must be an object");
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("never reads a folder a case-insensitive or Windows file system resolves to .git, in a walk", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x", "src/.git /config": `const key = "${key}";`, "src/GIT~1/config": `const key = "${key}";` });
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(0);
+    expect(found(result.out)).toEqual([]);
+    expect(result.out).not.toContain("credential");
+  });
+
+  it("never reads a file an exclude entry names in another spelling, and says so with the entry, in Git mode and in a walk", () => {
+    const files = { "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/private/"] }), LICENSE: "x", "src/a.ts": "x", "src/Private/notes.md": `const key = "${key}";` };
+    const committed = folder(files);
+    expect(gitIn(committed, "init", "-q").status).toBe(0);
+    expect(gitIn(committed, "add", "-A").status).toBe(0);
+    expect(gitIn(committed, "commit", "-qm", "x").status).toBe(0);
+    const inGit = run(committed, "--kind", "source-tree");
+    expect(inGit.code).toBe(0);
+    expect(inGit.out).not.toContain("FAC-SEM-158");
+    expect(inGit.out).not.toContain("credential");
+    expect(lines(inGit.out).filter((line) => line.includes("excluded-by-fold"))).toEqual([
+      expect.stringMatching(/^files\[(\d+)\] {2}\/files\/\1\/path {2}FAC-SEM-159 \(accepted\) {2}files\[\1\], its path: excluded-by-fold: .*\(exclude\[0\]\)/)
+    ]);
+    // A walk never enters the folder the fold leaves out, so it reads nothing there either.
+    const walked = run(folder(files), "--kind", "source-tree");
+    expect(walked.code).toBe(0);
+    expect(walked.out).not.toContain("FAC-SEM-158");
+  });
+
+  it("gives a read file the same files[<index>] in Git mode and in a walk, a path left out only under the fold indexed after every read file", () => {
+    const home = ["", "home", "jdoe", "notes"].join("/");
+    const files = { "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/private/"] }), LICENSE: "x", "src/Private/notes.md": "x", "src/b/z.ts": `const notes = "${home}";` };
+    const committed = folder(files);
+    expect(gitIn(committed, "init", "-q").status).toBe(0);
+    expect(gitIn(committed, "add", "-A").status).toBe(0);
+    expect(gitIn(committed, "commit", "-qm", "x").status).toBe(0);
+    const homeLine = (out: string) => lines(out).filter((line) => line.includes("home-path")).map((line) => line.split("  ").slice(0, 2));
+    const inGit = run(committed, "--kind", "source-tree");
+    const walked = run(folder(files), "--kind", "source-tree");
+    expect(inGit.code).toBe(1);
+    expect(walked.code).toBe(1);
+    expect(homeLine(inGit.out)).toEqual([["src/b/z.ts", "/files/2"]]);
+    expect(homeLine(walked.out)).toEqual(homeLine(inGit.out));
+    // The path left out only under the fold comes after every read file, by its index alone.
+    expect(lines(inGit.out).filter((line) => line.includes("excluded-by-fold")).map((line) => line.split("  ").slice(0, 2))).toEqual([["files[3]", "/files/3/path"]]);
+    expect(inGit.out).not.toContain("Private");
+  });
+
+  it("names a fold-only file in both modes and the paths under a fold-excluded folder in Git mode only, a read file's index the same", () => {
+    const files = {
+      "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/Secret.ts", "src/private/"] }),
+      LICENSE: "x", "src/secret.ts": "x", "src/Private/x.md": "x", "src/z.ts": "x"
+    };
+    const committed = folder(files);
+    expect(gitIn(committed, "init", "-q").status).toBe(0);
+    expect(gitIn(committed, "add", "-A").status).toBe(0);
+    const folded = (out: string) => lines(out).filter((line) => line.includes("excluded-by-fold")).map((line) => line.split("  ").slice(0, 2));
+    const inGit = run(committed, "--kind", "source-tree");
+    const walked = run(folder(files), "--kind", "source-tree");
+    expect(inGit.code).toBe(0);
+    expect(walked.code).toBe(0);
+    // Read files: LICENSE, fabric.source.json, src/z.ts take 0 to 2 in both modes; fold-only paths follow them.
+    expect(folded(walked.out)).toEqual([["files[3]", "/files/3/path"]]);
+    expect(folded(inGit.out)).toEqual([["files[3]", "/files/3/path"], ["files[4]", "/files/4/path"]]);
+  });
+
+  it.skipIf(process.platform === "win32")("reads an entry without / over a folder as leaving its files out, never unused, in Git mode and in a walk", () => {
+    const home = ["", "home", "jdoe", "notes"].join("/");
+    for (const git of [true, false]) {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/gen", "src/b.ts", "src/sub"] }), LICENSE: "x", "src/a.ts": "x", "src/gen/g.ts": `const notes = "${home}";`, "src/sub/s.ts": "x" });
+      const sub = path.join(dir, "src", "sub");
+      expect(gitIn(sub, "init", "-q").status).toBe(0);
+      expect(gitIn(sub, "add", "-A").status).toBe(0);
+      expect(gitIn(sub, "commit", "-qm", "x").status).toBe(0);
+      if (git) {
+        expect(gitIn(dir, "init", "-q").status).toBe(0);
+        // The nested repository is committed as a gitlink.
+        expect(gitIn(dir, "add", "-A").status).toBe(0);
+        expect(gitIn(dir, "commit", "-qm", "x").status).toBe(0);
+      }
+      const result = run(dir, "--kind", "source-tree");
+      // src/gen/g.ts is never read (no home-path), and only src/b.ts, which is not there, is unused.
+      expect(result.code, String(git)).toBe(0);
+      expect(result.out, String(git)).not.toContain("home-path");
+      const unused = lines(result.out).filter((line) => line.includes("unused-exclude"));
+      expect(unused.map((line) => line.split("  ")[1]), String(git)).toEqual(["/manifest/exclude/1"]);
+      expect(unused[0], String(git)).toContain("an entry without / names a file, a link or a folder and everything beneath that name");
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("calls unused a folder entry whose last segment is a file", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/gen/", "src/a.ts"] }), LICENSE: "x", "src/a.ts": "x", "src/gen": "x" });
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(0);
+    expect(lines(result.out).filter((line) => line.includes("unused-exclude")).map((line) => line.split("  ")[1])).toEqual(["/manifest/exclude/0"]);
+  });
+
+  it.skipIf(process.platform === "win32")("never calls unused an entry that keeps a link out or leaves files out only under the fold, in Git mode and in a walk", () => {
+    const outside = folder({ "x.ts": "x" });
+    const files = {
+      "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/link", "src/secrets./", "src/pri\u200cvate/", "src/private/", "src/gone/"] }),
+      LICENSE: "x", "src/a.ts": "x", "src/secrets/a.md": "x", "src/Private/b.md": "x"
+    };
+    for (const git of [true, false]) {
+      const dir = folder(files);
+      symlinkSync(outside, path.join(dir, "src", "link"));
+      if (git) {
+        expect(gitIn(dir, "init", "-q").status).toBe(0);
+        expect(gitIn(dir, "add", "-A").status).toBe(0);
+      }
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code, String(git)).toBe(0);
+      const unused = lines(result.out).filter((line) => line.includes("unused-exclude")).map((line) => line.split("  ")[1]);
+      expect(unused, String(git)).toEqual(["/manifest/exclude/4"]);
+      if (git) {
+        // Git lists the files the fold leaves out, and each is named beside its entry.
+        expect(lines(result.out).filter((line) => line.includes("excluded-by-fold")).length).toBe(2);
+      }
+    }
+  });
+
+  it("never calls unused an entry naming a gitlink the index records, with an empty folder or none", () => {
+    for (const withFolder of [true, false]) for (const excluded of [true, false]) {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "vendor/", "LICENSE"], ...(excluded ? { exclude: ["vendor/lib"] } : {}) }), LICENSE: "x", "src/a.ts": "x", "vendor/keep.ts": "x" });
+      if (withFolder) mkdirSync(path.join(dir, "vendor", "lib"), { recursive: true });
+      expect(gitIn(dir, "init", "-q").status).toBe(0);
+      expect(gitIn(dir, "add", "-A").status).toBe(0);
+      expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${"1".repeat(40)},vendor/lib`).status).toBe(0);
+      const result = run(dir, "--kind", "source-tree");
+      const label = `${String(withFolder)} ${String(excluded)}`;
+      expect(result.code, label).toBe(excluded ? 0 : 1);
+      expect(result.out, label).not.toContain("unused-exclude");
+      if (excluded) expect(result.out, label).not.toContain("nested-repository");
+      else expect(result.out, label).toContain("nested-repository");
+    }
+    // An entry ending in / over the gitlink, and a bare entry naming a folder it lies in, are used too.
+    for (const [include, exclude, link, extra] of [
+      [["src/", "vendor/", "LICENSE"], ["vendor/lib/"], "vendor/lib", { "vendor/keep.ts": "x" }],
+      [["src/", "LICENSE"], ["src/vendor"], "src/vendor/lib", {}]
+    ] as const) {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: [...include], exclude: [...exclude] }), LICENSE: "x", "src/a.ts": "x", ...extra });
+      expect(gitIn(dir, "init", "-q").status).toBe(0);
+      expect(gitIn(dir, "add", "-A").status).toBe(0);
+      expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${"1".repeat(40)},${link}`).status).toBe(0);
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code, exclude[0]).toBe(0);
+      expect(result.out, exclude[0]).not.toContain("unused-exclude");
+      expect(result.out, exclude[0]).not.toContain("nested-repository");
+    }
+  });
+
+  it("never says excluded-by-fold of a path NFC lengthens past the grammar, in Git mode or in a walk", () => {
+    const segment = "\u0958".repeat(60);
+    const long = `src/${[segment, segment, segment, segment].join("/")}/x.md`;
+    const files = { "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: [`SRC/${segment}/`] }), LICENSE: "x", "src/a.ts": "x", [long]: "x" };
+    const committed = folder(files);
+    expect(gitIn(committed, "init", "-q").status).toBe(0);
+    expect(gitIn(committed, "add", "-A").status).toBe(0);
+    const shape = (out: string) => found(out).map((line) => line.split("  ").slice(0, 3));
+    const inGit = run(committed, "--kind", "source-tree");
+    const walked = run(folder(files), "--kind", "source-tree");
+    expect(inGit.code).toBe(walked.code);
+    expect(inGit.out).not.toContain("excluded-by-fold");
+    expect(shape(inGit.out)).toEqual(shape(walked.out));
+  });
+
+  // Windows cannot start a process in a working folder past MAX_PATH (260), which these nested repositories need; the
+  // grammar's limits are the same on every system and are read here on macOS and Linux.
+  it.skipIf(process.platform === "win32")("never reads a folder NFC lengthens past the grammar as a nested repository, in Git mode or in a walk", () => {
+    const long = `src/${Array.from({ length: 4 }, () => "\u0958".repeat(60)).join("/")}`;
+    const address = ["dev", "acme-example.io"].join("@");
+    const make = () => {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x", "src/z.md": `write to ${address}` });
+      mkdirSync(path.join(dir, ...long.split("/")), { recursive: true });
+      expect(gitIn(path.join(dir, ...long.split("/")), "init", "-q").status).toBe(0);
+      return dir;
+    };
+    const committed = make();
+    expect(gitIn(committed, "init", "-q").status).toBe(0);
+    expect(gitIn(committed, "add", "fabric.source.json", "LICENSE", "src/a.ts", "src/z.md").status).toBe(0);
+    const shape = (out: string) => found(out).map((line) => line.split("  ").slice(0, 3));
+    const inGit = run(committed, "--kind", "source-tree");
+    const walked = run(make(), "--kind", "source-tree");
+    expect(inGit.code).toBe(walked.code);
+    expect(inGit.out).not.toContain("nested-repository");
+    expect(shape(inGit.out)).toEqual(shape(walked.out));
+    expect(shape(inGit.out).some((cells) => cells[2]?.startsWith("FAC-SEM-159"))).toBe(true);
+  });
+
+  it.skipIf(process.platform === "win32")("reads a path stored in NFD the same in Git mode, without git and in a folder Git refuses: NFD past the grammar is no source", () => {
+    // Three segments of 80 `é` stored in NFD: within 256 code points in NFC (as Git on macOS lists them), past them in NFD.
+    const deep = `src/${Array.from({ length: 3 }, () => "e\u0301".repeat(80)).join("/")}`;
+    const make = (nested: boolean) => {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x", [`${deep}/x.md`]: `"${key}"` });
+      if (nested) expect(gitIn(path.join(dir, ...deep.split("/")), "init", "-q").status).toBe(0);
+      return dir;
+    };
+    const shape = (out: string) => found(out).map((line) => line.split("  ").slice(0, 3));
+    for (const nested of [false, true]) {
+      const committed = make(nested);
+      expect(gitIn(committed, "init", "-q").status).toBe(0);
+      expect(gitIn(committed, "add", "fabric.source.json", "LICENSE", "src/a.ts").status).toBe(0);
+      if (!nested) expect(gitIn(committed, "add", "-A").status).toBe(0);
+      const inGit = run(committed, "--kind", "source-tree");
+      const plain = make(nested);
+      const saved = process.env.PATH;
+      process.env.PATH = path.join(path.sep, "nonexistent");
+      let noGit: ReturnType<typeof run>;
+      try {
+        noGit = run(plain, "--kind", "source-tree");
+      } finally {
+        process.env.PATH = saved;
+      }
+      // A folder Git refuses: its .git names a repository that does not exist.
+      const refused = make(nested);
+      writeFileSync(path.join(refused, ".git"), `gitdir: ${path.join(refused, "no-such-repository")}\n`);
+      const refusedRun = run(refused, "--kind", "source-tree");
+      for (const other of [noGit, refusedRun]) {
+        expect(other.code, String(nested)).toBe(inGit.code);
+        expect(shape(other.out), String(nested)).toEqual(shape(inGit.out));
+      }
+      expect(inGit.code, String(nested)).toBe(0);
+      expect(inGit.out, String(nested)).not.toContain("credential");
+      expect(inGit.out, String(nested)).not.toContain("nested-repository");
+    }
+  });
+
+  it("reads an exclude entry outside the grammar at its widest and says it once, in a folder and in a tree document", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/secrets/. /"] }), LICENSE: "x", "src/a.ts": "x", "src/secrets/key.ts": `"${key}"` });
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(found(result.out).filter((line) => line.includes("FAC-SEM-157"))).toHaveLength(1);
+    expect(result.out).not.toContain("credential");
+    const document = one("tree.json", { manifest: { include: ["src/.../", "LICENSE"] }, files: [{ path: "LICENSE", text: "x" }] });
+    const tree = run(document, "--kind", "source-tree");
+    expect(tree.code).toBe(1);
+    expect(found(tree.out).filter((line) => line.includes("FAC-SEM-157") && line.includes("/manifest/include/0"))).toHaveLength(1);
+  });
+
+  it("reads a gitlink recorded at the manifest's path as a nested repository, which blocks", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "LICENSE", "src/a.ts").status).toBe(0);
+    expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${"1".repeat(40)},fabric.source.json`).status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(found(result.out).some((line) => line.includes("FAC-SEM-158") && line.includes("nested-repository"))).toBe(true);
+    const document = one("tree.json", { manifest: { include: ["src/", "LICENSE"] }, files: [{ path: "LICENSE", text: "x" }, { path: "src/a.ts", text: "x" }, { path: "fabric.source.json", nestedRepository: true }] });
+    const tree = run(document, "--kind", "source-tree");
+    expect(tree.code).toBe(1);
+    expect(found(tree.out).some((line) => line.includes("FAC-SEM-158") && line.includes("nested-repository"))).toBe(true);
+  });
+
+  it("never lets a gitlink at the manifest's path use an exclude entry: unused-exclude for fabric.source.json/, none for the bare name", () => {
+    for (const [entry, unused] of [["fabric.source.json/", true], ["fabric.source.json", false]] as const) {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: [entry] }), LICENSE: "x", "src/a.ts": "x" });
+      expect(gitIn(dir, "init", "-q").status).toBe(0);
+      expect(gitIn(dir, "add", "LICENSE", "src/a.ts").status).toBe(0);
+      expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${"3".repeat(40)},fabric.source.json`).status).toBe(0);
+      const result = run(dir, "--kind", "source-tree");
+      const lines = found(result.out);
+      const nested = lines.filter((line) => line.includes("FAC-SEM-158") && line.includes("nested-repository"));
+      expect(nested, entry).toHaveLength(1);
+      expect(nested[0], entry).toContain("remove the nested repository or gitlink at that path");
+      const unusedLines = lines.filter((line) => line.includes("FAC-SEM-159") && line.includes("unused-exclude"));
+      expect(unusedLines.map((line) => line.split("  ")[1]), entry).toEqual(unused ? ["/manifest/exclude/0"] : []);
+    }
+  });
+
+  it("keeps Git mode for a listed file at a path an include entry lies beneath, which leaves that entry missing", () => {
+    // The file docs alone keeps Git mode: LICENSE is ignored and not added, build/ is ignored, so nothing else Git lists
+    // lies under an include path.
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["docs/guide.md", "build/", "LICENSE"] }), ".gitignore": "build/\nLICENSE\n", LICENSE: "x", docs: "a tracked file named docs", "build/out.txt": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "fabric.source.json", ".gitignore", "docs").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).not.toContain("note/walk");
+    const missing = found(result.out).filter((line) => line.includes("missing"));
+    expect(missing.map((line) => line.split("  ")[1]).sort()).toEqual(["/manifest/include/0", "/manifest/include/1", "/manifest/include/2"]);
+  });
+
+  it("walks when the only listed path an include entry lies beneath is one an exclude entry removes (E2)", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["docs/guide.md", "LICENSE"], exclude: ["docs"] }), ".gitignore": "LICENSE\n", LICENSE: "x", docs: "a tracked file named docs" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "fabric.source.json", ".gitignore", "docs").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).toContain("note/walk");
+    expect(found(result.out).filter((line) => line.includes("FAC-SEM-157") && line.includes("/include/0") && line.includes("include[0] lies inside an exclude path"))).toHaveLength(1);
+  });
+
+  it("keeps Git mode when src/old.ts, tracked and lying under the include folder src/, is excluded (E12)", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/old.ts"] }), ".gitignore": "LICENSE\n", LICENSE: "x", "src/old.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "fabric.source.json", ".gitignore", "src/old.ts").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).not.toContain("note/walk");
+    const lines = found(result.out);
+    // src/ holds no source file once src/old.ts is excluded, so include[0] is missing too; LICENSE, ignored, is include[1].
+    expect(lines.filter((line) => line.includes("missing")).map((line) => line.split("  ")[1])).toEqual(["/manifest/include/0", "/manifest/include/1"]);
+    expect(lines.some((line) => line.includes("no-license"))).toBe(true);
+  });
+
+  it("keeps Git mode when src/vendor, a gitlink lying under the include folder src/, is excluded (E13)", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/vendor"] }), ".gitignore": "LICENSE\n", LICENSE: "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "fabric.source.json", ".gitignore").status).toBe(0);
+    expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${"3".repeat(40)},src/vendor`).status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).not.toContain("note/walk");
+    const lines = found(result.out);
+    // A nested repository under an include path keeps Git mode as a file does, even one an exclude entry removes.
+    expect(lines.filter((line) => line.includes("missing")).map((line) => line.split("  ")[1])).toEqual(["/manifest/include/0", "/manifest/include/1"]);
+    expect(lines.some((line) => line.includes("no-license"))).toBe(true);
+  });
+
+  it("keeps Git mode when the only listed path an include entry names is the tracked manifest itself", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["fabric.source.json", "LICENSE"] }), ".gitignore": "LICENSE\n", LICENSE: "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "fabric.source.json").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).not.toContain("note/walk");
+    const lines = found(result.out);
+    // index.covers has no exception for the manifest: include[0] names it, so it keeps Git mode; LICENSE, ignored, is include[1].
+    expect(lines.filter((line) => line.includes("missing")).map((line) => line.split("  ")[1])).toEqual(["/manifest/include/1"]);
+    expect(lines.some((line) => line.includes("no-license"))).toBe(true);
+  });
+
+  it("keeps Git mode when src/vendor, an untracked nested repository under the include folder src/, is excluded", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/vendor"] }), ".gitignore": "LICENSE\n", LICENSE: "x", "src/vendor/a.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(path.join(dir, "src/vendor"), "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "fabric.source.json", ".gitignore").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).not.toContain("note/walk");
+    // Git lists the untracked repository as src/vendor/: index.covers counts it, as it counts a file or a gitlink.
+    expect(found(result.out).filter((line) => line.includes("missing")).map((line) => line.split("  ")[1])).toEqual(["/manifest/include/0", "/manifest/include/1"]);
+  });
+
+  it.skipIf(process.platform === "win32")("keeps Git mode when src/link, a tracked symbolic link and the only path under the include folder src/, is excluded", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/link"] }), ".gitignore": "LICENSE\n", LICENSE: "x" });
+    mkdirSync(path.join(dir, "src"));
+    symlinkSync("../LICENSE", path.join(dir, "src/link"));
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "fabric.source.json", ".gitignore", "src/link").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).not.toContain("note/walk");
+    expect(found(result.out).filter((line) => line.includes("missing")).map((line) => line.split("  ")[1])).toEqual(["/manifest/include/0", "/manifest/include/1"]);
+  });
+
+  it("stays in Git mode when Git lists only a gitlink at the manifest's path under the source, and reports it", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), ".gitignore": "src/\nLICENSE\n", LICENSE: "x", "src/a.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", ".gitignore").status).toBe(0);
+    expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${"2".repeat(40)},fabric.source.json`).status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(result.out).not.toContain("note/walk");
+    const nested = found(result.out).filter((line) => line.includes("FAC-SEM-158") && line.includes("nested-repository"));
+    expect(nested).toHaveLength(1);
+    expect(nested[0]).toContain("remove the nested repository or gitlink at that path");
+    expect(nested[0]).not.toContain("name it in exclude");
+  });
+
+  it("reads a folder's manifest even when it unchecks itself: FAC-SEM-157 and FAC-SEM-158 on fabric.source.json", () => {
+    const home = ["", "home", "jdoe", "notes"].join("/");
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], unchecked: [{ path: "fabric.source.json", reason: `kept in ${home}` }] }), LICENSE: "x", "src/a.ts": "x" });
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    const manifestLines = found(result.out).filter((line) => line.startsWith("fabric.source.json"));
+    expect(manifestLines.some((line) => line.includes("FAC-SEM-157"))).toBe(true);
+    expect(manifestLines.some((line) => line.includes("FAC-SEM-158") && line.includes("home-path"))).toBe(true);
+    expect(result.out).not.toContain(home);
+  });
+
+  it("gives a file the same files[<index>] in Git mode and in a walk when a name before it is stored in NFD", () => {
+    const home = ["", "home", "jdoe", "notes"].join("/");
+    const files = { "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/e\u0301.ts": "x", "src/f.ts": `const notes = "${home}";` };
+    const committed = folder(files);
+    expect(gitIn(committed, "init", "-q").status).toBe(0);
+    expect(gitIn(committed, "add", "-A").status).toBe(0);
+    const homeLine = (out: string) => lines(out).filter((line) => line.includes("home-path")).map((line) => line.split("  ")[1]);
+    const inGit = homeLine(run(committed, "--kind", "source-tree").out);
+    expect(inGit).toHaveLength(1);
+    expect(homeLine(run(folder(files), "--kind", "source-tree").out)).toEqual(inGit);
+  });
+
+  it.skipIf(process.platform === "win32")("calls unused a folder entry over a symbolic link, which it leaves in, and says to write it without /", () => {
+    const outside = folder({ "x.ts": "x" });
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/link/"] }), LICENSE: "x", "src/a.ts": "x" });
+    symlinkSync(outside, path.join(dir, "src", "link"));
+    const said = lines(run(dir, "--kind", "source-tree").out).filter((line) => line.includes("unused-exclude"));
+    expect(said.map((line) => line.split("  ")[1])).toEqual(["/manifest/exclude/0"]);
+    expect(said[0]).toContain("write it without / to leave the link out");
+  });
+
+  it.skipIf(process.platform === "win32")("says an exclude entry that names nothing in the folder, found by lstat and never through a link (accepted)", () => {
+    const outside = folder({ "secrets/x.ts": "x" });
+    const dir = folder({
+      "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/gen/", "src/cache/", "src/linked/x/", "src/a.ts/x", "src/Gen/"] }),
+      LICENSE: "x", "src/a.ts": "x", "src/gen/out.ts": "x"
+    });
+    symlinkSync(outside, path.join(dir, "src", "linked"));
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(0);
+    const said = lines(result.out).filter((line) => line.includes("unused-exclude"));
+    // src/cache/ is not there, src/linked/x/ lies through a link, src/a.ts/x under a file; src/gen/ is there, and src/Gen/
+    // matches it under the fold on any volume.
+    expect(said.map((line) => line.split("  ")[1])).toEqual(["/manifest/exclude/1", "/manifest/exclude/2", "/manifest/exclude/3"]);
+    for (const line of said) expect(line).toContain("FAC-SEM-159 (accepted)");
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("routes a named manifest under --kind source-tree as its folder: a dangling link, a loop, an unenterable folder", () => {
+    const dangling = folder({ LICENSE: "x" });
+    symlinkSync(path.join(dangling, "gone.json"), path.join(dangling, "fabric.source.json"));
+    const loop = folder({ LICENSE: "x" });
+    symlinkSync("fabric.source.json", path.join(loop, "fabric.source.json"));
+    for (const dir of [dangling, loop]) {
+      const result = run(path.join(dir, "fabric.source.json"), "--kind", "source-tree");
+      expect(result.code).toBe(2);
+      expect(result.out).toContain("cannot read fabric.source.json: not a file");
+      expect(result.out).not.toContain(dir);
+    }
+    const locked = folder({ "fabric.source.json": sourceManifest({ include: ["LICENSE"] }), LICENSE: "x" });
+    chmodSync(locked, 0o000);
+    try {
+      const result = run(path.join(locked, "fabric.source.json"), "--kind", "source-tree");
+      expect(result.code).toBe(2);
+      expect(result.out).toContain("cannot read .: EACCES");
+      expect(result.out).not.toContain(locked);
+    } finally {
+      chmodSync(locked, 0o755);
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("never counts an unchecked LICENSE that is a link as a licence, walked or in Git", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], unchecked: [{ path: "LICENSE", reason: "the terms live elsewhere" }] }), "src/a.ts": "x", "terms.txt": "terms" });
+    symlinkSync("terms.txt", path.join(dir, "LICENSE"));
+    for (const git of [false, true]) {
+      if (git) expect(gitIn(dir, "init", "-q").status).toBe(0);
+      expect(cells(run(dir, "--kind", "source-tree").out), String(git)).toEqual([["fabric.source.json", "/files", "FAC-SEM-159 (accepted)"]]);
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("routes a named manifest by lstat: a link to a folder is not a file; an absent folder is .", () => {
+    const target = folder({ "x.txt": "x" });
+    const dir = folder({ LICENSE: "x" });
+    symlinkSync(target, path.join(dir, "fabric.source.json"));
+    const linked = run(path.join(dir, "fabric.source.json"), "--kind", "source-tree");
+    expect(linked.code).toBe(2);
+    expect(linked.out).toContain("cannot read fabric.source.json: not a file");
+    const absent = run(path.join(dir, "no-such-folder", "fabric.source.json"), "--kind", "source-tree");
+    expect(absent.code).toBe(2);
+    expect(absent.out).toContain("cannot read .: ENOENT");
+    expect(absent.out).not.toContain(dir);
+    // A folder that is a dangling link (`ln -s nowhere d`) is never a folder holding no manifest.
+    symlinkSync("nowhere", path.join(dir, "d"));
+    const dangling = run(path.join(dir, "d", "fabric.source.json"), "--kind", "source-tree");
+    expect(dangling.code).toBe(2);
+    expect(dangling.out).toContain("cannot read .: ENOENT");
+    expect(dangling.out).not.toContain("holds none");
+    // A file's "folder" is no folder: its named manifest reads ENOTDIR, never "holds none".
+    writeFileSync(path.join(dir, "f"), "x");
+    const notDir = run(path.join(dir, "f", "fabric.source.json"), "--kind", "source-tree");
+    expect(notDir.code).toBe(2);
+    expect(notDir.out).toContain("cannot read .: ENOTDIR");
+    expect(notDir.out).not.toContain("holds none");
+    expect(notDir.out).not.toContain(dir);
+    // A link to a real folder with no manifest holds none, named as a folder or by the manifest's name in it.
+    mkdirSync(path.join(dir, "empty"));
+    symlinkSync("empty", path.join(dir, "link"));
+    for (const target of [path.join(dir, "link"), path.join(dir, "link", "fabric.source.json")]) {
+      const result = run(target, "--kind", "source-tree");
+      expect(result.code, target).toBe(2);
+      expect(result.out, target).toContain("the folder holds none");
+    }
+  });
+
+  it("refuses, by the discriminator, a JSON object with neither manifest nor files passed as a tree document", () => {
+    const message = "as a tree: it holds neither manifest nor files; a source manifest is named fabric.source.json, or pass its folder";
+    // A valid manifest, an invalid one (no include) and any other such object, each under another name.
+    for (const [name, value] of [["agent.json", sourceManifest({ include: ["LICENSE"] })], ["broken.json", { format: "fabric-source/1" }], ["other.json", { hello: "world" }]] as const) {
+      const target = one(name, value);
+      const result = run(target, "--kind", "source-tree");
+      expect(result.code, name).toBe(2);
+      expect(result.out, name).toContain(`cannot check ${name} ${message}`);
+      expect(result.out, name).not.toContain(path.dirname(target));
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("reads a dangling link named on a source route as not a file, never as absent", () => {
+    const dir = folder({ LICENSE: "x" });
+    symlinkSync(path.join(dir, "gone.json"), path.join(dir, "fabric.source.json"));
+    for (const args of [["--kind", "source-manifest"], ["--kind", "source-package"], [], ["--schema", "fabric-source"], ["--kind", "source-tree"]]) {
+      const result = run(path.join(dir, "fabric.source.json"), ...args);
+      expect(result.code, args.join(" ")).toBe(2);
+      expect(result.out, args.join(" ")).toContain("cannot read fabric.source.json: not a file");
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("reads a dangling manifest link under --kind source-tree as not a file, never as none", () => {
+    const dir = folder({ LICENSE: "x" });
+    symlinkSync(path.join(dir, "gone.json"), path.join(dir, "fabric.source.json"));
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(2);
+    expect(result.out).toContain("cannot read fabric.source.json: not a file");
+    expect(result.out).not.toContain("holds none");
+  });
+
+  it.skipIf(process.platform === "win32")("never follows a link at a listed path that is no source path, in Git mode", () => {
+    const outside = folder({ ".git/HEAD": "ref: refs/heads/main", "x.ts": "x" });
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE", "vendor/lib/"] }), LICENSE: "x", "src/a.ts": "x", "vendor/x.txt": "x" });
+    symlinkSync(outside, path.join(dir, "vendor/lib"));
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.out).not.toContain("nested-repository");
+  });
+
+  it("refuses a second target under --kind source-tree, and under --kind source-package when a target is a folder", () => {
+    const one = folder({ "fabric.source.json": sourceManifest({ include: ["LICENSE"] }), LICENSE: "x" });
+    const two = folder({ "fabric.source.json": sourceManifest({ include: ["LICENSE"] }), LICENSE: "x" });
+    for (const [kind, text] of [["source-tree", "--kind source-tree takes one target; run it once for each"], ["source-package", "--kind source-package takes one target when a target is a folder; run it once for each"]] as const) {
+      const result = run(one, two, "--kind", kind);
+      expect(result.code).toBe(2);
+      expect(result.out).toContain(`usage error: ${text}`);
+      expect(result.out).not.toContain(one);
+    }
+    // Documents named under --kind source-package are each a pair of their own, as before.
+    const a = path.join(one, "fabric.source.json");
+    const b = path.join(two, "fabric.source.json");
+    expect(run(a, b, "--kind", "source-package").code).toBe(0);
+  });
+
+  it.skipIf(process.platform === "win32")("refuses a manifest that is not a regular file, never opening it", () => {
+    const dir = folder({ LICENSE: "x" });
+    expect(spawnSync("mkfifo", [path.join(dir, "fabric.source.json")]).status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(2);
+    expect(result.out).toContain("usage error: cannot read fabric.source.json: not a file");
+    expect(result.out).not.toContain(dir);
+  });
+
+  it.skipIf(process.platform === "win32")("reads a named file outside a source check as before, and skips only a FIFO or a device in a folder run", () => {
+    // A piped standard input is read, as on main. The pipe is the shell's: Node gives a child's standard input as a socket
+    // pair on Linux, which `/dev/stdin` cannot open (ENXIO), while a shell pipe is a pipe on every system.
+    const tsx = path.join(root, "node_modules/tsx/dist/cli.mjs");
+    const piped = spawnSync("/bin/sh", ["-c", 'cat "$3" | "$0" "$1" "$2" /dev/stdin', process.execPath, tsx, path.join(root, "src/validate-cli.ts"), fixture("positive/manifest-mcp.json")], { encoding: "utf8", timeout: 60_000 });
+    expect(piped.status).toBe(0);
+    // A device named is read: it holds no JSON.
+    const empty = run("/dev/null");
+    expect(empty.code).toBe(1);
+    expect(empty.out).toContain("json  the file is not JSON");
+    // In a folder run a link to a folder is read and its error reported; a link to a device and a FIFO are skipped with a note.
+    const dir = folder({ "ok.json": json("positive/manifest-mcp.json"), "inner/x.txt": "x" });
+    symlinkSync(path.join(dir, "inner"), path.join(dir, "dir.json"));
+    symlinkSync("/dev/null", path.join(dir, "device.json"));
+    expect(spawnSync("mkfifo", [path.join(dir, "pipe.json")]).status).toBe(0);
+    const result = run(dir);
+    expect(result.code).toBe(2);
+    expect(result.out).toContain(`cannot read ${path.join(dir, "dir.json")}: EISDIR`);
+    for (const name of ["device.json", "pipe.json"]) expect(result.out).toContain(`${path.join(dir, name)}  /  note/skipped  not a file: a FIFO, a socket or a device is never read`);
+  }, 120_000);
+
+  it.skipIf(process.platform === "win32")("never opens a device named on a source route, and reads an installed manifest that is one as none", () => {
+    const dir = folder({ "x.txt": "x" });
+    symlinkSync("/dev/null", path.join(dir, "device.json"));
+    const named = run(path.join(dir, "device.json"), "--kind", "source-tree");
+    expect(named.code).toBe(2);
+    expect(named.out).toContain("cannot read device.json: not a file");
+    const descriptor = { ...json("positive/service-descriptor.json"), fabricManifest: "/dev/null" };
+    const pair = run(folder({ "example-agent.default.json": descriptor, "fabric-agent.json": json("positive/manifest-mcp.json") }));
+    expect(pair.out).toContain("/dev/null is not a file, so no manifest was read");
+  });
+
+  it.skipIf(process.platform === "win32")("refuses a manifest that is a symbolic link on every source route, never reading through it", () => {
+    const real = folder({ "real.json": sourceManifest({ include: ["LICENSE"] }) });
+    const dir = folder({ LICENSE: "x" });
+    symlinkSync(path.join(real, "real.json"), path.join(dir, "fabric.source.json"));
+    const manifest = path.join(dir, "fabric.source.json");
+    for (const args of [[dir, "--kind", "source-tree"], [manifest, "--kind", "source-tree"], [manifest], [manifest, "--kind", "source-manifest"], [dir, "--kind", "source-package"], [dir, "--kind", "source-manifest"]]) {
+      const result = run(...args);
+      expect(result.code, args.join(" ")).toBe(2);
+      expect(result.out, args.join(" ")).toMatch(/cannot read (\S*\/)?fabric\.source\.json: not a file/);
+    }
+    // A plain folder run walks many agents (a monorepo): it skips the linked manifest with a note and checks the rest.
+    const monorepo = folder({ "linked/LICENSE": "x", "real/fabric.source.json": sourceManifest({ include: ["LICENSE"] }) });
+    symlinkSync(path.join(real, "real.json"), path.join(monorepo, "linked/fabric.source.json"));
+    const plain = run(monorepo);
+    expect(plain.code).toBe(0);
+    expect(plain.out).toContain("note/skipped  not a file: a source manifest that is a symbolic link");
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(run(dir, "--kind", "source-tree").out).toContain("cannot read fabric.source.json: not a file");
+  });
+
+  it.skipIf(process.platform === "win32")("reads a FIFO under a source path as no source file, in a walk and in Git mode", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/pipe.txt", "LICENSE"] }), LICENSE: "x", "src/x.md": "x" });
+    expect(spawnSync("mkfifo", [path.join(dir, "src/pipe.txt")]).status).toBe(0);
+    for (const git of [false, true]) {
+      if (git) expect(gitIn(dir, "init", "-q").status).toBe(0);
+      expect(cells(run(dir, "--kind", "source-tree").out)).toEqual([["fabric.source.json", "/manifest/include/0", "FAC-SEM-158"]]);
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("never opens a FIFO on any route: no run waits on it", () => {
+    // Every run goes in one child process, bounded by the parent's timeout: a FIFO that is read waits for a writer
+    // forever, and a run blocked in a read would stop this test process too. The child times each run itself.
+    const dir = folder({ LICENSE: "x", "other.json": { format: "fabric-source/1", include: ["LICENSE"] } });
+    expect(spawnSync("mkfifo", [path.join(dir, "fabric.source.json")]).status).toBe(0);
+    const named = folder({ "x.txt": "x" });
+    expect(spawnSync("mkfifo", [path.join(named, "piped.json")]).status).toBe(0);
+    const routes: string[][] = [
+      [dir, "--kind", "source-package"],
+      [dir, "--kind", "source-manifest"],
+      [dir],
+      [path.join(named, "piped.json"), "--kind", "source-tree"],
+      [path.join(dir, "fabric.source.json")]
+    ];
+    const script = path.join(folder({ "x.txt": "x" }), "routes.ts");
+    writeFileSync(script, [
+      `import { main } from ${JSON.stringify(pathToFileURL(path.join(root, "src/validate-cli.ts")).href)};`,
+      `const routes = ${JSON.stringify(routes)};`,
+      "const results = routes.map((args) => { const start = performance.now(); const result = main(args); return { ...result, ms: performance.now() - start }; });",
+      "process.stdout.write(JSON.stringify(results));"
+    ].join("\n"));
+    const child = spawnSync(process.execPath, [path.join(root, "node_modules/tsx/dist/cli.mjs"), script], { encoding: "utf8", timeout: 60_000 });
+    expect(child.error).toBeUndefined();
+    const results = JSON.parse(child.stdout) as Array<{ code: number; out: string; ms: number }>;
+    expect(results).toHaveLength(routes.length);
+    for (const [index, result] of results.entries()) expect(result.ms, routes[index]?.join(" ")).toBeLessThan(20_000);
+    // A source kind's folder run refuses a FIFO manifest (exit 2); a plain folder run skips it with a note; a FIFO
+    // named on a source route is a usage error.
+    for (const index of [0, 1]) {
+      expect(results[index]).toMatchObject({ code: 2 });
+      expect(results[index]?.out).toContain("cannot read fabric.source.json: not a file");
+    }
+    expect(results[2]?.out).toContain("fabric.source.json  /  note/skipped  not a file");
+    expect(results[2]?.code).toBe(0);
+    expect(results[3]).toMatchObject({ code: 2 });
+    expect(results[3]?.out).toContain("cannot read piped.json: not a file");
+    expect(results[4]).toMatchObject({ code: 2 });
+    expect(results[4]?.out).toContain("cannot read fabric.source.json: not a file");
+    // A named source document is named by its basename (a folder run with another source kind echoes its folder).
+    expect(results[3]?.out).not.toContain(named);
+    expect(results[4]?.out).not.toContain(dir);
+  }, 120_000);
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("tells a folder or a manifest it cannot read from a missing manifest, naming neither by its path", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
+    chmodSync(dir, 0o000);
+    try {
+      const locked = run(dir, "--kind", "source-tree");
+      expect(locked.code).toBe(2);
+      expect(locked.out).toContain("usage error: cannot read .: EACCES");
+      expect(locked.out).not.toContain("holds none");
+      expect(locked.out).not.toContain(dir);
+    } finally {
+      chmodSync(dir, 0o755);
+    }
+    chmodSync(path.join(dir, "fabric.source.json"), 0o000);
+    try {
+      const unread = run(dir, "--kind", "source-tree");
+      expect(unread.code).toBe(2);
+      expect(unread.out).toContain("usage error: cannot read fabric.source.json: EACCES");
+      expect(unread.out).not.toContain("holds none");
+      expect(unread.out).not.toContain(dir);
+    } finally {
+      chmodSync(path.join(dir, "fabric.source.json"), 0o644);
+    }
+  }, 30_000);
+
+  it("names a path by the folder it is under when its name holds a finding, and the folder itself as .", () => {
+    expect(shownPath("")).toBe(".");
+    expect(shownPath("src/a.ts")).toBe("src/a.ts");
+    expect(shownPath("-Users-jdoe-x.md")).toBe("<a path that may hold a finding, under .>");
+    expect(shownPath("src/ok/-home-jdoe/b.ts")).toBe("<a path that may hold a finding, under src/ok/>");
+    expect(shownPath("src/.env")).toBe("<a path that may hold a finding, under src/>");
+    expect(shownPath(`docs/${["a", "@", "mail.org"].join("")}/x.md`)).toBe("<a path whose name holds an e-mail address, under docs/>");
+    // A path reads an address as a line does: an asset's name, an example address and an SSH remote are none.
+    const asset = ["assets/icon", "@2x.png"].join("");
+    for (const name of [asset, "docs/someone@example.com/notes.md", "git@host:owner/repo"]) expect(shownPath(name)).toBe(name);
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["assets/", "LICENSE"] }), LICENSE: "x", [asset]: "/home/jdoe" });
+    const out = run(dir, "--kind", "source-tree").out;
+    expect(cells(out)).toEqual([[asset, "/files/1", "FAC-SEM-158"]]);
+    expect(found(out)[0]).toContain(`${asset} line 1, column 7: home-path: `);
+    // A credential that runs across a "/" shows no part of itself: the clean prefix stops before its first segment.
+    const across = shownPath(`cfg/API_KEY=${"Ab1".repeat(5)}/${"Cd2".repeat(9)}/x.txt`);
+    expect(across).toBe("<a path that may hold a finding, under cfg/>");
+    expect(across).not.toContain("Ab1");
+  });
+
+  it("reads a long run per segment in a file's path, and never shows a part of a run across segments in a name", () => {
+    // A path of ordinary names is no run, though the whole of it, `/` included, is 46 characters mixing cases and digits.
+    const plain = "packages/CoreLib2/src/Components/Button3/Index.tsx";
+    const home = ["/Us", "ers/jdoe/notes"].join("");
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["packages/", "LICENSE"] }), LICENSE: "x", [plain]: `see ${home}` });
+    const out = run(dir, "--kind", "source-tree").out;
+    expect(cells(out)).toEqual([[plain, "/files/2", "FAC-SEM-158"]]);
+    expect(found(out)[0]).toContain(`${plain} line 1, column 12: home-path: `);
+    // The document form names it by its path too: the lead is not masked again.
+    const document = one("tree.json", { manifest: { format: "fabric-source/1", include: ["packages/", "LICENSE"] }, files: [{ path: "LICENSE", text: "x" }, { path: plain, text: `see ${home}` }] });
+    const documentOut = run(document, "--kind", "source-tree").out;
+    expect(documentOut).toContain(`${plain} line 1, column 12: home-path: `);
+    expect(documentOut).not.toContain(path.dirname(document));
+    // Five segments of 12 characters mixing cases and digits, assembled here: a name shows none of them.
+    const segments = Array.from({ length: 5 }, (_, index) => `Ab${index}Cd${index}Ef${index}Gh${index}`);
+    const split = shownPath(`src/${segments.join("/")}.ts`);
+    expect(split).toBe("<a path that may hold a finding, under src/>");
+    for (const segment of segments) expect(split).not.toContain(segment);
+    // A provider key split at a "/" shows no part of itself either.
+    const key = ["sk", "-", "Ab12Cd34Ef56"].join("");
+    const rest = "Gh78Ij90Kl12Mn34Op56Qr78";
+    const keyed = shownPath(`docs/${key}/${rest}.md`);
+    expect(keyed).toBe("<a path that may hold a finding, under docs/>");
+    for (const part of [key, rest, "sk-"]) expect(keyed).not.toContain(part);
+  });
+
+  it("reads at most 512 UTF-16 units of a name, so naming grows linearly with its length", () => {
+    // Many segments of a run that crosses them: each prefix and each segment would be read again without the cap.
+    const name = (count: number) => `src/${Array.from({ length: count }, (_, index) => `Ab${index % 10}Cd`).join("/")}.ts`;
+    expect(name(103).length).toBeGreaterThan(512);
+    expect(shownPath(name(103))).toBe("<a path that may hold a finding, under .>");
+    expect(longRunAt(`${"a".repeat(600)}${"Ab1".repeat(20)}`)).toBe(-1);
+    const cpu = () => { const used = process.cpuUsage(); return (used.user + used.system) / 1000; };
+    const timed = (text: string): number => Math.min(...[0, 1, 2].map(() => {
+      const started = cpu();
+      let calls = 0;
+      do { shownPath(text); longRunAt(text); calls += 1; } while (cpu() - started < 100);
+      return (cpu() - started) / calls;
+    }));
+    const small = timed(name(4_000));
+    const large = timed(name(64_000));
+    // Sixteen times the input: linear work grows about sixteen times, quadratic work about 256 times.
+    expect(large / Math.max(small, 0.001)).toBeLessThan(64);
+  }, 120_000);
+
+  it("prints a clean path leading a binary or nested-repository finding whole, in a folder and in a document", () => {
+    const image = "packages/CoreLib2/src/Components/Button3/Image.png";
+    const manifest = sourceManifest({ include: ["packages/", "LICENSE"] });
+    const binary = folder({ "fabric.source.json": manifest, LICENSE: "x", [image]: "\u0000png" });
+    const nested = folder({ "fabric.source.json": manifest, LICENSE: "x", [`${image}/.git/HEAD`]: "ref: refs/heads/main", [`${image}/a.ts`]: "x" });
+    const documentOf = (entry: Record<string, unknown>) => one("tree.json", { manifest, files: [{ path: "LICENSE", text: "x" }, { path: image, ...entry }] });
+    for (const [out, kind] of [
+      [run(binary, "--kind", "source-tree").out, "binary"],
+      [run(nested, "--kind", "source-tree").out, "nested-repository"],
+      [run(documentOf({ binary: true }), "--kind", "source-tree").out, "binary"],
+      [run(documentOf({ nestedRepository: true }), "--kind", "source-tree").out, "nested-repository"]
+    ] as const) {
+      expect(found(out).some((line) => line.includes(`${image}: ${kind}: `)), `${kind}: ${out}`).toBe(true);
+      expect(out).not.toContain("<a value the tree check reads");
+    }
+  });
+
+  it("reads a line holding a run of millions of characters without throwing, and always prints one JSON document", () => {
+    const base64 = "QUJDRGVmZ2gxMjM0".repeat(375_000);
+    const mixed = "Ab1Cd2Ef3Gh4".repeat(500_000);
+    expect(base64.length).toBe(6_000_000);
+    const wasm = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/wasm.ts": `export const wasm = "${base64}";` });
+    const quiet = run(wasm, "--kind", "source-tree", "--json");
+    expect(quiet.code).toBe(0);
+    expect((JSON.parse(quiet.out) as { problems: unknown[] }).problems).toEqual([]);
+    const token = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/token.ts": `token = "${mixed}"` });
+    const loud = run(token, "--kind", "source-tree", "--json");
+    expect(loud.code).toBe(1);
+    const problems = (JSON.parse(loud.out) as { problems: Array<{ rule: string; message: string }> }).problems;
+    expect(problems.map((problem) => problem.rule)).toEqual(["FAC-SEM-158"]);
+    expect(problems[0]?.message).toContain("line 1, column 10: credential");
+    expect(loud.out).not.toContain(mixed.slice(0, 40));
+  }, 180_000);
+
+  it("reports a source check that throws as a usage error naming the error only, in one JSON document", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const saved = gitLimits.maxBuffer;
+    gitLimits.maxBuffer = -1;
+    try {
+      const result = run(dir, "--kind", "source-tree", "--json");
+      expect(result.code).toBe(2);
+      expect(JSON.parse(result.out)).toEqual({ files: [], problems: [], notes: [], usage: ["cannot check .: RangeError"] });
+    } finally {
+      gitLimits.maxBuffer = saved;
+    }
+  });
+
+  it("splits what Git lists on NUL, and counts a name that is not UTF-8 by its position, never decoding it", () => {
+    const listed = Buffer.concat([Buffer.from("LICENSE\0src/a.ts\0"), Buffer.from([0x73, 0x72, 0x63, 0x2f, 0xff, 0x2e, 0x74, 0x73, 0]), Buffer.from("src/inner/\0src/b.ts")]);
+    expect(gitNames(listed)).toEqual({ names: ["LICENSE", "src/a.ts", "src/inner/", "src/b.ts"], unreadable: [2], folders: ["src"] });
+    expect(gitNames(Buffer.alloc(0))).toEqual({ names: [], unreadable: [], folders: [] });
+    expect(gitNames(Buffer.from("a\0\0b\0"))).toEqual({ names: ["a", "b"], unreadable: [], folders: [] });
+    // A folder that does not decode stops the leading folders.
+    expect(gitNames(Buffer.concat([Buffer.from([0x61, 0x2f, 0xff, 0x2f, 0x62, 0]), Buffer.from([0xff, 0])]))).toEqual({ names: [], unreadable: [0, 1], folders: ["a", ""] });
+    // `--stage` records: only mode 160000 is a gitlink; a name that is not UTF-8 is skipped.
+    const object = "0".repeat(40);
+    const staged = Buffer.concat([Buffer.from(`100644 ${object} 0\tsrc/a.ts\u0000160000 ${object} 0\tsrc/lib\u0000\u0000no-tab\u0000160000 ${object} 0\t`), Buffer.from([0xff, 0]), Buffer.from(`160000 ${object} 0\tlast`)]);
+    expect(gitlinkNames(staged)).toEqual(["src/lib", "last"]);
+  });
+
+  it.skipIf(process.platform === "win32")("reports a name Git lists that is not UTF-8 only where its folder lies in the source as a whole", () => {
+    // A git that lists what the test sets, a name that is not UTF-8 among it: a real file system may refuse such a name.
+    const bin = folder({ git: "#!/bin/sh\nfor a in \"$@\"; do case \"$a\" in ls-files) printf \"$FAKE_LIST\"; exit 0;; check-ignore) exit 1;; esac; done\nexit 1\n" });
+    chmodSync(path.join(bin, "git"), 0o755);
+    const saved = { path: process.env.PATH, list: process.env.FAKE_LIST };
+    process.env.PATH = bin;
+    const probe = (manifest: Record<string, unknown>, files: Record<string, string>, list: string[]) => {
+      process.env.FAKE_LIST = list.map((name) => `${name}\\000`).join("");
+      return run(folder({ "fabric.source.json": manifest, LICENSE: "x", ...files }), "--kind", "source-tree");
+    };
+    try {
+      for (const [manifest, files, list] of [
+        [sourceManifest({ include: ["src/", "LICENSE"] }), { "src/a.ts": "x" }, ["LICENSE", "src/a.ts", "outside/\\377.txt"]],
+        [sourceManifest({ include: ["src/a/", "LICENSE"] }), { "src/a/k.ts": "x" }, ["LICENSE", "src/a/k.ts", "src/\\377/x.ts"]],
+        [sourceManifest({ include: ["src/a.ts", "LICENSE"] }), { "src/a.ts": "x" }, ["LICENSE", "src/a.ts", "src/\\377.txt"]],
+        [sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/vendor/"] }), { "src/a.ts": "x", "src/vendor/keep.txt": "x" }, ["LICENSE", "src/a.ts", "src/vendor/\\377.txt"]]
+      ] as const) {
+        expect(probe(manifest, files, [...list]), list[2]).toEqual({ code: 0, out: "" });
+      }
+      const inside = probe(sourceManifest({ include: ["src/", "LICENSE"] }), { "src/a.ts": "x" }, ["LICENSE", "src/a.ts", "src/\\377.txt"]);
+      expect(inside.code).toBe(2);
+      expect(inside.out).toContain("usage error: cannot read the name Git listed at position 2: it is not UTF-8");
+    } finally {
+      process.env.PATH = saved.path;
+      if (saved.list === undefined) delete process.env.FAKE_LIST;
+      else process.env.FAKE_LIST = saved.list;
+    }
+  }, 60_000);
+
+  it.skipIf(process.platform === "win32")("never reads an untracked name shaped like an index entry as a gitlink", () => {
+    const crafted = `160000 ${"0".repeat(40)} 0\tsrc`;
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a/k.ts": "x", [`${crafted}/a`]: "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result).toEqual({ code: 0, out: "" });
+  });
+
+  it.skipIf(process.platform === "win32")("walks with a note when only the gitlink listing fails, never reading no gitlinks", () => {
+    const bin = folder({ git: "#!/bin/sh\nfor a in \"$@\"; do case \"$a\" in --stage) exit 3;; esac; done\nfor a in \"$@\"; do case \"$a\" in ls-files) printf 'LICENSE\\000src/a.ts\\000'; exit 0;; check-ignore) exit 1;; esac; done\nexit 1\n" });
+    chmodSync(path.join(bin, "git"), 0o755);
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
+    const saved = process.env.PATH;
+    process.env.PATH = bin;
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code).toBe(0);
+      expect(result.out).toContain("note/walk  git ls-files --stage refused the folder (exit 3), so the folder's files were walked");
+    } finally {
+      process.env.PATH = saved;
+    }
+  }, 60_000);
+
+  it.skipIf(process.platform === "win32")("says nothing of a name Git listed that is not UTF-8 when the run walks after all", () => {
+    const bin = folder({ git: "#!/bin/sh\nfor a in \"$@\"; do case \"$a\" in --stage) exit 3;; esac; done\nfor a in \"$@\"; do case \"$a\" in ls-files) printf 'LICENSE\\000src/a.ts\\000src/\\377.txt\\000'; exit 0;; check-ignore) exit 1;; esac; done\nexit 1\n" });
+    chmodSync(path.join(bin, "git"), 0o755);
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
+    const saved = process.env.PATH;
+    process.env.PATH = bin;
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code).toBe(0);
+      expect(result.out).toContain("note/walk");
+      expect(result.out).not.toContain("position");
+    } finally {
+      process.env.PATH = saved;
+    }
+  }, 60_000);
+
+  it.skipIf(process.platform === "win32")("walks with a note when the gitlink listing times out or cannot run", () => {
+    // A git that answers the first listing at once and the gitlink listing late, or with more than the buffer takes.
+    const bin = folder({ git: "#!/bin/sh\nfor a in \"$@\"; do case \"$a\" in --stage) if [ \"$FAKE_STAGE\" = slow ]; then /bin/sleep 3; fi; /usr/bin/head -c 8192 /dev/zero; exit 0;; esac; done\nfor a in \"$@\"; do case \"$a\" in ls-files) printf 'LICENSE\\000src/a.ts\\000'; exit 0;; check-ignore) exit 1;; esac; done\nexit 1\n" });
+    chmodSync(path.join(bin, "git"), 0o755);
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
+    const saved = { path: process.env.PATH, stage: process.env.FAKE_STAGE, limits: { ...gitLimits } };
+    process.env.PATH = bin;
+    try {
+      process.env.FAKE_STAGE = "slow";
+      gitLimits.timeoutMs = 1000;
+      expect(run(dir, "--kind", "source-tree").out).toContain("note/walk  git did not answer within 1 s");
+      process.env.FAKE_STAGE = "big";
+      gitLimits.timeoutMs = saved.limits.timeoutMs;
+      gitLimits.maxBuffer = 1024;
+      expect(run(dir, "--kind", "source-tree").out).toContain("note/walk  git ls-files --stage could not run (ENOBUFS)");
+    } finally {
+      process.env.PATH = saved.path;
+      if (saved.stage === undefined) delete process.env.FAKE_STAGE;
+      else process.env.FAKE_STAGE = saved.stage;
+      Object.assign(gitLimits, saved.limits);
+    }
+  }, 60_000);
+
+  it("states a listed path that is no source path only when it may be nested, and finds a gitlink under a folder that is gone", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE", "vendor/lib/", "gone/sub/"] }), LICENSE: "x", "src/a.ts": "x", "vendor/lib": "a file Git tracks where a folder is named" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "LICENSE", "vendor/lib").status).toBe(0);
+    expect(gitIn(dir, "commit", "-qm", "a").status).toBe(0);
+    const head = gitIn(dir, "rev-parse", "HEAD").stdout.trim();
+    expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${head},gone/sub`).status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    // `vendor/lib` is a file where an include names a folder: not nested, not source, never stated; `gone/sub` is a
+    // gitlink whose folder is gone, and is still a nested repository.
+    // An include naming only a nested repository reads as missing too.
+    expect(cells(result.out)).toEqual([["gone/sub", "/files/2", "FAC-SEM-158"], ["fabric.source.json", "/manifest/include/2", "FAC-SEM-158"], ["fabric.source.json", "/manifest/include/3", "FAC-SEM-158"]]);
+    expect(result.out).toContain("nested-repository");
+  });
+
+  it.skipIf(process.platform === "win32")("reads a gitlink as nested whatever sits above it: a file or a symbolic link", () => {
+    for (const above of ["file", "link"] as const) {
+      const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/k.ts": "x", "other/x.ts": "x" });
+      expect(gitIn(dir, "init", "-q").status).toBe(0);
+      expect(gitIn(dir, "add", "LICENSE").status).toBe(0);
+      expect(gitIn(dir, "commit", "-qm", "a").status).toBe(0);
+      const head = gitIn(dir, "rev-parse", "HEAD").stdout.trim();
+      expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${head},src/a/b/c`).status).toBe(0);
+      if (above === "file") writeFileSync(path.join(dir, "src/a"), "a file above the gitlink");
+      else symlinkSync(path.join(dir, "other"), path.join(dir, "src/a"));
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code, above).toBe(1);
+      expect(found(result.out).filter((line) => line.includes("nested-repository")).map((line) => line.split("  ")[0]), above).toEqual(["src/a/b/c"]);
+    }
+  });
+
+  it.skipIf(process.platform === "win32" || process.getuid?.() === 0)("never enters a folder an exclude folder names, so an unreadable one is no usage error", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], exclude: ["src/cache/"] }), LICENSE: "x", "src/a.ts": "x", "src/cache/x.bin": "x" });
+    chmodSync(path.join(dir, "src/cache"), 0o000);
+    try {
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code).toBe(0);
+      expect(found(result.out)).toEqual([]);
+    } finally {
+      chmodSync(path.join(dir, "src/cache"), 0o755);
+    }
+  });
+
+  it("reads a path the index records as a gitlink as a nested repository, even when a file sits there now", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "LICENSE").status).toBe(0);
+    expect(gitIn(dir, "commit", "-qm", "a").status).toBe(0);
+    const head = gitIn(dir, "rev-parse", "HEAD").stdout.trim();
+    expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${head},src/lib`).status).toBe(0);
+    writeFileSync(path.join(dir, "src/lib"), "a file now");
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(cells(result.out)).toEqual([["src/lib", "/files/3", "FAC-SEM-158"]]);
+    expect(result.out).toContain("nested-repository");
+  });
+
+  it("reports a manifest that fails its schema alone: its rules and the tree run once it validates", () => {
+    const dir = folder({ "fabric.source.json": { ...sourceManifest({ include: ["src/", "LICENSE"] }), extra: true, slots: [{ name: "A", kind: "config", purpose: "a" }, { name: "A", kind: "config", purpose: "b" }] }, LICENSE: "x", "src/a.ts": `"${key}"` });
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(found(result.out).map((line) => line.split("  ")[2])).toEqual(["schema/additionalProperties"]);
+  });
+
+  it("reads the manifest in Git mode even when .gitignore lists it", () => {
+    const dir = folder({
+      "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], unchecked: [{ path: "src/x.ts", reason: `uses ${key}` }] }),
+      ".gitignore": "fabric.source.json\n",
+      LICENSE: "x",
+      "src/a.ts": "x",
+      "src/x.ts": "x"
+    });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(cells(result.out)).toEqual([["fabric.source.json", "/files/1", "FAC-SEM-158"]]);
+    expect(result.out).not.toContain(key);
+  });
+
+  it("reports a gitlink whose folder is gone as a nested repository", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "LICENSE").status).toBe(0);
+    expect(gitIn(dir, "commit", "-qm", "a").status).toBe(0);
+    const head = gitIn(dir, "rev-parse", "HEAD").stdout.trim();
+    expect(gitIn(dir, "update-index", "--add", "--cacheinfo", `160000,${head},src/gone`).status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(1);
+    expect(cells(result.out)).toEqual([["src/gone", "/files/3", "FAC-SEM-158"]]);
+    expect(result.out).toContain("nested-repository");
+  });
+
+  it.skipIf(process.platform === "win32")("reads only the probe of a large binary file listed in binaries", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], binaries: ["src/disk.img"] }), LICENSE: "x", "src/a.ts": "x" });
+    // A sparse file of 3 GiB, all NUL: larger than one read can hold, and taking no space on disk.
+    const image = path.join(dir, "src/disk.img");
+    writeFileSync(image, "");
+    truncateSync(image, 3 * 1024 ** 3);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(0);
+    expect(found(result.out)).toEqual([]);
+    rmSync(image);
+  });
+
+  it("reads a tracked file replaced by a folder as no nested repository, and the files under it", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/sub": "x", "src/a.ts": "x" });
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    expect(gitIn(dir, "add", "src/sub").status).toBe(0);
+    expect(gitIn(dir, "commit", "-qm", "a").status).toBe(0);
+    rmSync(path.join(dir, "src/sub"));
+    mkdirSync(path.join(dir, "src/sub"));
+    writeFileSync(path.join(dir, "src/sub/b.ts"), `"${key}"`);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.out).not.toContain("nested-repository");
+    expect(cells(result.out)).toEqual([["src/sub/b.ts", "/files/3", "FAC-SEM-158"]]);
+  });
+
+  it.skipIf(process.platform === "win32")("reads a FIFO at an unchecked path as no source file, in a walk and in Git mode", () => {
+    const dir = folder({
+      "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE", "src/data.json"], unchecked: [{ path: "LICENSE", reason: "a licence" }, { path: "src/data.json", reason: "synthetic data" }] }),
+      "src/a.ts": "x"
+    });
+    for (const name of ["LICENSE", "src/data.json"]) expect(spawnSync("mkfifo", [path.join(dir, name)]).status).toBe(0);
+    for (const git of [false, true]) {
+      if (git) expect(gitIn(dir, "init", "-q").status).toBe(0);
+      const result = run(dir, "--kind", "source-tree");
+      expect(result.code).toBe(1);
+      expect(cells(result.out)).toEqual([["fabric.source.json", "/manifest/include/1", "FAC-SEM-158"], ["fabric.source.json", "/manifest/include/2", "FAC-SEM-158"], ["fabric.source.json", "/files", "FAC-SEM-159 (accepted)"]]);
+    }
+  });
+
+  it.runIf(process.platform === "linux")("reports a file whose name is not UTF-8 in Git mode as a usage error, by its position in Git's list", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "src/a.ts": "x" });
+    writeFileSync(Buffer.concat([Buffer.from(path.join(dir, "src/")), Buffer.from([0xff, 0x2e, 0x74, 0x73])]), "x");
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(2);
+    expect(result.out).toMatch(/usage error: cannot read the name Git listed at position \d+: it is not UTF-8/);
+  });
+
+  it("quotes no value a manifest error would carry: a schema error masks it, a parse error gives its position only", () => {
+    const at = ["someone", "@", "mail.org"].join("");
+    const home = ["/Users/", "jdoe"].join("");
+    const homeDir = folder({ "fabric.source.json": { ...sourceManifest({ include: ["src/", "LICENSE"] }), [home]: true }, LICENSE: "x", "src/a.ts": "x" });
+    const mailDir = folder({ "fabric.source.json": { ...sourceManifest({ include: ["src/", "LICENSE"] }), [at]: 1 }, LICENSE: "x", "src/a.ts": "x" });
+    const brokenDir = folder({ "fabric.source.json": `{"format": "fabric-source/1", "description": "${key} ${home}" x`, LICENSE: "x", "src/a.ts": "x" });
+    for (const dir of [homeDir, mailDir, brokenDir]) {
+      for (const out of [run(dir, "--kind", "source-tree").out, run(dir, "--kind", "source-tree", "--json").out]) {
+        expect(out).toContain("fabric.source.json");
+        for (const value of ["jdoe", "someone", "mail.org", dir]) expect(out).not.toContain(value);
+        for (let start = 0; start + 8 <= key.length; start += 1) expect(out).not.toContain(key.slice(start, start + 8));
+      }
+    }
+    expect(run(brokenDir, "--kind", "source-tree").out).toMatch(/fabric\.source\.json {2}\/ {2}json {2}the file is not JSON: it stops reading at line 1, column \d+/);
+    // An empty file stops at its start; one nested too deep to read again says only that it is not JSON.
+    const empty = run(folder({ "fabric.source.json": "", LICENSE: "x" }), "--kind", "source-tree");
+    expect(empty.code).toBe(1);
+    expect(empty.out).toContain("the file is not JSON: it stops reading at line 1, column 1");
+    const deep = run(folder({ "fabric.source.json": "[".repeat(200_000), LICENSE: "x" }), "--kind", "source-tree");
+    expect(deep.code).toBe(1);
+    expect(deep.out).toMatch(/fabric\.source\.json {2}\/ {2}json {2}the file is not JSON(?!:)/);
+  });
+
+  it("quotes no credential that runs across a space in a manifest member or a slot's name", () => {
+    const member = ["abcdef", "1234567890xyz"].join("");
+    const slot = ["abcdef", "1234567890qq"].join("");
+    const name = `x Bearer ${slot}`;
+    const dir = folder({
+      "fabric.source.json": { ...sourceManifest({ include: ["src/", "LICENSE"] }), [`Authorization: Bearer ${member}`]: true, slots: [{ name, kind: "config", purpose: "a" }, { name, kind: "config", purpose: "b" }] },
+      LICENSE: "x",
+      "src/a.ts": "x"
+    });
+    // The manifest fails its schema, so the folder run reports that alone; the rule's message is read on the document.
+    for (const out of [run(dir, "--kind", "source-tree").out, run(dir, "--kind", "source-tree", "--json").out]) {
+      expect(out).toContain("schema/additionalProperties");
+      expect(out).not.toContain("declared twice");
+      expect(out).not.toContain(member);
+      expect(out).not.toContain(slot);
+    }
+    const ruled = run(path.join(dir, "fabric.source.json"), "--kind", "source-manifest").out;
+    expect(ruled).toContain("slot slots[1] is declared twice");
+    expect(ruled).not.toContain(member);
+    expect(ruled).not.toContain(slot);
+  });
+
+  it("counts a repository nested outside the source in neither mode, so files[<index>] stays the same", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"] }), LICENSE: "x", "aaa/lib.ts": "x", "src/-Users-jdoe-x.md": "x" });
+    expect(gitIn(path.join(dir, "aaa"), "init", "-q").status).toBe(0);
+    const walkedOut = run(dir, "--kind", "source-tree").out;
+    // LICENSE (0), fabric.source.json (1), src/-Users-jdoe-x.md (2): aaa/ is no source, so it takes no index.
+    expect(cells(walkedOut)).toEqual([["files[2]", "/files/2/path", "FAC-SEM-158"]]);
+    expect(gitIn(dir, "init", "-q").status).toBe(0);
+    const gitOut = run(dir, "--kind", "source-tree").out;
+    expect(gitOut).not.toContain("note/walk");
+    expect(cells(gitOut)).toEqual(cells(walkedOut));
+  });
+
+  it("walks a folder only when an include path reaches into it or covers it", () => {
+    const dir = folder({ "fabric.source.json": sourceManifest({ include: ["LICENSE", "skills/digest/SKILL.md", ".claude-plugin/plugin.json"] }), LICENSE: "x", "skills/digest/SKILL.md": "x", ".claude-plugin/plugin.json": "{}", "skills/other/SKILL.md": `"${key}"`, "src/a.ts": `"${key}"`, ".cache/a.ts": `"${key}"` });
+    const result = run(dir, "--kind", "source-tree");
+    expect(result.code).toBe(0);
+    expect(found(result.out)).toEqual([]);
+  });
+
+  it("prints no member of a package's state[] path that is not a string, in the pair check", () => {
+    const pkg = json("positive/fabric-package-agent.json");
+    const synthetic = ["sk", "-", "Q7r".repeat(8)].join("");
+    const withArray = { ...pkg, state: [{ path: ["x", synthetic], purpose: "p" }] };
+    const findings = evaluateSemanticRules("source-package", { source: sourceManifest(), package: withArray });
+    expect(findings.some((finding) => finding.message.includes("state[0] (a value that is not a string)"))).toBe(true);
+    expect(JSON.stringify(findings)).not.toContain(synthetic);
+    for (const out of [run(folder({ "fabric.source.json": sourceManifest(), "fabric.package.json": withArray })).out, run(folder({ "fabric.source.json": sourceManifest(), "fabric.package.json": withArray }), "--json").out]) {
+      expect(out).not.toContain(synthetic);
+    }
+  });
+
+  it("checks a manifest whose one include entry runs far past the path grammar, through both routes, in linear time", () => {
+    const dirOf = (count: number) => folder({ "fabric.source.json": sourceManifest({ include: ["a/".repeat(count), "LICENSE"] }), LICENSE: "x" });
+    const small = dirOf(4000);
+    const large = dirOf(64_000);
+    for (const route of [(dir: string) => [path.join(dir, "fabric.source.json")], (dir: string) => [dir, "--kind", "source-tree"]]) {
+      // Sixteen times the entry, measured against the same route at a sixteenth: linear about 16, quadratic about 256.
+      expect(cpuOf(() => run(...route(large))) / Math.max(cpuOf(() => run(...route(small))), 0.01), route(large).join(" ")).toBeLessThan(64);
+      expect(run(...route(large)).code, route(large).join(" ")).toBe(1);
+    }
+  }, 180_000);
+
+  it("checks a folder's source files in time linear in their number", () => {
+    // The files sit under an unchecked folder and carry no text, so a run reads their paths only and the per-file
+    // linear part is small: at 250 to 8000 files the real tree read about 24, a `files.some` scan planted per file
+    // about 170.
+    const folderOf = (count: number) => {
+      const files: Record<string, unknown> = { "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], unchecked: [{ path: "src/vectors/", reason: "synthetic" }] }), LICENSE: "x" };
+      for (let index = 0; index < count; index += 1) files[`src/vectors/d${index % 31}/f${index}.ts`] = "";
+      return folder(files);
+    };
+    // One run's processor time (this process's user and system time, which a loaded machine's other work does not
+    // inflate as it does the wall clock): repeated until a trial lasts 200 ms, the best of three trials, less an empty
+    // folder's (the fixed cost of a run).
+    const cpu = () => { const used = process.cpuUsage(); return (used.user + used.system) / 1000; };
+    const timed = (dir: string): number => {
+      run(dir, "--kind", "source-tree");
+      return Math.min(...[0, 1, 2].map(() => {
+        const started = cpu();
+        let calls = 0;
+        do { run(dir, "--kind", "source-tree"); calls += 1; } while (cpu() - started < 200);
+        return (cpu() - started) / calls;
+      }));
+    };
+    const empty = timed(folderOf(0));
+    const small = timed(folderOf(250)) - empty;
+    const large = timed(folderOf(8000)) - empty;
+    expect(large / Math.max(small, 0.5)).toBeLessThan(64);
+  }, 120_000);
+
+  it("checks a manifest whose slot names are a 1 MB run of brackets in linear time", () => {
+    const fileOf = (count: number) => {
+      const long = `${")".repeat(count)}a`;
+      return path.join(folder({ "fabric.source.json": sourceManifest({ include: ["src/", "LICENSE"], slots: [{ name: long, kind: "config", purpose: "a" }, { name: long, kind: "config", purpose: "b" }] }), LICENSE: "x", "src/a.ts": "x" }), "fabric.source.json");
+    };
+    const small = fileOf(62_500);
+    const large = fileOf(1_000_000);
+    // The names fail the schema, so the rule is run on the document named with its kind.
+    expect(cpuOf(() => run(large, "--kind", "source-manifest")) / Math.max(cpuOf(() => run(small, "--kind", "source-manifest")), 0.01)).toBeLessThan(64);
+    const result = run(large, "--kind", "source-manifest");
+    expect(result.out).toContain("slot slots[1] is declared twice");
+  }, 180_000);
+
+  it("keeps a source check instance-free under a foreign schema, in its paths, messages and the target's name", () => {
+    const home = ["/Users/", "jdoe", "/notes"].join("");
+    const doc = { counts: { [key]: "x", [home]: "y" }, tables: { [key]: 5 } };
+    const parent = folder({ "-Users-jdoe-x/doc.json": doc, "-Users-jdoe-x/fabric.source.json": doc });
+    const dir = path.join(parent, "-Users-jdoe-x");
+    const routes = [
+      [path.join(dir, "doc.json"), "--kind", "source-manifest", "--schema", "settings-backup"],
+      [path.join(dir, "doc.json"), "--kind", "source-package", "--schema", "settings-backup"],
+      [path.join(dir, "fabric.source.json"), "--schema", "settings-backup"],
+      [path.join(dir, "missing.json"), "--kind", "source-manifest"]
+    ];
+    for (const route of routes) {
+      for (const out of [run(...route).out, run(...route, "--json").out]) {
+        expect(out, route.join(" ")).not.toContain("jdoe");
+        for (let start = 0; start + 8 <= key.length; start += 1) expect(out, route.join(" ")).not.toContain(key.slice(start, start + 8));
+      }
+    }
+  });
+
+  it("reads any source check instance-free: a source- kind, the source schema named or inferred, or the file's name", () => {
+    const other = folder({ "other.json": `{"include":[${["/Users/", "jdoe", "/x"].join("")}]}` });
+    const parse = run(path.join(other, "other.json"), "--schema", "fabric-source");
+    expect(parse.out).toContain("it stops reading at line 1, column");
+    expect(parse.out).not.toContain("jdo");
+    const home = ["/Users/", "jdoe", "/x"].join("");
+    const nearMiss = "https://fabric.passioncode.ai/agent-contract/extension/service/0.1";
+    const named = folder({ "fabric.source.json": { ...sourceManifest({ include: ["src/"] }), [home]: { extensions: { [nearMiss]: 1 } } } });
+    for (const args of [["--kind", "source-manifest"], ["--schema", "manifest"], []]) {
+      const out = run(path.join(named, "fabric.source.json"), ...args).out;
+      expect(out, args.join(" ")).not.toContain("jdoe");
+      expect(out, args.join(" ")).not.toContain("hint/");
+    }
+  });
+
+  it("says no pair was checked when --kind source-package reads a document or a folder without {source, package}", () => {
+    const dir = folder({ "doc.json": { a: 1 }, "fabric.source.json": sourceManifest() });
+    for (const target of [path.join(dir, "doc.json"), dir]) {
+      const result = run(target, "--kind", "source-package");
+      expect(result.code).toBe(0);
+      expect(result.out).toContain("note/pair  the document holds no {source, package} pair, so no pair was checked (FAC-SEM-160)");
+    }
+    const pair = folder({ "pair.json": { source: sourceManifest(), package: json("positive/fabric-package-agent.json") } });
+    expect(run(path.join(pair, "pair.json"), "--kind", "source-package").out).not.toContain("no pair was checked");
+  });
+
+  it("checks a source manifest beside its package as a pair, by their file names", () => {
+    const pkg = json("positive/fabric-package-agent.json");
+    const matching = sourceManifest({ slots: [{ name: "MAIL_OAUTH", kind: "secret", purpose: "reads the mailbox" }, { name: "DIGESTS", kind: "store", purpose: "the digests written", path: "digests" }] });
+    expect(run(folder({ "fabric.source.json": matching, "fabric.package.json": pkg })).code).toBe(0);
+    const result = run(folder({ "fabric.source.json": sourceManifest(), "fabric.package.json": pkg }));
+    expect(result.code).toBe(1);
+    expect(lines(result.out).map((line) => line.split("  ").slice(1, 3))).toEqual([["/package/secrets/0/name", "FAC-SEM-160"], ["/package/state/0/path", "FAC-SEM-160"]]);
+    expect(run(folder({ "a/fabric.source.json": sourceManifest(), "b/fabric.package.json": pkg })).code).toBe(0);
+    expect(run(folder({ "fabric-source.json": sourceManifest(), "fabric.package.json": pkg })).code).toBe(0);
+  });
+
+  it("knows fabric.source.json by its name when its content does not tell", () => {
+    expect(inferSchema({ include: [] }, "/x/fabric.source.json")).toBe("fabric-source.schema.json");
+    expect(inferSchema(sourceManifest(), "/x/anything.json")).toBe("fabric-source.schema.json");
   });
 });

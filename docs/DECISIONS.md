@@ -9105,6 +9105,732 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   DEC-0102 annotated; backlog CT-200, CT-202 and CT-203 filed.
 - **Source:** CT-200; the first organization server's request `38014539` (thread `1dcd7fda`) and its 0.5.0.
 
+### DEC-0149: an agent's source and its instance (`fabric-source/1`)
+
+- **Date:** 2026-11-03
+- **Status:** Accepted 2026-11-07, merged #251, after two consecutive clean rounds of the blind readings (rounds 81 and
+  82 at `d03ae791`, unit, product, seam). The research report's objection window closed 2026-11-03 18:00 UTC with no
+  objection (threads `21ac4057`, `0a8776f2`). The findings of rounds 1 to 82 of
+  the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
+  not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
+  exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
+  short names with an extension, unused-exclude, opt-in scope, owner's manifest patch; round 40 not clean: canonical
+  caseless fold; round 41 not clean: push carries history, history gate undefined, conformance fold, rules section 9;
+  round 42 not clean: history gate scope, KB item 5, and from its unit reading the Georgian join and a folder entry over
+  a link; round 43 not clean: whole-repository word text, CONTEXT team serving; round 44 not clean: target forms, word
+  forms, export parent, existing readers, public home; round 45 not clean: NFC nested repository; stale DEC/backlog/
+  scenario wording, elicitation target, later org release; round 46 not clean: grammar readers, organization later
+  public release; round 47 not clean: NFD-stored paths, binaries/missing, later public release, private mirror; round 48 not clean: the
+  lead's readers, the grammar's FAC-SEM-157 statement, CT-194's visibility sentence; exclude fails closed; CT-109
+  register is DEC-0149's landing step; round 49 not clean: the lead's routes still said 'another person'; vendored
+  files and binaries; boundary copies at DEC-0149's landing; widest reading made literal; round 50 not clean: the widest reading stopped at the first
+  segment; devices.md's strictest claim; the chain still named #235 as open; round 51 not clean: devices.md still ranked the boundaries; the
+  Done vector count; round 52 not clean: item 12's 'handing it to anyone'; pre-DEC-0149 readers outside the home;
+  credential file names read folded; the manifest under unchecked; round 53 not clean: the tree check's own unchecked
+  list skipped the manifest; an organization's own repositories; a personal agent's visibility change; a package to
+  earlier readers; round 54 not clean: CREDENTIAL_FILE missed U+2028/U+2029 names; the lead's old opening clause; public
+  release unqualified; round 55 not clean: a gitlink at the manifest's path under exclude; earlier collaborators
+  outside the home; a personal private home's visibility change; round 56 not clean: the manifest's path
+  read two ways; flat wordings beside round 55's sentence; round 57 not clean: flat access wordings;
+  the patch's full fold missing from the requirement rows; round 58 not clean: a flat
+  wording in conformance.md's hand-over row; round 59 not clean: flat wordings in the knowledge base's principles
+  section 7 and rules section 9; round 60 clean; round 61 not clean: principles section 7's shorter exception list,
+  the handoff's chain of open branches; round 62 not clean: relay.md's watcher sentence against service.md's; round 63 not clean: the
+  watcher's states named three times; round 64 not clean: authority.md's watcher state, the outage report, CT-244's
+  wording, "host" for a computer; round 65 not clean: the landing's watcher phrase widening FD-76's released fact; round 66 not clean: the first Git-mode
+  listing naming a file only, authority.md's start baseline; round 67 not clean: the landing's second sentence
+  naming every degraded source; round 68 not clean: a landing row citing moved test lines; round 69 not clean: authority.md's
+  clause on what DEC-0154 owes; round 70 not clean: who changes that clause in order 1; round 71 not clean: an interleaving where
+  nobody changes it; round 72 not clean: DEC-0150's Status form, "the same words"; round 73 not clean: who runs the
+  check after both land; round 74 clean, the first since round 63, at `b714bceb`; round 75 not clean: the knowledge
+  base's watcher lead, a new conflicting file, so the count of clean rounds starts again; round 76 not clean: the
+  dashed home form, the knowledge base's messages; round 77 not clean: `ENOTDIR`, the required-slot wording; round
+  78, after the merge with main at `b963d6a6`, not clean: CT-194's state, the `$comment`, the ops-digest import, fixed by
+  item DQ; round 79 not clean: an extension hint on a bare channel-agent declaration, Fabric Dashboards 0.8.30, fixed
+  by item DR; round 80 not clean: step 6's check of PR #628's watcher lines, the clause rule's end state, fixed by
+  item DS; rounds 81 and 82 at `d03ae791` clean on all three tiers),
+  cited by round number because their heads were on the review branch, which is not
+  kept at landing, are answered here as the coordinator
+  decided them. Additive: a new schema
+  (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
+  (`FAC-SEM-156` to `FAC-SEM-160`; `FAC-SEM-161`, reserved with them, is not used) and a new vector file; no existing
+  schema's validation, kind, code or vector changes (`device-common.schema.json`'s `$defs.detail.$comment`, count-free,
+  is DEC-0153's line, on main byte for byte, so DEC-0149 leaves that file unchanged).
+- **Context:** the operator asked that agents can be handed over as source and that a transfer happens only by their
+  wish (CT-194, relayed by Fabric `2af39c53` and a personal agent's request `99221f81`). The research report
+  [agent portability](reports/2026-10-27-agent-portability/README.md) set out the options (§5) and twelve questions (§6);
+  its window for objections passed with none. fabric-workspace answered (`f29499cf`) that the operator's words (agents
+  handed over as sources; a transfer only by wish, in translation) rule out never exporting a private agent and fit the
+  other two options; the Fabric Agent Adapter shipped the check's first part in its tag `v0.58.0` (commit `e311d308`,
+  announced in board message `565b20f3`: `fabric_source_check.py`, home paths, credential shapes, the operator's list
+  kept outside the tree, never a value repeated) and waits on this decision for the manifest, `export` and `import`;
+  another estate's interim scheme (board message `4cd56e3f`: an `<id>-data` instance folder, `<AGENT>_DATA_DIR`) found
+  no agent ready and an export that is in practice a fresh history. Here "the operator" is the person who owns the
+  agent and decides for it, the contract's term.
+- **Decision:** [source](specification/source.md).
+  1. **Where (Q1, option B).** A separate source manifest, `fabric.source.json` at the root of the agent's source
+     repository, `format: "fabric-source/1"`, schema `schemas/fabric-source.schema.json`, closed. It travels with the
+     source; it is not a member of `fabric-agent.json`, not the package and never the descriptor.
+  2. **Every kind (Q11):** serving agents, consumer agents and skill sets.
+  3. **Opt-in (Q10):** the manifest, the tree check, the source export and the import bind a repository with
+     `fabric.source.json`, and one without has none of them; the hand-over rule (item 12) binds every agent's source,
+     with a manifest or without one (decided by the coordinator in round 39: an opt-in that freed an agent without a
+     manifest from the hand-over rule would let the absence of a file decide what only the operator's word may). The
+     adapter's templates are to write one for every new agent (owed by CT-207). Requiring it of every agent is a later
+     decision.
+  4. **Default deny (Q2):** `include` (at least one path) names the source, `exclude` carves holes in it. A path is the
+     package's path grammar; one ending in `/` names a folder and everything under it; no globs. `.git` is never source
+     (a path with a `.git` segment, a segment read as Git's `is_hfs_dotgit` and `is_ntfs_dotgit` read one: ASCII case
+     folded, the code points HFS+ ignores removed, trailing dots and spaces dropped, or the short name `GIT~1`, decided
+     by the coordinator in round 37 because a case-insensitive or Windows file system resolves each of these to the
+     repository's `.git`); the manifest itself always is. Paths are compared in Unicode NFC, a file read and named by its
+     name as stored. A file outside `include` is simply not source.
+  5. **Members:** `format`, `include`, `exclude`, `slots`, `binaries` (binary files that are source, each inside it,
+     Q12), `unchecked` (at most 64 `{path, reason}`: source paths, files or folders, that travel with the source and
+     that the tree check reads by their path only, such as synthetic test vectors or a licence whose copyright line
+     names a holder on the operator's list; a credential file by its name is never source, unchecked or not; the
+     adapter's `.fabric-source-ignore` is retired into it: plain source to `unchecked` with its reason, a credential file
+     by its name to `exclude` or the instance, a glob to explicit paths or a folder entry, a nested repository to
+     `exclude` and checked in its own tree under its own manifest),
+     `publicAddresses` (at most 32 addresses the source may carry) and `description` (at most 200 characters).
+  6. **Slots:** `{name, kind, purpose, optional?, path?}`, `name` in the package's slot grammar, `kind` one of
+     `secret`, `config` (a non-secret setting, the operator's or publisher's identity included), `store` (a data store
+     relative to the data folder, with `path`, which no other kind has) and `endpoint` (the operator's infrastructure by
+     role). A store slot's `path` is written without a trailing slash and names the file or folder the agent keeps its
+     store in. No member ever holds a value.
+  7. **Installation strings (Q3):** the operator's own strings live on the operator's machine outside the source tree,
+     as plain text, never in the source and never exported; keyed digests are not adopted. The contract ships the
+     reference check with the list as an input; where a tool keeps the list is the tool's. `pnpm validate` reads none.
+  8. **The check** (`checkSourceTree`, kind `source-tree`, pure): `{manifest, files: [{path, text?, binary?,
+     nestedRepository?, link?}], instanceStrings?}` (`link: true` a symbolic link, its target as `text`, read with
+     `link-outside`'s rule and never a licence); it ignores a file that is not source and reads an `unchecked` file and a
+     nested repository by their path only. Blocking, `FAC-SEM-158`:
+     - `home-path`, on each line and a file's path: a home folder with a name in the forms the Fabric Agent Adapter's
+       `v0.58.0` check reads, listed in source.md; a one-character name and the adapter's neutral names, kept equal as
+       `NEUTRAL_HOMES`, are not a finding, and `~` never is: a path written relative to the user's home is portable; an
+       operator who wants a neutral-looking name caught lists it among the installation strings, and the adapter's
+       `home: <name>` declaration is a tool's addition;
+     - `credential`, on each line and a file's path, the forms the adapter's `v0.58.0` check reads (`_secret_in`),
+       listed in source.md: a private key block (PEM, OpenSSH, PGP); a JWK's private `d`; a JWT; a provider key
+       matched under ASCII case only, with no letter or digit of any script before it, read at every start; a bearer token inside a line; an absolute URL with a password
+       of 8 or more mixed characters, or a query or fragment value that is a credential (the URL ended by Python's white
+       space, an escape that is not UTF-8 decoded to U+FFFD), an inner URL starting with a
+       scheme read two levels deep; a long mixed run assigned to a name that can only carry a credential,
+       percent-decoded; a line with a JSON escape of `&`, `=` or `/` read again unescaped. A token holding one of the
+       adapter's synthetic words (`SYNTHETIC`, kept equal) is no finding, a private key block always is; a whole Ed25519
+       signature under a quoted `sig`, `signature` or `signatures` member is public. Or a file that is a credential by its name (pack's list plus
+       `*.token` and `*.credential`), unchecked or not;
+     - `binary` (marked binary and not in `binaries`, Q12); `nested-repository` (a submodule's gitlink or a folder
+       holding its own `.git` in the source: it would export as a link to another repository, or not at all; `exclude`
+       names it, and it is checked in its own tree; round 56: at fabric.source.json's own path, such as a gitlink the
+       index records there, exclude cannot remove it, since the manifest is always source: the line says to remove it);
+       `instance-string` (an entry found under Unicode simple case
+       folding, the entry and the text also in NFC, as written, percent-encoded, form-encoded with `+`, JSON-escaped,
+       with `\/`, or with `\uXXXX`); `short-instance-string` (an entry that is not a well-formed string of at least 3
+       characters, refused as input); `missing` (an `include` path with no file); `no-include`.
+
+     Warnings, `FAC-SEM-159`, accepted: `email` (the local part at most 64 characters, not in `publicAddresses`, not at
+     an RFC 2606 name, not followed by `:`, not ending in an image's extension, not inside a URL the credential kind
+     reports), `link-outside` (a relative Markdown link or a symbolic link whose target is not source), `no-license` (no licence file at the
+     root: the contract chooses no licence, Q7), `unused-exclude` (an `exclude` entry that names nothing the tree holds,
+     read folded; round 38), `excluded-by-fold` (a file an `exclude` entry names only once folded: not source, never
+     read, named beside the entry; round 38). A finding names the file, line (split at LF, a trailing CR dropped, as
+     the adapter reads it) and column (from 1, in UTF-16 code units) and kind, never the text found; a finding in a
+     file's own path has no line and no column. `pnpm --silent validate <dir> --kind source-tree` reads what Git would
+     commit in a work tree that does not ignore the folder (a `git` from PATH's absolute folders only, `-c
+     core.fsmonitor= ls-files --cached --others --exclude-standard`, gitlinks from `ls-files --stage`, the work tree's contents, Git's location variables
+     and `GIT_CONFIG*` removed, `GIT_CEILING_DIRECTORIES` kept as the caller's fence, never through a symbolic link, no path outside the source reached, an untracked repository a nested
+     one, a path it cannot reach a usage error, a Git command unanswered after 60 seconds a walk with a note, an
+     `include` path Git ignores read as `missing`) and otherwise walks the folder, which it does only when Git lists
+     nothing under any include path (a nested repository in the source counts) (never `.git`, a folder only when an include path reaches into it or covers it),
+     with a note saying why when Git was there; it never prints the checked folder or a found value: a file by its path
+     in the folder, or `files[<index>]` when a finding or an e-mail address is in that path (an address in a path is no
+     finding and is never printed), counted from 0 in the code-unit order of the paths read (a nested repository
+     outside the source takes no index); a path it cannot read that holds a finding or an address by the folder it is
+     under, a name Git lists that is not UTF-8 by its position in Git's list (only where its leading folders that decode
+     lie in the source as a whole; any other is outside the source and skipped). A source check (the
+     folder, a source-tree document, any `fabric.source.json`) prints no instance data in a schema or parse message: a
+     parse error by its line and column, found by reading the text again; a schema error built from its keyword and
+     the schema's own values (an extra member "has a member the schema does not define", without its name; a bad
+     member name at its object); no hint of any kind; and, as a second line of defence, each value of a message the
+     tree check would report and each member name of a problem's path that holds one named by its place; the checked folder itself as `.` in every usage error, a path's
+     finding read as the tree check reads one (an e-mail address in a path is no finding, and is read as in a line,
+     RFC 2606 and image names being none, except that one followed by `:` is still an address); a file whose own path
+     is outside the grammar is not source: never read and never exported, in either mode.
+     Given a file named `fabric.source.json`
+     it checks that file's folder; a file that is a JSON object with neither a `manifest` nor a `files` member (a
+     source manifest under another name, whatever its `format`, or any other such object) is a usage error (exit 2) that
+     says to name it `fabric.source.json` or pass its folder; a JSON value that is no object stays a schema finding
+     (`FAC-SEM-000`, exit 1); any other file is a source-tree document named by its basename.
+     The vectors carry a `constants` block (the neutral home names, the synthetic words, the home-folder and
+     credential-file patterns) written from `src/source-rules.ts`, which a port holds equal.
+  9. **The manifest's rules** (kind `source-manifest`): `FAC-SEM-156`, a slot named twice, a name or purpose shaped like
+     a credential (read as `FAC-SEM-065` reads a package secret's, so a purpose packs unchanged), a manifest
+     `description` shaped like one (read as prose), a store path twice; `FAC-SEM-157`, a path twice in its list (`unchecked` included), a path in
+     `.git`, an `include` path inside an `exclude` folder, an `exclude` path inside no `include` folder or equal to an
+     `include` path, a `binaries` path that is not a file of the source, an `unchecked` path outside the source. A
+     message names a credential-shaped name or path by its place (`slots[<i>]`, `secrets[<i>]`), never by its value; so
+     does `FAC-SEM-160`.
+  10. **The package pair** (kind `source-package`, `{source, package}`): `FAC-SEM-160`, the package's `secrets[]`
+      (name and `optional`) are the source's `secret` slots, always; its `state[]` paths are the `store` slots' paths,
+      as sets, when `state[]` holds any entry: an absent or empty `state[]` is a copy packed without state (a
+      colleague's copy, package.md) and passes. `pack` writes them from the manifest. A package may carry
+      `fabric.source.json` as an ordinary file listed in `files[]` (a packer that packs in place lists it), and
+      `pnpm validate <dir>` checks a folder holding both files as that pair.
+  11. **Source export (Q4, Q5, Q6, Q9):** it reads a committed tree at a named commit, takes only the source paths and
+      never a gitlink, runs the check with the operator's list and refuses on any blocking finding; it writes a
+      directory holding a Git repository with one new commit whose only parent, if any, is the earlier export commit the
+      recipient holds, and no commit from the home, author and committer `Fabric source export
+      <source-export@fabric.invalid>`, the source commit's committer date, the message `Source export`; it rewrites no
+      file (so the source's identity fields name the publisher, never a person or the operator's account), carries no
+      link to the original, publishes nothing, creates no hosted or remote repository and never pushes, and writes a receipt in the instance (source commit, the recipient, the manifest's
+      SHA-256, counts by kind, the new commit), never a value found. Author and committer dates are both the source
+      commit's committer date, with its time zone; the receipt records the recipient and the export commit, the next
+      export to that recipient reads its parent from it (fetched from the recipient's repository), and an export that
+      cannot land as a fast-forward (a moved branch, or a parentless export into a non-empty branch) goes as a new
+      branch or pull request, never a force-push (rounds 43 to 45). It does not run the source's tests and does not
+      refuse on them (Q9); a tool may offer a test run beside it. The adapter's `export`, owed by CT-207, is to be the
+      implementation; this repository ships the check.
+  12. **Handing over (Q8, option P3):** A source hand-over (a route source.md's Handing over counts) is effect class
+      `publish`, a person's act each time, which no standing grant authorises (the item's operative rule, placed here
+      in round 52; the dated chain below records how each route was decided). A local source export is not a transfer and is always allowed, and a copy moved
+      within the operator's own estate (the accounts and placements the operator alone holds) to a place that is not
+      public and that no one outside the operator can read is not a hand-over, while a push or copy elsewhere that is public,
+      that another owner holds, or that another person is given access to (round 49: anyone who could not already read
+      the home, since the round-48 lead filters every route; earlier collaborators included: they count as the home's
+      readers only inside the home itself), is one (for a personal agent, an organization's repository is
+      another owner's even when the operator administers it, while an organization's own repositories are its own agent's
+      owner's places (round 53), as the knowledge base's agents-first item 9, "A source
+      hand-over takes the operator's word on that act", reads); the operator's standing
+      permission of 2026-10-12 is unchanged (the knowledge base's roadmap records it in its D5 row: "the broker's
+      mechanics go into `node.lifecycle`, with a standing permission in his global instructions"; moving mechanics file
+      by file into a product's own source through that product's own change is this contract's reading of it, not its
+      text). The repository where the agent's owner keeps and develops its source is its home, not a recipient: the
+      owner's own commits, branches and releases there are no hand-over, and a hand-over is the source reaching a place
+      or a person it was not at; the carve-out never lets a personal agent's source move into an organization's or a
+      public repository, which stays a hand-over
+      ([source](specification/source.md#handing-over)'s line paragraph; decided by the coordinator in round 36 under the
+      operator's recorded rules: the rule guards source leaving the operator's estate or reaching new readers, personal
+      agents stay private, and an organization's agents are developed in its repositories by its standing practice of
+      branches, landing and releases, so without the carve-out every ordinary push and release of such an agent, and of
+      a public skill set, would need a word per act). Decided by the coordinator in round 37 on the same ground: the
+      owner's own placements are part of the home carve-out, so a deploy of the agent to a placement its owner holds
+      (an organization's agent on that organization's placement included) is no hand-over, while a personal agent's
+      source on an organization's or a team's placement, or on one other people can read, is one (it reaches new
+      readers); serving the running agent to a team gives no one the tree and is none; each push of a commit not
+      already in a repository that is not the home and that is public or another owner's is its own hand-over (each
+      brings new source to new readers); a package handed to another person (a colleague's copy) carries the source
+      and is a hand-over, a release that stays where the home's readers are is covered by "releases there", and a
+      personal agent's package or release published to a public registry stays a hand-over. Decided by the coordinator
+      in round 38 on the same ground: the permission covers mechanics adapted into a product's source file by file, and
+      the agent's source as such (its tree, or a whole copy under any name) moving into an organization's or a public
+      repository stays a hand-over (the permission's text names mechanics, not a repository); access the owning
+      organization gives its own members to its own agent's home is none, since they are the home's readers, while
+      access given to anyone outside the owner is one, any person but the operator for a personal agent; an
+      organization's agent released by the organization to a public registry is its own release, the organization
+      being the home's owner; for an act on the whole repository (a transfer, a visibility change, access given) the
+      word names the repository instead of one commit, since the act hands over every commit (round 42: not done for a
+      personal agent's private home; round 44: the repository only for an organization's two acts). Decided by the
+      coordinator in round 39 on the same ground: a file is a hand-over when it is sent to another person or to a place
+      outside the owner's, and a processor acting for the owner under the owner's own account or host (a model provider
+      in the owner's session, CI on the home's host, a service the owner runs) is no recipient, since the rule targets
+      disclosure and development uses such processors daily; a push or release of what is already public, from a public
+      home to another public place of the same owner (a mirror, a marketplace repository, a public registry), reaches
+      no reader who could not read it already and is no hand-over, the hand-over having been the visibility change that
+      made it public (the operator's recorded practice has agents release public skill sets themselves); mechanics are
+      "adapted file by file" when the result does not run as the agent, carries none of its manifest, identity, data,
+      keys or private names, and each file is changed into the product's own interfaces in the product's own change,
+      and in doubt the move is a hand-over and takes the word. Decided by the coordinator in round 40 on the same ground
+      (one principle: making a source public for the first time always takes the word): a processor counts only while
+      what it holds stays readable by no one outside the owner, and output it makes public or readable by others (a
+      public server, a Pages site) is a hand-over; a personal agent's home created public is the visibility change and
+      takes the word, the already-public carve-out covering only a source an earlier act on the word, or the owner's
+      own act, made public; a personal agent's package or release on a public registry is a hand-over unless its home is
+      already public, the files the pack step derives from the public source (`fabric.package.json`, signatures,
+      checksums) counting as public and nothing else; an act on the whole repository (a transfer, a visibility change,
+      access given outside the owner) hands over the history too, which no tree check reads (round 42 settles it
+      below); and an organization's release of its
+      agent to a public registry is its own act only when the agent's home is already public, a private organization
+      agent's first public release taking the word like a visibility change. Decided by the coordinator in round 41 on
+      the same ground: a hand-over by push or by file carries a source export (no commit from the home, the tree
+      check passed), never a home commit (round 42 restates it);
+      a processor is no recipient while what it holds stays readable by no one but the owner and the processors acting
+      for it; what takes the word when a source becomes public is a personal agent's source made public for the first
+      time and an organization agent's private source made public, while an organization creating its own agent's home
+      public is its own act (the rule guards the operator's personal agents and new readers of private source); a bundle
+      a public page serves is the agent's output, and serving the source tree, source maps or unbuilt files publicly is
+      a hand-over; and the prompts or resources a running agent serves to a team are its output. Decided by the
+      coordinator in round 42, simplifying the rule instead of defining a gate: a hand-over by push or by file carries a
+      source export (no commit from the home, the tree check passed), never another commit; an act on the whole
+      repository of a personal agent (a transfer, a visibility change, access given outside the owner) is not done, and
+      the source leaves only as a source export; a gate that would let such an act carry the history is not decided
+      here. The reason: a host keeps and serves more than any local clone sees (`refs/pull/*`, dangling and
+      force-pushed commits by id, fork networks), so no local gate can stand behind "never moves in its history", and
+      the history gate round 41 defined is withdrawn. An organization's acts on its own agent's whole repository are its
+      own, under its own release rules (the knowledge base's rules section 9), except that making a private
+      organization agent's source public takes the word. A push or release of what is already public, from a public
+      home to any other public place (another owner's included, such as a marketplace repository or a
+      fork-and-pull-request flow), reaches no reader who could not read it already and is no hand-over when an earlier
+      act on the word or the owner's own act made it public, and giving access to a public home is none, while on a
+      private home it is one. A prompt or resource that is a source file served verbatim, or a bundle built without
+      minification, is the source tree served. The 2026-10-12 permission is read as rewriting mechanics file by file,
+      without "or copying", the adapted-file test standing. Decided by the coordinator in round 43 on the same ground:
+      the routes are a list "among others", the push route reaching a repository that is public, another owner's, or
+      readable by another person, and source files' content copied into a message, an issue, a gist or a thread outside
+      the owner's being one too (the rule guards new readers, whatever the medium); a later export to the same
+      recipient takes the export commit it holds as its parent (round 44 restates how it lands); any other person's
+      access to a personal agent's private home is an act on its whole repository, which is not done (round 54: as with a
+      transfer, the operator's own explicit permission for a visibility change is outside this contract, and the
+      contract's tools do not perform it; round 44 settles
+      readers it already has); an organization agent's first public release from a private home takes the word and later ones are its
+      own; an organization's act that gives its agent's private source new readers outside the organization (a transfer
+      to another owner, access given outside it) takes the word naming the repository, which accepts the history as it
+      stands, its other acts staying its own; serving source takes the word as the deploy of a commit that serves it to
+      others, one word per commit and audience, and serving what is already public from a public home is none; a patch
+      path beneath a symbolic link in the receiver's tree is refused whole, as `git apply` refuses one; and outside a
+      service's action the agent states the agent, the target and the recipient, the operator's reply accepting
+      that statement being the word. Decided by the coordinator in round 44, aiming for fewer rules: the word names the
+      repository only for an organization agent's private home made public (a visibility change) or given new readers
+      outside the organization, and every other hand-over, an organization's first public release from a private home
+      included, names its source commit (one target form, the commit, wherever a commit is what moves); the word comes in
+      three forms and no other, the decision with its exact target and the service's in-call elicitation on a service's
+      action, and outside one the stated word, the agent stating the agent, the target and the recipient and the
+      operator's reply accepting that statement, consumed once and carried by a relay only under OA-5 (so a hand-over
+      outside a service has one defined form); a source export is one new commit whose only parent, if any, is the
+      earlier export commit the recipient holds, no commit from the home, a later export's input naming that commit
+      (from the earlier hand-over's receipt; none named, a parentless export) and landing as a fast-forward while the
+      recipient's branch still ends there, otherwise as a new branch or pull request for the recipient to merge under its
+      own rules, never a force-push (the recipient's history is the recipient's); access the operator gave to a personal
+      agent's private home before DEC-0149 was accepted stands as the operator's own act, so a commit reaching those readers is no
+      hand-over (round 52: in the home only), nothing is retroactive and an agent never gives new access (an inventory of such homes is filed at
+      landing for the operator to review, as information, not a gate); the whole-repository rule covers a personal
+      agent's private home only, a public home's access and visibility being outside it; and serving is a hand-over to
+      anyone who cannot read the home. Decided by the coordinator in round 45 on the same ground, removing second
+      statements that had gone stale: an organization's later public release from its private home by push (round 46: an
+      organization's later public release from its private home, by any route) takes no
+      word and still carries a source export whose parent is the earlier export commit, so the home's history stays
+      back (its release rules govern its own releases, and the export keeps the history out); the export's receipt
+      records the recipient and the export commit, from which the next export reads its parent, its objects fetched
+      from the recipient's repository, and any export that cannot land as a fast-forward goes as a new branch or pull
+      request (one landing rule, no force-push); access the operator gave to a personal agent's private home stands
+      when given before DEC-0149 was accepted, on its merge date (a fixed point, 2026-11-07); a transfer of a
+      personal agent's home, public or private, is not done, since the operator's rule asks his explicit permission for
+      any transfer of a personal agent and that permission is outside this contract, while making a public personal
+      home private is none; and material already public needs no word by any route (one clause for every route).
+      Decided by the coordinator in round 46, one rule stated once: an organization agent's private home's first public
+      release, by any route, takes the word naming its source commit, and every later public release from that home,
+      by any route, is the organization's own act; every public release from a private home, first or later, carries only the
+      source export (by push or by file) or, on a registry, a package packed from that source commit holding only source
+      paths that passed the tree check (so no route carries the home's history); a package handed over, or published to a public registry from a private home,
+      names as its target the source commit it was packed from; the two exceptions (an organization's later public release
+      from its private home and material already public) are stated once, in the lead of the route list, so they cover every route; the export's
+      receipt names the recipient; and every reader takes a path in the grammar as written and in NFC (round 47: and in
+      NFD, with no segment made only of dots, spaces and code points HFS+ ignores) through one helper,
+      `inGrammar`, since a reader that skipped NFC printed `excluded-by-fold` in Git mode only.
+      Decided by the coordinator in round 47: `inGrammar` holds when the grammar holds as written, in NFC and in NFD,
+      one rule for a path read from disk and a manifest entry alike (NFD of the NFC form is the NFD form, so Git mode,
+      which lists NFC on macOS, and a walk, which reads the stored form, agree), and a path with a segment made only of dots,
+      spaces and code points HFS+ ignores (`.` U+200C `.`, `.` and a space, `...`) is outside it, since it folds to
+      nothing and a tool that trims or folds names as the fold does (Win32 path handling drops trailing dots and spaces;
+      a reader that strips those code points before joining) may read it as empty, `.` or `..` (the coordinator's
+      correction of round 47: a scratch HFS+ volume creates `.` U+200C `.` as its own folder, so no file system mechanism
+      is claimed), so every reader,
+      the tree check and a patch refuse it and an import never writes it; the `missing` and `binaries` loops skip an
+      entry outside the grammar, which `FAC-SEM-157` names once by its cause; the not-done clause covers an act on the
+      whole repository of a personal agent's private home or of any copy of it within the operator's estate that
+      carries its history (a private mirror); the route list's lead says a route is a hand-over only when the source
+      reaches someone who could not already read the home, and that a release is a source export or a package (serving
+      and copied content are never a release, so they keep their own rule); a package holds only source paths that
+      passed that commit's tree check, besides the files the pack step writes (`fabric.package.json`), built files
+      travelling only as committed source paths; a local export with no recipient records none and is parentless; an
+      export keeps file modes and symbolic links as committed.
+      Decided by the coordinator in round 48: the route list's lead (round 47's reading narrowed) says a copy is no
+      hand-over only when it stays in a place the home's owner holds and only the home's readers can read it (the owning
+      organization's members for its own agent, and, for a personal agent's private home, the collaborators given access
+      before DEC-0149 was accepted (round 55: only inside the home itself)), and a repository or placement another owner
+      holds stays a hand-over; an `exclude`
+      entry outside the grammar as a file system may read it fails closed, still removing its widest reading (the
+      folder before its first segment made only of dots, spaces and code points HFS+ ignores, everything when that is
+      its first segment, or, lengthened only, the entry folded as written), while an `include` entry so read names
+      nothing; `FAC-SEM-157` says such an entry once by its cause, in a tree document too; an agent without
+      `fabric.source.json` is handed over or released publicly from a private home only once it has one (round 52: the routes that carry a source export or a package; opt-in otherwise), since every carrier
+      needs the tree check; a package handed over, or published to a public registry from a private home, holds only committed source paths besides
+      `fabric.package.json`, so a vendored file travels only as a committed source path (a binary one also listed in `binaries`); a hand-over by push or by
+      file of a local export records the recipient and the export commit in that export's receipt; the CT-109
+      register's fourth home-path boundary, `SOURCE_HOME_PATHS`, lands with this decision.
+      Decided by the coordinator in round 49: the round-48 lead filters every route (a route reaching only those who
+      could already read the home is none, beside the two named exceptions), each route saying "anyone who could not
+      already read the home" where it said another person; an exclude entry's widest reading is the union of the
+      readings (the folder before its first segment that folds to nothing, its parent too when that segment holds two
+      or more dots, each also as a file without a trailing `/`), its cause and effect read from that same segment
+      before a length cause, and an include equal to or under what it removes said once at the include; the opt-in
+      manifest is required only for a hand-over or a public release from a private home (round 52: the routes that carry a source export or a package; opt-in otherwise), and a package rule only for a
+      package handed over, or published to a public registry from a private home, a vendored file travelling only as a committed source path
+      (a binary one also listed in `binaries`); a local export records the recipient when handed over by push or by
+      file; every copy that counts the home-path boundaries counts four at DEC-0149's landing.
+      Decided by the coordinator in round 50: the widest reading walks every segment from the first that folds to
+      nothing (the depth starting at its index, a segment that folds to nothing with two or more dots lowering it by one,
+      one with fewer dots keeping it, any other segment raising it by one), and an exclude entry removes the folder the
+      shallowest reading reaches, everything but `fabric.source.json` at depth 0, without a trailing `/` also as a file
+      of its name (round 49's reading stopped at the first such segment); devices.md names the one form the `detail`
+      pattern accepts that `SOURCE_HOME_PATHS` reads (`%5CUsers%5C<name>`) (round 51: devices.md ranks no boundary and
+      counts no exceptions; it says the four boundaries read different forms, that form among them); a personal agent's private home takes no
+      access newly given to another person beyond the access given before DEC-0149 was accepted; the copied-content
+      route says readable by anyone who could not already read the home; the device-common `$comment` is count-free and
+      the same line as DEC-0153's.
+      Decided by the coordinator in round 51: the lead's filter is bound to its place condition, so a route that stays
+      in a place the home's owner holds and reaches only those who could already read the home is no hand-over, while a
+      place another owner holds stays one even when only earlier readers can read it; devices.md ranks no boundary.
+      Decided by the coordinator in round 52: the item's operative rule leads it (a source hand-over, a route source.md's
+      Handing over counts, is effect class `publish`); a commit reaching readers given access before DEC-0149 is no
+      hand-over in that home only; a credential file's name is read folded as a `.git` segment is; no `unchecked`
+      entry names the manifest; a hand-over by push or by file, a package handed over or published to a public registry or a public release (round 54: from a private home) carries a source export
+      or a package and so needs the manifest, while an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home an agent does neither on its own (with the operator's explicit permission for that act it is his own act, no act of this contract); every later public release of a personal agent from a private home is its own hand-over; a source export
+      creates no hosted or remote repository and never pushes.
+      Decided by the coordinator in round 53: the tree check skips a file as unchecked only where `uncheckedTest` does,
+      so the manifest is always read, and never as binary (`FAC-SEM-157` refuses a `binaries` entry naming it); a patch
+      path whose name is a credential file is refused; the `.env.example` exceptions match only as written in lower
+      case; for a personal agent an organization's repository is another owner's, while an organization's own
+      repositories are its own agent's owner's places; a package sent to a place outside the owner's is a hand-over;
+      whoever hands a local export over records the recipient and the export commit in its receipt, one record per
+      recipient.
+      Decided by the coordinator in round 54: `CREDENTIAL_FILE`'s name runs read any character but a line feed, as
+      `TOKEN_FILE`'s do, so a name holding U+2028 or U+2029 is a credential file; a nested repository at the manifest's
+      path is always in the source; a refused patch path that is not a string is named by its index; the lead opens "a
+      route is a hand-over when the source reaches someone who could not already read the home, or a place another owner
+      holds"; the scoping and package sentences read "from a private home", so an agent whose home is already public and
+      that has no manifest is untouched; a personal agent's private home's visibility change, like a transfer, needs the
+      operator's own explicit permission, which is outside this contract, and the contract's tools do not perform it.
+      Decided by the coordinator in round 55: a nested repository at the manifest's path is in the source before any
+      `exclude` is read, and its message gives the remedy (remove it), since `exclude` cannot remove the manifest; a
+      `paths` value that is not a list is refused whole as `paths`; round 52's answer on earlier collaborators stands,
+      stated once in the lead: they count as the home's readers only inside the home itself, so a copy in another
+      place, even one the owner holds and they can read, is a hand-over; a personal agent's private home changing
+      visibility or gaining outside readers is not done by an agent on its own, and with the operator's explicit
+      permission for that act it is the operator's own act under his own rule, and no act of this contract (round 55:
+      this restates round 54's sentence); the contract's tools do not perform it.
+      Decided by the coordinator in round 56: one reading of "at the manifest's path" (`atManifestPath`: one trailing
+      `/` dropped, NFC) in the nested-repository test and its message; a patch also refuses a credential file's name
+      under the full fold, while the tree check keeps its ASCII reading for parity with the adapter; a sparse `paths`
+      list's holes are refused by index; a personal agent's private home is not made public by an agent (superseded by round 57), and an agent
+      does neither of the organization's two acts on it on its own; the adapter's pack for an organization is a hand-over
+      the word gate covers.
+      Decided by the coordinator in round 57: an agent never gives new access on its own, and a transfer or an act on
+      the whole repository of a personal agent's private home is not done by an agent on its own (with the operator's
+      explicit permission for that act it is his own act, no act of this contract), every flat wording qualified so; the
+      three requirement rows carry the patch's full-fold credential reading; an `org:<orgId>` context instance on a
+      machine the operator holds, under a share grant (DEC-0082, DEC-0086), is the owner's placement serving the
+      organization and no hand-over, while a placement on a machine, registry or repository the organization holds is one.
+      Decided by the coordinator in round 58: every flat wording on the living pages about a personal home's access,
+      visibility or transfer is qualified (conformance.md's hand-over row included); a machine the operator holds stays
+      his when it is enrolled in an organization (enrollment gives the organization a device record, not the machine),
+      while an OS account or machine the organization owns whole is the organization's; the manifest is read as text
+      (unless a nested repository, a gitlink or a folder holding its own .git, sits at its path, which blocks on its own
+      as nested-repository; the folder check cannot read a manifest where a folder sits at its path, in a walk or in Git
+      mode, and stops with "not a file"; it reports nested-repository when the index records a gitlink at that path over
+      a file).
+      Decided by the coordinator in round 59: the knowledge base's principles section 7 and rules section 9 read with
+      the operator's own rule (never moved, published or listed without his explicit permission for that act; round 61:
+      with it, a transfer, a visibility change or new outside readers is his own act, no act of this contract, and
+      publishing the source is item 9's hand-over), naming the same exceptions (round 61: the full list whose home is
+      the knowledge base's item 9, material already public, the owner's own commits and releases in a public home, the
+      source hand-over on the word and the operator's own act with his explicit permission); a gitlink outside the manifest's
+      path is listed both as its name and as its folder, as the checker reads it, so a folder exclude entry over it is
+      used.
+      Round 60's readings were clean. Decided by the coordinator in round 61: the folder check cannot read a manifest
+      where a folder sits at its path and stops with "not a file", and reports a nested repository where the index
+      records a gitlink there over a file; FAC-SEM-157's "always travels and is always read" speaks of a manifest that
+      is a file; Git mode is kept for a listed file at a path an include entry lies beneath, leaving that entry missing.
+      Decided by the coordinator in round 62: relay.md's machine-report failure follows service.md's watcher rule (the
+      entry shows on the hub's well-known document and the dashboard; a degraded entry opens no message, only an agent
+      unavailable for more than 15 minutes does), so a move's wait on reports is seen on the dashboard and CT-244 owes a
+      rule for messaging that failure; conformance.md's watcher row says the same, with the FD-76 pointer.
+      Decided by the coordinator in round 63: relay.md and conformance.md name no watcher state and point at service.md's
+      definition of unavailable, so the one landing edit to service.md carries both; the hub's entry shows where the hub
+      shows its state (its well-known document and the dashboard under `fabric-service/0.1`, otherwise SCR-23 for
+      Fabric's hub); CT-244 keeps its id and starts from the operator's recorded rule that a failure lasting over 15
+      minutes is messaged; "Git hosting service" where "host" meant it.
+      Decided by the coordinator in round 64: CT-244's row says where the wait on reports is seen as relay.md does;
+      "host" for a computer becomes "a computer's name" (installation strings); the knowledge base's authority.md points
+      at service.md's definition. Round 63's unit reading passed; its one risk (the text said any listed path an include
+      entry lies beneath keeps Git mode, while the code requires that no exclude entry removes it) is closed by the
+      coordinator's item CF: the text follows the code, which stays, and two CLI tests pin both trees.
+      Round 64's seam reading failed on authority.md, closed by item CA in the knowledge base; the landing's watcher
+      phrase gains `foreign` (DEC-0154's W14) and a positive check.
+      Decided by the coordinator in round 65: the landing writes the contract's rule (unavailable is `down`, `foreign`
+      or `foreign-user`) and Fabric Dashboards' released fact (FD-76 counts `down`; `foreign` and `foreign-user` are
+      owed, DEC-0154) as two sentences, with a negative check; relay.md cites DEC-0149 and service.md for the rule and
+      FD-76 only for `down`; the contract PR merges first and PR #628 straight after, in one session, with a check that
+      the old watcher sentence is gone; a changed CT-244 id is found with `git grep`; Git mode's first listing is "a file
+      under one, even one an exclude entry removes", as the code reads it (round 66 made it "a listed path under one (a
+      file or a nested repository)", item CS); deterministic timeout tests are a row filed
+      at landing, the code unchanged; the landing changes only the subject and the list of states of the watcher text's
+      first sentence, keeps the rest and adds FD-76's fact after it, and its two checks quote their patterns so no shell
+      runs them, run on probe files. Round 65's product reading failed (item CJ); its unit and seam readings passed.
+      Decided by the coordinator in round 66: the first listing that keeps Git mode is a listed path under an include
+      path (a file or a nested repository), even one an exclude entry removes, as `index.covers` reads it, the code
+      unchanged and CLI test E13 added; the knowledge base's authority.md says the start baseline keeps an episode a
+      `down` opened open on a degraded source outside it and stays the fallback for a service that sends no `setup`
+      flag; the landing's second sentence and relay.md say FD-76 opens an episode only for `down` and keeps it open
+      on such a source; the negative landing check reads the joined text. Round 66's unit reading failed (item CS),
+      its product reading failed (item CQ) and its seam reading passed.
+      Decided by the coordinator in round 67: round 66's "a degraded source outside it" is a failing source, one not
+      marked `setup: true`, outside the start baseline, since FD leaves `setup: true` sources out of the baseline and of
+      holding the episode, so FD's failure message at 15 minutes may name that source (the landing's second sentence,
+      relay.md and the knowledge base's authority.md); a row filed at landing decides whether counting a degraded
+      continuation of a `down` episode toward the 15 minutes conforms; the negative landing check exits 1 when it
+      prints 0; E13 runs on Windows too; the first Git-mode listing names a file, a symbolic link or a nested
+      repository and counts the manifest when an include entry names it, while the second and third count the
+      manifest's own path only as a gitlink, the code unchanged and a CLI test added. Round 67's product reading passed
+      (its risks became items CV and CW), its unit reading passed (its risks became items CY and CZ), and its seam
+      reading failed (item CV).
+      Decided by the coordinator in round 68: the landing rows name tests by title; both landing orders are written
+      out, DEC-0149's landing always changing the watcher sentence's subject to "A watcher" and adding FD-76's sentence,
+      and the second of DEC-0149 and DEC-0154 changing the list of states and adding the clause on what DEC-0154 owes;
+      FD-76's held episode is within one run of a service (a restart puts the source in the new baseline); the third
+      Git-mode listing is a listed path an include entry names as a folder or lies beneath, as `nestedTest` reads it,
+      the code unchanged and two CLI tests added. Round 68's seam reading failed (item DA); its product and unit
+      readings passed.
+      Decided by the coordinator in round 69: the knowledge base's authority.md says counting `foreign` and
+      `foreign-user` is proposed for FD's watcher in contract DEC-0154, true while DEC-0154 is proposed; who changes it
+      depends on the landing order (round 70: DEC-0149's lander on PR #628 before merging it when DEC-0154 is already
+      accepted, DEC-0154's acceptance step otherwise); DEC-0154's handoff describes both landing orders with the same landed texts
+      and checks. Round 69's product reading failed (item DG); its unit and seam readings passed.
+      Decided by the coordinator in round 70: at step 6, right before PR #628 merges, the lander reads DEC-0154's Status
+      line on the contract's main; if DEC-0154 is accepted, the two clauses on PR #628 become "owed by FD's watcher
+      (contract DEC-0154)" before the merge, and otherwise "proposed" stays for DEC-0154's acceptance step; after both
+      land, in either order, the knowledge base reads "owed" twice and "proposed" never. Round 70's product and seam
+      readings failed on the same break (item DI); its unit reading passed.
+      Decided by the coordinator in round 71: who changes the knowledge base's clause on `foreign` follows one rule both
+      handoffs carry (since round 72 as one block, byte-identical), replacing rounds 69 and 70's owner per order: each lander checks after its own
+      write, so whichever finishes second sees the other's result, and the edit depends on the text, so a second run
+      changes nothing. DEC-0149's lander runs a status check that reads DEC-0154's Status anywhere in its block before
+      merging PR #628 (step 6) and again right after it (step 6b), with the clause check on the knowledge base's main;
+      DEC-0154's knowledge base step runs after its contract merge, and its Status takes the form "- **Status:**
+      Accepted <YYYY-MM-DD>, ...". The clause becomes "is done by FD's watcher since its 0.8.30, FD-159, under contract
+      DEC-0154" (round 79: Fabric Dashboards released the count in 0.8.30, `e23551e8`, so "owed" no longer holds), with
+      no inner parentheses; a withdrawn DEC-0154 leaves the clause to a knowledge base row its withdrawer files. Git
+      mode's second listing names only what it adds, a gitlink at the manifest's own path. Round 71's unit and product
+      readings passed; its seam reading failed (an interleaving where nobody edited the clause), fixed by item DK.
+      Decided by the coordinator in round 72: both handoffs carry the knowledge-base clause rule as one block,
+      byte-identical, pasted from one file; its status check matches any Status line in DEC-0154's block that starts
+      with "- **Status:** Accepted", as DEC-0150's ("Accepted, merged <date>, ...") and DEC-0153's ("Accepted <date>,
+      ...") on main both do; steps 6 and 6b point at the block. Round 72's unit, product and seam readings all failed on
+      DEC-0150's Status form, which round 71's text gave as "Accepted <date>", and the product reading also on the claim
+      that the two handoffs carried the rule in the same words; fixed by item DL.
+      Decided by the coordinator in round 73: in the shared block, the lander that makes the edit runs the check after
+      both land once its edit is on the knowledge base's main, records a mismatch and checks again once the other
+      lander's knowledge-base PR is merged or closed, and does not run it under `set -e`; the first window starts at the
+      later of DEC-0154's contract merge and PR #628's merge; any other order still ends owed twice. A deferred PR #628
+      merge reruns step 6's status check first. Round 73's unit reading passed; its product and seam readings failed on
+      who runs the check after both land (DEC-0154's lander could run it while step 6b's knowledge-base PR was open);
+      fixed by item DM.
+      Round 74, at `b714bceb`: the unit, product and seam readings all passed, the first clean round since the run of
+      not clean rounds that began at round 63; round 75 was not clean, so the count of clean rounds starts again.
+      Decided by the coordinator in round 75: the knowledge base's PR #628 states the contract's rule (a message only
+      for an agent unavailable, as `service.md` defines it, for more than 15 minutes) and FD-76's released fact apart
+      (an episode opens only for `down`, at its first `down` look, and stays open on a failing source outside its start
+      baseline, so the 15-minute message may follow a shorter `down`), its clause on `foreign` kept on lines 115 and 128;
+      the merge with DEC-0154 at `9161796d` conflicts in fifteen files, `service.md`'s rule table resolved with
+      FAC-SEM-142 from DEC-0149 and FAC-SEM-143 from DEC-0154; the shared block treats a clause count other than 0 or 2
+      as a mismatch and sends an outside edit to a knowledge base row. Round 75's unit reading passed; its product
+      reading failed on the knowledge base's watcher lead and its seam reading on the new conflicting file; fixed by
+      item DN.
+      Decided by the coordinator in round 76: the dashed home forms read as their patterns do (`-mnt-c-Users-` and
+      `-c-Users-` among the forms never after a letter, a digit or a dash; `C--Users-` never after a letter or a digit),
+      the code and vectors unchanged; the knowledge base says what FD sends for an episode (a failure only for an
+      episode still unavailable at 15 minutes, a recovery or removed message only after a delivered failure, one
+      message after the outage when the channel could not take the failure) and names a `down` within the 15-minute
+      calm as a second continuation, as the fourth landing row and CT-214 do; the root form of the non-UTF-8 name
+      line is shown; missing slots are reported as `setup: true` entries. Round 76's unit reading failed on the dashed
+      form and its product reading on the knowledge base's messages; its seam reading passed; fixed by item DO.
+      Decided by the coordinator in round 77: `service.md` says an agent reports each missing required slot as a
+      `setup: true` entry; source.md says a file at a named manifest's folder reads `cannot read .: ENOTDIR`, a
+      non-UTF-8 name directly in the root is always outside the source and skipped (round 76's root example
+      withdrawn), a missing slot is reported by its name within the 64-entry cap, and a file excluded only by fold
+      gets an `excluded-by-fold` line; a neutral home name before sentence punctuation is a candidate landing row.
+      Round 77's unit reading failed (`ENOTDIR`), its product reading passed and its seam reading failed (the
+      required-slot wording); fixed by item DP.
+      The hand-over action
+      declares the gate `relayed` (DEC-0121): it is taken only on the operator's word for that act, naming the agent, the
+      target and the recipient, and never by a mandate (MD-6); each act takes its own word. AP-2 and the
+      `actionDecision` table apply except where source.md gives another answer; CT-181 owns bringing the departures
+      [source](specification/source.md#handing-over) lists into the reference gate and defines the approval route;
+      until a service pins a revision carrying it, an `approval/1` is not read for a hand-over and the action's owner
+      enforces the departures. The three forms of the word, the `target` form, the order of checks, consumption,
+      idempotency and the refusal codes are in source.md. Every agent
+      follows the same rule, private or not, and a private agent is never handed over on anything less; under DEC-0126 a
+      relay carries the operator's words verbatim and an approval for one hand-over covers that act only (OA-5,
+      governance-and-roles' external effects). `src/mandate.ts` is unchanged: the contract names no hand-over action id,
+      so the rule binds the action's owner (Fabric, CT-208; the adapter, CT-207). The adapter's export, owed by CT-207,
+      never creates a repository and never pushes; Fabric's "give as source" action is to be the hand-over's twin under DEC-0121 (CT-208), and the
+      hand-over's screens are Fabric's (CT-208).
+  13. **Import:** a patch applies only when every path it touches is source, else it is refused whole; it applies at the
+      source, never at an exported copy (`patchPathsAllowed`). Because a case-insensitive file system makes two
+      spellings one file, a patch path is also refused when an `exclude` entry names it once both are folded, and
+      `.git` in each of item 4's forms is never source (decided by the coordinator in round 37: the unit reading found
+      `.GIT/hooks/post-checkout` and `app/PRIVATE/x` allowed past an excluded `app/private/`). Restated in round 38,
+      after the unit reading wrote `app/ſecrets/new` into an excluded `app/secrets/` with `git apply` on APFS and found
+      the Kelvin sign folding to `K` after the ASCII fold: the comparison is by the case mappings after NFC (restated in round 40),
+      with the code points HFS+ ignores removed and trailing dots and spaces dropped, both sides folded the same way per
+      segment (it folds more than APFS in places, which refuses more), and a segment shaped like an 8.3 short name is
+      refused when any `exclude` entry exists. `exclude` is read with the same fold at export too, so an export fails
+      closed. A patch is checked against the receiver's current manifest, never one the patch brings (decided by the
+      coordinator in round 38: one patch could drop an `exclude` and a later one land in the folder it left out).
+      Restated in round 39, decided by the coordinator after the unit reading wrote `app/PAẞWORDS/token.txt` over an
+      excluded `app/passwords/token.txt` with `git apply` on APFS and found short names with an extension passing: the
+      fold (as restated in round 40) is canonical caseless matching: the HFS+ ignorable code points removed first, then
+      NFD, lower, upper and lower case, then NFC (lower case first brings the capital sharp s to `ß`, and
+      the readers' sweep found no class that disagrees with Unicode's caseless matching), with the HFS+ ignorable code
+      points removed and trailing dots and spaces dropped, following the runtime's case mappings (Node's ICU, Unicode
+      17.0 when the vectors were written, the case pairs carried in the vectors; it also joins the dotless `ı` with `i`
+      and `I`, which Unicode's case folding keeps apart, and so refuses more, the safe side); any segment in which `~` is followed
+      by a digit is refused when any `exclude` entry exists; and an import never applies a change to
+      `fabric.source.json`, whoever sends it: such a patch is refused whole and held, kept unapplied, until the owner
+      decides, and the owner changes the manifest by a commit at the source, which then governs every later patch
+      (round 38's wording, which limited the hold to an outsider's patch, left two answers for the owner's own patch). Restated in round 40, decided by the coordinator after the unit
+      reading found `ᾼ͂` (U+1FBC U+0342) and `ᾷ` (U+1FB7), one inode on APFS, folding apart, so that a patch to
+      `app/ᾼ͂/token.txt` passed an excluded `app/ᾷ/` and the export read `app/ᾼ͂/notes.md`: case mappings applied to NFC
+      text split a letter that carries U+0345 and another mark, so the fold is canonical caseless matching, NFD before
+      the case mappings (the reader measured no split among 55,020 APFS collision pairs, and idempotence on every code
+      point). Restated again (decided by the coordinator after the round-41 unit reading reproduced on an HFS+ image a
+      patch to `app/<Asomtavruli>/token.txt` landing inside an excluded `app/<Mkhedruli>/`): after NFC and before the
+      trailing dots and spaces are dropped, Georgian Nuskhuri U+2D00 to U+2D25 is mapped onto Mkhedruli U+10D0 to
+      U+10F5, since HFS+ joins Asomtavruli U+10A0 to U+10C5 with Mkhedruli (the reader found no split on HFS+ or APFS,
+      case-insensitive or case-sensitive, and idempotence on every code point). A folder entry over a symbolic link is
+      `unused-exclude`: it excludes only what is under a folder, so the link stays a source file. Decided by the coordinator after
+      the round-42 unit reading: an exclude entry without `/` also leaves out everything beneath that name (a nested
+      repository's files, or anything placed there later), at export and in a patch, since `git apply` writes beneath an
+      uninitialised submodule's name; a gitlink the index records counts as present for `unused-exclude`, with or
+      without its folder; candidates are ordered by the NFC form of their paths in both modes, so `files[<index>]` agrees
+      for a name stored in NFD; and the path grammar is read on the NFC form too, an entry NFC lengthens past 256 code
+      points being `FAC-SEM-157` with its own message and a path so lengthened no source. With every name beneath an entry
+      without `/` left out, such an entry over a plain folder leaves that folder's files out and is used, which replaces
+      the round-41 reading that counted it unused. So such an entry naming an include folder is an include path
+      (`FAC-SEM-157`), an `unchecked` folder beneath it is not in the source, and an entry that excludes a gitlink as a
+      nested repository is read counts as used (round 43).
+  14. **Starting without the instance (§5.8):** an agent started with an empty data folder and no slot filled starts;
+      a service answers `status: degraded` with one `degraded[]` entry per missing required slot, its `source` the
+      slot's name, each `setup: true` (DEC-0044's setup state), an `endpoint` included; a `store` slot is never a setup
+      state (a store absent at the first start is created, one the agent cannot create under its data folder is a failure
+      entry); a missing slot is always reported by its name with `setup: true`, an `endpoint` included, never under a
+      connection's id, so a host never reads a setup state as a failing connection; only a filled endpoint that fails,
+      when the agent's own code knows it backs a declared connection, is reported under that connection's id, without
+      `setup` (the agent's code owns that mapping; no schema member declares it and nothing checks it). Every failure entry, from a slot or not, comes before every setup entry, and truncation past
+      `degraded[]`'s 64 entries drops setup entries first: failures, then missing slots in the manifest's order, up to
+      63 entries in all, then one `setup: true` entry with `source` `fabric.source.json#slots` counting the rest (a `#`
+      is outside both the slot and the connection id grammar); when failures alone exceed 63, 63 of them and that entry. A capability that needs a missing slot answers, after the gate
+      (AP-2) admitted the call, with its tool's own error (an MCP tool result with `isError: true`, or the surface's
+      ordinary error) whose text names the slot by its name, says a person must finish the agent's setup and points at
+      the well-known document's setup entry, never carrying a value; this decision adds no refusal code for it (a later
+      decision may). The rest work. A conformance row for the agent's own test; no vector.
+- **Why:** the source must travel with the source code and serve every kind of agent, which only a file of its own does;
+  default deny keeps a forgotten file at home, where default allow would publish it; a list of private strings is
+  itself private, so it stays with the operator; a source export that rewrites nothing keeps one truth, the source, and
+  a hand-over gated as `publish` on the operator's own decision keeps the operator's "only by wish" without forbidding
+  the handing over they asked for. The knowledge base's agents-first item 7 (one approval holds for the whole task,
+  carried as `mandate/1`) was read: the hand-over stays per act under it, because a hand-over publishes the agent to a
+  recipient, possibly outside the estate, and the operator's standing rule asks an explicit instruction for each
+  outward act; the merge is to amend agents-first item 9, 'A source hand-over takes the operator's word on that act', as the rule's home (items 5 and 7 pointing to it; item 8 is main's own, no production step without a person in the chat) to name the
+  exception, and `knowledge/principles.md`
+  section 7, which today says private agents are never moved, published or listed, to carve out the source hand-over
+  on the operator's word for that act (CT-211, a merge condition). A source check prints no instance
+  data in a schema or parse message by construction, since masking each leaking message after the fact missed one
+  shape after another. The contract's check gives the adapter's answers on the same shapes, so one vector file holds
+  both to one reading.
+- **Alternatives considered:** A, a `portability` member of `fabric-agent.json` (its top level is closed and a consumer
+  agent has none); A', the same under `extensions` (still absent for consumer agents and skill sets); C, members of
+  `fabric-package/1` (written at pack time, after `include` must be known; a repository never packed has none); D, the
+  descriptor (an installation's file, which never travels); default allow (a new file leaks); keyed digests for the
+  operator's list (substring and encoded-form matching would need their own tokenization rules and vectors); P1, a
+  private agent is never exported (contradicts the operator's ask); P2, export itself gated on the operator's word (a
+  local export publishes nothing, so the gate belongs on the hand-over); for `home-path`, the value scanner
+  `hasHomePath`, refused for a source tree because it flags `~/` and neutral homes, which every portable source holds;
+  for `credential`, the value detectors alone (`secretArgument`, `secretUrl`), refused because their `?token=` and
+  bare long-run readings block every documented placeholder and integrity hash; a separate `.fabric-source-ignore`
+  file beside the manifest (two files to keep in step; `unchecked` carries each path's reason); a new `humanStep`
+  value `setup` for a missing slot, decided in round 1 and reversed in round 2: a new step value ripples into
+  hand-written step lists in the adapter's kits, Fabric Dashboards' service host and a template, a pinned reader drops
+  a whole actions declaration holding it, and it leaves the order against the gate's refusals undefined; adding the
+  hand-over to `src/mandate.ts` now (the contract names no action id for it yet, so its owner refuses a mandate; CT-181
+  adds the MD-6 entry once the hand-over has an action id).
+- **Compatibility:** additive. `contractVersion` stays `0.1.0`; `fabric-source/1` joins the protocol register; no
+  existing schema, kind, code or vector changes. A repository without `fabric.source.json` is untouched by the source rules; the checker changes for every
+  repository in three ways the handoff's Open lists: a plain folder run skips a `.json` entry that is a FIFO, a socket
+  or a device with a note; the help text gains the source kinds; and a bare channel-agent declaration's schema lines
+  name no undeclared member and it gets no extension hint (DEC-0150's instance-free step, CT-209). `src/ops-digest.ts` now imports `foldPath` from
+  `src/source-rules.ts`, so a copy of the reference digest folds needs that file beside it.
+- **Consequences / affects:** `schemas/fabric-source.schema.json`; `src/ops-digest.ts` (`foldDir` is `foldPath`, `hasJwt`),
+  `src/channel-agent.ts` (`keyShaped` reads `hasJwt`), `docs/specification/ops-digest.md` and `channel-agent.md`,
+  `test/ops-digest.test.ts`, and DEC-0150's instance-free step in `src/validate-cli.ts` and `test/validate-cli.test.ts`
+  (the landing merge with DEC-0153 and DEC-0150 on main); `src/source-rules.ts`, `src/secret-shape.ts` (`jwtSpans`,
+  `hasJwt`, `rawValues` appending in place; no verdict changed; Fabric vendors it under a sha256 pin, the adapter ports
+  it), `src/semantic-rules.ts`,
+  `src/semantic-kinds.ts`, `src/protocol-revisions.ts`, `src/validator.ts` (instance-free schema messages), `src/validate-cli.ts` (`--kind source-tree`, Git and walk
+  modes, relative output, the pair, the name rule); `tools/vectors/source-tree.ts` and
+  `fixtures/vectors/source-tree.json`; `fixtures/positive/fabric-source-*.json`, `fixtures/negative/fabric-source-*.json`,
+  `fixtures/semantic/source-*.json`, `fixtures/catalogue.json`; `test/source-rules.test.ts`,
+  `test/validate-cli.test.ts`, `test/validate-cli-faults.test.ts`, `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
+  `test/schema-compilation.test.ts`, `test/protocol-revisions.test.ts`, `test/validator.test.ts`, `test/secret-shape.test.ts`
+  (`jwtSpans` and `hasJwt`); `test/validate-cli-git-links.test.ts`, `test/validate-cli-walk-names.test.ts`, `test/consistency.test.ts`
+  (round 61: listed here); `tools/vectors/run.ts`; `src/activity-rules.ts` and `src/proposal-rules.ts` (the fourth
+  home-path boundary in their scope comments); `docs/specification/contexts.md` (an organization context instance and
+  an enrolled machine), `devices.md` and `activity.md` (the four home-path boundaries); `relay.md` (a hub's machine-report entry and
+  the watcher, round 62, pointing at service.md's definition since round 63); `conformance.md`'s watcher row; CT-244
+  filed (a rule for messaging a hub's machine-report failure); `vitest.config.ts` (the floors, `src/validator.ts` added); `docs/specification/source.md` (new), `docs/guides/connecting-compatible-agents.md` (the inference row and the pair),
+  `package.md` (secrets and state from the source's slots, a copy without state), `proposals.md` (a private agent's
+  source), `delegation.md` (MD-5, MD-6, DL-18's order of checks, DL-26's exception, OA-5), `governance-and-roles.md` (external effects), `identifiers.md` (the hand-over's `target` compared exactly), `conformance.md` (the register,
+  the reference module, the readers' rows), `docs/specification/README.md`, `README.md` (Build an agent),
+  `docs/DOCMAP.md`, `CONTEXT.md` (Source, Instance, Source slot, Installation string, Source export, Source hand-over), `AGENTS.md`
+  (`pnpm --silent validate`), `docs/evidence/sources.md` (RFC 2606), `docs/ux/foundation.md` (ST-037),
+  `docs/ux/scenarios.md` (SCN-054), `docs/ux/screens.md` (SCR-03), `service.md` (the setup state, the AP-2 note, the actions-table note), `docs/ux/` SCN-045, SCN-046 and FLW-31, `connections.md` (the id grammar's guarantee), `interop.md` (the refusal table's pointer, C3.2's repeated keys, C3.3's in-call elicitation), `delegation.md`'s refusal table (the hand-over cases), the research report's header; backlog CT-181 (the
+  hand-over's target and MD-6 entry), CT-194 (done at merge), CT-207 (the adapter's
+  adoption), CT-208 (Fabric's "give as source").
+- **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
+  threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
+  board message `565b20f3`); rounds 1 to 82 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
+  case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
+  clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
+  and from its seam reading `files[<index>]` differing between Git mode and a walk, `unused-exclude` on a
+  case-sensitive volume and the manifest's own rules reading `exclude` literally; round 40 not clean: canonical caseless
+  fold; round 41 not clean: push carries history, history gate undefined, conformance fold, rules section 9; round 42
+  not clean: history gate scope, KB item 5, and from its unit reading the Georgian join and a folder entry over a
+  link; round 43 not clean: whole-repository word text, CONTEXT team serving; round 44 not clean: target forms, word
+  forms, export parent, existing readers, public home; round 45 not clean: NFC nested repository; stale DEC/backlog/
+  scenario wording, elicitation target, later org release; round 46 not clean: grammar readers, organization later
+  public release; round 47 not clean: NFD-stored paths, binaries/missing, later public release, private mirror; round 48 not clean: the
+  lead's readers, the grammar's FAC-SEM-157 statement, CT-194's visibility sentence; exclude fails closed; CT-109
+  register is DEC-0149's landing step; round 49 not clean: the lead's routes still said 'another person'; vendored
+  files and binaries; boundary copies at DEC-0149's landing; widest reading made literal; round 50 not clean: the widest reading stopped at the first
+  segment; devices.md's strictest claim; the chain still named #235 as open; round 51 not clean: devices.md still ranked the boundaries; the
+  Done vector count; round 52 not clean: item 12's 'handing it to anyone'; pre-DEC-0149 readers outside the home;
+  credential file names read folded; the manifest under unchecked; round 53 not clean: the tree check's own unchecked
+  list skipped the manifest; an organization's own repositories; a personal agent's visibility change; a package to
+  earlier readers; round 54 not clean: CREDENTIAL_FILE missed U+2028/U+2029 names; the lead's old opening clause; public
+  release unqualified; round 55 not clean: a gitlink at the manifest's path under exclude; earlier collaborators
+  outside the home; a personal private home's visibility change; round 56 not clean: the manifest's path
+  read two ways; flat wordings beside round 55's sentence; round 57 not clean: flat access wordings;
+  the patch's full fold missing from the requirement rows; round 58 not clean: a flat
+  wording in conformance.md's hand-over row; round 59 not clean: flat wordings in the knowledge base's principles
+  section 7 and rules section 9; round 60 clean; round 61 not clean: principles section 7's shorter exception list,
+  the handoff's chain of open branches; round 62 not clean: relay.md's watcher sentence against service.md's; round 63 not clean: the
+  watcher's states named three times; round 64 not clean: authority.md's watcher state, the outage report, CT-244's
+  wording, "host" for a computer; round 65 not clean: the landing's watcher phrase widening FD-76's released fact; round 66 not clean: the first Git-mode
+  listing naming a file only, authority.md's start baseline; round 67 not clean: the landing's second sentence
+  naming every degraded source; round 68 not clean: a landing row citing moved test lines; round 69 not clean: authority.md's
+  clause on what DEC-0154 owes; round 70 not clean: who changes that clause in order 1; round 71 not clean: an interleaving where
+  nobody changes it; round 72 not clean: DEC-0150's Status form, "the same words"; round 73 not clean: who runs the
+  check after both land; round 74 clean, the first since round 63, at `b714bceb`; round 75 not clean: the knowledge
+  base's watcher lead, a new conflicting file, so the count of clean rounds starts again; round 76 not clean: the
+  dashed home form, the knowledge base's messages; round 77 not clean: `ENOTDIR`, the required-slot wording; round
+  78, after the merge with main at `b963d6a6`, not clean: CT-194's state, the `$comment`, the ops-digest import, fixed by
+  item DQ; round 79 not clean: an extension hint on a bare channel-agent declaration, Fabric Dashboards 0.8.30, fixed
+  by item DR; round 80 not clean: step 6's check of PR #628's watcher lines, the clause rule's end state, fixed by
+  item DS; rounds 81 and 82 at `d03ae791` clean on all three tiers),
+  cited by round number (their heads were on the review branch, not kept at landing),
+  decided by the coordinator.
+
 ### DEC-0150: an agent that answers people on a channel declares `extensions/channel-agent/0.1`
 
 - **Date:** 2026-11-04
@@ -9443,6 +10169,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (unit, seam, product). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168`, a descriptor
   extension, a reference module and vectors, and a host obligation. Additive: nothing that validated before changes.
 - **Annotated (2026-11-07):** amended by DEC-0154 (OD-9: a collector in the same OS account reads the daily digests; CT-243).
+- **Annotated (2026-11-07):** DEC-0149 has landed: its "Starting without the instance", which item 4 cites as in progress, is on `main` (a call refused for the product's own missing source slot is `unknown`, never `failed`), and `foldDir` in `src/ops-digest.ts` is DEC-0149's `foldPath`; item 3's `JWT_SHAPE` is read through `hasJwt` (`src/secret-shape.ts`, one pass, the same matches).
 - **Context:** the operator asked on 2026-11-04 that every product's log be read every hour and every day, and that
   every agent close its work with a retro whose lessons are kept centrally; Fabric recorded the split in its ADR-0188
   (commit `0d0e5922`) and relayed the contract's part on board thread `f7758225` (message `516761e1`, item 2 of its
@@ -9776,6 +10503,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   product one break, seam one, W93); rounds 28 and 29 at `3fb5c12a` were clean; their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
+- **Annotated (2026-11-07):** Fabric Dashboards released FD-159 in 0.8.30 (FD-159 at `e23551e8`, tag `cc2b0048`): its watcher counts `foreign` and `foreign-user` as unavailable, as `down`; it refuses an owner it cannot tell, on Windows too; and it asks the owner of a listener that holds the port without answering. So the Compatibility's owed watcher row and its two open items are done (board thread `1fe66e6e`, message `a8661c7a`); DEC-0149's landing restates the knowledge base's clause as "is done by FD's watcher since its 0.8.30, FD-159, under contract DEC-0154".
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
   the organization's plan for a shared computer on which several OS accounts work side by side: an administrator's
   account, the operator's own account and an account an organization owns whole, each running its own Fabric, Fabric

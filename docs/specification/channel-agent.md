@@ -46,9 +46,11 @@ schemas leave the value open, as every vendor extension is ([overview](overview.
 [`service-channel-agent-extension.schema.json`](../../schemas/service-channel-agent-extension.schema.json), which refers
 to no other file, so a kit vendors that one file. A reader treats an invalid value as not declared and reports it, as
 with the [actions](service.md#actions) and [load](agent-network.md#load) keys. A bare declaration checked on its own
-(`pnpm validate --schema service-channel-agent-extension.schema.json`) gets the generic schema check, whose lines may
-name an undeclared member as written, and a hint, `hint/declaration-only`: `FAC-SEM-163` to `FAC-SEM-165` run only
-inside a manifest or a well-known answer. Check the manifest or the well-known answer instead.
+(`pnpm validate --schema service-channel-agent-extension.schema.json`) gets the schema check with instance-free lines
+(DEC-0149's `formatSchemaErrors`: an undeclared member is reported at its object, never by its name), whose places may
+name a map key as written (a language tag shaped like a credential included), and a hint, `hint/declaration-only`:
+`FAC-SEM-163` to `FAC-SEM-165` run only inside a manifest or a well-known answer. Check the manifest or the well-known
+answer instead.
 
 ## The declaration
 
@@ -305,8 +307,8 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    that starts with `sk-`: today any `sk-` followed by 16 or more letters, digits, `_` or `-`, in any case, such as the
    valid channel id `sk-support-desk-faq-answers-2026-v2` (a test pins it). DEC-0151, in progress, proposes to narrow
    that to a digit with an upper-case letter and 16, or a digit and 32; either way, do not start an id with `sk-`, for a
-   second reason too: DEC-0149's source tree check, in progress,
-   reads any `sk-` followed by 16 or more name characters in any case (`FAC-SEM-158`, DEC-0149 in progress), so a weak
+   second reason too: DEC-0149's source tree check
+   reads any `sk-` at a word start followed by 16 or more name characters, in any case (`FAC-SEM-158`), so a weak
    `sk-` id that `FAC-SEM-165` would accept under DEC-0151 would still block a source export. The
    finding on a member name, or on a value whose member takes an id (`id`, `code`, `lead_agent`, `owner`, `decision`,
    `answered_signal`, `target`, `spend_record`, `project`, `side`), that starts with `sk-` says so: an id that starts

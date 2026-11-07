@@ -36,6 +36,8 @@ const KINDS = [
   "machine-report",
   // An adaptation plan, each ref and request id once and every itemRef an item's (FAC-SEM-153, DEC-0138).
   "org-adaptation",
+  // An agent's source manifest, its tree and the package beside it (FAC-SEM-156 to FAC-SEM-160, DEC-0149).
+  "source-manifest", "source-tree", "source-package",
   // An operations digest, its window, its sums and its rises (FAC-SEM-166), no credential as an operation (FAC-SEM-167, DEC-0153).
   "ops-digest-hourly", "ops-digest-daily"
 ];
@@ -63,7 +65,8 @@ const MEMBERS = [
   "profiles", "models", "reads", "fallback", "choices", "policy", "resolved", "classes",
   "statement", "signature", "genesis", "purpose", "ceiling", "notBefore", "nonce", "uses", "hubKey", "deviceKeys",
   "subject", "order", "licence", "hosting", "support", "agents", "agentRef", "keys", "revoked", "notAfter", "issuer",
-  "grantRevision", "withdrawnAt", "registration", "registrations", "held", "transport", "orgId", "previouslyRegistered"
+  "grantRevision", "withdrawnAt", "registration", "registrations", "held", "transport", "orgId", "previouslyRegistered",
+  "include", "exclude", "binaries", "publicAddresses", "slots", "files", "instanceStrings"
 ];
 
 describe("a route event's selected index far past any route (the adapter's report on d8146cf, DEC-0084 fix round)", () => {

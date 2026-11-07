@@ -1,0 +1,76 @@
+{
+  "description": "A line holding a named home folder blocks (FAC-SEM-158, DEC-0149).",
+  "kind": "source-tree",
+  "expect": [
+    "FAC-SEM-158"
+  ],
+  "input": {
+    "manifest": {
+      "format": "fabric-source/1",
+      "include": [
+        "src/",
+        "docs/",
+        "README.md",
+        "LICENSE"
+      ],
+      "exclude": [
+        "src/generated/"
+      ],
+      "binaries": [
+        "docs/icon.png"
+      ],
+      "publicAddresses": [
+        "support@inbox-digest.example"
+      ],
+      "slots": [
+        {
+          "name": "MAIL_OAUTH",
+          "kind": "secret",
+          "purpose": "reads the mailbox the digest covers"
+        },
+        {
+          "name": "DIGEST_JOURNAL",
+          "kind": "store",
+          "purpose": "the digests written so far",
+          "path": "journal.sqlite"
+        },
+        {
+          "name": "KNOWLEDGE_BASE",
+          "kind": "endpoint",
+          "purpose": "the operator's knowledge base",
+          "optional": true
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "fabric.source.json",
+        "text": "{\"format\": \"fabric-source/1\"}"
+      },
+      {
+        "path": "LICENSE",
+        "text": "Licensed under the terms in this file."
+      },
+      {
+        "path": "README.md",
+        "text": "# Inbox digest\n\nWrites one digest of a mailbox each morning. See [the guide](docs/guide.md).\nQuestions: support@inbox-digest.example."
+      },
+      {
+        "path": "docs/guide.md",
+        "text": "# Guide\n\nBack to the [readme](../README.md)."
+      },
+      {
+        "path": "docs/icon.png",
+        "binary": true
+      },
+      {
+        "path": "src/main.ts",
+        "text": "export const name = \"inbox-digest\";"
+      },
+      {
+        "path": "src/paths.ts",
+        "text": "export const data = \"/home/jdoe\";"
+      }
+    ]
+  }
+}
