@@ -859,6 +859,19 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.instancePath)).toEqual([`${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/handoff_queues/0/recommendation`]);
     expect(JSON.stringify(found)).not.toContain("Pw7q");
   });
+  it("reads a recommendation in its grammar by a provider key's shape only (a key built at run time, a long mixed id)", () => {
+    const at = (recommendation: string) => {
+      const queue = { id: "support-mail", owner: "support-team", limit: "P2D", answered_signal: "none", recommendation };
+      const found = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [{ ...value.projects[0], handoff_queues: [queue] }] } } }, "well-known");
+      return found.filter((f) => f.code === "FAC-SEM-165").map((f) => f.instancePath);
+    };
+    const key = ["sk", "-", "Zx9Q".repeat(5)].join("");
+    expect(at(key)).toEqual([`${CHANNEL_AGENT_PATHS["well-known"]}/projects/0/handoff_queues/0/recommendation`]);
+    // A board thread's id is a long mixed run by design: 44 letters and digits with no provider prefix is no finding.
+    const id = ["Ab3d", "Kq7x", "Mn2p", "Rt5w"].join("").repeat(3).slice(0, 44);
+    expect(id).toHaveLength(44);
+    expect(at(id)).toEqual([]);
+  });
   it("answers a schema that cannot run on a value with one fixed error, and lets any other failure through", () => {
     const throwing = (error: Error) => (() => { throw error; }) as unknown as ValidateFunction;
     expect(schemaErrors({}, throwing(new RangeError("Maximum call stack size exceeded")))).toEqual([TOO_LARGE]);

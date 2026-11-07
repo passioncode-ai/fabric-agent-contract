@@ -390,7 +390,7 @@ Proposed DEC on its own branch, and files the rest.
   at 15 minutes may name that source." The two checks below are unchanged.
 
   After both land, run in bash or zsh: the first command prints 1 and the second prints 0 (the contract's rule names
-  "A watcher", so Fabric Dashboards' widened claim stays false). The second reads the file as one line, so a line break anywhere in a wrong landing is still
+  "A watcher", so Fabric Dashboards' widened claim stays absent). The second reads the file as one line, so a line break anywhere in a wrong landing is still
   found. When it prints 0 it also exits with status 1 (`grep -c` with no match), so do not run it under `set -e`:
 
   ```sh
@@ -538,7 +538,8 @@ Proposed DEC on its own branch, and files the rest.
   fabric-workspace `knowledge/` (the coordinator edits those pages). The pages to read are what this prints on the
   knowledge base's main at that time, every line of it, not a list fixed here:
   `git fetch origin && git grep -n -E 'DEC-0154|CT-22[89]|CT-23[0-9]|CT-24[0-3]' origin/main -- 'knowledge/*.md' | grep -v -e 'proposed for FD' -e "owed by FD's watcher under contract DEC-0154"` (run once, at `60c630db`; since
-  DEC-0149's round 79 the clause reads "done by FD's watcher since its 0.8.30", so a rerun filters that text instead)
+  DEC-0149's round 79 the clause rule's To text is "done by FD's watcher since its 0.8.30, FD-159", so a rerun filters
+  that text in place of the "owed" text)
   (in a fabric-workspace clone); `authority.md`'s two clause lines are the knowledge-base clause rule's below, never
   posted here. Each line it prints is made true for the moment after the landing: DEC-0154 accepted, on
   the contract's main, with the date and the tag; a row of CT-228 to CT-243 open on main; a line number into this

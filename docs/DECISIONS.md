@@ -9108,8 +9108,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0149: an agent's source and its instance (`fabric-source/1`)
 
 - **Date:** 2026-11-03
-- **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 80 of
+- **Status:** Accepted 2026-11-07, merged #251, after two consecutive clean rounds of the blind readings (rounds 81 and
+  82 at `d03ae791`, unit, product, seam). The research report's objection window closed 2026-11-03 18:00 UTC with no
+  objection (threads `21ac4057`, `0a8776f2`). The findings of rounds 1 to 82 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9147,7 +9148,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   78, after the merge with main at `b963d6a6`, not clean: CT-194's state, the `$comment`, the ops-digest import, fixed by
   item DQ; round 79 not clean: an extension hint on a bare channel-agent declaration, Fabric Dashboards 0.8.30, fixed
   by item DR; round 80 not clean: step 6's check of PR #628's watcher lines, the clause rule's end state, fixed by
-  item DS),
+  item DS; rounds 81 and 82 at `d03ae791` clean on all three tiers),
   cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
@@ -9412,7 +9413,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       records the recipient and the export commit, from which the next export reads its parent, its objects fetched
       from the recipient's repository, and any export that cannot land as a fast-forward goes as a new branch or pull
       request (one landing rule, no force-push); access the operator gave to a personal agent's private home stands
-      when given before DEC-0149 was accepted, on its merge date (a fixed point, written at landing); a transfer of a
+      when given before DEC-0149 was accepted, on its merge date (a fixed point, 2026-11-07); a transfer of a
       personal agent's home, public or private, is not done, since the operator's rule asks his explicit permission for
       any transfer of a personal agent and that permission is outside this contract, while making a public personal
       home private is none; and material already public needs no word by any route (one clause for every route).
@@ -9787,7 +9788,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 80 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 82 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9826,7 +9827,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   78, after the merge with main at `b963d6a6`, not clean: CT-194's state, the `$comment`, the ops-digest import, fixed by
   item DQ; round 79 not clean: an extension hint on a bare channel-agent declaration, Fabric Dashboards 0.8.30, fixed
   by item DR; round 80 not clean: step 6's check of PR #628's watcher lines, the clause rule's end state, fixed by
-  item DS),
+  item DS; rounds 81 and 82 at `d03ae791` clean on all three tiers),
   cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.
 

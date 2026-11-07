@@ -622,7 +622,7 @@ A transfer of a personal agent's home, public or private, is not done by an agen
 permission for any transfer of a personal agent, and that permission is outside this contract. A public home's access
 and visibility are outside the rule above, and making a public personal home private is no hand-over. A gate that
 would let such an act carry the history is not decided here. Access the operator gave to a personal agent's private
-home before DEC-0149 was accepted (on its merge date, written here at landing) stands as the operator's own act, so a commit reaching those readers in that home is no hand-over; nothing here is retroactive, and an agent never gives new access on its own (with the operator's explicit permission for that act it is his own act, no act of this contract). An
+home before DEC-0149 was accepted (on its merge date, 2026-11-07) stands as the operator's own act, so a commit reaching those readers in that home is no hand-over; nothing here is retroactive, and an agent never gives new access on its own (with the operator's explicit permission for that act it is his own act, no act of this contract). An
 organization's acts on its own agent's whole repository are its own, under its own release rules (the knowledge base's
 rules section 9), except two that take the word naming the repository: making a private organization agent's source
 public by a visibility change, and giving it new readers outside the organization (a transfer to another owner, access

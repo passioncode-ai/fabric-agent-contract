@@ -1,4 +1,4 @@
-# 2026-11-03: an agent's source and its instance (CT-194, DEC-0149)
+# 2026-11-03: an agent's source and its instance (CT-194, DEC-0149, accepted 2026-11-07, #251)
 
 ## Objective
 
@@ -526,7 +526,11 @@ source, what never travels with it, the check before a source export, and how a 
   lead and both episode lines by their text with a check that prints 3 today and 0 after, and re-pointing their
   `a0bc160` citations, DEC-0154's handoff's reason, the Open's third change with the Compatibility and the release
   notes, the timeout row named by symbol, the tag and commit of 0.8.30 apart, and the Annotated line on Fabric
-  Dashboards 0.8.30 moved to main's DEC-0154 (PR #250, CT-254); round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  Dashboards 0.8.30 moved to main's DEC-0154 (PR #250, CT-254); rounds 81 and 82 at `d03ae791` clean on all three
+  tiers (unit, product, seam), so DEC-0149 is accepted on 2026-11-07 (PR #251); round 80's two equivalent mutants are
+  one: `test/source-rules.test.ts`'s 1 MB linear-time test ("checks a 1 MB line of JWT openings or assignments in
+  linear time") kills `jwtSpans`' resume-point mutant on cost, so only `keyShaped` without `hasJwt` survives, as an
+  equivalent (its one caller admits only an `OPAQUE_ID`, which has no dot); round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -538,7 +542,8 @@ source, what never travels with it, the check before a source export, and how a 
   row for deterministic timeout tests of validate-cli's ignored and staged listings (round 65, item CN) and the row
   deciding whether Fabric Dashboards counting a degraded continuation, or a `down` within the 15-minute calm, toward
   its 15 minutes conforms (round 67, item CW; round 76) are filed at landing; the enforcing row's id goes into SCN-054 step 3, and all four
-  ids are written here, in the landing change (CT ids pending).
+  ids are written here, in the landing change: CT-255 (the inventory row), CT-256 (the enforcing row), CT-257 (the
+  timeout-test row) and CT-258 (the continuation row), filed on 2026-11-07.
 - A structured marker for a refusal that is a setup answer (a missing slot) is left open: by DEC-0149's choice the tool
   error carries none, so a caller or host that sees only the error cannot tell a setup answer from a failure. It is for
   CT-208 (Fabric) to take up (CT-219 is done with DEC-0153). The person's side of "Starting without the instance" (an
@@ -570,7 +575,8 @@ source, what never travels with it, the check before a source export, and how a 
   bounded; a later caller with a long input takes `jwtSpans` and `hasJwt`.
 - Outside a source check, a named file that exists but cannot be read is still named by its full path (`cannot read
   <path>: EACCES`), unchanged from `origin/main`; only a source check names it by its basename.
-- The merge: the next round of readings, then the status line rewritten as DEC-0147's is, CT-194 to `done`. Done (round 50):
+- The merge: the status line rewritten as DEC-0147's is and CT-194 `done`, both on 2026-11-07 after rounds 81 and 82;
+  the merge gate and the merge itself are steps 5 and 6 under **Next task**. Done (round 50):
   PR #235 (DEC-0148) merged into main as `08e24572` and moved both next-free markers there. `AGENTS.md`'s Commands table was also edited by
   `agent/template-parity-20261103` (PR #236), which is merged: this branch resolves it at its merge of main.
 - CT-207 (the adapter: the manifest in its templates, `pack`, the check on the manifest and the vectors with every
@@ -881,6 +887,16 @@ source, what never travels with it, the check before a source export, and how a 
   lines holding `://`, `:` or `=`, so a 1 MB one-line file checks in well under a second.
 
 ## Checks actually run
+
+2026-11-07, the acceptance edit (step 5) on the working tree over head `d03ae791`, after rounds 81 and 82 there were
+clean on all three tiers: `tsc --noEmit` exit 0; `tsx src/docs-check.ts` exit 0; `tsx src/lint-md.ts` exit 0;
+`python3 -I docs/ux/lint.py` exit 0; `tsx tools/vectors/run.ts` exit 0; `ORG_INDEX=... tsx src/privacy-check.ts`
+exit 0 (0 findings); single-file runs of `test/channel-agent.test.ts` (389 passed, the new test on a recommendation
+in its grammar included; with `keyShaped` mutated to `return hasJwt(read);` that test fails, and the file was
+restored), `test/docs-check.test.ts` and `test/consistency.test.ts`; DEC-0149's status check prints 1; CT-194's
+row has no "Proposed" or "Paused"; the shared knowledge-base block byte-identical in both handoffs (`cmp`); no
+added U+2014. Pending: step 5's merge gate (`pnpm run check`, each part's exit code read) on the acceptance head,
+which waits for 8 GB of free disk (`/` had about 5 GB free), with its output in the PR.
 
 2026-11-07, the merge with `main`: merge commit `b963d6a6` (parents `0099c4f1` and main `40a0ddb8`, which carries
 DEC-0154, released `v0.1.0+2026-11-07.1`, and CT-250 to CT-253), resolved as **DEC-0153 is on main** below says
@@ -1523,15 +1539,18 @@ session `74a9440a`), and resumed on 2026-11-07 by the operator's own word in the
 автономно до конца», a direct request, one of the pause's exceptions). DEC-0154 landed first (PR #248, main
 `18f8d487`, `v0.1.0+2026-11-07.1`); main `40a0ddb8` is merged into this branch at `b963d6a6` (step 2's merge done,
 its checks in Checks actually run). Round 78 at `d9ffe3f5` was not clean, fixed by item DQ; round 79 at `9c0ffbe0` was
-not clean, fixed by item DR; round 80 at `78bb901d` was not clean, fixed by item DS. The exact next task: blind
-readings round 81 (unit, product, seam) at this branch's head, then two clean rounds and the remaining steps below. After the landing post, once the coordinator
+not clean, fixed by item DR; round 80 at `78bb901d` was not clean, fixed by item DS. Rounds 81 and 82 at `d03ae791` were
+clean on all three tiers (unit, product, seam), so DEC-0149 is accepted on 2026-11-07 (PR #251) and the landing is in
+progress: steps 1 to 4 are done, step 5's acceptance edit is this change (its merge gate waits for 8 GB of free disk, see
+Checks actually run), and steps 6 and 7 remain. The exact next task: step 5's precondition on PR #250 and its merge
+gate on this head, the contract PR's merge, then steps 6 and 7 below. After the landing post, once the coordinator
 answers, `git show origin/main:knowledge/north-star.md | grep -c 'DEC-0149 and DEC-0154'` on the knowledge base's main
 prints 0 (DEC-0154's knowledge-base post, message `f83a171c` on `eefa7959`, asked the coordinator to drop DEC-0149 from
 `north-star.md` 262 and 521 once DEC-0149 lands).
 
 The landing continues on `agent/ct194-source-manifest-v2-20261104` (step 1 is done: one commit with the reviewed tree
 on the merge base `d1b905ee`, the review branch's remote ref deleted; never push the review branch again). The
-remaining steps, in order:
+steps, in order (1 to 4 done; 5's acceptance edit done, its merge gate pending; 6 and 7 remaining):
 
 1. Acquire the task lease CT-194 before each register commit (and before steps 5 and 6) and release it after the push;
    the register commits go under it, which the guard accepts. A released lease leaves no ref, so its absence between
@@ -1569,6 +1588,11 @@ remaining steps, in order:
    under DEC-0153 that says DEC-0149 has landed set to the landing date, CT-194 done, this handoff's
    status and the `docs/handoffs/README.md` row); then run the merge gate (`pnpm run check`, each part's exit code
    read) on that head, with its output in the PR. That head is the one that merges; nothing merges before this step.
+   Its precondition: PR #250 (CT-254) has merged, so main's DEC-0154 carries its Annotated line on Fabric Dashboards
+   0.8.30. If PR #250 is still open when DEC-0149's contract PR merges, the landing change carries that Annotated line
+   under DEC-0154 itself (its text is PR #250's, the line starting "- **Annotated (2026-11-07):** Fabric Dashboards
+   released FD-159 in 0.8.30" in `git show origin/agent/ha2-linux-listen-row-20261107:docs/DECISIONS.md`), and PR #250
+   drops that line before it merges. The acceptance edit (2026-11-07) does not add it: PR #250 was open then.
 6. Pair PR #628 only with a contract head that carries the same round of the readings (the round named in DEC-0149's
    status line and in RM-36's "Restated 2026-11-05" line in the PR's `knowledge/roadmap.md`, not its last commit,
    which may be a merge of main), and re-read the pair on the round-40 and round-41 points before landing.
@@ -1590,7 +1614,10 @@ remaining steps, in order:
    keeping the clause "counting `foreign` and `foreign-user` is proposed for FD's watcher in contract DEC-0154" word for
    word so the rule's replacement still finds it, and re-pointing their citations of Fabric Dashboards' `a0bc160`
    line ranges to `v0.8.30` (or dating each remaining one as FD-76's); then `git show HEAD:knowledge/authority.md | grep -c 'opens an episode
-   only for .down.'` prints 0 (3 at `d2a6d9f4`) and `grep -c FD-159` on the same file prints at least 3. The
+   only for .down.'` prints 0 (3 at `d2a6d9f4`) and `grep -c FD-159` on the same file prints at least 3. In the same
+   rewrite, PR #628's line "the service's own report is outside the watcher's rule, which FD-76 alone changed"
+   (`knowledge/authority.md` line 146 at `d2a6d9f4`, its "Each service" item) ends "which FD-76 and FD-159 (0.8.30)
+   changed"; then `git show HEAD:knowledge/authority.md | grep -c 'FD-76 alone'` prints 0 (1 at `d2a6d9f4`). The
    order of the two merges is mandatory (round 65, CJ and CL): the contract PR first,
    then PR #628 straight after, one after the other in the same landing session, since PR #628 points at `service.md`'s
    definition of unavailable and at `source.md#handing-over`, which the contract's main carries only once the contract
@@ -1630,22 +1657,22 @@ with main wrote as 2026-11-07: the Annotated line under DEC-0153 that says DEC-0
 DEC-0149's landing" and CT-224's "DEC-0149's lander confirmed it exists". At landing, file a backlog row (an id above the highest in use or
 leased at landing, on main and on every open branch, this branch's own CT-244 included, re-measured then: CT-227 is
 main's since `1c141418`, DEC-0154's branch holds CT-228 to CT-243 (round 75, re-measured at landing), this branch holds CT-244, which keeps its id,
-and main holds CT-250 to CT-253 since `40a0ddb8`, so this row is CT-254 or above, re-measured) to inventory the personal agent
+main holds CT-250 to CT-253 since `40a0ddb8`, and the open PR #250 (`agent/ha2-linux-listen-row-20261107`) holds CT-254,
+so the rows start at CT-255: this row is CT-255, re-measured on 2026-11-07) to inventory the personal agent
 homes, and any copy of them within the operator's estate (private mirrors, second private repositories), that people
 outside the operator can read, for the operator to review: information, not a gate, since access
-the operator gave before the rule stands as the operator's own act (DEC-0149 item 12, round 44). At landing, also file a backlog row under the next id above that one (CT-255 or above, re-measured), re-measured the
-same way: "`unchecked` covering a credential finding exits 0
+the operator gave before the rule stands as the operator's own act (DEC-0149 item 12, round 44). At landing, also file a backlog row under the next id above that one (CT-256, re-measured on 2026-11-07): "`unchecked` covering a credential finding exits 0
 (probe)", its evidence the round-35 probe (a manifest listing its own key-holding file under `unchecked` exits 0 under
 `--kind source-tree`, exit 1 without that entry), asking the checker to refuse such an entry. The lander writes the enforcing row's CT id
 into SCN-054 step 3, where it says the enforcing row is filed at landing. At landing, file a third backlog row under
-the next id above that one (CT-256 or above, re-measured the same way): "Deterministic timeout tests for
+the next id above that one (CT-257, re-measured the same way): "Deterministic timeout tests for
 validate-cli's ignored and staged listings", its evidence the two timeout branches in `src/validate-cli.ts`'s Git listing, the
 `timedOut(ignored)` and `timedOut(staged)` returns (named by symbol, since line numbers move), whose coverage depends on how fast the stub Git answers in the tests "walks the folder, saying why, when
 git does not answer in time" and "walks with a note when the gitlink listing times out or cannot run" in
 `test/validate-cli.test.ts`, named by title since line numbers move (round 68, DA) (the tests stay green either way; the full run covers all but one branch of that file (782 of 783 at round 79), above its
 floor, and Windows has no floor), and its decision a test seam beside `gitLimits` in `src/validate-cli.ts`
 that answers `ETIMEDOUT` to a chosen call; the code is not changed in this landing (round 65, item CN). At landing,
-file a fourth backlog row under the next id above that one (CT-257 or above, re-measured the same way): "Decide
+file a fourth backlog row under the next id above that one (CT-258, re-measured the same way): "Decide
 whether Fabric Dashboards counting a degraded continuation, or a `down` within the 15-minute calm, counted toward
 the 15 minutes from the episode's first `down` look, conforms", its sources fabric-dashboards `v0.8.30` (FD-159 at `e23551e8`, tag `cc2b0048`; the same continuation since then follows a `foreign` or
 `foreign-user` opening too, so the row asks about all three) and, before it, main `a0bc160`
@@ -1660,7 +1687,10 @@ changed now): a neutral home name followed by sentence punctuation is a blocking
 `SOURCE_HOME_PATHS` takes the trailing `.` (`/home/user.` gives `home-path`, `src/source-rules.ts` lines 928 to
 938); the row first checks parity with the adapter's `HOME_PATHS`, and notes as a minor item that `FAC-SEM-157`'s
 "listed twice" compares entries as written, not in NFC. The lander writes all four rows' ids (the inventory row, the enforcing row, the timeout-test
-row and this row) into this note's Open line, in the landing change. The release notes of the landing carry one more
+row and this row) into this note's Open line, in the landing change. Done in the acceptance change of 2026-11-07: the
+four rows are CT-255 (the inventory row), CT-256 (the enforcing row, written into SCN-054 step 3), CT-257 (the
+timeout-test row) and CT-258 (this row), written into the Open line; the fifth stays a candidate, not filed, since
+this note asks for four rows at landing. The release notes of the landing carry one more
 item: a plain `pnpm validate <dir>` skips a `.json` file that is a FIFO, a socket or a device with a `note/skipped`
 line saying it is not a file, and a `fabric.source.json` that is a symbolic link the same way (SCN-002's errors line);
 and one more: a bare channel-agent declaration's lines name no undeclared member and carry no extension hint.
