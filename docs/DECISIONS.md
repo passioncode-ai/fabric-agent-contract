@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0155` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0156` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -11049,3 +11049,63 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   CT-253 for FAC-SEM-010's message) is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.
+
+### DEC-0155: a restricted socket table: an owner that cannot be told, `table-restricted`, and two proofs of this account
+
+- **Date:** 2026-11-07
+- **Status:** Proposed (draft on branch `agent/ct261-restricted-table-20261107`, CT-261); binding once accepted on merge.
+  It amends HA-2 (DEC-0154): no schema, field or rule code changes.
+- **Context:** HA-2's macOS source reads the TCP socket table (`netstat -anv -p tcp`, `sysctl net.inet.tcp.pcblist64`)
+  as naming every account's sockets. The Fabric Agent Adapter measured on macOS 27.2 that a process with an ad hoc code
+  signature (Homebrew Python, likely Homebrew Node) is shown only its own sockets: `netstat` prints nothing with exit 0
+  and `pcblist_n` returns only the process's own rows, while Apple's `/usr/bin/python3` sees the whole table (FAA-266,
+  FAA-267; board thread `eefa7959`, message `31c317ab`). HA-2 then said nothing about an empty or partial table, and its
+  line "a client that can see its own account's sockets always tells its own listener" no longer held. The products had
+  already answered it in code, the same way: an owner that cannot be told, named `table-restricted`.
+- **Decision:** [service](specification/service.md#a-restricted-socket-table) RT-1 to RT-4.
+  1. **A restricted table (RT-1).** A table the reader cannot read, or that holds no row of another uid or another
+     process, or that lists sockets but not the server end of the reader's own connection, proves nothing by a missing
+     row. The listener is then `foreign-user` for an owner that cannot be told, never `down`, never this account's,
+     never named another account's; a reported reason is `table-restricted`, and a doctor shows a warning, not a fault.
+  2. **The accepted socket (RT-2).** The server end of the connection, the exact address pair, found among the
+     descriptors of a process of the reader's uid (libproc `PROC_PIDFDSOCKETINFO` over `proc_listpids`, or `lsof` of
+     established TCP sockets with the process's uid) proves this account, restricted table or not. It proves the
+     descriptor's holder, not the socket's credentials; a set-uid reader does not use it; a server end not yet accepted
+     may be looked for again for a bounded time.
+  3. **A process the caller started (RT-3).** Only after RT-1, an installer that started the listener's process may
+     vouch for it: its uid equal to the caller's and `lsof` showing it listening on `127.0.0.1:<port>` or
+     `*:<port>`. It proves a listener, not the accepted connection, and is weaker than RT-2.
+  4. **A chosen listener (RT-4).** Under a restricted table only this account's exact `127.0.0.1` bind counts as its
+     own; a wildcard or `::1` listener of this account, and root's, are `table-restricted`.
+  HA-2's opening list names a restricted table among the owners that cannot be told, the macOS row names `pcblist_n`
+  and the restriction, and [conformance](specification/conformance.md#clients-and-readers)'s client row reads it.
+- **Why:** an empty table read as "nobody listens" or as "another account listens" is wrong both ways: the first would
+  report a service `down` that runs, the second blames another account for nothing. Reading it as an owner that
+  cannot be told sends no credential, which is HA-2's whole point, and the two proofs give back what the restriction
+  took from an honest client: the accepted socket where the host can enumerate its own descriptors, the started process
+  where only an installer knows the pid. One reason name lets a person and a doctor tell this case from a real foreign
+  listener.
+- **Alternatives considered:** require an Apple-signed or Developer ID interpreter (true for products shipped as signed
+  apps, impossible for kits that run in the user's own Python or Node); read `lsof -u` of this account alone as proof of
+  a listener (it cannot tell an empty port from another account's, as HA-2's macOS row already says); a schema enum of
+  owner reasons (no schema carries a host state or an owner reason today, and the products report it as free text, a
+  doctor line or a refusal message).
+- **Compatibility:** nothing on the wire changes. Read on 2026-11-07: Project Observatory's `peer_owner` 1.3.0 (PR #466,
+  branch `release/0.35.2`, `8013f6e1`) reads a restricted table as `unknown` `table-restricted`, proves by the accepted
+  socket through libproc (RT-2), refuses a set-uid context and counts only an exact `127.0.0.1` bind (RT-4); the
+  adapter's kits on `rel-0.76.0` (`4ef7b936`) name `table-restricted` and vouch by a started process's pid (RT-3), and
+  FAA-272 owes the hub client's reason and an RT-2 path; the PassionCode launcher's doctor (`eca6974`, PC-163) shows
+  `table-restricted` as a warning; Fabric's client (`listenerOwner.ts` at `2438c90a`, CO-528) proves by the accepted
+  socket through `lsof` (RT-2) and refuses otherwise with `table-restricted`; Switchboard's proxy refuses a peer it
+  cannot tell, which a restricted table can only make stricter. Owed: sshlg-fabric-server names `owner_unknown` where
+  RT-1 names `table-restricted` (SFS-HA2-RESTRICTED waits for this decision); Fabric Dashboards reads an empty
+  `netstat` as another account's in its listener check (FD-159, `loopback-owner.ts` line 97) and a table without the
+  connection's row as another account's in its connection check (FD-168), where RT-1 reads both as an owner that
+  cannot be told. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/service.md` (HA-2's list and macOS row, the paragraph *A restricted
+  socket table*), `docs/specification/conformance.md` (the client row), `docs/DOCMAP.md`; backlog CT-261 (in progress),
+  CT-229 (its owed vectors gain the restricted cases); the handoff `docs/handoffs/2026-11-07-restricted-table.md`.
+- **Source:** the adapter's measurement on board thread `eefa7959` (message `31c317ab`), Project Observatory's
+  `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
+  inputs; backlog CT-261.
+
