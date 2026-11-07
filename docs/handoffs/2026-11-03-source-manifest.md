@@ -854,6 +854,20 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Checks actually run
 
+2026-11-07, the merge with `main`: merge commit `b963d6a6` (parents `0099c4f1` and main `40a0ddb8`, which carries
+DEC-0154, released `v0.1.0+2026-11-07.1`, and CT-250 to CT-253), resolved as **DEC-0153 is on main** below says
+(order 1 for the watcher sentence). On that tree: `tsc --noEmit` exit 0; `vitest run --coverage` exit 0 (117 files,
+11068 passed, 3 skipped; branches 99.02 %, every floor held); `python3 -I docs/ux/lint.py` exit 0 (56 scenarios);
+`tsx src/docs-check.ts` exit 0; `tsx src/lint-md.ts` exit 0 (266 files, 0 errors); `tsx tools/vectors/run.ts` exit 0
+(32 vector files); `ORG_INDEX=... tsx src/privacy-check.ts` exit 0 (0 findings). The merge notes' greps: schema count
+151 (151 files under `schemas/`), `JWT_SHAPE` 0 in `src/ops-digest.ts`, `docs/specification/ops-digest.md` and
+`src/channel-agent.ts`, the in-progress mirror grep empty, the `hasHomePath` gloss grep empty, `SOURCE_HOME_PATHS` 1
+in each of its three files, the watcher phrase 1 and the widened claim 0, CT-205, CT-215, CT-218, CT-224 and CT-232's
+landing greps 1 each, `installation-valued` 1, CT-220's CA-8 1, one coverage `include` line, two channel-agent
+conformance rows, SCN-054 and SCN-055 both kept, next free `DEC-0155` and `FAC-SEM-169` as the CAS refs hold, the
+shared knowledge-base block byte-identical in both handoffs (`cmp`), no conflict marker and no added U+2014. Blind
+readings round 78 run at this merged head, not at `3ba7e434`.
+
 Round 77's fix (item DP: source.md, service.md, this note, `docs/DECISIONS.md` and `docs/backlog.md`; no code
 changed) was checked on the working tree over head `c5a2e710`: the shared block still occurs once in this note, byte for
 byte; `pnpm typecheck` (exit 0), `pnpm run docs:check` (0 errors), `python3 docs/ux/lint.py` (exit 0),
