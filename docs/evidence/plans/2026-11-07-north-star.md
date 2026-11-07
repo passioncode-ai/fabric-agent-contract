@@ -83,8 +83,9 @@ repository.
 
 1. Done 2026-11-07: PR #250 (CT-254) merged (`1705d0f3`) after three readings and the gate, released
    `v0.1.0+2026-11-07.3`; Dashboards FD-168 and Fabric CO-528 build on it.
-2. Land DEC-0152 (CT-217): its draft date was 2026-11-07, and Fabric already hands its rule to every session. Rebase on
-   main, blind readings, gate, merge, tag.
+2. Done 2026-11-07: DEC-0152 (CT-217) merged (PR #258) after blind readings and the gate, released
+   `v0.1.0+2026-11-07.4`. Added the same day: DEC-0155 (CT-261, a restricted macOS socket table) merged (PR #259),
+   released `v0.1.0+2026-11-07.5`, and its consumers' changes posted on board thread `eefa7959` (message `2e99031d`).
 3. Land DEC-0151 (CT-210, the ticket counts in `support-quality-daily/1`) the same way, or record why it waits.
 4. Draft CT-220 (due 2026-11-08).
 5. Done 2026-11-07: both stale branches archived under `refs/archive/2026-11-07/` and deleted (`template-parity` was
@@ -125,12 +126,12 @@ repository.
 
 | # | The record says | The fact | Fix |
 | --- | --- | --- | --- |
-| 1 | Fabric's session rules cite DEC-0152, SA-2 and SA-3 | DEC-0152 is on `agent/ct217-board-same-turn-20261104` only | Wave 0, item 2 |
+| 1 | Fabric's session rules cite DEC-0152, SA-2 and SA-3 | DEC-0152 was on a branch only | closed 2026-11-07: released `v0.1.0+2026-11-07.4` |
 | 2 | CT-250 and CT-252: «the operator's pause» | the contract's sessions resumed 2026-11-07 | update both status cells when the designs start |
 | 3 | North Star G2 and G12: CT-250 and CT-251 «open PR #246» | #246 merged; the rows are on main | the estate cut lists it (its drift row 4); fabric-workspace owns the page |
 | 4 | North Star G1-a names Observatory and the contract; the contract had no row | CT-259 filed by this cut | tell Observatory on the board when its design starts |
 
 ## Exact next task
 
-Wave 0, item 1: rebase PR #250 on main `bb8eaa05` if needed, run `pnpm run check`, merge, tag, and post the tag on the
-board for Fabric (CO-528) and Dashboards (FD-168).
+Wave 0, item 3: merge main into `agent/sqd-fields-20261104` (DEC-0151, CT-210), run the three blind readings until two
+consecutive clean rounds, run `pnpm run check`, merge, tag.
