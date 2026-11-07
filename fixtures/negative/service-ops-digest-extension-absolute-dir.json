@@ -1,0 +1,6 @@
+[
+  {
+    "dir": "/var/lib/example-agent/digests",
+    "source": "app"
+  }
+]

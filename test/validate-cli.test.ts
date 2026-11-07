@@ -52,6 +52,43 @@ describe("every positive fixture passes", () => {
     expect(result.code).toBe(0);
   });
 
+  it("a bare channel-agent declaration gets the declaration-only hint and still passes (DEC-0150)", () => {
+    const result = run(fixture("positive/service-channel-agent-extension.json"), "--schema", "service-channel-agent-extension.schema.json");
+    expect(result.code).toBe(0);
+    expect(result.out).toContain("hint/declaration-only");
+    expect(result.out).toContain("may name a map key as written");
+    expect(result.out).toMatch(/ {2}\/ {2}hint\/declaration-only/);
+    // The hint carries this schema's own help page, so a later merge cannot point it elsewhere.
+    expect(result.out).toContain("docs/specification/channel-agent.md#what-is-checked");
+    const json = run(fixture("positive/service-channel-agent-extension.json"), "--schema", "service-channel-agent-extension.schema.json", "--json");
+    expect(json.out).toContain("docs/specification/channel-agent.md#what-is-checked");
+  });
+
+  it("a bare channel-agent declaration names a map key in its place and hints so (DEC-0150, DEC-0149's instance-free lines)", () => {
+    const declaration = json("positive/service-channel-agent-extension.json");
+    declaration.projects[0].channels[0].texts.final["sk-Latn-150-u-ca-gregory"] = 5;
+    const result = run(one("declaration.json", declaration), "--schema", "service-channel-agent-extension.schema.json");
+    expect(result.code).toBe(1);
+    expect(result.out).toContain("/projects/0/channels/0/texts/final/sk-Latn-150-u-ca-gregory");
+    expect(result.out).toContain("may name a map key as written");
+  });
+
+  it("a bare channel-agent declaration never prints an undeclared member's name (DEC-0150, DEC-0149's instance-free lines)", () => {
+    // A provider key's shape built at run time, so no source line holds it.
+    const name = ["sk", "-", "Ex4mpleN0tARealKey0000"].join("");
+    for (const at of ["top", "channel"] as const) {
+      const declaration = json("positive/service-channel-agent-extension.json");
+      if (at === "top") declaration[name] = 1;
+      else declaration.projects[0].channels[0][name] = 1;
+      const result = run(one("declaration.json", declaration), "--schema", "service-channel-agent-extension.schema.json");
+      expect(result.code, at).toBe(1);
+      expect(result.out, at).toContain("has a member the schema does not define");
+      expect(result.out, at).toContain(at === "top" ? "declaration.json  /  schema/additionalProperties" : "/projects/0/channels/0  schema/additionalProperties");
+      expect(result.out, at).not.toContain(name);
+      expect(run(one("declaration.json", declaration), "--schema", "service-channel-agent-extension.schema.json", "--json").out, at).not.toContain(name);
+    }
+  });
+
   it("a provider entry with run.mcp.stdio.scope gets the reader-pending hint and still passes (CT-27)", () => {
     const result = run(fixture("positive/provider-entry-stdio-on-demand.json"), "--schema", "provider.schema.json");
     expect(result.code).toBe(0);

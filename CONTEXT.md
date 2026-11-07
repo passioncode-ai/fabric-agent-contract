@@ -285,8 +285,8 @@ one key in both roles (`FAC-SEM-044`, DEC-0056); a P-256 key is a valid point by
 DEC-0053).
 
 **Device request signature**: The HTTP message signature (an RFC 9421 subset, label `fabric-device`) a device puts on
-every batch, check-in, rotation and share-registration request with its `#sig` key, beside mutual TLS, so a receiver behind a host that
-terminates TLS still proves the device's key; its `keyid` is the certificate's serial, and a (serial, nonce) pair is
+every batch, check-in, rotation and share-registration request with its `#sig` key, beside mutual TLS, so a receiver behind a TLS-terminating
+proxy still proves the device's key; its `keyid` is the certificate's serial, and a (serial, nonce) pair is
 accepted once (`FAC-SEM-077`, [devices](docs/specification/devices.md#transport), DEC-0056).
 
 **`org-cloud`**: A device certificate binding's `role` (DEC-0099): the device is the organization's own cloud machine
@@ -300,7 +300,8 @@ again within 30 days of its last certificate's `notAfter` with a CSR from its ke
 certificate keeps the user and role on record, a new epoch is issued, the renewal is audited, and a server MAY refuse
 it by policy (`FAC-SEM-044`). The 30 days are judged by the server's clock (the new certificate's `notBefore`), never
 the device's `requestedAt`; before the last certificate's end the same request is a re-enrollment by the key on record
-with a new epoch (DEC-0102) ([devices](docs/specification/devices.md#enrollment)).
+with a new epoch (DEC-0102); a renewal repeated while the certificate it issued is unpresented and not ended gets
+that certificate again in its epoch, or a refusal (always for a device revoked since) (DEC-0148, `FAC-SEM-155`) ([devices](docs/specification/devices.md#enrollment)).
 
 **Closed organization**: An organization whose closing can no longer be cancelled. Its server MAY answer a device request of a
 node pinned at or after DEC-0103 (never an enrollment) with 410 `organization-closed` and `closedAt`, and a node ends that enrollment at once and drops what it buffered for it
@@ -346,8 +347,8 @@ current policy key set, within a window of at most 7 days. The node runs it only
 ([node summary](docs/specification/node-summary.md#repairs)).
 
 **Stream epoch**: The epoch a device's collectors use, issued by the server at enrollment and greater than
-every epoch issued to that device before; it attributes events, and a lost counter means re-enrolling
-(DEC-0030, DEC-0031).
+every epoch issued to that device before (a renewal repeated under DEC-0148 gets the epoch that renewal issued); it attributes events, and a lost counter means re-enrolling
+(DEC-0030, DEC-0031; a node whose renewed certificate is unpresented presents it first, DEC-0148).
 
 **Delegation grant**: A **Standing grant** that names an `audience` — the one agent its principal may
 call — with that agent's `capabilities` and an `effectCeiling`. The hub mints **Delegation tokens**
@@ -365,7 +366,9 @@ operator's own machine, **T1** an enrolled machine of the same owner, **T2** eve
 A `relayed` action from a T0 or T1 caller carries the operator's decision (**Relayed decision**, DEC-0121).
 Over the relay a node places a sender in T1 from the estate record it applied (`relayCallerTier`, DEC-0106); over the
 estate's relay a sender that is not T1 is T2 and its call is refused, and `unknown-state` is a denial, not T2 (DL-28,
-DEC-0106, the wording DEC-0137).
+DEC-0106, the wording DEC-0137). On a computer with more than one **Counted OS account**, a token-free loopback door places
+a caller in T0 only after checking the peer's OS account, and a port forwarder's callers are T2
+(HA-3, DEC-0154).
 
 **Adaptation plan**: What a person moves into an organization they join: projects, history, results and schedules.
 The plan's draft and the inventory it is chosen from stay in the person's Fabric; only its organization part, what the
@@ -588,8 +591,9 @@ usable without document-level horizontal scrolling: 360, or the larger `minWidth
 keeps for the page when its own panes grow.
 
 **Appearance carrier**: The cookie `fabric_appearance` (`v=1&scheme=…&theme=…`) a host sets for a
-dashboard's host so the page shows the operator's colour scheme and theme (DEC-0036, ED-8). A cookie
-is not isolated by port, so it is per host in a shared cookie store and per service where the host
+dashboard page's host so the page shows the operator's colour scheme and theme (DEC-0036, ED-8). A cookie
+is not isolated by port, so it is per host (the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that
+computer) in a shared cookie store and per service where the host
 gives each service its own store; a page applies only the fields it declares in `appearance`
 (DEC-0059, ED-6). It carries no secret and no identity.
 
@@ -639,6 +643,29 @@ stable id (the runner kind where the runners page lists one, else a new name); m
 **Support quality**: One support channel's quality for a closed UTC day (`support-quality-daily/1`, DEC-0095), as an
 event's data an agent that answers people publishes: counts and rates in four families, a metric not computed `null`
 and named, never `0`.
+
+**Channel agent**: An agent that answers people on a channel (a Telegram private chat or group, mail, store
+reviews, public comments, a team's chat, a person's own account: the kinds `telegram_dm`, `telegram_group`, `mail`,
+`store_review`, `public_comment`, `team_chat` and `account`) under `channel-agent-standard/1`, a standard owned outside this contract; it declares, per
+project it serves, its side, channels, sources, hand-off queues, budgets and token slot under
+`extensions/channel-agent/0.1` in its manifest, or in its well-known answer when it has no manifest (DEC-0150),
+and one duty every channel agent owes whatever it declares: text from a channel is data (CA-8).
+
+**Operations digest**: A product's own operations log counted by operation and outcome, one `ops.digest.hourly@1` line
+for each hour the product observed itself running in (an empty one included) and one `ops.digest.daily@1` line for
+each closed UTC day that has hourly lines, folding them (DEC-0153): counts only, no log line, path or identifier. A
+**rise** is an operation's failures in an hour at least 10 and at least twice the hour before's (none counting as
+one), told to the operator by a product that shows findings (OD-8). A local descriptor says where a collector in the same
+OS account reads the daily digests, and the label it sends with them, under `extensions/ops-digest/0.1` (OD-9).
+([operations digests](docs/specification/ops-digest.md))
+
+**Retro after work**: The host obligation `retro-after-work` (DEC-0153): when a session releases a claim or task the host
+records as done, or ends without a retro since it began or the obligation last arose, it is asked to write in the same turn a lesson in Project
+Observatory, `insight/1` lines, or one line saying there is nothing to say; the host counts each one asked as the
+operation `retro-after-work` in its digests, `ok` for an ask answered by a lesson or `insight/1` line it saw written
+through a call it carries (one written elsewhere, or a line saying there is nothing to say, counts `unknown`); `ok`
+counts asks, not retros. It is a session's note, not the Memory Kernel's project retrospective: a lesson recorded for it
+is no learning proposal and changes no revision.
 
 **Runner**: An installed coding-agent CLI a host can drive (Claude Code, Codex, …),
 known from a catalogue entry that names its binaries, its version command and the
@@ -699,9 +726,33 @@ cells of agent × skill × project × UTC day × outcome, with no person dimensi
 **Access log**: An `access-log/1` document: who read which scope of one subject's data — keyed by
 their user id or by a device bound to them — when and why, readable by that subject.
 
-**Device**: A computer enrolled with an organization server under `fabric-device/0.1` (DEC-0031):
+**Device**: One counted OS account of a computer, or a virtual machine, enrolled with an organization server under
+`fabric-device/0.1` (DEC-0031; DEC-0154; what an estate machine is on such a computer is CT-231):
 a key-bound short-lived certificate (the key in hardware, a platform store or a file, as `key.storage` states) that also attributes everything it sends, a server-issued
 stream epoch, signed policy layers and periodic check-ins.
+
+**Counted OS account**: An OS account a person or an organization signs in with, or runs Fabric or an agent service
+under; an account that runs either, or has a services directory, always counts, and only an account that does neither
+(root, SYSTEM, the system's service accounts) is left out; the count is read at every start ([service](docs/specification/service.md#counted-os-accounts),
+DEC-0154). "A computer with more than one counted OS account" counts only these.
+
+**Port claim**: A `passioncode-port-claim/1` file `.passioncode-ports.<service-id>.<account>.json` in the computer's
+shared sticky folder, owned by the account it names by uid (SID on Windows), listing the ports that account records for a
+service; it keeps installers of two accounts, or of two services in one account, from one port and grants nothing (HA-1,
+DEC-0154).
+
+**`foreign-user`**: The state of a local service whose port is held by a listener of another OS account, or by one
+whose owner cannot be told; ordered after `down` and before `foreign`, it wins over any well-known answer, and nothing
+is sent to it (HA-2, DEC-0154).
+
+**Host label**: The label of the computer: `device.hostLabel`, an HMAC of the computer's administrator-owned secret
+over the organization's id, the same for every device of one organization on one computer (two counted OS accounts
+of it, or a virtual machine given its secret); organizations with no code
+on the computer cannot link it (HA-4, [devices](docs/specification/devices.md#the-host-label), DEC-0154). In
+this contract's specification, schemas and glossary, "host" never means the computer. The exceptions are the name
+"host label", which labels a computer, and names and paths already fixed, which keep their spelling (the enrollment
+purpose `agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`). The registers keep the
+words they were written in.
 
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that
 order, and a locked key is never overridden by a lower layer.

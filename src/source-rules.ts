@@ -922,7 +922,8 @@ export const NEUTRAL_HOMES: readonly string[] = [
  * letter, a digit or a dash (`--home-dir` is a flag) and `C--Users-` never after a letter or a digit (so `-C--Users-<name>`
  * is one); the URL-encoded ones. The name is
  * each pattern's last group, at the end of its match. This is narrower than `hasHomePath` in `src/activity-rules.ts`,
- * the scanner for values that hold no path at all: a source holds `~/` and neutral homes, and they are portable.
+ * the home-folder detector for values that may hold a path but never a home folder (activity values, an operation's
+ * name, an operations digest's `dir`, DEC-0153): a source holds `~/` and neutral homes, and they are portable.
  */
 export const SOURCE_HOME_PATHS: readonly RegExp[] = [
   /(?<![A-Za-z0-9_.-])(?:\/var)?\/home\/([A-Za-z0-9][A-Za-z0-9._-]*)/g,

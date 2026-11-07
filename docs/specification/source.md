@@ -254,8 +254,9 @@ a path written relative to the user's home is portable by construction. An opera
 caught lists it among the [installation strings](#installation-strings); the contract does not implement the adapter's
 `home: <name>` declaration, and a tool may add it.
 
-This is narrower than `hasHomePath` (`src/activity-rules.ts`), the scanner for values that must hold no path at all,
-which reads `~/` and every name: a portable source holds both.
+This is narrower than `hasHomePath` (`src/activity-rules.ts`), the home-folder detector for values that may hold a
+path but never a home folder (activity values, an operation's name, an operations digest's `dir`, DEC-0153), which
+reads `~/` and every name: a portable source holds both.
 
 ### The checker
 
@@ -708,7 +709,7 @@ the 64-entry cap (below), an
 when the agent's own code knows it backs a declared [connection](connections.md), is reported under that connection's
 id, without `setup`: a real failure of that connection. The agent's code owns that mapping from slot to connection;
 no schema member declares it and nothing checks it. A call refused because a slot is missing is a setup answer, not a
-failure: the agent's own operations count (DEC-0153, in progress) records it as `unknown`, never `failed`, so it never
+failure: the agent's own [operations count](ops-digest.md) (DEC-0153) records it as `unknown`, never `failed`, so it never
 makes a rise. A caller or a host that sees only the tool's error cannot tell a setup answer from a failure: by
 DEC-0149's choice the refusal carries no machine marker, and a structured one is left open.
 

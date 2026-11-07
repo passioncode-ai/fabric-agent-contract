@@ -314,11 +314,19 @@ describe("F-B-317 — ordinary parameter names pass (re-checked after DEC-0041)"
 describe("F-B-318 — the button cookie lives in the page's partition for the session only", () => {
   it("states the scope and the lifetime in FB-6", () => {
     const fb6 = /\*\*FB-6 — [\s\S]*?(?=\*\*FB-7)/.exec(read("docs/specification/fabric-button.md"))?.[0] ?? "";
-    // DEC-0059 gave FB-6 ED-8's scope: a cookie is per host, not per origin (RFC 6265 §8.5).
+    // DEC-0059 gave FB-6 ED-8's scope: a cookie is per host, not per origin (RFC 6265 §8.5). "Host" is the URL's
+    // host here, not the machine, so DEC-0154's W73 keeps it (W66 had changed it to "computer").
     expect(fb6).toMatch(/\*\*per host in a shared\s+cookie store; per service where the host gives each service its own store\*\*/);
     expect(fb6).toMatch(/hides the button of every\s+local service on that host/);
     expect(fb6).not.toMatch(/on the service origin/);
     expect(fb6).toMatch(/session cookie/);
+  });
+  it("states the same bold scope in ED-8 as in FB-6, so the two cannot drift apart (DEC-0154 W74)", () => {
+    const scope = (text: string) => /\*\*(per\s+host[^*]*)\*\*/.exec(text)?.[1]?.replace(/\s+/g, " ") ?? "";
+    const fb6 = /\*\*FB-6 \u2014 [\s\S]*?(?=\*\*FB-7)/.exec(read("docs/specification/fabric-button.md"))?.[0] ?? "";
+    const ed8 = /\*\*ED-8 \u2014 [\s\S]*?(?=\*\*ED-9)/.exec(read("docs/specification/embedded-dashboard.md"))?.[0] ?? "";
+    expect(scope(ed8)).toBe("per host in a shared cookie store; per service where the host gives each service its own store");
+    expect(scope(fb6)).toBe(scope(ed8));
   });
 });
 

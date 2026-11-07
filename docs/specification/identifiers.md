@@ -131,6 +131,9 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
   attribution](folder-attribution.md#the-snapshot), DEC-0089): each product's own opaque storage keys, matched byte for byte,
   even when one is shaped like a URI such as `project:<slug>`; the canonical id is Fabric's, the others its
   aliases (the run's D3 as the operator corrected it, Fabric ADR-0166's amendment);
+- a channel-agent declaration's `project` (`FAC-SEM-163`, [channel agent](channel-agent.md), DEC-0150): the registry
+  alias `project:<slug>`, whose pattern (`^project:[a-z0-9][a-z0-9._-]{0,127}$`) admits only its normal form, lower
+  case and with no percent-encoding, so comparing it as written is exact;
 
 - a source hand-over's decision `target` (`<agent>@<commit>-><recipient>`, or `sha256:` and its lowercase hex digest past
   200 characters; [source](source.md#handing-over), DEC-0149): the action computes the same string and compares it

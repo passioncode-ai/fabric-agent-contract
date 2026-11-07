@@ -5,6 +5,10 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 | Handoff | Decisions | Merge |
 |---|---|---|
 | [2026-11-03 an agent's source and its instance](2026-11-03-source-manifest.md) | DEC-0149 (CT-194; CT-207, CT-208, CT-211, CT-212, CT-214 filed) | open: branch `agent/ct194-source-manifest-v2-20261104` (the reviewed tree as a squash plus round commits) |
+| [2026-11-06 several OS accounts on one computer](2026-11-06-shared-host-ports.md) | DEC-0154 (CT-228; CT-229 to CT-243, CT-253 filed); rounds 1 to 16 not clean, 17 clean, 18 to 27 not clean, 28 and 29 clean; paused and resumed | accepted 2026-11-07, #248; merged 2026-11-07; released `v0.1.0+2026-11-07.1` |
+| [2026-11-04 operations digests and the retro after work](2026-11-04-ops-digest.md) | DEC-0153 (CT-219; CT-222, CT-226 filed) | accepted 2026-11-06, #244; merged 2026-11-06; released `v0.1.0+2026-11-06.1` |
+| [2026-11-04 an agent that answers people on a channel](2026-11-04-channel-agent.md) | DEC-0150, accepted (CT-209; CT-223, CT-224, CT-225 filed) | merged 2026-11-05 after rounds 38 and 39 were clean; released `v0.1.0+2026-11-05.2` |
+| [2026-11-02 a renewal repeated, not reissued](2026-11-02-renewal-repeat.md) | DEC-0148 (CT-200; CT-202, CT-203 filed) | merged 2026-11-05, #235; released `v0.1.0+2026-11-05.1` |
 | [2026-11-02 a peer share's risks settled](2026-11-02-peer-share-risks.md) | DEC-0147 (CT-189; CT-201 filed) | merged 2026-11-02, #232; released `v0.1.0+2026-11-02.1` |
 | [2026-10-27 the machines' report, its open design questions](2026-10-27-machine-report-design.md) | DEC-0146 (CT-172) | merged 2026-10-30, #230; released `v0.1.0+2026-10-30.2` |
 | [2026-10-26 three decisions for the simple Fabric](2026-10-26-simple-fabric-decisions.md) | DEC-0140 (CT-174) | merged 2026-10-30, #217 `86f3ebad`; released `v0.1.0+2026-10-30.1` |

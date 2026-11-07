@@ -37,8 +37,9 @@ export const PERSON_PAIRS: ReadonlySet<string> = new Set(["display_name", "full_
 export const PERSON_PREFIXES: readonly string[] = ["employ", "productiv", "assess", "apprais"];
 
 /**
- * A home directory inside a value, in the user-name segment form: a home root (`Users`, `users`, `home`) between two
- * separators of the same kind, followed by a name. Matched forms:
+ * A home directory inside a value, in the user-name segment form: a home root (`Users`, `users`, `home`) at the start,
+ * after any character that is not an ASCII letter or digit, or after %2F or %252F, then a separator, then a name (the exact boundary, as
+ * docs/specification/ops-digest.md#fac-sem-167 states it for FAC-SEM-167 and FAC-SEM-168). Matched forms:
  * - slash forms, absolute or relative, plain or URL-encoded once or twice: `/Users/<name>`, `users/<name>`,
  *   `home/<name>`, `C:\Users\<name>`, `%2FUsers%2F<name>`, `%252FUsers%252F<name>`;
  * - the dash forms runtimes write into file names: `-Users-<name>-`, `C--Users-<name>`, `-home-<name>-`, after any
@@ -50,8 +51,8 @@ export const PERSON_PREFIXES: readonly string[] = ["employ", "productiv", "asses
  * is undetectable by design. The control is the rule that a path-derived key is `hmac-sha256:` under the device's
  * telemetry key (`pathSourceKey`) and that no field carries a path (DEC-0030).
  *
- * Scope (CT-109): the value scanner of FAC-SEM-037 and FAC-SEM-040 (`forbiddenKeys`), FAC-SEM-128 (`src/node-summary.ts`)
- * and FAC-SEM-138 (`src/credentials.ts`). It reads values that may hold ordinary words, so it matches only the user-name
+ * Scope (CT-109): the value scanner of FAC-SEM-037 and FAC-SEM-040 (`forbiddenKeys`), FAC-SEM-128 (`src/node-summary.ts`),
+ * FAC-SEM-138 (`src/credentials.ts`), and FAC-SEM-167 and FAC-SEM-168 (`src/ops-digest.ts`). It reads values that may hold ordinary words, so it matches only the user-name
  * segment form, and the dash form only after a character that is not an ASCII letter or digit: `my-users-list` passes.
  * The `sourceKey` schema pattern (`activity-common`) repeats its dash clause over the key's alphabet, and a test in
  * `test/activity-rules.test.ts` pins that the two refuse the same keys. Three other rules draw other boundaries: the

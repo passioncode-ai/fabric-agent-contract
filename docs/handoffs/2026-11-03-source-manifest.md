@@ -608,7 +608,7 @@ source, what never travels with it, the check before a source export, and how a 
     message (service.md's watcher rule); a rule for messaging it is owed (CT-244).
 - Round 61, decided by the coordinator under the operator's recorded rules:
   - principles section 7 and rules section 9 name the same exceptions, whose home is item 9;
-  - CT-227 has landed (main `1c141418`); DEC-0154 is the open branch after DEC-0151 and DEC-0152; DEC-0149's landing
+  - CT-227 has landed (main `1c141418`); DEC-0154 was then the open branch after DEC-0151 and DEC-0152; DEC-0149's landing
     always changes the subject of the first sentence of its watcher text in `service.md` ("Fabric Dashboards' watcher"
     to "A watcher"), and whichever of DEC-0149 and DEC-0154 lands second changes its list of states (to "`down`,
     `foreign` or `foreign-user`, not merely `degraded`", on one line; round 68, DB: both orders, each with its landed
@@ -1640,7 +1640,10 @@ scenarios, screens), `fixtures/catalogue.json`, `schemas/device-enrollment.schem
 `test/delegation-sealed.test.ts`, `tools/vectors/run.ts` and `vitest.config.ts`, and adds
 `docs/evidence/specs/2026-11-06-shared-host-gaps.md`, `docs/handoffs/2026-11-06-shared-host-ports.md`,
 `src/host-label.ts`, `test/host-label.test.ts`, `tools/vectors/host-label.ts`, `fixtures/vectors/host-label.json`
-and two device-enrollment fixtures. A three-way merge of this branch (`b714bceb`) with `9161796d` conflicts in
+and two device-enrollment fixtures. DEC-0154 landed first (PR #248, main `18f8d487`, released `v0.1.0+2026-11-07.1`), so the
+notes on its `9161796d` here are history: this branch merged main `40a0ddb8` in the commit "Merge origin/main into
+DEC-0149 (DEC-0154 landed, CT-250 to CT-253)", resolved as these notes say, and order 1 below is the order that
+applied. A three-way merge of this branch (`b714bceb`) with `9161796d` conflicts in
 fifteen files, measured with `git merge-tree` on 2026-11-06 in round 75 (re-measured at landing): the fourteen it
 shares with main `1c141418` and `docs/specification/service.md`, whose rule table holds rows both sides rewrote,
 DEC-0149 the FAC-SEM-142 row and DEC-0154 the adjacent FAC-SEM-143 row (DEC-0154's next head rewrites FAC-SEM-143
@@ -2005,7 +2008,9 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   "Proposed" is true while DEC-0154 is proposed. Who changes it, the exact clauses, the checks, the interleavings and
   the withdrawal are in the knowledge-base clause rule in **Next task**, one block, byte-identical with DEC-0154's
   handoff (round 69, DG; round 70, DI; round 71, DK; round 72, DL); the service's own outage report stays at 5
-  minutes or more, as the copy agent writes it today. No knowledge base row is filed for it at landing.
+  minutes or more, as the copy agent writes it today. No knowledge base row is filed for it at landing. DEC-0154 is
+  accepted on main since 2026-11-07, so the rule's status check prints 1 there: at step 6 the lander changes both
+  clauses on PR #628 as the rule says, right before merging it.
 - At the DEC-0150 step, confirm DEC-0150's lander filed the backlog row (`grep -c 'installation-valued'
   docs/backlog.md` prints 1 on the merged tree) on how a channel
   declaration's installation-valued members (`tickets.token_slot`'s vault project and env, `evals.spend_record`, the

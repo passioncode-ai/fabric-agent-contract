@@ -93,7 +93,8 @@ export const INSTANCE_FREE: Readonly<Record<string, (params: Record<string, unkn
  * that some branch failed), except a `oneOf` that matched more than one branch. `enum` and `const` name their allowed
  * values, `required` the missing member, `additionalProperties` the extra member and, where the object's schema has
  * an `extensions` member (errors from a validator built with `verbose`), where vendor data goes. A bad member name is
- * one line at that member's path. Order is kept. With `instanceFree` (DEC-0149's source checks) no message carries
+ * one line at that member's path. Order is kept. With `instanceFree` (DEC-0149's source checks, and the bare
+ * channel-agent declaration checked with `--schema service-channel-agent-extension.schema.json`) no message carries
  * anything of the document: each is built from the keyword and the schema's own values, an extra member and a bad
  * member name are reported at their object without the name.
  */

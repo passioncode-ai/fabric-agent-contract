@@ -50,6 +50,11 @@
                 "linux",
                 "other"
               ]
+            },
+            "hostLabel": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{21}[AQgw]$",
+              "description": "DEC-0154 item 4: the host label, the label of the computer: HMAC-SHA-256 keyed with the computer's secret over fabric-host-label/1 followed by org.id, its first 16 bytes in base64url without padding. Two devices of one organization on one computer (two counted OS accounts, or a virtual machine given the computer's secret) carry the same label; organizations with no code on the computer cannot link their labels, while an organization's code on any counted account of the computer, or in a virtual machine given the secret, can compute every organization's label for that computer. Absent when the node has no usable secret, or until a device-policy member turns it on (CT-239). Not a credential."
             }
           },
           "additionalProperties": false

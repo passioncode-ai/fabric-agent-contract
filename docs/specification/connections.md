@@ -80,7 +80,9 @@ invalid against the schema, names an `id` twice or carries a credential is not d
 the agent as having declared nothing and says why, and never trusts a connection as authority (it is data, as every
 well-known member is). A valid list comes back with `failing` set on each connection a `degraded[].source` names. A
 service that names a failing connection in `degraded[]` reports a status other than `ready` (`FAC-SEM-011`); a
-connection that is down while the service stays ready is shown by its `state` alone. A host resolves a `service`
+connection that is down while the service stays ready is shown by its `state` alone. A `service` connection whose
+listener the host reads as `foreign` or `foreign-user` is `down`, as a node summary reports it
+([service](service.md#ha-2) HA-2, DEC-0154). A host resolves a `service`
 target to an installed agent to draw the chain.
 
 ## Semantic rules

@@ -513,7 +513,8 @@ describe("FAC-SEM-158 and FAC-SEM-159: the tree check", () => {
     for (const portable of ["~/x", "cd ~", "/users/123", "--home-dir", "/Users/a"]) {
       expect(homes(portable), portable).toEqual([]);
     }
-    // hasHomePath, the scanner for values that hold no path at all, is unchanged and still refuses them.
+    // hasHomePath, the home-folder detector for values that may hold a path but never a home folder (DEC-0153 applies
+    // it to an operations digest's dir too), is unchanged and still refuses them.
     expect(hasHomePath("~/x")).toBe(true);
     expect(hasHomePath("/Users/example")).toBe(true);
   });

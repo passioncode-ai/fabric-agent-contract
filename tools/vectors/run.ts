@@ -15,6 +15,7 @@ import { pathToFileURL } from "node:url";
 import { projectRoot } from "../../src/contract.js";
 import * as actions from "./actions.js";
 import * as agentNetwork from "./agent-network.js";
+import * as channelAgent from "./channel-agent.js";
 import * as commsHold from "./comms-hold.js";
 import * as connections from "./connections.js";
 import * as contextRoute from "./context-route.js";
@@ -24,7 +25,9 @@ import * as entitlement from "./entitlement.js";
 import * as orgMembership from "./org-membership.js";
 import * as orgExchange from "./org-exchange.js";
 import * as orgAdaptation from "./org-adaptation.js";
+import * as opsDigest from "./ops-digest.js";
 import * as folderAttribution from "./folder-attribution.js";
+import * as hostLabel from "./host-label.js";
 import * as hubMove from "./hub-move.js";
 import * as jobLimits from "./job-limits.js";
 import * as localChannel from "./local-channel.js";
@@ -48,6 +51,7 @@ const one = (file: string, build: () => string) => () => ({ [file]: build() });
 export const GENERATORS: readonly Generator[] = [
   { source: "actions.ts", build: one(actions.VECTOR_FILE, actions.buildActionsVectors) },
   { source: "agent-network.ts", build: one(agentNetwork.VECTOR_FILE, agentNetwork.buildAgentNetworkVectors) },
+  { source: "channel-agent.ts", build: one(channelAgent.VECTOR_FILE, channelAgent.buildChannelAgentVectors) },
   { source: "comms-hold.ts", build: one(commsHold.VECTOR_FILE, commsHold.buildCommsHoldVectors) },
   { source: "connections.ts", build: one(connections.VECTOR_FILE, connections.buildConnectionsVectors) },
   { source: "context-route.ts", build: one(contextRoute.VECTOR_FILE, contextRoute.buildContextRouteVectors) },
@@ -57,7 +61,9 @@ export const GENERATORS: readonly Generator[] = [
   { source: "org-membership.ts", build: one(orgMembership.VECTOR_FILE, orgMembership.buildOrgMembershipVectors) },
   { source: "org-exchange.ts", build: one(orgExchange.VECTOR_FILE, orgExchange.buildOrgExchangeVectors) },
   { source: "org-adaptation.ts", build: one(orgAdaptation.VECTOR_FILE, orgAdaptation.buildOrgAdaptationVectors) },
+  { source: "ops-digest.ts", build: one(opsDigest.VECTOR_FILE, opsDigest.buildOpsDigestVectors) },
   { source: "folder-attribution.ts", build: one(folderAttribution.VECTOR_FILE, folderAttribution.buildFolderAttributionVectors) },
+  { source: "host-label.ts", build: one(hostLabel.VECTOR_FILE, hostLabel.buildHostLabelVectors) },
   { source: "hub-move.ts", build: one(hubMove.VECTOR_FILE, hubMove.buildHubMoveVectors) },
   { source: "job-limits.ts", build: one(jobLimits.VECTOR_FILE, jobLimits.buildJobLimitVectors) },
   { source: "local-channel.ts", build: one(localChannel.VECTOR_FILE, localChannel.buildLocalChannelVectors) },

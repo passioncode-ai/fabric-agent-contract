@@ -70,9 +70,16 @@ run; a new binding revision is required ([profiles](../specification/profiles.md
 
 ## A local MCP service
 
-A service runs once on the machine, under its supervisor (launchd, systemd, the Task Scheduler or Project
+A service runs once per OS account on the computer, under its supervisor (launchd, systemd, the Task Scheduler or Project
 Observatory's node), and answers on `http://127.0.0.1:<port>`. Its installer writes the descriptor into the services
 folder; the running process serves the well-known document. A service with no capabilities needs no manifest.
+
+On every computer (DEC-0154): the installer records the port and writes a port claim, and the service itself
+rewrites the claim at every start ([HA-1](../specification/service.md#ha-1)); every client checks
+that the listener on the port belongs to its own OS account before it sends a credential
+([HA-2](../specification/service.md#ha-2)). On a computer with several
+[counted OS accounts](../specification/service.md#counted-os-accounts), each account runs its own copy of the
+service, and a loopback door without a token checks its peer's account ([HA-3](../specification/service.md#ha-3)).
 
 The descriptor, `<id>.<instance>.json` in the services folder:
 

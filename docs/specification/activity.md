@@ -265,8 +265,10 @@ depth is split into words — at `camelCase` boundaries, `_`, `-` and `.` — an
 - the key is `user` anywhere but the event's own `/user`.
 
 A value that holds a home directory is refused too. `HOME_PATH` in the same module matches the
-**user-name segment form**: a home root (`Users`, `users`, `home`) between two separators of the same
-kind, followed by a name. The forms it covers:
+**user-name segment form**: a home root (`Users`, `users`, `home`) at the start or after any character that is not
+an ASCII letter or digit, then a separator, then a name; the exact boundary, with the dash and tilde forms, is the one
+[operations digests](ops-digest.md#fac-sem-167) states for `FAC-SEM-167` and `FAC-SEM-168`, which this register now
+governs too. The forms it covers:
 
 - slash forms, absolute or relative: `/Users/<name>`, `users/<name>`, `home/<name>`,
   `C:\Users\<name>`;
@@ -280,7 +282,8 @@ kind, followed by a name. The forms it covers:
 refused.
 
 **Its scope** (CT-109): `HOME_PATH` is the value scanner of `FAC-SEM-037`, `FAC-SEM-040`, `FAC-SEM-128`
-([node summary](node-summary.md)) and `FAC-SEM-138`; it reads values that may hold ordinary words, so it refuses the
+([node summary](node-summary.md)), `FAC-SEM-138`, and `FAC-SEM-167` and `FAC-SEM-168`
+([operations digests](ops-digest.md#semantic-rules)); it reads values that may hold ordinary words, so it refuses the
 dash form only after a character that is not an ASCII letter or digit and `my-users-list` passes, while a device's
 one-line `detail` refuses the dash form after any character ([devices](devices.md#check-in)) and `FAC-SEM-103` matches
 only a home folder that starts a path in slash form ([proposals](proposals.md)); the `sourceKey` pattern repeats its
@@ -340,9 +343,10 @@ within its device, so every receiver keys streams by device as well. `seq` numbe
 by 1, with no reuse.
 
 **The epoch is issued by the organization server**, never chosen by the collector. Each enrollment
-returns a `streamEpoch` greater than every epoch issued to that device before
-([devices](devices.md#enrollment)), and every collector on the device uses it from then on. A
-collector that loses its persisted counter — a reinstall, a reset — MUST re-enroll the device. It
+returns a `streamEpoch` greater than every epoch issued to that device before (a renewal repeated under
+DEC-0148 gets the epoch that renewal issued) ([devices](devices.md#enrollment)), and every collector on the device uses it from then on. A
+collector that loses its persisted counter (a reinstall, a reset) MUST re-enroll the device (a node whose renewed
+certificate is still unpresented presents it first, so the re-enrollment is not a repeat: DEC-0148). It
 then starts again at seq 1 under the new epoch, which is not evidence of tampering. A collector that
 still holds buffered events of an earlier epoch may finish sending them.
 
@@ -359,7 +363,7 @@ Schemas: [`activity-batch.schema.json`](../../schemas/activity-batch.schema.json
 [`activity-batch-ack.schema.json`](../../schemas/activity-batch-ack.schema.json).
 
 A device sends `{protocol, device.id, batchId?, sent, events[1..1000]}` over its enrolled
-mutual-TLS channel, signed with an HTTP message signature that a receiver behind a TLS-terminating host verifies
+mutual-TLS channel, signed with an HTTP message signature that a receiver behind a TLS-terminating proxy verifies
 instead ([devices, transport](devices.md#transport), DEC-0056). **The receiver attributes the batch to the client
 certificate** — or to the certificate the verified signature names — not to the body:
 
