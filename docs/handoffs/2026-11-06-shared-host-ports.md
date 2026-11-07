@@ -817,6 +817,11 @@ grep printed plus HA-3's statement and the release in `products.md` and `roadmap
 `f83a171c`), with the ask to drop DEC-0149 from `north-star.md` 262 and 521 once DEC-0149 lands; the tag, SB-278 and
 the three Fabric Dashboards asks posted on `1fe66e6e` (message `f6d0a09a`); CT-228's state cell names the release.
 
+The knowledge base's pages, checked on its main `9fd0a638` (2026-11-07, after the coordinator's PRs #732, #733
+and #735, message `86bd8c99`): the north-star stale-wording grep 0, "waiting for DEC-0154's tag" in roadmap.md 0, the
+joined "loopback caller without a token;" 0, the tag in products.md and roadmap.md present. The window this step
+named is closed.
+
 Next: once the coordinator answers on `eefa7959`, run the knowledge-base page checks of the acceptance step on its
 main. Then CT-228's owed parts (the claim file's schema and a port-choice reference with vectors) and the rows CT-229 to
 CT-243 and CT-253 by priority.
