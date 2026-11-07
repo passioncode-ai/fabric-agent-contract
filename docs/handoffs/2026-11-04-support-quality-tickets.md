@@ -739,30 +739,13 @@ the round-4 head (`6c8ec0d4`), each exit code read separately: `pnpm exec tsc --
 `pnpm exec tsx tools/vectors/run.ts` 0 (28 vector files match; support quality has no vector generator). No U+2014 in
 the added lines.
 
+- Round 20 (on `f2d8a1ec`): clean on all three tiers, the second clean round in a row; DEC-0151 accepted. Its risks,
+  none blocking, filed as CT-268: the one-source rule only in CT-210 (a), readers on older pins skipping names the new
+  detector passes, the schema title and the copy's refused names, the backslash path case, `validate-cli`'s cleanup
+  timeout at high load, and a `/1` reader's own filter and day key.
+
 ## Next task
 
-Round 20 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers (round 19 was clean on all
-three tiers; a clean round 20 accepts it), until two consecutive rounds are clean, with the full coverage run at low load; open the pull
-request (DEC-0150 is on main, so the merge gate holds) and merge. The landing commit, before the merge:
-
-- DEC-0151's Status Accepted with its clean rounds; CT-129 closed with its receipt; CT-210's first step done; and every
-  other row that calls DEC-0151 proposed or on a branch restated as merged: CT-73, CT-103, CT-188 and this handoff's row
-  in `docs/handoffs/README.md`.
-- DEC-0151's Source and CT-210's status record the rounds from 16 on and the two clean ones, and "two consecutive clean
-  rounds are still owed" goes; the Consequences list stays complete.
-- The two Annotated lines this branch adds under DEC-0044 and DEC-0095 restated as merged, with the merge date (the
-  DEC-0095 one pointing to support quality's project section instead of paraphrasing rules 1 and 2), and the dates of
-  the three Annotated lines under DEC-0096, DEC-0150 and DEC-0153 ("DEC-0151 has merged", "has
-  landed") set to the merge date, so the append-only register keeps a true date.
-- The knowledge base (fabric-workspace `knowledge/roadmap.md`): AS-01 and the Agent assessment sentence ("publishes one
-  `support.quality_daily` per channel and closed day") both say per channel, project once adopted, and closed day.
-- Closing check on the landing commit: `grep -rnE 'DEC-0151 \(proposed|DEC-0151, proposed|branch \`agent/sqd-fields-20261104\`'
-  docs/backlog.md docs/handoffs/README.md docs/specification CONTEXT.md` prints nothing, and `grep -n -A2 '^### DEC-0151'
-  docs/DECISIONS.md` shows the Status Accepted, `grep -c 'DEC-0151 (proposed' docs/DECISIONS.md` prints 0, and `awk '/^### DEC-0151/,/^### DEC-0152/' docs/DECISIONS.md | grep -c
-  'still owed'` prints 0.
-
-Then release, and answer thread `b6820b97` with the tag. At landing also: CT-210 (f), the post to each multi-project
-`/1` producer on the board (rule 1's withholding starts at the merge); CT-210 (e), the vendor rows (the adapter, Fabric's
-re-pin, Dashboards' re-vendor, the Switchboard and Observatory ports); the North Star plan's wave 0 item 3 and its row on
-DEC-0151 marked done, and CT-210 (g), the operator's question on registry aliases, carried to its operator decisions
-table.
+Landed 2026-11-08: the landing commit above (DEC-0151 Accepted, CT-129 done, CT-210's first step done, the rows and
+annotations restated with the merge date, the closing grep empty), the pull request merged, the release tagged. What
+remains is CT-210's adoption (its steps (a) to (g)) and CT-268, each on its own branch.

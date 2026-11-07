@@ -62,7 +62,7 @@ is built from templates with the contract built in (§5), the board's rules (§6
 | G5, §6: the hub, the relay, boards between machines | the relay's adoption, its handshake, what it carries, the machines' report, a project's release from an organization | CT-33, CT-37, CT-152, CT-159, CT-162, CT-163, CT-164 | CT-163 waits on the operator, Fabric or the first organization server |
 | G16, §2: the organization's cloud | the cloud machine's usage, the encrypted server store, a service bound to a context | CT-93, CT-94, CT-140, CT-138 | CT-138 due 2026-11-14; CT-140 targets 2026-11-21 |
 | G13: a project in several organizations | the decision after CT-122's design | CT-141 | waits on the operator's G13 answer |
-| §9: assessment and support quality | `support-quality-daily/1`'s product, calibration and the producers' own schemas | CT-61, CT-103, CT-129, CT-188, CT-210 (DEC-0151, unmerged) | DEC-0151 waits to land |
+| §9: assessment and support quality | `support-quality-daily/1`'s product, calibration and the producers' own schemas | CT-61, CT-103, CT-129, CT-188, CT-210 (DEC-0151, merged 2026-11-08) | CT-210's adoption, CT-268 |
 
 ## Decisions only the operator can make (the contract's part)
 
@@ -86,7 +86,8 @@ repository.
 2. Done 2026-11-07: DEC-0152 (CT-217) merged (PR #258) after blind readings and the gate, released
    `v0.1.0+2026-11-07.4`. Added the same day: DEC-0155 (CT-261, a restricted macOS socket table) merged (PR #259),
    released `v0.1.0+2026-11-07.5`, and its consumers' changes posted on board thread `eefa7959` (message `2e99031d`).
-3. Land DEC-0151 (CT-210, the ticket counts in `support-quality-daily/1`) the same way, or record why it waits.
+3. Done 2026-11-08: DEC-0151 (CT-210, the ticket counts in `support-quality-daily/1`) accepted after clean rounds 19
+   and 20 of the blind readings, merged after the gate; its round-20 risks filed as CT-268.
 4. Draft CT-220 (due 2026-11-08).
 5. Done 2026-11-07: both stale branches archived under `refs/archive/2026-11-07/` and deleted (`template-parity` was
    squash-merged in #236); 34 merged branches deleted on `origin`, which keeps `main`,
