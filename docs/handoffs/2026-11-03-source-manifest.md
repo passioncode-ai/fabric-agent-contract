@@ -888,6 +888,14 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Checks actually run
 
+The second dispatch, run 42356946852 on `e3e593a5`, is green on all four jobs (ubuntu-latest on Node 22 and 24 with
+`pnpm test` and its coverage floors, windows-latest and macos-latest on Node 24): it ran the merge gate's parts
+(typecheck, tests, UX lint, docs check, privacy check); the local full gate did not run, the disk holding 3 to 5 GB
+free against the 8 GB a full local run needs. Locally on the landing head: the privacy check with the operator's
+denylist (0 findings), `vectors:check` (32 files), the docs check and markdownlint, and the doc-reading tests. Step 5's
+precondition: PR #250 was still open, so this landing carries its Annotated line on Fabric Dashboards 0.8.30 under
+DEC-0154, and PR #250 drops it.
+
 Step 3's hosted CI, run once on `a83efbd3` (run 42356441731, 2026-11-07): macos-latest (Node 24) green; ubuntu-latest
 (Node 22 and 24) red on one test, windows-latest (Node 24) on three, all in `test/validate-cli.test.ts` and all in the
 tests' own setup, none in the checker. On Linux a child that `spawnSync` feeds with `input` gets a socket pair as its

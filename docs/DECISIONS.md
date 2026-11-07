@@ -10503,6 +10503,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   product one break, seam one, W93); rounds 28 and 29 at `3fb5c12a` were clean; their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
+- **Annotated (2026-11-07):** Fabric Dashboards released FD-159 in 0.8.30 (FD-159 at `e23551e8`, tag `cc2b0048`): its watcher counts `foreign` and `foreign-user` as unavailable, as `down`; it refuses an owner it cannot tell, on Windows too; and it asks the owner of a listener that holds the port without answering. So the Compatibility's owed watcher row and its two open items are done (board thread `1fe66e6e`, message `a8661c7a`); DEC-0149's landing restates the knowledge base's clause as "is done by FD's watcher since its 0.8.30, FD-159, under contract DEC-0154".
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
   the organization's plan for a shared computer on which several OS accounts work side by side: an administrator's
   account, the operator's own account and an account an organization owns whole, each running its own Fabric, Fabric
