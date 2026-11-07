@@ -792,10 +792,16 @@ privacy (0 findings) and the tests that read the edited pages passed; the annota
 the head and 1 eleven times on a trial copy carrying the eleven lines, in bash and zsh; the split-marker finder prints
 nothing; the shared block is in the handoff once, byte for byte.
 
+The full gate at the landing head (`4812647c`, W94 with main merged), under the heavy lock (free disk 12 GB, 15-minute
+load 20.0): typecheck, 111 test files with 10548 tests passed and 1 skipped (branches 98.92%), the UX lint, 31 vector
+files matching their generators and the privacy check exited 0; the documentation check found one markdownlint
+error (MD018, a line of this handoff starting with `#248`), fixed in the next commit, after which markdownlint
+reports 0 errors. The only em dash on an added line is the existing SH-2 label in `session-handoff.md`.
+
 ## Next task
 
-DEC-0154's landing: merge main into this branch, run the full gate on the landing head under the heavy lock, merge
-#248, then the release `v0.1.0+2026-11-07.1`, the knowledge-base clause check, the knowledge base's pages post on
+DEC-0154's landing: merge main into this branch, run the full gate on the landing head under the heavy lock, merge PR #248,
+then the release `v0.1.0+2026-11-07.1`, the knowledge-base clause check, the knowledge base's pages post on
 `eefa7959`, the board post on `1fe66e6e` and the follow-up adding "released" to CT-228's state cell.
 
 The record of the run before acceptance:
