@@ -888,6 +888,16 @@ source, what never travels with it, the check before a source export, and how a 
 
 ## Checks actually run
 
+Step 3's hosted CI, run once on `a83efbd3` (run 42356441731, 2026-11-07): macos-latest (Node 24) green; ubuntu-latest
+(Node 22 and 24) red on one test, windows-latest (Node 24) on three, all in `test/validate-cli.test.ts` and all in the
+tests' own setup, none in the checker. On Linux a child that `spawnSync` feeds with `input` gets a socket pair as its
+standard input, which `/dev/stdin` cannot open, so the piped-stdin case now pipes through the shell. On Windows a bare
+`git` is looked up in the working folder first, so the test that plants a `git.exe` ran it: the tests' Git now runs by
+its absolute path (`gitExecutable()`); and two tests start Git in a nested repository past MAX_PATH, which Windows
+cannot use as a working folder, so they run on macOS and Linux only (the grammar's limits are the same everywhere; the
+checker's own Git mode on such paths under Windows is not covered by a hosted run). The fix's tests pass locally on
+macOS; the second dispatch reads the matrix again.
+
 2026-11-07, the acceptance edit (step 5) on the working tree over head `d03ae791`, after rounds 81 and 82 there were
 clean on all three tiers: `tsc --noEmit` exit 0; `tsx src/docs-check.ts` exit 0; `tsx src/lint-md.ts` exit 0;
 `python3 -I docs/ux/lint.py` exit 0; `tsx tools/vectors/run.ts` exit 0; `ORG_INDEX=... tsx src/privacy-check.ts`

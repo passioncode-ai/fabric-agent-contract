@@ -1109,8 +1109,11 @@ describe("an agent's source (DEC-0149)", () => {
   /** The lines that are not the note saying the folder was walked. */
   const found = (out: string) => lines(out).filter((line) => !line.includes("  note/walk  "));
   const cells = (out: string, count = 3) => found(out).map((line) => line.split("  ").slice(0, count));
+  // Git by its absolute path, as the checker finds it: on Windows a bare `git` is looked up in the working folder first,
+  // so a folder holding a `git.exe` (the test that plants one) would run that file.
+  const gitPath = gitExecutable() ?? "git";
   const gitIn = (dir: string, ...args: string[]) =>
-    spawnSync("git", ["-c", "user.name=Example", "-c", "user.email=agent@example.invalid", "-c", "commit.gpgsign=false", "-c", "protocol.file.allow=always", ...args], { cwd: dir, encoding: "utf8" });
+    spawnSync(gitPath, ["-c", "user.name=Example", "-c", "user.email=agent@example.invalid", "-c", "commit.gpgsign=false", "-c", "protocol.file.allow=always", ...args], { cwd: dir, encoding: "utf8" });
 
   it("checks the source files of a folder, naming each by its path in the folder, and leaves the rest unread", () => {
     const dir = folder({
@@ -2177,7 +2180,9 @@ describe("an agent's source (DEC-0149)", () => {
     expect(shape(inGit.out)).toEqual(shape(walked.out));
   });
 
-  it("never reads a folder NFC lengthens past the grammar as a nested repository, in Git mode or in a walk", () => {
+  // Windows cannot start a process in a working folder past MAX_PATH (260), which these nested repositories need; the
+  // grammar's limits are the same on every system and are read here on macOS and Linux.
+  it.skipIf(process.platform === "win32")("never reads a folder NFC lengthens past the grammar as a nested repository, in Git mode or in a walk", () => {
     const long = `src/${Array.from({ length: 4 }, () => "\u0958".repeat(60)).join("/")}`;
     const address = ["dev", "acme-example.io"].join("@");
     const make = () => {
@@ -2198,7 +2203,7 @@ describe("an agent's source (DEC-0149)", () => {
     expect(shape(inGit.out).some((cells) => cells[2]?.startsWith("FAC-SEM-159"))).toBe(true);
   });
 
-  it("reads a path stored in NFD the same in Git mode, without git and in a folder Git refuses: NFD past the grammar is no source", () => {
+  it.skipIf(process.platform === "win32")("reads a path stored in NFD the same in Git mode, without git and in a folder Git refuses: NFD past the grammar is no source", () => {
     // Three segments of 80 `é` stored in NFD: within 256 code points in NFC (as Git on macOS lists them), past them in NFD.
     const deep = `src/${Array.from({ length: 3 }, () => "e\u0301".repeat(80)).join("/")}`;
     const make = (nested: boolean) => {
@@ -2558,9 +2563,10 @@ describe("an agent's source (DEC-0149)", () => {
   });
 
   it.skipIf(process.platform === "win32")("reads a named file outside a source check as before, and skips only a FIFO or a device in a folder run", () => {
-    // A piped standard input is read, as on main.
+    // A piped standard input is read, as on main. The pipe is the shell's: Node gives a child's standard input as a socket
+    // pair on Linux, which `/dev/stdin` cannot open (ENXIO), while a shell pipe is a pipe on every system.
     const tsx = path.join(root, "node_modules/tsx/dist/cli.mjs");
-    const piped = spawnSync(process.execPath, [tsx, path.join(root, "src/validate-cli.ts"), "/dev/stdin"], { encoding: "utf8", input: readFileSync(fixture("positive/manifest-mcp.json"), "utf8"), timeout: 60_000 });
+    const piped = spawnSync("/bin/sh", ["-c", 'cat "$3" | "$0" "$1" "$2" /dev/stdin', process.execPath, tsx, path.join(root, "src/validate-cli.ts"), fixture("positive/manifest-mcp.json")], { encoding: "utf8", timeout: 60_000 });
     expect(piped.status).toBe(0);
     // A device named is read: it holds no JSON.
     const empty = run("/dev/null");
