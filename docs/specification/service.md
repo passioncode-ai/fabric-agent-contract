@@ -686,11 +686,14 @@ an HMAC under a key in an owner-only file; Switchboard reported on thread `1fe66
 
 How the owner is told, per system (the client looks at the server end of its own connection: local address
 `127.0.0.1:<port>`, remote address its own ephemeral port; where a source lists only listeners, and always on Linux,
-the listener on the port):
+the listener on the port). Whatever the source, the listener that counts is the one on the connection's local address
+(`127.0.0.1` or `::1`); one on the wildcard address counts only when none listens there, and listeners of different OS
+accounts there are an owner that cannot be told: this account's listener on `0.0.0.0:<port>` beside another account's
+on `127.0.0.1:<port>` does not make the port this account's (CT-254):
 
 | System | Source |
 |---|---|
-| macOS | the TCP socket table, which names the owning process even for another account's socket: `netstat -anv -p tcp`, or `sysctl net.inet.tcp.pcblist64` read in the process; the owning process's uid from the process table. A list of this account's own sockets (`lsof -u` of the current user) finds an own listener, but alone it cannot tell an empty port from another account's, so when it finds none the socket table decides |
+| macOS | the TCP socket table, which names the owning process even for another account's socket: `netstat -anv -p tcp`, or `sysctl net.inet.tcp.pcblist64` read in the process; the owning process's uid from the process table. A list of this account's own sockets (`lsof -u` of the current user) finds an own listener, which counts only by the rule above, but alone it cannot tell an empty port from another account's, so when it finds none the socket table decides |
 | Linux | the `uid` column of the listening entry (state `0A`) on the port in `/proc/net/tcp` and `/proc/net/tcp6`: the one on the connection's local address, else the one on the wildcard address; listeners of different uids there are an owner that cannot be told. Never the row of the client's own connection, which before the server accepts it can carry uid 0 and inode 0 and would read as a root owner (CT-254) |
 | Windows | `GetExtendedTcpTable` for the owning process id, then that process's token user, equal to the current user's; a process that cannot be opened is an owner that cannot be told |
 
@@ -705,7 +708,9 @@ The well-known `process.pid` is never proof: any listener can name any pid.
     reporting `foreign-user` instead of opening it;
   - on a computer with more than one counted account, a local surface whose credential arrives from such a client
     MUST refuse a connection from a peer of another OS account before it reads the request, telling the peer's owner
-    by the same sources applied to the client end of the connection: a dashboard a browser reaches, an MCP surface a
+    by the same sources applied to the client end of the connection (the row whose local address is the client's
+    address and port; on Linux a row there with inode 0 is a client already closed, an owner that cannot be told,
+    never the owner of a listener on that port): a dashboard a browser reaches, an MCP surface a
     coding agent reaches, a proxy that coding agents call. Every other local service SHOULD.
 - **Rotation.** A service that finds its recorded port held and comes up on another (the port moved by its installer
   at a reinstall, or by an app that records its own port; a running service never writes its descriptor) SHOULD rotate
