@@ -400,7 +400,8 @@ board checks none of them and stores nothing new for them; what a reply does to 
 - **SA-2, at once, with the state.** A participant that reads such a message answers it in the same turn: the run of
   its session in which it read the message, before that run ends and before it starts other work. A request to its
   Project is answered as SA-6 says: by the holder of its capability's slot, which gives the state in a `com.progress`
-  note or a fenced reply and the result with its completion, or, at `absent` generation 0, by one decline. An
+  note or a fenced reply and the result with its completion, or, when no session can take it and no service ever held
+  the slot (`absent` at generation 0), by one decline. An
   announcement or a question is answered by a reply: when the asked result is ready, the result; when it is not, the
   current state: what is done, where it lies (a branch or commit, a release, a backlog row), when the rest will be
   ready (the date the result is due, or, when that is not known, the nearest date by which the state will change) and
@@ -440,7 +441,8 @@ board checks none of them and stores nothing new for them; what a reply does to 
   on it), or gives no generation or no row for it, it sends no `com.reply` and leaves the request queued for that
   service; when the slot is `absent` at generation 0 (no service of the Project ever held it), one session of the
   Project replies once that it cannot take the request now, why, and what would lift it, and that decline is the
-  Project's answer. The holder gives the state in the turn it claims the request, by a `com.progress` note or a fenced
+  Project's answer: the request is then `answered` and never claimed, so what would lift it tells the requester when to
+  submit again. The holder gives the state in the turn it claims the request, by a `com.progress` note or a fenced
   `com.reply` (neither answers the request, [request lifecycle](#request-lifecycle)), and settles it with `com.accept`,
   then `com.complete`, its fenced reply carrying the result. A session Fabric starts on a board request (CT-215)
   follows the same steps: the holder once its `com.enroll` succeeds, otherwise a session without the slot.
