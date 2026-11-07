@@ -215,6 +215,6 @@ loopback; that assumption is the root of G1 to G3.
 ## The products' rows
 
 As each product reported them on thread `1fe66e6e` on 2026-11-06 (a reading of the board, not of their code); DEC-0154's
-Compatibility keeps the same list: Fabric CO-505, CO-513, CO-514, CO-515; Switchboard SB-269, SB-273, SB-274; Fabric
+Compatibility is the current list and has since added rows (Switchboard's SB-278, Fabric Inbox's B-220). On that day: Fabric CO-505, CO-513, CO-514, CO-515; Switchboard SB-269, SB-273, SB-274; Fabric
 Dashboards FD-156, FD-158, FD-159; Fabric Inbox B-217; the Fabric Agent Adapter FAA-225 to FAA-228; the first
 organization server VES-LOOPBACK-OWNER; the PassionCode launcher PC-152; Project Observatory OBS-354, OBS-355, OBS-357.

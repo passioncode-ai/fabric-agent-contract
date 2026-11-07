@@ -9759,7 +9759,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   product found two breaks, seam one, W83); round 20 at `3db473d0` was not clean (product found two breaks, seam two,
   unit one, the split marker W84 had already rejoined; W84); round 21 at `ea203020` was not clean (product found one
   break, seam one, W85); round 22 at `d4f3300c` was not clean (unit passed; product one break, seam two, W86); round 23 at `a5308d97` was not clean (unit and product passed; seam one break, W87); round 24 at `ab89d8a1` was not clean (product one break, unit two, seam three, W88 and W89); the full gate passed at
-  W88 (`60b3309e`); round 25 at `73f5a9ed` was not clean (unit one break, product two, seam one, W90 and W91); their batches are folded in (Source). A reference module and vectors, one optional schema
+  W88 (`60b3309e`); round 25 at `73f5a9ed` was not clean (unit one break, product two, seam one, W90 and W91); round 26 at `647754bf`
+  was not clean (unit one break, product three, seam one, W92); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9797,7 +9798,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      new port only when none is recorded or another holder has it (another `id.instance`'s descriptor, a claim of
      another account or of another service in this account unless the instance's own listener holds it, or another
      listener), and a new port is free on the
-     computer: no process listens on it, no other `id.instance`'s descriptor declares it (as `FAC-SEM-010` checks), and
+     computer: no listener accepts on it on `127.0.0.1`, a wildcard bind included, no other `id.instance`'s descriptor
+     declares it (as `FAC-SEM-010` checks), and
      no claim of another account, or of another service in this account, names it. It writes
      this account's claim `.passioncode-ports.<service-id>.<account>.json` (`<service-id>` the descriptor's `id`, or for
      an app without a descriptor its reverse-DNS bundle identifier under its own domain, stable across versions, and
@@ -10195,6 +10197,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the keep rule not keeping a port another `id.instance`'s descriptor declares; CT-228's next task after the W88 gate;
   its acceptance check catching "Paused"; SCR-20's `foreign` and `duplicate` steps) is folded in, and W91 (annotated lines under DEC-0045, DEC-0118 and
   DEC-0122, which this decision also amends; the README check covering the row's state; the knowledge-base window
-  named) is folded in; the two UI lines passed the operator's copy check
+  named) is folded in; round 26 at `647754bf` was not clean, and W92 (DEC-0122's annotated line naming item 2; lines
+  under DEC-0128 and DEC-0031 too, with the rule for which decisions get one; the loop checking each line's own text;
+  the gap spec's product rows pointing to the Compatibility; the handoff's Done pointing to HA-1; a wildcard bind in
+  the free-port test) is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

@@ -593,7 +593,7 @@ descriptor, its own state or its claim) when that instance's own listener holds 
 descriptor declares it, or when nothing does. It chooses a new
 port only when none is recorded, or when another holder has the recorded one: another `id.instance`'s descriptor in
 this account's services directory (`FAC-SEM-010`), a claim of another account or of another service in this account
-(unless the instance's own listener holds it), or another listener; "nothing does" means none of these. A new port is free on the computer: no process listens on `127.0.0.1:<port>`, no other
+(unless the instance's own listener holds it), or another listener; "nothing does" means none of these. A new port is free on the computer: no listener accepts on `127.0.0.1:<port>`, a wildcard bind (`0.0.0.0`, `[::]`) included, no other
 `id.instance`'s descriptor declares it, and no port claim of another account, or of another service in this account,
 names it. When it records a port it writes its descriptor and then this account's **port
 claim**, rebuilt atomically from all this service's descriptors in the account, as at start; and at uninstall it rebuilds

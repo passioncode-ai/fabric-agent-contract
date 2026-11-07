@@ -10,8 +10,8 @@ Proposed DEC on its own branch, and files the rest.
 ## Done
 
 - [DEC-0154](../DECISIONS.md), Status Proposed: counted OS accounts (who counts, read at every start); HA-1 (a port
-  recorded per counted account: kept when this instance's listener holds it or nothing does, chosen anew, free on the
-  computer, only when none is recorded or another holder has it; a one-account computer keeps its historical default;
+  recorded per counted account: kept, chosen anew and tested free as HA-1 in `service.md` states it; a one-account
+  computer keeps its historical default under the same keep rule;
   a claim `.passioncode-ports.<service-id>.<account>.json` naming the account by uid or SID, rewritten at every start,
   not only when it is missing; the port recorded anyway when the claim's path is squatted; at uninstall it rebuilds the claim from what remains,
   granting nothing);
@@ -34,7 +34,8 @@ Proposed DEC on its own branch, and files the rest.
   `down`. [conformance.md](../specification/conformance.md): the reference module's row and eight rows (installer,
   client, host-state reader, receiving surface, host handing a credential, token-free door, node, setup step), the
   connections reader's row (a `foreign` or `foreign-user` connection reported `down`, W83), and the
-  rewritten PL-2 and PL-3 row (`conformance.md:251`: a loopback address opened only after the listener's owner check).
+  rewritten PL-2 and PL-3 row (the row for PL-2 and PL-3: a loopback address opened only after the listener's owner
+  check).
 - The host label's reference `src/host-label.ts` (`hostLabel`: link, owner per platform, mode, size), its generator
   `tools/vectors/host-label.ts` (Node's own HMAC, not importing the reference), vectors
   `fixtures/vectors/host-label.json` (68 cases), `test/host-label.test.ts` (which also holds `ORG_ID` equal to the
@@ -313,9 +314,16 @@ Proposed DEC on its own branch, and files the rest.
   descriptor declares; CT-228's state names the W88 gate and the next readings; its acceptance check catches
   "Paused" and any next task; SCR-20 lists `foreign` and `duplicate`; the Checks entry reads in order.
 - Round 25, seam: the same G1 break, closed by W90's pointer. W91 folds its risks: annotated lines under DEC-0045
-  (item 6's T0 on loopback), DEC-0118 (item 2's mode `A`) and DEC-0122 (item 1's loopback premise), which this
+  (item 6's T0 on loopback), DEC-0118 (item 2's mode `A`) and DEC-0122 (item 2's loopback premise), which this
   decision also amends, with the loop extended to them; the README check also catches "not merged" and reads only
   this handoff's row; the knowledge-base pages' window until the coordinator acts is named.
+- Round 26 at `647754bf`: not clean (unit one break, product three, seam one). DEC-0122's annotated line named item
+  1, while the loopback premise is item 2; the gap spec said the Compatibility kept its list of product rows, which
+  has since grown; the handoff's Done restated HA-1's keep rule before W90; and DEC-0128 (item 5's residual
+  linkability) and DEC-0031 (what a device is) had no annotated line. W92 fixes the item, adds the two lines with
+  the rule for which decisions get one, makes the loop check each line's own text under its own decision (0 nine
+  times before, 1 nine times after, in bash and zsh), points the gap spec to the Compatibility and the Done to HA-1,
+  and counts a wildcard bind in the free-port test.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -453,7 +461,11 @@ Proposed DEC on its own branch, and files the rest.
   `src/semantic-rules.ts`, `tools/vectors/host-label.ts`'s "DEC-0154's text" (its line 9), and the generator's and
   vectors' "DEC-0154 item 4".
 - **Annotated lines.** Each line goes after the last line of the entry's last `- **Annotated` item, or of its Status
-  item when it has none, with the acceptance date in place of `<YYYY-MM-DD>`; under DEC-0015, DEC-0057, DEC-0123, DEC-0153, DEC-0045, DEC-0118 and DEC-0122 in turn:
+  item when it has none, with the acceptance date in place of `<YYYY-MM-DD>`; under DEC-0015, DEC-0057, DEC-0123, DEC-0153, DEC-0045, DEC-0118, DEC-0122, DEC-0128 and DEC-0031 in turn. A
+  decision gets a line when its own text, read alone, becomes incomplete or false; a decision to which DEC-0154 only
+  adds a duty its own text does not deny (DEC-0041's meter, DEC-0042's SH-9, DEC-0066's relay, DEC-0069's app
+  descriptor callers, DEC-0082's `org.id`, DEC-0096's connections, DEC-0101 and DEC-0102's node summary) keeps its
+  words, and DEC-0154's Consequences name the pages that carry the new duty:
 
   ```text
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (one copy per counted OS account, one `id.instance` in that account's services directory under `service.lock` in its data directory, or an app's own single-instance guard; the port claim, HA-1).
@@ -462,15 +474,21 @@ Proposed DEC on its own branch, and files the rest.
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (OD-9: a collector in the same OS account reads the daily digests; CT-243).
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (item 6: T0 on loopback needs the peer's OS account checked on a computer with more than one counted account, HA-3).
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (item 2: under mode `A` on a shared computer the organization sees the enrolling account's harness, until CT-232).
-  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (item 1's premise: a loopback origin is reachable by every OS account and relayed guest on the computer, HA-2 and HA-3).
+  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (item 2's premise: a loopback origin is reachable by every OS account and relayed guest on the computer, HA-2 and HA-3).
+  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (item 5's residual linkability gains the host label: shared by one organization's devices on one computer, and computable for every organization by an organization's code on any counted account or in a virtual machine given the secret; devices.md What stays linkable, HA-4).
+  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (a device is one counted OS account of a computer or a virtual machine; the enrollment's device object gains the optional `hostLabel`, HA-4).
   ```
 
   Each prints 1, in bash or zsh:
 
   ```sh
-  for d in 'DEC-0015 ' 'DEC-0057 ' 'DEC-0123:' 'DEC-0153:' 'DEC-0045 ' 'DEC-0118:' 'DEC-0122:'; do
+  for p in 'DEC-0015 |service.lock` in its data directory' 'DEC-0057 |the port claim rebuilt after the guard' \
+    'DEC-0123:|PL-3: the listener' 'DEC-0153:|OD-9: a collector' 'DEC-0045 |item 6: T0 on loopback' \
+    'DEC-0118:|item 2: under mode' 'DEC-0122:|item 2.s premise' 'DEC-0128:|item 5.s residual linkability' \
+    'DEC-0031 |a device is one counted OS account'; do
+    d=${p%%|*}; t=${p#*|}
     awk -v h="### $d" 'index($0, h) == 1 {f=1; next} /^### /{f=0} f' docs/DECISIONS.md \
-      | grep -c '^- \*\*Annotated ([0-9-]*):\*\* amended by DEC-0154 ('
+      | grep '^- \*\*Annotated ([0-9-]*):\*\* amended by DEC-0154 (' | grep -c -e "$t"
   done
   ```
 
@@ -797,3 +815,5 @@ W90 at the next head: round 25's breaks (HA-1 restated incompletely in the gap s
 pointers) and its risks are folded in. Next: round 26 at that head.
 
 W91 at the next head: round 25's seam risks are folded in. Next: round 26 at that head.
+
+W92 at the next head: round 26's breaks are folded in. Next: round 27 at that head.
