@@ -10203,7 +10203,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      leaves the request to that holder, calls nothing and asks no one; otherwise it calls `com.enroll` and does no work
      unless it is taken. Taken, it is the holder; refused `fenced`, as `active`; refused `not_authorized`, it sends no
      reply and asks the operator while the slot is `stale`, `absent` at a generation of 1 or more, or not shown, and at
-     `absent` generation 0 one session replies once that it cannot take the request now, why, and what would lift it,
+     `absent` generation 0, with no hold, one session replies once that it cannot take the request now, why, and what would lift it,
      and asks the operator; refused with any other code, it sends no reply and declines nothing, trying again when the
      refusal is `retryable` (`held` among them) and asking the operator otherwise. The holder gives the state in the
      turn it claims the request (a `com.progress` note or a fenced reply) and settles it with `com.accept`, then
@@ -10239,7 +10239,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `board_enroll` in `supabase/migrations`, pinned by `project-board-responders-db.test.mjs`), where SA-6 sends no reply
   unless the slot is `absent` at generation 0; its session rule, and the adapter's FAA-241, ask the operator after
   `not_authorized` at an `active` slot too, where SA-6 leaves a live holder's request and asks no one; its session text
-  closes a request with `com.complete` without `com.accept`; the Fabric Agent Adapter (main `a248613e`, FAA-205) lets
+  closes a request with `com.complete` without `com.accept`; the adapter's error rule leaves a request after a refusal
+  that is neither retryable nor `not_authorized` without asking the operator, where SA-6 asks; the Fabric Agent Adapter (main `a248613e`, FAA-205) lets
   a session that does the work without the slot give a request its state
   (`working-with-fabric/references/project-board.md`), where SA-6 says such a session does no work on it; the
   knowledge base's agents-first page (fabric-workspace `7937722a`, item 4) reads a state reply as an answer to a

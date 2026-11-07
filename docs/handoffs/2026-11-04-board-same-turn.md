@@ -34,12 +34,12 @@ blocks it); the finished result follows as a second message; a state answer with
 
 - No semantic rule code and no new schema member: the rule is a participant's behaviour, which no document the
   checker reads carries, so it is prose (SA-1 to SA-6) plus a conformance row checked by the agent's own test.
-- A request whose capability's slot is `active`, `stale`, or `absent` at a generation of 1 or more is left to that
-  service (SA-6), so a participant's state reply does not move it to `answered` and out of the responder's queue; only
-  at `absent` generation 0 does one session reply, once, declining with why and what would lift it, doing no work on
-  the request and asking the operator; a session that can enroll on a `stale` or `absent` slot enrolls first and is the
-  holder. Rounds 1 to 3 of the readings (2026-11-07) moved SA-6 there from "answers while `stale` or `absent`", the rule
-  Fabric and the adapter already ship.
+- SA-6 as it stands after seven rounds of readings: a session reads the request's capability slot in `com.status`
+  first and leaves an `active` holder's request alone, asking no one; otherwise it calls `com.enroll`. Taken, it holds;
+  `fenced`, as `active`; `not_authorized`, no reply and a question to the operator, and only at `absent` generation 0
+  with no hold one decline that says why and what would lift it; any other refusal, no reply and no decline, retried
+  when `retryable`, else the operator asked. Fabric and the adapter ship most of this; Compatibility lists what each
+  still owes.
 - A request is answered only through SA-6 (its holder's progress and completion, or the generation-0 decline); the
   state answer and the second-reply result of SA-2 and SA-3 are for announcements and questions.
 - A message is marked read only after its answer is stored (SA-4), so an unanswered message stays unread to its
@@ -61,11 +61,12 @@ blocks it); the finished result follows as a second message; a state answer with
   `not_authorized` branch; Compatibility missed Fabric's `not_authorized` message), folded in the next commit: SA-6
   reads the slot in `com.status` after any refusal, folded in `60858a23`. Round 6 at `60858a23`: all three failed
   (a decline after any refusal, Fabric's question at an active slot, `held`), folded in the next commit: SA-6 reads
-  the slot first, enrolls only when it is not `active`, and declines only after `not_authorized`.
+  the slot first, enrolls only when it is not `active`, and declines only after `not_authorized`. Round 7 at
+  `451d72c4`: all three passed; its risks folded in the next commit.
 - No U+2014 in the added lines (`git diff origin/main | grep '^+' | grep -c` on U+2014 prints 0).
 
 ## Next task
 
-Round 7 of the blind readings (unit, seam, product) on the head after round 6's fixes; once two consecutive rounds are
+Round 8 of the blind readings (unit, seam, product), the second clean round after round 7; once two consecutive rounds are
 clean and `pnpm run check` exits 0, open the pull request, merge it, tag the release, and tell Fabric, the adapter and
 the knowledge base on board thread `eefa7959`.

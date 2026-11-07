@@ -434,15 +434,15 @@ board checks none of them and stores nothing new for them; what a reply does to 
 - **SA-6, a request a responder takes.** A participant's reply answers a `queued` request, and an `answered` request is
   never claimed ([request lifecycle](#request-lifecycle)), so a reply would take the request from the service that
   holds, or held, its capability's slot. A session that reads a request to its Project first reads that slot in
-  `com.status`. `active` (a live holder): it leaves the request to that holder, calls nothing, sends no reply and asks
+  `com.status`. `active` (a live holder other than this session): it leaves the request to that holder, calls nothing, sends no reply and asks
   no one. Otherwise it calls `com.enroll` on the slot, and does no work on the request unless it is taken:
   - taken: the session is the holder;
   - refused `fenced` (a holder became live meanwhile): as `active`;
   - refused `not_authorized` (no grant): it acts by the slot. `stale`, or `absent` at a generation of 1 or more (a
     holder enrolled on it), or no generation or no row shown: it sends no `com.reply`, leaves the request queued for
     that service, and asks the operator (`fabric_question_ask` or the host's equal, telling its person too when one is
-    in its chat; the question answers no request). `absent` at generation 0 (no service of the Project ever held it):
-    one session of the Project replies once that it cannot take the request now, why, and what would lift it, and asks
+    in its chat; the question answers no request). `absent` at generation 0 (no service of the Project ever held it),
+    and neither the slot nor the Project held (`com.status`): one session of the Project replies once that it cannot take the request now, why, and what would lift it, and asks
     the operator. That decline is the Project's answer: the request is then `answered` and never claimed, so what would
     lift it tells the requester when to submit again;
   - refused with any other code: it sends no reply and declines nothing; with `retryable: true` (`held` among them,
