@@ -299,6 +299,10 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   CT-103, CT-188 and the handoffs README row saying proposed (now in Next task, with a closing grep). Its risks folded:
   the two Annotated dates set at merge, the roadmap's Agent assessment sentence beside AS-01, an SCN-002 alt path for
   the interim finding, CT-129's line citations addressed to `cd3af646`.
+- Round 16's seam tier (on `8b442779`) was clean: the two copies of the pattern match byte for byte, the new detector
+  accepts a subset of the old, DEC-0150's cost model bounds it after every boundary form (a 400 000-case fuzz, 0 misses,
+  linear time), and DEC-0153's page and tests agree. Its three risks are filed: the port vectors (connections URL cases,
+  AT-15 boundary forms and canonical case) as CT-267, and FAC-SEM-015's own reading in CT-73.
 - The collision check, by name, of every other new DEC-0151 member against the v2 fields: the evidence is the
   channel agent standard's section 5.1 table (DEC-0150's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`
   at `388f2b42`), which marks every member new except `autonomy.answered` and
