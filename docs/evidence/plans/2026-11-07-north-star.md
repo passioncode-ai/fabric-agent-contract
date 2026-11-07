@@ -33,7 +33,8 @@ closed, superseded, withdrawn, dropped or merged.
 - **Open pull request:** #250 (CT-254, HA-2's Linux source rule; mergeable, updated 2026-11-07 09:00 UTC).
 - **Stale branches:** `agent/ct194-source-manifest-20261103` (78 commits, not an ancestor of main) was replaced by the
   v2 branch merged in #251; `agent/template-parity-20261103` (3 commits) carries CT-206's README part.
-- **The pause:** the operator paused new work on 2026-11-06 (board thread `eefa7959`) and resumed this repository's
+- **The pause:** ended for every project on 2026-11-07 («снимай пайзу для всего», relayed on `eefa7959`, message
+  `d9d8d929`). Before that, the operator paused new work on 2026-11-06 (board thread `eefa7959`) and resumed this repository's
   sessions on 2026-11-07 («делай автономно до конца»,
   [handoff](../../handoffs/2026-11-06-shared-host-ports.md), «Resumed 2026-11-07»). CT-250 and CT-252 still say
   «the operator's pause»; their design date 2026-11-13 is unchanged.
@@ -80,13 +81,18 @@ repository.
 
 ### Wave 0: now (2026-11-07 and 2026-11-08)
 
-1. Merge and tag PR #250 (CT-254) after the gate; Dashboards FD-168 and Fabric CO-528 wait on it.
+1. Done 2026-11-07: PR #250 (CT-254) merged (`1705d0f3`) after three readings and the gate, released
+   `v0.1.0+2026-11-07.3`; Dashboards FD-168 and Fabric CO-528 build on it.
 2. Land DEC-0152 (CT-217): its draft date was 2026-11-07, and Fabric already hands its rule to every session. Rebase on
    main, blind readings, gate, merge, tag.
 3. Land DEC-0151 (CT-210, the ticket counts in `support-quality-daily/1`) the same way, or record why it waits.
 4. Draft CT-220 (due 2026-11-08).
-5. Close the stale branch `agent/ct194-source-manifest-20261103` (replaced by #251) and decide CT-206's
-   `agent/template-parity-20261103`.
+5. Done 2026-11-07: both stale branches archived under `refs/archive/2026-11-07/` and deleted (`template-parity` was
+   squash-merged in #236); 34 merged branches deleted on `origin`, which keeps `main`,
+   `agent/ct217-board-same-turn-20261104` and `agent/sqd-fields-20261104`; the merged and abandoned worktrees and
+   standalone copies of this repository under `_worktrees` removed (each clean with its head on `main`, or a copy
+   derived from a commit), the locked `fabric-agent-contract-00e050b` kept; 48 local scratch refs (`refs/tmp`,
+   `refs/scratch-t3`, remote-tracking refs of no remote) deleted; `git gc`, `.git` from 47 MB to 18 MB.
 
 ### Wave 1: designs, to 2026-11-13
 
