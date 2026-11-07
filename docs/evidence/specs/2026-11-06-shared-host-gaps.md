@@ -58,11 +58,9 @@ loopback; that assumption is the root of G1 to G3.
   or a host reaches the other account's copy of the same agent, whose well-known document answers the same
   `id.instance`, so `FAC-SEM-009` passes and the token is sent.
 - **Decided in DEC-0154 (proposed), HA-1.** The port is recorded per counted account, in the service's own state and the
-  descriptor's `origin`. An installer keeps the port its own `id.instance` records when that instance's listener holds
-  it or nothing does; it chooses a new port, free on the computer (not listening, in no other `id.instance`'s
-  descriptor, named by no claim of another account or of another service in this account), only when none is recorded
-  or another holder has it (a claim of another account or of another service in this account, unless the instance's
-  own listener holds it). It writes a claim
+  descriptor's `origin`. An installer keeps, chooses and tests a free port as HA-1 in the
+  [service specification](../../specification/service.md#ha-1) states it (this spec does not restate those rules). It
+  writes a claim
   `.passioncode-ports.<service-id>.<account>.json` in the computer's shared sticky folder (`<account>` the numeric uid,
   or the SID on Windows, never a login name that can be renamed), owned by that account, holding only
   `{schema, service, account, ports, updatedAt}`; the installer writes it at install, and the service itself

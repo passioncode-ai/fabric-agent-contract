@@ -307,6 +307,11 @@ Proposed DEC on its own branch, and files the rest.
   conformance row (with "nothing does" meaning none of them, the historical default port under the same rule, and
   CT-228's vector answering a new port), and names CT-232's conformance row; main's CT-251 names its sections in
   PR #247 (`2966a3a2`).
+- Round 25 at `73f5a9ed`: not clean (unit one break, product two). The gap spec's G1 and the conformance installer
+  row restated HA-1's holder list and free-port test incompletely. W90 states HA-1 once, in the specification and
+  item 1, and makes G1 and the row point to it; the keep rule no longer keeps a port another `id.instance`'s
+  descriptor declares; CT-228's state names the W88 gate and the next readings; its acceptance check catches
+  "Paused" and any next task; SCR-20 lists `foreign` and `duplicate`; the Checks entry reads in order.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -427,7 +432,7 @@ Proposed DEC on its own branch, and files the rest.
   cell in `docs/backlog.md`: "open: DEC-0154 accepted <YYYY-MM-DD>, merged #<PR>; still owed: the claim file's
   schema and the port-choice reference with vectors", with no "Proposed", "Paused" or pre-acceptance next task left
   in it; the release below adds ", released <tag> (main <merge commit>)" after the tag is pushed, in the same
-  follow-up change as its release notes, so main never names a tag that does not exist yet. On the landing head `grep '^| CT-228 ' docs/backlog.md | grep -c -E 'Proposed|Next task: the full gate'`
+  follow-up change as its release notes, so main never names a tag that does not exist yet. On the landing head `grep '^| CT-228 ' docs/backlog.md | grep -c -E 'Proposed|Paused|Next( task)?:'`
   prints 0 and `grep '^| CT-228 ' docs/backlog.md | grep -c '| open: DEC-0154 accepted [0-9]'` prints 1; `grep -c 'DEC-0154, proposed'
   docs/handoffs/README.md` and `head -1 docs/handoffs/2026-11-06-shared-host-ports.md | grep -c proposed` print 0.
 - **"proposed" markers.** Every "DEC-0154, proposed" (and "DEC-0154 (proposed)", "DEC-0154 item 4, proposed") in the
@@ -724,7 +729,7 @@ vectors (31 files), privacy (0 findings) and the tests that read the edited page
 prints nothing; the shared block is in the handoff once, byte for byte; the SH-2 line is still the one added line
 with U+2014.
 
-After W88 the full gate did not run (load above 45). The UX lint, the documentation checks (markdownlint 0 errors),
+When W88 was committed the full gate had not run yet (load above 45). The UX lint, the documentation checks (markdownlint 0 errors),
 vectors (31 files), privacy (0 findings) and the tests that read the edited pages passed; the split-marker finder
 prints nothing; the shared block is in the handoff once, byte for byte; the SH-2 line is still the one added line
 with U+2014.
@@ -777,3 +782,6 @@ the full gate when the load allows.
 
 W89 at the next head: round 24's unit and seam breaks are folded in, and the full gate passed at W88. Next: round 25
 at that head.
+
+W90 at the next head: round 25's breaks (HA-1 restated incompletely in the gap spec and the conformance row, now
+pointers) and its risks are folded in. Next: round 26 at that head.

@@ -589,7 +589,8 @@ a computer with more than one counted account.
 
 **HA-1, a port recorded per OS account.** A local service's port is recorded per counted OS account: in the service's
 own state and in its descriptor's `origin`. An installer keeps the port its own `id.instance` already records (in its
-descriptor, its own state or its claim) when that instance's own listener holds it or nothing does. It chooses a new
+descriptor, its own state or its claim) when that instance's own listener holds it and no other `id.instance`'s
+descriptor declares it, or when nothing does. It chooses a new
 port only when none is recorded, or when another holder has the recorded one: another `id.instance`'s descriptor in
 this account's services directory (`FAC-SEM-010`), a claim of another account or of another service in this account
 (unless the instance's own listener holds it), or another listener; "nothing does" means none of these. A new port is free on the computer: no process listens on `127.0.0.1:<port>`, no other

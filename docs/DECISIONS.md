@@ -9758,7 +9758,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   W82 (two adoption facts from the reconciliation answers); round 19 at `63c622d4` was not clean (unit passed;
   product found two breaks, seam one, W83); round 20 at `3db473d0` was not clean (product found two breaks, seam two,
   unit one, the split marker W84 had already rejoined; W84); round 21 at `ea203020` was not clean (product found one
-  break, seam one, W85); round 22 at `d4f3300c` was not clean (unit passed; product one break, seam two, W86); round 23 at `a5308d97` was not clean (unit and product passed; seam one break, W87); round 24 at `ab89d8a1` was not clean (product one break, unit two, seam three, W88 and W89); their batches are folded in (Source). A reference module and vectors, one optional schema
+  break, seam one, W85); round 22 at `d4f3300c` was not clean (unit passed; product one break, seam two, W86); round 23 at `a5308d97` was not clean (unit and product passed; seam one break, W87); round 24 at `ab89d8a1` was not clean (product one break, unit two, seam three, W88 and W89); the full gate passed at
+  W88 (`60b3309e`); round 25 at `73f5a9ed` was not clean (unit one break, product two, W90); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9791,7 +9792,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      services directory declares it.
   1. **A port recorded per OS account (HA-1, G1).** A local service's port is recorded per counted OS account, in the
      service's own state and in its descriptor's `origin`. An installer keeps the port its own `id.instance` already
-     records (descriptor, own state, claim) when that instance's own listener holds it or nothing does; it chooses a
+     records (descriptor, own state, claim) when that instance's own listener holds it and no other `id.instance`'s
+     descriptor declares it, or when nothing does; it chooses a
      new port only when none is recorded or another holder has it (another `id.instance`'s descriptor, a claim of
      another account or of another service in this account unless the instance's own listener holds it, or another
      listener), and a new port is free on the
@@ -10188,6 +10190,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (the gap spec's G1 free-port test as item 1 has it; the glossary's port claim; the installer row word for word;
   CT-228's "released" written after the tag; `duplicate` in CT-229) is folded in, and W89 (HA-1's holders naming a
   claim of another service in this account, so the keep, choose and free-port rules agree; CT-228's acceptance check
-  anchored on its state cell; CT-232's conformance pointer by the row's name) is folded in; the two UI lines passed the operator's copy check
+  anchored on its state cell; CT-232's conformance pointer by the row's name) is folded in; round 25 at `73f5a9ed` was not clean, and W90 (HA-1
+  stated once, in the specification and item 1, with the gap spec and the conformance installer row pointing to it;
+  the keep rule not keeping a port another `id.instance`'s descriptor declares; CT-228's next task after the W88 gate;
+  its acceptance check catching "Paused"; SCR-20's `foreign` and `duplicate` steps) is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.
