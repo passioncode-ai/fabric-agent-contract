@@ -108,7 +108,7 @@ independent agent author and P-02 project operator.
 
 - **Status:** validated
 
-- **Coverage:** `test/validate-cli.test.ts` (negative fixtures exit 1 with their keyword; semantic fixtures report their codes; one line per planted mistake; usage errors exit 2; the declaration-only hint), `test/schema-errors.test.ts`, `test/profile-branches.test.ts`, `test/channel-agent.test.ts` (FAC-SEM-162's places and pointer), `test/ops-digest.test.ts` (the declaration-only hint on a bare ops-digest declaration, with its help link)
+- **Coverage:** `test/support-quality.test.ts` (the interim message DEC-0151 keeps on purpose), `test/validate-cli.test.ts` (negative fixtures exit 1 with their keyword; semantic fixtures report their codes; one line per planted mistake; usage errors exit 2; the declaration-only hint), `test/schema-errors.test.ts`, `test/profile-branches.test.ts`, `test/channel-agent.test.ts` (FAC-SEM-162's places and pointer), `test/ops-digest.test.ts` (the declaration-only hint on a bare ops-digest declaration, with its help link)
 - **Product:** unobserved
 
 ### SCN-054: Check an agent's source before handing it over

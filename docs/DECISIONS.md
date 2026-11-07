@@ -6064,6 +6064,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-21
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-70.
+- **Annotated (2026-11-07):** DEC-0151 has merged: the shared detector now has a word start (with escapes), the `sk-` strength and canonical-case prefixes, so item 3's "narrower by a word start, the `sk-` rules, case-sensitive prefixes" no longer holds. The remaining differences are the Bearer rule, the per-member long run, the Telegram bot token, the escapes (a connection reads none before a provider prefix) and the bound (a connection's `sk-` look-aheads are unbounded, CT-213), as [connections](specification/connections.md) lists them; CT-73 decides them.
 - **Decision:** in [connections](specification/connections.md):
   1. A service MAY declare, under the well-known document's `extensions`, the key
      `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1` with at most 64 connections, each
@@ -10399,8 +10400,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   with their `fixtures/catalogue.json` rows, seven
   `fixtures/semantic/support-quality-daily-*`; `docs/specification/support-quality.md`, `docs/specification/conformance.md`
   (the producer and reader rows), `docs/specification/identifiers.md`, `docs/specification/profiles.md`,
-  `docs/specification/fabric-button.md`, `docs/specification/connections.md`, `docs/DOCMAP.md`, `CONTEXT.md`; DEC-0095,
-  DEC-0144 and DEC-0044 annotated; `docs/backlog.md` (CT-210, CT-129, CT-103, CT-73, CT-213, CT-188's note);
+  `docs/specification/fabric-button.md`, `docs/specification/connections.md`, `docs/specification/folder-attribution.md`,
+  `docs/specification/session-handoff.md`, `docs/specification/source.md`, `docs/specification/channel-agent.md`,
+  `docs/specification/ops-digest.md`, `docs/specification/README.md`, `docs/evidence/sources.md`, `docs/ux/scenarios.md`
+  (SCN-002), `src/channel-agent.ts`, `test/channel-agent.test.ts`, `test/ops-digest.test.ts`, `docs/DOCMAP.md`,
+  `CONTEXT.md`; DEC-0095, DEC-0144, DEC-0044, DEC-0096, DEC-0150 and DEC-0153 annotated; `docs/backlog.md` (CT-210, CT-129, CT-103, CT-73, CT-213, CT-188's note);
   `docs/handoffs/2026-11-04-support-quality-tickets.md`.
 - **Source:** CT-210, CT-129; the board request `74105ca1` (thread `b6820b97`); DEC-0151 reserved by git CAS (key
   `support-quality-v2-dec`, counter commit `ee67e35`). Readings: Rounds 1 to 15 found breaks, each fixed: round 8 the per-day attribution of an absent `project`; round 9 one rule for it (no `project` before adoption, `project` on every event after, a day without it never attributed); round 10 rule 1's trigger the day's tickets and calibration per side; round 11 the observed check by period, only projects whose tickets enter `/1`, merged legacy days kept from reruns before adoption, one-way adoption; round 12 adoption marked by the first day that names `project`, rule 9 per project, the colour boundary's `:` and `\33`; round 13 DEC-0144's calibration carry-forward per project and a weak `sk-` alias still a credential in a DEC-0149 source tree; round 14 AT-15 vectors for the canonical case, the `sk-` strength and the word start, the no-alias exception in every copy of rule 2, rule 9's "unnamed", the interim message, and the registry's alias rule as the operator's open question; before round 15, on a producer's board messages, the `notMeasured` pattern admits a digit after the first letter of either part (X-4, `6a4e3757`), the ticket count `autonomy.answered` renamed `autonomy.answeredTickets`, since v2's `autonomy.answered` counts turns (`5a1334d1`), and `stability.fallbackTurns` and `fallbackTickets` renamed `stability.safeReplyTurns` and `safeReplyTickets`, since v2's `stability.fallbackTurns` counts turns a fallback model answered (`24cf4f25`); round 15, not clean: the no-reply fixture showed check rates, a rubric and a judge on a day where nothing was judged (now `null`, with `checks` named), and with it the reuse rule is scoped to the members DEC-0151 adds (`channel` named as the older member with another value space) and CT-210 (d) records what the standard's owner applied at `86c49ec`; two consecutive clean rounds are still owed.

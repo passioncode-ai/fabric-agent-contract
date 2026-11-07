@@ -303,6 +303,12 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   accepts a subset of the old, DEC-0150's cost model bounds it after every boundary form (a 400 000-case fuzz, 0 misses,
   linear time), and DEC-0153's page and tests agree. Its three risks are filed: the port vectors (connections URL cases,
   AT-15 boundary forms and canonical case) as CT-267, and FAC-SEM-015's own reading in CT-73.
+- Round 17 (on `75919870`): the unit and seam readings stopped at the session limit before reporting; the product tier
+  found two breaks, fixed: accepted DEC-0096's item 3 now false (annotated, and DEC-0096 added to the Consequences), and
+  the landing step missing DEC-0151's Source and CT-210's round record (added to Next task). Its risks folded: the
+  at-landing board post, vendor rows and plan marks named in Next task; the reader row reads a missing day before
+  adoption as possibly withheld; SCN-002's Coverage names the interim test; the Consequences list completed. Left as a
+  risk: the interim message's wording (DEC-0151's Compatibility quotes it as written).
 - The collision check, by name, of every other new DEC-0151 member against the v2 fields: the evidence is the
   channel agent standard's section 5.1 table (DEC-0150's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`
   at `388f2b42`), which marks every member new except `autonomy.answered` and
@@ -722,19 +728,26 @@ the added lines.
 
 ## Next task
 
-Round 17 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers (round 16 was not clean on
+Round 18 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers (round 17 was not clean on
 the product tier), until two consecutive rounds are clean, with the full coverage run at low load; open the pull
 request (DEC-0150 is on main, so the merge gate holds) and merge. The landing commit, before the merge:
 
 - DEC-0151's Status Accepted with its clean rounds; CT-129 closed with its receipt; CT-210's first step done; and every
   other row that calls DEC-0151 proposed or on a branch restated as merged: CT-73, CT-103, CT-188 and this handoff's row
   in `docs/handoffs/README.md`.
-- The dates of the two Annotated lines this branch adds under DEC-0150 and DEC-0153 ("DEC-0151 has merged", "has
+- DEC-0151's Source and CT-210's status record the rounds from 16 on and the two clean ones, and "two consecutive clean
+  rounds are still owed" goes; the Consequences list stays complete.
+- The dates of the three Annotated lines this branch adds under DEC-0096, DEC-0150 and DEC-0153 ("DEC-0151 has merged", "has
   landed") set to the merge date, so the append-only register keeps a true date.
 - The knowledge base (fabric-workspace `knowledge/roadmap.md`): AS-01 and the Agent assessment sentence ("publishes one
   `support.quality_daily` per channel and closed day") both say per channel, project once adopted, and closed day.
 - Closing check on the landing commit: `grep -nE 'DEC-0151 \(proposed|DEC-0151, proposed|branch \`agent/sqd-fields-20261104\`'
   docs/backlog.md docs/handoffs/README.md docs/specification CONTEXT.md` prints nothing, and `grep -n -A2 '^### DEC-0151'
-  docs/DECISIONS.md` shows the Status Accepted.
+  docs/DECISIONS.md` shows the Status Accepted, and `awk '/^### DEC-0151/,/^### DEC-0152/' docs/DECISIONS.md | grep -c
+  'still owed'` prints 0.
 
-Then release, and answer thread `b6820b97` with the tag.
+Then release, and answer thread `b6820b97` with the tag. At landing also: CT-210 (f), the post to each multi-project
+`/1` producer on the board (rule 1's withholding starts at the merge); CT-210 (e), the vendor rows (the adapter, Fabric's
+re-pin, Dashboards' re-vendor, the Switchboard and Observatory ports); the North Star plan's wave 0 item 3 and its row on
+DEC-0151 marked done, and CT-210 (g), the operator's question on registry aliases, carried to its operator decisions
+table.
