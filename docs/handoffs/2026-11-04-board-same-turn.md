@@ -23,7 +23,8 @@ blocks it); the finished result follows as a second message; a state answer with
 
 - Blind readings until two consecutive rounds are clean, then merge and a release tag.
 - After merge: each consumer re-reads its text against SA-1 to SA-6 at its next pin, under CT-217. Owed differences,
-  named in DEC-0152's Compatibility: Fabric's "on a request too" state reply and its `com.accept`; the adapter's
+  named in DEC-0152's Compatibility: Fabric's "on a request too" state reply, its board's `not_authorized` message ("reply with the answer itself")
+  and its `com.accept`; the adapter's
   FAA-205 state reply without the slot; agents-first item 4. Read on 2026-11-07,
   Fabric (`db3fbe0f`) already hands SA-2 and SA-3 to every session and keeps SA-6's slot condition (no reply while the
   slot is active, stale, or absent at a later generation); the adapter (`a248613e`, FAA-205, FAA-231, FAA-241) and the
@@ -55,11 +56,14 @@ blocks it); the finished result follows as a second message; a state answer with
   read as a board rule), folded in `0d3e572c`. Round 3 at `0d3e572c`: seam passed, unit and product failed (SA-2, SA-3,
   the `com.reply` text and schema still sent a request a state answer), folded in `bc604e47`. Round 4 at `bc604e47`:
   seam and product failed (Compatibility said the consumers already match; a session that can enroll asked the operator
-  about an active holder's request; the Alternatives), folded in the next commit.
+  about an active holder's request; the Alternatives), folded in `111c8aaf` and `06a62a8e`. Round 5 at `06a62a8e`: all three
+  failed (SA-6 branched on refusal codes the contract does not define and dropped `active` from the
+  `not_authorized` branch; Compatibility missed Fabric's `not_authorized` message), folded in the next commit: SA-6
+  reads the slot in `com.status` after any refusal.
 - No U+2014 in the added lines (`git diff origin/main | grep '^+' | grep -c` on U+2014 prints 0).
 
 ## Next task
 
-Round 5 of the blind readings (unit, seam, product) on the head after round 4's fixes; once two consecutive rounds are
+Round 6 of the blind readings (unit, seam, product) on the head after round 5's fixes; once two consecutive rounds are
 clean and `pnpm run check` exits 0, open the pull request, merge it, tag the release, and tell Fabric, the adapter and
 the knowledge base on board thread `eefa7959`.
