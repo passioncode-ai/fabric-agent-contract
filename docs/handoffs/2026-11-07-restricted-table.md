@@ -26,15 +26,19 @@ client may still prove its own listener.
 - Written from what the products already ship, read on 2026-11-07 before the draft: Project Observatory's `peer_owner`
   1.3.0 (PR #466, `8013f6e1`, RT-2 by libproc, RT-4), the adapter's `rel-0.76.0` (`4ef7b936`, RT-3), the launcher's
   doctor (`eca6974`, a warning), Fabric's `listenerOwner.ts` (`2438c90a`, RT-2 by `lsof`).
-- RT-2 proves this account with or without a restricted table, since Fabric's client uses it always; RT-3 and RT-4 only
-  under a restricted table.
+- RT-2 proves this account with or without a restricted table, since Fabric's client uses it always; where it finds
+  nothing, a readable table decides. RT-3 and RT-4 only under a restricted table; RT-3 counts only an exact IPv4
+  `127.0.0.1` listen, as RT-4 does. RT-5 is the server side. Linux and Windows are out of scope.
 - No schema enum: no schema carries a host state or an owner reason; `table-restricted` is a reason text.
 
 ## Checks actually run
 
-To be recorded with the readings.
+- Round 1 at `bccee010`: all three tiers failed (RT-3 against RT-4 on a wildcard and `-iTCP`; Compatibility
+  understating the adapter's and sshlg-fabric-server's debts; no server side; Linux caught by the detection; no UX; no
+  Annotated line on DEC-0154), folded in the next commit. `pnpm run check`: one hook timeout under load (CT-204),
+  `pnpm docs:check` exit 0.
 
 ## Next task
 
-Round 1 of the blind readings (unit, seam, product) of branch `agent/ct261-restricted-table-20261107` against CT-261 and
-DEC-0155.
+Round 2 of the blind readings (unit, seam, product) on the head after round 1's fixes; two consecutive clean rounds,
+then merge and a release tag.

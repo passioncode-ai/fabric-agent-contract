@@ -10601,6 +10601,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Annotated (2026-11-07):** Fabric Dashboards released FD-159 in 0.8.30 (FD-159 at `e23551e8`, tag `cc2b0048`): its watcher counts `foreign` and `foreign-user` as unavailable, as `down`; it refuses an owner it cannot tell, on Windows too; and it asks the owner of a listener that holds the port without answering. So the Compatibility's owed watcher row and its two open items are done (board thread `1fe66e6e`, message `a8661c7a`); DEC-0149's landing restates the knowledge base's clause as "is done by FD's watcher since its 0.8.30, FD-159, under contract DEC-0154".
 - **Annotated (2026-11-07):** item 2's Linux source is the server end of the client's own connection when its inode is not 0 (accepted; its uid is the accepting process's), and the listening entry (state `0A`) on the port when its inode is 0 (not yet accepted, where uid 0 is no root owner), so a listener that changed hands after another account accepted the connection is still caught (Project Observatory's report, message `f3f3b438`); a listener counts on the connection's local address, else on the wildcard address, listeners of different uids being an owner that cannot be told, on every system (Fabric Dashboards' report, `3bfcea7a`); the check reads the open connection right before the credential is written, never a list kept from earlier (`7ea9d851`); on the server side a client's row with inode 0 is a client already closed, an owner that cannot be told (the adapter's reports on board thread `1fe66e6e`, messages `aeb15b30` and `b2684cad`; [service](specification/service.md#ha-2), CT-254). The products that released item 2's sources before this reading check them against it: Fabric Dashboards FD-168 (on Linux its `procNetPorts`, on macOS its own `lsof` list, and the listener list it keeps for up to 30 s, which reopen FD-156 and FD-159's Linux part) and Fabric CO-528 (fabric-mcp reads the hub port's listener before it connects and keeps the answer), both filed 2026-11-07; Switchboard reads SB-273 and SB-274's peer refusal against the server-side clause; and the open client rows of the Compatibility below (FAA-226, FAA-227, B-217, OBS-355, PC-152, VES-LOOPBACK-OWNER) take the sources as restated. The cases this reading adds have no reference or vectors yet: CT-229.
+- **Annotated (2026-11-07):** item 2's macOS source is amended by DEC-0155: a socket table restricted to the reader's own
+  sockets (macOS 27.2, an ad hoc signed process) is an owner that cannot be told, `table-restricted`, with the accepted
+  socket and a started process as proofs of this account and a server-side counterpart ([service](specification/service.md#a-restricted-socket-table), RT-1 to RT-5).
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
   the organization's plan for a shared computer on which several OS accounts work side by side: an administrator's
   account, the operator's own account and an account an organization owns whole, each running its own Fabric, Fabric
@@ -11062,23 +11065,31 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   FAA-267; board thread `eefa7959`, message `31c317ab`). HA-2 then said nothing about an empty or partial table, and its
   line "a client that can see its own account's sockets always tells its own listener" no longer held. The products had
   already answered it in code, the same way: an owner that cannot be told, named `table-restricted`.
-- **Decision:** [service](specification/service.md#a-restricted-socket-table) RT-1 to RT-4.
-  1. **A restricted table (RT-1).** A table the reader cannot read, or that holds no row of another uid or another
-     process, or that lists sockets but not the server end of the reader's own connection, proves nothing by a missing
-     row. The listener is then `foreign-user` for an owner that cannot be told, never `down`, never this account's,
-     never named another account's; a reported reason is `table-restricted`, and a doctor shows a warning, not a fault.
+- **Decision:** [service](specification/service.md#a-restricted-socket-table) RT-1 to RT-5, on macOS.
+  1. **A restricted table (RT-1).** A macOS table (`netstat`, the `pcblist` sysctls) that cannot be read, lists no row,
+     holds no row of another uid or process, or lists sockets but not the server end of the reader's own connection,
+     proves nothing by a missing row. A listener that accepted the connection is then `foreign-user` for an owner that
+     cannot be told, never this account's, never named another account's; a refused connection stays `down`; a
+     reported reason begins `table-restricted`, and a doctor shows a warning, not a fault. Linux and Windows tables,
+     which carry the owner on the connection's own row, are not read this way.
   2. **The accepted socket (RT-2).** The server end of the connection, the exact address pair, found among the
      descriptors of a process of the reader's uid (libproc `PROC_PIDFDSOCKETINFO` over `proc_listpids`, or `lsof` of
-     established TCP sockets with the process's uid) proves this account, restricted table or not. It proves the
-     descriptor's holder, not the socket's credentials; a set-uid reader does not use it; a server end not yet accepted
-     may be looked for again for a bounded time.
-  3. **A process the caller started (RT-3).** Only after RT-1, an installer that started the listener's process may
-     vouch for it: its uid equal to the caller's and `lsof` showing it listening on `127.0.0.1:<port>` or
-     `*:<port>`. It proves a listener, not the accepted connection, and is weaker than RT-2.
-  4. **A chosen listener (RT-4).** Under a restricted table only this account's exact `127.0.0.1` bind counts as its
+     established TCP sockets with the numeric uid) proves this account, restricted table or not; where it finds nothing,
+     a readable table decides. It proves the descriptor's holder, not the socket's credentials; a server end not yet
+     accepted may be looked for again for a bounded time.
+  3. **A process the caller started (RT-3).** Only after RT-1, the caller that started the listener's process (directly
+     or as its installed launchd job) may vouch for it: its uid equal to the caller's and `lsof -i4TCP` showing it
+     listening on exactly `127.0.0.1:<port>`. It proves a listener, not the accepted connection; a wildcard or IPv6
+     listener is not vouched for.
+  4. **A chosen listener (RT-4).** Under a restricted table only this account's exact IPv4 `127.0.0.1` bind counts as its
      own; a wildcard or `::1` listener of this account, and root's, are `table-restricted`.
-  HA-2's opening list names a restricted table among the owners that cannot be told, the macOS row names `pcblist_n`
-  and the restriction, and [conformance](specification/conformance.md#clients-and-readers)'s client row reads it.
+  5. **The server side (RT-5).** A surface that must refuse another account's peer and reads a restricted table refuses
+     with `table-restricted`, unless it finds the client end among its own uid's descriptors; a token-free door run
+     there admits only callers it proves so.
+  A reader running set-uid uses none of RT-2 to RT-5. HA-2's MUST names RT-2 as a source, its list of owners that cannot
+  be told names a restricted table, the macOS row names `pcblist_n` and the restriction,
+  [conformance](specification/conformance.md#clients-and-readers)'s client row reads it, and SCN-056 and SCR-20 carry
+  its recovery.
 - **Why:** an empty table read as "nobody listens" or as "another account listens" is wrong both ways: the first would
   report a service `down` that runs, the second blames another account for nothing. Reading it as an owner that
   cannot be told sends no credential, which is HA-2's whole point, and the two proofs give back what the restriction
@@ -11090,21 +11101,25 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   a listener (it cannot tell an empty port from another account's, as HA-2's macOS row already says); a schema enum of
   owner reasons (no schema carries a host state or an owner reason today, and the products report it as free text, a
   doctor line or a refusal message).
-- **Compatibility:** nothing on the wire changes. Read on 2026-11-07: Project Observatory's `peer_owner` 1.3.0 (PR #466,
-  branch `release/0.35.2`, `8013f6e1`) reads a restricted table as `unknown` `table-restricted`, proves by the accepted
-  socket through libproc (RT-2), refuses a set-uid context and counts only an exact `127.0.0.1` bind (RT-4); the
-  adapter's kits on `rel-0.76.0` (`4ef7b936`) name `table-restricted` and vouch by a started process's pid (RT-3), and
-  FAA-272 owes the hub client's reason and an RT-2 path; the PassionCode launcher's doctor (`eca6974`, PC-163) shows
-  `table-restricted` as a warning; Fabric's client (`listenerOwner.ts` at `2438c90a`, CO-528) proves by the accepted
-  socket through `lsof` (RT-2) and refuses otherwise with `table-restricted`; Switchboard's proxy refuses a peer it
-  cannot tell, which a restricted table can only make stricter. Owed: sshlg-fabric-server names `owner_unknown` where
-  RT-1 names `table-restricted` (SFS-HA2-RESTRICTED waits for this decision); Fabric Dashboards reads an empty
-  `netstat` as another account's in its listener check (FD-159, `loopback-owner.ts` line 97) and a table without the
-  connection's row as another account's in its connection check (FD-168), where RT-1 reads both as an owner that
-  cannot be told. `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `docs/specification/service.md` (HA-2's list and macOS row, the paragraph *A restricted
-  socket table*), `docs/specification/conformance.md` (the client row), `docs/DOCMAP.md`; backlog CT-261 (in progress),
-  CT-229 (its owed vectors gain the restricted cases); the handoff `docs/handoffs/2026-11-07-restricted-table.md`.
+- **Compatibility:** nothing on the wire changes. Read on 2026-11-07, each consumer's shipped code and what it owes:
+  Project Observatory's `peer_owner` 1.3.0 (PR #466, branch `release/0.35.2`, `8013f6e1`) matches RT-1, RT-2 (libproc),
+  RT-4 and the set-uid rule, and proves its peer by the client end as RT-5 says. The adapter's kits on `rel-0.76.0`
+  (`4ef7b936`) name `table-restricted` for an empty `netstat` and vouch by a started process's pid; they owe a header-only
+  or own-rows-only table read as RT-1, not `none` or `no-row` (their FAA-273 item 3), RT-3's exact `127.0.0.1` listen
+  in place of their `*:<port>`, and the hub client's reason with an RT-2 path (FAA-272). The PassionCode launcher's
+  doctor (`eca6974`, PC-163) shows `table-restricted` as a warning and keeps a refused connection `down`; it owes the
+  warning, not a failure, for a `netstat` that exits non-zero. Fabric's client (`listenerOwner.ts` at `2438c90a`,
+  CO-528) proves by the accepted socket through `lsof` (RT-2) and refuses otherwise with `table-restricted`; it owes
+  reading the table before naming that reason, so a readable table can name another account. Switchboard's proxy
+  refuses a peer it cannot tell, which RT-5 keeps; its signed releases read the whole table. sshlg-fabric-server owes
+  the reason `table-restricted` in place of `owner_unknown` (SFS-HA2-RESTRICTED) and its listener check's `down` on an
+  empty table. Fabric Dashboards owes reading an empty `netstat` in its listener check (FD-159, `loopback-owner.ts`
+  line 97) and a table without the connection's row in its connection check (FD-168) as an owner that cannot be told,
+  not another account's. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/service.md` (HA-2's MUST, its list and macOS row, the paragraph *A
+  restricted socket table*), `docs/specification/conformance.md` (the client row), `docs/ux/scenarios.md` (SCN-056),
+  `docs/ux/screens.md` (SCR-20), `docs/DOCMAP.md`, DEC-0154 (an Annotated line); backlog CT-261 (in progress), CT-229
+  (its owed vectors gain the restricted cases); the handoff `docs/handoffs/2026-11-07-restricted-table.md`.
 - **Source:** the adapter's measurement on board thread `eefa7959` (message `31c317ab`), Project Observatory's
   `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
   inputs; backlog CT-261.
