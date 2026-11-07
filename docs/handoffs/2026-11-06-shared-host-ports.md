@@ -324,6 +324,13 @@ Proposed DEC on its own branch, and files the rest.
   the rule for which decisions get one, makes the loop check each line's own text under its own decision (0 nine
   times before, 1 nine times after, in bash and zsh), points the gap spec to the Compatibility and the Done to HA-1,
   and counts a wildcard bind in the free-port test.
+- Round 27 at `f78c87c1`: not clean (unit passed; product one break, seam one). The Compatibility says Fabric
+  Dashboards is asked about a port that does not answer, and the board step did not ask it; DEC-0044's LC-19 ("one
+  copy on the machine") becomes false and had no annotated line. W93 adds the board's third ask; narrows the rule to
+  a text made false or a closed list or form changed, and adds lines under DEC-0044 and DEC-0061 (item 5's Install
+  and Uninstall forms), with DEC-0040's FL-7 among the decisions that keep their words; makes the conformance client
+  row point to HA-2's order; keeps CT-228's Goal tag in its rewritten cell; and names every changed part of
+  `service.md` and `profiles.md` in the Consequences.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -442,9 +449,9 @@ Proposed DEC on its own branch, and files the rest.
 - **Status.** The Status line is written `- **Status:** Accepted <YYYY-MM-DD>, ...`, as the knowledge-base clause rule
   below requires. Rewrite this handoff's row in the README, its title's marker and its Next task, and CT-228's state
   cell in `docs/backlog.md`: "open: DEC-0154 accepted <YYYY-MM-DD>, merged #<PR>; still owed: the claim file's
-  schema and the port-choice reference with vectors", with no "Proposed", "Paused" or pre-acceptance next task left
-  in it; the release below adds ", released <tag> (main <merge commit>)" after the tag is pushed, in the same
-  follow-up change as its release notes, so main never names a tag that does not exist yet. On the landing head `grep '^| CT-228 ' docs/backlog.md | grep -c -E 'Proposed|Paused|Next( task)?:'`
+  schema and the port-choice reference with vectors. Goal: reliable-work" (the Goal tag kept), with no "Proposed", "Paused" or pre-acceptance next task left
+  in it; the release below adds ", released <tag> (main <merge commit>)" after the tag is pushed, in a
+  follow-up change on main after the tag, so main never names a tag that does not exist yet. On the landing head `grep '^| CT-228 ' docs/backlog.md | grep -c -E 'Proposed|Paused|Next( task)?:'`
   prints 0 and `grep '^| CT-228 ' docs/backlog.md | grep -c '| open: DEC-0154 accepted [0-9]'` prints 1; `grep '2026-11-06-shared-host-ports.md' docs/handoffs/README.md | grep -c -E 'DEC-0154, proposed|not merged'` and `head -1 docs/handoffs/2026-11-06-shared-host-ports.md | grep -c proposed` print 0.
 - **"proposed" markers.** Every "DEC-0154, proposed" (and "DEC-0154 (proposed)", "DEC-0154 item 4, proposed") in the
   specification changes at acceptance. Find them on one line with
@@ -461,11 +468,13 @@ Proposed DEC on its own branch, and files the rest.
   `src/semantic-rules.ts`, `tools/vectors/host-label.ts`'s "DEC-0154's text" (its line 9), and the generator's and
   vectors' "DEC-0154 item 4".
 - **Annotated lines.** Each line goes after the last line of the entry's last `- **Annotated` item, or of its Status
-  item when it has none, with the acceptance date in place of `<YYYY-MM-DD>`; under DEC-0015, DEC-0057, DEC-0123, DEC-0153, DEC-0045, DEC-0118, DEC-0122, DEC-0128 and DEC-0031 in turn. A
-  decision gets a line when its own text, read alone, becomes incomplete or false; a decision to which DEC-0154 only
-  adds a duty its own text does not deny (DEC-0041's meter, DEC-0042's SH-9, DEC-0066's relay, DEC-0069's app
-  descriptor callers, DEC-0082's `org.id`, DEC-0096's connections, DEC-0101 and DEC-0102's node summary) keeps its
-  words, and DEC-0154's Consequences name the pages that carry the new duty:
+  item when it has none, with the acceptance date in place of `<YYYY-MM-DD>`; under DEC-0015, DEC-0057, DEC-0123, DEC-0153, DEC-0045, DEC-0118, DEC-0122, DEC-0128, DEC-0031, DEC-0044 and
+  DEC-0061 in turn. A decision gets a line when its own text, read alone, becomes false after DEC-0154, or when it
+  fixes a closed list or form that DEC-0154 changes (DEC-0128 item 5's named links, DEC-0031's device object,
+  DEC-0061 item 5's Install and Uninstall forms). A decision to which DEC-0154 only adds a duty its own text does not
+  deny keeps its words (DEC-0040's FL-7, DEC-0041's meter, DEC-0042's SH-9, DEC-0066's relay, DEC-0069's app
+  descriptor callers, DEC-0082's `org.id`, DEC-0096's connections, DEC-0101 and DEC-0102's node summary), and
+  DEC-0154's Consequences name the pages that carry the new duty:
 
   ```text
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (one copy per counted OS account, one `id.instance` in that account's services directory under `service.lock` in its data directory, or an app's own single-instance guard; the port claim, HA-1).
@@ -477,6 +486,8 @@ Proposed DEC on its own branch, and files the rest.
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (item 2's premise: a loopback origin is reachable by every OS account and relayed guest on the computer, HA-2 and HA-3).
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (item 5's residual linkability gains the host label: shared by one organization's devices on one computer, and computable for every organization by an organization's code on any counted account or in a virtual machine given the secret; devices.md What stays linkable, HA-4).
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (a device is one counted OS account of a computer or a virtual machine; the enrollment's device object gains the optional `hostLabel`, HA-4).
+  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (LC-19: one copy per counted OS account on the computer, not one per machine, HA-1).
+  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (item 5's Install and Uninstall forms: the port claim written after the descriptor, the install poll waiting for this account's listener, the claim rebuilt at uninstall, HA-1 and HA-2).
   ```
 
   Each prints 1, in bash or zsh:
@@ -485,7 +496,8 @@ Proposed DEC on its own branch, and files the rest.
   for p in 'DEC-0015 |service.lock` in its data directory' 'DEC-0057 |the port claim rebuilt after the guard' \
     'DEC-0123:|PL-3: the listener' 'DEC-0153:|OD-9: a collector' 'DEC-0045 |item 6: T0 on loopback' \
     'DEC-0118:|item 2: under mode' 'DEC-0122:|item 2.s premise' 'DEC-0128:|item 5.s residual linkability' \
-    'DEC-0031 |a device is one counted OS account'; do
+    'DEC-0031 |a device is one counted OS account' 'DEC-0044 |LC-19: one copy per counted' \
+    'DEC-0061 |item 5.s Install and Uninstall forms'; do
     d=${p%%|*}; t=${p#*|}
     awk -v h="### $d" 'index($0, h) == 1 {f=1; next} /^### /{f=0} f' docs/DECISIONS.md \
       | grep '^- \*\*Annotated ([0-9-]*):\*\* amended by DEC-0154 (' | grep -c -e "$t"
@@ -543,8 +555,9 @@ Proposed DEC on its own branch, and files the rest.
   `foreign-user` as unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card and an
   app event with a desktop notification (its `src/core/monitor.ts` lines 496 to 498 at `a0bc160`), not to the operator channel's watcher.
   Ask in the same message that its card's own `foreign-user` line (its `src/core/i18n.ts:128` and `:129`, the `.mac` variant shown on macOS, its own wording today) use this
-  decision's two lines or be checked against them, and that a line for an owner that cannot be told be added (part
-  of FD-159).
+  decision's two lines or be checked against them, that a line for an owner that cannot be told be added (part
+  of FD-159), and that it ask the owner of a port that does not answer too (its `look.ts` lines 103 to 105 at
+  `a0bc160` ask only after an answer), or say why it stays as it is.
 
 ### The knowledge-base clause rule (the same block in DEC-0149's and DEC-0154's handoffs)
 
@@ -767,6 +780,11 @@ After W90 and W91 (text only) the UX lint, the documentation checks (markdownlin
 privacy (0 findings) and the tests that read the edited pages passed; the split-marker finder prints nothing; the
 shared block is in the handoff once, byte for byte.
 
+After W92 and W93 (text only) the UX lint, the documentation checks (markdownlint 0 errors), vectors (31 files),
+privacy (0 findings) and the tests that read the edited pages passed; the annotated-line loop prints 0 eleven times at
+the head and 1 eleven times on a trial copy carrying the eleven lines, in bash and zsh; the split-marker finder prints
+nothing; the shared block is in the handoff once, byte for byte.
+
 ## Next task
 
 The coordinator's next blind readings of DEC-0154 at this branch's head.
@@ -817,3 +835,5 @@ pointers) and its risks are folded in. Next: round 26 at that head.
 W91 at the next head: round 25's seam risks are folded in. Next: round 26 at that head.
 
 W92 at the next head: round 26's breaks are folded in. Next: round 27 at that head.
+
+W93 at the next head: round 27's breaks are folded in. Next: round 28 at that head.
