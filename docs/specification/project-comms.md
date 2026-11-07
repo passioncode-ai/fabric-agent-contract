@@ -605,7 +605,7 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
 - `com.enroll` takes the caller's Project's slot for a capability when the host's responder grant allows it. Any
   participant reply of the request's target Project moves a `queued` request to `answered`, whatever the slot's state,
   so a session calls `com.enroll` only when the slot is not `active`, and replies to a `queued` request only where
-  SA-6 lets it: refused `not_authorized` with the slot `absent` at generation 0, once, that it cannot take the request
+  SA-6 lets it: refused `not_authorized` with the slot `absent` at generation 0 and no hold, once, that it cannot take the request
   now, why and what would lift it, and asks the operator. After any other refusal, or at any other slot state, it sends
   no reply (SA-6). A session that enrolls answers each request it claims in the same turn by a `com.progress`
   note or a fenced reply carrying the state, and settles it with `com.accept`, then `com.complete` (SA-2, SA-6,
