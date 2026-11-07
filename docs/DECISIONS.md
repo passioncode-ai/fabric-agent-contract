@@ -9109,7 +9109,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 79 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 80 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9145,7 +9145,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   base's watcher lead, a new conflicting file, so the count of clean rounds starts again; round 76 not clean: the
   dashed home form, the knowledge base's messages; round 77 not clean: `ENOTDIR`, the required-slot wording; round
   78, after the merge with main at `b963d6a6`, not clean: CT-194's state, the `$comment`, the ops-digest import, fixed by
-  item DQ),
+  item DQ; round 79 not clean: an extension hint on a bare channel-agent declaration, Fabric Dashboards 0.8.30, fixed
+  by item DR; round 80 not clean: step 6's check of PR #628's watcher lines, the clause rule's end state, fixed by
+  item DS),
   cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
@@ -9753,9 +9755,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adds the MD-6 entry once the hand-over has an action id).
 - **Compatibility:** additive. `contractVersion` stays `0.1.0`; `fabric-source/1` joins the protocol register; no
   existing schema, kind, code or vector changes. A repository without `fabric.source.json` is untouched by the source rules; the checker changes for every
-  repository in two ways the handoff's Open lists (a plain folder run skips a `.json` entry that is a FIFO, a socket
-  or a device with a note; the help text gains the source kinds), and a bare channel-agent declaration's schema lines
-  name no undeclared member (DEC-0150's instance-free step, CT-209). `src/ops-digest.ts` now imports `foldPath` from
+  repository in three ways the handoff's Open lists: a plain folder run skips a `.json` entry that is a FIFO, a socket
+  or a device with a note; the help text gains the source kinds; and a bare channel-agent declaration's schema lines
+  name no undeclared member and it gets no extension hint (DEC-0150's instance-free step, CT-209). `src/ops-digest.ts` now imports `foldPath` from
   `src/source-rules.ts`, so a copy of the reference digest folds needs that file beside it.
 - **Consequences / affects:** `schemas/fabric-source.schema.json`; `src/ops-digest.ts` (`foldDir` is `foldPath`, `hasJwt`),
   `src/channel-agent.ts` (`keyShaped` reads `hasJwt`), `docs/specification/ops-digest.md` and `channel-agent.md`,
@@ -9785,7 +9787,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 79 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 80 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -9822,7 +9824,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   base's watcher lead, a new conflicting file, so the count of clean rounds starts again; round 76 not clean: the
   dashed home form, the knowledge base's messages; round 77 not clean: `ENOTDIR`, the required-slot wording; round
   78, after the merge with main at `b963d6a6`, not clean: CT-194's state, the `$comment`, the ops-digest import, fixed by
-  item DQ),
+  item DQ; round 79 not clean: an extension hint on a bare channel-agent declaration, Fabric Dashboards 0.8.30, fixed
+  by item DR; round 80 not clean: step 6's check of PR #628's watcher lines, the clause rule's end state, fixed by
+  item DS),
   cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.
 
@@ -10498,7 +10502,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   product one break, seam one, W93); rounds 28 and 29 at `3fb5c12a` were clean; their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
-- **Annotated (2026-11-07):** Fabric Dashboards' watcher counts `foreign` and `foreign-user` as unavailable since FD-159 (0.8.30, `e23551e8`), so the watcher row its Compatibility calls owed is done; the knowledge base's clause becomes "is done by FD's watcher since its 0.8.30, FD-159, under contract DEC-0154" (DEC-0149 round 79, the shared clause rule in both handoffs).
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
   the organization's plan for a shared computer on which several OS accounts work side by side: an administrator's
   account, the operator's own account and an account an organization owns whole, each running its own Fabric, Fabric

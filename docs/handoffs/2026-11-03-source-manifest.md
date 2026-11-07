@@ -518,7 +518,15 @@ source, what never travels with it, the check before a source export, and how a 
   the clause rule's To text (both handoffs) restating FD's released count, an Annotated line under DEC-0154, step 6
   rewriting PR #628's episode lines; DEC-0153's Annotated line naming `hasJwt`; the rounds count; the Open bullet's
   owner and the owed scenario; the README's CT-244; the Compatibility's checker changes and the import; the affects
-  list; the fourth landing row citing 0.8.30; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  list; the fourth landing row citing 0.8.30; round 80 at `78bb901d` (not clean: unit PASS, two equivalent
+  mutants, `keyShaped`'s JWT test and `jwtSpans`' resume point, no test measuring `jwtSpans`' cost; product FAIL,
+  the clause rule's "owed" end state, the "Done in PR #628" bullet, step 6's vacuous check of PR #628's watcher
+  lines, DEC-0154's handoff's stale reason, the Open's third checker change; seam FAIL, the same step 6 check) answered
+  as decided in item DS: "done" in the rule's interleavings (both handoffs), the bullet restated, step 6 naming the
+  lead and both episode lines by their text with a check that prints 3 today and 0 after, and re-pointing their
+  `a0bc160` citations, DEC-0154's handoff's reason, the Open's third change with the Compatibility and the release
+  notes, the timeout row named by symbol, the tag and commit of 0.8.30 apart, and the Annotated line on Fabric
+  Dashboards 0.8.30 moved to main's DEC-0154 (PR #250, CT-254); round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -538,10 +546,12 @@ source, what never travels with it, the check before a source export, and how a 
   has no scenario in `docs/ux`: it is owed with CT-208's screens and CT-207's templates.
 - CT-205 (from PR #236, merged) gets the hand-over exclusion when main is merged in: see the CT-205 row edit and its
   grep in the merge notes below.
-- Two changes outside source checks. First, a plain folder run (`pnpm validate <dir>`) skips a `.json` entry that
+- Three changes outside source checks. First, a plain folder run (`pnpm validate <dir>`) skips a `.json` entry that
   is a FIFO, a socket or a device with a note naming it, `not a file` (before, a FIFO hung the run). Second, the help
   text: the USAGE block gains the source kinds (`--kind source-tree`, `--kind source-package`) and its exit line is
-  reworded (`exit 0: no blocking problem (accepted lines may print)`). Everything else
+  reworded (`exit 0: no blocking problem (accepted lines may print)`). Third, a bare channel-agent declaration
+  (`--schema service-channel-agent-extension.schema.json`) gets instance-free schema lines, the reworded
+  declaration-only hint and no extension hint (DEC-0150's step, CT-209, items DQ and DR). Everything else
   outside source checks is as on `origin/main`: a named target that is not a regular file is read (a piped
   `/dev/stdin` is read, `/dev/null` is "not JSON"), and a folder entry that links to a folder is an `EISDIR` usage
   error. A source check never opens a file that is not a regular file.
@@ -1513,7 +1523,8 @@ session `74a9440a`), and resumed on 2026-11-07 by the operator's own word in the
 автономно до конца», a direct request, one of the pause's exceptions). DEC-0154 landed first (PR #248, main
 `18f8d487`, `v0.1.0+2026-11-07.1`); main `40a0ddb8` is merged into this branch at `b963d6a6` (step 2's merge done,
 its checks in Checks actually run). Round 78 at `d9ffe3f5` was not clean, fixed by item DQ; round 79 at `9c0ffbe0` was
-not clean, fixed by item DR. The exact next task: blind readings round 80 (unit, product, seam) at this branch's head, then two clean rounds and the remaining steps below. After the landing post, once the coordinator
+not clean, fixed by item DR; round 80 at `78bb901d` was not clean, fixed by item DS. The exact next task: blind
+readings round 81 (unit, product, seam) at this branch's head, then two clean rounds and the remaining steps below. After the landing post, once the coordinator
 answers, `git show origin/main:knowledge/north-star.md | grep -c 'DEC-0149 and DEC-0154'` on the knowledge base's main
 prints 0 (DEC-0154's knowledge-base post, message `f83a171c` on `eefa7959`, asked the coordinator to drop DEC-0149 from
 `north-star.md` 262 and 521 once DEC-0149 lands).
@@ -1572,9 +1583,14 @@ remaining steps, in order:
    straight after in the same session, the permission covers rewriting mechanics file by file (round 42 withdrew
    copying), and the head and the three greps' counts are the current ones; then
    `gh api repos/passioncode-ai/fabric-workspace/pulls/628 --jq .body | grep -c -e 'immediately before the contract' -e 'item 8' -e 'or copied'`
-   prints 0. Rewrite PR #628's two episode lines in `knowledge/authority.md` (FD-76 opens an episode only for `down`
-   today) to Fabric Dashboards' released watcher: an episode for `down` since FD-76 and for `foreign` and `foreign-user`
-   since FD-159 (0.8.30); `git show HEAD:knowledge/authority.md | grep -c 'only for .down. today'` then prints 0. The
+   prints 0. Rewrite PR #628's three statements of the watcher in `knowledge/authority.md` (the lead, "Fabric Dashboards'
+   released fact, FD-76 (0.7.15): it opens an episode only for `down`", and the two episode lines, "FD-76 opens an
+   episode only for `down`, at its first `down` look"; lines 105, 112 and 125 at `d2a6d9f4`) to Fabric Dashboards'
+   released watcher: an episode for `down` since FD-76 and for `foreign` and `foreign-user` since FD-159 (0.8.30),
+   keeping the clause "counting `foreign` and `foreign-user` is proposed for FD's watcher in contract DEC-0154" word for
+   word so the rule's replacement still finds it, and re-pointing their citations of Fabric Dashboards' `a0bc160`
+   line ranges to `v0.8.30` (or dating each remaining one as FD-76's); then `git show HEAD:knowledge/authority.md | grep -c 'opens an episode
+   only for .down.'` prints 0 (3 at `d2a6d9f4`) and `grep -c FD-159` on the same file prints at least 3. The
    order of the two merges is mandatory (round 65, CJ and CL): the contract PR first,
    then PR #628 straight after, one after the other in the same landing session, since PR #628 points at `service.md`'s
    definition of unavailable and at `source.md#handing-over`, which the contract's main carries only once the contract
@@ -1623,15 +1639,15 @@ same way: "`unchecked` covering a credential finding exits 0
 `--kind source-tree`, exit 1 without that entry), asking the checker to refuse such an entry. The lander writes the enforcing row's CT id
 into SCN-054 step 3, where it says the enforcing row is filed at landing. At landing, file a third backlog row under
 the next id above that one (CT-256 or above, re-measured the same way): "Deterministic timeout tests for
-validate-cli's ignored and staged listings", its evidence the two timeout branches at `src/validate-cli.ts` lines 779
-and 790, whose coverage depends on how fast the stub Git answers in the tests "walks the folder, saying why, when
+validate-cli's ignored and staged listings", its evidence the two timeout branches in `src/validate-cli.ts`'s Git listing, the
+`timedOut(ignored)` and `timedOut(staged)` returns (named by symbol, since line numbers move), whose coverage depends on how fast the stub Git answers in the tests "walks the folder, saying why, when
 git does not answer in time" and "walks with a note when the gitlink listing times out or cannot run" in
-`test/validate-cli.test.ts`, named by title since line numbers move (round 68, DA) (the tests stay green either way; the full run covers 774 of 775 branches of that file, above its
-floor, and Windows has no floor), and its decision a test seam beside `gitLimits` (`src/validate-cli.ts` line 644)
+`test/validate-cli.test.ts`, named by title since line numbers move (round 68, DA) (the tests stay green either way; the full run covers all but one branch of that file (782 of 783 at round 79), above its
+floor, and Windows has no floor), and its decision a test seam beside `gitLimits` in `src/validate-cli.ts`
 that answers `ETIMEDOUT` to a chosen call; the code is not changed in this landing (round 65, item CN). At landing,
 file a fourth backlog row under the next id above that one (CT-257 or above, re-measured the same way): "Decide
 whether Fabric Dashboards counting a degraded continuation, or a `down` within the 15-minute calm, counted toward
-the 15 minutes from the episode's first `down` look, conforms", its sources fabric-dashboards `v0.8.30` (`e23551e8`; the same continuation since then follows a `foreign` or
+the 15 minutes from the episode's first `down` look, conforms", its sources fabric-dashboards `v0.8.30` (FD-159 at `e23551e8`, tag `cc2b0048`; the same continuation since then follows a `foreign` or
 `foreign-user` opening too, so the row asks about all three) and, before it, main `a0bc160`
 `src/core/outage-alerts.ts` lines 112 to 129 and 156 to 160 and the rule
 in `service.md` that a watcher messages the operator only when an agent has been unavailable for more than 15
@@ -1646,7 +1662,8 @@ changed now): a neutral home name followed by sentence punctuation is a blocking
 "listed twice" compares entries as written, not in NFC. The lander writes all four rows' ids (the inventory row, the enforcing row, the timeout-test
 row and this row) into this note's Open line, in the landing change. The release notes of the landing carry one more
 item: a plain `pnpm validate <dir>` skips a `.json` file that is a FIFO, a socket or a device with a `note/skipped`
-line saying it is not a file, and a `fabric.source.json` that is a symbolic link the same way (SCN-002's errors line).
+line saying it is not a file, and a `fabric.source.json` that is a symbolic link the same way (SCN-002's errors line);
+and one more: a bare channel-agent declaration's lines name no undeclared member and carry no extension hint.
 
 Right after the merge: close CT-211 with the three greps' outputs; add the contract's row in the knowledge base's
 `knowledge/products.md` for the release that carries DEC-0149, with the release decision (the version tag, as DEC-0150's
@@ -1866,10 +1883,10 @@ such PR; an edit from outside the two landers goes to a knowledge-base row.
 Interleavings: DEC-0154 merges and its clause check prints 0 (PR #628 not merged); then, if
 DEC-0149's step 6 ran before that merge, PR #628 merges with "proposed" and step 6b sees 1 and
 2 and edits, and if step 6 ran after it, step 6 changes PR #628 and PR #628 merges already
-owed; or PR #628 merges, step 6b sees 0 and does nothing, then DEC-0154 merges and its clause
+done; or PR #628 merges, step 6b sees 0 and does nothing, then DEC-0154 merges and its clause
 check sees 2 and edits; or both open a knowledge-base PR at once, and the re-check before
 merging closes the second. In any other order, or if both re-checks race and both PRs merge,
-the text still ends owed twice, since a second edit changes nothing. Two windows are named and
+the text still ends done twice, since a second edit changes nothing. Two windows are named and
 close: from the later of DEC-0154's contract merge and PR #628's merge until a knowledge-base
 PR merges, the knowledge base says "proposed" for an accepted DEC-0154; in the other order the
 knowledge base names a DEC-0154 the contract's main does not carry yet.
@@ -2071,13 +2088,16 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
 - Done in PR #628 (rounds 63 to 72): `knowledge/authority.md`'s outage-watcher lines point at the contract's
   `service.md` for what unavailable means (an episode opens only for an agent unavailable, as `service.md` defines it,
   for more than 15 minutes; a `degraded` answer opens none), keeping `down` only as the dated fact of FD-76's release
-  and saying, in both episode lines, that FD-76 opens an episode only for `down` today and keeps it open while a
+  and saying, in its lead and both episode lines, that FD-76 opens an episode only for `down` ("at its first `down`
+  look" in the episode lines) and keeps it open while a
   failing source (one not marked `setup: true`) outside its start baseline stays, its failure message at 15 minutes
   possibly naming that source, and that counting `foreign` and `foreign-user` is proposed for FD's watcher in contract
   DEC-0154 (round 69, DG: true while DEC-0154 is proposed, which in order 2 the contract's main does not even carry
   when PR #628 merges; who changes it, round 71, DK, in the rule in **Next task** above); the start baseline stays the fallback for a service that sends no `setup`
   flag (round 66, CQ). In both orders the knowledge base points at the definition in `service.md`, so the landing edits
-  to `service.md` need no edit there; only its clause on `foreign` changes, twice, from "proposed" to "owed".
+  to `service.md` need no edit there; at step 6 its lead and both episode lines are rewritten to Fabric Dashboards' released watcher (`down` since FD-76,
+  `foreign` and `foreign-user` since FD-159, 0.8.30), and its clause on `foreign` changes twice, from "proposed" to
+  "done by FD's watcher since its 0.8.30, FD-159", as the shared rule says.
   "Proposed" is true while DEC-0154 is proposed. Who changes it, the exact clauses, the checks, the interleavings and
   the withdrawal are in the knowledge-base clause rule in **Next task**, one block, byte-identical with DEC-0154's
   handoff (round 69, DG; round 70, DI; round 71, DK; round 72, DL); the service's own outage report stays at 5
