@@ -721,7 +721,7 @@ uid on the row of the connection itself, and Windows names the owning process of
 way.) A reader treats its macOS table as restricted when it cannot read it (the command fails or exits non-zero), when
 it lists no row at all (output that is empty or a header only), when it holds no row of another uid (a source that
 carries uids) or of another process (`netstat`, which carries process ids), or when it lists sockets but not the
-server end of the reader's own connection. Then:
+server end of the reader's own connection (for a server reading its peer, the client end). Then:
 
 - **RT-1, the owner cannot be told.** A listener that accepted the connection is `foreign-user` for an owner that
   cannot be told: no credential is sent and nothing it answers is read as the service's. It is never this account's
@@ -752,13 +752,12 @@ server end of the reader's own connection. Then:
   that same address and port beside it); this account's wildcard or `::1` listener, and root's, are `table-restricted`,
   not this account's.
 - **RT-5, the server side.** A local surface that must refuse a peer of another account (*Who checks when the client
-  cannot*, below) and reads a restricted table cannot tell its peer's owner, so it refuses the peer with the reason
-  `table-restricted`, unless it finds the client end of the connection among the descriptors of a process of its own
+  cannot*, below) and reads a restricted table cannot tell its peer's owner, so it refuses the peer (with a reason
+  beginning `table-restricted` where it reports one), unless it finds the client end of the connection among the descriptors of a process of its own
   uid, as RT-2 does for the server end. A token-free loopback door (HA-3) run where its table is restricted therefore
   admits only callers it proves that way.
 
-A reader whose real and effective uid differ uses none of RT-2 to RT-5. RT-3 to RT-5's table reads are used only under
-a restricted table: where the table shows other accounts' rows, HA-2's sources above decide. On a computer where the
+A reader whose real and effective uid differ uses none of the proofs in RT-2 to RT-5; RT-5's refusal still applies. RT-3 to RT-5 apply only under a restricted table: where the table shows other accounts' rows, HA-2's sources above decide. On a computer where the
 reader's table shows only its own sockets because no other process has any open, it is read as restricted: the cost is
 a proof by RT-2 or a warning, never a credential sent to another account.
 

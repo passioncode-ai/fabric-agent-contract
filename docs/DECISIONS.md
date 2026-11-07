@@ -11103,9 +11103,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   doctor line or a refusal message).
 - **Compatibility:** nothing on the wire changes. Read on 2026-11-07, each consumer's shipped code and what it owes:
   Project Observatory's `peer_owner` 1.3.0 (PR #466, branch `release/0.35.2`, `8013f6e1`) matches RT-1, RT-2 (libproc),
-  RT-4 and the set-uid rule, and proves its peer by the client end as RT-5 says. The adapter's kits on `rel-0.76.0`
+  RT-4 and the set-uid rule, and proves its peer by the client end as RT-5 says; it owes the reason `table-restricted` when its libproc
+  layout fails calibration (today `libproc: layout failed calibration`). The adapter's kits on `rel-0.76.0`
   (`4ef7b936`) name `table-restricted` for an empty `netstat` and vouch by a started process's pid; they owe a header-only
-  or own-rows-only table read as RT-1, not `none` or `no-row` (their FAA-273 item 3), RT-3's exact `127.0.0.1` listen
+  or own-rows-only table read as RT-1, not `none` or `no-row` (their FAA-273 item 3), a `netstat` that exits non-zero
+  read as RT-1 with the `table-restricted` reason (today `netstat: exit N`, which skips their vouch), RT-3's exact `127.0.0.1` listen
   in place of their `*:<port>`, and the hub client's reason with an RT-2 path (FAA-272). The PassionCode launcher's
   doctor (`eca6974`, PC-163) shows `table-restricted` as a warning and keeps a refused connection `down`; it owes the
   warning, not a failure, for a `netstat` that exits non-zero. Fabric's client (`listenerOwner.ts` at `2438c90a`,
@@ -11113,11 +11115,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reading the table before naming that reason, so a readable table can name another account. Switchboard's proxy
   refuses a peer it cannot tell, which RT-5 keeps; its signed releases read the whole table. sshlg-fabric-server owes
   the reason `table-restricted` in place of `owner_unknown` (SFS-HA2-RESTRICTED) and its listener check's `down` on an
-  empty table. Fabric Dashboards owes reading an empty `netstat` in its listener check (FD-159, `loopback-owner.ts`
-  line 97) and a table without the connection's row in its connection check (FD-168) as an owner that cannot be told,
+  empty table. Fabric Dashboards owes reading an empty, header-only or own-rows-only `netstat` in its listener check (FD-159,
+  `loopback-owner.ts` line 97) and a table without the connection's row in its connection check (FD-168) as an owner that cannot be told,
   not another account's. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/service.md` (HA-2's MUST, its list and macOS row, the paragraph *A
-  restricted socket table*), `docs/specification/conformance.md` (the client row), `docs/ux/scenarios.md` (SCN-056),
+  restricted socket table*), `docs/specification/conformance.md` (the client row, the local-surface row and the token-free door's row), `docs/ux/scenarios.md` (SCN-056),
   `docs/ux/screens.md` (SCR-20), `docs/DOCMAP.md`, DEC-0154 (an Annotated line); backlog CT-261 (in progress), CT-229
   (its owed vectors gain the restricted cases); the handoff `docs/handoffs/2026-11-07-restricted-table.md`.
 - **Source:** the adapter's measurement on board thread `eefa7959` (message `31c317ab`), Project Observatory's

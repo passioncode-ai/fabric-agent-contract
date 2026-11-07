@@ -745,6 +745,10 @@ DEC-0154).
 whose owner cannot be told; ordered after `down` and before `foreign`, it wins over any well-known answer, and nothing
 is sent to it (HA-2, DEC-0154).
 
+**`table-restricted`**: The reason, or its prefix, for an owner that cannot be told because a macOS socket table shows
+its reader only the reader's own sockets (macOS 27.2, an ad hoc signed process); `foreign-user`, never `down` or this
+account's, unless the accepted socket proves this account (RT-1 to RT-5, DEC-0155).
+
 **Host label**: The label of the computer: `device.hostLabel`, an HMAC of the computer's administrator-owned secret
 over the organization's id, the same for every device of one organization on one computer (two counted OS accounts
 of it, or a virtual machine given its secret); organizations with no code

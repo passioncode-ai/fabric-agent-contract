@@ -814,7 +814,7 @@ independent agent author and P-02 project operator.
 
 - **Persona:** P-02
 - **Feature:** service
-- **Traces:** ST-021, FLW-17 (JTBD-03, JRN-02/#3); DEC-0154 HA-1 and HA-2
+- **Traces:** ST-021, FLW-17 (JTBD-03, JRN-02/#3); DEC-0154 HA-1 and HA-2; DEC-0155 RT-1 to RT-5
 - **Entry point:** the host's card for a local service (Fabric Dashboards, Fabric), on a computer where several OS accounts work
 - **Preconditions:** my service is installed with a recorded port; another OS account on the same computer runs a listener on that port (its own copy of the agent, or anything else)
 - **Steps:**
