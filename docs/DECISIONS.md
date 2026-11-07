@@ -9757,7 +9757,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   W81 (b) to (h)); paused 2026-11-06 by the operator's relay and resumed 2026-11-07 by the operator's own word, with
   W82 (two adoption facts from the reconciliation answers); round 19 at `63c622d4` was not clean (unit passed;
   product found two breaks, seam one, W83); round 20 at `3db473d0` was not clean (product found two breaks, seam two,
-  W84); their batches are folded in (Source). A reference module and vectors, one optional schema
+  unit one, the split marker W84 had already rejoined; W84); round 21 at `ea203020` was not clean (product found one
+  break, seam one, W85); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9955,6 +9956,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - Fabric Dashboards: listens on no TCP port (an owner-only socket or named pipe), so item 1 does not apply to it;
     FD-156 (the owner check on macOS, 0.8.25) and FD-158 (`foreign-user`, 0.8.26, commit `53a62f9`) reported done;
     FD-159: Linux done in 0.8.27 (PR #349); the refusal of an owner it cannot tell and Windows open, due at acceptance.
+    Open too, asked the same day: it asks the owner only of a port that answered (its `look.ts` lines 103 to 105 at
+    `a0bc160`), so another account's listener that never answers reads `starting`, then `down` or `stopped`, not
+    `foreign-user` (safe, since its local probe sends no token).
     Owed: its watcher (FD-76's successor) counts `foreign` and `foreign-user` as unavailable; asked on `1fe66e6e` on acceptance day.
     Asked the same day: its card's own `foreign-user` line (its `i18n.ts:128`) uses, or is checked against, this
     decision's two lines (item 2; SCR-20 in `docs/ux/screens.md`), and a line for an owner that cannot be told is
@@ -10000,7 +10004,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `docs/specification/service.md` (the port claim's pointer, `FAC-SEM-009`'s neighbour,
   the threat model and its two residues, the trust anchor, PL-3, the new section with counted accounts and HA-1 to
   HA-3, the Install, Uninstall, One copy and Start rows, the One copy section, the directories table, the caller
-  table, the A2A paragraph, `FAC-SEM-010`'s register row), `docs/specification/provider.md` (a loopback `run.mcp.url`
+  table, the A2A paragraph, `FAC-SEM-010`'s register row, the app descriptor's callers), `docs/specification/provider.md` (a loopback `run.mcp.url`
   under HA-2), `docs/specification/relay.md` (a loopback relay under HA-2), `docs/guides/connecting-compatible-agents.md`
   (the note on HA-1 to HA-3), `src/semantic-rules.ts` (`FAC-SEM-010`'s comment), `test/delegation-sealed.test.ts` (its FB-6 comment; the pinned "per host" kept),
   `docs/specification/embedded-dashboard.md` and `docs/specification/fabric-button.md` (ED-8's and FB-6's cookie
@@ -10013,7 +10017,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/specification/contexts.md` (`org.id` for the host label), `docs/specification/connections.md` (a connection to
   a `foreign` or `foreign-user` listener is `down`), `docs/specification/node-summary.md` (a `foreign` or
   `foreign-user` service reported `down`; mode `A`), `docs/specification/conformance.md` (the reference module's row,
-  eight client, host, reader and setup rows, and the PL-2 and PL-3 row), `schemas/device-enrollment.schema.json`,
+  eight client, host, reader and setup rows, the connections reader's row, and the PL-2 and PL-3 row), `schemas/device-enrollment.schema.json`,
   `schemas/service-well-known.schema.json` (`service.id`'s description), `src/host-label.ts`,
   `tools/vectors/host-label.ts`, `tools/vectors/run.ts`, `fixtures/vectors/host-label.json`,
   `fixtures/positive/device-enrollment-request-host-label.json`,
@@ -10168,6 +10172,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `63c622d4` was not clean, and W83 (CT-228's state after the resume, CT-231's reader named without a line number, the
   North Star step, the cheap risks) is folded in; round 20 at `3db473d0` was not clean, and W84 (a supervisor's stop
   shown only when nothing answers, as Fabric Dashboards does; a named bullet in place of a line number; the split
-  marker rejoined; the North Star step widened to every page statement the landing makes false) is folded in; the two UI lines passed the operator's copy check
+  marker rejoined; the North Star step widened to every page statement the landing makes false) is folded in; round 21 at `ea203020`
+  was not clean, and W85 (Fabric Dashboards' lines 31 to 40 and its monitor's skip, the knowledge-base step driven by
+  its grep at landing time with checks that read the pages, DEC-0151's three rows, the order-1 window's conformance
+  row, the Fabric Dashboards row's silent listener) is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

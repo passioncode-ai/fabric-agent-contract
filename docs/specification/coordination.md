@@ -61,7 +61,7 @@ sequenceDiagram
   participant PM as Product manager
   participant D as Developer agent
   participant C as Coordination backend
-  participant G as Git host
+  participant G as Git hosting service
   participant K as Independent checker
   PM->>C: claim(work, scopes, ttl)
   C-->>D: claim + branch/worktree

@@ -671,8 +671,9 @@ an HMAC under a key in an owner-only file; Switchboard reported on thread `1fe66
   is read" means it outranks any answer, `ready` included, and no credential is sent to read one. A host's own states
   that the listener does not decide may come before this order, provided no answer is read as the service's: an
   invalid descriptor, a conflict over an `id.instance` or a port, its own stop or start in flight (Fabric Dashboards
-  at `a0bc160`, `packages/service-host/src/state.ts` lines 31 to 39, and `look.ts` lines 91 to 105, which skip the
-  probe then). A service its supervisor stopped is not one of them: a host shows that only when nothing answers on the
+  at `a0bc160`: `packages/service-host/src/state.ts` lines 31 to 40; `look.ts` lines 91 to 105 skip the probe for an
+  invalid descriptor or a conflict, and its monitor, `src/core/monitor.ts` line 280, while a stop or start is in
+  flight). A service its supervisor stopped is not one of them: a host shows that only when nothing answers on the
   port, in place of `down` (the same `state.ts`, lines 67 to 69, and Fabric Dashboards' vector "another program
   answering comes before launchd saying it is off"). A host's own further states (a second copy shown as `duplicate`,
   under [One copy](#one-copy)) come after these.

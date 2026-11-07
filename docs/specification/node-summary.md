@@ -53,7 +53,7 @@ Under either mode the services are those of the summary's own context only (DEC-
 or space, by schema; no string holds a home directory, the dash forms runtimes write into file names included after
 any character that is not an ASCII letter or digit, `x.-Users-<name>` or `p@-Users-<name>`, DEC-0105), a credential, an argument, an environment value, a prompt, an
 output or a file's content, and no member that says the summary is withheld (DEC-0105). A personal agent service is
-not listed toward an organization; under `machine.mode` `A` the organization sees the enrolling account's harness (until CT-232) because the
+not listed toward an organization; under `machine.mode` `A` the organization sees the enrolling account's harness (until CT-232; DEC-0154, proposed) because the
 operator decided work machines are transparent to their organization (S8), named as a purpose in its notice, and under
 `C` only its own context's (DEC-0118).
 
