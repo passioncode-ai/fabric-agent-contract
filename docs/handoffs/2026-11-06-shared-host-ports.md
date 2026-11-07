@@ -800,9 +800,16 @@ reports 0 errors. The only em dash on an added line is the existing SH-2 label i
 
 ## Next task
 
-DEC-0154's landing: merge main into this branch, run the full gate on the landing head under the heavy lock, merge PR #248,
-then the release `v0.1.0+2026-11-07.1`, the knowledge-base clause check, the knowledge base's pages post on
-`eefa7959`, the board post on `1fe66e6e` and the follow-up adding "released" to CT-228's state cell.
+Landed 2026-11-07: PR #248 merged (main `18f8d487`, the same tree as the gated head `2636bebf`); annotated tag
+`v0.1.0+2026-11-07.1` on it and its GitHub release; the knowledge-base clause check printed 0 on the knowledge base's
+main `60c630d` (PR #628 not merged), so this lander edits nothing there; the knowledge base's pages, the six lines its
+grep printed plus HA-3's statement and the release in `products.md` and `roadmap.md`, posted on `eefa7959` (message
+`f83a171c`), with the ask to drop DEC-0149 from `north-star.md` 262 and 521 once DEC-0149 lands; the tag, SB-278 and
+the three Fabric Dashboards asks posted on `1fe66e6e` (message `f6d0a09a`); CT-228's state cell names the release.
+
+Next: once the coordinator answers on `eefa7959`, run the knowledge-base page checks of the acceptance step on its
+main. Then CT-228's owed parts (the claim file's schema and a port-choice reference with vectors) and the rows CT-229 to
+CT-243 and CT-253 by priority.
 
 The record of the run before acceptance:
 
