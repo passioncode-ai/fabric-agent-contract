@@ -11056,8 +11056,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0155: a restricted socket table: an owner that cannot be told, `table-restricted`, and two proofs of this account
 
 - **Date:** 2026-11-07
-- **Status:** Proposed (draft on branch `agent/ct261-restricted-table-20261107`, CT-261); binding once accepted on merge.
-  It amends HA-2 (DEC-0154): no schema, field or rule code changes.
+- **Status:** Accepted 2026-11-07: rounds 3 and 4 of the coordinator's blind readings (at `24c677c5` and `b5dbab86`)
+  were clean on all three tiers (unit, seam, product). Proposed the same day as a draft written from what the products
+  already ship; round 1 at `bccee010` was not clean on any tier (RT-3 against RT-4, no server side, Linux caught by the
+  detection, consumers' debts understated, no UX), round 2 at `9f6dcb4a` not clean on the product tier (RT-5 missing
+  from conformance's server rows). Their non-blocking risks are CT-265. It amends HA-2 (DEC-0154): no schema, field or
+  rule code changes.
 - **Context:** HA-2's macOS source reads the TCP socket table (`netstat -anv -p tcp`, `sysctl net.inet.tcp.pcblist64`)
   as naming every account's sockets. The Fabric Agent Adapter measured on macOS 27.2 that a process with an ad hoc code
   signature (Homebrew Python, likely Homebrew Node) is shown only its own sockets: `netstat` prints nothing with exit 0
@@ -11086,7 +11090,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   5. **The server side (RT-5).** A surface that must refuse another account's peer and reads a restricted table refuses
      with `table-restricted`, unless it finds the client end among its own uid's descriptors; a token-free door run
      there admits only callers it proves so.
-  A reader running set-uid uses none of RT-2 to RT-5. HA-2's MUST names RT-2 as a source, its list of owners that cannot
+  A reader running set-uid uses none of the proofs in RT-2 to RT-5 and may name that context as its reason; RT-5's
+  refusal still applies. HA-2's MUST names RT-2 as a source, its list of owners that cannot
   be told names a restricted table, the macOS row names `pcblist_n` and the restriction,
   [conformance](specification/conformance.md#clients-and-readers)'s client row reads it, and SCN-056 and SCR-20 carry
   its recovery.

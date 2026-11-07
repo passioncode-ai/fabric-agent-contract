@@ -8,7 +8,7 @@ client may still prove its own listener.
 
 ## Done
 
-- [DEC-0155](../DECISIONS.md) (Proposed): RT-1 to RT-5 in
+- [DEC-0155](../DECISIONS.md) (Accepted 2026-11-07): RT-1 to RT-5 in
   [service](../specification/service.md#a-restricted-socket-table); HA-2's list of owners that cannot be told and its
   macOS row name the restriction and `pcblist_n`.
 - [Conformance](../specification/conformance.md#clients-and-readers): the client row, the local-surface row and the
@@ -38,10 +38,12 @@ client may still prove its own listener.
   understating the adapter's and sshlg-fabric-server's debts; no server side; Linux caught by the detection; no UX; no
   Annotated line on DEC-0154), folded in `9f6dcb4a`. Round 2 at `9f6dcb4a`: unit and seam passed, product failed
   (RT-5 not in conformance's server rows; DOCMAP and the handoff named RT-1 to RT-4), folded in `24c677c5` with
-  the readers' risks. Round 3 at `24c677c5`: all three passed; two wording risks folded in the next commit. `pnpm run check`: one hook timeout under load (CT-204),
+  the readers' risks. Round 3 at `24c677c5`: all three passed; two wording risks folded in `b5dbab86`. Round 4 at
+  `b5dbab86`: all three passed; accepted. `pnpm run check` at `b5dbab86`: exit 0 (117 test files), `pnpm vectors:check`
+  32 files match. `pnpm run check`: one hook timeout under load (CT-204),
   `pnpm docs:check` exit 0.
 
 ## Next task
 
-Round 4 of the blind readings (unit, seam, product), the second clean round; two consecutive clean rounds,
-then merge and a release tag.
+Merge the pull request, tag the release, and tell the consumers on board thread `eefa7959` what each owes (DEC-0155's
+Compatibility); then DEC-0151 (branch `agent/sqd-fields-20261104`).
