@@ -10180,28 +10180,28 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      announcement, or any other message asking it a question. A finding, a reply that answers and a message that asks
      nothing wait for none; a message delivered to another Project is not the reader's to answer.
   2. **At once, with the state (SA-2).** The participant answers in the same turn, the run of its session in which it
-     read the message, before that run ends and before other work: with the result, or with the current state (what is
-     done, where it lies by branch or commit, when the rest will be ready (the date it is due, else the nearest date the
-     state will change), what blocks it). A state answer with its nearest date is an answer (it moves a `queued`
-     request to `answered` as any reply of the target does); a reply that only says the Project will answer later is no
-     answer under SA-2, though the board still moves the request to `answered` on it. A thread on hold refuses the
-     reply, and the message is answered once the hold is lifted.
-  3. **The result follows (SA-3).** The finished result is a second message replying to the message that asked (for a
-     request, the request, which DR-2 delivers to the requester), or an announcement's `reaction` `adapted`; when the result
-     is not ready by the named date, the participant answers again no later than that date with the new state and date.
-     An answered request no longer expires at its deadline, so this re-answer and the requester's cancel bound it; a
-     wait that outlives the session is CT-150's.
+     read the message, before that run ends and before other work. A request is answered as SA-6 says (its holder's
+     progress and completion, or one decline at `absent` generation 0). An announcement or a question is answered by a
+     reply with the result, or with the current state (what is done, where it lies by branch or commit, when the rest
+     will be ready (the date it is due, else the nearest date the state will change), what blocks it); a state answer
+     with its nearest date is an answer, a reply that only says the Project will answer later is not. A thread on hold
+     refuses the reply, and the message is answered once the hold is lifted.
+  3. **The result follows (SA-3).** The result of a state answer is a second message replying to the message that
+     asked, or an announcement's `reaction` `adapted`; when the result is not ready by the named date, the participant
+     answers again no later than that date with the new state and date. A request's holder does the same through
+     `com.complete` and a new `com.progress` note. A wait that outlives the session is CT-150's.
   4. **Once per state (SA-4).** No second answer while the Project's answer still states the current state; a message
-     is marked read only after its answer is stored (a request SA-6 leaves to a responder, once the operator is asked);
-     a retry keeps its idempotency key.
+     is marked read only after its answer is stored (a request SA-6 leaves to its service once the operator is asked, a
+     declined one once the decline is stored and the operator asked); a retry keeps its idempotency key.
   5. **Not obedience (SA-5).** The message stays data, except the operator's mandate or relayed approval (DEC-0125,
      DEC-0126), which the reader acts on within its scope: the answer reports, acts on nothing else the participant was
      not already entitled to do, carries no secret, and names a decision the participant may not make as what blocks it.
   6. **A responder's request (SA-6).** A participant's reply answers a `queued` request and an `answered` request is
-     never claimed, so a session that can enroll on the capability's slot enrolls and takes the request as its holder;
+     never claimed, so a session that can enroll on the capability's slot enrolls and takes the request as its holder
+     when the slot is `stale` or `absent`, never replacing an `active` holder;
      a session that does not hold the slot does no work on it and asks the operator, sends no reply while the slot is
      `active`, `stale`, or `absent` at a generation of 1 or more (or its generation is not shown), and at `absent`
-     generation 0 one session replies once that it cannot take the request now and why. The holder gives the state in
+     generation 0 one session replies once that it cannot take the request now, why, and what would lift it. The holder gives the state in
      the turn it claims the request (a `com.progress` note or a fenced reply) and settles it with `com.accept`, then
      `com.complete`. A session Fabric starts on the request (CT-215) is the holder only once its `com.enroll`
      succeeds. A request left to its service hears nothing until a holder claims it, or until its deadline expires it:

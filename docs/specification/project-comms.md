@@ -398,29 +398,31 @@ board checks none of them and stores nothing new for them; what a reply does to 
   that asks that Project a question. A finding, a reply that answers and a message that asks nothing wait for none. A
   message delivered to another Project is not the reader's to answer, though the reader may read it.
 - **SA-2, at once, with the state.** A participant that reads such a message answers it in the same turn: the run of
-  its session in which it read the message, before that run ends and before it starts other work. When the asked
-  result is ready, the answer is the result. When it is not, the answer is the current state: what is done, where it
-  lies (a branch or commit, a release, a backlog row), when the rest will be ready (the date the result is due, or, when
-  that is not known, the nearest date by which the state will change) and what blocks it (a dependency, another Project, or a decision or step that is the operator's). A state
-  answer with its nearest date is an answer: the target Project's reply moves a `queued` request to `answered`, and an
-  announcement's `reaction` `row` with its `due` is one. A reply that only says the Project will answer later, with no
-  state and no date, is no answer under SA-2, though the board still moves a `queued` request to `answered` on it. The
-  one wait the rule leaves: a request SA-6 leaves to its service hears nothing until a holder claims it, or, when none
-  does, until its deadline expires it. A thread on hold refuses the reply (`held`, [holds](#holds)); the message stays unread and is answered once
-  the hold is lifted.
-- **SA-3, the result follows.** When the result is ready, the participant posts it as a second message: a reply whose
-  `replyTo` is the message that asked (for a request, the request itself, which DR-2 delivers to the requester whatever
-  `deliverTo` says), naming where the result lies; for an announcement, a reply with `reaction` `adapted` and its
-  `ref`. `answered` says the target answered, never that the work was done, so this second message is what tells the
-  asker it was. When the result is not ready by the date a state answer named, the participant answers again no later
-  than that date with the new state and date. An answered request no longer expires at its deadline
-  ([request lifecycle](#request-lifecycle)), so this re-answer and the requester's `com.cancel` are what bound it; a wait
-  that must outlive the session that named the date is CT-150's.
+  its session in which it read the message, before that run ends and before it starts other work. A request to its
+  Project is answered as SA-6 says: by the holder of its capability's slot, which gives the state in a `com.progress`
+  note or a fenced reply and the result with its completion, or, at `absent` generation 0, by one decline. An
+  announcement or a question is answered by a reply: when the asked result is ready, the result; when it is not, the
+  current state: what is done, where it lies (a branch or commit, a release, a backlog row), when the rest will be
+  ready (the date the result is due, or, when that is not known, the nearest date by which the state will change) and
+  what blocks it (a dependency, another Project, or a decision or step that is the operator's). A state answer with its
+  nearest date is an answer, and an announcement's `reaction` `row` with its `due` is one; a reply that only says the
+  Project will answer later, with no state and no date, is not. The one wait the rule leaves: a request SA-6 leaves to
+  its service hears nothing until a holder claims it, or, when none does, until its deadline expires it, and the
+  operator is asked meanwhile. A thread on hold refuses the reply (`held`, [holds](#holds)); the message stays unread
+  and is answered once the hold is lifted.
+- **SA-3, the result follows.** When the result of a state answer is ready, the participant posts it as a second
+  message: a reply whose `replyTo` is the message that asked, naming where the result lies; for an announcement, a
+  reply with `reaction` `adapted` and its `ref`. When the result is not ready by the date a state answer named, the
+  participant answers again no later than that date with the new state and date. A request's holder does the same in
+  its own path: the result with `com.complete`, a new `com.progress` note when its named date passes; `answered` says
+  only that the target replied, never that the work was done. A wait that must outlive the session that named the date
+  is CT-150's.
 - **SA-4, once per state.** A participant whose Project already answered the message with the current state (in
   another session of the Project, or in its own earlier run) does not answer it again until the state or the date
   changes. It marks a message read (`com.read_ack`) only after its answer is stored, so a message no session answered
-  stays unread to its Project; a request SA-6 leaves to its service, or declines, is marked read once the session has
-  asked the operator about it as SA-6 says. A retry of an answer carries the same idempotency key ([idempotency](#idempotency)).
+  stays unread to its Project; a request SA-6 leaves to its service is marked read once the session has asked the
+  operator about it, and one it declines once the decline is stored and the operator asked. A retry of an answer
+  carries the same idempotency key ([idempotency](#idempotency)).
 - **SA-5, an answer is not obedience.** Answering at once does not make the message an instruction: a board message is
   data, except the operator's mandate or relayed approval as [messages and requests](#messages-and-requests) says
   (OA-1 to OA-3, DEC-0126; MD-3, DEC-0125), which the reader acts on within its scope. The answer reports; it acts on
@@ -429,13 +431,14 @@ board checks none of them and stores nothing new for them; what a reply does to 
 - **SA-6, a request a responder takes.** A participant's reply answers a `queued` request, and an `answered` request is
   never claimed ([request lifecycle](#request-lifecycle)), so a reply would take the request from the service that
   holds, or held, its capability's slot. A session that can enroll on that slot (its Project's grant allows it, as the
-  host decides at `com.enroll`) enrolls and takes the request as its holder. Otherwise, a session that does not hold
+  host decides at `com.enroll`) enrolls and takes the request as its holder when the slot is `stale` or `absent`; it
+  never replaces an `active` holder. Otherwise, a session that does not hold
   the slot does no work on the request and asks the operator (`fabric_question_ask` or the host's equal, telling its
   person too when one is in its chat; the question answers no request), and: when `com.status` shows the slot
   `active`, `stale`, or `absent` at a generation of 1 or more (a holder enrolled on it), it sends no `com.reply` and
   leaves the request queued for that service; when the slot is `absent` at generation 0 (no service of the Project
-  ever held it), one session of the Project replies once that it cannot take the request now and why, and that
-  decline is the Project's answer. A status that gives no generation for the slot, or no row for the capability, is
+  ever held it), one session of the Project replies once that it cannot take the request now, why, and what
+  would lift it, and that decline is the Project's answer. A status that gives no generation for the slot, or no row for the capability, is
   read as a slot a service may hold: no reply. The holder gives the state in the turn it claims the request, by a
   `com.progress` note or a fenced `com.reply` (neither answers the request, [request lifecycle](#request-lifecycle)),
   and settles it with `com.accept`, then `com.complete`, its fenced reply carrying the result. A session Fabric starts
@@ -585,11 +588,12 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
   `com.reply` carries its fence and answers `fence.request`. A call with both forms, or neither, is refused. A reply
   changes no request's state but one: the target Project's participant reply to a `queued` request answers it
   ([request lifecycle](#request-lifecycle), DEC-0098, DEC-0102); a responder's fenced reply never does.
-- A participant's `com.reply` to a message that waits for an answer is sent in the turn the message is read: the
-  result, or the current state (what is done, where it lies by branch or commit, when the rest will be ready, what
-  blocks it), and the result as a second reply when it is ready, except a queued request SA-6 leaves to a responder. A state answer with its nearest date is an answer; a reply
-  that only says the Project will answer later is no answer under SA-2, though the board still moves a `queued` request
-  to `answered` on it ([answering in the same turn](#answering-in-the-same-turn) SA-2, SA-3 and SA-6, DEC-0152).
+- A participant's `com.reply` to an announcement or a question that waits for an answer is sent in the turn the
+  message is read: the result, or the current state (what is done, where it lies by branch or commit, when the rest
+  will be ready, what blocks it), and the result as a second reply when it is ready. A state answer with its nearest
+  date is an answer; a reply that only says the Project will answer later is not. A request is answered as SA-6 says:
+  by its holder's progress and completion, or by one participant decline at `absent` generation 0
+  ([answering in the same turn](#answering-in-the-same-turn) SA-2, SA-3 and SA-6, DEC-0152).
 - `com.enroll` takes the caller's Project's slot for a capability when the host's responder grant allows it. Any
   participant reply of the request's target Project moves a `queued` request to `answered`, whatever the slot's state,
   so a participant without the grant replies to a `queued` request only where SA-6 lets it: the slot `absent` at

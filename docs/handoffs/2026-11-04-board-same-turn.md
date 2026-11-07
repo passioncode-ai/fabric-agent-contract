@@ -33,8 +33,12 @@ blocks it); the finished result follows as a second message; a state answer with
   checker reads carries, so it is prose (SA-1 to SA-6) plus a conformance row checked by the agent's own test.
 - A request whose capability's slot is `active`, `stale`, or `absent` at a generation of 1 or more is left to that
   service (SA-6), so a participant's state reply does not move it to `answered` and out of the responder's queue; only
-  at `absent` generation 0 does a session answer, once. Round 1 of the readings (2026-11-07) moved SA-6 from "answers
-  while `stale` or `absent`" to this, the rule Fabric and the adapter already ship.
+  at `absent` generation 0 does one session reply, once, declining with why and what would lift it, doing no work on
+  the request and asking the operator; a session that can enroll on a `stale` or `absent` slot enrolls first and is the
+  holder. Rounds 1 to 3 of the readings (2026-11-07) moved SA-6 there from "answers while `stale` or `absent`", the rule
+  Fabric and the adapter already ship.
+- A request is answered only through SA-6 (its holder's progress and completion, or the generation-0 decline); the
+  state answer and the second-reply result of SA-2 and SA-3 are for announcements and questions.
 - A message is marked read only after its answer is stored (SA-4), so an unanswered message stays unread to its
   Project.
 
@@ -44,11 +48,14 @@ blocks it); the finished result follows as a second message; a state answer with
   exit codes were recorded.
 - 2026-11-07, merged with main at `41784daf`: `pnpm run check` 116 of 117 test files passed, one test timed out at
   5000 ms under machine load (CT-204), `pnpm vectors:check` 32 files match; round 1 of the blind readings (unit, seam,
-  product) failed on SA-6, Compatibility, SA-5's mandate exception and SA-3's wording, all folded in the next commit.
+  product) failed on SA-6, Compatibility, SA-5's mandate exception and SA-3's wording, folded in `1a1a1512`.
+- Round 2 at `1a1a1512`: product passed, seam and unit failed (generation 0 wider than Fabric ships; the enroll text
+  read as a board rule), folded in `0d3e572c`. Round 3 at `0d3e572c`: seam passed, unit and product failed (SA-2, SA-3,
+  the `com.reply` text and schema still sent a request a state answer), folded in the next commit.
 - No U+2014 in the added lines (`git diff origin/main | grep '^+' | grep -c` on U+2014 prints 0).
 
 ## Next task
 
-Round 2 of the blind readings (unit, seam, product) on the head after round 1's fixes; once two consecutive rounds are
+Round 4 of the blind readings (unit, seam, product) on the head after round 3's fixes; once two consecutive rounds are
 clean and `pnpm run check` exits 0, open the pull request, merge it, tag the release, and tell Fabric, the adapter and
 the knowledge base on board thread `eefa7959`.
