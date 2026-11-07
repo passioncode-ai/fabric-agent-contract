@@ -17,7 +17,8 @@ against the hour before is a rise, which a product that shows findings tells its
 close its work with a retro, `retro-after-work`, which the host asks for and counts. The split of who keeps and reads
 what is Fabric's ADR-0188 (commit `0d0e5922`); the shape's origin is Fabric's commit `e1eecec0`, and this page is the
 shape every product writes, so one reader reads them all. The reference folds are this contract's
-[`src/ops-digest.ts`](../../src/ops-digest.ts) with its vectors; their errors on inputs no digest holds (a list that
+[`src/ops-digest.ts`](../../src/ops-digest.ts) with its vectors; it imports `foldPath` from
+[`src/source-rules.ts`](../../src/source-rules.ts), so a copy of it needs `src/source-rules.ts` beside it; their errors on inputs no digest holds (a list that
 is not an array, an item that is not an object, a `from` or `day` that is not a string) are the reference's choice,
 not this page's rule. This page makes no claim about any product's code; what each product's code was read to do, at a
 date, is in the CT-219 handoff.

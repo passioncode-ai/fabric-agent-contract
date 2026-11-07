@@ -595,6 +595,9 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
     // A provider key keeps the short message.
     const key2 = ["gh", "p_", "ABCDEFGHIJKLMNOPQRSTUV"].join("");
     expect(evaluateSemanticRules("service-descriptor", withFolders([{ dir: key2, source: "app" }])).filter((f) => f.code === "FAC-SEM-168").map((f) => f.message)).toEqual(["a dir is shaped like a credential; it names a folder, never a value"]);
+    // A dir shaped only as a JWT (no provider prefix, no long run) keeps the short message too: `hasJwt` decides it.
+    const jwt = ["ey", "J", "abc", ".def", ".ghi"].join("");
+    expect(evaluateSemanticRules("service-descriptor", withFolders([{ dir: jwt, source: "app" }])).filter((f) => f.code === "FAC-SEM-168").map((f) => f.message)).toEqual(["a dir is shaped like a credential; it names a folder, never a value"]);
   });
 
   it("names a duplicate dir only when it is printable ASCII", () => {

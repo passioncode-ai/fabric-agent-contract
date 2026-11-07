@@ -516,7 +516,9 @@ function readAsUrlRead(head: string): boolean {
 /** The detector's URL reading where `readAsUrl` admits the string, its argument reading otherwise (no URL parse), on a
  * string already cut to its head. */
 const urlReadingRead = (read: string): boolean => (readAsUrlRead(read) ? secretUrl(read) : secretArgument(read));
-/** Only a provider key's or a JWT's shape: a board thread's id is a long mixed run by design. */
+/** Only a provider key's or a JWT's shape: a board thread's id is a long mixed run by design. Its one caller admits
+ * only an `OPAQUE_ID` (no dot), which a JWT never is, so the JWT test is a defence for a wider id form, not a live
+ * branch today. */
 const keyShaped = (text: string): boolean => {
   const read = head(text);
   return hasJwt(read) || SECRET_VALUE.test(read);

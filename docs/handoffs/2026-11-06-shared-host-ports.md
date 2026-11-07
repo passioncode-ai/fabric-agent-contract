@@ -575,7 +575,8 @@ This block is byte-identical in `docs/handoffs/2026-11-03-source-manifest.md` (D
 Rule: each lander checks after its own write, so whichever lander finishes second sees the
 other's result; the edit depends on the text, so a second run changes nothing.
 
-The clause sits at `knowledge/authority.md:115` and `:128` (PR #628). From: "counting `foreign`
+The clause sits twice in `knowledge/authority.md` (PR #628; lines 115 and 128 at `d2a6d9f4`, which
+move when the knowledge base's main is merged in, so the clause check finds them by text). From: "counting `foreign`
 and `foreign-user` is proposed for FD's watcher in contract DEC-0154". To: "counting `foreign`
 and `foreign-user` is owed by FD's watcher under contract DEC-0154" (no inner parentheses: the
 clause sits inside a bracket that closes right after it).
@@ -642,7 +643,7 @@ PR merges, the knowledge base says "proposed" for an accepted DEC-0154; in the o
 knowledge base names a DEC-0154 the contract's main does not carry yet.
 
 Withdrawal: if DEC-0154 is withdrawn instead of accepted, its withdrawer files a knowledge-base
-row to drop the "proposed for FD" clause from `authority.md:115` and `:128`; neither lander
+row to drop the "proposed for FD" clause from both places in `authority.md`; neither lander
 edits it.
 
 ## Open

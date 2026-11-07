@@ -502,7 +502,15 @@ source, what never travels with it, the check before a source export, and how a 
   false for optional and store slots) answered as decided in item DP: `service.md` names each missing required slot,
   source.md names `ENOTDIR`, drops round 76's root example (a non-UTF-8 name directly in the root is always outside
   the source and skipped), qualifies the slot name by the 64-entry cap and names `excluded-by-fold` as the exception
-  to `isSourcePath`; a fifth landing row candidate on a neutral home name before punctuation; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  to `isSourcePath`; a fifth landing row candidate on a neutral home name before punctuation; round 78 at `d9ffe3f5`,
+  after the merge with main at `b963d6a6` (not clean: unit PASS, its risks a JWT-only dir no test pinned and
+  `keyShaped`'s JWT test unreachable behind `OPAQUE_ID`; product FAIL, CT-194's row still paused, the Status claiming a
+  `$comment` change DEC-0153 already made, ops-digest.md not saying the reference imports `src/source-rules.ts`; seam
+  FAIL, the same import and the order-1 measurements stale after the merge) answered as decided in item DQ: CT-194's
+  state restated, the Status and the CT-109 bullet saying the `$comment` came with DEC-0153, ops-digest.md naming the
+  import, the order-1 measurements dated and restated, a JWT-only dir test, `keyShaped`'s comment, the clause named by
+  text in the shared block, the landing rows from CT-254, the three 2026-11-07 dates and the Annotated line's date set
+  at landing, PR #628's item 9 pointing to CT-250, and DEC-0152's adjacent backlog rows; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -1536,7 +1544,8 @@ remaining steps, in order:
    tests (`test/channel-agent.test.ts` near its lines 1003 and 1184 in round 62) and the two ops-digest tests, re-measured
    on that tree, and nothing else is red; hosted CI on main should be green since PR #245 (run
    42139472645 on its branch).
-5. Make the acceptance edit on the PR branch, as DEC-0147 did (DEC-0149's status line, CT-194 done, this handoff's
+5. Make the acceptance edit on the PR branch, as DEC-0147 did (DEC-0149's status line, the date of the Annotated line
+   under DEC-0153 that says DEC-0149 has landed set to the landing date, CT-194 done, this handoff's
    status and the `docs/handoffs/README.md` row); then run the merge gate (`pnpm run check`, each part's exit code
    read) on that head, with its output in the PR. That head is the one that merges; nothing merges before this step.
 6. Pair PR #628 only with a contract head that carries the same round of the readings (the round named in DEC-0149's
@@ -1545,7 +1554,10 @@ remaining steps, in order:
    First re-measure the knowledge base's PR #628 (CT-211's amendment) against the knowledge base's main (`80d46916` at
    round 75, merged into the PR as `5bec3daf`): if it is behind, merge main into it (never a rebase or a force-push),
    keeping main's item 8 as main has it and the PR's item 9, and set the round named in RM-36's "Restated 2026-11-05"
-   line to the landing round. The order of the two merges is mandatory (round 65, CJ and CL): the contract PR first,
+   line to the landing round. The knowledge base's main since `80d46916` holds `authority.md`'s "Access levels"
+   (operator, 2026-11-06), which names no exception for a source hand-over: add to PR #628's item 9 that whether a
+   caller's access level stands as the operator's word for a hand-over is decided by the contract's CT-250 with the
+   operator, and that until then only the operator's own word for the act does. The order of the two merges is mandatory (round 65, CJ and CL): the contract PR first,
    then PR #628 straight after, one after the other in the same landing session, since PR #628 points at `service.md`'s
    definition of unavailable and at `source.md#handing-over`, which the contract's main carries only once the contract
    has landed. If main moved after step 5, merge it into the contract PR and re-run the merge gate before merging it.
@@ -1579,25 +1591,27 @@ remaining steps, in order:
    operator's (GitHub Support).
 
 At landing, write DEC-0149's merge date into source.md's line paragraph where it says "on its merge date, written here
-at landing" (and in DEC-0149 item 12's round-45 sentence). At landing, file a backlog row (an id above the highest in use or
+at landing" (and in DEC-0149 item 12's round-45 sentence), and set the same merge date in the three lines the merge
+with main wrote as 2026-11-07: the Annotated line under DEC-0153 that says DEC-0149 has landed, CT-209's "done at
+DEC-0149's landing" and CT-224's "DEC-0149's lander confirmed it exists". At landing, file a backlog row (an id above the highest in use or
 leased at landing, on main and on every open branch, this branch's own CT-244 included, re-measured then: CT-227 is
-main's since `1c141418`, DEC-0154's branch holds CT-228 to CT-243 (round 75, re-measured at landing), and this branch holds CT-244, which keeps its id,
-so this row is CT-245 or above, re-measured) to inventory the personal agent
+main's since `1c141418`, DEC-0154's branch holds CT-228 to CT-243 (round 75, re-measured at landing), this branch holds CT-244, which keeps its id,
+and main holds CT-250 to CT-253 since `40a0ddb8`, so this row is CT-254 or above, re-measured) to inventory the personal agent
 homes, and any copy of them within the operator's estate (private mirrors, second private repositories), that people
 outside the operator can read, for the operator to review: information, not a gate, since access
-the operator gave before the rule stands as the operator's own act (DEC-0149 item 12, round 44). At landing, also file a backlog row under the next id above that one (CT-246 or above, re-measured), re-measured the
+the operator gave before the rule stands as the operator's own act (DEC-0149 item 12, round 44). At landing, also file a backlog row under the next id above that one (CT-255 or above, re-measured), re-measured the
 same way: "`unchecked` covering a credential finding exits 0
 (probe)", its evidence the round-35 probe (a manifest listing its own key-holding file under `unchecked` exits 0 under
 `--kind source-tree`, exit 1 without that entry), asking the checker to refuse such an entry. The lander writes the enforcing row's CT id
 into SCN-054 step 3, where it says the enforcing row is filed at landing. At landing, file a third backlog row under
-the next id above that one (CT-247 or above, re-measured the same way): "Deterministic timeout tests for
+the next id above that one (CT-256 or above, re-measured the same way): "Deterministic timeout tests for
 validate-cli's ignored and staged listings", its evidence the two timeout branches at `src/validate-cli.ts` lines 779
 and 790, whose coverage depends on how fast the stub Git answers in the tests "walks the folder, saying why, when
 git does not answer in time" and "walks with a note when the gitlink listing times out or cannot run" in
 `test/validate-cli.test.ts`, named by title since line numbers move (round 68, DA) (the tests stay green either way; the full run covers 774 of 775 branches of that file, above its
 floor, and Windows has no floor), and its decision a test seam beside `gitLimits` (`src/validate-cli.ts` line 644)
 that answers `ETIMEDOUT` to a chosen call; the code is not changed in this landing (round 65, item CN). At landing,
-file a fourth backlog row under the next id above that one (CT-248 or above, re-measured the same way): "Decide
+file a fourth backlog row under the next id above that one (CT-257 or above, re-measured the same way): "Decide
 whether Fabric Dashboards counting a degraded continuation, or a `down` within the 15-minute calm, counted toward
 the 15 minutes from the episode's first `down` look, conforms", its sources fabric-dashboards main `a0bc160`
 `src/core/outage-alerts.ts` lines 112 to 129 and 156 to 160 and the rule
@@ -1690,7 +1704,8 @@ the failure message at 15 minutes, naming that source). The phrase each positive
 prints 0 exits with code 1, as `grep -c` does when nothing matches, so do not run them under `set -e` (round 67,
 CX).
 
-**Order 1: DEC-0154 lands first, DEC-0149 second.** DEC-0149's landing changes the first sentence's subject ("Fabric
+**Order 1: DEC-0154 lands first, DEC-0149 second.** This is the order that happened: DEC-0154 landed on 2026-11-07,
+and the merge at `b963d6a6` made the edit described here. DEC-0149's landing changes the first sentence's subject ("Fabric
 Dashboards' watcher" becomes "A watcher") and its list of states ("`down`, not merely `degraded`" becomes "`down`,
 `foreign` or `foreign-user`, not merely `degraded`") and adds the second sentence with its clause on `foreign` and
 `foreign-user`. The landed text:
@@ -1744,8 +1759,10 @@ and 1 with a line break before "(`down`", and 1 and 1 with one before "unavailab
 three checks print 1, 0 and 0; on the same text with the subject still Fabric Dashboards' watcher they print 1, 1 and
 0; with the clause on what DEC-0154 owes added too early, 1, 0 and 1; and DEC-0154's later edit of order 2's landed
 text gives order 1's text word for word (its line breaks may differ), where order 1's checks print 1 and 0. On this
-branch's `service.md`, before the landing, order 1's checks print 0 and 1, and order 2's 0, 1 and 0 (DEC-0149's
-sentence, which the landing changes, holds the phrase across two lines). After that one edit `relay.md`'s
+branch's `service.md` before the merge at `b963d6a6`, order 1's checks printed 0 and 1, and order 2's 0, 1 and 0
+(DEC-0149's sentence, which order 1's edit changed, held the phrase across two lines); since `b963d6a6` the branch
+carries order 1's landed text: order 1's checks print 1 and 0, and order 2's 0, 0 and 1, so the landing makes no
+edit of its own there. After that one edit `relay.md`'s
 machine-report paragraph and `conformance.md`'s watcher row follow `service.md` by themselves: since round 63 they name
 no state and point at the definition in `service.md`. Every head here is re-measured at landing.
 
@@ -1757,7 +1774,8 @@ This block is byte-identical in `docs/handoffs/2026-11-03-source-manifest.md` (D
 Rule: each lander checks after its own write, so whichever lander finishes second sees the
 other's result; the edit depends on the text, so a second run changes nothing.
 
-The clause sits at `knowledge/authority.md:115` and `:128` (PR #628). From: "counting `foreign`
+The clause sits twice in `knowledge/authority.md` (PR #628; lines 115 and 128 at `d2a6d9f4`, which
+move when the knowledge base's main is merged in, so the clause check finds them by text). From: "counting `foreign`
 and `foreign-user` is proposed for FD's watcher in contract DEC-0154". To: "counting `foreign`
 and `foreign-user` is owed by FD's watcher under contract DEC-0154" (no inner parentheses: the
 clause sits inside a bracket that closes right after it).
@@ -1824,7 +1842,7 @@ PR merges, the knowledge base says "proposed" for an accepted DEC-0154; in the o
 knowledge base names a DEC-0154 the contract's main does not carry yet.
 
 Withdrawal: if DEC-0154 is withdrawn instead of accepted, its withdrawer files a knowledge-base
-row to drop the "proposed for FD" clause from `authority.md:115` and `:128`; neither lander
+row to drop the "proposed for FD" clause from both places in `authority.md`; neither lander
 edits it.
 
 ### DEC-0153 is on main: the steps of this landing's merge
@@ -1873,7 +1891,9 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
 - `docs/backlog.md` (against all four siblings) and `docs/handoffs/README.md` (against DEC-0150 and DEC-0151)
   conflict as appends at the tail: keep both sides; the merged backlog tail is kept in id order, whatever main holds at the merge
   (re-measure at landing; CT-200 to CT-225 on main's head `1016f0ec`, re-measured in round 51); the handoffs index is newest first, so at each merge the later-landing branch's row goes above: DEC-0149's row stays
-  on top of `docs/handoffs/README.md`, with CT-227's edited text of DEC-0153's row kept (one DEC-0153 row).
+  on top of `docs/handoffs/README.md`, with CT-227's edited text of DEC-0153's row kept (one DEC-0153 row). Against
+  DEC-0152 (`d760f756`) the backlog also conflicts at adjacent rows, its CT-217 against this branch's CT-218: keep each
+  side's own row.
   DEC-0151's edited files also include `src/connections.ts` (a comment) and `docs/specification/conformance.md` (the
   secret-shape reference row). DEC-0150's small edits to `src/validate-cli.ts`
   and `test/validate-cli.test.ts` merge cleanly beside this branch's.
@@ -1902,9 +1922,9 @@ the sqd-fields branch edits `schemas/support-quality-daily.schema.json` but adds
   (`src/source-rules.ts`) is the fourth home-path boundary as soon as DEC-0149 is on main, and DEC-0153 adds none
   (`FAC-SEM-167` and `FAC-SEM-168` reuse `hasHomePath`). This branch already rewrites every copy that counts the
   boundaries: the scope comment in `src/activity-rules.ts`, activity.md's "Its scope (CT-109)", `devices.md`'s check-in
-  paragraph, `proposals.md`'s boundary paragraph, `src/proposal-rules.ts`'s scope comment, the
-  `schemas/device-common.schema.json` `$defs.detail.$comment`, and the backlog's CT-109 row (which names the five places that count the boundaries and the `$comment`'s
-  pointer). The `$comment` is count-free and byte for byte DEC-0153's line at `cc1fc853` (pointing to the scope list in
+  paragraph, `proposals.md`'s boundary paragraph, `src/proposal-rules.ts`'s scope comment and the backlog's CT-109 row (which names the five places that count the boundaries and the `$comment`'s
+  pointer). The `schemas/device-common.schema.json` `$defs.detail.$comment` came with DEC-0153, so this landing leaves
+  that file unchanged: it is count-free and byte for byte DEC-0153's line at `cc1fc853` (pointing to the scope list in
   `src/activity-rules.ts`, ending "Changing any of them is a decision."), so both branches carry the same line and the
   second landing has no conflict there; the scope comments in `src/activity-rules.ts` and `src/proposal-rules.ts` end
   with the same sentence on both branches, this one naming `SOURCE_HOME_PATHS` as the fourth boundary before it. Checks on the landed tree: `grep -c SOURCE_HOME_PATHS src/activity-rules.ts docs/specification/activity.md`

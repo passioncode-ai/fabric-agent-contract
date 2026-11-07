@@ -9143,14 +9143,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   nobody changes it; round 72 not clean: DEC-0150's Status form, "the same words"; round 73 not clean: who runs the
   check after both land; round 74 clean, the first since round 63, at `b714bceb`; round 75 not clean: the knowledge
   base's watcher lead, a new conflicting file, so the count of clean rounds starts again; round 76 not clean: the
-  dashed home form, the knowledge base's messages; round 77 not clean: `ENOTDIR`, the required-slot wording),
+  dashed home form, the knowledge base's messages; round 77 not clean: `ENOTDIR`, the required-slot wording; round
+  78, after the merge with main at `b963d6a6`, not clean: CT-194's state, the `$comment`, the ops-digest import, fixed by
+  item DQ),
   cited by round number because their heads were on the review branch, which is not
   kept at landing, are answered here as the coordinator
   decided them. Additive: a new schema
   (`fabric-source.schema.json`), three new kinds (`source-manifest`, `source-tree`, `source-package`), five new codes
   (`FAC-SEM-156` to `FAC-SEM-160`; `FAC-SEM-161`, reserved with them, is not used) and a new vector file; no existing
-  schema's validation, kind, code or vector changes (`device-common.schema.json`'s `$defs.detail.$comment` changes,
-  which is not normative).
+  schema's validation, kind, code or vector changes (`device-common.schema.json`'s `$defs.detail.$comment`, count-free,
+  is DEC-0153's line, on main byte for byte, so DEC-0149 leaves that file unchanged).
 - **Context:** the operator asked that agents can be handed over as source and that a transfer happens only by their
   wish (CT-194, relayed by Fabric `2af39c53` and a personal agent's request `99221f81`). The research report
   [agent portability](reports/2026-10-27-agent-portability/README.md) set out the options (§5) and twelve questions (§6);
@@ -9810,7 +9812,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   nobody changes it; round 72 not clean: DEC-0150's Status form, "the same words"; round 73 not clean: who runs the
   check after both land; round 74 clean, the first since round 63, at `b714bceb`; round 75 not clean: the knowledge
   base's watcher lead, a new conflicting file, so the count of clean rounds starts again; round 76 not clean: the
-  dashed home form, the knowledge base's messages; round 77 not clean: `ENOTDIR`, the required-slot wording),
+  dashed home form, the knowledge base's messages; round 77 not clean: `ENOTDIR`, the required-slot wording; round
+  78, after the merge with main at `b963d6a6`, not clean: CT-194's state, the `$comment`, the ops-digest import, fixed by
+  item DQ),
   cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.
 
