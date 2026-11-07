@@ -10198,13 +10198,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      DEC-0126), which the reader acts on within its scope: the answer reports, acts on nothing else the participant was
      not already entitled to do, carries no secret, and names a decision the participant may not make as what blocks it.
   6. **A responder's request (SA-6).** A participant's reply answers a `queued` request and an `answered` request is
-     never claimed, so while the capability's slot is `active`, `stale`, or `absent` at a generation of 1 or more, a
-     session that is not its holder sends no reply: it leaves the request queued for that service, tells its person or
-     asks the operator, and ends. The holder gives the state in the turn it claims the request (a `com.progress` note or
-     a fenced reply) and settles it with `com.accept`, then `com.complete`. Only at `absent` generation 0 does a session
-     answer, once, with what SA-2 asks or with why it cannot take the request now; a session Fabric starts on the
-     request to claim it (CT-215) is the holder. A request left to a responder that has not claimed it yet hears nothing
-     until the claim: the one wait the rule leaves.
+     never claimed, so a session that can enroll on the capability's slot enrolls and takes the request as its holder;
+     a session that does not hold the slot does no work on it and asks the operator, sends no reply while the slot is
+     `active`, `stale`, or `absent` at a generation of 1 or more (or its generation is not shown), and at `absent`
+     generation 0 one session replies once that it cannot take the request now and why. The holder gives the state in
+     the turn it claims the request (a `com.progress` note or a fenced reply) and settles it with `com.accept`, then
+     `com.complete`. A session Fabric starts on the request (CT-215) is the holder only once its `com.enroll`
+     succeeds. A request left to its service hears nothing until a holder claims it, or until its deadline expires it:
+     the one wait the rule leaves.
   The descriptions of `com.reply` and `com.enroll` (project-comms.md's receipts, `comms-reply.schema.json`,
   `comms-enroll.schema.json`) say so, and [conformance](specification/conformance.md#clients-and-readers) gains a
   board client's row.
@@ -10225,11 +10226,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and fails only the board client's row. Read on 2026-11-07, the consumers already carry the rule: Fabric (main
   `db3fbe0f`) hands every session SA-2 and SA-3 through `fabric_whoami` since 0.3.16, and its `com.enroll`
   description and session rules send no reply while the slot is `active`, `stale`, or `absent` at a later generation
-  and one decline at `absent` generation 0 (its commit `12d57bdd`, the adapter's FAA-231), which is SA-6 as decided
+  and one decline, no work and a question to the operator at `absent` generation 0 (its commit `12d57bdd`, the
+  adapter's FAA-231 and FAA-241), which is SA-6 as decided
   here; the Fabric Agent Adapter (main `a248613e`, FAA-205, FAA-231, FAA-241) says the same in its working-with-fabric
   skill; the knowledge base's agents-first page (fabric-workspace `7937722a`, items 3 to 5) states the rule for every
   agent. Each re-reads its text against SA-1 to SA-6 at its next pin; every other board client is bound by the board
-  client's row from this merge. On-demand sessions (CT-215) claim before they answer, so SA-6 keeps their requests
+  client's row from this merge. An on-demand session (CT-215) is the holder once its `com.enroll` succeeds and otherwise follows the
+  non-holder rule, so SA-6 keeps its requests
   claimable. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/project-comms.md` (the amendment line, the section *Answering in
   the same turn*, the `com.reply` and `com.enroll` paragraphs of *Receipts*), `schemas/comms-reply.schema.json` and
