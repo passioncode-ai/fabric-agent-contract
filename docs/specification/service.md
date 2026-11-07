@@ -695,15 +695,18 @@ an HMAC under a key in an owner-only file; Switchboard reported on thread `1fe66
 How the owner is told, per system (the client looks at the server end of its own connection: local address
 `127.0.0.1:<port>`, remote address its own ephemeral port; where a source lists only listeners, the listener on the port).
 The check is made on the open connection, right before the credential is written to it: a list of listeners read
-before connecting, or kept from an earlier look, says nothing about who accepted this connection. Whatever the source, the listener that counts is the one on the connection's local address
-(`127.0.0.1` or `::1`); one on the wildcard address counts only when none listens there, and listeners of different OS
-accounts there are an owner that cannot be told: this account's listener on `0.0.0.0:<port>` beside another account's
-on `127.0.0.1:<port>` does not make the port this account's (CT-254):
+before connecting, or kept from an earlier look, says nothing about who accepted this connection. Where a listener is
+chosen (a source that lists only listeners, or Linux's row with inode 0 below), the listener that counts is the one on
+the connection's local address (`127.0.0.1` or `::1`; in `/proc/net/tcp6` a connection to `127.0.0.1` that a dual-stack
+socket accepted reads `::ffff:127.0.0.1`); one on a wildcard address (`0.0.0.0`, or `::` that also accepts IPv4)
+counts only when none listens on the local address, and listeners of different OS accounts on the address that counts
+are an owner that cannot be told: this account's listener on `0.0.0.0:<port>` beside another account's on
+`127.0.0.1:<port>` does not make the port this account's (CT-254):
 
 | System | Source |
 |---|---|
 | macOS | the TCP socket table, which names the owning process even for another account's socket: `netstat -anv -p tcp`, or `sysctl net.inet.tcp.pcblist64` read in the process; the owning process's uid from the process table. A list of this account's own sockets (`lsof -u` of the current user) finds an own listener, which counts only by the rule above, but alone it cannot tell an empty port from another account's, so when it finds none the socket table decides |
-| Linux | the `uid` column of `/proc/net/tcp` and `/proc/net/tcp6`: the server end of the client's own connection when its inode is not 0 (the connection was accepted, and the row carries the accepting process's uid); when its inode is 0 (not yet accepted, the uid there may read 0), the listening entry (state `0A`) on the port, chosen by the rule above. A uid 0 read from a row with inode 0 is never a root owner (CT-254) |
+| Linux | the `uid` column of `/proc/net/tcp` and `/proc/net/tcp6`: the server end of the client's own connection when its inode is not 0 (the connection was accepted, and the row carries the accepting process's uid); when its inode is 0 (not yet accepted, the uid there may read 0), the listening entry (state `0A`) on the port, chosen by the rule above. A uid 0 read from a row with inode 0 is never a root owner; no row for the connection (a client in another network namespace, for example), or a row with inode 0 and no listening entry on the port, is an owner that cannot be told (CT-254) |
 | Windows | `GetExtendedTcpTable` for the owning process id, then that process's token user, equal to the current user's; a process that cannot be opened is an owner that cannot be told |
 
 The well-known `process.pid` is never proof: any listener can name any pid.
