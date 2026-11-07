@@ -115,8 +115,8 @@ uninstall when it can be; a reader that does not find `lifecycle.app` treats the
 app, because its live origin changes from start to start: the app keeps its own liveness file, rewritten on every start
 and removed on quit, with its origin and process id. A kit that shows an "Open in <app>" button reads the descriptor;
 a caller that sends anything reads the liveness file and checks the process, and before any credential the
-listener's owner (HA-2, [Several OS accounts on one computer](#several-os-accounts-on-one-computer); DEC-0154,
-proposed). An app's descriptor without an origin declares no port for `FAC-SEM-010`. Vectors: [`fixtures/vectors/app-descriptor.json`](../../fixtures/vectors/app-descriptor.json).
+listener's owner (HA-2, [Several OS accounts on one computer](#several-os-accounts-on-one-computer);
+DEC-0154, proposed). An app's descriptor without an origin declares no port for `FAC-SEM-010`. Vectors: [`fixtures/vectors/app-descriptor.json`](../../fixtures/vectors/app-descriptor.json).
 
 | Platform | Services directory |
 |---|---|
@@ -670,10 +670,12 @@ an HMAC under a key in an owner-only file; Switchboard reported on thread `1fe66
   `foreign` (`FAC-SEM-009`), then the well-known `status`. "`foreign-user` is decided before the well-known document
   is read" means it outranks any answer, `ready` included, and no credential is sent to read one. A host's own states
   that the listener does not decide may come before this order, provided no answer is read as the service's: an
-  invalid descriptor, a conflict over an `id.instance` or a port, its own stop or start in flight, a service its
-  supervisor stopped (Fabric Dashboards at `a0bc160`, `packages/service-host/src/state.ts` lines 31 to 70 and `look.ts` lines 91
-  to 105). A host's own further states (a second copy shown as `duplicate`, under [One copy](#one-copy)) come after
-  these.
+  invalid descriptor, a conflict over an `id.instance` or a port, its own stop or start in flight (Fabric Dashboards
+  at `a0bc160`, `packages/service-host/src/state.ts` lines 31 to 39, and `look.ts` lines 91 to 105, which skip the
+  probe then). A service its supervisor stopped is not one of them: a host shows that only when nothing answers on the
+  port, in place of `down` (the same `state.ts`, lines 67 to 69, and Fabric Dashboards' vector "another program
+  answering comes before launchd saying it is off"). A host's own further states (a second copy shown as `duplicate`,
+  under [One copy](#one-copy)) come after these.
 - A reader that meets a state it does not know treats it as not ready: it sends nothing and shows the service as not
   serving. A watcher counts `foreign` and `foreign-user` as unavailable, as it counts `down`: the service serves nothing.
 

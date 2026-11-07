@@ -9754,7 +9754,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and seam found breaks, W79 (a) to (j)); round 16 at `9161796d` was not clean (unit passed; product and seam found
   breaks, W80 (a) to (c), with risks W80 (d) to (g)); round 17 at `832dc557` was clean on all three tiers; round 18
   at `832dc557` was not clean (unit and seam passed; product found one break, W81 (a), with risks from both rounds,
-  W81 (b) to (h)); their batches are folded in (Source). A reference module and vectors, one optional schema
+  W81 (b) to (h)); paused 2026-11-06 by the operator's relay and resumed 2026-11-07 by the operator's own word, with
+  W82 (two adoption facts from the reconciliation answers); round 19 at `63c622d4` was not clean (unit passed;
+  product found two breaks, seam one, W83); round 20 at `3db473d0` was not clean (product found two breaks, seam two,
+  W84); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9947,7 +9950,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     ports 54320 to 54329 are fixed, to be recorded per account) open; CO-514 (its MCP server checks only that the hub's
     recorded pid is alive) open; CO-515 (a restore carries no node identity, CT-233) open.
   - Switchboard: its control channel's HMAC proof done; SB-273 (the proxy refuses a peer of another OS account) and
-    SB-274 (the same on Windows) reported done in 0.7.18; SB-269 (rotation) filed; SB-278 (the port claim) waits for
+    SB-274 (the same on Windows) reported done in 0.7.18; SB-269 (rotation) reported shipped in 0.7.18 too; SB-278 (the port claim) waits for
     DEC-0154's tag.
   - Fabric Dashboards: listens on no TCP port (an owner-only socket or named pipe), so item 1 does not apply to it;
     FD-156 (the owner check on macOS, 0.8.25) and FD-158 (`foreign-user`, 0.8.26, commit `53a62f9`) reported done;
@@ -9983,8 +9986,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - The first organization server: VES-LOOPBACK-OWNER open: its app grant sends no bearer on loopback, and its
     `onboard --check` and its administrator's agents do not check the listener's owner yet; the `down` counts in the
     node summaries it reads can rise for item 2's reasons. Its `org.id` has 100 random bits today (its reconciliation
-    answer, board message `922e6fed`), so it does not turn the host label on until it issues ids of at least 128 random bits, for an organization whose
-    `org.id` it issued with fewer bits too.
+    answer, board message `922e6fed`), so it does not turn the host label on until it issues ids of at least 128 random
+    bits (item 4).
   - The PassionCode launcher: listens on no port; PC-152 (the owner check in its doctor) open.
   - A Fabric server that reads host states through Fabric Dashboards, in its own words: it listens on no port, sends no
     token to loopback, and reads `foreign-user` and any state it does not know as not ready (its 0.17.0 and 0.18.0).
@@ -10027,7 +10030,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   services), `docs/specification/interop.md` (a host name), `docs/specification/peer-share.md` (another server),
   FAC-SEM-143's row (PL's list of local hosts); a collector of operations digests in the same OS account:
   `docs/specification/ops-digest.md` (OD-9 and its bullets), `docs/specification/service.md`'s ops-digest pointer
-  (its line 151), `schemas/service-ops-digest-extension.schema.json`'s title, `docs/specification/conformance.md`'s
+  (the Descriptor section's ops-digest bullet), `schemas/service-ops-digest-extension.schema.json`'s title, `docs/specification/conformance.md`'s
   two digest rows, `docs/specification/README.md`'s row and `CONTEXT.md`'s Operations digest; a meter in the hub's
   OS account (`delegation.md`), the enrolling account's harness (`node-summary.md`), SH-2's POSIX system
   (`session-handoff.md`); `fixtures/catalogue.json` (the host-label fixtures' rows), the spec `docs/evidence/specs/2026-11-06-shared-host-gaps.md` and the handoff
@@ -10160,6 +10163,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   registers keeping their words; the open rows CT-04, CT-70 and CT-185 reworded and the sweep extended to open
   backlog rows; HA-2's order scoped to states read from the listener, a host's own states before it; the glossary's
   host label; Fabric Dashboards' FD-159 and Switchboard's SB-278; three descriptions; the release step and the
-  annotated lines at acceptance; CT-231's and CT-232's readers; the markers) is folded in; the two UI lines passed the operator's copy check
+  annotated lines at acceptance; CT-231's and CT-232's readers; the markers) is folded in; W82 (the first
+  organization server's 100-bit `org.id`, the adapter's T0 reading and FAA-227's priority) is folded in; round 19 at
+  `63c622d4` was not clean, and W83 (CT-228's state after the resume, CT-231's reader named without a line number, the
+  North Star step, the cheap risks) is folded in; round 20 at `3db473d0` was not clean, and W84 (a supervisor's stop
+  shown only when nothing answers, as Fabric Dashboards does; a named bullet in place of a line number; the split
+  marker rejoined; the North Star step widened to every page statement the landing makes false) is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

@@ -255,6 +255,20 @@ Proposed DEC on its own branch, and files the rest.
   annotated lines for DEC-0015, DEC-0057, DEC-0123 and DEC-0153 with their check; the TLS clause of the
   Consequences; CT-231 names the node and hub readers "on the same machine", CT-232 the whole-harness readers; the
   digest rows cite DEC-0154; `delegation.md`'s meter marked; the gap spec says CT-242 and CT-243 came later.
+- Paused 2026-11-06 by the operator's relay (board thread `eefa7959`), resumed 2026-11-07 by the operator's own word.
+  W82: the first organization server's 100-bit `org.id` (board message `922e6fed`) and the adapter's T0 reading of a
+  token-free loopback door with FAA-227 at P2 (board message `cdf28788`) in the adoption rows.
+- Round 19 at `63c622d4`: not clean (unit passed; product two breaks, seam one). Product: CT-228's state cell still
+  read paused; CT-231 cited `CONTEXT.md` line 830, which W81's own edit had moved. Seam: the knowledge base's North
+  Star page calls DEC-0154 "proposed, paused, not on main" and no step corrected it. W83 folded the three and the
+  cheap risks.
+- Round 20 at `3db473d0`: not clean (product two breaks, seam two). Product: the text said Fabric Dashboards places a
+  supervisor's stop before the order, while it shows that only when nothing answers (its `state.ts` lines 67 to 69,
+  its vector "another program answering comes before launchd saying it is off"); the affects list cited `service.md`
+  "its line 151", moved to 152 by W83. Seam: further North Star statements (gap row G22, the one-command project
+  line) and the release rows the landing makes false; W83's HA-2 pointer split a "proposed" marker across lines. W84
+  folded the four, the round's record into the Status, Source, Readings and README row, SCN-056's first step worded as
+  precedence, SB-269 reported shipped in 0.7.18, and FD-158's app event in the board step.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -417,18 +431,26 @@ Proposed DEC on its own branch, and files the rest.
   knowledge-base clause rule below says, for DEC-0154's lander. The check after both land runs only once DEC-0154's
   own knowledge-base PR for the clause has merged; when the clause check prints 0, or the PR is closed unmerged, it
   runs nothing.
-- **The North Star page.** Right after the merge, post on thread `eefa7959` the correction of fabric-workspace
-  `knowledge/north-star.md` (the coordinator edits that page): its two sentences that call DEC-0154 "proposed, paused,
-  not on main" read accepted, on the contract's main, with the date and the tag; HA-3 reads "no door admits a
-  loopback caller without a token unless it checks the peer's OS account". Check on the knowledge base's main once
-  the coordinator answers: `grep -c -E 'DEC-0154: proposed, paused|DEC-0154 is proposed, paused'` prints 0.
+- **The knowledge base's pages.** Right after the merge, post on thread `eefa7959` the corrections of
+  fabric-workspace `knowledge/` (the coordinator edits those pages), re-reading every statement of theirs about
+  DEC-0154 first (`grep -n -E 'DEC-0154|CT-23[0-9]|CT-24[0-3]' knowledge/*.md` on the knowledge base's main). At
+  `60c630db` they are: `north-star.md`'s two sentences that call DEC-0154 "proposed, paused, not on main" (accepted, on
+  the contract's main, with the date and the tag); its HA-3 ("on a computer with several accounts no door admits a
+  loopback caller without a token unless it checks the peer's OS account, and where guests reach loopback through a
+  forwarder none on TCP"); its gap row G22, which calls CT-232 "(branch, no PR)" and cites `devices.md:414` for the
+  `machine.mode` row (CT-232 open on the contract's main; the row by its name, the line moves); its line on the
+  one-command agent project, which "waits on DEC-0149 and DEC-0154" (only what it still waits on); and the contract's
+  release in `products.md` and `roadmap.md` (the new tag). Check on the knowledge base's main once the coordinator
+  answers: `grep -c -E 'DEC-0154: proposed, paused|DEC-0154 is proposed, paused|CT-232 \(branch, no PR\)|devices\.md:414|waits on DEC-0149 and DEC-0154'`
+  on `knowledge/north-star.md` prints 0.
 - **Release.** Right after the merge, an annotated tag `v0.1.0+<YYYY-MM-DD>` (`.2`, `.3` after the date for a second
   or third release that day) on the merge commit, once its gate and `pnpm vectors:check` passed, with a GitHub release
   whose notes list the decisions since the previous release ([versioning](../specification/versioning.md#releases)).
   Post the tag on thread `1fe66e6e`: Switchboard's SB-278 (the port claim) waits for it.
 - **The board.** Tell thread `1fe66e6e` the same day (Fabric Dashboards' FD-159 and Fabric's server build on it), and in
   that message ask Fabric Dashboards for a row that its watcher (FD-76's successor) counts `foreign` and
-  `foreign-user` as unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card only.
+  `foreign-user` as unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card and an
+  app event with a desktop notification (its `monitor.ts` lines 496 to 498), not to the operator channel's watcher.
   Ask in the same message that its card's own `foreign-user` line (its `i18n.ts:128`, its own wording today) use this
   decision's two lines or be checked against them, and that a line for an owner that cannot be told be added (part
   of FD-159).
@@ -619,6 +641,12 @@ copy of `DECISIONS.md` carrying the four lines, and 0 four times on this head. T
 the same once joined; the split-marker finder prints nothing; the shared block's Python count is 1. The SH-2 line is
 still the one added line with U+2014.
 
+After W84 the full gate did not run: the machine's 15-minute load stood near 90 (the threshold is 45). The UX lint,
+the documentation checks (markdownlint 0 errors), vectors (31 files), privacy (0 findings) and the docs-check,
+consistency, sources-ledger, delegation-sealed, page-links, local-channel and node-summary tests (334) passed. The
+split-marker finder prints nothing; `git grep -n proposed -- docs/specification/service.md | grep -c DEC-0154` prints
+13; the shared block is in the handoff once, byte for byte. The SH-2 line is still the one added line with U+2014.
+
 ## Next task
 
 The coordinator's next blind readings of DEC-0154 at this branch's head.
@@ -642,3 +670,7 @@ corrected it). W83 fixes the three, adds the North Star step to the acceptance s
 from the app descriptor and the connections row, SCR-20's host states first, main's CT-250 to CT-252 in the merge
 notes). Held for later rounds or rows: Windows order vectors for the host label, the low-uid sign-in account in the
 count, a same-account claim of another product in HA-1's free-port test, row 185's mapping to `down`.
+
+W84 at the next head: round 20's four breaks (a supervisor's stop placed as Fabric Dashboards places it, a named
+bullet for `service.md`'s ops-digest pointer, the split marker rejoined, the knowledge base's step widened) and its
+risks are folded in. Next: round 21 at that head, the full gate when the load allows.
