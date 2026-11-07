@@ -685,13 +685,13 @@ an HMAC under a key in an owner-only file; Switchboard reported on thread `1fe66
   serving. A watcher counts `foreign` and `foreign-user` as unavailable, as it counts `down`: the service serves nothing.
 
 How the owner is told, per system (the client looks at the server end of its own connection: local address
-`127.0.0.1:<port>`, remote address its own ephemeral port; where a source lists only listeners, the listener on the
-port):
+`127.0.0.1:<port>`, remote address its own ephemeral port; where a source lists only listeners, and always on Linux,
+the listener on the port):
 
 | System | Source |
 |---|---|
 | macOS | the TCP socket table, which names the owning process even for another account's socket: `netstat -anv -p tcp`, or `sysctl net.inet.tcp.pcblist64` read in the process; the owning process's uid from the process table. A list of this account's own sockets (`lsof -u` of the current user) finds an own listener, but alone it cannot tell an empty port from another account's, so when it finds none the socket table decides |
-| Linux | the `uid` column of the matching entry in `/proc/net/tcp` and `/proc/net/tcp6` |
+| Linux | the `uid` column of the listening entry (state `0A`) on the port in `/proc/net/tcp` and `/proc/net/tcp6`: the one on the connection's local address, else the one on the wildcard address; listeners of different uids there are an owner that cannot be told. Never the row of the client's own connection, which before the server accepts it can carry uid 0 and inode 0 and would read as a root owner (CT-254) |
 | Windows | `GetExtendedTcpTable` for the owning process id, then that process's token user, equal to the current user's; a process that cannot be opened is an owner that cannot be told |
 
 The well-known `process.pid` is never proof: any listener can name any pid.
