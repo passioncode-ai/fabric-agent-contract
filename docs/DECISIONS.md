@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0156` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0159` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -378,6 +378,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   responder; the operator who owns a Project may move an occupied slot to another authorized session as one fenced
   transition, after which the ordinary rules govern it; a session role is a claim, and a reported branch stays in its
   Project (whether it may feed an activity event's `git.branch` is CT-176's).
+- **Annotated (2026-11-08):** C5 amended by DEC-0158 (proposed) for the host alone: the host that serves its operator's
+  board may start an on-demand session for a request no responder takes, on by default with one switch; a client still
+  keeps no background helper and claims stay short tool bursts.
 - **Decision:** An opt-in extension `fabric-project-comms/0.1`. A Fabric host serves a
   board on which messages are addressed to a Project, and through a request to a capability of
   that Project. Identity comes from the authenticated endpoint and never from the payload. A
@@ -11131,3 +11134,81 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
   inputs; backlog CT-261.
 
+
+### DEC-0158: on-demand sessions, a board request no responder takes is answered by a session the host starts for it
+
+- **Date:** 2026-11-08
+- **Status:** Proposed. A rule set for the host that serves the board and for the session it starts (OS-1 to OS-7 in
+  [project comms](specification/project-comms.md#on-demand-sessions)); it amends C5 of DEC-0022 for the host alone and
+  adds no board tool, argument, field, state or refusal. `contractVersion` stays `0.1.0`.
+- **Context:** the operator decided on 2026-11-04 (Fabric's session `5d9bed98`, relayed on the board by the Fabric
+  project the same hour, thread `b2e5df1f`, announcement `42a41db8`) that when no agent of a Project is connected to take
+  a request, a new session of the machine's default agent starts in the Project's folder with every permission and all
+  the request's facts, does the work, reports, and ends, so no Project needs a session kept open, on Windows and on the
+  Mac alike. Fabric specified and built it (its specification `docs/evidence/specs/2026-11-04-on-demand-sessions.md`,
+  commit `7dce3758`; the dispatcher on by default since 0.3.16, `apps/desktop/src/shared/boardDispatch.ts`), with
+  Fabric Switchboard's `switchboard dispatch` (SB-247), Project Observatory's workflow packet (OBS-323) and the
+  adapter's `working-with-fabric` section for a started run (FAA-201). Fabric's specification leaves to this contract
+  the packet's shape, the run's lifecycle and the request's fate when a run dies, and asks it to record the change to
+  C5 ("no background helper by default", OQ-0008). Backlog CT-215 lists what the contract owes; this decision answers
+  it against Fabric's text.
+- **Decision:**
+  1. **Who starts one (OS-1).** Only the host that serves its operator's board, on the operator's own machine, in a
+     folder of the target Project, for a request of its own estate whose slot has no live holder, in a state a run can
+     take (`queued`, `claimed` with a lapsed attempt, `accepted` or `in_progress` with no live holder), with time left
+     before the deadline; at most one run per request at a time; one switch for the operator that stops new starts. C5
+     is amended for the host alone: a standing dispatcher on by default is the operator's choice; a client keeps no
+     background helper and claims stay short tool bursts.
+  2. **What a run is handed (OS-2).** References only: the request id, thread, Project, capability, deadline,
+     `run-ends-at`, the mandate as the request carries it (read only from a sender the board verified, MD-3) and the
+     exit contract. Never a secret, a message's text, a lease, an attempt, a fence or an absolute folder; keys by name.
+  3. **Knowing it is the run (OS-3).** The first prompt line `fabric-dispatch/1 workflow=… handoff=… request=…` and the
+     same three ids in `FABRIC_DISPATCH_WORKFLOW`, `FABRIC_DISPATCH_HANDOFF` and `FABRIC_DISPATCH_REQUEST`, both; the
+     environment alone never makes a session the run (a child inherits it); a line without the environment is a
+     quotation; an environment that disagrees with the line is said once in the thread and the session stops.
+  4. **Done (OS-4).** Enroll, claim, accept, begin an effect before acting outward, renew inside the lease, reply in
+     the thread, settle with `com.complete` (`completed`, or `failed_known` with the reason), then end, which releases
+     the slot; end at `run-ends-at` too, settling `failed_known` rather than leaving `accepted` when no later run could
+     start before the deadline. A refused `com.enroll` follows SA-6 (DEC-0152).
+  5. **A run that dies (OS-5).** The request keeps the state the extension gives it (`queued`, a lapsed `claimed`,
+     a held `accepted` continued only by a transfer, `in_progress` to `outcome_unknown` by `lost_result` when the next
+     holder takes the slot, settled only by an observed reconcile, DEC-0081); the host may start one more run, and after
+     two that ended without settling starts none and shows the request to its operator unchanged. An effect a run began
+     is never begun again without an observation: its idempotency key is recorded where the next run reads it and
+     reused for the same effect.
+  6. **No person in the run (OS-6).** The run never waits for a person, never answers an elicitation as one (a cancel
+     is neither the operator's decision nor a person's no), leaves another job's `input_required` unanswered and
+     settles `failed_known` naming it unless the mandate or a relayed decision covers that exact choice, names a human
+     step once and settles `failed_known`, and takes a source hand-over only as a decision with the exact target
+     (DEC-0149), never under the request's mandate.
+  7. **Slots and mandates (OS-7).** A run holds a slot only while it works, never takes one from a live holder, uses a
+     replacement only to continue a held request whose holder is gone (CT-175), carries the mandate appended to only
+     (MD-2), never extends it, and settles `failed_known` when it expires before the work is done (CT-205). Its outcome
+     is the host's record, never a request state, with no request text and no secret.
+- **Why:** the operator's word asked for exactly this, and the products have built it; without the contract's text the
+  run's lifecycle lives in four repositories' prose and each reads a dead run differently. Keeping the request's states
+  as the extension already defines them means a run that dies needs no new state, no new refusal and no host write:
+  the next run, or the owner, settles it through the operations every client already has. Settling `failed_known` at
+  a human step or a job's question keeps a request from waiting on a session that no longer exists, and the person
+  still sees the step in the thread.
+- **Alternatives considered:** (a) a new request state `dispatched` while a run works: rejected, it would change every
+  reader's state table for what is the host's record; (b) relaunching without limit until the deadline: rejected, two
+  empty runs already show the request needs a person (Fabric's choice (b) of 2026-11-04, which this contract's review
+  proposed); (c) letting the run keep the slot after it settles so it answers the next request: rejected, the operator
+  asked that no session be kept open, and a run that lingers is the helper C5 refused; (d) treating a cancelled
+  elicitation as the person's no in a run: rejected, there is no person, and C3.3 and DEC-0149 read a cancel as no
+  choice made.
+- **Compatibility:** additive for every board client: a run is an ordinary client of its Project. Fabric's dispatcher
+  (`7dce3758`) is read to meet OS-1 to OS-5 and OS-7 as its specification states them; what its 0.3.16 row CO-409 lists
+  as not yet built (board-event wakes, the `crash` hand-over reason, the mandate's carriage, `com.get` reading, the
+  time-out stop) are its own debts under this decision at its next pin. Fabric Switchboard's `switchboard dispatch`
+  passes the environment and the first line of OS-3. The adapter's `working-with-fabric` (FAA-201) owes OS-6 at its
+  next pin where it differs: a job's `input_required` and a human step settle `failed_known` and are named in the
+  thread. Project Observatory's workflow (OBS-323) carries the packet's references and, under OS-5, the begun effect's
+  idempotency key in a checkpoint. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/project-comms.md` (the amendment line and the section *On-demand
+  sessions*), DEC-0022 (an Annotated line), `docs/specification/conformance.md` (a row for the host that starts a run
+  and one for the run), `CONTEXT.md` (*On-demand session*), `docs/ux/scenarios.md` (SCN-025's alt path); backlog CT-215 (in
+  progress); the handoff `docs/handoffs/2026-11-08-on-demand-sessions.md`.
+- **Source:** the operator's word of 2026-11-04, relayed by the Fabric project (thread `b2e5df1f`, announcement
+  `42a41db8`); Fabric's specification at `7dce3758`; backlog CT-215.

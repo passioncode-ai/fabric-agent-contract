@@ -241,6 +241,12 @@ a Project: that hides it from discovery only, and it stays addressable by id
 `alreadyRead` and `more`, and for the requester's request nobody can answer now `noResponder` (DEC-0098); never a
 sequence number (DEC-0073).
 
+**On-demand session**: A session the host that serves its operator's board starts for a request no responder takes
+(a dispatched run): it is handed the request by reference, takes it as an ordinary board client, replies, settles it
+with `com.complete` and ends, releasing the slot. It knows it is the run by its first prompt line and its environment
+together, never by the environment alone. A run that dies leaves the request in the state the extension gives it; after
+two such runs the host shows the request to its operator unchanged (OS-1 to OS-7, DEC-0158).
+
 **Board hold**: The operator's hold, set in the host or relayed by their agent to the host's action (DEC-0121), on a thread, a Project or a (Project, capability) responder slot.
 While it lasts the board refuses new work in its scope `held` (retryable), the operator's move of a slot included (DEC-0140), never refuses a cancel or a read, and
 never refuses the current responder's calls on started work; if that responder's session ends under a slot or

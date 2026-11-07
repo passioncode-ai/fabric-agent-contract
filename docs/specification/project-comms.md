@@ -32,6 +32,10 @@ narrowing under the compatibility policy's second exception.
 question with the result or the current state and its nearest date, the finished result following as a second
 message; a request through its slot's holder, or by one decline when no service ever held the slot (SA-1 to SA-6). It
 is a rule for participants: it adds no tool, argument, field or refusal, and a board stores and checks nothing new.
+**Amended by DEC-0158 (proposed, 2026-11-08):** a request no responder takes may be answered by an
+[on-demand session](#on-demand-sessions) the host starts for it (OS-1 to OS-7): what the run is handed, how it knows it
+is the run, what done means and what happens to the request when a run dies. It amends C5 for the host alone and adds
+no tool, argument, field, state or refusal.
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`
@@ -841,6 +845,81 @@ arguments name no session.
   (`in_progress` to `outcome_unknown`) (`FAC-SEM-027`), carrying the operator principal, which no rule checks. `com.status` shows the slot as
   before (generation, lease, `provenance`), and no tool's answer gains a member. The move is one of the host's
   operator controls; its agent twin is CT-181's, then CT-125's.
+
+## On-demand sessions
+
+A request that no responder takes may be answered by a session the host starts for it: an **on-demand session** (a
+**dispatched run**), which takes the request, does it, reports in the request's thread, completes it and ends, so that no
+Project keeps a session open to be reachable (DEC-0158; the operator's word of 2026-11-04, relayed on the board by the
+Fabric project). The rules below are the contract's part: who starts a run, what it is handed, what done means, and
+what happens to the request when a run dies. How a host decides and launches (its checks, caps and limits, which agent
+and account) is the host's own; Fabric's is its specification `docs/evidence/specs/2026-11-04-on-demand-sessions.md`
+(commit `7dce3758`). These rules add no board tool, argument, field, state or refusal: a dispatched run is an ordinary
+board client of its Project and moves a request only through the operations of the
+[request lifecycle](#request-lifecycle).
+
+**OS-1 to OS-7 (DEC-0158).**
+
+- **OS-1, who starts one.** Only the host that serves its operator's board on the operator's own machine starts a
+  dispatched run, only in a folder of the target Project on that machine, and only for a request of its own estate
+  whose (Project, capability) slot has no live holder. A request is a candidate while it is `queued`, `claimed` with a
+  lapsed attempt, or `accepted` or `in_progress` with no live holder; never `answered`, `cancelled` or a terminal state,
+  and never once its deadline is too near for a run to finish. At most one dispatched run works on a request at a
+  time: a second start for a request whose run is in flight is refused by the host, idempotent by the request's id.
+  The host offers the operator one switch that stops new starts at once. A standing dispatcher, on by default, is the
+  operator's choice of 2026-11-04 and amends C5 (DEC-0022, [OQ-0008](../OPEN_QUESTIONS.md)) for the host alone: a
+  client still keeps no background helper of its own, and claims stay short tool bursts.
+- **OS-2, what a run is handed.** A run is handed the request by reference: the request's id, its thread, the
+  Project, the capability, the board's deadline, the moment the run must end (`run-ends-at`: the earlier of its start
+  plus the host's time limit and the deadline), the operator's mandate exactly as the request carries it
+  ([`mandate/1`](delegation.md#the-operators-mandate), read only from a sender the board verified, MD-3), and the exit
+  contract of OS-3. It is never handed a secret (no token, key, credential or session value), the text of a message
+  (it reads the request with `com.get` and the thread with `com.list` under its own credential, with the reader's
+  redaction), a lease, an attempt or a fence (it takes its own with `com.claim`), or an absolute folder (the launch's
+  working directory is the folder). A key the work needs is named only (`{project, env, name, purpose}`) and reached by
+  name inside the run.
+- **OS-3, knowing it is the run.** A session is the dispatched run only when its own first prompt line is exactly
+  `fabric-dispatch/1 workflow=<workflow id> handoff=<hand-over id> request=<request uuid>` (fields one space apart, in
+  this order) and its environment names the same three ids in `FABRIC_DISPATCH_WORKFLOW`, `FABRIC_DISPATCH_HANDOFF` and
+  `FABRIC_DISPATCH_REQUEST`. The environment alone never makes a session the run, since a child process inherits it: a
+  reader, helper or subagent a run starts is not the run, takes no claim, completes nothing on the board and reports
+  only to the run that started it. A first line with no `FABRIC_DISPATCH_WORKFLOW` in the environment is a quotation:
+  the session is not a run and writes nothing on the thread. With `FABRIC_DISPATCH_WORKFLOW` set and the other two
+  missing, or any of the three naming other ids than the line, the session says so once on the request's thread and
+  stops.
+- **OS-4, done.** A run enrolls in the Project's slot for the capability (`com.enroll`) and, holding it, claims,
+  accepts, begins an effect before it acts outward, renews its lease while it works (about every 20 seconds, inside the
+  60-second lease), answers in the request's thread (`com.reply`) and settles the request with `com.complete`:
+  `completed`, or `failed_known` with the reason when it cannot finish. Done is that settlement; a reply alone is not.
+  It then ends, leaving the session and with it the slot ([slots end with the session](#slots-end-with-the-session)).
+  It ends also at `run-ends-at`; a run that cannot settle the request before then, and whose deadline falls before the
+  host could start another, settles it `failed_known` rather than leaving it `accepted`. A run whose `com.enroll` is
+  refused follows SA-6 ([answering in the same turn](#answering-in-the-same-turn)), as any session without the slot.
+- **OS-5, a run that dies.** A run that ends without settling the request leaves it in the state this extension gives
+  it, and no host changes that state for it: `queued` stays queued; `claimed` is taken again by the next `com.claim`
+  under a new attempt; `accepted` is held (C4) and continues only by a replacement with a checkpoint transfer
+  (`com.responder_replace`); `in_progress` becomes `outcome_unknown` by `lost_result` when the next holder takes the
+  slot, and is settled only by an observed `com.reconcile` (the next run, from the run's own records of what it did, or
+  the estate owner, DEC-0081). The host may start one more run for it; after two runs that ended without settling it,
+  the host starts none and shows the request to its operator, unchanged. An effect the earlier run began is never begun
+  again without an observation: the run records the effect's own idempotency key where the next run reads it (the
+  workflow's checkpoint), and the next run reuses that key for the same effect.
+- **OS-6, no person in the run.** A dispatched run has no person at it and never waits for one. It never answers an
+  elicitation as a person: it cancels one or does not declare the capability, and a cancel is never the operator's
+  decision (AP-2) nor a person's no (C3.3). A job of another service that stops at `input_required` is left
+  unanswered: the run names the job and what it waits on in the request's thread and settles the request
+  `failed_known`, unless the request's mandate or a relayed decision covers that exact choice. A human step (AP-4: a
+  sign-in, a consent, a payment, a typed secret, spend above a limit) is named once in the thread with why no route
+  avoided it ([the operator's word](governance-and-roles.md) where pinned), and the request is settled `failed_known`.
+  A source hand-over is never covered by the request's mandate: a run takes one only as a decision with the exact
+  target ([source](source.md#handing-over), DEC-0149), and otherwise settles `failed_known` naming the hand-over.
+- **OS-7, slots and mandates.** A dispatched run holds a slot only while it works: it never takes a slot from a live
+  holder, uses `com.responder_replace` only to continue a held `accepted` request whose holder is gone (CT-175), and
+  ends its session, and with it the slot, when it ends. It carries the operator's mandate as the request carries it,
+  appended to only, joining the chain as a callee (MD-2); it never extends a mandate's `expiresAt`, and a request whose
+  mandate expires before the work is done is settled `failed_known` naming what is left (a task longer than a mandate
+  is CT-205). The run's outcome (finished, ended without an answer, timed out, failed to start) is the host's record,
+  never a state of the request, and carries no text of the request and no secret.
 
 ## A session's role and branch
 
