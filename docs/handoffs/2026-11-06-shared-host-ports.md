@@ -312,6 +312,10 @@ Proposed DEC on its own branch, and files the rest.
   item 1, and makes G1 and the row point to it; the keep rule no longer keeps a port another `id.instance`'s
   descriptor declares; CT-228's state names the W88 gate and the next readings; its acceptance check catches
   "Paused" and any next task; SCR-20 lists `foreign` and `duplicate`; the Checks entry reads in order.
+- Round 25, seam: the same G1 break, closed by W90's pointer. W91 folds its risks: annotated lines under DEC-0045
+  (item 6's T0 on loopback), DEC-0118 (item 2's mode `A`) and DEC-0122 (item 1's loopback premise), which this
+  decision also amends, with the loop extended to them; the README check also catches "not merged" and reads only
+  this handoff's row; the knowledge-base pages' window until the coordinator acts is named.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -433,8 +437,7 @@ Proposed DEC on its own branch, and files the rest.
   schema and the port-choice reference with vectors", with no "Proposed", "Paused" or pre-acceptance next task left
   in it; the release below adds ", released <tag> (main <merge commit>)" after the tag is pushed, in the same
   follow-up change as its release notes, so main never names a tag that does not exist yet. On the landing head `grep '^| CT-228 ' docs/backlog.md | grep -c -E 'Proposed|Paused|Next( task)?:'`
-  prints 0 and `grep '^| CT-228 ' docs/backlog.md | grep -c '| open: DEC-0154 accepted [0-9]'` prints 1; `grep -c 'DEC-0154, proposed'
-  docs/handoffs/README.md` and `head -1 docs/handoffs/2026-11-06-shared-host-ports.md | grep -c proposed` print 0.
+  prints 0 and `grep '^| CT-228 ' docs/backlog.md | grep -c '| open: DEC-0154 accepted [0-9]'` prints 1; `grep '2026-11-06-shared-host-ports.md' docs/handoffs/README.md | grep -c -E 'DEC-0154, proposed|not merged'` and `head -1 docs/handoffs/2026-11-06-shared-host-ports.md | grep -c proposed` print 0.
 - **"proposed" markers.** Every "DEC-0154, proposed" (and "DEC-0154 (proposed)", "DEC-0154 item 4, proposed") in the
   specification changes at acceptance. Find them on one line with
   `git grep -n proposed -- docs/specification docs/guides docs/DOCMAP.md CONTEXT.md schemas src tools | grep DEC-0154`,
@@ -450,19 +453,22 @@ Proposed DEC on its own branch, and files the rest.
   `src/semantic-rules.ts`, `tools/vectors/host-label.ts`'s "DEC-0154's text" (its line 9), and the generator's and
   vectors' "DEC-0154 item 4".
 - **Annotated lines.** Each line goes after the last line of the entry's last `- **Annotated` item, or of its Status
-  item when it has none, with the acceptance date in place of `<YYYY-MM-DD>`; under DEC-0015, DEC-0057, DEC-0123 and DEC-0153 in turn:
+  item when it has none, with the acceptance date in place of `<YYYY-MM-DD>`; under DEC-0015, DEC-0057, DEC-0123, DEC-0153, DEC-0045, DEC-0118 and DEC-0122 in turn:
 
   ```text
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (one copy per counted OS account, one `id.instance` in that account's services directory under `service.lock` in its data directory, or an app's own single-instance guard; the port claim, HA-1).
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (one copy and `service.lock` per OS account, an app's own single-instance guard in place of the lock, the port claim rebuilt after the guard, HA-1).
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (PL-3: the listener's owner is checked before a raw loopback address is opened; another account's, or one that cannot be told, is `foreign-user` and nothing opens, HA-2).
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (OD-9: a collector in the same OS account reads the daily digests; CT-243).
+  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (item 6: T0 on loopback needs the peer's OS account checked on a computer with more than one counted account, HA-3).
+  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (item 2: under mode `A` on a shared computer the organization sees the enrolling account's harness, until CT-232).
+  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (item 1's premise: a loopback origin is reachable by every OS account and relayed guest on the computer, HA-2 and HA-3).
   ```
 
   Each prints 1, in bash or zsh:
 
   ```sh
-  for d in 'DEC-0015 ' 'DEC-0057 ' 'DEC-0123:' 'DEC-0153:'; do
+  for d in 'DEC-0015 ' 'DEC-0057 ' 'DEC-0123:' 'DEC-0153:' 'DEC-0045 ' 'DEC-0118:' 'DEC-0122:'; do
     awk -v h="### $d" 'index($0, h) == 1 {f=1; next} /^### /{f=0} f' docs/DECISIONS.md \
       | grep -c '^- \*\*Annotated ([0-9-]*):\*\* amended by DEC-0154 ('
   done
@@ -501,7 +507,7 @@ Proposed DEC on its own branch, and files the rest.
   name no DEC-0154 and are corrected in the same post: `north-star.md` 392 to 393, HA-3 ("on a computer with several
   accounts no door admits a loopback caller without a token unless it checks the peer's OS account, and where guests
   reach loopback through a forwarder none on TCP"), and the contract's release in `products.md` and `roadmap.md` (the
-  new tag). Check on the knowledge base's main once the coordinator answers, in a fabric-workspace clone after
+  new tag). Until the coordinator acts, those lines stay false (a named window, closed by the checks below). Check on the knowledge base's main once the coordinator answers, in a fabric-workspace clone after
   `git fetch origin`:
   `git show origin/main:knowledge/north-star.md | grep -c -E 'DEC-0154: proposed, paused|DEC-0154 is proposed, paused|CT-232 \(branch, no PR\)|devices\.md:414'`
   and `git show origin/main:knowledge/roadmap.md | grep -c "waiting for DEC-0154's tag"` print 0;
@@ -739,6 +745,10 @@ At W88 (`60b3309e`), with a 15-minute load of 43.9 and 9 GB free, the full gate 
 all exit 0; the one added line with U+2014 is the SH-2 label. After W89 (text only) the UX lint, the documentation
 checks, vectors, privacy and the tests that read the edited pages passed again.
 
+After W90 and W91 (text only) the UX lint, the documentation checks (markdownlint 0 errors), vectors (31 files),
+privacy (0 findings) and the tests that read the edited pages passed; the split-marker finder prints nothing; the
+shared block is in the handoff once, byte for byte.
+
 ## Next task
 
 The coordinator's next blind readings of DEC-0154 at this branch's head.
@@ -785,3 +795,5 @@ at that head.
 
 W90 at the next head: round 25's breaks (HA-1 restated incompletely in the gap spec and the conformance row, now
 pointers) and its risks are folded in. Next: round 26 at that head.
+
+W91 at the next head: round 25's seam risks are folded in. Next: round 26 at that head.
