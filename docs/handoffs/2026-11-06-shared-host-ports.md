@@ -1,4 +1,4 @@
-# 2026-11-06: several OS accounts on one computer (CT-228, DEC-0154, proposed)
+# 2026-11-06: several OS accounts on one computer (CT-228, DEC-0154, accepted 2026-11-07)
 
 ## Objective
 
@@ -334,6 +334,14 @@ Proposed DEC on its own branch, and files the rest.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
+- Round 28 at `3fb5c12a`: clean on all three tiers. Its risks are folded into W94 or filed.
+- Round 29 at `3fb5c12a`: clean on all three tiers, the second clean round in a row, which accepted DEC-0154. Unit
+  recomputed the 68 host-label vectors with an independent HMAC and killed 25 mutants; product and seam traced every
+  copy of HA-1 and HA-2 and the acceptance checks on probe copies in bash and zsh. Their risks: the Fabric Dashboards
+  asks dated to acceptance day and DEC-0019 and DEC-0069 named among the decisions that keep their words (W94);
+  FAC-SEM-010's message still saying "claimed" (CT-253); the Open bullet naming CT-251; DEC-0149's landing checking
+  `north-star.md` for "DEC-0149 and DEC-0154" (carried to DEC-0149's landing); the product rows framed as the
+  readings of 2026-11-06.
 
 ## Decisions made in the draft
 
@@ -473,8 +481,8 @@ Proposed DEC on its own branch, and files the rest.
   fixes a closed list or form that DEC-0154 changes (DEC-0128 item 5's named links, DEC-0031's device object,
   DEC-0061 item 5's Install and Uninstall forms). A decision to which DEC-0154 only adds a duty its own text does not
   deny keeps its words (DEC-0040's FL-7, DEC-0041's meter, DEC-0042's SH-9, DEC-0066's relay, DEC-0069's app
-  descriptor callers, DEC-0082's `org.id`, DEC-0096's connections, DEC-0101 and DEC-0102's node summary), and
-  DEC-0154's Consequences name the pages that carry the new duty:
+  descriptor callers, DEC-0082's `org.id`, DEC-0096's connections, DEC-0101 and DEC-0102's node summary; DEC-0019's and DEC-0069's FAC-SEM-010 "port claim", read in
+  their own sense of a declaration), and DEC-0154's Consequences name the pages that carry the new duty:
 
   ```text
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (one copy per counted OS account, one `id.instance` in that account's services directory under `service.lock` in its data directory, or an app's own single-instance guard; the port claim, HA-1).
@@ -638,16 +646,15 @@ edits it.
 
 ## Open
 
-- The coordinator's next blind readings of DEC-0154.
 - CT-228's owed parts: the claim file's schema and a port-choice reference with vectors.
-- CT-229 to CT-243, each with its evidence and acceptance in the backlog; G10 is a decision of the second wave.
-- An open question outside DEC-0154: the operator decided on 2026-11-06 (relayed in board thread `22876238`, message
-  `433ab602`) that agents of an organization call, and accept calls from, only agents of the same organization. The
-  contract writes it as a new decision together with provider-account isolation, not as DEC-0154. It conflicts with
-  [contexts](../specification/contexts.md) lines 10 and 11 (a person's own agents shared into two organizations on one
-  machine), with DEC-0086 (a share grant runs a sharer's agent in an organization's context) and with PS-3 of DEC-0142
-  (a credential shared with another person's estate, used outside any context). It waits for the operator's choice
-  between options (a) and (b) as posed in that thread.
+- CT-229 to CT-243 and CT-253, each with its evidence and acceptance in the backlog; G10 is a decision of the second
+  wave.
+- The landing day's steps above: the release, the knowledge-base clause rule, the knowledge base's pages and the
+  board.
+- An open question outside DEC-0154, now CT-251 on main: the operator decided on 2026-11-06 (relayed in board thread
+  `22876238`, message `433ab602`) that agents of an organization call, and accept calls from, only agents of the same
+  organization. It conflicts with [contexts](../specification/contexts.md) lines 10 to 12, DEC-0086 and PS-3 of
+  DEC-0142, and waits for the operator's choice between options (a) and (b) as posed in that thread.
 
 ## Checks actually run
 
@@ -787,6 +794,12 @@ nothing; the shared block is in the handoff once, byte for byte.
 
 ## Next task
 
+DEC-0154's landing: merge main into this branch, run the full gate on the landing head under the heavy lock, merge
+#248, then the release `v0.1.0+2026-11-07.1`, the knowledge-base clause check, the knowledge base's pages post on
+`eefa7959`, the board post on `1fe66e6e` and the follow-up adding "released" to CT-228's state cell.
+
+The record of the run before acceptance:
+
 The coordinator's next blind readings of DEC-0154 at this branch's head.
 
 Paused 2026-11-06 by the operator's relay in board thread `eefa7959` (about 12:50 UTC, from fabric-workspace session
@@ -837,3 +850,7 @@ W91 at the next head: round 25's seam risks are folded in. Next: round 26 at tha
 W92 at the next head: round 26's breaks are folded in. Next: round 27 at that head.
 
 W93 at the next head: round 27's breaks are folded in. Next: round 28 at that head.
+
+W94 at the next head: rounds 28 and 29 at `3fb5c12a` were clean on all three tiers, the acceptance edits are made
+(Status accepted 2026-11-07, the markers dropped, eleven annotated lines, CT-228's state cell, this title and the
+README row) and round 29's risks are folded in or filed (CT-253).

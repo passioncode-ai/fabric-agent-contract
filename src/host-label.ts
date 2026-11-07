@@ -3,7 +3,7 @@ import { isObject } from "./findings.js";
 
 // #region host-label, docs: docs/specification/devices.md#the-host-label
 /**
- * The host label (DEC-0154 item 4, proposed): what tells an organization that two of its devices (two counted OS
+ * The host label (DEC-0154 item 4): what tells an organization that two of its devices (two counted OS
  * accounts of one computer, or a virtual machine and its computer) run on one computer, without naming it. `hostLabel` is
  * the reference a node ports; it reads no file and never throws. The node reads the computer's secret file's metadata first
  * (whether the path is a symbolic link, the file's owner and who else can write it, its folder's owner and mode) and

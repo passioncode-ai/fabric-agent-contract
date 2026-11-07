@@ -44,7 +44,7 @@ enrollment; an `org.id` that holds `.`, `:` or `~` can be enrolled but is no con
 it (the vectors carry `org.example`). So **an organization server that takes part in contexts MUST issue its `org.id`
 within `[A-Za-z0-9][A-Za-z0-9_-]{0,127}`** (DEC-0082; [devices](devices.md#enrollment)). A server that turns the
 [host label](devices.md#the-host-label) on also issues `org.id` with at least 128 random bits, so that it is
-unguessable and unique across organization servers with overwhelming probability (DEC-0154, proposed).
+unguessable and unique across organization servers with overwhelming probability (DEC-0154).
 
 Fabric Switchboard uses the same form for its pool's context attribute (its SB-109, the pilot's answer of 2026-10-13).
 

@@ -116,7 +116,7 @@ app, because its live origin changes from start to start: the app keeps its own 
 and removed on quit, with its origin and process id. A kit that shows an "Open in <app>" button reads the descriptor;
 a caller that sends anything reads the liveness file and checks the process, and before any credential the
 listener's owner (HA-2, [Several OS accounts on one computer](#several-os-accounts-on-one-computer);
-DEC-0154, proposed). An app's descriptor without an origin declares no port for `FAC-SEM-010`. Vectors: [`fixtures/vectors/app-descriptor.json`](../../fixtures/vectors/app-descriptor.json).
+DEC-0154). An app's descriptor without an origin declares no port for `FAC-SEM-010`. Vectors: [`fixtures/vectors/app-descriptor.json`](../../fixtures/vectors/app-descriptor.json).
 
 | Platform | Services directory |
 |---|---|
@@ -130,7 +130,7 @@ DEC-0154, proposed). An app's descriptor without an origin declares no port for 
 - `channels.local` MAY name where a client reaches the service's local channel (`{protocol, path | pipe}`; Project
   Observatory's node, [local channel](local-channel.md), DEC-0075); a client never computes that path.
 - `id` and `instance` together MUST be unique within one OS account's services directory (one copy per counted OS
-  account on the computer, DEC-0154, proposed). A second copy of the same
+  account on the computer, DEC-0154). A second copy of the same
   service (a preview, a branch build) MUST be a second `instance`, never a second `id`.
 - `placement` is `local` (the default when absent) or `remote`. Every rule in this document
   applies to a local placement; [Remote placement](#remote-placement) states what changes for a
@@ -140,7 +140,7 @@ DEC-0154, proposed). An app's descriptor without an origin declares no port for 
   that another local `id.instance` already declares. Semantic rule `FAC-SEM-010` checks a
   directory; a remote origin declares no port here. The directory shows only this OS account's descriptors, while
   loopback is one per computer: the port is also kept or chosen free on the computer, recorded and claimed as
-  [Several OS accounts on one computer](#several-os-accounts-on-one-computer) says (HA-1, DEC-0154, proposed), which keeps
+  [Several OS accounts on one computer](#several-os-accounts-on-one-computer) says (HA-1, DEC-0154), which keeps
   two [counted OS accounts](#counted-os-accounts) from one port.
 - Paths MAY start with `~/`, and on Windows with `~\`, `C:\` or `C:/` (DEC-0032); a command's executable
   follows the same grammar (`FAC-SEM-012`). Commands MUST be argument arrays; a shell string is
@@ -152,7 +152,7 @@ DEC-0154, proposed). An app's descriptor without an origin declares no port for 
 - A local descriptor MAY say where a collector in the same OS account reads its daily operations digests, under
   `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1`: 1 to 8 `{dir, source}`, `dir` a folder
   inside `paths.data` and `source` the label sent with its lines ([operations digests](ops-digest.md#where-a-collector-reads-the-daily-digests),
-  OD-9, DEC-0153; the same OS account per DEC-0154, proposed; `FAC-SEM-168`). A remote descriptor carries none.
+  OD-9, DEC-0153; the same OS account per DEC-0154; `FAC-SEM-168`). A remote descriptor carries none.
 - `installedBy` says who installed the instance (DEC-0061): the installer and its version as a string, as before, or
   `{by, role?, tool}`. `by` is `person` — a person ran the installer or had their coding agent run it — with `role`
   `operator` (the person who uses this machine) or `administrator` (an organization's administrator); `node` — Project
@@ -216,7 +216,7 @@ placement requires the token here too ([Remote placement](#remote-placement)).
 - `service.id` and `service.instance` MUST equal the descriptor's. A different answer
   means another program holds the port; a host MUST report it as `foreign` and MUST NOT
   send it the descriptor's token (`FAC-SEM-009`). A listener of another OS account, or one whose owner cannot be
-  told, is `foreign-user` before any of this is read, whatever it answers (HA-2, DEC-0154, proposed): an equal
+  told, is `foreign-user` before any of this is read, whatever it answers (HA-2, DEC-0154): an equal
   identity stops a mistake, not another account holding the port.
 - `service.build` MUST carry a commit or a package digest, so a host can tell a restart
   onto new code from one onto old code.
@@ -503,7 +503,7 @@ login](#operator-login)); a raw address opens a browser that has no session and 
   computer (`origin` plus the path): a remote `https` origin as before, and
   a loopback address only after checking the listener's owner by [HA-2](#ha-2)'s sources: a listener of another
   account, or one whose owner cannot be told, is reported as `foreign-user` and the address is not opened
-  (DEC-0154, proposed). An installed host that did not open the page is not absent: the failure is
+  (DEC-0154). An installed host that did not open the page is not absent: the failure is
   reported to the person, and the browser does not replace it.
 - **PL-4, where the link travels.** A tool answer that names a page for a person MUST carry the open_link in a member
   named `open_link`; a raw address beside it (`http_url`, or an existing `dashboard_url`) is the diagnostic of PL-3,
@@ -543,7 +543,7 @@ not against a hostile process of the same user. Loopback is one per computer, no
 another OS account on the same computer, and a guest a port forwarder relays onto loopback, reach every local service.
 The Host and Origin guard does not tell them apart, so every computer adds HA-1 and HA-2, and a computer with more
 than one [counted OS account](#counted-os-accounts) also HA-3, of
-[Several OS accounts on one computer](#several-os-accounts-on-one-computer) (DEC-0154, proposed). Two residues stay:
+[Several OS accounts on one computer](#several-os-accounts-on-one-computer) (DEC-0154). Two residues stay:
 
 - **The browser's cookies.** Browsers do not isolate cookies by port ([RFC 6265](https://www.rfc-editor.org/rfc/rfc6265)
   section 8.5): a page served on `127.0.0.1` by another account's process, once the person's browser visits it,
@@ -561,7 +561,7 @@ than one [counted OS account](#counted-os-accounts) also HA-3, of
 
 ## Several OS accounts on one computer
 
-DEC-0154, proposed. On one computer each counted OS account runs its own copy of a service, with its own services
+DEC-0154. On one computer each counted OS account runs its own copy of a service, with its own services
 directory, tokens and descriptors, and every account (and every guest whose traffic a forwarder relays) reaches every
 port on `127.0.0.1`. In this contract's specification, schemas and glossary, "host" never means the computer. The
 exceptions are the name "host label", which labels a computer, and names and paths already fixed, which keep their
@@ -891,15 +891,15 @@ These rules are a local placement's; a remote one is supervised by its platform 
 
 | Rule | Requirement |
 |---|---|
-| One copy | Before any side effect (binding its port, resuming jobs, starting a scheduler, migrating a store), a service MUST take an exclusive lock on `service.lock` in its data directory. A copy that does not hold the lock MUST NOT perform a side effect; when it does not get the lock it prints one sentence naming the holder's pid and exits with status 75. A copy its supervisor started, and marked so, MAY wait for the lock first, at most 300 s ([One copy](#one-copy), DEC-0057). Binding a port is not a lock. An app (`lifecycle.manager: "person"`) or an app's part MAY guard with its own single-instance guard instead ([One copy](#one-copy), DEC-0154, proposed). |
-| Start (the port claim) | A local service itself (or the app), never what starts it, rewrites this account's port claim at every start, after it holds its guard against a second copy: `service.lock` for a service with a descriptor; an app (`lifecycle.manager: "person"`) or an app's part: its own single-instance guard, which it MAY use instead of `service.lock`, even when its descriptor names an origin ([One copy](#one-copy)): rebuilt from this service's descriptors in the account, or, for an app without a descriptor origin or an app's part, from the port it records in its own state, read after it has written its new liveness file (or it would read an old port or none) (the ports of every instance it records), written atomically (a temporary file, then a rename), never from the old claim ([HA-1](#ha-1), DEC-0154, proposed). |
+| One copy | Before any side effect (binding its port, resuming jobs, starting a scheduler, migrating a store), a service MUST take an exclusive lock on `service.lock` in its data directory. A copy that does not hold the lock MUST NOT perform a side effect; when it does not get the lock it prints one sentence naming the holder's pid and exits with status 75. A copy its supervisor started, and marked so, MAY wait for the lock first, at most 300 s ([One copy](#one-copy), DEC-0057). Binding a port is not a lock. An app (`lifecycle.manager: "person"`) or an app's part MAY guard with its own single-instance guard instead ([One copy](#one-copy), DEC-0154). |
+| Start (the port claim) | A local service itself (or the app), never what starts it, rewrites this account's port claim at every start, after it holds its guard against a second copy: `service.lock` for a service with a descriptor; an app (`lifecycle.manager: "person"`) or an app's part: its own single-instance guard, which it MAY use instead of `service.lock`, even when its descriptor names an origin ([One copy](#one-copy)): rebuilt from this service's descriptors in the account, or, for an app without a descriptor origin or an app's part, from the port it records in its own state, read after it has written its new liveness file (or it would read an old port or none) (the ports of every instance it records), written atomically (a temporary file, then a rename), never from the old claim ([HA-1](#ha-1), DEC-0154). |
 | Supervisor | One per operating system (DEC-0032), named by `lifecycle.manager`; the file a writer writes for it carries the supervisor marker ([One copy](#one-copy), DEC-0057). **macOS — `launchd`** (`label`, `plist`): `RunAtLoad` true, `KeepAlive` true, `ThrottleInterval` 10, `ExitTimeOut` above the drain time; the marker `FABRIC_SERVICE_SUPERVISOR=launchd` in `EnvironmentVariables`. **Linux — `systemd`** (`unit`): a user unit under `~/.config/systemd/user/`, run with `systemctl --user`, `Restart=always`, `RestartSec=10`, `TimeoutStopSec` above the drain time, `WantedBy=default.target`; the marker `Environment=FABRIC_SERVICE_SUPERVISOR=systemd`. **Windows — `task-scheduler`** (`task`, a full task path such as `\PassionCode\example-agent.default`): a per-user Scheduled Task created without administrator rights, a logon trigger, restart on failure every minute, no execution time limit, run only when the user is logged on, `MultipleInstancesPolicy` `IgnoreNew` (recommended); the marker `--fabric-supervisor task-scheduler` in the action's `Arguments`, because a task's action carries no environment. **Any system — `node`**: Project Observatory's node (`node.lifecycle`) supervises the services it starts as its children and honours the same wait and exit; the marker `FABRIC_SERVICE_SUPERVISOR=node` or `--fabric-supervisor node`, which the node sets when it starts a child. The descriptor names it `lifecycle.manager: "node"` and nothing else: the node keeps its children in its own record, so there is no supervisor file and no `label`, `plist`, `unit` or `task` (DEC-0061). The node restarts a child that exits, no sooner than 10 s after the child's last start, as `ThrottleInterval` and `RestartSec` do. **No supervisor — `person`**: an app a person installs and starts ([an app's descriptor](#an-apps-descriptor), DEC-0069); no supervisor file and no marker. A descriptor names one supervisor: `label` and `plist` are refused beside `systemd`, `task-scheduler`, `node` and `person`, `unit` and `task` beside any other manager (DEC-0032, DEC-0057, DEC-0061, DEC-0069). No supervisor file carries a secret. |
-| Install | For a local placement, first keep the port this `id.instance` records, or choose a new one, as [HA-1](#ha-1) says. Write the supervisor file and the descriptor, then rebuild this account's port claim atomically from all this service's descriptors in the account, as at start (DEC-0154, proposed); start the service through its supervisor, then poll, for at most 40 seconds, until the listener on the port is this OS account's ([HA-2](#ha-2)) and the well-known document's `service.id` matches; a listener of another account is `foreign-user`, never a successful install. launchd: write the plist, `bootout` and wait until the job is unloaded, `bootstrap` (retrying the transient I/O error). systemd: write the unit, `systemctl --user daemon-reload`, `enable --now`. Task Scheduler: register the per-user task with the Supervisor row's settings, then run it. Node: the node installs the package (v4 §6 Path 2: the publisher signature against the pinned key, the digest, no network at install), writes the descriptor with `lifecycle.manager: "node"`, starts the service as its child with the marker and polls as above (DEC-0061). |
+| Install | For a local placement, first keep the port this `id.instance` records, or choose a new one, as [HA-1](#ha-1) says. Write the supervisor file and the descriptor, then rebuild this account's port claim atomically from all this service's descriptors in the account, as at start (DEC-0154); start the service through its supervisor, then poll, for at most 40 seconds, until the listener on the port is this OS account's ([HA-2](#ha-2)) and the well-known document's `service.id` matches; a listener of another account is `foreign-user`, never a successful install. launchd: write the plist, `bootout` and wait until the job is unloaded, `bootstrap` (retrying the transient I/O error). systemd: write the unit, `systemctl --user daemon-reload`, `enable --now`. Task Scheduler: register the per-user task with the Supervisor row's settings, then run it. Node: the node installs the package (v4 §6 Path 2: the publisher signature against the pinned key, the digest, no network at install), writes the descriptor with `lifecycle.manager: "node"`, starts the service as its child with the marker and polls as above (DEC-0061). |
 | Stop | `SIGTERM` drains in-flight work and exits; interrupted work resumes on the next start. |
 | Off | A host stops a service so that it stays off across logins, and starts it so that it comes back after one: launchd `bootout` then `disable`, start `enable` then `bootstrap`; systemd `systemctl --user disable --now`, start `enable --now`, restart `restart`; Task Scheduler end then disable the task, start enable then run it, restart end then run. Node: a host asks the node to start (`node.lifecycle.ensure_running`), to stop so that the service stays off until it is started again, and to restart (DEC-0061). A host reads state from the supervisor (`launchctl print`, `systemctl --user show -p ActiveState,SubState,MainPID,UnitFileState`, the task's state and last run; from the node, whether the child is kept on, whether it runs and its pid, which a host compares with the well-known `process.pid` as it compares systemd's `MainPID`). A host MUST NOT start a service process itself, and MUST NOT stop or signal a node's child or write a supervisor file for it. The node's operations' names and schemas are Project Observatory's (its row OBS-79); this row fixes what each does. |
 | Code | Code runs from an immutable release directory. An upgrade writes the new release, rewrites the supervisor file (plist, unit or task) to run it, and restarts the service through its supervisor: launchd reinstalls as the Install row does (`bootout`, wait, `bootstrap`); systemd `systemctl --user daemon-reload`, then `restart`; Task Scheduler re-registers the task, then ends and runs it; the node points its record of the child at the new release and restarts the child. |
 | State | Data and configuration, logs and cache live in the service's own directories for its system ([below](#directories-per-system)) — never inside the service's own code checkout or a release directory. A repository that exists to version the data itself (a registry, a plan) is a store, not code, and is allowed; the descriptor's `source.repository` tells the two apart. Writes are atomic; logs rotate. |
-| Uninstall | A service that keeps settings backups takes the final one first ([below](#settings-backup)). Then remove its supervision: launchd `bootout` (waiting until the job is gone) and delete the plist; systemd `systemctl --user disable --now`, delete the unit, `daemon-reload`; Task Scheduler end and delete the task; the node stops the child and removes it from its record, so it never starts again. Then delete the descriptor, and then rebuild this account's port claim from the remaining descriptors and the own state of the instances that remain, atomically, as at start, never a read-modify-write, deleting the claim file only when no port remains (HA-1, DEC-0154, proposed). Data stays unless the operator asks to purge it. |
+| Uninstall | A service that keeps settings backups takes the final one first ([below](#settings-backup)). Then remove its supervision: launchd `bootout` (waiting until the job is gone) and delete the plist; systemd `systemctl --user disable --now`, delete the unit, `daemon-reload`; Task Scheduler end and delete the task; the node stops the child and removes it from its record, so it never starts again. Then delete the descriptor, and then rebuild this account's port claim from the remaining descriptors and the own state of the instances that remain, atomically, as at start, never a read-modify-write, deleting the claim file only when no port remains (HA-1, DEC-0154). Data stays unless the operator asks to purge it. |
 | Settings | A service whose store holds operator decisions SHOULD keep settings backups outside its data directory ([Settings backup](#settings-backup), DEC-0025). |
 
 ### Directories per system
@@ -922,7 +922,7 @@ A copy that does not hold its guard against a second copy (`service.lock`, or an
 touches nothing: it binds no port, writes no file, resumes no job and starts
 no scheduler; it may read the lock to learn the holder's pid (DEC-0015, DEC-0057). An app (`lifecycle.manager:
 "person"`) or an app's part MAY guard against a second copy with its own single-instance guard instead of
-`service.lock`; that guard is what HA-1's claim rewrite waits for (DEC-0154, proposed).
+`service.lock`; that guard is what HA-1's claim rewrite waits for (DEC-0154).
 
 - **Started by hand,** a copy that finds the lock held tries once and exits 75 at once, printing one sentence naming
   the holder's pid. When it cannot learn the pid (the lock records none yet, or cannot be read), the sentence says the

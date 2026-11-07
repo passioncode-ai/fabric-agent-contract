@@ -1,6 +1,6 @@
 # Devices `fabric-device/0.1`
 
-DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per organization, `org.id` for contexts) DEC-0094 (a key in a file, idempotent rotation), DEC-0099 to DEC-0102, DEC-0103 (a closed organization), DEC-0148 (a repeated renewal) and DEC-0154 (the host label, proposed) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
+DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per organization, `org.id` for contexts) DEC-0094 (a key in a file, idempotent rotation), DEC-0099 to DEC-0102, DEC-0103 (a closed organization), DEC-0148 (a repeated renewal) and DEC-0154 (the host label) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
 `FAC-SEM-069`, `FAC-SEM-077`, `FAC-SEM-125`, `FAC-SEM-155` · schemas
 [`device-enrollment`](../../schemas/device-enrollment.schema.json),
 [`device-policy`](../../schemas/device-policy.schema.json),
@@ -15,7 +15,7 @@ A **device** is one [counted OS account](service.md#counted-os-accounts) of a co
 under `fabric-device/0.1`, on which collector nodes send [activity telemetry](activity.md) to an organization server.
 Two counted OS accounts of one computer are two devices, with their own `device.id`, keys and enrollments; the
 [host label](#the-host-label) is the only value the contract defines for telling one organization that two of its
-devices share a computer (DEC-0154, proposed; what this means for the estate's machines is CT-231). This protocol covers three things:
+devices share a computer (DEC-0154; what this means for the estate's machines is CT-231). This protocol covers three things:
 
 - how a device is enrolled;
 - how it receives policy the organization signed;
@@ -207,7 +207,7 @@ passes the small-order check (DEC-0045).
 
 ### The host label
 
-DEC-0154 item 4 (HA-4), proposed. The **host label** is the label of the computer. In this contract's specification,
+DEC-0154 item 4 (HA-4). The **host label** is the label of the computer. In this contract's specification,
 schemas and glossary, "host" never means the computer. The exceptions are the name "host label", which labels a
 computer, and names and paths already fixed, which keep their spelling (the enrollment purpose `agent-host`, file
 names such as `docs/handoffs/2026-11-06-shared-host-ports.md`). The registers keep the words they were written in.
@@ -471,7 +471,7 @@ DEC-0052). Each key is `{value, locked?}`. The layer's `source` is one of:
 | `models.credentials` | list of `{credentialRef, provider, credentialKind: "api-org", fingerprint, callers?, quota?, dataClasses}` | The organization's API keys a device may use — never a subscription, a seat or a person's own key (schema). `fingerprint` is `hmac-sha256:` of the key under the organization's salt, so a node recognises the slot that holds it, and so its provenance, without the policy carrying the key. `quota.usd` is a decimal string. |
 | `models.personal_key_sharing` | `allowed`, `forbidden` | Whether a person's own key may serve someone else's call. **Absent means forbidden** (`FAC-SEM-068`). |
 | `workspace.folders` | list of folder patterns | The organization's work folders, relative to the person's home directory, so a value never names a user (schema: no leading `/`, `\`, `~` or drive letter, no `..`); `*` matches one segment. |
-| `machine.mode` | `A`, `C` | `C`, the default: the organization manages only its own work on the machine, and `node-summary/1` lists the coding agents, the hook count, this context's own items and the items its baseline names ([node summary](node-summary.md#the-summary), DEC-0118). `A`: it administers the whole machine, taken only from an `mdm` layer; a `server` or `user` layer's `A` is ignored (`FAC-SEM-042`); `node-summary/1` then lists the whole harness (S8, DEC-0118). On a computer with several counted OS accounts, until CT-232 decides, mode `A`'s harness is the enrolling counted account's (DEC-0154, proposed). |
+| `machine.mode` | `A`, `C` | `C`, the default: the organization manages only its own work on the machine, and `node-summary/1` lists the coding agents, the hook count, this context's own items and the items its baseline names ([node summary](node-summary.md#the-summary), DEC-0118). `A`: it administers the whole machine, taken only from an `mdm` layer; a `server` or `user` layer's `A` is ignored (`FAC-SEM-042`); `node-summary/1` then lists the whole harness (S8, DEC-0118). On a computer with several counted OS accounts, until CT-232 decides, mode `A`'s harness is the enrolling counted account's (DEC-0154). |
 | `harness.baseline` | `{items: [{kind, name, minVersion?, digest?}]}`: `minVersion` only for a coding agent or a plugin, `digest` only for a skill or a plugin | DEC-0101: what every enrolled machine is expected to run, read only from the `mdm` and `server` layers (a `user` layer's value is ignored, DEC-0102); a node reports its drift from it in `node-summary/1` ([node summary](node-summary.md#the-baseline-and-the-drift)). Absent: no drift is reported. |
 | `repair.packages` | list of `{agentRef, digest}` | DEC-0101: the packages a `repair-request/1` may name, read only from the `mdm` and `server` layers (a `user` layer's value is ignored, DEC-0102). **Absent means no repair runs** (`FAC-SEM-129`). |
 
@@ -674,7 +674,7 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   coding-agent versions and the hook count in a mode `C` node summary (DEC-0118); within one organization, the
   [host label](#the-host-label) its devices on one computer share, by design and only after its notice, and any label of
   that computer, which an organization's code on any counted account of the computer, or in a virtual machine given the secret,
-  can compute for every organization (DEC-0154, proposed); an agent the person shares into two
+  can compute for every organization (DEC-0154); an agent the person shares into two
   organizations shows the same `agentRef` (the person's own choice); the relay operator reads `org:<orgId>` in the estate
   record until per-context relay sessions (the operator's questions 1 to 4, taken at their defaults); an operator that
   runs two of a machine's relays (an estate's and an organization's, or two organizations', DEC-0134) sees that

@@ -82,7 +82,7 @@ well-known member is). A valid list comes back with `failing` set on each connec
 service that names a failing connection in `degraded[]` reports a status other than `ready` (`FAC-SEM-011`); a
 connection that is down while the service stays ready is shown by its `state` alone. A `service` connection whose
 listener the host reads as `foreign` or `foreign-user` is `down`, as a node summary reports it
-([service](service.md#ha-2) HA-2, DEC-0154, proposed). A host resolves a `service`
+([service](service.md#ha-2) HA-2, DEC-0154). A host resolves a `service`
 target to an installed agent to draw the chain.
 
 ## Semantic rules

@@ -145,6 +145,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted
 - **Annotated (2026-10-11):** supervisor part amended by DEC-0032 (one supervisor per operating system: launchd, systemd, the Task Scheduler).
 - **Annotated (2026-10-12):** one copy amended by DEC-0057 (a copy its supervisor started and marked may wait for the lock, at most 300 s, before exit 75; the node supervises too).
+- **Annotated (2026-11-07):** amended by DEC-0154 (one copy per counted OS account, one `id.instance` in that account's services directory under `service.lock` in its data directory, or an app's own single-instance guard; the port claim, HA-1).
 - **Decision:** A long-running local agent process follows the `fabric-service/0.1`
   extension, keyed `https://fabric.passioncode.ai/agent-contract/extensions/service/0.1`.
   Its installer writes a descriptor into one per-user services directory; the running
@@ -927,6 +928,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-20):** DEC-0094: a device without a hardware or platform store MAY hold its key in a file
   (`storage: file`, `exportable: true`, no `attestation`), its `deviceKeys` in the same store; rotation is idempotent
   (`FAC-SEM-125`).
+- **Annotated (2026-11-07):** amended by DEC-0154 (a device is one counted OS account of a computer or a virtual machine; the enrollment's device object gains the optional `hostLabel`, HA-4).
 - **Decision:** A device that sends activity telemetry (DEC-0030) is managed as
   [devices](specification/devices.md) says:
   1. **Enrollment** (`device-enrollment.schema.json`):
@@ -1814,6 +1816,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric Dashboards' outage
   watcher (FD-48) and Example Console read `setup`; the adapter checks Claude Code plugin configurations against LC-19 and
   LC-21 (its own row); Fabric starts provider entries' stdio servers by `scope`.
+- **Annotated (2026-11-07):** amended by DEC-0154 (LC-19: one copy per counted OS account on the computer, not one per machine, HA-1).
 - **Decision:**
   - a well-known `degraded` entry MAY carry `setup: true`: the source waits for a person to finish setting it up,
     not an outage. It still names `source` and `reason` and still makes the service `degraded` (`FAC-SEM-011`
@@ -1889,6 +1892,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   superseded by DEC-0059: FB-6's cookie, like ED-8's, is per host in a shared cookie store and per service where the
   host gives each service its own store, so in a shared store an `owner=host` for one local service hides every local
   service's button on that host (RFC 6265 §8.5).
+- **Annotated (2026-11-07):** amended by DEC-0154 (item 6: T0 on loopback needs the peer's OS account checked on a computer with more than one counted account, HA-3).
 - **Amends:** DEC-0039 (DL-2, DL-4…DL-6, DL-8, DL-12, DL-13, DL-16, DL-17, DL-19, DL-21; `FAC-SEM-050`), DEC-0040
   (FB-6), the session-lifetime paragraph of [service](specification/service.md#operator-session-lifetime). Implements
   Fabric ADR-0144 amendments 3 and 4 at
@@ -2899,6 +2903,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   so. `S4U` and `SYSTEM` principals were not measured.
 - **Annotated (2026-10-12):** its *Not decided here* item on the node — `lifecycle.manager: node` in the descriptor,
   `label`/`plist` beside it, the node's Install, Off, Uninstall and state read — is decided by DEC-0061.
+- **Annotated (2026-11-07):** amended by DEC-0154 (one copy and `service.lock` per OS account, an app's own single-instance guard in place of the lock, the port claim rebuilt after the guard, HA-1).
 - **Amends:** DEC-0015 (one copy; launchd as the only supervisor) and DEC-0032 (the supervisor per system, Windows
   paths and token files), additively under the DEC-0016 extension policy except where *Compatibility* says.
 - **Decision:** in [service](specification/service.md) —
@@ -3341,6 +3346,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the first organization server's listings carry what `peer` carries (CT-04); Fabric Inbox's organization mode (its
   B-87) writes a remote descriptor with `peer` and `runner.credentialKind: "platform-metered"` and reports usage on that
   route.
+- **Annotated (2026-11-07):** amended by DEC-0154 (item 5's Install and Uninstall forms: the port claim written after the descriptor, the install poll waiting for this account's listener, the claim rebuilt at uninstall, HA-1 and HA-2).
 - **Amends:** DEC-0015 (`installedBy`), DEC-0019 (a remote placement may be offered to others), DEC-0021 and DEC-0046
   (the usage report's `route`), DEC-0057 (its *Not decided here* item on the node), additively under the DEC-0016
   extension policy except where *Compatibility* says. Closes V4-DESCRIPTOR (board run N08, packet P4-02).
@@ -7133,6 +7139,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted (2026-10-23) by the contract on the operator's recorded decisions, CT-92 answered; the operator
   may reverse it. Consumer adoption: Project Observatory's node (OBS-192, OBS-217); the first organization server
   (VES-HARNESS).
+- **Annotated (2026-11-07):** amended by DEC-0154 (item 2: under mode `A` on a shared computer the organization sees the enrolling account's harness, until CT-232).
 - **Context:** DEC-0102 shipped the whole harness of a machine to every organization it is enrolled in, whatever
   `machine.mode` says, from the operator's S8 (a work machine is transparent to its organization) and left CT-92 to the
   operator: whether an organization sees harness names and services of other contexts on one machine, against
@@ -7347,6 +7354,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-26
 - **Status:** Accepted (2026-10-26). Additive on the wire (an optional member of `surfaces`); a behaviour rule for a
   service that serves an Agent Card, from its next pin.
+- **Annotated (2026-11-07):** amended by DEC-0154 (item 2's premise: a loopback origin is reachable by every OS account and relayed guest on the computer, HA-2 and HA-3).
 - **Context:** CT-131 (board thread `2587bdd2`, 2026-10-25) asked whether `fabric-service/0.1` publishes a service's
   catalogue as an A2A Agent Card or an `ai-catalog` entry, and which is normative. The Agent Card is already in the
   contract: DEC-0002 and the A2A peer profile pin A2A `1.0` and the card at `/.well-known/agent-card.json`, so a service
@@ -7418,6 +7426,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-26
 - **Status:** Accepted (2026-10-26). A behaviour rule for every service and agent from its next pin, a checker rule
   (`FAC-SEM-143`) and a reference; no schema changes.
+- **Annotated (2026-11-07):** amended by DEC-0154 (PL-3: the listener's owner is checked before a raw loopback address is opened; another account's, or one that cannot be told, is `foreign-user` and nothing opens, HA-2).
 - **Context:** the operator ruled on 2026-10-24 that every page of their agents and local Fabric services opens in
   Fabric Dashboards, not in a browser, including links in chat and notifications. An estate agent asked the contract
   for that rule (request `886c9b4d`, thread `67961610`, deadline 2026-10-31; backlog CT-130): a MUST in
@@ -7798,6 +7807,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (devices.md What stays linkable; relay.md OR-5).
 - **Annotated (2026-10-27):** UE-1's rule of an identity per membership applies to a person-to-person share: a key pair per
   share on each side, never the device keys (DEC-0142 PS-2).
+- **Annotated (2026-11-07):** amended by DEC-0154 (item 5's residual linkability gains the host label: shared by one organization's devices on one computer, and computable for every organization by an organization's code on any counted account or in a virtual machine given the secret; devices.md What stays linkable, HA-4).
 - **Context:** the operator decided K-1 on 2026-10-15 (NET-2, DEC-0084): each organization enrollment of a machine gets
   keys of its own, so two organizations cannot link the machine (CX-22). The scope brief
   (`docs/evidence/specs/2026-10-24-ct122-unlinkable/brief.md`) listed twelve values two enrollments share today, and the
@@ -9432,6 +9442,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted 2026-11-06, after clean rounds 22 and 23 at `f5302e3f` of the coordinator's blind readings
   (unit, seam, product). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168`, a descriptor
   extension, a reference module and vectors, and a host obligation. Additive: nothing that validated before changes.
+- **Annotated (2026-11-07):** amended by DEC-0154 (OD-9: a collector in the same OS account reads the daily digests; CT-243).
 - **Context:** the operator asked on 2026-11-04 that every product's log be read every hour and every day, and that
   every agent close its work with a retro whose lessons are kept centrally; Fabric recorded the split in its ADR-0188
   (commit `0d0e5922`) and relayed the contract's part on board thread `f7758225` (message `516761e1`, item 2 of its
@@ -9731,7 +9742,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0154: several OS accounts on one computer: recorded ports, the listener's owner, no token-free loopback door, the host label
 
 - **Date:** 2026-11-06
-- **Status:** Proposed 2026-11-06, a draft for the coordinator's blind readings (unit, seam, product). Round 1 at
+- **Status:** Accepted 2026-11-07, merged #248: rounds 28 and 29 of the coordinator's blind readings, both at `3fb5c12a`,
+  were clean on all three tiers (unit, product, seam). Proposed 2026-11-06 as a draft for those readings. Round 1 at
   `25ba36f7` was not clean (the unit reading passed, the product reading found seven breaks and the seam reading one);
   round 2 at `cbc425d7` was not clean (the unit reading passed with one risk, the product reading found four breaks,
   the seam reading passed); round 3 at `feef4e4d` was not clean (unit passed, seam passed with no break, its risks
@@ -9761,7 +9773,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   break, seam one, W85); round 22 at `d4f3300c` was not clean (unit passed; product one break, seam two, W86); round 23 at `a5308d97` was not clean (unit and product passed; seam one break, W87); round 24 at `ab89d8a1` was not clean (product one break, unit two, seam three, W88 and W89); the full gate passed at
   W88 (`60b3309e`); round 25 at `73f5a9ed` was not clean (unit one break, product two, seam one, W90 and W91); round 26 at `647754bf`
   was not clean (unit one break, product three, seam one, W92); round 27 at `f78c87c1` was not clean (unit passed;
-  product one break, seam one, W93); their batches are folded in (Source). A reference module and vectors, one optional schema
+  product one break, seam one, W93); rounds 28 and 29 at `3fb5c12a` were clean; their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9962,12 +9974,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     DEC-0154's tag.
   - Fabric Dashboards: listens on no TCP port (an owner-only socket or named pipe), so item 1 does not apply to it;
     FD-156 (the owner check on macOS, 0.8.25) and FD-158 (`foreign-user`, 0.8.26, commit `53a62f9`) reported done;
-    FD-159: Linux done in 0.8.27 (PR #349); the refusal of an owner it cannot tell and Windows open, due at acceptance.
-    Open too, asked the same day: it asks the owner only of a port that answered (its `look.ts` lines 103 to 105 at
+    FD-159: Linux done in 0.8.27 (PR #349); the refusal of an owner it cannot tell and Windows open, owed after acceptance.
+    Open too, asked on acceptance day (the board step): it asks the owner only of a port that answered (its `look.ts` lines 103 to 105 at
     `a0bc160`), so another account's listener that never answers reads `starting`, then `down` or `stopped`, not
     `foreign-user` (safe, since its local probe sends no token).
     Owed: its watcher (FD-76's successor) counts `foreign` and `foreign-user` as unavailable; asked on `1fe66e6e` on acceptance day.
-    Asked the same day: its card's own `foreign-user` line (its `src/core/i18n.ts:128` and `:129`, the `.mac` variant shown on macOS) uses, or is checked against, this
+    Asked on acceptance day too: its card's own `foreign-user` line (its `src/core/i18n.ts:128` and `:129`, the `.mac` variant shown on macOS) uses, or is checked against, this
     decision's two lines (item 2; SCR-20 in `docs/ux/screens.md`), and a line for an owner that cannot be told is
     added (part of FD-159). The landing text's
     second sentence describes FD's released watcher (FD-76: an episode only for `down`, kept open while a failing
@@ -10206,6 +10218,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   false or a closed list or form changed, with lines under DEC-0044's LC-19 and DEC-0061's Install and Uninstall forms
   and DEC-0040 among the decisions that keep their words; the board's third ask, a port that does not answer; the
   client row pointing to HA-2's order; the CT-228 cell keeping its Goal tag; the Consequences naming every
-  `service.md` and `profiles.md` part) is folded in; the two UI lines passed the operator's copy check
+  `service.md` and `profiles.md` part) is folded in; round 28 at `3fb5c12a` was clean on all three tiers, and round
+  29 at the same head too, which accepted it; W94 (the acceptance edits: the markers dropped, the annotated lines, the
+  Fabric Dashboards asks dated to acceptance day, DEC-0019 and DEC-0069 named among the decisions that keep their words,
+  CT-253 for FAC-SEM-010's message) is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

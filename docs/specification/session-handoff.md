@@ -135,7 +135,7 @@ whose payload has a numeric `exp` — and the server that receives it verifies t
 expiry). A secret in this folder is materialised for the session from a reference and removed with it (DEC-0013). A runtime that does
 not read this dialect is given the same servers in its own (SH-11); `mcp.json` stays the record.
 Before it writes `mcp.json` for a local server, the host checks that server's listener belongs to its own OS account
-([service](service.md#ha-2) HA-2, DEC-0154, proposed).
+([service](service.md#ha-2) HA-2, DEC-0154).
 
 `mcp.strict` is declared: whether the runtime is told to load only the handoff's servers. Fabric's launched
 sessions keep it (`--strict-mcp-config`); Dashboards' console does not. Where a runtime offers no such switch,

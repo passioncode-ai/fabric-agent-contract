@@ -82,7 +82,7 @@ These follow from the table and are enforced by the schema:
   (DEC-0013), such as `secret-ref:example-agent/EXAMPLE_API_KEY`.
 - `url` is `http://127.0.0.1:<port>/mcp`: loopback only, the port in range, no query. Before a client sends a credential
   to it, it checks that the listener belongs to its own OS account ([service](service.md#ha-2)
-  HA-2, DEC-0154, proposed).
+  HA-2, DEC-0154).
 - `run.mcp.stdio.scope` is `project`, `on-demand` or `session`; the last is spelled so that `FAC-SEM-056` refuses it
   by name ([profiles](profiles.md#where-a-stdio-server-is-declared), DEC-0044). A writer does not emit
   `run.mcp.stdio.scope` until every reader accepts it: the adapter's (`fabric_provider.py`, FAA-22, CT-28) does, and

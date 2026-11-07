@@ -1,5 +1,5 @@
 /**
- * The generator of the host-label vectors (DEC-0154 item 4, proposed): `fixtures/vectors/host-label.json`, shared by
+ * The generator of the host-label vectors (DEC-0154 item 4): `fixtures/vectors/host-label.json`, shared by
  * every node that sends `device.hostLabel` in an organization enrollment and every organization server that shows it.
  *
  *   tsx tools/vectors/host-label.ts --check   compare the committed file with what this writes (exit 1 on a difference)

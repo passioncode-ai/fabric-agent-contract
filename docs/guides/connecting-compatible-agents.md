@@ -74,7 +74,7 @@ A service runs once per OS account on the computer, under its supervisor (launch
 Observatory's node), and answers on `http://127.0.0.1:<port>`. Its installer writes the descriptor into the services
 folder; the running process serves the well-known document. A service with no capabilities needs no manifest.
 
-On every computer (DEC-0154, proposed): the installer records the port and writes a port claim, and the service itself
+On every computer (DEC-0154): the installer records the port and writes a port claim, and the service itself
 rewrites the claim at every start ([HA-1](../specification/service.md#ha-1)); every client checks
 that the listener on the port belongs to its own OS account before it sends a credential
 ([HA-2](../specification/service.md#ha-2)). On a computer with several

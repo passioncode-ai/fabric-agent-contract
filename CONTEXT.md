@@ -365,7 +365,7 @@ Over the relay a node places a sender in T1 from the estate record it applied (`
 estate's relay a sender that is not T1 is T2 and its call is refused, and `unknown-state` is a denial, not T2 (DL-28,
 DEC-0106, the wording DEC-0137). On a computer with more than one **Counted OS account**, a token-free loopback door places
 a caller in T0 only after checking the peer's OS account, and a port forwarder's callers are T2
-(HA-3, DEC-0154, proposed).
+(HA-3, DEC-0154).
 
 **Adaptation plan**: What a person moves into an organization they join: projects, history, results and schedules.
 The plan's draft and the inventory it is chosen from stay in the person's Fabric; only its organization part, what the
@@ -645,28 +645,28 @@ cells of agent × skill × project × UTC day × outcome, with no person dimensi
 their user id or by a device bound to them — when and why, readable by that subject.
 
 **Device**: One counted OS account of a computer, or a virtual machine, enrolled with an organization server under
-`fabric-device/0.1` (DEC-0031; DEC-0154, proposed; what an estate machine is on such a computer is CT-231):
+`fabric-device/0.1` (DEC-0031; DEC-0154; what an estate machine is on such a computer is CT-231):
 a key-bound short-lived certificate (the key in hardware, a platform store or a file, as `key.storage` states) that also attributes everything it sends, a server-issued
 stream epoch, signed policy layers and periodic check-ins.
 
 **Counted OS account**: An OS account a person or an organization signs in with, or runs Fabric or an agent service
 under; an account that runs either, or has a services directory, always counts, and only an account that does neither
 (root, SYSTEM, the system's service accounts) is left out; the count is read at every start ([service](docs/specification/service.md#counted-os-accounts),
-DEC-0154, proposed). "A computer with more than one counted OS account" counts only these.
+DEC-0154). "A computer with more than one counted OS account" counts only these.
 
 **Port claim**: A `passioncode-port-claim/1` file `.passioncode-ports.<service-id>.<account>.json` in the computer's
 shared sticky folder, owned by the account it names by uid (SID on Windows), listing the ports that account records for a
 service; it keeps installers of two accounts, or of two services in one account, from one port and grants nothing (HA-1,
-DEC-0154, proposed).
+DEC-0154).
 
 **`foreign-user`**: The state of a local service whose port is held by a listener of another OS account, or by one
 whose owner cannot be told; ordered after `down` and before `foreign`, it wins over any well-known answer, and nothing
-is sent to it (HA-2, DEC-0154, proposed).
+is sent to it (HA-2, DEC-0154).
 
 **Host label**: The label of the computer: `device.hostLabel`, an HMAC of the computer's administrator-owned secret
 over the organization's id, the same for every device of one organization on one computer (two counted OS accounts
 of it, or a virtual machine given its secret); organizations with no code
-on the computer cannot link it (HA-4, [devices](docs/specification/devices.md#the-host-label), DEC-0154, proposed). In
+on the computer cannot link it (HA-4, [devices](docs/specification/devices.md#the-host-label), DEC-0154). In
 this contract's specification, schemas and glossary, "host" never means the computer. The exceptions are the name
 "host label", which labels a computer, and names and paths already fixed, which keep their spelling (the enrollment
 purpose `agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`). The registers keep the
