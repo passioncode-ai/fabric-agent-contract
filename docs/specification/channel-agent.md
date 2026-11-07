@@ -499,7 +499,8 @@ existing fixture validates and checks as before. `contractVersion` stays `0.1.0`
 - **The daily quality payload.** The standard's section 5.1 publishes [`support-quality-daily/1`](support-quality.md)
   per project, with members `/1` lacked before DEC-0151 (`arrived`, `ended`, `open.*`, the outcomes,
   `autonomy.answeredTickets`, `stability.safeReplyTurns` and `stability.safeReplyTickets`, `notATicket`): the copy
-  received on 2026-11-04 named them `autonomy.answered` and `stability.fallbackTurns`; the standard renamed them at the
+  received on 2026-11-04 named them `autonomy.answered`, `stability.fallbackTurns` and
+  `stability.fallbackTickets`; the standard renamed them at the
   owner's commit `86c49ec`. DEC-0151 decides that payload: its [ticket counts](support-quality.md#the-ticket-counts-dec-0151),
   its [project](support-quality.md#the-project-dec-0151) and how the seven channel kinds here map to `/1`'s four channels
   ([the channel kinds table](support-quality.md#the-channel-agent-standards-channel-kinds-dec-0151)). The escalation

@@ -292,6 +292,13 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   closing checks: the in-progress reading over `docs`, `src` and `test` prints nothing; inside DEC-0150 it prints only
   CA-2, CA-5, the Compatibility and the Source line, with the Annotated line beside them; the third and fourth checks
   print nothing; `grep -c "^| a .*| DEC-0153" docs/specification/conformance.md` prints 5.
+- Round 16 of the readings (on `8b442779`): unit clean (two risks: `KEY_REREAD` 255 against about 259 units read per
+  boundary `sk-`, a constant factor; the interim finding is a `FAC-SEM-126` a producer's gate keeps on purpose); the
+  product tier found two breaks, fixed: the daily payload bullet and CT-210 (d) named two of the three received names
+  (now `autonomy.answered`, `stability.fallbackTurns` and `stability.fallbackTickets`), and the landing step left CT-73,
+  CT-103, CT-188 and the handoffs README row saying proposed (now in Next task, with a closing grep). Its risks folded:
+  the two Annotated dates set at merge, the roadmap's Agent assessment sentence beside AS-01, an SCN-002 alt path for
+  the interim finding, CT-129's line citations addressed to `cd3af646`.
 - The collision check, by name, of every other new DEC-0151 member against the v2 fields: the evidence is the
   channel agent standard's section 5.1 table (DEC-0150's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`
   at `388f2b42`), which marks every member new except `autonomy.answered` and
@@ -711,6 +718,19 @@ the added lines.
 
 ## Next task
 
-Round 16 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers (round 15 was not clean),
-until two consecutive rounds are clean, with the full coverage run at low load; open the pull request; merge only once DEC-0150 is on main (the merge gate above), applying the merge list;
-mark DEC-0151 accepted, close CT-129, mark CT-210's first step done, release, and answer thread `b6820b97` with the tag.
+Round 17 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers (round 16 was not clean on
+the product tier), until two consecutive rounds are clean, with the full coverage run at low load; open the pull
+request (DEC-0150 is on main, so the merge gate holds) and merge. The landing commit, before the merge:
+
+- DEC-0151's Status Accepted with its clean rounds; CT-129 closed with its receipt; CT-210's first step done; and every
+  other row that calls DEC-0151 proposed or on a branch restated as merged: CT-73, CT-103, CT-188 and this handoff's row
+  in `docs/handoffs/README.md`.
+- The dates of the two Annotated lines this branch adds under DEC-0150 and DEC-0153 ("DEC-0151 has merged", "has
+  landed") set to the merge date, so the append-only register keeps a true date.
+- The knowledge base (fabric-workspace `knowledge/roadmap.md`): AS-01 and the Agent assessment sentence ("publishes one
+  `support.quality_daily` per channel and closed day") both say per channel, project once adopted, and closed day.
+- Closing check on the landing commit: `grep -nE 'DEC-0151 \(proposed|DEC-0151, proposed|branch \`agent/sqd-fields-20261104\`'
+  docs/backlog.md docs/handoffs/README.md docs/specification CONTEXT.md` prints nothing, and `grep -n -A2 '^### DEC-0151'
+  docs/DECISIONS.md` shows the Status Accepted.
+
+Then release, and answer thread `b6820b97` with the tag.
