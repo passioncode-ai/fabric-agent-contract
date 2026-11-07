@@ -666,7 +666,8 @@ the claim from what remains:
 **HA-2, the listener's owner, and `foreign-user`.** Before a client sends any credential to
 `http://127.0.0.1:<port>` (a descriptor's token, a delegation token, a login code's request, a session cookie, a door's
 token), and before a host reports a local service healthy, it MUST establish that the server end of its connection
-belongs to a process of its own OS account, from the computer's socket table (below), or by the listener proving,
+belongs to a process of its own OS account, from the computer's socket table (below), from the accepted socket among
+its own account's processes' descriptors ([RT-2](#a-restricted-socket-table)), or by the listener proving,
 before any credential travels, that it holds a secret only this OS account can read (a fresh challenge answered with
 an HMAC under a key in an owner-only file; Switchboard reported on thread `1fe66e6e` that its control channel does so):
 
@@ -675,8 +676,9 @@ an HMAC under a key in an owner-only file; Switchboard reported on thread `1fe66
   credential, and nothing the listener answers is read as the service's. A listener owned by root, SYSTEM or a service
   account (a rootful container proxy, a launch daemon, a task run as SYSTEM) is another account's, so it reads
   `foreign-user` on a computer with one counted account too; so does an owner the client cannot tell (a process it
-  cannot open, a client without access to the socket table). A client that can see its own account's sockets always
-  tells its own listener.
+  cannot open, a client without access to the socket table, a table restricted to the reader's own sockets). A client
+  that can see its own account's sockets always tells its own listener, unless its table is restricted
+  ([a restricted socket table](#a-restricted-socket-table)).
 - The order of a local service's states read from the listener and its answer: `down`, then `foreign-user`, then
   `foreign` (`FAC-SEM-009`), then the well-known `status`. "`foreign-user` is decided before the well-known document
   is read" means it outranks any answer, `ready` included, and no credential is sent to read one. A host's own states
@@ -707,9 +709,58 @@ are an owner that cannot be told: this account's listener on `0.0.0.0:<port>` be
 
 | System | Source |
 |---|---|
-| macOS | the TCP socket table, which names the owning process even for another account's socket: `netstat -anv -p tcp`, or `sysctl net.inet.tcp.pcblist64` read in the process; the owning process's uid from the process table. A list of this account's own sockets (`lsof -u` of the current user) finds an own listener, which counts only by the rule above, but alone it cannot tell an empty port from another account's, so when it finds none the socket table decides |
+| macOS | the TCP socket table, which names the owning process even for another account's socket: `netstat -anv -p tcp`, or `sysctl net.inet.tcp.pcblist64` (or `pcblist_n`) read in the process; the owning process's uid from the process table. From macOS 27.2 a process with an ad hoc code signature (a Homebrew interpreter, for example) is not shown other processes' sockets: `netstat` prints nothing and the sysctl only the process's own rows, a restricted table, read as the next paragraph says. A list of this account's own sockets (`lsof -u` of the current user) finds an own listener, which counts only by the rule above, but alone it cannot tell an empty port from another account's, so when it finds none the socket table decides |
 | Linux | the `uid` column of `/proc/net/tcp` and `/proc/net/tcp6`: the server end of the client's own connection (state `01`) when its inode is not 0 (the connection was accepted, and the row carries the accepting process's uid); when its inode is 0 (not yet accepted, the uid there may read 0; a server end that already closed also reads inode 0, in a state other than `01`), the listening entry (state `0A`) on the port, chosen by the rule above. A uid 0 read from a row with inode 0 is never a root owner; no row for the connection (a reader whose `/proc/net` is not its socket's network namespace, or a server end not yet created, as in a SYN-cookie handshake whose last ACK has not arrived), or a row with inode 0 and no listening entry on the port, is an owner that cannot be told (CT-254) |
 | Windows | `GetExtendedTcpTable` for the owning process id, then that process's token user, equal to the current user's; a process that cannot be opened is an owner that cannot be told |
+
+<a id="a-restricted-socket-table"></a>
+
+**A restricted socket table (DEC-0155).** On macOS a socket table read from `netstat` or the `pcblist` sysctls may
+show its reader only the reader's own sockets, and a missing row then proves nothing. (Linux's `/proc/net` carries the
+uid on the row of the connection itself, and Windows names the owning process of every row; neither is read this
+way.) A reader treats its macOS table as restricted when it cannot read it (the command fails or exits non-zero), when
+it lists no row at all (output that is empty or a header only), when it holds no row of another uid (a source that
+carries uids) or of another process (`netstat`, which carries process ids), or when it lists sockets but not the
+server end of the reader's own connection (for a server reading its peer, the client end). Then:
+
+- **RT-1, the owner cannot be told.** A listener that accepted the connection is `foreign-user` for an owner that
+  cannot be told: no credential is sent and nothing it answers is read as the service's. It is never this account's
+  and never named another account's; a connection refused (nothing listens) is still `down`. Where the reader reports a
+  reason (a refusal, a `degraded` entry, a doctor's line), the reason begins `table-restricted` (a colon and a detail may
+  follow, and readers match the prefix); a doctor shows it as a warning that the service is not called healthy,
+  never as the service's fault, an unreadable table included. A host that watches services or reports them to the
+  estate (a node summary, connections) SHOULD run where its table reads (a signed app) or prove by RT-2, since a
+  `foreign-user` it cannot resolve counts as unavailable.
+- **RT-2, the accepted socket proves this account.** A reader proves that a process of its own account accepted this
+  connection by finding the server end of the connection (the exact pair of local and remote addresses) among the open
+  descriptors of a process of its uid: `proc_pidfdinfo` with `PROC_PIDFDSOCKETINFO` over the processes `proc_listpids`
+  lists for that uid, or `lsof -nP -iTCP:<port> -sTCP:ESTABLISHED -F pun` matching the pair and reading the numeric uid
+  (`lsof` prints a login name unless asked for `-F u` or `-l`). It proves that a process of this account holds the
+  descriptor, not the socket's own credentials, so a descriptor passed to it by another process reads as this
+  account's. A server end not found yet (the connection not yet accepted) may be looked for again for a bounded time,
+  then RT-1 applies. RT-2 is a proof with or without a restricted table; where it finds nothing and the table reads,
+  the table decides, so a reader that finds nothing by RT-2 reads the table before it names the reason
+  `table-restricted`, and where a readable table names another account for the server end, that table decides.
+- **RT-3, a process the caller started.** Only after RT-1, a caller that started the listener's process itself
+  (directly, or as the launchd job it installed) may vouch for that process: its uid in the process table equal to the
+  caller's, and `lsof -nP -a -p <pid> -i4TCP -sTCP:LISTEN` showing it listening on exactly `127.0.0.1:<port>`. It
+  proves that the process listens, not that it accepted this connection, so it is weaker than RT-2, and a host prefers
+  RT-2 where it can run it. A wildcard or IPv6 listener is not vouched for this way: `lsof` prints an IPv6-only
+  wildcard as `*:<port>` too, and another account's `127.0.0.1` bind can stand beside it.
+- **RT-4, a listener chosen under a restricted table.** Where a listener, not the connection, is read, only this
+  account's own exact IPv4 `127.0.0.1` bind on the port counts as this account's (another non-root account cannot bind
+  that same address and port beside it); this account's wildcard or `::1` listener, and root's, are `table-restricted`,
+  not this account's.
+- **RT-5, the server side.** A local surface that must refuse a peer of another account (*Who checks when the client
+  cannot*, below) and reads a restricted table cannot tell its peer's owner, so it refuses the peer (with a reason
+  beginning `table-restricted` where it reports one), unless it finds the client end of the connection among the descriptors of a process of its own
+  uid, as RT-2 does for the server end. A token-free loopback door (HA-3) run where its table is restricted therefore
+  admits only callers it proves that way.
+
+A reader whose real and effective uid differ uses none of the proofs in RT-2 to RT-5, and may name that context as
+its reason in place of `table-restricted`; RT-5's refusal still applies. RT-3 to RT-5 apply only under a restricted table: where the table shows other accounts' rows, HA-2's sources above decide. On a computer where the
+reader's table shows only its own sockets because no other process has any open, it is read as restricted: the cost is
+a proof by RT-2 or a warning, never a credential sent to another account.
 
 The well-known `process.pid` is never proof: any listener can name any pid.
 
