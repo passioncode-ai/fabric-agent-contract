@@ -541,8 +541,8 @@ Loopback reachability is not authorization: any process running as the same user
 read the token file. This extension protects against a web page and against a mistake,
 not against a hostile process of the same user. Loopback is one per computer, not one per OS account: a process of
 another OS account on the same computer, and a guest a port forwarder relays onto loopback, reach every local service.
-The Host and Origin guard does not tell them apart, so a computer with more than one
-[counted OS account](#counted-os-accounts) adds the checks of
+The Host and Origin guard does not tell them apart, so every computer adds HA-1 and HA-2, and a computer with more
+than one [counted OS account](#counted-os-accounts) also HA-3, of
 [Several OS accounts on one computer](#several-os-accounts-on-one-computer) (DEC-0154, proposed). Two residues stay:
 
 - **The browser's cookies.** Browsers do not isolate cookies by port ([RFC 6265](https://www.rfc-editor.org/rfc/rfc6265)
@@ -591,9 +591,10 @@ a computer with more than one counted account.
 own state and in its descriptor's `origin`. An installer keeps the port its own `id.instance` already records (in its
 descriptor, its own state or its claim) when that instance's own listener holds it or nothing does. It chooses a new
 port only when none is recorded, or when another holder has the recorded one: another `id.instance`'s descriptor in
-this account's services directory (`FAC-SEM-010`), another account's claim, or another listener. A new port is free on
-the computer: no process listens on `127.0.0.1:<port>`, no other `id.instance`'s descriptor declares it, and no port
-claim of another account names it. When it records a port it writes its descriptor and then this account's **port
+this account's services directory (`FAC-SEM-010`), another account's claim (unless the instance's own listener holds
+it), or another listener. A new port is free on the computer: no process listens on `127.0.0.1:<port>`, no other
+`id.instance`'s descriptor declares it, and no port claim of another account, or of another service in this account,
+names it. When it records a port it writes its descriptor and then this account's **port
 claim**, rebuilt atomically from all this service's descriptors in the account, as at start; and at uninstall it rebuilds
 the claim from what remains:
 
@@ -671,10 +672,10 @@ an HMAC under a key in an owner-only file; Switchboard reported on thread `1fe66
   is read" means it outranks any answer, `ready` included, and no credential is sent to read one. A host's own states
   that the listener does not decide may come before this order, provided no answer is read as the service's: an
   invalid descriptor, a conflict over an `id.instance` or a port, its own stop or start in flight (Fabric Dashboards
-  at `a0bc160`: `packages/service-host/src/state.ts` lines 31 to 40; `look.ts` lines 91 to 105 skip the probe for an
+  at `a0bc160`: `packages/service-host/src/state.ts` lines 31 to 40; `look.ts` lines 91 to 99 skip the probe for an
   invalid descriptor or a conflict, and its monitor, `src/core/monitor.ts` line 280, while a stop or start is in
   flight). A service its supervisor stopped is not one of them: a host shows that only when nothing answers on the
-  port, in place of `down` (the same `state.ts`, lines 67 to 69, and Fabric Dashboards' vector "another program
+  port, in place of `down` (the same `state.ts`, lines 68 and 69, and Fabric Dashboards' vector "another program
   answering comes before launchd saying it is off"). A host's own further states (a second copy shown as `duplicate`,
   under [One copy](#one-copy)) come after `foreign` and before the well-known `status` (Fabric Dashboards, the same
   `state.ts`, lines 56 to 58).

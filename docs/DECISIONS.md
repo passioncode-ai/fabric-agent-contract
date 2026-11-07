@@ -9758,7 +9758,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   W82 (two adoption facts from the reconciliation answers); round 19 at `63c622d4` was not clean (unit passed;
   product found two breaks, seam one, W83); round 20 at `3db473d0` was not clean (product found two breaks, seam two,
   unit one, the split marker W84 had already rejoined; W84); round 21 at `ea203020` was not clean (product found one
-  break, seam one, W85); round 22 at `d4f3300c` was not clean (unit passed; product one break, seam two, W86); their batches are folded in (Source). A reference module and vectors, one optional schema
+  break, seam one, W85); round 22 at `d4f3300c` was not clean (unit passed; product one break, seam two, W86); round 23 at `a5308d97` was not clean (unit and product passed; seam one break, W87); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -9793,8 +9793,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      service's own state and in its descriptor's `origin`. An installer keeps the port its own `id.instance` already
      records (descriptor, own state, claim) when that instance's own listener holds it or nothing does; it chooses a
      new port only when none is recorded or another holder has it (another `id.instance`'s descriptor, another
-     account's claim or another listener), and a new port is free on the computer: no process listens on it, no other
-     `id.instance`'s descriptor declares it (as `FAC-SEM-010` checks), and no other account's claim names it. It writes
+     account's claim unless the instance's own listener holds it, or another listener), and a new port is free on the
+     computer: no process listens on it, no other `id.instance`'s descriptor declares it (as `FAC-SEM-010` checks), and
+     no claim of another account, or of another service in this account, names it. It writes
      this account's claim `.passioncode-ports.<service-id>.<account>.json` (`<service-id>` the descriptor's `id`, or for
      an app without a descriptor its reverse-DNS bundle identifier under its own domain, stable across versions, and
      for an app with separately recorded parts that identifier plus `.<part>`, one claim per part, as Fabric's hub and
@@ -9839,7 +9840,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and nothing it answers is read as the service's. A host shows it with one of two lines, as SCR-20 in
      `docs/ux/screens.md` records: "Another account on this computer is using this service's port; nothing was sent to it." for another account's listener, and "This computer would not say who is using this service's port; nothing was sent to it." for an owner that cannot be told.
      A client that can see its own account's sockets always tells its
-     own listener. The order is `down`, `foreign-user`, `foreign`, then the well-known `status`; `foreign-user` is
+     own listener. The order of the states read from the listener and its answer is `down`, `foreign-user`, `foreign`, then the well-known `status`, with a second copy shown as `duplicate` after `foreign`; a host's own states (an invalid descriptor, a conflict, its own stop or start in flight) may come first, and a supervisor's stop is shown only when nothing answers, in place of `down`; `foreign-user` is
      decided before the well-known document is read and wins over every answer, `ready` included; a reader treats a
      state it does not know as not ready; a watcher counts `foreign` and `foreign-user` as unavailable, as it counts `down`; a node
      reports a `foreign` or `foreign-user` service as `down` in its node summary. The sources: on macOS the TCP socket
@@ -9960,7 +9961,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     `a0bc160`), so another account's listener that never answers reads `starting`, then `down` or `stopped`, not
     `foreign-user` (safe, since its local probe sends no token).
     Owed: its watcher (FD-76's successor) counts `foreign` and `foreign-user` as unavailable; asked on `1fe66e6e` on acceptance day.
-    Asked the same day: its card's own `foreign-user` line (its `i18n.ts:128`) uses, or is checked against, this
+    Asked the same day: its card's own `foreign-user` line (its `src/core/i18n.ts:128` and `:129`, the `.mac` variant shown on macOS) uses, or is checked against, this
     decision's two lines (item 2; SCR-20 in `docs/ux/screens.md`), and a line for an owner that cannot be told is
     added (part of FD-159). The landing text's
     second sentence describes FD's released watcher (FD-76: an episode only for `down`, kept open while a failing
@@ -10179,6 +10180,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   knowledge-base step leaving `authority.md`'s clause lines to the clause rule and stating what DEC-0149's handoff
   carries; CT-228 and CT-229 in its grep; the roadmap's tag checked; HA-3's forwarder duty in its conformance row;
   `duplicate` placed before the well-known `status`; `coordination.md` in this list; a local refusal in CT-229) is
-  folded in; the two UI lines passed the operator's copy check
+  folded in; round 23 at `a5308d97` was not clean, and W87 (CT-228's state cell, the title and Next task in the
+  acceptance step; the knowledge-base post after the tag; HA-1's free port counting this account's claims of other
+  services and keeping a port its own listener holds; item 2's order with its scope; the threat model's HA-1 and HA-2
+  on every computer; Fabric Dashboards' `.mac` line and narrower line ranges) is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

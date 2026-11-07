@@ -287,6 +287,13 @@ Proposed DEC on its own branch, and files the rest.
   the clause rule, widens the grep to CT-228 and CT-229, checks the roadmap's tag, writes HA-3's forwarder duty into
   its conformance row, places `duplicate` before the well-known `status`, names `coordination.md` in the
   Consequences, and names a local refusal and an owner a server cannot tell in CT-229.
+- Round 23 at `a5308d97`: not clean (unit and product passed; seam one break). The acceptance step left CT-228's
+  state cell, this handoff's title marker and its Next task as before acceptance. W87 adds them to the step and
+  folds the risks: the knowledge-base post follows the tag; HA-1's free-port test counts this account's claims of
+  other services, and a recorded port the instance's own listener holds is kept whatever another account's claim
+  says (CT-228's vectors name the case); item 2 states the order's scope as the specification does; the threat model
+  puts HA-1 and HA-2 on every computer; Fabric Dashboards' `.mac` line (`i18n.ts:129`) and narrower line ranges
+  (`look.ts` 91 to 99, `state.ts` 68 and 69).
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -403,7 +410,11 @@ Proposed DEC on its own branch, and files the rest.
 ## Acceptance step
 
 - **Status.** The Status line is written `- **Status:** Accepted <YYYY-MM-DD>, ...`, as the knowledge-base clause rule
-  below requires. Rewrite this handoff's row in the README.
+  below requires. Rewrite this handoff's row in the README, its title's marker and its Next task, and CT-228's state
+  cell in `docs/backlog.md`: "open: DEC-0154 accepted <YYYY-MM-DD>, merged #<PR>, released <tag>; still owed: the
+  claim file's schema and the port-choice reference with vectors", with no "Proposed", "Paused" or pre-acceptance
+  next task left in it. On the landing head `grep '^| CT-228 ' docs/backlog.md | grep -c -E 'Proposed|Next task: the full gate'`
+  prints 0 and `grep '^| CT-228 ' docs/backlog.md | grep -c 'accepted'` prints 1.
 - **"proposed" markers.** Every "DEC-0154, proposed" (and "DEC-0154 (proposed)", "DEC-0154 item 4, proposed") in the
   specification changes at acceptance. Find them on one line with
   `git grep -n proposed -- docs/specification docs/guides docs/DOCMAP.md CONTEXT.md schemas src tools | grep DEC-0154`,
@@ -453,7 +464,7 @@ Proposed DEC on its own branch, and files the rest.
   knowledge-base clause rule below says, for DEC-0154's lander. The check after both land runs only once DEC-0154's
   own knowledge-base PR for the clause has merged; when the clause check prints 0, or the PR is closed unmerged, it
   runs nothing.
-- **The knowledge base's pages.** Right after the merge, post on thread `eefa7959` the corrections of
+- **The knowledge base's pages.** Right after the release below (the post needs its tag), post on thread `eefa7959` the corrections of
   fabric-workspace `knowledge/` (the coordinator edits those pages). The pages to read are what this prints on the
   knowledge base's main at that time, every line of it, not a list fixed here:
   `git fetch origin && git grep -n -E 'DEC-0154|CT-22[89]|CT-23[0-9]|CT-24[0-3]' origin/main -- 'knowledge/*.md' | grep -v -e 'proposed for FD' -e "owed by FD's watcher under contract DEC-0154"`
@@ -486,7 +497,7 @@ Proposed DEC on its own branch, and files the rest.
   that message ask Fabric Dashboards for a row that its watcher (FD-76's successor) counts `foreign` and
   `foreign-user` as unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card and an
   app event with a desktop notification (its `src/core/monitor.ts` lines 496 to 498 at `a0bc160`), not to the operator channel's watcher.
-  Ask in the same message that its card's own `foreign-user` line (its `i18n.ts:128`, its own wording today) use this
+  Ask in the same message that its card's own `foreign-user` line (its `src/core/i18n.ts:128` and `:129`, the `.mac` variant shown on macOS, its own wording today) use this
   decision's two lines or be checked against them, and that a line for an owner that cannot be told be added (part
   of FD-159).
 
@@ -692,6 +703,11 @@ vectors (31 files), privacy (0 findings) and the tests that read the edited page
 finder prints nothing; the shared block is in the handoff once, byte for byte; the SH-2 line is still the one added
 line with U+2014.
 
+After W87 the full gate did not run (load above 45). The UX lint, the documentation checks (markdownlint 0 errors),
+vectors (31 files), privacy (0 findings) and the tests that read the edited pages passed; the split-marker finder
+prints nothing; the shared block is in the handoff once, byte for byte; the SH-2 line is still the one added line
+with U+2014.
+
 ## Next task
 
 The coordinator's next blind readings of DEC-0154 at this branch's head.
@@ -726,3 +742,6 @@ full gate when the load allows.
 
 W86 at the next head: round 22's breaks (what DEC-0149's handoff carries; `authority.md`'s clause lines left to the
 clause rule) and its risks are folded in. Next: round 23 at that head, the full gate when the load allows.
+
+W87 at the next head: round 23's break (CT-228's state cell, the title and Next task in the acceptance step) and its
+risks are folded in. Next: round 24 at that head, the full gate when the load allows.
