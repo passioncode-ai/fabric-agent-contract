@@ -70,9 +70,16 @@ run; a new binding revision is required ([profiles](../specification/profiles.md
 
 ## A local MCP service
 
-A service runs once on the machine, under its supervisor (launchd, systemd, the Task Scheduler or Project
+A service runs once per OS account on the computer, under its supervisor (launchd, systemd, the Task Scheduler or Project
 Observatory's node), and answers on `http://127.0.0.1:<port>`. Its installer writes the descriptor into the services
 folder; the running process serves the well-known document. A service with no capabilities needs no manifest.
+
+On every computer (DEC-0154): the installer records the port and writes a port claim, and the service itself
+rewrites the claim at every start ([HA-1](../specification/service.md#ha-1)); every client checks
+that the listener on the port belongs to its own OS account before it sends a credential
+([HA-2](../specification/service.md#ha-2)). On a computer with several
+[counted OS accounts](../specification/service.md#counted-os-accounts), each account runs its own copy of the
+service, and a loopback door without a token checks its peer's account ([HA-3](../specification/service.md#ha-3)).
 
 The descriptor, `<id>.<instance>.json` in the services folder:
 
@@ -358,7 +365,8 @@ Read next: [the local-runner profile](../specification/profiles.md#local-runner-
 checkout of this repository at the commit you pin. For files in your own repository, run it from there with
 `pnpm --dir <path to the contract checkout> validate ./fabric/`: a relative path is read from where you ran it. It
 runs the schema and then the semantic rules, and prints one line per problem with its path, its rule and a link to the
-rule. It exits 0 when everything is clean, 1 when a document has a problem, and 2 on a usage error. A hint, such as an
+rule. It exits 0 when there is no blocking problem (accepted lines may print), 1 when a document has a problem, and 2 on a
+usage error. A hint, such as an
 extension key one letter away from the contract's, is printed as a note and does not fail the run.
 `pnpm --silent validate <dir> --json` prints the same findings as JSON for a script or a CI step (`--silent` keeps
 pnpm's own lines off the output).
@@ -372,6 +380,7 @@ order (`inferSchema` and `checkFile` in `src/validate-cli.ts`). Each row has a c
 | `--schema <name>` on the command line | that schema |
 | a discriminator a schema pins (`protocol`, `contractVersion`, `format`) and every member that schema requires | that schema; of several, the one requiring the most members |
 | the name `fabric-agent.json` | a manifest |
+| the name `fabric.source.json` | a source manifest ([agent source](../specification/source.md)) |
 | the name `fabric-contract.lock.json` | a contract pin; a member the pin schema does not define is a note; a lock with none of a pin's `contract` and `commit` and another tool's members (`schemas`, `releases`, `schemaRelease`) is that tool's and is noted |
 | a JSON Schema: a `*.schema.json` name, a `$schema` naming json-schema.org, or a `$id` beside `type` or `properties` | no contract document |
 | a `providerId` with a `manifest` path or a `run` object | a provider entry, wherever it is saved |
@@ -386,7 +395,11 @@ A folder in which no file is a contract document is a usage error. Folders whose
 `.well-known/`.
 
 A folder's documents are also checked as pairs: a descriptor with its well-known document, a descriptor with the
-manifest its `fabricManifest` names, and a provider entry with its manifest. A file at the named path is read. When it
+manifest its `fabricManifest` names, a provider entry with its manifest, and a source manifest with the package beside
+it in the same folder (`FAC-SEM-160`), only a package it can read; any `fabric.package.json` entry beside the manifest that was not read as a package
+(skipped, unreadable, a link under a source kind, a dangling link) gets a note that no pair was checked. A run with a
+source kind never reads a package through a link; a plain run follows one. An agent's source tree is checked by `pnpm --silent validate <dir> --kind
+source-tree` instead ([the checker](../specification/source.md#the-checker)). A file at the named path is read. When it
 is an installed copy outside the folder, a note names it if the folder holds a copy that could have stood in, or if the
 pair rule then fails, so a stale install is visible: reinstall it, or check the folder's copy in a folder without the
 installed path. Before the manifest is installed, the folder's copy stands in: a file with the named file name in a folder

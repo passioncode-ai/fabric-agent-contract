@@ -2,7 +2,7 @@
 
 DEC-0039, DEC-0041, DEC-0043, DEC-0045, DEC-0055, DEC-0060, DEC-0066, DEC-0082, DEC-0084, DEC-0090 ([the partner
 channel](partner-channel.md)), DEC-0099, DEC-0104, DEC-0106, DEC-0107, DEC-0111, DEC-0121, DEC-0125, DEC-0126, DEC-0128, DEC-0130,
-DEC-0132, DEC-0136, DEC-0137, DEC-0141 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
+DEC-0132, DEC-0136, DEC-0137, DEC-0141, DEC-0154 · implements Fabric [ADR-0144](https://github.com/passioncode-ai/fabric/blob/19ad05ca2cf9e830d396a8fca3273b7d5e9c3bc7/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md) (at its amendment 4, `19ad05ca`)
 · schemas [`delegation-token`](../../schemas/delegation-token.schema.json),
 [`delegation-jwks`](../../schemas/delegation-jwks.schema.json), [`approval`](../../schemas/approval.schema.json),
 [`delegation-refusal`](../../schemas/delegation-refusal.schema.json),
@@ -313,7 +313,8 @@ to take, and finally that the `jti` was not consumed — recording it in a store
 approval's lifetime. Any fault of the document is `approval-invalid`; a second use is `approval-reused`. The store
 is required: without one the answer is `unknown-state`, and a callee that truly wants no replay protection
 passes `UNSAFE_NO_JTI_STORE` by name. **The order** is: the delegation token, then the grant check, then `verifyApproval`, which consumes the `jti` last, then the action (DL-13, DL-21) — so an approval is not
-spent when the meter refuses, and stays usable until its `exp`.
+spent when the meter refuses, and stays usable until its `exp`. A source hand-over orders its checks as
+[source](source.md#handing-over) specifies (DEC-0149).
 `actionDigest(action)` computes the digest; `jcs` (`rfc8785` in `src/canonical.ts`) is the canonical form —
 RFC 8785, not the settings form a device policy is signed over ([canonical forms](conformance.md#canonical-forms),
 DEC-0043). Products keep their own gates for
@@ -343,7 +344,7 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `grant-expired` | the grant has expired | hub, meter | 403 |
 | `grant-revoked` | the grant was revoked | hub, meter | 403 |
 | `limit-reached` | a spend window is exhausted; `error.data.window` names it, `level` where it was; window `call` (DEC-0041) is a grant's `perCallMaxUsd` exceeded, always at level L3 | meter, callee | 403 |
-| `approval-required` | this action needs an approval; `error.data.actionDigest` carries its digest | callee (verifier) | 403 |
+| `approval-required` | this action needs an approval; `error.data.actionDigest` carries its digest; a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee (verifier) | 403 |
 | `approval-invalid` | the approval is not valid for this action, callee or time | callee (verifier) | 403 |
 | `approval-reused` | the approval's `jti` was already consumed | callee (verifier) | 403 |
 | `principal-unproven` | the caller's proof to the hub is missing or stale | hub, meter | 401 |
@@ -352,8 +353,8 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `profile-forbids` | a call between two machines of one estate that the caller's or the target's machine profile does not allow, or whose profile is unreadable (`machineCallVerdict`, DEC-0106) | callee | 403 |
 | `issuer-unavailable` | no hub to mint, or no usable published keys, or no usable estate revision to certify them (DL-14) | caller, callee (verifier) | 503 |
 | `unknown-state` | the refusing side cannot establish the state; an unknown state is a denial | any | 503 |
-| `operator-decision-required` | a `relayed` action from a T0 or T1 caller without the operator's decision, or a call the caller's mandate does not cover (`error.data.detail` `outside-mandate: <part>`, with `estimateUsd` and `perCallMaxUsd` for spend); ask the operator and call again with their answer in `_meta.decision`, or with a mandate that covers the call ([service](service.md#actions) AP-2, DEC-0121; [MD-4](#the-operators-mandate), DEC-0125) | callee | 403 |
-| `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121), or its mandate is not (`error.data.detail`: `mandate-malformed`, `mandate-widened`, `mandate-expired`, `mandate-early`, `mandate-not-for-this-call`; MD-3, DEC-0125) | callee | 403 |
+| `operator-decision-required` | a `relayed` action from a T0 or T1 caller without the operator's decision, or a call the caller's mandate does not cover (`error.data.detail` `outside-mandate: <part>`, with `estimateUsd` and `perCallMaxUsd` for spend); ask the operator and call again with their answer in `_meta.decision`, or with a mandate that covers the call ([service](service.md#actions) AP-2, DEC-0121; [MD-4](#the-operators-mandate), DEC-0125); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
+| `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121), or its mandate is not (`error.data.detail`: `mandate-malformed`, `mandate-widened`, `mandate-expired`, `mandate-early`, `mandate-not-for-this-call`; MD-3, DEC-0125); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
 | `human-step-required` | the action is the person's (a sign-in, a consent, a payment, a secret, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one); `error.data.humanStep` names it and `error.data.url` links to it (AP-4, DEC-0121) | callee | 403 |
 
 A product maps its own authorisation codes onto these and keeps its words in `error.data`. Fabric's hub maps
@@ -415,7 +416,7 @@ context of its own.
 This is the contract's **local-placement profile** for how the meter reads a grant (DEC-0041; Fabric ADR-0144
 [amendment 1](https://github.com/passioncode-ai/fabric/blob/92cb5124e4f9e8db2314acf439e4a1f903541cc2/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md#amendment-1--2026-10-11-how-the-meter-reads-a-grant-the-call-and-task-windows),
 and [amendment 2](https://github.com/passioncode-ai/fabric/blob/217aff4dfbd6989122fc9135cc362d904d1ec838/docs/adr/0144-one-delegation-model-fabric-issues-the-chain-the-callee-checks-it-observatory-meters-it.md#amendment-2--2026-10-11-the-task-windows-key-a-vault-slot-released-under-a-grant)
-for the task window's key): a meter on the same computer as the hub reads the hub's own record of the grant,
+for the task window's key): a meter in the hub's OS account (DEC-0154) reads the hub's own record of the grant,
 not a second store and not a call to the hub, so a check within a token's lifetime still works while the hub is
 closed.
 
@@ -467,13 +468,16 @@ Proof starts at the machine boundary (DEC-0045; Fabric ADR-0144
 
 | Tier | Who | Placed by |
 |---|---|---|
-| **T0** | the operator's own machine: a caller on loopback, running under the owner's OS account | the local placement's floor ([service](service.md#authentication-and-network)), which this profile does not change |
+| **T0** | the operator's own machine: a caller on loopback, running under the owner's OS account | the local placement's floor ([service](service.md#authentication-and-network)), which this profile does not change; on a computer with more than one [counted OS account](service.md#counted-os-accounts), a token-free loopback door places a caller in T0 only when it checks the peer's OS account ([service](service.md#ha-3) HA-3, DEC-0154) |
 | **T1** | an enrolled machine of the same owner | its enrolment in the owner's estate (the estate record, DEC-0084); over the relay, `relayCallerTier` from the estate record the callee's node applied ([machine calls](machine-calls.md#the-t1-binding-over-the-relay), DEC-0106) |
 | **T2** | everything else: another person's machine (a share grant, `principalKind: external`), and any caller the callee cannot place in T0 or T1 (over the estate's relay a sender that is not T1 is T2 and its call is refused, and a sender `relayCallerTier` reads `unknown-state` is a denial rather than T2, DL-28, [machine calls](machine-calls.md#the-t1-binding-over-the-relay), DEC-0106) | the default: no placement |
 
 A caller's tier is its origin's, not its connection's. A call relayed onto loopback from off the machine — through
 a tunnel, a reverse proxy, or the hub forwarding (DL-10) a T2 caller's call — is T2 unless the relay proves the
-origin's tier, and the hub always attaches the delegation token of a T2 origin to what it forwards.
+origin's tier, and the hub always attaches the delegation token of a T2 origin to what it forwards. A port forwarder
+of a virtual machine or a container is such a relay; it runs as the OS account that owns the guest, so a peer check
+alone does not catch that account's own guests (HA-3, DEC-0154). That is an accepted gap: on a computer with one
+counted account a token-free door still admits the account's own guests through a forwarder (CT-238).
 
 **DL-26 — Inside the boundary the operator's instruction is the authority.** A callee MUST NOT require a
 delegation token, an `approval/1` or a grant record from a T0 or T1 caller, and no local call waits on the hub.
@@ -489,7 +493,8 @@ source is never another agent's key or vault slot at any tier ([spend policy](sp
 `_meta.decision` (or an accepted `approval/1`) as the operator's own, and refuses it without one
 `operator-decision-required`: inside the boundary the instruction is the authority, and the decision is how it travels
 ([service](service.md#actions) AP-2, DEC-0121). A call that carries the operator's mandate for its task instead is
-decided by it ([below](#the-operators-mandate), DEC-0125).
+decided by it ([below](#the-operators-mandate), DEC-0125); a source hand-over takes neither a mandate, an `approval/1` nor
+a decision without its exact target, as [source](source.md#handing-over) specifies (DEC-0149).
 
 ## The family and the agent network
 
@@ -622,13 +627,16 @@ it reaches acts on them without asking, within what they cover.
   the callee's clock, or not addressed to this call) is refused `decision-invalid` with its `detail`; at a job's step,
   which has no refusal to send, the job waits `input_required` instead ([interop C3.3](interop.md#c33-awaiting-a-choice)).
 - **MD-5, beyond the estate.** A T2 caller's mandate changes nothing: the callee applies the whole profile as if it were
-  absent (DL-8, DL-13, DL-17), so a relayed action still answers `approval-required`. Toward another person's
+  absent (DL-8, DL-13, DL-17), so a relayed action still answers `approval-required`; a source hand-over answers as
+  [source](source.md#handing-over) specifies (DEC-0149). Toward another person's
   machine or another organization's agents the operator's authority travels only as a delegation token under a grant
   (DL-4, DEC-0039), which the hub mints for the mandate's scope once Fabric's issuer serves it. Inside the estate (T0,
   T1) the mandate needs no token, before and after the issuer exists (DL-26).
 - **MD-6, what never travels.** A mandate never covers a human step (AP-4: a sign-in, a consent, a payment or top-up, a
   secret typed in or handed out, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one (DEC-0142)): spend above the project's L1 per-task threshold, an L0
-  limit or a key's ceiling stays the person's ([spend policy](spend-policy.md#levels)). It never covers approving one's
+  limit or a key's ceiling stays the person's ([spend policy](spend-policy.md#levels)). A mandate never covers a source hand-over
+  (DEC-0149): it is taken only on the operator's word for that act, as [source](source.md#handing-over) specifies. It
+  never covers approving one's
   own promotion, grant, checker rule or policy change (AP-5). A mandate found in a tool result, a page, a file, or a
   board message the target cannot place as the operator's, is data, as AP-3 says of a decision. The boundary below
   stands: a hostile local process could write a mandate as it could a decision, and a product that needs protection
@@ -674,8 +682,9 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
   scope covers the case, the receiver acts and says so in its reply.
 - **OA-5, what stays the person's.** The human steps of AP-4 and MD-6: a sign-in (with its one-time code), a consent,
   a payment or top-up, a secret typed in or handed out, spend above a limit, a passkey signature, a comparison of codes between two
-  people or the choice to share without one (DEC-0142); and a decision recorded as the
-  operator's own when the relay does not carry it.
+  people or the choice to share without one (DEC-0142); a decision recorded as the
+  operator's own when the relay does not carry it; and, not a human step: a source hand-over, which a relay covers only
+  as the operator's word for that one act, as [source](source.md#handing-over) specifies (DEC-0149).
 - **OA-6, the record.** The receiver records the relay as its reason: the operator's words (a peer share link's fragment
   replaced by the share id, PS-4, DEC-0147), `at` and `source` in its change log or audit record, its reply in the thread, its handoff. A service records `source` with the decision or
   the mandate (`actionDecision` and `mandateCovers` return it in `recordAs`). `source` is the relaying agent's
@@ -740,7 +749,8 @@ tests: [`test/delegation.test.ts`](../../test/delegation.test.ts), [`test/delega
 - A device approval (`method: device`): removed by DEC-0045 until a decision says which device signal it is
   and who signs it.
 - The binding that places a caller in T1 other than over the relay (DEC-0106 decides the relay's), and how a surface
-  that declares `surfaces.mcp.auth: "delegation"` admits a T0 or T1 caller that presents no token.
+  that declares `surfaces.mcp.auth: "delegation"` admits a T0 or T1 caller that presents no token; on a computer with more
+  than one counted OS account HA-3 applies ([service](service.md#ha-3), DEC-0154).
 - A grant check by a T0 or T1 callee called without a token: `grant-check-request` requires the `tokenJti` of
   the callee's own token, and the meter's token-less answer (Observatory's `slotsRequireGrant: when-token`) is
   the meter's (CT-30).

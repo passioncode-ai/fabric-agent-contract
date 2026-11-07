@@ -42,7 +42,9 @@ A device's enrollment names its organization by `org.id`, an opaque id (`activit
 DEC-0031). `orgId`'s pattern is the part of that set a context can name, so every valid organization context can name an
 enrollment; an `org.id` that holds `.`, `:` or `~` can be enrolled but is no context, so nothing of a context is routed to
 it (the vectors carry `org.example`). So **an organization server that takes part in contexts MUST issue its `org.id`
-within `[A-Za-z0-9][A-Za-z0-9_-]{0,127}`** (DEC-0082; [devices](devices.md#enrollment)).
+within `[A-Za-z0-9][A-Za-z0-9_-]{0,127}`** (DEC-0082; [devices](devices.md#enrollment)). A server that turns the
+[host label](devices.md#the-host-label) on also issues `org.id` with at least 128 random bits, so that it is
+unguessable and unique across organization servers with overwhelming probability (DEC-0154).
 
 Fabric Switchboard uses the same form for its pool's context attribute (its SB-109, the pilot's answer of 2026-10-13).
 
@@ -67,7 +69,10 @@ would need a rule reconciling it with the fields, and a checker would have to ch
 
 ## One instance per context on a machine
 
-An agent runs on one machine once per context. In the estate record, a placement (`machines[].packages[]`) gains an
+An agent runs on one machine once per context. A personal agent's `org:<orgId>` instance on a machine the operator
+holds, run under a share grant, is the owner's placement serving the organization, so it is no source hand-over, while
+a placement on a machine, registry or repository the organization holds is one ([source](source.md#handing-over),
+DEC-0149). A machine the operator holds stays his when it is enrolled in an organization (enrollment gives the organization a device record, not the machine); an OS account or machine the organization owns whole (its org-cloud machine, or an account such as an organization's own macOS user on a shared computer) is the organization's. In the estate record, a placement (`machines[].packages[]`) gains an
 optional `context` (absent means `personal`) and an optional `grant`, the id of the share grant it runs under; a secret
 placement (`machines[].secrets[]`) gains `context` too, so a slot fills one instance. The rules are the estate
 record's ([machines](estate-record.md#machines), [semantic rules](estate-record.md#semantic-rules)):

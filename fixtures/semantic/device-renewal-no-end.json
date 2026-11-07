@@ -1,0 +1,16 @@
+{
+  "description": "An unreadable notAfter on the latest certificate decides no repeat; no finding.",
+  "kind": "device-renewal",
+  "expect": [],
+  "input": {
+    "latest": {
+      "certificate": "MIIB-renewed-certificate",
+      "renewed": true,
+      "notAfter": "2026-02-30T00:00:00Z"
+    },
+    "at": "2026-11-02T08:31:00Z",
+    "response": {
+      "certificate": "MIIB-another-certificate"
+    }
+  }
+}

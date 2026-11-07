@@ -1,0 +1,65 @@
+{
+  "format": "fabric-source/1",
+  "description": "Writes one digest of a mailbox each morning.",
+  "include": [
+    "fabric-agent.json",
+    "bin/",
+    "src/",
+    "skills/",
+    "schemas/",
+    "tests/",
+    "README.md",
+    "LICENSE",
+    "assets/"
+  ],
+  "exclude": [
+    "tests/recorded/",
+    "src/local-overrides.json"
+  ],
+  "binaries": [
+    "assets/icon.png"
+  ],
+  "publicAddresses": [
+    "support@inbox-digest.example"
+  ],
+  "slots": [
+    {
+      "name": "MAIL_OAUTH",
+      "kind": "secret",
+      "purpose": "reads the mailbox the digest covers"
+    },
+    {
+      "name": "DIGEST_MODEL_KEY",
+      "kind": "secret",
+      "purpose": "writes the digest's summary",
+      "optional": true
+    },
+    {
+      "name": "MAILBOX_ADDRESS",
+      "kind": "config",
+      "purpose": "the mailbox the digest reads"
+    },
+    {
+      "name": "OWNER_LABEL",
+      "kind": "config",
+      "purpose": "the name the digest is addressed to"
+    },
+    {
+      "name": "SUPERVISOR_LABEL",
+      "kind": "config",
+      "purpose": "the supervisor's label for this installation"
+    },
+    {
+      "name": "DIGEST_JOURNAL",
+      "kind": "store",
+      "purpose": "the digests written so far",
+      "path": "journal.sqlite"
+    },
+    {
+      "name": "KNOWLEDGE_BASE",
+      "kind": "endpoint",
+      "purpose": "the operator's knowledge base the digest cites",
+      "optional": true
+    }
+  ]
+}

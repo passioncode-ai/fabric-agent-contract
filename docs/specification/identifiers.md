@@ -124,12 +124,20 @@ The rules that compare identifier-typed fields compare their normal forms (DEC-0
 
 - a repository identity (`normalizeOrigin`, [folder attribution](folder-attribution.md#the-repository-identity), DEC-0089):
   `host/path` from a remote URL with `A` to `Z` lower-cased (a non-ASCII letter keeps its case), compared as written
-  once built; it folds the path's case, so it is not the normal form above, which compares URIs;
+  once built; it folds the path's case, so it is not the normal form above, which compares URIs; it is also the
+  repository form of a source hand-over's `target` (an organization agent's private home made public or given new
+  readers outside the organization, [source](source.md#handing-over), DEC-0149);
 - a folder-attribution snapshot's Project ids (`id`, `explicit`, `work[].project`; [folder
   attribution](folder-attribution.md#the-snapshot), DEC-0089): each product's own opaque storage keys, matched byte for byte,
   even when one is shaped like a URI such as `project:<slug>`; the canonical id is Fabric's, the others its
   aliases (the run's D3 as the operator corrected it, Fabric ADR-0166's amendment);
+- a channel-agent declaration's `project` (`FAC-SEM-163`, [channel agent](channel-agent.md), DEC-0150): the registry
+  alias `project:<slug>`, whose pattern (`^project:[a-z0-9][a-z0-9._-]{0,127}$`) admits only its normal form, lower
+  case and with no percent-encoding, so comparing it as written is exact;
 
+- a source hand-over's decision `target` (`<agent>@<commit>-><recipient>`, or `sha256:` and its lowercase hex digest past
+  200 characters; [source](source.md#handing-over), DEC-0149): the action computes the same string and compares it
+  exactly, never case-folded or normalised;
 - board Project ids (`comms-common.schema.json#/$defs/projectId`, opaque) and capability names on a directory page
   (`FAC-SEM-107`, DEC-0077): neither is a URI;
 - context ids (`common.schema.json#/$defs/contextId`: `personal`, `org:<orgId>`; [contexts](contexts.md), DEC-0082) — a

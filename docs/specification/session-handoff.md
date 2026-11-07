@@ -35,7 +35,7 @@ The manifest's schema is
 ancestor of the folder holds `.git`. The folder is a folder, not a link to one. It is the host's material, not
 the project's, and a copy committed to a repository would be a stale copy of a moving store.
 
-**SH-2 — Modes.** On a POSIX host the folder is `0700` and every file in it `0600`: the files may hold a
+**SH-2 — Modes.** When the host runs on a POSIX system the folder is `0700` and every file in it `0600`: the files may hold a
 credential, and a listable folder still publishes the session ids. On Windows access is the profile's ACL and the
 modes are not checked.
 
@@ -134,6 +134,8 @@ checks a delegation token's shape — a JWS whose header is `{"alg": "EdDSA", "t
 whose payload has a numeric `exp` — and the server that receives it verifies the rest (DL-13: signature, audience,
 expiry). A secret in this folder is materialised for the session from a reference and removed with it (DEC-0013). A runtime that does
 not read this dialect is given the same servers in its own (SH-11); `mcp.json` stays the record.
+Before it writes `mcp.json` for a local server, the host checks that server's listener belongs to its own OS account
+([service](service.md#ha-2) HA-2, DEC-0154).
 
 `mcp.strict` is declared: whether the runtime is told to load only the handoff's servers. Fabric's launched
 sessions keep it (`--strict-mcp-config`); Dashboards' console does not. Where a runtime offers no such switch,

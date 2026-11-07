@@ -1,0 +1,14 @@
+{
+  "format": "fabric-source/1",
+  "include": [
+    "src/",
+    "README.md"
+  ],
+  "slots": [
+    {
+      "name": "JOURNAL",
+      "kind": "store",
+      "purpose": "the digests written so far"
+    }
+  ]
+}

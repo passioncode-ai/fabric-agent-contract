@@ -10,7 +10,7 @@ import { ruleCodeFindings } from "../src/rule-codes.js";
 const PIN = { contract: "fabric-agent-contract", version: "0.1.0", repository: "https://github.com/passioncode-ai/fabric-agent-contract", commit: "a5a27092ba0dcc5facfbeae8b359146dfb403e9a" };
 
 describe("G-08: one spelling of every extension key", () => {
-  it("names the service, interop, memory, dashboard, connections, load and actions keys on one host and path", () => {
+  it("names the service, interop, memory, dashboard, connections, load, actions, channel-agent and ops-digest keys on one host and path", () => {
     expect(EXTENSION_KEYS).toEqual({
       service: "https://fabric.passioncode.ai/agent-contract/extensions/service/0.1",
       interop: "https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1",
@@ -18,7 +18,9 @@ describe("G-08: one spelling of every extension key", () => {
       dashboard: "https://fabric.passioncode.ai/agent-contract/extensions/dashboard/0.1",
       connections: "https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1",
       load: "https://fabric.passioncode.ai/agent-contract/extensions/load/0.1",
-      actions: "https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1"
+      actions: "https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1",
+      channelAgent: "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1",
+      opsDigest: "https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1"
     });
   });
 
@@ -149,5 +151,23 @@ describe("pin:check: the pin is a commit of the contract's history", () => {
   });
   it("finds this repository's own main commit on its history", () => {
     expect(pinHistory("ca4cca7ad93183cdbd8c82084004222e6ba0383b", projectRoot()).state).toBe("on-history");
+  });
+});
+
+describe("the coverage floors (DEC-0149)", () => {
+  // A floor whose key matches no included file is never measured, so it passes silently: every key must be a file the
+  // coverage include reaches, and a file that exists.
+  it("name only files the coverage include reaches", async () => {
+    const config = (await import("../vitest.config.js")).default as { test: { coverage: { include: string[]; thresholds: Record<string, unknown> } } };
+    const { include, thresholds } = config.test.coverage;
+    const asPattern = (glob: string) => new RegExp(`^${glob.split("*").map((part) => part.replace(/[.+?^${}()|[\]\\]/g, "\\$&")).join("[^/]*")}$`);
+    const patterns = include.map(asPattern);
+    const files = Object.keys(thresholds).filter((key) => key.includes("/"));
+    expect(files.length).toBeGreaterThan(0);
+    const unmatched = files.filter((file) => !patterns.some((pattern) => pattern.test(file)));
+    expect(unmatched).toEqual([]);
+    for (const file of files) await expect(readFile(path.join(projectRoot(), file), "utf8"), file).resolves.toBeTypeOf("string");
+    // The check itself: a key no glob reaches is caught.
+    expect(patterns.some((pattern) => pattern.test("src/no-such-module.ts"))).toBe(false);
   });
 });

@@ -309,7 +309,7 @@ The board row is CT-57.
   session's usage and policy violations are not reported, and the per-day totals undercount it. Board row CT-64.
 - How a product learns the work records: Switchboard reads them from coding agents' transcripts (SB-131, SB-132).
 - Folders on network shares and case-insensitive file systems beyond the product resolving the real path.
-- Hosts that serve one repository under two URL shapes (Azure DevOps: `dev.azure.com/org/proj/_git/repo` and
+- Git hosting services that serve one repository under two URL shapes (Azure DevOps: `dev.azure.com/org/proj/_git/repo` and
   `ssh.dev.azure.com/v3/org/proj/repo`): today they are two identities, and the owner of the first reads as
   `org/proj/_git`.
 - While Fabric's hub runs: who records an answer of `fabric.project.resolve` whose record is not null (an attach, AT-14's

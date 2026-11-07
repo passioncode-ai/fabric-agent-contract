@@ -16,11 +16,11 @@ derived) and the operator's rulings of DEC-0017 (each marked as ruled).
 
 ## Extension key
 
-`https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1` (the same host and
+`https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1` (the same host name and
 path shape as the contract's `service/0.1` key; the Dashboards docs' other spelling is
 fixed in AR-1).
 
-The contract defines seven extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
+The contract defines nine extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
 
 | Key | Page |
 |---|---|
@@ -31,6 +31,8 @@ The contract defines seven extension keys, the constants in [`src/extensions.ts`
 | `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1` | [connections](connections.md) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` | [agent network](agent-network.md#load) (DEC-0104) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1` | [service](service.md#actions) (DEC-0121) |
+| `https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1` | [channel agent](channel-agent.md) (DEC-0150) |
+| `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1` | [operations digests](ops-digest.md#where-a-collector-reads-the-daily-digests) (DEC-0153) |
 
 The documentation gate (`pnpm docs:check`) refuses any other spelling of an extension key in
 this repository's documents, schemas and fixtures (G-08). The spelling Fabric Dashboards'
@@ -241,7 +243,11 @@ the same input never share a job (a node that queues keys its callers with `jobC
 network](agent-network.md#call-queue)). A key whose job ended `quota-exhausted` admits the same intent again once the limit no
 longer holds (the reset passed, or the person acted), and so does a key whose job ended `limit-reached` once its
 approval is granted: the provider runs it, once. A key whose job ended `outcome-unknown` is answered with that job
-again and never runs a second time. Any other key whose job ended is answered with that job.
+again and never runs a second time. Any other key whose job ended is answered with that job. A source hand-over is
+one synchronous call, never a job: a repeated key while the call is in flight is refused `unknown-state`
+(`handover-in-flight`), the same key with other arguments is refused `decision-invalid` (`idempotency-conflict`), and its
+key never stores a refusal or
+a failure before any effect, as [source](source.md#handing-over) specifies (DEC-0149).
 
 **Unknown is `null`.** In a job's or a result's `usage` ([`common.schema.json#/$defs/usage`](../../schemas/common.schema.json)),
 `inputTokens`, `outputTokens`, `cacheReadTokens`, `cacheWriteTokens`, `costUsd` and `wallMs` are `null` when nobody
@@ -270,7 +276,13 @@ A job or call that needs a person returns `input_required` with MCP
 elicitation `inputRequests` in **form mode**; a choice is a single-select enum with titles
 (`oneOf: [{const, title}]`). Fabric maps it to an interaction point (ADR-0017) and answers with
 `tasks/update` (Task) or `fabric.job.get` + `inputResponses` (job handle). **FAC-SEM-018** form
-mode never requests a secret (MCP rule); secrets use URL mode. A job whose start call carried the operator's mandate
+mode never requests a secret (MCP rule); secrets use URL mode. A source hand-over, one synchronous call, elicits in-call instead:
+an MCP `elicitation/create` sent within its own `tools/call`, in form mode under these constraints
+([source](source.md#handing-over), DEC-0149). AP-2's elicitation for other relayed actions (DEC-0121) is unchanged; the
+source hand-over's in-call elicitation adds no route for them and removes none. For the source hand-over's in-call
+elicitation only, a client with no person at it cancels it, which means no choice was made
+([source](source.md#handing-over)); AP-2 stays unchanged for every other job and input request, where this section reads
+a cancel as the person's no. A job whose start call carried the operator's mandate
 for its task reads it at its own approval step: a step the mandate covers raises no input request and goes on as the
 operator's decision; a step it does not cover waits `input_required` as here, its message naming the part not covered,
 and its answer may carry a mandate that covers it in the `_meta.mandate` of the `fabric.job.get` call
@@ -317,12 +329,13 @@ each in the `structuredContent` of an `isError` tool result:
 
 | Code | Meaning | Who answers | What the caller does |
 |---|---|---|---|
-| `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without a decision, or the caller's mandate does not cover the call (`data.detail` `outside-mandate: <part>`, DEC-0125) | the service | hands on again within its own mandate when that covers the call; otherwise asks the operator for that part and calls again with their answer in `_meta.decision` or a mandate that covers it |
-| `decision-invalid` | the decision is not valid against its schema, names another action or another object, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it; or the mandate is not valid (`data.detail` `mandate-*`, DEC-0125) | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3) |
+| `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without a decision, or the caller's mandate does not cover the call (`data.detail` `outside-mandate: <part>`, DEC-0125); a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149) | the service | hands on again within its own mandate when that covers the call; otherwise asks the operator for that part and calls again with their answer in `_meta.decision` or a mandate that covers it; for a source hand-over, as [source](source.md#handing-over) specifies |
+| `decision-invalid` | the decision is not valid against its schema, names another action or another object, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it; or the mandate is not valid (`data.detail` `mandate-*`, DEC-0125); a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149) | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3); for a source hand-over, as [source](source.md#handing-over) specifies |
 | `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one | the service, with `error.data.humanStep` and `error.data.url`, the direct link to the step | hands the person that link |
 
 A `relayed` action from a T2 caller keeps [delegation](delegation.md#refusal-codes)'s `approval-required` (DL-17); its
-`_meta.decision` changes nothing. `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference, with
+`_meta.decision` changes nothing; a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149).
+`actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference, with
 the vectors [`actions.json`](../../fixtures/vectors/actions.json) (DEC-0121).
 
 ## C3.4 Trace
