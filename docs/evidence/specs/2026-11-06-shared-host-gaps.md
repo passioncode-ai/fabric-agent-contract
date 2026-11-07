@@ -61,7 +61,8 @@ loopback; that assumption is the root of G1 to G3.
   descriptor's `origin`. An installer keeps the port its own `id.instance` records when that instance's listener holds
   it or nothing does; it chooses a new port, free on the computer (not listening, in no other `id.instance`'s
   descriptor, named by no claim of another account or of another service in this account), only when none is recorded
-  or another holder has it (another account's claim unless the instance's own listener holds it). It writes a claim
+  or another holder has it (a claim of another account or of another service in this account, unless the instance's
+  own listener holds it). It writes a claim
   `.passioncode-ports.<service-id>.<account>.json` in the computer's shared sticky folder (`<account>` the numeric uid,
   or the SID on Windows, never a login name that can be renamed), owned by that account, holding only
   `{schema, service, account, ports, updatedAt}`; the installer writes it at install, and the service itself

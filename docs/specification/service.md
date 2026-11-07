@@ -591,8 +591,8 @@ a computer with more than one counted account.
 own state and in its descriptor's `origin`. An installer keeps the port its own `id.instance` already records (in its
 descriptor, its own state or its claim) when that instance's own listener holds it or nothing does. It chooses a new
 port only when none is recorded, or when another holder has the recorded one: another `id.instance`'s descriptor in
-this account's services directory (`FAC-SEM-010`), another account's claim (unless the instance's own listener holds
-it), or another listener. A new port is free on the computer: no process listens on `127.0.0.1:<port>`, no other
+this account's services directory (`FAC-SEM-010`), a claim of another account or of another service in this account
+(unless the instance's own listener holds it), or another listener; "nothing does" means none of these. A new port is free on the computer: no process listens on `127.0.0.1:<port>`, no other
 `id.instance`'s descriptor declares it, and no port claim of another account, or of another service in this account,
 names it. When it records a port it writes its descriptor and then this account's **port
 claim**, rebuilt atomically from all this service's descriptors in the account, as at start; and at uninstall it rebuilds
@@ -646,7 +646,8 @@ the claim from what remains:
   remains.
 - An ephemeral port that the listener protects with a proof (a fresh challenge answered with an HMAC, as below) needs
   no claim: nothing records it, and a client finds it only through the record the service writes.
-- A computer with one counted account keeps a service's historical default port, which its instance records.
+- A computer with one counted account keeps a service's historical default port, which its instance records, under
+  the same keep rule.
 - A client takes a service's port only from its descriptor or the service's own record, never from a formula. A
   formula over the account's uid (Fabric's hub, CO-505) is an allowed default only when the port it gives is recorded,
   claimed and checked free as above.

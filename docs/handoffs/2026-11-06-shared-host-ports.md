@@ -294,11 +294,19 @@ Proposed DEC on its own branch, and files the rest.
   says (CT-228's vectors name the case); item 2 states the order's scope as the specification does; the threat model
   puts HA-1 and HA-2 on every computer; Fabric Dashboards' `.mac` line (`i18n.ts:129`) and narrower line ranges
   (`look.ts` 91 to 99, `state.ts` 68 and 69).
-- Round 24 at `ab89d8a1`: not clean (product one break; unit and seam reported separately). The gap spec's G1 still
+- Round 24 at `ab89d8a1`: not clean (product one break, unit two, seam three). The gap spec's G1 still
   gave the free-port test before W87 (no claim of another service in this account). W88 brings G1 to item 1's words
   and folds the risks: the glossary's port claim covers two services in one account; the conformance installer row
   says HA-1's choose and free-port rules word for word; CT-228's "released <tag>" is added after the tag, in the
   release's follow-up change; CT-229's reference places `duplicate` after `foreign`.
+- Round 24, unit and seam: CT-228's acceptance check matched "accepted" in the row's description, so it could not
+  fail; HA-1's holder list left out this account's claim of another service, which the free-port test counts (seam
+  also found the gap spec's G1, already fixed by W88); main's CT-251 and this branch's CT-232 pointed by line number
+  into pages the landing moves. W89 anchors the check on the state cell and checks the README row and the title,
+  names the claim of another service among HA-1's holders in the specification, item 1, the gap spec and the
+  conformance row (with "nothing does" meaning none of them, the historical default port under the same rule, and
+  CT-228's vector answering a new port), and names CT-232's conformance row; main's CT-251 names its sections in
+  PR #247 (`2966a3a2`).
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -420,7 +428,8 @@ Proposed DEC on its own branch, and files the rest.
   schema and the port-choice reference with vectors", with no "Proposed", "Paused" or pre-acceptance next task left
   in it; the release below adds ", released <tag> (main <merge commit>)" after the tag is pushed, in the same
   follow-up change as its release notes, so main never names a tag that does not exist yet. On the landing head `grep '^| CT-228 ' docs/backlog.md | grep -c -E 'Proposed|Next task: the full gate'`
-  prints 0 and `grep '^| CT-228 ' docs/backlog.md | grep -c 'accepted'` prints 1.
+  prints 0 and `grep '^| CT-228 ' docs/backlog.md | grep -c '| open: DEC-0154 accepted [0-9]'` prints 1; `grep -c 'DEC-0154, proposed'
+  docs/handoffs/README.md` and `head -1 docs/handoffs/2026-11-06-shared-host-ports.md | grep -c proposed` print 0.
 - **"proposed" markers.** Every "DEC-0154, proposed" (and "DEC-0154 (proposed)", "DEC-0154 item 4, proposed") in the
   specification changes at acceptance. Find them on one line with
   `git grep -n proposed -- docs/specification docs/guides docs/DOCMAP.md CONTEXT.md schemas src tools | grep DEC-0154`,
@@ -720,6 +729,11 @@ vectors (31 files), privacy (0 findings) and the tests that read the edited page
 prints nothing; the shared block is in the handoff once, byte for byte; the SH-2 line is still the one added line
 with U+2014.
 
+At W88 (`60b3309e`), with a 15-minute load of 43.9 and 9 GB free, the full gate ran under the heavy lock: typecheck,
+111 test files (10548 passed, 1 skipped; branches 98.92%), the UX lint, the documentation checks, vectors and privacy
+all exit 0; the one added line with U+2014 is the SH-2 label. After W89 (text only) the UX lint, the documentation
+checks, vectors, privacy and the tests that read the edited pages passed again.
+
 ## Next task
 
 The coordinator's next blind readings of DEC-0154 at this branch's head.
@@ -760,3 +774,6 @@ risks are folded in. Next: round 24 at that head, the full gate when the load al
 
 W88 at the next head: round 24's break (the gap spec's G1) and its risks are folded in. Next: round 25 at that head,
 the full gate when the load allows.
+
+W89 at the next head: round 24's unit and seam breaks are folded in, and the full gate passed at W88. Next: round 25
+at that head.
