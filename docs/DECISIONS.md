@@ -10255,8 +10255,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      declaration's `project`. Until every reader of its feed it knows of has adopted DEC-0151, a producer publishes no `project` and withholds every channel whose day holds tickets of two projects that enter `/1`, counting every project whose tickets the channel holds: by its channel agent declaration where the declaration names the project, by its own project mapping otherwise (no declaration, no alias, or an alias read as a credential); a project whose kind there is left out of `/1`, such as `team_chat`, does not count. The switch day of a channel moving from one project to another is one of them, and a withheld day is dropped, never published later.
      Once every reader has adopted, it names `project` on every day it first publishes, whatever the number of
      projects on the channel, except a project with no registry alias (rule 9).
-     A reader never attributes a day without `project` to a project: it keeps such a day (published before adoption, a
-     merged legacy day, or a rerun of one) per service, channel and day, and per-project history starts at adoption,
+     A reader never attributes a day without `project` to a project, and does not read a producer's day missing before
+     that producer's adoption as an outage (it may be one rule 1 withholds): it keeps such a day (published before
+     adoption, a merged legacy day, or a rerun of one) per service, channel and day, and per-project history starts at adoption,
      the same for every reader. A rerun republishes a day as first published. With `project` (DEC-0151), a project's event carries the latest calibration of the side whose judge and rubric judge its tickets, on every day it still holds for (DEC-0144's carry-forward), whether or not anything was judged that day; a project of a side with no calibration carries none, and a producer with no declaration carries its calibration likewise on each project's event. The rules are held by
      [support quality](specification/support-quality.md#the-project-dec-0151). The top level then holds 19 members,
      inside DEC-0070's 32.

@@ -1270,6 +1270,14 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(pattern).toBeDefined();
     expect(JSON.parse(`"${pattern}"`)).toBe(((support.$defs as Json).projectAlias as Json).pattern);
   });
+  it("gives no rename advice to an id that starts with an upper-case SK-, which DEC-0151 reads as no key", () => {
+    const run = ["Q7r2", "aB3c", "D4eF", "5gH6"].join("").repeat(3);
+    const id = ["SK", "-", run].join("");
+    const channel = { ...value.projects[0].channels[0], id };
+    const found = channelAgentRules({ extensions: { [KEY]: { ...value, projects: [{ ...value.projects[0], channels: [channel, value.projects[0].channels[1]] }] } } }, "well-known").filter((f) => f.code === "FAC-SEM-165");
+    expect(found).toHaveLength(1);
+    expect(found[0]?.message).not.toContain("rename it");
+  });
   it("tells the author of an id that starts with sk- to rename it", () => {
     const id = "sk-support-desk-faq-answers-2026-v2";
     const channel = { ...value.projects[0].channels[0], id };

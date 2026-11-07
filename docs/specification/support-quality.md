@@ -134,6 +134,8 @@ DEC-0151 item 6, its Compatibility and CT-210 point here; where they repeat a ru
    without `project` as rule 3 says. A reader on the channel agent standard combines only projects of one side, the side
    taken from the channel agent declaration or from the signal server; it never combines a day without `project` with
    other days across services or channels under the standard's side rule, and keeps such a day out of side summaries.
+   A day missing from a producer before that producer's adoption may be one rule 1 withholds, so a reader does not
+   read it as an outage.
 6. **Calibration** (DEC-0144), per side (a side as the channel agent standard's section 1 defines it,
    [`2026-11-04-channel-agent-standard-v1-rc.md`](../evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md), added by DEC-0150): With `project` (DEC-0151), a project's event carries the latest calibration of the side whose judge and rubric judge its tickets, on every day it still holds for (DEC-0144's carry-forward), whether or not anything was judged that day; a project of a side with no calibration carries none, and a producer with no declaration carries its calibration likewise on each project's event. A reader reads calibration per project's event, never summing or copying it across projects.
 7. **An alias read as a credential**: the paragraph on credentials under [the payload](#the-payload) holds the rule.

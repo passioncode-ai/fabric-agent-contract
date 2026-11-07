@@ -309,6 +309,13 @@ loop (its v1 release candidate, section 5) a home in `support-quality-daily/1`, 
   at-landing board post, vendor rows and plan marks named in Next task; the reader row reads a missing day before
   adoption as possibly withheld; SCN-002's Coverage names the interim test; the Consequences list completed. Left as a
   risk: the interim message's wording (DEC-0151's Compatibility quotes it as written).
+- Round 18 (on `e0fb6d37`): unit and seam clean; the product tier found two breaks, fixed: the reader row's rule (a day
+  missing before adoption is no outage) stated only in conformance (now support quality's rule 5, DEC-0151 item 6 and
+  CT-210 (b)), and the DEC-0044 and DEC-0095 annotations left saying "(proposed)" at landing (now in Next task, with the
+  closing grep on DECISIONS.md). Risks folded: SCN-002 names the call and one line per metric; DOCMAP's detector row
+  names DEC-0151; a test that an upper-case `SK-` id gets no rename advice. Filed to CT-267: an AT-15 case whose inner
+  key takes the 32-character branch, so a port without the inner retry fails it. Left as a risk: DEC-0150's cost model
+  charges 255 units per boundary `sk-` where the look-ahead may probe 259 (a constant factor, predating this branch).
 - The collision check, by name, of every other new DEC-0151 member against the v2 fields: the evidence is the
   channel agent standard's section 5.1 table (DEC-0150's copy, `docs/evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md`
   at `388f2b42`), which marks every member new except `autonomy.answered` and
@@ -728,7 +735,7 @@ the added lines.
 
 ## Next task
 
-Round 18 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers (round 17 was not clean on
+Round 19 of the readings of branch `agent/sqd-fields-20261104` (DEC-0151) by blind readers (round 18 was not clean on
 the product tier), until two consecutive rounds are clean, with the full coverage run at low load; open the pull
 request (DEC-0150 is on main, so the merge gate holds) and merge. The landing commit, before the merge:
 
@@ -737,13 +744,15 @@ request (DEC-0150 is on main, so the merge gate holds) and merge. The landing co
   in `docs/handoffs/README.md`.
 - DEC-0151's Source and CT-210's status record the rounds from 16 on and the two clean ones, and "two consecutive clean
   rounds are still owed" goes; the Consequences list stays complete.
-- The dates of the three Annotated lines this branch adds under DEC-0096, DEC-0150 and DEC-0153 ("DEC-0151 has merged", "has
+- The two Annotated lines this branch adds under DEC-0044 and DEC-0095 restated as merged, with the merge date (the
+  DEC-0095 one pointing to support quality's project section instead of paraphrasing rules 1 and 2), and the dates of
+  the three Annotated lines under DEC-0096, DEC-0150 and DEC-0153 ("DEC-0151 has merged", "has
   landed") set to the merge date, so the append-only register keeps a true date.
 - The knowledge base (fabric-workspace `knowledge/roadmap.md`): AS-01 and the Agent assessment sentence ("publishes one
   `support.quality_daily` per channel and closed day") both say per channel, project once adopted, and closed day.
 - Closing check on the landing commit: `grep -nE 'DEC-0151 \(proposed|DEC-0151, proposed|branch \`agent/sqd-fields-20261104\`'
   docs/backlog.md docs/handoffs/README.md docs/specification CONTEXT.md` prints nothing, and `grep -n -A2 '^### DEC-0151'
-  docs/DECISIONS.md` shows the Status Accepted, and `awk '/^### DEC-0151/,/^### DEC-0152/' docs/DECISIONS.md | grep -c
+  docs/DECISIONS.md` shows the Status Accepted, `grep -c 'DEC-0151 (proposed' docs/DECISIONS.md` prints 0, and `awk '/^### DEC-0151/,/^### DEC-0152/' docs/DECISIONS.md | grep -c
   'still owed'` prints 0.
 
 Then release, and answer thread `b6820b97` with the tag. At landing also: CT-210 (f), the post to each multi-project
