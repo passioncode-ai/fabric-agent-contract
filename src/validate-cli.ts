@@ -451,7 +451,9 @@ function checkFileAs(run: Run, file: string, relative: string, schemaArg: string
   // A source check prints no hint of any kind: a hint quotes the document's own keys and values.
   if (sourceCheck(file, schema, kindArg)) return { file, relative, value, schema };
   const hints: Hint[] = [];
-  extensionHints(value, "", hints);
+  // A bare channel-agent declaration gets no extension hint: its schema declares no `extensions`, so every such hint
+  // would be about a member the schema refuses, and it would quote that member's name or key (DEC-0150).
+  if (schema !== "service-channel-agent-extension.schema.json") extensionHints(value, "", hints);
   profileHints(schema, value, hints);
   // A hint is advice, never a failure: a vendor key the contract does not know is legal, so a near miss is reported
   // beside the result and the exit code ignores it.

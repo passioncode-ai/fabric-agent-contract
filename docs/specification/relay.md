@@ -610,8 +610,8 @@ a failure otherwise (a private half it cannot read, or one that does not match t
 machine's key"). Where the hub serves `fabric-service/0.1`, either entry shows on its well-known document and in the
 dashboard; otherwise it shows where the hub shows its state (for Fabric's hub, SCR-23 below). A watcher messages the
 operator only for an agent unavailable, as [service](service.md#well-known-document) defines it, for more than 15
-minutes (DEC-0149 and [service](service.md#well-known-document); Fabric Dashboards' watcher opens an episode only for
-`down` since its FD-76 and keeps it open while a failing source (one not marked `setup: true`) outside its start
+minutes (DEC-0149 and [service](service.md#well-known-document); Fabric Dashboards' watcher opens an episode for
+`down` since its FD-76, and for `foreign` and `foreign-user` since its FD-159 (0.8.30), and keeps it open while a failing source (one not marked `setup: true`) outside its start
 baseline stays, so its failure message at 15 minutes may name that source), and a `degraded` entry opens no message, so DL-15's switch, and a move's
 step 6 and its division, waiting on reports are seen where the entry shows; whether a hub's machine-report failure is
 messaged is owed by CT-244, which starts from the operator's recorded rule that a failure lasting over 15 minutes is

@@ -383,6 +383,12 @@ Proposed DEC on its own branch, and files the rest.
   `foreign-user` is owed (DEC-0154).
   ```
 
+  Since Fabric Dashboards 0.8.30 (FD-159, `e23551e8`, 2026-11-07) counts `foreign` and `foreign-user` as unavailable,
+  DEC-0149's round 79 (item DR) restates the second sentence: "Fabric Dashboards' watcher opens an episode for `down`
+  since FD-76 (0.7.15, `ebffd16`), and for `foreign` and `foreign-user` since FD-159 (0.8.30, `e23551e8`), and keeps it
+  open while a failing source (one not marked `setup: true`) outside its start baseline stays, so its failure message
+  at 15 minutes may name that source." The two checks below are unchanged.
+
   After both land, run in bash or zsh: the first command prints 1 and the second prints 0 (the released watcher
   reports only `down`). The second reads the file as one line, so a line break anywhere in a wrong landing is still
   found. When it prints 0 it also exits with status 1 (`grep -c` with no match), so do not run it under `set -e`:
@@ -578,7 +584,7 @@ other's result; the edit depends on the text, so a second run changes nothing.
 The clause sits twice in `knowledge/authority.md` (PR #628; lines 115 and 128 at `d2a6d9f4`, which
 move when the knowledge base's main is merged in, so the clause check finds them by text). From: "counting `foreign`
 and `foreign-user` is proposed for FD's watcher in contract DEC-0154". To: "counting `foreign`
-and `foreign-user` is owed by FD's watcher under contract DEC-0154" (no inner parentheses: the
+and `foreign-user` is done by FD's watcher since its 0.8.30, FD-159, under contract DEC-0154" (no inner parentheses: the
 clause sits inside a bracket that closes right after it).
 
 Status check, in the contract checkout. It matches any Status line in DEC-0154's block that
@@ -621,7 +627,7 @@ edit, runs nothing. Run it in `bash` and in `zsh`:
 ```sh
 git fetch origin && git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'
 git show origin/main:knowledge/authority.md \
-  | grep -cF "counting \`foreign\` and \`foreign-user\` is owed by FD's watcher under contract DEC-0154"
+  | grep -cF "counting \`foreign\` and \`foreign-user\` is done by FD's watcher since its 0.8.30, FD-159, under contract DEC-0154"
 ```
 
 The first prints 0 and the second prints 2. The first `grep -c` exits 1 when it prints 0, so

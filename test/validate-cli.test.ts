@@ -80,6 +80,16 @@ describe("every positive fixture passes", () => {
       const declaration = json("positive/service-channel-agent-extension.json");
       if (at === "top") declaration[name] = 1;
       else declaration.projects[0].channels[0][name] = 1;
+      runAndCheck(declaration, at);
+    }
+    // Nor through an extension hint: a member holding `extensions`, or an extension key carrying the name.
+    const holding = json("positive/service-channel-agent-extension.json");
+    holding[name] = { extensions: { "https://fabric.passioncode.ai/extensions/x": 1 } };
+    runAndCheck(holding, "top");
+    const keyed = json("positive/service-channel-agent-extension.json");
+    keyed.extensions = { [`https://fabric.passioncode.ai/extensions/${name}`]: 1 };
+    runAndCheck(keyed, "top");
+    function runAndCheck(declaration: Record<string, any>, at: "top" | "channel"): void {
       const result = run(one("declaration.json", declaration), "--schema", "service-channel-agent-extension.schema.json");
       expect(result.code, at).toBe(1);
       expect(result.out, at).toContain("has a member the schema does not define");

@@ -510,7 +510,15 @@ source, what never travels with it, the check before a source export, and how a 
   state restated, the Status and the CT-109 bullet saying the `$comment` came with DEC-0153, ops-digest.md naming the
   import, the order-1 measurements dated and restated, a JWT-only dir test, `keyShaped`'s comment, the clause named by
   text in the shared block, the landing rows from CT-254, the three 2026-11-07 dates and the Annotated line's date set
-  at landing, PR #628's item 9 pointing to CT-250, and DEC-0152's adjacent backlog rows; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
+  at landing, PR #628's item 9 pointing to CT-250, and DEC-0152's adjacent backlog rows; round 79 at `9c0ffbe0` (not clean: unit FAIL, a bare
+  channel-agent declaration's extension hint still quoting an undeclared member; product FAIL, the Next task naming
+  round 78 and PR #628's description; seam FAIL, Fabric Dashboards 0.8.30 (FD-159, `e23551e8`) counting `foreign` and
+  `foreign-user`, which made "owed" false) answered as decided in item DR: no extension hint on that path, with two
+  tests; the Next task and PR #628's description in step 6; the watcher sentence in `service.md` and `relay.md` and
+  the clause rule's To text (both handoffs) restating FD's released count, an Annotated line under DEC-0154, step 6
+  rewriting PR #628's episode lines; DEC-0153's Annotated line naming `hasJwt`; the rounds count; the Open bullet's
+  owner and the owed scenario; the README's CT-244; the Compatibility's checker changes and the import; the affects
+  list; the fourth landing row citing 0.8.30; round 1's `humanStep: "setup"` widening was reversed in round 2 and every file it touched
   is back to `main`.
 
 - Also in this change: the AP-2 note and the actions-table note in `service.md`, and `connections.md`'s id grammar
@@ -525,7 +533,9 @@ source, what never travels with it, the check before a source export, and how a 
   ids are written here, in the landing change (CT ids pending).
 - A structured marker for a refusal that is a setup answer (a missing slot) is left open: by DEC-0149's choice the tool
   error carries none, so a caller or host that sees only the error cannot tell a setup answer from a failure. It is for
-  CT-208 (Fabric) and CT-219 (not on this branch; on main or its own branch at landing) to take up.
+  CT-208 (Fabric) to take up (CT-219 is done with DEC-0153). The person's side of "Starting without the instance" (an
+  agent shown degraded with setup entries named by slot, a capability answering that a person must finish the setup)
+  has no scenario in `docs/ux`: it is owed with CT-208's screens and CT-207's templates.
 - CT-205 (from PR #236, merged) gets the hand-over exclusion when main is merged in: see the CT-205 row edit and its
   grep in the merge notes below.
 - Two changes outside source checks. First, a plain folder run (`pnpm validate <dir>`) skips a `.json` entry that
@@ -1502,8 +1512,8 @@ Paused on 2026-11-06 by the operator's relay in board thread `eefa7959` (about 1
 session `74a9440a`), and resumed on 2026-11-07 by the operator's own word in the coordinator's session («делай
 автономно до конца», a direct request, one of the pause's exceptions). DEC-0154 landed first (PR #248, main
 `18f8d487`, `v0.1.0+2026-11-07.1`); main `40a0ddb8` is merged into this branch at `b963d6a6` (step 2's merge done,
-its checks in Checks actually run). The exact next task: blind readings round 78 (unit, product, seam) at this
-branch's head, then two clean rounds and the remaining steps below. After the landing post, once the coordinator
+its checks in Checks actually run). Round 78 at `d9ffe3f5` was not clean, fixed by item DQ; round 79 at `9c0ffbe0` was
+not clean, fixed by item DR. The exact next task: blind readings round 80 (unit, product, seam) at this branch's head, then two clean rounds and the remaining steps below. After the landing post, once the coordinator
 answers, `git show origin/main:knowledge/north-star.md | grep -c 'DEC-0149 and DEC-0154'` on the knowledge base's main
 prints 0 (DEC-0154's knowledge-base post, message `f83a171c` on `eefa7959`, asked the coordinator to drop DEC-0149 from
 `north-star.md` 262 and 521 once DEC-0149 lands).
@@ -1519,7 +1529,7 @@ remaining steps, in order:
    them only if agent-sync accepts them, and then `git ls-remote origin 'refs/agent-sync/leases/*'` lists them before
    the step 5 commit.
 2. Before this step, bring PR #628 up to the knowledge base's main (the coordinator's round-39 note asks for it rebased:
-   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 75 into `5bec3daf`, which carries main's `80d46916` (the PR's head `a778f02b`),
+   its item 8's last line differed and GitHub read its mergeability as UNKNOWN; this run merged main in again, last at round 75 into `5bec3daf`, which carries main's `80d46916` (the PR's head `a778f02b` then, `d2a6d9f4` since round 76; the knowledge base's main is `60c630db` at round 79),
    and a rebase of that shared branch would take a force-push, which the rules forbid, so re-measure and merge main
    in again if it moved). PR #235 (DEC-0148) and DEC-0150 are already on main (`1016f0ec` when re-measured in round
    50), so nothing is refreshed for them. Merge the current `origin/main` (re-measured at landing; `1c141418` as of round 61, or later) into the fresh branch
@@ -1557,7 +1567,15 @@ remaining steps, in order:
    line to the landing round. The knowledge base's main since `80d46916` holds `authority.md`'s "Access levels"
    (operator, 2026-11-06), which names no exception for a source hand-over: add to PR #628's item 9 that whether a
    caller's access level stands as the operator's word for a hand-over is decided by the contract's CT-250 with the
-   operator, and that until then only the operator's own word for the act does. The order of the two merges is mandatory (round 65, CJ and CL): the contract PR first,
+   operator, and that until then only the operator's own word for the act does. Rewrite PR #628's description before
+   merging it: the rule's home is item 9 (main's item 8 is another rule), the contract PR merges first and PR #628
+   straight after in the same session, the permission covers rewriting mechanics file by file (round 42 withdrew
+   copying), and the head and the three greps' counts are the current ones; then
+   `gh api repos/passioncode-ai/fabric-workspace/pulls/628 --jq .body | grep -c -e 'immediately before the contract' -e 'item 8' -e 'or copied'`
+   prints 0. Rewrite PR #628's two episode lines in `knowledge/authority.md` (FD-76 opens an episode only for `down`
+   today) to Fabric Dashboards' released watcher: an episode for `down` since FD-76 and for `foreign` and `foreign-user`
+   since FD-159 (0.8.30); `git show HEAD:knowledge/authority.md | grep -c 'only for .down. today'` then prints 0. The
+   order of the two merges is mandatory (round 65, CJ and CL): the contract PR first,
    then PR #628 straight after, one after the other in the same landing session, since PR #628 points at `service.md`'s
    definition of unavailable and at `source.md#handing-over`, which the contract's main carries only once the contract
    has landed. If main moved after step 5, merge it into the contract PR and re-run the merge gate before merging it.
@@ -1568,7 +1586,7 @@ remaining steps, in order:
    knowledge base's `npm test` and `npm run verify:content` on that head (round 75), and push; if it prints 0, leave
    PR #628 as it is (round 71, DK; round 72, DL). Merge PR #628. Then, once PR #628 is merged, fetch the knowledge base checkout (`git fetch origin`), and run its three greps on the knowledge base's main (`git show
    origin/main:knowledge/agents-first.md | grep -n 'source hand-over'`, the same for `knowledge/principles.md` and
-   `knowledge/rules.md`; at PR #628's head, re-measured at landing (`a778f02b` in round 75, which carries the
+   `knowledge/rules.md`; at PR #628's head, re-measured at landing (`d2a6d9f4` since round 76, which carries the
    knowledge base's main `80d46916`; when that main has moved, merge it in first), they print 4, 4 and 5
    lines, rules section 9's "never publish" sentence having gained the hand-over exception in round 38 and principles
    section 7 and rules section 9 their two named exceptions in round 59), and `grep -c 'own estate'` on the same three pages
@@ -1613,7 +1631,8 @@ floor, and Windows has no floor), and its decision a test seam beside `gitLimits
 that answers `ETIMEDOUT` to a chosen call; the code is not changed in this landing (round 65, item CN). At landing,
 file a fourth backlog row under the next id above that one (CT-257 or above, re-measured the same way): "Decide
 whether Fabric Dashboards counting a degraded continuation, or a `down` within the 15-minute calm, counted toward
-the 15 minutes from the episode's first `down` look, conforms", its sources fabric-dashboards main `a0bc160`
+the 15 minutes from the episode's first `down` look, conforms", its sources fabric-dashboards `v0.8.30` (`e23551e8`; the same continuation since then follows a `foreign` or
+`foreign-user` opening too, so the row asks about all three) and, before it, main `a0bc160`
 `src/core/outage-alerts.ts` lines 112 to 129 and 156 to 160 and the rule
 in `service.md` that a watcher messages the operator only when an agent has been unavailable for more than 15
 minutes (round 67, item CW: within one run of the service, the same `startedAt`, a `down` of 1 minute followed by 14
@@ -1686,7 +1705,7 @@ prints 1 and `grep -c '^<<<<<<<' docs/specification/service.md` prints 0 (both r
 merge-tree). Where its lines meet this landing's elsewhere: the coverage `include` of `vitest.config.ts` (the union
 keeps `src/host-label.ts`, `src/validator.ts`, `src/channel-agent.ts` and `src/ops-digest.ts`), the handoffs README
 row, and the tails of `docs/DECISIONS.md` (ordered through DEC-0154) and `docs/backlog.md` (in id order). DEC-0154's handoff also
-names the watcher sentence in `service.md`, DEC-0149's watcher text (`service.md` lines 222 to 225 on this branch).
+names the watcher sentence in `service.md`, DEC-0149's watcher text (the sentence starting "A watcher messages the operator only when" in `service.md`).
 Both orders are written here, each with its landed text and its checks (round 68, DB); DEC-0154's handoff describes
 both orders with the same landed texts and checks (byte-identical after joining, at DEC-0154's head when last measured, `3c1ea1f8` in round 70's seam reading;
 re-measured at landing; round 69, DH, and round 70). In both, the first sentence keeps everything but its subject and its
@@ -1766,6 +1785,20 @@ edit of its own there. After that one edit `relay.md`'s
 machine-report paragraph and `conformance.md`'s watcher row follow `service.md` by themselves: since round 63 they name
 no state and point at the definition in `service.md`. Every head here is re-measured at landing.
 
+**Since Fabric Dashboards 0.8.30 (round 79, item DR).** FD-159 (0.8.30, `e23551e8`, 2026-11-07) counts `foreign` and
+`foreign-user` as unavailable, so "is owed (DEC-0154)" no longer holds. The second sentence on this branch now reads
+(the first is order 1's, unchanged):
+
+```text
+Fabric Dashboards' watcher opens an episode for `down` since FD-76 (0.7.15, `ebffd16`), and for `foreign` and
+`foreign-user` since FD-159 (0.8.30, `e23551e8`), and keeps it open while a failing source (one not marked `setup: true`)
+outside its start baseline stays, so its failure message at 15 minutes may name that source.
+```
+
+Order 1's two checks still print 1 and 0; `tr '\n' ' ' < docs/specification/service.md | tr -s ' ' | grep -cF 'is owed (DEC-0154)'`
+prints 0, and `grep -c FD-159 docs/specification/service.md docs/specification/relay.md` prints 1 for each. `relay.md`'s
+machine-report paragraph names FD-159 too.
+
 ### The knowledge-base clause rule (the same block in DEC-0149's and DEC-0154's handoffs)
 
 This block is byte-identical in `docs/handoffs/2026-11-03-source-manifest.md` (DEC-0149) and
@@ -1777,7 +1810,7 @@ other's result; the edit depends on the text, so a second run changes nothing.
 The clause sits twice in `knowledge/authority.md` (PR #628; lines 115 and 128 at `d2a6d9f4`, which
 move when the knowledge base's main is merged in, so the clause check finds them by text). From: "counting `foreign`
 and `foreign-user` is proposed for FD's watcher in contract DEC-0154". To: "counting `foreign`
-and `foreign-user` is owed by FD's watcher under contract DEC-0154" (no inner parentheses: the
+and `foreign-user` is done by FD's watcher since its 0.8.30, FD-159, under contract DEC-0154" (no inner parentheses: the
 clause sits inside a bracket that closes right after it).
 
 Status check, in the contract checkout. It matches any Status line in DEC-0154's block that
@@ -1820,7 +1853,7 @@ edit, runs nothing. Run it in `bash` and in `zsh`:
 ```sh
 git fetch origin && git show origin/main:knowledge/authority.md | grep -c 'proposed for FD'
 git show origin/main:knowledge/authority.md \
-  | grep -cF "counting \`foreign\` and \`foreign-user\` is owed by FD's watcher under contract DEC-0154"
+  | grep -cF "counting \`foreign\` and \`foreign-user\` is done by FD's watcher since its 0.8.30, FD-159, under contract DEC-0154"
 ```
 
 The first prints 0 and the second prints 2. The first `grep -c` exits 1 when it prints 0, so
@@ -1859,7 +1892,8 @@ with `origin/main`, read from the section "Left to the landers of DEC-0149 and D
    and that `src/ops-digest.ts` then imports `./source-rules.js`, so a consumer copying it needs `source-rules.ts` beside
    it.
 2. The JWT test: `digestFoldersRules` calls `hasJwt` in place of `JWT_SHAPE.test`, the import dropped, and the OD-2
-   and `FAC-SEM-167` sentences of `ops-digest.md` name `hasJwt`.
+   and `FAC-SEM-167` sentences of `ops-digest.md` name `hasJwt`; DEC-0153 item 3 gets the same through the Annotated
+   line of step 3.
 3. The mirror lines: every in-progress marker after a DEC-0149 citation on main dropped (ops-digest.md, the comments
    of `src/ops-digest.ts`, the parity comment of `test/ops-digest.test.ts`), the DEC-0153 marker in source.md's
    setup-answer sentence dropped, and an "Annotated (<date>)" line under DEC-0153 saying DEC-0149's "Starting without

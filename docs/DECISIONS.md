@@ -9109,7 +9109,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-03
 - **Status:** Proposed: the research report's objection window closed 2026-11-03 18:00 UTC with no objection (threads
-  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 77 of
+  `21ac4057`, `0a8776f2`); accepted at merge after two clean rounds of readings. The findings of rounds 1 to 79 of
   the readings (round 16 read clean; round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156` sentence; round 36
   not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the case-insensitive `.git` and
   exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not clean: capital sharp s fold,
@@ -9604,8 +9604,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
       changes nothing. DEC-0149's lander runs a status check that reads DEC-0154's Status anywhere in its block before
       merging PR #628 (step 6) and again right after it (step 6b), with the clause check on the knowledge base's main;
       DEC-0154's knowledge base step runs after its contract merge, and its Status takes the form "- **Status:**
-      Accepted <YYYY-MM-DD>, ...". The clause becomes "is owed by FD's watcher under contract DEC-0154", with no
-      inner parentheses; a withdrawn DEC-0154 leaves the clause to a knowledge base row its withdrawer files. Git
+      Accepted <YYYY-MM-DD>, ...". The clause becomes "is done by FD's watcher since its 0.8.30, FD-159, under contract
+      DEC-0154" (round 79: Fabric Dashboards released the count in 0.8.30, `e23551e8`, so "owed" no longer holds), with
+      no inner parentheses; a withdrawn DEC-0154 leaves the clause to a knowledge base row its withdrawer files. Git
       mode's second listing names only what it adds, a gitlink at the manifest's own path. Round 71's unit and product
       readings passed; its seam reading failed (an interleaving where nobody edited the clause), fixed by item DK.
       Decided by the coordinator in round 72: both handoffs carry the knowledge-base clause rule as one block,
@@ -9751,8 +9752,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   hand-over to `src/mandate.ts` now (the contract names no action id for it yet, so its owner refuses a mandate; CT-181
   adds the MD-6 entry once the hand-over has an action id).
 - **Compatibility:** additive. `contractVersion` stays `0.1.0`; `fabric-source/1` joins the protocol register; no
-  existing schema, kind, code or vector changes. A repository without `fabric.source.json` is untouched.
-- **Consequences / affects:** `schemas/fabric-source.schema.json`; `src/source-rules.ts`, `src/secret-shape.ts` (`jwtSpans`,
+  existing schema, kind, code or vector changes. A repository without `fabric.source.json` is untouched by the source rules; the checker changes for every
+  repository in two ways the handoff's Open lists (a plain folder run skips a `.json` entry that is a FIFO, a socket
+  or a device with a note; the help text gains the source kinds), and a bare channel-agent declaration's schema lines
+  name no undeclared member (DEC-0150's instance-free step, CT-209). `src/ops-digest.ts` now imports `foldPath` from
+  `src/source-rules.ts`, so a copy of the reference digest folds needs that file beside it.
+- **Consequences / affects:** `schemas/fabric-source.schema.json`; `src/ops-digest.ts` (`foldDir` is `foldPath`, `hasJwt`),
+  `src/channel-agent.ts` (`keyShaped` reads `hasJwt`), `docs/specification/ops-digest.md` and `channel-agent.md`,
+  `test/ops-digest.test.ts`, and DEC-0150's instance-free step in `src/validate-cli.ts` and `test/validate-cli.test.ts`
+  (the landing merge with DEC-0153 and DEC-0150 on main); `src/source-rules.ts`, `src/secret-shape.ts` (`jwtSpans`,
   `hasJwt`, `rawValues` appending in place; no verdict changed; Fabric vendors it under a sha256 pin, the adapter ports
   it), `src/semantic-rules.ts`,
   `src/semantic-kinds.ts`, `src/protocol-revisions.ts`, `src/validator.ts` (instance-free schema messages), `src/validate-cli.ts` (`--kind source-tree`, Git and walk
@@ -9777,7 +9785,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adoption), CT-208 (Fabric's "give as source").
 - **Source:** CT-194; the research report [agent portability](reports/2026-10-27-agent-portability/README.md); board
   threads `21ac4057` and `0a8776f2`; fabric-workspace `f29499cf`; the adapter's tag `v0.58.0` (commit `e311d308`,
-  board message `565b20f3`); rounds 1 to 77 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
+  board message `565b20f3`); rounds 1 to 79 of the readings (round 35 not clean: SCN-054 and the handoff's `FAC-SEM-156`
   sentence; round 36 not clean: no home-repository carve-out; round 37 not clean: the governance gloss and the
   case-insensitive `.git` and exclude hole; round 38 not clean: Unicode case folding bypass of exclude; round 39 not
   clean: capital sharp s fold, short names with an extension, unused-exclude, opt-in scope, owner's manifest patch,
@@ -10156,7 +10164,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (unit, seam, product). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168`, a descriptor
   extension, a reference module and vectors, and a host obligation. Additive: nothing that validated before changes.
 - **Annotated (2026-11-07):** amended by DEC-0154 (OD-9: a collector in the same OS account reads the daily digests; CT-243).
-- **Annotated (2026-11-07):** DEC-0149 has landed: its "Starting without the instance", which item 4 cites as in progress, is on `main` (a call refused for the product's own missing source slot is `unknown`, never `failed`), and `foldDir` in `src/ops-digest.ts` is DEC-0149's `foldPath`.
+- **Annotated (2026-11-07):** DEC-0149 has landed: its "Starting without the instance", which item 4 cites as in progress, is on `main` (a call refused for the product's own missing source slot is `unknown`, never `failed`), and `foldDir` in `src/ops-digest.ts` is DEC-0149's `foldPath`; item 3's `JWT_SHAPE` is read through `hasJwt` (`src/secret-shape.ts`, one pass, the same matches).
 - **Context:** the operator asked on 2026-11-04 that every product's log be read every hour and every day, and that
   every agent close its work with a retro whose lessons are kept centrally; Fabric recorded the split in its ADR-0188
   (commit `0d0e5922`) and relayed the contract's part on board thread `f7758225` (message `516761e1`, item 2 of its
@@ -10490,6 +10498,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   product one break, seam one, W93); rounds 28 and 29 at `3fb5c12a` were clean; their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
+- **Annotated (2026-11-07):** Fabric Dashboards' watcher counts `foreign` and `foreign-user` as unavailable since FD-159 (0.8.30, `e23551e8`), so the watcher row its Compatibility calls owed is done; the knowledge base's clause becomes "is done by FD's watcher since its 0.8.30, FD-159, under contract DEC-0154" (DEC-0149 round 79, the shared clause rule in both handoffs).
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
   the organization's plan for a shared computer on which several OS accounts work side by side: an administrator's
   account, the operator's own account and an account an organization owns whole, each running its own Fabric, Fabric

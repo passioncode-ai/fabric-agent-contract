@@ -497,8 +497,9 @@ describe("FAC-SEM-168: where a collector reads the daily digests (OD-9)", () => 
   });
 
   // DEC-0149's fold as foldDir calls it (foldDir is foldPath from src/source-rules.ts, one implementation): these pairs
-  // pin it, its FOLD_PAIRS (fixtures/vectors/source-tree.json, Unicode 17.0) copied as written, and the HFS+ samples
-  // (U+200C, U+FEFF, U+202A removed; Asomtavruli, Nuskhuri and Mkhedruli joined).
+  // pin it at this seam: the vector's FOLD_PAIRS (fixtures/vectors/source-tree.json, Unicode 17.0) as they stood at
+  // `d4cc1e16`, 26 of today's 30 (its four Georgian pairs are pinned by test/source-rules.test.ts against the vector),
+  // and the HFS+ samples (U+200C, U+FEFF, U+202A removed; Asomtavruli, Nuskhuri and Mkhedruli joined).
   const DEC_0149_FOLD_PAIRS: Array<[string, string]> = [
     ["PA\u1e9eWORDS", "passwords"], ["pa\u00dfwords", "passwords"], ["PASSWORDS", "passwords"], ["\u017fecrets", "secrets"],
     ["\u212aeys", "keys"], ["\u212b", "\u00e5"], ["\u00c5", "\u00e5"], ["\u03a3x", "\u03c3x"], ["\u03c2x", "\u03c3x"],

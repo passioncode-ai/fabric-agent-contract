@@ -234,9 +234,10 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   unavailable (`down`, `foreign` or `foreign-user`, not merely `degraded`) for more than 15 minutes, once per case, and
   says it is back after 15 minutes well; a `degraded` answer opens no message, so setup entries are left out (fabric-dashboards
   `docs/backlog.md` FD-76, ADR-0010, released in 0.7.15, read at `ebffd16`); a watcher MUST NOT message the operator
-  for an entry with `setup: true`. Fabric Dashboards' watcher opens an episode only for `down` since FD-76 (0.7.15,
-  `ebffd16`) and keeps it open while a failing source (one not marked `setup: true`) outside its start baseline stays,
-  so its failure message at 15 minutes may name that source; counting `foreign` and `foreign-user` is owed (DEC-0154).
+  for an entry with `setup: true`. Fabric Dashboards' watcher opens an episode for `down` since FD-76 (0.7.15,
+  `ebffd16`), and for `foreign` and `foreign-user` since FD-159 (0.8.30, `e23551e8`), and keeps it open while a failing
+  source (one not marked `setup: true`) outside its start baseline stays, so its failure message at 15 minutes may name
+  that source.
   An agent with a source manifest reports each missing required slot as a `setup: true` entry, as
   [starting without the instance](source.md#starting-without-the-instance) says (DEC-0149).
 - `summary` carries at most six tiles for a host card; a tile with `attention: true`
