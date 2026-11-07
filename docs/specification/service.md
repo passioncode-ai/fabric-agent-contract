@@ -698,10 +698,10 @@ The check is made on the open connection, right before the credential is written
 before connecting, or kept from an earlier look, says nothing about who accepted this connection. Where a listener is
 chosen (a source that lists only listeners, or Linux's row with inode 0 below), the listener that counts is the one on
 the connection's local address (`127.0.0.1` or `::1`; in `/proc/net/tcp6` a connection to `127.0.0.1` that a dual-stack
-socket accepted reads `::ffff:127.0.0.1`, in the file's form `0000000000000000FFFF00000100007F`); one on a wildcard
-address (`0.0.0.0`, or `::` that also accepts IPv4, which the table does not flag: a v4-mapped row of the connection
-shows that a `::` socket accepted it, and on Linux a dual-stack `::` cannot listen beside `0.0.0.0` or `127.0.0.1` on
-one port) counts only when none listens on the local address, and listeners of different OS accounts on the address that counts
+socket accepted reads `::ffff:127.0.0.1`, in the file's form `0000000000000000FFFF00000100007F` on a little-endian
+host); one on a wildcard address (`0.0.0.0`, or `::` that also accepts IPv4, which the table does not flag: a
+v4-mapped row shows that an IPv6 socket accepted the connection, `::` or one bound to `::ffff:127.0.0.1`, and on Linux
+a dual-stack `::` cannot listen beside another uid's `0.0.0.0` or `127.0.0.1` on one port) counts only when none listens on the local address, and listeners of different OS accounts on the address that counts
 are an owner that cannot be told: this account's listener on `0.0.0.0:<port>` beside another account's on
 `127.0.0.1:<port>` does not make the port this account's (CT-254):
 
