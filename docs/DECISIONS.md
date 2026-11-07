@@ -9758,7 +9758,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   W82 (two adoption facts from the reconciliation answers); round 19 at `63c622d4` was not clean (unit passed;
   product found two breaks, seam one, W83); round 20 at `3db473d0` was not clean (product found two breaks, seam two,
   unit one, the split marker W84 had already rejoined; W84); round 21 at `ea203020` was not clean (product found one
-  break, seam one, W85); round 22 at `d4f3300c` was not clean (unit passed; product one break, seam two, W86); round 23 at `a5308d97` was not clean (unit and product passed; seam one break, W87); their batches are folded in (Source). A reference module and vectors, one optional schema
+  break, seam one, W85); round 22 at `d4f3300c` was not clean (unit passed; product one break, seam two, W86); round 23 at `a5308d97` was not clean (unit and product passed; seam one break, W87); round 24 at `ab89d8a1` was not clean (product one break, W88); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -10183,6 +10183,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   folded in; round 23 at `a5308d97` was not clean, and W87 (CT-228's state cell, the title and Next task in the
   acceptance step; the knowledge-base post after the tag; HA-1's free port counting this account's claims of other
   services and keeping a port its own listener holds; item 2's order with its scope; the threat model's HA-1 and HA-2
-  on every computer; Fabric Dashboards' `.mac` line and narrower line ranges) is folded in; the two UI lines passed the operator's copy check
+  on every computer; Fabric Dashboards' `.mac` line and narrower line ranges) is folded in; round 24 at `ab89d8a1` was not clean, and W88
+  (the gap spec's G1 free-port test as item 1 has it; the glossary's port claim; the installer row word for word;
+  CT-228's "released" written after the tag; `duplicate` in CT-229) is folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

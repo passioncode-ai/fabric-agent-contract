@@ -294,6 +294,11 @@ Proposed DEC on its own branch, and files the rest.
   says (CT-228's vectors name the case); item 2 states the order's scope as the specification does; the threat model
   puts HA-1 and HA-2 on every computer; Fabric Dashboards' `.mac` line (`i18n.ts:129`) and narrower line ranges
   (`look.ts` 91 to 99, `state.ts` 68 and 69).
+- Round 24 at `ab89d8a1`: not clean (product one break; unit and seam reported separately). The gap spec's G1 still
+  gave the free-port test before W87 (no claim of another service in this account). W88 brings G1 to item 1's words
+  and folds the risks: the glossary's port claim covers two services in one account; the conformance installer row
+  says HA-1's choose and free-port rules word for word; CT-228's "released <tag>" is added after the tag, in the
+  release's follow-up change; CT-229's reference places `duplicate` after `foreign`.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -411,9 +416,10 @@ Proposed DEC on its own branch, and files the rest.
 
 - **Status.** The Status line is written `- **Status:** Accepted <YYYY-MM-DD>, ...`, as the knowledge-base clause rule
   below requires. Rewrite this handoff's row in the README, its title's marker and its Next task, and CT-228's state
-  cell in `docs/backlog.md`: "open: DEC-0154 accepted <YYYY-MM-DD>, merged #<PR>, released <tag>; still owed: the
-  claim file's schema and the port-choice reference with vectors", with no "Proposed", "Paused" or pre-acceptance
-  next task left in it. On the landing head `grep '^| CT-228 ' docs/backlog.md | grep -c -E 'Proposed|Next task: the full gate'`
+  cell in `docs/backlog.md`: "open: DEC-0154 accepted <YYYY-MM-DD>, merged #<PR>; still owed: the claim file's
+  schema and the port-choice reference with vectors", with no "Proposed", "Paused" or pre-acceptance next task left
+  in it; the release below adds ", released <tag> (main <merge commit>)" after the tag is pushed, in the same
+  follow-up change as its release notes, so main never names a tag that does not exist yet. On the landing head `grep '^| CT-228 ' docs/backlog.md | grep -c -E 'Proposed|Next task: the full gate'`
   prints 0 and `grep '^| CT-228 ' docs/backlog.md | grep -c 'accepted'` prints 1.
 - **"proposed" markers.** Every "DEC-0154, proposed" (and "DEC-0154 (proposed)", "DEC-0154 item 4, proposed") in the
   specification changes at acceptance. Find them on one line with
@@ -492,7 +498,8 @@ Proposed DEC on its own branch, and files the rest.
 - **Release.** Right after the merge, an annotated tag `v0.1.0+<YYYY-MM-DD>` (`.2`, `.3` after the date for a second
   or third release that day) on the merge commit, once its gate and `pnpm vectors:check` passed, with a GitHub release
   whose notes list the decisions since the previous release ([versioning](../specification/versioning.md#releases)).
-  Post the tag on thread `1fe66e6e`: Switchboard's SB-278 (the port claim) waits for it.
+  Post the tag on thread `1fe66e6e`: Switchboard's SB-278 (the port claim) waits for it. Then a follow-up change on
+  main adds ", released <tag> (main <merge commit>)" to CT-228's state cell.
 - **The board.** Tell thread `1fe66e6e` the same day (Fabric Dashboards' FD-159 and Fabric's server build on it), and in
   that message ask Fabric Dashboards for a row that its watcher (FD-76's successor) counts `foreign` and
   `foreign-user` as unavailable: FD-76 opens an episode only for `down`, and FD-158 added the state to the card and an
@@ -708,6 +715,11 @@ vectors (31 files), privacy (0 findings) and the tests that read the edited page
 prints nothing; the shared block is in the handoff once, byte for byte; the SH-2 line is still the one added line
 with U+2014.
 
+After W88 the full gate did not run (load above 45). The UX lint, the documentation checks (markdownlint 0 errors),
+vectors (31 files), privacy (0 findings) and the tests that read the edited pages passed; the split-marker finder
+prints nothing; the shared block is in the handoff once, byte for byte; the SH-2 line is still the one added line
+with U+2014.
+
 ## Next task
 
 The coordinator's next blind readings of DEC-0154 at this branch's head.
@@ -745,3 +757,6 @@ clause rule) and its risks are folded in. Next: round 23 at that head, the full 
 
 W87 at the next head: round 23's break (CT-228's state cell, the title and Next task in the acceptance step) and its
 risks are folded in. Next: round 24 at that head, the full gate when the load allows.
+
+W88 at the next head: round 24's break (the gap spec's G1) and its risks are folded in. Next: round 25 at that head,
+the full gate when the load allows.
