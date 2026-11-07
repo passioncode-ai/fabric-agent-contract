@@ -10165,9 +10165,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0152: a board message that waits for an answer is answered in the same turn
 
 - **Date:** 2026-11-04
-- **Status:** Proposed (draft on branch `agent/ct217-board-same-turn-20261104`, CT-217); binding once accepted on
-  merge. A rule for participants of `fabric-project-comms/0.1`: no tool, argument, field, refusal or schema constraint
-  changes, and a board stores and checks nothing new.
+- **Status:** Accepted 2026-11-07: rounds 7 and 8 of the coordinator's blind readings (at `451d72c4` and `02f64dcf`)
+  were clean on all three tiers (unit, seam, product). Proposed 2026-11-04 as a draft; rounds 1 to 6 on 2026-11-07
+  were not clean, and their findings moved SA-6 from "answer while the slot is `stale` or `absent`" to the rule Fabric
+  and the adapter ship (read the slot first, decline only after `not_authorized` at `absent` generation 0) and kept the
+  participant's state answer for announcements and questions. Their non-blocking risks are CT-263. A rule for
+  participants of `fabric-project-comms/0.1`: no tool, argument, field, refusal or schema constraint changes, and a
+  board stores and checks nothing new.
 - **Context:** the board says how a message is delivered (DEC-0135) and that the target Project's participant reply
   answers a `queued` request (DEC-0098, DEC-0102), but not when a participant answers what it reads. A session that
   reads a request, an announcement or a question addressed to its Project can end its turn, or go on to other work,

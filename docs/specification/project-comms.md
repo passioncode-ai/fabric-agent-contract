@@ -27,10 +27,11 @@ read, that leaves out its own messages, a narrowing made under the compatibility
 session; and what a [session's role and branch](#a-sessions-role-and-branch) may and may not carry. It adds no board tool, no
 argument and no field to any tool's schema (the move is a host control), and reserves one capability name no service may serve or declare, a
 narrowing under the compatibility policy's second exception.
-**Proposed in DEC-0152 (2026-11-04), binding once it is accepted:** a participant
-[answers in the same turn](#answering-in-the-same-turn) a message that waits for an answer, with the result or the
-current state and its nearest date, and the finished result follows as a second message (SA-1 to SA-6). It is a rule
-for participants: it adds no tool, argument, field or refusal, and a board stores and checks nothing new.
+**Amended by DEC-0152 (2026-11-07):** a participant
+[answers in the same turn](#answering-in-the-same-turn) a message that waits for an answer: an announcement or a
+question with the result or the current state and its nearest date, the finished result following as a second
+message; a request through its slot's holder, or by one decline when no service ever held the slot (SA-1 to SA-6). It
+is a rule for participants: it adds no tool, argument, field or refusal, and a board stores and checks nothing new.
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`

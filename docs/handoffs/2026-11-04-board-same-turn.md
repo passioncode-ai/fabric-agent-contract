@@ -9,7 +9,7 @@ blocks it); the finished result follows as a second message; a state answer with
 
 ## Done
 
-- [DEC-0152](../DECISIONS.md) (Proposed): the participant rules SA-1 to SA-6 in
+- [DEC-0152](../DECISIONS.md) (Accepted 2026-11-07): the participant rules SA-1 to SA-6 in
   [project communication](../specification/project-comms.md#answering-in-the-same-turn), with an amendment line at the
   top of that page.
 - The descriptions of `com.reply` and `com.enroll`: two paragraphs in *Receipts* of
@@ -62,11 +62,11 @@ blocks it); the finished result follows as a second message; a state answer with
   reads the slot in `com.status` after any refusal, folded in `60858a23`. Round 6 at `60858a23`: all three failed
   (a decline after any refusal, Fabric's question at an active slot, `held`), folded in the next commit: SA-6 reads
   the slot first, enrolls only when it is not `active`, and declines only after `not_authorized`. Round 7 at
-  `451d72c4`: all three passed; its risks folded in the next commit.
+  `451d72c4` and round 8 at `02f64dcf`: all three passed both times; accepted. `pnpm run check` at `02f64dcf`: exit 0
+  (117 test files), `pnpm vectors:check` 32 files match.
 - No U+2014 in the added lines (`git diff origin/main | grep '^+' | grep -c` on U+2014 prints 0).
 
 ## Next task
 
-Round 8 of the blind readings (unit, seam, product), the second clean round after round 7; once two consecutive rounds are
-clean and `pnpm run check` exits 0, open the pull request, merge it, tag the release, and tell Fabric, the adapter and
-the knowledge base on board thread `eefa7959`.
+Merge the pull request, tag the release, and tell Fabric, the adapter and the knowledge base on board thread
+`eefa7959` what each owes (DEC-0152's Compatibility); then CT-261 (HA-2's restricted socket table on macOS 27.2).
