@@ -622,3 +622,8 @@ Paused 2026-11-06 by the operator's relay in board thread `eefa7959` (about 12:5
 18 not clean, fixed by W81; the full gate not run since W80 because the load was high. Exact next task once the pause
 lifts: run the full gate at this head under the heavy lock, then blind readings round 19 (unit, product, seam), then
 two clean rounds and the acceptance step.
+
+Resumed 2026-11-07 by the operator's own word in this session («делай автономно до конца», a direct request, one of
+the pause's exceptions). W82: the first organization server's row names its 100-bit `org.id` (board message
+`922e6fed`) and the adapter's row its T0 reading of a token-free loopback door and FAA-227's priority (board message
+`cdf28788`). Next: the full gate at the W82 head, then round 19.
