@@ -32,6 +32,7 @@
 | SCN-024 | Restore settings after the data directory was lost | settings | P-02 | ST-019, FLW-15 | draft | not audited |
 | SCN-025 | Follow a request on the Project board to its result, or to outcome_unknown | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
 | SCN-026 | A second copy of a service starts, by hand or by its supervisor | service | P-02 | ST-021, FLW-17 | draft | not audited |
+| SCN-056 | Another OS account on this computer holds my service's port | service | P-02 | ST-021, FLW-17 | draft | not audited |
 | SCN-027 | The operator unlists a Project: it leaves the directory, and a sender that knows its id still reaches it | project-board | P-02 | ST-022, FLW-18 | draft | not audited |
 | SCN-051 | The operator makes another session the Project's main one, and the host shows when it changes hands again | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
 | SCN-028 | Add a second machine from afar: compare the code, sign with the passkey | network | P-02 | ST-023, FLW-19 | draft | not audited |
@@ -788,6 +789,26 @@ independent agent author and P-02 project operator.
 - **Coverage:** service specification, One copy; `src/service-supervisor.ts`; `test/service-supervisor.test.ts`, `fixtures/semantic/service-lock-*.json`
 - **Product:** unobserved
 
+### SCN-056: Another OS account on this computer holds my service's port
+
+- **Persona:** P-02
+- **Feature:** service
+- **Traces:** ST-021, FLW-17 (JTBD-03, JRN-02/#3); DEC-0154 HA-1 and HA-2
+- **Entry point:** the host's card for a local service (Fabric Dashboards, Fabric), on a computer where several OS accounts work
+- **Preconditions:** my service is installed with a recorded port; another OS account on the same computer runs a listener on that port (its own copy of the agent, or anything else)
+- **Steps:**
+  1. The host probes my service -> it reads who owns the listener on the port, and the owner outranks whatever the well-known answer says; it sends no token before it knows the owner.
+  2. The listener is another account's -> the card shows `foreign-user` with one line: "Another account on this computer is using this service's port; nothing was sent to it." The computer will not say who owns the listener -> the card shows `foreign-user` with: "This computer would not say who is using this service's port; nothing was sent to it."
+  3. The other listener answers `ready` with my service's own identity -> the card still shows `foreign-user`; the identity is not read as mine.
+- **Expected result:** nothing the host sends (token, login code) reaches the other account, and I see why my service is not serving; a cookie the browser already holds for `127.0.0.1` is the residue the service specification names: on a computer with more than one counted account it is bounded by the session's lifetime and the dashboard's refusal of another account's peer; on a computer with one counted account only by the session's lifetime (12 hours idle, 7 days at most). Against a tab in my own browser the dashboard's Origin guard and its custom request header on cookie writes stand as before.
+- **Alt paths:** a browser tab on my dashboard is open when the port changes hands -> its next request carries the cookie it holds to the other listener; my own dashboard, back on a recorded port, refuses another account's peer, and the session ends within its lifetime. No listener at all -> `down`, as before. The listener is mine but names another service -> `foreign`. A listener owned by root or a system service account (a launch daemon, a rootful container proxy) -> `foreign-user` too, on a computer with one counted account.
+- **UI elements:** the service card's state and its one line.
+- **States covered:** error, success
+- **Errors & recovery:** another account's listener: reinstall my service onto a free port, which its installer records and claims (HA-1), or stop the other account's copy; the card then shows my service's own state. A listener owned by root or a system service account: find the system process or container that holds the port, or reinstall onto a free recorded port (HA-1). An owner that cannot be told: retry later, check the computer's own processes for what holds the port, or reinstall onto a free recorded port (HA-1).
+- **Status:** draft
+- **Coverage:** service specification, Several OS accounts on one computer (HA-1, HA-2); the state-order vectors owed by CT-229
+- **Product:** unobserved
+
 ## Network
 
 ### SCN-028: Add a second machine from afar: compare the code, sign with the passkey
@@ -1003,7 +1024,7 @@ independent agent author and P-02 project operator.
   1. The operator asks "show me the drafts waiting for me" -> the agent calls the service's tool, whose answer carries `open_link` `fabric-dashboards://service/example-publisher.default?path=%2Fdashboard%2Fdrafts` beside the diagnostic `http_url`.
   2. The agent presents the `open_link` and opens it through Fabric Dashboards with no browser fallback -> the host shows the drafts page, signed in.
 - **Expected result:** the page is open in Fabric Dashboards; the operator never saw a sign-in wall or a `127.0.0.1` address as the action.
-- **Alt paths:** Fabric Dashboards is installed but does not open the page -> the agent says it failed and opens no browser. Fabric Dashboards is not installed, or the computer runs a system it does not ship for (`unsupported`) -> the agent opens the service's own address, read from its descriptor's `origin` and the path. The service asks for a typed secret in URL mode -> the request's `url` is the `open_link` of its own page. The service posts a stop to the operator channel -> the message names the page and says it opens in Fabric Dashboards on the computer. Fabric Dashboards is installed but too old for the link, or its state is unknown (`incompatible`, `handler_mismatch`, `unknown`) -> the agent says so and how to update, and opens no browser: an unknown host is not an absent one.
+- **Alt paths:** Fabric Dashboards is installed but does not open the page -> the agent says it failed and opens no browser. Fabric Dashboards is not installed, or the computer runs a system it does not ship for (`unsupported`) -> the agent opens the service's own address, read from its descriptor's `origin` and the path, after checking the listener's owner (HA-2); when the listener is another OS account's or its owner cannot be told (`foreign-user`), nothing opens and the agent's reply (SCR-30) shows the line for that case ("Another account on this computer is using this service's port; nothing was sent to it.", or "This computer would not say who is using this service's port; nothing was sent to it."). The service asks for a typed secret in URL mode -> the request's `url` is the `open_link` of its own page. The service posts a stop to the operator channel -> the message names the page and says it opens in Fabric Dashboards on the computer. Fabric Dashboards is installed but too old for the link, or its state is unknown (`incompatible`, `handler_mismatch`, `unknown`) -> the agent says so and how to update, and opens no browser: an unknown host is not an absent one.
 - **UI elements:** the agent's answer with one link; the page in Fabric Dashboards.
 - **States covered:** success, error
 - **Errors & recovery:** a tool answer whose `open_link` is a raw local address or outside the grammar fails `FAC-SEM-143` in the service's own checks before it ships.

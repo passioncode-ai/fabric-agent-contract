@@ -12,7 +12,7 @@ placement) or online at an `https` origin (a **remote** placement, [below](#remo
 state, answers other agents, and usually shows a dashboard. This extension says how a
 service is found, how it reports that it is alive, how it is started and stopped, how
 an operator is let into its dashboard, and how it reports what it did. It lets a host
-such as Fabric Dashboards watch every service on a machine without knowing any of them
+such as Fabric Dashboards watch every service of its OS account without knowing any of them
 in advance.
 
 The extension key is `https://fabric.passioncode.ai/agent-contract/extensions/service/0.1`.
@@ -81,7 +81,7 @@ The smallest descriptor a local service installs, here for a service supervised 
 |---|---|---|
 | `protocol` | yes | `"fabric-service/0.1"` |
 | `id` | yes | the service's slug, `^[a-z][a-z0-9-]{1,62}$`, the same on every machine |
-| `instance` | yes | which copy on this machine, `default` for the first |
+| `instance` | yes | which copy in this OS account's services directory, `default` for the first |
 | `name` | yes | what a host shows, at most 80 characters |
 | `auth` | yes | `tokenFile`, where the token is; optionally the `header` it travels in and its `scheme` (below) |
 | `lifecycle` | yes | the one supervisor (`manager`) and its own names: launchd's `label` and `plist`, systemd's `unit`, the Task Scheduler's `task`, an app's `app` |
@@ -114,8 +114,9 @@ uninstall when it can be; a reader that does not find `lifecycle.app` treats the
 (`appDescriptorStale`). **The descriptor says the app is installed, never that it runs.** `origin` is optional for an
 app, because its live origin changes from start to start: the app keeps its own liveness file, rewritten on every start
 and removed on quit, with its origin and process id. A kit that shows an "Open in <app>" button reads the descriptor;
-a caller that sends anything reads the liveness file and checks the process. An app's descriptor without an origin
-claims no port (`FAC-SEM-010`). Vectors: [`fixtures/vectors/app-descriptor.json`](../../fixtures/vectors/app-descriptor.json).
+a caller that sends anything reads the liveness file and checks the process, and before any credential the
+listener's owner (HA-2, [Several OS accounts on one computer](#several-os-accounts-on-one-computer);
+DEC-0154). An app's descriptor without an origin declares no port for `FAC-SEM-010`. Vectors: [`fixtures/vectors/app-descriptor.json`](../../fixtures/vectors/app-descriptor.json).
 
 | Platform | Services directory |
 |---|---|
@@ -128,15 +129,19 @@ claims no port (`FAC-SEM-010`). Vectors: [`fixtures/vectors/app-descriptor.json`
   `fsync`, rename) with mode `0600`.
 - `channels.local` MAY name where a client reaches the service's local channel (`{protocol, path | pipe}`; Project
   Observatory's node, [local channel](local-channel.md), DEC-0075); a client never computes that path.
-- `id` and `instance` together MUST be unique on the machine. A second copy of the same
+- `id` and `instance` together MUST be unique within one OS account's services directory (one copy per counted OS
+  account on the computer, DEC-0154). A second copy of the same
   service (a preview, a branch build) MUST be a second `instance`, never a second `id`.
 - `placement` is `local` (the default when absent) or `remote`. Every rule in this document
   applies to a local placement; [Remote placement](#remote-placement) states what changes for a
   remote one.
-- For a local placement `origin` MUST be `http://127.0.0.1:<port>`; only an app's descriptor may omit it (above). **A port is a claim:**
+- For a local placement `origin` MUST be `http://127.0.0.1:<port>`; only an app's descriptor may omit it (above). **A port is a declaration:**
   before writing, an installer MUST read every descriptor in the directory and refuse a port
   that another local `id.instance` already declares. Semantic rule `FAC-SEM-010` checks a
-  directory; a remote origin claims no port here.
+  directory; a remote origin declares no port here. The directory shows only this OS account's descriptors, while
+  loopback is one per computer: the port is also kept or chosen free on the computer, recorded and claimed as
+  [Several OS accounts on one computer](#several-os-accounts-on-one-computer) says (HA-1, DEC-0154), which keeps
+  two [counted OS accounts](#counted-os-accounts) from one port.
 - Paths MAY start with `~/`, and on Windows with `~\`, `C:\` or `C:/` (DEC-0032); a command's executable
   follows the same grammar (`FAC-SEM-012`). Commands MUST be argument arrays; a shell string is
   invalid, as for the local runner ([profiles](profiles.md)). No argument carries a credential
@@ -144,10 +149,10 @@ claims no port (`FAC-SEM-010`). Vectors: [`fixtures/vectors/app-descriptor.json`
 - Only two commands are defined: `doctor` and `update`. A host MUST NOT run any other
   command a descriptor lists.
 - A host MUST preserve and ignore unknown `extensions`.
-- A local descriptor MAY say where a collector on the same machine reads its daily operations digests, under
+- A local descriptor MAY say where a collector in the same OS account reads its daily operations digests, under
   `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1`: 1 to 8 `{dir, source}`, `dir` a folder
   inside `paths.data` and `source` the label sent with its lines ([operations digests](ops-digest.md#where-a-collector-reads-the-daily-digests),
-  OD-9, DEC-0153; `FAC-SEM-168`). A remote descriptor carries none.
+  OD-9, DEC-0153; the same OS account per DEC-0154; `FAC-SEM-168`). A remote descriptor carries none.
 - `installedBy` says who installed the instance (DEC-0061): the installer and its version as a string, as before, or
   `{by, role?, tool}`. `by` is `person` — a person ran the installer or had their coding agent run it — with `role`
   `operator` (the person who uses this machine) or `administrator` (an organization's administrator); `node` — Project
@@ -210,7 +215,9 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   revision is refused with `schema-unsupported` ([versioning](versioning.md#protocol-revisions), DEC-0067).
 - `service.id` and `service.instance` MUST equal the descriptor's. A different answer
   means another program holds the port; a host MUST report it as `foreign` and MUST NOT
-  send it the descriptor's token (`FAC-SEM-009`).
+  send it the descriptor's token (`FAC-SEM-009`). A listener of another OS account, or one whose owner cannot be
+  told, is `foreign-user` before any of this is read, whatever it answers (HA-2, DEC-0154): an equal
+  identity stops a mistake, not another account holding the port.
 - `service.build` MUST carry a commit or a package digest, so a host can tell a restart
   onto new code from one onto old code.
 - `process.pid` and `process.startedAt` are the live process. A host compares the pid
@@ -493,7 +500,10 @@ login](#operator-login)); a raw address opens a browser that has no session and 
   primary action. It becomes the action only where Fabric Dashboards cannot show the page on that computer: its
   `host_status` answers `not_installed`, or `unsupported` on a system it does not ship for (it ships for macOS today).
   There the agent or the host opens the page's own address, which it reads from the service's descriptor on that
-  computer (`origin` plus the path). An installed host that did not open the page is not absent: the failure is
+  computer (`origin` plus the path): a remote `https` origin as before, and
+  a loopback address only after checking the listener's owner by [HA-2](#ha-2)'s sources: a listener of another
+  account, or one whose owner cannot be told, is reported as `foreign-user` and the address is not opened
+  (DEC-0154). An installed host that did not open the page is not absent: the failure is
   reported to the person, and the browser does not replace it.
 - **PL-4, where the link travels.** A tool answer that names a page for a person MUST carry the open_link in a member
   named `open_link`; a raw address beside it (`http_url`, or an existing `dashboard_url`) is the diagnostic of PL-3,
@@ -529,7 +539,204 @@ These rules are the local placement's; a remote one replaces the first two
 
 Loopback reachability is not authorization: any process running as the same user can
 read the token file. This extension protects against a web page and against a mistake,
-not against a hostile process of the same user.
+not against a hostile process of the same user. Loopback is one per computer, not one per OS account: a process of
+another OS account on the same computer, and a guest a port forwarder relays onto loopback, reach every local service.
+The Host and Origin guard does not tell them apart, so every computer adds HA-1 and HA-2, and a computer with more
+than one [counted OS account](#counted-os-accounts) also HA-3, of
+[Several OS accounts on one computer](#several-os-accounts-on-one-computer) (DEC-0154). Two residues stay:
+
+- **The browser's cookies.** Browsers do not isolate cookies by port ([RFC 6265](https://www.rfc-editor.org/rfc/rfc6265)
+  section 8.5): a page served on `127.0.0.1` by another account's process, once the person's browser visits it,
+  receives the cookies a dashboard set on `127.0.0.1`. The bound is the operator session's lifetime (12 hours idle,
+  7 days at most, [above](#operator-session-lifetime)) and the dashboard's refusal of another account's peer (HA-2),
+  which keeps that page from using the cookie on the dashboard; what stays is a cookie value read by another account's
+  page. Fabric Dashboards reported on thread `1fe66e6e` that its own window keeps the dashboard's session out of the
+  person's browser. The appearance and owner cookies ([Fabric's button](fabric-button.md),
+  [embedded dashboard](embedded-dashboard.md)) are shared across accounts too, and another account's page can set them,
+  which changes appearance and the button only ([Fabric's button](fabric-button.md) FB-6); accepted because they carry
+  no credential.
+- **A coding agent's bearer.** A client the contract does not reach, reconnecting after the port changed hands, sends
+  what it holds. The bound is the session bearer's lifetime ([session handoff](session-handoff.md) SH-9) and the
+  rotation HA-2 asks for.
+
+## Several OS accounts on one computer
+
+DEC-0154. On one computer each counted OS account runs its own copy of a service, with its own services
+directory, tokens and descriptors, and every account (and every guest whose traffic a forwarder relays) reaches every
+port on `127.0.0.1`. In this contract's specification, schemas and glossary, "host" never means the computer. The
+exceptions are the name "host label", which labels a computer, and names and paths already fixed, which keep their
+spelling (the enrollment purpose `agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`).
+The registers keep the words they were written in.
+
+<a id="counted-os-accounts"></a>
+
+**Counted OS accounts.** A counted OS account is an OS account a person or an organization signs in with, or runs
+Fabric or an agent service under. The count fails toward more: an account that runs Fabric or an agent service, or has
+a services directory, is counted whatever its shell, uid or name. Only an account that does neither is left out by
+these tests: root, SYSTEM and the system's service accounts, that is on macOS the accounts with a uid under 500 or a
+name starting with `_`; on Linux the accounts with a uid below `UID_MIN` of `/etc/login.defs` or a `nologin` shell; on
+Windows the built-in and service accounts. "A computer with one counted OS account" and "a
+computer with more than one" count only these. A listener one of the uncounted accounts owns is still `foreign-user`
+under HA-2. The count is read by the service itself at every start, by an installer when it installs and by a door
+at its own start; launchd, systemd, the Task Scheduler and other launchers do not read it. It is never read once at
+install for good, so an account added later is seen at the next start. A local service runs under the counted account whose services directory declares it.
+
+On a computer with one counted account a service keeps its port and HA-2's check finds the account's own services;
+what is new there is that an installer writes its claim (HA-1) and a client checks the listener (HA-2). HA-3 binds only
+a computer with more than one counted account.
+
+<a id="ha-1"></a>
+
+**HA-1, a port recorded per OS account.** A local service's port is recorded per counted OS account: in the service's
+own state and in its descriptor's `origin`. An installer keeps the port its own `id.instance` already records (in its
+descriptor, its own state or its claim) when that instance's own listener holds it and no other `id.instance`'s
+descriptor declares it, or when nothing does. It chooses a new
+port only when none is recorded, or when another holder has the recorded one: another `id.instance`'s descriptor in
+this account's services directory (`FAC-SEM-010`), a claim of another account or of another service in this account
+(unless the instance's own listener holds it), or another listener; "nothing does" means none of these. A new port is free on the computer: no listener accepts on `127.0.0.1:<port>`, a wildcard bind (`0.0.0.0`, `[::]`) included, no other
+`id.instance`'s descriptor declares it, and no port claim of another account, or of another service in this account,
+names it. When it records a port it writes its descriptor and then this account's **port
+claim**, rebuilt atomically from all this service's descriptors in the account, as at start; and at uninstall it rebuilds
+the claim from what remains:
+
+| | |
+|---|---|
+| File | `.passioncode-ports.<service-id>.<account>.json`, `<service-id>` the descriptor's `id`; an app without a descriptor: its reverse-DNS bundle identifier under its own domain, stable across versions; an app with separately recorded parts: that identifier plus `.<part>`, one claim per part (Fabric's hub and its local stack: `ai.passioncode.desktop.hub`, `ai.passioncode.desktop.stack`); `<account>` the OS account's numeric uid on macOS and Linux, its SID on Windows (a login name can be renamed, and is not what the owner check compares) |
+| Folder | the computer's shared sticky folder: `/Users/Shared` (macOS), `/var/tmp` (Linux), `%ProgramData%\PassionCode\port-claims` (Windows) |
+| Owner | the account the file names |
+| Content | only `{schema, service, account, ports, updatedAt}`: `schema` `passioncode-port-claim/1`, `service` the `id`, `account` the same uid (a string of digits) or SID, `ports` every port this account's instances of the service (or the app's part) record, in one claim, `updatedAt` an RFC 3339 UTC time |
+
+```json
+{"schema": "passioncode-port-claim/1", "service": "example-agent", "account": "504", "ports": [48210], "updatedAt": "2026-11-06T09:00:00Z"}
+```
+
+- A reader ignores a claim whose file owner (its owner uid; on Windows its owner SID) is not the `account` it names,
+  and a claim of an account no longer on the computer.
+- **A claim grants nothing.** It only keeps two installers from choosing one port; who may receive a credential is
+  HA-2's check, never a claim.
+- **Who writes the claim.** At install the installer, or the node that installs the service, chooses the port, writes
+  the descriptor, and then rebuilds the claim atomically from all this service's descriptors in the account, as at
+  start. The short
+  window between choosing the port and writing the claim is accepted: its cost is only a collision warning. At
+  every start only the service itself (or the app) rewrites it, not only when the file is missing; launchd, systemd,
+  the Task Scheduler and the node do not, since none of them can take the service's lock, and a wrapper that took it
+  would make its child exit 75. The rewrite is rebuilt from this service's descriptors in the account, or, for an app without a descriptor origin or an app's part, from the port it records in its own state, read after it has written its new liveness file (or it would read an old port or none), never from the old claim; it is atomic (a
+  temporary file, then a rename); and it runs only after it holds its guard against a second copy: `service.lock` for a service with a descriptor; an app (`lifecycle.manager: "person"`) or an app's part: its own single-instance guard, which it MAY use instead of `service.lock`, even when its descriptor names an origin ([One copy](#one-copy)), so a copy without its guard writes nothing. The reasons: a file's age in `/var/tmp` decides whether `systemd-tmpfiles` removes it, and a rewrite
+  also lets a computer installed before this decision catch up without a reinstall. Since one claim holds the ports of
+  every instance of the service in the account, a rewrite writes the ports of all the instances this account records
+  (read from this service's descriptors and own state), never only its own. Losing a claim costs only a
+  collision warning: the claim grants nothing, and the listener's check (HA-2) is what protects a credential.
+- **A squatted claim path.** When a file of the claim's name exists and another account owns it, the installer cannot
+  write its claim: it records the port in its own state and descriptor anyway, reports the squatted path (a note, never
+  a refusal, since claims grant nothing), and chooses its port by the listener and descriptor tests alone.
+- **The Windows claims folder.** The administrator's setup step, run with administrator rights, the one that writes
+  the host label's secret ([devices](devices.md#the-host-label)), creates `%ProgramData%\PassionCode\port-claims`
+  and sets its ACL: Users may create files in it, the creator owner has full control of its own files, and no account
+  may write or delete another's, the sticky folder's meaning on macOS and Linux. That step is part of the first
+  installation of a Fabric node on Windows, whose installer asks once for elevation. An installer or a service running
+  as an ordinary account that finds the folder missing, or with another ACL, records its port anyway and reports it
+  once, until the folder appears or its ACL is right, not at every start: a short line in the service's own health
+  report or its log, never interface text (its wording and where it shows are owed by CT-228). It never creates the
+  folder or changes its ACL itself.
+- **The Linux folder's limits.** `/var/tmp` was agreed on the board and stays, with two known limits: `systemd-tmpfiles`
+  may age a claim out, and a unit with `PrivateTmp` sees its own `/var/tmp`. So the service itself rewrites
+  the claim at every start, and CT-228's reference covers a claim aged out.
+- **Uninstall.** After it deletes its own descriptor, the uninstaller rebuilds the claim from the remaining descriptors
+  and the own state of the instances that remain (never the removed instance's state, or its port would stay in the
+  claim), atomically as at start (never a read-modify-write of the old claim), and deletes the file when no port
+  remains.
+- An ephemeral port that the listener protects with a proof (a fresh challenge answered with an HMAC, as below) needs
+  no claim: nothing records it, and a client finds it only through the record the service writes.
+- A computer with one counted account keeps a service's historical default port, which its instance records, under
+  the same keep rule.
+- A client takes a service's port only from its descriptor or the service's own record, never from a formula. A
+  formula over the account's uid (Fabric's hub, CO-505) is an allowed default only when the port it gives is recorded,
+  claimed and checked free as above.
+
+<a id="ha-2"></a>
+
+**HA-2, the listener's owner, and `foreign-user`.** Before a client sends any credential to
+`http://127.0.0.1:<port>` (a descriptor's token, a delegation token, a login code's request, a session cookie, a door's
+token), and before a host reports a local service healthy, it MUST establish that the server end of its connection
+belongs to a process of its own OS account, from the computer's socket table (below), or by the listener proving,
+before any credential travels, that it holds a secret only this OS account can read (a fresh challenge answered with
+an HMAC under a key in an owner-only file; Switchboard reported on thread `1fe66e6e` that its control channel does so):
+
+- No listener on the port is `down`, as before.
+- A listener of another OS account, or one whose owner cannot be told, is **`foreign-user`**: the client sends no
+  credential, and nothing the listener answers is read as the service's. A listener owned by root, SYSTEM or a service
+  account (a rootful container proxy, a launch daemon, a task run as SYSTEM) is another account's, so it reads
+  `foreign-user` on a computer with one counted account too; so does an owner the client cannot tell (a process it
+  cannot open, a client without access to the socket table). A client that can see its own account's sockets always
+  tells its own listener.
+- The order of a local service's states read from the listener and its answer: `down`, then `foreign-user`, then
+  `foreign` (`FAC-SEM-009`), then the well-known `status`. "`foreign-user` is decided before the well-known document
+  is read" means it outranks any answer, `ready` included, and no credential is sent to read one. A host's own states
+  that the listener does not decide may come before this order, provided no answer is read as the service's: an
+  invalid descriptor, a conflict over an `id.instance` or a port, its own stop or start in flight (Fabric Dashboards
+  at `a0bc160`: `packages/service-host/src/state.ts` lines 31 to 40; `look.ts` lines 91 to 99 skip the probe for an
+  invalid descriptor or a conflict, and its monitor, `src/core/monitor.ts` line 280, while a stop or start is in
+  flight). A service its supervisor stopped is not one of them: a host shows that only when nothing answers on the
+  port, in place of `down` (the same `state.ts`, lines 68 and 69, and Fabric Dashboards' vector "another program
+  answering comes before launchd saying it is off"). A host's own further states (a second copy shown as `duplicate`,
+  under [One copy](#one-copy)) come after `foreign` and before the well-known `status` (Fabric Dashboards, the same
+  `state.ts`, lines 56 to 58).
+- A reader that meets a state it does not know treats it as not ready: it sends nothing and shows the service as not
+  serving. A watcher counts `foreign` and `foreign-user` as unavailable, as it counts `down`: the service serves nothing.
+
+How the owner is told, per system (the client looks at the server end of its own connection: local address
+`127.0.0.1:<port>`, remote address its own ephemeral port; where a source lists only listeners, the listener on the
+port):
+
+| System | Source |
+|---|---|
+| macOS | the TCP socket table, which names the owning process even for another account's socket: `netstat -anv -p tcp`, or `sysctl net.inet.tcp.pcblist64` read in the process; the owning process's uid from the process table. A list of this account's own sockets (`lsof -u` of the current user) finds an own listener, but alone it cannot tell an empty port from another account's, so when it finds none the socket table decides |
+| Linux | the `uid` column of the matching entry in `/proc/net/tcp` and `/proc/net/tcp6` |
+| Windows | `GetExtendedTcpTable` for the owning process id, then that process's token user, equal to the current user's; a process that cannot be opened is an owner that cannot be told |
+
+The well-known `process.pid` is never proof: any listener can name any pid.
+
+- **Who checks when the client cannot.** A client the contract does not reach (a browser, a coding agent, another
+  vendor's program) cannot run this check, so it is carried by the side that hands the credential over or receives it:
+  - the host checks the listener before it mints a login code for a person's browser ([Operator login](#operator-login)),
+    before it writes an `mcp.json` or hands a session bearer to a coding agent
+    ([session handoff](session-handoff.md) SH-9), and before an agent or the host opens a raw
+    `http://127.0.0.1:<port>` address in the person's browser (PL-3, [page links](#links-to-a-services-pages)),
+    reporting `foreign-user` instead of opening it;
+  - on a computer with more than one counted account, a local surface whose credential arrives from such a client
+    MUST refuse a connection from a peer of another OS account before it reads the request, telling the peer's owner
+    by the same sources applied to the client end of the connection: a dashboard a browser reaches, an MCP surface a
+    coding agent reaches, a proxy that coding agents call. Every other local service SHOULD.
+- **Rotation.** A service that finds its recorded port held and comes up on another (the port moved by its installer
+  at a reinstall, or by an app that records its own port; a running service never writes its descriptor) SHOULD rotate
+  the secrets it issued to clients that reach it by port, since a client that could not check may have sent them to the holder
+  (Switchboard's row SB-269).
+- **A loopback redirect with PKCE is not a credential here.** An authorization code bound to a PKCE `S256` challenge
+  and sent to a loopback redirect ([RFC 8252](https://www.rfc-editor.org/rfc/rfc8252)) is useless without the
+  verifier; the app that holds the listener and the verifier carries this check, not the browser that follows the
+  redirect.
+
+As Fabric Dashboards reported on thread `1fe66e6e` (message `262523cc`), its commit `53a62f9` adds three FD-158
+cases to its state-precedence file (`packages/service-host/test-vectors/state-precedence.json`): a listener of
+another OS account that answers `ready` as this agent is `foreign-user`; a listener of another OS account that
+answers as another agent is `foreign-user`, not `foreign`; a port nobody holds stays `down`. The file also holds an
+older case, another Fabric service answering on the port, which is the `foreign` case (a listener of this account
+that answers another identity). The contract's own vector file for these states is CT-229.
+
+<a id="ha-3"></a>
+
+**HA-3, no token-free loopback door on a computer with several accounts.** On a computer with more than one counted
+OS account, a door that admits a caller on loopback without a token is not a T0 door
+([delegation](delegation.md#trust-tiers) DL-25) unless it checks the peer's OS account as HA-2's server side does.
+Project Observatory's local channel is the same check on another transport: it checks the peer's uid on its socket or
+named pipe ([local channel](local-channel.md#transport-and-who-may-connect), DEC-0075). A port forwarder of a virtual
+machine or a container (a Lima or Colima forwarding agent, a user-mode gateway, an SSH tunnel) is a relay onto
+loopback: its callers are T2. A forwarder runs as the OS account that owns the guest, so the uid check does not catch
+that account's own guests; a computer whose guests reach its loopback either closes that path or admits no token-free
+caller on TCP. **An accepted gap:** on a computer with one counted account, a token-free door still admits that
+account's own guests through a forwarder, since no uid check can tell them apart; CT-238 records it.
+
+The host label (HA-4), the label of the computer, is in [devices](devices.md#the-host-label).
 
 ## Remote placement
 
@@ -541,10 +748,10 @@ at the same paths. Only reachability, supervision and the trust anchor change (D
 | | Local placement | Remote placement |
 |---|---|---|
 | `origin` | `http://127.0.0.1:<port>` | `https://<dns-name>[:<port>]` |
-| Trust anchor | loopback and the Host/Origin guard | the origin's TLS certificate and the service token |
+| Trust anchor | loopback and the Host/Origin guard; the listener's owner ([HA-2](#ha-2)) | the origin's TLS certificate and the service token |
 | Supervisor | launchd (macOS), systemd (Linux), Task Scheduler (Windows), Project Observatory's node (any system), or `lifecycle.manager: "none"` | its platform; `lifecycle.manager: "none"` |
 | Well-known document | unauthenticated, under 100 ms | the token is required |
-| Port claim (`FAC-SEM-010`) | yes | no; `id.instance` stays unique |
+| Port declaration (`FAC-SEM-010`) | yes | no; `id.instance` stays unique |
 | Commands | `doctor`, `update` | `doctor` only |
 | Session cookie | `HttpOnly; SameSite=Strict` | `__Host-` name, `Secure; HttpOnly; SameSite=Strict; Path=/` |
 
@@ -640,7 +847,7 @@ operator's subscription is refused. Read beside its usage report, a service offe
   organization's listing does ([estate record](estate-record.md), DEC-0055), and the caller presents its own
   credential at `endpoint` — a delegation token ([delegation](delegation.md), DEC-0039) or a guest's through the relay.
   The descriptor's token stays the host's: others never receive it ([MCP credentials](#mcp-credentials), DEC-0024).
-- `custody` and `residency` are shown beside the service. Which data an organization lets reach a `personal` host, and
+- `custody` and `residency` are shown beside the service. Which data an organization lets reach a service whose `custody` is `personal`, and
   whether a caller's residency requirement admits a service's, are the organization's placement policy and the
   caller's, not this descriptor's rules (DEC-0061, *Not decided*).
 
@@ -684,14 +891,15 @@ These rules are a local placement's; a remote one is supervised by its platform 
 
 | Rule | Requirement |
 |---|---|
-| One copy | Before any side effect (binding its port, resuming jobs, starting a scheduler, migrating a store), a service MUST take an exclusive lock on `service.lock` in its data directory. A copy that does not hold the lock MUST NOT perform a side effect; when it does not get the lock it prints one sentence naming the holder's pid and exits with status 75. A copy its supervisor started, and marked so, MAY wait for the lock first, at most 300 s ([One copy](#one-copy), DEC-0057). Binding a port is not a lock. |
+| One copy | Before any side effect (binding its port, resuming jobs, starting a scheduler, migrating a store), a service MUST take an exclusive lock on `service.lock` in its data directory. A copy that does not hold the lock MUST NOT perform a side effect; when it does not get the lock it prints one sentence naming the holder's pid and exits with status 75. A copy its supervisor started, and marked so, MAY wait for the lock first, at most 300 s ([One copy](#one-copy), DEC-0057). Binding a port is not a lock. An app (`lifecycle.manager: "person"`) or an app's part MAY guard with its own single-instance guard instead ([One copy](#one-copy), DEC-0154). |
+| Start (the port claim) | A local service itself (or the app), never what starts it, rewrites this account's port claim at every start, after it holds its guard against a second copy: `service.lock` for a service with a descriptor; an app (`lifecycle.manager: "person"`) or an app's part: its own single-instance guard, which it MAY use instead of `service.lock`, even when its descriptor names an origin ([One copy](#one-copy)): rebuilt from this service's descriptors in the account, or, for an app without a descriptor origin or an app's part, from the port it records in its own state, read after it has written its new liveness file (or it would read an old port or none) (the ports of every instance it records), written atomically (a temporary file, then a rename), never from the old claim ([HA-1](#ha-1), DEC-0154). |
 | Supervisor | One per operating system (DEC-0032), named by `lifecycle.manager`; the file a writer writes for it carries the supervisor marker ([One copy](#one-copy), DEC-0057). **macOS — `launchd`** (`label`, `plist`): `RunAtLoad` true, `KeepAlive` true, `ThrottleInterval` 10, `ExitTimeOut` above the drain time; the marker `FABRIC_SERVICE_SUPERVISOR=launchd` in `EnvironmentVariables`. **Linux — `systemd`** (`unit`): a user unit under `~/.config/systemd/user/`, run with `systemctl --user`, `Restart=always`, `RestartSec=10`, `TimeoutStopSec` above the drain time, `WantedBy=default.target`; the marker `Environment=FABRIC_SERVICE_SUPERVISOR=systemd`. **Windows — `task-scheduler`** (`task`, a full task path such as `\PassionCode\example-agent.default`): a per-user Scheduled Task created without administrator rights, a logon trigger, restart on failure every minute, no execution time limit, run only when the user is logged on, `MultipleInstancesPolicy` `IgnoreNew` (recommended); the marker `--fabric-supervisor task-scheduler` in the action's `Arguments`, because a task's action carries no environment. **Any system — `node`**: Project Observatory's node (`node.lifecycle`) supervises the services it starts as its children and honours the same wait and exit; the marker `FABRIC_SERVICE_SUPERVISOR=node` or `--fabric-supervisor node`, which the node sets when it starts a child. The descriptor names it `lifecycle.manager: "node"` and nothing else: the node keeps its children in its own record, so there is no supervisor file and no `label`, `plist`, `unit` or `task` (DEC-0061). The node restarts a child that exits, no sooner than 10 s after the child's last start, as `ThrottleInterval` and `RestartSec` do. **No supervisor — `person`**: an app a person installs and starts ([an app's descriptor](#an-apps-descriptor), DEC-0069); no supervisor file and no marker. A descriptor names one supervisor: `label` and `plist` are refused beside `systemd`, `task-scheduler`, `node` and `person`, `unit` and `task` beside any other manager (DEC-0032, DEC-0057, DEC-0061, DEC-0069). No supervisor file carries a secret. |
-| Install | Write the supervisor file and the descriptor, start the service through its supervisor, then poll the well-known document until `service.id` matches, for at most 40 seconds. launchd: write the plist, `bootout` and wait until the job is unloaded, `bootstrap` (retrying the transient I/O error). systemd: write the unit, `systemctl --user daemon-reload`, `enable --now`. Task Scheduler: register the per-user task with the Supervisor row's settings, then run it. Node: the node installs the package (v4 §6 Path 2: the publisher signature against the pinned key, the digest, no network at install), writes the descriptor with `lifecycle.manager: "node"`, starts the service as its child with the marker and polls as above (DEC-0061). |
+| Install | For a local placement, first keep the port this `id.instance` records, or choose a new one, as [HA-1](#ha-1) says. Write the supervisor file and the descriptor, then rebuild this account's port claim atomically from all this service's descriptors in the account, as at start (DEC-0154); start the service through its supervisor, then poll, for at most 40 seconds, until the listener on the port is this OS account's ([HA-2](#ha-2)) and the well-known document's `service.id` matches; a listener of another account is `foreign-user`, never a successful install. launchd: write the plist, `bootout` and wait until the job is unloaded, `bootstrap` (retrying the transient I/O error). systemd: write the unit, `systemctl --user daemon-reload`, `enable --now`. Task Scheduler: register the per-user task with the Supervisor row's settings, then run it. Node: the node installs the package (v4 §6 Path 2: the publisher signature against the pinned key, the digest, no network at install), writes the descriptor with `lifecycle.manager: "node"`, starts the service as its child with the marker and polls as above (DEC-0061). |
 | Stop | `SIGTERM` drains in-flight work and exits; interrupted work resumes on the next start. |
 | Off | A host stops a service so that it stays off across logins, and starts it so that it comes back after one: launchd `bootout` then `disable`, start `enable` then `bootstrap`; systemd `systemctl --user disable --now`, start `enable --now`, restart `restart`; Task Scheduler end then disable the task, start enable then run it, restart end then run. Node: a host asks the node to start (`node.lifecycle.ensure_running`), to stop so that the service stays off until it is started again, and to restart (DEC-0061). A host reads state from the supervisor (`launchctl print`, `systemctl --user show -p ActiveState,SubState,MainPID,UnitFileState`, the task's state and last run; from the node, whether the child is kept on, whether it runs and its pid, which a host compares with the well-known `process.pid` as it compares systemd's `MainPID`). A host MUST NOT start a service process itself, and MUST NOT stop or signal a node's child or write a supervisor file for it. The node's operations' names and schemas are Project Observatory's (its row OBS-79); this row fixes what each does. |
 | Code | Code runs from an immutable release directory. An upgrade writes the new release, rewrites the supervisor file (plist, unit or task) to run it, and restarts the service through its supervisor: launchd reinstalls as the Install row does (`bootout`, wait, `bootstrap`); systemd `systemctl --user daemon-reload`, then `restart`; Task Scheduler re-registers the task, then ends and runs it; the node points its record of the child at the new release and restarts the child. |
 | State | Data and configuration, logs and cache live in the service's own directories for its system ([below](#directories-per-system)) — never inside the service's own code checkout or a release directory. A repository that exists to version the data itself (a registry, a plan) is a store, not code, and is allowed; the descriptor's `source.repository` tells the two apart. Writes are atomic; logs rotate. |
-| Uninstall | A service that keeps settings backups takes the final one first ([below](#settings-backup)). Then remove its supervision: launchd `bootout` (waiting until the job is gone) and delete the plist; systemd `systemctl --user disable --now`, delete the unit, `daemon-reload`; Task Scheduler end and delete the task; the node stops the child and removes it from its record, so it never starts again. Then delete the descriptor. Data stays unless the operator asks to purge it. |
+| Uninstall | A service that keeps settings backups takes the final one first ([below](#settings-backup)). Then remove its supervision: launchd `bootout` (waiting until the job is gone) and delete the plist; systemd `systemctl --user disable --now`, delete the unit, `daemon-reload`; Task Scheduler end and delete the task; the node stops the child and removes it from its record, so it never starts again. Then delete the descriptor, and then rebuild this account's port claim from the remaining descriptors and the own state of the instances that remain, atomically, as at start, never a read-modify-write, deleting the claim file only when no port remains (HA-1, DEC-0154). Data stays unless the operator asks to purge it. |
 | Settings | A service whose store holds operator decisions SHOULD keep settings backups outside its data directory ([Settings backup](#settings-backup), DEC-0025). |
 
 ### Directories per system
@@ -704,14 +912,17 @@ is (DEC-0032).
 
 | What | macOS | Linux | Windows |
 |---|---|---|---|
-| data and configuration (holds `service.lock`) | `~/Library/Application Support/<id>/` | `${XDG_DATA_HOME:-~/.local/share}/<id>/` | `%LOCALAPPDATA%\<id>\` |
+| data and configuration (holds `service.lock`, for a service that takes it) | `~/Library/Application Support/<id>/` | `${XDG_DATA_HOME:-~/.local/share}/<id>/` | `%LOCALAPPDATA%\<id>\` |
 | logs | `~/Library/Logs/<id>/` | `${XDG_STATE_HOME:-~/.local/state}/<id>/logs/` | `%LOCALAPPDATA%\<id>\Logs\` |
 | cache (rebuilt when deleted) | `~/Library/Caches/<id>/` | `${XDG_CACHE_HOME:-~/.cache}/<id>/` | `%LOCALAPPDATA%\<id>\Cache\` |
 
 ### One copy
 
-A copy that does not hold `service.lock` touches nothing: it binds no port, writes no file, resumes no job and starts
-no scheduler; it may read the lock to learn the holder's pid (DEC-0015, DEC-0057).
+A copy that does not hold its guard against a second copy (`service.lock`, or an app's own single-instance guard)
+touches nothing: it binds no port, writes no file, resumes no job and starts
+no scheduler; it may read the lock to learn the holder's pid (DEC-0015, DEC-0057). An app (`lifecycle.manager:
+"person"`) or an app's part MAY guard against a second copy with its own single-instance guard instead of
+`service.lock`; that guard is what HA-1's claim rewrite waits for (DEC-0154).
 
 - **Started by hand,** a copy that finds the lock held tries once and exits 75 at once, printing one sentence naming
   the holder's pid. When it cannot learn the pid (the lock records none yet, or cannot be read), the sentence says the
@@ -864,12 +1075,12 @@ defaulted or refused. Applying it is the operator's decision, taken on the page 
 
 ## Surfaces
 
-A tool that holds no per-session state is offered as a service's MCP surface, one copy on the machine under its
+A tool that holds no per-session state is offered as a service's MCP surface, one copy per OS account on the computer under its
 supervisor, rather than as a stdio server each session starts (LC-19, [profiles](profiles.md#where-a-stdio-server-is-declared)).
 
 | Caller | Surface |
 |---|---|
-| Another agent on the same machine | MCP `2026-07-28`, `streamable-http`, at `surfaces.mcp.path` on the service origin, token in the declared header, unless `surfaces.mcp.auth` is `own` or `delegation` ([below](#mcp-credentials)); an agent of the estate presents a delegation token ([delegation](delegation.md), DEC-0039); or A2A `1.0` on the loopback origin, never with the descriptor's token ([A2A Agent Card](#a2a-agent-card)) |
+| Another agent on the same computer (its listener's owner checked, [HA-2](#ha-2); a token-free door under [HA-3](#ha-3)) | MCP `2026-07-28`, `streamable-http`, at `surfaces.mcp.path` on the service origin, token in the declared header, unless `surfaces.mcp.auth` is `own` or `delegation` ([below](#mcp-credentials)); an agent of the estate presents a delegation token ([delegation](delegation.md), DEC-0039); or A2A `1.0` on the loopback origin, never with the descriptor's token ([A2A Agent Card](#a2a-agent-card)) |
 | The operator, a script | the service's CLI, delegating start, stop and restart to the supervisor |
 | A remote agent | A2A `1.0` over HTTPS, found through its [Agent Card](#a2a-agent-card), or MCP behind an authenticated gateway |
 | The dashboard page | same-origin requests with the session cookie and the custom request header; its layout and appearance inside a host follow [`fabric-dashboard/0.1`](embedded-dashboard.md) (DEC-0036) |
@@ -923,9 +1134,11 @@ surfaces; a peer finds it at A2A's own well-known path (A2A 1.0 §8.2):
   `surfaces.a2a` only says where it is.
 - **Where the card and its interfaces are.** On a local placement the public card answers on the service origin
   without authentication, as the well-known document does, and the Host and Origin checks still apply. Its interface
-  URLs are on that origin (`http://127.0.0.1:<port>`): a peer on the same computer reaches them, and loopback is the
-  trust anchor ([Remote placement](#remote-placement)). A2A asks for HTTPS in production (A2A 1.0 §4.4.6, §7.1); a
-  loopback origin is not reachable from outside the computer, so this contract admits it there and nowhere else. A
+  URLs are on that origin (`http://127.0.0.1:<port>`): a peer on the same computer reaches them. A2A asks for HTTPS in
+  production (A2A 1.0 §4.4.6, §7.1); this contract admits a loopback origin here and nowhere else. A loopback origin is
+  reachable from this computer, its other OS accounts and any guest a port forwarder relays
+  ([HA-3](#ha-3)); the trust anchor is loopback with the Host and Origin guard and the listener's owner
+  ([HA-2](#ha-2)), and a token-free A2A interface falls under HA-3. A
   service [offered to others](#offered-to-others) serves the card its outside peers read at the well-known path on its
   `peer.endpoint`'s origin (A2A 1.0 §8.2 is rooted at the domain), whose interface URLs are on that `https` endpoint; a
   remote placement serves it on its `https` origin. There it MAY answer without the token, since a peer that holds no
@@ -1095,7 +1308,7 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-009"></a>`FAC-SEM-009` | `service-observation` | the well-known identity matches the descriptor |
-| <a id="fac-sem-010"></a>`FAC-SEM-010` | `service-directory` | no two local descriptors claim one port (an app's descriptor without an origin claims none, DEC-0069); no two descriptors claim one `id.instance` |
+| <a id="fac-sem-010"></a>`FAC-SEM-010` | `service-directory` | no two local descriptors declare one port (an app's descriptor without an origin declares none, DEC-0069); no two descriptors declare one `id.instance` |
 | <a id="fac-sem-011"></a>`FAC-SEM-011` | `service-well-known` | `ready` carries no degraded source |
 | <a id="fac-sem-012"></a>`FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or home-relative executable path in `localPath`'s grammar: `/…` or `~/…`, and on Windows `C:\…`, `C:/…` or `~\…` (DEC-0032); never a network share |
 | <a id="fac-sem-024"></a>`FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no local supervisor field (`label`, `plist`, `unit`, `task`) |
@@ -1111,5 +1324,5 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | <a id="fac-sem-087"></a>`FAC-SEM-087` | `service-runner` | the runner's kind is in the node's catalogue; a subscription names its vendor's runner; the declared credential kind is one of the four and equals the one the node derived; a service offered to others runs on no subscription, declared, derived or in its usage report |
 | <a id="fac-sem-088"></a>`FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
 | <a id="fac-sem-101"></a>`FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
-| <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address on a local host, and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
+| <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address whose host is a local one as PL's [check](#links-to-a-services-pages) lists it (`127.0.0.0/8`, `[::1]`, the IPv4-mapped `[::ffff:127.x.y.z]`, `localhost` and names under it, and the unspecified `0.0.0.0` and `[::]` a wildcard bind reports), and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
 | <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121) |

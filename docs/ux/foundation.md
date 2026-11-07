@@ -524,14 +524,16 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Status:** draft
 - **Product:** unobserved
 
-### ST-021: Operator sees what a second copy of a service did
+### ST-021: Operator sees what a second copy of a service did, or that another account holds its port
 
-- **Story:** As P-02, I want a second copy of a running service to leave the first one alone and to say what it did, so that a duplicate start never costs me an outage or a restart loop.
+- **Story:** As P-02, I want a second copy of a running service to leave the first one alone and to say what it did, and a listener of another OS account on my service's port to be shown as such, with nothing sent to it and never shown as my service, so that a duplicate start never costs me an outage or a restart loop and a foreign listener never receives my credentials (DEC-0154).
 - **Traces:** JTBD-03, JRN-02/#3
 - **Acceptance criteria:**
   - Given a service running, when I start a second copy by hand, then it exits at once with one sentence naming the running copy's pid (or saying it is unknown) and changes nothing.
   - Given a service running, when its supervisor starts a second copy marked as supervised, then that copy waits up to 300 s touching nothing, the running copy keeps answering, and the host never shows an outage.
   - Given launchd supervises it, then the host lists the waiting copy as two copies (`duplicate`); given the Task Scheduler, then the host shows the running copy as ready and nothing of the waiting one.
+  - Given another OS account on this computer listens on my service's port, when the host probes it, then the host shows `foreign-user` with the line "Another account on this computer is using this service's port; nothing was sent to it.", sends nothing and reads nothing it answers as my service's (DEC-0154).
+  - Given the computer will not say who owns the listener on my service's port, when the host probes it, then the host shows `foreign-user` with the line "This computer would not say who is using this service's port; nothing was sent to it." and sends nothing (DEC-0154).
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved
@@ -717,7 +719,8 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given Fabric Dashboards is installed, when an agent, a tool answer or a completion message hands me a service's page, then it hands me the `open_link` and the page opens in Fabric Dashboards (PL-1, DEC-0123).
   - Given Fabric Dashboards is installed but did not open the page, then I am told it failed and no browser opens in its place (PL-3).
-  - Given Fabric Dashboards is not installed, or cannot run on my system, then the page opens at the service's own address, read from its descriptor (PL-3).
+  - Given Fabric Dashboards is not installed, or cannot run on my system, and the address is a remote `https` origin, or a loopback address whose listener is this account's, then the page opens at the service's own address, read from its descriptor (PL-3).
+  - Given Fabric Dashboards is not installed, or cannot run on my system, and the listener on the service's port is another OS account's or its owner cannot be told, then nothing opens, and the line for that case shows in the agent's reply (SCR-30) when an agent handed me the page, or where Fabric shows the link when I came through Fabric's link back (FL-7) (`foreign-user`, HA-2, DEC-0154).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

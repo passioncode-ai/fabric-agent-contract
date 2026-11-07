@@ -282,8 +282,8 @@ one key in both roles (`FAC-SEM-044`, DEC-0056); a P-256 key is a valid point by
 DEC-0053).
 
 **Device request signature**: The HTTP message signature (an RFC 9421 subset, label `fabric-device`) a device puts on
-every batch, check-in, rotation and share-registration request with its `#sig` key, beside mutual TLS, so a receiver behind a host that
-terminates TLS still proves the device's key; its `keyid` is the certificate's serial, and a (serial, nonce) pair is
+every batch, check-in, rotation and share-registration request with its `#sig` key, beside mutual TLS, so a receiver behind a TLS-terminating
+proxy still proves the device's key; its `keyid` is the certificate's serial, and a (serial, nonce) pair is
 accepted once (`FAC-SEM-077`, [devices](docs/specification/devices.md#transport), DEC-0056).
 
 **`org-cloud`**: A device certificate binding's `role` (DEC-0099): the device is the organization's own cloud machine
@@ -363,7 +363,9 @@ operator's own machine, **T1** an enrolled machine of the same owner, **T2** eve
 A `relayed` action from a T0 or T1 caller carries the operator's decision (**Relayed decision**, DEC-0121).
 Over the relay a node places a sender in T1 from the estate record it applied (`relayCallerTier`, DEC-0106); over the
 estate's relay a sender that is not T1 is T2 and its call is refused, and `unknown-state` is a denial, not T2 (DL-28,
-DEC-0106, the wording DEC-0137).
+DEC-0106, the wording DEC-0137). On a computer with more than one **Counted OS account**, a token-free loopback door places
+a caller in T0 only after checking the peer's OS account, and a port forwarder's callers are T2
+(HA-3, DEC-0154).
 
 **Adaptation plan**: What a person moves into an organization they join: projects, history, results and schedules.
 The plan's draft and the inventory it is chosen from stay in the person's Fabric; only its organization part, what the
@@ -507,8 +509,9 @@ usable without document-level horizontal scrolling: 360, or the larger `minWidth
 keeps for the page when its own panes grow.
 
 **Appearance carrier**: The cookie `fabric_appearance` (`v=1&scheme=…&theme=…`) a host sets for a
-dashboard's host so the page shows the operator's colour scheme and theme (DEC-0036, ED-8). A cookie
-is not isolated by port, so it is per host in a shared cookie store and per service where the host
+dashboard page's host so the page shows the operator's colour scheme and theme (DEC-0036, ED-8). A cookie
+is not isolated by port, so it is per host (the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that
+computer) in a shared cookie store and per service where the host
 gives each service its own store; a page applies only the fields it declares in `appearance`
 (DEC-0059, ED-6). It carries no secret and no identity.
 
@@ -570,8 +573,8 @@ and one duty every channel agent owes whatever it declares: text from a channel 
 for each hour the product observed itself running in (an empty one included) and one `ops.digest.daily@1` line for
 each closed UTC day that has hourly lines, folding them (DEC-0153): counts only, no log line, path or identifier. A
 **rise** is an operation's failures in an hour at least 10 and at least twice the hour before's (none counting as
-one), told to the operator by a product that shows findings (OD-8). A local descriptor says where a collector on its
-machine reads the daily digests, and the label it sends with them, under `extensions/ops-digest/0.1` (OD-9).
+one), told to the operator by a product that shows findings (OD-8). A local descriptor says where a collector in the same
+OS account reads the daily digests, and the label it sends with them, under `extensions/ops-digest/0.1` (OD-9).
 ([operations digests](docs/specification/ops-digest.md))
 
 **Retro after work**: The host obligation `retro-after-work` (DEC-0153): when a session releases a claim or task the host
@@ -641,9 +644,33 @@ cells of agent × skill × project × UTC day × outcome, with no person dimensi
 **Access log**: An `access-log/1` document: who read which scope of one subject's data — keyed by
 their user id or by a device bound to them — when and why, readable by that subject.
 
-**Device**: A computer enrolled with an organization server under `fabric-device/0.1` (DEC-0031):
+**Device**: One counted OS account of a computer, or a virtual machine, enrolled with an organization server under
+`fabric-device/0.1` (DEC-0031; DEC-0154; what an estate machine is on such a computer is CT-231):
 a key-bound short-lived certificate (the key in hardware, a platform store or a file, as `key.storage` states) that also attributes everything it sends, a server-issued
 stream epoch, signed policy layers and periodic check-ins.
+
+**Counted OS account**: An OS account a person or an organization signs in with, or runs Fabric or an agent service
+under; an account that runs either, or has a services directory, always counts, and only an account that does neither
+(root, SYSTEM, the system's service accounts) is left out; the count is read at every start ([service](docs/specification/service.md#counted-os-accounts),
+DEC-0154). "A computer with more than one counted OS account" counts only these.
+
+**Port claim**: A `passioncode-port-claim/1` file `.passioncode-ports.<service-id>.<account>.json` in the computer's
+shared sticky folder, owned by the account it names by uid (SID on Windows), listing the ports that account records for a
+service; it keeps installers of two accounts, or of two services in one account, from one port and grants nothing (HA-1,
+DEC-0154).
+
+**`foreign-user`**: The state of a local service whose port is held by a listener of another OS account, or by one
+whose owner cannot be told; ordered after `down` and before `foreign`, it wins over any well-known answer, and nothing
+is sent to it (HA-2, DEC-0154).
+
+**Host label**: The label of the computer: `device.hostLabel`, an HMAC of the computer's administrator-owned secret
+over the organization's id, the same for every device of one organization on one computer (two counted OS accounts
+of it, or a virtual machine given its secret); organizations with no code
+on the computer cannot link it (HA-4, [devices](docs/specification/devices.md#the-host-label), DEC-0154). In
+this contract's specification, schemas and glossary, "host" never means the computer. The exceptions are the name
+"host label", which labels a computer, and names and paths already fixed, which keep their spelling (the enrollment
+purpose `agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`). The registers keep the
+words they were written in.
 
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that
 order, and a locked key is never overridden by a lower layer.

@@ -16,7 +16,7 @@ derived) and the operator's rulings of DEC-0017 (each marked as ruled).
 
 ## Extension key
 
-`https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1` (the same host and
+`https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1` (the same host name and
 path shape as the contract's `service/0.1` key; the Dashboards docs' other spelling is
 fixed in AR-1).
 

@@ -25,7 +25,7 @@
 | SCR-17 | Usage by grant | FLW-14 | disabled | proposed | `test/spend-policy.test.ts` |
 | SCR-18 | Restore preview and report | FLW-15 | disabled | proposed | `test/settings-backup.test.ts` |
 | SCR-19 | Project board thread | FLW-16 | disabled | proposed | `test/comms-rules.test.ts` |
-| SCR-20 | Service card with a second copy | FLW-17 | disabled | proposed | none yet |
+| SCR-20 | Service card: a second copy or another account's listener | FLW-17 | disabled | proposed | none yet |
 | SCR-21 | Project listing setting | FLW-18 | disabled | proposed | `test/comms-tools.test.ts` |
 | SCR-22 | Add a machine | FLW-19 | disabled | proposed | `test/pairing.test.ts` |
 | SCR-23 | My network's machines | FLW-20, FLW-26, FLW-27 | disabled | proposed | `test/ceremonies.test.ts` |
@@ -265,15 +265,15 @@
 - **Resources:** project-comms specification, Request lifecycle
 - **Status:** proposed
 
-### SCR-20: Service card with a second copy
+### SCR-20: Service card: a second copy or another account's listener
 
 - **Used by:** FLW-17
-- **Purpose:** a host's card for a service shows a second copy honestly: never as an outage, and as two copies where the supervisor's pid shows one.
-- **Elements:** the service's state from its well-known document; under launchd a "two copies" (`duplicate`) mark with both pids; the second copy's one sentence in its log (primary action: none; the operator removes the duplicate install).
-- **States:** loading — a supervised copy waits for the lock (launchd: `duplicate`; Task Scheduler: the holder `ready`, the wait not visible); error — the second copy exited 75 naming the holder, the holder unknown, or the markers; success — one copy runs and answers.
-- **Coverage:** `src/service-supervisor.ts`, `test/service-supervisor.test.ts`, `fixtures/semantic/service-lock-*.json`
-- **Scenarios:** SCN-026
-- **Resources:** service specification, One copy
+- **Purpose:** a host's card for a service shows a second copy honestly, never as an outage and as two copies where the supervisor's pid shows one; and shows another OS account's listener on the service's port (or one whose owner the computer will not tell) as `foreign-user`, never as the service.
+- **Elements:** the service's state: the host's own states first (an invalid descriptor, a conflict over an `id.instance` or a port, a stop or start in flight), then from the listener's owner (`foreign-user` with its line, "Another account on this computer is using this service's port; nothing was sent to it." or the line for an owner that cannot be told), then `foreign` for another identity answering, a second copy as `duplicate`, otherwise from its well-known document, and a supervisor's stop only when nothing answers; under launchd a "two copies" (`duplicate`) mark with both pids; the second copy's one sentence in its log (primary action: none; the operator removes the duplicate install).
+- **States:** loading: a supervised copy waits for the lock (launchd: `duplicate`; Task Scheduler: the holder `ready`, the wait not visible); error: the second copy exited 75 naming the holder, the holder unknown, or the markers; error: `foreign-user`: another OS account's listener holds the port, with the line "Another account on this computer is using this service's port; nothing was sent to it."; or its owner cannot be told, with the line "This computer would not say who is using this service's port; nothing was sent to it." (DEC-0154 HA-2); success: one copy runs and answers.
+- **Coverage:** `src/service-supervisor.ts`, `test/service-supervisor.test.ts`, `fixtures/semantic/service-lock-*.json`; `foreign-user`: the state-order vectors owed by CT-229
+- **Scenarios:** SCN-026, SCN-056
+- **Resources:** service specification, One copy; service specification, Several OS accounts on one computer (HA-2)
 - **Status:** proposed
 
 ### SCR-21: Project listing setting
@@ -379,9 +379,9 @@
 
 - **Used by:** FLW-29, FLW-30, FLW-31
 - **Purpose:** the operator sees their instruction taken: the agent's reply in their chat and the service's audit row.
-- **Elements:** the agent's reply (what it called, the service's answer, a link to hand over for a human step, a service's page as its `open_link`); the audit row (decided by, via, relayed by the authenticated caller, when; under a mandate also the task, the chain and the operator's words, for the operator's own view; for a relayed approval also where the operator said it, `source`, DEC-0126).
-- **States:** success, the action taken as the operator's; error, `operator-decision-required`, `decision-invalid` or `human-step-required` with its link.
-- **Coverage:** `src/actions.ts` (`actionDecision`, `FAC-SEM-142`), `test/actions.test.ts`
+- **Elements:** the agent's reply (what it called, the service's answer, a link to hand over for a human step, a service's page as its `open_link`; where Fabric Dashboards is not installed, or unsupported on this system, and the service's listener is another OS account's, or its owner cannot be told, the `foreign-user` line for that case, "Another account on this computer is using this service's port; nothing was sent to it." or "This computer would not say who is using this service's port; nothing was sent to it.", and nothing opened, DEC-0154 HA-2); the audit row (decided by, via, relayed by the authenticated caller, when; under a mandate also the task, the chain and the operator's words, for the operator's own view; for a relayed approval also where the operator said it, `source`, DEC-0126).
+- **States:** success, the action taken as the operator's; error, `operator-decision-required`, `decision-invalid` or `human-step-required` with its link; error, `foreign-user`: no service card is on the agent's path, so the reply itself shows the line and opens nothing.
+- **Coverage:** `src/actions.ts` (`actionDecision`, `FAC-SEM-142`), `test/actions.test.ts`; `foreign-user`: owed by CT-229
 - **Scenarios:** SCN-043, SCN-044, SCN-045, SCN-046
 - **Resources:** service specification, Actions
 - **Status:** proposed

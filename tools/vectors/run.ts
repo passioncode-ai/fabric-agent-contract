@@ -27,6 +27,7 @@ import * as orgExchange from "./org-exchange.js";
 import * as orgAdaptation from "./org-adaptation.js";
 import * as opsDigest from "./ops-digest.js";
 import * as folderAttribution from "./folder-attribution.js";
+import * as hostLabel from "./host-label.js";
 import * as hubMove from "./hub-move.js";
 import * as jobLimits from "./job-limits.js";
 import * as localChannel from "./local-channel.js";
@@ -61,6 +62,7 @@ export const GENERATORS: readonly Generator[] = [
   { source: "org-adaptation.ts", build: one(orgAdaptation.VECTOR_FILE, orgAdaptation.buildOrgAdaptationVectors) },
   { source: "ops-digest.ts", build: one(opsDigest.VECTOR_FILE, opsDigest.buildOpsDigestVectors) },
   { source: "folder-attribution.ts", build: one(folderAttribution.VECTOR_FILE, folderAttribution.buildFolderAttributionVectors) },
+  { source: "host-label.ts", build: one(hostLabel.VECTOR_FILE, hostLabel.buildHostLabelVectors) },
   { source: "hub-move.ts", build: one(hubMove.VECTOR_FILE, hubMove.buildHubMoveVectors) },
   { source: "job-limits.ts", build: one(jobLimits.VECTOR_FILE, jobLimits.buildJobLimitVectors) },
   { source: "local-channel.ts", build: one(localChannel.VECTOR_FILE, localChannel.buildLocalChannelVectors) },

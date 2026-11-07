@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0154` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0155` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -145,6 +145,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted
 - **Annotated (2026-10-11):** supervisor part amended by DEC-0032 (one supervisor per operating system: launchd, systemd, the Task Scheduler).
 - **Annotated (2026-10-12):** one copy amended by DEC-0057 (a copy its supervisor started and marked may wait for the lock, at most 300 s, before exit 75; the node supervises too).
+- **Annotated (2026-11-07):** amended by DEC-0154 (one copy per counted OS account, one `id.instance` in that account's services directory under `service.lock` in its data directory, or an app's own single-instance guard; the port claim, HA-1).
 - **Decision:** A long-running local agent process follows the `fabric-service/0.1`
   extension, keyed `https://fabric.passioncode.ai/agent-contract/extensions/service/0.1`.
   Its installer writes a descriptor into one per-user services directory; the running
@@ -927,6 +928,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-20):** DEC-0094: a device without a hardware or platform store MAY hold its key in a file
   (`storage: file`, `exportable: true`, no `attestation`), its `deviceKeys` in the same store; rotation is idempotent
   (`FAC-SEM-125`).
+- **Annotated (2026-11-07):** amended by DEC-0154 (a device is one counted OS account of a computer or a virtual machine; the enrollment's device object gains the optional `hostLabel`, HA-4).
 - **Decision:** A device that sends activity telemetry (DEC-0030) is managed as
   [devices](specification/devices.md) says:
   1. **Enrollment** (`device-enrollment.schema.json`):
@@ -1814,6 +1816,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric Dashboards' outage
   watcher (FD-48) and Example Console read `setup`; the adapter checks Claude Code plugin configurations against LC-19 and
   LC-21 (its own row); Fabric starts provider entries' stdio servers by `scope`.
+- **Annotated (2026-11-07):** amended by DEC-0154 (LC-19: one copy per counted OS account on the computer, not one per machine, HA-1).
 - **Decision:**
   - a well-known `degraded` entry MAY carry `setup: true`: the source waits for a person to finish setting it up,
     not an outage. It still names `source` and `reason` and still makes the service `degraded` (`FAC-SEM-011`
@@ -1889,6 +1892,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   superseded by DEC-0059: FB-6's cookie, like ED-8's, is per host in a shared cookie store and per service where the
   host gives each service its own store, so in a shared store an `owner=host` for one local service hides every local
   service's button on that host (RFC 6265 §8.5).
+- **Annotated (2026-11-07):** amended by DEC-0154 (item 6: T0 on loopback needs the peer's OS account checked on a computer with more than one counted account, HA-3).
 - **Amends:** DEC-0039 (DL-2, DL-4…DL-6, DL-8, DL-12, DL-13, DL-16, DL-17, DL-19, DL-21; `FAC-SEM-050`), DEC-0040
   (FB-6), the session-lifetime paragraph of [service](specification/service.md#operator-session-lifetime). Implements
   Fabric ADR-0144 amendments 3 and 4 at
@@ -2899,6 +2903,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   so. `S4U` and `SYSTEM` principals were not measured.
 - **Annotated (2026-10-12):** its *Not decided here* item on the node — `lifecycle.manager: node` in the descriptor,
   `label`/`plist` beside it, the node's Install, Off, Uninstall and state read — is decided by DEC-0061.
+- **Annotated (2026-11-07):** amended by DEC-0154 (one copy and `service.lock` per OS account, an app's own single-instance guard in place of the lock, the port claim rebuilt after the guard, HA-1).
 - **Amends:** DEC-0015 (one copy; launchd as the only supervisor) and DEC-0032 (the supervisor per system, Windows
   paths and token files), additively under the DEC-0016 extension policy except where *Compatibility* says.
 - **Decision:** in [service](specification/service.md) —
@@ -3341,6 +3346,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the first organization server's listings carry what `peer` carries (CT-04); Fabric Inbox's organization mode (its
   B-87) writes a remote descriptor with `peer` and `runner.credentialKind: "platform-metered"` and reports usage on that
   route.
+- **Annotated (2026-11-07):** amended by DEC-0154 (item 5's Install and Uninstall forms: the port claim written after the descriptor, the install poll waiting for this account's listener, the claim rebuilt at uninstall, HA-1 and HA-2).
 - **Amends:** DEC-0015 (`installedBy`), DEC-0019 (a remote placement may be offered to others), DEC-0021 and DEC-0046
   (the usage report's `route`), DEC-0057 (its *Not decided here* item on the node), additively under the DEC-0016
   extension policy except where *Compatibility* says. Closes V4-DESCRIPTOR (board run N08, packet P4-02).
@@ -7133,6 +7139,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted (2026-10-23) by the contract on the operator's recorded decisions, CT-92 answered; the operator
   may reverse it. Consumer adoption: Project Observatory's node (OBS-192, OBS-217); the first organization server
   (VES-HARNESS).
+- **Annotated (2026-11-07):** amended by DEC-0154 (item 2: under mode `A` on a shared computer the organization sees the enrolling account's harness, until CT-232).
 - **Context:** DEC-0102 shipped the whole harness of a machine to every organization it is enrolled in, whatever
   `machine.mode` says, from the operator's S8 (a work machine is transparent to its organization) and left CT-92 to the
   operator: whether an organization sees harness names and services of other contexts on one machine, against
@@ -7347,6 +7354,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-26
 - **Status:** Accepted (2026-10-26). Additive on the wire (an optional member of `surfaces`); a behaviour rule for a
   service that serves an Agent Card, from its next pin.
+- **Annotated (2026-11-07):** amended by DEC-0154 (item 2's premise: a loopback origin is reachable by every OS account and relayed guest on the computer, HA-2 and HA-3).
 - **Context:** CT-131 (board thread `2587bdd2`, 2026-10-25) asked whether `fabric-service/0.1` publishes a service's
   catalogue as an A2A Agent Card or an `ai-catalog` entry, and which is normative. The Agent Card is already in the
   contract: DEC-0002 and the A2A peer profile pin A2A `1.0` and the card at `/.well-known/agent-card.json`, so a service
@@ -7418,6 +7426,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-26
 - **Status:** Accepted (2026-10-26). A behaviour rule for every service and agent from its next pin, a checker rule
   (`FAC-SEM-143`) and a reference; no schema changes.
+- **Annotated (2026-11-07):** amended by DEC-0154 (PL-3: the listener's owner is checked before a raw loopback address is opened; another account's, or one that cannot be told, is `foreign-user` and nothing opens, HA-2).
 - **Context:** the operator ruled on 2026-10-24 that every page of their agents and local Fabric services opens in
   Fabric Dashboards, not in a browser, including links in chat and notifications. An estate agent asked the contract
   for that rule (request `886c9b4d`, thread `67961610`, deadline 2026-10-31; backlog CT-130): a MUST in
@@ -7798,6 +7807,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (devices.md What stays linkable; relay.md OR-5).
 - **Annotated (2026-10-27):** UE-1's rule of an identity per membership applies to a person-to-person share: a key pair per
   share on each side, never the device keys (DEC-0142 PS-2).
+- **Annotated (2026-11-07):** amended by DEC-0154 (item 5's residual linkability gains the host label: shared by one organization's devices on one computer, and computable for every organization by an organization's code on any counted account or in a virtual machine given the secret; devices.md What stays linkable, HA-4).
 - **Context:** the operator decided K-1 on 2026-10-15 (NET-2, DEC-0084): each organization enrollment of a machine gets
   keys of its own, so two organizations cannot link the machine (CX-22). The scope brief
   (`docs/evidence/specs/2026-10-24-ct122-unlinkable/brief.md`) listed twelve values two enrollments share today, and the
@@ -9432,6 +9442,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted 2026-11-06, after clean rounds 22 and 23 at `f5302e3f` of the coordinator's blind readings
   (unit, seam, product). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168`, a descriptor
   extension, a reference module and vectors, and a host obligation. Additive: nothing that validated before changes.
+- **Annotated (2026-11-07):** amended by DEC-0154 (OD-9: a collector in the same OS account reads the daily digests; CT-243).
 - **Context:** the operator asked on 2026-11-04 that every product's log be read every hour and every day, and that
   every agent close its work with a retro whose lessons are kept centrally; Fabric recorded the split in its ADR-0188
   (commit `0d0e5922`) and relayed the contract's part on board thread `f7758225` (message `516761e1`, item 2 of its
@@ -9727,3 +9738,489 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   changed) is in the landing commit;
   Fabric ADR-0188 at commit `0d0e5922`; the shape's origin at Fabric commit `e1eecec0` (the reference folds are
   `src/ops-digest.ts`); backlog CT-219.
+
+### DEC-0154: several OS accounts on one computer: recorded ports, the listener's owner, no token-free loopback door, the host label
+
+- **Date:** 2026-11-06
+- **Status:** Accepted 2026-11-07, merged #248: rounds 28 and 29 of the coordinator's blind readings, both at `3fb5c12a`,
+  were clean on all three tiers (unit, product, seam). Proposed 2026-11-06 as a draft for those readings. Round 1 at
+  `25ba36f7` was not clean (the unit reading passed, the product reading found seven breaks and the seam reading one);
+  round 2 at `cbc425d7` was not clean (the unit reading passed with one risk, the product reading found four breaks,
+  the seam reading passed); round 3 at `feef4e4d` was not clean (unit passed, seam passed with no break, its risks
+  becoming S1 to S8, product found five breaks); round 4 at `66e44c3d` was not clean (product found two breaks, V1 and
+  V2, seam one, V1; unit passed, 38 of 40 mutants killed, one equivalent and one becoming V14); round 5 at
+  `190ee95e` was not clean (product found three breaks, W1 to W3; unit passed, 156 mutants, 4 survivors, closed by
+  W10; seam passed with 0 breaks, the full suite of 10520 tests green, its risks closed by W3, W4, W12 and W13); round 6 at
+  `d47295d5` was not clean (unit passed, 65 of 67 mutants killed, the rest closed by W15; product found two breaks,
+  W16 and W17; seam found the same break as W17, the full suite of 10524 green); round 7 at
+  `8a9373a1` was not clean (product found two breaks, W27 and W28; seam found the same break as W27; unit passed, 101
+  of 107 mutants, the rest closed by W39); round 8 at `7fbe27f0` was not clean (product found one break, W40; seam
+  passed; unit did not run, since W39 changes the vectors); round 9 at `7ce5cc67` was not clean (unit passed, 319 of
+  376 mutants killed and 53 equivalent, the rest closed by W55; product found two breaks, W53 and W54; seam found the
+  same break as W54, the full suite of 10530 green); round 10 at `23fd509d` was not clean (unit passed, seam passed,
+  product found one break, W63); round 11 at `bbb5b956` was not clean (seam found one break, W73; product found the same break); round 12 at `3c1ea1f8`
+  was not clean (unit passed, 79 of 86 mutants, 5 equivalent, the rest closed by W76 (g); product found three breaks,
+  W76 (a) to (c); seam found three breaks, the same as W76 (a), (c) and (f)); round 13 at `545ba274` was not clean (unit
+  passed; product found one break and seam three, W77 (a) to (c)); round 14 at `d6138063` was not clean on all three
+  tiers (W78 (a) to (c), and a unit risk, W78 (e)); round 15 at `df98d10c` was not clean (unit passed; product
+  and seam found breaks, W79 (a) to (j)); round 16 at `9161796d` was not clean (unit passed; product and seam found
+  breaks, W80 (a) to (c), with risks W80 (d) to (g)); round 17 at `832dc557` was clean on all three tiers; round 18
+  at `832dc557` was not clean (unit and seam passed; product found one break, W81 (a), with risks from both rounds,
+  W81 (b) to (h)); paused 2026-11-06 by the operator's relay and resumed 2026-11-07 by the operator's own word, with
+  W82 (two adoption facts from the reconciliation answers); round 19 at `63c622d4` was not clean (unit passed;
+  product found two breaks, seam one, W83); round 20 at `3db473d0` was not clean (product found two breaks, seam two,
+  unit one, the split marker W84 had already rejoined; W84); round 21 at `ea203020` was not clean (product found one
+  break, seam one, W85); round 22 at `d4f3300c` was not clean (unit passed; product one break, seam two, W86); round 23 at `a5308d97` was not clean (unit and product passed; seam one break, W87); round 24 at `ab89d8a1` was not clean (product one break, unit two, seam three, W88 and W89); the full gate passed at
+  W88 (`60b3309e`); round 25 at `73f5a9ed` was not clean (unit one break, product two, seam one, W90 and W91); round 26 at `647754bf`
+  was not clean (unit one break, product three, seam one, W92); round 27 at `f78c87c1` was not clean (unit passed;
+  product one break, seam one, W93); rounds 28 and 29 at `3fb5c12a` were clean; their batches are folded in (Source). A reference module and vectors, one optional schema
+  member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
+  doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
+- **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
+  the organization's plan for a shared computer on which several OS accounts work side by side: an administrator's
+  account, the operator's own account and an account an organization owns whole, each running its own Fabric, Fabric
+  Dashboards and Switchboard, and virtual machines under them. The contract's local placement assumed one OS account
+  per loopback: the services directory is under the account's home and shows only that account's port claims
+  ([service](specification/service.md#descriptor), `FAC-SEM-010`), the identity check of the well-known document stops
+  a mistake but not another account holding the port (`FAC-SEM-009`), and T0 is "a caller on loopback, running under
+  the owner's OS account" with no means to tell accounts apart on TCP ([delegation](specification/delegation.md#trust-tiers)
+  DL-25). Loopback is one per computer, so any account, and any guest a forwarder relays, reaches every port. The gaps
+  are G1 to G11 of the spec [`2026-11-06-shared-host-gaps.md`](evidence/specs/2026-11-06-shared-host-gaps.md); this
+  decision takes G1 to G3 and the host label the board agreed, and files the rest. Fabric's hub already chooses a port
+  per account by a uid formula (its CO-505).
+  In this contract's specification, schemas and glossary, "host" never means the computer. The exceptions are the name
+  "host label", which labels a computer, and names and paths already fixed, which keep their spelling (the enrollment
+  purpose `agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`). The registers keep the
+  words they were written in.
+- **Decision:** [Several OS accounts on one computer](specification/service.md#several-os-accounts-on-one-computer)
+  and [the host label](specification/devices.md#the-host-label):
+  0. **Counted OS accounts.** A counted OS account is one a person or an organization signs in with, or runs Fabric or
+     an agent service under. The count fails toward more: an account that runs Fabric or an agent service, or has a
+     services directory, is counted whatever its shell, uid or name; the tests only leave out an account that does
+     neither, root, SYSTEM and the system's service accounts (macOS: a uid under 500 or a name starting with `_`;
+     Linux: a uid below `UID_MIN` of `/etc/login.defs` or a `nologin` shell; Windows: the built-in and service
+     accounts), and a listener one of those owns is still `foreign-user` (item 2). "A computer
+     with one counted OS account" and "a computer with more than one" count only these, and the count is read by the
+     service itself at every start, by an installer when it installs and by a door at its own start (launchd, systemd,
+     the Task Scheduler and other launchers do not read it), never once at install for good. A local service runs under the counted account whose
+     services directory declares it.
+  1. **A port recorded per OS account (HA-1, G1).** A local service's port is recorded per counted OS account, in the
+     service's own state and in its descriptor's `origin`. An installer keeps the port its own `id.instance` already
+     records (descriptor, own state, claim) when that instance's own listener holds it and no other `id.instance`'s
+     descriptor declares it, or when nothing does; it chooses a
+     new port only when none is recorded or another holder has it (another `id.instance`'s descriptor, a claim of
+     another account or of another service in this account unless the instance's own listener holds it, or another
+     listener), and a new port is free on the
+     computer: no listener accepts on it on `127.0.0.1`, a wildcard bind included, no other `id.instance`'s descriptor
+     declares it (as `FAC-SEM-010` checks), and
+     no claim of another account, or of another service in this account, names it. It writes
+     this account's claim `.passioncode-ports.<service-id>.<account>.json` (`<service-id>` the descriptor's `id`, or for
+     an app without a descriptor its reverse-DNS bundle identifier under its own domain, stable across versions, and
+     for an app with separately recorded parts that identifier plus `.<part>`, one claim per part, as Fabric's hub and
+     local stack, `ai.passioncode.desktop.hub` and `ai.passioncode.desktop.stack`; `<account>` the numeric uid on macOS
+     and Linux, the SID on Windows, never the login name, which can be renamed) in the computer's shared sticky folder
+     (`/Users/Shared` on macOS; `/var/tmp` on Linux, agreed on the board, where `systemd-tmpfiles` may age a claim out
+     and a unit with `PrivateTmp` sees its own folder; `%ProgramData%\PassionCode\port-claims` on Windows, created by
+     the administrator's setup step of item 4, part of a Fabric node's first installation on Windows whose installer
+     asks once for elevation, with Users allowed to create files, the creator owner in full control of its own files and
+     no account allowed to write or delete another's; an installer or a service that finds it missing or with another
+     ACL records its port anyway and reports it once, until the folder appears or its ACL is right, as a line in its
+     health report or log, never creating it or changing its ACL),
+     owned by that account and holding only `{schema, service, account, ports, updatedAt}` (`schema`
+     `passioncode-port-claim/1`; several recorded ports of one service or part in one claim's `ports`). The installer,
+     or the node that installs the service, chooses the port, writes the descriptor and then rebuilds the claim
+     atomically from all this service's descriptors in the account, as at start (the short window between choosing the port and
+     writing the claim is accepted: its cost is a collision warning); at every start only the service itself (or
+     the app), never launchd, systemd, the Task Scheduler or the node, which cannot take its lock, rewrites it, after it holds its guard against a second copy (`service.lock` for a service with a descriptor; an app, `lifecycle.manager: "person"`, or an app's part: its own single-instance guard, which it MAY use instead of `service.lock`, even when its descriptor names an origin),
+     rebuilt from this service's descriptors in the account, or, for an app without a descriptor origin or an app's part, from the port it records in its own state, read after it has written its new liveness file (or it would read an old port or none), with the ports of every instance the account records, written atomically (a temporary file, then a rename),
+     not only when it is missing, because a file's age decides `systemd-tmpfiles`' cleaning and a computer installed
+     before catches up; at uninstall, after the descriptor is deleted, the claim is rebuilt the same way from the
+     remaining descriptors and the own state of the instances that remain (never the removed one's), never by a read-modify-write, and the file is deleted when no port
+     remains. A claim
+     whose file owner (uid, or SID on Windows) is not the `account` it names, or of an account no longer on the
+     computer, is ignored. When a file of the claim's name is owned by another account, the installer records its port
+     in its own state and descriptor anyway, reports the squatted path (a note, never a refusal) and chooses by the
+     listener and descriptor tests. A claim grants nothing: it keeps two installers from one port, and who may receive
+     a credential is item 2's. An ephemeral port the listener protects with a proof (an HMAC answer to a fresh
+     challenge) needs no claim. A computer with one counted account keeps a service's historical default port, which
+     its instance records, and writes its claim too. A client takes the port only from the descriptor or the service's
+     record; a formula over the uid (Fabric's hub, CO-505) is only an allowed default, when the port it gives is
+     recorded, claimed and checked free. The install polls until the listener is this account's and `service.id`
+     matches; a listener of another account is never a successful install. `FAC-SEM-010` is unchanged: it checks one
+     directory.
+  2. **The listener's owner, and `foreign-user` (HA-2, G2).** Before a client sends any credential to
+     `http://127.0.0.1:<port>`, and before a host reports a local service healthy, it establishes that the server end
+     of its connection belongs to its own OS account: from the computer's socket table, or by the listener proving
+     before any credential travels that it holds a secret only this account can read (Switchboard reported that its
+     control channel answers a fresh challenge with an HMAC). No listener is `down`. A listener of another account
+     (root, SYSTEM and service accounts included), or one whose owner cannot be told (a process the client cannot
+     open, a client without access to the socket table), is the new host state `foreign-user`: no credential is sent
+     and nothing it answers is read as the service's. A host shows it with one of two lines, as SCR-20 in
+     `docs/ux/screens.md` records: "Another account on this computer is using this service's port; nothing was sent to it." for another account's listener, and "This computer would not say who is using this service's port; nothing was sent to it." for an owner that cannot be told.
+     A client that can see its own account's sockets always tells its
+     own listener. The order of the states read from the listener and its answer is `down`, `foreign-user`, `foreign`, then the well-known `status`, with a second copy shown as `duplicate` after `foreign`; a host's own states (an invalid descriptor, a conflict, its own stop or start in flight) may come first, and a supervisor's stop is shown only when nothing answers, in place of `down`; `foreign-user` is
+     decided before the well-known document is read and wins over every answer, `ready` included; a reader treats a
+     state it does not know as not ready; a watcher counts `foreign` and `foreign-user` as unavailable, as it counts `down`; a node
+     reports a `foreign` or `foreign-user` service as `down` in its node summary. The sources: on macOS the TCP socket
+     table (`netstat -anv -p tcp`, or `sysctl net.inet.tcp.pcblist64` in the process), which names another account's
+     socket where a list of the account's own sockets (`lsof -u` of the current user) cannot tell an empty port from
+     another account's; on Linux the `uid` column of `/proc/net/tcp` and `/proc/net/tcp6`; on Windows
+     `GetExtendedTcpTable`, then the owning process's token user. The well-known `process.pid` is never proof. When
+     the client is one the contract does not reach (a browser, a coding agent, another vendor's program), the check is
+     carried by the side that hands the credential over or receives it: the host checks the listener before it mints a
+     login code, before it writes an `mcp.json` or hands a session bearer to a coding agent (SH-9), and before it or an
+     agent opens a raw `http://127.0.0.1:<port>` address in the person's browser (PL-3), reporting `foreign-user`
+     instead; and on a computer with more than one counted account a local surface whose credential arrives from such
+     a client (a dashboard a browser reaches, an MCP surface a coding agent reaches, a proxy coding agents call) MUST
+     refuse a peer of another OS account before it reads the request; every other local service SHOULD. A service that
+     finds its recorded port held and comes up on another (the port moved by its installer at a reinstall, or by an
+     app that records its own port; a running service never writes its descriptor) SHOULD rotate the secrets it issued to clients that reach it by
+     port (Switchboard's SB-269). An authorization code bound to a PKCE `S256` challenge and sent to a loopback redirect
+     (RFC 8252) is not a credential under this item: the app holding the listener and the verifier carries the check.
+     Two residues are named, not closed. The browser's cookies: browsers do not isolate cookies by port (RFC 6265
+     section 8.5), so a `127.0.0.1` page of another account the person's browser visits receives a local dashboard's
+     cookies; the bound is the operator session's lifetime (12 hours idle, 7 days at most) and the dashboard's refusal
+     of another account's peer, so what stays is a cookie value read by that page, and the appearance and owner
+     cookies are shared too, accepted because they carry no credential. A coding agent's bearer: a client the contract
+     does not reach, reconnecting after the port changed hands, sends what it holds; the bound is the session bearer's
+     lifetime (SH-9) and the rotation above. The A2A sentence that a loopback origin is not reachable from outside the
+     computer is rewritten: it is reachable from the computer, its other OS accounts and any forwarded guest, its trust
+     anchor is the Host and Origin guard with the listener's owner, and a token-free A2A interface falls under item 3.
+  3. **No token-free loopback door on a computer with several accounts (HA-3, G3).** On a computer with more than one
+     counted OS account, a door that admits a loopback caller without a token is not a T0 door (DL-25) unless it checks
+     the peer's OS account as item 2's server side does; Project Observatory's local channel (DEC-0075) is the same
+     check on another transport (a socket or named pipe). A port forwarder of a virtual machine or container (a Lima or
+     Colima forwarding agent, a user-mode gateway, an SSH tunnel) is a relay onto loopback, its callers T2; since it
+     runs as the account that owns the guest, a computer whose guests reach its loopback closes that path or admits no
+     token-free caller on TCP. An accepted gap: on a computer with one counted account a token-free door still admits
+     that account's own guests through a forwarder (CT-238). A surface that declares `surfaces.mcp.auth: "delegation"`
+     falls under this item on a computer with more than one counted account.
+  4. **The host label (HA-4).** Each counted OS account and each virtual machine is its own device, with its own id,
+     keys and enrollments (G5, the workspace's answer on the thread). The host label is the label of the computer. An
+     enrollment request MAY carry `device.hostLabel`: HMAC-SHA-256 keyed with the computer's secret over the UTF-8
+     bytes of `fabric-host-label/1` followed directly by the organization's `org.id`, its first 16 bytes in base64url
+     without padding. A server that turns the label on issues `org.id` with at least 128 random bits, so it is
+     unguessable and unique across organization servers with overwhelming probability. The secret is 32 random bytes in one file per computer
+     (`/Library/Application Support/PassionCode/host-label.key` on macOS, `/etc/passioncode/host-label.key` on Linux,
+     `%ProgramData%\PassionCode\host-label.key` on Windows): on macOS and Linux owner root, mode `0444`, its folder
+     root's with mode `0755`; on Windows owner Administrators (or SYSTEM), set explicitly (for example `icacls
+     /setowner`), since an elevated step can leave the user as owner and the label would silently not be sent,
+     the folder `%ProgramData%\PassionCode` with the same explicit owner (or `folderOk` fails), Administrators full
+     control, Users read, no inherited write. An administrator's
+     setup step creates it and MUST exclude it from the computer's backups (macOS `tmutil addexclusion -p`; Linux the
+     computer's backup tool's exclusion list; Windows the `FilesNotToBackup` registry list); it is never in a snapshot
+     or a machine pack, and that a restore never carries it is owed by CT-233. On Windows the same step creates item
+     1's claims folder. A virtual machine MAY be given its
+     computer's secret at creation, and then carries it in its own snapshots. A node decides by the file's metadata
+     before it reads a byte, and uses it only when the path is no symbolic link, the owner is the administrator (root;
+     on Windows Administrators or SYSTEM), it is writable by no one but the platform's administrator, its folder is the
+     administrator's and writable by no one but the platform's administrator, and it is exactly 32 bytes; otherwise it sends no `hostLabel`, never falling back to
+     another key. A malformed input (platform, owner name, a flag, `org.id`) is a fault before the link, owner and mode
+     are looked at: a fault outranks every reason for no label. A node sends the label only once a device-policy member turns it on for that organization, a member
+     owed by CT-239. An organization shows it only after its notice says so. A label is per organization, so
+     organizations with no code on the computer cannot link their labels; an organization's code on any counted
+     account of the computer, or in a virtual machine given the secret, can compute every organization's label for
+     that computer (named in devices.md's unlinkable enrollments). The label is not a credential. Reference
+     `src/host-label.ts` `hostLabel` (the metadata decided before the bytes are validated; a file up to 1024 bytes
+     answered by size, above that a fault); vectors `fixtures/vectors/host-label.json`, written by
+     `tools/vectors/host-label.ts` with Node's HMAC; schema member `device.hostLabel` (optional, pattern
+     `^[A-Za-z0-9_-]{21}[AQgw]$`). Until CT-232 decides, `machine.mode` `A` on a computer with several counted accounts
+     covers the enrolling counted account's harness.
+- **Why:** a port recorded per account and claimed in a folder every account reads lets two accounts' installers avoid
+  each other without a band any product must compute, and keeps the descriptor the one place a client reads; keeping a
+  port an instance already records keeps every existing install where it is; a claim is advisory because any account
+  can write a file, so the security sits in the owner check, which the operating system answers and no listener can
+  forge. Naming an account by uid or SID keeps the owner check comparing what the system reports. A state of its own,
+  before `foreign`, keeps a listener of another account from ever reading as the service, however well it imitates
+  the service's identity, and lets a host tell the person why, in two lines for the two causes. A client the contract
+  does not reach cannot check, so the host that hands it a credential, and the surface that receives one, check
+  instead. A token-free door is safe only where its peers are the owner's, which a loopback socket proves only by its
+  owner. Counting only accounts people and agents use keeps a system's service accounts from making every computer a
+  shared one, while their listeners still read as another account's. The host label is keyed by a secret no ordinary
+  account can change and is per organization, so it tells one organization what it needs (these devices share a
+  computer) and links nothing across organizations that have no code on the computer (DEC-0128).
+- **Alternatives considered:** a reserved port band for Fabric's hubs and a band per account for every service
+  (the spec's first proposal for G1: every product would have to compute it, and a band names nothing about who
+  listens); a bind probe alone (a probe at install time says nothing about who holds the port later); a proof of
+  possession as the only check (Switchboard uses one on its control channel and it is admitted as one way to
+  establish the owner; it cannot serve a client that is another vendor's program); an own-list `lsof` as the macOS
+  source (it cannot tell an empty port from another account's); the login name in the claim (it can be renamed, and
+  the owner check compares a uid); a hash of the computer's name as the label (linkable across organizations and
+  guessable); a label keyed by the node's own key (each account's node has its own key, so two accounts would never
+  share a label); renaming `hostLabel` to a computer word (the field name was agreed with the products).
+- **Compatibility:** additive for a computer with one counted OS account, with two honest exceptions: a descriptor, a
+  well-known document and a port are unchanged (an installer keeps the port its instance records), and the client's
+  check finds every service of the account its own, but a port held by root, SYSTEM or a service account (a rootful
+  container proxy, a launch daemon, a task run as SYSTEM) now reads `foreign-user` where it read the service's answer
+  before, and so does an owner the client cannot tell (a process it cannot open, a client without access to the socket
+  table); a client that can see its own account's sockets tells its own listener. A node's summary can report more
+  `down` services for these reasons, and every `foreign` service, on any computer. `foreign-user` is a new state: [service](specification/service.md) defined no
+  rule for a host state a reader does not know, and this decision adds that a reader treats it as not ready, sending
+  nothing; a reader pinned before shows whatever it does with a value it does not know. `device.hostLabel` is
+  optional; the request's `device` object is closed, so a server pinned before refuses an enrollment that carries it
+  at its schema, as one pinned before DEC-0094 refused `file`, and a node sends it only once the owed device-policy
+  member (CT-239) turns it on (how a node learns a server's pin is CT-67). `schemas/service-well-known.schema.json`,
+  `schemas/service-descriptor.schema.json`, `schemas/service-ops-digest-extension.schema.json` (its title) and
+  `schemas/device-enrollment.schema.json` change bytes (three descriptions, and the new member), so a consumer that
+  vendors them re-pins. An app (`lifecycle.manager: "person"`) or an app's
+  part is no longer bound to take `service.lock`: it MAY guard against a second copy with its own single-instance
+  guard. The product rows, as each product reported them on thread `1fe66e6e` on 2026-11-06 (a reading
+  of the board, not of their code):
+  - Fabric: CO-505 (the hub's port per account by a uid formula) reported in its main; CO-513 (its bundled stack's
+    ports 54320 to 54329 are fixed, to be recorded per account) open; CO-514 (its MCP server checks only that the hub's
+    recorded pid is alive) open; CO-515 (a restore carries no node identity, CT-233) open.
+  - Switchboard: its control channel's HMAC proof done; SB-273 (the proxy refuses a peer of another OS account) and
+    SB-274 (the same on Windows) reported done in 0.7.18; SB-269 (rotation) reported shipped in 0.7.18 too; SB-278 (the port claim) waits for
+    DEC-0154's tag.
+  - Fabric Dashboards: listens on no TCP port (an owner-only socket or named pipe), so item 1 does not apply to it;
+    FD-156 (the owner check on macOS, 0.8.25) and FD-158 (`foreign-user`, 0.8.26, commit `53a62f9`) reported done;
+    FD-159: Linux done in 0.8.27 (PR #349); the refusal of an owner it cannot tell and Windows open, owed after acceptance.
+    Open too, asked on acceptance day (the board step): it asks the owner only of a port that answered (its `look.ts` lines 103 to 105 at
+    `a0bc160`), so another account's listener that never answers reads `starting`, then `down` or `stopped`, not
+    `foreign-user` (safe, since its local probe sends no token).
+    Owed: its watcher (FD-76's successor) counts `foreign` and `foreign-user` as unavailable; asked on `1fe66e6e` on acceptance day.
+    Asked on acceptance day too: its card's own `foreign-user` line (its `src/core/i18n.ts:128` and `:129`, the `.mac` variant shown on macOS) uses, or is checked against, this
+    decision's two lines (item 2; SCR-20 in `docs/ux/screens.md`), and a line for an owner that cannot be told is
+    added (part of FD-159). The landing text's
+    second sentence describes FD's released watcher (FD-76: an episode only for `down`, kept open while a failing
+    source outside its start baseline stays); whether that degraded continuation fits the first sentence is decided
+    separately, with DEC-0149's landing row.
+    The knowledge base's `knowledge/authority.md` (fabric-workspace) clause "counting `foreign` and `foreign-user` is
+    proposed for FD's watcher in contract DEC-0154" becomes "counting `foreign` and `foreign-user` is owed by FD's
+    watcher under contract DEC-0154" (twice): DEC-0154's lander checks right after its contract PR merges and edits
+    the knowledge base when the clause is there; DEC-0149's lander checks at its steps 6 and 6b; the lander that makes
+    the edit checks, once its edit is on the knowledge base's main, that `grep -c 'proposed for FD'` prints 0 and the
+    full new clause appears twice, and a lander that makes no edit runs nothing; if DEC-0154 is
+    withdrawn, its withdrawer files a knowledge-base row to drop the clause. The steps and their interleavings are one
+    block, byte-identical in both handoffs ("The knowledge-base clause rule" in DEC-0154's and DEC-0149's).
+  - Fabric Inbox: B-217 open, after this decision (its PR #421, rows B-217 to B-220): its desktop connect step sends a
+    new agent key to the hub's loopback callback; on macOS and Linux another account's listener reads today as no
+    listener (safe, for the wrong reason), and on Windows, where the process tables show every account's processes,
+    the key could reach another account's listener; the fix reads the owner by item 2's sources and gives
+    `foreign-user` and no key.
+  - The Fabric Agent Adapter: FAA-225 (its installer refuses only a port in this account's descriptors), FAA-226 (its
+    checker sends the token with no owner check, its hub client trusts the recorded pid), FAA-227 (no refusal of
+    another account's peer) open; FAA-228 (launchd's `gui/<uid>` domain) waits for CT-234; its token-file reader
+    already refuses a symlink, a foreign owner and loose modes (G4 for the kit). Its reference on surfaces and
+    authentication still reads a token-free loopback door as T0, and FAA-227 is filed at P2; on a computer with more than
+    one counted account item 3 takes T0 from such a door until it checks the peer's account as FAA-227 would and,
+    where its guests reach loopback, closes that path or takes no token-free caller on TCP (its reconciliation answer,
+    board message `cdf28788`).
+  - The first organization server: VES-LOOPBACK-OWNER open: its app grant sends no bearer on loopback, and its
+    `onboard --check` and its administrator's agents do not check the listener's owner yet; the `down` counts in the
+    node summaries it reads can rise for item 2's reasons. Its `org.id` has 100 random bits today (its reconciliation
+    answer, board message `922e6fed`), so it does not turn the host label on until it issues ids of at least 128 random
+    bits (item 4).
+  - The PassionCode launcher: listens on no port; PC-152 (the owner check in its doctor) open.
+  - A Fabric server that reads host states through Fabric Dashboards, in its own words: it listens on no port, sends no
+    token to loopback, and reads `foreign-user` and any state it does not know as not ready (its 0.17.0 and 0.18.0).
+  - With no objection to the claim's `<service-id>` (thread `1fe66e6e`, message `38aaf2fe`): Fabric (CO-513, CO-514),
+    Project Observatory (one claim holding all its ports, OBS-354, OBS-355, OBS-357) and Fabric Inbox (B-220).
+  - Project Observatory: OBS-354 (the recorded port and its claims, claims of absent accounts ignored, shown by
+    `project-observatory full ports show --json`) open; OBS-355 (its state renamed `foreign-user`) open; OBS-357 (the
+    secret file written by the administrator's setup step, its own local place id kept local) open; its local channel
+    already checks the peer's uid (DEC-0075).
+- **Consequences / affects:** `docs/specification/service.md` (the port claim's pointer, `FAC-SEM-009`'s neighbour,
+  the threat model and its two residues, the trust anchor, PL-3, the new section with counted accounts and HA-1 to
+  HA-3, the Install, Uninstall, One copy and Start rows, the One copy section, the directories table, the caller
+  table, the A2A paragraph, `FAC-SEM-010`'s register row, the app descriptor's callers, the opening line's OS account, the `instance` row
+  and the `id.instance` bullet, the remote table's Port declaration row, the `custody` line, LC-19's one copy), `docs/specification/provider.md` (a loopback `run.mcp.url`
+  under HA-2), `docs/specification/relay.md` (a loopback relay under HA-2), `docs/guides/connecting-compatible-agents.md`
+  (the note on HA-1 to HA-3), `src/semantic-rules.ts` (`FAC-SEM-010`'s comment), `test/delegation-sealed.test.ts` (its FB-6 comment; the pinned "per host" kept),
+  `docs/specification/embedded-dashboard.md` and `docs/specification/fabric-button.md` (ED-8's and FB-6's cookie
+  scope: "per host" kept, with "the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that
+  computer"), `docs/evidence/sources.md` (the RFC 6265 row's note), `docs/handoffs/README.md`,
+  `schemas/service-descriptor.schema.json` (`paths.data`'s description), `docs/specification/delegation.md` (the
+  header, DL-25's T0 row, the relay paragraph and the accepted gap, the open item on `surfaces.mcp.auth`),
+  `docs/specification/profiles.md` (the loopback card, LC-19's one copy), `docs/specification/session-handoff.md` (SH-9's pointer),
+  `docs/specification/devices.md` (the device definition, the host label, `machine.mode` `A`, UE's linkable list),
+  `docs/specification/contexts.md` (`org.id` for the host label), `docs/specification/connections.md` (a connection to
+  a `foreign` or `foreign-user` listener is `down`), `docs/specification/node-summary.md` (a `foreign` or
+  `foreign-user` service reported `down`; mode `A`), `docs/specification/conformance.md` (the reference module's row,
+  eight client, host, reader and setup rows, the connections reader's row, and the PL-2 and PL-3 row), `schemas/device-enrollment.schema.json`,
+  `schemas/service-well-known.schema.json` (`service.id`'s description), `src/host-label.ts`,
+  `tools/vectors/host-label.ts`, `tools/vectors/run.ts`, `fixtures/vectors/host-label.json`,
+  `fixtures/positive/device-enrollment-request-host-label.json`,
+  `fixtures/negative/device-enrollment-host-label-padding-bits.json` with their catalogue rows,
+  `test/host-label.test.ts`, `vitest.config.ts`, `CONTEXT.md` (Device, Counted OS account, Port claim, `foreign-user`,
+  Host label, Trust tier, Appearance carrier), `docs/ux/foundation.md` (ST-021's story and criteria; ST-036's criterion for
+  `foreign-user`), `docs/ux/scenarios.md` (SCN-056; SCN-044's alt path), `docs/ux/screens.md` (SCR-20's purpose,
+  elements and `foreign-user` state; SCR-30's `foreign-user` line), `docs/ux/flows.md` (FLW-17's branch and screens; FLW-30's owner check before
+  the raw address), `docs/specification/fabric-button.md` (FL-7's owner check),
+  `docs/evidence/sources.md` (RFC 8252's row, RFC 6265's row read again), `docs/DOCMAP.md`, `docs/backlog.md` (CT-228
+  to CT-243; the open rows CT-04, CT-70 and CT-185 reworded), "host" for a computer or a server reworded where the rule needs it: `docs/specification/activity.md`
+  and `CONTEXT.md`'s device request signature (a TLS-terminating proxy), `src/http-signature.ts` (a server that
+  terminates TLS), `docs/specification/folder-attribution.md` (Git hosting
+  services), `docs/specification/coordination.md` (a Git hosting service), `docs/specification/interop.md` (a host name), `docs/specification/peer-share.md` (another server),
+  FAC-SEM-143's row (PL's list of local hosts); a collector of operations digests in the same OS account:
+  `docs/specification/ops-digest.md` (OD-9 and its bullets), `docs/specification/service.md`'s ops-digest pointer
+  (the Descriptor section's ops-digest bullet), `schemas/service-ops-digest-extension.schema.json`'s title, `docs/specification/conformance.md`'s
+  two digest rows, `docs/specification/README.md`'s row and `CONTEXT.md`'s Operations digest; a meter in the hub's
+  OS account (`delegation.md`), the enrolling account's harness (`node-summary.md`), SH-2's POSIX system
+  (`session-handoff.md`); `fixtures/catalogue.json` (the host-label fixtures' rows), the spec `docs/evidence/specs/2026-11-06-shared-host-gaps.md` and the handoff
+  `docs/handoffs/2026-11-06-shared-host-ports.md`.
+- **Not decided here:** the claim file's schema and a reference for the port choice (CT-228); the contract's own vector
+  file of the state order (CT-229); a POSIX owner check of the services directory, the descriptors and the token files
+  (G4, CT-230); what a machine of the estate is when it is an OS account or a virtual machine, and `FAC-SEM-074` per
+  node (G5, CT-231); a `machine.mode` for an OS account an organization owns whole, and mode `A`'s scope on a computer
+  with several counted accounts (G6, CT-232); that a restored backup carries no node or installation identity (G7,
+  CT-233, with Fabric's CO-515); services of an account with no open session, the launchd domain and systemd lingering
+  (G8, CT-234); containerized local services (G9, CT-235, with CT-132); one computer per singleton through the
+  placement record `observatory-placement/1` as a readable norm (G10, CT-236, a decision of the second wave; the schema
+  stays `/1`, additive); the contract's own gate on a shared computer (G11, CT-237); a token-free door and a single
+  account's own guests (CT-238); the device-policy member that turns the host label on (CT-239); the organization's
+  "these devices share a computer" display and its scenario (CT-241); how a collector or a sink tells two accounts'
+  copies of one product apart in the operations digests (CT-243). Calls between two accounts of one computer go
+  through the organization's relay or tokens, never the tailnet (the workspace's answer).
+- **Source:** the operator's request of 2026-11-05 relayed on board thread `1fe66e6e`; the contract's gap list
+  (research of 2026-11-06, kept as the spec above); the thread's rounds of 2026-11-05 and 2026-11-06, answered by the
+  contract in messages `db8090d1`, `d6035cae`, `14b4dc86` (item 1's text is Project Observatory's message `054d53fd`,
+  with the absent account and "a claim grants nothing" added there, one name for the client's refusal and the host
+  state, "an owner that cannot be told" refused, and the check before "healthy" from the launcher's message
+  `c9a1a188`), `262523cc` (Fabric Dashboards' three state-precedence cases at `53a62f9`), `28d9ab82` and `d3b8f308`
+  (the host label, agreed by the first organization server in `30762429` and by Project Observatory, with its paths)
+  and `99cedce5` (the product rows); the board's answers on the claim's `<service-id>` (the descriptor's `id`, an app's
+  reverse-DNS bundle identifier, the `.<part>` suffix for an app's separately recorded parts in message `38aaf2fe`,
+  several ports in one claim, no claim for a proof-protected ephemeral port), with no objection from the launcher, the
+  adapter, the first organization server, Switchboard or Fabric Dashboards; the coordinator's correction of the claim's
+  account to a uid or SID; round 1 of the coordinator's blind readings at `25ba36f7` was not clean (the product
+  reading's seven breaks: an undefined account count, the clients the contract does not reach, the host label's
+  unlinkability, the secret in backups, the UX scenario, the glossary and three rows without acceptance; the seam
+  reading's break: the Install and Uninstall rows), and its batch, with the coordinator's decisions on system-account
+  listeners, single-account forwarders, the claim catch-up, the sending signal, the product facts framed as reports,
+  the read rule failing closed and `org.id`'s randomness, is folded in; round 2 at `cbc425d7` was not clean (the
+  product reading's four breaks: "host" in two senses, one UI line for two causes, the free-port test moving existing
+  ports, the A2A sentence on loopback reach; the unit reading's risk: the bytes validated before the metadata), and its
+  batch, with the seam reading's follow-ups (the squatted claim path, the Windows claims folder, the uninstall of one
+  instance's ports, the caller table, mode `A` on a shared computer, an `org.id` of at least 128 random bits in the fixture, the appearance
+  cookies) and the coordinator's decisions on the second single-account exception, the coding agent's bearer, the
+  cookie's bound, PL-3, the UX trace and the renamed files, is folded in; round 3 at `feef4e4d` was not clean (the
+  product reading's five breaks: "host" still meaning the computer outside the specification pages, the display's
+  wording, HA-1 restated in the spec and the handoff, SCN-056's expected result against the cookie residue, and the
+  count of accounts failing toward fewer), and its batch, with the coordinator's decisions on the `org_<base32>`
+  parenthesis (removed for want of evidence), `foreign` mapped to `down` on any computer, the Linux folder's limits and
+  the Windows claims folder, is folded in; round 3's unit and seam readings passed (the seam's risks are folded as S1
+  to S8); round 4 at `66e44c3d` was not clean (product: V1, the claim rewritten at every start stated as "only when
+  missing" in the spec, the handoff and a conformance row, and V2, "host" for the computer in the reference, the
+  generator and the vectors; seam: V1; unit passed, 38 of 40 mutants killed, one equivalent, the other closed by two
+  vectors that fix the mode before the bytes, V14), and its batch, with the coordinator's decisions on who rewrites the
+  claim and reads the count, the rotation trigger, SCN-056's cookie bound per computer, the guide's note, the aged-out
+  claim, the Windows folder's elevation and its one report, and CT-229's mapping test, is folded in; round 5 at `190ee95e` was not clean
+  (product: W1, FLW-17's goal and ST-021's story against another account's listener; W2, SCR-20's elements and
+  resources; W3, the guide's note scoping HA-1 and HA-2 to a shared computer), and its batch, with the coordinator's
+  decisions on the landing check, a claim rewritten with every instance's ports, the Windows folder's one report for a
+  missing folder or another ACL, SCN-056's recovery for a root or system listener and "same computer" in the RFC 6265
+  row, is folded in; round 5's unit reading passed (156 mutants, 4 survivors: the shape checks moved after the link or
+  the mode, now killed by four vectors in which a fault outranks every reason for no label, W10; and `writableByOthers`
+  defined as anyone but the platform's administrator, W11); its seam reading passed (0 breaks, 10520 tests green; risks
+  closed by W3, W4, the claim's rewrite rebuilt, atomic and after the lock, W12, and the conformance row's SHOULD,
+  W13); and from DEC-0149's seam reading, `foreign` counted unavailable beside `foreign-user` (W14); round 6 at
+  `d47295d5` was not clean (unit passed, 65 of 67 mutants, the rest closed by W15: a flag that is not a boolean is a
+  fault before the link and the owner; product: W16, PL-3's owner check unknown to ST-036, FLW-30, SCN-044 and FL-7,
+  and W17, no rebuild source for an app without a descriptor origin or an app's part; seam: the same break as W17, with
+  no `service.lock` for such an app; 10524 tests green), and its batch, with the coordinator's decisions W18 to W26 (the
+  landing phrase on one line as two sentences with a negative check, the G1 wording, who moves a port, only the service
+  itself rewriting the claim, the uninstall's rebuild, `writableByOthers` and `folderOk` as writable by anyone but the
+  platform's administrator, the fault's scope, the relay check dropped), is folded in; round 7 at `8a9373a1` was not clean (product: W27, a negative
+  landing check the shell could never fail, now in a fenced block with `grep -cF` and escaped backticks, run on trial
+  files; W28, the uninstall still stated as removing an instance's ports), and its batch, with the coordinator's
+  decisions W29 to W33 (DEC-0149's sentence kept whole at landing, the installer's order and its accepted window, the
+  ask for Fabric Dashboards' card line, FLW-30's traces, the account count read by the service, an installer and a
+  door only), is folded in; round 7's seam reading failed on the same break as W27, and its risks W34 to W37 (an app
+  rebuilding its claim after its new liveness file, one wording for an app without a descriptor origin or an app's
+  part, SCR-30's `foreign-user` line where no card exists, DEC-0154 able to land first) are folded in; round 7's unit reading
+  passed (101 of 107 mutants; W39's vectors close the rest); round 8 at `7fbe27f0` was not clean (product: W40, PL-3's
+  owner check scoped to a loopback address, a remote `https` origin opening as before; seam passed; unit did not run),
+  and its batch, with the coordinator's decisions W38 and W41 to W50 (the landing text in full and its one-line checks,
+  ST-036's and FLW-30's `foreign-user` paths, "declares no port for `FAC-SEM-010`", the guard and the port source told
+  apart, the uninstall from the remaining instances' state, "this service's descriptors in the account"), is folded
+  in; round 9 at `7ce5cc67` was not clean (product: W53, the spec's G1 still rebuilding in its wording from
+  before W46 and W50, and W54, W40 not carried into ST-036 and FLW-30; seam: the same break as W54, 10530 tests
+  green; unit passed, 319 of 376 mutants, 53 equivalent, the rest closed by four vectors, W55), and its batch, with the
+  coordinator's decisions W51, W52 and W56 to W62 (DEC-0149's CV sentence in the landing text, the negative check's
+  exit status, the POSIX meaning of `writableByOthers` and `folderOk`, CT-229's PL-3 fallback test, SCR-30's states
+  and elements, an app's own guard in One copy, "declaration" for `FAC-SEM-010`, and CT-242 for Fabric's link-back
+  screen), is folded in; round 10 at `23fd509d` was not clean (product: W63, the Lifecycle table's One copy row still
+  binding every service to `service.lock`; unit and seam passed), and its batch, with the coordinator's decisions W64 to
+  W70 (the affects and Compatibility lists, the two UI lines quoted in item 2, "computer" in the cookie scope of FB and
+  CONTEXT, HA-2 pointers in `provider.md` and `relay.md`, two vectors and their mutants, the CT-232 check counting
+  occurrences, and both landing orders with DEC-0149), is folded in; W71 copied both landing orders from DEC-0149's handoff at
+  `1bd70e54`; round 11 at `bbb5b956` was not clean (seam: W73, the cookie scope's "host" is the URL's host in ED-8 and
+  RFC 6265 section 8.5, not the machine, so W66, W71 and W8 wrongly changed it to "computer" in FB-6, ED-8's open
+  question, CONTEXT and the RFC 6265 row; "per host" is restored there with "the URL's host, RFC 6265 section 8.5; for
+  local services, 127.0.0.1 on that computer", and the `semantic-rules.ts` comment, about a remote placement's machine,
+  keeps "computer"; product found the same break), and its batch, with the acceptance-day edit of the knowledge
+  base's `authority.md` (W72) and W74 (the cookie-scope exception to "host" stated, ED-8's bold scope pinned by a test
+  beside FB-6's, the handoff's references, One copy's guard), is folded in; round 11's unit reading passed (65 of 69 mutants, 3 equivalent),
+  and W75 (a vector for an `org.id` that is not a string; the Windows owner of the secret set explicitly) is folded in;
+  round 12 at `3c1ea1f8` was not clean (product: the "host" rule in `service.md` naming one exception where there are
+  two, the guide's "once on the machine", and line numbers in the handoff that went stale; seam: those and the
+  knowledge-base step; unit passed, 79 of 86 mutants, 5 equivalent), and W76 (both exceptions named, "once per OS
+  account on the computer", block names instead of line numbers, the cookie note worded as "here 'per host' is the
+  URL's host", the Windows folder's owner set explicitly, the knowledge-base step by whether DEC-0149's #628 is merged,
+  a vector for a link and an `org.id` that is not a string, a stale note corrected) is folded in; round 13 at
+  `545ba274` was not clean (product and seam: `id.instance` unique "on the machine", a service once "on the machine",
+  and a host vocabulary rule whose closed set of exceptions made other readings of "host" false; unit passed), and W77
+  (unique within one OS account's services directory, once per OS account on the computer, one host rule in the same
+  words in every copy with the lines it covers reworded, the knowledge-base step after DEC-0154's merge per the rule
+  shared with DEC-0149, five Windows vectors, the "proposed" markers listed, `service.id`'s description and the
+  reference-module row) is folded in; round 14 at `d6138063` was not clean on all three tiers (a host rule that listed
+  the forms in which a URL's host is named, a closed list other pages broke; a service's copies and what a host
+  watches still "on a machine"; "proposed" markers split across lines and citations without one; unit: three
+  posix-only hex mutants), and W78 (a purely negative host rule in the same words in every copy, "host" for a computer
+  replaced where it was meant, copies and watching per OS account, the markers joined and listed with a multi-line
+  finder, the shared knowledge-base block pasted byte for byte, four Windows hex vectors) is folded in; round 15 at
+  `df98d10c` was not clean (unit passed; product and seam: the shared knowledge-base block had changed, more uses of
+  "host" for a computer or a server, a self-referential host rule, the multi-line finder, the vectors' path), and W79
+  (the current shared block, the after-both check by the lander that makes the edit once it is on the knowledge
+  base's main, the host rule without "the computer is called the computer", the hosts the readings named reworded
+  (`service.md`, `devices.md`, `activity.md`, `session-handoff.md`, FAC-SEM-143's row, `folder-attribution.md`),
+  digests read in the same OS account and CT-243, the FAC-SEM-010 comment, a finder for any split, the vectors' full
+  path) is folded in; round 16 at `9161796d` was not clean (unit passed; product and seam: FAC-SEM-143's row narrower
+  than its check, collector readers and TLS twins still on "the machine" or a "host", stale lists, the FD-158 cases
+  misattributed), and W80 (the row with PL's list of local hosts, every collector reader and TLS twin reworded and
+  OD-9 marked, names already fixed keeping their spelling in the host rule, the Consequences and Not decided lists,
+  a meter in the hub's OS account and the enrolling account's harness, the FD-158 cases as Fabric Dashboards' file
+  holds them, the shared knowledge-base block's current text) is folded in; round 17 at `832dc557` was clean on all
+  three tiers; round 18 at the same head was not clean (product: open backlog rows still used "host" for a server
+  and a TLS-terminating proxy), and W81 (the host rule scoped to the specification, schemas and glossary, with the
+  registers keeping their words; the open rows CT-04, CT-70 and CT-185 reworded and the sweep extended to open
+  backlog rows; HA-2's order scoped to states read from the listener, a host's own states before it; the glossary's
+  host label; Fabric Dashboards' FD-159 and Switchboard's SB-278; three descriptions; the release step and the
+  annotated lines at acceptance; CT-231's and CT-232's readers; the markers) is folded in; W82 (the first
+  organization server's 100-bit `org.id`, the adapter's T0 reading and FAA-227's priority) is folded in; round 19 at
+  `63c622d4` was not clean, and W83 (CT-228's state after the resume, CT-231's reader named without a line number, the
+  North Star step, the cheap risks) is folded in; round 20 at `3db473d0` was not clean, and W84 (a supervisor's stop
+  shown only when nothing answers, as Fabric Dashboards does; a named bullet in place of a line number; the split
+  marker rejoined; the North Star step widened to every page statement the landing makes false) is folded in; round 21 at `ea203020`
+  was not clean, and W85 (Fabric Dashboards' lines 31 to 40 and its monitor's skip, the knowledge-base step driven by
+  its grep at landing time with checks that read the pages, DEC-0151's three rows, the order-1 window's conformance
+  row, the Fabric Dashboards row's silent listener) is folded in; round 22 at `d4f3300c` was not clean, and W86 (the
+  knowledge-base step leaving `authority.md`'s clause lines to the clause rule and stating what DEC-0149's handoff
+  carries; CT-228 and CT-229 in its grep; the roadmap's tag checked; HA-3's forwarder duty in its conformance row;
+  `duplicate` placed before the well-known `status`; `coordination.md` in this list; a local refusal in CT-229) is
+  folded in; round 23 at `a5308d97` was not clean, and W87 (CT-228's state cell, the title and Next task in the
+  acceptance step; the knowledge-base post after the tag; HA-1's free port counting this account's claims of other
+  services and keeping a port its own listener holds; item 2's order with its scope; the threat model's HA-1 and HA-2
+  on every computer; Fabric Dashboards' `.mac` line and narrower line ranges) is folded in; round 24 at `ab89d8a1` was not clean, and W88
+  (the gap spec's G1 free-port test as item 1 has it; the glossary's port claim; the installer row word for word;
+  CT-228's "released" written after the tag; `duplicate` in CT-229) is folded in, and W89 (HA-1's holders naming a
+  claim of another service in this account, so the keep, choose and free-port rules agree; CT-228's acceptance check
+  anchored on its state cell; CT-232's conformance pointer by the row's name) is folded in; round 25 at `73f5a9ed` was not clean, and W90 (HA-1
+  stated once, in the specification and item 1, with the gap spec and the conformance installer row pointing to it;
+  the keep rule not keeping a port another `id.instance`'s descriptor declares; CT-228's next task after the W88 gate;
+  its acceptance check catching "Paused"; SCR-20's `foreign` and `duplicate` steps) is folded in, and W91 (annotated lines under DEC-0045, DEC-0118 and
+  DEC-0122, which this decision also amends; the README check covering the row's state; the knowledge-base window
+  named) is folded in; round 26 at `647754bf` was not clean, and W92 (DEC-0122's annotated line naming item 2; lines
+  under DEC-0128 and DEC-0031 too, with the rule for which decisions get one; the loop checking each line's own text;
+  the gap spec's product rows pointing to the Compatibility; the handoff's Done pointing to HA-1; a wildcard bind in
+  the free-port test) is folded in; round 27 at `f78c87c1` was not clean, and W93 (the rule narrowed to a text made
+  false or a closed list or form changed, with lines under DEC-0044's LC-19 and DEC-0061's Install and Uninstall forms
+  and DEC-0040 among the decisions that keep their words; the board's third ask, a port that does not answer; the
+  client row pointing to HA-2's order; the CT-228 cell keeping its Goal tag; the Consequences naming every
+  `service.md` and `profiles.md` part) is folded in; round 28 at `3fb5c12a` was clean on all three tiers, and round
+  29 at the same head too, which accepted it; W94 (the acceptance edits: the markers dropped, the annotated lines, the
+  Fabric Dashboards asks dated to acceptance day, DEC-0019 and DEC-0069 named among the decisions that keep their words,
+  CT-253 for FAC-SEM-010's message) is folded in; the two UI lines passed the operator's copy check
+  (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
+  CT-228.

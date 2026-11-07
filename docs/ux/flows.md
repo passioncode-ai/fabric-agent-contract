@@ -414,13 +414,13 @@ flowchart TD
 
 - **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired; SCR-19 answered; SCR-32 success when the operator moves the slot that answers the request (DEC-0140).
 
-### FLW-17: A second copy of a service starts while one runs
+### FLW-17: A second copy of a service starts, or another account's listener holds its port
 
-- **Traces:** ST-021 (JTBD-03, JRN-02/#3)
-- **Goal:** a second copy changes nothing, and what the operator sees says what happened, never an outage
-- **Entry points:** the operator runs the service by hand; its supervisor starts it again
-- **Success exit:** one copy runs and answers; the second has exited 75 or taken over after the first left
-- **Task analysis:** the second copy reads the supervisor marker → by hand it tries the lock once and exits 75 naming the holder → marked, it waits up to 300 s touching nothing and exits 75, or takes the lock if the holder leaves → markers that disagree exit 75 at once → the host keeps showing the holder's health.
+- **Traces:** ST-021 (JTBD-03, JRN-02/#3); SCN-056, DEC-0154
+- **Goal:** a second copy changes nothing, and what the operator sees says what happened, never an outage; another account's listener on the port is shown as `foreign-user`, nothing is sent to it, and it is never shown as the service
+- **Entry points:** the operator runs the service by hand; its supervisor starts it again; the host probes the service's port
+- **Success exit:** one copy runs and answers; the second has exited 75 or taken over after the first left. For another account's listener: the card shows `foreign-user` and its line; after a reinstall onto a free recorded port (HA-1) the card shows the service's own state
+- **Task analysis:** the second copy reads the supervisor marker → by hand it tries the lock once and exits 75 naming the holder → marked, it waits up to 300 s touching nothing and exits 75, or takes the lock if the holder leaves → markers that disagree exit 75 at once → the host keeps showing the holder's health. On a probe: the host reads who owns the listener, and the owner outranks whatever the well-known document says → another account's, or an owner that cannot be told, is `foreign-user` and nothing is sent → this account's listener goes on to the well-known document.
 - **Rejected shape:** exiting at once under a supervisor — rejected because launchd and systemd restart it every 10 s, forever (service, One copy).
 - **Flow:**
 
@@ -432,12 +432,16 @@ flowchart TD
   M -->|supervised| W[Wait up to 300 s, touching nothing]
   W -->|holder leaves| T[Takes the lock and runs]
   W -->|wait runs out| X
-  X --> V[Screen: Service card with a second copy]
+  X --> V[Screen: Service card, a second copy or another account's listener]
   C --> V
   W --> V
+  P[Host probes the service's port] --> O{Who owns the listener?}
+  O -->|this account| V
+  O -->|another account, or cannot be told| F[foreign-user: nothing sent]
+  F --> V
 ```
 
-- **Screens traversed:** SCR-20 loading (the wait); SCR-20 error (exit 75); SCR-20 success (one copy runs).
+- **Screens traversed:** SCR-20 loading (the wait); SCR-20 error (exit 75); SCR-20 success (one copy runs); SCR-20 error `foreign-user` (another OS account's listener holds the port, SCN-056, DEC-0154).
 
 ### FLW-18: Operator unlists a Project
 
@@ -763,11 +767,11 @@ flowchart TD
 
 ### FLW-30: A service's page, from the link to the host
 
-- **Traces:** ST-036 (JTBD-06, JRN-05/#3)
+- **Traces:** ST-036 (JTBD-06, JRN-05/#3); SCN-044, DEC-0154
 - **Goal:** the operator opens a service's page inside Fabric Dashboards, signed in by it
 - **Entry points:** an agent's answer, a tool answer's `open_link`, a completion message, an event's notification, Fabric's link back (FL-7)
-- **Success exit:** the page shows in Fabric Dashboards; where the host cannot run, at the service's own address
-- **Task analysis:** the service or agent builds the `open_link` from the service's own `id.instance` and the page's path → the agent opens it through Fabric Dashboards with no browser fallback → the host shows the page and signs in.
+- **Success exit:** the page shows in Fabric Dashboards; where the host cannot run, at the service's own address, or, when the listener is another OS account's or its owner cannot be told, `foreign-user`: nothing opens and the line for that case is shown
+- **Task analysis:** the service or agent builds the `open_link` from the service's own `id.instance` and the page's path → the agent opens it through Fabric Dashboards with no browser fallback → the host shows the page and signs in. Where the host cannot run, the agent (or Fabric, for FL-7) checks the listener's owner (HA-2) before it opens a loopback address: `foreign-user`, or an owner that cannot be told, opens nothing. Entered through an agent, the line shows on SCR-30; entered through FL-7, Fabric shows it where it shows the link.
 - **Rejected shape:** handing the operator `http://127.0.0.1:<port>/…` as the action, or an agent opening a browser because the host did not open the page: rejected, because a browser has no session and shows the page outside the host (DEC-0123).
 - **Flow:**
 
@@ -778,10 +782,14 @@ flowchart TD
   O --> P{page shown}
   P -->|yes| D[Page in Fabric Dashboards, signed in]
   P -->|no| F[Failure reported; no browser]
-  S -->|not_installed or unsupported| B[Service's own address from its descriptor, in the browser]
+  S -->|not_installed or unsupported| A{Loopback address?}
+  A -->|remote https origin| B
+  A -->|loopback| W{Listener's owner, HA-2}
+  W -->|this account| B[Service's own address from its descriptor, in the browser]
+  W -->|another account, or cannot be told| N[foreign-user: nothing opens; the line on SCR-30 through an agent, where Fabric shows the link through FL-7]
 ```
 
-- **Screens traversed:** SCR-30 the operator's agent; the service's page in Fabric Dashboards.
+- **Screens traversed:** SCR-30 the operator's agent; the service's page in Fabric Dashboards; SCR-30 `foreign-user` (the line for that case, nothing opened) when entered through an agent; Fabric's surface for the link back (no SCR yet, CT-242) when entered through FL-7.
 
 ### FLW-31: The operator's task, from one agent to the agents it engages
 

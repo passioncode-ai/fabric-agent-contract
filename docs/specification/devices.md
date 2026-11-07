@@ -1,6 +1,6 @@
 # Devices `fabric-device/0.1`
 
-DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per organization, `org.id` for contexts) DEC-0094 (a key in a file, idempotent rotation), DEC-0099 to DEC-0102, DEC-0103 (a closed organization) and DEC-0148 (a repeated renewal) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
+DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per organization, `org.id` for contexts) DEC-0094 (a key in a file, idempotent rotation), DEC-0099 to DEC-0102, DEC-0103 (a closed organization), DEC-0148 (a repeated renewal) and DEC-0154 (the host label) · rule codes `FAC-SEM-041`…`FAC-SEM-046`, `FAC-SEM-068`,
 `FAC-SEM-069`, `FAC-SEM-077`, `FAC-SEM-125`, `FAC-SEM-155` · schemas
 [`device-enrollment`](../../schemas/device-enrollment.schema.json),
 [`device-policy`](../../schemas/device-policy.schema.json),
@@ -11,8 +11,11 @@ DEC-0031, amended by DEC-0052, DEC-0053, DEC-0056, DEC-0082 (one enrollment per 
 [`device-organization-closed`](../../schemas/device-organization-closed.schema.json), shared definitions in
 [`device-common`](../../schemas/device-common.schema.json)
 
-A **device** is a computer on which collector nodes send [activity telemetry](activity.md) to an
-organization server. This protocol covers three things:
+A **device** is one [counted OS account](service.md#counted-os-accounts) of a computer, or a virtual machine, enrolled
+under `fabric-device/0.1`, on which collector nodes send [activity telemetry](activity.md) to an organization server.
+Two counted OS accounts of one computer are two devices, with their own `device.id`, keys and enrollments; the
+[host label](#the-host-label) is the only value the contract defines for telling one organization that two of its
+devices share a computer (DEC-0154; what this means for the estate's machines is CT-231). This protocol covers three things:
 
 - how a device is enrolled;
 - how it receives policy the organization signed;
@@ -114,7 +117,7 @@ context names it, so nothing of a context is routed to it.
 The certificate is **short-lived**: at most 30 days (`FAC-SEM-044`), and SHOULD be 7. Its binding
 names the organization and device of the request, and the signed-in user for an SSO enrollment
 (`FAC-SEM-044`). Every later request (batches, check-ins, rotation and share registrations) is made over mutual TLS with it and carries an
-HTTP message signature made with the device's key, which a receiver behind a host that terminates TLS verifies instead
+HTTP message signature made with the device's key, which a receiver behind a TLS-terminating proxy verifies instead
 ([transport](#transport), DEC-0056).
 
 **An enrolled device id is proven, not claimed.** A request for a `device.id` the server already
@@ -202,12 +205,69 @@ SEC 1 §3.2.2 before use: not the point at infinity, coordinates in range, on th
 ([`isValidP256Key`](../../src/p256.ts), vectors `fixtures/vectors/p256.json`). Every Ed25519 key still
 passes the small-order check (DEC-0045).
 
+### The host label
+
+DEC-0154 item 4 (HA-4). The **host label** is the label of the computer. In this contract's specification,
+schemas and glossary, "host" never means the computer. The exceptions are the name "host label", which labels a
+computer, and names and paths already fixed, which keep their spelling (the enrollment purpose `agent-host`, file
+names such as `docs/handoffs/2026-11-06-shared-host-ports.md`). The registers keep the words they were written in.
+An enrollment request MAY carry `device.hostLabel`: an opaque value that is the same for every device of one
+organization on one computer (two counted OS accounts of it, or a virtual machine given its secret) and that
+organizations with no code on the computer cannot link.
+
+- **The value.** HMAC-SHA-256 keyed with the computer's secret over the UTF-8 bytes of `fabric-host-label/1` followed
+  directly by the enrollment's `org.id`, its first 16 bytes in base64url without padding: 22 characters (schema
+  pattern). The reference is [`hostLabel`](../../src/host-label.ts); its vectors are
+  [`fixtures/vectors/host-label.json`](../../fixtures/vectors/host-label.json), written by
+  `tools/vectors/host-label.ts`.
+- **`org.id`.** A server that turns the label on issues `org.id` with at least 128 random bits, so it is unguessable
+  and unique across organization servers with overwhelming probability ([contexts](contexts.md)); otherwise two
+  organizations with one `org.id` would see one label for one computer.
+- **The computer's secret.** 32 random bytes in one file per computer, created by an administrator's setup step:
+
+  | System | File |
+  |---|---|
+  | macOS | `/Library/Application Support/PassionCode/host-label.key` |
+  | Linux | `/etc/passioncode/host-label.key` |
+  | Windows | `%ProgramData%\PassionCode\host-label.key` |
+
+  On macOS and Linux: owner root, mode `0444`, its folder owned by root with mode `0755`. On Windows: owner
+  Administrators (or SYSTEM), set explicitly, for example with `icacls /setowner`, since an elevated step can leave the
+  user who ran it as owner and the node would then send no label; the folder `%ProgramData%\PassionCode` gets the
+  same explicit owner, or `folderOk` fails and no label is sent; Administrators full control, Users read, no
+  inherited write, on the file and its folder. Every account reads it, none but the
+  administrator can write it. On Windows the same step also creates the port claims folder
+  ([service](service.md#ha-1) HA-1).
+- **Never in a backup.** The setup step MUST exclude the file from the computer's backups: on macOS
+  `tmutil addexclusion -p` on the file; on Linux the exclusion list of the computer's backup tool; on Windows the
+  `FilesNotToBackup` registry list. It is not in a snapshot or a machine pack either. That a restore never carries it
+  is the restore's rule, owed by CT-233. A virtual machine MAY be given its computer's secret when it is created, and
+  then carries it in its own snapshots.
+- **A node reads it only when it passes, metadata first.** The path is not a symbolic link (on Windows a reparse
+  point); the file is owned by the administrator (root on macOS and Linux; the Administrators group or SYSTEM on
+  Windows); it is writable by no one but the platform's administrator (on POSIX no write permission, mode bits or an
+  ACL entry, for anyone but root; on Windows Administrators or SYSTEM); its folder is the administrator's and writable
+  by no one but the platform's administrator (on POSIX owned by root and writable by no one but root, `0755` as set
+  up); and only
+  then its bytes, exactly 32. Otherwise the node sends no `hostLabel`, and never one computed from another key (a
+  node key included). A malformed input to that decision (a platform, an owner name, a flag or an `org.id` that is not
+  its shape) is a fault before the link, the owner or the mode is looked at: a fault outranks every reason for no label.
+  The label is not a credential and proves nothing: it is what the node says, shown as such.
+- **What an organization does with it.** It shows the label only after its notice says so, and only as "these
+  devices share a computer". A label is per organization, so an organization with no code on the computer cannot link
+  its labels with another's (DEC-0128); an organization's code running on any counted account of the computer, or in
+  a virtual machine given the secret, reads the secret and can compute every organization's label for that computer
+  (named in [unlinkable enrollments](#unlinkable-enrollments)).
+- **Sending it.** A node sends `hostLabel` only once a device-policy member turns it on for that organization; that
+  member is owed (CT-239), so until it lands a node sends none. A server pinned before DEC-0154 refuses the member at
+  its schema, as one pinned before DEC-0094 refused `file`; how a node learns a server's pin is CT-67's.
+
 <a id="transport"></a>
 
 ## Transport
 
-DEC-0056, agreed with the first organization server (its ADR-0007, amended 2026-10-12 at its commit `7a47447`). A host
-that terminates TLS — a platform's load balancer — never sees a client certificate, so mutual TLS alone cannot prove
+DEC-0056, agreed with the first organization server (its ADR-0007, amended 2026-10-12 at its commit `7a47447`). A server
+that terminates TLS (a platform's load balancer) never sees a client certificate, so mutual TLS alone cannot prove
 the device's key there. **A device signs every batch, check-in, rotation and share-registration request with an HTTP message signature**
 ([RFC 9421](https://www.rfc-editor.org/rfc/rfc9421), a subset), beside mutual TLS, not instead of it. Enrollment is
 unchanged: its proof travels in `Authorization` ([enrollment](#enrollment)).
@@ -226,7 +286,7 @@ A relay admits only an ES256 `#sig` key; this binding also admits Ed25519.
 - An invalid signature over a valid mutual-TLS session is refused with the signature step's code: the session does not
   excuse it.
 - An unsigned request — no `fabric-device` member in either field — is accepted only by a receiver that sees the client
-  certificate, and only while that certificate is known, not revoked and valid; a receiver behind a TLS-terminating host
+  certificate, and only while that certificate is known, not revoked and valid; a receiver behind a TLS-terminating proxy
   refuses it as `signature-missing`.
 
 | Part | Value |
@@ -411,7 +471,7 @@ DEC-0052). Each key is `{value, locked?}`. The layer's `source` is one of:
 | `models.credentials` | list of `{credentialRef, provider, credentialKind: "api-org", fingerprint, callers?, quota?, dataClasses}` | The organization's API keys a device may use — never a subscription, a seat or a person's own key (schema). `fingerprint` is `hmac-sha256:` of the key under the organization's salt, so a node recognises the slot that holds it, and so its provenance, without the policy carrying the key. `quota.usd` is a decimal string. |
 | `models.personal_key_sharing` | `allowed`, `forbidden` | Whether a person's own key may serve someone else's call. **Absent means forbidden** (`FAC-SEM-068`). |
 | `workspace.folders` | list of folder patterns | The organization's work folders, relative to the person's home directory, so a value never names a user (schema: no leading `/`, `\`, `~` or drive letter, no `..`); `*` matches one segment. |
-| `machine.mode` | `A`, `C` | `C`, the default: the organization manages only its own work on the machine, and `node-summary/1` lists the coding agents, the hook count, this context's own items and the items its baseline names ([node summary](node-summary.md#the-summary), DEC-0118). `A`: it administers the whole machine, taken only from an `mdm` layer; a `server` or `user` layer's `A` is ignored (`FAC-SEM-042`); `node-summary/1` then lists the whole harness (S8, DEC-0118). |
+| `machine.mode` | `A`, `C` | `C`, the default: the organization manages only its own work on the machine, and `node-summary/1` lists the coding agents, the hook count, this context's own items and the items its baseline names ([node summary](node-summary.md#the-summary), DEC-0118). `A`: it administers the whole machine, taken only from an `mdm` layer; a `server` or `user` layer's `A` is ignored (`FAC-SEM-042`); `node-summary/1` then lists the whole harness (S8, DEC-0118). On a computer with several counted OS accounts, until CT-232 decides, mode `A`'s harness is the enrolling counted account's (DEC-0154). |
 | `harness.baseline` | `{items: [{kind, name, minVersion?, digest?}]}`: `minVersion` only for a coding agent or a plugin, `digest` only for a skill or a plugin | DEC-0101: what every enrolled machine is expected to run, read only from the `mdm` and `server` layers (a `user` layer's value is ignored, DEC-0102); a node reports its drift from it in `node-summary/1` ([node summary](node-summary.md#the-baseline-and-the-drift)). Absent: no drift is reported. |
 | `repair.packages` | list of `{agentRef, digest}` | DEC-0101: the packages a `repair-request/1` may name, read only from the `mdm` and `server` layers (a `user` layer's value is ignored, DEC-0102). **Absent means no repair runs** (`FAC-SEM-129`). |
 
@@ -611,7 +671,10 @@ Every `intervalSeconds` the device sends a `check-in` (OpAMP `AgentToServer`):
   an organization server keeps its device and key lookups per organization (`FAC-SEM-044`'s "device on record" is its
   own record, so one server hosting two organizations scopes it per organization), and each enrollment's `sequenceNum`
   is its own (UE-1); a token's `project`, `task` and actor ids in an organization's context are that context's;
-  coding-agent versions and the hook count in a mode `C` node summary (DEC-0118); an agent the person shares into two
+  coding-agent versions and the hook count in a mode `C` node summary (DEC-0118); within one organization, the
+  [host label](#the-host-label) its devices on one computer share, by design and only after its notice, and any label of
+  that computer, which an organization's code on any counted account of the computer, or in a virtual machine given the secret,
+  can compute for every organization (DEC-0154); an agent the person shares into two
   organizations shows the same `agentRef` (the person's own choice); the relay operator reads `org:<orgId>` in the estate
   record until per-context relay sessions (the operator's questions 1 to 4, taken at their defaults); an operator that
   runs two of a machine's relays (an estate's and an organization's, or two organizations', DEC-0134) sees that
@@ -776,7 +839,7 @@ Fixtures are `fixtures/positive/device-*` and `fixtures/negative/device-*`; the 
   organization server adopts DEC-0031.
 - A response signature: the server signing its answers (DEC-0056). A device trusts the TLS channel and the signed policy
   and key sets.
-- How a receiver behind a TLS-terminating host learns of a certificate's revocation beyond its own records (DEC-0056).
+- How a receiver behind a TLS-terminating proxy learns of a certificate's revocation beyond its own records (DEC-0056).
 - What a receiver does when a reported `records.estateRecord.digest` shows a fork of the estate record (DEC-0056): the hub
   over the relay or through its own node's `machine.report` (DEC-0132, DEC-0146), or an organization server toward a node that has not adopted DEC-0128's UE-2.
 - RFC 9421's successor drafts and its `Accept-Signature` field (DEC-0056).
