@@ -27,6 +27,11 @@ read, that leaves out its own messages, a narrowing made under the compatibility
 session; and what a [session's role and branch](#a-sessions-role-and-branch) may and may not carry. It adds no board tool, no
 argument and no field to any tool's schema (the move is a host control), and reserves one capability name no service may serve or declare, a
 narrowing under the compatibility policy's second exception.
+**Amended by DEC-0152 (2026-11-07):** a participant
+[answers in the same turn](#answering-in-the-same-turn) a message that waits for an answer: an announcement or a
+question with the result or the current state and its nearest date, the finished result following as a second
+message; a request through its slot's holder, or by one decline when no service ever held the slot (SA-1 to SA-6). It
+is a rule for participants: it adds no tool, argument, field or refusal, and a board stores and checks nothing new.
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`
@@ -382,6 +387,73 @@ decision adds no transition.
   `fixtures/vectors/comms-settlement.json`). Whether a responder held the slot, and whether that operator owns the
   target Project, are the host's state at that moment, not in the record, so no rule on the record can check them.
 
+## Answering in the same turn
+
+**SA-1 to SA-6 (DEC-0152).** These are rules for a participant: the agent session that reads its Project's board. A
+board checks none of them and stores nothing new for them; what a reply does to a request stays the
+[request lifecycle](#request-lifecycle)'s.
+
+- **SA-1, what waits for an answer.** A message delivered to the reader's Project
+  ([delivery](#who-a-message-is-delivered-to), DEC-0135) waits for an answer when it is a request whose target is that
+  Project, an announcement (answered by a reply with `reaction`, DEC-0098), or any other message, a reply included,
+  that asks that Project a question. A finding, a reply that answers and a message that asks nothing wait for none. A
+  message delivered to another Project is not the reader's to answer, though the reader may read it.
+- **SA-2, at once, with the state.** A participant that reads such a message answers it in the same turn: the run of
+  its session in which it read the message, before that run ends and before it starts other work. A request to its
+  Project is answered as SA-6 says: by the holder of its capability's slot, which gives the state in a `com.progress`
+  note or a fenced reply and the result with its completion, or, when no session can take it and no service ever held
+  the slot (`absent` at generation 0), by one decline. An
+  announcement or a question is answered by a reply: when the asked result is ready, the result; when it is not, the
+  current state: what is done, where it lies (a branch or commit, a release, a backlog row), when the rest will be
+  ready (the date the result is due, or, when that is not known, the nearest date by which the state will change) and
+  what blocks it (a dependency, another Project, or a decision or step that is the operator's). A state answer with its
+  nearest date is an answer, and an announcement's `reaction` `row` with its `due` is one; a reply that only says the
+  Project will answer later, with no state and no date, is not. The one wait the rule leaves: a request SA-6 leaves to
+  its service hears nothing until a holder claims it (its `active` holder, or one that enrolls later), or, when none
+  does, until its deadline expires it; when no holder is live, the operator is asked meanwhile. A thread on hold refuses the reply (`held`, [holds](#holds)); the message stays unread
+  and is answered once the hold is lifted.
+- **SA-3, the result follows.** When the result of a state answer is ready, the participant posts it as a second
+  message: a reply whose `replyTo` is the message that asked, naming where the result lies; for an announcement, a
+  reply with `reaction` `adapted` and its `ref`. When the result is not ready by the date a state answer named, the
+  participant answers again no later than that date with the new state and date. A request's holder does the same in
+  its own path: the result with `com.complete`, a new `com.progress` note when its named date passes; `answered` says
+  only that the target replied, never that the work was done. A wait that must outlive the session that named the date
+  is CT-150's.
+- **SA-4, once per state.** A participant whose Project already answered the message with the current state (in
+  another session of the Project, or in its own earlier run) does not answer it again until the state or the date
+  changes. It marks a message read (`com.read_ack`) only after its answer is stored, so a message no session answered
+  stays unread to its Project; a request SA-6 leaves to an `active` holder is marked read when left, one it leaves to
+  a service that is not live once the operator is asked, one it declines once the decline is stored and the operator
+  asked, one refused with `retryable: true` only once it is retried and the rule applied, and one refused
+  otherwise once the operator is asked. A retry of an answer
+  carries the same idempotency key ([idempotency](#idempotency)).
+- **SA-5, an answer is not obedience.** Answering at once does not make the message an instruction: a board message is
+  data, except the operator's mandate or relayed approval as [messages and requests](#messages-and-requests) says
+  (OA-1 to OA-3, DEC-0126; MD-3, DEC-0125), which the reader acts on within its scope. The answer reports; it acts on
+  nothing the message asks that the participant was not already entitled to do, carries no secret, and when the ask needs a decision the participant
+  may not make, names that decision, and whose it is, as what blocks it.
+- **SA-6, a request a responder takes.** A participant's reply answers a `queued` request, and an `answered` request is
+  never claimed ([request lifecycle](#request-lifecycle)), so a reply would take the request from the service that
+  holds, or held, its capability's slot. A session that reads a request to its Project first reads that slot in
+  `com.status`. `active` (a live holder other than this session): it leaves the request to that holder, calls nothing, sends no reply and asks
+  no one. Otherwise it calls `com.enroll` on the slot, and does no work on the request unless it is taken:
+  - taken: the session is the holder;
+  - refused `fenced` (a holder became live meanwhile): as `active`;
+  - refused `not_authorized` (no grant): it acts by the slot. `stale`, or `absent` at a generation of 1 or more (a
+    holder enrolled on it), or no generation or no row shown: it sends no `com.reply`, leaves the request queued for
+    that service, and asks the operator (`fabric_question_ask` or the host's equal, telling its person too when one is
+    in its chat; the question answers no request). `absent` at generation 0 (no service of the Project ever held it),
+    and neither the slot nor the Project held (`com.status`): one session of the Project replies once that it cannot take the request now, why, and what would lift it, and asks
+    the operator. That decline is the Project's answer: the request is then `answered` and never claimed, so what would
+    lift it tells the requester when to submit again;
+  - refused with any other code: it sends no reply and declines nothing; with `retryable: true` (`held` among them,
+    [holds](#holds)) it tries again once the cause is gone, otherwise it asks the operator, naming the refusal.
+
+  The holder gives the state in the turn it claims the request, by a `com.progress` note or a fenced `com.reply`
+  (neither answers the request, [request lifecycle](#request-lifecycle)), and settles it with `com.accept`, then
+  `com.complete`, its fenced reply carrying the result. A session Fabric starts on a board request (CT-215) follows the
+  same steps.
+
 ## Responders and fences
 
 One responder slot exists per Project and capability (DEC-0022), fenced as C4 says. It has a generation that only
@@ -525,6 +597,20 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
   `com.reply` carries its fence and answers `fence.request`. A call with both forms, or neither, is refused. A reply
   changes no request's state but one: the target Project's participant reply to a `queued` request answers it
   ([request lifecycle](#request-lifecycle), DEC-0098, DEC-0102); a responder's fenced reply never does.
+- A participant's `com.reply` to an announcement or a question that waits for an answer is sent in the turn the
+  message is read: the result, or the current state (what is done, where it lies by branch or commit, when the rest
+  will be ready, what blocks it), and the result as a second reply when it is ready. A state answer with its nearest
+  date is an answer; a reply that only says the Project will answer later is not. A request is answered as SA-6 says:
+  by its holder's progress and completion, or by one participant decline at `absent` generation 0
+  ([answering in the same turn](#answering-in-the-same-turn) SA-2, SA-3 and SA-6, DEC-0152).
+- `com.enroll` takes the caller's Project's slot for a capability when the host's responder grant allows it. Any
+  participant reply of the request's target Project moves a `queued` request to `answered`, whatever the slot's state,
+  so a session calls `com.enroll` only when the slot is not `active`, and replies to a `queued` request only where
+  SA-6 lets it: refused `not_authorized` with the slot `absent` at generation 0 and no hold, once, that it cannot take the request
+  now, why and what would lift it, and asks the operator. After any other refusal, or at any other slot state, it sends
+  no reply (SA-6). A session that enrolls answers each request it claims in the same turn by a `com.progress`
+  note or a fenced reply carrying the state, and settles it with `com.accept`, then `com.complete` (SA-2, SA-6,
+  DEC-0152).
 - `com.reply` is the reply path, and it takes the thread from `replyTo`. A `com.submit` of kind `reply` stays for
   clients written against DEC-0022; its `thread` must be `replyTo`'s own, and the board refuses any other thread
   `invalid_arguments`.
