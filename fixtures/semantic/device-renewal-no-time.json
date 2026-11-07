@@ -1,0 +1,16 @@
+{
+  "description": "An input with no readable clock decides no repeat; no finding.",
+  "kind": "device-renewal",
+  "expect": [],
+  "input": {
+    "latest": {
+      "certificate": "MIIB-renewed-certificate",
+      "renewed": true,
+      "notAfter": "2026-11-09T08:30:05Z"
+    },
+    "at": "soon",
+    "response": {
+      "certificate": "MIIB-another-certificate"
+    }
+  }
+}

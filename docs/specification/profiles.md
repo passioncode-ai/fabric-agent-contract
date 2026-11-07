@@ -41,8 +41,8 @@ static gateway credential. Stdio environment values use secret references only.
 - `session` means every session the host starts, and `FAC-SEM-056` refuses it. A host MUST NOT write a declared stdio
   server into a runtime's user-wide MCP configuration, whatever the scope says.
 
-A server that holds no per-session state SHOULD NOT be a stdio server at all: it runs once on the machine as a
-[service](service.md) whose MCP surface is `streamable-http`, under its supervisor and the machine's lifecycle broker,
+A server that holds no per-session state SHOULD NOT be a stdio server at all: it runs once per OS account on the computer as a
+[service](service.md) whose MCP surface is `streamable-http`, under its supervisor and the lifecycle broker,
 with its well-known document as the health check. One copy per session is right only for a server that holds that
 session's state, such as a browser or a project index. On 2026-10-11 about 35 sessions each held their own copies of
 five stdio servers, about 10 GB of memory (fabric-workspace `knowledge/lifecycle.md` LC-19). Claude Code plugin
@@ -55,7 +55,9 @@ The profile MUST declare:
 - A2A version `1.0` for contract 0.1.0, in the member `protocolVersion`;
 - an HTTPS Agent Card URL, normally `/.well-known/agent-card.json`, the card a peer outside the computer reads; a
   [service](service.md#a2a-agent-card) also names its card in its well-known document's `surfaces.a2a`, and a local
-  service's card for peers on the same computer is on its loopback origin (DEC-0122);
+  service's card for peers on the same computer is on its loopback origin (DEC-0122), reachable from that computer,
+  its other OS accounts and any forwarded guest, so its trust anchor is the listener's owner and a token-free A2A
+  interface falls under HA-3 ([service](service.md#ha-3), DEC-0154);
 - the exact Agent Card skill IDs used to satisfy Fabric capabilities;
 - supported binding (`REST`, `JSON-RPC` or `gRPC`) and optional streaming/push;
 - task-state mapping and cancellation behavior — a host-side expectation of the A2A peer, not a manifest field (DEC-0064);

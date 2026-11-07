@@ -35,10 +35,15 @@ Pick the row that describes your agent. Each names what to read, what to write, 
 | An A2A agent: a peer other agents call over A2A | [profiles](docs/specification/profiles.md#a2a-peer-profile) | a [manifest](schemas/manifest.schema.json) whose capability uses the `a2a` profile | [`manifest-a2a.json`](fixtures/positive/manifest-a2a.json) | `pnpm validate <file>` |
 | A coding agent run as a local runner (Claude Code, Codex, Cursor and others) | [the local-runner profile](docs/specification/profiles.md#local-runner-profile), [runners](docs/specification/runners.md) | a [manifest](schemas/manifest.schema.json) whose capability uses the `local-runner` profile | [`manifest-local.json`](fixtures/positive/manifest-local.json), [`catalogue/coding-agents.json`](catalogue/coding-agents.json) | `pnpm validate <file>` |
 
-`pnpm validate <file|dir> [--schema <name>] [--kind <kind>] [--json]` exits 0 when the document is clean, 1 when it
-has a problem and 2 on a usage error. The [guide](docs/guides/connecting-compatible-agents.md) walks the service, stdio and
+`pnpm validate <file|dir> [--schema <name>] [--kind <kind>] [--json]` exits 0 when there is no blocking problem (accepted
+lines may print), 1 when it has a problem and 2 on a usage error. The [guide](docs/guides/connecting-compatible-agents.md) walks the service, stdio and
 local-runner rows with minimal examples; for an A2A peer, its profile and the fixture above are the example, and the [Fabric Agent Adapter](https://github.com/passioncode-ai/fabric-agent-adapter) scaffolds
 and probes each kind.
+
+An agent of any kind may also carry a source manifest, `fabric.source.json` (opt-in, DEC-0149; a hand-over by push or by file, a package handed over, or published to a public registry from a private home, or a public release from a private home, which carry a source export or a package, needs it first; an organization's private agent packed for its own private registry, readable only by its members, needs none): which files are its
+source, which slots an installation fills, and the check that keeps its instance out of a source export. The export, owed by the
+adapter (CT-207), is to read the operator's list of installation strings; the run here,
+`pnpm --silent validate <folder> --kind source-tree`, reads none ([agent source](docs/specification/source.md)).
 
 ## Start here
 
@@ -101,12 +106,14 @@ admission decision before a project binding can grant access.
 
 Open source under the [GNU AGPL-3.0](LICENSE). A [commercial license](COMMERCIAL-LICENSE.md) is
 available for use that does not meet the AGPL's terms: [passioncode.ai/business](https://passioncode.ai/business/).
-Earlier commits carried no licence: the repository was private and unlicensed
+Earlier commits carried no license: the repository was private and unlicensed
 ([design](docs/evidence/specs/2026-08-26-fabric-agent-contract-design.md)). Releases are tags
 `v<contractVersion>+<YYYY-MM-DD>` on `main`, the first `v0.1.0+2026-10-23`
 ([versioning](docs/specification/versioning.md#releases), DEC-0108); a consumer still pins the release's commit.
-Whether the schemas should carry a permissive exception so any host can implement them is open
-for the operator as CO-KB-02 in the knowledge base's
-[licensing](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/licensing.md#open-for-the-operator).
+Whether the schemas should carry a permissive exception, so that a closed-source host could copy them
+without the commercial license, was the
+operator's question CO-KB-02 in the knowledge base's
+[licensing](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/licensing.md#open-for-the-operator);
+it closed on 2026-10-19 and the schemas stay under this repository's license.
 Contributions are accepted under [CLA.md](CLA.md).
 

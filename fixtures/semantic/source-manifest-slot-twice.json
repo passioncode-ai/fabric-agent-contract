@@ -1,0 +1,49 @@
+{
+  "description": "A slot named twice (FAC-SEM-156, DEC-0149).",
+  "kind": "source-manifest",
+  "expect": [
+    "FAC-SEM-156"
+  ],
+  "input": {
+    "format": "fabric-source/1",
+    "include": [
+      "src/",
+      "docs/",
+      "README.md",
+      "LICENSE"
+    ],
+    "exclude": [
+      "src/generated/"
+    ],
+    "binaries": [
+      "docs/icon.png"
+    ],
+    "publicAddresses": [
+      "support@inbox-digest.example"
+    ],
+    "slots": [
+      {
+        "name": "MAIL_OAUTH",
+        "kind": "secret",
+        "purpose": "reads the mailbox the digest covers"
+      },
+      {
+        "name": "DIGEST_JOURNAL",
+        "kind": "store",
+        "purpose": "the digests written so far",
+        "path": "journal.sqlite"
+      },
+      {
+        "name": "KNOWLEDGE_BASE",
+        "kind": "endpoint",
+        "purpose": "the operator's knowledge base",
+        "optional": true
+      },
+      {
+        "name": "MAIL_OAUTH",
+        "kind": "config",
+        "purpose": "the mailbox address"
+      }
+    ]
+  }
+}

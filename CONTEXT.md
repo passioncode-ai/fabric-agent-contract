@@ -143,7 +143,9 @@ for 24 hours. A service takes a
 `relayed` action from a T0 or T1 caller that carries a valid one as the operator's act, records the caller it
 authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
 `decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1` (`actionDecision`,
-[service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121).
+[service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121). A **Source hand-over** takes a decision only
+with its exact target ([source](docs/specification/source.md#handing-over), DEC-0149). A hand-over by push or by file, a package handed over, or published to a public registry from a private home, or a public release from a private home carries a source export or a package, which needs the tree check, so an agent without `fabric.source.json` takes those routes only once it has one; an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home an agent does neither on its own (with the operator's explicit permission for that act it is his own act, no act of this contract); the manifest stays opt-in otherwise (an organization's private agent packed for its own private registry, readable
+only by its members, needs none).
 
 **Mandate**: The operator's instruction for one task, carried with the task down a chain of the operator's agents
 (`mandate/1`): the task, the operator's words verbatim, when they were given, an expiry within 7 days, a scope
@@ -153,6 +155,7 @@ from T0 or T1 (by the agent before it, where it authenticated its caller's agent
 not cover, so the operator is asked again for that alone; a T2 caller's mandate changes nothing, beyond the estate a
 delegation token carries the authority. A job's step is read under the job's capability (MJ-1, DEC-0141; `actionDecision`'s
 `mandateCapability`) (`mandateCovers`, [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
+A mandate never covers a **Source hand-over** ([source](docs/specification/source.md#handing-over), DEC-0149).
 
 **Relayed approval**: The operator's approval, given in one agent's session, carried to another of their agents by a
 relay: the words verbatim, when and where they were said (`source`: the project, and the session or the board thread)
@@ -282,8 +285,8 @@ one key in both roles (`FAC-SEM-044`, DEC-0056); a P-256 key is a valid point by
 DEC-0053).
 
 **Device request signature**: The HTTP message signature (an RFC 9421 subset, label `fabric-device`) a device puts on
-every batch, check-in, rotation and share-registration request with its `#sig` key, beside mutual TLS, so a receiver behind a host that
-terminates TLS still proves the device's key; its `keyid` is the certificate's serial, and a (serial, nonce) pair is
+every batch, check-in, rotation and share-registration request with its `#sig` key, beside mutual TLS, so a receiver behind a TLS-terminating
+proxy still proves the device's key; its `keyid` is the certificate's serial, and a (serial, nonce) pair is
 accepted once (`FAC-SEM-077`, [devices](docs/specification/devices.md#transport), DEC-0056).
 
 **`org-cloud`**: A device certificate binding's `role` (DEC-0099): the device is the organization's own cloud machine
@@ -297,7 +300,8 @@ again within 30 days of its last certificate's `notAfter` with a CSR from its ke
 certificate keeps the user and role on record, a new epoch is issued, the renewal is audited, and a server MAY refuse
 it by policy (`FAC-SEM-044`). The 30 days are judged by the server's clock (the new certificate's `notBefore`), never
 the device's `requestedAt`; before the last certificate's end the same request is a re-enrollment by the key on record
-with a new epoch (DEC-0102) ([devices](docs/specification/devices.md#enrollment)).
+with a new epoch (DEC-0102); a renewal repeated while the certificate it issued is unpresented and not ended gets
+that certificate again in its epoch, or a refusal (always for a device revoked since) (DEC-0148, `FAC-SEM-155`) ([devices](docs/specification/devices.md#enrollment)).
 
 **Closed organization**: An organization whose closing can no longer be cancelled. Its server MAY answer a device request of a
 node pinned at or after DEC-0103 (never an enrollment) with 410 `organization-closed` and `closedAt`, and a node ends that enrollment at once and drops what it buffered for it
@@ -343,8 +347,8 @@ current policy key set, within a window of at most 7 days. The node runs it only
 ([node summary](docs/specification/node-summary.md#repairs)).
 
 **Stream epoch**: The epoch a device's collectors use, issued by the server at enrollment and greater than
-every epoch issued to that device before; it attributes events, and a lost counter means re-enrolling
-(DEC-0030, DEC-0031).
+every epoch issued to that device before (a renewal repeated under DEC-0148 gets the epoch that renewal issued); it attributes events, and a lost counter means re-enrolling
+(DEC-0030, DEC-0031; a node whose renewed certificate is unpresented presents it first, DEC-0148).
 
 **Delegation grant**: A **Standing grant** that names an `audience` — the one agent its principal may
 call — with that agent's `capabilities` and an `effectCeiling`. The hub mints **Delegation tokens**
@@ -362,7 +366,9 @@ operator's own machine, **T1** an enrolled machine of the same owner, **T2** eve
 A `relayed` action from a T0 or T1 caller carries the operator's decision (**Relayed decision**, DEC-0121).
 Over the relay a node places a sender in T1 from the estate record it applied (`relayCallerTier`, DEC-0106); over the
 estate's relay a sender that is not T1 is T2 and its call is refused, and `unknown-state` is a denial, not T2 (DL-28,
-DEC-0106, the wording DEC-0137).
+DEC-0106, the wording DEC-0137). On a computer with more than one **Counted OS account**, a token-free loopback door places
+a caller in T0 only after checking the peer's OS account, and a port forwarder's callers are T2
+(HA-3, DEC-0154).
 
 **Adaptation plan**: What a person moves into an organization they join: projects, history, results and schedules.
 The plan's draft and the inventory it is chosen from stay in the person's Fabric; only its organization part, what the
@@ -415,6 +421,85 @@ requires, cost presets, the **Result signal**, the state that moves, the evals r
 
 **agentRef**: `urn:fabric:agent:<publisher>:<id>`, the name of one agent across its versions, derived from its
 package and never chosen. A placement names an agent by it and keeps it when it moves (`FAC-SEM-066`, DEC-0050).
+
+**Source**: What of an agent can be handed to someone else: its code, skills, prompts, schemas, tests and the
+documents it ships, as its `fabric.source.json` (`fabric-source/1`) names them; default deny, `.git` never, its
+`unchecked` paths travelling unread (DEC-0149, [source](docs/specification/source.md)).
+
+**Instance**: What belongs to one installation of an agent and never travels with its **Source**: its records, logs,
+keys, the names of the people and clients it works for, private paths and its configuration, reached through its
+**Source slots**. *Avoid*: "instance" for a running instance (a context instance, a service instance) in this sense.
+
+**Source slot**: A named place an installation fills, declared in the source manifest without a value (not a board's
+responder slot, DEC-0140): `secret` (a key read
+by name), `config` (a non-secret setting, the operator's or publisher's identity included), `store` (a data store under
+the data folder) or `endpoint` (the operator's infrastructure by role). A required slot left empty is a setup state
+(`setup: true`) of the agent, reported by the slot's name (an `endpoint` too; only a filled endpoint that fails may
+be reported under the connection it backs); a `store` slot is never a setup state: a store absent at the first start is created, and
+one the agent cannot create under its data folder is a failure. A package's `secrets[]` are its secret slots and its `state[]` its store slots
+(`FAC-SEM-160`), except that an absent or empty `state[]` is a copy packed without state (a colleague's copy) and
+passes.
+
+**Installation string**: One of the operator's own strings (an account, a person, a private project, a computer's name) the tree
+check looks for before a **Source export**, kept on the operator's machine outside the source tree and never exported
+(`FAC-SEM-158`).
+
+**Source export**: An agent's **Source** at a named commit written as a Git repository holding one new commit by
+`Fabric source export`, whose only parent, if any, is the earlier export commit the recipient holds, and no commit from
+the home, after the tree check finds nothing blocking; local, publishing nothing, running
+no test as a condition, never a gitlink. Handing it over is a source hand-over where
+[source](docs/specification/source.md#handing-over) counts one (`publish`, on the operator's word), except an
+organization's later public release from its private home and material already public (DEC-0149). Not the peer share's Export (DEC-0147) and not
+a proposal's `export` destination (`FAC-SEM-103`).
+
+**Source hand-over**: An agent's source reaching a place or a person it was not at; a route is a hand-over when the source reaches someone who could not already read the home, or a place another owner holds: a copy is none only when it stays in a place the home's owner holds and only the home's readers can read it (the owning organization's members for its own agent; for a personal agent's private home, the collaborators given access before DEC-0149 was accepted count as the home's readers only inside the home itself, so a copy in another place, even one the owner holds and they can read, is a hand-over), and a repository or placement another owner holds stays a hand-over; a release is a source export or a package, and serving and copied content are never a release, so they keep their own rule. The routes include, among others,
+the ones below, each a hand-over except, on every route, an organization's later public release from its private home
+(its own act) and material already public; the lead filters every route, beside those two exceptions: a route that stays in a place the home's owner holds and reaches only those who could already read the home is no hand-over (an organization's export pushed to its own private repository, readable only by its members, is none), and a place another owner holds stays a hand-over even when only earlier readers can read it (a personal agent's export pushed to a collaborator's own private repository is one, whenever that collaborator was given access). The routes: a **Source export** handed to anyone who could not already read the home or sent as a file to such a person or to a place outside the owner's; a push of a
+commit not already there to a repository that is not the agent's home and that is public, another owner's, or readable by anyone who could not already read the home (for a personal agent, an organization's repository is another owner's even when the operator administers it; an organization's own repositories are its own agent's owner's places), each such push its own; source files' content copied into a message, an issue, a gist or a thread outside the owner's, or into one the owner holds that anyone who could not already read the home can read; a package handed to anyone who could not already read the home, or sent to a place outside the owner's (a colleague's copy), which carries the source; a personal agent's package or release published to a
+public registry, unless its home is already public (the files the pack step derives from the public source count as
+public, nothing else does). A hand-over by push or by file carries a source export (one new commit, whose only parent,
+if any, is the earlier export commit the recipient holds; no commit from the home; the tree check passed), never
+another commit; the export's receipt records the recipient and the export commit, from which the next export reads its
+parent, and an export that cannot land as a fast-forward goes as a new branch or pull request, never by a force-push; a package handed over, or published to a public registry from a private home, names as its target the source commit it was packed
+from and holds only source paths that passed that commit's tree check, besides the files the pack step writes (`fabric.package.json`); built files travel only as committed source paths.
+An act on the whole repository of a personal agent's private home, or of any copy of it within the operator's estate that carries its history (a private mirror), such as a visibility change or access given to any other person, is not done by an agent on its own; with the operator's explicit permission for that act it is the operator's own act under his own rule, and no act of this contract; the contract's tools do not perform it; the source leaves only as a source export; a transfer of a personal agent's home, public or
+private, is not done by an agent on its own either (the operator's own permission for it is outside this contract); a public home's access and
+visibility are outside that rule, making a public personal home private is none, access the operator gave before
+DEC-0149 was accepted stands as the operator's own act (nothing is retroactive), and an agent never gives new access on its own (with the operator's explicit permission for that act it is his own act, no act of this contract). An organization's acts on its own agent's whole
+repository are its own, under its own release rules, except two that take the word naming the repository: making a
+private organization agent's source public by a visibility change, and giving it new readers outside the organization
+(the word accepts the history as it stands); its first public release from a private home, by any route, takes the word naming
+its source commit, every later one by any route is its own act, and every public release from a private home carries only the
+source export (its parent the earlier export commit) or a package packed from that source commit holding only source
+paths that passed the tree check. A processor acting for the owner under the owner's own account
+or Git hosting service is no recipient while what it holds stays readable by no one but the owner and the processors acting for it;
+output it makes public is one. Access the owning organization gives its own members to its own agent's home is none,
+and giving access to a public home is none. What takes the word when a source becomes public: a personal agent's source
+made public for the first time (as a source export, a public repository created for it included; its own repository's
+visibility is not changed by an agent on its own, above), and every later public release of a personal agent from a private home (each new
+commit is its own hand-over), and an organization agent's private source made public; an organization creating its
+own agent's home public is its own act, and a push, release or serving of what is already public, from a public home to
+any other public place (another owner's included), reaches no new reader and is none, when an earlier act on the word,
+or the owner's own act, made it public; material already public needs no word by any route. The repository where the agent's owner keeps and develops its source is its
+home, not a recipient, and the owner's placements are the owner's own: the owner's own commits, branches and releases
+in the home, a release that stays where the home's readers are, and a deploy to a placement its owner holds (an
+organization's agent on that organization's placement included) are none; a bundle a public page serves is the agent's
+output, while serving the source tree, source maps or unbuilt files publicly, or to anyone who cannot read the home, is
+a hand-over, the word naming the deploy of a commit that serves source to anyone who cannot read the home (one word per
+commit and audience); a copy moved within the operator's own estate (here, the accounts and placements the operator
+alone holds) to a place that is not public and that no one outside the operator can read (a private mirror the operator
+owns) is none either. The home carve-out never lets a personal agent's source move into an organization's or a public
+repository, or onto an organization's or a team's placement or one that anyone who could not already read the home can read, which stays one; an `org:<orgId>` context instance on a
+machine the operator holds, run under a share grant (DEC-0082, DEC-0086), is the owner's placement serving the
+organization and no hand-over, while a placement on a machine, registry or repository the organization holds is one
+(a machine the operator holds stays his when it is enrolled in an organization (enrollment gives the organization a device record, not the machine); an OS account or machine the organization owns whole (its org-cloud machine, or an account such as an organization's own macOS user on a shared computer) is the organization's); serving the
+running agent to a team (`peer`, client keys) gives no one the tree, except a prompt or resource that is a source file
+served verbatim, or a bundle built without minification, which is the source tree served. It is taken only on the
+operator's word for that act naming the agent, the target (the source commit, or the repository for an organization's
+two acts above) and the recipient, in one of three forms: on a service's action, where the hand-over is one synchronous
+call of effect class `publish`, a decision with its exact target or the service's in-call elicitation; outside one, the
+stated word the operator's reply accepts, consumed once; never by a mandate or an `approval/1` before CT-181, as
+[source](docs/specification/source.md#handing-over) specifies (DEC-0149). *Avoid*: a bare "hand-over" for this meaning.
 
 **Package digest**: SHA-256 over the RFC 8785 form of a **Package** without its digest and signatures; through the
 listed files it covers the whole folder, and a countersignature does not change it (DEC-0050).
@@ -506,8 +591,9 @@ usable without document-level horizontal scrolling: 360, or the larger `minWidth
 keeps for the page when its own panes grow.
 
 **Appearance carrier**: The cookie `fabric_appearance` (`v=1&scheme=…&theme=…`) a host sets for a
-dashboard's host so the page shows the operator's colour scheme and theme (DEC-0036, ED-8). A cookie
-is not isolated by port, so it is per host in a shared cookie store and per service where the host
+dashboard page's host so the page shows the operator's colour scheme and theme (DEC-0036, ED-8). A cookie
+is not isolated by port, so it is per host (the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that
+computer) in a shared cookie store and per service where the host
 gives each service its own store; a page applies only the fields it declares in `appearance`
 (DEC-0059, ED-6). It carries no secret and no identity.
 
@@ -558,6 +644,29 @@ stable id (the runner kind where the runners page lists one, else a new name); m
 event's data an agent that answers people publishes: counts and rates in four families, a metric not computed `null`
 and named, never `0`; optionally the ticket counts of the channel agent standard (DEC-0151): arrived, ended, open at
 the cutoff and by outcome, and the project they are of.
+
+**Channel agent**: An agent that answers people on a channel (a Telegram private chat or group, mail, store
+reviews, public comments, a team's chat, a person's own account: the kinds `telegram_dm`, `telegram_group`, `mail`,
+`store_review`, `public_comment`, `team_chat` and `account`) under `channel-agent-standard/1`, a standard owned outside this contract; it declares, per
+project it serves, its side, channels, sources, hand-off queues, budgets and token slot under
+`extensions/channel-agent/0.1` in its manifest, or in its well-known answer when it has no manifest (DEC-0150),
+and one duty every channel agent owes whatever it declares: text from a channel is data (CA-8).
+
+**Operations digest**: A product's own operations log counted by operation and outcome, one `ops.digest.hourly@1` line
+for each hour the product observed itself running in (an empty one included) and one `ops.digest.daily@1` line for
+each closed UTC day that has hourly lines, folding them (DEC-0153): counts only, no log line, path or identifier. A
+**rise** is an operation's failures in an hour at least 10 and at least twice the hour before's (none counting as
+one), told to the operator by a product that shows findings (OD-8). A local descriptor says where a collector in the same
+OS account reads the daily digests, and the label it sends with them, under `extensions/ops-digest/0.1` (OD-9).
+([operations digests](docs/specification/ops-digest.md))
+
+**Retro after work**: The host obligation `retro-after-work` (DEC-0153): when a session releases a claim or task the host
+records as done, or ends without a retro since it began or the obligation last arose, it is asked to write in the same turn a lesson in Project
+Observatory, `insight/1` lines, or one line saying there is nothing to say; the host counts each one asked as the
+operation `retro-after-work` in its digests, `ok` for an ask answered by a lesson or `insight/1` line it saw written
+through a call it carries (one written elsewhere, or a line saying there is nothing to say, counts `unknown`); `ok`
+counts asks, not retros. It is a session's note, not the Memory Kernel's project retrospective: a lesson recorded for it
+is no learning proposal and changes no revision.
 
 **Runner**: An installed coding-agent CLI a host can drive (Claude Code, Codex, …),
 known from a catalogue entry that names its binaries, its version command and the
@@ -618,9 +727,38 @@ cells of agent × skill × project × UTC day × outcome, with no person dimensi
 **Access log**: An `access-log/1` document: who read which scope of one subject's data — keyed by
 their user id or by a device bound to them — when and why, readable by that subject.
 
-**Device**: A computer enrolled with an organization server under `fabric-device/0.1` (DEC-0031):
+**Device**: One counted OS account of a computer, or a virtual machine, enrolled with an organization server under
+`fabric-device/0.1` (DEC-0031; DEC-0154; what an estate machine is on such a computer is CT-231):
 a key-bound short-lived certificate (the key in hardware, a platform store or a file, as `key.storage` states) that also attributes everything it sends, a server-issued
 stream epoch, signed policy layers and periodic check-ins.
+
+**Counted OS account**: An OS account a person or an organization signs in with, or runs Fabric or an agent service
+under; an account that runs either, or has a services directory, always counts, and only an account that does neither
+(root, SYSTEM, the system's service accounts) is left out; the count is read at every start ([service](docs/specification/service.md#counted-os-accounts),
+DEC-0154). "A computer with more than one counted OS account" counts only these.
+
+**Port claim**: A `passioncode-port-claim/1` file `.passioncode-ports.<service-id>.<account>.json` in the computer's
+shared sticky folder, owned by the account it names by uid (SID on Windows), listing the ports that account records for a
+service; it keeps installers of two accounts, or of two services in one account, from one port and grants nothing (HA-1,
+DEC-0154).
+
+**`foreign-user`**: The state of a local service whose port is held by a listener of another OS account, or by one
+whose owner cannot be told; ordered after `down` and before `foreign`, it wins over any well-known answer, and nothing
+is sent to it (HA-2, DEC-0154).
+
+**`table-restricted`**: The reason, or its prefix, for an owner that cannot be told because a macOS socket table shows
+its reader only the reader's own sockets (macOS 27.2, an ad hoc signed process); for a listener that accepted the
+connection, `foreign-user`, never this account's unless RT-2 to RT-4 prove it (a refused connection is still `down`;
+RT-1 to RT-5, DEC-0155).
+
+**Host label**: The label of the computer: `device.hostLabel`, an HMAC of the computer's administrator-owned secret
+over the organization's id, the same for every device of one organization on one computer (two counted OS accounts
+of it, or a virtual machine given its secret); organizations with no code
+on the computer cannot link it (HA-4, [devices](docs/specification/devices.md#the-host-label), DEC-0154). In
+this contract's specification, schemas and glossary, "host" never means the computer. The exceptions are the name
+"host label", which labels a computer, and names and paths already fixed, which keep their spelling (the enrollment
+purpose `agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-ports.md`). The registers keep the
+words they were written in.
 
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that
 order, and a locked key is never overridden by a lower layer.
@@ -799,7 +937,16 @@ value (DEC-0142 PS-10).
 
 **Proposal**: A change proposed to a project's manager or the CEO (`fabric-proposal/1`): a rule, an agent, a skill, a
 listing or a fix, with evidence by reference; a rule is approved by a person, nothing applies itself, and nothing
-about a private agent leaves (DEC-0072, [proposals](docs/specification/proposals.md)).
+about a private agent leaves as a proposal (DEC-0072, [proposals](docs/specification/proposals.md)); handing over its
+**Source export** goes only by a **Source hand-over** (DEC-0149). The operator's standing permission of 2026-10-12 lets
+a private agent's mechanics move into a product (the knowledge base's roadmap records it in its D5 row: "the broker's
+mechanics go into `node.lifecycle`, with a standing permission in his global instructions"); the contract reads it as
+rewriting them file by file into the product's own source through that product's own change, private data
+stripped. It is unchanged and needs no word per act; the agent's source as such (its tree, or a whole copy under any
+name) moving into an organization's or a public repository stays a **Source hand-over**. Mechanics are adapted file by
+file when the result does not run as the agent, carries none of its manifest, identity, data, keys or private names,
+and each file is changed into the product's own interfaces in the product's own change; in doubt the move is a hand-over
+and takes the word, as [source](docs/specification/source.md#handing-over) draws the line.
 
 **Protocol revision**: `<name>/<revision>`, the version every document names (DEC-0009); a receiver accepts N and N−1
 of the contract's register, lists them in `protocols`, and refuses another with `schema-unsupported` (DEC-0067,

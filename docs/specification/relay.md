@@ -82,7 +82,9 @@ Shared vectors are in `fixtures/vectors/` (`relay.json`, `secret-envelope.json`,
   nothing more: `https://` and a host name or a bracketed IP literal, or — for a relay on the same machine — `http://`
   on a loopback literal, 127.0.0.0/8 or `[::1]`; either with an optional port up to 65535, and no path, user information
   or anything after it. A name such as `localhost` is refused over http: a name resolves somewhere a literal cannot
-  (DEC-0066; vectors `relayOrigin`).
+  (DEC-0066; vectors `relayOrigin`). A client checks the owner of a loopback relay's listener before it sends a
+  credential there ([service](service.md#ha-2) HA-2, DEC-0154); the `auth` signature over the relay's own
+  nonce is not a reusable credential, so a relay held by another account learns nothing it can replay.
 - **Frames** are UTF-8 JSON text frames of at most 1 MiB, each with `{v: 1, type, id}`
   ([`relay-frame.schema.json`](../../schemas/relay-frame.schema.json)).
   - Unknown members are ignored.
@@ -605,7 +607,15 @@ which it shows the operator its state, so DL-15's switch, a move's step 6 and it
 `source` is `machine-report`; it is a setup state (`setup: true`, its reason "sign the revision that lists this
 machine's key") while the hub's new `#kem` waits only for a revision the hub drafted and the person has not signed, and
 a failure otherwise (a private half it cannot read, or one that does not match the listed key: "replace this
-machine's key"), which a watcher reports after 5 minutes (DEC-0146). Fabric's hub, which serves no well-known document
+machine's key"). Where the hub serves `fabric-service/0.1`, either entry shows on its well-known document and in the
+dashboard; otherwise it shows where the hub shows its state (for Fabric's hub, SCR-23 below). A watcher messages the
+operator only for an agent unavailable, as [service](service.md#well-known-document) defines it, for more than 15
+minutes (DEC-0149 and [service](service.md#well-known-document); Fabric Dashboards' watcher opens an episode for
+`down` since its FD-76, and for `foreign` and `foreign-user` since its FD-159 (0.8.30), and keeps it open while a failing source (one not marked `setup: true`) outside its start
+baseline stays, so its failure message at 15 minutes may name that source), and a `degraded` entry opens no message, so DL-15's switch, and a move's
+step 6 and its division, waiting on reports are seen where the entry shows; whether a hub's machine-report failure is
+messaged is owed by CT-244, which starts from the operator's recorded rule that a failure lasting over 15 minutes is
+messaged (the knowledge base's agents-first, "Messages to the operator in Telegram"). Fabric's hub, which serves no well-known document
 today, shows it on its own machine's row in My network's machines (SCR-23, a setup note while only the person's signature is missing, its error state otherwise). A recipient acknowledges
 (`ack`) and drops a body it verified whose payload type it does not know ([Messages](#messages), DEC-0146), so a hub
 not yet on DEC-0132 that does so drops a report and its mailbox does not fill with them (no Fabric reads a relay mailbox today; its 0.4.0 reader does so, Fabric's PL-12, CO-452); the machine hears nothing back either way, since a report is never answered.

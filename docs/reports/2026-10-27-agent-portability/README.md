@@ -3,7 +3,7 @@ report: 2026-10-27-agent-portability
 kind: research
 project: fabric-agent-contract
 date: 2026-10-27
-status: draft
+status: active
 backlog: CT-194 (docs/backlog.md:201), roadmap track RM-36
 sources:
   - fabric-agent-contract origin/main 2b3a00a4f51f32a6d0ec486cc283c04b10a42128
@@ -14,6 +14,8 @@ sources:
 ---
 
 # Agents portable from the start: an agent's source kept apart from its instance
+
+Decided by DEC-0149 ([source](../../specification/source.md)); the rest of this report is the historical record.
 
 Phase 1 of CT-194: research only. This report proposes options for a decision; it decides nothing.
 

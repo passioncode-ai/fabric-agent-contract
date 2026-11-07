@@ -23,6 +23,7 @@ import { pageLinkRules } from "./page-link-rules.js";
 import { sessionHandoffRules } from "./session-handoff.js";
 import { profileRules } from "./profile-rules.js";
 import { packageRules } from "./package-rules.js";
+import { sourceRules } from "./source-rules.js";
 import { estateRecordRules } from "./estate-record-rules.js";
 import { enrollTokenRules } from "./enroll-token.js";
 import { contextRules } from "./context-rules.js";
@@ -40,11 +41,13 @@ import { nodeEnrollmentRules } from "./node-enrollments.js";
 import { orgAuthorityRules } from "./org-authority.js";
 import { orgExchangeRules } from "./org-exchange.js";
 import { orgAdaptationRules } from "./org-adaptation.js";
+import { digestFoldersRules, opsDigestRules } from "./ops-digest.js";
 import { orgMembershipRules } from "./org-membership.js";
 import { shareRegistrationRules } from "./share-registration.js";
 import { nodeSummaryRules } from "./node-summary.js";
 import { agentNetworkRules, loadExtensionRules } from "./agent-network.js";
 import { actionRules, actionsExtensionRules } from "./actions.js";
+import { channelAgentRules } from "./channel-agent.js";
 import { machineCallRules } from "./machine-call.js";
 import { machineReportRules } from "./machine-report.js";
 import { checkInCredentialFindings, credentialRules } from "./credentials.js";
@@ -88,6 +91,9 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (profiles) return profiles;
   const packaged = packageRules(kind, value);
   if (packaged) return packaged;
+  // DEC-0149: an agent's source manifest, its tree and its package (FAC-SEM-156 to FAC-SEM-160).
+  const source = sourceRules(kind, value);
+  if (source) return source;
   const estate = estateRecordRules(kind, value);
   if (estate) return estate;
   const enroll = enrollTokenRules(kind, value);
@@ -108,6 +114,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (exchange) return exchange;
   const adaptation = orgAdaptationRules(kind, value);
   if (adaptation) return adaptation;
+  const opsDigest = opsDigestRules(kind, value);
+  if (opsDigest) return opsDigest;
   const enrollments = nodeEnrollmentRules(kind, value);
   if (enrollments) return enrollments;
   const folderAttribution = folderAttributionRules(kind, value);
@@ -201,9 +209,11 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "service-well-known") findings.push(...connectionsRules(value));
   if (kind === "service-well-known") findings.push(...loadExtensionRules(value));
   if (kind === "service-well-known") findings.push(...actionsExtensionRules(value));
+  if (kind === "service-well-known") findings.push(...channelAgentRules(value, "well-known"));
   if (kind === "service-well-known") findings.push(...embeddedProtocolsFindings(value.protocols, "/protocols"));
-  if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value), ...descriptorPeerRules(value));
+  if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value), ...descriptorPeerRules(value), ...digestFoldersRules(value));
   if (kind === "manifest") findings.push(...declaredServers(kind, value), ...commandLines(kind, value));
+  if (kind === "manifest") findings.push(...channelAgentRules(value));
   if (kind === "service-usage") findings.push(...usageRules(value), ...usageLimits(value));
   if (kind === "support-quality-daily") findings.push(...supportQualityRules(value));
   if (kind === "service-feed-request") findings.push(...feedRequestRules(value));
@@ -234,9 +244,11 @@ function serviceClaims(value: JsonObject): Finding[] {
   const byKey = new Set<string>();
   descriptors.forEach((descriptor, index) => {
     const key = serviceKey(descriptor);
-    // DEC-0019: a port is a claim on THIS computer, so only local placements claim one. A remote
-    // origin's port belongs to another host and collides with nothing here.
-    // DEC-0069: an app's descriptor may carry no origin (its live origin is in its liveness file), so it claims no port.
+    // DEC-0019: a port is a declaration in one OS account's services directory, so only local placements declare one. A remote
+    // origin's port belongs to another computer and collides with nothing here. The message below says "claimed" in
+    // DEC-0019's sense of a declaration, not a DEC-0154 port claim; it is the rule's text a user sees, kept as it is.
+    // DEC-0069: an app's descriptor may carry no origin (its live origin is in its liveness file), so it declares no port
+    // for FAC-SEM-010 (not to be confused with a DEC-0154 port claim).
     if (descriptor.placement !== "remote" && descriptor.origin !== undefined) {
       const port = /:(\d+)$/.exec(show(descriptor.origin))?.[1] ?? "";
       const holder = byPort.get(port);

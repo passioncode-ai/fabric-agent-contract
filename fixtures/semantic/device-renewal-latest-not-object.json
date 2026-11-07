@@ -1,0 +1,12 @@
+{
+  "description": "A latest that is not an object decides no repeat; no finding.",
+  "kind": "device-renewal",
+  "expect": [],
+  "input": {
+    "latest": "MIIB-renewed-certificate",
+    "at": "2026-11-02T08:31:00Z",
+    "response": {
+      "certificate": "MIIB-another-certificate"
+    }
+  }
+}

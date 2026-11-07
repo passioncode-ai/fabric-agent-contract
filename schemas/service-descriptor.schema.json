@@ -451,7 +451,7 @@
       "properties": {
         "data": {
           "$ref": "service-common.schema.json#/$defs/localPath",
-          "description": "The data and configuration directory; it holds service.lock (docs/specification/service.md#directories-per-system)."
+          "description": "The data and configuration directory; it holds service.lock, for a service that takes it (docs/specification/service.md#directories-per-system)."
         },
         "config": {
           "$ref": "service-common.schema.json#/$defs/localPath",

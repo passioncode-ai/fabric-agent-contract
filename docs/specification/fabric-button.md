@@ -77,9 +77,9 @@ the 1 500 ms test.
 **FB-6 — The host's cookie.** A host that embeds a dashboard MAY set the cookie `fabric_button` for the page's host
 in the cookie store the page reads, with the attributes of the appearance carrier (ED-8: path `/`,
 `SameSite=Strict`, not `HttpOnly`, `Secure` on `https`). Its scope is ED-8's (DEC-0059): **per host in a shared
-cookie store; per service where the host gives each service its own store**. A cookie is not isolated by port
+cookie store; per service where the host gives each service its own store** (here "per host" is the URL's host, RFC 6265 section 8.5; for local services, 127.0.0.1 on that computer). A cookie is not isolated by port
 (RFC 6265 §8.5), so in a shared store an `owner=host` written for one local service hides the button of every
-local service on that host; a host that draws its own button over only some pages gives each service its own store
+local service on that host (the page's host); a host that draws its own button over only some pages gives each service its own store
 (Fabric Dashboards: the partition `persist:svc-<key>`). It is a session cookie, with no `Max-Age` and no
 `Expires` (DEC-0045), so an `owner=host` written while the host showed the page never hides the page's button
 in a plain browser tab later, where no host draws one (FB-1). Its value is form-encoded:
@@ -188,7 +188,9 @@ when the action does not define the parameter (`FAC-SEM-052`), when:
 Dashboards' `link` tool returns, which shows the page inside Fabric Dashboards, signed in by the host. Only where
 Fabric Dashboards cannot show it on that computer (`not_installed`, or `unsupported` on a system it does not ship for)
 does Fabric open the service's own address
-(its `https` origin, or `http://127.0.0.1:<port>`, with the path) in the browser; an installed host that did not open
+(its `https` origin, or `http://127.0.0.1:<port>`, with the path) in the browser, a local one only after checking the
+listener's owner ([service](service.md#ha-2) HA-2, DEC-0154): on `foreign-user` Fabric opens nothing and
+reports it where it shows the link, with the line the service card shows for that case; an installed host that did not open
 the page is reported, not replaced ([service](service.md#page-links) PL-3, DEC-0123). Neither carries a token or a login code: signing in is the host's
 ([Operator login](service.md#operator-login)). The `fabric-dashboards://` grammar is Fabric Dashboards'; this
 profile only uses it.

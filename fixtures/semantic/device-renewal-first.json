@@ -1,0 +1,15 @@
+{
+  "description": "The device's latest certificate was issued by an enrollment, not a renewal, so the request is a new renewal: a new certificate; no finding.",
+  "kind": "device-renewal",
+  "expect": [],
+  "input": {
+    "latest": {
+      "certificate": "MIIB-enrolled-certificate",
+      "notAfter": "2026-10-31T08:30:05Z"
+    },
+    "at": "2026-11-02T08:31:00Z",
+    "response": {
+      "certificate": "MIIB-renewed-certificate"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "format": "fabric-source/1",
+  "include": [
+    ".claude-plugin/plugin.json",
+    "skills/",
+    "README.md",
+    "LICENSE"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "format": "fabric-source/1",
+  "include": [
+    "src/",
+    "README.md"
+  ],
+  "publicAddresses": [
+    "support@agent.example",
+    "support@agent.example"
+  ]
+}

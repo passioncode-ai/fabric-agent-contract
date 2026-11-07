@@ -3,12 +3,12 @@
 ## Read first
 
 1. The organization's
-   [roadmap](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/roadmap.md) —
+   [roadmap](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/roadmap.md):
    every major feature and release across PassionCode.ai as `RM-*` tracks with owner, phase and
    state. It is the entry point: a task here that serves a track names it, and the track's status
    is edited only in the roadmap.
-2. The PassionCode.ai knowledge base — `fabric-workspace/knowledge/` in your clone (org-index
-   `scripts/clone_all.sh` makes it) or https://wiki.passioncode.ai/knowledge — at least its
+2. The PassionCode.ai knowledge base, `fabric-workspace/knowledge/` in your clone (org-index
+   `scripts/clone_all.sh` makes it) or https://wiki.passioncode.ai/knowledge: at least its
    [README](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/README.md),
    vision, principles and how-to-work.
 3. This file, then the organization's
@@ -16,19 +16,19 @@
 
 ## What this repository is
 
-Fabric Agent Contract: what makes any agent Fabric-compatible — schemas, profiles and the
-conformance checker every provider is admitted by. It stands on its own; any host can implement it.
+Fabric Agent Contract: what makes any agent Fabric-compatible (schemas, profiles and the
+conformance checker every provider is admitted by). It stands on its own; any host can implement it.
 
 ## Commands
 
 | What | Command |
 |---|---|
 | Install | `pnpm install --frozen-lockfile` |
-| Test (the gate) | `pnpm run check` — the merge gate, run by the merging session with its output in the PR; hosted CI is the nightly batch on Linux and Windows (org-index `docs/CI-BATCHING.md`, DEC-0145), or `gh workflow run ci.yml --ref <branch>` once for an urgent branch |
+| Test (the gate) | `pnpm run check`: the merge gate, run by the merging session with its output in the PR; hosted CI is the nightly batch on Linux, Windows and macOS (org-index `docs/CI-BATCHING.md`, DEC-0145), or `gh workflow run ci.yml --ref <branch>` once for an urgent branch |
 | Privacy check | `pnpm privacy:check` (part of the gate): runs org-index's `check_private.py` where the operator's denylist exists: from `ORG_INDEX`, this checkout's sibling, or, from a linked worktree, the main checkout's sibling; with the denylist present and no script found it fails rather than skips (`src/privacy-plan.ts`, CT-40); without `python3` on PATH it fails and says so (CT-191) |
 | Consumer pin | `pnpm pin:check <consumer checkout>` |
-| Check one document or folder | `pnpm validate <file or folder> [--schema <name>] [--kind <kind>] [--json]`: schema and semantic rules, one line per problem; exit 0 clean, 1 a problem, 2 a usage error (`src/validate-cli.ts`) |
-| MCP (register + proving call) | none — the contract serves no MCP tools; README "Quick start → MCP" |
+| Check one document or folder | `pnpm validate <file or folder> [--schema <name>] [--kind <kind>] [--json]`: schema and semantic rules, one line per problem; exit 0 when there is no blocking problem (accepted lines may print), 1 a problem, 2 a usage error (`src/validate-cli.ts`); `pnpm --silent validate <folder> --kind source-tree` checks an agent's source under its `fabric.source.json`, without the operator's list of installation strings (DEC-0149); `--silent` keeps pnpm from echoing the command line, the folder included |
+| MCP (register + proving call) | none: the contract serves no MCP tools; README "Quick start → MCP" |
 
 Every script in `package.json`, with what it needs beyond Node 22.13+ and the installed dependencies:
 
@@ -44,7 +44,7 @@ Every script in `package.json`, with what it needs beyond Node 22.13+ and the in
 | `pnpm vectors:check` | every generator in `tools/vectors/` against its committed vector file (`tools/vectors/run.ts`) | |
 | `pnpm vectors:write` | writes every vector file from its generator; one generator alone: `tsx tools/vectors/<name>.ts --write` | |
 | `pnpm privacy:check` | the operator's private-name denylist, where it exists | `python3` |
-| `pnpm validate` | checks an author's own document or folder: the schema, the semantic rules and the pairs, one line per problem | |
+| `pnpm validate` | checks an author's own document or folder: the schema, the semantic rules and the pairs, one line per problem; `--kind source-tree` on a folder checks an agent's source | |
 | `pnpm check` | the gate: typecheck, test, ux:lint, docs:check, privacy:check | `python3`, `git` |
 
 The fast loop while editing: `pnpm test:fast`, or one file with `pnpm vitest run test/<file>.test.ts`; then the gate.
@@ -75,12 +75,13 @@ version-pinned external specification. Protocol revisions are recorded explicitl
 The licence is the organization's (Fabric ADR-0092): `AGPL-3.0-only OR
 LicenseRef-PassionCode-Commercial` in `package.json`; `LICENSE`, `COMMERCIAL-LICENSE.md` and
 `CLA.md` byte for byte the knowledge base templates. Whether the schemas need a permissive
-exception is the operator's open question CO-KB-02 in the knowledge base, not a decision here.
+exception was the operator's question CO-KB-02 in the knowledge base; it closed on 2026-10-19 and the
+schemas stay under this repository's licence.
 
 ## Organisation
 
-This repository is one of the `passioncode-ai` repositories. The organization's rules —
-branches, commits, CI, leases, secrets, handoffs — live in the knowledge base,
+This repository is one of the `passioncode-ai` repositories. The organization's rules
+(branches, commits, CI, leases, secrets, handoffs) live in the knowledge base,
 [`knowledge/rules.md`](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/rules.md)
 (Fabric ADR-0093); the repository map and onboarding are in
 [passioncode-ai/org-index](https://github.com/passioncode-ai/org-index) (both private; readable
@@ -122,6 +123,6 @@ Land the source change, then run `node scripts/workspace.mjs sync` from a Fabric
 
 In the same run: update this repository's docs with the change; if a cross-repository fact changed
 (a product, a version, a plan row, a principle), update the page in `fabric-workspace/knowledge/`
-that owns it — a contract revision that moves a consumer's pin is also a row in its
+that owns it; a contract revision that moves a consumer's pin is also a row in its
 `products.md`/`plans.md`; land both; publish (`node scripts/workspace.mjs sync` from a Fabric
 checkout) or leave it to the scheduled sync. Leave a handoff with the exact next task.

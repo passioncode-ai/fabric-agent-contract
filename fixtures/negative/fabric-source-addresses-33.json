@@ -1,0 +1,42 @@
+{
+  "format": "fabric-source/1",
+  "include": [
+    "src/",
+    "README.md"
+  ],
+  "publicAddresses": [
+    "a0@agent.example",
+    "a1@agent.example",
+    "a2@agent.example",
+    "a3@agent.example",
+    "a4@agent.example",
+    "a5@agent.example",
+    "a6@agent.example",
+    "a7@agent.example",
+    "a8@agent.example",
+    "a9@agent.example",
+    "a10@agent.example",
+    "a11@agent.example",
+    "a12@agent.example",
+    "a13@agent.example",
+    "a14@agent.example",
+    "a15@agent.example",
+    "a16@agent.example",
+    "a17@agent.example",
+    "a18@agent.example",
+    "a19@agent.example",
+    "a20@agent.example",
+    "a21@agent.example",
+    "a22@agent.example",
+    "a23@agent.example",
+    "a24@agent.example",
+    "a25@agent.example",
+    "a26@agent.example",
+    "a27@agent.example",
+    "a28@agent.example",
+    "a29@agent.example",
+    "a30@agent.example",
+    "a31@agent.example",
+    "a32@agent.example"
+  ]
+}
