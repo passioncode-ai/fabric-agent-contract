@@ -1491,10 +1491,14 @@ file's named manifest reads `cannot read .: ENOTDIR` without the folder's path.
 ## Next task
 
 Paused on 2026-11-06 by the operator's relay in board thread `eefa7959` (about 12:50 UTC, from fabric-workspace
-session `74a9440a`: finish the current step, start no new tasks, answer the reconciliation by 2026-11-07 10:00 UTC).
-State: head `3ba7e434`, round 77 not clean, fixed by DP, the knowledge base's PR #628 at `d2a6d9f4`. The exact next
-task once the pause lifts: blind readings round 78 (unit, product, seam) at this head, then two clean rounds and the
-landing as the steps below say.
+session `74a9440a`), and resumed on 2026-11-07 by the operator's own word in the coordinator's session («делай
+автономно до конца», a direct request, one of the pause's exceptions). DEC-0154 landed first (PR #248, main
+`18f8d487`, `v0.1.0+2026-11-07.1`); main `40a0ddb8` is merged into this branch at `b963d6a6` (step 2's merge done,
+its checks in Checks actually run). The exact next task: blind readings round 78 (unit, product, seam) at this
+branch's head, then two clean rounds and the remaining steps below. After the landing post, once the coordinator
+answers, `git show origin/main:knowledge/north-star.md | grep -c 'DEC-0149 and DEC-0154'` on the knowledge base's main
+prints 0 (DEC-0154's knowledge-base post, message `f83a171c` on `eefa7959`, asked the coordinator to drop DEC-0149 from
+`north-star.md` 262 and 521 once DEC-0149 lands).
 
 The landing continues on `agent/ct194-source-manifest-v2-20261104` (step 1 is done: one commit with the reviewed tree
 on the merge base `d1b905ee`, the review branch's remote ref deleted; never push the review branch again). The
@@ -1802,7 +1806,8 @@ git show origin/main:knowledge/authority.md \
 ```
 
 The first prints 0 and the second prints 2. The first `grep -c` exits 1 when it prints 0, so
-these commands are not run under `set -e`. If the check prints anything else, the lander
+these commands are not run under `set -e`; every check in this block runs with `set -o pipefail`
+(`setopt pipefail` in zsh), so a `git show` that fails fails the line instead of printing 0. If the check prints anything else, the lander
 records the mismatch in its handoff and runs the check again once the other lander's
 knowledge-base PR for the clause is merged or closed, or at once when the other lander has no
 such PR; an edit from outside the two landers goes to a knowledge-base row.

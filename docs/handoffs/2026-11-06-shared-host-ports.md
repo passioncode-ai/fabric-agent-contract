@@ -624,7 +624,8 @@ git show origin/main:knowledge/authority.md \
 ```
 
 The first prints 0 and the second prints 2. The first `grep -c` exits 1 when it prints 0, so
-these commands are not run under `set -e`. If the check prints anything else, the lander
+these commands are not run under `set -e`; every check in this block runs with `set -o pipefail`
+(`setopt pipefail` in zsh), so a `git show` that fails fails the line instead of printing 0. If the check prints anything else, the lander
 records the mismatch in its handoff and runs the check again once the other lander's
 knowledge-base PR for the clause is merged or closed, or at once when the other lander has no
 such PR; an edit from outside the two landers goes to a knowledge-base row.
