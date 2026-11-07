@@ -59,11 +59,13 @@ blocks it); the finished result follows as a second message; a state answer with
   about an active holder's request; the Alternatives), folded in `111c8aaf` and `06a62a8e`. Round 5 at `06a62a8e`: all three
   failed (SA-6 branched on refusal codes the contract does not define and dropped `active` from the
   `not_authorized` branch; Compatibility missed Fabric's `not_authorized` message), folded in the next commit: SA-6
-  reads the slot in `com.status` after any refusal.
+  reads the slot in `com.status` after any refusal, folded in `60858a23`. Round 6 at `60858a23`: all three failed
+  (a decline after any refusal, Fabric's question at an active slot, `held`), folded in the next commit: SA-6 reads
+  the slot first, enrolls only when it is not `active`, and declines only after `not_authorized`.
 - No U+2014 in the added lines (`git diff origin/main | grep '^+' | grep -c` on U+2014 prints 0).
 
 ## Next task
 
-Round 6 of the blind readings (unit, seam, product) on the head after round 5's fixes; once two consecutive rounds are
+Round 7 of the blind readings (unit, seam, product) on the head after round 6's fixes; once two consecutive rounds are
 clean and `pnpm run check` exits 0, open the pull request, merge it, tag the release, and tell Fabric, the adapter and
 the knowledge base on board thread `eefa7959`.

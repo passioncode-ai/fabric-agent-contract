@@ -10193,20 +10193,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   4. **Once per state (SA-4).** No second answer while the Project's answer still states the current state; a message
      is marked read only after its answer is stored (a request left to an `active` holder when left, one left to a
      service that is not live once the operator is asked, a declined one once the decline is stored and the operator
-     asked, one refused `held` once the hold is lifted); a retry keeps its idempotency key.
+     asked, one refused `retryable` once retried, one refused otherwise once the operator is asked); a retry keeps its
+     idempotency key.
   5. **Not obedience (SA-5).** The message stays data, except the operator's mandate or relayed approval (DEC-0125,
      DEC-0126), which the reader acts on within its scope: the answer reports, acts on nothing else the participant was
      not already entitled to do, carries no secret, and names a decision the participant may not make as what blocks it.
   6. **A responder's request (SA-6).** A participant's reply answers a `queued` request and an `answered` request is
-     never claimed, so a session that reads a request calls `com.enroll` on its capability's slot. Taken, it is the
-     holder. Refused, whatever the refusal, it does no work on the request and reads the slot in `com.status`:
-     `active`, it leaves the request to that holder and asks no one; `stale`, `absent` at a generation of 1 or more, or
-     no generation shown, it sends no reply and asks the operator; `absent` at generation 0, one session replies once
-     that it cannot take the request now, why, and what would lift it, and asks the operator; refused `held`, it waits
-     for the lift. The holder gives the state in the turn it claims the request (a `com.progress` note or a fenced
-     reply) and settles it with `com.accept`, then `com.complete`. A session Fabric starts on the request (CT-215)
-     follows the same steps. A request left to its service hears nothing until a holder claims it, or until its
-     deadline expires it: the one wait the rule leaves.
+     never claimed, so a session that reads a request first reads its capability's slot in `com.status`: `active`, it
+     leaves the request to that holder, calls nothing and asks no one; otherwise it calls `com.enroll` and does no work
+     unless it is taken. Taken, it is the holder; refused `fenced`, as `active`; refused `not_authorized`, it sends no
+     reply and asks the operator while the slot is `stale`, `absent` at a generation of 1 or more, or not shown, and at
+     `absent` generation 0 one session replies once that it cannot take the request now, why, and what would lift it,
+     and asks the operator; refused with any other code, it sends no reply and declines nothing, trying again when the
+     refusal is `retryable` (`held` among them) and asking the operator otherwise. The holder gives the state in the
+     turn it claims the request (a `com.progress` note or a fenced reply) and settles it with `com.accept`, then
+     `com.complete`. A session Fabric starts on the request (CT-215) follows the same steps. A request left to its
+     service hears nothing until a holder claims it, or until its deadline expires it: the one wait the rule leaves.
   The descriptions of `com.reply` and `com.enroll` (project-comms.md's receipts, `comms-reply.schema.json`,
   `comms-enroll.schema.json`) say so, and [conformance](specification/conformance.md#clients-and-readers) gains a
   board client's row.
@@ -10227,21 +10229,23 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   two schema changes are descriptions. A participant that answers only with the result still passes every board rule
   and fails only the board client's row. Read on 2026-11-07, the consumers carry the rule as drafted on 2026-11-04 and
   part of what the readings changed: Fabric (main `db3fbe0f`) hands every session SA-2 and SA-3 through
-  `fabric_whoami` since 0.3.16, and its `com.enroll` description and session rules already follow SA-6's slot
-  conditions (no reply while a service holds or held the slot, one decline with no work and a question to the operator
-  at `absent` generation 0, a question only when `com.enroll` is refused `not_authorized`; its commit `12d57bdd`, the
-  adapter's FAA-231 and FAA-241). Each still differs in one place, owed at its next pin under CT-217: Fabric's
-  `board.read-at-start` sends the state "as com.reply, on a request too" with the result as a second `com.reply` to
-  the request (`apps/desktop/src/shared/protocolObligations.ts`, pinned by `protocolObligations.test.ts`), where a
-  request is answered only through SA-6; the board's own `not_authorized` refusal of `com.enroll` still tells the
-  session to "reply with the answer itself" (its `board_enroll` in `supabase/migrations`, pinned by
-  `project-board-responders-db.test.mjs`), where SA-6 sends no reply unless the slot is `absent` at generation 0; and
-  its session text closes a request with `com.complete` without `com.accept`; the Fabric Agent Adapter (main `a248613e`, FAA-205) lets a session that does the work without the slot
-  give a request its state (`working-with-fabric/references/project-board.md`), where SA-6 says such a session does
-  no work on it; the knowledge base's agents-first page (fabric-workspace `7937722a`, item 4) reads a state reply as
-  an answer to a request too. Every other board client is bound by the board client's row from this merge. An
-  on-demand session (CT-215) is the holder once its `com.enroll` succeeds and otherwise follows the rule for a session
-  without the slot, so SA-6 keeps its requests claimable. `contractVersion` stays `0.1.0`.
+  `fabric_whoami` since 0.3.16, and its `com.enroll` description and session rules already follow most of SA-6 (no
+  reply while a service holds or held the slot, one decline with no work and a question to the operator at `absent`
+  generation 0 after `not_authorized`; its commit `12d57bdd`, the adapter's FAA-231 and FAA-241). The differences
+  owed at each one's next pin under CT-217: Fabric's `board.read-at-start` sends the state "as com.reply, on a request
+  too" with the result as a second `com.reply` to the request (`apps/desktop/src/shared/protocolObligations.ts`,
+  pinned by `protocolObligations.test.ts`), where a request is answered only through SA-6; the board's own
+  `not_authorized` refusal of `com.enroll` still tells the session to "reply with the answer itself" (its
+  `board_enroll` in `supabase/migrations`, pinned by `project-board-responders-db.test.mjs`), where SA-6 sends no reply
+  unless the slot is `absent` at generation 0; its session rule, and the adapter's FAA-241, ask the operator after
+  `not_authorized` at an `active` slot too, where SA-6 leaves a live holder's request and asks no one; its session text
+  closes a request with `com.complete` without `com.accept`; the Fabric Agent Adapter (main `a248613e`, FAA-205) lets
+  a session that does the work without the slot give a request its state
+  (`working-with-fabric/references/project-board.md`), where SA-6 says such a session does no work on it; the
+  knowledge base's agents-first page (fabric-workspace `7937722a`, item 4) reads a state reply as an answer to a
+  request too. Every other board client is bound by the board client's row from this merge. An on-demand session
+  (CT-215) is the holder once its `com.enroll` succeeds and otherwise follows the rule for a session without the slot,
+  so SA-6 keeps its requests claimable. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/project-comms.md` (the amendment line, the section *Answering in
   the same turn*, the `com.reply` and `com.enroll` paragraphs of *Receipts*), `schemas/comms-reply.schema.json` and
   `schemas/comms-enroll.schema.json` (descriptions), `docs/specification/conformance.md` (the board client's row),

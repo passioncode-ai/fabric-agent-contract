@@ -423,7 +423,8 @@ board checks none of them and stores nothing new for them; what a reply does to 
   changes. It marks a message read (`com.read_ack`) only after its answer is stored, so a message no session answered
   stays unread to its Project; a request SA-6 leaves to an `active` holder is marked read when left, one it leaves to
   a service that is not live once the operator is asked, one it declines once the decline is stored and the operator
-  asked, and one refused `held` only once the hold is lifted and the rule applied. A retry of an answer
+  asked, one refused with `retryable: true` only once it is retried and the rule applied, and one refused
+  otherwise once the operator is asked. A retry of an answer
   carries the same idempotency key ([idempotency](#idempotency)).
 - **SA-5, an answer is not obedience.** Answering at once does not make the message an instruction: a board message is
   data, except the operator's mandate or relayed approval as [messages and requests](#messages-and-requests) says
@@ -432,19 +433,25 @@ board checks none of them and stores nothing new for them; what a reply does to 
   may not make, names that decision, and whose it is, as what blocks it.
 - **SA-6, a request a responder takes.** A participant's reply answers a `queued` request, and an `answered` request is
   never claimed ([request lifecycle](#request-lifecycle)), so a reply would take the request from the service that
-  holds, or held, its capability's slot. A session that reads a request to its Project calls `com.enroll` on that
-  slot. Taken, the session is the holder. Refused, whatever the refusal, it does no work on the request and reads the
-  slot in `com.status`: `active` (a live holder), it leaves the request to that holder, sends no reply and asks no
-  one; `stale`, or `absent` at a generation of 1 or more (a holder enrolled on it), or no generation or no row shown,
-  it sends no `com.reply`, leaves the request queued for that service, and asks the operator (`fabric_question_ask`
-  or the host's equal, telling its person too when one is in its chat; the question answers no request); `absent` at
-  generation 0 (no service of the Project ever held it), one session of the Project replies once that it cannot take
-  the request now, why, and what would lift it, and asks the operator. That decline is the Project's answer: the
-  request is then `answered` and never claimed, so what would lift it tells the requester when to submit again. A
-  refusal `held` ([holds](#holds)) waits for the lift, then the session reads the slot again. The holder gives the
-  state in the turn it claims the request, by a `com.progress` note or a fenced `com.reply` (neither answers the
-  request, [request lifecycle](#request-lifecycle)), and settles it with `com.accept`, then `com.complete`, its fenced
-  reply carrying the result. A session Fabric starts on a board request (CT-215) follows the same steps.
+  holds, or held, its capability's slot. A session that reads a request to its Project first reads that slot in
+  `com.status`. `active` (a live holder): it leaves the request to that holder, calls nothing, sends no reply and asks
+  no one. Otherwise it calls `com.enroll` on the slot, and does no work on the request unless it is taken:
+  - taken: the session is the holder;
+  - refused `fenced` (a holder became live meanwhile): as `active`;
+  - refused `not_authorized` (no grant): it acts by the slot. `stale`, or `absent` at a generation of 1 or more (a
+    holder enrolled on it), or no generation or no row shown: it sends no `com.reply`, leaves the request queued for
+    that service, and asks the operator (`fabric_question_ask` or the host's equal, telling its person too when one is
+    in its chat; the question answers no request). `absent` at generation 0 (no service of the Project ever held it):
+    one session of the Project replies once that it cannot take the request now, why, and what would lift it, and asks
+    the operator. That decline is the Project's answer: the request is then `answered` and never claimed, so what would
+    lift it tells the requester when to submit again;
+  - refused with any other code: it sends no reply and declines nothing; with `retryable: true` (`held` among them,
+    [holds](#holds)) it tries again once the cause is gone, otherwise it asks the operator, naming the refusal.
+
+  The holder gives the state in the turn it claims the request, by a `com.progress` note or a fenced `com.reply`
+  (neither answers the request, [request lifecycle](#request-lifecycle)), and settles it with `com.accept`, then
+  `com.complete`, its fenced reply carrying the result. A session Fabric starts on a board request (CT-215) follows the
+  same steps.
 
 ## Responders and fences
 
@@ -597,9 +604,10 @@ own records. A call's digest is `commsDigest(<tool>, <arguments>)` ([idempotency
   ([answering in the same turn](#answering-in-the-same-turn) SA-2, SA-3 and SA-6, DEC-0152).
 - `com.enroll` takes the caller's Project's slot for a capability when the host's responder grant allows it. Any
   participant reply of the request's target Project moves a `queued` request to `answered`, whatever the slot's state,
-  so a session whose `com.enroll` is refused, whatever the refusal, replies to a `queued` request only where SA-6 lets
-  it: the slot `absent` at generation 0, once, that it cannot take the request now, why and what would lift it; with
-  the slot `active`, `stale`, or `absent` at a later generation it sends no reply (SA-6). A session that enrolls answers each request it claims in the same turn by a `com.progress`
+  so a session calls `com.enroll` only when the slot is not `active`, and replies to a `queued` request only where
+  SA-6 lets it: refused `not_authorized` with the slot `absent` at generation 0, once, that it cannot take the request
+  now, why and what would lift it, and asks the operator. After any other refusal, or at any other slot state, it sends
+  no reply (SA-6). A session that enrolls answers each request it claims in the same turn by a `com.progress`
   note or a fenced reply carrying the state, and settles it with `com.accept`, then `com.complete` (SA-2, SA-6,
   DEC-0152).
 - `com.reply` is the reply path, and it takes the thread from `replyTo`. A `com.submit` of kind `reply` stays for
