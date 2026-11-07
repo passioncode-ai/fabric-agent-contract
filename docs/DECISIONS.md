@@ -9977,12 +9977,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
     another account's peer) open; FAA-228 (launchd's `gui/<uid>` domain) waits for CT-234; its token-file reader
     already refuses a symlink, a foreign owner and loose modes (G4 for the kit). Its reference on surfaces and
     authentication still reads a token-free loopback door as T0, and FAA-227 is filed at P2; on a computer with more than
-    one counted account item 3 takes T0 from such a door until it checks the peer's account as FAA-227 would (its
-    reconciliation answer, board message `cdf28788`).
+    one counted account item 3 takes T0 from such a door until it checks the peer's account as FAA-227 would and,
+    where its guests reach loopback, closes that path or takes no token-free caller on TCP (its reconciliation answer,
+    board message `cdf28788`).
   - The first organization server: VES-LOOPBACK-OWNER open: its app grant sends no bearer on loopback, and its
     `onboard --check` and its administrator's agents do not check the listener's owner yet; the `down` counts in the
     node summaries it reads can rise for item 2's reasons. Its `org.id` has 100 random bits today (its reconciliation
-    answer, board message `922e6fed`), so it does not turn the host label on until it issues ids of at least 128.
+    answer, board message `922e6fed`), so it does not turn the host label on until it issues ids of at least 128 random bits, for an organization whose
+    `org.id` it issued with fewer bits too.
   - The PassionCode launcher: listens on no port; PC-152 (the owner check in its doctor) open.
   - A Fabric server that reads host states through Fabric Dashboards, in its own words: it listens on no port, sends no
     token to loopback, and reads `foreign-user` and any state it does not know as not ready (its 0.17.0 and 0.18.0).

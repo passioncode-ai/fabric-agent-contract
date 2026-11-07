@@ -278,7 +278,7 @@ Proposed DEC on its own branch, and files the rest.
   the backlog tail reads CT-227 then CT-228 to CT-243; the handoffs README stays newest first, DEC-0154's row above
   DEC-0153's. Done: main `1c141418` (PR #245) is merged into this branch.
 - DEC-0149 (`agent/ct194-source-manifest-v2-20261104`): its landing backlog rows take ids above the highest on
-  main and on open branches (DEC-0149 already holds CT-244), re-measured at landing; the DECISIONS tail in id order; the next-free markers re-read
+  main and on open branches (DEC-0149 already holds CT-244; main holds CT-250 to CT-252 since `75db14fb`), re-measured at landing; the DECISIONS tail in id order; the next-free markers re-read
   from `refs/agent-sync/ids` at landing; the backlog tail in id order; the handoffs README newest first;
   `vitest.config.ts`'s coverage `include` is the union (`src/host-label.ts` and `src/validator.ts` both); the watcher
   sentence in `service.md`: DEC-0149 rewrites it (its `service.md` line 222), and whichever of DEC-0149 and DEC-0154
@@ -377,15 +377,16 @@ Proposed DEC on its own branch, and files the rest.
   `docs/guides/connecting-compatible-agents.md`, `conformance.md`, `connections.md`, `contexts.md`, `delegation.md`,
   `devices.md`, `fabric-button.md`, `node-summary.md`, `ops-digest.md`, `profiles.md`, `provider.md`, `relay.md`, `service.md`,
   `session-handoff.md`, `schemas/device-enrollment.schema.json`, `schemas/service-well-known.schema.json`,
-  `src/host-label.ts` and `tools/vectors/host-label.ts`.
+  `src/host-label.ts` and `tools/vectors/host-label.ts`. The dated spec `docs/evidence/specs/2026-11-06-shared-host-gaps.md`
+  keeps its "DEC-0154 (proposed)" as a record of its day.
   Re-read too the citations that carry no marker: `devices.md`'s "a server pinned before DEC-0154", the comments in
   `src/semantic-rules.ts`, `tools/vectors/host-label.ts`'s "DEC-0154's text" (its line 9), and the generator's and
   vectors' "DEC-0154 item 4".
-- **Annotated lines.** Each line goes after the entry's last `- **Annotated` line, or after its Status when it has
-  none, with the acceptance date in place of `<YYYY-MM-DD>`; under DEC-0015, DEC-0057, DEC-0123 and DEC-0153 in turn:
+- **Annotated lines.** Each line goes after the last line of the entry's last `- **Annotated` item, or of its Status
+  item when it has none, with the acceptance date in place of `<YYYY-MM-DD>`; under DEC-0015, DEC-0057, DEC-0123 and DEC-0153 in turn:
 
   ```text
-  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (one copy per counted OS account under `service.lock` in that account's services directory, or an app's own single-instance guard; the port claim, HA-1).
+  - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (one copy per counted OS account, one `id.instance` in that account's services directory under `service.lock` in its data directory, or an app's own single-instance guard; the port claim, HA-1).
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (one copy and `service.lock` per OS account, an app's own single-instance guard in place of the lock, the port claim rebuilt after the guard, HA-1).
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (PL-3: the listener's owner is checked before a raw loopback address is opened; another account's, or one that cannot be told, is `foreign-user` and nothing opens, HA-2).
   - **Annotated (<YYYY-MM-DD>):** amended by DEC-0154 (OD-9: a collector in the same OS account reads the daily digests; CT-243).
@@ -416,6 +417,11 @@ Proposed DEC on its own branch, and files the rest.
   knowledge-base clause rule below says, for DEC-0154's lander. The check after both land runs only once DEC-0154's
   own knowledge-base PR for the clause has merged; when the clause check prints 0, or the PR is closed unmerged, it
   runs nothing.
+- **The North Star page.** Right after the merge, post on thread `eefa7959` the correction of fabric-workspace
+  `knowledge/north-star.md` (the coordinator edits that page): its two sentences that call DEC-0154 "proposed, paused,
+  not on main" read accepted, on the contract's main, with the date and the tag; HA-3 reads "no door admits a
+  loopback caller without a token unless it checks the peer's OS account". Check on the knowledge base's main once
+  the coordinator answers: `grep -c -E 'DEC-0154: proposed, paused|DEC-0154 is proposed, paused'` prints 0.
 - **Release.** Right after the merge, an annotated tag `v0.1.0+<YYYY-MM-DD>` (`.2`, `.3` after the date for a second
   or third release that day) on the merge commit, once its gate and `pnpm vectors:check` passed, with a GitHub release
   whose notes list the decisions since the previous release ([versioning](../specification/versioning.md#releases)).
@@ -627,3 +633,12 @@ Resumed 2026-11-07 by the operator's own word in this session («делай ав
 the pause's exceptions). W82: the first organization server's row names its 100-bit `org.id` (board message
 `922e6fed`) and the adapter's row its T0 reading of a token-free loopback door and FAA-227's priority (board message
 `cdf28788`). Next: the full gate at the W82 head, then round 19.
+
+Round 19 at `63c622d4`: unit clean; product not clean (CT-228's state cell still paused, CT-231's stale line number);
+seam not clean (the knowledge base's North Star page calls DEC-0154 "proposed, paused, not on main", and no step
+corrected it). W83 fixes the three, adds the North Star step to the acceptance step, and folds in the cheap risks
+(Fabric Dashboards' line range 31 to 70, "a conflict over an `id.instance` or a port", the two W82 sentences, the
+`service.lock` place in DEC-0015's line, the annotation place, the two collector rows marked proposed, HA-2 pointers
+from the app descriptor and the connections row, SCR-20's host states first, main's CT-250 to CT-252 in the merge
+notes). Held for later rounds or rows: Windows order vectors for the host label, the low-uid sign-in account in the
+count, a same-account claim of another product in HA-1's free-port test, row 185's mapping to `down`.
