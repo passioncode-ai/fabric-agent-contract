@@ -37,11 +37,11 @@ client may still prove its own listener.
 - Round 1 at `bccee010`: all three tiers failed (RT-3 against RT-4 on a wildcard and `-iTCP`; Compatibility
   understating the adapter's and sshlg-fabric-server's debts; no server side; Linux caught by the detection; no UX; no
   Annotated line on DEC-0154), folded in `9f6dcb4a`. Round 2 at `9f6dcb4a`: unit and seam passed, product failed
-  (RT-5 not in conformance's server rows; DOCMAP and the handoff named RT-1 to RT-4), folded in the next commit with
-  the readers' risks. `pnpm run check`: one hook timeout under load (CT-204),
+  (RT-5 not in conformance's server rows; DOCMAP and the handoff named RT-1 to RT-4), folded in `24c677c5` with
+  the readers' risks. Round 3 at `24c677c5`: all three passed; two wording risks folded in the next commit. `pnpm run check`: one hook timeout under load (CT-204),
   `pnpm docs:check` exit 0.
 
 ## Next task
 
-Round 3 of the blind readings (unit, seam, product) on the head after round 2's fixes; two consecutive clean rounds,
+Round 4 of the blind readings (unit, seam, product), the second clean round; two consecutive clean rounds,
 then merge and a release tag.

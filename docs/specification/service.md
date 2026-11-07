@@ -757,7 +757,8 @@ server end of the reader's own connection (for a server reading its peer, the cl
   uid, as RT-2 does for the server end. A token-free loopback door (HA-3) run where its table is restricted therefore
   admits only callers it proves that way.
 
-A reader whose real and effective uid differ uses none of the proofs in RT-2 to RT-5; RT-5's refusal still applies. RT-3 to RT-5 apply only under a restricted table: where the table shows other accounts' rows, HA-2's sources above decide. On a computer where the
+A reader whose real and effective uid differ uses none of the proofs in RT-2 to RT-5, and may name that context as
+its reason in place of `table-restricted`; RT-5's refusal still applies. RT-3 to RT-5 apply only under a restricted table: where the table shows other accounts' rows, HA-2's sources above decide. On a computer where the
 reader's table shows only its own sockets because no other process has any open, it is read as restricted: the cost is
 a proof by RT-2 or a warning, never a credential sent to another account.
 
