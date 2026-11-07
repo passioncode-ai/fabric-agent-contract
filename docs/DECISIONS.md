@@ -9758,7 +9758,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   W82 (two adoption facts from the reconciliation answers); round 19 at `63c622d4` was not clean (unit passed;
   product found two breaks, seam one, W83); round 20 at `3db473d0` was not clean (product found two breaks, seam two,
   unit one, the split marker W84 had already rejoined; W84); round 21 at `ea203020` was not clean (product found one
-  break, seam one, W85); their batches are folded in (Source). A reference module and vectors, one optional schema
+  break, seam one, W85); round 22 at `d4f3300c` was not clean (unit passed; product one break, seam two, W86); their batches are folded in (Source). A reference module and vectors, one optional schema
   member, a new host state and new obligations for installers, hosts, clients, local services, token-free loopback
   doors, nodes and an administrator's setup step; no rule code. Backlog CT-228.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
@@ -10031,7 +10031,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   to CT-243; the open rows CT-04, CT-70 and CT-185 reworded), "host" for a computer or a server reworded where the rule needs it: `docs/specification/activity.md`
   and `CONTEXT.md`'s device request signature (a TLS-terminating proxy), `src/http-signature.ts` (a server that
   terminates TLS), `docs/specification/folder-attribution.md` (Git hosting
-  services), `docs/specification/interop.md` (a host name), `docs/specification/peer-share.md` (another server),
+  services), `docs/specification/coordination.md` (a Git hosting service), `docs/specification/interop.md` (a host name), `docs/specification/peer-share.md` (another server),
   FAC-SEM-143's row (PL's list of local hosts); a collector of operations digests in the same OS account:
   `docs/specification/ops-digest.md` (OD-9 and its bullets), `docs/specification/service.md`'s ops-digest pointer
   (the Descriptor section's ops-digest bullet), `schemas/service-ops-digest-extension.schema.json`'s title, `docs/specification/conformance.md`'s
@@ -10175,6 +10175,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   marker rejoined; the North Star step widened to every page statement the landing makes false) is folded in; round 21 at `ea203020`
   was not clean, and W85 (Fabric Dashboards' lines 31 to 40 and its monitor's skip, the knowledge-base step driven by
   its grep at landing time with checks that read the pages, DEC-0151's three rows, the order-1 window's conformance
-  row, the Fabric Dashboards row's silent listener) is folded in; the two UI lines passed the operator's copy check
+  row, the Fabric Dashboards row's silent listener) is folded in; round 22 at `d4f3300c` was not clean, and W86 (the
+  knowledge-base step leaving `authority.md`'s clause lines to the clause rule and stating what DEC-0149's handoff
+  carries; CT-228 and CT-229 in its grep; the roadmap's tag checked; HA-3's forwarder duty in its conformance row;
+  `duplicate` placed before the well-known `status`; `coordination.md` in this list; a local refusal in CT-229) is
+  folded in; the two UI lines passed the operator's copy check
   (en-US, register ui, report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings); decided by the coordinator; backlog
   CT-228.

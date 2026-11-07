@@ -676,7 +676,8 @@ an HMAC under a key in an owner-only file; Switchboard reported on thread `1fe66
   flight). A service its supervisor stopped is not one of them: a host shows that only when nothing answers on the
   port, in place of `down` (the same `state.ts`, lines 67 to 69, and Fabric Dashboards' vector "another program
   answering comes before launchd saying it is off"). A host's own further states (a second copy shown as `duplicate`,
-  under [One copy](#one-copy)) come after these.
+  under [One copy](#one-copy)) come after `foreign` and before the well-known `status` (Fabric Dashboards, the same
+  `state.ts`, lines 56 to 58).
 - A reader that meets a state it does not know treats it as not ready: it sends nothing and shows the service as not
   serving. A watcher counts `foreign` and `foreign-user` as unavailable, as it counts `down`: the service serves nothing.
 

@@ -280,6 +280,13 @@ Proposed DEC on its own branch, and files the rest.
   wording, the monitor citation pinned, the connections row and the app descriptor's callers in the change lists,
   "Git hosting service" in `coordination.md`, `node-summary.md`'s marker, DEC-0151's three rows in the merge notes,
   the order-1 window's conformance row, the Fabric Dashboards row's silent listener).
+- Round 22 at `d4f3300c`: not clean (unit passed; product one break, seam two). Both: the knowledge-base step said
+  DEC-0149's lander does the same for DEC-0149, and DEC-0149's handoff has no such step. Seam: once PR #628 merges,
+  the step's grep also prints `authority.md`'s clause lines, which the clause rule owns, so a coordinator's edit in
+  other words could end with the owed clause 0. W86 states what DEC-0149's handoff carries, leaves the clause lines to
+  the clause rule, widens the grep to CT-228 and CT-229, checks the roadmap's tag, writes HA-3's forwarder duty into
+  its conformance row, places `duplicate` before the well-known `status`, names `coordination.md` in the
+  Consequences, and names a local refusal and an owner a server cannot tell in CT-229.
 - The two UI lines of `foreign-user` ("Another account on this computer is using this service's port; nothing was
   sent to it." and "This computer would not say who is using this service's port; nothing was sent to it.") passed
   the operator's copy check (en-US, register ui), report `967586eb-8376-458f-a086-744c9c21b576`, 0 findings.
@@ -449,11 +456,14 @@ Proposed DEC on its own branch, and files the rest.
 - **The knowledge base's pages.** Right after the merge, post on thread `eefa7959` the corrections of
   fabric-workspace `knowledge/` (the coordinator edits those pages). The pages to read are what this prints on the
   knowledge base's main at that time, every line of it, not a list fixed here:
-  `git fetch origin && git grep -n -E 'DEC-0154|CT-23[0-9]|CT-24[0-3]' origin/main -- 'knowledge/*.md'` (in a
-  fabric-workspace clone). Each line it prints is made true for the moment after the landing: DEC-0154 accepted, on
+  `git fetch origin && git grep -n -E 'DEC-0154|CT-22[89]|CT-23[0-9]|CT-24[0-3]' origin/main -- 'knowledge/*.md' | grep -v -e 'proposed for FD' -e "owed by FD's watcher under contract DEC-0154"`
+  (in a fabric-workspace clone); `authority.md`'s two clause lines are the knowledge-base clause rule's below, never
+  posted here. Each line it prints is made true for the moment after the landing: DEC-0154 accepted, on
   the contract's main, with the date and the tag; a row of CT-228 to CT-243 open on main; a line number into this
   contract replaced by the row's or the section's name; "waits on" or "after" naming only what is not on the
-  contract's main at the time of the post (DEC-0149's lander does the same for DEC-0149 at its landing). At `60c630db`
+  contract's main at the time of the post. DEC-0149's handoff carries no such step at `0099c4f1`: when DEC-0149 is not
+  on main yet, the post also asks the coordinator to drop DEC-0149 from those lines once DEC-0149 lands, the day its
+  landing is posted on threads `21ac4057` and `0a8776f2`. At `60c630db`
   it prints six lines: `north-star.md` 262 and 521 (the one-command agent project and gap row G21, after DEC-0149 and
   DEC-0154), 393 and 400 ("proposed, paused, not on main"), 522 (gap row G22: CT-232 "(branch, no PR)",
   `devices.md:414`), and `roadmap.md` 64 (Switchboard's SB-278 "waiting for DEC-0154's tag"). Two more statements
@@ -465,7 +475,8 @@ Proposed DEC on its own branch, and files the rest.
   `git show origin/main:knowledge/north-star.md | grep -c -E 'DEC-0154: proposed, paused|DEC-0154 is proposed, paused|CT-232 \(branch, no PR\)|devices\.md:414'`
   and `git show origin/main:knowledge/roadmap.md | grep -c "waiting for DEC-0154's tag"` print 0;
   `git show origin/main:knowledge/north-star.md | tr '\n' ' ' | tr -s ' ' | grep -c 'loopback caller without a token;'`
-  prints 0; `git show origin/main:knowledge/products.md | grep -c '<the tag>'` prints at least 1; and the lines on the
+  prints 0; `git show origin/main:knowledge/products.md | grep -c '<the tag>'` and the same on `roadmap.md` print at
+  least 1; and the lines on the
   one-command project and G21 are read against the contract's main of that day.
 - **Release.** Right after the merge, an annotated tag `v0.1.0+<YYYY-MM-DD>` (`.2`, `.3` after the date for a second
   or third release that day) on the merge commit, once its gate and `pnpm vectors:check` passed, with a GitHub release
@@ -676,6 +687,11 @@ errors), vectors (31 files), privacy (0 findings) and the docs-check, consistenc
 page-links, local-channel and node-summary tests (334) passed; the split-marker finder prints nothing; the shared block
 is in the handoff once, byte for byte; the SH-2 line is still the one added line with U+2014.
 
+After W86 the full gate did not run (load above 45). The UX lint, the documentation checks (markdownlint 0 errors),
+vectors (31 files), privacy (0 findings) and the tests that read the edited pages (334) passed; the split-marker
+finder prints nothing; the shared block is in the handoff once, byte for byte; the SH-2 line is still the one added
+line with U+2014.
+
 ## Next task
 
 The coordinator's next blind readings of DEC-0154 at this branch's head.
@@ -707,3 +723,6 @@ risks are folded in. Next: round 21 at that head, the full gate when the load al
 W85 at the next head: round 21's two breaks (Fabric Dashboards' lines 31 to 40 with its monitor's skip; the
 knowledge-base step following its grep at landing time) and its risks are folded in. Next: round 22 at that head, the
 full gate when the load allows.
+
+W86 at the next head: round 22's breaks (what DEC-0149's handoff carries; `authority.md`'s clause lines left to the
+clause rule) and its risks are folded in. Next: round 23 at that head, the full gate when the load allows.
