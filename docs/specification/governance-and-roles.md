@@ -99,7 +99,8 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   rest of the task goes on (AP-3). A task that may outlive a decision's 24 hours (AP-2) is carried under such a mandate
   (up to 7 days, MD-1), so the operator is not asked again for a word they gave while it lasts, except for an act no
   mandate covers (MD-3, MD-6 and PR-2: among them a change-policy effect, a source hand-over and the move of a board
-  slot), whose word is renewed by one short question as AP-2 says. A task still open when the mandate expires asks once, in one line, as MD-1 says.
+  slot), whose word is renewed by one short question as AP-2 says (for a source hand-over, as
+  [source](source.md#handing-over) says: a word consumed once by the act it names). A task still open when the mandate expires asks once, in one line, as MD-1 says.
 - **OW-2, no command handed over.** The agent runs the commands itself. It never asks the operator to run a command,
   paste an output, press a button, open a page to confirm or choose on a card where an agent twin the agent may take
   itself under the words, a decision or a mandate in force exists (`gate` `none` or `relayed`, AP-1), or another route
@@ -138,7 +139,10 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   stays open in the report. In a session with no person in its chat (a session carrying out a board request in the
   default mode), the agent does not perform the act and asks nothing from that session: it leaves the act open and
   names it, in its board reply and in its report, as a step for a session the person is in, as Fabric's
-  `board.read-at-start` already hands a step that touches production to such a session. A relay or a mandate that
+  `board.read-at-start` already hands a step that touches production to such a session; it gives the board request's
+  state in a `com.progress` note naming the open act and what blocks it ([project
+  communication](project-comms.md#answering-in-the-same-turn) SA-5), and settles the request as SA-6 says, completing
+  it with the open act named in its result or leaving it in progress, as the rest of the work allows. A relay or a mandate that
   names the act changes neither mode: like the operator's words in a session the person is in, it is the reason the
   one ask quotes, not the agreement the gate holds the act for (Fabric's ADR-0160 section 4); `board.read-at-start`'s production
   stop, which its own text lifts on such a relay, is another gate.
@@ -179,7 +183,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   elicitation in the call); a control the contract reserves to the person's own act (the operator's move of a board
   slot, which [project communication](project-comms.md#the-operator-moves-a-slot) DEC-0140 PR-2 leaves to the host's
   operator controls until the move's agent twin ships: no agent moves a slot on its own account or as a relay, and no
-  mandate covers it); a control that has no agent twin (AP-1's exception, a service that has not shipped its twin); and
+  mandate covers it); a control that has no agent twin (a service that has not shipped its twin, which AP-1 makes nonconformant); and
   a refusal by the agent's own tool or harness, where the person's step is to allow that
   command in the harness's own permission settings, or to answer yes to a host tool the agent runs that installs the
   named rule there on that yes, after which the agent runs it; allowing it lifts the harness's

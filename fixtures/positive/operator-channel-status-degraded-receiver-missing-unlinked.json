@@ -9,7 +9,7 @@
   "state": "degraded",
   "reason": {
     "code": "receiver-missing",
-    "detail": "Nobody has received this bot's updates since 08:52 while the agent waits for a link code; a supervisor restarts a stopped receiver; if this stays, ask the agent in any session to restart it, then type the code, or ask it for a new one once this one expires."
+    "detail": "Nobody has received this bot's updates since 08:52 while the agent waits for a link code; a supervisor restarts a stopped receiver; if this stays, ask the agent, or the session that runs it, to restart it, then type the code, or ask for a new one once it expires."
   },
   "credential": {
     "name": "EXAMPLE_AGENT_TELEGRAM_BOT_TOKEN",
