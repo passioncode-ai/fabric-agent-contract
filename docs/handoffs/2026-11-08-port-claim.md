@@ -71,6 +71,24 @@ what was done:
   hash of the canonical folder path, `ai.passioncode.fabric-switchboard.proxy-<8 hex digits>`), with vectors: two parts
   in one account avoid each other's ports, and rebuilding one part never touches the other's claim.
 
+## Round 2 of the blind readings (2026-11-08), unit only, folded
+
+The unit reading of `cd265ab2` failed with two breaks; seam and product were not run on that head, since both breaks
+were plain contradictions in the text.
+
+- Break: the installer row in `docs/specification/conformance.md` applied "once" to the health entry. It now keeps the
+  `port-claims-folder` entry at every start while the state lasts, and "once ... remembered in its own state" binds the
+  log line only, as HA-1 and DEC-0160 item 4 say.
+- Break: the index row in `docs/handoffs/README.md` said round 1 was next. It now says round 1 is folded and round 2
+  next; this fold moves it to round 3.
+
+- Risk folded: the installer row names all four ignore reasons (`readClaims`), as the reference row and HA-1 do.
+- Risk folded: the guide sentence says the setup step creates the folder "with its access list".
+- Risk folded: SCN-060's recovery no longer says the setup step resets an existing folder's access list; an
+  administrator restores the access list the step sets (HA-1).
+- To Open: what a caller does with the claim file on disk when `rebuildClaim` answers `claim-invalid`; the file-name
+  vectors share `claimFileName`'s template, so only the 255-byte length adds information.
+
 ## Open
 
 - Round 2 of the coordinator's blind readings (unit, seam, product) at the new head, until two consecutive rounds are
@@ -152,4 +170,4 @@ At the fold's working tree, each once unless said:
 
 ## Next task
 
-Round 2 of the blind readings of DEC-0160 (unit, seam, product) at the branch's head, then fold what they find.
+Round 3 of the blind readings of DEC-0160 (unit, seam, product) at the branch's head, then fold what they find.

@@ -82,7 +82,7 @@ that the listener on the port belongs to its own OS account before it sends a cr
 service, and a loopback door without a token checks its peer's account ([HA-3](../specification/service.md#ha-3)).
 On Windows, a service that finds the claims folder `%ProgramData%\PassionCode\port-claims` missing or with another
 access list keeps the `port-claims-folder` setup entry, with HA-1's reason, in its well-known document's `degraded`
-list until an administrator's setup step creates it ([HA-1](../specification/service.md#ha-1), DEC-0160).
+list until an administrator's setup step creates it with its access list ([HA-1](../specification/service.md#ha-1), DEC-0160).
 
 The descriptor, `<id>.<instance>.json` in the services folder:
 

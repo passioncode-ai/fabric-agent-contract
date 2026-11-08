@@ -846,7 +846,7 @@ independent agent author and P-02 project operator.
 - **Alt paths:** a service without a health report, or an installer -> the same text as one log line, once until the folder appears with its access list, not at every start. I am not an administrator of this computer -> the line still names who acts; a coding agent in my ordinary account cannot run the step for me.
 - **UI elements:** the service card's setup-wait line.
 - **States covered:** partial (a setup wait), success
-- **Errors & recovery:** the folder exists with another access list (accounts may write each other's files, or another account created it) -> the same entry; an administrator runs the setup step again, which sets the access list. My service never creates the folder or changes its access list itself; until the step runs, two accounts' installers may choose one port, and the listener's check (HA-2) still keeps every credential from another account.
+- **Errors & recovery:** the folder exists with another access list (accounts may write each other's files, or another account created it) -> the same entry; an administrator restores the access list the setup step sets (HA-1). My service never creates the folder or changes its access list itself; until the step runs, two accounts' installers may choose one port, and the listener's check (HA-2) still keeps every credential from another account.
 - **Status:** draft
 - **Coverage:** service specification, Several OS accounts on one computer (HA-1, the Windows claims folder); `test/port-claim.test.ts` pins the entry against the well-known document's degraded item
 - **Product:** unobserved
