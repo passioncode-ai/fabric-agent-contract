@@ -338,7 +338,7 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `unauthenticated` | no token, or one not signed by a published key or not of this profile, or signed by a key the estate revision the callee reads does not certify (DL-14) | callee (verifier) | 401 |
 | `token-expired` | past `exp` by more than the leeway; mint a new one | callee (verifier) | 401 |
 | `wrong-audience` | the token is for another callee | callee (verifier) | 403 |
-| `scope-not-granted` | the called capability is not in `scope`; a cloud instance in the local and cloud form also answers it to a client-key caller whose call reaches a step on the operator's page, with `data.detail` `operator-step: <humanStep>` (`operator-step: choice` for a choice its call needs), and that caller tells the person the operator will take the step, does not retry under a wider key and repeats the call later ([service](service.md#the-local-and-cloud-form-of-one-agent) CF-4, DEC-0159) | callee (verifier); the service for CF-4's `operator-step` | 403 |
+| `scope-not-granted` | the called capability is not in `scope`; a cloud instance in the local and cloud form also answers it to a client-key caller whose call to a tool that is not job-backed reaches a person's step or needs a choice, every one of which is the operator's, with `data.detail` `operator-step: <humanStep>` (`operator-step: choice` for a choice), and that caller tells the person the operator was asked (or, for a choice, is the one to make it), does not retry under a wider key and repeats the call later ([service](service.md#the-local-and-cloud-form-of-one-agent) CF-4, DEC-0159) | callee (verifier); the service for CF-4's `operator-step` | 403 |
 | `effect-above-ceiling` | the capability's effect is above `effect` | callee (verifier) | 403 |
 | `no-grant` | no live grant covers this actor, audience and capability; carries the ready request where one is filed | hub, meter | 403 |
 | `grant-expired` | the grant has expired | hub, meter | 403 |
@@ -484,7 +484,9 @@ delegation token, an `approval/1` or a grant record from a T0 or T1 caller, and 
 It MAY accept a token such a caller presents; it then verifies it as DL-13 says, refuses it when the verifier
 does (a present but invalid token is refused, never ignored, as DL-10), and uses an accepted one for
 attribution and narrowing. A T2 caller takes the whole profile: a token per call (DL-8, DL-13), an approval for
-each effect that needs one (DL-17), a grant with limits, an expiry and a payer. At every tier the money limits
+each effect that needs one (DL-17), a grant with limits, an expiry and a payer; at a callee that declares no
+`auth.delegation` (DL-16), such as a cloud instance in the local and cloud form without it, the caller's own client key
+takes the token's place ([service](service.md#the-local-and-cloud-form-of-one-agent) CF-3, DEC-0159). At every tier the money limits
 bind — L0, the project's L1 and each provider key's own ceiling ([spend policy](spend-policy.md#levels)) — and so
 do the human gates: sign-ins, consents, payments and top-ups, a secret typed into a hidden prompt or a held one handed out (a peer share's export, DEC-0147), signatures by the
 person's passkey, a comparison of codes between two people or the choice to share without one (DEC-0142). A credential
@@ -542,7 +544,9 @@ open to what its context was granted, a share grant, a partner grant or an organ
 token per call (DL-8, DL-13). A service off the estate's machines (a platform the operator uses) has no caller of
 this operator's family: the operator's agents reach it as T2 (its own owner's processes on its machine are that
 owner's T0, and on that owner's other enrolled machines T1; an organization's cloud machine binds no person, DEC-0099, so the operator's agents are T2 there too). The operator's agents reach it, once
-Fabric's issuer serves (MD-5), with a token the operator's hub issues for `personal`: its issuer is the estate's,
+Fabric's issuer serves (MD-5), with a token the operator's hub issues for `personal`, or, at a cloud instance in the
+local and cloud form that declares no `auth.delegation`, with a client key its operator issued them
+([service](service.md#the-local-and-cloud-form-of-one-agent) CF-3, DEC-0159). The token's issuer is the estate's,
 `urn:fabric:estate:<id>` (DL-2, DL-14a), since a token names no context of its own, and its scope is all they carry. A
 service that keeps its own token classes may map such a token onto a class of its own for the operator's account (the
 first consumer's token class it calls `internal`, not [service](service.md)'s data class of that name), never a

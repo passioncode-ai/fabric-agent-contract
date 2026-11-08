@@ -156,7 +156,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 ### JTBD-16: Use my team's agent without holding its keys
 
 - **Statement:** When my team runs an agent that holds keys to the organization's accounts, I want my coding agent to call it with a key of my own, so I get its work without any provider key, its owner's token or its owner's page reaching my machine, and my key stops when the operator revokes it.
-- **Personas:** P-03
+- **Personas:** P-03; P-02, the operator who issues the keys and takes the steps the members' calls raise (ST-042)
 - **Type:** functional
 - **Forces:** push: provider keys copied onto every member's machine; pull: one key per member, revoked one by one; anxiety: a key pasted into a chat, a key that outlives my place on the team; habit: asking the operator to run it for me.
 - **Success metric:** the member's coding agent calls the cloud instance with its own client key; no provider key, descriptor token or page address reaches the member's machine; every refusal names what the member does next.
@@ -796,8 +796,21 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given the operator handed me my client key through a channel that keeps it out of chat and logs, I stored it in my own vault, and the operator told me `peer.endpoint`, when my coding agent calls a tool in my key's scopes, then the cloud instance answers with the provider keys it holds on the server (DEC-0159 CF-3, CF-5).
   - Given no key, a key the service does not hold or a revoked key, then my call is refused `unauthenticated` (`401`); given a tool outside my key's scopes, `scope-not-granted` (`403`) (CF-3, DL-19).
   - Given my key on the page's routes, then the page opens nothing for me and answers as to a request with no session (CF-4).
-  - Given a tool that reaches a step on the operator's page, then no page link reaches me, the step goes to the operator, and my call is refused `scope-not-granted` naming `operator-step`, its message telling me the operator was asked and to repeat the call later (CF-4).
-  - Given my job or call needs a choice, then I am never asked it: the choice goes to the operator, my job reads `working` until the operator answers, and a call that cannot go on without it is refused `scope-not-granted` naming `operator-step: choice` (CF-4).
+  - Given a tool that reaches a person's step, on the operator's page or at the service's provider, then no link reaches me and the step goes to the operator: a job-backed tool answers with its job, which reads `working` until the operator acts and then goes on or ends as the operator's no ends it; another tool refuses my call `scope-not-granted` naming `operator-step`, its message telling me the operator was asked, or that the operator declined (CF-4).
+  - Given my job needs a choice, then I am never asked it: the choice goes to the operator and my job reads `working` until the operator answers; a tool that is not job-backed and cannot go on without a choice refuses my call `scope-not-granted` naming `operator-step: choice` (CF-4).
+  - Given the team's budget or my key's cap is reached, then my call is refused `limit-reached` naming its window, with no approval request, and I ask the operator (CF-3).
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-042: Operator gives the team keys and takes the steps their calls raise
+
+- **Story:** As P-02, I want to issue, rotate and revoke my team's client keys from my own terminal or my page, and to see each step or choice their calls raise once, named with the key it came from, so that the team uses my cloud agent without its provider keys and nothing of my account is decided by whoever holds a key.
+- **Traces:** JTBD-16
+- **Acceptance criteria:**
+  - Given I issue a key with the agent's CLI or on my page, then it is shown once, under the holder label I give it, which only my CLI and page show (DEC-0159 CF-3).
+  - Given a member's call reaches a person's step or a job's choice, then I get one ask naming the step and never the member, and my page shows it with the key's holder label and records my answer as mine (CF-4).
+  - Given a member leaves, then no client key ends with the membership, and I revoke that member's keys by their holder label (CF-3, OM-5).
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

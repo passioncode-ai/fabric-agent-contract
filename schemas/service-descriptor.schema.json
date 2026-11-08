@@ -47,7 +47,7 @@
     },
     "peer": {
       "type": "object",
-      "description": "DEC-0061: the service is offered to others — a colleague, an organization, a guest — beside its operator. It declares where they reach it, who controls the machine or account it runs on, where it runs and the most sensitive data it may receive. It grants nobody access: a share grant or an organization listing does.",
+      "description": "DEC-0061: the service is offered to others (a colleague, an organization, a guest) beside its operator. It declares where they reach it, who controls the machine or account it runs on, where it runs and the most sensitive data it may receive. It grants nobody access: a share grant, an organization listing, or a client key the service's operator issued (DEC-0159 CF-3) does.",
       "required": [
         "endpoint",
         "custody",

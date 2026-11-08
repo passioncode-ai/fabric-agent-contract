@@ -382,7 +382,7 @@
 - **Elements:** the agent's reply (what it called, the service's answer, a link to hand over for a human step, a service's page as its `open_link`; where Fabric Dashboards is not installed, or unsupported on this system, and the service's listener is another OS account's, or its owner cannot be told, the `foreign-user` line for that case, "Another account on this computer is using this service's port; nothing was sent to it." or "This computer would not say who is using this service's port; nothing was sent to it.", and nothing opened, DEC-0154 HA-2); the audit row (decided by, via, relayed by the authenticated caller, when; under a mandate also the task, the chain and the operator's words, for the operator's own view; for a relayed approval also where the operator said it, `source`, DEC-0126).
 - **States:** success, the action taken as the operator's; error, `operator-decision-required`, `decision-invalid` or `human-step-required` with its link; error, `foreign-user`: no service card is on the agent's path, so the reply itself shows the line and opens nothing.
 - **Coverage:** `src/actions.ts` (`actionDecision`, `FAC-SEM-142`), `test/actions.test.ts`; `foreign-user`: owed by CT-229
-- **Scenarios:** SCN-043, SCN-044, SCN-045, SCN-046
+- **Scenarios:** SCN-043, SCN-044, SCN-045, SCN-046, SCN-059
 - **Resources:** service specification, Actions
 - **Status:** proposed
 
@@ -424,8 +424,8 @@
 
 - **Used by:** FLW-35
 - **Purpose:** the member sees the cloud instance's answer in their coding agent, or the refusal and whom to ask.
-- **Elements:** the coding agent's MCP server entry (the endpoint, and the client key from the member's own vault, never shown; how it reaches the header is CT-275's open question); the agent's reply: the tool's answer, or the refusal's code and the member's next step (ask the operator for a key or a scope, or wait for the operator's step); never a link to the operator's page.
-- **States:** success; error, `unauthenticated` (no, an unknown or a revoked key), which the coding agent may show as its own connection failure rather than the code (unobserved until tried with a named coding agent), the operator's hand-over note naming whom to ask; error, `scope-not-granted` (a scope the key lacks, or `operator-step: <humanStep>` for a step on the operator's page and `operator-step: choice` for a choice the call needs, its message saying the operator was asked and to repeat the call later); waiting, a job reading `working` while the operator takes a step or answers a choice on their page.
+- **Elements:** the coding agent's MCP server entry (the endpoint, and the client key from the member's own vault, never shown; how it reaches the header is CT-275's open question); the agent's reply: the tool's answer, or the refusal's code and the member's next step (ask the operator for a key, a scope or a higher limit, or wait for the operator's step); never a link to a page, the operator's or a provider's.
+- **States:** success; error, `unauthenticated` (no, an unknown or a revoked key), which the coding agent may show as its own connection failure rather than the code (unobserved until tried with a named coding agent), the operator's hand-over note naming whom to ask; error, `scope-not-granted` (a scope the key lacks, or `operator-step: <humanStep>` for a person's step and `operator-step: choice` for a choice a tool that is not job-backed needs, its message saying the operator was asked, or that the operator declined, and to repeat the call later); error, `limit-reached` (the team's budget or the key's cap, its window named, no approval request); waiting, a job reading `working` while the operator takes a step or answers a choice on their page; ended, a job the operator's no ended.
 - **Coverage:** DEC-0159 CF-3, CF-4 (owed: the service's own test); `schemas/delegation-refusal.schema.json`
 - **Scenarios:** SCN-058
 - **Resources:** service specification, The local and cloud form of one agent

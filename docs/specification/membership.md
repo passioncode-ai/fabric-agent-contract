@@ -209,6 +209,10 @@ Everything the membership carried ends with it, as one rule:
   operating system's;
 - nothing of the organization's leaves the person's machine from then on ([OM-7](#what-leaves-a-persons-fabric)).
 
+A client key a service issued itself, such as a cloud instance's in the local and cloud form, is not carried by the
+membership and does not end with it: it ends only when the service's operator revokes it, and revoking it on a
+departure is that operator's duty ([service](service.md#the-local-and-cloud-form-of-one-agent) CF-3, DEC-0159).
+
 **OM-6, suspended is not ended.** An attestation that expired, could not be refreshed or no longer verifies under the
 applied key set **suspends** the membership: nothing new is authorised for the organization (no share grant created or
 widened, no delegation token minted in its context), while what already runs keeps its own expiry. Since a delegation

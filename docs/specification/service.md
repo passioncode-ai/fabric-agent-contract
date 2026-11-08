@@ -520,9 +520,9 @@ login](#operator-login)); a raw address opens a browser that has no session and 
   a step on its own page, which the agent hands over as the open_link, or the `https` address of another party's page
   (a payment provider, a sign-in) (DEC-0121 AP-4). An input request in URL mode on the service's own page MUST carry
   the open_link as its `url` ([interop C3.3](interop.md#c33-awaiting-a-choice)). To a client-key caller of a cloud
-  instance in the local and cloud form no page of the operator's travels, neither an `open_link`, a
-  `human-step-required` path nor a URL-mode request on that page: the service raises the step to its operator
-  ([CF-4](#the-local-and-cloud-form-of-one-agent), DEC-0159). A message on the
+  instance in the local and cloud form no link for a person travels, neither an `open_link`, a
+  `human-step-required` path or `https` address nor a URL-mode request: every step and choice is the operator's, and
+  the service raises it to them ([CF-4](#the-local-and-cloud-form-of-one-agent), DEC-0159). A message on the
   [operator channel](operator-channel.md) is read on a phone, where neither form opens: it names the page and says it
   opens in Fabric Dashboards on the computer, as OC-10 says of files.
 - **The check.** `FAC-SEM-143` refuses a link handed to a person that is a raw `http` or `https` address on a local
@@ -952,8 +952,11 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   The agent's manifest names one descriptor, `<id>.<instance>`, in its service extension, and a descriptor that names
   the manifest must be that one (`FAC-SEM-020`, G-07, the opening of this document), so only the local (`default`)
   instance's descriptor carries `fabricManifest`; the cloud descriptor carries none, and a reader of the cloud instance
-  reaches the manifest through the local descriptor's `fabricManifest` or the registry's provider entry. The fixture pair
-  above shows an agent without a manifest: neither descriptor carries `fabricManifest`.
+  reaches the manifest through the local descriptor's `fabricManifest` or the registry's provider entry. A channel agent
+  in the form has a manifest and declares its channel-agent extension there ([channel agent](channel-agent.md) CA-1,
+  DEC-0150), since the cloud instance's well-known answer sits behind the descriptor's token (CF-2) and other readers
+  read the manifest's declaration. The fixture pair above shows an agent without a manifest: neither descriptor carries
+  `fabricManifest`.
 - **CF-2, the cloud instance is a remote placement.** Its descriptor carries `placement: "remote"`, an `https` origin
   and `lifecycle.manager: "none"`, and every rule of [remote placement](#remote-placement) applies: the token is required
   on the well-known document, the session cookie's name starts with `__Host-`, `commands` carries `doctor` at most. Its
@@ -985,9 +988,11 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   key; the twin stays open to a delegation-token caller with the operator's decision (T0 or T1, AP-2) or an accepted
   `approval/1` (DL-16). A twin that takes `approval/1` holds the estate's issuer and key set to check it (DL-18),
   configured or read from `auth.delegation`. A twin without them takes no `approval/1`: a T2 caller with no approval is
-  refused `approval-required` (`verifyApproval`'s first refusal, DL-18), a caller carrying an approval is refused
-  `issuer-unavailable` (DL-13 row 1, which DL-18 applies to an approval), and keys are then managed only through the
-  CLI and the page. The well-known fixture above leaves the actions declaration (`extensions/actions/0.1`,
+  refused `approval-required` (`verifyApproval`'s first refusal, DL-18), and a caller carrying an approval is refused
+  `issuer-unavailable` (DL-13 row 1, which DL-18 applies to an approval), which such a twin answers itself or by passing
+  `verifyApproval` a jti store, since with none DL-18's order answers `unknown-state` first. From such a twin
+  `issuer-unavailable` is final, not DL-19's passing `503`: the caller does not retry it or fetch another approval, and
+  keys are then managed only through the CLI and the page. The well-known fixture above leaves the actions declaration (`extensions/actions/0.1`,
   [AP-1](#actions)) out, so it shows neither the page's key action nor its twin; a service that has them declares them
   there (AP-1). A key is shown once, in the issuing answer,
   and never again; the service keeps it only as a hash; it is revoked one by one, a revoked key refused from the next
@@ -1001,7 +1006,12 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   ([usage report](#usage-report), DL-22). Client-key spend reaches no `grant.usage` event and no grant limit, so the
   service's own budgets ([Limits](#limits), DEC-0027) are the ceiling the operator sets for the team. Per-key spend,
   and any cap on one key's spend, are the service's own and shown on the operator's CLI and page only, as the holder
-  label is.
+  label is; a per-key cap is no entry of `budgets`, whose scopes name no key. A client-key call that a budget or a
+  per-key cap stops is refused `limit-reached` with `error.data.window` (DL-19), the service the refuser, and carries no
+  approval request: raising the ceiling is the operator's, on the CLI or the page, so the caller tells its person to ask
+  the operator (the hand-over note names whom) and does not resend until the operator says so (interop's resend after an approval through
+  SCN-017 reaches the caller's own operator, not this service's). An `approval` threshold an order crosses is a step,
+  spend above a limit, and goes to the operator as CF-4 says.
   The operator hands a member their key through a channel that keeps it out of chat and logs, with a note naming whom
   the member asks when a call is refused; the member stores the key in their own vault (SCN-053's secret window, for
   example), and the member's coding agent reaches `peer.endpoint` as the operator states it, until a listing contract
@@ -1030,43 +1040,61 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   binds only a callee that declares `auth.delegation` (DL-16), so here the client key takes its place. Either way the descriptor's token is never accepted on the MCP surface or the HTTP
   API and never given to a client. For a cloud instance, these are the per-client keys the agent network leaves to a
   later decision ([agent network](agent-network.md), CT-84).
-- **CF-4, the page is the operator's.** The operator opens the cloud instance's page from their own host with the
-  [operator login](#operator-login) code, exactly as for a local instance; the form has no password sign-in, and a
-  member of the team works through a client key, not the page. The session that code opens covers the page and its own
+- **CF-4, the page and every step are the operator's.** The operator opens the cloud instance's page from their own host
+  with the [operator login](#operator-login) code, exactly as for a local instance; the form has no password sign-in, and
+  a member of the team works through a client key, not the page. The session that code opens covers the page and its own
   same-origin requests (the page's routes, CF-3), and never authorizes a call to the MCP surface or the HTTP API; a
   client key never opens the page. A client key is a caller's credential and never the operator's presence: whoever
-  holds one (a member, or an agent of the estate the operator issued one to, CF-3) is not the operator at that call, and
-  the page is the operator's. So a tool answer to a client-key caller names no page of the operator's: it carries no
-  `open_link` and no page address ([PL-4](#page-links) hands a link to the person the page is for). Nor is a step that
-  lives on the operator's page handed to that caller: a `human` action whose `data.url` would be a path on the service
-  origin ([AP-4](#actions)), and an input request in URL mode on that page ([interop C3.3](interop.md#c33-awaiting-a-choice)).
-  The service raises the step to its operator as an event in its [events feed](#events-feed) with `notify: true` (a
-  host raises no notification without it), whose `link` is the page's path, whose `kind` the host reads as an ask
-  (Fabric Dashboards: its ask pattern, such as `human_step.opened`) and whose `level` is `notice` or higher (Fabric
-  Dashboards' default minimum for a banner), and which its [operator channel](operator-channel.md), where it has one,
-  sends (OC-4); and it refuses the call `scope-not-granted` (DL-19, the code a product maps its own refusal
-  onto: no client key's scopes reach a step that is the operator's), with `error.data.detail`
-  `operator-step: <humanStep>` and an `error.message` saying the operator was asked to take the step and to repeat the
-  call later. `human-step-required` does not fit, because its `data.url` is
-  required ([`delegation-refusal.schema.json`](../../schemas/delegation-refusal.schema.json)) and is the page this
-  caller is not given. A job's input request of that kind is not put in the caller's `inputRequests`: the job reads
-  `working` to that caller, its `statusMessage` saying the operator was asked, until the operator has taken the step on the page, then goes on, or ends as a decline ends
-  it. Every other choice a client-key caller's job or call needs is handled the same way, because answering it is a
-  `relayed` action ([AP-2](#actions), [interop C3.3](interop.md#c33-awaiting-a-choice)) and that caller is not the
-  operator, and an elicitation it accepted would be recorded as the operator's decision (AP-2): a form-mode input
-  request of its job is never put in its `inputRequests`, and the job reads `working` as above; the service never sends
-  that caller an elicitation in a call; it raises the choice to its operator as above, and a call that cannot go on
-  without it is refused `scope-not-granted` with `error.data.detail` `operator-step: choice`. A step on another party's
-  page (an `https` URL) is handed over as AP-4 says. Only the operator sees the cloud
-  instance in Fabric Dashboards, since its descriptor sits on the operator's computers alone (CF-2); a member sees it as
-  an MCP server their coding agent is configured with. Where Fabric Dashboards cannot show the page on the operator's
-  computer (`not_installed` or `unsupported`, [PL-3](#page-links)), no host signs the operator in, and the operator
-  manages keys with the agent's CLI (CF-3); a step on the operator's page is then taken from another computer of the
-  operator's that shows the page, and until then the job keeps reading `working` and a repeated call is refused again.
-  A member's key carries no scope that reaches a `relayed` action ([AP-2](#actions)): a member is a T2 caller with no
-  hub of the operator's to ask for an `approval/1`, so such a call is refused `scope-not-granted`, and the operator
-  takes the action on the page or with the CLI. A page for members needs a credential per person that can be revoked one by
-  one and mints no operator session, which a later decision adds.
+  holds one (a member, or an agent of the estate the operator issued one to, CF-3) is not the operator at that call. So
+  one rule holds: **a client-key caller is handed no person's step and no choice.** A tool answer to it names no page
+  of the operator's: no `open_link` and no page address ([PL-4](#page-links) hands a link to the person the page is
+  for). Every step a person takes that its call or job reaches is the operator's: every `human` action
+  ([AP-4](#actions): a sign-in, a consent, a payment or a top-up, a secret, spend above a limit), on the operator's page
+  or on another party's (an `https` URL), because the service acts with its own provider keys (CF-5) and a step for its
+  account binds that account to whoever takes it. So is every choice its job needs (an input request in either mode,
+  [interop C3.3](interop.md#c33-awaiting-a-choice)), because answering one is a `relayed` action and an answer that
+  caller gave would be recorded as the operator's decision ([AP-2](#actions)); the service never sends that caller an
+  elicitation.
+  - **Raised once.** The service raises each such step, and each such choice of a job, to its operator as one event in
+    its [events feed](#events-feed) while it is open, however many calls reach it: `notify: true` (a host raises no
+    notification without it); a `subject` naming the step by an opaque id of the service's (`type` `operator-step`),
+    never the holder label (CF-3), so that a host tells two steps apart (Fabric Dashboards keys an ask by its subject);
+    a `link` that is the page's path; a `kind` the host reads as an ask (Fabric Dashboards: its ask pattern, such as
+    `human_step.opened`); and a `level` of `notice` or higher (Fabric Dashboards' default minimum for a banner). Its
+    [operator channel](operator-channel.md), where it has one, sends that event (OC-4); a call that reaches a step still
+    open raises no new event. The page lists each open step and choice with the holder label of the key whose call
+    raised it and, for a choice, the request's message and options, and records the operator's answer (taking the step,
+    choosing, or declining) as theirs (AP-1).
+  - **What the caller reads.** A job reads `working` to that caller, its `statusMessage` saying the operator was asked,
+    and its request is never put in the caller's `inputRequests`; when the operator answers, the job goes on, or ends as
+    the operator's no ends it (C3.3), which the caller reads with `fabric.job.get`. A call to a job-backed tool that
+    reaches such a step or choice starts its job and answers the job's handle, which that tool's output admits
+    ([interop C3.1](interop.md#c31-capabilities)). A call to any other tool cannot wait, and is refused
+    `scope-not-granted` (DL-19, the code a product maps its own refusal onto: no client key's scopes reach a step that
+    is the operator's) with `error.data.detail` `operator-step: <humanStep>` and an `error.message` saying the operator
+    was asked and to repeat the call later, or, once the operator declined the step, that the operator declined it. A
+    declined step stays declined until the operator takes it on the page: a later call is refused as declined, a later
+    job ends as the operator's no ends it, and neither raises an event. A call to a tool that is not job-backed and
+    cannot go on without a choice is refused the same way with `operator-step: choice` and raises no event, since no later call
+    carries the operator's answer: its message says the choice is the operator's to make on the page.
+    `human-step-required` does not fit, because its `data.url` is required
+    ([`delegation-refusal.schema.json`](../../schemas/delegation-refusal.schema.json)) and is a page this caller is not
+    given.
+  - **A `relayed` action keeps its gate.** A call to a `relayed` action raises no choice: the action's own gate answers
+    it, as for any T2 caller, after the key's scopes are checked: `approval-required` without an accepted `approval/1`
+    (AP-2, DL-17; the twin, CF-3), and for a source hand-over `operator-decision-required` with
+    `handover-needs-estate-route`, as [source](source.md#handing-over) answers a T2 caller. A member's key carries no
+    scope that reaches a `relayed` action: a member is a T2 caller with no hub of the operator's to ask for an
+    `approval/1`, so such a call is refused `scope-not-granted`, and the operator takes the action on the page or with
+    the CLI.
+  - **Where the operator is.** Only the operator sees the cloud instance in Fabric Dashboards, since its descriptor sits
+    on the operator's computers alone (CF-2); a member sees it as an MCP server their coding agent is configured with.
+    Where no host on the operator's computer signs the operator in to the page (Fabric Dashboards cannot show it there,
+    `not_installed` or `unsupported`, [PL-3](#page-links), and no other host, Fabric for one, mints a login code for a
+    browser there, [HA-2](#ha-2)), the operator manages keys with the agent's CLI (CF-3) and takes a step from another
+    computer of theirs that shows the page; until then the job keeps reading `working` and a repeated call is refused
+    again. A page for members needs a credential per person that can be revoked one by one and mints no operator
+    session, which a later decision adds.
 - **CF-5, provider keys stay on the server.** The provider keys the cloud instance uses live only in the platform's
   secrets: set from the owner's vault by reference, the move recorded where the vault records moves, never in the
   repository, a descriptor, a client's configuration, an answer, a page, a log or a report. A client of the cloud
@@ -1454,8 +1482,8 @@ Every button a person has, the person's agent has (except the operator's move of
   an elicitation (C3.3) when the client supports one: an accepted one is the operator's decision on its own, recorded
   `via: elicitation` from the service's own record, never from the caller's claim; a declined one is the operator's no,
   and the service does not act; it MUST NOT require one when the client cannot show it (DEC-0121). It MUST NOT send an elicitation to a client-key caller
-  of a cloud instance in the local and cloud form, whose acceptance would not be the operator's: it raises the choice to
-  its operator instead ([CF-4](#the-local-and-cloud-form-of-one-agent), DEC-0159). A job's input
+  of a cloud instance in the local and cloud form, whose acceptance would not be the operator's: such a caller is handed
+  no choice ([CF-4](#the-local-and-cloud-form-of-one-agent), DEC-0159). A job's input
   request is an action too: its id is the request's key in `inputRequests` (`requestKey`), its tool `fabric.job.get`,
   its gate `relayed`, and the decision rides in the `_meta.decision` of the `fabric.job.get` call that carries
   `inputResponses`, one call per key decided; a person's click at the host's interaction point travels the same way
@@ -1500,8 +1528,9 @@ Every button a person has, the person's agent has (except the operator's move of
   window, the comparison, a typed secret and a peer share's export, the service's page that names that window), so the agent hands the person the exact
   button (DEC-0121). An https URL is another party's page; a step on the service's own page is a path, which the agent
   hands over as the service's open_link ([PL-4](#page-links), DEC-0123). To a client-key caller of a cloud instance in
-  the local and cloud form, a step on the operator's page is not handed over: the service raises it to its operator and
-  refuses the call `scope-not-granted` ([CF-4](#the-local-and-cloud-form-of-one-agent), DEC-0159).
+  the local and cloud form, no such step is handed over, on the operator's page or another party's: the service raises
+  it to its operator, and answers the call with its job or refuses it `scope-not-granted`
+  ([CF-4](#the-local-and-cloud-form-of-one-agent), DEC-0159).
 - **AP-5, approval separation.** A relayed decision is the operator's, not the agent's: an agent still MUST NOT approve
   its own promotion, grant, checker rule or policy change on its own account, and MAY relay the operator's approval of
   it, which the service's audit records with the relaying caller ([governance](governance-and-roles.md#approval-separation),
@@ -1538,9 +1567,10 @@ reference's under `FAC-SEM-142`. A refusal is DL-19's ([delegation](delegation.m
 behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from then an older caller that calls a
 `relayed` action without a decision is refused `operator-decision-required` until its kit relays decisions (CT-124)
 (DEC-0121). A source hand-over departs from this table as [source](source.md#handing-over) specifies (DEC-0149). A
-client-key caller of a cloud instance in the local and cloud form departs from the `human` row on a step on the
-operator's page, which the service answers `scope-not-granted` as [CF-4](#the-local-and-cloud-form-of-one-agent)
-specifies (DEC-0159): the reference cannot tell such a caller, so kind `action-call` is not run on those calls.
+client-key caller of a cloud instance in the local and cloud form departs from the `human` row on every `human`
+action, which the service answers with its job or `scope-not-granted` as [CF-4](#the-local-and-cloud-form-of-one-agent)
+specifies (DEC-0159): the reference cannot tell such a caller, so kind `action-call` is not run on those calls. Its
+`relayed` calls are not departures: their gate answers them as the reference does (CF-4).
 
 ## Semantic rules
 
@@ -1564,4 +1594,4 @@ specifies (DEC-0159): the reference cannot tell such a caller, so kind `action-c
 | <a id="fac-sem-088"></a>`FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
 | <a id="fac-sem-101"></a>`FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
 | <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address whose host is a local one as PL's [check](#links-to-a-services-pages) lists it (`127.0.0.0/8`, `[::1]`, the IPv4-mapped `[::ffff:127.x.y.z]`, `localhost` and names under it, and the unspecified `0.0.0.0` and `[::]` a wildcard bind reports), and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
-| <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121), except a source hand-over ([source](source.md#handing-over)), out of this rule until a service pins a contract revision carrying CT-181: `--kind action-call` cannot tell a hand-over and is not run on a hand-over's calls until then; and except, with no such bound, a client-key caller's call on a step on the operator's page in the local and cloud form, which CF-4 answers `scope-not-granted` and `--kind action-call` is not run on (DEC-0159) |
+| <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121), except a source hand-over ([source](source.md#handing-over)), out of this rule until a service pins a contract revision carrying CT-181: `--kind action-call` cannot tell a hand-over and is not run on a hand-over's calls until then; and except, with no such bound, a client-key caller's call on a `human` action in the local and cloud form, which CF-4 answers with its job or `scope-not-granted` and `--kind action-call` is not run on (DEC-0159) |

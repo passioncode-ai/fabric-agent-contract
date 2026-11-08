@@ -39,6 +39,9 @@ was deleted from `origin` and replaced by this squash. Commit-addressed referenc
   `byGrant`, key management through the CLI and the page alone where `auth.delegation` is declared; CF-4's
   `notify: true`, message and `statusMessage`; SCN-044's alt paths for the operator's key management; a clause each in DL-19's
   `scope-not-granted` row, DEC-0121's caller-action table and conformance's actions and channel-agent rows.
+- Round 7: CF-4 as one rule (a client-key caller is handed no person's step and no choice), SCN-059 for the operator's
+  keys and the steps members' calls raise (ST-042), OM-5's sentence on client keys, `peer`'s schema description, and
+  back-pointers to CF-3 in DL-26, DL-29 and source.md's T2 premise (see *Rounds*).
 
 ## Compared with the first implementation
 
@@ -82,8 +85,18 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   route key management through its operator's CLI or page, or through a `relayed` twin, and the list tool's holder
   names); send the adapter FAA-204's two round-4 items (`fabricManifest` off the
   cloud descriptor, the refusal mapping) and round 5's two (the manifest's resolution for a descriptor without
-  `fabricManifest`, the kits' `operator-step` message and client-key caller input); the adapter's offer in its skills (FAA-204) and fabric-workspace's knowledge
-  page follow.
+  `fabricManifest`, the kits' `operator-step` message and client-key caller input) and round 7's (the kits answering
+  every `human` action and input request of a client-key caller as CF-4 says, one event per open step, and each
+  instance's delegation gate configured with the audience `<id>.<instance>`); the adapter's offer in its skills
+  (FAA-204) and fabric-workspace's knowledge page follow. That page (message `56ccc6d2`) states the boundary of a CF-3
+  client key against the north star's (no grant, not metered by Observatory's meter, issued only by the service's
+  operator), and the same landing changes fabric-workspace `knowledge/agents-first.md` line 291 from
+  "(`peer`, client keys, the one-time code)" to "the operator's one-time code for the page", as source.md and CT-218
+  read.
+- At landing, whichever of DEC-0156 (branch `agent/ct220-operators-word-v2`) and DEC-0159 lands second rebases
+  SCN-044's *Alt paths* and *Coverage* lines in `docs/ux/scenarios.md`, which both rewrite, and keeps both texts:
+  DEC-0156's update alt path and its `DEC-0156 OW-1 to OW-4` coverage, and this branch's one sentence for the cloud
+  instance's page and its `DEC-0159 CF-1, CF-2, CF-4` coverage.
 
 ## Rounds
 
@@ -247,6 +260,56 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   `origin/main`: nothing; em dashes in the branch's added lines against `origin/main`: 0. The full `pnpm run check` was
   not run here.
 
+- Round 7 (on `1da49807`), not clean: the unit tier passed with five risks, the seam and product tiers failed. The
+  coordinator asked to prefer a simpler rule where one removes a class of findings; CF-4 is now one rule, and with it
+  `operator-step: choice` is left only for a tool that is not job-backed. Breaks folded: (1) CF-4 handed a client-key
+  caller a step on another party's page as AP-4 says, so a member could take the sign-in, consent, payment or top-up
+  of the service's own account, against SCN-058 and ST-041 (now a client-key caller is handed no person's step and no
+  choice: every `human` action, on the operator's page or another party's, and every input request of its job is the
+  operator's, since the service acts with its own provider keys, CF-5; in CF-4, PL-4, AP-2, AP-4, the note under
+  `actionDecision`'s table, `FAC-SEM-142`, interop C3.3 and its caller-action row, DL-19's row, the conformance rows,
+  SCN-058, ST-041, FLW-35, SCR-35 and DEC-0159 item 4); (2) membership OM-5 promised that everything the membership
+  carried ends with it, which a client key a service issued itself does not (now one sentence in OM-5; membership.md
+  in DEC-0159's *Consequences*); (3) `peer`'s description in `schemas/service-descriptor.schema.json` still listed only
+  a share grant and an organization listing (now it names the client key, DEC-0159 CF-3; description only, its em
+  dashes replaced by parentheses since the line is rewritten; DEC-0159's Status says "no schema member, validation,
+  field or rule code changes" and names the description); (4) fabric-workspace `knowledge/agents-first.md` line 291
+  keeps "(`peer`, client keys, the one-time code)" (named in DEC-0159 *Compatibility* and in *Open*: the knowledge edit
+  lands at merge, as the cross-repository rule in `AGENTS.md` asks of the landing run). Risks folded: the raised event
+  names its step by an opaque `subject` (type `operator-step`), never the holder label, one event per open step and
+  none for a call that meets a step still open, since Fabric Dashboards keys an ask by its subject and holds an ask for
+  24 hours (CF-4, DEC-0159 item 4 and *Compatibility*); the page lists each open step and choice with the holder label
+  of the key whose call raised it and records the operator's answer as theirs (CF-4, SCN-059, ST-042); the member's
+  end state: a call to a job-backed tool answers with its job, whose state the member reads, including the operator's
+  no; a call to another tool cannot become a job, because its declared output admits no job handle (interop C3.1), so
+  it stays a refusal whose message says the operator was asked or declined, a declined step raising no new event
+  (CF-4, SCN-058's taken and declined alt paths, SCR-35's ended state); a budget or a per-key cap stopping a
+  client-key call is `limit-reached` with its window, the service the refuser, no approval request, a per-key cap no
+  `budgets` entry (CF-3, SCN-058's alt path, ST-041, FLW-35's limit node, SCR-35); the twin without the estate's issuer
+  answers `issuer-unavailable` itself or through `verifyApproval` with a jti store (without one DL-18's order answers
+  `unknown-state` first, the unit tier's probe), and that answer is final for the caller (CF-3, the conformance row,
+  DEC-0159 item 3, SCN-059); CF-4's choice rule is bounded: a `relayed` action keeps its own gate after the key's
+  scopes, so AP-2's and DL-17's answers stand and `FAC-SEM-142`'s carve-out covers only `human` actions; a client-key
+  caller of a source hand-over gets source.md's T2 answer, `handover-needs-estate-route`, with source.md's premise
+  naming the client key; DL-26 and DL-29 point to CF-3; CF-1 states CA-1's manifest obligation; FAA-204's items in
+  *Compatibility* add the audience `<id>.<instance>` for each instance's gate; the operator's key management moved
+  from SCN-044 into SCN-059 (P-02, ST-042, SCR-30), SCN-044 keeping one sentence, and *Open* records the rebase of
+  SCN-044 with DEC-0156; the owed knowledge page states the CF-3 client key's boundary against the north star's
+  (DEC-0159 *Compatibility*, *Open*); SCN-058's persona note says a member needs neither an enrolled device nor the
+  operator's estate; the browser-login claim now reads "no host on the operator's computer signs the operator in"
+  (Fabric Dashboards cannot show the page, PL-3, and no other host, Fabric for one, mints a login code for a browser
+  there, HA-2), so it no longer depends on which host mints the code. Declined: none. Not changed: P-03's own
+  definition, which other scenarios use; SCN-058 notes the wider reading instead.
+- Checks run on the round-7 fold before its commit: `pnpm run docs:check` ("Documentation checks passed", markdownlint
+  0 errors over 271 files); `python3 docs/ux/lint.py` (passed: 42 stories, 35 flows, 35 screens, 58 scenarios);
+  `pnpm run privacy:check` (0 findings); `pnpm vectors:check` (32 vector files match their generators);
+  `pnpm --silent validate` on the three fixtures (exit 0 each); `pnpm vitest run test/fixtures.test.ts
+  test/consistency.test.ts test/actions.test.ts test/positive-sweep.test.ts` (1469 passed), and, for the schema
+  description, `test/descriptor-rules.test.ts`, `test/guide-examples.test.ts`, `test/spec-required-members.test.ts`,
+  `test/validate-cli.test.ts` and `test/service-rules.test.ts` (2120 passed, 2 skipped); em dashes in the branch's
+  added lines against `origin/main`: 0; `git merge-tree --write-tree HEAD origin/main`: exit 0. The full
+  `pnpm run check` was not run here.
+
 ## Next task
 
-Round 7 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.
+Round 8 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.
