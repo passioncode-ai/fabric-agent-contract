@@ -11709,7 +11709,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (CA-1's manifest declaration and where a reader of the cloud instance finds it), `docs/specification/source.md` and backlog CT-218 ("the operator's
   one-time code for the page"), backlog CT-218 (in progress), CT-270 (filed in round 2, done in round 3: SCN-058) and
   CT-275 (filed in round 5: the key's path from the member's vault into the coding agent's header, and the endpoint's
-  delivery until a listing contract carries it);
+  delivery until a listing contract carries it), CT-279 (filed in round 12: the reference input for `FAC-SEM-142`'s
+  client-key exception) and CT-283 (filed in round 14: the call records of a client-key caller);
   `docs/specification/membership.md` (OM-5: a client key a service issued itself is not carried by the membership),
   `docs/specification/delegation.md` (a clause each in DL-26 and DL-29 pointing to CF-3, and in DL-27 naming L0's one exception; DL-19's
   `issuer-unavailable` row makes `no-trusted-issuer` final from any callee, still HTTP `503`), `docs/specification/source.md`

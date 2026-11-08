@@ -1106,7 +1106,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     other `humanStep` (`passkey`, `comparison`, or a `secret` that is no provider account's, such as the member-key
     action's), one action with its arguments; every call that reaches a step while it is open is listed on that one
     step, with its key. Only a job waits on a step (a call to a tool that is not job-backed is refused, below), and a
-    step stays open until the operator takes or declines it or no key listed on it remains (CF-3). The service raises each such step to its operator as an
+    step stays open until the operator takes or declines it or no key listed on it remains (CF-3). A client-key call
+    that reaches the member-key action raises the step, and its job, if any, ends without the key, which the operator
+    alone sees, on the page or with the CLI (CF-3). The service raises each such step to its operator as an
     event in its [events feed](#events-feed) when it opens, however many calls reach it: `notify: true` (a host raises
     no notification without it); a `subject` naming the step by an opaque id of the service's (`type`
     `operator-step`), never a holder label (CF-3), so that a host tells two steps apart (Fabric Dashboards keys an ask by

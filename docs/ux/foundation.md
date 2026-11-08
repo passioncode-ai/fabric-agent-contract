@@ -805,7 +805,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-042: Operator gives the team keys and takes the steps their calls raise
 
-- **Story:** As P-02, I want to issue and rotate my team's client keys from my own terminal or my page, and have them revoked there or by my own agent on my word, and to see each step or choice their calls raise once, named with the key it came from, so that the team uses my cloud agent without its provider keys and nothing of my account is decided by whoever holds a key.
+- **Story:** As P-02, I want to issue and rotate my team's client keys from my own terminal or my page, and have them revoked there or by my own agent on my word, and to see each step or choice their calls raise once however many calls reach it, and again while it stays open (CF-4), named with the key it came from, so that the team uses my cloud agent without its provider keys and nothing of my account is decided by whoever holds a key.
 - **Traces:** JTBD-16
 - **Acceptance criteria:**
   - Given I issue a key with the agent's CLI or on my page, then it is shown once, under the holder label I give it, which only my CLI and page show (DEC-0159 CF-3).

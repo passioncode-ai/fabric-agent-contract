@@ -60,6 +60,14 @@ was deleted from `origin` and replaced by this squash. Commit-addressed referenc
   open step's repeat bounded to 25 to 48 hours, `no-trusted-issuer` final from any callee and still HTTP `503`, the
   page's `relayed` key action stated (it revokes), the re-keying window and the organization's usage view in
   *Compatibility*, CT-279 filed (see *Rounds*).
+- Round 13: a member's key reaches `fabric.job.get` in every statement that it reaches no `relayed` action's tool,
+  SCN-059's key split carried into SCN-044 and CF-4's *Where the operator is*, the choose and decline twins made tools
+  of their own addressing a step by its opaque id, and the twin refusing to rotate, as to issue, a key that can manage
+  keys (see *Rounds*).
+- Round 15: `issuer-unavailable` final in SCN-059 and SCR-36 only from an instance with no estate issuer configured
+  (`no-trusted-issuer`), a missing key set staying DL-14's retryable `no-published-keys`; an operator step raised once
+  however many calls reach it, and again while it stays open, in SCN-058, FLW-35 and ST-042; CF-4's member-key job
+  ending without the key; CT-279 and CT-283 in DEC-0159's *Consequences* (see *Rounds*).
 - Round 14: SCN-044's cloud page narrowed to a delegation-token caller, the twin of a page answer gated in SCN-059,
   FLW-36, CF-4 and SCR-36, DL-8's client-key path, CF-1's premise, `no-trusted-issuer` for a missing issuer only,
   AP-1's wider twin, the call-record gap with CT-283, and the DEC-0157 merge note's two requirements (see *Rounds*).
@@ -730,6 +738,28 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   test/delegation.test.ts` (1499 passed); em dashes in the branch's added lines against `origin/main`: 0;
   `git merge-tree --write-tree HEAD origin/main`: exit 0. The full `pnpm run check` was not run here.
 
+- Round 15 (on `cbe9fe94`), not clean: the unit tier failed with one break and four risks. The seam and product tiers
+  were not run on this head, on purpose: the unit break is a plain contradiction between the UX texts and the
+  specification, so round 16 reads all three tiers on the folded head. Break folded: SCN-059's alt path and SCR-36's
+  states called `issuer-unavailable` final for "an instance without the estate's issuer and key set", which covers an
+  instance holding the issuer with no usable key set, whose answer DL-19's row, CF-4, DEC-0159 and the conformance row
+  make DL-14's retryable `no-published-keys`; both now keep finality to an instance with no estate issuer configured
+  (`no-trusted-issuer`, final, the agent revokes with the CLI) and say an instance holding the issuer with no usable key
+  set answers the retryable `no-published-keys`, so the agent calls again later; SCN-059's UI elements name both
+  details. Risks folded: SCN-058's alt path, FLW-35's task analysis and diagram node R, and ST-042's story say a step is
+  raised "once however many calls reach it, and again while it stays open (CF-4)", FLW-35 exempting a choice a tool
+  that is not job-backed needs, which raises nothing; CF-4 says a client-key call reaching the member-key action raises
+  the step and its job, if any, ends without the key, which the operator alone sees on the page or with the CLI;
+  DEC-0159's *Consequences* name CT-279 and CT-283; *Done* gains a Round 13 bullet. Not changed: no rule code, schema,
+  fixture or vector.
+
+- Checks run on the round-15 fold before its commit: `pnpm run docs:check` ("Documentation checks passed", markdownlint
+  0 errors over 271 files); `python3 docs/ux/lint.py` (passed: 42 stories, 36 flows, 36 screens, 58 scenarios);
+  `pnpm run privacy:check` (0 findings); `pnpm vitest run test/consistency.test.ts` (23 passed); em dashes in the
+  added lines: 0; `git merge-tree --write-tree HEAD origin/main`: exit 0. The full `pnpm run check`, `pnpm vectors:check`
+  and `pnpm typecheck` were not run here (no source, schema, fixture or vector changed); `docs:check` ran before this
+  paragraph replaced its placeholder.
+
 ## Next task
 
-Round 15 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.
+Round 16 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).
