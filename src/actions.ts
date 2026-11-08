@@ -105,7 +105,10 @@ function acceptedApproval(approval: unknown): approval is { ok: true; approver: 
  * DL-18, DL-25, DL-26). It runs after DL-13 and DL-21 and after `verifyApproval` when the call presented an approval.
  *
  * - `none`: the caller's own act.
- * - `human`: refused `human-step-required` with the step and its direct link, at every tier.
+ * - `human`: refused `human-step-required` with the step and its direct link, at every tier; except a client-key
+ *   caller of a cloud instance in the local and cloud form, which this function cannot tell (its input marks no such
+ *   caller) and kind `action-call` is not run on: that caller is answered with its job or `scope-not-granted` with
+ *   `operator-step: <humanStep>` (service CF-4, DEC-0159).
  * - `relayed`, in this order: an accepted approval (any tier) is the approver's decision; a T2 caller without one is
  *   refused `approval-required` with the action's digest, whatever its call carries; the service's own record of an
  *   accepted elicitation is the operator's decision; without a decision `operator-decision-required`; a decision not

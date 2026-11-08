@@ -39,6 +39,10 @@ was deleted from `origin` and replaced by this squash. Commit-addressed referenc
   `byGrant`, key management through the CLI and the page alone where `auth.delegation` is declared; CF-4's
   `notify: true`, message and `statusMessage`; SCN-044's alt paths for the operator's key management; a clause each in DL-19's
   `scope-not-granted` row, DEC-0121's caller-action table and conformance's actions and channel-agent rows.
+- Round 8: DL-19's `401` header for no credential, DL-26's grant and DL-29's outside-family sentence for a client
+  key, CF-4's daily repeat of an open step's event and its definition of one step, the page's answers as twins, the
+  issuer-less reading for every `relayed` action, the limit window mapping, a key's optional expiry, SCR-36 and FLW-36
+  for SCN-059's operator side (see *Rounds*).
 - Round 7: CF-4 as one rule (a client-key caller is handed no person's step and no choice), SCN-059 for the operator's
   keys and the steps members' calls raise (ST-042), OM-5's sentence on client keys, `peer`'s schema description, and
   back-pointers to CF-3 in DL-26, DL-29 and source.md's T2 premise (see *Rounds*).
@@ -96,7 +100,22 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
 - At landing, whichever of DEC-0156 (branch `agent/ct220-operators-word-v2`) and DEC-0159 lands second rebases
   SCN-044's *Alt paths* and *Coverage* lines in `docs/ux/scenarios.md`, which both rewrite, and keeps both texts:
   DEC-0156's update alt path and its `DEC-0156 OW-1 to OW-4` coverage, and this branch's one sentence for the cloud
-  instance's page and its `DEC-0159 CF-1, CF-2, CF-4` coverage.
+  instance's page and its `DEC-0159 CF-1, CF-2, CF-4` coverage. `git merge-tree --write-tree HEAD
+  origin/agent/ct220-operators-word-v2` on the round-8 head shows two conflict hunks in `scenarios.md`: the first is
+  SCN-044's *Alt paths*; the second holds SCN-044's *Coverage* line on DEC-0156's side and, on this branch's side,
+  that line followed by the whole of SCN-058 and SCN-059, so a resolver keeps DEC-0156's coverage and both scenario
+  bodies (after it, `python3 docs/ux/lint.py` counts 59 scenarios and `grep -c '^### SCN-05[789]'
+  docs/ux/scenarios.md` prints 3). `docs/DECISIONS.md`, `docs/backlog.md` and `docs/handoffs/README.md` conflict too,
+  each keeping both sides' rows. `screens.md` no longer conflicts: since round 8 SCN-059's operator side is SCR-36's,
+  and SCR-30 is as on `origin/main`.
+- The same landing carries DEC-0156's substantive question about client keys, whose home is now SCN-059 (DEC-0156's
+  landing note still points at SCN-044 and should point at SCN-059): whether issuing, rotating or revoking a client key
+  on the operator's word is the agent's step through the `relayed` twin (OW-2) or the step that hands out a secret
+  (OW-4). The resolution this branch proposes, to be written into SCN-059 when both have landed: issuing or rotating a
+  member's key hands out a secret and stays the operator's (OW-4), from their own terminal or the page, since the new
+  key would come back in the agent's answer and transcript (CF-3, FLW-36's rejected shape); revoking a key, and
+  issuing an agent its own key, are the agent's steps through the twin with the operator's decision (OW-2). DEC-0156's
+  branch is told to point its note at SCN-059.
 
 ## Rounds
 
@@ -310,6 +329,57 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   added lines against `origin/main`: 0; `git merge-tree --write-tree HEAD origin/main`: exit 0. The full
   `pnpm run check` was not run here.
 
+- Round 8 (on `02606f7e`), not clean: all three tiers failed. The coordinator again asked to prefer a simpler rule
+  where one removes a class of findings. Breaks folded: (1) DL-19's closing sentence put `error="invalid_token"` on
+  every `401`, against CF-3's bare challenge for no key (now DL-19 says it for a credential that came, and a bare
+  `WWW-Authenticate: Bearer` for none, RFC 6750 section 3.1; no test or vector of this repository asserts the old
+  wording, `git grep invalid_token` finds only prose; the adapter's kits send `invalid_token` on a no-token `401`,
+  named under FAA-204 in DEC-0159 *Compatibility*); (2) DL-26 gave a T2 caller a grant with limits, an expiry and a
+  payer while a client key carries no grant (now the client key takes the token's place and the grant's: the
+  service's own budgets its limits, the key's revocation or expiry its end, the service's operator its payer, in DL-26,
+  CF-3 and DEC-0159 item 3); (3) a step raised while the operator's Fabric Dashboards was not running never became an
+  ask, since it reads its first poll as history (`src/core/monitor.ts` line 582 at `d43c94e`) (now CF-4 raises an
+  open step's event again under the same `subject` once a day until it is taken or declined, which the host's 24-hour
+  ask cooldown and its operator-channel relay, one ask per episode in 24 hours, `src/core/outage-alerts.ts` lines 66
+  and 182, keep to one ask a day; in CF-4, the conformance row, DEC-0159 item 4 and *Compatibility*, SCN-059 step 3,
+  ST-042 and FLW-36); (4) SCN-059's operator side had no screen (now SCR-36, the operator's cloud agent: the CLI's
+  key list with per-key spend and cap, the host's ask, the page's open steps and choices with take, choose and
+  decline, and the operator's agent's twin answers, `scope-not-granted`, `approval-required` with the digest, a final
+  `issuer-unavailable` and a key shown once; FLW-36 is SCN-059's flow; SCR-30 maps SCN-059 no longer, which also
+  removes the `screens.md` conflict with DEC-0156's branch).
+  Risks folded: `operator-step: choice` now tells the caller the tool cannot wait for the operator's choice and is not
+  repeated (DL-19's row, interop's caller-action row, CF-4, SCN-058, SCR-35, the conformance row, DEC-0159 item 4);
+  `limit-reached`'s window mapped per budget (the `period`, `task` for `per_job`, the smallest covering `day`, `week`
+  or `month` for a rolling window, else `total`; a per-key cap the same way); the issuer-less reading stated once for
+  every `relayed` action of an instance in CF-4, CF-3's twin pointing to it (the simpler rule: one place, every
+  action); DL-29's issuer condition on the token route only, and its outside-family sentence naming the client key;
+  `actionDecision`'s doc comment and `fixtures/semantic/action-call-human.json`'s description name CF-4's exception
+  (no behaviour change, vectors unchanged); Fabric's agent registry refusing `peer`, `runner` and the object
+  `installedBy` (Fabric CO-278, DEC-0061) in *Compatibility*, with the direct call (DL-9) as the route until it
+  re-pins; *Open*'s rebase note now names both `scenarios.md` hunks with DEC-0156 (SCN-058 and SCN-059 inside the
+  second) and homes DEC-0156's key-issuance question in SCN-059 with a proposed resolution; the north star's
+  administrator-run offboarding and the PM agent's issuance named in *Compatibility* against CF-3, and a clause in the
+  usage report (client-key spend has no per-member total outside the service's CLI and page); a key MAY carry an expiry
+  the operator sets, past which it is treated as revoked (CF-3, SCN-058, SCN-059, ST-042), as the simpler answer to a
+  departed member's key than naming an outside signal; one step defined in CF-4 (one account step, one order's spend
+  above a limit, one job's input request), the page listing every key waiting on it and a decline answering every
+  caller of it (CF-4, SCN-058, SCN-059); the page's choose and decline as `relayed` actions with agent twins under
+  AP-1, taking a step being the operator's `human` step itself (CF-4, SCN-059, SCR-36); CF-1's audience: a grant
+  naming an instance in the form names `<id>.<instance>`, the bare `id` being no audience there. Declined: the
+  `knowledge/agents-first.md` line 291 edit stays at landing, as *Open* already says, because the knowledge page states
+  what the contract says and DEC-0159 is not landed; the conformance row's "(CF-1 to CF-6)" stays, since CF-7 restates
+  source.md's *Handing over* and asks of the service no conduct the row's test would check. Also folded from the unit
+  tier's not-examined list: an `inputResponses` a client-key caller sends anyway is never taken as the answer (CF-4).
+
+- Checks run on the round-8 fold before its commit: `pnpm run docs:check` ("Documentation checks passed", markdownlint
+  0 errors over 271 files); `python3 docs/ux/lint.py` (passed: 42 stories, 36 flows, 36 screens, 58 scenarios);
+  `pnpm run privacy:check` (0 findings); `pnpm vectors:check` (32 vector files match their generators);
+  `pnpm --silent validate` on the three fixtures (exit 0 each); `pnpm typecheck` (exit 0, for the doc comment);
+  `pnpm vitest run test/fixtures.test.ts test/consistency.test.ts test/actions.test.ts test/positive-sweep.test.ts
+  test/delegation.test.ts` (1499 passed); the private-name grep over the round's diff: nothing; em dashes in the
+  branch's added lines against `origin/main`: 0; `git merge-tree --write-tree HEAD origin/main`: exit 0. The full
+  `pnpm run check` was not run here.
+
 ## Next task
 
-Round 8 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.
+Round 9 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.

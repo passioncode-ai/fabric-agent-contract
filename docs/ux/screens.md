@@ -382,7 +382,7 @@
 - **Elements:** the agent's reply (what it called, the service's answer, a link to hand over for a human step, a service's page as its `open_link`; where Fabric Dashboards is not installed, or unsupported on this system, and the service's listener is another OS account's, or its owner cannot be told, the `foreign-user` line for that case, "Another account on this computer is using this service's port; nothing was sent to it." or "This computer would not say who is using this service's port; nothing was sent to it.", and nothing opened, DEC-0154 HA-2); the audit row (decided by, via, relayed by the authenticated caller, when; under a mandate also the task, the chain and the operator's words, for the operator's own view; for a relayed approval also where the operator said it, `source`, DEC-0126).
 - **States:** success, the action taken as the operator's; error, `operator-decision-required`, `decision-invalid` or `human-step-required` with its link; error, `foreign-user`: no service card is on the agent's path, so the reply itself shows the line and opens nothing.
 - **Coverage:** `src/actions.ts` (`actionDecision`, `FAC-SEM-142`), `test/actions.test.ts`; `foreign-user`: owed by CT-229
-- **Scenarios:** SCN-043, SCN-044, SCN-045, SCN-046, SCN-059
+- **Scenarios:** SCN-043, SCN-044, SCN-045, SCN-046
 - **Resources:** service specification, Actions
 - **Status:** proposed
 
@@ -425,9 +425,20 @@
 - **Used by:** FLW-35
 - **Purpose:** the member sees the cloud instance's answer in their coding agent, or the refusal and whom to ask.
 - **Elements:** the coding agent's MCP server entry (the endpoint, and the client key from the member's own vault, never shown; how it reaches the header is CT-275's open question); the agent's reply: the tool's answer, or the refusal's code and the member's next step (ask the operator for a key, a scope or a higher limit, or wait for the operator's step); never a link to a page, the operator's or a provider's.
-- **States:** success; error, `unauthenticated` (no, an unknown or a revoked key), which the coding agent may show as its own connection failure rather than the code (unobserved until tried with a named coding agent), the operator's hand-over note naming whom to ask; error, `scope-not-granted` (a scope the key lacks, or `operator-step: <humanStep>` for a person's step and `operator-step: choice` for a choice a tool that is not job-backed needs, its message saying the operator was asked, or that the operator declined, and to repeat the call later); error, `limit-reached` (the team's budget or the key's cap, its window named, no approval request); waiting, a job reading `working` while the operator takes a step or answers a choice on their page; ended, a job the operator's no ended.
+- **States:** success; error, `unauthenticated` (no, an unknown or a revoked key), which the coding agent may show as its own connection failure rather than the code (unobserved until tried with a named coding agent), the operator's hand-over note naming whom to ask; error, `scope-not-granted` (a scope the key lacks; `operator-step: <humanStep>` for a person's step, its message saying the operator was asked and to repeat the call later, or that the operator declined; `operator-step: choice` for a choice a tool that is not job-backed needs, its message saying the choice is the operator's and the tool cannot wait for it, so the call is not repeated); error, `limit-reached` (the team's budget or the key's cap, its window named, no approval request); waiting, a job reading `working` while the operator takes a step or answers a choice on their page; ended, a job the operator's no ended.
 - **Coverage:** DEC-0159 CF-3, CF-4 (owed: the service's own test); `schemas/delegation-refusal.schema.json`
 - **Scenarios:** SCN-058
+- **Resources:** service specification, The local and cloud form of one agent
+- **Status:** proposed
+
+### SCR-36: The operator's cloud agent: its page, its CLI and the agent's key twin
+
+- **Used by:** FLW-36
+- **Purpose:** the operator issues, rotates and revokes the team's client keys, sees what each key spent, and takes or answers each step and choice the team's calls raise.
+- **Elements:** the agent's CLI output, run in the operator's own terminal (a key shown once with its scopes, holder label and expiry if any; the key list with each key's holder label, per-key spend and cap); the host's ask, naming the step by the service's opaque id and never a member; the cloud instance's page, opened with the host's one-time login code: the open steps and choices, each with the holder label of every key whose call waits on it, a choice's message and options, and take (the step itself, on the page or the provider's), choose and decline; the same key list and the key action; the operator's coding agent's reply when it calls the key action's twin or a page answer's twin.
+- **States:** success, a key issued (shown once), rotated (the new key shown once) or revoked; success, a step taken, a choice answered or a step declined, recorded as the operator's; waiting, a step open with the members' jobs reading `working`, raised again once a day under the same subject while open; error in the agent's reply, `scope-not-granted` (a key without the twin's scope), `approval-required` with the action's digest (the agent asks the operator for an `approval/1` of it), `issuer-unavailable` from an instance without the estate's issuer and key set, final (the agent does not retry and the operator uses the CLI or the page); a key the twin issued shown once in the agent's reply, so in its transcript (a member's key is issued from the terminal or the page instead); no page on this computer (Fabric Dashboards cannot show it and no other host signs the operator in): the CLI and the page actions' twins only.
+- **Coverage:** DEC-0159 CF-3, CF-4 (owed: the service's own test); DL-13 row 1, DL-17, DL-18; `src/delegation.ts` (`verifyApproval`)
+- **Scenarios:** SCN-059
 - **Resources:** service specification, The local and cloud form of one agent
 - **Status:** proposed
 

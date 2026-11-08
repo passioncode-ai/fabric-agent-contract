@@ -809,8 +809,8 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Traces:** JTBD-16
 - **Acceptance criteria:**
   - Given I issue a key with the agent's CLI or on my page, then it is shown once, under the holder label I give it, which only my CLI and page show (DEC-0159 CF-3).
-  - Given a member's call reaches a person's step or a job's choice, then I get one ask naming the step and never the member, and my page shows it with the key's holder label and records my answer as mine (CF-4).
-  - Given a member leaves, then no client key ends with the membership, and I revoke that member's keys by their holder label (CF-3, OM-5).
+  - Given a member's call reaches a person's step or a job's choice, then I get one ask naming the step and never the member, at most one a day while it stays open, also when my host starts after the step opened, and my page shows it with the holder label of every key waiting on it and records my answer as mine (CF-4).
+  - Given a member leaves, then no client key ends with the membership, and I revoke that member's keys by their holder label, or a key I issued with an expiry ends when it passes (CF-3, OM-5).
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

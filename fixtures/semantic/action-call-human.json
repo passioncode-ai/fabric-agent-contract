@@ -1,5 +1,5 @@
 {
-  "description": "A human step answers human-step-required with its step and its direct link, at every tier (DEC-0121 AP-4).",
+  "description": "A human step answers human-step-required with its step and its direct link, at every tier (DEC-0121 AP-4); a client-key caller of a cloud instance in the local and cloud form, which this input cannot mark, is answered as service CF-4 says instead (DEC-0159).",
   "kind": "action-call",
   "expect": [],
   "input": {

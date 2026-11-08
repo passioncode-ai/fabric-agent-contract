@@ -954,6 +954,35 @@ flowchart TD
 
 - **Screens traversed:** SCR-35 the member's coding agent.
 
+### FLW-36: The operator gives the team keys, answers the steps their calls raise, and takes the keys back
+
+- **Traces:** ST-042 (JTBD-16); SCN-059, DEC-0159
+- **Goal:** the team works through client keys the operator alone issues, and every step or choice their calls raise reaches the operator, named with the keys waiting on it, and is answered as the operator's
+- **Entry points:** the agent's CLI in the operator's own terminal; the host's ask; the cloud instance's page
+- **Success exit:** a key in the member's vault and none in a chat or a log; each step taken, each choice answered or declined as the operator's; a departed member's keys revoked
+- **Task analysis:** the operator issues a key with the CLI or on the page, naming its scopes, a holder label and, optionally, an expiry → the key is shown once and handed over out of chat and logs → a member's call reaches a step or a choice → the service raises it as an event when it opens and again once a day while it stays open → the host asks once a day at most, a host started later included → the operator opens the page, sees the step with the holder label of every key waiting on it, and takes, chooses or declines (or answers through their agent's twin of a page answer) → the members' jobs go on or end → the operator checks per-key spend, caps a key, rotates or revokes it, and revokes a departed member's keys by holder label.
+- **Rejected shape:** the operator's agent issuing or rotating a member's key through the twin: rejected, because the new key comes back in the agent's answer and so in its transcript (DEC-0159 CF-3); the twin stays for revocation, and for an agent's own key, on the operator's decision.
+- **Flow:**
+
+```mermaid
+flowchart TD
+  I[The operator issues a key with the CLI or on the page: scopes, holder label, optional expiry] --> H[Shown once; handed over out of chat and logs]
+  H --> C[A member's call reaches a step or a choice]
+  C --> E[The service raises it when it opens and once a day while open]
+  E --> A{Was the host running when it opened?}
+  A -->|yes| K[The host asks once]
+  A -->|no| N[The host asks at the next daily repeat]
+  K --> P[The page lists the step with every waiting key's holder label]
+  N --> P
+  P --> D{Take, choose or decline}
+  D -->|take or choose| G[The members' jobs go on]
+  D -->|decline| X[The jobs end as the operator's no ends them; later calls are refused as declined]
+  G --> R[Per-key spend, caps, rotation, revocation; a departed member's keys revoked by holder label]
+  X --> R
+```
+
+- **Screens traversed:** SCR-36 the operator's cloud agent.
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |
