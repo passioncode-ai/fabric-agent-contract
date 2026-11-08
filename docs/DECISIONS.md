@@ -11439,13 +11439,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      is shown once in the issuing answer and never again, held as a hash, labelled with its holder for the operator
      alone, revoked one by one, and MAY carry an expiry the operator sets, past which it is treated as revoked;
      revoking a key, or its expiry, cancels that key's running jobs and its jobs waiting on an operator step (they end
-     `cancelled`), drops it from every step's waiting list on the page and closes a step no remaining call or job waits
-     on. Rotating a key revokes it, its jobs included, and issues a new key under the same holder label, scopes and
-     per-key cap, shown once. An agent that calls an issuing door (the twin, or the CLI run through that agent)
+     `cancelled`), drops it from every step's list on the page and closes a step no remaining key is listed on. Rotating
+     a key revokes it, its jobs included, and issues a new key under the same holder label, scopes, per-key cap and
+     expiry (the old key's, unless the operator sets another), shown once. An agent that calls an issuing door (the twin, or the CLI run through that agent)
      receives the key in its answer and so in its transcript, so issuing or rotating a member's key, a secret handed
      out, is the operator's own step in their terminal or on the page: the page's action for a member's key is its own
      action, declared `gate: "human"` with `humanStep` `secret` (AP-4), with no `relayed` twin, the twin issuing and
-     rotating only an agent's own key (the agent conformance row says an agent never calls the member's door); revoking hands out no value, so the operator's agent revokes on the
+     rotating a key only for the agent that calls it, returned to that agent alone and so no secret handed to another
+     party, and none where the instance declares `auth.delegation`, whose estate agents hold no client key (the agent
+     conformance row says an agent never calls the member's door; any other agent's key is the operator's to issue in
+     their own terminal or on the page); revoking hands out no value, so the operator's agent revokes on the
      operator's word, through the twin where its gate lets it through, else by running the agent's CLI on the operator's
      computer, as it must on an issuer-less instance, whose twin answers a caller carrying an approval
      `issuer-unavailable` (item 4). Usage counts a client key's spend in its days and rows
@@ -11492,17 +11495,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      (CF-5) and a step for its account binds that account to whoever takes it; and so is every input request of its
      job, since answering one is a `relayed` action that caller reaches only through its gate (AP-2, C3.3); no
      elicitation is sent to it. One step is one account step for one provider account, one order's spend
-     above a limit, or one job's input request, every call reaching it while open waiting on it. The service raises it
+     above a limit, one job's input request, or, for any other `humanStep` (`passkey`, `comparison`, a `secret` that is
+     no provider account's), one action with its arguments; every call reaching it while open is listed on it with its
+     key, only a job waits on it, and it stays open until the operator takes or declines it or no listed key remains. The service raises it
      to its operator when it opens, however many calls reach it, and again while it stays open, each time no sooner than
      25 hours after the previous raise (a host's 24-hour ask hold and its poll interval), as a new event with a new
      `id` and the same `subject`, `kind` and `link`, so that each host and each channel asks at most once per raise and
      a host that was not running when it opened, which reads its first poll as history, still asks: an events-feed event with `notify: true`, a `subject` naming the step by an opaque id (never
      the holder label), `link` the page's path, a `kind` the host reads as an ask (Fabric Dashboards: its ask pattern,
      such as `human_step.opened`) and `level` `notice` or higher (its default banner minimum), which its operator
-     channel, where it has one, sends (OC-4); the page shows it with the holder label of every key whose call waits on
+     channel, where it has one, sends (OC-4); the page shows it with the holder label of every key listed on
      it and records the operator's answer as theirs: taking a step is the step itself (AP-4), and choosing and declining
      are `relayed` page actions with agent twins (AP-1), reached as the key twin is, so an operator without the page
-     answers through their agent or the operator channel's buttons (OC-5). The caller reads the outcome: a job reads `working`, its `statusMessage` saying the operator was asked, then goes on
+     answers through their agent or the operator channel's buttons (OC-5). The caller reads the outcome: a job reads `working`, its `statusMessage` starting `operator-step <humanStep>`
+     (`operator-step choice` for a choice) in the style of `FAC-SEM-119`'s pause grammar, then goes on
      or, on a decline, ends `failed` with `error.data.detail` `operator-declined: <humanStep>`
      (`operator-declined: choice` for a choice), its `error.code` the service's own, an `inputResponses` that caller sends being the step's `relayed` action
      under its gate (`approval-required` without an accepted `approval/1`, the approver's decision with one where the
@@ -11521,7 +11527,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      instance without the estate's issuer and key set takes no `approval/1` for any of them: a T2 caller with none is
      refused `approval-required` (`verifyApproval`'s first refusal) and a caller carrying one `issuer-unavailable`
      (DL-13 row 1, DL-18), answered by the service itself or by `verifyApproval` given a jti store (with none it answers
-     `unknown-state` first), final for the caller, the operator then acting on the page or with the CLI; a
+     `unknown-state` first), with `data.detail` `no-trusted-issuer` and final for the caller (DL-19's row), the
+     operator then acting on the page or with the CLI; a
      member's key carries no scope that reaches one's tool, so the operator takes such an action on the page or with
      the CLI, and a member's `inputResponses` on `fabric.job.get`, which its key reaches, is refused
      `approval-required`.
@@ -11605,7 +11612,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   at landing that its sample copies the kit. Under FAA-204 the kits also owe a message for `operator-step`,
   and a kit input marking a client-key caller so that the kit answers every `human` action and input request as
   CF-4 says (the job, or `scope-not-granted` with `operator-step: <humanStep>`) and raises the event once per open
-  step; and, in the form, each instance's delegation gate configured with the audience `<id>.<instance>`, not the bare
+  step; the kits' answer to an approval at an instance without the estate's issuer, `issuer-unavailable` with
+  `data.detail` `no-trusted-issuer` (the detail the JS kit's `verifyApproval` already gives, `fabric-delegation.mjs`
+  line 326), read by their callers as final and not retried (CF-4, DL-19's row); and, in the form, each instance's delegation gate configured with the audience `<id>.<instance>`, not the bare
   `id` its delegation reference shows today (`references/delegation.md` lines 34 and 42), so that a token for one
   instance is not accepted by the other (CF-1). The estate's cloud-deploy template declares `own` and
   registers the descriptor on the operator's computer only. It registers its descriptor's instance as `default` unless
@@ -11644,7 +11653,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   which is no defect. The adapter owes the form's offer in `creating-fabric-agents` and `building-fabric-services`
   (message `8eb77518`); fabric-workspace owes a knowledge page (message `56ccc6d2`), which states the boundary of a
   CF-3 client key (it carries no grant, is not metered by Observatory's meter and is issued only by the service's
-  operator, so an organization agent issues one only as that operator's `relayed` twin with a recorded decision, and the north star's "client key" checked against a grant is another credential until that page names it; the
+  operator, so an organization agent issues only its own key, and only as that operator's `relayed` twin with a
+  recorded decision, and never issues or rotates a member's key (CF-3), and the north star's "client key" checked against a grant is another credential until that page names it; the
   north star's administrator agent issuing members' client keys at joining and reversing them on leaving (`north-star.md`
   section 3, *Joining* and *Leaving*, and the PM agent's row in section 5) meets CF-3 only as each service operator's
   act, a revocation through the `relayed` twin with that operator's decision and found by holder label on that
@@ -11669,7 +11679,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   that name a caller's credentials (*Offered to others*, its granting clause included, and the *Surfaces* table) and the
   client-key caller's exception in PL-4, AP-4, the note under `actionDecision`'s table and `FAC-SEM-142`'s row,
   `docs/specification/interop.md` (C3.3, one sentence, and a clause in DEC-0121's caller-action table),
-  `docs/specification/delegation.md` (a clause in DL-19's `scope-not-granted` row and its *Refused by*),
+  `docs/specification/delegation.md` (a clause in DL-19's `scope-not-granted` row and its *Refused by*, one in its
+  `issuer-unavailable` row naming `no-trusted-issuer`, and a sentence closing DL-21),
   `docs/specification/agent-network.md` (one sentence beside CT-84), `docs/specification/channel-agent.md`
   (CA-1's manifest declaration and where a reader of the cloud instance finds it), `docs/specification/source.md` and backlog CT-218 ("the operator's
   one-time code for the page"), backlog CT-218 (in progress), CT-270 (filed in round 2, done in round 3: SCN-058) and
@@ -11683,7 +11694,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   personas), `docs/ux/screens.md` (SCR-36, the operator's page, CLI and key twin, for SCN-059, which
   SCR-30 no longer maps since round 8), `docs/ux/flows.md` (FLW-36, SCN-059's flow);
   `docs/specification/spend-policy.md` (L0's row names client-key spend in the form as the one exception to its hard
-  stop), `docs/evidence/sources.md` (RFC 6750's row: section 3's `invalid_token` for a credential that came, section
+  stop, and rule 2 points to it), `docs/evidence/sources.md` (RFC 6750's row: section 3's `invalid_token` for a credential that came, section
   3.1's bare challenge for none), `docs/specification/conformance.md` (the agent-relaying row: an agent never calls
   the member's key door);
   `docs/specification/delegation.md` (DL-19's `401` header sentence: `invalid_token` for a credential that came, a bare

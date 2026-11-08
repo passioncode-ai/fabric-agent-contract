@@ -351,7 +351,7 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `credential-source-refused` | the grant names a credential source that is not the project's own key or another agent's capability | meter | 403 |
 | `chain-too-deep` | the chain would exceed four actors (five for the meter's token, DL-6) | hub, callee (verifier) | 403 |
 | `profile-forbids` | a call between two machines of one estate that the caller's or the target's machine profile does not allow, or whose profile is unreadable (`machineCallVerdict`, DEC-0106) | callee | 403 |
-| `issuer-unavailable` | no hub to mint, or no usable published keys, or no usable estate revision to certify them (DL-14) | caller, callee (verifier) | 503 |
+| `issuer-unavailable` | no hub to mint, or no usable published keys, or no usable estate revision to certify them (DL-14); a cloud instance in the local and cloud form that holds no estate issuer and key set answers it to a caller carrying an approval with `data.detail` `no-trusted-issuer`, which is final: the caller does not retry it or fetch another approval, and the operator takes the action on the page or with the CLI ([service](service.md#the-local-and-cloud-form-of-one-agent) CF-4, DEC-0159) | caller, callee (verifier); the service for CF-4's `no-trusted-issuer` | 503 |
 | `unknown-state` | the refusing side cannot establish the state; an unknown state is a denial | any | 503 |
 | `operator-decision-required` | a `relayed` action from a T0 or T1 caller without the operator's decision, or a call the caller's mandate does not cover (`error.data.detail` `outside-mandate: <part>`, with `estimateUsd` and `perCallMaxUsd` for spend); ask the operator and call again with their answer in `_meta.decision`, or with a mandate that covers the call ([service](service.md#actions) AP-2, DEC-0121; [MD-4](#the-operators-mandate), DEC-0125); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
 | `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121), or its mandate is not (`error.data.detail`: `mandate-malformed`, `mandate-widened`, `mandate-expired`, `mandate-early`, `mandate-not-for-this-call`; MD-3, DEC-0125); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
@@ -406,7 +406,9 @@ context of its own.
      the `code` unchanged into `error.code`, and `window`, `level` (when not `null`) and `approvalRequest` into
      `error.data` (DEC-0045; `refusalFromDenial` in [`src/delegation.ts`](../../src/delegation.ts)).
 
-  The token's `spend` claim is what was left at mint, not a reservation.
+  The token's `spend` claim is what was left at mint, not a reservation. A client key's call at a cloud instance in
+  the local and cloud form carries no token and asks no meter: it reaches no grant check
+  ([service](service.md#the-local-and-cloud-form-of-one-agent) CF-3, the one exception spend policy's L0 row names).
 - **DL-22 — Usage stays opaque.** A usage report attributes spend by grant reference only (`byGrant`,
   [service](service.md#usage-report)), the value of the token's `grant` claim. It never carries the principal,
   the chain or a caller's identity; the mapping from grant to chain lives in the issuer's journal. A call between

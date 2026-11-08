@@ -1003,9 +1003,10 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   call. A key MAY carry an expiry the operator sets when issuing it, shown on the operator's CLI and page; past it the
   service treats the key as revoked. Revoking a key, or its expiry, also cancels that key's running jobs and its jobs
   waiting on an operator step, which end `cancelled` ([interop C3.2](interop.md#c32-jobs)); the page drops a revoked
-  key from every step's waiting list, and a step no remaining call or job waits on closes, raising no further repeat
+  key from every step's list, and a step no remaining key is listed on closes, raising no further repeat
   (CF-4). Rotating a key revokes it, with all that revoking does, its jobs included, and issues a new key under the
-  same holder label, scopes and per-key cap, shown once in the rotating answer. Apart from that one issuing answer, a
+  same holder label, scopes, per-key cap and expiry (the old key's, unless the operator sets another when rotating),
+  shown once in the rotating answer. Apart from that one issuing answer, a
   client key never appears in a log, an answer, a page or a report. An
   agent that calls an issuing door (the twin, or the CLI the operator runs through that agent) receives the key in its
   answer and so in its transcript; the hand-over below keeps a key out of chat and logs only when the operator runs
@@ -1013,7 +1014,11 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   the operator's own step in their terminal or on the page, never an agent's: the page's action that issues or rotates
   a member's key is its own action, declared `gate: "human"` with `humanStep` `secret` (AP-1, [AP-4](#actions): a
   secret handed out), so its tool answers an agent as every `human` action does and it has no `relayed` twin; the
-  `relayed` twin issues and rotates only an agent's own key, and revokes any key. Revoking a key hands out no value, so
+  `relayed` twin issues and rotates a key only for the agent that calls it, returned in that agent's own answer, and
+  revokes any key. A key minted for its holder and returned to it alone is handed to no other party, so it is not
+  AP-4's secret handed out; a key for any other agent is issued or rotated by the operator in their own terminal or on
+  the page, as a member's is. Where the instance declares `auth.delegation` an agent of the estate holds no client key
+  (below), so there the twin issues none to its caller and only revokes. Revoking a key hands out no value, so
   the operator's agent revokes one on the operator's word: through the twin where its gate lets the agent through
   (above; CF-4, *A `relayed` action keeps its gate*), else by running the agent's CLI on the operator's
   computer, as it must on an instance without the estate's issuer (unless the platform proves its tier, above), where
@@ -1033,7 +1038,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   approval request. The window is the budget's `period` where it has one (`day` or `month`), `task` for a `per_job`
   budget, for a rolling `windowSeconds` the smallest of `day` (up to 86400 seconds), `week` (up to 604800 seconds)
   and `month` (up to 2678400 seconds, 31 days, so every monthly window of [Limits](#limits) maps to it) that covers it
-  (`total` beyond), and `total` for a `since` budget or another with no window; a per-key cap names its own window the same way. Raising the
+  (`total` beyond), and `total` for a `since` budget or another with no window; a per-key cap names its own window the same way.
+  For a rolling budget the window names its length class, not the calendar reset at UTC midnight that spend policy's
+  windows have. Raising the
   ceiling is the operator's, on the CLI or the page, so the caller tells its person to ask
   the operator (the hand-over note names whom) and does not resend until the operator says so (interop's resend after an approval through
   SCN-017 reaches the caller's own operator, not this service's). An `approval` threshold an order crosses is a step,
@@ -1088,8 +1095,11 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   which that caller reaches only through its gate (*A `relayed` action keeps its gate*, below); the service never
   sends that caller an elicitation, whose acceptance would not be the operator's.
   - **Raised to the operator.** One step is one account step (a sign-in, a consent, a payment or top-up, or a secret
-    for one provider account of the service's), one order's spend above a limit, or one job's input request; every call
-    that reaches a step while it is open waits on that one step. The service raises each such step to its operator as an
+    for one provider account of the service's), one order's spend above a limit, one job's input request, or, for any
+    other `humanStep` (`passkey`, `comparison`, or a `secret` that is no provider account's, such as the member-key
+    action's), one action with its arguments; every call that reaches a step while it is open is listed on that one
+    step, with its key. Only a job waits on a step (a call to a tool that is not job-backed is refused, below), and a
+    step stays open until the operator takes or declines it or no key listed on it remains (CF-3). The service raises each such step to its operator as an
     event in its [events feed](#events-feed) when it opens, however many calls reach it: `notify: true` (a host raises
     no notification without it); a `subject` naming the step by an opaque id of the service's (`type`
     `operator-step`), never a holder label (CF-3), so that a host tells two steps apart (Fabric Dashboards keys an ask by
@@ -1102,15 +1112,17 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     reads the event, so a repeat is a new ask, and a host that was not running when the step opened, which reads the
     events it finds at its first poll as history and asks nothing for them (Fabric Dashboards), asks at the next
     repeat. Its [operator channel](operator-channel.md), where it has one, sends each of these events (OC-4), and a host
-    may relay its ask to a channel of its own, so each raise is at most one ask per host and per channel. The page lists each open step and choice with the holder label of every key whose call
-    waits on it and, for a choice, the request's message and options, and records the operator's answer as theirs
+    may relay its ask to a channel of its own, so each raise is at most one ask per host and per channel. The page lists each open step and choice with the holder label of every key listed on
+    it and, for a choice, the request's message and options, and records the operator's answer as theirs
     (AP-1): taking a step is the step itself, the operator's `human` action (AP-4); choosing and declining are
     `relayed` actions of the page, each with its agent twin (AP-1), which a caller reaches as CF-3's key twin is (the
     operator's decision from a T0 or T1 caller, or an accepted `approval/1`, with the gate below), so an operator whose
     computer shows no page can answer a choice or decline a step through their own agent where that gate lets the agent
     through, or with their operator channel's buttons, which perform the page's own operation (OC-5).
-  - **What the caller reads.** A job reads `working` to that caller, its `statusMessage` saying the operator was asked,
-    and its request is never put in the caller's `inputRequests`; when the operator takes the step or answers the
+  - **What the caller reads.** A job reads `working` to that caller, its `statusMessage` starting
+    `operator-step <humanStep>` (`operator-step choice` for a choice), optionally followed by a colon, a space and a
+    text saying the operator was asked, at most 500 characters in all, in the style of interop's pause grammar
+    (`FAC-SEM-119`), so that a caller reads which step it waits on; no rule code checks this grammar yet. Its request is never put in the caller's `inputRequests`; when the operator takes the step or answers the
     choice, the job goes on; when the operator declines it, the job ends `failed`, its `error.code` the service's own
     and its `error.data.detail` `operator-declined: <humanStep>` (`operator-declined: choice` for a choice), which the
     caller reads with `fabric.job.get` ([interop C3.2](interop.md#c32-jobs)). An `inputResponses` that caller
@@ -1146,8 +1158,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     approval is refused `approval-required` (`verifyApproval`'s first refusal, DL-18), and a caller carrying an approval
     `issuer-unavailable` (DL-13 row 1, which DL-18 applies to an approval), which the service answers itself or by
     passing `verifyApproval` a jti store, since with none DL-18's order answers `unknown-state` first. From such an
-    instance `issuer-unavailable` is final, not DL-19's passing `503`: the caller does not retry it or fetch another
-    approval, and the operator takes the action on the page or with the CLI. A member's key carries no
+    instance `issuer-unavailable` carries `error.data.detail` `no-trusted-issuer` and is final, not the `503` DL-14
+    tells a caller to retry: the caller does not retry it or fetch another approval, and the operator takes the action
+    on the page or with the CLI (DL-19's row). A member's key carries no
     scope that reaches a `relayed` action's tool: a member is a T2 caller with no hub of the operator's to ask for an
     `approval/1`, so such a call is refused `scope-not-granted`, and the operator takes the action on the page or with
     the CLI. A job step is the one `relayed` action whose tool, `fabric.job.get`, the member's key reaches to read its

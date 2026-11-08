@@ -78,7 +78,8 @@ Three rules apply to every grant and every reader:
    no identity and holds none: it is proven to by the estate hub's delegation token. That proof is owed
    across the machine boundary (tier T2, [delegation](delegation.md#trust-tiers) DL-25); a caller inside it
    (T0, T1) needs no token and no grant record, and the money limits — L0, L1 and each key's ceiling — still
-   bind it (DL-26, DEC-0045).
+   bind it (DL-26, DEC-0045), with the one exception the L0 row names
+   ([service](service.md#the-local-and-cloud-form-of-one-agent) CF-3).
    - The callee exchanges the token it was called with for an **onward token** for the meter: `aud` the
      meter, the callee added as outermost actor, `scope` the meter's grant-check capability, `effect:
      ["none"]`, the same one grant, principal and project, expiring no later than the callee's token.
