@@ -26,8 +26,8 @@ export const PORT_CLAIM_SCHEMA = "passioncode-port-claim/1";
 export const SERVICE_ID = /^[a-z][a-z0-9-]{1,62}$/;
 /** A reverse-DNS bundle identifier, optionally followed by `.<part>` (the schema's `$defs/bundleId`), at most 130 characters. */
 export const BUNDLE_ID = /^[A-Za-z][A-Za-z0-9-]*(?:\.[A-Za-z0-9][A-Za-z0-9-]*)+$/;
-/** A numeric uid (macOS, Linux) or a SID (Windows), at most 100 characters; never a login name. */
-export const ACCOUNT = /^(?:[0-9]{1,10}|S-1-[0-9]+(?:-[0-9]+){1,14})$/;
+/** A numeric uid in decimal with no leading zero (macOS, Linux) or a SID (Windows), at most 100 characters; never a login name. */
+export const ACCOUNT = /^(?:0|[1-9][0-9]{0,9}|S-1-[0-9]+(?:-[0-9]+){1,14})$/;
 /** An RFC 3339 instant in UTC (interop-common.schema.json `utcInstant`): `Z`, at most three fraction digits. */
 export const UTC_INSTANT = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-5][0-9](\.[0-9]{1,3})?Z$/;
 const MEMBERS = ["schema", "service", "account", "ports", "updatedAt"];

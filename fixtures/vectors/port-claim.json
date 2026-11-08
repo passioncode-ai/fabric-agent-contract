@@ -222,6 +222,39 @@
       }
     },
     {
+      "name": "a uid with a leading zero: invalid, never compared with the owner's uid",
+      "input": {
+        "files": [
+          {
+            "name": ".passioncode-ports.example-agent.0501.json",
+            "owner": "501",
+            "json": {
+              "schema": "passioncode-port-claim/1",
+              "service": "example-agent",
+              "account": "0501",
+              "ports": [
+                48210
+              ],
+              "updatedAt": "2026-11-08T09:00:00Z"
+            }
+          }
+        ],
+        "presentAccounts": [
+          "501",
+          "502"
+        ]
+      },
+      "expected": {
+        "claims": [],
+        "notes": [
+          {
+            "code": "claim-invalid",
+            "file": ".passioncode-ports.example-agent.0501.json"
+          }
+        ]
+      }
+    },
+    {
       "name": "a claim of an account no longer on the computer: ignored",
       "input": {
         "files": [

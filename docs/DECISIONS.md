@@ -11388,7 +11388,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-08
 - **Status:** Proposed 2026-11-08, a draft for the coordinator's blind readings: round 1 (unit pass, seam fail, product
-  fail) folded 2026-11-08; round 2 (unit fail, two text contradictions) folded 2026-11-08, round 3 next. It completes DEC-0154's HA-1 with what CT-228 owed and adds no rule beyond
+  fail) folded 2026-11-08; round 2 (unit fail, two text contradictions) and round 3 (unit fail, one stale line) folded 2026-11-08, round 4 next. It completes DEC-0154's HA-1 with what CT-228 owed and adds no rule beyond
   three: (a) the wording and place of the line a service writes when the Windows claims folder is missing or has another
   ACL, (b) the order in which a reported reason names the holder when several hold one port, and (c) the length bound
   on a claim's service and account, so its file name stays at or under 255 bytes. Everything else here is a reading of

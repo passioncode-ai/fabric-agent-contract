@@ -55,6 +55,8 @@ function readCases(): Json[] {
     ["a Windows claim, its owner the SID it names", read([file(SERVICE, SID, [48210])], [SID]), { claims: [claim(SERVICE, SID, [48210])], notes: [] }],
     ["a claim whose owner is not its account: ignored", read([file(SERVICE, OTHER, [48210], { owner: ME })]),
       { claims: [], notes: [{ code: "claim-owner-mismatch", file: fileName(SERVICE, OTHER) }] }],
+    ["a uid with a leading zero: invalid, never compared with the owner's uid", read([file(SERVICE, "0501", [48210], { owner: ME })]),
+      { claims: [], notes: [{ code: "claim-invalid", file: fileName(SERVICE, "0501") }] }],
     ["a claim of an account no longer on the computer: ignored", read([file(SERVICE, GONE, [48210])]),
       { claims: [], notes: [{ code: "claim-account-absent", file: fileName(SERVICE, GONE) }] }],
     ["a name that names another account than the content: ignored", read([file(SERVICE, ME, [48210], { name: fileName(SERVICE, OTHER) })]),

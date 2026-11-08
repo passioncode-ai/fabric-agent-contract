@@ -89,10 +89,21 @@ were plain contradictions in the text.
 - To Open: what a caller does with the claim file on disk when `rebuildClaim` answers `claim-invalid`; the file-name
   vectors share `claimFileName`'s template, so only the 255-byte length adds information.
 
-## Open
+## Round 3 of the blind readings (2026-11-08), unit only, folded
 
-- Round 2 of the coordinator's blind readings (unit, seam, product) at the new head, until two consecutive rounds are
-  clean; then merge, a release tag, an Annotated line on DEC-0154, and the board threads told.
+The unit reading of `2a5827ad` failed on one stale line; seam and product were not run on that head.
+
+- Break: the Open list named round 2 as the next readings. It now names no round number and points at the Next task,
+  so a later fold cannot leave it stale.
+- Risk folded: the guide sentence keeps the setup entry while the folder is missing or has another access list,
+  until an administrator runs the setup step or restores its access list, as HA-1 and SCN-060 say.
+- Risk folded: a uid is written in decimal with no leading zero (`schemas/port-claim.schema.json`, `ACCOUNT` in
+  `src/port-claim.ts`, HA-1's File row), the form the owner check compares; a read vector shows `0501` as
+  `claim-invalid` (87 vectors now). Branch coverage of `src/port-claim.ts` stays 100% (73 of 73).
+
+
+- The coordinator's blind readings (unit, seam, product) at the branch's head, round by round as the Next task names
+  them, until two consecutive rounds are clean; then merge, a release tag, an Annotated line on DEC-0154, and the board threads told.
 - Board line for thread `1fe66e6e` (the hosts, Fabric Dashboards FD-159 and Fabric), to send with the acceptance: the
   `port-claims-folder` setup entry is person-facing and needs an administrator of that computer, not the coding-agent
   setup path ("Set up with coding agent" runs as an ordinary account and cannot create the folder or set its ACL); a
@@ -170,4 +181,4 @@ At the fold's working tree, each once unless said:
 
 ## Next task
 
-Round 3 of the blind readings of DEC-0160 (unit, seam, product) at the branch's head, then fold what they find.
+Round 4 of the blind readings of DEC-0160 (unit, seam, product) at the branch's head, then fold what they find.
