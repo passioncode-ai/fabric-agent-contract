@@ -32,7 +32,8 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   installation id, that id, whether it is shared and with which products, that it ties this install's events together
   (and, when shared, to those products' events) even though no person is named, and that turning the switch back on
   resumes a shared id; when it sends a session id (UD-3), that it does and that the session id ties one session's
-  events together; where the data is sent, or a link to its usage data page (UD-5), which says; and where the switch
+  events together; where the data is sent (naming the organization that receives it meets this, its usage data page
+  naming the host, UD-5), or a link to that page, which says; and where the switch
   is. The products that share the id are named as of the product's version,
   with a link to one maintained list of them. Where that list lives is the sharing products' owners' choice: the
   estate's privacy page on passioncode.ai (the launcher's PC-137 in the knowledge base's plans.md, its launcher row at
@@ -66,7 +67,9 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   run of that version stands in for the first send: a shared `analytics: false` present then, on an install whose own
   switch the person never set, is read as the earlier no. After a product's first send (for such an install, after
   that first run), its own switch alone governs it, and an off written in the shared file later does not turn it off
-  (plans.md item D, "one product's switch never turns another off"). A product's own switch MUST NOT write the shared
+  (plans.md item D, "one product's switch never turns another off"). A shared file that exists but cannot be read
+  when the product reads it before its first send (or at that first run) is no answer: the product MUST send nothing
+  in that run and reads it again at its next run. A product's own switch MUST NOT write the shared
   file's `analytics` field; a product whose switch wrote it under words that governed every reader stops writing it
   from the version whose switch governs it alone, and leaves an off already written there, which stays the earlier no
   for products that have not yet sent. Fabric's live setting says its switch governs every
@@ -90,8 +93,8 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   installation id bound to no account names no one, and a product that binds either id to an account leaves UD-3
   (below). Whether a stored random id needs prior consent in a given market
   (the EU's ePrivacy rule, which the knowledge base's RM-13 records as the operator's open question) is a product's
-  privacy review, not this rule's. The product, and every service it sends the data to, MUST NOT join either id with an
-  account, purchase, billing or advertising record; data so joined, or bound to an account, is no longer anonymous
+  privacy review, not this rule's. The product, every service it sends the data to, and every service that reads it there, MUST NOT
+  join either id with an account, purchase, billing or advertising record; data so joined, or bound to an account, is no longer anonymous
   under these rules, is `personal`, or `regulated` where the product's privacy review finds it legally controlled,
   needs its own consent and is never described to the person as anonymous. Properties are facts about the
   product (a version, a kind, a count). Error data names an error's kind, its place in the product's own code and the
@@ -107,7 +110,7 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   `approval/1` of another approver and never a standing rule. Any other person turns their switch on in the product's
   settings, and the agent says so. An agent does not decline a person who asks it to turn their switch off: the
   operator's own switch it turns off on the operator's word, relayed under AP-2 (the product's own checks still apply,
-  so a T2 caller, or one placed in no tier, brings an `approval/1`, [delegation](delegation.md#trust-tiers) DL-17, DL-18
+  so a T2 caller (any caller the callee cannot place in T0 or T1) brings an `approval/1`, [delegation](delegation.md#trust-tiers) DL-17, DL-18
   and DL-25), and anyone else it points to the setting, since off only protects them. Where the notice is not a
   question (UD-1), turning a product's usage data on or off is a `relayed` action under AP-2 and AP-3, not AP-4's
   consent (a human gate, DEC-0121). Where UD-1's ask-first branch applies (the platform's own consent or a market's
@@ -132,7 +135,7 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   action would split AP-2's single table.
 - **UD-5, no machine declaration yet.** A product MUST state in its own documentation (its privacy text and a page on
   its usage data) what it collects, the installation id it sends (when it sends one) and whether it is shared, where it
-  sends the data, where the switch is, how long the data is kept, the version that turned collection on by default, and
+  sends the data (the organization that receives it and its host), where the switch is, how long the data is kept, the version that turned collection on by default, and
   whether data already sent can be erased and how. Where erasure needs an installation id, the product either shows that
   id beside the switch before off deletes it and keeps its erasure route working with it, or says beside the switch that
   turning off ends erasure of what was sent. A product whose uninstall deletes its installation id says in its privacy
@@ -168,7 +171,9 @@ their conforming version, a shared off on an install whose own switch was never 
 `crates/switchboard-runtime/src/analytics.rs` lines 315 to 322 at `405b789` and its test
 `an_install_whose_shared_file_says_off_still_sends_when_never_answered_here`; Fabric Inbox's `desktop/analytics.cjs`
 line 295 at `1395416`), and Fabric Dashboards never reads it (`src/core/analytics.ts` lines 9 to 11 at `d43c94e`), so
-each sends for an install whose person said no under Fabric's shared switch before it first sent. Their notices owe
+each sends for an install whose person said no under Fabric's shared switch before it first sent. Fabric Inbox also
+sends a baseline without an id when the shared file cannot be read (`desktop/analytics.cjs` lines 307 to 310 at
+`1395416`), and owes UD-2's sending nothing in that run. Their notices owe
 UD-1's contents: Fabric Dashboards' (`src/core/i18n.ts` lines 86 to 88 at `d43c94e`) names no installation id though
 every event carries the shared `install_id`, and no purpose of counting once, so it owes the id, that it is shared and
 with which products, that it ties events together, that turning back on resumes it, and that purpose; Fabric Inbox's
@@ -184,7 +189,10 @@ UD-3's renewal; the launcher's (`lib/analytics.js` line 244 at `ad978a6`) is mad
 carries that run's events in one request at its end (`after`, line 192), so no idle hour passes within it and it
 meets UD-3's session-id rule. Fabric's notice names "a
 session id" (`i18n/en.ts` line 864 at `eafcf2e4`), and the other four owe naming it (UD-1). Fabric Dashboards' MCP
-`settings` tool, declared with gate `none` (FD-175), lets any agent turn its switch on with no operator decision, and
+`settings` tool, declared with gate `none` (FD-175), lets any agent turn its switch on with no operator decision (its
+switch's own action refuses `operator-decision-required` without a decision, AP-2, rather than take the path its
+dispatcher keeps for other relayed calls, which runs one without a decision as the caller's own act, `src/mcp/server.ts`
+lines 332 to 333 at `d43c94e`), and
 Switchboard's agent door (`switchboard_analytics`, `crates/switchboard-cli/src/mcp.rs` line 72, SB-299) takes no
 decision; both owe UD-4, and since neither ships a manifest and Switchboard declares no actions extension,
 Switchboard owes an action for its switch and both owe a manifest capability for that tool with the effect
@@ -193,9 +201,20 @@ Switchboard owes an action for its switch and both owe a manifest capability for
 (Share Usage Details, its notice at `desktop/main.cjs` line 937) with no agent twin, and Fabric offers its switch only to its own window
 (`analyticsSetEnabled`, `apps/desktop/src/main/index.ts` line 4201 at `eafcf2e4`) and declares no action for it; both
 owe UD-4's product side, an action for the switch whose tool's effect is `change-policy`, with `gate: relayed`
-(Fabric at CO-496). No notice read (Switchboard's, Fabric Inbox's, Fabric Dashboards', Fabric's and the launcher's,
-each cited in DEC-0157's Compatibility) says where the data is sent (the estate's analytics host, outside the organization, the knowledge base's
-roadmap RM-13) or links a usage data page, so each owes that (UD-1). Fabric sends nothing before the person has answered its question (its ADR-0127, its SCN-134,
+(Fabric at CO-496). The products read send it to PassionCode.ai's own self-hosted analytics host, `analytics.passioncode.ai`
+(passioncode-platform PLAT-019, live since 2026-10-17, and PLAT-132; Switchboard's
+`crates/switchboard-runtime/src/analytics.rs` line 30 at `b99a17b`). Fabric Inbox's notice names that receiving
+organization ("Fabric Inbox sends PassionCode.ai anonymous usage and error data", `desktop/main.cjs` line 937), which
+meets UD-1's "where"; the other notices read (Switchboard's, which says its counts help PassionCode.ai without saying
+who receives them, Fabric Dashboards', Fabric's and the launcher's, each cited in DEC-0157's Compatibility) neither say
+where the data is sent nor link a usage data page, so each owes that (UD-1). The host's owner (PassionCode.ai
+Platform) keeps the data 730 days (PLAT-132), the retention each product's usage data page states (UD-5), and owns any erasure
+route by installation id UD-5 asks a product about (not read here); it admits a reader of the raw events, the shared
+installation id included (PLAT-133), which as a service that reads the data there owes UD-3's join rule; where the counts are read
+there, each product's conforming version is marked (below). PassionCode.ai's public privacy page (the
+organization's site repository `passioncode-ai.github.io`, `privacy/index.html` line 60 at `8c517867`) names only Switchboard and Fabric as sending and says
+the switch applies to every PassionCode.ai app on that computer: its owner owes UD-2's switch for each product alone
+and, for every product that sends, what UD-5 asks of its privacy text. Fabric sends nothing before the person has answered its question (its ADR-0127, its SCN-134,
 "Usage counts: share them?" and "Nothing more is sent until you answer", `i18n/en.ts` lines 868 to 870 at
 `eafcf2e4`), which is a UD-1 debt: the notice is not a question and no answer means on. Its notice and settings also
 say its switch governs every PassionCode app on the computer and give no purpose, so it owes UD-1's purpose, naming

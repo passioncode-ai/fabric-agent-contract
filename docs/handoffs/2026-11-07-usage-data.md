@@ -14,8 +14,8 @@ decision of 2026-11-04.
   answer meaning on, told again when the notice changes),
   UD-2 (the product's own switch), UD-3 (anonymous), UD-4 (the switch is the person's, a `relayed` action on the
   product's side), UD-5 (no machine declaration yet), UD-6 (not activity telemetry; an operations digest kept on its
-  machine is not usage data, and a collector sends digests off it only for a product whose switch is on and whose
-  notice was shown), and the practice in the estate; hosted services that install nothing are outside the page.
+  machine is not usage data, and a collector sends digests to anyone but the person only for a product whose switch
+  is on and whose notice was shown), and the practice in the estate; hosted services that install nothing are outside the page.
 - Conformance: a product row, an agent row, the OD-9 declarer's row and the collector's row restated with UD-6.
 - The pointers: [operations digests](../specification/ops-digest.md) OD-6 and its Not decided here point to UD-6;
   [activity telemetry](../specification/activity.md)'s purpose points to UD-6's channel separation.
@@ -53,7 +53,7 @@ decision of 2026-11-04.
   Inbox's `desktop/fabric-descriptor.cjs` and `desktop/main.cjs` line 937 at `1395416`; Fabric's
   `apps/desktop/src/main/index.ts` line 4201 (`analyticsSetEnabled`) and `i18n/en.ts` lines 862 to 871 at `eafcf2e4`;
   Switchboard's `src/main.ts` line 109 at `b99a17b` (no manifest in its tree); Fabric Dashboards' `src/core/i18n.ts`
-  lines 84 to 89 at `d43c94e`; the knowledge base's plans.md items C and D (lines 97 and 108) and roadmap RM-13 (lines
+  lines 84 to 89 at `d43c94e`; the knowledge base's plans.md items C and D (lines 109 and 110) and roadmap RM-13 (lines
   563 to 575) at `c84c7a40`; the contract's interop C3.1, AP-1's actions extension (`service.md`) and the data
   classification table (`governance-and-roles.md`).
 - OQ-0013 (the second purpose, and since round 11 the hosted services' scope, for the operator) taken under the lease on `docs/OPEN_QUESTIONS.md` (no `OQ` register in
@@ -68,11 +68,20 @@ decision of 2026-11-04.
   and, now and independently of CO-496, a string-only correction of its three strings that say its switch governs
   every app, `i18n/en.ts` lines 864, 869 and 870, and an agent twin for its switch (UD-4) at CO-496;
   Switchboard, with an action for its switch and a manifest capability for that tool (UD-4); Fabric Inbox, its
-  exported shared-field writer kept uncalled and an agent twin for its switch on its desktop copy (UD-4); Fabric
-  Dashboards, FD-175 and a manifest capability for that tool included; the launcher (PC-123, before 0.2.76 is tagged):
+  exported shared-field writer kept uncalled, an agent twin for its switch on its desktop copy (UD-4) and sending
+  nothing in a run where the shared file cannot be read (UD-2, its baseline at `desktop/analytics.cjs` lines 307 to
+  310); Fabric Dashboards, FD-175 and a manifest capability for that tool included, its switch's action refusing
+  `operator-decision-required` without a decision rather than run as the caller's own act (`src/mcp/server.ts` lines
+  332 to 333 at `d43c94e`); the launcher (PC-123, before 0.2.76 is tagged):
   UD-1's notice contents and a notice where the person reads it, its doc's agent-only path at
-  `docs/analytics-events.md` line 50; every product, that its notice names where the data is sent or links its usage
-  data page (UD-1); the
+  `docs/analytics-events.md` line 50; every product but Fabric Inbox (whose notice names PassionCode.ai as its recipient), that its notice names where
+  the data is sent or links its usage data page (UD-1); the analytics host's owner, PassionCode.ai Platform
+  (`analytics.passioncode.ai`, PLAT-019): UD-3's join rule for any reader of the raw events it admits (PLAT-133), the
+  retention (730 days, PLAT-132) and any erasure route by installation id the products state under UD-5, and the
+  conforming versions marked where the counts are read there; the owner of PassionCode.ai's privacy page (the
+  organization's site repository `passioncode-ai.github.io`, `privacy/index.html` line 60 at `8c517867`): UD-2's
+  switch for each product alone in place of "the switch applies to every PassionCode.ai app", and UD-5's statements
+  for every product that sends; the
   estate's hosted workspace product, whose self-hosted image owes UD-3's session id; the estate's growth and experiments service; the adapter; Okolos and Observatory to
   check themselves, Observatory also that its encrypted snapshot's key is the person's; the hosted products of
   plans.md item D only where they ship an installed product, pending OQ-0013; the operator asked OQ-0013); the board message says each
@@ -89,8 +98,12 @@ decision of 2026-11-04.
 - Landing step, the knowledge base (AGENTS.md "After work"), in the same landing: plans.md's Contract row restates
   CT-216 as "what usage data every product shares: UD-1 to UD-6, no machine declaration" (today "what a service
   declares about analytics on by default", line 124 at `c84c7a40`), and roadmap RM-13 links
-  `docs/specification/usage-data.md`; then the workspace sync, checked with
-  `git -C fabric-workspace grep -n 'usage-data' origin/main -- knowledge/roadmap.md knowledge/plans.md` (non-empty).
+  `docs/specification/usage-data.md`, and RM-13's sentence placing the analytics backend beyond the organization
+  (line 573 at `c84c7a40`, written 2026-10-05, before PLAT-019 went live on 2026-10-17) is restated as PassionCode.ai's own
+  self-hosted analytics host, `analytics.passioncode.ai` (PLAT-019); then the workspace sync, checked with
+  `git -C fabric-workspace grep -n 'usage-data' origin/main -- knowledge/roadmap.md knowledge/plans.md` (non-empty)
+  and `git -C fabric-workspace grep -n 'backend is hosted outside' origin/main -- knowledge/roadmap.md`
+  (empty).
 - A question for the operator, [OQ-0013](../OPEN_QUESTIONS.md): does "only for this" («Все, только для этого») admit
   the second purpose, counting one installation once across the products that share its id? DEC-0157 reads it so; the
   page marks that reading and the notice wording that follows from it as provisional until he answers. Its second
@@ -118,8 +131,8 @@ decision of 2026-11-04.
   product that reads the file; the product only stops sending it.
 - No machine declaration (UD-5): no host reads one; the safer reversible choice is to add it when a host asks.
 - UD-6 against OD-9 (round 6): a digest kept on its machine is counts a product keeps about itself, not usage data, so
-  the declaration a local collector reads stands whatever the switch says; the condition sits where data leaves the
-  machine. The other reading (a declaration kept only while the switch is on) would stop a product that collects no
+  the declaration a local collector reads stands whatever the switch says; the condition sits where data is sent to
+  anyone but the person. The other reading (a declaration kept only while the switch is on) would stop a product that collects no
   usage data from declaring its digests to a local collector at all.
 
 ## Rounds
@@ -373,6 +386,38 @@ not pushed for the same reason; the round entries' commits resolve only there.
   private personal repository in the branch's diff, and the branch-name check printing, for this branch's names, only
   the historical `agent/ct216-usage-data-20261107`. Not the full gate.
 
+- Round 12 (on `39d37010`, all three tiers), not clean: unit clean with risks; seam and product, the page and
+  DEC-0157's Compatibility placed the estate's analytics host beyond the organization, from RM-13's paragraph of
+  2026-10-05, while every product read sends to PassionCode.ai's own self-hosted host,
+  `analytics.passioncode.ai` (passioncode-platform PLAT-019, live 2026-10-17; Switchboard's
+  `crates/switchboard-runtime/src/analytics.rs` line 30 at `b99a17b`) (now named so in the practice paragraph and the
+  Compatibility; UD-1 decides that naming the organization that receives the data meets "where the data is sent",
+  its usage data page naming the host, and UD-5 names both, in the page, DEC items 1 and 5, the product row and the
+  README cell; Fabric Inbox's notice, "Fabric Inbox sends PassionCode.ai", meets it, so its "where" debt is dropped in
+  the practice paragraph, the Compatibility, the README cell and the board message; the knowledge base's landing step
+  restates RM-13's sentence, with a check); seam, this handoff cited plans.md items C and D at lines 97 and 108 (now
+  109 and 110 at `c84c7a40`). Risks folded: UD-3's join bar binds every service that reads the data where it was sent
+  (page, DEC item 3, the product row), and the host's owner (PassionCode.ai Platform: 730 days' retention, PLAT-132;
+  a reader of raw events with the shared id, PLAT-133; any erasure route by id, not read) is in the practice
+  paragraph, the Compatibility, the README cell and the board message, with the conforming versions marked where its
+  counts are read; PassionCode.ai's public privacy page (`privacy/index.html` line 60 at `8c517867`, "the switch
+  applies to every PassionCode.ai app") owes UD-2's per-product switch and UD-5's statements, in the same places;
+  Fabric Dashboards' switch action refuses `operator-decision-required` without a decision rather than take its
+  dispatcher's caller's-own-act path (`src/mcp/server.ts` lines 332 to 333 at `d43c94e`), in the practice paragraph,
+  the Compatibility, the README cell and the board message; UD-2: a shared file that exists but cannot be read before
+  the first send (or at the conforming version's first run) is no answer and the product sends nothing in that run,
+  in the page, DEC item 2, the product row, CONTEXT and DOCMAP, Fabric Inbox's baseline without an id
+  (`desktop/analytics.cjs` lines 307 to 310 at `1395416`) owing it; the Why and this handoff's Done and Decisions say
+  "where data is sent to anyone but the person" instead of "where data leaves the machine"; the DOCMAP row carries the
+  conforming version's first run; UD-4 says "a T2 caller (any caller the callee cannot place in T0 or T1)", DL-25's
+  words. Declined in part: mirroring the widened join bar in CONTEXT (product), since its entry names no one who may
+  not join, only what joined data becomes, which is unchanged.
+- On the round 12 fold (this commit's tree): `pnpm run docs:check` exit 0 (272 Markdown files, 0 errors), `python3
+  docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios), `pnpm run privacy:check` exit 0 (0
+  findings), `pnpm vitest run test/consistency.test.ts test/docs-check.test.ts` 45 tests passed, `git merge-tree
+  --write-tree HEAD origin/main` exit 0, no U+2014 in the lines the branch adds against `origin/main`, and no name of a
+  private personal repository in the branch's diff. Not the full gate.
+
 ## Next task
 
-Round 12 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.
+Round 13 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.
