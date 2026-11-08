@@ -146,6 +146,19 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   Fabric's "one run in flight" debt dropped (OS-1 leaves another machine's second run to the board's slot);
   `comms-enroll.schema.json`'s description applies the run's end to every refusal branch (description only);
   backlog CT-281 (a host test of the revision rule); CT-215 and the handoffs index current.
+- Round 15: OS-6's never-resubmit is kept only for a host's gate, an act a host refuses to a session with no person
+  whatever is agreed (on Fabric FA-09, checked before any grant, for a `floor.ask-first` act), grounded in that
+  refusal and not in the gate's agreement; at the estate's production stop the note names the step and says the
+  request is submitted again once it carries the operator's relayed words naming that step (agents-first item 8);
+  OS-6, item 6, the run's row, CONTEXT, SCN-025 and the drafted item 8 changed together, OS-5, item 5 and the host's
+  row naming the two stops; a refused stop note now has one directive (the run asks its notice question at every stop,
+  and a requester who finds no note may submit again, a later run meeting the same stop and writing the note); OS-4's
+  exemption covers the `in_progress` branch; the owner-settlement sentence names nobody at a host's gate; a side act
+  left at a stop after the asked act was done and observed settles `completed`; the drafted item 1 drops "finds them"
+  and names the effect-key window; the drafted item 3's intent line withdrawn; Fabric's W4-7, Switchboard's
+  `EXIT_CONTRACT` and the adapter's `DISPATCH_CONTRACT` host-gate debts named in the Compatibility and the landing
+  post; the DEC-0156 landing requirement states the resubmission alignment with OW-3 in words; SCN-025 and CT-276 say
+  SA-6's generation-0 decline wins over a run; CT-215 and the handoffs index current.
 
 ## Decisions taken here
 
@@ -220,10 +233,19 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   under a hold cannot be unmade by the lift. The cost, a small change waiting on a hold the operator set for another
   reason, is the operator's to lift. After round 14 the check comes first, before any cancel and before the `expired`
   line, as the adapter's `references/project-board.md:105-106` puts it in its step 1: the requester reads the target in
-  `com.directory` (`com.status` reads only its own Project), and finds a thread hold, which no page shows, by a `held`
-  refusal of a one-line post of its intent made before the change; an *adapted by* line a later thread hold refuses is
-  posted once the hold lifts. The operator may reverse it before the merge; the drafted item 3 and DEC-0158's
-  Compatibility then change together.
+  `com.directory` (`com.status` reads only its own Project). Round 15 withdrew round 14's one-line intent post that
+  found a thread hold before the change (the seam reading found no `held` refusal in Fabric's board migrations, so on
+  Fabric it may be inert): a thread hold, which no page shows and which never refuses a cancel, is now met only by an
+  *adapted by* line it refuses, posted once the hold lifts, so a requester's own change under a thread hold is not
+  stopped. On Fabric the Project and slot check is a mixed state too until its W4-7 (`comms-directory-held`,
+  DEC-0079) ships, its `com.directory` carrying no `held`. The operator may reverse the decision before the merge;
+  the drafted item 3 and DEC-0158's Compatibility then change together.
+- From round 15, not folded into the text (open): whether Fabric refuses `held` at all under a DEC-0079 thread hold
+  (the seam found its responder pause label, `en.ts:2263`, and no held refusal in the board migrations it searched),
+  a reading at Fabric's next pin; a requester's cancel-and-submit-again path for an `accepted` request whose run
+  recorded an effect key the requester cannot see (the drafted item 1 names the window; the requester's side is
+  CT-175's); SA-6's generation-0 decline taking a request from the dispatcher while on-demand is on (SCN-025 says the
+  decline wins; the rule's choice is CT-276's).
 - CT-276 (the operator's limits on where a run starts) and CT-277 (how a requester learns a target Project's registry
   agent id) are open; neither blocks the merge.
 - Fabric's specification at its main `eafcf2e4` also tells the run to append itself
@@ -256,21 +278,30 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   its machines, one record of a request's runs across them (a begun effect's key, a
   settlement at a human step), the on-demand switch as one setting its machines share, the accept immediately after
   the claim, owner settlement's "Settle" on a shown `outcome_unknown` request (CT-41, DEC-0081) with its "nothing
-  settles it" string and its "answer the requester" next step brought to owner settlement; Switchboard's: the end of
-  every refused enrollment, the operator asked only where SA-6 asks) and a date: 2026-11-22 (two weeks after landing) unless the consumer's
+  settles it" string and its "answer the requester" next step brought to owner settlement, OS-6's stops in its packet
+  and `board.read-at-start`, and `held` in `com.directory`, its W4-7 (`comms-directory-held`, DEC-0079), until which a
+  held target reads on Fabric as not held and a requester under item 3 may cancel or change under a hold; Switchboard's:
+  the end of every refused enrollment, the operator asked only where SA-6 asks, and OS-6's host-gate stop in its
+  `EXIT_CONTRACT`; the adapter's: OS-6's host-gate stop in its `DISPATCH_CONTRACT`) and a date: 2026-11-22 (two weeks after landing) unless the consumer's
   reply carries a `row` reaction with its own `due` (DEC-0098), which then replaces it. Until each date, a consumer
   still at the old reading is the mixed state the post names.
 
-- From round 14, Fabric's packet and `board.read-at-start` text owe OS-6's host-gate stop: at a `floor.ask-first`
-  refusal or the production stop a run settles as OS-6 says, asks no question, and its note says nobody submits the
-  request to the board again; its dispatcher shows such a request to the operator by the run's record (OS-5).
+- From round 14, restated in round 15: Fabric's packet and `board.read-at-start` text, Switchboard's `EXIT_CONTRACT`
+  and the adapter's `DISPATCH_CONTRACT` owe OS-6's two stops: at a host's gate (on Fabric, a `floor.ask-first` act
+  refused to a run by FA-09) a run settles, asks no question unless its note was refused, and its note says nobody
+  submits the request to the board again; at the production stop its note says the request is submitted again once it
+  carries the operator's relayed words naming the step; the dispatcher shows such a request to the operator by the
+  run's record (OS-5).
 - Sibling landing requirements on DEC-0158's own text, binding on whichever of the two branches lands second. They
   are stated here as requirements on the merged text with merged-tree checks; what each sibling's own text says is
   read on its branch at landing, never assumed here.
   - DEC-0156 (the operator's word): OW-3 and OS-6 cite each other; OW-3's no-person case and OS-6 name one
-    settlement (before an effect, `failed_known` with `observed: false` and a reply naming the open act); no act that
-    only a session with a person can take (FA-09) is submitted to the board again; OS-6's notice question only at a
-    human step; the conformance rows keep their order (the board-client row with "a dispatched run follows its own
+    settlement (before an effect, `failed_known` with `observed: false` and a reply naming the open act; an asked act
+    done with only a side act left open, `completed` with the open act named); one resubmission rule for the
+    production stop in both (submitted again once the request carries the operator's relayed words naming the step),
+    and never-resubmit only for the act a host refuses to a session with no person whatever is agreed (on Fabric
+    FA-09), OS-6's host's gate and OW-3's FA-09 case being that one act; OS-6's notice question only at a human step
+    and where a stop note was refused; the conformance rows keep their order (the board-client row with "a dispatched run follows its own
     row below (OS-4, OS-7)" first). Checks on the merged tree: `awk '/^- \*\*OS-6/,/^- \*\*OS-7/'
     docs/specification/project-comms.md | grep -c OW-3` prints at least 1; `awk '/^- \*\*OW-3/,/^- \*\*OW-4/'
     docs/specification/governance-and-roles.md | grep -c OS-6` prints at least 1; `grep -c 'a dispatched run follows
@@ -307,8 +338,12 @@ nobody answers and its `effect` is still `not_started`"):
 > revision `com.get` returned; on `revision_conflict`, read it again and go by its new state), and only once the
 > receipt shows it `cancelled` submit it again. A request a run took (contract DEC-0158 OS-4) may be `accepted` with
 > `effect` `not_started` and already carry the run's edits in the target's folder: the run accepts before any change
-> there, and `not_started` says only that it has done nothing outward yet; the run of the request you submit again
-> observes the folder first and finds them.
+> there, and `not_started` says only that it has done nothing outward yet. Those edits may sit uncommitted in a folder
+> of the target Project on the machine where the run ran; the run of the request you submit again is not told of
+> them, and the operator or the owner's next session reconciles them. A run may also have recorded the effect's key
+> in the host's record, which you cannot see: where the operator owns your Project, leave such a request to the
+> operator, whom the host shows it to with that key (OS-5); otherwise know that a request you submit again gets no
+> earlier key.
 
 "When nobody answers", item 3, its first sentence restated and one paragraph added after it (the rest of the item
 unchanged but its last paragraph, below):
@@ -324,10 +359,8 @@ unchanged but its last paragraph, below):
 > This comes before every line below, `expired` included, so a request that expires under a hold waits for the lift
 > before any change: a hold stops board work on the held thread, Project or slot (no run starts under it, contract
 > OS-1) and your own change for that request too. A thread hold shows in neither, only as a `held` refusal of a post
-> into the thread: so before a change under the `queued`, `answered` or `expired` line, post on the request's thread
-> (`com.submit`, kind message, the thread's id) one line, that the asker means to make this change itself. A `held`
-> refusal of that line is the thread's hold: cancel nothing, make no change, and go to item 4. A thread held only
-> after your change leaves the change made: post the **adapted by** line (below) once the hold lifts. Then read the
+> into the thread (never of a cancel): an **adapted by** line (below) it refuses after your change is posted once the
+> hold lifts. Then read the
 > request (`com.get` gives its `state` and `revision`) and go by its state:
 >
 > - `queued`, or `answered` (the target's decline; no run takes it): cancel it (`com.cancel`, `expectedRevision` set
@@ -371,9 +404,12 @@ a run a host starts (item 5)".
 > step included: `failed_known` with
 > `observed: false` before an effect began; after one, `failed_known` only once it observed that no effect happened,
 > and otherwise it leaves the request `in_progress` for the next holder; then it names the stop once in the thread
-> (contract DEC-0158 OS-6). At this item's production step, or an act a host's gate holds until a person agrees
-> (Fabric's `floor.ask-first`), it asks no question, and its note says the act waits for a session the person is in and
-> that nobody submits the request to the board again.
+> (contract DEC-0158 OS-6). At this item's production step it asks no question, and its note names the step and says
+> the request is submitted again once it carries the operator's verbatim relayed words naming that step (date,
+> source, scope), which lift this stop as above. At an act a host refuses to a session with no person whatever is
+> agreed (Fabric's FA-09 refusal of a `floor.ask-first` act, which no relay, mandate or grant passes) it asks no
+> question, and its note says the act waits for a session the person is in and that nobody submits the request to the
+> board again. Where its note is refused, it asks the operator through the host's question surface instead.
 
 and its close rule's parenthesis, aligned with OS-5's terminal states:
 
@@ -498,6 +534,17 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   test/fixtures.test.ts` exit 0 (5 files, 1492 tests); `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014
   printed 0; `git merge-tree --write-tree HEAD origin/main` exit 0. The full `pnpm run check` was not run in this
   round.
+
+## Checks run on the round-15 commit
+
+- On the tree of the round-15 commit (parent `b31b6889`): `pnpm run docs:check` exit 0 (lint:md 271 files, 0
+  errors); `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios); `pnpm run
+  privacy:check` exit 0 (0 findings); `pnpm vectors:check` exit 0 (32 vector files match their generators); `pnpm
+  vitest run test/mandate.test.ts test/consistency.test.ts` exit 0 (2 files, 108 tests); `git diff origin/main...HEAD
+  | grep '^+' | grep -c` of U+2014 printed 0; `git merge-tree --write-tree HEAD origin/main` exit 0; `awk
+  '/^- \*\*OS-6/,/^- \*\*OS-7/' docs/specification/project-comms.md | grep -c "every stop but the estate's production
+  stop and a host's gate"` printed 0; `awk '/^### DEC-0158/,0' docs/DECISIONS.md | grep -c 'W4-7\|comms-directory-held'`
+  printed 1. The full `pnpm run check` was not run in this round.
 
 ## Rounds
 
@@ -808,11 +855,33 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   CONTEXT's "(`fenced` aside)" (product); OS-4 exempts a refused stop note (unit); Fabric's "one run in flight" debt
   dropped to match OS-1 (unit); `comms-enroll.schema.json`'s run ending on every refusal branch (unit). Filed: the
   revision rule's host test, CT-281 (unit).
+- Round 15 (on `b31b6889`), not clean: unit, seam and product each failed. Breaks folded: OS-6's never-resubmit
+  covered the estate's production stop, which the operator's relayed words naming the step lift (agents-first item 8,
+  Fabric's `board.read-at-start`, the adapter's `DISPATCH_CONTRACT`), against DEC-0156's OW-3 (seam, product); now
+  never-resubmit holds only at a host's gate, an act a host refuses to a session with no person whatever is agreed
+  (FA-09), and the production stop's note says the request is submitted again once it carries those words, in OS-6,
+  item 6, the run's row, CONTEXT, SCN-025 and the drafted item 8, with the DEC-0156 landing requirement aligned in
+  words. A production-stop or gate note refused under a thread hold gave two resubmit directives (unit); now the run
+  asks its notice question at every stop once its note was refused, and a requester who finds no note may submit
+  again, a later run meeting the same stop and writing the note. The drafted item 1 and the Compatibility promised
+  that a resubmitted request's run "observes the folder first and finds them" (product); dropped, the edits named as
+  possibly on another machine or folder and reconciled by the operator or the owner's next session. Risks folded:
+  OS-4's exemption covers the `in_progress` branch (unit); the owner-settlement sentence and the run's row name nobody
+  at a host's gate (unit); the gate grounded in FA-09's refusal, not the gate's agreement (seam, unit); a side act left
+  at a stop after the asked act settles `completed` (product); the effect-key window in the drafted item 1 (product);
+  SA-6's generation-0 decline winning over a run in SCN-025 and CT-276 (product); the drafted item 3's intent line
+  withdrawn (seam: maybe inert on Fabric; product: never withdrawn); Fabric's W4-7 and the mixed state until it ships,
+  and the host-gate stop as a debt of Switchboard's `EXIT_CONTRACT` and the adapter's `DISPATCH_CONTRACT`, in the
+  Compatibility and the landing post (seam). To Open: whether Fabric refuses `held` under a thread hold at all, the
+  requester's effect-key window under CT-175, SA-6's pre-emption under CT-276. Kept as is: the named mixed state and
+  DEC-0159's operator-step greps (product).
 
 ## Next task
 
-Round 15 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers, read hardest at
-OS-6's host-gate stop and the drafted "When nobody answers" item 3's hold check. At landing, also the sibling
+Round 16 blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers, read hardest at
+OS-6's split between the production stop (submitted again once the relayed words naming the step are carried) and a
+host's gate (FA-09, never submitted again by a reader of the note), the refused stop note's one directive, and the
+drafted items 1, 3 and 8 against agents-first.md and, on the merged tree, DEC-0156's OW-3. At landing, also the sibling
 requirements in Open (DEC-0156, DEC-0159, DEC-0157), whichever branch lands second. At landing:
 DEC-0158 Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the
 North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` ("The project board" items 3 and 4, "When

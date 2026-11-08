@@ -250,7 +250,7 @@ two runs that ended without settling it (not counted only a run that found a liv
 refused `held` or `fenced`, whose work a hold refused or that the operator's move fenced; every other counted, one that
 ended before its `com.enroll` included; a start the launcher refused or could not make is no run), an `outcome_unknown` a run's enrollment made or a run left, an `accepted` or
 `in_progress` request with no live holder and no time left before the deadline, a `not_authorized` or other non-retryable refusal of its enrollment (`fenced` aside), a human step the run could not
-put to its operator, and a step only a session with a person can take (the estate's production stop, a host's gate). A board request's mandate reaches the run as the target's registry agent id, which the run acts
+put to its operator, and a run's stop at the estate's production stop (submitted again once the request carries the operator's relayed words naming the step) or at a host's gate (an act the host refuses to a session with no person whatever is agreed, on Fabric FA-09, which nobody who reads the run's note submits again). A board request's mandate reaches the run as the target's registry agent id, which the run acts
 as when that is the chain's last entry, appending only its onward callees (OS-1 to OS-7, DEC-0158). Not the stdio server scope `on-demand` (LC-19).
 
 **Board hold**: The operator's hold, set in the host or relayed by their agent to the host's action (DEC-0121), on a thread, a Project or a (Project, capability) responder slot.

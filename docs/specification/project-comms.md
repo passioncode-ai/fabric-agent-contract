@@ -945,8 +945,9 @@ contract times.
   what SA-6 says for that refusal ([answering in the same turn](#answering-in-the-same-turn)) except SA-6's retry once
   the cause is gone, and ends, the host's next start after the cause is gone being the retry where OS-5 allows one; any other refusal of a board call on its work (`held`, `fenced` and `lease_expired` among
   them, and a `com.reconcile` refused because the run no longer holds the slot) ends it, never retaking the slot, and
-  leaves the request as OS-5 says; a refusal of OS-6's stop note itself, after the settlement, ends nothing but the
-  note, and the run still asks its question as OS-6 says.
+  leaves the request as OS-5 says; a refusal of OS-6's stop note itself, after OS-6's settlement or after it leaves
+  the request `in_progress`, ends nothing but the note, and the run still asks its question as OS-6 says (at every
+  stop, once its note was refused).
 - **OS-5, a run that dies.** A run that ends without settling the request leaves it in the state this extension gives
   it, and no host changes that state for it: `queued` stays queued; `claimed` is taken again by the next `com.claim`
   under a new attempt; `accepted` is held (C4) and continues only by a replacement with a checkpoint transfer
@@ -956,14 +957,14 @@ contract times.
   choice. The host may start one more run for a request; after two runs that ended without settling it, the host starts
   none and shows the request to its operator, unchanged. The count is one for the request across every machine the
   host dispatches from, and so is the host's record of the request's runs that OS-5 and OS-6 read (a begun effect's key
-  among it, and a run's settlement at a human step it could not put to its operator or at a step only a session with
-  a person can take, OS-6): a run the host starts on any of
+  among it, and a run's settlement at a human step it could not put to its operator, at the estate's production stop
+  or at a host's gate, OS-6): a run the host starts on any of
   its machines is handed that one record (OS-2). It shows to its operator at once, unchanged: every request a
   run's enrollment moved to `outcome_unknown` (`lost_result`), the run's own request or another of the slot's, and one a
   run left in `outcome_unknown`, since the estate owner settles them; an `accepted` or `in_progress` request with no
   live holder once its deadline leaves no time for a run (OS-1's candidate needs that time), at the latest when the
-  deadline passes; and a request a run settled at a human step it could not put to its operator, or at a step only a
-  session with a person can take (the estate's production stop, a host's gate), by the run's record (OS-6, OS-7). A run counts for nothing only when it found the slot `active` with another live holder, when its
+  deadline passes; and a request a run settled at a human step it could not put to its operator, at the estate's
+  production stop or at a host's gate, by the run's record (OS-6, OS-7). A run counts for nothing only when it found the slot `active` with another live holder, when its
   enrollment was refused `held` or `fenced`, when a hold refused its work, or when the operator's move of the slot
   fenced it; after a hold's lift the host may start again. Every other run that ends without settling the request
   counts toward the two, one that ended before its `com.enroll` included (a crash, OS-3's mismatch, a client that could
@@ -1008,20 +1009,25 @@ the refused run's cause was the operator's to lift. The requester sees no signal
   the elicitation capability the service answers `operator-decision-required` with the detail `handover-needs-operator`)
   are each a stop, and so is a step the estate's rules keep from a session with no person (in PassionCode, the
   production stop of fabric-workspace `knowledge/agents-first.md`, *One approval binds all*, item 8), and so is an act
-  a host's gate holds until a person agrees (on Fabric, `floor.ask-first`, its ADR-0160 section 4: publishing outward,
-  a release to users among it). Only the first two are answered by what covers that exact choice: a job's question or an
+  a host refuses to a session with no person whatever is agreed, a host's gate (on Fabric, an act `floor.ask-first`
+  holds, its ADR-0160 section 4: publishing outward, a release to users among it, which Fabric refuses to a dispatched
+  run by FA-09, checked before any grant, since it reads a session a launcher started as one it cannot contain). Only the first two are answered by what covers that exact choice: a job's question or an
   `operator-decision-required` refusal that the request's mandate (MD-3) or a relayed decision (OA-1 to OA-3) covers
   exactly is answered by it and is not a stop. A source hand-over goes ahead only on a decision, relayed or not, naming its exact target
-  ([source](source.md#handing-over)), never on a mandate (MD-6), and a human step is never covered (MD-6, AP-4, OA-5); the estate's production stop is lifted only as its own rule says, and
-  a host's gate only as that host's gate says, which a run with no person to agree never meets. Each is otherwise
-  settled and noted as a human step is, with two differences. The run asks no question at either (OS-6's notice
-  question is asked only at a human step); it names the step in its thread note and in its report. And since the act is
-  one only a session with a person can take, a later run would meet the same stop, so nobody submits the request to the
-  board again: its note says the act waits for a session the person is in and that nobody submits the request to the
-  board again, the person's session that performs the act records that in the request's thread, and the host shows the
-  request to its operator by the run's record (OS-5). A request settled at a stop is submitted again only where what
-  the person does lets a later run with no person take the step (a human step cleared, a decision or a relay naming the
-  exact choice), never for an act only a session with a person can take. At a stop the run settles first: before an effect began,
+  ([source](source.md#handing-over)), never on a mandate (MD-6), and a human step is never covered (MD-6, AP-4, OA-5); the estate's production stop is lifted only as its own rule says (in PassionCode, the operator's
+  verbatim relayed words naming the step, with their date, source and scope, item 8, carried by the request), and a
+  host's gate by no relay, mandate or grant (FA-09). Each is otherwise settled and noted as a human step is, with two
+  differences. The run asks no question at either, unless its note was refused (below); it names the step in its
+  thread note and in its report, and the host shows the request to its operator by the run's record (OS-5). And its
+  note says what lets the request through: at the estate's production stop, that the request is submitted again once
+  it carries the operator's relayed words naming that step, by the one the note names (below); at a host's gate, that
+  the act waits for a session the person is in and that nobody submits the request to the board again, since a later
+  run would meet the same refusal, and the person's session that performs the act records that in the request's
+  thread. A host that lets a run's session take the act once the operator grants has no host's gate here: its act is a
+  stop the grant clears. A request settled at a stop is submitted again only where what the person does lets a later
+  run with no person take the step (a human step cleared, a decision or a relay naming the exact choice or the step, a
+  grant), never by one who reads a host's gate note. A request whose asked act the run did and observed, with only a
+  side act left at a stop, is settled `completed`, the open act named in its result and its note. At a stop the run settles first: before an effect began,
   `failed_known` with `observed: false`; after one, it cancels a waiting job with that job's own cancel and settles
   `failed_known` once it has observed that the effect did not happen, or else leaves the request `in_progress`, so the
   next holder's `lost_result` makes it `outcome_unknown`, which the host shows at once (OS-5). Then it names the stop
@@ -1032,25 +1038,28 @@ the refused run's cause was the operator's to lift. The requester sees no signal
   question is a notice: it says the run has ended, names who submits the request again (below), and blocks nothing;
   the run never reads an answer, so answering it continues nothing. The
   note and the question go by the outcome. After `failed_known` at a stop a later run can get past once the person
-  acts (every stop but the estate's production stop and a host's gate, above), the note names who submits it again: "the operator
+  acts (every stop but a host's gate, above), the note names who submits it again: "the operator
   submits it again once the step is taken; leave it" only when the operator owns the requesting Project (the run reads
   it as a Project its own `com.directory` lists, the directory never listing another owner's Project,
   [project directory](#project-directory); an unlisted one reads as not, which leaves it to the requester), since the operator acts on a request only through a session of the
-  requesting Project they own (OS-5); otherwise "the requester submits it again once the step is taken". After a
+  requesting Project they own (OS-5); otherwise "the requester submits it again once the step is taken" (at the estate's production stop, "once it carries
+  the operator's relayed words naming the step" in place of "once the step is taken"). After a
   request left `in_progress`: "do not submit it again; it reaches the owner as `outcome_unknown` once a session of the
   target Project takes the slot". A run, or a session the operator opened (OS-5), that settles `failed_known` a request an earlier run left
   `in_progress` at a stop writes the same `failed_known` note, by the earlier run's record. A `failed_known` request
   with no such note in its thread (a responder's own reason, a run's time limit, OS-4, or a note a
   [hold](#what-a-hold-refuses) refused, since a thread hold refuses a participant's `com.reply` and never
-  `com.complete`) leaves to the requester whether to submit it again, and a run whose note was refused names the
-  requester in its question. So the requester submits it again only when that note, the operator, the owner's
+  `com.complete`) leaves to the requester whether to submit it again, at a host's gate too: a run whose note was
+  refused asks its notice question at every stop, a host's gate and the production stop included, naming the requester
+  and what the note would have said, and a request submitted again from a host's gate with no note meets the same
+  refusal in a later run, which settles it again and writes the note. So the requester submits it again only when that note, the operator, the owner's
   settlement (below) or the absence of a note says so. Once
   the person has taken the step, the one the note names submits a `failed_known` request again (a requester's wake for
   it is CT-150); a request left `in_progress` is not submitted again, since a new request's run gets no earlier effect
   key (OS-2, OS-5), until the estate owner settles it ([owner settlement](#owner-settlement), `settledBy: "owner"`):
   settled `failed_known` (observed: the effect did not happen), the one a run's `failed_known` note would name submits
   it again once the step is taken (the operator through a session of the requesting Project they own, otherwise the
-  requester); settled `completed`, nothing is submitted again.
+  requester; at a host's gate, nobody); settled `completed`, nothing is submitted again.
 - **OS-7, slots and mandates.** A dispatched run holds a slot only while it works: it never takes a slot from a live
   holder, uses `com.responder_replace` only to continue a held `accepted` request whose holder is gone (CT-175), and
   ends its session, and with it the slot, when it ends. The host withholds the move of a slot to a dispatched run in its

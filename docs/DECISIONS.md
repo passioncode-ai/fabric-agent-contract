@@ -11460,7 +11460,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      unchanged; it shows at once every request a run's enrollment moved to `outcome_unknown` (the run's own or another of
      the slot's), one a run left `outcome_unknown`, an `accepted` or `in_progress` request with no live holder once its
      deadline leaves no time for a run, and a request a run settled at a human step it could not put to its operator or
-     at a step only a session with a person can take (the estate's production stop, a host's gate), by the run's
+     at the estate's production stop or a host's gate, by the run's
      record (OS-6, OS-7); only a run that found the slot `active` with another live holder, whose enrollment
      was refused `held` or `fenced`, whose work a hold refused, or that the operator's move fenced counts for nothing,
      and every other run that ends without settling counts toward the two, one that ended before its `com.enroll`
@@ -11486,13 +11486,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      launcher or host owning that lever where the client cannot drop it); a job's `input_required`, an
      `operator-decision-required` outside the mandate, a human step, a source hand-over without its exact decision and a
      step the estate's rules keep from a session with no person (in PassionCode, `agents-first.md` item 8's production
-     stop, lifted only as that rule says) and an act a host's gate holds until a person agrees (on Fabric,
-     `floor.ask-first`, its ADR-0160 section 4, a release to users among it; lifted only as that gate says, which a run
-     never meets) are stops. The last two are settled and noted as a human step is, but the run asks no question there
-     and nobody submits the request to the board again, since only a session with a person can take the act: the note
-     and the run's report say it waits for a session the person is in, that session records the act in the thread, and
-     the host shows the request to its operator (OS-5); a request settled at a stop is submitted again only where what
-     the person does lets a later run with no person take the step. Only the first two are answered by what covers that exact choice (the mandate or a relayed decision);
+     stop, lifted only as that rule says: the operator's verbatim relayed words naming the step, with date, source and
+     scope, carried by the request) and an act a host refuses to a session with no person whatever is agreed, a host's
+     gate (on Fabric, an act `floor.ask-first` holds, its ADR-0160 section 4, a release to users among it, refused to a
+     dispatched run by FA-09 before any grant, since Fabric reads a launcher's session as one it cannot contain) are
+     stops. The last two are settled and noted as a human step is, but the run asks no question there unless its note
+     was refused, and the host shows the request to its operator (OS-5): at the production stop the note says the
+     request is submitted again once it carries the operator's relayed words naming that step, by the one the note
+     names; at a host's gate the note and the run's report say the act waits for a session the person is in and that
+     nobody submits the request to the board again, since a later run would meet the same refusal, and that session
+     records the act in the thread (a host that lets a run's session take the act once the operator grants has no
+     host's gate here, its act being a stop the grant clears); a request settled at a stop is submitted again only
+     where what the person does lets a later run with no person take the step, never by one who reads a host's gate
+     note; a request whose asked act the run did and observed, with only a side act left at a stop, is settled
+     `completed`, the open act named. Only the first two are answered by what covers that exact choice (the mandate or a relayed decision);
      a source hand-over goes ahead only on a decision, relayed or not, naming its exact target (source, DEC-0149), never
      on a mandate (MD-6), and a human step is never
      covered (MD-6, AP-4, OA-5). At a stop the run settles first: `failed_known` (`observed: false` before an effect
@@ -11501,19 +11508,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      reply. At a human step the note carries the refusal's `humanStep` and `url` when it gave them, and the run asks the
      operator through the host's question surface (a notice that blocks nothing: the run has ended and never reads the
      answer), or leaves the host to show the request as OS-5 does; the note and
-     the question go by the outcome: after `failed_known`, "the operator submits it again once the step is taken; leave
-     it" only when the operator owns the requesting Project (a Project the run's own `com.directory` lists), since the
+     the question go by the outcome: after `failed_known` at any stop but a host's gate, "the operator submits it again
+     once the step is taken; leave it" (at the production stop, once the request carries the relayed words naming the
+     step) only when the operator owns the requesting Project (a Project the run's own `com.directory` lists), since the
      operator acts only through a session of the requesting Project they own, and otherwise "the requester submits it
      again once the step is taken"; after a request left `in_progress`, "do not submit it again; it reaches the owner
      as `outcome_unknown` once a session of the target Project takes the slot". After the step the one the note names
      submits a `failed_known` request again (a requester's wake is CT-150), and a request left `in_progress` is not
      submitted again (a new request's run gets no earlier effect key) until the estate owner settles it (`settledBy:
      "owner"`): settled `failed_known` (observed), the one a run's `failed_known` note would name (the operator through a
-     session of the requesting Project they own, otherwise the requester) submits it again once the step is taken;
-     settled `completed`, nothing is submitted again. A later run or opened session that settles `failed_known` a
+     session of the requesting Project they own, otherwise the requester; at a host's gate, nobody) submits it again
+     once the step is taken; settled `completed`, nothing is submitted again. A later run or opened session that settles `failed_known` a
      request an earlier run left `in_progress` at a stop writes the same note; a `failed_known` request with no such
      note (a responder's own reason, a run's time limit, a note a thread hold refused) leaves resubmission to the
-     requester, and a run whose note was refused names the requester in its question.
+     requester, at a host's gate too: a run whose note was refused asks its notice question at every stop, naming the
+     requester and what the note would have said, and a request submitted again from a host's gate with no note meets
+     the same refusal in a later run, which settles it again and writes the note.
   7. **Slots and mandates (OS-7).** A run holds a slot only while it works, never takes one from a live holder, uses a
      replacement only to continue a held request whose holder is gone (CT-175), and is never offered as the receiving
      session of the operator's move (the host withholds "Make main" and "Move" on a run); holding `project.work` it is the main
@@ -11592,7 +11602,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `ru.ts:297`, "Fabric waits two minutes, then starts the default agent") but as a promise, and owes saying that the
   grace is the earliest a run starts and that its caps or a live session may defer the start; a session of the target Project the operator opens for a shown request
   shown the earlier runs' record of a begun effect's key (OS-5); no move of a slot offered to a run once it offers
-  the move (OS-7, CT-125); its `board.read-at-start` rule, which tells every session "A request addressed to this
+  the move (OS-7, CT-125); OS-6's stops in its packet and its `board.read-at-start` rule: at a host's gate a run
+  settles, asks no question unless its note was refused and notes that nobody submits the request again, where its
+  `floor.ask-first` text tells a session to ask again once the operator has agreed
+  (`apps/desktop/src/shared/protocolObligations.ts:72-75`), and at the production stop its note names the relayed
+  words that let the request through; `held` in `com.directory`, its W4-7 (`comms-directory-held`, DEC-0079, listed
+  owed in `apps/desktop/test/board-service.test.mjs:58`; its directory carries capability and responder only), until
+  which a held target Project or capability reads on Fabric as not held, so a requester under item 3 below may cancel
+  or change under a hold, a mixed state the landing post names; its `board.read-at-start` rule, which tells every session "A request addressed to this
   project is work addressed to you" and to "Answer what waits on you in the same turn"
   (`apps/desktop/src/shared/protocolObligations.ts:197-226`), saying that a session started for one board request
   answers only that request (OS-7) and that it accepts the request immediately after its claim, before any change in
@@ -11645,7 +11662,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   observed and the request otherwise left `in_progress`, the same point as the adapter's below; on a refused
   `com.enroll`, what SA-6 says for that code without its retry, then the end, the operator asked only for a refusal
   that is not `retryable`, where its text (`6912ae2`, `crates/switchboard-runtime/src/dispatch.rs:266`) names no end for a
-  refusal other than `not_authorized`, asking the operator even where SA-6 asks no one) and, as the launcher,
+  refusal other than `not_authorized`, asking the operator even where SA-6 asks no one; and OS-6's host-gate stop,
+  its `EXIT_CONTRACT` host's gate debt: the text sends money, deletion and publication to `fabric_effect_request` and
+  says nothing of settling at a host's gate with no question and a note that nobody submits the request again) and,
+  as the launcher,
   the elicitation lever of OS-6 where the coding agent's client declares the capability. A third host of the estate
   implements the dispatched run itself (its own board-spawn design of 2026-11-04) and owes the same reading of OS-4 to
   OS-7. The adapter's `working-with-fabric` (FAA-201, `references/on-demand-session.md`) reads OS-3's line and
@@ -11658,7 +11678,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `input_required` and at a human step, with the step's `humanStep` and `url` and the operator asked (OS-6); after
   `com.effect_begin`, `failed_known` only once no effect is observed and otherwise the request left `in_progress`
   (OS-4, OS-6; its `references/on-demand-session.md:147` and `:191`, and its `scripts/fabric_session_cli.py`
-  `DISPATCH_CONTRACT` at `:159` and `:165`, complete `failed_known` with `observed: true` after an effect began); recording a begun effect's key in the host's record of the run before it acts outward, a debt new
+  `DISPATCH_CONTRACT` at `:159` and `:165`, complete `failed_known` with `observed: true` after an effect began); OS-6's
+  host-gate stop in its `DISPATCH_CONTRACT` host's gate text (`:161` sends money, deletion and publication to
+  `fabric_effect_request` and says nothing of settling there); recording a begun effect's key in the host's record of the run before it acts outward, a debt new
   with this decision that the landing board post names (its FAA-215 covers closing the workflow, `observed: true` and
   the open checkpoint's reason, not this); taking a board request's mandate only when its last entry is the target's
   registry agent id as the run knows it (OS-7); its requester rule, which still tells a requester to make a small
@@ -11682,8 +11704,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   request claims no other, does not retry a refused enrollment and ends, OS-4, and accepts the request immediately
   after its claim) and item 4 (a session a host started for one board request answers only that request,
   OS-7), in "When nobody answers", item 1 (its cancel of a request still `accepted` with effect `not_started`
-  carrying `expectedRevision`, and such a request, when a run took it, possibly already carrying the run's edits in the
-  target's folder, which the resubmitted request's run observes), item 3 (on every board, since the host that serves the board may start a run from any
+  carrying `expectedRevision`, and such a request, when a run took it, possibly already carrying the run's edits in a
+  folder of the target Project on the machine where it ran, which no run of the request submitted again is told of,
+  the operator or the owner's next session reconciling them, and a begun effect's key the run may have recorded that
+  the requester cannot see, SCR-19 offering the operator "Open a session of the target Project" first), item 3 (on every board, since the host that serves the board may start a run from any
   machine of the operator's it runs on for a request and the board does not say whether one will: a requester makes a change in
   the owner's repository only for a request it cancelled while `queued` or `answered` with `expectedRevision` set to
   the revision `com.get` returned, only a `cancelled` receipt answering a cancel sent with that `expectedRevision`
@@ -11693,9 +11717,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   request left `queued` may be taken by a run; every state on one line; a cancel the requester did not send read as another session of its Project having acted, so
   it submits nothing; before any state line, `expired` included, the target read in `com.directory` (a requester's
   source for another Project, `com.status` reading only its own), a target Project or capability reading `held: true`
-  meaning no cancel and no change, the request waiting for the lift (item 4); a thread hold, which shows only as a
-  `held` refusal, found by a one-line post of the requester's intent before its change, with the same wait, and an
-  *adapted by* line a later thread hold refuses posted once the hold lifts, as decided in the handoff),
+  meaning no cancel and no change, the request waiting for the lift (item 4), as decided in the handoff; a thread
+  hold, which shows only as a `held` refusal of a post into the thread and never of a cancel, leaving an *adapted by*
+  line it refuses to be posted once the hold lifts),
   item 4 (the request stays for its owner, or for a run a host starts) and item 5 (a
   session the host starts is built, not asked for; the operator acts on a shown request through a session of the
   requesting Project they own, otherwise the requester on its own reading, OS-5) restated, and in "One approval binds all", item 8's production stop
