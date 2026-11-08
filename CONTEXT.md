@@ -247,7 +247,7 @@ a replacement with a transfer, or an observed reconcile), replies, settles it an
 is the run by its first prompt line and its environment together, never by the environment alone. A run that dies
 leaves the request in the state the extension gives it, and the host shows its operator the runs and cases OS-5 lists:
 two runs that ended without settling it (a run that never held the slot, whose work a hold refused or that the
-operator's move fenced not counted), an `outcome_unknown` a run's enrollment made or a run left, an `accepted` or
+operator's move fenced not counted; one whose enrollment was refused `retryable` for another cause counted), an `outcome_unknown` a run's enrollment made or a run left, an `accepted` or
 `in_progress` request with no live holder and no time left before the deadline, a `not_authorized` or other non-retryable refusal of its enrollment, and a human step the run could not
 put to its operator. A board request's mandate reaches the run as the target's registry agent id, which the run acts
 as when that is the chain's last entry, appending only its onward callees (OS-1 to OS-7, DEC-0158). Not the stdio server scope `on-demand` (LC-19).

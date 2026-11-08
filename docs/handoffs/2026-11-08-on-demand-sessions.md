@@ -66,6 +66,23 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   CT-272; Compatibility gains the adapter's requester rule and mandate guidance, Switchboard's scrub limited to sessions
   launched through it, and Fabric's delegation token's outermost actor; `comms-enroll.schema.json`'s description
   reworded (description only); DOCMAP's and Consequences' vector counts.
+- Round 7: SA-6's closing sentence keeps OS-4's one immediate retry of a settling call (a refused enrollment is not
+  retried, nothing else is); OS-1, DEC-0158 item 1, SCR-32 and SCN-025 say a hold stops a working run only before its
+  effect begins (a hold refuses `com.accept` and `com.effect_begin`, never `com.complete`, `com.reconcile`,
+  `com.progress` or `com.renew`) and a move fences it at its next board call, its `in_progress` request turning
+  `outcome_unknown`; OS-6's note for a request left `in_progress` reaches the owner "once a session of the target
+  Project takes the slot", and SCR-19 and SCN-025 offer "Open a session of the target Project" for every shown
+  `in_progress` request with no live holder; OS-6's note names the operator as resubmitter only when the operator owns
+  the requesting Project (a Project the run's own `com.directory` lists), otherwise the requester (item 6, SCN-025,
+  SCR-19, the run's row); SCR-19's Elements list a shown request with its cause and actions. Risks folded: OS-5 counts
+  a run refused `retryable` for another cause (item 5, the host's row, CONTEXT); OS-6's human step points to AP-4's
+  full list; SCN-025's wait of a question or an announcement (CT-272); OS-1's grace stated among the host's settings;
+  the host shows an opened session of the target Project the earlier runs' effect key (OS-5, SCR-19, SCN-025); the
+  host withholds the move of a slot to a run (OS-7, SCR-32, SCN-051, item 7); JRN-08 stage 6 and an ST-020 criterion
+  (FLW-16 and SCN-025 trace it); Compatibility gains the adapter's `DISPATCH_CONTRACT` lines and its vector-count tests,
+  Fabric's new debts, the `hand_on` read as the service case, and the knowledge base's items 3 and 8 as drafted below;
+  backlog CT-276 (the operator's limits on where a run starts) and CT-277 (how a requester learns a target Project's
+  registry agent id).
 
 ## Decisions taken here
 
@@ -99,8 +116,16 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   a board request's mandate on only to the target's registry agent id; Switchboard's scrub covers sessions launched
   through it, a shell-launched one being the adapter's; Fabric's delegation token for a run's onward call, once its hub
   forwards one, carries the target's registry agent id as its outermost actor or is not sent.
-- The adapter's vector-count literals move at its next pin: `test/fabric-mandate.test.mjs:26` asserts 40 cases and
-  `:40` asserts 30 hand-overs at its main `2c0b1b18`; this branch's `fixtures/vectors/mandate.json` holds 44 and 32.
+- The adapter's vector-count literals move at its next pin, with `mandate-vectors.json` re-vendored:
+  `test/fabric-mandate.test.mjs:26` and `test/test_fabric_mandate.py:35` assert 40 cases, and
+  `test/fabric-mandate.test.mjs:40` and `test/test_fabric_mandate.py:51` assert 30 hand-overs at its main `2c0b1b18`;
+  this branch's `fixtures/vectors/mandate.json` holds 44 and 32. Its `scripts/fabric_session_cli.py`
+  `DISPATCH_CONTRACT` (`:159`, `:165`) completes `failed_known` with `observed: true` after an effect began, the same
+  debt as `references/on-demand-session.md:147` and `:191`.
+- Fabric's CO-409 answer on whether its home count of requests no agent answers excludes a request a run holds: name
+  the answer in SCN-025 (its Coverage) when Fabric gives it.
+- CT-276 (the operator's limits on where a run starts) and CT-277 (how a requester learns a target Project's registry
+  agent id) are open; neither blocks the merge.
 - Fabric's specification at its main `eafcf2e4` also tells the run to append itself
   (`docs/evidence/specs/2026-11-04-on-demand-sessions.md:139-140` and `:148-149`): part of Fabric's OS-7 debt, with its
   packet text. Fabric's CO-409 also answers whether its home count of requests no agent answers excludes a request a
@@ -110,11 +135,50 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   answers" items 3 and 5 restated (a requester leaves a request to a host that dispatches; a session the host starts
   is built) and "One approval binds all" item 8's production stop kept with OS-6's settlement beside it. Its check:
   the knowledge base's own gate on that change, then a reading of the merged items against OS-1, OS-5 and OS-6. The
-  contract's merge and that change land together.
+  contract's merge and that change land together. The draft below is the text to land.
 - The landing board post of the consumer debts names, for each consumer (Fabric, Fabric Switchboard, the adapter,
   Project Observatory, the third host), its debts and a date: 2026-11-22 (two weeks after landing) unless the consumer's
   reply carries a `row` reaction with its own `due` (DEC-0098), which then replaces it. Until each date, a consumer
   still at the old reading is the mixed state the post names.
+
+## Draft of the knowledge base change (a merge condition)
+
+The text to land in fabric-workspace `knowledge/agents-first.md` with this decision's merge (read at its main
+`c84c7a40`). Items not named keep their text.
+
+"When nobody answers", item 3, its first sentence restated (the rest of the item unchanged):
+
+> 3\. **Nobody is live, the machine is the operator's, and the change is small: make it yourself, in the owner's
+> repository, unless the host dispatches.** Where the machine's host starts on-demand sessions (Fabric's dispatcher,
+> on by default; contract DEC-0158 OS-1), a request whose receipt carries `noResponder` is first left to it: wait
+> longer than the host's grace, which the host states among its settings, then read the request (`com.get`). Still
+> `queued`: no run took it (the switch is off, the slot, Project or thread is held, or a run's enrollment was
+> refused), so go on with this item. Claimed or further on: a run has it, so leave it and put the wait on a watcher
+> (item 2).
+
+"When nobody answers", item 5, restated:
+
+> 5\. **Waking the owner.** A host that dispatches starts a session in the target Project for a request no responder
+> takes, after its grace, with that request as its only task; the session takes it by its state, settles it and
+> ends (contract DEC-0158 OS-1 to OS-7; Fabric's dispatcher since 0.3.16). A request the host starts no more runs
+> for is shown to the operator with its cause (OS-5), and the operator acts through a session of the requesting
+> Project they own; a question or an announcement waits for the Project's next session (OS-7, contract CT-272).
+> Fabric's home ("requests no agent answers now") and the thread remain how the owner's next session, or the
+> operator, finds a request no run holds; the asker does not wait on either.
+
+"One approval binds all", item 8, two additions (its production stop kept):
+
+> A session started for a request settles it before it stops at a step that needs a person: `failed_known` with
+> `observed: false` before an effect began; after one, `failed_known` only once it observed that no effect happened,
+> and otherwise it leaves the request `in_progress` for the next holder; then it names the stop once in the thread
+> (contract DEC-0158 OS-6).
+
+and its close rule's parenthesis, aligned with OS-5's terminal states:
+
+> The same close rule (close the workflow only once the request has left the run: `answered`, terminal or
+> `outcome_unknown`; of these only a terminal state settles the request, as the contract's OS-5 counts runs) ...
+
+Its check: the knowledge base's own gate on the change, then a reading of the merged items against OS-1, OS-5 and OS-6.
 
 ## Checks run
 
@@ -155,6 +219,15 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   exit 0 (4 files, 355 tests; `test/mandate.test.ts` alone 85); `pnpm typecheck` exit 0;
   `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014 printed 0. The full `pnpm run check` was not run in
   this round.
+
+## Checks run on the round-7 commit
+
+- On the tree of the round-7 commit (parent `eabacf59`): `pnpm run docs:check` exit 0 ("Documentation checks passed",
+  lint:md 271 files, 0 errors); `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios);
+  `pnpm run privacy:check` exit 0 (0 findings); `pnpm vectors:check` exit 0 (32 vector files match their generators);
+  `pnpm vitest run test/mandate.test.ts test/comms-tools.test.ts test/comms-hold.test.ts test/consistency.test.ts`
+  exit 0 (4 files, 355 tests); `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014 printed 0. The full
+  `pnpm run check` was not run in this round.
 
 ## Rounds
 
@@ -239,10 +312,27 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   Switchboard's scrub scope and Fabric's delegation token in Compatibility; the adapter's count literals at its next
   pin.
 
+- Round 7 (on `eabacf59`), not clean: unit (and a seam risk), SA-6's closing sentence said a run never retries a
+  refusal, against OS-4's one immediate retry of a settling call (now SA-6 says a refused enrollment is not retried and
+  nothing else is but that one retry); product, the switch's text said holding a run's slot stops it, though a hold
+  refuses only `com.accept` and `com.effect_begin` (now a hold stops a run only before its effect begins, and a move
+  fences it at its next board call, its `in_progress` request turning `outcome_unknown`, in OS-1, item 1, SCR-32 and
+  SCN-025); OS-6's note "it reaches the owner as `outcome_unknown`" held only once a session takes the slot (now said
+  so, and SCR-19 and SCN-025 offer "Open a session of the target Project" for every shown `in_progress` request with no
+  live holder); OS-6's note always named the operator as resubmitter, who acts only through a session of the requesting
+  Project they own (now only then, otherwise the requester); SCR-19's Elements said "otherwise none" while its States
+  offered actions (now its Elements list a shown request's actions). Risks folded: a run refused `retryable` for
+  another cause counts toward OS-5's two; OS-6's human step points to AP-4's full list; SCN-025's question or
+  announcement waits (CT-272); the CO-409 count kept as named, its answer to be named in SCN-025; CT-276 for the
+  operator's limits; JRN-08 stage 6 and an ST-020 criterion; the host shows an opened session the earlier runs' effect
+  key; the host withholds the move to a run; the knowledge base's items 3, 5 and 8 drafted here; the adapter's
+  `DISPATCH_CONTRACT` and vector-count tests; CT-277 for a target Project's registry agent id, `hand_on` read as the
+  service case.
+
 ## Next task
 
-Round 7 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
+Round 8 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
 DEC-0158 Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the
-North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` items 3, 5 and 8 landed with the merge (a
+North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` items 3, 5 and 8 landed with the merge as drafted above (a
 merge condition, not a step after it), and a board post of the consumer debts to Fabric, Switchboard, the adapter,
 Observatory and the third host, a date for each.

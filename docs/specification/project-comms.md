@@ -461,8 +461,9 @@ board checks none of them and stores nothing new for them; what a reply does to 
   The holder gives the state in the turn it claims the request, by a `com.progress` note or a fenced `com.reply`
   (neither answers the request, [request lifecycle](#request-lifecycle)), and settles it with `com.accept`, then
   `com.complete`, its fenced reply carrying the result. A session the host starts on a board request answers only the
-  request it was handed, takes it by the state it finds, and never waits on a refusal or retries one (the host's next
-  start is the retry), as [on-demand sessions](#on-demand-sessions) OS-4 and OS-7 say (DEC-0158).
+  request it was handed, takes it by the state it finds, never waits on a refusal, does not retry a refused enrollment
+  (the host's next start is the retry) and retries nothing else but one immediate retry of a settling call, as
+  [on-demand sessions](#on-demand-sessions) OS-4 and OS-7 say (DEC-0158).
 
 ## Responders and fences
 
@@ -870,14 +871,17 @@ board client of its Project and moves a request only through the operations of t
 
 - **OS-1, who starts one.** Only the host that serves its operator's board starts a dispatched run, on the operator's
   own machine, only in a folder of the target Project on that machine, after a grace of its own choosing from the
-  request's submission, and only for a request of its own estate whose (Project, capability) slot has no live holder. A
+  request's submission, which it states among its settings so that a requester can wait longer than it, and only for a request of its own estate whose (Project, capability) slot has no live holder. A
   request is a candidate while it is `queued`, `claimed` with a lapsed attempt, or `accepted` or `in_progress` with no
   live holder, with time left before its deadline for a run to finish; never `answered`, `outcome_unknown`, `cancelled`
   or a terminal state, and never while its thread, its Project or its slot is [held](#holds) (it waits for the lift, as
   enrollment and a named claim do). At most one dispatched run works on a request at a time: a second start for a request whose run is
   in flight is refused by the host, idempotent by the request's id. The host offers the operator one switch that stops
-  new starts at once; a run already working is not stopped by it (it finishes, or the operator stops it by moving or
-  holding its slot), and turned on again the host starts at once for a request whose grace has passed. A standing dispatcher, on by default, is the operator's choice of 2026-11-04 and amends C5
+  new starts at once; a run already working is not stopped by it: it finishes, or the operator stops it. Holding its
+  slot stops it only before its effect begins, since a hold refuses `com.accept` and `com.effect_begin` and never
+  `com.complete`, `com.reconcile`, `com.progress` or `com.renew` ([what a hold refuses](#what-a-hold-refuses)), so a run
+  whose effect began finishes under the hold; moving its slot ([PR-2](#the-operator-moves-a-slot)) fences the run at its
+  next board call and turns its `in_progress` request into `outcome_unknown` (`lost_result`). Turned on again, the host starts at once for a request whose grace has passed. A standing dispatcher, on by default, is the operator's choice of 2026-11-04 and amends C5
   (DEC-0022, [OQ-0008](../OPEN_QUESTIONS.md)) for the host alone: a client still keeps no background helper of its own,
   and claims stay short tool bursts.
 - **OS-2, what a run is handed.** A run is handed the request by reference: the request's id, its thread, the
@@ -940,8 +944,9 @@ board client of its Project and moves a request only through the operations of t
   after a hold's lift the host may start again. A run refused `not_authorized` ends the host's starts for that request
   until the operator grants, and the host shows the request to its operator (a grant is the operator's). A run whose
   enrollment is refused with any other code that is not `retryable` (not `fenced` and not `held`, which count for
-  nothing above) likewise ends the host's starts for that request and shows it to its operator, so no refusal starts runs
-  without end. After the
+  nothing above) likewise ends the host's starts for that request and shows it to its operator. A run whose enrollment
+  is refused with a `retryable` code other than `held` or `fenced` counts as a run that ended without settling the
+  request, toward the two above, so no refusal starts runs without end. After the
   grant: at `absent` generation 0 the run's SA-6 decline made the request `answered`, so the requester submits it
   again; at a generation of 1 or more the run sent no reply, so the request kept its state (a `queued` one stays
   queued), and the host may start a run for it again. The requester sees no signal from the host in the thread:
@@ -956,13 +961,15 @@ board client of its Project and moves a request only through the operations of t
   request, or, on an `accepted` request it continued by a transfer, reuses that key for the same effect after its own
   `com.effect_begin`. The `accepted` branch covers a key the earlier run recorded before its `com.effect_begin`
   committed: the request then never left `accepted`, and the next run reuses that key, never a new one, so a service
-  that already saw the key does the effect once.
+  that already saw the key does the effect once. When the operator opens a session of the target Project for a request
+  the host shows to its operator, the host shows that session the earlier runs' record of a begun effect's key, as it would hand a next run (OS-2), so that session observes the effect before it
+  reconciles, or reuses the key, as a run does.
 - **OS-6, no person in the run.** A dispatched run has no person at it and never waits for one. It declares no
   elicitation capability for its session, so no service asks it one: a cancel would read as the person's no
   ([C3.3](interop.md#c33-awaiting-a-choice)) and is never the operator's decision (AP-2); where the launcher's client
   cannot omit the capability, the launcher or the host owns that lever. A job of another service that stops at
   `input_required`, a call refused `operator-decision-required` that the request's mandate does not cover (MD-4), a
-  human step ([service](service.md#actions) AP-4: a sign-in, a consent, a payment, a typed secret, spend above a limit),
+  human step ([service](service.md#actions) AP-4, the full list there),
   and a source hand-over without a decision naming its exact target ([source](source.md#handing-over), DEC-0149; without
   the elicitation capability the service answers `operator-decision-required` with the detail `handover-needs-operator`)
   are each a stop. Only the first two have an exception: a job's question or an `operator-decision-required` refusal
@@ -976,15 +983,21 @@ board client of its Project and moves a request only through the operations of t
   `queued` request, DEC-0102). At a human step the note carries the refusal's `humanStep` and `url` when the refusal
   gave them, and the run also asks the operator through the host's question surface (`fabric_question_ask` or the
   host's equal), or, where the run has none, leaves the host to show the request to its operator as OS-5 does. The
-  note and the question go by the outcome: after `failed_known`, "the operator submits it again once the step is taken;
-  leave it", naming the operator as the one who submits it again; after a request left `in_progress`, "do not submit
-  it again; it reaches the owner as `outcome_unknown`". So the requester submits it again only when that note or the
-  operator says so. Once the person has taken the step, the operator submits a `failed_known` request again by
-  default, or the requester does when the note or the operator says so (a requester's wake for it is CT-150); a request
-  left `in_progress` is not submitted again, since a new request's run gets no earlier effect key (OS-2, OS-5).
+  note and the question go by the outcome. After `failed_known`, the note names who submits it again: "the operator
+  submits it again once the step is taken; leave it" only when the operator owns the requesting Project (the run reads
+  it as a Project its own `com.directory` lists, the directory never listing another owner's Project,
+  [project directory](#project-directory); an unlisted one reads as not, which leaves it to the requester), since the operator acts on a request only through a session of the
+  requesting Project they own (OS-5); otherwise "the requester submits it again once the step is taken". After a
+  request left `in_progress`: "do not submit it again; it reaches the owner as `outcome_unknown` once a session of the
+  target Project takes the slot". So the requester submits it again only when that note or the operator says so. Once
+  the person has taken the step, the one the note names submits a `failed_known` request again (a requester's wake for
+  it is CT-150); a request left `in_progress` is not submitted again, since a new request's run gets no earlier effect
+  key (OS-2, OS-5).
 - **OS-7, slots and mandates.** A dispatched run holds a slot only while it works: it never takes a slot from a live
   holder, uses `com.responder_replace` only to continue a held `accepted` request whose holder is gone (CT-175), and
-  ends its session, and with it the slot, when it ends. While it holds the slot of `project.work` it is the Project's
+  ends its session, and with it the slot, when it ends. The host withholds the move of a slot to a dispatched run in its
+  operator controls (no "Make main" or "Move" on the run, [PR-2](#the-operator-moves-a-slot)): a run is never the
+  receiving session, since it ends with its own request; moving a slot off a run is how the operator stops it (OS-1). While it holds the slot of `project.work` it is the Project's
   main session ([PR-1](#the-primary-responder)); it answers only its own request, and every other message waiting for
   the Project stays unread for the Project's next session (SA-1 to SA-6 bind the run for its own request alone). It
   settles no request but its own; [owner settlement](#owner-settlement) is refused while the run holds the slot, so the

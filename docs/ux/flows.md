@@ -386,7 +386,7 @@ flowchart TD
 
 ### FLW-16: Operator follows a request on the Project board
 
-- **Traces:** ST-020 (JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3, JRN-08/#5)
+- **Traces:** ST-020 (JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3, JRN-08/#5, JRN-08/#6)
 - **Goal:** the operator reads each request between Projects with its request state and its effect state, and a lost result stays visible
 - **Entry points:** a request submitted to a Project's capability on the board
 - **Success exit:** the request terminal with an observed result, or `outcome_unknown` until reconciled by the responder or, when none holds the slot, by the estate owner, or `answered` when the target's participant replied to it while it was queued, or while it was claimed and it returned to queued (DEC-0098, DEC-0102)
@@ -413,7 +413,7 @@ flowchart TD
   N -->|the requester cancels| K[Cancelled]
 ```
 
-- **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired; SCR-19 answered; SCR-19 failed_known (a request settled as not done with its reason, an on-demand session's step that needs a person among its cases, DEC-0158 OS-6); SCR-32 success when the operator moves the slot that answers the request (DEC-0140); SCR-19 shown to you (a request the host starts no more on-demand runs for, with its cause and action, DEC-0158 OS-5); SCR-32 on-demand on and off (the host's switch, DEC-0158 OS-1).
+- **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired; SCR-19 answered; SCR-19 failed_known (a request settled as not done with its reason, an on-demand session's step that needs a person among its cases, DEC-0158 OS-6); SCR-32 success when the operator moves the slot that answers the request (DEC-0140); SCR-19 shown to you (a request the host starts no more on-demand runs for, with its cause and the actions that cause allows, "Open a session of the target Project" among them, DEC-0158 OS-5); SCR-32 on-demand on and off (the host's switch, DEC-0158 OS-1).
 
 ### FLW-17: A second copy of a service starts, or another account's listener holds its port
 

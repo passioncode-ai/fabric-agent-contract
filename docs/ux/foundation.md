@@ -229,6 +229,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | 3 | Lost result | finds a request whose result was lost | the board thread | 2 | an effect reported as done or silently retried, or a request stuck forever because its responder is gone | `outcome_unknown`, left only by an observed reconciliation, which the operator gives as the estate owner when no responder holds the slot, shown as the owner's (priority 9) |
 | 4 | Unlist | keeps a Project out of other agents' lookups | the host's Project settings | 3 | every agent of the estate can find a Project the operator keeps to itself | an unlisting that hides it from discovery only, never from a sender that knows its id (priority 6) |
 | 5 | Choose who answers | makes another session the Project's main one | the host's view of a Project's sessions | 3 | the wrong session answers the Project's requests, and taking over by hand loses or doubles work | a move by the operator from the generation they saw, fenced like a replacement, and the host showing when it changes hands again (priority 7) |
+| 6 | Nobody is there | finds a request answered by a session the host started, or shown to them when that session died, and turns the host's on-demand switch | the board thread and the host's view of a Project's sessions | 3 | a Project kept open only to be reachable, or a request stuck once the session started for it died | an on-demand session that takes the request, settles it and ends, a dead run's request shown with its cause and action, and one switch that stops new runs (DEC-0158; priority 7) |
 
 ### JRN-09: Operator — my machines as one network (JTBD-10)
 
@@ -513,13 +514,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 ### ST-020: Operator follows a request on the Project board
 
 - **Story:** As P-02, I want each request between Projects to show its request state and its effect state, so that I know what happened and what is unknown.
-- **Traces:** JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3, JRN-08/#5
+- **Traces:** JTBD-09, JRN-08/#1, JRN-08/#2, JRN-08/#3, JRN-08/#5, JRN-08/#6
 - **Acceptance criteria:**
   - Given a Project whose main session is the holder of `project.work`, when the operator moves that slot to another authorized session, then the old session's claimed requests return to the queue, its in-progress ones show `outcome_unknown`, its accepted ones are kept until the new session takes them over or the requester cancels them, and the host shows when the slot later changes hands.
   - Given a request sent to a Project's capability, when the responder accepts and completes it, then the thread shows `accepted`, then `completed` with an observed result.
   - Given a request whose result was lost after its effect began, then the thread shows `outcome_unknown`, and only an observed reconciliation settles it.
   - Given such a request whose slot no responder holds, when the operator settles it with a summary of what they observed, then the thread shows it `completed` or `failed_known`, settled by the owner; without a summary it stays `outcome_unknown`, and it can never be closed as cancelled.
   - Given a deadline that passes before anyone accepts, then the request shows `expired`; accepted work is held, not expired.
+  - Given a request no session of its target Project takes within the host's grace, with on-demand on, when the host starts a session for it, then that session claims it, gives its state, completes it and ends, and the thread shows `completed`; when that session dies without settling it, then the request keeps its state and, after two such runs or when one left it `outcome_unknown`, the host shows it to me with its cause and the actions that cause allows; when I turn on-demand off, then no new run starts, and a run already working finishes unless I hold its slot before its effect begins or move its slot (DEC-0158 OS-1, OS-4, OS-5).
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved
