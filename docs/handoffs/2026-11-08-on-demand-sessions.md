@@ -25,6 +25,17 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   `docs/ux/flows.md` FLW-16 gains `failed_known` (an edge and SCR-19's state); `docs/ux/screens.md` SCR-32 gains the
   on-demand run as main session; backlog CT-175's requester side names a dead dispatched run.
 - The merge of `origin/main` (50 commits) at `44feaab7`; `Next free ID` set to `DEC-0160` (the CAS counter's next 160).
+- Round 4: OS-5 shows at once a request a run settled at a human step it could not put to its operator, and says what
+  follows a grant after `not_authorized`; `noResponder`'s paragraph names a host that dispatches; OS-3's mismatch is a
+  `com.submit` of kind `message` with no `replyTo`; OS-6 names the operator as the default resubmitter (CT-150 for the
+  requester's wake); OS-7 and MD-2 cover a target with no registry agent id and the caller id a run's onward calls
+  present (MD-3); DEC-0152 annotated; DEC-0158 items 2, 3, 5, 6 and 7, Compatibility (Fabric's specification lines and
+  the CO-409 count question) and Consequences restated; the conformance rows (the board client points a run to its own
+  row); `CONTEXT.md` lists OS-5's cases; SCN-025 gains the switch, the request shown to the operator and the grant's
+  path, SCN-025 and SCN-051 the Settle wait for a run; SCR-19 gains "shown to you", SCR-32 the on-demand switch, FLW-16
+  both; two mandate vectors (a hand-on of the target again, refused `mandate-malformed`; a call whose chain carries the
+  run's runner kind, refused `mandate-not-for-this-call`), both what `src/mandate.ts` answers (`pnpm vitest run
+  test/mandate.test.ts`, 83 tests).
 
 ## Decisions taken here
 
@@ -50,10 +61,20 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   variables removed from what a run launches, no elicitation capability, OS-6's settlement, `failed_known` after an
   effect only once no effect is observed, at `references/on-demand-session.md:147` and `:191`); Observatory's kept
   reference form for an effect's key (its checkpoint redaction would destroy the key today).
-- A landing step: fabric-workspace `knowledge/agents-first.md`, "When nobody answers" items 3 and 5 restated (a
-  requester leaves a request to a host that dispatches; a session the host starts is built) and "One approval binds
-  all" item 8's production stop kept with OS-6's settlement beside it. Its check: the knowledge base's own gate on that
-  change, then a reading of the merged items against OS-1, OS-5 and OS-6.
+- Fabric's specification at its main `eafcf2e4` also tells the run to append itself
+  (`docs/evidence/specs/2026-11-04-on-demand-sessions.md:139-140` and `:148-149`): part of Fabric's OS-7 debt, with its
+  packet text. Fabric's CO-409 also answers whether its home count of requests no agent answers excludes a request a
+  run is about to take or is working, and owes showing at once a request a run settled at a human step it could not put
+  to its operator.
+- A merge condition, landed with the merge and not after: fabric-workspace `knowledge/agents-first.md`, "When nobody
+  answers" items 3 and 5 restated (a requester leaves a request to a host that dispatches; a session the host starts
+  is built) and "One approval binds all" item 8's production stop kept with OS-6's settlement beside it. Its check:
+  the knowledge base's own gate on that change, then a reading of the merged items against OS-1, OS-5 and OS-6. The
+  contract's merge and that change land together.
+- The landing board post of the consumer debts names, for each consumer (Fabric, Fabric Switchboard, the adapter,
+  Project Observatory, the third host), its debts and a date: 2026-11-22 (two weeks after landing) unless the consumer's
+  reply carries a `row` reaction with its own `due` (DEC-0098), which then replaces it. Until each date, a consumer
+  still at the old reading is the mixed state the post names.
 
 ## Checks run
 
@@ -66,6 +87,15 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
 - On `7bd5253d`: `pnpm run docs:check` exit 0 ("Documentation checks passed", lint:md 270 files, 0 errors);
   `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios); no U+2014 in the added lines
   (reproduced by round 1's readers).
+
+## Checks run on the round-4 commit
+
+- On the tree of the round-4 commit (parent `33f611d9`): `pnpm run docs:check` exit 0 (lint:md 271 files, 0 errors);
+  `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios); `pnpm run privacy:check` exit 0
+  (0 findings); `pnpm vectors:check` exit 0 (32 vector files match their generators); `pnpm vitest run
+  test/mandate.test.ts test/comms-tools.test.ts test/consistency.test.ts` exit 0 (3 files, 229 tests);
+  `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014 printed 0. The full `pnpm run check` was not run in
+  this round.
 
 ## Rounds
 
@@ -112,9 +142,21 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   CT-175's dead run; SCR-32's state; SA-6's closing sentence in Consequences; the knowledge base's landing step with its
   check; CONTEXT's counting; DOCMAP's rows.
 
+- Round 4 (on `33f611d9`), not clean: unit, OS-6 left a run with no question surface to OS-5, whose list had no such
+  case (now OS-5, DEC-0158 item 5 and the host's row show at once a request a run settled at a human step it could not
+  put to its operator, by the run's record); product, OS-1's switch and OS-5's showing had no UX home (now SCN-025's
+  UI elements and States, SCR-19's "shown to you" with each cause's action, SCR-32's on-demand switch, FLW-16). Risks
+  folded: the grant after `not_authorized` (OS-5, SCN-025); `noResponder` and a dispatching host, and the knowledge
+  base change a merge condition; DEC-0152 annotated; CONTEXT's list; DEC-0158 item 2's handed references; the
+  operator as default resubmitter and CT-150; CO-409's count question; SCN-051's and SCN-025's Settle wait; OS-3's
+  `message` with no `replyTo`; a target with no registry agent id and the onward caller id (OS-7, MD-2); Fabric's
+  specification lines; two vectors, both what the code answers; the board client's row; the debts' dates;
+  Consequences lists every file.
+
 ## Next task
 
-Round 4 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
+Round 5 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
 DEC-0158 Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the
-North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` items 3, 5 and 8, and a board post of the
-consumer debts to Fabric, Switchboard, the adapter and Observatory.
+North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` items 3, 5 and 8 landed with the merge (a
+merge condition, not a step after it), and a board post of the consumer debts to Fabric, Switchboard, the adapter,
+Observatory and the third host, a date for each.

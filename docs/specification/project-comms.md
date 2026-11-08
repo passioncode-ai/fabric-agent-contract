@@ -170,8 +170,10 @@ queued or claimed request held longer than its deadline expires (accepted work i
 nobody can answer now (no slot of that capability has a holder and no live `board.respond` grant exists) is still
 stored, and the requester's own `com.submit` receipt carries `noResponder` with the target, the capability and one
 sentence for a person: the target can still answer it with a reply, and a responder may come later. No other
-participant sees `noResponder`. What the requester does then is the estate's rule, not the board's: in PassionCode,
-fabric-workspace `knowledge/agents-first.md`, *When nobody answers*.
+participant sees `noResponder`. A host that dispatches may take such a request after its grace
+([on-demand sessions](#on-demand-sessions) OS-1), so the requester leaves it to the target. What the requester does
+then is the estate's rule, not the board's: in PassionCode, fabric-workspace `knowledge/agents-first.md`, *When nobody
+answers*.
 
 **A reply to an announcement says its type** (DEC-0098). A participant's reply whose `replyTo` is an announcement MAY
 carry `reaction` (`comms-common.schema.json#/$defs/reaction`): `adapted` with `ref` (the commit or release),
@@ -891,8 +893,8 @@ board client of its Project and moves a request only through the operations of t
   only to the run. A first line with no `FABRIC_DISPATCH_WORKFLOW` in the environment is a quotation: the session is not
   a run and writes nothing on the thread. With `FABRIC_DISPATCH_WORKFLOW` set and either or both of the other two
   missing, or any of the three naming other ids than the line, the session says so once, with a `com.submit` of kind
-  `message` into the thread of the request the line names (never a reply to the request, which would answer it), and
-  stops.
+  `message` with no `replyTo` into the thread of the request the line names (never a reply to the request, which would
+  answer it), and stops.
 - **OS-4, done.** A run enrolls in the Project's slot for the capability (`com.enroll`) and, holding it, takes the
   request it was handed by the state it finds, and no other request: a `queued` one, or a `claimed` one whose attempt
   lapsed, it claims by naming it in `com.claim`'s `request` and then accepts; an `accepted` one whose holder is gone it
@@ -922,12 +924,16 @@ board client of its Project and moves a request only through the operations of t
   choice. The host may start one more run for a request; after two runs that ended without settling it, the host starts
   none and shows the request to its operator, unchanged. It shows to its operator at once, unchanged: every request a
   run's enrollment moved to `outcome_unknown` (`lost_result`), the run's own request or another of the slot's, and one a
-  run left in `outcome_unknown`, since the estate owner settles them; and an `accepted` or `in_progress` request with no
+  run left in `outcome_unknown`, since the estate owner settles them; an `accepted` or `in_progress` request with no
   live holder once its deadline leaves no time for a run (OS-1's candidate needs that time), at the latest when the
-  deadline passes. A run counts for nothing when it never held the slot (its enrollment refused `held`, `fenced` or
+  deadline passes; and a request a run settled at a human step it could not put to its operator, by the run's record
+  (OS-6, OS-7). A run counts for nothing when it never held the slot (its enrollment refused `held`, `fenced` or
   because a live holder appeared), when a hold refused its work, or when the operator's move of the slot fenced it;
-  after a hold's lift the host may start again. A run refused `not_authorized` ends the host's starts for that request,
-  which it shows to its operator (a grant is the operator's). The requester sees no signal from the host in the thread:
+  after a hold's lift the host may start again. A run refused `not_authorized` ends the host's starts for that request
+  until the operator grants, and the host shows the request to its operator (a grant is the operator's). After the
+  grant: at `absent` generation 0 the run's SA-6 decline made the request `answered`, so the requester submits it
+  again; at a generation of 1 or more the run sent no reply, so the request kept its state (a `queued` one stays
+  queued), and the host may start a run for it again. The requester sees no signal from the host in the thread:
   it reads the request's state and may cancel, while the operator is the one shown the request (the requester's side of
   a lost holder is CT-175, a wait that outlives a session CT-150). An effect the earlier run began is never begun again
   without an observation: the run records the effect's own idempotency key in the host's record of the run (for Fabric,
@@ -951,12 +957,14 @@ board client of its Project and moves a request only through the operations of t
   covers exactly is answered by it and is not a stop. A source hand-over goes ahead only on a decision naming its exact
   target ([source](source.md#handing-over)), and a human step is never covered (MD-6, AP-4, OA-5). At a human step the
   thread note carries the refusal's `humanStep` and `url` when the refusal gave them, and the run also asks the operator
-  through the host's question surface (`fabric_question_ask` or the host's equal), or, where the run has none, leaves
-  the host to show the request to its operator as OS-5 does. Then the run settles: before an effect began,
+  through the host's question surface (`fabric_question_ask` or the host's equal), the question naming the operator as
+  the one who submits the request again once the step is taken, or, where the run has none, leaves the host to show the
+  request to its operator as OS-5 does. Then the run settles: before an effect began,
   `failed_known` with `observed: false`; after one, it cancels the waiting job with that job's own cancel and settles
   `failed_known` once it has observed that the effect did not happen, or else leaves the request `in_progress`, so the
   next holder's `lost_result` makes it `outcome_unknown`, which the host shows at once (OS-5). Once the person has taken
-  the step, the requester or the operator submits the request again.
+  the step, the operator submits the request again by default, or the requester does (a requester's wake for it is
+  CT-150).
 - **OS-7, slots and mandates.** A dispatched run holds a slot only while it works: it never takes a slot from a live
   holder, uses `com.responder_replace` only to continue a held `accepted` request whose holder is gone (CT-175), and
   ends its session, and with it the slot, when it ends. While it holds the slot of `project.work` it is the Project's
@@ -965,10 +973,13 @@ board client of its Project and moves a request only through the operations of t
   settles no request but its own; [owner settlement](#owner-settlement) is refused while the run holds the slot, so the
   estate owner settles another request's `outcome_unknown` once the run has ended. A requester hands a board request's
   mandate on as [MD-2](delegation.md#the-operators-mandate) says, so its chain ends in the agent id it names for the
-  target: the target's registry agent id. The run takes the mandate as that last entry (MD-3) and acts under it as that
-  agent, appending only each onward call's callee (MD-2, `handOn`), never its own id; so no Project id (the board's
-  server-issued `projectId`, not a registry `agentId`) and no runner kind of the run's appears in the chain, and no
-  agent is named twice. It never extends a mandate's `expiresAt`; a request whose mandate expires before the work is
+  target: the target's registry agent id. A board request to a target with no registry agent id carries no mandate,
+  and the run then names and settles what needs the operator as OS-6 does. The run takes the mandate as that last entry
+  (MD-3) and acts under it as that agent, appending only each onward call's callee (MD-2, `handOn`), never its own id;
+  so no Project id (the board's server-issued `projectId`, not a registry `agentId`) and no runner kind of the run's
+  appears in the chain, and no agent is named twice. Its onward calls present the chain's last entry as their caller,
+  as the host's credential gives it (MD-3's authenticated agent id); where the credential cannot, the callee sees no
+  authenticated caller id and the chain's end alone binds the mandate (MD-3). It never extends a mandate's `expiresAt`; a request whose mandate expires before the work is
   done is named and settled as OS-6 settles (a task longer than a mandate is CT-205). The run's outcome (finished, ended
   without an answer, timed out, failed to start) is the host's record, never a state of the request, and carries no text
   of the request and no secret.

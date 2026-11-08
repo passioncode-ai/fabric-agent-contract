@@ -578,9 +578,10 @@ it reaches acts on them without asking, within what they cover.
   the ceiling, never drops a list or the ceiling, never changes `task`, `instruction`, `at`, `expiresAt` or `source` (DEC-0126), and never
   names an agent twice; the chain holds at most four agents, as a delegation chain (DL-6). `FAC-SEM-144` refuses a
   document that breaks this. A board request's mandate is handed on the same way: its requester appends the target's
-  registry agent id, never the Project's id, and a session the target's host starts for the request acts as that
-  last entry and appends only the callees of its own onward calls, never itself ([project comms](project-comms.md#on-demand-sessions)
-  OS-7, DEC-0158).
+  registry agent id, never the Project's id (a target with no registry agent id gets no mandate), and a session the
+  target's host starts for the request acts as that last entry and appends only the callees of its own onward calls,
+  never itself; its onward calls present that entry as their caller where the host's credential gives it, and
+  otherwise no authenticated caller id (MD-3; [project comms](project-comms.md#on-demand-sessions) OS-7, DEC-0158).
 - **MD-2a, a naming list is never added** (DEC-0136). A `capabilities` list left out is "any" for a read or a draft
   but names no call for an external effect, and an `actions` list left out covers a relayed action only through a
   listed capability (its tool, for a job's step the job's capability; MD-3, **Covered**, MJ-1). So a hand-over never

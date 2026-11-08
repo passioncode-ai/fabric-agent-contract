@@ -413,7 +413,7 @@ flowchart TD
   N -->|the requester cancels| K[Cancelled]
 ```
 
-- **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired; SCR-19 answered; SCR-19 failed_known (a request settled as not done with its reason, an on-demand session's step that needs a person among its cases, DEC-0158 OS-6); SCR-32 success when the operator moves the slot that answers the request (DEC-0140).
+- **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired; SCR-19 answered; SCR-19 failed_known (a request settled as not done with its reason, an on-demand session's step that needs a person among its cases, DEC-0158 OS-6); SCR-32 success when the operator moves the slot that answers the request (DEC-0140); SCR-19 shown to you (a request the host starts no more on-demand runs for, with its cause and action, DEC-0158 OS-5); SCR-32 on-demand on and off (the host's switch, DEC-0158 OS-1).
 
 ### FLW-17: A second copy of a service starts, or another account's listener holds its port
 

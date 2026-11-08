@@ -51,6 +51,8 @@ function cases(): Array<[string, Json, Json]> {
     // DEC-0158 OS-7: a board request's requester hands the mandate on to the target's registry agent id; the run the
     // target's host starts acts as that entry and appends only its onward callee, so the chain names no Project id.
     ["a board request's mandate at the onward callee of the run the target's host started", call({ mandate: board, self: "example-crawler", callerAgent: "example-target" }), OK(["example-requester", "example-target", "example-crawler"])],
+    // DEC-0158 OS-7: a run that appended its runner kind breaks the chain; the target before the callee no longer binds it.
+    ["a board request's chain where the run appended its runner kind: the target is not the agent before the callee", call({ mandate: { ...base, chain: [...board.chain.slice(0, 2), { agent: "claude-code", at: "2026-10-26T10:06:00Z" }, { agent: "example-crawler", at: "2026-10-26T10:07:00Z" }] }, self: "example-crawler", callerAgent: "example-target" }), BAD("mandate-not-for-this-call")],
     // DEC-0126 OA-2, OA-6: the operator said it in another of their agents' sessions; where travels into the record.
     ["words relayed from another of the operator's agents: where they said them travels into the record", call({ mandate: { ...base, source: { project: "example-analyst", thread: "example-thread-3" } } }), { ...OK(), recordAs: { ...OK().recordAs, source: { project: "example-analyst", thread: "example-thread-3" } } }],
     ["a source naming neither the session nor the thread", call({ mandate: { ...base, source: { project: "example-analyst" } } }), BAD("mandate-malformed")],
@@ -125,6 +127,7 @@ function handOnCases(): Array<[string, Json, Json]> {
     ["adding a capabilities list where only actions are listed widens (MD-2a draws the line at the list)", { mandate: actionsOnly, callee: "example-researcher", at: "2026-10-26T10:05:00Z", narrower: { capabilities: ["page.update"], actions: ["publish-page"], effects: ["publish"], projects: ["example-site"] } }, STOP("mandate-widened")],
     // DEC-0158 OS-7: the run holds the chain ending in the target's registry agent id and appends only its callee.
     ["the run the target's host started for a board request calls on: only the callee is appended", { mandate: boardHeld, callee: "example-crawler", at: "2026-10-26T10:06:00Z" }, SENT(boardHeld, step("example-crawler", "2026-10-26T10:06:00Z"))],
+    ["the run appends the target, the chain's last entry, again: refused", { mandate: boardHeld, callee: "example-target", at: "2026-10-26T10:06:00Z" }, STOP("mandate-malformed")],
     ["at the same second as the step before", { mandate: leading, callee: "example-researcher", at: "2026-10-26T10:01:00Z" }, SENT(leading, step("example-researcher", "2026-10-26T10:01:00Z"))],
     ["where the operator said the words travels unchanged", { mandate: sourced, callee: "example-researcher", at: "2026-10-26T10:05:00Z" }, SENT(sourced, step("example-researcher", "2026-10-26T10:05:00Z"))],
     ["a higher per-call ceiling widens", { mandate: handed, callee: "example-crawler", at: "2026-10-26T10:06:00Z", narrower: { ...narrow, perCallMaxUsd: 6 } }, STOP("mandate-widened")],
