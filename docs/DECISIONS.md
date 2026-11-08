@@ -11600,14 +11600,26 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   of OS-5's two runs and one run in flight for a request across every machine it dispatches from (a record its
   machines share), where its spec lets another machine take a request one machine skipped
   (`docs/evidence/specs/2026-11-04-on-demand-sessions.md:124`) and both are read from a local file today, the board's
-  slot meanwhile keeping a second run from working (OS-1); the on-demand switch as one setting its machines share,
+  slot meanwhile keeping a second run from working (OS-1); one record of a request's runs across those machines too,
+  the record OS-5 and OS-6 read (a begun effect's key, a settlement at a human step the run could not put to its
+  operator), where the take-back reads an earlier run from the same local file (`board-dispatches.json` under the
+  machine's user data, `apps/desktop/src/main/index.ts:2998`) and, on a machine without it, opens a fresh workflow with
+  no earlier key (`apps/desktop/src/main/boardDispatchRun.ts:302-309`), so a run started there for an `accepted`
+  request would begin the effect under a new key, the double effect OS-5's key exists to prevent (Project
+  Observatory's workflow store, which holds that body, is local to each machine as well); the on-demand switch as one setting its machines share,
   stopping new starts on every machine it dispatches from (OS-1), where each machine reads its own
   (`apps/desktop/src/main/index.ts:2996`, `switchOn: () => readSettings().dispatchBoardRequests`); the request shown to its operator naming each cause SCR-19 lists (two runs, a
   timed-out run told apart from one that ended for another reason, no time left, `not_authorized` or another refusal
   that is not `retryable`, a human step the run could not ask about) with the actions that cause allows, "Open a
   session of the target Project" among them, opened with the request's id and the earlier runs' record (OS-5), where
   `apps/desktop/src/shared/abandonedSweep.ts:241-249` ships two texts for a stopped request and one for
-  `outcome_unknown`; its `request-unmoved` next step (`:250-251`, "answer it (com.reply)"), which on a request a run
+  `outcome_unknown`; for an `accepted` request whose record holds a begun effect's key, "Open a session of the target
+  Project" offered before cancel and submit again (SCR-19); owner settlement's "Settle" on a shown `outcome_unknown`
+  request (OS-5's "for the owner to settle", designed and not built: CT-41, DEC-0081), with its thread's
+  `launch.comms.unknown.nobody` string ("nothing settles it until one does",
+  `apps/desktop/src/renderer/src/i18n/en.ts:2266`) and its sweep's `request-outcome-unknown` next step ("settle it
+  (com.reconcile) or answer the requester", `apps/desktop/src/shared/abandonedSweep.ts:248`, where a target's answer
+  never moves an `outcome_unknown` request) brought to owner settlement; its `request-unmoved` next step (`:250-251`, "answer it (com.reply)"), which on a request a run
   is due to take would move it to `answered` and take it from the run, telling a session to leave such a request to
   the run; and the
   items its CO-409 row still lists open (the journal events, the permissions screen, the live session's wake, the
@@ -11624,8 +11636,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   folder, and settlement, with `failed_known` after an effect only once no effect is
   observed and the request otherwise left `in_progress`, the same point as the adapter's below; on a refused
   `com.enroll`, what SA-6 says for that code without its retry, then the end, the operator asked only for a refusal
-  that is not `retryable`, where its text (`6912ae2`, `crates/switchboard-runtime/src/dispatch.rs:266`) always asks the operator
-  and never ends) and, as the launcher,
+  that is not `retryable`, where its text (`6912ae2`, `crates/switchboard-runtime/src/dispatch.rs:266`) names no end for a
+  refusal other than `not_authorized`, asking the operator even where SA-6 asks no one) and, as the launcher,
   the elicitation lever of OS-6 where the coding agent's client declares the capability. A third host of the estate
   implements the dispatched run itself (its own board-spawn design of 2026-11-04) and owes the same reading of OS-4 to
   OS-7. The adapter's `working-with-fabric` (FAA-201, `references/on-demand-session.md`) reads OS-3's line and
@@ -11659,16 +11671,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   UUIDs, long hex or random runs except its kept references (`session:`, `board-request:`, `board-thread:`,
   `fabric-project:`, `commit:`), which today would destroy the key OS-5 keeps there. fabric-workspace's
   `knowledge/agents-first.md` owes, in "The project board", item 3 (a session a host started for one
-  request claims no other) and item 4 (a session a host started for one board request answers only that request,
-  OS-7), in "When nobody answers", item 3 (on every board, since the host that serves the board may start a run from any
+  request claims no other, does not retry a refused enrollment and ends, OS-4, and accepts the request immediately
+  after its claim) and item 4 (a session a host started for one board request answers only that request,
+  OS-7), in "When nobody answers", item 1 (its cancel of a request still `accepted` with effect `not_started`
+  carrying `expectedRevision`, and such a request, when a run took it, possibly already carrying the run's edits in the
+  target's folder, which the resubmitted request's run observes), item 3 (on every board, since the host that serves the board may start a run from any
   machine of the operator's it runs on for a request and the board does not say whether one will: a requester makes a change in
   the owner's repository only for a request it cancelled while `queued` or `answered` with `expectedRevision` set to
   the revision `com.get` returned, only a `cancelled` receipt answering a cancel sent with that `expectedRevision`
-  proving that no run accepted it (the board refuses `revision_conflict` when the request moved), or for one that `expired`, a run accepting before any change in the target's folder
+  proving that no run accepted it (every lifecycle operation advances the revision, so the board refuses `revision_conflict` when the request moved), or for one that `expired`, a run accepting before any change in the target's folder
   (OS-4); never for a request a run has held (`claimed`, `accepted`, `in_progress`, `outcome_unknown`), for which it
   waits and acts only as item 1 says; the old order, the change first and the cancel after it, dropped, since a
   request left `queued` may be taken by a run; every state on one line; a cancel the requester did not send read as another session of its Project having acted, so
-  it submits nothing; a hold never a reason to make the change),
+  it submits nothing; a hold stopping board work, whether it also stops the requester's own change being the operator's
+  open question in the handoff),
   item 4 (the request stays for its owner, or for a run a host starts) and item 5 (a
   session the host starts is built, not asked for; the operator acts on a shown request through a session of the
   requesting Project they own, otherwise the requester on its own reading, OS-5) restated, and in "One approval binds all", item 8's production stop
@@ -11688,7 +11704,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** every file this decision changed: `docs/DECISIONS.md` (this record, DEC-0022's and
   DEC-0152's Annotated lines, `Next free ID`); `docs/specification/project-comms.md` (the amendment line, SA-6's
-  closing sentence, `noResponder`'s line on a host that dispatches and the section *On-demand sessions*);
+  closing sentence, `noResponder`'s line on a host that dispatches, the request lifecycle's sentence that every
+  operation of its table advances the request's revision, and the section *On-demand sessions*);
   `docs/specification/delegation.md` (MD-2's sentence on a board request's chain); `tools/vectors/mandate.ts` and
   `fixtures/vectors/mandate.json` (four call cases and two hand-on cases of a board request's chain);
   `schemas/comms-enroll.schema.json` (its description: a dispatched run ends instead of retrying);

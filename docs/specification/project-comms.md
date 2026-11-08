@@ -326,6 +326,9 @@ alive, a lease, a Telegram delivery or a read mark.
 | `com.reconcile` | `outcome_unknown` → `completed` / `failed_known`, observed only, by the current responder, or the estate owner when no responder holds the slot (DEC-0081) |
 | answer | `queued` → `answered`: a participant's message of any kind but `request` (never a responder's fenced message or progress note) from the request's target Project whose `replyTo` is the request, in the same transaction as that message, or on a board's pass for a `queued` request such a message already answered (DEC-0098, DEC-0102) |
 
+Each operation of this table advances the request's revision (the `revision` a receipt's `request` and a message
+carry), so a call that carries the revision its caller read (`expectedRevision`) is refused `revision_conflict` once
+any of them has happened since (DEC-0158).
 An operator's [hold](#holds) (DEC-0079) is not an operation of this table: it moves no request and changes no revision,
 it refuses some operations while it lasts, and a held request's deadline keeps running. It is not the C4 sense of
 *held* above, in which accepted work outlives its deadline.
@@ -464,7 +467,7 @@ board checks none of them and stores nothing new for them; what a reply does to 
   (neither answers the request, [request lifecycle](#request-lifecycle)), and settles it with `com.accept`, then
   `com.complete`, its fenced reply carrying the result. A session the host starts on a board request answers only the
   request it was handed, takes it by the state it finds, never waits on a refusal, does not retry a refused enrollment
-  (the host's next start is the retry) and retries nothing else but one immediate retry of a settling call, as
+  (the host's next start, where OS-5 allows one, is the retry) and retries nothing else but one immediate retry of a settling call, as
   [on-demand sessions](#on-demand-sessions) OS-4 and OS-7 say (DEC-0158).
 
 ## Responders and fences
@@ -940,7 +943,7 @@ contract times.
   (`com.complete`, `com.reconcile`) with the same idempotency key when its refusal is `retryable` and neither `held` nor `lease_expired` (a lapsed lease is never retried; the
   key makes the retry safe, [idempotency](#idempotency)); a settling call refused again leaves the request as OS-5 says. One whose `com.enroll` is refused does
   what SA-6 says for that refusal ([answering in the same turn](#answering-in-the-same-turn)) except SA-6's retry once
-  the cause is gone, and ends, the host's next start after the cause is gone being the retry (OS-5); any other refusal of a board call on its work (`held`, `fenced` and `lease_expired` among
+  the cause is gone, and ends, the host's next start after the cause is gone being the retry where OS-5 allows one; any other refusal of a board call on its work (`held`, `fenced` and `lease_expired` among
   them, and a `com.reconcile` refused because the run no longer holds the slot) ends it, never retaking the slot, and
   leaves the request as OS-5 says.
 - **OS-5, a run that dies.** A run that ends without settling the request leaves it in the state this extension gives
@@ -951,7 +954,9 @@ contract times.
   counts runs only, and when a host closes its own record of a run (at `answered` or `outcome_unknown` too) is its own
   choice. The host may start one more run for a request; after two runs that ended without settling it, the host starts
   none and shows the request to its operator, unchanged. The count is one for the request across every machine the
-  host dispatches from. It shows to its operator at once, unchanged: every request a
+  host dispatches from, and so is the host's record of the request's runs that OS-5 and OS-6 read (a begun effect's key
+  among it, and a run's settlement at a human step it could not put to its operator): a run the host starts on any of
+  its machines is handed that one record (OS-2). It shows to its operator at once, unchanged: every request a
   run's enrollment moved to `outcome_unknown` (`lost_result`), the run's own request or another of the slot's, and one a
   run left in `outcome_unknown`, since the estate owner settles them; an `accepted` or `in_progress` request with no
   live holder once its deadline leaves no time for a run (OS-1's candidate needs that time), at the latest when the
@@ -966,7 +971,8 @@ contract times.
   until the operator grants, and the host shows the request to its operator (a grant is the operator's). A run whose
   enrollment is refused with any other code that is not `retryable` (`fenced` aside, which counts for nothing above)
   likewise ends the host's starts for that request
-  and shows it to its operator. After the
+  and shows it to its operator; no next start retries such a refusal, and the request waits for the operator's act on
+  it (OS-5's shown request, never a host's own retry). After the
   grant: at `absent` generation 0 the run's SA-6 decline made the request `answered`, so whoever submits it again
   (the operator through a session of the requesting Project they own, otherwise the requester) first cancels it with
   `expectedRevision` set to the revision it read, and submits it again only on its own `cancelled` receipt; on

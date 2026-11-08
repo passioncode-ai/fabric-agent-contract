@@ -123,6 +123,15 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   debt); OS-4's reply fenced and a `lease_expired` settling call never retried; OS-6's hand-over wording; the drafted
   item 3 names the host that serves the board, drops the receipt's revision parenthesis and reads a cancel the
   requester did not send; Fabric's two tests pinning the old accept wording named.
+- Round 13: the host's record of a request's runs (a begun effect's key, a settlement at a human step) is one across
+  every machine it dispatches from, as the count is (OS-5, the host's row; Fabric's shared-record debt); the request
+  lifecycle says every operation of its table advances the request's revision and a hold does not, which grounds the
+  cancel proof; SA-6 and OS-4 call the host's next start the retry only where OS-5 allows one, and OS-5 says no start
+  retries a refusal that is not `retryable`; SCR-19 and SCN-025 offer "Open a session of the target Project" first for
+  an `accepted` request whose record holds a begun effect's key; the conformance rows cite *at once* and OS-3's
+  object exactly; Fabric's missing owner "Settle" and its two texts named; Switchboard's exit text debt restated; the
+  drafted item 3 says a hold stops board work and leaves the requester's own change to the operator's open question;
+  the drafted "The project board" item 3 and "When nobody answers" item 1.
 
 ## Decisions taken here
 
@@ -156,8 +165,17 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   machines share, stopping new starts on every machine it dispatches from, where each machine reads its own today
   (`index.ts:2996`), its tests `board-dispatch-run.test.mjs:566` and `protocolObligations.test.ts:91` changing with
   the `:281` and `:222` wording they pin, and its packet having a run observe, never redo, a change the thread's
-  *adapted by* line says was made); Switchboard's `EXIT_CONTRACT` (from round 10, the accept immediately after the
-  claim); the adapter's FAA-201 (the three
+  *adapted by* line says was made; from round 13, one record of a request's runs across those machines, a begun
+  effect's key and a settlement at a human step among it, where the take-back reads `prior` from the local
+  `board-dispatches.json` (`index.ts:2998`) and opens a fresh workflow with no earlier key on another machine
+  (`boardDispatchRun.ts:302-309`), owner settlement's "Settle" on a shown `outcome_unknown` request (CT-41,
+  DEC-0081, designed and not built) with its "nothing settles it until one does" string (`en.ts:2266`) and its sweep's
+  "answer the requester" next step (`abandonedSweep.ts:248`) brought to owner settlement, and "Open a session of the
+  target Project" offered before cancel and submit again for an `accepted` request whose record holds a begun
+  effect's key); Switchboard's `EXIT_CONTRACT` (from round 10, the accept immediately after the
+  claim; from round 13, on a refused `com.enroll`, where its text names no end for a refusal other than
+  `not_authorized`, asking the operator even where SA-6 asks no one, the end for every refused code and the operator
+  asked only where SA-6 asks); the adapter's FAA-201 (the three
   variables removed from what a run launches, no elicitation capability, OS-6's settlement, `failed_known` after an
   effect only once no effect is observed, at `references/on-demand-session.md:147` and `:191`; recording a begun
   effect's key in the host's record of the run, a debt new with DEC-0158 and not FAA-215's, which covers closing the
@@ -178,6 +196,15 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   debt as `references/on-demand-session.md:147` and `:191`.
 - Fabric's CO-409 answer on whether its home count of requests no agent answers excludes a request a run holds: name
   the answer in SCN-025 (its Coverage) when Fabric gives it.
+- An operator question (product reading, round 13): does a hold of the target's Project or slot also stop the
+  requester's own change under "When nobody answers" item 3? (a) Yes: a request whose target Project or slot reads
+  `held: true` waits for the lift and the requester makes no change for it (item 4), so the hold reads as the pause
+  Fabric's label says ("nothing new is taken until you resume"), at the cost of a small change waiting on a hold the
+  operator may have set for another reason. (b) No: a hold stops board work only, and the requester may still make a
+  small change in a held Project by item 3's lines, so the change is not delayed, at the cost of a pause label the
+  operator may read as covering it, which Fabric's label then owes a line on. The draft claims neither: it says a hold
+  stops board work and the question is open. The answer is the operator's; it lands in the drafted item 3 and in
+  DEC-0158's Compatibility before the merge.
 - CT-276 (the operator's limits on where a run starts) and CT-277 (how a requester learns a target Project's registry
   agent id) are open; neither blocks the merge.
 - Fabric's specification at its main `eafcf2e4` also tells the run to append itself
@@ -186,7 +213,9 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   run is about to take or is working, and owes showing at once a request a run settled at a human step it could not put
   to its operator.
 - A merge condition, landed with the merge and not after: fabric-workspace `knowledge/agents-first.md`, "The project
-  board" items 3 and 4 gaining OS-7's one-request rule, "When nobody answers" items 3, 4 and 5 restated (on every
+  board" items 3 and 4 gaining OS-7's one-request rule (item 3 also OS-4's end without a retry and its accept right
+  after the claim), "When nobody answers" item 1's cancel carrying `expectedRevision` and naming a run's edits under an
+  `accepted` request with effect `not_started`, items 3, 4 and 5 restated (on every
   board, a requester makes a change itself only for a request it cancelled while `queued` or `answered`, the
   `cancelled` receipt answering a cancel sent with the read `expectedRevision`, or one that expired, never for one a
   run has held; a request left `queued` may be taken by a run; a session the host starts is built) and "One approval binds all" item 8's production
@@ -205,8 +234,11 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
 - The landing board post of the consumer debts names, for each consumer (Fabric, Fabric Switchboard, the adapter,
   Project Observatory, the third host), its debts (the adapter's among them: dropping "do not cancel it" from its
   requester rule; Fabric's: its `com.submit` description, its `noResponder` sentence, one count and one run in
-  flight per request across its machines, the on-demand switch as one setting its machines share, and the accept
-  immediately after the claim) and a date: 2026-11-22 (two weeks after landing) unless the consumer's
+  flight per request across its machines, one record of a request's runs across them (a begun effect's key, a
+  settlement at a human step), the on-demand switch as one setting its machines share, the accept immediately after
+  the claim, owner settlement's "Settle" on a shown `outcome_unknown` request (CT-41, DEC-0081) with its "nothing
+  settles it" string and its "answer the requester" next step brought to owner settlement; Switchboard's: the end of
+  every refused enrollment, the operator asked only where SA-6 asks) and a date: 2026-11-22 (two weeks after landing) unless the consumer's
   reply carries a `row` reaction with its own `due` (DEC-0098), which then replaces it. Until each date, a consumer
   still at the old reading is the mixed state the post names.
 
@@ -217,12 +249,24 @@ The text to land in fabric-workspace `knowledge/agents-first.md` with this decis
 
 "The project board", item 3, one sentence added after its first ("... claim it and start (principle 10, item 2)."):
 
-> A session a host started for one board request claims no other (item 4, contract DEC-0158 OS-7).
+> A session a host started for one board request claims no other (item 4, contract DEC-0158 OS-7), does not retry a
+> refused enrollment and ends (the host's next start, where it starts one, is the retry; OS-4, OS-5), and accepts the
+> request immediately after its claim, before any change in the target's folder (OS-4).
 
 "The project board", item 4 ("Answer at once"), one sentence added at its end:
 
 > A session a host started for one board request answers only that request: every other message waiting for the
 > Project stays unread for the Project's next session (contract DEC-0158 OS-7).
+
+"When nobody answers", item 1, its cancel of a request still `accepted` with effect `not_started` restated (from "If
+nobody answers and its `effect` is still `not_started`"):
+
+> If nobody answers and its `effect` is still `not_started`, cancel it (`com.cancel`, `expectedRevision` set to the
+> revision `com.get` returned; on `revision_conflict`, read it again and go by its new state), and only once the
+> receipt shows it `cancelled` submit it again. A request a run took (contract DEC-0158 OS-4) may be `accepted` with
+> `effect` `not_started` and already carry the run's edits in the target's folder: the run accepts before any change
+> there, and `not_started` says only that it has done nothing outward yet; the run of the request you submit again
+> observes the folder first and finds them.
 
 "When nobody answers", item 3, its first sentence restated and one paragraph added after it (the rest of the item
 unchanged but its last paragraph, below):
@@ -237,8 +281,8 @@ unchanged but its last paragraph, below):
 >
 > - `queued`, or `answered` (the target's decline; no run takes it): cancel it (`com.cancel`, `expectedRevision` set
 >   to that revision, the reason "the asker makes this change itself"), then make the change. Only a `cancelled`
->   receipt answering a cancel sent with that `expectedRevision` proves no run accepted it (the board refuses
->   `revision_conflict` when the request moved). On `revision_conflict`, read it again.
+>   receipt answering a cancel sent with that `expectedRevision` proves no run accepted it (every operation of the
+>   request's lifecycle advances its revision, so the board refuses `revision_conflict` when the request moved). On `revision_conflict`, read it again.
 > - `expired`: no run accepted it; make the change.
 > - `claimed`, `accepted`, `in_progress` or `outcome_unknown`: a run or another holder has it; never make the change.
 >   Wait on a watcher (item 2) and act on it only as item 1 says.
@@ -249,7 +293,9 @@ unchanged but its last paragraph, below):
 >   your Project, otherwise you; with no such note, you decide (OS-6).
 >
 > If your change does not land, submit the request again. A hold (`held: true` in `com.directory` or `com.status`)
-> changes none of these lines.
+> stops board work on the held thread, Project or slot (no run starts under it, contract OS-1); whether it also stops
+> your own change for that request is an open question of the operator's, and until it is answered this item claims
+> neither.
 
 and the item's last paragraph, from "Then post on the request's thread", reads:
 
@@ -380,6 +426,16 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   scenarios); `pnpm run privacy:check` exit 0 (0 findings); `pnpm vectors:check` exit 0 (32 vector files match their
   generators); `pnpm vitest run test/mandate.test.ts test/consistency.test.ts test/comms-tools.test.ts
   test/comms-hold.test.ts` exit 0 (4 files, 355 tests); `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014
+  printed 0; `git merge-tree --write-tree HEAD origin/main` exit 0. The full `pnpm run check` was not run in this
+  round.
+
+## Checks run on the round-13 commit
+
+- On the tree of the round-13 commit (parent `0dd3e829`): `pnpm run docs:check` exit 0 ("Documentation checks
+  passed", lint:md 271 files, 0 errors); `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56
+  scenarios); `pnpm run privacy:check` exit 0 (0 findings); `pnpm vectors:check` exit 0 (32 vector files match their
+  generators); `pnpm vitest run test/mandate.test.ts test/comms-hold.test.ts test/consistency.test.ts
+  test/comms-tools.test.ts` exit 0 (4 files, 355 tests); `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014
   printed 0; `git merge-tree --write-tree HEAD origin/main` exit 0. The full `pnpm run check` was not run in this
   round.
 
@@ -652,11 +708,36 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   takes one; `comms-message.schema.json`'s request carries none), so the drafted line alone carries it; Fabric's home
   count (product) needs Fabric's CO-409 answer, already planned for SCN-025's Coverage.
 
+- Round 13 (on `0dd3e829`), not clean: unit and product passed with risks, seam failed with one break. Seam, OS-5 had
+  the host carry an earlier run's record of a begun effect's key to the next run while OS-1 lets that run start on any
+  machine the host dispatches from, and only the count was one across machines; Fabric reads `prior` from a local
+  `board-dispatches.json` (`index.ts:2998`) and on another machine opens a fresh workflow with no earlier key
+  (`boardDispatchRun.ts:302-309`), so a run there for an `accepted` request would begin the effect under a new key
+  (now OS-5 makes the host's record of the request's runs, the effect key and a human-step settlement among it, one
+  across every machine it dispatches from, as the count is; the host's row says so; Fabric's shared-record debt, the
+  Open list and the landing post name it). Chosen over restricting OS-1 to the machine holding the record, since OS-1
+  and OS-5 already make the count, the run in flight and the switch one across machines. Risks folded: the request
+  lifecycle says every operation of its table advances the request's revision and a hold does not, which grounds the
+  drafted cancel proof, now cited in the draft and the Compatibility (seam); the drafted "When nobody answers" item 1
+  gives its cancel `expectedRevision` and says an `accepted` request with effect `not_started` may carry a run's edits
+  (seam); the drafted "The project board" item 3 says a session a host started does not retry a refused enrollment and
+  ends, and accepts right after its claim (seam); Switchboard's `EXIT_CONTRACT` names no end for a refusal other than
+  `not_authorized` and asks the operator even where SA-6 asks no one, not "never ends" (seam); the host's row cites
+  *at once* as defined for OS-1 to OS-7 (unit); the run's row reads "writes nothing on the request's thread", as OS-3
+  (unit); SA-6 and OS-4 call the host's next start the retry only where OS-5 allows one, and OS-5 says no start retries
+  a refusal that is not `retryable`, the request waiting for the operator's act (unit); SCR-19 and SCN-025 offer "Open
+  a session of the target Project" before cancel and submit again for an `accepted` request whose record holds a begun
+  effect's key (product); Fabric's missing owner "Settle" (CT-41, DEC-0081) and its "nothing settles it" string and
+  "answer the requester" next step named in its debts and the landing post (product). To the operator (Open): whether
+  a hold of the target's Project or slot also stops the requester's own change (product); the draft says a hold stops
+  board work and claims neither answer. Kept as is: the mixed-state window (product), already a merge condition with a
+  dated post.
+
 ## Next task
 
-Round 13 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
+Round 14 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
 DEC-0158 Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the
 North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` ("The project board" items 3 and 4, "When
-nobody answers" items 3, 4 and 5, "One approval binds all" item 8) landed with the merge as drafted above (a merge condition, not
+nobody answers" items 1, 3, 4 and 5, "One approval binds all" item 8) landed with the merge as drafted above (a merge condition, not
 a step after it), and a board post of the consumer debts to Fabric, Switchboard, the adapter, Observatory and the third
 host, a date for each, naming the window from Fabric 0.3.16 until the knowledge change lands and each consumer meets its debt by its date.
