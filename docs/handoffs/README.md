@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-11-07 the operator's word, carried out the first time](2026-11-07-operators-word.md) | DEC-0156 (CT-220; CT-266, CT-269, CT-271 filed), proposed; rounds 1 to 15 not clean, round 16 next | open, branch `agent/ct220-operators-word-v2` |
+| [2026-11-07 the operator's word, carried out the first time](2026-11-07-operators-word.md) | DEC-0156 (CT-220; CT-266, CT-269, CT-271 filed), proposed; rounds 1 to 16 not clean, round 17 next | open, branch `agent/ct220-operators-word-v2` |
 | [2026-11-04 the channel agent standard's ticket counts](2026-11-04-support-quality-tickets.md) | DEC-0151 (CT-210, CT-129 closed); rounds 1 to 18 not clean, 19 and 20 clean | accepted 2026-11-08, #261; merged 2026-11-08; released `v0.1.0+2026-11-08.1` |
 | [2026-11-07 a restricted socket table](2026-11-07-restricted-table.md) | DEC-0155 (CT-261; CT-265 filed); rounds 1 and 2 not clean, 3 and 4 clean | accepted 2026-11-07; merged with this change |
 | [2026-11-04 a board message is answered in the same turn](2026-11-04-board-same-turn.md) | DEC-0152 (CT-217; CT-263 filed); rounds 1 to 6 not clean, 7 and 8 clean | accepted 2026-11-07; merged with this change |

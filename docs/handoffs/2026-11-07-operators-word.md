@@ -20,12 +20,12 @@ contract already has.
   word in any session with it, a waiting decision answered there or on the dashboard, not in the bot's chat; the
   webhook's removal waiting on OC-2's decision).
 - [Operator channel](../specification/operator-channel.md) OC-11's step 3 (the agent enables and links on AP-2's
-  relayed decision, the code shown to the person only; an old `accepted` renewed by one question, MD-1) and DEC-0034's Annotated line; six status
+  relayed decision, the code shown to the person only, a new one issued when it expires unused and never because of a chat message; an old `accepted` renewed by one question, MD-1), DEC-0034's Annotated line and DEC-0150's (OW-6 keeps CA-8's bound); six status
   fixtures (`fixtures/positive/operator-channel-status-degraded*.json` three,
   `fixtures/negative/operator-channel-status-degraded-without-credential.json`,
-  `-receiver-missing-lease-held.json`, `-receiver-missing-without-receiver.json`) whose `detail` says what happens for
-  a stopped receiver and the person's step if it stays and, for a set webhook, that its removal is the operator's decision, taken in the channel
-  settings or told to the agent in any session with it, never in the bot's chat.
+  `-receiver-missing-lease-held.json`, `-receiver-missing-without-receiver.json`) whose `detail`, one sentence each as the schema describes it, says what happens for
+  a stopped receiver and the person's step if it stays and, for a set webhook, that its removal is the operator's decision, told to the agent
+  in any session with it, never in the bot's chat, or taken in the channel settings.
 - `docs/ux/foundation.md` (JRN-04/#2's touchpoint, ST-035), `docs/ux/flows.md` (FLW-29), `CONTEXT.md` (the operator's
   word), `docs/DOCMAP.md`, `docs/specification/README.md`, `docs/specification/channel-agent.md` (CA-8's pointer).
 - Backlog CT-220 in progress; CT-266, CT-269 and CT-271 filed.
@@ -58,18 +58,28 @@ contract already has.
   person in a dispatched run), both ways; a dispatched run settles as OS-6 says. Both branches also add rows to
   `docs/specification/conformance.md` after the board-client row (`git merge-tree` reports the conflict there):
   whichever lands second keeps both, the OW row and DEC-0158's dispatched-run rows, after the board-client row.
-- Landing note, CT-218 and DEC-0159 (branch `agent/ct218-local-cloud-v2`; DEC-0157 is on `agent/ct216-usage-data-v2`;
-  re-read the remote names with `git ls-remote origin 'refs/heads/agent/ct2*'` at landing): both branches rewrite SCN-044's Alt paths and
-  Coverage lines (`docs/ux/scenarios.md` lines 1049 and 1054 here). Whichever lands second keeps OW-3's "asks once
-  whether to update" for `incompatible` and CT-218's cloud-instance alt path, and keeps both Coverage citations. It
-  also states in SCN-044, citing OW-2 and OW-4, whether issuing, rotating or revoking a client key on the operator's
-  word is the agent's step through DEC-0159's relayed twin, or OW-4's secret step because the key is a secret handed to
-  the person (kept out of the agent's transcript); CT-218's "the operator issues a client key with the agent's own CLI"
-  otherwise hands the operator a command OW-2 forbids.
-- Landing note, DEC-0157 (branch `agent/ct216-usage-data-v2`): its UD-4 makes turning a usage switch on an act no
-  mandate covers (a change-policy effect, MD-3), so OW-1's sentence that a task outliving 24 hours is carried under a
-  mandate does not hold for it. Whichever of DEC-0156 and DEC-0157 lands second adds to OW-1's sentence: "except an act
-  no mandate covers (MD-3; a usage switch, UD-4), whose word is renewed as AP-2 says", and cites OW-1 from UD-4.
+- Landing note, CT-218 and DEC-0159 (branch `agent/ct218-local-cloud-v2`, read at `02606f7e`; DEC-0157 is on
+  `agent/ct216-usage-data-v2`; re-read the remote names with `git ls-remote origin 'refs/heads/agent/ct2*'` at
+  landing): `git merge-tree` reports conflicts in `docs/ux/scenarios.md` (SCN-044's Alt paths and Coverage lines) and
+  `docs/ux/screens.md` (SCR-30), and in `docs/DECISIONS.md`, `docs/backlog.md` and `docs/handoffs/README.md`, where they
+  are adjacent appends that keep both sides. Whichever lands second keeps, in SCN-044, OW-3's "asks once whether to
+  update" for `incompatible` and CT-218's cloud-instance alt path with both Coverage citations, and, in SCR-30, this
+  branch's Elements, States and Coverage lines with the Scenarios line "SCN-043, SCN-044, SCN-045, SCN-046, SCN-057,
+  SCN-059". CT-218's SCN-044 alt path says "the operator manages client keys with the agent's own CLI", its SCN-059
+  step 1 says "The operator issues a key for a member with the agent's own CLI in their own terminal", and its
+  recovery says the operator "issues a new one from their own terminal or the page (CF-3)"; read under OW-2 and OW-4,
+  the second lander restates them: issuing a member's key is OW-4's secret step (a secret handed out, its value shown
+  to the person only and kept out of the agent's transcript), as is SCN-058 step 1's hand-over of the key to the
+  member; revoking or rotating a key on the operator's word is the agent's step through DEC-0159's relayed twin (CF-3),
+  a rotated key's new value shown to the person as an issued one is. Check: `grep -n "own terminal"
+  docs/ux/scenarios.md` prints no step that hands the operator a command for a revoke or a rotation.
+- Landing note, DEC-0157 (branch `agent/ct216-usage-data-v2`): its UD-4 makes turning on a usage switch a person
+  turned off a change-policy effect no mandate covers (MD-3), one more instance of the exception OW-1 already states (a
+  change-policy effect, AP-5). Whichever of DEC-0156 and DEC-0157 lands second names UD-4's switch in OW-1's exception
+  as that instance ("a change-policy effect, AP-5, such as UD-4's usage switch"), adds DEC-0157's sentence to OW-5's
+  list (a product's usage switch a person turned off, UD-4: a mandate from the operator's words never turns a declined
+  switch back on), and cites OW-1 from UD-4. Check: `awk '/^- \*\*OW-1/,/^- \*\*OW-2/'
+  docs/specification/governance-and-roles.md | grep -c UD-4` and the same over `OW-5` to `OW-6` each print at least 1.
 - Named risk carried to the closing verdict (round 15, product): in the no-person FA-09 case only Fabric's refused card
   and its OS notification reach the person, and the card's "Allow once" leaves the act undone; the person learns what
   is open only from the board reply and the report until Fabric ships the card change DEC-0156's Compatibility owes. The
@@ -389,7 +399,39 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   changed fixtures: the positives exit 0, the negatives exit 1 with the same reason as their `origin/main` copies
   (`/receiver/lease` must be "none"; missing "receiver"); no U+2014 in the added lines; `git merge-tree --write-tree
   HEAD origin/main` exit 0. The full gate (`pnpm run check`) was not run.
+- Round 16 (on `1c9b90f6`): unit, seam and product not clean. Breaks folded: the four receiver-missing status
+  fixtures (two positive, two negative) carried a three-sentence `reason.detail`, while the schema describes the field
+  as "One sentence a person can read" (unit, seam); each `detail` is now one sentence joined by semicolons (299 and
+  280 characters), the webhook ones stay one sentence (261), and a check over every
+  `fixtures/*/operator-channel-status-*.json` finds no `detail` with more than one sentence or over 300 characters;
+  each negative still fails for its original reason (`pnpm --silent validate` against the `origin/main` copy).
+  OW-1's promise that a task outliving 24 hours is not asked again (product) was false for an act no mandate covers:
+  OW-1 and DEC-0156 item 1 now except a change-policy effect (AP-5) and the move of a board slot (PR-2), whose word is
+  renewed by one short question as AP-2 says; the conformance row does not restate the promise and is unchanged; the
+  DEC-0157 landing note now adds only UD-4's switch as one more instance of that exception, carries DEC-0157's OW-5
+  sentence too, and checks that both the OW-1 and the OW-5 bullet name UD-4. Risks folded: the link code's re-issue
+  (product): OC-11 step 3 now says when a new code is issued (on expiry while the `accepted` holds, shown the same
+  way, on the dashboard first, never because of a chat message), and the unlinked tile and SCN-012's alt path and
+  recovery use that one trigger; the CT-218 landing note (seam, product) quotes CT-218 verbatim, homes the question in
+  SCN-059 step 1 and its recovery and SCN-058 step 1's hand-over (issuing a member's key is OW-4's secret step, its
+  value kept out of the agent's transcript; revoking or rotating one on the operator's word is the agent's step through
+  DEC-0159's relayed twin), names the SCR-30 conflict with its resolution, and says the register conflicts are adjacent
+  appends; OW-4's harness-refusal hand-over (product) now lets the person's step be a yes to a host tool the agent runs
+  that installs the named rule, and SCN-057's alt path names a launcher that installs a rule the agent declares as the
+  example; SCN-044's "lifecycle owner" (product) is now the supervisor the descriptor's `lifecycle.manager` names,
+  with the agent's own tools where that is `person` or `none`; DEC-0150's Annotated line (unit, seam) is named in
+  DEC-0156's Consequences and in Done; the webhook `detail` (unit) and SCN-012's tile sentence put the agent route
+  first. Declined: posting the CT-218 item to that branch's handoff through the board (product); this fold edits only
+  this branch, and the landing note binds whichever branch lands second, so the coordinator may relay it.
+- On the round-16 fold (working tree over `1c9b90f6`): `pnpm run docs:check` exit 0 (271 Markdown files, 0
+  markdownlint errors); `python3 docs/ux/lint.py` exit 0 (57 scenarios); `pnpm run privacy:check` 0 findings;
+  `pnpm vitest run test/operator-channel.test.ts test/consistency.test.ts test/positive-sweep.test.ts
+  test/channel-agent.test.ts test/fixtures.test.ts`, 5 files, 1780 passed; `pnpm --silent validate` on the six
+  changed fixtures: the positives exit 0, the negatives exit 1 with the same reason as their `origin/main` copies
+  (missing "credential"; `/receiver/lease` must be "none"; missing "receiver"); the one-sentence check over every
+  operator-channel status fixture prints nothing; no U+2014 in the added lines; `git merge-tree --write-tree HEAD
+  origin/main` exit 0. The full gate (`pnpm run check`) was not run.
 
 ## Next task
 
-Round 16 of the blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 17 of the blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.

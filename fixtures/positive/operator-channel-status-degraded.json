@@ -6,7 +6,7 @@
   "state": "degraded",
   "reason": {
     "code": "webhook-set",
-    "detail": "A webhook is set on this bot, so polling cannot receive; removing it or switching the agent to it is your decision: remove it in the agent's channel settings, or tell the agent which in any session with it, not in this bot's chat, which cannot receive."
+    "detail": "A webhook is set on this bot, so polling cannot receive; removing it or switching the agent to it is your decision: tell the agent which in any session with it, not in this bot's chat, which cannot receive, or remove it yourself in the agent's channel settings."
   },
   "credential": { "name": "EXAMPLE_AGENT_TELEGRAM_BOT_TOKEN", "present": true },
   "receiver": { "mode": "long-polling", "lease": "held" },

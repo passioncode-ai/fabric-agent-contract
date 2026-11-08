@@ -97,8 +97,9 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   not name is either covered by the mandate the leading agent states from those words
   ([delegation](delegation.md#the-operators-mandate) MD-1, never wider than the words) or raised under OW-3 while the
   rest of the task goes on (AP-3). A task that may outlive a decision's 24 hours (AP-2) is carried under such a mandate
-  (up to 7 days, MD-1), so the operator is not asked again for a word they gave while it lasts; a task still open when
-  it expires asks once, in one line, as MD-1 says.
+  (up to 7 days, MD-1), so the operator is not asked again for a word they gave while it lasts, except an act no mandate
+  covers: a change-policy effect, AP-5, and the move of a board slot, PR-2; its word is renewed by one short question as
+  AP-2 says. A task still open when the mandate expires asks once, in one line, as MD-1 says.
 - **OW-2, no command handed over.** The agent runs the commands itself. It never asks the operator to run a command,
   paste an output, press a button, open a page to confirm or choose on a card where an agent twin the agent may take
   itself under the words, a decision or a mandate in force exists (`gate` `none` or `relayed`, AP-1), or another route
@@ -177,7 +178,8 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   operator controls until the move's agent twin ships: no agent moves a slot on its own account or as a relay, and no
   mandate covers it); a control that has no agent twin (AP-1's exception, a service that has not shipped its twin); and
   a refusal by the agent's own tool or harness, where the person's step is to allow that
-  command in the harness's own permission settings, after which the agent runs it; allowing it lifts the harness's
+  command in the harness's own permission settings, or to answer yes to a host tool the agent runs that installs the
+  named rule there on that yes, after which the agent runs it; allowing it lifts the harness's
   stop only, and the run still meets OW-5 (a hand-over takes its own word, an effect outside a grant its gate); for a
   tool that is not the harness, the person's step is to allow it in that tool's or the system's own permission
   settings. A refusal by the agent's own tool or harness (its runner's permission system, or a tool that refuses the
@@ -187,7 +189,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   paid run's level, is the person's choice, asked as
   [spend policy](spend-policy.md) rule 3's approval request, never through chat. The agent hands each over with
   the reason and the exact step: AP-4's link for a human step (rule 3's approval request for metered spend), the page's
-  link for a control, the command, the refusal and the setting for a refusal, the decision's own question quoted with its
+  link for a control, the command, the refusal and the setting (or the host tool's yes) for a refusal, the decision's own question quoted with its
   record for a recorded decision, DEC-0149's statement of the agent, the target and the recipient for a source hand-over,
   and the binding's own step (OC-3's code, the bot to create) for a binding; and it goes on with the rest of the task meanwhile. A control with no twin,
   and any step a route of the agent's own can reach, is handed over only after those routes (another tool, the
