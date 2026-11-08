@@ -11683,8 +11683,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (OS-4); never for a request a run has held (`claimed`, `accepted`, `in_progress`, `outcome_unknown`), for which it
   waits and acts only as item 1 says; the old order, the change first and the cancel after it, dropped, since a
   request left `queued` may be taken by a run; every state on one line; a cancel the requester did not send read as another session of its Project having acted, so
-  it submits nothing; a hold stopping board work, whether it also stops the requester's own change being the operator's
-  open question in the handoff),
+  it submits nothing; a hold stopping board work and the requester's own change for that request too, a request whose target
+  Project or slot is held waiting for the lift (item 4), as decided in the handoff),
   item 4 (the request stays for its owner, or for a run a host starts) and item 5 (a
   session the host starts is built, not asked for; the operator acts on a shown request through a session of the
   requesting Project they own, otherwise the requester on its own reading, OS-5) restated, and in "One approval binds all", item 8's production stop

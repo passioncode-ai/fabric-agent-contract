@@ -130,7 +130,7 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   retries a refusal that is not `retryable`; SCR-19 and SCN-025 offer "Open a session of the target Project" first for
   an `accepted` request whose record holds a begun effect's key; the conformance rows cite *at once* and OS-3's
   object exactly; Fabric's missing owner "Settle" and its two texts named; Switchboard's exit text debt restated; the
-  drafted item 3 says a hold stops board work and leaves the requester's own change to the operator's open question;
+  drafted item 3 says a hold stops board work and leaves the requester's own change to the operator's open question (then decided: held work waits for the lift, see Open);
   the drafted "The project board" item 3 and "When nobody answers" item 1.
 
 ## Decisions taken here
@@ -196,15 +196,15 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   debt as `references/on-demand-session.md:147` and `:191`.
 - Fabric's CO-409 answer on whether its home count of requests no agent answers excludes a request a run holds: name
   the answer in SCN-025 (its Coverage) when Fabric gives it.
-- An operator question (product reading, round 13): does a hold of the target's Project or slot also stop the
-  requester's own change under "When nobody answers" item 3? (a) Yes: a request whose target Project or slot reads
-  `held: true` waits for the lift and the requester makes no change for it (item 4), so the hold reads as the pause
-  Fabric's label says ("nothing new is taken until you resume"), at the cost of a small change waiting on a hold the
-  operator may have set for another reason. (b) No: a hold stops board work only, and the requester may still make a
-  small change in a held Project by item 3's lines, so the change is not delayed, at the cost of a pause label the
-  operator may read as covering it, which Fabric's label then owes a line on. The draft claims neither: it says a hold
-  stops board work and the question is open. The answer is the operator's; it lands in the drafted item 3 and in
-  DEC-0158's Compatibility before the merge.
+- Decided after round 13 (the product reading's question; taken by the coordinator under the operator's rule that an
+  open question is decided by the safest reversible option and recorded): a hold of the target's Project or slot also
+  stops the requester's own change under "When nobody answers" item 3. A request whose target Project or slot reads
+  `held: true` waits for the lift and the requester makes no change for it (item 4). Reasons: it is what Fabric's pause
+  label already tells the operator ("nothing new is taken until you resume"), it matches round 8's settlement that held
+  work waits for the lift, and it is the reversible side: a change that waits can be made after the lift, a change made
+  under a hold cannot be unmade by the lift. The cost, a small change waiting on a hold the operator set for another
+  reason, is the operator's to lift. The operator may reverse it before the merge; the drafted item 3 and DEC-0158's
+  Compatibility then change together.
 - CT-276 (the operator's limits on where a run starts) and CT-277 (how a requester learns a target Project's registry
   agent id) are open; neither blocks the merge.
 - Fabric's specification at its main `eafcf2e4` also tells the run to append itself
@@ -293,9 +293,9 @@ unchanged but its last paragraph, below):
 >   your Project, otherwise you; with no such note, you decide (OS-6).
 >
 > If your change does not land, submit the request again. A hold (`held: true` in `com.directory` or `com.status`)
-> stops board work on the held thread, Project or slot (no run starts under it, contract OS-1); whether it also stops
-> your own change for that request is an open question of the operator's, and until it is answered this item claims
-> neither.
+> stops board work on the held thread, Project or slot (no run starts under it, contract OS-1), and your own change for
+> that request too: a request whose target Project or slot reads `held: true` waits for the lift, and you make no change
+> for it (item 4).
 
 and the item's last paragraph, from "Then post on the request's thread", reads:
 
