@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0156` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0162` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -10857,6 +10857,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-11-07):** item 2's macOS source is amended by DEC-0155: a socket table restricted to the reader's own
   sockets (macOS 27.2, an ad hoc signed process) is an owner that cannot be told, `table-restricted`, with the accepted
   socket and a started process as proofs of this account and a server-side counterpart ([service](specification/service.md#a-restricted-socket-table), RT-1 to RT-5).
+- **Annotated (2026-11-08):** item 2 gains one reader that may vouch across accounts, proposed in DEC-0161: the root
+  installer of a launchd system-domain job, for its own job's token-free well-known document only (RT-3a); every
+  other client keeps HA-2.
 - **Context:** the operator asked on 2026-11-05, relayed on board thread `1fe66e6e`, that the contract be read against
   the organization's plan for a shared computer on which several OS accounts work side by side: an administrator's
   account, the operator's own account and an account an organization owns whole, each running its own Fabric, Fabric
@@ -11315,6 +11318,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   detection, consumers' debts understated, no UX), round 2 at `9f6dcb4a` not clean on the product tier (RT-5 missing
   from conformance's server rows). Their non-blocking risks are CT-265. It amends HA-2 (DEC-0154): no schema, field or
   rule code changes.
+- **Annotated (2026-11-08):** RT-3 is extended by DEC-0161 (proposed): RT-3a lets the root installer of a launchd
+  system-domain job vouch for its own job's listener, with or without a restricted table, for the token-free
+  well-known document only.
 - **Context:** HA-2's macOS source reads the TCP socket table (`netstat -anv -p tcp`, `sysctl net.inet.tcp.pcblist64`)
   as naming every account's sockets. The Fabric Agent Adapter measured on macOS 27.2 that a process with an ad hoc code
   signature (Homebrew Python, likely Homebrew Node) is shown only its own sockets: `netstat` prints nothing with exit 0
@@ -11384,3 +11390,72 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
   inputs; backlog CT-261.
 
+### DEC-0161: a root installer vouches for its launchd system-domain job's listener (RT-3a)
+
+- **Date:** 2026-11-08
+- **Status:** Proposed 2026-11-08, a draft for the coordinator's blind readings (round 1 next). It amends HA-2
+  (DEC-0154) and RT-3 (DEC-0155): no schema, field or rule code changes.
+- **Context:** the adapter (fabric-agent-adapter) asked on board request `7eabdcee` (thread `b986b9f7`, capability
+  `contract.change`, due 2026-11-15; answered in principle in message `ff108cd4`) for its FAA-288. Its kit 0.78.0
+  (FAA-278; branch `rel-0.78.0` at `33b8e5ad`, read-only; its `main` at `2c0b1b18` carries only the FAA-278 row) installs
+  a service as a LaunchDaemon in launchd's system domain (a plist in `/Library/LaunchDaemons` that names `UserName`) so
+  it runs on a computer with no GUI login after FileVault, where a `gui/<uid>` job never starts. Its installer runs as
+  root and polls the install as the Lifecycle Install row says (until the listener is this account's and the well-known
+  `service.id` matches): it reads `GET /.well-known/fabric-service` without a token, only on a connection the pid
+  `launchctl print system/<label>` reports for the job accepted, or, under a restricted table, on a port that pid
+  listens on at exactly `127.0.0.1` (`lsof -p`). Its `SECURITY.md` and
+  `plugins/fabric-agent-adapter/skills/building-fabric-services/references/lifecycle.md` (*The system domain*) at
+  `33b8e5ad` record this as a departure from HA-2 and RT-3 and ask for an exception. At `main` `0fcb5d97`, HA-2 reads
+  that listener as `foreign-user` for root (its uid is the job's `UserName`, not root), and RT-3 vouches only for a
+  process whose uid equals the caller's, and only under a restricted table, which root's table is not.
+- **Decision:** [service](specification/service.md#a-restricted-socket-table) RT-3a, on macOS.
+  1. **Who.** A caller running as root that itself bootstrapped the launchd system-domain job `system/<label>` from a
+     plist that names `UserName` U. Every other client keeps HA-2: for a client of another account the listener stays
+     `foreign-user`, and root reading anything other than this, or another account's listener, keeps it too.
+  2. **The pid.** The pid that holds the listener equals the pid `launchctl print system/<label>` reports for the
+     running job: the pid of the server end of this connection (the socket table root reads, or that pid's descriptors
+     as RT-2 finds a server end), or, under a restricted table, the pid RT-3's
+     `lsof -nP -a -p <pid> -i4TCP -sTCP:LISTEN` shows listening on the port. The accepted connection is preferred to
+     the listen, as RT-2 is to RT-3.
+  3. **The account.** That pid's uid in the process table equals U's uid, and U is the service's own account: the
+     counted account whose services directory holds the service's descriptor (the account its HA-1 claim names; the
+     claim itself grants nothing).
+  4. **The bind.** Exactly `127.0.0.1:<port>`, as RT-3: a wildcard or IPv6 listener is not vouched for this way.
+  5. **The read.** Only the token-free well-known document, and the health it carries, to confirm the install or
+     report the job's health; no credential (a descriptor's token, a delegation token, a login code's request, an
+     operator session) is ever sent to that listener.
+  6. **Set-uid.** A reader whose real and effective uid differ uses none of RT-2 to RT-5, RT-3a included.
+  7. **Where it applies.** With or without a restricted table (RT-3, RT-4 and RT-5 apply only under one). The
+     Lifecycle Install row polls a system-domain job this way, and launchd's `bootstrap` names `gui/<uid>` for a
+     LaunchAgent and `system`, as root, for a LaunchDaemon. HA-2 names the exception and says that a LaunchDaemon with
+     `UserName` runs as that account; [conformance](specification/conformance.md#clients-and-readers) gains the root
+     installer's row.
+  8. **Open.** No system-domain equivalent is decided for systemd (a `--system` unit with `User=` is the analogue) or
+     for Windows; it is owed when an adapter ships one.
+- **Why:** an install on a computer with no GUI login has no other way to learn that its job came up: the installer
+  must be root to bootstrap into the system domain, and HA-2 makes everything the job answers unreadable to root.
+  launchd's own record of the job's pid is a stronger tie between the installer and the listener than anything the
+  listener says (the well-known `process.pid` is never proof), and the uid check keeps a job of another account, or a
+  root process, from passing. Since only a token-free document is read and no credential travels, a wrong vouch costs a
+  wrong install report, never a leaked secret.
+- **Alternatives considered:** refuse, keeping HA-2 as written (the install poll is then impossible on a headless
+  computer, and the installer could only report "started, unverified"); let root send the descriptor's token (a
+  credential to a listener nothing has proved is the service's); a proof file the root installer writes and the
+  service echoes (weaker than launchd's pid: any process that can read the file can echo it, and the file would be a
+  new secret to keep); require the poll to run as `UserName` (`sudo -u`), where HA-2's table or RT-2's accepted socket
+  proves the listener this account's with no exception (an installer MAY still do so; it is not required because it
+  adds a second process under another uid to the install for a read whose only output is whether the job came up, and
+  launchd's pid ties the job to the installer at least as strongly).
+- **Compatibility:** nothing on the wire changes; `contractVersion` stays `0.1.0`. The adapter's kit at `33b8e5ad`
+  already takes launchd's pid (item 2), an exact `127.0.0.1` bind under a restricted table (item 4) and a token-free
+  read with no credential (item 5); it owes item 3, the pid's uid checked against the plist's `UserName` (its
+  `lifecycle.md` today says the vouch rests on launchd's pid "and nothing else"), and its departure note's removal at
+  its next repin (FAA-258). Hosts that read launchd only in `gui/<uid>` are the adapter's FAA-287, not this decision.
+  No contract vector set covers listener ownership (the state-order vectors are CT-229), so this decision is text and a
+  conformance row; the installer's own test carries the cases (a matching job, a pid that is not the job's, a uid that
+  is not U's, a wildcard bind, a non-root caller).
+- **Consequences / affects:** `docs/specification/service.md` (HA-2's list, RT-3a, the set-uid and scope paragraph,
+  the Lifecycle Install row), `docs/specification/conformance.md` (the root installer's row), DEC-0154 and DEC-0155 (an
+  Annotated line each); backlog CT-284; the handoff `docs/handoffs/2026-11-08-system-domain.md`.
+- **Source:** board request `7eabdcee` (thread `b986b9f7`, message `ff108cd4`); the adapter's FAA-288 and FAA-278 at
+  `33b8e5ad` (`rel-0.78.0`).
