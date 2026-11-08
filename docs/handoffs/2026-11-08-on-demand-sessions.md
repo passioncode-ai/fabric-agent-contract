@@ -36,6 +36,19 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   both; two mandate vectors (a hand-on of the target again, refused `mandate-malformed`; a call whose chain carries the
   run's runner kind, refused `mandate-not-for-this-call`), both what `src/mandate.ts` answers (`pnpm vitest run
   test/mandate.test.ts`, 83 tests).
+- Round 5: the dispatched run's conformance row names OS-6's stops in OS-6's order and the two that a mandate or a
+  relayed decision may answer; SCR-19's and SCN-025's actions for a request shown to the operator go by its effect
+  state (cancel and only then submit again while the effect is `not_started`; never submit again once it is `started`)
+  and name who acts (the requester's `com.cancel` and `com.submit`); the switch's semantics (on by default, a working
+  run not stopped by it, starts at once where the grace has passed) in OS-1, DEC-0158 item 1, the host's row, SCR-32 and
+  SCN-025; settling while runs keep taking the slot (hold it, settle, lift) in SCR-19, SCN-025 and SCN-051; OS-6's thread
+  note names the resubmitter; the section's opening sentence says a run serves a request only; OS-5 ends the starts on
+  any non-retryable refusal of a run's enrollment; `noResponder`'s sentence limited to a host that can grant the run the
+  slot; OS-2 hands the target's registry agent id when the host has it, and OS-7 and MD-2 take the mandate only when
+  its last entry is that id; one more mandate vector (a chain ending in the requester, refused
+  `mandate-not-for-this-call`, what `src/mandate.ts` answers, 84 tests); `comms-enroll.schema.json`'s description (a
+  dispatched run ends instead of retrying; description only); DOCMAP's count of the board-request vectors; CONTEXT's
+  counting; the adapter's effect-key debt named as new, not FAA-215's; backlog CT-215 and the handoffs index.
 
 ## Decisions taken here
 
@@ -59,7 +72,10 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   packet's OS-4 and OS-6 text beside the production stop, its mandate text appending each callee and never the run, the
   key carried by the take-back, the 60-second skew); Switchboard's `EXIT_CONTRACT`; the adapter's FAA-201 (the three
   variables removed from what a run launches, no elicitation capability, OS-6's settlement, `failed_known` after an
-  effect only once no effect is observed, at `references/on-demand-session.md:147` and `:191`); Observatory's kept
+  effect only once no effect is observed, at `references/on-demand-session.md:147` and `:191`; recording a begun
+  effect's key in the host's record of the run, a debt new with DEC-0158 and not FAA-215's, which covers closing the
+  workflow, `observed: true` and the open checkpoint's reason; taking a board request's mandate only when its last
+  entry is the target's registry agent id); Observatory's kept
   reference form for an effect's key (its checkpoint redaction would destroy the key today).
 - Fabric's specification at its main `eafcf2e4` also tells the run to append itself
   (`docs/evidence/specs/2026-11-04-on-demand-sessions.md:139-140` and `:148-149`): part of Fabric's OS-7 debt, with its
@@ -96,6 +112,15 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   test/mandate.test.ts test/comms-tools.test.ts test/consistency.test.ts` exit 0 (3 files, 229 tests);
   `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014 printed 0. The full `pnpm run check` was not run in
   this round.
+
+## Checks run on the round-5 commit
+
+- On the tree of the round-5 commit (parent `bf1acbde`): `pnpm run docs:check` exit 0 ("Documentation checks passed",
+  lint:md 271 files, 0 errors); `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios);
+  `pnpm run privacy:check` exit 0 (0 findings); `pnpm vectors:check` exit 0 (32 vector files match their generators);
+  `pnpm vitest run test/mandate.test.ts test/comms-tools.test.ts test/comms-hold.test.ts test/consistency.test.ts`
+  exit 0 (4 files, 354 tests; `test/mandate.test.ts` alone 84); `git diff origin/main...HEAD | grep '^+' | grep -c` of
+  U+2014 printed 0. The full `pnpm run check` was not run in this round.
 
 ## Rounds
 
@@ -153,9 +178,21 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   specification lines; two vectors, both what the code answers; the board client's row; the debts' dates;
   Consequences lists every file.
 
+- Round 5 (on `bf1acbde`), not clean: unit, the dispatched run's conformance row listed the human step first and then
+  let "the first two" be answered by a mandate, against OS-6 (now OS-6's order, the two named); product, SCR-19's
+  "cancel it or submit it again" could begin an effect twice, since a resubmitted request's run gets no earlier effect
+  key (now split by effect state, SCN-025's no-time-left path in the same words); seam, DOCMAP counted two
+  board-request vectors where there were four (now five, with the new one). Risks folded: the actor of each action; the
+  human step's resubmitter in OS-6's thread note and SCN-025; settling while runs take the slot; the switch's
+  semantics; the section's purpose sentence; CONTEXT's counting; OS-5's starts ended by any non-retryable refusal;
+  `noResponder` limited to a host that can grant the run the slot; the vector comment narrowed to an authenticated
+  caller; OS-7 and MD-2 take the mandate only when its last entry is the target's registry agent id as the run knows it,
+  OS-2 handing that id, one more vector; the enroll schema's description; the adapter's key debt not FAA-215's; Fabric
+  meets the held path from its next pin (CO-409, SCN-025).
+
 ## Next task
 
-Round 5 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
+Round 6 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
 DEC-0158 Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the
 North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` items 3, 5 and 8 landed with the merge (a
 merge condition, not a step after it), and a board post of the consumer debts to Fabric, Switchboard, the adapter,

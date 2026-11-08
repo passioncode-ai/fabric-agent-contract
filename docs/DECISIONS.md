@@ -11412,12 +11412,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      folder of the target Project, after a grace of its own, for a request of its own estate whose slot has no live
      holder, in a state a run can take (`queued`, `claimed` with a lapsed attempt, `accepted` or `in_progress` with no
      live holder), with time left before the deadline and never while its thread, Project or slot is held; at most one
-     run per request at a time; one switch for the operator that stops new starts. C5 is amended for the host alone: a
+     run per request at a time; one switch for the operator that stops new starts (a run already working finishes or
+     is stopped by moving or holding its slot; on again, starts follow at once where the grace has passed). C5 is amended for the host alone: a
      standing dispatcher on by default is the operator's choice; a client keeps no background helper and claims stay
      short tool bursts.
   2. **What a run is handed (OS-2).** References only: the request id, thread, Project, capability, deadline,
-     `run-ends-at`, the mandate as the request carries it (read only from a sender the board verified, MD-3), the exit
-     contract of OS-4, the workflow and hand-over ids with OS-3's first line and environment, and the host's record of
+     `run-ends-at`, the mandate as the request carries it (read only from a sender the board verified, MD-3), the
+     target's registry agent id when the host has it, the exit contract of OS-4, the workflow and hand-over ids with OS-3's first line and environment, and the host's record of
      an earlier run on the same request (OS-5). Never a secret, a message's text, a lease, an attempt, a fence or an
      absolute folder; keys by name.
   3. **Knowing it is the run (OS-3).** The first prompt line `fabric-dispatch/1 workflow=… handoff=… request=…` and the
@@ -11442,7 +11443,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      deadline leaves no time for a run, and a request a run settled at a human step it could not put to its operator, by
      the run's record (OS-6, OS-7); a run that never held the slot, whose work a hold refused, or that the operator's
      move fenced counts for nothing; a run refused `not_authorized` ends the starts until the operator grants and shows
-     the request (after the grant, at `absent` generation 0 the run's SA-6 decline made the request `answered` and the
+     the request, as does any other refusal of its enrollment that is not `retryable`, so no refusal starts runs without
+     end (after the grant, at `absent` generation 0 the run's SA-6 decline made the request `answered` and the
      requester submits it again; at a generation of 1 or more the request kept its state and the host may start again);
      the requester sees only the request's state. A begun effect's key is recorded in the host's record of the run
      before the run acts outward (with its `com.effect_begin`, never after the outward call), carried to the next run,
@@ -11456,10 +11458,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      that exact choice; a source hand-over needs a decision naming its exact target (source, DEC-0149) and a human step
      is never covered (MD-6, AP-4, OA-5). At a human step the note carries the refusal's `humanStep` and `url` when it
      gave them, and the run asks the operator through the host's question surface, naming the operator as the one who
-     submits the request again, or leaves the host to show the request as OS-5 does. The run then settles
+     submits the request again, or leaves the host to show the request as OS-5 does; the thread note names the
+     resubmitter too ("the operator submits it again once the step is taken; leave it"). The run then settles
      `failed_known` (`observed: false` before an effect began; after one, only once it observed no effect, after
      cancelling a begun job) or leaves the request `in_progress` for the next holder's `lost_result`; after the step the
-     operator submits again by default, or the requester does (its wake is CT-150).
+     operator submits again by default, or the requester does when the note or the operator says so (its wake is
+     CT-150), and a request left `in_progress` is not submitted again (a new request's run gets no earlier effect key).
   7. **Slots and mandates (OS-7).** A run holds a slot only while it works, never takes one from a live holder, uses a
      replacement only to continue a held request whose holder is gone (CT-175); holding `project.work` it is the main
      session meanwhile, answers only its own request (other waiting messages stay unread for the Project's next
@@ -11467,12 +11471,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      board request's mandate on as MD-2 says, so its chain ends in the agent id it names for the target, the target's
      registry agent id (as the adapter's `hand_on` already does, `working-with-fabric` `references/project-board.md`),
      and a request to a target with no registry agent id carries no mandate (the run then names and settles as OS-6
-     does); the run acts under that last entry as that agent and appends only each onward callee (MD-2, MD-3,
+     does); the run takes the mandate only when its last entry is the target's registry agent id as the run knows it
+     (handed by the host, OS-2, or read from the target folder's own record), treating it otherwise as no mandate, and
+     acts under that last entry as that agent and appends only each onward callee (MD-2, MD-3,
      `handOn`), never its own id, so no Project id and no runner kind appears in a chain and nothing is named twice; its
      onward calls present that entry as their caller as the host's credential gives it, and where it cannot, the callee
      sees no authenticated caller id and the chain's end binds the mandate (MD-3) (vectors
-     `fixtures/vectors/mandate.json`, its four board-request cases: a covered call and a refused one where the run
-     appended its runner kind, a hand-on of the callee and a refused hand-on of the target again). It never extends the mandate and settles as OS-6
+     `fixtures/vectors/mandate.json`, its five board-request cases: a covered call, a refused one where the run appended
+     its runner kind and the callee authenticated the target as its caller, a refused one whose chain ends in the
+     requester, a hand-on of the callee and a refused hand-on of the target again). It never extends the mandate and settles as OS-6
      does when it expires (CT-205). Its outcome is the host's record, never a request state, with no request text and
      no secret.
 - **Why:** the operator's word asked for exactly this, and the products have built it; without the contract's text the
@@ -11499,7 +11506,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   board-event wake, the `crash` reason, the mandate's carriage, `com.get` reading and the time-out stop done on main.
   It owes, at its next pin: a held slot, Project or thread is no candidate (its `responderLive` reads a held holder as
   not live and starts a run into the hold); a run that never held the slot, whose work a hold refused or that the
-  operator's move fenced is not counted, and a `not_authorized` refusal ends the starts; the take-back carrying the
+  operator's move fenced is not counted, and a `not_authorized` refusal, or another refusal of a run's enrollment that is not `retryable`, ends the starts;
+  the take-back carrying the
   earlier run's record of a begun effect's key into the body it writes (today a fresh body); the packet's constraints
   carrying OS-4 by state (the claim naming the request, a replacement for `accepted`, an observed reconcile for
   `outcome_unknown`, a refused enrollment not retried) and OS-6's settlement in addition to the estate's production
@@ -11525,7 +11533,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `input_required` and at a human step, with the step's `humanStep` and `url` and the operator asked (OS-6); after
   `com.effect_begin`, `failed_known` only once no effect is observed and otherwise the request left `in_progress`
   (OS-4, OS-6; its `references/on-demand-session.md:147` and `:191` complete `failed_known` with `observed: true` after
-  an effect began); recording a begun effect's key in its checkpoint before it acts outward (its FAA-215); and nothing
+  an effect began); recording a begun effect's key in the host's record of the run before it acts outward, a debt new
+  with this decision that the landing board post names (its FAA-215 covers closing the workflow, `observed: true` and
+  the open checkpoint's reason, not this); taking a board request's mandate only when its last entry is the target's
+  registry agent id as the run knows it (OS-7); and nothing
   for closing its own run at `answered` or `outcome_unknown`, which OS-5 leaves to the host. Its `hand_on` already ends
   a board request's chain in the target's registry agent id (`references/project-board.md:248`), as OS-7 reads it.
   Project Observatory's workflow (OBS-323) carries the packet's references; it owes a kept reference form for an
@@ -11542,7 +11553,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   DEC-0152's Annotated lines, `Next free ID`); `docs/specification/project-comms.md` (the amendment line, SA-6's
   closing sentence, `noResponder`'s line on a host that dispatches and the section *On-demand sessions*);
   `docs/specification/delegation.md` (MD-2's sentence on a board request's chain); `tools/vectors/mandate.ts` and
-  `fixtures/vectors/mandate.json` (two covered-call cases and two hand-on cases of a board request's chain);
+  `fixtures/vectors/mandate.json` (three covered-call cases and two hand-on cases of a board request's chain);
+  `schemas/comms-enroll.schema.json` (its description: a dispatched run ends instead of retrying);
   `docs/specification/conformance.md` (the board client's row pointing a run to its own, a row for the host that
   starts a run and one for the run); `CONTEXT.md` (*On-demand session*); `docs/ux/scenarios.md` (SCN-025's alt paths,
   UI elements, States and Coverage; SCN-051's alt path and recovery); `docs/ux/screens.md` (SCR-19's `failed_known`

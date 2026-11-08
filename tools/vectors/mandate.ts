@@ -51,8 +51,12 @@ function cases(): Array<[string, Json, Json]> {
     // DEC-0158 OS-7: a board request's requester hands the mandate on to the target's registry agent id; the run the
     // target's host starts acts as that entry and appends only its onward callee, so the chain names no Project id.
     ["a board request's mandate at the onward callee of the run the target's host started", call({ mandate: board, self: "example-crawler", callerAgent: "example-target" }), OK(["example-requester", "example-target", "example-crawler"])],
-    // DEC-0158 OS-7: a run that appended its runner kind breaks the chain; the target before the callee no longer binds it.
+    // DEC-0158 OS-7: a run that appended its runner kind breaks the chain where the callee authenticated the target as
+    // its caller: the target is then not the agent before the callee.
     ["a board request's chain where the run appended its runner kind: the target is not the agent before the callee", call({ mandate: { ...base, chain: [...board.chain.slice(0, 2), { agent: "claude-code", at: "2026-10-26T10:06:00Z" }, { agent: "example-crawler", at: "2026-10-26T10:07:00Z" }] }, self: "example-crawler", callerAgent: "example-target" }), BAD("mandate-not-for-this-call")],
+    // DEC-0158 OS-7, MD-2: the requester did not hand the mandate on to the target, so the chain ends in the requester and
+    // the run, acting as the target's registry agent id, is not its last entry: no mandate for it.
+    ["a board request's chain that ends in the requester: the run acting as the target is not its last entry", call({ mandate: { ...base, chain: [{ agent: "example-developer", at: "2026-10-26T10:01:00Z" }, { agent: "example-requester", at: "2026-10-26T10:05:00Z" }] }, self: "example-target", callerAgent: undefined }), BAD("mandate-not-for-this-call")],
     // DEC-0126 OA-2, OA-6: the operator said it in another of their agents' sessions; where travels into the record.
     ["words relayed from another of the operator's agents: where they said them travels into the record", call({ mandate: { ...base, source: { project: "example-analyst", thread: "example-thread-3" } } }), { ...OK(), recordAs: { ...OK().recordAs, source: { project: "example-analyst", thread: "example-thread-3" } } }],
     ["a source naming neither the session nor the thread", call({ mandate: { ...base, source: { project: "example-analyst" } } }), BAD("mandate-malformed")],
