@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-11-08 the local and cloud form of one agent](2026-11-08-local-and-cloud-form.md) | DEC-0159 (CT-218; CT-270 filed and done, SCN-058; CT-275 and CT-279 filed; SCN-059), proposed; rounds 1 to 13 not clean, round 14 next | branch `agent/ct218-local-cloud-v2` |
+| [2026-11-08 the local and cloud form of one agent](2026-11-08-local-and-cloud-form.md) | DEC-0159 (CT-218; CT-270 filed and done, SCN-058; CT-275, CT-279 and CT-282 filed; SCN-059), proposed; rounds 1 to 14 not clean, round 15 next | branch `agent/ct218-local-cloud-v2` |
 | [2026-11-04 the channel agent standard's ticket counts](2026-11-04-support-quality-tickets.md) | DEC-0151 (CT-210, CT-129 closed); rounds 1 to 18 not clean, 19 and 20 clean | accepted 2026-11-08, #261; merged 2026-11-08; released `v0.1.0+2026-11-08.1` |
 | [2026-11-07 a restricted socket table](2026-11-07-restricted-table.md) | DEC-0155 (CT-261; CT-265 filed); rounds 1 and 2 not clean, 3 and 4 clean | accepted 2026-11-07; merged with this change |
 | [2026-11-04 a board message is answered in the same turn](2026-11-04-board-same-turn.md) | DEC-0152 (CT-217; CT-263 filed); rounds 1 to 6 not clean, 7 and 8 clean | accepted 2026-11-07; merged with this change |

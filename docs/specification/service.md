@@ -956,8 +956,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   first). Both run code from one source home ([source](source.md#handing-over)); the cloud instance runs a commit that
   passed that home's own gate. An agent copied into another home under another `id` is a second agent, not this form.
   The agent's manifest names one descriptor, `<id>.<instance>`, in its service extension, and a descriptor that names
-  the manifest must be that one (`FAC-SEM-020`, G-07, the opening of this document), so only the local (`default`)
-  instance's descriptor carries `fabricManifest`; the cloud descriptor carries none, and a reader of the cloud instance
+  the manifest must be that one (`FAC-SEM-020`, G-07, the opening of this document). In the form the manifest's service extension
+  names the `default` instance, so by `FAC-SEM-020` only the local (`default`) instance's descriptor carries
+  `fabricManifest`; the cloud descriptor carries none, and a reader of the cloud instance
   reaches the manifest through the local descriptor's `fabricManifest` or the registry's provider entry. A channel agent
   in the form has a manifest and declares its channel-agent extension there ([channel agent](channel-agent.md) CA-1,
   DEC-0150), since the cloud instance's well-known answer sits behind the descriptor's token (CF-2) and other readers
@@ -1019,7 +1020,7 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   `relayed` twin issues and rotates a key only for the agent that calls it, returned in that agent's own answer, and
   revokes any key. On the page, the `relayed` key action revokes a key, and issuing or rotating any key is the `human`
   action: the twin revokes with the same effect (AP-1), and its issuing of its caller's own key is an act of the agent
-  surface that no page action offers, so it narrows no page action. A key minted for its holder and returned to it alone is handed to no other party, so it is not
+  surface that no page action offers, so it narrows no page action (AP-1 lets a twin add an act no page offers). A key minted for its holder and returned to it alone is handed to no other party, so it is not
   AP-4's secret handed out; a key for any other agent is issued or rotated by the operator in their own terminal or on
   the page, as a member's is. Where the instance declares `auth.delegation` an agent of the estate holds no client key
   (below), so there the twin issues none to its caller and only revokes. Revoking a key hands out no value, so
@@ -1055,7 +1056,7 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   item share, a one-time secret link, or reading it out to the member, who types it into their own secret window),
   with a note naming whom the member asks when a call is refused and the key's expiry, where one is set; the member
   stores the key in their own vault (SCN-053's secret window, for
-  example), and the member's coding agent reaches `peer.endpoint` as the operator states it, until a listing contract
+  example, where the member runs that app; otherwise CT-275 carries it), and the member's coding agent reaches `peer.endpoint` as the operator states it, until a listing contract
   carries it (backlog CT-275, which also holds how the key reaches the coding agent's header); a listing of the cloud instance installs no descriptor on a member's
   machine (CF-2). A member's departure revokes no client key: removing a member ends what the organization listed or
   issued (its share grants, DEC-0055; the credentials its issuer sealed, by `credential-revocation/1`, DEC-0111), never
@@ -1165,9 +1166,10 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     `auth.delegation`. An instance without them takes none for any of its `relayed` actions: a T2 caller with no
     approval is refused `approval-required` (`verifyApproval`'s first refusal, DL-18), and a caller carrying an approval
     `issuer-unavailable` (DL-13 row 1, which DL-18 applies to an approval), which the service answers itself or by
-    passing `verifyApproval` a jti store, since with none DL-18's order answers `unknown-state` first. From such an
-    instance `issuer-unavailable` carries `error.data.detail` `no-trusted-issuer` and is still HTTP `503`, but final,
-    not retried as DL-14's `503` is: the caller does not retry it or fetch another approval, and the operator takes the action
+    passing `verifyApproval` a jti store, since with none DL-18's order answers `unknown-state` first. From an
+    instance with no estate issuer configured, `issuer-unavailable` carries `error.data.detail` `no-trusted-issuer` and
+    is still HTTP `503`, but final, not retried as DL-14's `503` is (an instance that holds the issuer but has no usable
+    key set answers DL-14's retryable `503`, `no-published-keys`): the caller does not retry it or fetch another approval, and the operator takes the action
     on the page or with the CLI (DL-19's row). A member's key carries no
     scope that reaches a `relayed` action's tool other than `fabric.job.get`, which it reaches to read its own job: a
     member is a T2 caller with no hub of the operator's to ask for an `approval/1`, so a call to any other `relayed`
@@ -1182,7 +1184,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     own agent revokes one on the operator's word by running that CLI on the operator's computer (CF-3), the operator
     takes a step from another
     computer of theirs that shows the page, and may answer a choice or decline a step through the page actions' agent
-    twins or the operator channel's buttons (above); until then the job keeps reading `working` and a repeated call is refused
+    twins where the gate above lets the agent through, or the operator channel's buttons (above), so on an instance
+    without the estate's issuer, unless the platform proves the agent's tier T0 or T1, only through the buttons or from
+    another computer that shows the page; until then the job keeps reading `working` and a repeated call is refused
     again. A page for members needs a credential per person that can be revoked one by one and mints no operator
     session, which a later decision adds.
 - **CF-5, provider keys stay on the server.** The provider keys the cloud instance uses live only in the platform's
@@ -1533,7 +1537,10 @@ Every button a person has, the person's agent has (except the operator's move of
 
 - **AP-1, parity.** Every action a service's dashboard, app or page lets a person take (approve, reject, choose, edit,
   pause, resume, cancel, retry, send, publish, restore, set a policy, and any other) MUST have a tool on the service's
-  agent surface with the same effect, the same checks, the same audit record and an idempotency key. An action offered
+  agent surface with the same effect, the same checks, the same audit record and an idempotency key. A twin's tool MAY
+  also take an act no page action offers, under the same gate, and `actionsView` shows only the page's act (the local
+  and cloud form's key twin, which also issues and rotates its own caller's key, [CF-3](#the-local-and-cloud-form-of-one-agent),
+  DEC-0159). An action offered
   only on a page is nonconformant (DEC-0121), with one exception: the operator's move of a board slot ([project
   communication](project-comms.md#the-operator-moves-a-slot) PR-2) is a host control without an agent twin until the
   host ships its twin (CT-181, the twin's contract half, then CT-125; DEC-0140). A service declares its actions in its well-known document under the

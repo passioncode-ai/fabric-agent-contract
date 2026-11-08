@@ -60,6 +60,9 @@ was deleted from `origin` and replaced by this squash. Commit-addressed referenc
   open step's repeat bounded to 25 to 48 hours, `no-trusted-issuer` final from any callee and still HTTP `503`, the
   page's `relayed` key action stated (it revokes), the re-keying window and the organization's usage view in
   *Compatibility*, CT-279 filed (see *Rounds*).
+- Round 14: SCN-044's cloud page narrowed to a delegation-token caller, the twin of a page answer gated in SCN-059,
+  FLW-36, CF-4 and SCR-36, DL-8's client-key path, CF-1's premise, `no-trusted-issuer` for a missing issuer only,
+  AP-1's wider twin, the call-record gap with CT-282, and the DEC-0157 merge note's two requirements (see *Rounds*).
 - Round 7: CF-4 as one rule (a client-key caller is handed no person's step and no choice), SCN-059 for the operator's
   keys and the steps members' calls raise (ST-042), OM-5's sentence on client keys, `peer`'s schema description, and
   back-pointers to CF-3 in DL-26, DL-29 and source.md's T2 premise (see *Rounds*).
@@ -126,7 +129,10 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   request of a client-key caller as CF-4 says, one event per open step, and each instance's delegation gate configured
   with the audience `<id>.<instance>`), and round 10's: DL-19's `401` header change, a bare `WWW-Authenticate: Bearer`
   when no credential came and `error="invalid_token"` only for one that came, in both kits, their tests and their
-  builders' reference (DEC-0159 *Compatibility*); the adapter's offer in its skills (FAA-204) follows.
+  builders' reference (DEC-0159 *Compatibility*), and a header assertion in the adapter's probe (a bare
+  `WWW-Authenticate: Bearer` for no token, `error="invalid_token"` for a bad one), so that a re-pinned service that
+  has not re-copied the kit is caught, since `contractVersion` stays `0.1.0` and no checker here asserts the header;
+  the adapter's offer in its skills (FAA-204) follows.
 - At landing, to Fabric Dashboards: its sample service (`test/fixtures/sample-service/fabric_delegation.py`) copies the
   adapter's Python kit, whose no-credential `401` changes with DL-19's header sentence; every other service that
   vendors the kits follows when it re-copies them (DEC-0159 *Compatibility*).
@@ -192,7 +198,14 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   `grep -n 'elicitation' | grep -c 'CF-4'` prints at least 1, and `awk '/^### DEC-0157/,/^### DEC-0158/'
   docs/DECISIONS.md | grep -c 'operator-step: consent'` prints at least 1, and the conformance row DEC-0157 adds for
   the agent carries it too: `grep -n 'DEC-0157' docs/specification/conformance.md | grep -c 'operator-step: consent'`
-  prints at least 1.
+  prints at least 1. The same lander places a cloud instance in the local and cloud form served to a team in UD-1's
+  scope, with the requirement that until a page for members exists it sends no usage data about its members' calls;
+  on the merged tree `grep -c 'sends no usage data about its members' docs/specification/usage-data.md` prints at
+  least 1. `docs/specification/conformance.md` conflicts as well, where this branch appends its row for the form
+  directly after the row *a device deciding under its policy*, which DEC-0157 rewrites: the lander takes DEC-0157's
+  rewritten device row, then this branch's form row, and never keeps both device rows; on the merged tree
+  `grep -c '^| a device deciding under its policy |' docs/specification/conformance.md` prints 1, and that line
+  contains `UD-2`. These requirements bind whichever of DEC-0157 and DEC-0159 lands second.
 - The merged text with DEC-0158: the register appends above, and one edit by whichever lands second. A run DEC-0158
   dispatches is an estate session that may hold a client key at a cloud instance declaring no `auth.delegation`
   (CF-3), so OS-6's list of a dispatched run's stops counts, as a human-step stop, a `scope-not-granted` whose
@@ -201,8 +214,8 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   `awk '/^- \*\*OS-6/,/^- \*\*OS-7/' docs/specification/project-comms.md | grep -c 'operator-step'` prints at least 1,
   and `grep -n 'DEC-0158' docs/specification/conformance.md | grep 'dispatched run' | grep -c 'operator-step'` prints
   at least 1. This requirement binds whichever of DEC-0158 and DEC-0159 lands second; the note is written on this
-  branch only, so the coordinator relays it to DEC-0158's branch (round 13), and a lander of DEC-0158 that lands
-  second makes the edit from this note.
+  branch only, and its relay to DEC-0158's branch is owed by the coordinator (not seen on that branch at round 14's
+  reading); until it is relayed, a lander of DEC-0158 that lands second makes the edit from this note.
 
 ## Rounds
 
@@ -679,6 +692,40 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   test/delegation.test.ts` (1499 passed); em dashes in the branch's added lines against `origin/main`: 0;
   `git merge-tree --write-tree HEAD origin/main`: exit 0. The full `pnpm run check` was not run here.
 
+- Round 14 (on `f81f577c`), not clean: the unit tier passed with four risks, the seam tier passed with four, and the
+  product tier failed with two breaks and six risks. Breaks folded: (1) SCN-044's cloud alt path said the page opens
+  the same way, yet an agent holding a client key gets no `open_link` (CF-4, PL-4): now the page opens the same way
+  where the operator's agent calls with a delegation token (the instance declares `auth.delegation`), and an agent
+  calling with a client key leaves the operator to open the cloud instance from the host's own list or builds the
+  `open_link` from the descriptor on the operator's computer (PL-1); DEC-0156's checks still hold (`operator manages
+  client keys` prints 0 over SCN-044, revoking still named); (2) SCN-059's choice and no-page sentences and FLW-36's
+  clause offered the twin of a page answer ungated: now each names the gate CF-4 sets (the operator's decision from a
+  caller proven T0 or T1, else an accepted `approval/1` only where the instance holds the estate's issuer) and, on an
+  issuer-less instance with no page on that computer, the channel's buttons or another computer showing the page, the
+  member's job reading `working` until then; CF-4's *Where the operator is* and SCR-36's no-page state carry the same
+  gate. Risks folded: DL-8 names the client-key path at a cloud instance in the form (DL-29, CF-3); CF-1 and its
+  conformance row state the premise (the manifest's service extension names the `default` instance, so `FAC-SEM-020`
+  admits that descriptor alone); CF-4, DL-19's row, DEC-0159 and the conformance row keep `no-trusted-issuer` to an
+  instance with no estate issuer configured, a missing key set staying DL-14's retryable `no-published-keys`; AP-1
+  lets a twin's tool take an act no page action offers under the same gate, which CF-3's key twin does; contexts.md
+  and *Compatibility* say client-key calls to a cloud instance in the form write no `call-record/1` the organization
+  reads, and CT-282 asks whether the form should write them; SCN-058 step 1 and CF-3 offer SCN-053's window where the
+  member runs that app, CT-275 carrying it otherwise; *Open*'s DEC-0157 note adds UD-1's scope for a cloud instance
+  served to a team (no usage data about its members' calls until a page for members exists) and the conformance
+  conflict (DEC-0157's device row, then this branch's form row, never both device rows), each with its merged-tree
+  check; *Open*'s adapter item names a header assertion in the adapter's probe under FAA-204. Left in *Open*: the L0
+  relaxation question, the vault-delivery question, the DEC-0158 relay (owed by the coordinator, not seen on that
+  branch at this reading) and the knowledge base's restatement at landing. Not changed: no rule code, schema or
+  vector.
+
+- Checks run on the round-14 fold before its commit: `pnpm run docs:check` ("Documentation checks passed", markdownlint
+  0 errors over 271 files); `python3 docs/ux/lint.py` (passed: 42 stories, 36 flows, 36 screens, 58 scenarios);
+  `pnpm run privacy:check` (0 findings); `pnpm vectors:check` (32 vector files match their generators);
+  `pnpm typecheck` (exit 0); `pnpm --silent validate` on the three fixtures (exit 0 each); `pnpm vitest run
+  test/fixtures.test.ts test/consistency.test.ts test/actions.test.ts test/positive-sweep.test.ts
+  test/delegation.test.ts` (1499 passed); em dashes in the branch's added lines against `origin/main`: 0;
+  `git merge-tree --write-tree HEAD origin/main`: exit 0. The full `pnpm run check` was not run here.
+
 ## Next task
 
-Round 14 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.
+Round 15 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.

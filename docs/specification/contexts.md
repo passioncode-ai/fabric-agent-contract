@@ -157,6 +157,10 @@ DEC-0045) stay on the device, with its meter. So the activity protocol gains the
 metered usage for one UTC day ([activity → kinds](activity.md#kinds), `telemetry-event.schema.json#/$defs/grantUsage`).
 Client-key spend at a cloud instance in the local and cloud form carries no grant, so it is not in this view: only
 that service's usage report and its operator's CLI and page show it ([service](service.md#the-local-and-cloud-form-of-one-agent) CF-3, DEC-0159).
+Nor are those calls in the organization's call list: the callee's node writes a call's `call-record/1`
+([credentials](credentials.md#the-call-record)), a cloud instance on a platform has no node, and a client-key call
+carries no context, so client-key calls to a cloud instance in the form write no `call-record/1` that the organization
+reads (whether the form should write them is backlog CT-282).
 
 - **Its data**: `day`; `grantId`, the share grant's `meta.id`, `urn:fabric:share:` and 32 lower-case hex digits,
   compared as written (DEC-0086, `FAC-SEM-117`), so one grant revised during the day is one row and the organization

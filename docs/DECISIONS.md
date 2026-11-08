@@ -11531,7 +11531,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      instance without the estate's issuer and key set takes no `approval/1` for any of them: a T2 caller with none is
      refused `approval-required` (`verifyApproval`'s first refusal) and a caller carrying one `issuer-unavailable`
      (DL-13 row 1, DL-18), answered by the service itself or by `verifyApproval` given a jti store (with none it answers
-     `unknown-state` first), with `data.detail` `no-trusted-issuer`, still HTTP `503` but final for the caller from any callee (DL-19's row), the
+     `unknown-state` first), with `data.detail` `no-trusted-issuer` where no estate issuer is configured, still HTTP `503` but final for the caller from any callee (DL-19's row; a missing key set stays DL-14's retryable `no-published-keys`), the
      operator then acting on the page or with the CLI; a
      member's key carries no scope that reaches one's tool other than `fabric.job.get`, which it reaches to read its own
      job, so the operator takes such an action on the page or with
@@ -11635,7 +11635,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   instance's client-key spend: it reaches no `grant.usage` event, and the organization's collector reports only what
   the meter holds (`docs/specification/contexts.md`, *grant.usage* collection), so when an organization's cloud agent moves its team
   from share grants to client keys, that agent's usage in the organization's view falls while the real spend goes on,
-  which only the service's usage report and its operator's CLI and page show (CF-3). The estate's cloud-deploy template declares `own` and
+  which only the service's usage report and its operator's CLI and page show (CF-3). Those calls also leave the
+  organization's call list: the callee's node writes a call's `call-record/1` (`docs/specification/credentials.md`,
+  *The call record*), a cloud instance on a platform has no node, and a client-key call carries no context, so
+  client-key calls to a cloud instance in the form write no `call-record/1` that the organization reads (backlog
+  CT-282 asks whether the form should write them). The estate's cloud-deploy template declares `own` and
   registers the descriptor on the operator's computer only. It registers its descriptor's instance as `default` unless
   its configuration names another; as the cloud half of the form it must be set to `cloud`, so the cloud descriptor does
   not take the local one's `id.instance` (CF-1); the adapter's offer is to say so (FAA-204, message `8eb77518`). Its
@@ -11697,7 +11701,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   scenario, and its index row), `docs/ux/foundation.md` (JTBD-16, ST-041), `docs/ux/flows.md` (FLW-35),
   `docs/ux/screens.md` (SCR-35), `docs/DOCMAP.md` (a row), `README.md` (a row of *Build an agent*), the service.md lines
   that name a caller's credentials (*Offered to others*, its granting clause included, and the *Surfaces* table) and the
-  client-key caller's exception in PL-4, AP-4, the note under `actionDecision`'s table and `FAC-SEM-142`'s row,
+  client-key caller's exception in PL-4, AP-4, AP-1's sentence letting a twin add an act no page offers (round 14), the note under `actionDecision`'s table and `FAC-SEM-142`'s row,
   `docs/specification/interop.md` (C3.3, one sentence, and a clause in DEC-0121's caller-action table),
   `docs/specification/delegation.md` (a clause in DL-19's `scope-not-granted` row and its *Refused by*, one in its
   `issuer-unavailable` row naming `no-trusted-issuer`, and a sentence closing DL-21),
@@ -11719,7 +11723,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3.1's bare challenge for none), `docs/specification/conformance.md` (the agent-relaying row: an agent never calls
   the member's key door; the family row names L0's one exception), `docs/ux/foundation.md` (ST-035's human-step
   criterion answered at a cloud instance as CF-4 says), `docs/specification/contexts.md` (*Usage per grant*: client-key
-  spend at a cloud instance in the form is not in that view, CF-3), `CONTEXT.md` (*Family* names L0's one exception);
+  spend at a cloud instance in the form is not in that view, CF-3, and its calls write no `call-record/1` the organization reads, round 14), `CONTEXT.md` (*Family* names L0's one exception);
   `docs/specification/delegation.md` (DL-19's `401` header sentence: `invalid_token` for a credential that came, a bare
   challenge for none, RFC 6750 section 3.1; the `operator-step: choice` caller instruction in its row; DL-26's grant
   and DL-29's outside-family sentence for a client key), `docs/specification/interop.md` (the caller-action row for
