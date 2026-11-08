@@ -11479,8 +11479,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `humanStep` `consent` for the action that turns it on and `gate: relayed` for a separate action that turns it off,
      the action declared in the service's actions extension (AP-1) and the effect on its tool's manifest capability
      (C3.1), so a service that offers its switch to agents and ships no manifest owes one for that tool, and a product
-     outside `fabric-service/0.1` (such as the launcher) that offers its switch on an agent surface declaring
-     it the same way, so a mandate or a standing rule never turns it on, a gate of `none` being nonconformant;
+     outside `fabric-service/0.1` that offers its switch on an agent surface (a tool an agent calls, such as an MCP
+     tool) declaring it the same way, a command line an agent runs in the person's shell (such as the launcher's
+     `analytics on|off`) being the person's own surface, which owes no action, the agent side binding the agent that
+     runs it, so a mandate or a standing rule never turns it on, a gate of `none` being nonconformant;
      an accepted `approval/1` still decides that relayed action under AP-2 (`actionDecision`'s
      row for a `relayed` action with an accepted approval, DL-18), so the agent-side limit is the only bar on that form,
      and no product-side refusal is added (an approval is a signed approver's decision on the action's digest, DL-17,
@@ -11508,7 +11510,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      by an agent acting for them, on machines or accounts of theirs, where no product owner receives the data, is not
      sending, an encrypted backup a store makes to the person's own storage, readable only with a key the person holds,
      being such a case; the condition binds the products under the page, and a hosted service's digests on its own
-     server are its own.
+     server are its own; OpenRouter attribution (DEC-0065), which labels a product's model requests, is not usage data
+     under the page: it stays off by default under its own setting, and the usage data switch neither turns it on nor
+     off.
 - **Why:** the operator's decision fixes the default and the per-product switch; what keeps it trustworthy across
   products is that "anonymous" and "off" mean the same everywhere, so those two are the contract's. The operator's words
   (quoted in Fabric Switchboard's `docs/ANALYTICS.md`, lines 19 to 23 at `405b789`) begin «Включает первый раз продукт,
@@ -11611,7 +11615,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   that data already sent cannot be erased, unless the host's owner files such a route; it admits a reader of the raw
   events, the shared installation id included (PLAT-133), which as a service that reads the data there owes UD-3's
   join rule and is named, with its purpose, on each product's UD-5 page; where the counts are read
-  there, each product's conforming version is marked (below). PassionCode.ai's public privacy page (the organization's
+  there, each product's conforming version is marked (below). Fabric, Switchboard and Fabric Inbox's events also sit
+  in a second store, the operator's earlier analytics instance in the operator's own account: their history to
+  2026-10-17 was copied from it to PassionCode.ai's host that day (the source only read), and installs older than each
+  product's switch version (Fabric 0.3.7, Switchboard 0.6.42, Fabric Inbox 0.19.0) kept sending there until they
+  updated (passioncode-platform `infra/analytics/README.md`, "The move", lines 101 to 119 at `e4d1c0e`; PLAT-019); as
+  its owner records it, that instance keeps events 2 years and removes installation ids after 400 days, has its own
+  erasure of the installation ids the estate's growth and experiments service deleted, and keeps an off-host copy for
+  28 days, and that service still reads it; until those products' apps there are retired (PLAT-019's remainder), each
+  of the three products' UD-5 page states that store too (that it received the product's events, its retention, its
+  erasure and its reader). PassionCode.ai's public privacy page (the organization's
   site repository `passioncode-ai.github.io`, line 60 of `privacy/index.html` and of its nine locale copies, `de`,
   `es`, `fr`, `ja`, `ko`, `pl`, `pt-br`, `ru` and `zh-hans`, at `e7a2ed25`) names only Switchboard and
   Fabric as sending and says the switch applies to every PassionCode.ai app on that computer: its owner owes UD-2's
@@ -11640,7 +11653,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   at `ad978a6`, PC-123), which meets UD-1's timing and UD-2's kept decline (a shared off given before its first send);
   it owes UD-1's notice contents (its notice, `lib/analytics.js` line 31, names neither the installation id nor its
   sharing, its session id nor the resume) and a notice where the person reads it (its doc, `docs/analytics-events.md` line 50, lets
-  another tool show it to its agent only). The five creators of the shared file that were read make its id a random UUID and meet UD-3's random id (Fabric's
+  another tool show it to its agent only). Its switch, `analytics on|off`, is a command a person or their coding agent
+  runs (its `AGENTS.md` line 138 at `0f4b27f`), a command line and no agent surface under UD-4, so the launcher owes
+  UD-4's product side nothing; its setup skill, which points agents at that command
+  (`plugin/passioncode/skills/setting-up-passioncode/SKILL.md` lines 145 to 149 at `0f4b27f`), owes UD-4's agent side.
+  The five creators of the shared file that were read make its id a random UUID and meet UD-3's random id (Fabric's
   `apps/desktop/src/main/analytics.ts` line 70 at `eafcf2e4`, `randomUUID`; Switchboard's
   `crates/switchboard-runtime/src/analytics.rs` line 149 at `405b789`, `Uuid::new_v4`; Fabric Inbox's
   `desktop/analytics.cjs` line 81 with `desktop/main.cjs` line 662 at `1395416`, `randomUUID`; Fabric Dashboards'
@@ -11652,8 +11669,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   as a hosted service; its self-hosted image, a component an organization deploys on its own server for its members,
   is under it with that organization's switch (its owner and administrators turn the counting off or on, its ADR-0014
   item 3) and owes UD-3's session id, random per server process per UTC day today rather than renewed after an idle
-  hour (its ADR-0014 line 24 at `43f04f15`); no self-hosted instance of it runs yet (line 37). Project Observatory was read only as the digest store
-  (OBS-330), not for usage data of its own (OBS-324). The owners of both check them against UD-1 to UD-6. Observatory's
+  hour (its ADR-0014 line 24 at `43f04f15`); no self-hosted instance of it runs yet (line 37). Project Observatory was read as the digest store
+  (OBS-330); it also sends anonymous usage and error data on by default since its 0.33.0 (OBS-324; its `CHANGELOG.md`
+  and `docs/COMPATIBILITY.md`, "Workspace state: anonymous usage data", at `2a11b3fd`), which was not read against
+  these rules. The owners of both check them against UD-1 to UD-6. Observatory's
   encrypted workspace snapshot copies its home, the digest store included, into the person's own storage (which iCloud
   may carry off the machine), which UD-6 counts as no sending only when its key is the person's: Observatory's to confirm. The estate's
   hosted products in the knowledge base's plans.md item D are outside the page unless they ship an installed product
@@ -11680,7 +11699,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   operator chooses whether to accept that or to have those products' events from before their conforming versions
   dropped. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/usage-data.md` (new), `docs/OPEN_QUESTIONS.md` (OQ-0013, the second
-  purpose, for the operator), `docs/specification/conformance.md` (a product
+  purpose and the hosted services' scope, for the operator), `docs/specification/conformance.md` (a product
   row, an agent row, the OD-9 declarer's row and the collector's row), `docs/specification/ops-digest.md` (OD-6 and Not
   decided here point to UD-6), `docs/specification/activity.md` (its purpose points to UD-6's channel separation),
   `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (usage data), `docs/ux/scenarios.md` (SCN-043's alt

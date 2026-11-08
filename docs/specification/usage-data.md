@@ -128,7 +128,10 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   service's actions extension (AP-1), and the effect on its tool's manifest capability
   ([interop](interop.md#c31-capabilities) C3.1; a `fabric-service/0.1` well-known document lists capability names
   only, `surfaces.mcp.capabilities` in [`service-well-known.schema.json`](../../schemas/service-well-known.schema.json)), so a service that offers its switch to agents and ships no manifest owes one for that tool. A product outside
-  `fabric-service/0.1` (such as the launcher) that offers its switch on an agent surface declares it the same way. So
+  `fabric-service/0.1` that offers its switch on an agent surface (a tool an agent calls, such as an MCP tool) declares
+  it the same way. A command line an agent runs in the person's shell (such as the launcher's `analytics on|off`) is
+  the person's own surface, not an agent surface: it owes no action, and the agent side above binds the agent that
+  runs it. So
   `actionDecision` takes a relayed
   one only as its table takes a `relayed` action ([service](service.md#actions)), never under a mandate (MD-3), and a
   standing rule is never a decision (AP-3); a switch reachable through an action whose gate is `none` is nonconformant.
@@ -165,7 +168,9 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   an agent acting for them, on machines or accounts of theirs, where no product owner receives the data, is not
   sending; an encrypted backup a store makes to the person's own storage, readable only with a key the person holds, is
   such a case. The condition binds the products under this page (its scope above); a hosted service's digests on its
-  own server are its own.
+  own server are its own. [OpenRouter attribution](openrouter-attribution.md) (DEC-0065), which
+  labels a product's model requests to OpenRouter, is not usage data under this page: it stays off by default under its
+  own setting, and the usage data switch neither turns it on nor off.
 
 Practice in the estate, read on 2026-11-07 and 2026-11-08 (DEC-0157's Compatibility is the full account, product by
 product): Fabric Switchboard, Fabric Inbox and Fabric Dashboards collect and send from their first start, a background
@@ -194,10 +199,10 @@ UD-3's renewal; the launcher's (`lib/analytics.js` line 244 at `ad978a6`) is mad
 carries that run's events in one request at its end (`after`, line 192), so no idle hour passes within it and it
 meets UD-3's session-id rule. Fabric's notice names "a
 session id" (`i18n/en.ts` line 864 at `eafcf2e4`), and the other four owe naming it (UD-1). Fabric Dashboards' MCP
-`settings` tool, declared with gate `none` (FD-175), lets any agent turn its switch on with no operator decision (its
-switch's own action refuses `operator-decision-required` without a decision, AP-2, rather than take the path its
-dispatcher keeps for other relayed calls, which runs one without a decision as the caller's own act, `src/mcp/server.ts`
-lines 332 to 333 at `d43c94e`), and
+`settings` tool, declared with gate `none` (FD-175), lets any agent turn its switch on with no operator decision (it owes
+its switch an action of its own that refuses `operator-decision-required` without a decision, AP-2, rather than take
+the path its dispatcher keeps for other relayed calls, which runs one without a decision as the caller's own act,
+`src/mcp/server.ts` lines 332 to 333 at `d43c94e`), and
 Switchboard's agent door (`switchboard_analytics`, `crates/switchboard-cli/src/mcp.rs` line 72, SB-299) takes no
 decision; both owe UD-4, and since neither ships a manifest and Switchboard declares no actions extension,
 Switchboard owes an action for its switch and both owe a manifest capability for that tool with the effect
@@ -220,7 +225,16 @@ each product's usage data page states (UD-5). The host offers no erasure by inst
 retention pass), so each product's page says that data already sent cannot be erased, unless the host's owner files
 such a route. It admits a reader of the raw events, the shared installation id included (PLAT-133), which as a
 service that reads the data there owes UD-3's join rule and is named, with its purpose, on each product's page
-(UD-5); where the counts are read there, each product's conforming version is marked (below). PassionCode.ai's public privacy page (the
+(UD-5); where the counts are read there, each product's conforming version is marked (below). Fabric, Switchboard and
+Fabric Inbox's events also sit in a second store, the operator's earlier analytics instance in the operator's own
+account: their history to 2026-10-17 was copied from it to PassionCode.ai's host that day (the source only read), and
+installs older than each product's switch version (Fabric 0.3.7, Switchboard 0.6.42, Fabric Inbox 0.19.0) kept
+sending there until they updated (passioncode-platform `infra/analytics/README.md`, "The move", lines 101 to 119 at
+`e4d1c0e`; PLAT-019). As its owner records it, that instance keeps events 2 years and removes installation ids after
+400 days, has its own erasure of the installation ids the estate's growth and experiments service deleted, and keeps
+an off-host copy for 28 days; that service still reads it. Until those products' apps there are retired
+(PLAT-019's remainder), each of the three products' UD-5 page states that store too: that it received the product's
+events, its retention, its erasure and its reader. PassionCode.ai's public privacy page (the
 organization's site repository `passioncode-ai.github.io`, line 60 of `privacy/index.html` and of its nine locale
 copies, `de`, `es`, `fr`, `ja`, `ko`, `pl`, `pt-br`, `ru` and `zh-hans`, at `e7a2ed25`) names only Switchboard and Fabric as sending and says
 the switch applies to every PassionCode.ai app on that computer: its owner owes UD-2's switch for each product alone
@@ -244,10 +258,16 @@ re-enable and their no-switch exception, and UD-3's join rule for the service's 
 owes UD-2 and UD-4 in its kits. The PassionCode launcher sends nothing before its notice and reads a shared "no" at
 every run until it first counts (`lib/analytics.js` lines 148 to 155 and `docs/analytics-events.md` lines 57 to 64 at
 `ad978a6`), which meets UD-1's timing and UD-2's kept decline; it owes UD-1's notice contents and a notice where the
-person reads it (its doc lets another tool show the notice to its agent only, line 50). Okolos turned it on by default
+person reads it (its doc lets another tool show the notice to its agent only, line 50). Its switch,
+`analytics on|off`, is a command a person or their coding agent runs (its `AGENTS.md` line 138 at `0f4b27f`), a command line and
+no agent surface under UD-4, so the launcher owes UD-4's product side nothing; its setup skill, which points agents at
+that command (`plugin/passioncode/skills/setting-up-passioncode/SKILL.md` lines 145 to 149 at `0f4b27f`), owes UD-4's
+agent side (an agent turns a switch the person turned off back on only as UD-4 admits). Okolos turned it on by default
 on 2026-11-05 in Chrome and Edge, and its Firefox build follows Firefox's built-in data consent, which UD-1 admits
 pending the operator's ePrivacy answer (the knowledge base's roadmap RM-13, okolos ADR-0021 and B-216); the rest of its
-practice was not read against these rules. The estate's hosted workspace product is outside the page as a hosted
+practice was not read against these rules. Project Observatory sends anonymous usage and error data on by default
+since its 0.33.0 (OBS-324; its `CHANGELOG.md` and `docs/COMPATIBILITY.md`, "Workspace state: anonymous usage data",
+at `2a11b3fd`), a sender under this page not read against these rules. The estate's hosted workspace product is outside the page as a hosted
 service; its self-hosted image, a component an organization deploys on its own server for its members, is under it
 with that organization's switch (its owner and administrators turn the counting off or on, its ADR-0014 item 3), and
 owes UD-3's session id, random per server process per UTC day today rather than renewed after an idle hour (its
