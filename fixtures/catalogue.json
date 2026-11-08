@@ -1135,5 +1135,18 @@
   {"name": "service-ops-digest-extension-home-dir", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-home-dir.json", "valid": false, "keyword": "pattern"},
   {"name": "service-ops-digest-extension-upper-source", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-upper-source.json", "valid": false, "keyword": "pattern"},
   {"name": "service-ops-digest-extension-empty", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-empty.json", "valid": false, "keyword": "minItems"},
-  {"name": "service-ops-digest-extension-extra-member", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-extra-member.json", "valid": false, "keyword": "additionalProperties"}
+  {"name": "service-ops-digest-extension-extra-member", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-extra-member.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "port-claim-macos", "schema": "port-claim.schema.json", "path": "positive/port-claim-macos.json", "valid": true},
+  {"name": "port-claim-windows", "schema": "port-claim.schema.json", "path": "positive/port-claim-windows.json", "valid": true},
+  {"name": "port-claim-app-part", "schema": "port-claim.schema.json", "path": "positive/port-claim-app-part.json", "valid": true},
+  {"name": "port-claim-extra-member", "schema": "port-claim.schema.json", "path": "negative/port-claim-extra-member.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "port-claim-no-port", "schema": "port-claim.schema.json", "path": "negative/port-claim-no-port.json", "valid": false, "keyword": "minItems"},
+  {"name": "port-claim-port-zero", "schema": "port-claim.schema.json", "path": "negative/port-claim-port-zero.json", "valid": false, "keyword": "minimum"},
+  {"name": "port-claim-port-65536", "schema": "port-claim.schema.json", "path": "negative/port-claim-port-65536.json", "valid": false, "keyword": "maximum"},
+  {"name": "port-claim-port-twice", "schema": "port-claim.schema.json", "path": "negative/port-claim-port-twice.json", "valid": false, "keyword": "uniqueItems"},
+  {"name": "port-claim-login-name", "schema": "port-claim.schema.json", "path": "negative/port-claim-login-name.json", "valid": false, "keyword": "pattern"},
+  {"name": "port-claim-offset", "schema": "port-claim.schema.json", "path": "negative/port-claim-offset.json", "valid": false, "keyword": "pattern"},
+  {"name": "port-claim-service-path", "schema": "port-claim.schema.json", "path": "negative/port-claim-service-path.json", "valid": false, "keyword": "anyOf"},
+  {"name": "port-claim-no-updated-at", "schema": "port-claim.schema.json", "path": "negative/port-claim-no-updated-at.json", "valid": false, "keyword": "required"},
+  {"name": "port-claim-other-revision", "schema": "port-claim.schema.json", "path": "negative/port-claim-other-revision.json", "valid": false, "keyword": "const"}
 ]

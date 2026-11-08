@@ -51,7 +51,8 @@ describe("the examples an author copies (REQ-10, REQ-11)", () => {
     expect(new Set(guide.map((example) => example.schema))).toEqual(new Set(["service-descriptor.schema.json", "service-well-known.schema.json", "manifest.schema.json", "provider.schema.json"]));
     const profiles = guide.filter((example) => example.schema === "manifest.schema.json").map((example) => ((example.document.capabilities as Array<{ profile: { kind: string } }>)[0] as { profile: { kind: string } }).profile.kind);
     expect(profiles.sort()).toEqual(["local-runner", "mcp", "mcp"]);
-    expect(examples.filter((example) => example.file.endsWith("service.md"))).toHaveLength(2);
+    // The descriptor, the well-known document and the port claim (HA-1, DEC-0160).
+    expect(examples.filter((example) => example.file.endsWith("service.md"))).toHaveLength(3);
   });
 
   it.each(examples.map((example) => [`${example.file}:${example.line}`, example] as const))("%s validates against its schema", (_where, example) => {

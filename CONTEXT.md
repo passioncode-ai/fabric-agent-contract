@@ -740,7 +740,7 @@ DEC-0154). "A computer with more than one counted OS account" counts only these.
 **Port claim**: A `passioncode-port-claim/1` file `.passioncode-ports.<service-id>.<account>.json` in the computer's
 shared sticky folder, owned by the account it names by uid (SID on Windows), listing the ports that account records for a
 service; it keeps installers of two accounts, or of two services in one account, from one port and grants nothing (HA-1,
-DEC-0154).
+DEC-0154). Its schema is `schemas/port-claim.schema.json` and its reference `src/port-claim.ts` (DEC-0160).
 
 **`foreign-user`**: The state of a local service whose port is held by a listener of another OS account, or by one
 whose owner cannot be told; ordered after `down` and before `foreign`, it wins over any well-known answer, and nothing

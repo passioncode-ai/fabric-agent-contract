@@ -122,7 +122,10 @@ export const NOT_SWEPT: readonly string[] = [
   "service-channel-agent-extension.schema.json",
   // Where a collector reads the daily operations digests (DEC-0153 OD-9): checked inside a descriptor (FAC-SEM-168, kind
   // `service-descriptor`), whose positive fixture with the key is swept.
-  "service-ops-digest-extension.schema.json"
+  "service-ops-digest-extension.schema.json",
+  // A port claim (DEC-0154 HA-1, DEC-0160) is a shape only: the reader's rules (owner, name, present account) and the
+  // port choice are src/port-claim.ts, run by test/port-claim.test.ts over fixtures/vectors/port-claim.json.
+  "port-claim.schema.json"
 ];
 
 describe("every positive fixture passes the semantic rules", () => {

@@ -11384,3 +11384,76 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
   inputs; backlog CT-261.
 
+### DEC-0160: the port claim's schema `passioncode-port-claim/1` and the port-choice reference (CT-228)
+
+- **Date:** 2026-11-08
+- **Status:** Proposed 2026-11-08, a draft for the coordinator's blind readings (round 1 next). It completes DEC-0154's
+  HA-1 with what CT-228 owed and adds no rule beyond two: (a) the wording and place of the line a service writes when the
+  Windows claims folder is missing or has another ACL, and (b) the order in which a reported reason names the holder when
+  several hold one port. Everything else here is a reading of HA-1's text, named below.
+- **Context:** DEC-0154 decided the semantics of a port recorded per OS account (HA-1, merged #248, released
+  v0.1.0+2026-11-07.1) and left owed, in CT-228: a schema for the claim file, a reference for the port choice with
+  vectors, and the Windows folder line's wording and place. Fabric's hub port per account (CO-513), Switchboard
+  (SB-278) and Fabric Dashboards (FD-159) wait on them (board threads `d5abc880` and `1fe66e6e`).
+- **Decision:** [service](specification/service.md#ha-1) HA-1 points at three new artifacts and one line.
+  1. **The schema.** `schemas/port-claim.schema.json`, title `passioncode-port-claim/1`: a closed object of exactly
+     `{schema, service, account, ports, updatedAt}`, all required. `service` is the descriptor's id
+     (service-common's `serviceId`) or a reverse-DNS bundle identifier, optionally followed by `.<part>`; `account` a
+     numeric uid of 1 to 10 digits or a SID (`S-1-` and 2 to 15 numeric parts), never a login name; `ports` 1 to 64
+     unique integers from 1 to 65535 (a claim with no port is deleted, HA-1's uninstall); `updatedAt` interop-common's
+     `utcInstant`. No semantic rule: the schema states every rule of the content, and the reader's rules need the
+     file's owner and the computer's accounts, which no document carries.
+  2. **The reference.** `src/port-claim.ts`, pure functions that read no file and never throw. `readClaims(files,
+     presentAccounts)` keeps the usable claims in the order read and notes each ignored file with the first code that
+     applies: `claim-invalid`, `claim-name-mismatch`, `claim-owner-mismatch`, `claim-account-absent`. `choosePort`
+     answers `{port, kept, reason, notes}` or `{fault: "no-free-port", notes}`, the reason one of `kept-own-listener`,
+     `kept-free`, `new-none-recorded`, `new-held-by-descriptor`, `new-held-by-claim-other-account`,
+     `new-held-by-claim-other-service`, `new-held-by-listener`. `rebuildClaim` writes the ports of this service's
+     descriptors in the account and its own state, once each and ascending, or `{delete: true}` when none remains; it
+     takes no parameter for the old claim. `claimFileName` gives `.passioncode-ports.<service>.<account>.json`.
+  3. **The vectors.** `fixtures/vectors/port-claim.json`, written by `tools/vectors/port-claim.ts`, every case CT-228
+     lists and the readings below; a port runs them as their `about` says.
+  4. **(a) The Windows folder line.** A service with a health report keeps one `degraded` entry while the folder is
+     missing or has another ACL: `source` `port-claims-folder`, `setup: true`, and the `reason` "The port claims folder
+     %ProgramData%\PassionCode\port-claims is missing or its access list is not the setup's; this service records its
+     port without a claim until the administrator's setup step runs." An installer, or a service without a health
+     report, writes that text as one log line, once until the folder exists with the setup's ACL. Never interface text.
+  5. **(b) The holder order.** When several hold the recorded port, the reason names the first of: another
+     `id.instance`'s descriptor, a claim of another account, a claim of another service in this account, a listener.
+     The port chosen does not depend on it; only the reported reason does, and the order keeps the vectors stable.
+  6. **Readings of HA-1, no new rule.**
+     - A squatted claim path (this account's own claim file owned by another account): no claim is read at all, this
+       account's or any other, and the answer carries the note `claim-path-squatted`. HA-1 says the installer "chooses
+       its port by the listener and descriptor tests alone", read literally.
+     - "Another listener": with the instance's own listener not holding the recorded port, any listener on it, of any
+       account, a wildcard bind included. With its own listener holding it, only another `id.instance`'s descriptor
+       moves the port (HA-1's keep rule as written), so another listener beside it, or a claim, does not.
+     - This service's own claim in this account names no other holder; another instance of the same service is held by
+       its descriptor, not by the shared claim. A candidate named only by this service's own claim is free.
+     - The descriptors a choice reads carry their service id as well as their instance, so another `id.instance` can be
+       told; they are this account's services directory, any service.
+     - A file whose content is not a valid claim, or whose name is not the claim file name of its content's service and
+       account (HA-1's File row), is ignored like an owner that is not its account: claims grant nothing, so a reader
+       ignores and notes, never refuses. The order of the notes is the reference's; every one of them ignores the file.
+     - The folder entry is a setup state (`setup: true`): it waits for the administrator's step, not an outage, which
+       is what a setup entry means ([service](specification/service.md#well-known-document), DEC-0044).
+     - A fault keeps the squatted note, so a caller reports the path even when no port is free.
+- **Why:** three products were about to write the claim and choose a port from HA-1's prose; one schema and one set
+  of vectors keep three ports of the same rule from drifting, as the host label's vectors did for HA-4. The two added
+  rules are the ones prose could not settle: a line whose text every product shows the same way, and a reason that a
+  test can compare.
+- **Alternatives considered:** a semantic rule that the ports be sorted (HA-1 does not say so; the reference sorts for
+  deterministic bytes and a reader takes any order); a `code` member on the degraded entry (the entry's schema has
+  `source`, `reason` and `setup` only, so `source` carries the code); reading this account's own claim under a squatted
+  path (HA-1 says the listener and descriptor tests alone); one pattern for the service (the `anyOf` keeps the
+  descriptor's own `serviceId` by reference); a semantic kind for the claim (no document rule needs one).
+- **Compatibility:** new files only: a schema, a module, a vector file; nothing existing changes shape, and
+  `contractVersion` stays `0.1.0`. `passioncode-port-claim/1` joins `PROTOCOL_REVISIONS`. Fabric (CO-513), Switchboard
+  (SB-278) and Fabric Dashboards (FD-159) adopt at their next pin of this contract, running the vectors in their gates.
+- **Consequences / affects:** `schemas/port-claim.schema.json`, `src/port-claim.ts`, `fixtures/vectors/port-claim.json`
+  (by `tools/vectors/port-claim.ts`), `test/port-claim.test.ts`, `fixtures/positive/port-claim-*.json`,
+  `fixtures/negative/port-claim-*.json`, `fixtures/catalogue.json`, `src/protocol-revisions.ts`,
+  `test/schema-compilation.test.ts` (152 schemas), `test/positive-sweep.test.ts`, `docs/specification/service.md`
+  (HA-1), `docs/specification/conformance.md` (the reference row and the installer row), `docs/DOCMAP.md`, `CONTEXT.md`;
+  backlog CT-228; the handoff `docs/handoffs/2026-11-08-port-claim.md`.
+- **Source:** DEC-0154 (HA-1); backlog CT-228; board threads `d5abc880` and `1fe66e6e`.

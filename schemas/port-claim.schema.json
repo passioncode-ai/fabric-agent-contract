@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/port-claim.schema.json",
+  "title": "passioncode-port-claim/1",
+  "description": "DEC-0154 HA-1, DEC-0160: one OS account's port claim for one service, the file .passioncode-ports.<service>.<account>.json in the computer's shared sticky folder (/Users/Shared on macOS, /var/tmp on Linux, %ProgramData%\\PassionCode\\port-claims on Windows), owned by the account it names. It only keeps two installers from choosing one port and grants nothing; who may receive a credential is HA-2's check. A claim with no port is deleted, never written empty. The reference that reads, chooses and rebuilds is src/port-claim.ts (docs/specification/service.md#ha-1).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "service",
+    "account",
+    "ports",
+    "updatedAt"
+  ],
+  "properties": {
+    "schema": {
+      "const": "passioncode-port-claim/1"
+    },
+    "service": {
+      "anyOf": [
+        {
+          "$ref": "service-common.schema.json#/$defs/serviceId"
+        },
+        {
+          "$ref": "#/$defs/bundleId"
+        }
+      ],
+      "description": "The descriptor's id; an app without a descriptor: its reverse-DNS bundle identifier, and for an app's separately recorded part that identifier plus .<part> (ai.passioncode.desktop.hub)."
+    },
+    "account": {
+      "type": "string",
+      "pattern": "^(?:[0-9]{1,10}|S-1-[0-9]+(?:-[0-9]+){1,14})$",
+      "description": "The OS account the claim is for: its numeric uid on macOS and Linux, its SID on Windows, never a login name (a login name can be renamed, and is not what the owner check compares)."
+    },
+    "ports": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 65535
+      },
+      "description": "Every port this account's instances of the service (or the app's part) record, in one claim. The reference rebuilds them ascending, once each (src/port-claim.ts rebuildClaim); a reader takes them in any order."
+    },
+    "updatedAt": {
+      "$ref": "interop-common.schema.json#/$defs/utcInstant",
+      "description": "When the claim was last rebuilt, an RFC 3339 instant in UTC."
+    }
+  },
+  "$defs": {
+    "bundleId": {
+      "type": "string",
+      "maxLength": 255,
+      "pattern": "^[A-Za-z][A-Za-z0-9-]*(?:\\.[A-Za-z0-9][A-Za-z0-9-]*)+$",
+      "description": "A reverse-DNS bundle identifier under the app's own domain, stable across versions, optionally followed by .<part>: letters, digits and hyphens in two or more dot-separated parts."
+    }
+  }
+}

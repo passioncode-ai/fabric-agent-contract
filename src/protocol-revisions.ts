@@ -71,6 +71,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["org-membership", ["1"]],
   ["org-root-registration", ["1"]],
   ["pairing-message", ["1"]],
+  ["passioncode-port-claim", ["1"]],
   ["peer-share-deletion", ["1"]],
   ["peer-share-frame", ["1"]],
   ["peer-share-revocation", ["1"]],

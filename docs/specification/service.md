@@ -612,12 +612,19 @@ the claim from what remains:
 | File | `.passioncode-ports.<service-id>.<account>.json`, `<service-id>` the descriptor's `id`; an app without a descriptor: its reverse-DNS bundle identifier under its own domain, stable across versions; an app with separately recorded parts: that identifier plus `.<part>`, one claim per part (Fabric's hub and its local stack: `ai.passioncode.desktop.hub`, `ai.passioncode.desktop.stack`); `<account>` the OS account's numeric uid on macOS and Linux, its SID on Windows (a login name can be renamed, and is not what the owner check compares) |
 | Folder | the computer's shared sticky folder: `/Users/Shared` (macOS), `/var/tmp` (Linux), `%ProgramData%\PassionCode\port-claims` (Windows) |
 | Owner | the account the file names |
-| Content | only `{schema, service, account, ports, updatedAt}`: `schema` `passioncode-port-claim/1`, `service` the `id`, `account` the same uid (a string of digits) or SID, `ports` every port this account's instances of the service (or the app's part) record, in one claim, `updatedAt` an RFC 3339 UTC time |
+| Content | only `{schema, service, account, ports, updatedAt}`: `schema` `passioncode-port-claim/1`, `service` the `id`, `account` the same uid (a string of digits) or SID, `ports` every port this account's instances of the service (or the app's part) record, in one claim, `updatedAt` an RFC 3339 UTC time ([`port-claim.schema.json`](../../schemas/port-claim.schema.json), DEC-0160) |
+
+<!-- example: port-claim.schema.json -->
 
 ```json
 {"schema": "passioncode-port-claim/1", "service": "example-agent", "account": "504", "ports": [48210], "updatedAt": "2026-11-06T09:00:00Z"}
 ```
 
+- **The reference.** [`src/port-claim.ts`](../../src/port-claim.ts) reads the claims (`readClaims`), keeps or chooses
+  the port (`choosePort`) and rebuilds the claim (`rebuildClaim`) as this section says, with its vectors in
+  [`port-claim.json`](../../fixtures/vectors/port-claim.json) (DEC-0160). When several hold the recorded port, a
+  reported reason names the first in this order: another `id.instance`'s descriptor, a claim of another account, a claim
+  of another service in this account, a listener.
 - A reader ignores a claim whose file owner (its owner uid; on Windows its owner SID) is not the `account` it names,
   and a claim of an account no longer on the computer.
 - **A claim grants nothing.** It only keeps two installers from choosing one port; who may receive a credential is
@@ -636,19 +643,26 @@ the claim from what remains:
   collision warning: the claim grants nothing, and the listener's check (HA-2) is what protects a credential.
 - **A squatted claim path.** When a file of the claim's name exists and another account owns it, the installer cannot
   write its claim: it records the port in its own state and descriptor anyway, reports the squatted path (a note, never
-  a refusal, since claims grant nothing), and chooses its port by the listener and descriptor tests alone.
+  a refusal, since claims grant nothing), and chooses its port by the listener and descriptor tests alone: it reads
+  no claim, its own or any other (DEC-0160).
 - **The Windows claims folder.** The administrator's setup step, run with administrator rights, the one that writes
   the host label's secret ([devices](devices.md#the-host-label)), creates `%ProgramData%\PassionCode\port-claims`
   and sets its ACL: Users may create files in it, the creator owner has full control of its own files, and no account
   may write or delete another's, the sticky folder's meaning on macOS and Linux. That step is part of the first
   installation of a Fabric node on Windows, whose installer asks once for elevation. An installer or a service running
   as an ordinary account that finds the folder missing, or with another ACL, records its port anyway and reports it
-  once, until the folder appears or its ACL is right, not at every start: a short line in the service's own health
-  report or its log, never interface text (its wording and where it shows are owed by CT-228). It never creates the
-  folder or changes its ACL itself.
+  once, until the folder appears or its ACL is right, not at every start, never as interface text (DEC-0160): a
+  service with a health report keeps one `degraded` entry while it lasts, `source` `port-claims-folder`, `setup: true`
+  (it waits for the administrator's step, not an outage) and the `reason` below; an installer, or a service without a
+  health report, writes one log line with the same text. It never creates the folder or changes its ACL itself.
+
+  ```json
+  {"source": "port-claims-folder", "setup": true, "reason": "The port claims folder %ProgramData%\\PassionCode\\port-claims is missing or its access list is not the setup's; this service records its port without a claim until the administrator's setup step runs."}
+  ```
+
 - **The Linux folder's limits.** `/var/tmp` was agreed on the board and stays, with two known limits: `systemd-tmpfiles`
   may age a claim out, and a unit with `PrivateTmp` sees its own `/var/tmp`. So the service itself rewrites
-  the claim at every start, and CT-228's reference covers a claim aged out.
+  the claim at every start, and the reference covers a claim aged out.
 - **Uninstall.** After it deletes its own descriptor, the uninstaller rebuilds the claim from the remaining descriptors
   and the own state of the instances that remain (never the removed instance's state, or its port would stay in the
   claim), atomically as at start (never a read-modify-write of the old claim), and deletes the file when no port
