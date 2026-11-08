@@ -146,7 +146,9 @@ sessions keep it (`--strict-mcp-config`); Dashboards' console does not. Where a 
 **SH-10 — What any carrier passes, and no credential on a command line.** `launch.args` are the arguments the
 handoff adds to the runtime's own command, in order: at most 16, each at most 1024 characters, none with a
 control character. No argument carries a credential, which a process listing shows. The kit looks for a JWT, a provider key's
-shape, `Bearer <token>` with a digit in the token, and a long mixed-case run (40 or more base64 characters); in a
+shape (DEC-0151 item 7: its prefix in its canonical case only, at the start or after no ASCII letter or digit,
+or after one of the escapes item 7 lists; an `sk-` key with a digit and an upper-case letter with 16 or more
+characters, or a digit with 32 or more), `Bearer <token>` with a digit in the token, and a long mixed-case run (40 or more base64 characters); in a
 path or a URL it looks for the run between separators, so a session id in a folder path is not taken for a key.
 A long base64 value that is not a secret (a public key) in an environment value is reported too: record it as
 `null` or pass it by file. `launch.env` names each

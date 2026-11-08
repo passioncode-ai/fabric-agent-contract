@@ -485,8 +485,9 @@ function head(text: string): string {
 // With the `u` flag a surrogate pair is one character, so no pair is ever split; a lone surrogate is one too.
 const HEAD = new RegExp(`^[\\s\\S]{0,${DETECTOR_CODE_POINTS}}`, "u");
 /**
- * Whether a string is shaped like a credential, by FAC-SEM-101's detector (by shape: today an ordinary name of `sk-` and
- * 16 or more letters, digits, `_` or `-`, in any case, is one too; DEC-0151, in progress, narrows that rule).
+ * Whether a string is shaped like a credential, by FAC-SEM-101's detector (by shape, DEC-0151: a provider prefix in its
+ * canonical case at a word start, so an `sk-` inside a word is none, and an `sk-` name is one only with a digit and an
+ * upper-case letter and 16 or more characters, or a digit and 32 or more).
  */
 const shaped = (text: string): boolean => shapedRead(head(text));
 /** shaped() on a string already cut to its head (the walk cuts each string once). */
@@ -768,7 +769,8 @@ function secrets(value: unknown, root: string, budget: Budget = newBudget()): Fi
   const flag = (at: string, what: string, text: string, id: boolean) => {
     if (budget.named < SECRET_FINDINGS) {
       budget.named += 1;
-      const rename = id && /^sk-/i.test(text) ? "; an id that starts with sk- is read as a key; rename it" : "";
+      // Canonical case only (DEC-0151): an upper-case SK- is no key, so the advice would name the wrong cause.
+      const rename = id && /^sk-/.test(text) ? "; an id that starts with sk- is read as a key; rename it" : "";
       findings.push({ code: "FAC-SEM-165", instancePath: at, message: `${what} is shaped like a credential: a token is named by its vault slot, never written${rename} (DEC-0150 CA-5)` });
     } else {
       budget.more += 1;

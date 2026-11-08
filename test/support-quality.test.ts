@@ -151,3 +151,215 @@ describe("FAC-SEM-126: support-quality-daily/1", () => {
     expect(paths(load("support-quality-daily-calibration-week-after-day.json").input as Json)).toEqual(["FAC-SEM-126 /calibration/week"]);
   });
 });
+
+describe("DEC-0151: the ticket counts of the channel agent standard in support-quality-daily/1", () => {
+  const positive = (name: string) => JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive", name), "utf8")) as Json;
+  const tickets = () => positive("support-quality-daily-tickets.json");
+  const schemaId = `${SCHEMA_PREFIX}schemas/support-quality-daily.schema.json`;
+  it("accepts every new member, measured, and finds nothing in them", async () => {
+    const ajv = await createValidator();
+    const value = tickets();
+    const result = validateDocument(ajv, schemaId, value);
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+    expect(paths(value)).toEqual([]);
+    expect(Object.keys(value.open).sort()).toEqual(["awaitingApproval", "awaitingCustomer", "handedOpen", "questionOpen"]);
+    expect(Object.keys(value.outcomes).sort()).toEqual(["answeredElsewhere", "customerSilent", "expired", "expiredByDecision", "firstReplyLate", "handoffsClosedByPerson", "noReplyOwed", "promotions", "referred", "unanswered"]);
+  });
+  it("leaves a payload without them valid and unread, as before DEC-0151", async () => {
+    const ajv = await createValidator();
+    const result = validateDocument(ajv, schemaId, positive("support-quality-daily.json"));
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+    expect(paths(ok())).toEqual([]);
+  });
+  it("applies the not-measured rule to each new member, at the top level and in each object", () => {
+    const value = tickets();
+    value.arrived = null;
+    value.open.awaitingApproval = null;
+    value.outcomes.expired = null;
+    value.autonomy.answeredTickets = null;
+    value.stability.safeReplyTickets = null;
+    expect(paths(value).sort()).toEqual(["FAC-SEM-126 /arrived", "FAC-SEM-126 /autonomy/answeredTickets", "FAC-SEM-126 /open/awaitingApproval", "FAC-SEM-126 /outcomes/expired", "FAC-SEM-126 /stability/safeReplyTickets"]);
+    value.notMeasured = [...value.notMeasured, "arrived", "open.awaitingApproval", "outcomes.expired", "autonomy.answeredTickets", "stability.safeReplyTickets"];
+    expect(paths(value)).toEqual([]);
+    const zero = tickets();
+    zero.notMeasured = [...zero.notMeasured, "notATicket", "outcomes.promotions", "stability.safeReplyTurns"];
+    expect(paths(zero).sort()).toEqual(["FAC-SEM-126 /notATicket", "FAC-SEM-126 /outcomes/promotions", "FAC-SEM-126 /stability/safeReplyTurns"]);
+  });
+  it("names only what the payload carries: an absent member named not measured is a finding", () => {
+    const value = ok();
+    value.notMeasured = [...value.notMeasured, "ended", "outcomes.unanswered"];
+    expect(paths(value)).toEqual(["FAC-SEM-126 /notMeasured", "FAC-SEM-126 /notMeasured"]);
+    const malformed = Object.assign(ok(), { open: "x", outcomes: [1], notMeasured: [...ok().notMeasured, "open.handedOpen"] });
+    expect(paths(malformed)).toEqual(["FAC-SEM-126 /notMeasured"]);
+  });
+  it("says a top-level name that is no metric is not one, and an unknown name is not carried (DEC-0151)", () => {
+    const messages = (value: unknown) => evaluateSemanticRules("support-quality-daily", value).map((f) => `${f.instancePath} ${f.message}`);
+    for (const name of ["project", "day", "kind", "outcomes", "calibration"]) {
+      expect(messages(Object.assign(tickets(), { notMeasured: [...tickets().notMeasured, name] }))).toEqual([`/notMeasured notMeasured names ${name}, which is not a metric`]);
+    }
+    expect(messages(Object.assign(ok(), { notMeasured: [...ok().notMeasured, "arrived", "lostTickets"] }))).toEqual([
+      "/notMeasured notMeasured names arrived, which the payload does not carry",
+      "/notMeasured notMeasured names lostTickets, which the payload does not carry"
+    ]);
+  });
+  it("adds no sum the channel agent standard does not state: an outcome count above ended, or an open count above arrived, is no finding", () => {
+    const value = tickets();
+    value.outcomes.referred = value.ended + 1;
+    value.open.handedOpen = value.arrived + 1;
+    expect(paths(value)).toEqual([]);
+  });
+  it("lets notMeasured name a metric with a digit, as FAC-SEM-126 asks of nobodyDropped.firstReplyP50Ms (X-4)", async () => {
+    const ajv = await createValidator();
+    const value = positive("support-quality-daily-first-reply-unmeasured.json");
+    expect(value.notMeasured).toContain("nobodyDropped.firstReplyP50Ms");
+    const result = validateDocument(ajv, schemaId, value);
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+    expect(paths(value)).toEqual([]);
+    for (const name of ["9nobodyDropped.turns", "1arrived", "outcomes.9expired", "outcomes.expired-", "Outcomes.expired", "outcomes."]) {
+      const refused = Object.assign(ok(), { notMeasured: [name] });
+      expect(validateDocument(ajv, schemaId, refused).valid, name).toBe(false);
+    }
+  });
+  it("accepts a no-reply day that names both first-reply percentiles in notMeasured, under the schema and FAC-SEM-126, and admits a digit after the first letter of either segment (DEC-0151, message 6a4e3757)", async () => {
+    const ajv = await createValidator();
+    const value = positive("support-quality-daily-no-reply.json");
+    expect(value.notMeasured).toEqual(expect.arrayContaining(["nobodyDropped.firstReplyP50Ms", "nobodyDropped.firstReplyP90Ms"]));
+    expect(value.nobodyDropped.firstReplyP50Ms).toBeNull();
+    expect(value.nobodyDropped.firstReplyP90Ms).toBeNull();
+    // Nothing was judged that day: checks is null and named, and no rubric or judge is named (support quality's payload table).
+    expect(value.quality.sampled).toBe(0);
+    expect(value.checks).toBeNull();
+    expect(value.notMeasured).toContain("checks");
+    expect(value.rubricVersion).toBeNull();
+    expect(value.judgeModel).toBeNull();
+    const result = validateDocument(ajv, schemaId, value);
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+    expect(paths(value)).toEqual([]);
+    // A valid name the payload does not carry is the one FAC-SEM-126 finding that says so.
+    const unknown = ok();
+    unknown.nobodyDropped.answeredLater = 0;
+    unknown.notMeasured = ["family2.metric"];
+    expect(validateDocument(ajv, schemaId, unknown).valid).toBe(true);
+    expect(evaluateSemanticRules("support-quality-daily", unknown).map((f) => `${f.instancePath} ${f.message}`)).toEqual(["/notMeasured notMeasured names family2.metric, which the payload does not carry"]);
+    for (const name of ["family2.metric", "top9", "a1.b2_c"]) expect(validateDocument(ajv, schemaId, Object.assign(ok(), { notMeasured: [name] })).valid, name).toBe(true);
+    for (const name of ["9nobodyDropped.answeredLater", "nobodyDropped.9turns", "_a.b", "a.b.c"]) expect(validateDocument(ajv, schemaId, Object.assign(ok(), { notMeasured: [name] })).valid, name).toBe(false);
+  });
+  it("maps each of the channel agent standard's seven channel kinds onto one of /1's four channels, adding none", () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
+    expect(schema.properties.channel.enum).toEqual(["chat", "mail", "reviews", "community"]);
+    const page = readFileSync(path.join(projectRoot(), "docs/specification/support-quality.md"), "utf8");
+    const start = page.indexOf("### The channel agent standard's channel kinds");
+    expect(start).toBeGreaterThan(0);
+    const section = page.slice(start, page.indexOf("## Semantic rules"));
+    const rows = [...section.matchAll(/^\| `([a-z_]+)` \| `([a-z]+)` \|/gm)].map((match) => [match[1], match[2]]);
+    // The kinds are the channel agent declaration's own (DEC-0150), read from its schema, not a list kept here.
+    const declaration = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/service-channel-agent-extension.schema.json"), "utf8")) as Json;
+    const kinds = [...(declaration.$defs.channel.properties.kind.enum as string[])].sort();
+    expect(kinds).toHaveLength(7);
+    expect(rows.map(([kind]) => kind).sort()).toEqual(kinds);
+    for (const [, channel] of rows) expect(schema.properties.channel.enum).toContain(channel);
+  });
+  it("keys two projects' days on one channel apart by project, the registry's project:<slug> (DEC-0151)", async () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
+    const common = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/comms-common.schema.json"), "utf8")) as Json;
+    // The project registry's alias, project:<slug>, as the channel agent declaration names a project (DEC-0150).
+    expect(schema.$defs.projectAlias.pattern).toBe("^project:[a-z0-9][a-z0-9._-]{0,127}$");
+    expect(schema.$defs.projectId).toBeUndefined();
+    expect(common.$defs.projectId.pattern).not.toBe(schema.$defs.projectAlias.pattern);
+    expect(schema.required).not.toContain("project");
+    const ajv = await createValidator();
+    const page = positive("service-events-page-support-quality-projects.json");
+    const pageResult = validateDocument(ajv, `${SCHEMA_PREFIX}schemas/service-events-page.schema.json`, page);
+    expect(pageResult.valid, JSON.stringify(pageResult.errors)).toBe(true);
+    expect(evaluateSemanticRules("service-events-page", page)).toEqual([]);
+    const values = (page.events as Json[]).map((event) => event.data.value as Json);
+    for (const value of values) {
+      const result = validateDocument(ajv, schemaId, value);
+      expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+      expect(paths(value)).toEqual([]);
+    }
+    // A reader that adopted DEC-0151 keys by service, channel, day and project: the two days stand side by side.
+    const key = (value: Json) => [value.channel, value.day, value.project ?? ""].join(" ");
+    expect(values.map((value) => [value.channel, value.day].join(" "))).toEqual(["chat 2026-10-18", "chat 2026-10-18"]);
+    expect(new Set(values.map(key)).size).toBe(2);
+    for (const project of ["project:alpha support", "alpha", "project:Alpha", "project:", `project:${"a".repeat(129)}`]) {
+      expect(validateDocument(ajv, schemaId, Object.assign(tickets(), { project })).valid, project).toBe(false);
+    }
+    expect(validateDocument(ajv, schemaId, positive("support-quality-daily-project.json")).valid).toBe(true);
+    expect(validateDocument(ajv, schemaId, Object.assign(tickets(), { project: `project:${"a".repeat(128)}` })).valid).toBe(true);
+  });
+  it("refuses a 40-character mixed-case id as a project, the shape FAC-SEM-101 would read as a credential (DEC-0151)", async () => {
+    const ajv = await createValidator();
+    // Built at run time from a fixed alphabet, so no credential-shaped literal sits in the repository.
+    const alphabet = "aB3cD4eF5gH6jK7mN8pQ9rS2tU";
+    const id = Array.from({ length: 40 }, (_, index) => alphabet[(index * 7) % alphabet.length]).join("");
+    expect(id).toHaveLength(40);
+    expect(/[a-z]/.test(id) && /[A-Z]/.test(id)).toBe(true);
+    expect(validateDocument(ajv, schemaId, Object.assign(tickets(), { project: id })).valid).toBe(false);
+    expect(validateDocument(ajv, schemaId, Object.assign(tickets(), { project: `project:${id}` })).valid).toBe(false);
+  });
+  it("partitions every top-level member: the counts, checks and the members that are no metric (DEC-0151)", () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
+    const source = readFileSync(path.join(projectRoot(), "src/support-quality-rules.ts"), "utf8");
+    const list = (name: string) => [...(new RegExp(`const ${name}[^=]*= (?:new Set\\()?\\[([^\\]]*)\\]`).exec(source)?.[1] ?? "").matchAll(/"([A-Za-z]+)"/g)].map((match) => match[1]);
+    const families = list("FAMILIES");
+    const counts = list("TOP_COUNTS");
+    const notMetrics = [...list("NOT_METRICS"), ...families];
+    expect(families).toEqual(["nobodyDropped", "quality", "stability", "autonomy", "open", "outcomes"]);
+    expect(counts).toEqual(["arrived", "ended", "notATicket"]);
+    const parts = [...counts, "checks", ...notMetrics];
+    expect(new Set(parts).size).toBe(parts.length);
+    expect([...parts].sort()).toEqual(Object.keys(schema.properties).sort());
+  });
+  it("finds the interim first-reply day: null and unnamed, the one finding a producer gives up before adoption (DEC-0151)", () => {
+    expect(paths(load("support-quality-daily-first-reply-interim.json").input as Json)).toEqual(["FAC-SEM-126 /nobodyDropped/firstReplyP50Ms"]);
+    // With no first-reply time measured, one finding per percentile, and nothing else.
+    expect(paths(load("support-quality-daily-first-reply-interim-both.json").input as Json)).toEqual(["FAC-SEM-126 /nobodyDropped/firstReplyP50Ms", "FAC-SEM-126 /nobodyDropped/firstReplyP90Ms"]);
+  });
+  it("points the first-reply finding to DEC-0151's interim, and no other metric's (DEC-0151)", () => {
+    const interim = ", but until every reader of the feed has adopted DEC-0151, leave it null and unnamed: support quality, the interim";
+    const messages = evaluateSemanticRules("support-quality-daily", load("support-quality-daily-first-reply-interim-both.json").input).map((f) => f.message);
+    expect(messages).toEqual([`nobodyDropped.firstReplyP50Ms is null, so notMeasured names it${interim}`, `nobodyDropped.firstReplyP90Ms is null, so notMeasured names it${interim}`]);
+    const other = structuredClone(load("support-quality-daily-first-reply-interim.json").input as Json);
+    other.nobodyDropped.replyCoverage = null;
+    expect(evaluateSemanticRules("support-quality-daily", other).map((f) => f.message)).toContain("nobodyDropped.replyCoverage is null, so notMeasured names it");
+  });
+  it("keeps DEC-0070's bounds: every object of the schema at most 32 members, and the whole payload inside an events page", async () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
+    expect(Object.keys(schema.properties)).toHaveLength(19);
+    for (const member of Object.values(schema.properties) as Json[]) {
+      if (member.properties) expect(Object.keys(member.properties).length).toBeLessThanOrEqual(10);
+      if (member.maxProperties !== undefined) expect(member.maxProperties).toBeLessThanOrEqual(16);
+    }
+    expect(Object.keys(schema.properties.outcomes.properties)).toHaveLength(10);
+    // DEC-0151's refused alternative, the outcomes at the top level: 28 members, inside 32 too.
+    expect(Object.keys(schema.properties).length - 1 + Object.keys(schema.properties.outcomes.properties).length).toBe(28);
+    expect(schema.properties.notMeasured.maxItems).toBe(32);
+    const ajv = await createValidator();
+    const page = JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/service-events-page-data.json"), "utf8")) as Json;
+    const event = (page.events as Json[]).find((entry) => entry.data) as Json;
+    event.data = { schema: "https://support.example.com/schemas/support-quality-daily.schema.json", value: tickets() };
+    const result = validateDocument(ajv, `${SCHEMA_PREFIX}schemas/service-events-page.schema.json`, page);
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+  });
+  it("validates the worst case: every required metric null and named, and an unlabelled calibration, with no FAC-SEM-126 (DEC-0151)", async () => {
+    const schema = JSON.parse(readFileSync(path.join(projectRoot(), "schemas/support-quality-daily.schema.json"), "utf8")) as Json;
+    const families = ["nobodyDropped", "quality", "stability", "autonomy"];
+    const value: Json = { kind: "support-quality-daily/1", day: "2026-10-18", channel: "chat", rubricVersion: "v1", judgeModel: "qwen/qwen3.8-flash", notMeasured: [] as string[], checks: null };
+    for (const family of families) {
+      value[family] = {};
+      for (const metric of schema.properties[family].required as string[]) {
+        value[family][metric] = null;
+        value.notMeasured.push(`${family}.${metric}`);
+      }
+    }
+    value.notMeasured.push("checks");
+    value.calibration = { week: "2026-W42", labelled: 1, helped: null };
+    value.notMeasured.push("calibration.helped");
+    expect(value.notMeasured).toHaveLength(24);
+    const ajv = await createValidator();
+    const result = validateDocument(ajv, `${SCHEMA_PREFIX}schemas/support-quality-daily.schema.json`, value);
+    expect(result.valid, JSON.stringify(result.errors)).toBe(true);
+    expect(paths(value)).toEqual([]);
+  });
+});

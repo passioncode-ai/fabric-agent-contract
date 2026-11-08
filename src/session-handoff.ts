@@ -47,7 +47,7 @@ const CONTROL = /[\u0000-\u001f\u007f]/;
 const TOOL_WORD = /\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g;
 /*
  * The credential detector of `src/secret-shape.ts` (DEC-0041, DEC-0044), copied so this module stays dependency-free:
- * Fabric vendors this file alone. `test/session-handoff-review.test.ts` checks that the copy agrees with the original.
+ * its vendors take this file alone (Fabric Dashboards, DEC-0151). `test/session-handoff-review.test.ts` checks that the copy agrees with the original.
  */
 /** A name's words: split at `.`, `_`, `-` and camelCase humps, lowercased (`refreshToken_v2-Id` is `refresh token v2 id`). */
 function nameWords(name: string): string[] {
@@ -80,7 +80,7 @@ export function credentialName(name: string): boolean {
   return Object.entries(CREDENTIAL_PAIRS).some(([word, partners]) => all.includes(word) && partners.some((partner) => all.includes(partner)));
 }
 const JWT_SHAPE = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]*/;
-const SECRET_VALUE = /(^bearer\s.+|sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,})/i;
+const SECRET_VALUE = /(^[Bb][Ee][Aa][Rr][Ee][Rr]\s.+|(?:^|[^A-Za-z0-9]|%[0-9A-Fa-f]{2}|\\[nrt"']|\\u[0-9A-Fa-f]{4}|\\x[0-9A-Fa-f]{2}|\\[bfv0ae]|\\[0-7]{1,3}|%25[0-9A-Fa-f]{2}|\x1b\[[0-9;:]*m|(?:\\u001[bB]|\\x1[bB]|\\e|\\033|\\33)\[[0-9;:]*m)(?:sk-(?=[A-Za-z0-9_-]{0,255}?\d)(?:(?=[A-Za-z0-9_-]{0,255}?[A-Z])[A-Za-z0-9_-]{16,}|[A-Za-z0-9_-]{32,})|gh[pousr]_[A-Za-z0-9]{20,}|xox[abposr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|glpat-[A-Za-z0-9_-]{20,}))/;
 const LONG_RUN = /[A-Za-z0-9+/=_-]{40,}/g;
 const longSecret = (value: string) => (value.match(LONG_RUN) ?? []).some((run) => /[a-z]/.test(run) && /[A-Z]/.test(run) && /[0-9]/.test(run));
 /** Whether a value could be a credential: a JWT anywhere, a provider key or `Bearer …`, or a long secret-shaped run. */

@@ -1,0 +1,44 @@
+{
+  "kind": "support-quality-daily/1",
+  "day": "2026-10-19",
+  "channel": "chat",
+  "rubricVersion": null,
+  "judgeModel": null,
+  "notMeasured": [
+    "nobodyDropped.firstReplyP50Ms",
+    "nobodyDropped.firstReplyP90Ms",
+    "nobodyDropped.answeredLater",
+    "checks"
+  ],
+  "nobodyDropped": {
+    "turns": 4,
+    "replyCoverage": 0,
+    "firstReplyP50Ms": null,
+    "firstReplyP90Ms": null,
+    "repeatAskRate": 0,
+    "agentRepeats": 0,
+    "answeredLater": null
+  },
+  "quality": {
+    "sampled": 0,
+    "helpedYes": 0,
+    "helpedPartly": 0,
+    "helpedNo": 0
+  },
+  "checks": null,
+  "stability": {
+    "turnErrors": 0,
+    "modelCallFailures": 0,
+    "recoveredByFallback": 0,
+    "processErrors": 0,
+    "restarts": 0,
+    "knowledgeAgeHours": 20
+  },
+  "autonomy": {
+    "resolvedWithoutPerson": 0,
+    "toPersonPolicy": 0,
+    "toPersonInability": 0,
+    "queueOldestMinutes": 45,
+    "queueSlaMinutes": 240
+  }
+}
