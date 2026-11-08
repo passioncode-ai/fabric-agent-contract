@@ -107,7 +107,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   itself under the words, a decision or a mandate in force exists (`gate` `none` or `relayed`, AP-1), or another route
   reaches the step (the service's API or tool, its
   command line, a credential the estate holds); a command is for the agent (the operator's word of 2026-11-07 that they
-  press nothing). The one press this rule keeps is a host gate's agreement to an act it holds, where neither a twin nor
+  press nothing). The one press this rule itself keeps, beside the steps OW-4 hands the person, is a host gate's agreement to an act it holds, where neither a twin nor
   a route reaches it: on Fabric the "Allow once" of a `floor.ask-first` refusal (OW-3), while Fabric's question
   `add1df7c` on whether the operator's words pass that gate stays open. A refusal by the agent's own tool or harness is not a command for the operator: it is
   OW-4's step.
@@ -115,8 +115,8 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   name (data lost, an act that cannot be undone, an outward effect, a contradiction with a decision on record), the
   agent says so once, in one short message naming the risk and the corrected way, and the rest of the task goes on.
   The step the message concerns waits for the answer in three cases: its corrected way is a relayed act the words do
-  not name and the mandate in force does not cover; it is a step a limit of OW-5 gates other than a human step, a
-  reserved control (OW-4) or a host's gate (a source hand-over, an effect outside a grant); or no corrected way both undoes cleanly and still meets
+  not name and the mandate in force does not cover; it is a step a limit of OW-5 gates (a source hand-over, an effect outside a grant),
+  other than a human step, a reserved control (OW-4) or a host's gate; or no corrected way both undoes cleanly and still meets
   the word, the one stop this rule adds itself, as AP-3 has an agent that is not sure the operator decided ask them.
   For a step that waits the message is a question (with no person in the chat, the step is named as the end of this rule says); for any other it states the corrected way as under way and how to
   stop it. When the step the message concerns is one a host's gate holds (below), the message is no question of its

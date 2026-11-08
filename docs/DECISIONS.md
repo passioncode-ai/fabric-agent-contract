@@ -11419,13 +11419,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2. OW-2: the agent runs commands itself and never asks the operator to run one, paste an output, press a button, open
      a page to confirm or choose on a card where an agent twin it may take itself (`gate` `none` or `relayed`, AP-1) or
      another route of its own reaches the step (the operator's word of 2026-11-07 that they press nothing); the one
-     press it keeps is a host gate's agreement where neither reaches the act (on Fabric the "Allow once" of a
+     press it itself keeps, beside the steps OW-4 hands the person, is a host gate's agreement where neither reaches the act (on Fabric the "Allow once" of a
      `floor.ask-first` refusal, OW-3), while Fabric's question `add1df7c` stays open; a refusal by its own tool or
      harness goes to OW-4.
   3. OW-3: a risk the words did not name gets one short message, once, naming the risk and the corrected way; the rest
      of the task goes on; the step waits for the answer when its corrected way is a relayed act the words do not name
-     and the mandate does not cover, a step a limit of OW-5 gates other than a human step, a reserved control (OW-4)
-     or a host's gate, or when no corrected way both undoes cleanly and still meets the word (the one stop this rule adds itself, grounded in AP-3);
+     and the mandate does not cover, a step a limit of OW-5 gates (a source hand-over, an effect outside a grant),
+     other than a human step, a reserved control (OW-4) or a host's gate, or when no corrected way both undoes cleanly and still meets the word (the one stop this rule adds itself, grounded in AP-3);
      the message is a question for a step that waits, and states the corrected way as under way and how to stop it for
      any other; where the step is one a host's gate holds, the message is no question of its own but travels as that
      gate's one ask, its reason naming the risk, the corrected way and the words; otherwise the agent takes the safest
@@ -11620,7 +11620,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `docs/specification/governance-and-roles.md` (the section *The operator's word, carried
   out the first time*), `docs/specification/conformance.md` (one row for every agent that takes the operator's words),
   `docs/ux/scenarios.md` (SCN-057 and its index row; SCN-044's alt path, the host app's update asked once and done by
-  the agent through the supervisor its descriptor's `lifecycle.manager` names, and its Coverage; SCN-012's step 1, its alt path and its recovery, and SCN-014's recovery: the link command the agent's, a stopped receiver
+  the agent through the host app's own update route, or its supervisor where it publishes a descriptor, and its Coverage; SCN-012's step 1, its alt paths (one for an `accepted` given before the token is stored) and its recovery, and SCN-014's recovery: the link command the agent's, a stopped receiver
   restarted by OC-17's supervisor and, if the status stays, by the agent on the operator's word, given to it or the
   coding session it runs in,
   a waiting decision answered on the dashboard, not in the bot's chat, spend above a project's `autoApproveUsd` only
@@ -11634,8 +11634,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   person's ask when one expires unused while the `accepted` holds and never because of a chat message, an old `accepted` renewed by one question), DEC-0034 (an Annotated line), DEC-0150 (an Annotated line:
   OW-6 keeps CA-8's bound), the operator channel's status fixtures whose
   `detail`, one sentence each as the schema describes it, now says what happens for a stopped receiver (a supervisor
-  restarts it; if the status stays, the person asks the agent, or the coding session it runs in, to restart it and answers decisions on
-  its dashboard, since an answer sent in the bot's chat may be lost after 24 hours, OC-5 and OC-17; while unlinked, the code,
+  restarts it; if the status stays, the person asks the agent, or the coding session it runs in, to restart it and answers decisions by
+  telling the agent or on its dashboard, since an answer sent in the bot's chat may be lost after 24 hours, OC-5 and OC-17; while unlinked, the code,
   or a new one the person asks the agent for once it expires, OC-11) and, for a set
   webhook, that removing it or switching to it is the operator's decision, told to the agent or the coding session it runs in,
   never in the bot's chat, or taken by them in the channel settings (OC-2)
@@ -11653,5 +11653,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-11-07-operators-word.md` and its row in `docs/handoffs/README.md`.
 - **Source:** the operator's words of 2026-11-04 relayed on board threads `b91254c4` and `a7a9d05d` (message
   `b66a8fae`); their words of 2026-11-07 that they press nothing in any interface (relayed by one of their projects
-  on board thread `c4ec741b`, announcement `e6385b29`), which OW-2 states, keeping one press, a host gate's agreement
+  on board thread `c4ec741b`, announcement `e6385b29`), which OW-2 states, keeping one press of its own beside the steps OW-4 hands the person, a host gate's agreement
   (Fabric's "Allow once" under `floor.ask-first`, OW-3), while Fabric's question `add1df7c` stays open; backlog CT-220; DEC-0156 reserved by git CAS on 2026-11-07.

@@ -17,7 +17,7 @@ contract already has.
 - SCN-057 in `docs/ux/scenarios.md` and its index row, mapped to SCR-30 in `docs/ux/screens.md`; SCN-044's update
   alt path and Coverage; SCN-012's step 1, alt path and recovery and SCN-014's recovery (the link command the
   agent's; a stopped receiver restarted by OC-17's supervisor and, if the status stays, by the agent on the operator's
-  word, given to it or the coding session it runs in, a waiting decision answered on the dashboard, not in the bot's chat; spend
+  word, given to it or the coding session it runs in, a waiting decision answered by telling the agent or on the dashboard, not in the bot's chat; spend
   above a project's `autoApproveUsd` only through spend policy rule 3's approval request, never a chat or session
   message (CT-269), and a paid action within a limit as AP-1's `relayed` class, on the dashboard or by telling the
   agent as AP-2 says, in the bot's chat only with OC-6's presses once the receiver is back; the
@@ -98,7 +98,9 @@ contract already has.
     names OW-3, settles a stop before an effect as `failed_known` with `observed: false`, names the same resubmitter
     split, has no FA-09 act submitted again and scopes its notice question to a human step (judgement, where OS-6 is
     defined).
-  - DEC-0159 (CT-218, members' client keys): SCN-059 states the key split. Issuing and rotating a member's key are
+  - DEC-0159 (CT-218, members' client keys): this requirement is written here and binds whichever of DEC-0156 and
+    DEC-0159 lands second, whether or not the other branch's handoff repeats it (the coordinator relays it to that
+    branch's owner). SCN-059 states the key split. Issuing and rotating a member's key are
     OW-4's secret step, from the operator's terminal or the page, so the value never enters an agent's transcript (CF-3);
     revoking is the agent's step on the operator's decision (OW-2), through the `relayed` twin where the instance checks
     `approval/1`, else by the agent running the agent's own CLI on the operator's computer (CF-4). SCN-059's sentence
@@ -110,9 +112,9 @@ contract already has.
     `awk '/^### SCN-044/,/^### SCN-058/' docs/ux/scenarios.md | grep -c 'operator manages client keys'` prints 0, and
     the same range with `grep -c 'revok'` prints at least 1 (judgement: revoking named as the agent's). OW-4 names, as a human step's exact step, a command the person runs in their own
     terminal where an agent's run would put a secret in its transcript (CF-3), and CONTEXT's "hands the operator no
-    command" takes that exception. That clause goes into OW-4 and into CONTEXT's entry whichever branch lands second,
-    and into CF-4's *Where the operator is* in addition where DEC-0159's own note puts it there; the clause in CF-4
-    alone meets none of the checks below. Checks: judgement, each SCN-059 line naming the operator's terminal or CLI names
+    command" takes that exception. That clause goes into OW-4 and into CONTEXT's entry whichever branch lands second;
+    CF-4's *Where the operator is* may carry it as well, but never instead, and the clause in CF-4 alone meets none of
+    the checks below. Checks: judgement, each SCN-059 line naming the operator's terminal or CLI names
     issuing, rotating or the entry point, never revoking;
     `awk '/^### SCR-30/,/^### SCR-31/' docs/ux/screens.md | grep -c SCN-059` prints 0; `python3 docs/ux/lint.py` exits 0;
     `awk '/^- \*\*OW-4/,/^- \*\*OW-5/' docs/specification/governance-and-roles.md | grep -c 'own terminal'` prints at
@@ -124,6 +126,13 @@ contract already has.
     `awk '/^- \*\*OW-4/,/^- \*\*OW-5/' docs/specification/governance-and-roles.md | grep -c CF-4` prints at least 1
     and the same range with `grep -c 'client key'` prints at least 1 (judgement: read with CF-4 for the operator's own
     agent holding a client key).
+    `docs/ux/foundation.md` conflicts too, in ST-035's criteria: the merged text keeps DEC-0159's human-step line (its
+    CF-4 case, which hands the agent no link), then this branch's task line with DEC-0156 OW-3, in that order, and
+    ST-035's list of exact steps ("a link, the command and the setting, ...") reads with CF-4's no-link case: where the
+    agent holds a client key at a cloud instance, the exact step is the raised operator step, not a link (judgement).
+    Checks, on the merged tree: `grep -c '^<<<<<<<' docs/ux/foundation.md` prints 0, and
+    `grep -c 'DEC-0156 OW-3' docs/ux/foundation.md` and `grep -c 'DEC-0159 CF-4' docs/ux/foundation.md` each print at
+    least 1.
   - Register conflicts with any sibling (`docs/DECISIONS.md`, `docs/backlog.md`, `docs/handoffs/README.md`) are
     adjacent appends: the lander keeps both sides, in id order. Check: no conflict marker is left (`git grep -n '^<<<<<<<'`
     prints nothing), no backlog id appears twice (`grep -o '^| CT-[0-9]*' docs/backlog.md | sort | uniq -d` prints
@@ -669,7 +678,36 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   other fixture changed); `pnpm vitest run test/operator-channel.test.ts test/fixtures.test.ts test/consistency.test.ts
   test/positive-sweep.test.ts`, 4 files, 1390 passed; no U+2014 in the added lines; `git merge-tree --write-tree HEAD
   origin/main` clean. The full gate (`pnpm run check`) was not run.
+- Round 22 (on `721acaf7`): unit and product clean of breaks; seam not clean. Break folded: the DEC-0159 landing note
+  lacked the binding sentence the DEC-0158 note has, and its "in addition where DEC-0159's own note puts it there"
+  could be read as letting the "own terminal" clause go into CF-4 instead of OW-4 and CONTEXT (seam). The note now
+  binds whichever of DEC-0156 and DEC-0159 lands second, whether or not the other branch's handoff repeats it, and says
+  the clause goes into OW-4 and CONTEXT's entry whichever lands second, CF-4 carrying it as well but never instead.
+  Risks folded: the DEC-0159 note names the `docs/ux/foundation.md` conflict in ST-035's criteria (DEC-0159's
+  human-step line, then this branch's task line, in that order; ST-035's exact steps read with CF-4's no-link case),
+  with three merged-tree greps (seam); OW-2 says "the one press this rule itself keeps, beside the steps OW-4 hands the
+  person", mirrored in DEC-0156 item 2, its Source and CT-220's row (unit); OW-3's first wait sentence attaches "(a
+  source hand-over, an effect outside a grant)" to "a limit of OW-5", not to "a host's gate", mirrored in DEC-0156
+  item 3 (unit); the three receiver-missing details (one positive, two negatives) name both ways to answer a decision,
+  by telling the agent or on its dashboard, not in the bot's chat, each one sentence of 300 characters, mirrored in
+  SCN-014's recovery, DEC-0156's Consequences and Done (product); SCN-012 has an alt path for an `accepted` given
+  before the token is stored (the status stays `off`, the tile names the token under `credential.name`, the agent
+  enables and links once told it is stored, renewing an `accepted` past its window by one question first), its
+  Coverage names `operator-channel-status-off-awaiting-token`, DEC-0156's Consequences says so, and CT-278's row now
+  also owes the status tile's screen states (product); SCN-044's `incompatible` sentence updates the host app through
+  its own update route, or its supervisor where it publishes a descriptor, mirrored in DEC-0156's Consequences
+  (product). Left as owed, no edit: the schema's `off` description (Open); the adapter's and fabric-workspace's mixed
+  state until landing (DEC-0156's Compatibility, the landing step); the sibling reconciliation, carried by the landing
+  notes the coordinator relays (product). Declined: none.
+- On the round-22 fold (working tree over `721acaf7`): `pnpm run docs:check` exit 0 (271 Markdown files, 0
+  markdownlint errors); `python3 docs/ux/lint.py` exit 0 (57 scenarios); `pnpm run privacy:check` 0 findings;
+  `pnpm --silent validate` exits 0 on `fixtures/positive/operator-channel-status-degraded-receiver-missing.json` and 1
+  on the two changed negatives, each for its original single reason (`/receiver/lease` must be "none"; missing
+  "receiver"); every operator-channel-status `detail` is at most 300 characters; `pnpm vitest run
+  test/operator-channel.test.ts test/fixtures.test.ts test/consistency.test.ts test/positive-sweep.test.ts`, 4 files,
+  1390 passed; no U+2014 in the added lines; `git merge-tree --write-tree HEAD origin/main` clean. The full gate
+  (`pnpm run check`) was not run.
 
 ## Next task
 
-Round 22 of the blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 23 of the blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
