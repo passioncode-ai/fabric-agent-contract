@@ -69,7 +69,8 @@ decision of 2026-11-04.
   UD-2's rule on writing at CO-496, since its switch writes the shared `analytics` field both ways,
   and, now and independently of CO-496, a string-only correction of its three strings that say its switch governs
   every app, `i18n/en.ts` lines 864, 869 and 870, and an agent twin for its switch (UD-4) at CO-496;
-  Switchboard, with an action for its switch and a manifest capability for that tool (UD-4); Fabric Inbox, its
+  Switchboard, with an action for its switch and a manifest capability for that tool (UD-4), and UD-1's purpose in its
+  notice (its "to help PassionCode.ai improve its apps", `src/main.ts` line 109 at `f6f1dc1`, names every app); Fabric Inbox, its
   exported shared-field writer kept uncalled, an agent twin for its switch on its desktop copy (UD-4) and sending
   nothing in a run before its first send (or before its conforming version's stand-in run) in which the shared file
   cannot be read (UD-2, its baseline at `desktop/analytics.cjs` lines 307 to 310), and that its server is counted by
@@ -114,7 +115,10 @@ decision of 2026-11-04.
   and first sent it from 0.33.1, the first release build carrying its key (OBS-324, OBS-329), and sends it to the
   operator's earlier analytics instance, not PassionCode.ai's host: its notice names no destination (UD-1's "where"),
   and neither its own, unshared installation id nor its session id, which it owes naming (UD-1,
-  `observatory/engine/usage_analytics.py` lines 12, 99 to 102 and 288 to 300 at `2a11b3fd`); its session id is one per
+  `observatory/engine/usage_analytics.py` lines 12, 99 to 102 and 288 to 300 at `2a11b3fd`); it owes UD-1's "nothing
+  before the notice", since its `flush` checks only the switch and its app key (the same file, lines 558 to 580) and its
+  maintenance pass flushes what was queued (`observatory/engine/maintenance.py` lines 1117 and 1125 to 1129 at
+  `2a11b3fd`), whether or not its notice was shown at a terminal or on its dashboard; its session id is one per
   process (lines 401 to 409), so it owes UD-3's renewal after an idle hour where a process lives that long; its UD-5
   page states that store (retention, erasure, off-host copy, both readers) and that its OpenRouter attribution
   goes out whatever its usage data switch says (UD-6); that attribution also sends the legacy `X-Title` header
@@ -143,13 +147,17 @@ decision of 2026-11-04.
   but Project Observatory, and the operator's earlier analytics instance in his own account, outside the
   organization, for Project Observatory (which sends there by default from its 0.33.1) and for the older installs and
   history PLAT-019's remainder retires; RM-13's heading "Product analytics, private by default" (line 563), which
-  reads as off by default, becomes "Product analytics, on by default with a per-product switch"; and plans.md's
+  reads as off by default, becomes "Product analytics, on by default with a per-product switch"; RM-08's "Measurement
+  stays local and private by default" (`knowledge/roadmap.md` line 457 at `bdd35d57`), which reads the same way though
+  RM-13 ties RM-08's funnel to its answer, is restated as: the funnel's counts are each product's usage data, on by
+  default with a per-product switch (RM-13, `usage-data.md`); and plans.md's
   quality-table Contract row (line 146 at `bdd35d57`, "CT-216 by 2026-11-09") is restated as CT-216 done, linking
   `docs/specification/usage-data.md`; then the workspace sync, checked with
   `git -C fabric-workspace grep -n 'usage-data' origin/main -- knowledge/roadmap.md knowledge/plans.md` (non-empty),
   `git -C fabric-workspace grep -n 'backend is hosted outside the organization\|analytics, private by default'
   origin/main -- knowledge/roadmap.md` (empty), `git -C fabric-workspace grep -n 'CT-216 by 2026-11-09' origin/main --
-  knowledge/plans.md` (empty), and the restated RM-13 section read for both `analytics.passioncode.ai` and Project
+  knowledge/plans.md` (empty), `git -C fabric-workspace grep -n 'Measurement stays local and private by default'
+  origin/main -- knowledge/roadmap.md` (empty), and the restated RM-13 section read for both `analytics.passioncode.ai` and Project
   Observatory's own destination.
 - A question for the operator, [OQ-0013](../OPEN_QUESTIONS.md): does "only for this" («Все, только для этого») admit
   the second purpose, counting one installation once across the products that share its id? DEC-0157 reads it so; the
@@ -166,9 +174,11 @@ decision of 2026-11-04.
   where the platform's own consent or a market's privacy review needs it.
 - Named residual risks, carried to the closing verdict: senders under the page that no reading here checked against
   it, each a dependant of UD-1 to UD-5 with no test: Project Observatory's own usage data, on by default since its
-  0.33.0 and first sent by 0.33.1 (OBS-324, OBS-329), read in rounds 15 and 16 only for its destination (the
-  operator's earlier analytics instance), its notice, its installation and session ids and its OpenRouter attribution (not whether it sends before its notice is
-  shown at a terminal or on its dashboard, or whether its MCP surface offers its switch), Okolos beyond its default
+  0.33.0 and first sent by 0.33.1 (OBS-324, OBS-329), read in rounds 15 to 17 only for its destination (the
+  operator's earlier analytics instance), its notice, its installation and session ids, its OpenRouter attribution and,
+  in round 17, whether it sends before its notice (it does: its maintenance pass flushes the queue whether or not the
+  notice was shown, now a UD-1 debt in the page, the Compatibility, the README cell and the board message), not
+  whether its MCP surface offers its switch, Okolos beyond its default
   and its destination (`analytics.passioncode.ai`, read in round 15), and the adapter's kits (FAA-202, planned). The board message's general line asks each owner to check its product before its next release; no row is
   filed here, since each check is its owner's backlog, not this repository's.
 - Whether a person needs a switch of their own for OpenRouter attribution that a product sends whatever its usage data
@@ -187,7 +197,11 @@ decision of 2026-11-04.
     existing row in place, and two such rows can fall in one hunk, so the second lander takes each row from the branch
     that owns it (CT-216 from this branch, every other row from its own branch), one of each. Checks:
     `grep -c '^| CT-215 ' docs/backlog.md` and `grep -c '^| CT-216 ' docs/backlog.md` each print 1;
-    `grep -o '^| [A-Z]*-[0-9]* ' docs/backlog.md | sort | uniq -d` prints nothing.
+    `grep -o '^| [A-Z]*-[0-9]* ' docs/backlog.md | sort | uniq -d` prints nothing. OQ ids have no compare-and-swap
+    counter (only `DEC` and `SEM` do), so the second lander also keeps them unique: an `OQ` id taken on both branches
+    stays with the branch that landed first, and the other branch's question is renumbered to the next free id, with
+    every reference to it and the file's next free id line. Check: `grep -o '^### OQ-[0-9]*' docs/OPEN_QUESTIONS.md |
+    sort | uniq -d` prints nothing.
   - With DEC-0156. The second lander writes into the merged OW-1 UD-4's switch as an example of a `change-policy`
     effect its exception covers, whatever form OW-1's list takes; writes into OW-5's limits UD-4's switch (a mandate
     from the operator's words never turns a declined switch back on); and makes UD-4 cite OW-1. Checks, each printing
@@ -196,28 +210,42 @@ decision of 2026-11-04.
     `awk '/^- \*\*OW-5/,/^- \*\*OW-6/' docs/specification/governance-and-roles.md | grep -c UD-4`;
     `grep -c 'OW-1' docs/specification/usage-data.md`.
   - With DEC-0159. The second lander restates UD-4's ask-first sentence, DEC-0157 item 4 and the conformance agent row
-    so that a client-key caller of a cloud instance reads `scope-not-granted` with `operator-step: consent` and tells
-    the person the operator was asked (CF-4); restates UD-4's "the contract adds no product-side refusal" (page, item
-    4) so that it allows CF-4's refusal of a member key's call on a `relayed` action and of an approval such an
-    instance cannot check; and adds to UD-4's elicitation clause AP-2's rule that a cloud instance sends no elicitation
-    to a client-key caller. It also places a cloud instance served to a team in UD-1's scope paragraph: an instance on
-    a placement the estate hosts, which installs nothing on a member's machine or in an account or server of theirs,
-    is outside the page as a hosted service; an instance an organization runs in its own cloud account for its team is
-    under it as a component the organization deploys for its members, with that organization's switch, and its
-    members are told by its notice in the first output each reads from it: the instance's page at its first open or,
-    for a member who reaches it only through their agent's client-key calls, the text with which the member receives
-    the client key (as UD-1 counts an installer's output), never a line only the member's agent's tool reads. Checks,
-    each printing at least 1: `grep -c 'CF-4' docs/specification/usage-data.md`;
-    `grep -c 'cloud instance' docs/specification/usage-data.md`; and the merged AP-2 and CF-2 to CF-4 read against
-    UD-4 and the scope paragraph.
+    so that a client-key caller of a cloud instance, on a call the instance refuses for want of the operator, reads that
+    refusal in both forms the merged CF-4 gives it, and tells the person the operator was asked: a tool that is not
+    job-backed answers `scope-not-granted` with `operator-step: consent`; a job-backed tool answers a job reading
+    `working` whose `statusMessage` is `operator-step consent`. It restates UD-4's "the contract adds no product-side
+    refusal" (page, item 4) so that it allows CF-4's refusal of a member key's call on a `relayed` action and of an
+    approval such an instance cannot check, and adds to UD-4's elicitation clause, on a line that names CF-4, AP-2's
+    rule that a cloud instance sends no elicitation to a client-key caller. It also places a cloud instance served to a
+    team in UD-1's scope paragraph: an instance on a placement the estate hosts, which installs nothing on a member's
+    machine or in an account or server of theirs, is outside the page as a hosted service; an instance an organization
+    runs in its own cloud account for its team is under it as a component the organization deploys for its members,
+    with that organization's switch, and, until a page for members exists, it sends no usage data about its members'
+    calls (in those words), since a member who reaches it only through a client key reads no product output where
+    UD-1's notice could be shown first, and UD-1 sends nothing before the notice; a later decision that adds a page for
+    members places the notice there. The merged text promises members no notice at a page or in the hand-over of a
+    client key. Checks on the merged tree, each printing at least 1:
+    `grep -c 'CF-4' docs/specification/usage-data.md`;
+    `grep -c 'cloud instance' docs/specification/usage-data.md`;
+    `grep -c 'sends no usage data about its members' docs/specification/usage-data.md`;
+    `awk '/\*\*UD-4/,/\*\*UD-5/' docs/specification/usage-data.md | grep -c 'operator-step: consent'`;
+    `awk '/\*\*UD-4/,/\*\*UD-5/' docs/specification/usage-data.md | grep 'elicitation' | grep -c 'CF-4'` (the
+    elicitation line names CF-4);
+    `awk '/^### DEC-0157/{f=1;print;next} /^### DEC-/{f=0} f' docs/DECISIONS.md | grep -c 'operator-step: consent'`
+    (in the DEC-0157 section);
+    and printing 0: `grep -c 'receives the client key' docs/specification/usage-data.md`; then the merged AP-2 and
+    CF-2 to CF-4 read against UD-4 and the scope paragraph.
   - With DEC-0158. The second lander re-reads UD-4 against AP-2, AP-3, MD-3 (no mandate covers `change-policy`) and
     DL-26 as merged, and restates any conformance row for a dispatched run, or for a host that starts one, that would
     let a mandate cover the switch, so it agrees with UD-4's agent row (a dispatched run is an agent session, and a
-    mandate it carries never covers the switch). Checks:
-    `git diff --name-only <merge-base> HEAD -- docs/specification` names every specification file the two landings
-    changed; each conformance row the merge
-    brought in for a session started on a request, or for its host, is read beside the agent row that cites UD-4,
-    whatever words it uses; `grep -n 'UD-4' docs/specification/conformance.md` finds that agent row.
+    mandate it carries never covers the switch). Checks, with `<merge>` the second landing's merge commit and `<base>`
+    its first parent (`git rev-parse <merge>^1`): `git diff --name-only <base> <merge> -- docs/specification` names
+    every specification file that landing brought in; each conformance row the merge brought in for a session started
+    on a request, or for its host, is read beside the agent row that cites UD-4, whatever words it uses;
+    `grep -n 'UD-4' docs/specification/conformance.md` finds that agent row; and
+    `git grep -n -E 'mandate[^|]*covers[^|]*change-policy' -- docs/specification/conformance.md | grep -v -E
+    'never[^|]*change-policy'` prints nothing (no row lets a mandate cover `change-policy`; the filter keeps out the
+    callee row that never lets one cover it, which the bare grep matches).
 
 ## Decisions taken here
 
@@ -235,6 +263,16 @@ decision of 2026-11-04.
   lock extension keys ([devices](../specification/devices.md#policy)), hold a declined switch on. A product that
   receives a lock that would hold its switch on ignores it, resolving the key as if unlocked (round 16), rather than
   refusing the whole policy, since devices keep and ignore keys they do not take, or showing the switch as locked on.
+  Round 17 narrowed it to "as if that layer's lock were absent": treating the whole key as unlocked would also drop a
+  lower layer's lock off, which UD-2 lets a layer set. `resolvePolicy` does not apply the limit; the product applies it
+  after resolution, and a reference helper with its vector is CT-279 rather than a change to the reference here, since
+  no usage switch key is defined and no product reads one from a device policy today.
+- An organization-run cloud instance sends no usage data about its members' calls until a page for members exists
+  (round 17, a merged-text requirement in the DEC-0159 landing item): a member who works only through a client key
+  reads no product output where UD-1's notice could be shown first, and a hand-over of the key by the operator is no
+  product output. The other choice, carrying the notice in the answer that issues a member key and in the operator's
+  hand-over note, needs a restatement of CF-3 on another branch and a notice the product does not control; sending
+  nothing is the safer reversible choice, and a later decision that adds a member page places the notice there.
 - A new product sharing the installation id is named on the maintained list (or each product's own copy) before it
   first sends (UD-1, round 16), and the other products' notices name it from their next version: the list is a page
   its owners update at once, while a notice changes only with a release, so requiring every sharing product to ship
@@ -668,6 +706,42 @@ not pushed for the same reason; the round entries' commits resolve only there.
   private personal repository in the branch's diff, and the product tier's two greps on this handoff (`only if the
   merged OW-1` printing 0, the OW-1 `awk` listed). Not the full gate.
 
+- Round 17 (on `b9184846`, all three tiers), not clean: unit passed with risks, seam passed with risks, product
+  failed. Product, the DEC-0159 landing item promised members of an organization-run cloud instance a notice at the
+  instance's page or in the text with which they receive the client key, places that are not product output a member
+  reads on the merged text (now: until a page for members exists, such an instance sends no usage data about its
+  members' calls, with a grep for that sentence and one printing 0 for the key's hand-over; Decisions taken here);
+  product, the knowledge-base landing step left RM-08's "Measurement stays local and private by default"
+  (`knowledge/roadmap.md` line 457 at `bdd35d57`), which reads as off by default (now restated as the funnel's counts
+  being each product's usage data, on by default with a per-product switch, with a grep printing nothing after the
+  landing). Risks folded: UD-2's lock limit reads "as if that layer's lock were absent", a lower layer's lock off still
+  holding (page, DEC item 2, the product row, devices.md; unit), and devices.md says `resolvePolicy` does not apply it
+  and the product applies it after resolution, a reference helper and vector filed as CT-279 (seam); UD-1's privacy
+  page parenthetical says the list of sharing products on that page (PC-137) is unpublished, not the page (page, DEC
+  item 1; unit); "is to be marked" for the conforming version in both places in the page and the DEC (unit); the
+  Switchboard door pinned (`mcp.rs` line 72 at `c762821`) and Fabric Dashboards' `AGENT_SETTINGS` pinned (`settings.ts`
+  line 248 at `d43c94e`), both read there (unit); Project Observatory owes UD-1's "nothing before the notice" (its
+  `record` at `usage_analytics.py` lines 437 to 442, `flush` at lines 558 to 580, and `maintenance.py` lines 1117 and
+  1125 to 1129, all read at `2a11b3fd`) in the page, the Compatibility, the README cell and the board message, the
+  residual-risk sentence narrowed to its MCP surface's switch (product); Switchboard's notice purpose, "to help
+  PassionCode.ai improve its apps" (`src/main.ts` line 109, read at `c762821` and `f6f1dc1`), added to its UD-1 debts
+  (page, Compatibility, README cell, board message) and named in OQ-0013's list of shipped strings (product); the
+  DEC-0159 item names both refusal forms (a tool that is not job-backed: `scope-not-granted` with `operator-step:
+  consent`; a job-backed tool: a job reading `working` with `statusMessage` `operator-step consent`) and adds three
+  checks (`operator-step: consent` in the UD-4 range, the elicitation line naming CF-4, `operator-step: consent` in the
+  DEC-0157 section; seam); the DEC-0158 item names its base, the first parent of the second landing's merge commit,
+  and adds a grep for a row letting a mandate cover `change-policy` (seam), filtered with `grep -v -E
+  'never[^|]*change-policy'` because the bare grep matches the existing callee row that never lets a mandate cover it
+  (`conformance.md` line 253 on this head, and on the tree merged with DEC-0158's branch), so it printed one line where
+  the check asks for none; the filtered grep prints nothing on both and catches a row that lets one cover it; the
+  Registers item keeps OQ ids unique at the second landing, with a `uniq -d` check (seam). Filed: CT-279.
+- On the round 17 fold (this commit's tree): `pnpm run docs:check` passed (272 Markdown files, 0 errors), `python3
+  docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios), `pnpm run privacy:check` 0 findings, `pnpm
+  vitest run test/consistency.test.ts test/docs-check.test.ts test/device-rules.test.ts` 215 tests passed, `git
+  merge-tree --write-tree HEAD origin/main` exit 0, no U+2014 in the lines the branch adds against `origin/main`, no
+  name of a private personal repository in the branch's diff, and the filtered DEC-0158 grep printing nothing on this
+  head and on the tree merged with DEC-0158's branch. Not the full gate.
+
 ## Next task
 
-Round 17 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.
+Round 18 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.

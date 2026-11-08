@@ -41,8 +41,9 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   naming the host, UD-5), or a link to that page, which says; and where the switch
   is. The products that share the id are named as of the product's version,
   with a link to one maintained list of them. Where that list lives is the sharing products' owners' choice: the
-  estate's privacy page on passioncode.ai (the launcher's PC-137 in the knowledge base's plans.md, its launcher row at
-  `c84c7a40`, asked and not yet published) would be one home for every product; until one home exists, each product
+  estate's privacy page on passioncode.ai would be one home for every product (the page is live; the list of sharing
+  products on it, which the launcher's PC-137 in the knowledge base's plans.md asks for, its launcher row at `c84c7a40`,
+  is not yet published); until one home exists, each product
   keeps its own copy on its usage data page (UD-5). The list, and every such copy, MUST name a new sharing product
   before that product first sends the shared id; a notice already shown names the sharing products as of its version,
   so from that first send until the product's next version re-shows its notice, the notice's link (the maintained list,
@@ -87,8 +88,11 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   has already sent, that is a false promise, which the person reads until Fabric's switch for Fabric alone ships (its
   CO-496). A device policy ([devices](devices.md#policy)) whose layer carries a key for a product's switch MAY lock it
   off; it MUST NOT lock it on, since a person who declined stays off and the switch is the person's (UD-4). A product
-  ignores a lock that would hold its switch on: its switch resolves as if that key were unlocked, the person's own
-  setting (or an earlier no) governs, and the product does not show the switch as locked.
+  ignores a lock that would hold its switch on: its switch resolves as if that layer's lock were absent, so a lower
+  layer's lock off still holds and, where none holds it off, the person's own setting (or an earlier no) governs; the
+  product does not show the switch as locked on. The reference resolution (`resolvePolicy`, [devices](devices.md#policy))
+  does not apply this limit: the product applies it after resolution, resolving the key again without the lock that
+  held it on.
 - **UD-3, anonymous.** "Anonymous" here means the data names no person; it is not unlinkable: an installation id ties
   one install's events together, and a shared one ties together the events of every product on that machine that sends
   it, which the notice (UD-1) and the privacy text (UD-5) say. The data MUST NOT carry a person (a name, an email
@@ -208,7 +212,9 @@ UD-1's contents: Fabric Dashboards' (`src/core/i18n.ts` lines 86 to 88 at `d43c9
 every event carries the shared `install_id`, and no purpose of counting once, so it owes the id, that it is shared and
 with which products, that it ties events together, that turning back on resumes it, and that purpose; Fabric Inbox's
 (`desktop/main.cjs` line 937 at `1395416`, "an id shared by the PassionCode apps") owes naming those products, the tying of events and the resume; Switchboard's (`src/main.ts` line 109 at `c762821`)
-owes naming them, the tying of events and the resume. Switchboard, Fabric Inbox, Fabric Dashboards, the launcher
+owes naming them, the tying of events and the resume, and UD-1's purpose: that line gives it as "to help PassionCode.ai
+improve its apps" (unchanged at `f6f1dc1`), every app of the organization, where UD-1's purpose is to improve that
+product (OQ-0013 names the string). Switchboard, Fabric Inbox, Fabric Dashboards, the launcher
 and Fabric send a session id whose form UD-3 admits (the Aptabase SDKs' form, Unix seconds times 10^8 plus 8 random
 digits, kept in memory). Switchboard's (`crates/switchboard-runtime/src/analytics.rs` lines 417 to 426 at `405b789`)
 and Fabric Inbox's (`desktop/analytics.cjs` lines 184 to 191 at `1395416`) are renewed after an idle hour and meet
@@ -224,7 +230,7 @@ MCP `settings` tool, lets any agent turn its switch on with no operator decision
 its switch an action of its own that refuses `operator-decision-required` without a decision, AP-2, rather than take
 the path its dispatcher keeps for other relayed calls, which runs one without a decision as the caller's own act,
 `src/mcp/server.ts` lines 332 to 333 at `d43c94e`), and
-Switchboard's agent door (`switchboard_analytics`, `crates/switchboard-cli/src/mcp.rs` line 72, SB-299) takes no
+Switchboard's agent door (`switchboard_analytics`, `crates/switchboard-cli/src/mcp.rs` line 72 at `c762821`, SB-299) takes no
 decision; both owe UD-4, and since neither ships a manifest and Switchboard declares no actions extension,
 Switchboard owes an action for its switch and both owe a manifest capability for that tool with the effect
 `change-policy`. Fabric Inbox's desktop copy, a `fabric-service/0.1` service by its descriptor
@@ -247,7 +253,7 @@ each product's usage data page states (UD-5). The host offers no erasure by inst
 retention pass), so each product's page says that data already sent cannot be erased, unless the host's owner files
 such a route. It admits a reader of the raw events, the shared installation id included (PLAT-133), which as a
 service that reads the data there owes UD-3's join rule and is named, with its purpose, on each product's page
-(UD-5); where the counts are read there, each product's conforming version is marked (below). Fabric, Switchboard and
+(UD-5); where the counts are read there, each product's conforming version is to be marked (below). Fabric, Switchboard and
 Fabric Inbox's events also sit in a second store, the operator's earlier analytics instance in the operator's own
 account: their history to 2026-10-17 was copied from it to PassionCode.ai's host that day (the source only read), and
 installs older than each product's switch version (Fabric 0.3.7, Switchboard 0.6.42, Fabric Inbox 0.19.0) kept
@@ -295,11 +301,15 @@ its 0.33.0 and first sent it from 0.33.1, the first release build carrying its k
 `CHANGELOG.md` and `docs/COMPATIBILITY.md`, "Workspace state: anonymous usage data", at `2a11b3fd`), so its counts
 start at 0.33.1. It sends to the second store above, the operator's earlier analytics instance, not to PassionCode.ai's
 host (its `observatory/engine/usage_analytics.py` line 61 at `2a11b3fd`), and its notice (the same file, lines 99 to
-102) names no destination, so it owes UD-1's "where", and its UD-5 page states that store. That notice also names
+102) names no destination, so it owes UD-1's "where", and its UD-5 page states that store. It also owes UD-1's "nothing before the notice": `record` queues an event whenever it collects (lines 437 to
+442), its `flush` checks only the switch and its app key, never whether the notice was shown (lines 558 to 580), and
+its scheduled maintenance pass flushes the queue (`observatory/engine/maintenance.py` lines 1117 and 1125 to 1129 at
+`2a11b3fd`), while its notice is printed only to a person's terminal or shown when its dashboard is opened, so what an
+install queued before either is sent at the next pass. That notice also names
 neither the installation id every event carries (its own, unshared: line 12, `install_id` at lines 288 to 300) nor its
 session id, so it owes naming both (UD-1); its session id is one per process (lines 401 to 409), so where a process
-lives past an idle hour it owes UD-3's renewal. The rest of its sender was
-not read against these rules. The estate's hosted workspace product is outside the page as a hosted
+lives past an idle hour it owes UD-3's renewal. The rest of its sender, whether its MCP
+surface offers its switch (UD-4) included, was not read against these rules. The estate's hosted workspace product is outside the page as a hosted
 service; its self-hosted image, a component an organization deploys on its own server for its members, is under it
 with that organization's switch (its owner and administrators turn the counting off or on, its ADR-0014 item 3), and
 owes UD-3's session id, random per server process per UTC day today rather than renewed after an idle hour (its
@@ -312,7 +322,7 @@ nothing to declare until a later decision adds one. A product's install and acti
 and UD-2: they drop where the product sent before its notice or past an earlier no (Switchboard, Fabric Inbox, Fabric
 Dashboards), and rise where it waited for an answer (Fabric, whose never-answered installs send nothing today and come
 on after its notice at CO-496); an installation id a product owns, made anew at re-enable (UD-2), counts that install
-again. That version should be marked where its counts are read.
+again. That version is to be marked where its counts are read.
 Fabric, the operations digests' collector (its CO-503), sends only its own daily lines, to the local Project
 Observatory's `ops.digest.record` (OBS-330) over local stdio, so it sends none of them (UD-6;
 `apps/desktop/src/main/opsDigestSend.ts` lines 45 to 47 at `eafcf2e4`); its planned path for other services' lines,

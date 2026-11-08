@@ -206,7 +206,9 @@ ruling; DEC-0017 states what holds now.
   by the PassionCode.ai tools on this computer, lets one person using several of them count once", `src/main.ts`
   line 109 at `b99a17b`) and Fabric Inbox's ("An id shared by the PassionCode apps on this computer counts one person
   once", `desktop/main.cjs` line 937 at `1395416`), so a narrower answer changes shipped strings, not only future
-  wording. Does "only for this" admit the second purpose, or is a shared id's only use each product's own improvement?
+  wording. Switchboard's same line also gives its first purpose as "to help PassionCode.ai improve its apps" (unchanged
+  at `f6f1dc1`), every app of the organization rather than Switchboard, which DEC-0157 counts as a UD-1 debt; a narrow
+  answer changes that string too. Does "only for this" admit the second purpose, or is a shared id's only use each product's own improvement?
   (2) Plans.md item D addresses "every product owner". DEC-0157 reads it as the products the estate ships to people
   (an app, an agent, a command line tool, a component run on the person's own server) and leaves out a service the
   estate hosts that installs nothing on the person's machine or in an account or server of theirs, since nothing of it

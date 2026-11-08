@@ -11410,7 +11410,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      pending his answer, OQ-0013, so the wording that follows from it is provisional), and, when it sends an
      installation id, that id, whether it is shared and with which products (named as of the product's version, with a
      link to one maintained list of them, whose home is the sharing products' owners' choice: the estate's privacy page
-     on passioncode.ai, the launcher's PC-137 in plans.md, would be one home for every product, and until one exists
+     on passioncode.ai would be one home for every product (the page is live; the list of sharing products on it,
+     the launcher's PC-137 in plans.md, is not yet published), and until one exists
      each product keeps its own copy on its UD-5 page; the list and every copy name a new sharing product before it
      first sends the shared id, the notice's link naming it until the next version re-shows the notice), that the id ties events together though no person is named
      and that turning back on resumes a shared id, and, when it sends a session id, that it does and that the session
@@ -11454,8 +11455,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      shared file that exists but cannot be read before a product's first send (or before that stand-in run) is no
      answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run;
      a device policy whose layer carries a key for a product's switch may lock it off and never locks it on, and a
-     product ignores a lock that would hold its switch on, as if the key were unlocked (the pointer in devices.md's
-     "Precedence and locks").
+     product ignores a lock that would hold its switch on, as if that layer's lock were absent (a lower layer's lock
+     off still holds), applying this after the reference resolution `resolvePolicy`, which does not (the pointer in
+     devices.md's "Precedence and locks"; a reference helper and its vector are CT-279).
   3. UD-3: anonymous means no person named, not unlinkable (a shared id ties the products that send it); it leaves out a
      person (name, email, phone, account, billing or store id, an IP kept with the data, a hardware or advertising id),
      a credential, a path or a file name from the person's machine or data, and any content or text a person wrote or
@@ -11570,13 +11572,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   code); it owes UD-1's "nothing before the notice" (a background first start sends before the notice is shown: its test
   `on_by_default_a_background_start_sends_from_the_first_start`, "Nothing waits for the notice"), UD-1's naming of the
   products that share its id, the tying of events, its session id and that turning back on resumes it (its notice,
-  `src/main.ts` line 109 at `c762821`),
+  `src/main.ts` line 109 at `c762821`), UD-1's purpose (that line gives it as "to help PassionCode.ai improve its apps",
+  unchanged at `f6f1dc1`, every app of the organization rather than Switchboard, OQ-0013 naming the string),
   UD-2's kept decline (it reads the shared `analytics: false` only for an install that answered in Switchboard under its
   earlier rule, `crates/switchboard-runtime/src/analytics.rs` lines 315 to 322 at `405b789`, so it sends for an install
   whose person said no under Fabric's shared switch before Switchboard first sent, its test
   `an_install_whose_shared_file_says_off_still_sends_when_never_answered_here`; it owes reading an earlier shared no
   before its first send, and, at the first run of its conforming version that reads the shared file or finds it absent (UD-2), a shared off on an install whose own switch
-  was never set, though it already sent), and UD-4's forms of the word for its agent door (`switchboard_analytics`, `crates/switchboard-cli/src/mcp.rs` line 72,
+  was never set, though it already sent), and UD-4's forms of the word for its agent door (`switchboard_analytics`, `crates/switchboard-cli/src/mcp.rs` line 72 at `c762821`,
   `switchboard analytics on|off`, SB-299, used "only when the operator asks" and carrying no `_meta.decision`); its `docs/ANALYTICS.md` also says it sends no error
   event, which its own table contradicts. Fabric Inbox (its B-200, `desktop/analytics.cjs`, which sends at launch and
   shows the notice when a window first comes forward) and Fabric Dashboards (its FD-136, sending from a hidden or
@@ -11605,7 +11608,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   session id" (`i18n/en.ts` line 864 at `eafcf2e4`), and the other four owe naming it (UD-1). Fabric Dashboards also owes UD-4:
   its MCP `settings` tool (FD-175) lets any agent turn the switch on with no operator decision, its `change-settings`
   action declared with gate `none` (`src/mcp/actions.ts` line 38 at `d43c94e`) and `analytics` among the settings an
-  agent may change (`AGENT_SETTINGS`, `src/core/settings.ts` line 248); the `analytics` key becomes its own `relayed`
+  agent may change (`AGENT_SETTINGS`, `src/core/settings.ts` line 248 at `d43c94e`); the `analytics` key becomes its own `relayed`
   action carrying the operator's decision, which refuses `operator-decision-required` without one (AP-2) rather than
   take the path its dispatcher keeps for other relayed calls, running one without a decision as the caller's own act
   (`src/mcp/server.ts` lines 332 to 333 at `d43c94e`), and, since Fabric Dashboards ships no manifest, it owes a manifest
@@ -11631,7 +11634,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   that data already sent cannot be erased, unless the host's owner files such a route; it admits a reader of the raw
   events, the shared installation id included (PLAT-133), which as a service that reads the data there owes UD-3's
   join rule and is named, with its purpose, on each product's UD-5 page; where the counts are read
-  there, each product's conforming version is marked (below). Fabric, Switchboard and Fabric Inbox's events also sit
+  there, each product's conforming version is to be marked (below). Fabric, Switchboard and Fabric Inbox's events also sit
   in a second store, the operator's earlier analytics instance in the operator's own account: their history to
   2026-10-17 was copied from it to PassionCode.ai's host that day (the source only read), and installs older than each
   product's switch version (Fabric 0.3.7, Switchboard 0.6.42, Fabric Inbox 0.19.0) kept sending there until they
@@ -11701,10 +11704,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the first release build carrying its key (OBS-324, OBS-329; its `CHANGELOG.md` and `docs/COMPATIBILITY.md`,
   "Workspace state: anonymous usage data", at `2a11b3fd`), to the second store above rather than PassionCode.ai's host
   (`observatory/engine/usage_analytics.py` line 61 at `2a11b3fd`); its notice (lines 99 to 102) names no destination,
-  so it owes UD-1's "where", and its UD-5 page states that store; that notice also names neither its own, unshared
+  so it owes UD-1's "where", and its UD-5 page states that store; it owes UD-1's "nothing before the notice" too:
+  `record` queues an event whenever it collects (lines 437 to 442), its `flush` checks only the switch and its app key,
+  never whether the notice was shown (lines 558 to 580), and its scheduled maintenance pass flushes the queue
+  (`observatory/engine/maintenance.py` lines 1117 and 1125 to 1129 at `2a11b3fd`), while its notice reaches only a
+  person's terminal or its opened dashboard, so what an install queued before either is sent at the next pass; that notice also names neither its own, unshared
   installation id (line 12, `install_id` at lines 288 to 300) nor its session id, so it owes naming both (UD-1), and
   its session id is one per process (lines 401 to 409), so where a process lives past an idle hour it owes UD-3's
-  renewal; the rest of its sender was not read against these rules. It also sends OpenRouter attribution on every
+  renewal; the rest of its sender, whether its MCP surface offers its switch (UD-4) included, was not read against these rules. It also sends OpenRouter attribution on every
   request it makes to OpenRouter whatever its usage data switch says (`observatory/engine/agent/providers.py` lines 76
   to 94), which UD-6 leaves outside the page and asks it to say on its usage data page, and that attribution carries
   the legacy `X-Title` header too (line 93), where DEC-0065 has a product add exactly its headers and send the
@@ -11728,7 +11735,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   meets UD-1 and UD-2: they drop where the product sent before its notice or past an earlier no (Switchboard, Fabric
   Inbox, Fabric Dashboards), and rise where it waited for an answer (Fabric, whose never-answered installs send nothing
   today and come on after its notice at CO-496); an installation id a product owns, made anew at re-enable (UD-2),
-  counts that install again. That version should be marked where its counts are read. Events the host already
+  counts that install again. That version is to be marked where its counts are read. Events the host already
   received past an earlier no (from Switchboard, Fabric Inbox and Fabric Dashboards before their conforming versions)
   cannot be told apart there, since Fabric, under whose shared switch those people declined, sent nothing for those
   installs, and stay under the host's retention: the
@@ -11741,7 +11748,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/specification/openrouter-attribution.md` (its default points to UD-6), `docs/specification/devices.md`
   ("Precedence and locks" points to UD-2's limit on a lock),
   `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (usage data), `docs/ux/scenarios.md` (SCN-043's alt
-  path for UD-4 and its Coverage), backlog CT-216; the handoff `docs/handoffs/2026-11-07-usage-data.md` and its row in
+  path for UD-4 and its Coverage), backlog CT-216 and CT-279 (a reference for UD-2's limit on a lock); the handoff `docs/handoffs/2026-11-07-usage-data.md` and its row in
   `docs/handoffs/README.md`. The notice and the switch are each product's screens (Fabric's SCR-52 and SCN-134, which
   owe UD-1 and UD-2 under its CO-496 rewrite), not this contract's UX.
 - **Source:** the operator's decision of 2026-11-04 (CT-216; the knowledge base's roadmap track RM-13, product analytics private by default, and plans.md item D); the reading of the operator's decision in board reply `cbea0b76`; the consent rules of the estate's growth and experiments service (board `42a41db8`); Fabric
