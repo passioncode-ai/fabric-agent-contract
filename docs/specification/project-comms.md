@@ -882,7 +882,9 @@ contract times.
   live holder, with time left before its deadline for a run to finish; never `answered`, `outcome_unknown`, `cancelled`
   or a terminal state, and never while its thread, its Project or its slot is [held](#holds) (it waits for the lift, as
   enrollment and a named claim do). At most one dispatched run works on a request at a time: a second start for a request whose run is
-  in flight is refused by the host, idempotent by the request's id. The host offers the operator one switch that stops
+  in flight is refused by the host, idempotent by the request's id, and where the host dispatches from more than one
+  machine of the estate, the board's slot keeps a second run from working (its `com.enroll` finds the slot `active`
+  with a live holder and is refused `fenced`, which counts for nothing, OS-5). The host offers the operator one switch that stops
   new starts at once; a run already working is not stopped by it: it finishes, or the operator stops it. Holding its
   slot stops it only before its effect begins, since a hold refuses `com.accept` and `com.effect_begin` and never
   `com.complete`, `com.reconcile`, `com.progress` or `com.renew` ([what a hold refuses](#what-a-hold-refuses)), so a run
@@ -932,7 +934,7 @@ contract times.
   reply alone is not. It then ends, leaving the session and with it the slot
   ([slots end with the session](#slots-end-with-the-session)). It ends also at `run-ends-at`; a run that cannot settle the request before
   then, and whose deadline falls before the host could start another, settles it `failed_known` as above rather than
-  leaving it `accepted`. A run never waits on a refusal and never retries one, except one immediate retry of a settling call
+  leaving it `accepted` (who submits it again: OS-6). A run never waits on a refusal and never retries one, except one immediate retry of a settling call
   (`com.complete`, `com.reconcile`) with the same idempotency key when its refusal is `retryable` and not `held` (the
   key makes the retry safe, [idempotency](#idempotency)); a settling call refused again leaves the request as OS-5 says. One whose `com.enroll` is refused does
   what SA-6 says for that refusal ([answering in the same turn](#answering-in-the-same-turn)) except SA-6's retry once
@@ -946,7 +948,8 @@ contract times.
   slot. Settled here means the request reads `completed`, `failed_known` or another terminal state after the run; it
   counts runs only, and when a host closes its own record of a run (at `answered` or `outcome_unknown` too) is its own
   choice. The host may start one more run for a request; after two runs that ended without settling it, the host starts
-  none and shows the request to its operator, unchanged. It shows to its operator at once, unchanged: every request a
+  none and shows the request to its operator, unchanged. The count is one for the request across every machine the
+  host dispatches from. It shows to its operator at once, unchanged: every request a
   run's enrollment moved to `outcome_unknown` (`lost_result`), the run's own request or another of the slot's, and one a
   run left in `outcome_unknown`, since the estate owner settles them; an `accepted` or `in_progress` request with no
   live holder once its deadline leaves no time for a run (OS-1's candidate needs that time), at the latest when the
@@ -963,7 +966,8 @@ contract times.
   likewise ends the host's starts for that request
   and shows it to its operator. After the
   grant: at `absent` generation 0 the run's SA-6 decline made the request `answered`, so the requester submits it
-  again; at a generation of 1 or more the run sent no reply, so the request kept its state (a `queued` one stays
+  again, only while it still reads `answered` (one the requester cancelled to make the change itself reads `cancelled`
+  and is not submitted again); at a generation of 1 or more the run sent no reply, so the request kept its state (a `queued` one stays
   queued), and the host may start a run for it again: the grant starts the count of two again for that request, since
 the refused run's cause was the operator's to lift. The requester sees no signal from the host in the thread:
   it reads the request's state and may cancel, while the operator is the one shown the request; the operator acts on
@@ -992,9 +996,9 @@ the refused run's cause was the operator's to lift. The requester sees no signal
   and a source hand-over without a decision naming its exact target ([source](source.md#handing-over), DEC-0149; without
   the elicitation capability the service answers `operator-decision-required` with the detail `handover-needs-operator`)
   are each a stop, and so is a step the estate's rules keep from a session with no person (in PassionCode, the
-  production stop of fabric-workspace `knowledge/agents-first.md`, *One approval binds all*, item 8). Only the first two have an exception: a job's question or an `operator-decision-required` refusal
-  that the request's mandate (MD-3) or a relayed decision (OA-1 to OA-3) covers exactly is answered by it and is not a
-  stop. A source hand-over goes ahead only on a decision naming its exact target ([source](source.md#handing-over)), and
+  production stop of fabric-workspace `knowledge/agents-first.md`, *One approval binds all*, item 8). Only the first two are answered under a mandate or a relayed decision: a job's question or an
+  `operator-decision-required` refusal that the request's mandate (MD-3) or a relayed decision (OA-1 to OA-3) covers
+  exactly is answered by it and is not a stop. A source hand-over goes ahead only on a decision naming its exact target ([source](source.md#handing-over)), and
   a human step is never covered (MD-6, AP-4, OA-5); the estate's production stop is lifted only as its own rule says, and
   otherwise is settled, noted and submitted again as a human step is. At a stop the run settles first: before an effect began,
   `failed_known` with `observed: false`; after one, it cancels a waiting job with that job's own cancel and settles
@@ -1012,8 +1016,13 @@ the refused run's cause was the operator's to lift. The requester sees no signal
   [project directory](#project-directory); an unlisted one reads as not, which leaves it to the requester), since the operator acts on a request only through a session of the
   requesting Project they own (OS-5); otherwise "the requester submits it again once the step is taken". After a
   request left `in_progress`: "do not submit it again; it reaches the owner as `outcome_unknown` once a session of the
-  target Project takes the slot". So the requester submits it again only when that note, the operator or the owner's
-  settlement (below) says so. Once
+  target Project takes the slot". A run, or a session the operator opened (OS-5), that settles `failed_known` a request an earlier run left
+  `in_progress` at a stop writes the same `failed_known` note, by the earlier run's record. A `failed_known` request
+  with no such note in its thread (a responder's own reason, a run's time limit, OS-4, or a note a
+  [hold](#what-a-hold-refuses) refused, since a thread hold refuses a participant's `com.reply` and never
+  `com.complete`) leaves to the requester whether to submit it again, and a run whose note was refused names the
+  requester in its question. So the requester submits it again only when that note, the operator, the owner's
+  settlement (below) or the absence of a note says so. Once
   the person has taken the step, the one the note names submits a `failed_known` request again (a requester's wake for
   it is CT-150); a request left `in_progress` is not submitted again, since a new request's run gets no earlier effect
   key (OS-2, OS-5), until the estate owner settles it ([owner settlement](#owner-settlement), `settledBy: "owner"`):

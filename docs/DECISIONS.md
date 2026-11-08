@@ -11416,7 +11416,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      starts, never a promise that none starts later), for a request of its own estate whose slot has no live
      holder and where its responder grant lets the run's own `com.enroll` take that slot, in a state a run can take (`queued`, `claimed` with a lapsed attempt, `accepted` or `in_progress` with no
      live holder), with time left before the deadline and never while its thread, Project or slot is held; at most one
-     run per request at a time; one switch for the operator that stops new starts (a run already working finishes, or
+     run per request at a time (across the host's machines, the board's slot refusing a second run's `com.enroll`
+     `fenced`); one switch for the operator that stops new starts (a run already working finishes, or
      the operator stops it: holding its slot stops it only before its effect begins, since a hold refuses `com.accept`
      and `com.effect_begin` and never `com.complete`, `com.reconcile`, `com.progress` or `com.renew`, so a run whose
      effect began finishes under the hold, and moving its slot fences the run at its next fenced board call, its renewal
@@ -11451,7 +11452,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      (`held`, `fenced` and `lease_expired` among them, and a `com.reconcile` refused because the run no longer holds
      the slot) ends the run, leaving the request as OS-5 says.
   5. **A run that dies (OS-5).** The request keeps the state the extension gives it; settled means terminal and counts
-     runs only; after two runs that ended without settling, the host starts none and shows the request to its operator
+     runs only; after two runs that ended without settling, one count across the host's machines, the host starts none and shows the request to its operator
      unchanged; it shows at once every request a run's enrollment moved to `outcome_unknown` (the run's own or another of
      the slot's), one a run left `outcome_unknown`, an `accepted` or `in_progress` request with no live holder once its
      deadline leaves no time for a run, and a request a run settled at a human step it could not put to its operator, by
@@ -11462,7 +11463,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      could not make, where no session ran, is no run and is bounded by the host's own back-off; a run refused
      `not_authorized` ends the starts until the operator grants and shows the request, as does any other refusal of its
      enrollment that is not `retryable` (after the grant, at `absent` generation 0 the run's SA-6 decline made the
-     request `answered` and the requester submits it again; at a generation of 1 or more the request kept its state and
+     request `answered` and the requester submits it again, only while it still reads `answered`; at a generation of 1 or more the request kept its state and
      the host may start again, the grant starting the count of two again);
      the requester sees only the request's state, and the operator acts on what is shown through a session of the
      requesting Project they own, the requester otherwise acting on its own reading of the state (the estate's rule,
@@ -11477,7 +11478,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      launcher or host owning that lever where the client cannot drop it); a job's `input_required`, an
      `operator-decision-required` outside the mandate, a human step, a source hand-over without its exact decision and a
      step the estate's rules keep from a session with no person (in PassionCode, `agents-first.md` item 8's production
-     stop, lifted only as that rule says, otherwise settled and noted as a human step) are stops. Only the first two are answered instead when the mandate or a relayed decision covers that exact
+     stop, lifted only as that rule says, otherwise settled and noted as a human step) are stops. Only the first two are answered under the mandate or a relayed decision, when it covers that exact
      choice; a source hand-over needs a decision naming its exact target (source, DEC-0149) and a human step is never
      covered (MD-6, AP-4, OA-5). At a stop the run settles first: `failed_known` (`observed: false` before an effect
      began; after one, only once it observed no effect, after cancelling a begun job), or it leaves the request
@@ -11494,7 +11495,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      submitted again (a new request's run gets no earlier effect key) until the estate owner settles it (`settledBy:
      "owner"`): settled `failed_known` (observed), the one a run's `failed_known` note would name (the operator through a
      session of the requesting Project they own, otherwise the requester) submits it again once the step is taken;
-     settled `completed`, nothing is submitted again.
+     settled `completed`, nothing is submitted again. A later run or opened session that settles `failed_known` a
+     request an earlier run left `in_progress` at a stop writes the same note; a `failed_known` request with no such
+     note (a responder's own reason, a run's time limit, a note a thread hold refused) leaves resubmission to the
+     requester, and a run whose note was refused names the requester in its question.
   7. **Slots and mandates (OS-7).** A run holds a slot only while it works, never takes one from a live holder, uses a
      replacement only to continue a held request whose holder is gone (CT-175), and is never offered as the receiving
      session of the operator's move (the host withholds "Make main" and "Move" on a run); holding `project.work` it is the main
@@ -11534,7 +11538,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** additive for every board client: a run is an ordinary client of its Project. Read on 2026-11-08
   at each product's default branch. Fabric's dispatcher (its specification at `7dce3758`; `boardDispatch.ts`,
   `boardDispatchRun.ts`, `boardDispatchWiring.ts`, `boardMandate.ts`, `abandonedSweep.ts` on its main at `bc21883d`)
-  meets OS-1's candidate states, its one run in flight and OS-5's two empty runs, and writes no request state; it shows
+  meets OS-1's candidate states, and on each machine its one run in flight and OS-5's two empty runs (its in-flight
+  record and count are a local file, `apps/desktop/src/main/boardDispatchRun.ts:527-553`), and writes no request state; it shows
   an `outcome_unknown` request to the operator at once (`abandonedSweep.ts`, commit `09ddb2fc`, an ancestor of
   `bc21883d`; its CO-409 row "done on main 2026-11-05") and an `accepted` or `in_progress` request with no live holder
   at its deadline (`apps/desktop/src/shared/boardDispatch.ts:104-106`, OS-5's latest moment); its CO-409 row marks the
@@ -11579,7 +11584,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `com.submit` tool description (`apps/desktop/src/main/boardTools.ts:94-96`), which tells a requester that a
   `noResponder` request's target "can still answer it with a reply" and says nothing of a run, saying that a host that
   dispatches may take such a request after its grace (OS-1), so a requester goes by the request's state (the knowledge
-  base's item 3 below); the request shown to its operator naming each cause SCR-19 lists (two runs, a
+  base's item 3 below), and the same of the `noResponder` receipt's own sentence for a person
+  (`apps/desktop/src/main/boardService.ts:617-618`, "The request waits until the target replies ..., an agent of the
+  target asks for board.respond and the operator allows it, or its deadline passes"), which names no run; one count
+  of OS-5's two runs and one run in flight for a request across every machine it dispatches from (a record its
+  machines share), where its spec lets another machine take a request one machine skipped
+  (`docs/evidence/specs/2026-11-04-on-demand-sessions.md:124`) and both are read from a local file today, the board's
+  slot meanwhile keeping a second run from working (OS-1); the request shown to its operator naming each cause SCR-19 lists (two runs, a
   timed-out run told apart from one that ended for another reason, no time left, `not_authorized` or another refusal
   that is not `retryable`, a human step the run could not ask about) with the actions that cause allows, "Open a
   session of the target Project" among them, opened with the request's id and the earlier runs' record (OS-5), where
@@ -11633,15 +11644,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   effect's idempotency key (such as `effect-key:<key>`), since it redacts a checkpoint body's strings that look like
   UUIDs, long hex or random runs except its kept references (`session:`, `board-request:`, `board-thread:`,
   `fabric-project:`, `commit:`), which today would destroy the key OS-5 keeps there. fabric-workspace's
-  `knowledge/agents-first.md` owes, in "The project board", item 4 (a session a host started for one board request
-  answers only that request, OS-7), in "When nobody answers", item 3 (where the host dispatches, a requester makes a
-  change in the owner's repository only for a request it cancelled while `queued` or `answered` with
-  `expectedRevision` set to the revision `com.get` returned, a `cancelled` receipt at that revision being the only
-  proof that no run accepted it, or for one that `expired` (before any run accepted it), whatever `noResponder` says, a
-  run accepting before any change in the target's folder (OS-4), since the grace is only the
-  earliest a run starts (OS-1), and submits it again if its change does not land; never for a request a run has held
-  (`claimed`, `accepted`, `in_progress`, `outcome_unknown`), for which it waits on a watcher and acts only as item 1
-  says, a resubmission going back to the target; every state on one line; a hold never a reason to make the change) and item 5 (a
+  `knowledge/agents-first.md` owes, in "The project board", item 3 (a session a host started for one
+  request claims no other) and item 4 (a session a host started for one board request answers only that request,
+  OS-7), in "When nobody answers", item 3 (on every board, since any host of the operator's estate, another machine's
+  included, may start a run for a request and the board does not say whether one will: a requester makes a change in
+  the owner's repository only for a request it cancelled while `queued` or `answered` with `expectedRevision` set to
+  the revision `com.get` returned, only a `cancelled` receipt answering a cancel sent with that `expectedRevision`
+  proving that no run accepted it (the board refuses `revision_conflict` when the request moved; the receipt's own
+  revision is the next one), or for one that `expired`, a run accepting before any change in the target's folder
+  (OS-4); never for a request a run has held (`claimed`, `accepted`, `in_progress`, `outcome_unknown`), for which it
+  waits and acts only as item 1 says; the old order, the change first and the cancel after it, dropped, since a
+  request left `queued` may be taken by a run; every state on one line; a hold never a reason to make the change),
+  item 4 (the request stays for its owner, or for a run a host starts) and item 5 (a
   session the host starts is built, not asked for; the operator acts on a shown request through a session of the
   requesting Project they own, otherwise the requester on its own reading, OS-5) restated, and in "One approval binds all", item 8's production stop
   kept with OS-6's settlement added beside it and its "settled" read as OS-5 reads it (a terminal state; `answered`
@@ -11649,8 +11663,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   items against OS-1, OS-5 and OS-6, a merge condition in the handoff (landed with this decision's merge, not after).
   Until then a mixed state is open: Fabric's dispatcher is on by default since 0.3.16, while item 3 at `c84c7a40` has a
   requester make a small change and cancel afterwards, the adapter's requester rule has it make the change and leave
-  the request `queued` (so a run takes the request after the change), Fabric's `com.submit` description says nothing
-  of a run, and Fabric's packet and Switchboard's exit text have a run accept only before its effect begins (so a run
+  the request `queued` (so a run takes the request after the change), Fabric's `com.submit` description and `noResponder`
+  sentence say nothing of a run, and Fabric's packet and Switchboard's exit text have a run accept only before its effect begins (so a run
   may change the folder while the request is still `claimed`), so a requester and a run can change the owner's
   repository for one request; the landing board post names that window (from Fabric 0.3.16
   to the knowledge change's landing) beside the consumer debts.
