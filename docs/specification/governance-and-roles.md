@@ -107,14 +107,16 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   itself under the words, a decision or a mandate in force exists (`gate` `none` or `relayed`, AP-1), or another route
   reaches the step (the service's API or tool, its
   command line, a credential the estate holds); a command is for the agent (the operator's word of 2026-11-07 that they
-  press nothing). A refusal by the agent's own tool or harness is not a command for the operator: it is
+  press nothing). The one press this rule keeps is a host gate's agreement to an act it holds, where neither a twin nor
+  a route reaches it: on Fabric the "Allow once" of a `floor.ask-first` refusal (OW-3), while Fabric's question
+  `add1df7c` on whether the operator's words pass that gate stays open. A refusal by the agent's own tool or harness is not a command for the operator: it is
   OW-4's step.
 - **OW-3, a risk is a reason to adjust, not to stop.** When the asked way carries a risk the operator's words did not
   name (data lost, an act that cannot be undone, an outward effect, a contradiction with a decision on record), the
   agent says so once, in one short message naming the risk and the corrected way, and the rest of the task goes on.
   The step the message concerns waits for the answer in three cases: its corrected way is a relayed act the words do
-  not name and the mandate in force does not cover; it is a step a limit of OW-5 gates other than a human step or a
-  host's gate (a source hand-over, an effect outside a grant); or no corrected way both undoes cleanly and still meets
+  not name and the mandate in force does not cover; it is a step a limit of OW-5 gates other than a human step, a
+  reserved control (OW-4) or a host's gate (a source hand-over, an effect outside a grant); or no corrected way both undoes cleanly and still meets
   the word, the one stop this rule adds itself, as AP-3 has an agent that is not sure the operator decided ask them.
   For a step that waits the message is a question (with no person in the chat, the step is named as the end of this rule says); for any other it states the corrected way as under way and how to
   stop it. When the step the message concerns is one a host's gate holds (below), the message is no question of its
@@ -145,9 +147,11 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   communication](project-comms.md#answering-in-the-same-turn) SA-5), and settles the request under SA-6's `com.accept`, then
   `com.complete`, and adds: it calls no `com.effect_begin` for an act it has not begun, so until it settles the request
   stays `accepted` with its effect `not_started`; a request whose asked act is the open one settles `failed_known` with
-  `observed: false` before any effect, a `com.reply` to it naming the open act and what it waits for, and the
-  requester submits it again once the person has acted; a request whose asked act was done, with only a side act left
-  open, settles `completed` with the open act named in its result. A relay or a mandate that
+  `observed: false` before any effect, and a `com.reply` to it names the open act and says that it waits for a session
+  the person is in and that nobody submits the request to the board again (a session with no person would meet the
+  same refusal); when a session the person is in performs the act, it records that in the request's thread, and the
+  requester submits nothing; a request whose asked act was done, with only a side act left open, settles `completed`
+  with the open act named in its result. A relay or a mandate that
   names the act changes neither mode: like the operator's words in a session the person is in, it is the reason the
   one ask quotes, not the agreement the gate holds the act for (Fabric's ADR-0160 section 4); `board.read-at-start`'s production
   stop, which its own text lifts on such a relay, is another gate.
@@ -164,8 +168,9 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   action class, that does not lift the FA-09 refusal (FA-09 is checked before any grant) and that Fabric hands to any
   session of the project that keeps its runner gate and asks for the same floor class and target, which would spend it
   without asking; the card then reads "Allowed once, until {time}" and leaves the queue while the act stays undone.
-  Unpressed, the card stays in the queue as refused, the act done or not (it leaves only when newer policy decisions
-  push it out). The card is no question the agent asks: the agent's chat question is the one the operator answers, and it says
+  Unpressed, the card stays in the queue as refused, the act done or not (it leaves when newer policy decisions
+  push it out, or a later grant or a later decision allowing the same floor class and target, in the project or
+  estate-wide, resolves it). The card is no question the agent asks: the agent's chat question is the one the operator answers, and it says
   that the card does not allow the act, naming the card by its label in the operator's interface language (in Russian
   «Разрешить один раз», under «заблокировано» or «Отказано»), for example: "Fabric refused publishing this project's
   release in this session; its "Allow once" card does not allow it here. You said "release it"; shall I publish it
@@ -181,7 +186,12 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   In a session with no person in its chat, every step that waits under this rule (one of the three waits above, an act
   a host's gate holds, or the FA-09 case) has the one place the FA-09 case names: the agent asks no question from that
   session, leaves the step open and names it, in its board reply and its report, as a step for a session the person is
-  in (a host's gate still asks as it does), and settles the board request as that case does.
+  in (a host's gate still asks as it does), and settles the board request as that case does, save for who submits it again: a request
+  settled `failed_known` this way is submitted to the board again only where what the person does lets a session with no
+  person take the step (an answer, a decision or a relay naming the step, a grant, a human step cleared); then the
+  operator submits it again when they own the requesting Project, and the requester otherwise, and the `com.reply`
+  names which. An act that only a session the person is in can take (the FA-09 case) is never submitted again, as
+  that case says.
 - **OW-4, only what needs the person.** Of the task's steps, the agent hands the person only those that technically
   need a person: a binding that only the person's own act proves (a bot created in their own messenger account, the
   code typed in their own chat, OC-3 and OC-11); a human step of AP-4 and OA-5 (a sign-in with its one-time code, a consent, a payment or top-up, a

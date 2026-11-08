@@ -150,7 +150,7 @@ stop while the channel is off. The proposal lists its four steps, three of them 
    DEC-0156). The agent reads the store for the token at its next start and when the person tells it, or the coding session
    it runs in, that the token is stored, and its reply or its dashboard then says that the code is ready. When a code
    expires unused while that `accepted` holds, the agent issues a new one when the person asks it, or the coding session it runs in,
-   for one, and shows it the same way, on the dashboard first; it never issues one because of a message in the chat
+   for one, and shows it the same way, on the dashboard when the agent has one; it never issues one because of a message in the chat
    with the bot (a late code typed there is refused, OC-3). A code in that reply stays in the session's transcript, a residual like DEC-0147's share code, without
    its comparison code: the code is for one use and at most 10 minutes (OC-3), the operator's own send of a code already spent binds
    nothing, and the status shows when the chat was bound and for how many users (`binding.linkedAt`,
@@ -243,6 +243,8 @@ missing receiver is never reported as `unlinked`, `linked`, `standby` or `off`, 
 The status schema makes the other states unrepresentable for it (DEC-0058): `unlinked` requires
 `receiver.lease` `held` or `elsewhere`, and a `reason.code` of `receiver-missing` requires `state: degraded`
 and `receiver.lease: none`. Like every channel failure, it degrades the channel, not the service (OC-9).
+A product's own `reason.detail` stays within the schema's 300 characters in every locale it ships, a translation
+included; the fixtures' English examples are not a length budget for another language.
 
 ## Status
 
@@ -250,7 +252,7 @@ Schema: [`operator-channel-status.schema.json`](../../schemas/operator-channel-s
 
 | State | Meaning | Requires |
 |---|---|---|
-| `off` | the channel is not enabled (the default); with `proposal.answer: accepted` and `credential.present: false` it waits for the token (OC-11 step 3: the agent enables it once the token is stored), and the tile names that step, the token to store under `credential.name` | no field beyond the common ones |
+| `off` | the channel is not enabled (the default); with `proposal.answer: accepted` and `credential.present: false` it waits for the token (OC-11 step 3: the agent enables it once the token is stored), and the tile names that step, the token to store under `credential.name`, or, with no `credential` member, the step without a name, which the agent states in its reply or on its dashboard | no field beyond the common ones |
 | `unlinked` | enabled; no chat is bound yet, the agent waits for a code | `credential`, `receiver` with `receiver.lease: held` or `elsewhere`; no `binding` |
 | `linked` | bound; this process holds the receiving lease | `credential` present, `receiver.lease: held`, `binding`; no `reason` |
 | `standby` | bound; another process of the same agent holds the lease | `reason`, `credential`, `receiver.lease: elsewhere`, `binding` |

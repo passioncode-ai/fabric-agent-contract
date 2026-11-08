@@ -32,7 +32,10 @@ contract already has.
 - `docs/ux/foundation.md` (JRN-04/#2's touchpoint, ST-035), `docs/ux/flows.md` (FLW-29), `CONTEXT.md` (the operator's
   word), `docs/DOCMAP.md`, `docs/specification/README.md`, `docs/specification/channel-agent.md` (CA-8's pointer).
 - Backlog CT-220 in progress; CT-266, CT-269, CT-271, CT-273 and CT-278 filed. The operator channel's Status table:
-  its `off` row names an `accepted` answer waiting for the token, and the tile names that step.
+  its `off` row names an `accepted` answer waiting for the token, and the tile names that step (or, with no
+  `credential` member, the step without a name, which the agent states), pinned by the positive fixture
+  `fixtures/positive/operator-channel-status-off-awaiting-token.json` and its catalogue row; OC-17 says a product's own
+  `reason.detail` stays within 300 characters in every locale it ships.
 - Consumers read before drafting: the adapter ships the rule (FAA-207, `v0.63.0`, citing CT-220); fabric-workspace
   `knowledge/agents-first.md` states it (`956afadf`); Fabric's session rules do not.
 
@@ -56,7 +59,9 @@ contract already has.
   its refusals section's item 4.
 - Landing step for Fabric question `add1df7c` (round 14): add to it the case of a board request whose relay names a
   floored act; DEC-0156 reads it as the reason the one ask quotes, not the agreement, so the act still goes to a session
-  the person is in (OW-3, the Compatibility).
+  the person is in (OW-3, the Compatibility); and add the operator's word of 2026-11-07 that they press nothing
+  (announcement `e6385b29`), set against the one press DEC-0156 keeps, a host gate's agreement (Fabric's "Allow once"
+  under `floor.ask-first`, OW-2 and OW-3), so the answer says whether that press stays.
 - Landing notes for the sibling decisions. Each states what the merged text must say once both branches are on `main`
   and a check run on the merged tree at landing; none states what a sibling branch says now, since the siblings move
   every round. Whichever of the two branches lands second makes the merged text say it. The branches: DEC-0157 on
@@ -75,23 +80,39 @@ contract already has.
     branch's owner). `docs/specification/conformance.md` keeps the board-client row in DEC-0158's form (with "a
     dispatched run follows its own row below (OS-4, OS-7)"), then the OW row, then DEC-0158's rows; OW-3 and OS-6 cite
     each other; and OW-3's no-person case and OS-6 name the same settlement, so one situation reads one way on the
-    board: before any effect, `failed_known` with `observed: false`, a `com.reply` naming the open act and what it
-    waits for, and the request submitted again once the person has acted. Checks, on the merged tree:
+    board: before any effect, `failed_known` with `observed: false` and a `com.reply` naming the open act. Who submits
+    it again follows OS-6's split, the operator when they own the requesting Project and the requester otherwise, and
+    only where what the person does lets a session with no person take the step (a human step cleared, a decision or
+    a relay naming the step); an act that only a session the person is in can take (OW-3's FA-09 case) is never
+    submitted again, its reply says so, and the person's session that performs it records that in the request's
+    thread. OS-6 asks its notice question (`fabric_question_ask` or the host's equal) only at a human step; at the
+    estate's production stop or a step a host's gate holds, a dispatched run asks no question and names the step in
+    its thread note and its report, as OW-3 has a session with no person do. Checks, on the merged tree:
     `grep -c 'a dispatched run follows its own row below (OS-4, OS-7)' docs/specification/conformance.md` prints 1,
     `grep -c "^| an agent that takes its operator's words" docs/specification/conformance.md` prints 1,
     `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c OS-6` prints at least 1,
     `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c 'observed: false'`
-    prints at least 1, the same range with `grep -c 'left in progress'` prints 0, and OS-6's paragraph names OW-3 and
-    settles a stop before an effect as `failed_known` with `observed: false` (judgement, where OS-6 is defined).
+    prints at least 1, the same range with `grep -c 'left in progress'` prints 0, the same range with
+    `grep -c 'requester submits it again'` prints 0, with `grep -c 'nobody submits the request to the board again'`
+    prints at least 1 and with `grep -c 'when they own the requesting Project'` prints at least 1, and OS-6's paragraph
+    names OW-3, settles a stop before an effect as `failed_known` with `observed: false`, names the same resubmitter
+    split, has no FA-09 act submitted again and scopes its notice question to a human step (judgement, where OS-6 is
+    defined).
   - DEC-0159 (CT-218, members' client keys): SCN-059 states the key split. Issuing and rotating a member's key are
     OW-4's secret step, from the operator's terminal or the page, so the value never enters an agent's transcript (CF-3);
     revoking is the agent's step on the operator's decision (OW-2), through the `relayed` twin where the instance checks
     `approval/1`, else by the agent running the agent's own CLI on the operator's computer (CF-4). SCN-059's sentence
     for a host that cannot show the page leaves revoking with the agent, and SCR-30's Scenarios do not list SCN-059. In
     SCN-044 the merged text keeps OW-3's "asks once whether to update" for `incompatible` and CT-218's cloud-instance alt
-    path, with both Coverage citations. OW-4 names, as a human step's exact step, a command the person runs in their own
+    path, with both Coverage citations; that alt path's sentence takes SCN-059's split (issuing and rotating a
+    member's key are the operator's, from their own terminal; revoking is the agent's, on the operator's word, through
+    the agent's CLI on the operator's computer), so no SCN-044 line has the operator manage client keys. Checks:
+    `awk '/^### SCN-044/,/^### SCN-058/' docs/ux/scenarios.md | grep -c 'operator manages client keys'` prints 0, and
+    the same range with `grep -c 'revok'` prints at least 1 (judgement: revoking named as the agent's). OW-4 names, as a human step's exact step, a command the person runs in their own
     terminal where an agent's run would put a secret in its transcript (CF-3), and CONTEXT's "hands the operator no
-    command" takes that exception. Checks: judgement, each SCN-059 line naming the operator's terminal or CLI names
+    command" takes that exception. That clause goes into OW-4 and into CONTEXT's entry whichever branch lands second,
+    and into CF-4's *Where the operator is* in addition where DEC-0159's own note puts it there; the clause in CF-4
+    alone meets none of the checks below. Checks: judgement, each SCN-059 line naming the operator's terminal or CLI names
     issuing, rotating or the entry point, never revoking;
     `awk '/^### SCR-30/,/^### SCR-31/' docs/ux/screens.md | grep -c SCN-059` prints 0; `python3 docs/ux/lint.py` exits 0;
     `awk '/^- \*\*OW-4/,/^- \*\*OW-5/' docs/specification/governance-and-roles.md | grep -c 'own terminal'` prints at
@@ -111,7 +132,8 @@ contract already has.
 - Owed at the operator-channel status schema's next change (round 20, product): its `state` description still reads
   `off` as "the operator has not enabled the channel"; it takes the Status table's `off` row (an `accepted` answer
   with `credential.present: false` waits for the token, and the tile names that step). Not changed here, so the schema
-  and its vendored copies stay byte for byte.
+  and its vendored copies stay byte for byte. That change also decides whether `off` with an `accepted` answer requires
+  `credential` (round 21, seam); until then the row says what the tile shows without it.
 - Named risk carried to the closing verdict (round 15, product): in the no-person FA-09 case only Fabric's refused card
   and its OS notification reach the person, and the card's "Allow once" leaves the act undone; the person learns what
   is open only from the board reply and the report until Fabric ships the card change DEC-0156's Compatibility owes. The
@@ -122,7 +144,7 @@ contract already has.
 
 - OW-3's waits: the coordinator's reading of the operator's «если есть риски уточнить и корректировать и выполнить»
   against AP-2 and AP-3. The one message never stops the task; only a step whose corrected way is a `relayed` act the
-  words do not name and the mandate does not cover, a step a limit of OW-5 gates other than a human step or a host's gate, or a step with no corrected way that
+  words do not name and the mandate does not cover, a step a limit of OW-5 gates other than a human step, a reserved control or a host's gate, or a step with no corrected way that
   both undoes cleanly and still meets the word waits for the answer. The third is the one stop the rule adds itself,
   grounded in AP-3 (an agent not sure the operator decided asks); the operator may overrule it.
 - Fabric's `intake.spec-first` stands: it is the operator's own recorded decision (Fabric ADR-0176), and OW-3 lets such a
@@ -144,9 +166,12 @@ contract already has.
   is in, rather than `fabric_question_ask` (dropped in round 13 because a yes there reached no live session). Round 20
   replaced its settlement: OW-3 adds to SA-6's `com.accept`, then `com.complete`, that no `com.effect_begin` is called
   for an act not begun, and that a request whose asked act is the open step settles `failed_known` with
-  `observed: false` before any effect, a `com.reply` naming the open act and what it waits for, the requester
-  submitting it again once the person has acted, as DEC-0158's OS-6 does for a dispatched run, so the board reads one
-  way; a request whose asked act was done, with only a side act left open, settles `completed` with that act named.
+  `observed: false` before any effect, with a `com.reply` naming the open act; a request whose asked act was done,
+  with only a side act left open, settles `completed` with that act named. Round 21 replaced its resubmission: an act
+  only a session the person is in can take (the FA-09 case) is never submitted again, the reply says so and the
+  person's session records the act in the request's thread; a request is submitted again only where what the person
+  does lets a session with no person take the step, by the operator when they own the requesting Project and the
+  requester otherwise, the split DEC-0158's OS-6 states for a dispatched run (the DEC-0158 landing note above).
 - OW-5 names the separation the operator keeps between unrelated businesses as recorded in the operator's own
   instructions, outside this contract: the contract has no specification of it (contexts, DEC-0082, are personal and
   organization contexts, not businesses).
@@ -608,6 +633,43 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   no U+2014 in the added lines; `git merge-tree --write-tree HEAD origin/main` exit 0. The full gate
   (`pnpm run check`) was not run.
 
+- Round 21 (on `b1676b13`): unit clean of breaks; seam and product not clean. Breaks folded: OW-3's no-person
+  settlement (product) had the requester submit a request again "once the person has acted", which under FA-09 asks
+  for the act a second time or sends it to another no-person session refused the same way: now the `com.reply` says
+  the act waits for a session the person is in and that nobody submits the request to the board again, the person's
+  session records the act in the request's thread when it performs it and the requester submits nothing; a request is
+  submitted again only where what the person does lets a session with no person take the step, by the operator when
+  they own the requesting Project and the requester otherwise (DEC-0158's OS-6 split), in OW-3, DEC-0156 item 3, the
+  conformance row, SCN-057's board alt path and FLW-29's FA node; the DEC-0158 landing note now requires that split,
+  scopes OS-6's notice question to a human step (a production stop or a host gate's step in a dispatched run asks no
+  question and names the step) and adds merged-tree greps for the wording, and Decisions taken here no longer says
+  OW-3 settles "as DEC-0158's OS-6 does". The DEC-0159 landing note (seam) left SCN-044's cloud-instance sentence
+  ("the operator manages client keys with the agent's own CLI") against SCN-059's split: it now requires the same
+  split there (issuing and rotating the operator's, from their own terminal; revoking the agent's, on the operator's
+  word, through the agent's CLI on the operator's computer) with two merged-tree checks over SCN-044. Risks folded: the
+  "own terminal" clause goes into OW-4 and CONTEXT whichever branch lands second, CF-4 in addition (seam); OW-2,
+  DEC-0156 item 2 and its Source name the one press DEC-0156 keeps, a host gate's agreement (Fabric's "Allow once"
+  under `floor.ask-first`), pending `add1df7c`, and that question's landing step adds the 2026-11-07 word
+  (announcement `e6385b29`) (product); OW-3's exclusion reads "a human step, a reserved control (OW-4) or a host's
+  gate", mirrored in DEC-0156 item 3 and the conformance row (unit); OC-11 step 3 reads "on the dashboard when the
+  agent has one" (unit); the FA-09 card's "leaves only when" now reads as Fabric's `shared/attention.ts`
+  `openRefusals` (main `0e7a8a00`, from line 222; its comment from line 170) does: it leaves when newer policy
+  decisions push it out, or a later grant or a later decision allowing the same floor class and target, in the project
+  or estate-wide, resolves it, in OW-3 and DEC-0156's Compatibility (unit); the Status table's `off` row has the
+  positive fixture `operator-channel-status-off-awaiting-token.json` (`proposal.answer` `accepted`,
+  `credential.present` false) with its catalogue row, and says what the tile shows with no `credential` (unit, seam,
+  product); OC-17 says a product's own `reason.detail` stays within 300 characters in every locale it ships
+  (product). Left as owed, no edit: the schema's `off` description and whether it requires `credential` (Open); the
+  adapter's and fabric-workspace's mixed state until landing (DEC-0156's Compatibility, the landing step); the spend
+  approval while nobody receives (CT-269). Declined: shortening the 291-character example `detail` (optional; the
+  OC-17 sentence carries the locale bound).
+- On the round-21 fold (working tree over `b1676b13`): `pnpm run docs:check` exit 0 (271 Markdown files, 0
+  markdownlint errors); `python3 docs/ux/lint.py` exit 0 (57 scenarios); `pnpm run privacy:check` 0 findings;
+  `pnpm --silent validate` exits 0 on the new `fixtures/positive/operator-channel-status-off-awaiting-token.json` (no
+  other fixture changed); `pnpm vitest run test/operator-channel.test.ts test/fixtures.test.ts test/consistency.test.ts
+  test/positive-sweep.test.ts`, 4 files, 1390 passed; no U+2014 in the added lines; `git merge-tree --write-tree HEAD
+  origin/main` clean. The full gate (`pnpm run check`) was not run.
+
 ## Next task
 
-Round 21 of the blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 22 of the blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.

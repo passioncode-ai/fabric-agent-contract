@@ -11418,12 +11418,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      says.
   2. OW-2: the agent runs commands itself and never asks the operator to run one, paste an output, press a button, open
      a page to confirm or choose on a card where an agent twin it may take itself (`gate` `none` or `relayed`, AP-1) or
-     another route of its own reaches the step (the operator's word of 2026-11-07 that they press nothing); a refusal
-     by its own tool or harness goes to OW-4.
+     another route of its own reaches the step (the operator's word of 2026-11-07 that they press nothing); the one
+     press it keeps is a host gate's agreement where neither reaches the act (on Fabric the "Allow once" of a
+     `floor.ask-first` refusal, OW-3), while Fabric's question `add1df7c` stays open; a refusal by its own tool or
+     harness goes to OW-4.
   3. OW-3: a risk the words did not name gets one short message, once, naming the risk and the corrected way; the rest
      of the task goes on; the step waits for the answer when its corrected way is a relayed act the words do not name
-     and the mandate does not cover, a step a limit of OW-5 gates other than a human step or a host's gate, or when no
-     corrected way both undoes cleanly and still meets the word (the one stop this rule adds itself, grounded in AP-3);
+     and the mandate does not cover, a step a limit of OW-5 gates other than a human step, a reserved control (OW-4)
+     or a host's gate, or when no corrected way both undoes cleanly and still meets the word (the one stop this rule adds itself, grounded in AP-3);
      the message is a question for a step that waits, and states the corrected way as under way and how to stop it for
      any other; where the step is one a host's gate holds, the message is no question of its own but travels as that
      gate's one ask, its reason naming the risk, the corrected way and the words; otherwise the agent takes the safest
@@ -11442,9 +11444,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      SA-6's `com.accept`, then `com.complete`, with OW-3's additions (a `com.progress` note naming the open act and what
      blocks it, SA-5; no `com.effect_begin` for an act not begun, so the request stays `accepted` with its effect
      `not_started` until it settles; a request whose asked act is the open one settled `failed_known` with
-     `observed: false` before any effect, a `com.reply` to it naming the open act and what it waits for, and submitted
-     again by the requester once the person has acted; one whose asked act was done, with only a side act left open,
-     settled `completed` with the open act named in its result), every other step that waits in such a session named the same way, a relay or a mandate that names the
+     `observed: false` before any effect, a `com.reply` to it naming the open act and saying that it waits for a
+     session the person is in and that nobody submits the request to the board again, the person's session that
+     performs the act recording that in the request's thread and the requester submitting nothing; one whose asked
+     act was done, with only a side act left open, settled `completed` with the open act named in its result), every
+     other step that waits in such a session named the same way, a request settled `failed_known` there submitted
+     again only where what the person does lets a session with no person take the step (an answer, a decision or a
+     relay naming the step, a grant, a human step cleared), by the operator when they own the requesting Project and by
+     the requester otherwise, a relay or a mandate that names the
      act changing neither mode, being the reason the one ask quotes, not the agreement the gate holds the act for; the
      agent adds no question of its own
      about an act a host's gate already asks about (a risk on it travels as that gate's one ask), while the asks other
@@ -11559,7 +11566,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `apps/desktop/src/shared/attention.ts` lines 257 to 274, `renderer/src/launch/ObligationActs.tsx` line 108, announced
   once by an OS notification when Fabric is not in front, which carries no button, `shared/notify.ts`
   `decideNotification` from line 46, reading the same queue, `main/index.ts` near line 3423; the card stays in the
-  queue as refused until 50 newer policy decisions push it out, `main/index.ts` line 3429 `REFUSAL_WINDOW = 50`; the
+  queue as refused until 50 newer policy decisions push it out, `main/index.ts` line 3429 `REFUSAL_WINDOW = 50`, unless
+  a later grant or a later decision allowing the same floor class and target, in the project or estate-wide, resolves
+  it first, `shared/attention.ts` `openRefusals` from line 222 (Fabric main `0e7a8a00`); the
   button reads "Allow once" (in Russian «Разрешить один раз», the card's kind «заблокировано» or «Отказано» and its
   status «Разрешено один раз, до {time}», `renderer/src/i18n/ru.ts` lines 2419, 2423 to 2424 and 476) and issues a
   single-use one-hour grant scoped to the project, the floor class and the target with no action class, the
@@ -11631,7 +11640,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   webhook, that removing it or switching to it is the operator's decision, told to the agent or the coding session it runs in,
   never in the bot's chat, or taken by them in the channel settings (OC-2)
   (`fixtures/positive/operator-channel-status-degraded.json`, `-degraded-receiver-missing.json`,
-  `-degraded-receiver-missing-unlinked.json`; `fixtures/negative/operator-channel-status-degraded-without-credential.json`,
+  `-degraded-receiver-missing-unlinked.json`; the new `-off-awaiting-token.json` for the Status table's `off` row; `fixtures/negative/operator-channel-status-degraded-without-credential.json`,
   `-receiver-missing-lease-held.json`, `-receiver-missing-without-receiver.json`, each negative for its original
   reason), `docs/ux/foundation.md` (JRN-04/#2's touchpoint and ST-035), `docs/ux/screens.md` (SCR-30), `docs/DOCMAP.md`,
   `docs/specification/README.md`, `docs/specification/channel-agent.md` (CA-8's pointer), `CONTEXT.md` (the operator's
@@ -11640,8 +11649,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   CT-271, CT-273 and CT-278 (filed; CT-271 rewrites the recoveries other scenarios still give the operator, under OW-2
   and OW-3; CT-273 names how the operator removes a channel binding they did not make; CT-278 puts the dashboard's
   link code on a screen), the operator channel's Status table (its `off` row: an `accepted` answer waiting for the
-  token); the handoff
+  token) and OC-17 (a product's own `reason.detail` within 300 characters in every locale it ships); the handoff
   `docs/handoffs/2026-11-07-operators-word.md` and its row in `docs/handoffs/README.md`.
 - **Source:** the operator's words of 2026-11-04 relayed on board threads `b91254c4` and `a7a9d05d` (message
   `b66a8fae`); their words of 2026-11-07 that they press nothing in any interface (relayed by one of their projects
-  on board thread `c4ec741b`, announcement `e6385b29`), which OW-2 states; backlog CT-220; DEC-0156 reserved by git CAS on 2026-11-07.
+  on board thread `c4ec741b`, announcement `e6385b29`), which OW-2 states, keeping one press, a host gate's agreement
+  (Fabric's "Allow once" under `floor.ask-first`, OW-3), while Fabric's question `add1df7c` stays open; backlog CT-220; DEC-0156 reserved by git CAS on 2026-11-07.
