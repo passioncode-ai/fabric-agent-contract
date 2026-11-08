@@ -17,7 +17,8 @@ contract already has.
 - SCN-057 in `docs/ux/scenarios.md` and its index row, mapped to SCR-30 in `docs/ux/screens.md`; SCN-044's update
   alt path and Coverage; SCN-012's step 1, alt path and recovery and SCN-014's recovery (the link command the
   agent's; a stopped receiver restarted by OC-17's supervisor and, if the status stays, by the agent on the operator's
-  word in any session with it, a waiting decision answered there or on the dashboard, not in the bot's chat; the
+  word in any session with it, a waiting decision answered on the dashboard, not in the bot's chat, a paid action or a
+  spend approval only as OC-6 and spend policy rule 3 say; the
   webhook's removal waiting on OC-2's decision).
 - [Operator channel](../specification/operator-channel.md) OC-11's step 3 (the agent enables and links on AP-2's
   relayed decision, the code shown to the person only, a new one issued when it expires unused and never because of a chat message; an old `accepted` renewed by one question, MD-1), DEC-0034's Annotated line and DEC-0150's (OW-6 keeps CA-8's bound); six status
@@ -53,33 +54,43 @@ contract already has.
 - Landing step for Fabric question `add1df7c` (round 14): add to it the case of a board request whose relay names a
   floored act; DEC-0156 reads it as the reason the one ask quotes, not the agreement, so the act still goes to a session
   the person is in (OW-3, the Compatibility).
-- Landing note, DEC-0158 (branch `agent/ct215-on-demand-20261108`, re-read on origin on 2026-11-08): whichever of DEC-0156 and DEC-0158 lands second
+- Landing note, DEC-0158 (branch `agent/ct215-on-demand-20261108`, re-read on origin on 2026-11-08 at `d54bd9de`): whichever of DEC-0156 and DEC-0158 lands second
   adds a cross-reference between OW-3's sentence for a session with no person in its chat and DEC-0158's OS-6 (no
-  person in a dispatched run), both ways; a dispatched run settles as OS-6 says. Both branches also add rows to
-  `docs/specification/conformance.md` after the board-client row (`git merge-tree` reports the conflict there):
-  whichever lands second keeps both, the OW row and DEC-0158's dispatched-run rows, after the board-client row.
-- Landing note, CT-218 and DEC-0159 (branch `agent/ct218-local-cloud-v2`, read at `02606f7e`; DEC-0157 is on
+  person in a dispatched run), both ways; a dispatched run settles as OS-6 says. `git merge-tree --write-tree HEAD
+  origin/agent/ct215-on-demand-20261108` reports four conflicts: `docs/specification/conformance.md`, where both add
+  rows after the board-client row and the second lander keeps both, the OW row and DEC-0158's dispatched-run rows,
+  after that row; and `docs/DECISIONS.md`, `docs/backlog.md` and `docs/handoffs/README.md`, adjacent appends that keep
+  both sides. Check: `git merge-tree --write-tree --name-only HEAD origin/agent/ct215-on-demand-20261108 | sed -n
+  '2,5p'` prints those four files and no other.
+- Landing note, CT-218 and DEC-0159 (branch `agent/ct218-local-cloud-v2`, re-read at `05dc64ec`; DEC-0157 is on
   `agent/ct216-usage-data-v2`; re-read the remote names with `git ls-remote origin 'refs/heads/agent/ct2*'` at
-  landing): `git merge-tree` reports conflicts in `docs/ux/scenarios.md` (SCN-044's Alt paths and Coverage lines) and
-  `docs/ux/screens.md` (SCR-30), and in `docs/DECISIONS.md`, `docs/backlog.md` and `docs/handoffs/README.md`, where they
-  are adjacent appends that keep both sides. Whichever lands second keeps, in SCN-044, OW-3's "asks once whether to
-  update" for `incompatible` and CT-218's cloud-instance alt path with both Coverage citations, and, in SCR-30, this
-  branch's Elements, States and Coverage lines with the Scenarios line "SCN-043, SCN-044, SCN-045, SCN-046, SCN-057,
-  SCN-059". CT-218's SCN-044 alt path says "the operator manages client keys with the agent's own CLI", its SCN-059
-  step 1 says "The operator issues a key for a member with the agent's own CLI in their own terminal", and its
-  recovery says the operator "issues a new one from their own terminal or the page (CF-3)"; read under OW-2 and OW-4,
-  the second lander restates them: issuing a member's key is OW-4's secret step (a secret handed out, its value shown
-  to the person only and kept out of the agent's transcript), as is SCN-058 step 1's hand-over of the key to the
-  member; revoking or rotating a key on the operator's word is the agent's step through DEC-0159's relayed twin (CF-3),
-  a rotated key's new value shown to the person as an issued one is. Check: `grep -n "own terminal"
-  docs/ux/scenarios.md` prints no step that hands the operator a command for a revoke or a rotation.
-- Landing note, DEC-0157 (branch `agent/ct216-usage-data-v2`): its UD-4 makes turning on a usage switch a person
-  turned off a change-policy effect no mandate covers (MD-3), one more instance of the exception OW-1 already states (a
-  change-policy effect, AP-5). Whichever of DEC-0156 and DEC-0157 lands second names UD-4's switch in OW-1's exception
-  as that instance ("a change-policy effect, AP-5, such as UD-4's usage switch"), adds DEC-0157's sentence to OW-5's
-  list (a product's usage switch a person turned off, UD-4: a mandate from the operator's words never turns a declined
-  switch back on), and cites OW-1 from UD-4. Check: `awk '/^- \*\*OW-1/,/^- \*\*OW-2/'
-  docs/specification/governance-and-roles.md | grep -c UD-4` and the same over `OW-5` to `OW-6` each print at least 1.
+  landing): `git merge-tree` reports conflicts in `docs/ux/scenarios.md` (two hunks: SCN-044's Alt paths, and SCN-044's
+  Coverage line, which on CT-218's side is followed by the whole of SCN-058 and SCN-059) and in `docs/DECISIONS.md`,
+  `docs/backlog.md` and `docs/handoffs/README.md`, adjacent appends that keep both sides. `docs/ux/screens.md`
+  auto-merges: SCR-30's Scenarios line reads "SCN-043, SCN-044, SCN-045, SCN-046, SCN-057", and SCN-059 is SCR-36's;
+  the second lander adds SCN-059 to no other screen. Whichever lands second keeps, in SCN-044, OW-3's "asks once
+  whether to update" for `incompatible` and CT-218's cloud-instance alt path with both Coverage citations, and both
+  scenario bodies (after it, `python3 docs/ux/lint.py` counts 59 scenarios). The key split is CT-218's, as its
+  handoff (`docs/handoffs/2026-11-08-local-and-cloud-form.md` on that branch) proposes and CF-3 reads: issuing or
+  rotating a member's client key hands out a secret and stays the operator's (OW-4's secret step, AP-4), from their own
+  terminal or the page, so the value never enters an agent's transcript (CF-3); revoking a key is the agent's step on
+  the operator's decision (OW-2), through DEC-0159's `relayed` twin where the instance checks `approval/1`, else by the
+  agent running the agent's own CLI on the operator's computer (on an instance without the estate's issuer the twin
+  answers `issuer-unavailable`, CF-4); issuing an agent its own key is the agent's step too. The DEC-0159 fold states
+  the same split. The second lander writes it into SCN-059 (its home since CT-218's round 8; SCN-044's alt path only
+  points there), and SCN-058 step 1's hand-over of the key to the member stays the operator's. Check: `grep -n -i revok
+  docs/ux/scenarios.md | grep -e "own terminal" -e "operator runs"` prints nothing (no step hands the operator a
+  command for a revoke), `grep -c 'SCN-059' docs/ux/screens.md` counts only SCR-36's line, and the rotation sentence
+  reads the same in both handoffs.
+- Landing note, DEC-0157 (branch `agent/ct216-usage-data-v2`, read at `7d7c9b89`): its UD-4 makes turning on a usage
+  switch a person turned off a change-policy effect no mandate covers (MD-3), which OW-1's exception already covers: it
+  names acts no mandate covers as an open list (MD-3, MD-6 and PR-2: "among them"), so OW-1 needs no change. Whichever
+  of DEC-0156 and DEC-0157 lands second adds DEC-0157's sentence to OW-5's list (a product's usage switch a person
+  turned off, UD-4: a mandate from the operator's words never turns a declined switch back on) and cites OW-1 from
+  UD-4, as CT-216's own note asks. `git merge-tree --write-tree HEAD origin/agent/ct216-usage-data-v2` reports two
+  conflicts, `docs/DECISIONS.md` and `docs/handoffs/README.md`, adjacent appends that keep both sides (`docs/backlog.md`
+  auto-merges). Check: `awk '/^- \*\*OW-5/,/^- \*\*OW-6/' docs/specification/governance-and-roles.md | grep -c UD-4`
+  prints at least 1.
 - Named risk carried to the closing verdict (round 15, product): in the no-person FA-09 case only Fabric's refused card
   and its OS notification reach the person, and the card's "Allow once" leaves the act undone; the person learns what
   is open only from the board reply and the report until Fabric ships the card change DEC-0156's Compatibility owes. The
@@ -432,6 +443,50 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   operator-channel status fixture prints nothing; no U+2014 in the added lines; `git merge-tree --write-tree HEAD
   origin/main` exit 0. The full gate (`pnpm run check`) was not run.
 
+- Round 17 (on `c9122a22`): unit, seam and product not clean. Breaks folded: OW-1's exception (unit) left out the
+  source hand-over, one of the acts no mandate covers; rather than add a fourth item, OW-1 and DEC-0156 item 1 now
+  word the exception as an open list ("except for an act no mandate covers (MD-3, MD-6 and PR-2: among them a
+  change-policy effect, a source hand-over and the move of a board slot), whose word is renewed by one short question
+  as AP-2 says"), so a later instance such as DEC-0157's UD-4 needs no edit to OW-1. The receiver-missing details
+  (product) told the person to answer a waiting decision "in any session", which spend policy rule 3 and OC-6 never
+  accept for a spend approval or a paid confirmation: the three details now say "answer decisions on its dashboard,
+  not in the bot's chat" (OC-5: a press and the dashboard perform the same operation), each one sentence of at most
+  270 characters (268) for headroom against the schema's 300; the unlinked detail (257) says "or ask it for a new one
+  once this one expires", true with or without a dashboard and after the `accepted` lapses; SCN-014's recovery says
+  the same and that a paid action or a spend approval is answered only as OC-6 and rule 3 say, never by a chat or
+  session message (the surface is CT-269's); SCN-012's recovery and DEC-0156's Consequences and Done match. The CT-218
+  landing note (seam) was stale: re-read at `05dc64ec`, `screens.md` auto-merges with SCR-30's Scenarios line "SCN-043,
+  SCN-044, SCN-045, SCN-046, SCN-057" (SCN-059 is SCR-36's), and the note now says so and that the second lander maps
+  SCN-059 to no other screen. The key split (seam) is now CT-218's, which CF-3 reads and the DEC-0159 fold states:
+  issuing and rotating a member's key are OW-4's secret step from the operator's terminal or the page, the value never
+  in an agent's transcript; revoking is the agent's step, through DEC-0159's `relayed` twin where the instance checks
+  `approval/1`, else by the agent running the agent's own CLI on the operator's computer (CF-4's `issuer-unavailable`);
+  its check now greps revoking lines for "own terminal" and "operator runs". Risks folded: OC-11 step 3 (unit) now
+  states its two cases (a decision older than 24 hours, an answer under a mandate past its `expiresAt`); the
+  conformance row (unit) carries the `add1df7c` parenthetical on its FA-09 clause and cites DEC-0156's Compatibility
+  for the other host gates; OW-3's `floor.ask-first` branch (product) has the report, and a statement (not a question)
+  in the chat when the person is in it, name where the gate asks (on Fabric the refused card, whose "Allow once" is the
+  agreement there, unlike under FA-09), mirrored in DEC-0156 item 3, the conformance row, SCN-057's alt path and
+  FLW-29's F1; the DEC-0158 landing note (seam) names its four `merge-tree` conflicts, the three register files as
+  adjacent appends, re-read at `d54bd9de`; the DEC-0157 landing note (seam) names its two register conflicts and, since
+  OW-1's list is now open, asks only for DEC-0157's OW-5 sentence and the OW-1 citation from UD-4, as CT-216's own note
+  does (the request to change CT-216's note is no longer needed); fixture headroom (seam, product) as above. Declined:
+  the unit tier's alternative of keeping the unlinked tile as a dashboard-only example (the softer wording holds in
+  both cases at no cost); a new fixtures test that a negative carries only its catalogued keyword (seam's alternative):
+  the 270-character headroom removes the near-limit cause, and the per-fixture `validate` run below is the check; the
+  product tier's mixed-state risk (adapter `v0.63.0`, fabric-workspace `knowledge/agents-first.md`) stays the landing
+  step already written in Open; relaying the CT-218 note to that branch's owner (product) is the coordinator's, and the
+  DEC-0159 fold states the same split.
+
+- On the round-17 fold (working tree over `c9122a22`): `pnpm run docs:check` exit 0 (271 Markdown files, 0
+  markdownlint errors); `python3 docs/ux/lint.py` exit 0 (57 scenarios); `pnpm run privacy:check` 0 findings;
+  `pnpm vitest run test/operator-channel.test.ts test/consistency.test.ts test/positive-sweep.test.ts
+  test/channel-agent.test.ts test/fixtures.test.ts`, 5 files, 1780 passed; `pnpm --silent validate` on the four
+  changed fixtures and the two webhook ones: the positives exit 0, each negative prints one error, the same as its
+  `origin/main` copy (missing "credential"; `/receiver/lease` must be "none"; missing "receiver"); every operator-channel
+  status fixture `detail` is one sentence of at most 270 characters (longest 268); no U+2014 in the added lines;
+  `git merge-tree --write-tree HEAD origin/main` exit 0. The full gate (`pnpm run check`) was not run.
+
 ## Next task
 
-Round 17 of the blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 18 of the blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.

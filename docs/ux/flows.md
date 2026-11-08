@@ -771,7 +771,7 @@ flowchart TD
   K1 -->|a decision recorded as the operator's own holds the work| S1[Its question asked as that decision says; Fabric's intake.spec-first: the rest waits]
   S1 -->|answered| K1
   H1 -->|allowed| K1
-  K1 -->|a host's gate on an act, Fabric's floor.ask-first| F1[Asked once with the words, and with the risk and the corrected way when a risk brought the step here, no question of the agent's own; on agreement called again and taken; unanswered, left open]
+  K1 -->|a host's gate on an act, Fabric's floor.ask-first| F1[Asked once with the words, and with the risk and the corrected way when a risk brought the step here, no question of the agent's own; the report, and a statement in the chat when the person is in it, names where to agree: Fabric's refused card, whose Allow once is the agreement here, unlike under FA-09; on agreement called again and taken; unanswered, left open]
   R1 -->|the step is one a host's gate holds| F1
   F1 -->|agreed| K1
   F1 -->|declined| SL[The step left open; the rest goes on]

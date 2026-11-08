@@ -152,8 +152,8 @@ stop while the channel is off. The proposal lists its four steps, three of them 
    code's: the code is for one use and at most 10 minutes (OC-3), the operator's own send of a code already spent binds
    nothing, and the status shows when the chat was bound and for how many users (`binding.linkedAt`,
    `binding.allowedUsers`), so a binding the operator did not make is seen. Until the token is stored the agent names that
-   step; an `accepted` answer older than AP-2's 24-hour window, or past the `expiresAt` of the mandate it was given under,
-   is renewed by one short question ([delegation](delegation.md#the-operators-mandate) MD-1), which is not a repeat of
+   step; an `accepted` answer given as a decision and older than AP-2's 24-hour window, or given under a mandate and past
+   that mandate's `expiresAt`, is renewed by one short question ([delegation](delegation.md#the-operators-mandate) MD-1), which is not a repeat of
    the proposal;
 4. the operator types the code in the chat with the bot (OC-3's binding, which only the person's own send proves).
 

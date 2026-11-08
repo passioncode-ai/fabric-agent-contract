@@ -11410,8 +11410,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      that word; every step inside the task is the agent's to take within the grants, mandates and money limits that
      already apply, without asking leave for each; a relayed act the words do not name is covered by the leading
      agent's mandate (MD-1) or raised under OW-3 while the rest goes on; a task that may outlive a decision's 24 hours
-     is carried under a mandate stated from the words, except an act no mandate covers: a change-policy effect, AP-5,
-     and the move of a board slot, PR-2; its word is renewed by one short question as AP-2 says.
+     is carried under a mandate stated from the words, so the operator is not asked again for a word they gave while it
+     lasts, except for an act no mandate covers (MD-3, MD-6 and PR-2: among them a change-policy effect, a source
+     hand-over and the move of a board slot), whose word is renewed by one short question as AP-2 says.
   2. OW-2: the agent runs commands itself and never asks the operator to run one, paste an output, press a button, open
      a page to confirm or choose on a card where an agent twin it may take itself (`gate` `none` or `relayed`, AP-1) or
      another route of its own reaches the step (the operator's word of 2026-11-07 that they press nothing); a refusal
@@ -11426,8 +11427,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      corrected way that undoes cleanly and still meets the word and reports it; a decision recorded as the operator's
      own that holds work until a question the words do not answer is answered governs; a host's gate that holds an act
      the agent performs itself or through that host until a person agrees (Fabric's `floor.ask-first`; a service's
-     relayed action meets that service's gate) stays, the agent asking through it once with the words as its reason
-     and calling it again after the agreement; under a gate that refuses the act for the session whatever is agreed
+     relayed action meets that service's gate) stays, the agent asking through it once with the words as its reason,
+     naming where the gate asks (on Fabric the refused card, whose "Allow once" is the agreement there, unlike under
+     FA-09) in its report and in a statement in the chat, and calling it again after the agreement; under a gate that refuses the act for the session whatever is agreed
      (Fabric's FA-09), in a session whose chat the person is in, the agent asks the operator once in the chat (one
      short question naming the act, its target and the operator's words, standing in for the gate's ask), goes on with
      the rest, and on the operator's yes performs the act itself and records it with the words in its own report, and
@@ -11602,16 +11604,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/ux/scenarios.md` (SCN-057 and its index row; SCN-044's alt path, the host app's update asked once and done by
   the agent through the supervisor its descriptor's `lifecycle.manager` names, and its Coverage; SCN-012's step 1, its alt path and its recovery, and SCN-014's recovery: the link command the agent's, a stopped receiver
   restarted by OC-17's supervisor and, if the status stays, by the agent on the operator's word in any session with it,
-  a waiting decision answered there or on the dashboard, not in the bot's chat, the webhook's removal waiting on
+  a waiting decision answered on the dashboard, not in the bot's chat, a paid action or a spend approval only as OC-6
+  and spend policy rule 3 say, the webhook's removal waiting on
   the operator's decision, OC-2, AP-2 and AP-3),
   `docs/specification/operator-channel.md` (OC-11's third step the agent's, OW-2, on AP-2's relayed decision, the code
   shown to the person only, a new code issued when one expires unused while the `accepted` holds and never because of a
   chat message, an old `accepted` renewed by one question), DEC-0034 (an Annotated line), DEC-0150 (an Annotated line:
   OW-6 keeps CA-8's bound), the operator channel's status fixtures whose
   `detail`, one sentence each as the schema describes it, now says what happens for a stopped receiver (a supervisor
-  restarts it; if the status stays, the person asks the agent in any session with it to restart it and answers a
-  waiting decision there or on the agent's dashboard, not in the bot's chat, where an answer may be lost after 24
-  hours, OC-17; while unlinked, the code or the new one the dashboard shows once it expires, OC-11) and, for a set
+  restarts it; if the status stays, the person asks the agent in any session to restart it and answers decisions on
+  its dashboard, not in the bot's chat, where they may be lost in 24 hours, OC-5 and OC-17; while unlinked, the code,
+  or a new one the person asks the agent for once it expires, OC-11) and, for a set
   webhook, that removing it or switching to it is the operator's decision, told to the agent in any session with it,
   never in the bot's chat, or taken by them in the channel settings (OC-2)
   (`fixtures/positive/operator-channel-status-degraded.json`, `-degraded-receiver-missing.json`,

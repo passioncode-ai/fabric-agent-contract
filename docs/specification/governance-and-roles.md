@@ -97,9 +97,9 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   not name is either covered by the mandate the leading agent states from those words
   ([delegation](delegation.md#the-operators-mandate) MD-1, never wider than the words) or raised under OW-3 while the
   rest of the task goes on (AP-3). A task that may outlive a decision's 24 hours (AP-2) is carried under such a mandate
-  (up to 7 days, MD-1), so the operator is not asked again for a word they gave while it lasts, except an act no mandate
-  covers: a change-policy effect, AP-5, and the move of a board slot, PR-2; its word is renewed by one short question as
-  AP-2 says. A task still open when the mandate expires asks once, in one line, as MD-1 says.
+  (up to 7 days, MD-1), so the operator is not asked again for a word they gave while it lasts, except for an act no
+  mandate covers (MD-3, MD-6 and PR-2: among them a change-policy effect, a source hand-over and the move of a board
+  slot), whose word is renewed by one short question as AP-2 says. A task still open when the mandate expires asks once, in one line, as MD-1 says.
 - **OW-2, no command handed over.** The agent runs the commands itself. It never asks the operator to run a command,
   paste an output, press a button, open a page to confirm or choose on a card where an agent twin the agent may take
   itself under the words, a decision or a mandate in force exists (`gate` `none` or `relayed`, AP-1), or another route
@@ -126,7 +126,10 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   of 2026-10-15 in its ADR-0160), for an act the agent performs itself or through that host, stays as OW-5 keeps it (a
   relayed action of a service the words name meets that service's gate instead, AP-2 and OW-1): the agent asks through
   it once, quoting the operator's words as its reason, goes on with the rest meanwhile, and calls it again once the
-  operator has agreed, as the gate requires; unanswered, that step stays open in the report. A gate that refuses the
+  operator has agreed, as the gate requires; unanswered, that step stays open in the report. Its report, and a statement
+  (not a question) in the chat when the person is in it, names where the gate asks: on Fabric the refused card in its
+  attention queue, by its label in the operator's interface language, whose "Allow once" is the agreement here, unlike
+  under an FA-09 refusal (below). A gate that refuses the
   act for the session itself whatever is agreed (Fabric's FA-09 refusal for a session whose runner gate is removed,
   whose remedy reads: run it in a mode where the runner asks before each tool, or perform the effect yourself) is read
   so that both modes behave alike. In a session whose chat the person is in, the agent asks the operator once in the
