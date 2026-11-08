@@ -191,16 +191,29 @@ ruling; DEC-0017 states what holds now.
   answer to a repeated key, `null` and `partial` in `usage` under the revision `fabric-interop/0.2` a caller names in
   `_meta.protocols`; `FAC-SEM-119`, `FAC-SEM-120`. C4 stays adapter guidance.
 
-### OQ-0013: Usage data: does "only for this" admit counting one installation once across the products?
+### OQ-0013: Usage data: does "only for this" admit counting one installation once across the products, and does "every product" reach a hosted service?
 
 - **Status:** Open
-- **Raised:** 2026-11-08, the blind readings of DEC-0157 (CT-216), branch `agent/ct216-usage-data-20261107`
+- **Raised:** 2026-11-08, the blind readings of DEC-0157 (CT-216), on branch `agent/ct216-usage-data-20261107`, since
+  recut as `agent/ct216-usage-data-v2` (the earlier name is historical); the second part raised in round 11, the same day
 - **Owner of the answer:** the operator.
-- **Question:** the operator's decision of 2026-11-04 names one purpose for anonymous usage and error data: «чтобы мы
-  улучшали наш продукт. Все, только для этого» (quoted in Fabric Switchboard's `docs/ANALYTICS.md`). DEC-0157 reads
-  it as admitting a second purpose, counting one installation once across the products that share its installation
-  id, as an accurate count serving the same improvement. Does it, or is a shared id's only use each product's own
-  improvement?
+- **Question:** (1) the operator's decision of 2026-11-04 names one purpose for anonymous usage and error data: «чтобы мы
+  улучшали наш продукт. Все, только для этого» (quoted in Fabric Switchboard's `docs/ANALYTICS.md`; the knowledge
+  base's plans.md item D). DEC-0157 reads it as admitting a second purpose, counting one installation once across the
+  products that share its installation id, as an accurate count serving the same improvement. His item C of the same
+  plan bears on it: «логи добавляем ... аналитику для корректной оценки, отслеживания» (plans.md line 97 at
+  `c84c7a40`). Two live notices already state the second purpose: Switchboard's ("A random installation number, shared
+  by the PassionCode.ai tools on this computer, lets one person using several of them count once", `src/main.ts`
+  line 109 at `b99a17b`) and Fabric Inbox's ("An id shared by the PassionCode apps on this computer counts one person
+  once", `desktop/main.cjs` line 937 at `1395416`), so a narrower answer changes shipped strings, not only future
+  wording. Does "only for this" admit the second purpose, or is a shared id's only use each product's own improvement?
+  (2) Plans.md item D addresses "every product owner". DEC-0157 reads it as the products the estate ships to people
+  (an app, an agent, a command line tool, a component run on the person's own server) and leaves out a service the
+  estate hosts that installs nothing on the person's machine or in an account or server of theirs, since nothing of it
+  runs where the person's switch could stop it. Does "every product" reach such a hosted service, at least for what
+  "anonymous" means (UD-3) and what its documentation states (UD-5)?
 - **Meanwhile:** [usage data](specification/usage-data.md) UD-1 and DEC-0157 item 1 state both purposes and mark the
   second, and the notice wording that follows from it, as provisional; a narrower answer changes the notice's purposes
-  (UD-1) and is a new notice under its re-show rule.
+  (UD-1) and is a new notice under its re-show rule. The page's scope and DEC-0157 item 1 mark the hosted exclusion as
+  DEC-0157's reading pending (2); an answer that reaches hosted services is a new decision extending UD-3 and UD-5 to
+  them, the switch staying each product's.

@@ -48,8 +48,15 @@ decision of 2026-11-04.
   to 96, 192 and 305 to 308) and `apps/desktop/src/main/index.ts` line 1311 at `eafcf2e4`; Fabric Inbox's
   `desktop/analytics.cjs` lines 96 to 103 and line 434 (its exports; no caller) at `1395416`; the estate's hosted
   workspace product's ADR-0014 (lines 24 and 37) at `43f04f15`; the knowledge base's plans.md launcher row (PC-137) at
-  `c84c7a40`; the contract's AP-1 (`service.md`) and data classes (`governance-and-roles.md`).
-- OQ-0013 (the second purpose, for the operator) taken under the lease on `docs/OPEN_QUESTIONS.md` (no `OQ` register in
+  `c84c7a40`; the contract's AP-1 (`service.md`) and data classes (`governance-and-roles.md`). Read in round 11: the
+  launcher's `lib/analytics.js` lines 192 and 244 (one session id per run's one send) and line 31 at `ad978a6`; Fabric
+  Inbox's `desktop/fabric-descriptor.cjs` and `desktop/main.cjs` line 937 at `1395416`; Fabric's
+  `apps/desktop/src/main/index.ts` line 4201 (`analyticsSetEnabled`) and `i18n/en.ts` lines 862 to 871 at `eafcf2e4`;
+  Switchboard's `src/main.ts` line 109 at `b99a17b` (no manifest in its tree); Fabric Dashboards' `src/core/i18n.ts`
+  lines 84 to 89 at `d43c94e`; the knowledge base's plans.md items C and D (lines 97 and 108) and roadmap RM-13 (lines
+  563 to 575) at `c84c7a40`; the contract's interop C3.1, AP-1's actions extension (`service.md`) and the data
+  classification table (`governance-and-roles.md`).
+- OQ-0013 (the second purpose, and since round 11 the hosted services' scope, for the operator) taken under the lease on `docs/OPEN_QUESTIONS.md` (no `OQ` register in
   the coordination config); the file's next free id line reads `OQ-0014`.
 
 ## Open
@@ -57,11 +64,18 @@ decision of 2026-11-04.
 - The coordinator's blind readings until two consecutive clean rounds; the gate; the pull request, merge, tag and
   release; at merge DEC-0157 Accepted and CT-216 done, and the products told on the board what each owes, as
   DEC-0157's Compatibility lists it (Fabric, with the collector row's UD-6 condition as the digest collector, and
-  UD-2's rule on writing at CO-496, since its switch writes the shared `analytics` field both ways;
-  Switchboard; Fabric Inbox, its exported shared-field writer kept uncalled; Fabric Dashboards, FD-175 included; the
+  UD-2's rule on writing at CO-496, since its switch writes the shared `analytics` field both ways,
+  and, now and independently of CO-496, a string-only correction of its three strings that say its switch governs
+  every app, `i18n/en.ts` lines 864, 869 and 870, and an agent twin for its switch (UD-4) at CO-496;
+  Switchboard, with an action for its switch and a manifest capability for that tool (UD-4); Fabric Inbox, its
+  exported shared-field writer kept uncalled and an agent twin for its switch on its desktop copy (UD-4); Fabric
+  Dashboards, FD-175 and a manifest capability for that tool included; the launcher (PC-123, before 0.2.76 is tagged):
+  UD-1's notice contents and a notice where the person reads it, its doc's agent-only path at
+  `docs/analytics-events.md` line 50; every product, that its notice names where the data is sent or links its usage
+  data page (UD-1); the
   estate's hosted workspace product, whose self-hosted image owes UD-3's session id; the estate's growth and experiments service; the adapter; Okolos and Observatory to
   check themselves, Observatory also that its encrypted snapshot's key is the person's; the hosted products of
-  plans.md item D only where they ship an installed product; the operator asked OQ-0013); the board message says each
+  plans.md item D only where they ship an installed product, pending OQ-0013; the operator asked OQ-0013); the board message says each
   product's install and active counts move at the version that meets UD-1 and UD-2 (they drop where the product sent
   before its notice or past an earlier no, Switchboard, Fabric Inbox and Fabric Dashboards; they rise where it waited
   for an answer, Fabric at CO-496; an id a product owns, made anew at re-enable, counts that install again), and that
@@ -71,16 +85,27 @@ decision of 2026-11-04.
   an idle hour (UD-3, both one per process today); that where the list of the products sharing the id lives is their
   owners' choice, the estate's privacy page on passioncode.ai (PC-137) being one home; and, for the DEC-0156 branch,
   the sentence naming UD-4's switch beside OW-5's limits (a mandate from the operator's words never turns a declined
-  switch back on); the knowledge base's RM-13 and plans.md item D pointed at `usage-data.md`.
+  switch back on).
+- Landing step, the knowledge base (AGENTS.md "After work"), in the same landing: plans.md's Contract row restates
+  CT-216 as "what usage data every product shares: UD-1 to UD-6, no machine declaration" (today "what a service
+  declares about analytics on by default", line 124 at `c84c7a40`), and roadmap RM-13 links
+  `docs/specification/usage-data.md`; then the workspace sync, checked with
+  `git -C fabric-workspace grep -n 'usage-data' origin/main -- knowledge/roadmap.md knowledge/plans.md` (non-empty).
 - A question for the operator, [OQ-0013](../OPEN_QUESTIONS.md): does "only for this" («Все, только для этого») admit
   the second purpose, counting one installation once across the products that share its id? DEC-0157 reads it so; the
-  page marks that reading and the notice wording that follows from it as provisional until he answers.
+  page marks that reading and the notice wording that follows from it as provisional until he answers. Its second
+  part: does "every product" reach a service the estate hosts that installs nothing? DEC-0157 reads it as not, marked
+  pending in the page's scope and DEC item 1.
 - The operator's ePrivacy answer (the knowledge base's RM-13, okolos B-216): until it, UD-1 lets a product ask first
   where the platform's own consent or a market's privacy review needs it.
 - Parallel branches: DEC-0156, DEC-0158 and DEC-0159 are open on their own branches. Whichever of them and DEC-0157
   lands second resolves `docs/DECISIONS.md`, `docs/handoffs/README.md` and `docs/backlog.md` keeping both sides, and,
   for DEC-0156, adds the sentence naming UD-4's switch beside OW-5's limits (a mandate from the operator's words never
-  turns a declined switch back on).
+  turns a declined switch back on) to OW-5 and to DEC-0156's restatement, checked after both merge with
+  `git grep -n 'UD-4' origin/main -- docs/specification/governance-and-roles.md` (non-empty). DEC-0158 and DEC-0159
+  edit `delegation.md` and `service.md`: whichever of them and DEC-0157 lands second re-reads UD-4 against AP-2,
+  AP-3, MD-3 (no mandate covers `change-policy`) and DL-26 as merged, not only the registers (on 2026-11-08 none of
+  the three moves them).
 
 ## Decisions taken here
 
@@ -98,6 +123,11 @@ decision of 2026-11-04.
   usage data from declaring its digests to a local collector at all.
 
 ## Rounds
+
+The commits named in rounds 1 to 10 are on the earlier line `agent/ct216-usage-data-20261107` (historical), squashed on
+2026-11-08 into `agent/ct216-usage-data-v2` because its commits carried private names into this public repository.
+That line is kept only in a local archive ref, `refs/archive/2026-11-08/agent/ct216-usage-data-20261107`, which is
+not pushed for the same reason; the round entries' commits resolve only there.
 
 - Round 1 (on `f73791f4`, product tier only), not clean: the Compatibility said Fabric and Switchboard met UD-2, which
   they cannot on a shared id (now: only an owned id is deleted and rotated); Fabric's practice was described from
@@ -304,6 +334,45 @@ decision of 2026-11-04.
   0, no U+2014 in the lines the branch adds against `origin/main`, and no name of a private personal repository in the
   branch's diff. Not the full gate.
 
+- Round 11 (on `0c88f719`, all three tiers), not clean: all three tiers, the handoffs index row, this handoff's next
+  task and CT-216 named `agent/ct216-usage-data-20261107`, which no longer exists (now `agent/ct216-usage-data-v2` in
+  every live pointer, the earlier name kept only as historical in CT-216, OQ-0013 and the note above); seam, Fabric
+  Inbox's desktop copy (a `fabric-service/0.1` service by its descriptor, `desktop/fabric-descriptor.cjs` at
+  `1395416`, its switch in its menu with no agent twin) and Fabric (its switch only on its own window,
+  `analyticsSetEnabled`, `apps/desktop/src/main/index.ts` line 4201 at `eafcf2e4`) owed UD-4's product side unstated
+  (now in the practice paragraph, the Compatibility, the README cell and the board message, Fabric's at CO-496);
+  product, the board message left out the launcher (now: UD-1's notice contents and a notice where the person reads
+  it, its doc's agent-only path at `docs/analytics-events.md` line 50, before 0.2.76 is tagged, PC-123). Risks folded:
+  UD-3's class read against the data classification table (now `confidential`, the table's "private metrics", with
+  the reason, in the page, DEC item 3 and Why, the product row and CONTEXT; data joined or bound to an account
+  `personal`, or `regulated` where the privacy review finds it legally controlled, replacing "at least `personal`");
+  UD-4's effect given a home (the action in the actions extension, AP-1, the effect on its tool's manifest capability,
+  C3.1, a service with no manifest owing one; Switchboard owes an action and a manifest capability, Fabric Dashboards a
+  manifest capability; page, DEC item 4, the product row, the Compatibility, the README cell); UD-1's notice says
+  where the data is sent or links the UD-5 page (RM-13, "where it is sent"; every notice read owes it) in the page,
+  DEC item 1, the product row, the Compatibility and the README cell; the board message asks Fabric to correct its
+  three strings now, independently of CO-496; OQ-0013 quotes the two live notices that already state the second
+  purpose (Switchboard's `src/main.ts` line 109 at `b99a17b`, Fabric Inbox's `desktop/main.cjs` line 937) and plans.md
+  item C, and asks as its second part whether "every product" reaches a hosted service that installs nothing, the
+  page's scope, DEC item 1 and Why, the product row and the README cell marking the exclusion pending it; CONTEXT and
+  the Why say "renewed no later than after an idle hour"; the launcher's session id meets UD-3 (made at each run's one
+  send, `lib/analytics.js` lines 192 and 244 at `ad978a6`), in the practice paragraph, the Compatibility and the
+  README cell; the parallel-branches item adds the re-read of UD-4 against AP-2, AP-3, MD-3 and DL-26 as merged and a
+  check for the OW-5 sentence; the knowledge base's edit (plans.md's CT-216 row, RM-13's link) is a landing step.
+  Declined: pushing the earlier line's archive ref (product), because its commits carry private names into a public
+  repository; the note above says once that the round entries' commits resolve only in the local archive. Recording
+  the OW-5 sentence in DEC-0156's handoff too (product): that handoff is another session's branch, which already names
+  this branch in its landing notes (`docs/handoffs/2026-11-07-operators-word.md` line 57 on
+  `origin/agent/ct220-operators-word-v2`); this handoff's item binds whichever lands second and carries the check.
+  Applying UD-3 and UD-5 to hosted services now (product's other option): put to the operator as OQ-0013's second part
+  instead, the safer reversible choice.
+- On the round 11 fold (this commit's tree): `pnpm run docs:check` exit 0 (272 Markdown files, 0 errors), `python3
+  docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios), `pnpm run privacy:check` exit 0 (0
+  findings), `pnpm vitest run test/consistency.test.ts test/docs-check.test.ts` 45 tests passed, `git merge-tree
+  --write-tree HEAD origin/main` exit 0, no U+2014 in the lines the branch adds against `origin/main`, no name of a
+  private personal repository in the branch's diff, and the branch-name check printing, for this branch's names, only
+  the historical `agent/ct216-usage-data-20261107`. Not the full gate.
+
 ## Next task
 
-Round 11 of the blind readings of branch `agent/ct216-usage-data-20261107` (DEC-0157), all three tiers.
+Round 12 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.

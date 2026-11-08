@@ -11413,7 +11413,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      on passioncode.ai, the launcher's PC-137 in plans.md, would be one home for every product, and until one exists
      each product keeps its own copy on its UD-5 page and updates it in the version that re-shows the notice), that the id ties events together though no person is named
      and that turning back on resumes a shared id, and, when it sends a session id, that it does and that the session
-     id ties one session's events together, and where the switch is, and says when data collected before it may
+     id ties one session's events together, where the data is sent or a link to its usage data page (UD-5), which
+     says, and where the switch is, and says when data collected before it may
      be sent at once; it is shown again, once, where the person reads it, before data is sent under the change, when what it states
      changes (a new purpose, or a new sharing product,
      which the notice states from the product's next version that ships the updated list), as a device policy's
@@ -11423,7 +11424,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      (such as Firefox's built-in data consent) or the product's privacy review for a market requires an answer first,
      the product asks there, sends nothing until it is answered and treats no answer as off in that place, which is no
      UD-1 debt, pending the operator's ePrivacy answer (RM-13, okolos B-216); a product may collect nothing; a hosted
-     service that installs nothing on the person's machine or in an account or server of theirs is outside the page,
+     service that installs nothing on the person's machine or in an account or server of theirs is outside the page
+     (DEC-0157's reading of the operator's "every product", pending his answer, OQ-0013),
      one that ships an installed product is under it for that product, and a component the estate ships to run on the
      person's own server is under it for that component, the switch being the deploying organization's where an
      organization deploys it on its own server for its members, who are told by the component's notice.
@@ -11452,10 +11454,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      time), never derived from another id, kept only in memory and renewed no later than after an idle hour, which is
      no installation id and ties only one session's events; neither id is a user identifier (unlike activity
      telemetry's `user.id`, which names a membership or a profile and makes its events personal data), data that meets
-     UD-3 being `project-internal` (whether a stored id needs prior consent in a market is the product's privacy review,
+     UD-3 being `confidential`, the data classification table's "private metrics" (whether a stored id needs prior consent in a market is the product's privacy review,
      RM-13's open question); neither the product nor a service it sends to joins either id with an account, purchase,
-     billing or advertising record, and data so joined, or bound to an account, leaves UD-3, is at least `personal`
-     (the product's privacy review may set a stricter class), needs its own consent and is never called anonymous; error data names a place in the product's own code
+     billing or advertising record, and data so joined, or bound to an account, leaves UD-3, is `personal`, or
+     `regulated` where the product's privacy review finds it legally controlled, needs its own consent and is never called anonymous; error data names a place in the product's own code
      and is cleared of content, paths and credentials before it leaves.
   4. UD-4: an agent never turns a switch on that a person turned off except on that person's own word for that switch,
      which it takes only when the person is its operator (AP-3): a decision the operator gave that names the
@@ -11471,7 +11473,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      service whose app or page offers its switch offers it on its agent surface, as AP-1 requires, and declares it
      with a tool whose effect is `change-policy` and `gate: relayed`, or, in an ask-first place, `gate: human` with
      `humanStep` `consent` for the action that turns it on and `gate: relayed` for a separate action that turns it off,
-     a product outside `fabric-service/0.1` (such as the launcher) that offers its switch on an agent surface declaring
+     the action declared in the service's actions extension (AP-1) and the effect on its tool's manifest capability
+     (C3.1), so a service that offers its switch to agents and ships no manifest owes one for that tool, and a product
+     outside `fabric-service/0.1` (such as the launcher) that offers its switch on an agent surface declaring
      it the same way, so a mandate or a standing rule never turns it on, a gate of `none` being nonconformant;
      an accepted `approval/1` still decides that relayed action under AP-2 (`actionDecision`'s
      row for a `relayed` action with an accepted approval, DL-18), so the agent-side limit is the only bar on that form,
@@ -11520,9 +11524,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   several products share cannot be rotated by one of them without breaking the others' counts, so off stops sending it
   and only an id the product owns is deleted. An operations digest kept on its machine is counts a product keeps about
   itself, so the condition sits where data leaves the machine, not on the declaration a local collector reads. A
-  session id kept in memory and renewed after an idle hour ties no more than the installation id already does, so UD-3
-  admits it beside that id and UD-1 has the notice name it. A hosted service the estate runs, which installs nothing on
-  the person's machine or in an account or server of theirs, is left out because nothing of it runs where a switch in
+  session id kept in memory and renewed no later than after an idle hour ties no more than the installation id already does, so UD-3
+  admits it beside that id and UD-1 has the notice name it. Data that meets UD-3 names no person, yet its counts are the
+  estate's private metrics, which the data classification table puts in `confidential`, so it is that class rather
+  than `project-internal`; data joined with an account names a person, so it is `personal`, or `regulated` where a
+  market's law controls it. A hosted service the estate runs, which installs nothing on
+  the person's machine or in an account or server of theirs, is left out (a reading of the operator's "every product",
+  pending his answer, OQ-0013) because nothing of it runs where a switch in
   the person's settings could stop it: what it learns from requests is its own server's record, under its privacy text
   and terms; a product it ships to install is under the page. A component an organization deploys on its own server
   for its members is run by that organization, so the switch is the organization's, and its members are told by the
@@ -11565,12 +11573,24 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   rule; Fabric Dashboards' (`src/core/analytics.ts` line 128 at `d43c94e`) and Fabric's
   (`apps/desktop/src/main/analytics.ts` line 192 at `eafcf2e4`, made once, since `createAnalytics` runs once,
   `apps/desktop/src/main/index.ts` line 1311) last one process and are never renewed after an idle hour, so both owe
-  UD-3's renewal; the launcher's (`lib/analytics.js` line 244 at `ad978a6`) lasts one run. Fabric's notice names "a
+  UD-3's renewal; the launcher's (`lib/analytics.js` line 244 at `ad978a6`) is made at each run's one send, which
+  carries that run's events in one request at its end (`after`, line 192), so no idle hour passes within it and it
+  meets UD-3's session-id rule. Fabric's notice names "a
   session id" (`i18n/en.ts` line 864 at `eafcf2e4`), and the other four owe naming it (UD-1). Fabric Dashboards also owes UD-4:
   its MCP `settings` tool (FD-175) lets any agent turn the switch on with no operator decision, its `change-settings`
   action declared with gate `none` (`src/mcp/actions.ts` line 38 at `d43c94e`) and `analytics` among the settings an
   agent may change (`AGENT_SETTINGS`, `src/core/settings.ts` line 248); the `analytics` key becomes its own `relayed`
-  action carrying the operator's decision. Fabric owes UD-1's notice, not a question: it sends nothing until the
+  action carrying the operator's decision, and, since Fabric Dashboards ships no manifest, it owes a manifest
+  capability for that action's tool with the effect `change-policy` (UD-4); Switchboard, which ships no manifest and
+  declares no actions extension, owes both for its door. Fabric Inbox's desktop copy, a `fabric-service/0.1`
+  service by its descriptor (`desktop/fabric-descriptor.cjs` at `1395416`, serving no agent surface yet), offers its
+  switch in its menu (Share Usage Details, its notice at `desktop/main.cjs` line 937) with no agent twin, and Fabric
+  offers its switch only to its own window (`analyticsSetEnabled`, `apps/desktop/src/main/index.ts` line 4201 at
+  `eafcf2e4`) and declares no action for it; both owe UD-4's product side, an action for the switch whose tool's
+  effect is `change-policy`, with `gate: relayed` (Fabric at CO-496). No notice read (Switchboard's, Fabric Inbox's,
+  Fabric Dashboards', Fabric's and the launcher's, cited here) says where the data is sent (the estate's analytics
+  host, outside the organization, RM-13) or links a usage data page, so each owes that (UD-1). Fabric owes UD-1's
+  notice, not a question: it sends nothing until the
   person answers "Usage counts: share them?" ("Nothing more is sent until you answer", `i18n/en.ts` lines 868 to 870 at
   `eafcf2e4`; its ADR-0127, SCN-134), where UD-1 has no answer mean on. It owes UD-2's per-product switch and UD-1's
   purpose, naming of the sharing products, the tying of events and the resume: its live notice and settings say its
@@ -11610,7 +11630,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (OBS-330), not for usage data of its own (OBS-324). The owners of both check them against UD-1 to UD-6. Observatory's
   encrypted workspace snapshot copies its home, the digest store included, into the person's own storage (which iCloud
   may carry off the machine), which UD-6 counts as no sending only when its key is the person's: Observatory's to confirm. The estate's
-  hosted products in the knowledge base's plans.md item D are outside the page unless they ship an installed product,
+  hosted products in the knowledge base's plans.md item D are outside the page unless they ship an installed product
+  (pending OQ-0013),
   and none was read. No agent rule shipped states UD-4 in full; the adapter's kits and Fabric's session rules owe it.
   The operations digests meet UD-6 on Fabric's stdio path only: Fabric is the shipped OD-9 collector (CO-503,
   `apps/desktop/src/shared/opsDigestCollect.ts`) and sends only its own daily lines to the local Project Observatory's
