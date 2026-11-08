@@ -142,13 +142,17 @@ stop while the channel is off. The proposal lists its four steps, three of them 
 2. the operator puts its token into the secret store under the name the agent states (a typed secret);
 3. once the operator has answered `accepted` and the token is in the store under that name, the agent enables the
    channel on that answer (the operator's decision relayed as [service](service.md#actions) AP-2 says, its words in
-   AP-3's form, OC-1), runs its own link command and shows the code to the person only: on the dashboard OC-3 names, handed
-   over as the page's [`open_link`](service.md#page-links) (DEC-0123), where the agent has one, else only in its reply in the
-   operator's session, never in a tool argument, a message, a file or any outward act
+   AP-3's form, OC-1), runs its own link command and shows the code to the person on the dashboard OC-3 names, handed
+   over as the page's [`open_link`](service.md#page-links) (DEC-0123); only an agent without a dashboard shows it in its
+   reply in the operator's session, never in a tool argument, an outward message, a file or any other outward act
    ([governance and roles](governance-and-roles.md#the-operators-word-carried-out-the-first-time) OW-2 and OW-4,
-   DEC-0156); until the token is stored it names that step; an `accepted` answer older than AP-2's 24-hour window, or
-   than the mandate it was given under, is renewed by one short question ([delegation](delegation.md#the-operators-mandate)
-   MD-1), which is not a repeat of the proposal;
+   DEC-0156). A code in that reply stays in the session's transcript, a residual bounded as DEC-0147 bounds a share
+   code's: the code is for one use and at most 10 minutes (OC-3), the operator's own send of a code already spent binds
+   nothing, and the status shows when the chat was bound and for how many users (`binding.linkedAt`,
+   `binding.allowedUsers`), so a binding the operator did not make is seen. Until the token is stored the agent names that
+   step; an `accepted` answer older than AP-2's 24-hour window, or past the `expiresAt` of the mandate it was given under,
+   is renewed by one short question ([delegation](delegation.md#the-operators-mandate) MD-1), which is not a repeat of
+   the proposal;
 4. the operator types the code in the chat with the bot (OC-3's binding, which only the person's own send proves).
 
 The agent records the answer — `accepted`, `declined` or `later` — and shows it in its status

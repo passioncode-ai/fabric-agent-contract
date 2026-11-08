@@ -16,14 +16,15 @@ contract already has.
   operator's words.
 - SCN-057 in `docs/ux/scenarios.md` and its index row, mapped to SCR-30 in `docs/ux/screens.md`; SCN-044's update
   alt path and Coverage; SCN-012's step 1, alt path and recovery and SCN-014's recovery (the link command the
-  agent's, the receiver restarted by the agent (OC-17's supervisor when the loop stopped, else through its lifecycle
-  owner), the webhook's removal waiting on OC-2's decision).
+  agent's; a stopped receiver restarted by OC-17's supervisor and, if the status stays, by the agent on the operator's
+  word in any session with it, a waiting decision answered there or on the dashboard, not in the bot's chat; the
+  webhook's removal waiting on OC-2's decision).
 - [Operator channel](../specification/operator-channel.md) OC-11's step 3 (the agent enables and links on AP-2's
   relayed decision, the code shown to the person only; an old `accepted` renewed by one question, MD-1) and DEC-0034's Annotated line; six status
   fixtures (`fixtures/positive/operator-channel-status-degraded*.json` three,
   `fixtures/negative/operator-channel-status-degraded-without-credential.json`,
-  `-receiver-missing-lease-held.json`, `-receiver-missing-without-receiver.json`) whose `detail` says what the agent
-  does for a stopped receiver and, for a set webhook, that its removal is the operator's decision, taken in the channel
+  `-receiver-missing-lease-held.json`, `-receiver-missing-without-receiver.json`) whose `detail` says what happens for
+  a stopped receiver and the person's step if it stays and, for a set webhook, that its removal is the operator's decision, taken in the channel
   settings or told to the agent in any session with it, never in the bot's chat.
 - `docs/ux/foundation.md` (JRN-04/#2's touchpoint, ST-035), `docs/ux/flows.md` (FLW-29), `CONTEXT.md` (the operator's
   word), `docs/DOCMAP.md`, `docs/specification/README.md`, `docs/specification/channel-agent.md` (CA-8's pointer).
@@ -45,7 +46,8 @@ contract already has.
   floor line, its operator-channel references and evals, both skills' `references/source-and-instance.md` line 7);
   fabric-workspace's link and rewrite (the landing step below).
 - Landing step for fabric-workspace (owner: its knowledge base; DEC-0156's Compatibility): in the same run as the
-  merge, open the change to `knowledge/agents-first.md` that links the OW rules, rewrites its stale CT-220 paragraph to
+  merge, land the change to `knowledge/agents-first.md` (merged in fabric-workspace, not only opened) that links the OW
+  rules, rewrites its stale CT-220 paragraph to
   them (OW-3's waits, its message form, its FA-09 reading, OW-4's list with a refusal never routed around) and fixes
   its refusals section's item 4.
 - Landing step for Fabric question `add1df7c` (round 14): add to it the case of a board request whose relay names a
@@ -53,11 +55,26 @@ contract already has.
   the person is in (OW-3, the Compatibility).
 - Landing note, DEC-0158 (branch `agent/ct215-on-demand-20261108`, re-read on origin on 2026-11-08): whichever of DEC-0156 and DEC-0158 lands second
   adds a cross-reference between OW-3's sentence for a session with no person in its chat and DEC-0158's OS-6 (no
-  person in a dispatched run), both ways; a dispatched run settles as OS-6 says.
+  person in a dispatched run), both ways; a dispatched run settles as OS-6 says. Both branches also add rows to
+  `docs/specification/conformance.md` after the board-client row (`git merge-tree` reports the conflict there):
+  whichever lands second keeps both, the OW row and DEC-0158's dispatched-run rows, after the board-client row.
 - Landing note, CT-218 and DEC-0159 (branch `agent/ct218-local-cloud-v2`; DEC-0157 is on `agent/ct216-usage-data-v2`;
   re-read the remote names with `git ls-remote origin 'refs/heads/agent/ct2*'` at landing): both branches rewrite SCN-044's Alt paths and
   Coverage lines (`docs/ux/scenarios.md` lines 1049 and 1054 here). Whichever lands second keeps OW-3's "asks once
-  whether to update" for `incompatible` and CT-218's cloud-instance alt path, and keeps both Coverage citations.
+  whether to update" for `incompatible` and CT-218's cloud-instance alt path, and keeps both Coverage citations. It
+  also states in SCN-044, citing OW-2 and OW-4, whether issuing, rotating or revoking a client key on the operator's
+  word is the agent's step through DEC-0159's relayed twin, or OW-4's secret step because the key is a secret handed to
+  the person (kept out of the agent's transcript); CT-218's "the operator issues a client key with the agent's own CLI"
+  otherwise hands the operator a command OW-2 forbids.
+- Landing note, DEC-0157 (branch `agent/ct216-usage-data-v2`): its UD-4 makes turning a usage switch on an act no
+  mandate covers (a change-policy effect, MD-3), so OW-1's sentence that a task outliving 24 hours is carried under a
+  mandate does not hold for it. Whichever of DEC-0156 and DEC-0157 lands second adds to OW-1's sentence: "except an act
+  no mandate covers (MD-3; a usage switch, UD-4), whose word is renewed as AP-2 says", and cites OW-1 from UD-4.
+- Named risk carried to the closing verdict (round 15, product): in the no-person FA-09 case only Fabric's refused card
+  and its OS notification reach the person, and the card's "Allow once" leaves the act undone; the person learns what
+  is open only from the board reply and the report until Fabric ships the card change DEC-0156's Compatibility owes. The
+  run continues around it (round 14 declined a further surface); at landing CT-220's row states `add1df7c`'s answer, or
+  that it is still open.
 
 ## Decisions taken here
 
@@ -342,6 +359,37 @@ At landing: DEC-0156 Accepted, CT-220 done with the tag and the answers to Fabri
 (or that they are open), the North Star plan's wave 0 item 4 marked done, the `Next free ID` line rewritten from the
 counter, and the board told what each consumer owes (DEC-0156's Compatibility).
 
+- Round 15 (on `33343a29`): unit and seam clean of breaks; product not clean. Breaks folded (product): the
+  receiver-missing `detail` said "an answer sent here may be lost", read on the status tile or a doctor line (OC-9),
+  never in the bot's chat: it now names the place ("not in the bot's chat, where it may be lost after 24 hours") and
+  says "a waiting decision", so it holds when `pendingDecisions` is 0; and it promised without condition that "the
+  agent restarts its receiver through its supervisor or lifecycle owner", a term no specification page defines, in a
+  state that exists because no restart happened: the three fixtures and the unlinked one now read "A supervisor restarts
+  a stopped receiver; if this stays, ask the agent in any session with it to restart it", then where to answer (299
+  and 270 characters, the schema's bound 300); SCN-012, SCN-014, DEC-0156's Consequences and this handoff say the same,
+  and "lifecycle owner" is gone from them. Each negative still fails for its original reason (`pnpm --silent validate`
+  against the `origin/main` copy). Risks folded: the conformance row's "until Fabric's third owed change" (unit), which
+  counted against the row's own owed list, now names the change by its content ("until Fabric stops offering an FA-09
+  refusal as a grantable card"); OC-11 step 3 (unit) reads "past the `expiresAt` of the mandate" and "an outward
+  message"; the link code in the session transcript (unit, seam): the dashboard's `open_link` is the path, the reply
+  only for an agent without a dashboard, and the residual is stated as DEC-0147 states its share code's (one use, at
+  most 10 minutes, the operator's own send of a spent code binding nothing, and the status's `binding.linkedAt` and
+  `binding.allowedUsers` showing a binding the operator did not make; the schema carries counts only, never the bound
+  user, so the text names those fields rather than "the bound user"); DEC-0034's Annotated line names both acts,
+  enabling the channel and running the link command (product); DEC-0150 has an Annotated line that OW-6 now keeps
+  CA-8's bound (seam); DEC-0158's landing note names the `conformance.md` row conflict (seam); the SCN-044 landing note
+  says the key-issuing step must be named as the relayed twin or OW-4's secret step (product); a DEC-0157 UD-4 landing
+  note for OW-1's 24-hour sentence (product); the fabric-workspace landing step and DEC-0156's Compatibility say "land"
+  (merged in the same run), not "open" (product); the no-person FA-09 residual is a named risk above and in CT-220's
+  row, with `add1df7c`'s answer stated there at landing (product). Declined: none.
+- On the round-15 fold (working tree over `33343a29`): `pnpm run docs:check` exit 0 (271 Markdown files, 0
+  markdownlint errors); `python3 docs/ux/lint.py` exit 0 (57 scenarios); `pnpm run privacy:check` 0 findings;
+  `pnpm vitest run test/operator-channel.test.ts test/consistency.test.ts test/positive-sweep.test.ts
+  test/channel-agent.test.ts test/fixtures.test.ts`, 5 files, 1780 passed; `pnpm --silent validate` on the four
+  changed fixtures: the positives exit 0, the negatives exit 1 with the same reason as their `origin/main` copies
+  (`/receiver/lease` must be "none"; missing "receiver"); no U+2014 in the added lines; `git merge-tree --write-tree
+  HEAD origin/main` exit 0. The full gate (`pnpm run check`) was not run.
+
 ## Next task
 
-Round 15 of the blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 16 of the blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.

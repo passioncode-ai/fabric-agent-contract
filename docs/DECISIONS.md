@@ -1130,9 +1130,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
 - **Annotated (2026-10-11):** extended by DEC-0035 (a shared group: OC-14…OC-17).
 - **Annotated (2026-10-12):** the status table's `unlinked` row amended by DEC-0058 (`receiver.lease` `held` or `elsewhere`; a channel nobody receives on is only `degraded` with `receiver-missing`).
-- **Annotated (2026-11-08):** OC-11 amended by DEC-0156 (proposed): of the proposal's four steps, running the link
-  command is the agent's once the operator answers `accepted` (OW-2); creating the bot, storing its token and typing
-  the code stay the operator's.
+- **Annotated (2026-11-08):** OC-11 amended by DEC-0156 (proposed): of the proposal's four steps, enabling the
+  channel and running the link command are the agent's once the operator answers `accepted` (AP-2, OW-2); creating the
+  bot, storing its token and typing the code stay the operator's.
 - **Amends:** nothing — a new profile beside `fabric-service/0.1` and `fabric-project-comms/0.1`,
   added under the DEC-0016 extension policy; one optional well-known surface.
 - **Decision:** An agent MAY have an **operator channel** — its own messenger channel to its
@@ -9863,6 +9863,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   in turns). The Source's counter sentence agrees with DEC-0151's Source: `ee67e35e` (key `support-quality-v2-dec`,
   next 152) is DEC-0151's reservation and `d3da4336` (next 149) the value before it; DEC-0149's own reservation is
   `e27a5441` (key `ct194-source-manifest`, next 150).
+- **Annotated (2026-11-08):** CA-8's bound, which the Decision gives "CT-220, when drafted" to keep, is kept by
+  DEC-0156 (proposed) [governance and roles](specification/governance-and-roles.md#the-operators-word-carried-out-the-first-time)
+  OW-6: a word in a customer chat acts only inside that chat and is no AP-3 or OA-2 source (CA-8).
 - **Context:** a project on the board asked (request `437c404b`, thread `b6820b97`, 2026-11-04) for an extension key
   under which an agent that answers people on a channel (mail, Telegram, store reviews) declares what
   `channel-agent-standard/1` asks, checked statically by the Fabric Agent Adapter's service check (its row FAA-197),
@@ -11588,20 +11591,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   item, owner fabric-workspace's knowledge base, the whole of its list above: `knowledge/agents-first.md` links the OW
   rules (it has no link today), its stale CT-220 paragraph is rewritten to them (OW-3's waits, its message form and
   OW-4's list), its "every route of its own" bullet takes the refusal exception, and its refusals section's item 4
-  says a rule's form is chosen before acting, never re-formed; the session that lands this decision opens that change (the
-  handoff's landing step). Providers of `fabric-operator-channel/0.1` adopt OC-11's step 3 (the agent enables the
+  says a rule's form is chosen before acting, never re-formed; the session that lands this decision lands that change,
+  merged in fabric-workspace in the same run (the handoff's landing step). Providers of `fabric-operator-channel/0.1` adopt OC-11's step 3 (the agent enables the
   channel and runs its link command on the `accepted` answer) through the adapter's kits at their next adaptation;
   this decision changes no provider by itself. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/governance-and-roles.md` (the section *The operator's word, carried
   out the first time*), `docs/specification/conformance.md` (one row for every agent that takes the operator's words),
   `docs/ux/scenarios.md` (SCN-057 and its index row; SCN-044's alt path, the host app's update asked once and done by
-  the agent, and its Coverage; SCN-012's step 1, its alt path and its recovery, and SCN-014's recovery: the link command the agent's, the receiver
-  restarted by OC-17's supervisor and then by the agent through its lifecycle owner, the webhook's removal waiting on
+  the agent, and its Coverage; SCN-012's step 1, its alt path and its recovery, and SCN-014's recovery: the link command the agent's, a stopped receiver
+  restarted by OC-17's supervisor and, if the status stays, by the agent on the operator's word in any session with it,
+  a waiting decision answered there or on the dashboard, not in the bot's chat, the webhook's removal waiting on
   the operator's decision, OC-2, AP-2 and AP-3),
   `docs/specification/operator-channel.md` (OC-11's third step the agent's, OW-2, on AP-2's relayed decision, the code
   shown to the person only, an old `accepted` renewed by one question), DEC-0034 (an Annotated line), the operator channel's status fixtures whose
-  `detail` now says what the agent does for a stopped receiver (restarts it; until it is back a waiting decision is
-  answered on the agent's dashboard, since an answer sent to the bot may be lost after 24 hours, OC-17) and, for a set
+  `detail` now says what happens for a stopped receiver (a supervisor restarts it; if the status stays, the person asks
+  the agent in any session with it to restart it, and meanwhile answers a waiting decision there or on the agent's
+  dashboard, not in the bot's chat, where an answer may be lost after 24 hours, OC-17) and, for a set
   webhook, that removing it or switching to it is the operator's decision, taken by them in the channel settings or told
   to the agent in any session with it, never in the bot's chat (OC-2)
   (`fixtures/positive/operator-channel-status-degraded.json`, `-degraded-receiver-missing.json`,
