@@ -399,6 +399,7 @@ flowchart TD
   Q[Request queued] --> C[Claimed]
   C --> A[Accepted]
   A --> E[Effect started]
+  A -->|settled not done before an effect began: observed false| F[failed_known with its reason]
   E -->|observed result| D[Completed or failed_known]
   E -->|result lost| U[outcome_unknown]
   U -->|observed reconciliation| D
@@ -412,7 +413,7 @@ flowchart TD
   N -->|the requester cancels| K[Cancelled]
 ```
 
-- **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired; SCR-19 answered; SCR-32 success when the operator moves the slot that answers the request (DEC-0140).
+- **Screens traversed:** SCR-19 success; SCR-19 unknown; SCR-19 expired; SCR-19 answered; SCR-19 failed_known (a request settled as not done with its reason, an on-demand session's step that needs a person among its cases, DEC-0158 OS-6); SCR-32 success when the operator moves the slot that answers the request (DEC-0140).
 
 ### FLW-17: A second copy of a service starts, or another account's listener holds its port
 

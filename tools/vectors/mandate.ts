@@ -40,6 +40,7 @@ const BAD = (detail: string) => ({ ok: false, code: "decision-invalid", data: { 
 function cases(): Array<[string, Json, Json]> {
   const narrowed = { capabilities: ["research.run"], effects: ["charge"], perCallMaxUsd: 15, projects: ["example-site"] };
   const third = { ...base, chain: [...base.chain, { agent: "example-crawler", at: "2026-10-26T10:06:00Z" }] };
+  const board = { ...base, chain: [{ agent: "example-requester", at: "2026-10-26T10:01:00Z" }, { agent: "example-target", at: "2026-10-26T10:05:00Z" }, { agent: "example-crawler", at: "2026-10-26T10:06:00Z" }] };
   return [
     ["the operator's words with no amount: the paid research is covered, the money limits decide its spend", call(), OK()],
     ["the same from another of the operator's machines (T1)", call({ tier: "T1" }), OK()],
@@ -47,6 +48,9 @@ function cases(): Array<[string, Json, Json]> {
     ["a per-call ceiling the estimate stays within", call({ mandate: withScope({ perCallMaxUsd: 20 }) }), OK()],
     ["handed on narrowed, used within the narrower scope", call({ mandate: lastScope(narrowed) }), OK()],
     ["a third agent the researcher called", call({ mandate: third, self: "example-crawler", callerAgent: "example-researcher" }), OK(["example-developer", "example-researcher", "example-crawler"])],
+    // DEC-0158 OS-7: a board request's requester hands the mandate on to the target's registry agent id; the run the
+    // target's host starts acts as that entry and appends only its onward callee, so the chain names no Project id.
+    ["a board request's mandate at the onward callee of the run the target's host started", call({ mandate: board, self: "example-crawler", callerAgent: "example-target" }), OK(["example-requester", "example-target", "example-crawler"])],
     // DEC-0126 OA-2, OA-6: the operator said it in another of their agents' sessions; where travels into the record.
     ["words relayed from another of the operator's agents: where they said them travels into the record", call({ mandate: { ...base, source: { project: "example-analyst", thread: "example-thread-3" } } }), { ...OK(), recordAs: { ...OK().recordAs, source: { project: "example-analyst", thread: "example-thread-3" } } }],
     ["a source naming neither the session nor the thread", call({ mandate: { ...base, source: { project: "example-analyst" } } }), BAD("mandate-malformed")],
@@ -104,6 +108,7 @@ function handOnCases(): Array<[string, Json, Json]> {
   const unprojected = { ...leading, scope: { capabilities: ["page.update"], effects: ["publish"] } };
   const actionsOnly = { ...leading, scope: { actions: ["publish-page"], effects: ["publish"], projects: ["example-site"] } };
   const actioned = { ...base, chain: [base.chain[0], { agent: "example-researcher", at: "2026-10-26T10:05:00Z", scope: { ...narrow, actions: ["approve-draft", "reject-draft"] } }] };
+  const boardHeld = { ...base, chain: [step("example-requester", "2026-10-26T10:01:00Z"), step("example-target", "2026-10-26T10:05:00Z")] };
   const passed = { ...handed, chain: [...handed.chain, step("example-crawler", "2026-10-26T10:06:00Z")] };
   const widenedEarlier = { ...base, chain: [base.chain[0], { ...base.chain[1], scope: { ...base.scope, capabilities: ["research.run", "research.ask", "page.update", "page.delete"] } }] };
   return [
@@ -118,6 +123,8 @@ function handOnCases(): Array<[string, Json, Json]> {
     ["adding a projects list narrows it (no list means every project)", { mandate: unprojected, callee: "example-researcher", at: "2026-10-26T10:05:00Z", narrower: { capabilities: ["page.update"], effects: ["publish"], projects: ["example-site"] } }, SENT(unprojected, step("example-researcher", "2026-10-26T10:05:00Z", { capabilities: ["page.update"], effects: ["publish"], projects: ["example-site"] }))],
     ["adding a capabilities list where only actions are listed widens even within draft (the line is at the list, not the call)", { mandate: actionsOnly, callee: "example-researcher", at: "2026-10-26T10:05:00Z", narrower: { capabilities: ["page.update"], actions: ["publish-page"], effects: ["draft"], projects: ["example-site"] } }, STOP("mandate-widened")],
     ["adding a capabilities list where only actions are listed widens (MD-2a draws the line at the list)", { mandate: actionsOnly, callee: "example-researcher", at: "2026-10-26T10:05:00Z", narrower: { capabilities: ["page.update"], actions: ["publish-page"], effects: ["publish"], projects: ["example-site"] } }, STOP("mandate-widened")],
+    // DEC-0158 OS-7: the run holds the chain ending in the target's registry agent id and appends only its callee.
+    ["the run the target's host started for a board request calls on: only the callee is appended", { mandate: boardHeld, callee: "example-crawler", at: "2026-10-26T10:06:00Z" }, SENT(boardHeld, step("example-crawler", "2026-10-26T10:06:00Z"))],
     ["at the same second as the step before", { mandate: leading, callee: "example-researcher", at: "2026-10-26T10:01:00Z" }, SENT(leading, step("example-researcher", "2026-10-26T10:01:00Z"))],
     ["where the operator said the words travels unchanged", { mandate: sourced, callee: "example-researcher", at: "2026-10-26T10:05:00Z" }, SENT(sourced, step("example-researcher", "2026-10-26T10:05:00Z"))],
     ["a higher per-call ceiling widens", { mandate: handed, callee: "example-crawler", at: "2026-10-26T10:06:00Z", narrower: { ...narrow, perCallMaxUsd: 6 } }, STOP("mandate-widened")],
