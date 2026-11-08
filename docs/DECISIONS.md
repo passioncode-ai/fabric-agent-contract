@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0156` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0160` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -1130,6 +1130,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
 - **Annotated (2026-10-11):** extended by DEC-0035 (a shared group: OC-14…OC-17).
 - **Annotated (2026-10-12):** the status table's `unlinked` row amended by DEC-0058 (`receiver.lease` `held` or `elsewhere`; a channel nobody receives on is only `degraded` with `receiver-missing`).
+- **Annotated (2026-11-08):** OC-11 amended by DEC-0156 (proposed): of the proposal's four steps, running the link
+  command is the agent's once the operator answers `accepted` (OW-2); creating the bot, storing its token and typing
+  the code stay the operator's.
 - **Amends:** nothing — a new profile beside `fabric-service/0.1` and `fabric-project-comms/0.1`,
   added under the DEC-0016 extension policy; one optional well-known surface.
 - **Decision:** An agent MAY have an **operator channel** — its own messenger channel to its
@@ -11384,3 +11387,221 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
   inputs; backlog CT-261.
 
+### DEC-0156: the operator's word is carried out the first time, by the agent itself
+
+- **Date:** 2026-11-07
+- **Status:** Proposed: accepted at merge after two clean rounds of the coordinator's blind readings. A rule of every
+  agent's conduct, stated in [governance and roles](specification/governance-and-roles.md#the-operators-word-carried-out-the-first-time)
+  as OW-1 to OW-6; no schema, field or rule code changes.
+- **Context:** the operator, 2026-11-04, in one product's session, relayed on the board (thread `b91254c4`, then
+  thread `a7a9d05d`, message `b66a8fae`, with the request to fix it across the agent system): «мое слово исполнение с
+  первого раза, если есть риски уточнить и корректировать и выполнить» and «сколько повторять за мной только команды /
+  команды тебе». Agents handed the operator commands to run, stopped at a risk instead of correcting their way, and
+  asked leave for steps inside a task the operator had already given. The contract already says whose words decide an
+  action (DEC-0121 AP-2, AP-3), that one approval binds every agent it reaches (DEC-0126 OA-1 to OA-7), what a mandate
+  covers (DEC-0125) and which steps stay the person's (AP-4, OA-5); it did not say that the agent carries the word out
+  itself. Backlog CT-220.
+- **Decision:**
+  1. OW-1: the operator's words about a task, in a form AP-3 admits (its own session, a subagent passing them on
+     verbatim, the operator channel, a mandate handed on as MD-2 says, a relay OA-2 and OA-3 accept), are carried out on
+     that word; every step inside the task is the agent's to take within the grants, mandates and money limits that
+     already apply, without asking leave for each; a relayed act the words do not name is covered by the leading
+     agent's mandate (MD-1) or raised under OW-3 while the rest goes on; a task that may outlive a decision's 24 hours
+     is carried under a mandate stated from the words.
+  2. OW-2: the agent runs commands itself and never asks the operator to run one, paste an output, press a button, open
+     a page to confirm or choose on a card where an agent twin it may take itself (`gate` `none` or `relayed`, AP-1) or
+     another route of its own reaches the step (the operator's word of 2026-11-07 that they press nothing); a refusal
+     by its own tool or harness goes to OW-4.
+  3. OW-3: a risk the words did not name gets one short message, once, naming the risk and the corrected way; the rest
+     of the task goes on; the step waits for the answer when its corrected way is a relayed act the words do not name
+     and the mandate does not cover, a step a limit of OW-5 gates other than a human step or a host's gate, or when no
+     corrected way both undoes cleanly and still meets the word (the one stop this rule adds itself, grounded in AP-3);
+     the message is a question for a step that waits, and states the corrected way as under way and how to stop it for
+     any other; where the step is one a host's gate holds, the message is no question of its own but travels as that
+     gate's one ask, its reason naming the risk, the corrected way and the words; otherwise the agent takes the safest
+     corrected way that undoes cleanly and still meets the word and reports it; a decision recorded as the operator's
+     own that holds work until a question the words do not answer is answered governs; a host's gate that holds an act
+     the agent performs itself or through that host until a person agrees (Fabric's `floor.ask-first`; a service's
+     relayed action meets that service's gate) stays, the agent asking through it once with the words as its reason
+     and calling it again after the agreement; under a gate that refuses the act for the session whatever is agreed
+     (Fabric's FA-09), in a session whose chat the person is in, the agent asks the operator once in the chat (one
+     short question naming the act, its target and the operator's words, standing in for the gate's ask), goes on with
+     the rest, and on the operator's yes performs the act itself and records it with the words in its own report, and
+     in a session with no person in its chat it does not perform the act and asks nothing from that session, leaving
+     the act open and naming it, in its board reply and its report, as a step for a session the person is in (as
+     Fabric's `board.read-at-start` hands a production step to such a session); the agent adds no question of its own
+     about an act a host's gate already asks about (a risk on it travels as that gate's one ask), while the asks other
+     rules require for the same act stay and are named: spend policy rule 3's approval request for spend above a
+     project's `autoApproveUsd` (OW-4, CT-269), DEC-0149's stated word for a source hand-over the words do not give
+     (OW-4), and the host's own gate; the other host gates OW-5 keeps are met as their own text says; Fabric's refused
+     card for an FA-09 refusal in its attention queue, announced once by its OS notification when Fabric is not in
+     front, until Fabric ships the third change owed below, is no question the agent asks: its "Allow once" issues a
+     single-use one-hour grant scoped to the project, floor class and target with no action class, which does not lift
+     the refusal and which a session of the project that keeps its runner gate and asks for the same floor class and
+     target would spend without asking, after which the card reads "Allowed once, until {time}" and leaves the queue
+     while the act stays undone, and unpressed the card stays refused after the act, so the chat question, which says
+     the card does not allow the act and names it by its label in the operator's interface language, is the one the
+     operator answers, and the agent's report says the card stays refused and what its press would leave; until Fabric
+     answers its open question `add1df7c` this FA-09 reading is the contract's; a waiting step with no answer stays
+     open and named, a step taken stays done and reported, and the message is not repeated; an answer naming another
+     way is a new word, a bare refusal undoes the corrected way where it can and leaves the step open.
+  4. OW-4: of the task's steps, only what technically needs a person goes to the person (a binding only the person's
+     own act proves, OC-3 and OC-11; AP-4 and OA-5's human steps, a
+     decision recorded as the operator's own that the words do not cover, the operator's word for a source hand-over
+     the words do not give, a control the contract reserves to the person's own act (the move of a board slot, DEC-0140
+     PR-2), a control with no agent twin, a refusal by the agent's own tool or harness (its runner's
+     permission system or a tool that refuses the act itself; a host's gate is OW-3's), for which the
+     person allows the command in the harness or the tool, which lifts only that stop; such a refusal is never routed
+     around and is handed over without trying another route),
+     and spend above a project's `autoApproveUsd` or with no project policy
+     yet (spend policy rule 3), with the reason and the exact step, a control with no twin and any step a route of the
+     agent's own reaches only after those routes (a route performing the act with the same checks and audit as AP-1's
+     twin, never a write that skips the control), a human step, a reserved control and a refusal at once, no route
+     taking a human step or a reserved control in the person's place, while
+     the rest of the task goes on; OW-4 limits what is handed over, not the questions AP-2, AP-3, MD-1, MD-4, OA-4, SA-6
+     or an approval request for an effect outside a grant have the agent ask.
+  5. OW-5: no limit widens: money limits, credentials held by reference, the separation the operator keeps between
+     unrelated businesses (recorded in the operator's own instructions), the word for each source hand-over (DEC-0149),
+     approval separation (AP-5), an effect outside a grant, the move of a board slot reserved to the host's operator
+     controls until its twin ships (DEC-0140 PR-2) and a host's gate that holds an act until a person agrees (OW-3)
+     stay.
+  6. OW-6: only the operator's words carry a task on OW-1's terms; a board request, another agent's call and a request
+     on a channel are taken as their own rules say (SA-5, SA-6, MD-3, CA-8); other content the agent reads is data
+     (AP-3), a mandate handed on and an accepted relay excepted; a word in a customer chat acts only there (DEC-0150
+     CA-8).
+- **Why:** an agent that hands its operator a command or stops at a risk makes the person do the work the agent was
+  given, and repeats the cost every time. The contract's gates already stand where a person is needed; OW-1 to OW-4
+  say that everywhere else the agent acts, and OW-5 and OW-6 keep every gate and boundary that existed. OW-3 reads
+  «уточнить» two ways the operator may overrule (Fabric questions `46167c9f` and `add1df7c`): it adds one stop of its
+  own, when no corrected way both undoes cleanly and still meets the word (then the agent cannot be sure the operator
+  decided, AP-3); and it states a corrected way it takes as under way with how to stop it, asking a question only for
+  a step that waits.
+- **Alternatives considered:** leave it to each product's prompt (the products diverged: some shipped it, some did
+  not, so the operator repeated the word); make it a host setting the operator switches on (the operator's word was a
+  rule for every agent, not a mode); stop at every risk until the operator answers (the operator's word says to
+  correct and carry out; OW-3's own waits are its three cases for the step a risk message concerns, beside those other
+  rules and gates already impose: MD-4, a decision recorded as the operator's, a host's gate).
+- **Compatibility:** nothing on the wire changes. Read on 2026-11-07: the Fabric Agent Adapter ships the rule in part
+  (FAA-207, released in `v0.63.0`: working-with-fabric `SKILL.md` and creating-fabric-agents `references/practices.md`,
+  citing CT-220, pinned by `test/test_mandate_prose.py`). Its text ("on a risk, one short question, then do it"; only a
+  sign-in, a one-time code, a payment or a refusing tool goes to the person) owes, at its next release: the DEC-0156
+  citation; OW-3's three waits and its bare-refusal case; OW-4's full list (a decision recorded as the operator's own,
+  the word for a source hand-over under DEC-0149, which its skills do not name today, a control with no agent twin); and
+  the pinned phrase in its test and the behaviour eval `test/evals/working-with-fabric/scenarios.json` (the scenario
+  `the-operators-word-is-done-the-first-time`, whose expected lines grade the old rule) with them. fabric-workspace states the rule in `knowledge/agents-first.md`
+  (`956afadf`) and owes the link to the OW rules with OW-3's waits, its message form and OW-4's list, and in its refusals
+  section's item 4 that a rule's form is chosen before acting and a refused act is handed over, never re-formed. Fabric's session rules (the
+  obligations `fabric_whoami` hands every session, `apps/desktop/src/shared/protocolObligations.ts` at `a0a89d1b`) do
+  not state it; Fabric owes OW-1 to OW-6 in them. Four of those obligations hold or carry an OW-1 step, read on its main at
+  `eafcf2e4`: `board.read-at-start`'s production stop (a session carrying out a board request with no person in its
+  chat hands any step that touches production to a session the person is in or to the operator, lifted only by the
+  operator's word said in its chat or relayed verbatim with its date, source and scope naming the step) and
+  `ladder.no-self-close` (a session cannot close a task itself; `fabric_task_close` carries the operator's words when
+  they told it to close or cancel that very task) are host gates that OW-3 and OW-5 keep (`board.read-at-start` is
+  advice the session keeps, its mode `ADVICE` in `protocolObligations.ts` from line 197, not a refusal Fabric enforces;
+  `ladder.no-self-close` is a refusal, mode `REFUSED`): the agent meets each as its text says, carrying the operator's words where the gate takes them, and goes on with the rest; the other two follow. `floor.ask-first` (spending
+  money, deleting what cannot be recovered and publishing outward need a person; the agent asks with
+  `fabric_effect_request`, whose first answer is a refusal; a grant row the database requires, Fabric ADR-0004 and
+  ADR-0028; the operator's instruction of 2026-10-15 that spending above a project's limit or a key's ceiling,
+  publishing outward and deleting what cannot be restored still stop and ask, ADR-0160 section 4; its stop on spend
+  within a limit is Fabric's own gate) is a host's
+  gate that OW-3 and OW-5 keep: the agent asks through it once, quoting the operator's words as its reason, and goes on
+  with the rest. Whether the operator's words should pass that gate without a second ask is the operator's decision, not
+  this one's (Fabric question `add1df7c`); until then Fabric owes nothing for it. Noted beside that question: Fabric's
+  relay test for the production stop (a relay whose scope names the step) is narrower than a mandate handed on as MD-2
+  says, whose scope names capabilities (`mandate.schema.json`) and whose `source` may be absent (OA-7); until Fabric
+  says otherwise, a relayed mandate that does not name the step meets that stop, which OW-5 keeps. For a session whose runner gate is
+  removed (FA-09, the machine's default mode under Fabric ADR-0168, and every session Fabric did not launch), Fabric
+  refuses every floored act whatever is agreed and returns a remedy with two options ("Run it in a mode where the runner
+  asks before each tool, or perform the effect yourself", `containment.ts`). Fabric's own record reads that remedy as
+  addressed to the person (`containment.ts`: "refuse the profile the action"; the FA-09 audit packet's acceptance, `docs/audit/2026-09-09-final/packets/FA-09.md` line 44: «profile явно не допускается к этому действию»; `policy.ts`: a person acting with their own hands is the floor),
+  and Fabric question `add1df7c` is open. Until Fabric answers it, OW-3 reads the refusal so that both modes behave
+  alike: in a session whose chat the person is in, the agent asks the operator once in the chat, standing in for the
+  floor's ask, goes on with the rest, and on the yes performs the act itself and records it with the words in its own
+  report, while a session with its runner gate asks once through the floor; in a session with no person in its chat
+  the agent does not perform the act and asks nothing from that session, leaving the act open and naming it, in its
+  board reply and its report, as a step for a session the person is in, as `board.read-at-start` already hands a
+  production step to such a session (`protocolObligations.ts` from line 197). So the agent adds no question of its
+  own about a floored act, the floor's ask being the one ADR-0160 section 4 has; the asks other rules require for the
+  same act stay and are named: spend policy rule 3's approval request for spend above a project's `autoApproveUsd`,
+  DEC-0149's stated word for a source hand-over the words do not give (OW-4), and the floor's own ask. Fabric owes three changes for it. First, the fixed next line of every refusal ("The operator has
+  been asked. Do the act only after asking again and being allowed.", `agentSurface.ts`, read on its main at
+  `bc21883d`) tells an uncontained session to wait for an allowance that cannot come, since FA-09 is checked before any
+  grant, so for an FA-09 refusal that line names the remedy instead. Second, a way to record an act the operator agreed to
+  after an FA-09 refusal (`fabric_effect_report` takes only an effect id an allow issued, so today such an act leaves
+  no receipt in Fabric, only the agent's own report). Third, an FA-09 refusal not offered as a grantable card in its
+  attention queue or the OS notification that announces it, issuing no grant (the press creates nothing a later
+  session could spend), its status line never reading "Allowed" for an FA-09 refusal, and the card resolving when the
+  agent records the act the operator agreed to in the chat (today every refusal the
+  journal records as `policy.decided@1` with the verdict `refuse` becomes a red "refused" card with a grant button,
+  `apps/desktop/src/shared/attention.ts` lines 257 to 274, `renderer/src/launch/ObligationActs.tsx` line 108, announced
+  once by an OS notification when Fabric is not in front, which carries no button, `shared/notify.ts`
+  `decideNotification` from line 46, reading the same queue, `main/index.ts` near line 3423; the card stays in the
+  queue as refused until 50 newer policy decisions push it out, `main/index.ts` line 3429 `REFUSAL_WINDOW = 50`; the
+  button reads "Allow once" (in Russian «Разрешить один раз», the card's kind «заблокировано» or «Отказано» and its
+  status «Разрешено один раз, до {time}», `renderer/src/i18n/ru.ts` lines 2419, 2423 to 2424 and 476) and issues a
+  single-use one-hour grant scoped to the project, the floor class and the target with no action class, the
+  `attentionGrant` handler with `ttlMs: 60 * 60 * 1000` at `main/index.ts` line 4192, which `main/policy.ts`
+  `findGrantFor` (lines 208 to 237) hands to any session of the project that keeps its runner gate and asks for the
+  same floor class and target, so such a session would spend it without asking,
+  `renderer/src/launch/ObligationActs.tsx` lines 125 to 150 and `renderer/src/i18n/en.ts` lines 731 and 732; the grant
+  does not lift the refusal, FA-09 being checked before any grant, `main/policy.ts` lines 324 to 346, yet the card then
+  shows "Allowed once, until {time}" and leaves the queue, a later grant of the same floor class and target resolving
+  the refusal there, `shared/attention.ts` lines 184 and 222 to 240 and `main/index.ts` line 3582, while the act stays
+  undone; and nothing resolves the card after the agent acts on the chat yes). Until Fabric ships it, OW-3 has the
+  operator see that card beside the agent's chat question, the chat question saying that the card's "Allow once" does
+  not allow the act, naming the card by its label in the operator's interface language, and being the one the operator
+  answers, and the agent's report saying that the card stays refused and that a press would leave such a grant. `intake.spec-first` (build nothing
+  while the specification is incomplete) rests on the operator's own recorded decision (Fabric ADR-0176, 2026-10-23):
+  its question (the missing parts of a specification) is one the words do not answer, so under OW-3 it stands and
+  Fabric owes nothing for it (Fabric question `46167c9f` asked whether it, and OW-3's added wait, stand). The adapter's line that `fabric_effect_request` is for acts on the agent's own initiative
+  (working-with-fabric `SKILL.md`, since `344ed96c`) owes the same for an act the agent performs itself or through
+  Fabric: an act the operator ordered still asks Fabric's floor once with the words as its reason; its carve-out for a
+  service's relayed action (AP-2) stays. One owed list for the adapter, here and in the conformance row: the DEC-0156
+  citation; OW-3's waits, its message form (a statement as under way with how to stop it, a question only for a step
+  that waits; a risk on a step a host's gate holds carried as that gate's one ask), its bare refusal and its one
+  question in the chat under an FA-09 refusal and, with no person in the chat, the act left open and named for a
+  session the person is in (Fabric's refused card no question of the agent's); the asks other rules require for the
+  same act named (rule 3's approval request, DEC-0149's word); OW-4's full list with the word for a source hand-over (DEC-0149) and the rule that
+  a refusal by its own tool or harness is never routed around and is handed over without first trying other routes
+  (its `references/practices.md` says "after the agent's own routes"); the floor line above; its prose test and
+  behaviour eval with them; and its operator-channel references (`operator-channel-and-repository.md` in
+  creating-fabric-agents and adapting-projects-to-fabric, step 3 "run the agent's link command"), creating-fabric-agents'
+  Step 6 and adapting-projects-to-fabric's section 8 (both "Propose the operator channel": "the operator's four steps",
+  read on the adapter's main at `2c0b1b18`) and their evals, which OC-11 now gives the agent the link command in
+  (OW-2); and both skills' `references/source-and-instance.md` line 7 ("handing over, a new remote, a push or a change
+  of visibility stays the owner's act, each time"), which under OW-4 reads as the owner's word for each such act
+  (DEC-0149's word where the act is a source hand-over), the agent performing it. Fabric owes the same for `floor.ask-first`'s own text ("Ask again once they have agreed"), which tells a session
+  with no runner gate to wait for agreement that changes nothing under FA-09; in that default mode OW-3's FA-09 reading
+  has the agent ask once in the chat instead (or, with no person in the chat, leave the act for a session the person
+  is in), which the operator's answer to question `add1df7c` may change. fabric-workspace's section on refusals (`knowledge/agents-first.md`, never work around a
+  refusal) agrees with OW-4; its CT-220 bullet (a refusal goes to the person "after the agent tried every route of its
+  own") owes the same exception, beside the link to the OW rules, OW-3's waits, its message form and OW-4's list. Owed
+  item, owner fabric-workspace's knowledge base, the whole of its list above: `knowledge/agents-first.md` links the OW
+  rules (it has no link today), its stale CT-220 paragraph is rewritten to them (OW-3's waits, its message form and
+  OW-4's list), its "every route of its own" bullet takes the refusal exception, and its refusals section's item 4
+  says a rule's form is chosen before acting, never re-formed; the session that lands this decision opens that change (the
+  handoff's landing step). Providers of `fabric-operator-channel/0.1` adopt OC-11's step 3 (the agent enables the
+  channel and runs its link command on the `accepted` answer) through the adapter's kits at their next adaptation;
+  this decision changes no provider by itself. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/governance-and-roles.md` (the section *The operator's word, carried
+  out the first time*), `docs/specification/conformance.md` (one row for every agent that takes the operator's words),
+  `docs/ux/scenarios.md` (SCN-057 and its index row; SCN-044's alt path, the host app's update asked once and done by
+  the agent, and its Coverage; SCN-012's step 1, its alt path and its recovery, and SCN-014's recovery: the link command the agent's, the receiver
+  restarted by OC-17's supervisor and then by the agent through its lifecycle owner, the webhook's removal waiting on
+  the operator's decision, OC-2, AP-2 and AP-3),
+  `docs/specification/operator-channel.md` (OC-11's third step the agent's, OW-2, on AP-2's relayed decision, an old
+  `accepted` renewed by one question), DEC-0034 (an Annotated line), the operator channel's status fixtures whose
+  `detail` now tells the reader what the agent does and where its one question waits (in the session the operator gave it the task in, not the bot's chat, which cannot receive while a webhook is set), not what the person does
+  (`fixtures/positive/operator-channel-status-degraded.json`, `-degraded-receiver-missing.json`,
+  `-degraded-receiver-missing-unlinked.json`; `fixtures/negative/operator-channel-status-degraded-without-credential.json`,
+  `-receiver-missing-lease-held.json`, `-receiver-missing-without-receiver.json`, each negative for its original
+  reason), `docs/ux/foundation.md` (JRN-04/#2's touchpoint and ST-035), `docs/ux/screens.md` (SCR-30), `docs/DOCMAP.md`,
+  `docs/specification/README.md`, `docs/specification/channel-agent.md` (CA-8's pointer), `CONTEXT.md` (the operator's
+  word), the separation of the operator's businesses (OW-5) as a pointer to the
+  operator's own instructions outside this contract, `docs/ux/flows.md` (FLW-29), backlog CT-220, CT-266, CT-269 and
+  CT-271 (filed; CT-271 rewrites the recoveries other scenarios still give the operator, under OW-2 and OW-3); the handoff
+  `docs/handoffs/2026-11-07-operators-word.md` and its row in `docs/handoffs/README.md`.
+- **Source:** the operator's words of 2026-11-04 relayed on board threads `b91254c4` and `a7a9d05d` (message
+  `b66a8fae`); their words of 2026-11-07 that they press nothing in any interface (relayed by one of their projects
+  on board thread `c4ec741b`, announcement `e6385b29`), which OW-2 states; backlog CT-220; DEC-0156 reserved by git CAS on 2026-11-07.

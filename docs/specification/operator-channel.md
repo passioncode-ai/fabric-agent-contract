@@ -136,12 +136,18 @@ computer running the agent.
 
 **OC-11 — The proposal duty.** An agent that has human stops or `notify` events proposes the
 channel to its operator **once**: when it is created or adapted to Fabric, or at its first human
-stop while the channel is off. The proposal lists the four steps that are the operator's:
+stop while the channel is off. The proposal lists its four steps, three of them the operator's:
 
-1. create a bot with @BotFather;
-2. put its token into the secret store under the name the agent states;
-3. run the agent's link command;
-4. type the code it shows in the chat with the bot.
+1. the operator creates a bot with @BotFather (an act in their own messenger account);
+2. the operator puts its token into the secret store under the name the agent states (a typed secret);
+3. once the operator has answered `accepted` and the token is in the store under that name, the agent enables the
+   channel on that answer (the operator's decision relayed as [service](service.md#actions) AP-2 says, its words in
+   AP-3's form, OC-1), runs its own link command and shows the code
+   ([governance and roles](governance-and-roles.md#the-operators-word-carried-out-the-first-time) OW-2 and OW-4,
+   DEC-0156); until the token is stored it names that step; an `accepted` answer older than AP-2's 24-hour window, or
+   than the mandate it was given under, is renewed by one short question ([delegation](delegation.md#the-operators-mandate)
+   MD-1), which is not a repeat of the proposal;
+4. the operator types the code in the chat with the bot (OC-3's binding, which only the person's own send proves).
 
 The agent records the answer — `accepted`, `declined` or `later` — and shows it in its status
 (`proposal`). A recorded answer ends the duty: the agent does not repeat the proposal on its
