@@ -100,6 +100,13 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   launcher-refused start (no run) and the grant restarting the count; `noResponder`'s live grant defined; the opened
   session of the target Project given the request's id (CT-175 for its continuation); OS-6's question a notice;
   SCR-32's switch scope; Fabric's new debts and the open window in Compatibility.
+- Round 10: OS-4 has a run accept immediately after its claim, before any change in the target's folder (item 4, the
+  run's row, CONTEXT, Fabric's packet and `board.read-at-start` debts, Switchboard's `EXIT_CONTRACT` debt; the adapter
+  already does it), so the drafted item 3 claims only what the board proves (no run accepted it); the window names the
+  adapter's "do not cancel it", Fabric's `com.submit` description and the run's accept; OS-6, item 6, the run's row,
+  SCR-19, SCN-025 and the drafted item 3 say who submits again a request a run left `in_progress` once the owner
+  settles it `failed_known`; OS-1, item 1 and the host's row carry the grant condition `noResponder`'s paragraph
+  defers to; the conformance rows reworded; Fabric's mandate, grace and `com.submit` debts; JRN-08 stage 6.
 
 ## Decisions taken here
 
@@ -123,7 +130,12 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   packet's OS-4 and OS-6 text beside the production stop, its mandate text appending each callee and never the run, the
   key carried by the take-back, the 60-second skew; from round 9, its `board.read-at-start` saying OS-7's
   one-request rule, SCR-19's causes and actions, a `request-unmoved` next step that leaves a request to the run due to
-  take it, and the grant starting OS-5's count again); Switchboard's `EXIT_CONTRACT`; the adapter's FAA-201 (the three
+  take it, and the grant starting OS-5's count again; from round 10, the accept immediately after the claim, before
+  any change in the target's folder, in its packet (`boardDispatchRun.ts:281`) and its `board.read-at-start` rule, the
+  mandate taken only when its last entry is the target's registry agent id with that id as a packet reference, its
+  grace help saying the grace is the earliest a run starts, and its `com.submit` description naming a run that may
+  take a `noResponder` request); Switchboard's `EXIT_CONTRACT` (from round 10, the accept immediately after the
+  claim); the adapter's FAA-201 (the three
   variables removed from what a run launches, no elicitation capability, OS-6's settlement, `failed_known` after an
   effect only once no effect is observed, at `references/on-demand-session.md:147` and `:191`; recording a begun
   effect's key in the host's record of the run, a debt new with DEC-0158 and not FAA-215's, which covers closing the
@@ -157,12 +169,16 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   stop kept with OS-6's settlement beside it. Its check: the knowledge base's own gate on that change, then a reading
   of the merged items against OS-1, OS-5, OS-6 and OS-7. The contract's merge and that change land together. The draft
   below is the text to land.
-- Until then a mixed state is open: Fabric's dispatcher is on by default since 0.3.16, while item 3 at `c84c7a40` and
-  the adapter's requester rule still have a requester make a small change and cancel afterwards. The landing board
-  post names that window (from Fabric 0.3.16 to the knowledge change's landing) beside the consumer debts (DEC-0158
+- Until then a mixed state is open: Fabric's dispatcher is on by default since 0.3.16, while item 3 at `c84c7a40` has a
+  requester make a small change and cancel afterwards, the adapter's requester rule has it make the change and leave
+  the request `queued` ("do not cancel it", `references/project-board.md:134-136` at `2c0b1b18`), so a run takes the
+  request after the change, Fabric's `com.submit` description (`boardTools.ts:94-96`) says nothing of a run, and
+  Fabric's packet and Switchboard's exit text have a run accept only before its effect begins, so a run may change the
+  folder while the request is still `claimed`. The landing board post names that window (from Fabric 0.3.16 to the knowledge change's landing) beside the consumer debts (DEC-0158
   Compatibility).
 - The landing board post of the consumer debts names, for each consumer (Fabric, Fabric Switchboard, the adapter,
-  Project Observatory, the third host), its debts and a date: 2026-11-22 (two weeks after landing) unless the consumer's
+  Project Observatory, the third host), its debts (the adapter's among them: dropping "do not cancel it" from its
+  requester rule; Fabric's: its `com.submit` description and the accept immediately after the claim) and a date: 2026-11-22 (two weeks after landing) unless the consumer's
   reply carries a `row` reaction with its own `due` (DEC-0098), which then replaces it. Until each date, a consumer
   still at the old reading is the mixed state the post names.
 
@@ -183,21 +199,26 @@ unchanged but its last paragraph's cancel, below):
 > repository; where the host dispatches, only as the lines below allow.** Where the machine's host starts on-demand
 > sessions (Fabric's dispatcher, on by default; contract DEC-0158 OS-1), a run may take a request no responder holds
 > at any time (the host's grace is the earliest a run starts, never a promise that none starts later), and a run that
-> has held a request may already have changed the repository. So, whatever the receipt's `noResponder` says, read the
+> has held a request may already have changed the repository. A run accepts the request immediately after its claim,
+> before any change in the target's folder (OS-4), and an accepted request never returns to `queued` and never
+> expires. So, whatever the receipt's `noResponder` says, read the
 > request (`com.get` gives its `state` and `revision`) and go by its state, each on one line:
 >
 > - `queued`, or `answered` (the target's decline, OS-5; no run takes an `answered` request): cancel it
 >   (`com.cancel` with `expectedRevision` set to that revision, the reason "the asker makes this change itself"). Only
->   a receipt that reads `cancelled` at that revision proves no run took it; then make the change. A refusal
->   `revision_conflict` means it moved meanwhile: read it again and go by these lines.
-> - `expired`: it expired before any run accepted it (accepted work never expires); make the change.
-> - `claimed`, `accepted`, `in_progress` or `outcome_unknown`: a run has held it, so never make the change yourself.
->   Put the wait on a watcher (item 2) and act on the request only as item 1 says; a request you submit again under
->   item 1 goes to the target, and you never cancel it to make the change yourself.
+>   a receipt that reads `cancelled` at that revision proves no run accepted it, so none changed anything; then make
+>   the change. A refusal `revision_conflict` means it moved meanwhile: read it again and go by these lines.
+> - `expired`: no run accepted it (accepted work never expires), so none changed anything; make the change.
+> - `claimed`, `accepted`, `in_progress` or `outcome_unknown`: a run or another holder has it, so never make the
+>   change yourself. Wait on a watcher (item 2): a lapsed claim is taken again by a run, and a dead run's
+>   `in_progress` request reaches the owner as `outcome_unknown` (OS-5). Act on the request only as item 1 says; a
+>   request you submit again under item 1 goes to the target, and you never cancel it to make the change yourself.
 > - `completed` or `cancelled`: settled; make no change for it, except a request your Project cancelled under the
 >   first line (its reason says so), whose change you finish.
-> - `failed_known`: settled as not done; make no change for it, and follow the run's note in the thread on who
->   submits it again.
+> - `failed_known`: settled as not done; make no change for it. Read its `settledBy` first: `owner` means the owner
+>   observed that the effect did not happen, and then the operator submits it again through a session of the
+>   requesting Project they own, otherwise you do, once the step is taken (OS-6); without it, follow the run's note in
+>   the thread on who submits it again.
 >
 > If a change you started under the first two lines does not land, submit the request again. A hold of the target's
 > slot, Project or thread (`held: true` on the slot in `com.directory` or `com.status`) changes none of these lines:
@@ -300,6 +321,16 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   `pnpm vitest run test/mandate.test.ts test/consistency.test.ts test/comms-tools.test.ts` exit 0 (3 files, 231
   tests); `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014 printed 0; `git merge-tree --write-tree HEAD
   origin/main` exit 0. The full `pnpm run check` was not run in this round.
+
+## Checks run on the round-10 commit
+
+- On the tree of the round-10 commit (parent `da4b3a90`): `pnpm run docs:check` exit 0 ("Documentation checks
+  passed", lint:md 271 files, 0 errors); `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56
+  scenarios); `pnpm run privacy:check` exit 0 (0 findings); `pnpm vectors:check` exit 0 (32 vector files match their
+  generators); `pnpm vitest run test/mandate.test.ts test/consistency.test.ts test/comms-tools.test.ts
+  test/comms-hold.test.ts` exit 0 (4 files, 355 tests); `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014
+  printed 0; `git merge-tree --write-tree HEAD origin/main` exit 0. The full `pnpm run check` was not run in this
+  round.
 
 ## Rounds
 
@@ -473,9 +504,39 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   DEC-0158's OS rules, still Proposed on an unmerged branch; the window is named instead, the finding's second
   option.
 
+- Round 10 (on `da4b3a90`), not clean: seam, the drafted item 3 read a `cancelled` receipt at the request's revision,
+  or `expired`, as proof that no run had changed the repository, but a run told to accept only "before its effect
+  begins" (Fabric's packet, `boardDispatchRun.ts:281`) may edit the target's folder while the request is `claimed`, and
+  a replacement (the next `com.enroll` on a lapsed slot, the `stale` cause) returns `claimed` to `queued` and a
+  deadline expires it, so a requester and a run could both change the repository (now OS-4 has a run accept
+  immediately after its claim, before any change in the target's folder, so a request a run has worked on is at least
+  `accepted`, which no replacement returns to `queued` and no deadline expires; item 4, the run's row and CONTEXT say
+  so, Fabric's packet and `board.read-at-start` and Switchboard's `EXIT_CONTRACT` owe it, the adapter already does it at
+  `references/on-demand-session.md:77-78`; the draft's proof sentence and `expired` line claim only that no run accepted
+  it, so none changed anything). This is not round 9's declined suggestion: an accept is not an effect, so a dead run's
+  request stays `accepted` and continues by a transfer (OS-5), never becoming `outcome_unknown` for an edit in the
+  run's own folder. Seam, the named window said the adapter's requester rule makes the change and cancels afterwards,
+  but it says "do not cancel it" (`references/project-board.md:134-136` at `2c0b1b18`), so the request stays `queued`
+  and a run takes it after the change (now the window in the Compatibility and here says so, and the adapter's debt
+  and the landing post name dropping "do not cancel it"). Product, a request a run left `in_progress` and the owner
+  later settled `failed_known` had no one to submit it again (now OS-6, item 6, the run's row, SCR-19, SCN-025 and the
+  drafted item 3's `failed_known` line, which reads `settledBy` before the run's note: settled `failed_known` by the
+  owner, the one a run's `failed_known` note would name submits it again; settled `completed`, nothing is). Risks
+  folded: Fabric's mandate debt gains the last-entry condition and the target's registry agent id as a packet
+  reference (OS-2, OS-7; seam); the draft's `claimed`/`in_progress` line says the requester waits on a watcher (a
+  lapsed claim is retaken by a run, a dead run's `in_progress` reaches the owner as `outcome_unknown`), which corrects
+  round 8's note that item 1's cancel serves a `claimed` request: item 1's cancel serves only an `accepted` one (seam);
+  Fabric's grace debt restated as met but stated as a promise in its setting help (`en.ts:985`, `ru.ts:297`), which
+  owes saying the grace is the earliest a run starts and that caps or a live session may defer it (product); Fabric's
+  `com.submit` description (`boardTools.ts:94-96`) a debt and part of the window (product); JRN-08 stage 6 reads
+  "completed", not "answered" (product); the run's row lists the by-state takes before the refused-enrollment clause,
+  the host's row has "(`fenced` aside)" after "not `retryable`" and the launcher clause as its own item (unit); the
+  grant condition `noResponder`'s paragraph stated is now in OS-1, item 1 and the host's row, the paragraph deferring
+  to OS-1 (unit). Declined: none.
+
 ## Next task
 
-Round 10 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
+Round 11 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
 DEC-0158 Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the
 North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` ("The project board" item 4, "When nobody
 answers" items 3 and 5, "One approval binds all" item 8) landed with the merge as drafted above (a merge condition, not

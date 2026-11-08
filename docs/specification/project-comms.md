@@ -172,10 +172,9 @@ board holds now for that Project and capability, which would let a session's `co
 gives a session only at its own `com.enroll` is not one until then) is still
 stored, and the requester's own `com.submit` receipt carries `noResponder` with the target, the capability and one
 sentence for a person: the target can still answer it with a reply, and a responder may come later. No other
-participant sees `noResponder`. A host that dispatches may take such a request after its grace
-([on-demand sessions](#on-demand-sessions) OS-1) only where it gives the run it starts that grant at the run's own
-`com.enroll`, which is checked against the host's responder grant as any session's is ([receipts](#receipts),
-`com.enroll`); a standing grant the board already held for the capability would have kept `noResponder` off the
+participant sees `noResponder`. A host that dispatches may take such a request after its grace, only where its
+responder grant lets the run's own `com.enroll` take the slot ([on-demand sessions](#on-demand-sessions) OS-1); a
+standing grant the board already held for the capability would have kept `noResponder` off the
 receipt. `noResponder` reads the board at submission, not a run the host may start. A requester cannot observe whether a
 host can grant such a run the slot: nothing on the board says so until a run holds it. What the requester does then is
 the estate's rule, not the board's: in PassionCode, fabric-workspace `knowledge/agents-first.md`, *When nobody
@@ -877,7 +876,8 @@ contract times.
   own machine, only in a folder of the target Project on that machine, after a grace of its own choosing from the
   request's submission, which it states among its settings; the grace is the earliest a run starts, never a promise that none starts later
   (the host's checks, caps and limits may defer a start), so a requester never reads a still-`queued` request as one
-  no run will take; and only for a request of its own estate whose (Project, capability) slot has no live holder. A
+  no run will take; and only for a request of its own estate whose (Project, capability) slot has no live holder, where the host's
+  responder grant lets the run's own `com.enroll` take that slot ([receipts](#receipts), `com.enroll`). A
   request is a candidate while it is `queued`, `claimed` with a lapsed attempt, or `accepted` or `in_progress` with no
   live holder, with time left before its deadline for a run to finish; never `answered`, `outcome_unknown`, `cancelled`
   or a terminal state, and never while its thread, its Project or its slot is [held](#holds) (it waits for the lift, as
@@ -916,7 +916,9 @@ contract times.
   answer it), and stops.
 - **OS-4, done.** A run enrolls in the Project's slot for the capability (`com.enroll`) and, holding it, takes the
   request it was handed by the state it finds, and no other request: a `queued` one, or a `claimed` one whose attempt
-  lapsed, it claims by naming it in `com.claim`'s `request` and then accepts; an `accepted` one whose holder is gone it
+  lapsed, it claims by naming it in `com.claim`'s `request` and accepts it (`com.accept`) immediately after the claim,
+  before any change in the target's folder, so a request a run has worked on is at least `accepted`, which no
+  replacement returns to `queued` and no deadline expires ([request lifecycle](#request-lifecycle)); an `accepted` one whose holder is gone it
   continues by `com.responder_replace` with a transfer of that request, writing the transfer's checkpoint summary itself
   from the earlier holder's record where one exists, its fence taken from the replacement's receipt (OS-7); one its own
   enrollment moved from `in_progress` to `outcome_unknown` (`lost_result`) it settles only by an observed
@@ -1010,10 +1012,14 @@ the refused run's cause was the operator's to lift. The requester sees no signal
   [project directory](#project-directory); an unlisted one reads as not, which leaves it to the requester), since the operator acts on a request only through a session of the
   requesting Project they own (OS-5); otherwise "the requester submits it again once the step is taken". After a
   request left `in_progress`: "do not submit it again; it reaches the owner as `outcome_unknown` once a session of the
-  target Project takes the slot". So the requester submits it again only when that note or the operator says so. Once
+  target Project takes the slot". So the requester submits it again only when that note, the operator or the owner's
+  settlement (below) says so. Once
   the person has taken the step, the one the note names submits a `failed_known` request again (a requester's wake for
   it is CT-150); a request left `in_progress` is not submitted again, since a new request's run gets no earlier effect
-  key (OS-2, OS-5).
+  key (OS-2, OS-5), until the estate owner settles it ([owner settlement](#owner-settlement), `settledBy: "owner"`):
+  settled `failed_known` (observed: the effect did not happen), the one a run's `failed_known` note would name submits
+  it again once the step is taken (the operator through a session of the requesting Project they own, otherwise the
+  requester); settled `completed`, nothing is submitted again.
 - **OS-7, slots and mandates.** A dispatched run holds a slot only while it works: it never takes a slot from a live
   holder, uses `com.responder_replace` only to continue a held `accepted` request whose holder is gone (CT-175), and
   ends its session, and with it the slot, when it ends. The host withholds the move of a slot to a dispatched run in its

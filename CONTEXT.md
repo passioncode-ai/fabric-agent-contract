@@ -242,8 +242,8 @@ a Project: that hides it from discovery only, and it stays addressable by id
 sequence number (DEC-0073).
 
 **On-demand session**: A session the host that serves its operator's board starts for a request no responder takes
-(a dispatched run): it is handed the request by reference, takes it by its state as an ordinary board client (a claim,
-a replacement with a transfer, or an observed reconcile), replies, settles it and ends, releasing the slot. It knows it
+(a dispatched run): it is handed the request by reference, takes it by its state as an ordinary board client (a claim
+with its accept right after it, a replacement with a transfer, or an observed reconcile), replies, settles it and ends, releasing the slot. It knows it
 is the run by its first prompt line and its environment together, never by the environment alone. A run that dies
 leaves the request in the state the extension gives it, and the host shows its operator the runs and cases OS-5 lists:
 two runs that ended without settling it (not counted only a run that found a live holder, whose enrollment was
