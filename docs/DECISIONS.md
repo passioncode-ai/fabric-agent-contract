@@ -11496,9 +11496,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      names; at a host's gate the note and the run's report say the act waits for a session the person is in and that
      nobody submits the request to the board again, since a later run would meet the same refusal, and that session
      records the act in the thread (a host that lets a run's session take the act once the operator grants has no
-     host's gate here, its act being a stop the grant clears); a request settled at a stop is submitted again only
-     where what the person does lets a later run with no person take the step, never by one who reads a host's gate
-     note; a request whose asked act the run did and observed, with only a side act left at a stop, is settled
+     host's gate here, its act being a stop the grant clears); a request whose stop note is in its thread is submitted
+     again only where what the person does lets a later run with no person take the step, never by one who reads a
+     host's gate note, the sole exception being a request with no such note, whose requester decides (below); a request whose asked act the run did and observed, with only a side act left at a stop, is settled
      `completed`, the open act named. Only the first two are answered by what covers that exact choice (the mandate or a relayed decision);
      a source hand-over goes ahead only on a decision, relayed or not, naming its exact target (source, DEC-0149), never
      on a mandate (MD-6), and a human step is never
@@ -11520,10 +11520,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      session of the requesting Project they own, otherwise the requester; at a host's gate, nobody) submits it again
      once the step is taken; settled `completed`, nothing is submitted again. A later run or opened session that settles `failed_known` a
      request an earlier run left `in_progress` at a stop writes the same note; a `failed_known` request with no such
-     note (a responder's own reason, a run's time limit, a note a thread hold refused) leaves resubmission to the
-     requester, at a host's gate too: a run whose note was refused asks its notice question at every stop, naming the
-     requester and what the note would have said, and a request submitted again from a host's gate with no note meets
-     the same refusal in a later run, which settles it again and writes the note.
+     note (a responder's own reason, a run's time limit, a refused note) is that sole exception: its requester decides,
+     finding no note, at a host's gate too. A run whose note was refused asks its notice question at every stop, naming
+     the step and one actor with one directive, "the requester decides, finding no note", never a note's directive (at
+     a host's gate, that nobody submits it again) beside it; a request submitted again from a host's gate meets the
+     same refusal in a later run, which settles it and writes the note.
   7. **Slots and mandates (OS-7).** A run holds a slot only while it works, never takes one from a live holder, uses a
      replacement only to continue a held request whose holder is gone (CT-175), and is never offered as the receiving
      session of the operator's move (the host withholds "Make main" and "Move" on a run); holding `project.work` it is the main
@@ -11577,6 +11578,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   once* is its next pass: it reads the switch on each pass of its dispatcher (`apps/desktop/src/main/index.ts:2996`),
   so a switch turned on again starts on its next cycle, and it shows an `outcome_unknown` request on its abandoned
   sweep, every third cycle, every 3 minutes (its `AGENTS.md:148`).
+  OS-6's host's gate is its FA-09 at that main: ADR-0160 section 4 keeps publishing outward, a release to users
+  among it, as an act that stops and asks (`docs/adr/0160-on-the-operators-machine-an-act-happens-at-once-is-recorded-and-can-be-undone.md:36-38`),
+  and its floor asks whether an agent asker can be held to the act before it reads any grant, refusing one it cannot
+  contain (`apps/desktop/src/main/policy.ts:324-347`, `apps/desktop/src/shared/containment.ts:1-22`; the finding's row
+  `docs/audit/2026-09-09-final/core-tasks.json:321`).
   It owes, at its next pin: a held slot, Project or thread is no candidate (its `responderLive` reads a held holder as
   not live and starts a run into the hold); a run that found the slot `active` with another live holder, whose
   enrollment was refused `held` or `fenced`, whose work a hold refused or that the operator's move fenced is not

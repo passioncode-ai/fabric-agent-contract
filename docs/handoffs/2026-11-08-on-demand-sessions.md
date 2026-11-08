@@ -159,6 +159,14 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   `EXIT_CONTRACT` and the adapter's `DISPATCH_CONTRACT` host-gate debts named in the Compatibility and the landing
   post; the DEC-0156 landing requirement states the resubmission alignment with OW-3 in words; SCN-025 and CT-276 say
   SA-6's generation-0 decline wins over a run; CT-215 and the handoffs index current.
+- Round 16: the resubmission rule's "submitted again only where what the person does lets a later run with no person
+  take the step, never by one who reads a host's gate note" now applies only to a request whose stop note is in its
+  thread, and a request with no such note is its stated sole exception, its requester deciding; the refused-note notice
+  question names one actor and one directive ("the requester decides, finding no note") and never quotes a note's
+  directive beside it, a request submitted again from a host's gate meeting the same refusal in a later run, which
+  settles it and writes the note; OS-6, item 6 and the run's conformance row changed together, OS-4's refused-note
+  sentence aligned, SCR-19 and the run's row say "a refused note" / "one whose note was refused"; SCN-025's
+  `in_progress` hold says "do not submit it again"; FA-09 pinned in the Compatibility at Fabric's main `eafcf2e4`.
 
 ## Decisions taken here
 
@@ -314,6 +322,20 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   - DEC-0157 (usage data): UD-4 re-read against the host's and the dispatched run's rows and OS-7 (a change-policy
     act such as the usage switch stays outside any mandate). Check: a reading on the merged tree, recorded in the
     lander's handoff.
+- Round 16, DEC-0156's own landing requirement read (its handoff's DEC-0158 note on
+  `origin/agent/ct220-operators-word-v2`, read only), its greps run on `git merge-tree --write-tree` of this round's
+  tree and that branch (conflicts in `docs/DECISIONS.md`, `docs/backlog.md`, `docs/handoffs/README.md`,
+  `docs/specification/conformance.md`, the greps counting the conflicted text): every count this round's edit can
+  move still prints what it requires (the board-client row 1, the OW row 1, OS-6 with FA-09 2, with `a grant` 1, with
+  `side act` 1, the run's row with the old "asks no question ... says that it waits" 0 and with "at the production
+  stop says the request is submitted again" 1, item 6 with "request is submitted again once it carries" 1 and with
+  FA-09 at least 1, this handoff's production-stop line 1). Two counts print 0 where 1 is required, as before this
+  round (neither branch has made the edit; it is the second lander's): the OW-3 range with `OS-6` and the OS-6 range
+  with `OW-3`. For the coordinator to relay to DEC-0156's owner: its judgement items read "OS-6 ... scopes its notice
+  question to a human step" and "has no FA-09 act submitted again", while OS-6 since round 15 also asks the notice
+  question where its stop note was refused, and since round 16 states the no-note path as the sole exception, under
+  which a requester who finds no note may submit a host's-gate request again (a later run meets the same refusal and
+  writes the note); this branch's own DEC-0156 requirement above already names the refused-note question.
 
 ## Draft of the knowledge base change (a merge condition)
 
@@ -875,13 +897,31 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   Compatibility and the landing post (seam). To Open: whether Fabric refuses `held` under a thread hold at all, the
   requester's effect-key window under CT-175, SA-6's pre-emption under CT-276. Kept as is: the named mixed state and
   DEC-0159's operator-step greps (product).
+- Round 16 (on `755023cf`), not clean: the unit reading failed with one break and three risks; the seam and product
+  readings were deliberately not run on this head, since the break is a self-contradiction in the text they would
+  read. Break folded: the resubmission rule contradicted itself on the refused-note path (unit): OS-6's unqualified
+  "submitted again only where what the person does lets a later run with no person take the step, never by one who
+  reads a host's gate note" forbade what its no-note sentence allowed (a requester resubmitting from a host's gate),
+  and the refused-note question named the requester while carrying the gate note's "nobody submits the request to
+  the board again". Now the "only where" sentence binds a request whose stop note is in its thread, the no-note path
+  is its stated sole exception, and the refused-note question names one actor and one directive ("the requester
+  decides, finding no note"), never a note's directive beside it; a request submitted again from a host's gate meets
+  the same refusal in a later run, which settles it and writes the note; in OS-6
+  (`docs/specification/project-comms.md`), DEC-0158 item 6 and the run's row in `docs/specification/conformance.md`,
+  with OS-4's refused-note sentence aligned. Risks folded: FA-09 pinned in the Compatibility at Fabric's main
+  `eafcf2e4` (`apps/desktop/src/main/policy.ts:324-347`, `apps/desktop/src/shared/containment.ts:1-22`, ADR-0160
+  `:36-38`, the finding's row `docs/audit/2026-09-09-final/core-tasks.json:321`) (unit); SCN-025's `in_progress`
+  hold uses OS-6's "do not submit it again" (unit); the run's row and SCR-19 say "one whose note was refused" and
+  "a refused note", not a thread hold alone (unit).
 
 ## Next task
 
-Round 16 blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers, read hardest at
-OS-6's split between the production stop (submitted again once the relayed words naming the step are carried) and a
-host's gate (FA-09, never submitted again by a reader of the note), the refused stop note's one directive, and the
-drafted items 1, 3 and 8 against agents-first.md and, on the merged tree, DEC-0156's OW-3. At landing, also the sibling
+Round 17 blind readings (unit, seam, product) of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three
+tiers, read hardest at OS-6's resubmission rule (the "only where" sentence binding a request whose stop note is in its
+thread, the no-note path its sole exception), the refused-note notice question's one actor and one directive, the
+production stop (submitted again once the relayed words naming the step are carried) and a host's gate (FA-09, never
+submitted again by a reader of the note), and the drafted items 1, 3 and 8 against agents-first.md and, on the merged
+tree, DEC-0156's OW-3 (see Open on its notice-question and no-note judgements). At landing, also the sibling
 requirements in Open (DEC-0156, DEC-0159, DEC-0157), whichever branch lands second. At landing:
 DEC-0158 Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the
 North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` ("The project board" items 3 and 4, "When

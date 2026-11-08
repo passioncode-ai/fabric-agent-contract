@@ -946,8 +946,8 @@ contract times.
   the cause is gone, and ends, the host's next start after the cause is gone being the retry where OS-5 allows one; any other refusal of a board call on its work (`held`, `fenced` and `lease_expired` among
   them, and a `com.reconcile` refused because the run no longer holds the slot) ends it, never retaking the slot, and
   leaves the request as OS-5 says; a refusal of OS-6's stop note itself, after OS-6's settlement or after it leaves
-  the request `in_progress`, ends nothing but the note, and the run still asks its question as OS-6 says (at every
-  stop, once its note was refused).
+  the request `in_progress`, ends nothing but the note, and the run still asks its notice question as OS-6 says (at
+  every stop, once its note was refused, naming the requester, who decides, finding no note).
 - **OS-5, a run that dies.** A run that ends without settling the request leaves it in the state this extension gives
   it, and no host changes that state for it: `queued` stays queued; `claimed` is taken again by the next `com.claim`
   under a new attempt; `accepted` is held (C4) and continues only by a replacement with a checkpoint transfer
@@ -1024,9 +1024,10 @@ the refused run's cause was the operator's to lift. The requester sees no signal
   the act waits for a session the person is in and that nobody submits the request to the board again, since a later
   run would meet the same refusal, and the person's session that performs the act records that in the request's
   thread. A host that lets a run's session take the act once the operator grants has no host's gate here: its act is a
-  stop the grant clears. A request settled at a stop is submitted again only where what the person does lets a later
-  run with no person take the step (a human step cleared, a decision or a relay naming the exact choice or the step, a
-  grant), never by one who reads a host's gate note. A request whose asked act the run did and observed, with only a
+  stop the grant clears. A request whose stop note is in its thread is submitted again only where what the person does
+  lets a later run with no person take the step (a human step cleared, a decision or a relay naming the exact choice or
+  the step, a grant), never by one who reads a host's gate note; the sole exception is a request with no such note,
+  whose requester decides (below). A request whose asked act the run did and observed, with only a
   side act left at a stop, is settled `completed`, the open act named in its result and its note. At a stop the run settles first: before an effect began,
   `failed_known` with `observed: false`; after one, it cancels a waiting job with that job's own cancel and settles
   `failed_known` once it has observed that the effect did not happen, or else leaves the request `in_progress`, so the
@@ -1035,7 +1036,8 @@ the refused run's cause was the operator's to lift. The requester sees no signal
   `queued` request, DEC-0102). At a human step the note carries the refusal's `humanStep` and `url` when the refusal
   gave them, and the run also asks the operator through the host's question surface (`fabric_question_ask` or the
   host's equal), or, where the run has none, leaves the host to show the request to its operator as OS-5 does. The
-  question is a notice: it says the run has ended, names who submits the request again (below), and blocks nothing;
+  question is a notice: it says the run has ended, names one actor with one directive on submitting the request again
+  (below), and blocks nothing;
   the run never reads an answer, so answering it continues nothing. The
   note and the question go by the outcome. After `failed_known` at a stop a later run can get past once the person
   acts (every stop but a host's gate, above), the note names who submits it again: "the operator
@@ -1049,10 +1051,12 @@ the refused run's cause was the operator's to lift. The requester sees no signal
   `in_progress` at a stop writes the same `failed_known` note, by the earlier run's record. A `failed_known` request
   with no such note in its thread (a responder's own reason, a run's time limit, OS-4, or a note a
   [hold](#what-a-hold-refuses) refused, since a thread hold refuses a participant's `com.reply` and never
-  `com.complete`) leaves to the requester whether to submit it again, at a host's gate too: a run whose note was
-  refused asks its notice question at every stop, a host's gate and the production stop included, naming the requester
-  and what the note would have said, and a request submitted again from a host's gate with no note meets the same
-  refusal in a later run, which settles it again and writes the note. So the requester submits it again only when that note, the operator, the owner's
+  `com.complete`) is the sole exception to the rule for a request whose stop note is in its thread (above): its requester decides whether to submit it again, finding
+  no note, at a host's gate too. A run whose note was refused asks its notice question at every stop, a host's gate and
+  the production stop included; the question names the step and why no route avoided it, and one actor with one
+  directive, "the requester decides, finding no note", never a note's directive (at a host's gate, that nobody submits
+  it again) beside it. A request submitted again from a host's gate meets the same refusal in a later run, which
+  settles it and writes the note. So the requester submits it again only when that note, the operator, the owner's
   settlement (below) or the absence of a note says so. Once
   the person has taken the step, the one the note names submits a `failed_known` request again (a requester's wake for
   it is CT-150); a request left `in_progress` is not submitted again, since a new request's run gets no earlier effect
